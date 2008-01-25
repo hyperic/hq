@@ -99,6 +99,7 @@ public class MeasurementStartupListener
             }
         });
 
+        /*
         app.registerCallbackListener(PluginsDeployedCallback.class,
                                      new PluginsDeployedCallback() {
             public void pluginsDeployed(List plugins) {
@@ -110,6 +111,7 @@ public class MeasurementStartupListener
                 }
             }
         });
+        */
 
         initReportsStats();
         AgentScheduleSynchronizer.getInstance().initialize();

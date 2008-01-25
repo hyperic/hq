@@ -434,7 +434,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         // Authz check
         super.checkModifyPermission(subject.getId(), id);        
 
-        // Call back into ourselves to force a new transation to be created.
+        // Call back into ourselves to force a new transaction to be created.
         List dmList = getDMManager().createMeasurements(id, templates,
                                                         intervals, props);
         sendAgentSchedule(id);
@@ -1465,6 +1465,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     
     /**
      * @ejb:interface-method
+     * @ejb:transaction type="NOTSUPPORTED"
      */
     public void syncPluginMetrics(String plugin) {
         List entities =
