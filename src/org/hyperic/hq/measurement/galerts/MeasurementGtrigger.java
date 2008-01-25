@@ -187,11 +187,7 @@ public class MeasurementGtrigger
                                                       _startOfTimeWindow, 
                                                       endOfTimeWindow);
         
-        if (srcId2ViolatingMetricValue.size() > 0) {
-            long firedTime = getAlertFiredTime(_startOfTimeWindow, endOfTimeWindow);
-            
-            tryToFire(srcId2ViolatingMetricValue, firedTime);            
-        }
+        tryToFire(srcId2ViolatingMetricValue, _startOfTimeWindow, endOfTimeWindow);
     }
     
     /**
@@ -227,13 +223,15 @@ public class MeasurementGtrigger
     /**
      * Process the collection interval change.
      */
-    private void metricCollectionIntervalChanged() {
+    private void metricCollectionIntervalChanged() {        
         // It's safer to pull directly from the database than to 
         // use the measurement schedule event, since we may have 
         // missed a prior measurement schedule event.
         List derivedMeas = getMeasurementsCollecting();
 
         _srcId2CollectionInterval.clear();
+        
+        long oldInterval = _maxCollectionInterval;
         
         _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
         
@@ -246,6 +244,10 @@ public class MeasurementGtrigger
             _maxCollectionInterval = 
                 Math.max(_maxCollectionInterval, meas.getInterval());
         }
+        
+        _log.debug("Trigger ["+getTriggerNameWithPartitionDesc()+
+                   "] processed measurement schedule zevent: old collection interval="+
+                   oldInterval+"; new collection interval="+_maxCollectionInterval);
     }
 
     /**
@@ -511,22 +513,24 @@ public class MeasurementGtrigger
      * @return The alert fired time.
      */
     private long getAlertFiredTime(long startTime, long endTime) {
-        return (endTime-startTime)/2;
+        return (endTime+startTime)/2L;
     }    
     
-    private void tryToFire(Map srcId2MetricValue, long firedTime) {                
+    private void tryToFire(Map srcId2MetricValue, long startTime, long endTime) {                
         int numMatched = 0;
         
-        for (Iterator i=srcId2MetricValue.values().iterator(); i.hasNext(); ) {
-            MetricValue val = (MetricValue)i.next();
-            
-            // Offending resources always add towards the number matched
-            if (val.equals(MetricValue.NONE) || 
-                _comparator.isTrue(new Float(val.getValue()), _metricVal)) { 
-                numMatched++;
-            }
+        if (srcId2MetricValue.size()>0) {
+            for (Iterator i=srcId2MetricValue.values().iterator(); i.hasNext(); ) {               
+                MetricValue val = (MetricValue)i.next();
+                
+                // Offending resources always add towards the number matched
+                if (val.equals(MetricValue.NONE) || 
+                    _comparator.isTrue(new Float(val.getValue()), _metricVal)) { 
+                    numMatched++;
+                }
+            }    
         }
-        
+                
         String leftHandStr, numMatchStr;
         int leftHand;
         
@@ -579,12 +583,15 @@ public class MeasurementGtrigger
             .append(_comparator)
             .append(" ")
             .append(_metricVal);
+        
+        long nonReportingResourceFiredTime = getAlertFiredTime(startTime, endTime);
 
         setFired(new FireReason(sr.toString(), lr.toString(), 
-                    formulateAuxLogs(srcId2MetricValue, firedTime)));
+            formulateAuxLogs(srcId2MetricValue, nonReportingResourceFiredTime)));
     }
 
-    private List formulateAuxLogs(Map srcId2MetricValue, long firedTime) {
+    private List formulateAuxLogs(Map srcId2MetricValue, 
+                                 long nonReportingResourceFiredTime) {
         // Assemble the aux info
         List auxLogs = new ArrayList();
         DerivedMeasurementManagerLocal dmMan = getDMMan();
@@ -597,7 +604,6 @@ public class MeasurementGtrigger
             SimpleAlertAuxLog baseLog; 
             AppdefEntityValue entVal;
             AppdefEntityID entId;
-            String descr, entName, metricName;
             
             // We know that offending resources violate the conditions.
             // No need to do the comparison in this case.
@@ -618,26 +624,33 @@ public class MeasurementGtrigger
             entId  = new AppdefEntityID(metric.getAppdefType(), 
                                         metric.getInstanceId());
             entVal = new AppdefEntityValue(entId, overlord);
+            
+            String entName;
+           
             try {
                 entName = entVal.getName();
             } catch(Exception e) {
                 entName = entId.toString();
             }
-            metricName = metric.getTemplate().getName();
-            descr = entName + " reported " + metric.getTemplate().getName() + 
-                    " = " + val.getValue();
-                      
-            baseLog = new SimpleAlertAuxLog(descr, val.getTimestamp());
             
+            String metricName = metric.getTemplate().getName();
+            String descrNoVal = entName+" reported "+metricName+" = ";
+
+            String descr;
+            long timestamp;
+            
+            // Set the metric description and timestamp in the aux log.
             if (val.equals(MetricValue.NONE)) {
-                // Offending resources have no metric aux log.
-                baseLog.addChild(new ResourceAuxLog(entName, firedTime, entId));
+                descr = descrNoVal+"Unknown";
+                timestamp = nonReportingResourceFiredTime;
             } else {
-                baseLog.addChild(new MetricAuxLog(metricName + " chart", 
-                        val.getTimestamp(), metric));                
-                baseLog.addChild(new ResourceAuxLog(entName, val.getTimestamp(), 
-                        entId));
+                descr = descrNoVal+val.getValue();
+                timestamp = val.getTimestamp();
             }
+            
+            baseLog = new SimpleAlertAuxLog(descr, timestamp);                
+            baseLog.addChild(new MetricAuxLog(metricName+" chart", timestamp, metric));                
+            baseLog.addChild(new ResourceAuxLog(entName, timestamp, entId));
             
             auxLogs.add(baseLog);
         }
