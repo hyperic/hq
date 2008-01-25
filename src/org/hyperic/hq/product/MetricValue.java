@@ -180,6 +180,10 @@ public class MetricValue
      * value of the measurements, not the timestamp.
      */
     public int compareTo(Object o) {
+        if (o == this) {
+            return 0;
+        }
+        
         MetricValue o2 = (MetricValue)o;
         double difference = _value - o2._value;
         // can't just return subtraction, because casting to integer
@@ -191,10 +195,15 @@ public class MetricValue
     }
 
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        
         if (obj instanceof MetricValue) {
             MetricValue val = (MetricValue) obj;
-            return (getTimestamp() == val.getTimestamp() &&
-                    getValue() == val.getValue());
+            return getTimestamp() == val.getTimestamp() &&
+                    ((getValue() == val.getValue()) || 
+                     (Double.isNaN(getValue()) && Double.isNaN(val.getValue())));
         }
 
         return false;
