@@ -556,14 +556,24 @@ public class EscalationManagerEJBImpl
      * Acknowledge an alert, potentially sending out notifications.
      * 
      * @param subject Person who acknowledged the alert
+     * @param pause TODO
      * 
      * @ejb:interface-method  
      */
     public void acknowledgeAlert(AuthzSubject subject, EscalationAlertType type, 
-                                 Integer alertId, String moreInfo)  
+                                 Integer alertId, String moreInfo, long pause)  
                                  
-    { 
-        fixOrNotify(subject, type, alertId, false, moreInfo);
+    {
+        Escalatable esc = type.findEscalatable(alertId);
+        EscalationState state = _stateDAO.find(esc);
+        if (pause > 0) {
+            long nextTime = System.currentTimeMillis() + pause;
+            if (nextTime > state.getNextActionTime()) {
+                state.setNextActionTime(nextTime);
+                EscalationRuntime.getInstance().scheduleEscalation(state);    
+            }
+        }
+        fixOrNotify(subject, esc, state, type, false, moreInfo);
     }
     
     /**
@@ -632,17 +642,11 @@ public class EscalationManagerEJBImpl
     public void fixAlert(AuthzSubject subject, EscalationAlertType type, 
                          Integer alertId, String moreInfo)
     { 
-        fixOrNotify(subject, type, alertId, true, moreInfo);
-    } 
-    
-    private void fixOrNotify(AuthzSubject subject, EscalationAlertType type, 
-                             Integer alertId, boolean fixed, String moreInfo)
-    {
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
-        fixOrNotify(subject, esc, state, type, fixed, moreInfo);
+        fixOrNotify(subject, esc, state, type, true, moreInfo);
     } 
-
+    
     private void fixOrNotify(AuthzSubject subject, Escalatable esc,
                              EscalationState state, EscalationAlertType type,
                              boolean fixed, String moreInfo) 

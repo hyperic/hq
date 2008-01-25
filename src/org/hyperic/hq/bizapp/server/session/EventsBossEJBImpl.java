@@ -1703,7 +1703,8 @@ public class EventsBossEJBImpl
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
-        getEscMan().acknowledgeAlert(subject, alertType, alertID, moreInfo);
+        getEscMan().acknowledgeAlert(subject, alertType, alertID, moreInfo,
+                                     pauseWaitTime);
     }
 
     /**
