@@ -40,6 +40,7 @@
 <title><fmt:message key="login.title"/></title>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <script language="JavaScript" src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/dojo/dojo.js"/>" type="text/javascript"></script>
 <script language="JavaScript" type="text/javascript">
   if (top != self)
     top.location.href = self.document.location;
@@ -50,6 +51,12 @@
   var semiIndex = imagePath.indexOf(";");
   if (semiIndex!= -1)
     imagePath = imagePath.substring(0, semiIndex);
+    
+  dojo.addOnLoad(function(){
+      if(dojo.render.html.ie70 || dojo.render.html.safari){
+         dojo.byId("browsermsg").style.display = '';
+      }
+  });
 </script>
 </head>
 
@@ -85,9 +92,9 @@
             </table>	
           </td>
         </tr>
-          <!--[if gt IE 6]>
           <tr>
             <td>
+              <div id="browsermsg" style="display:none;">
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td class="ErrorBlock"><html:img page="/images/tt_error.gif" width="10" height="11" alt="" border="0"/></td>
@@ -98,9 +105,9 @@
                   <td class="ErrorBlock" style="padding-bottom:15px;padding-right:10px;"><fmt:message key="login.browserMessage"/></td>
                 </tr>
               </table>
+              </div>
             </td>
           </tr>
-          <![endif]--> 
           <c:if test='${loginStatus ne null}'>
           <tr>
             <td>
