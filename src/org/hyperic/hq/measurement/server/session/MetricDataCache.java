@@ -256,6 +256,6 @@ public class MetricDataCache {
     }
     
     public int getUnavailableMetricsSize() {
-        return _downCache.getSize();
+        return _downCache.getKeys().size();
     }
 }
