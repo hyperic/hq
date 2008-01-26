@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -1741,7 +1741,7 @@ public class EventsBossEJBImpl
     public boolean alertsAllowed(int sessionId)
         throws SessionNotFoundException, SessionTimeoutException {
         manager.getSubjectPojo(sessionId);
-        return getAM().alertsAllowed();
+        return getADM().alertsAllowed();
     }
 
     /**
@@ -1751,7 +1751,7 @@ public class EventsBossEJBImpl
     public void setAlertsAllowed(int sessionId, boolean allowed)
         throws SessionNotFoundException, SessionTimeoutException {
         manager.getSubjectPojo(sessionId);
-        getAM().setAlertsAllowed(allowed);
+        getADM().setAlertsAllowed(allowed);
     }
 
     /**

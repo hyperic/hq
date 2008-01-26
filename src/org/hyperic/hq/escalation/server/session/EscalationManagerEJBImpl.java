@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -58,6 +58,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
@@ -288,7 +289,7 @@ public class EscalationManagerEJBImpl
     public boolean startEscalation(PerformsEscalations def, 
                                    EscalatableCreator creator) 
     {
-        if (!AlertManagerEJBImpl.getOne().alertsAllowed()) {
+        if (!AlertDefinitionManagerEJBImpl.getOne().alertsAllowed()) {
             return false;
         }
         

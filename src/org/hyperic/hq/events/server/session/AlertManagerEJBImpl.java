@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -49,7 +48,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.EventConstants;
@@ -105,22 +103,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
     private AlertConditionDAO getAlertConDAO() {
         return new AlertConditionDAO(DAOFactory.getDAOFactory());
-    }
-
-    /**
-     * Returns true if alerts are allowed.
-     * @ejb:interface-method
-     */
-    public boolean alertsAllowed() {
-        return AlertRegulator.getInstance().alertsAllowed();
-    }
-    
-    /**
-     * @see alertsAllowed()
-     * @ejb:interface-method
-     */
-    public void setAlertsAllowed(boolean allowed) {
-        AlertRegulator.getInstance().setAlertsAllowed(allowed);
     }
 
     /**

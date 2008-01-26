@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -224,7 +224,10 @@ public abstract class AbstractTrigger
         if (!isSystemReady())
             return;
 
-        if (!AlertManagerEJBImpl.getOne().alertsAllowed()) {
+        AlertDefinitionManagerLocal aman =
+            AlertDefinitionManagerEJBImpl.getOne();
+
+        if (!aman.alertsAllowed()) {
             log.debug("Alert not firing because they are not allowed");
             return;
         }
@@ -232,8 +235,6 @@ public abstract class AbstractTrigger
         // No matter what, send a message to let people know that this trigger
         // has fired
         publishEvent(event);
-
-        AlertDefinitionManagerLocal aman = AlertDefinitionManagerEJBImpl.getOne();
 
         try {
             Integer adId = aman.getIdFromTrigger(getId());
