@@ -15,13 +15,6 @@ class Plugin extends HQUPlugin {
     AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r,
                                                  AuthzSubject u) 
     {
-        if (!u.isSuperUser()) {
-            return super.getAttachmentDescriptor(a, r, u)
-        }
-        
-        def l = DMM.one.numUnavailEntities
-        new SimpleAttachmentDescriptor(a, 
-                                       descriptor.getProperty('plugin.helpTag'), 
-                                       "${description}  ($l)")
+       return super.getAttachmentDescriptor(a, r, u)
     }
 }
