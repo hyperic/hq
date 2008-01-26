@@ -38,6 +38,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -618,12 +619,13 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         }
         
         Map res = new HashMap(idToCount.size());
+        AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
         for (Iterator i=idToCount.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry ent = (Map.Entry)i.next();
             Integer id = (Integer)ent.getKey();
             Long count = (Long)ent.getValue();
             
-            res.put(AgentManagerEJBImpl.getOne().findAgentPojo(id), count);
+            res.put(agentMan.findAgentPojo(id), count);
         }
         return res;
     }
