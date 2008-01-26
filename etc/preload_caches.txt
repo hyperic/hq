@@ -10,10 +10,5 @@ org.hyperic.hq.appdef.server.session.ServiceType
 org.hyperic.hq.appdef.server.session.Platform
 org.hyperic.hq.appdef.server.session.Server
 org.hyperic.hq.appdef.server.session.Service
-org.hyperic.hq.events.server.session.Action
-org.hyperic.hq.events.server.session.AlertCondition
-org.hyperic.hq.events.server.session.AlertDefinition
-org.hyperic.hq.events.server.session.RegisteredTrigger
 org.hyperic.hq.measurement.server.session.Category
 org.hyperic.hq.measurement.server.session.MonitorableType
-org.hyperic.hq.measurement.server.session.Baseline
