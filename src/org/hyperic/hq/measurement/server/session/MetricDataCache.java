@@ -254,4 +254,8 @@ public class MetricDataCache {
         }
         return downMetrics;
     }
+    
+    public int getUnavailableMetricsSize() {
+        return _downCache.getSize();
+    }
 }

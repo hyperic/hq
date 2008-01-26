@@ -1418,7 +1418,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public int getNumUnavailEntities() {
-        return MetricDataCache.getInstance().getUnavailableMetrics().size();
+        return MetricDataCache.getInstance().getUnavailableMetricsSize();
     }
     
     /**
