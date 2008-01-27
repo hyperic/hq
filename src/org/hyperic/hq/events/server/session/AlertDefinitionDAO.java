@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -157,27 +157,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
     }
 
     public AlertDefinition findById(Integer id) {
-        return (AlertDefinition)super.findById(id);
-    }
-    
-    /** 
-     * Find an alert definition by Id, loading from the current session.
-     * 
-     * @param id The alert definition Id.
-     * @param refresh <code>true</code> to force the alert def state to be 
-     *                to be re-read from the database; <code>false</code> to 
-     *                allow the persistence engine to return a cached copy.
-     * @return The alert definition.               
-     * @throws ObjectNotFoundException if no alert definition with the give Id exists.
-     */
-    public AlertDefinition findById(Integer id, boolean refresh) {
-        AlertDefinition def = findById(id);
-        
-        if (refresh) {
-            getSession().refresh(def);
-        }
-        
-        return def;
+        return (AlertDefinition) super.findById(id);
     }
     
     /**
@@ -400,6 +380,13 @@ public class AlertDefinitionDAO extends HibernateDAO {
         return getSession()
             .createQuery("from AlertDefinition where escalation = :esc")
             .setParameter("esc", e).list();
+    }
+    
+    Object[] getEnabledAndTriggerId(Integer id) {
+        return (Object[]) getSession()
+            .createQuery("select enabled, actOnTrigger.id from AlertDefinition"+
+            		     " where id = " + id)
+            .uniqueResult();
     }
 
 }

@@ -60,7 +60,6 @@ import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
-import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.ClassicEscalatableCreator;
 import org.hyperic.hq.events.server.session.TriggerTrackerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
@@ -163,7 +162,8 @@ public abstract class AbstractTrigger
                 // Try adding a transaction listener that will call any 
                 // TriggerFireActionsFailureHandlers if the current 
                 // transaction is rolled back.
-                HQApp.getInstance().addTransactionListener(new TransactionListener() {
+                HQApp.getInstance()
+                    .addTransactionListener(new TransactionListener() {
 
                     public void afterCommit(boolean success) {
                         if (!success) {
@@ -178,10 +178,10 @@ public abstract class AbstractTrigger
                 
                 addedTxnListener = true;
             } finally {
-                // If the current transaction has been marked for rollback already, 
-                // then adding the transaction listener will cause an exception.
-                // If this occurs, then invoke the TriggerFireActionsFailureHandlers 
-                // immediately.
+                // If the current transaction has been marked for rollback 
+                // already, then adding the transaction listener will cause an 
+                // exception.  If this occurs, then invoke the 
+                // TriggerFireActionsFailureHandlers immediately.
                 if (!addedTxnListener) {
                     invokeTriggerFireActionsFailureHandlers();
                 }
@@ -198,7 +198,7 @@ public abstract class AbstractTrigger
             return;
         
         try {
-            AlertDefinition alertDef = aman.getByIdNoCheck(adId, false);
+            AlertDefinition alertDef = aman.getByIdNoCheck(adId);
             
             Collection actions = alertDef.getActions();
             
@@ -207,8 +207,10 @@ public abstract class AbstractTrigger
                 
                 ActionInterface actionInterface = action.getInitializedAction();
                 
-                if (actionInterface instanceof TriggerFireActionsFailureHandler) {
-                    ((TriggerFireActionsFailureHandler)actionInterface).onFailure();
+                if (actionInterface instanceof TriggerFireActionsFailureHandler)
+                {
+                    ((TriggerFireActionsFailureHandler) actionInterface)
+                        .onFailure();
                 }
             }
         } catch (FinderException e) {
@@ -241,25 +243,32 @@ public abstract class AbstractTrigger
             if (adId == null)
                 return;
             
-            
             AlertDefinition alertDef = null;
             
             // HQ-902: Retrieving the alert def and checking if the actions 
             // should fire must be guarded by a mutex.
             synchronized (alertDefEnabledStatusLock) {
-                alertDef = aman.getByIdNoCheck(adId, true);
-                
-                // See if the alert def is actually enabled and if it's our job to
-                // fire the actions
-                if (!shouldFireActions(aman, alertDef)) {
+                // Check cached alert def status
+                if (!uncommitedAlertDefEnabledStatus.isAlertDefinitionEnabled())
                     return;
-                }                
+                
+                // Check persisted alert def status
+                if (!shouldTriggerAlert(aman, adId))
+                    return;
+        
+                alertDef = aman.getByIdNoCheck(adId);
+                
+                // See if the alert def is actually enabled and if it's our job
+                // to fire the actions
+                if (!shouldFireActions(aman, alertDef))
+                    return;
             }
             
             if (triggerFiredLog.isDebugEnabled()) {
-                triggerFiredLog.debug("Firing actions for trigger with id="+
-                                        getId()+"; alert def ["+alertDef.getName()+
-                                        "] with id="+alertDef.getId());    
+                triggerFiredLog.debug("Firing actions for trigger with id=" +
+                                      getId() + "; alert def [" +
+                                      alertDef.getName() + "] with id=" +
+                                      alertDef.getId());    
             }
             
             EscalatableCreator creator = 
@@ -282,18 +291,18 @@ public abstract class AbstractTrigger
         }
     }
     
+    private boolean shouldTriggerAlert(AlertDefinitionManagerLocal adman,
+                                       Integer id) {
+        Object[] flags = adman.getEnabledAndTriggerId(id);
+        
+        // Check stored enabled flag as well as don't fire if it's not up to us
+        // to act
+        return flags[0].equals(Boolean.TRUE) && flags[1].equals(getId());
+    }
+
     private boolean shouldFireActions(AlertDefinitionManagerLocal aman, 
                                       AlertDefinition alertDef) 
         throws PermissionException {
-        
-        // Check stored as well as cached alert def status
-        if (!alertDef.isEnabled() || 
-            !uncommitedAlertDefEnabledStatus.isAlertDefinitionEnabled())
-            return false;
-        
-        // Don't fire if it's not up to us to act
-        if (!alertDef.getActOnTrigger().getId().equals(getId()))
-            return false;
         
         if (log.isDebugEnabled())
             log.debug("Trigger id " + getId() +
@@ -317,9 +326,9 @@ public abstract class AbstractTrigger
             
             try {
                 succeeded = aman.updateAlertDefinitionInternalEnable(
-                                AuthzSubjectManagerEJBImpl.getOne().findOverlord(),
-                                alertDef, 
-                                false);                
+                            AuthzSubjectManagerEJBImpl.getOne().findOverlord(),
+                            alertDef, 
+                            false);                
             } finally {
                 if (succeeded) {
                     setUncommitedAlertDefEnabledStatusToDisabled();                    
@@ -330,15 +339,15 @@ public abstract class AbstractTrigger
         return true;        
 
     }
-        
+
     private void setUncommitedAlertDefEnabledStatusToDisabled() {
         boolean addedTxnListener = false;
         
         try {
             uncommitedAlertDefEnabledStatus.flipEnabledStatus();
             
-            HQApp.getInstance().addTransactionListener(new TransactionListener() {
-
+            HQApp.getInstance().addTransactionListener(new TransactionListener()
+            {
                 public void afterCommit(boolean success) {
                     uncommitedAlertDefEnabledStatus.resetEnabledStatus();
                 }
@@ -350,9 +359,10 @@ public abstract class AbstractTrigger
             
             addedTxnListener = true;
         } finally {
-            // If for any reason we can't add the transaction listener, reset the
-            // cached alert definition enabled status immediately so the trigger 
-            // will continue firing after recovering from this failure case.
+            // If for any reason we can't add the transaction listener, reset
+            // the cached alert definition enabled status immediately so the
+            // trigger will continue firing after recovering from this failure
+            // case.
             if (!addedTxnListener) {
                 uncommitedAlertDefEnabledStatus.resetEnabledStatus();
             }
@@ -394,11 +404,13 @@ public abstract class AbstractTrigger
             throw e;
         } finally {
             if (isStreamCorrupted && recoverFromCorruption) {
-                log.info("Attempting to recover from event stream corruption by " +
-                        "deleting all events associated with trigger id="+getId());
+                log.info("Attempting to recover from event stream corruption " +
+                		"by deleting all events associated with trigger id=" +
+                		getId());
                 
                 try {
-                    EventTrackerLocal eTracker = EventTrackerUtil.getLocalHome().create();
+                    EventTrackerLocal eTracker =
+                        EventTrackerUtil.getLocalHome().create();
                     eTracker.deleteReference(getId());
                     log.info("Recovery succeeded for trigger id="+getId());
                 } catch (Exception e) {

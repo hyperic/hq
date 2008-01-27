@@ -648,16 +648,6 @@ public class AlertDefinitionManagerEJBImpl
         }
     }
     
-    private AlertDefinition badFindById(Integer id, boolean refresh) 
-    throws FinderException
-    {
-        try {
-            return getAlertDefDAO().findById(id, refresh);
-        } catch(ObjectNotFoundException e) {
-            throw new FinderException("Couldn't find AlertDefinition#" + id);
-        }
-    }
-    
     /** Find an alert definition and return a value object
      * @throws PermissionException if user does not have permission to manage
      * alerts
@@ -688,14 +678,11 @@ public class AlertDefinitionManagerEJBImpl
      * the abstract trigger, so it does no permission checking.
      * 
      * @param id The alert def Id.
-     * @param refresh <code>true</code> to force the alert def state to be 
-     *                to be re-read from the database; <code>false</code> to 
-     *                allow the persistence engine to return a cached copy.
      * @ejb:interface-method
      */
-    public AlertDefinition getByIdNoCheck(Integer id, boolean refresh) 
+    public AlertDefinition getByIdNoCheck(Integer id) 
         throws FinderException {
-        return badFindById(id, refresh);
+        return badFindById(id);
     }
     
     /**
@@ -1025,6 +1012,14 @@ public class AlertDefinitionManagerEJBImpl
             ret.put(adLocal.getName(), adLocal.getId());
         }
         return ret;
+    }
+    
+    /**
+     * Return array of two values: enabled and act on trigger ID
+     * @ejb:interface-method
+     */
+    public Object[] getEnabledAndTriggerId(Integer id) {
+        return getAlertDefDAO().getEnabledAndTriggerId(id);
     }
 
     /**

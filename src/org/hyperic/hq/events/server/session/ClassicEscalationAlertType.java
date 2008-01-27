@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -86,7 +86,7 @@ public final class ClassicEscalationAlertType
 
     public PerformsEscalations findDefinition(Integer defId) {
         try {
-            return getDefMan().getByIdNoCheck(defId, false);
+            return getDefMan().getByIdNoCheck(defId);
         } catch(FinderException e) {
             return null;
         }
@@ -94,7 +94,7 @@ public final class ClassicEscalationAlertType
     
     protected void setEscalation(Integer defId, Escalation escalation) {
         try {
-            AlertDefinition def = getDefMan().getByIdNoCheck(defId, false);
+            AlertDefinition def = getDefMan().getByIdNoCheck(defId);
             def.setEscalation(escalation);
             long mtime = System.currentTimeMillis();
             def.setMtime(mtime);
