@@ -82,6 +82,12 @@ public class MeasurementGtrigger
     private static final Log _log = LogFactory.getLog(MeasurementGtrigger.class);
     
     /**
+     * We need to allow up to a 1 minute time skew with the agent behind the 
+     * server.
+     */
+    private static final int AGENT_SERVER_TIME_SKEW_TOLERANCE=60*1000;
+    
+    /**
      * The minimum assumed measurement collection interval. This 
      * value doesn't have to be exact since it's only used to 
      * estimate the time window if we have the case where none 
@@ -103,6 +109,7 @@ public class MeasurementGtrigger
     private       String             _partitionDescription;
     private       long               _maxCollectionInterval;
     private       boolean            _isWithinFirstTimeWindow;
+    private       boolean            _isTimeWindowingInitialized;
     private       long               _startOfTimeWindowExact; // the start of the time window
     private       long               _startOfTimeWindow;  // the start of the time window, voodooed down
     private       String             _metricName;
@@ -132,9 +139,9 @@ public class MeasurementGtrigger
         _groupSize        = 0;
         _isNotReportingEventsOffending = isNotReportingOffending;
         _srcId2CollectionInterval = new HashMap();
-        setStartOfFirstTimeWindow(System.currentTimeMillis());
         _trackedHeartBeatTimestamps = new TreeSet();
         _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
+        _isTimeWindowingInitialized = false;
         setTriggerName();
     }
     
@@ -148,6 +155,8 @@ public class MeasurementGtrigger
             metricCollectionIntervalChanged();
             return;
         }
+        
+        initializeTimeWindowing(event);
         
         // Evaluate the sliding time window boundary.
         boolean inFirstTimeWindow = isInFirstTimeWindow();
@@ -188,6 +197,20 @@ public class MeasurementGtrigger
                                                       endOfTimeWindow);
         
         tryToFire(srcId2ViolatingMetricValue, _startOfTimeWindow, endOfTimeWindow);
+    }
+    
+    /**
+     * Initialize the time windowing. This is only done once when the trigger 
+     * processes the first heart beat or measurement event.
+     * 
+     * @param event The event.
+     */
+    private void initializeTimeWindowing(Zevent event) {
+        if (!_isTimeWindowingInitialized && 
+            (isHeartBeatEvent(event) || isMeasurementEvent(event))) {
+            setStartOfFirstTimeWindow(System.currentTimeMillis());
+            _isTimeWindowingInitialized = true;
+        }        
     }
     
     /**
@@ -274,7 +297,8 @@ public class MeasurementGtrigger
     private boolean isInFirstTimeWindow() {
         if (_isWithinFirstTimeWindow) {
             if (System.currentTimeMillis() <
-                _startOfTimeWindowExact+2*_maxCollectionInterval) {
+                _startOfTimeWindowExact+(2*_maxCollectionInterval)+
+                AGENT_SERVER_TIME_SKEW_TOLERANCE) {
                 // still in first time window
                 _isWithinFirstTimeWindow = true;
             } else {
@@ -762,10 +786,6 @@ public class MeasurementGtrigger
             _metricName = tMan.getTemplate(_templateId).getName();
             
             setTriggerName();
-            
-            // reset the start of the first time window to now since we 
-            // can't even start processing events until the group is set
-            setStartOfFirstTimeWindow(System.currentTimeMillis());
         } catch(Exception e) {
             throw new SystemException(e);
         }
