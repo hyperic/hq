@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.bizapp.server.mdb;
 
-public class EventsHandler {
+import java.util.List;
 
+interface EventsHandler {
+    void handleEvents(List events);
 }
