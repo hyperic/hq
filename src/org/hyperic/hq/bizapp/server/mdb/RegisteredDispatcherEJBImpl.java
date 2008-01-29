@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -45,9 +45,7 @@ import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.AbstractEvent;
-import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.FlushStateEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
@@ -67,7 +65,7 @@ import org.hyperic.hq.events.shared.EventProcessingTxnWrapperLocal;
  *      acknowledge-mode="Auto-acknowledge"
  *      destination-type="javax.jms.Topic"
  *
- * @ejb:transaction type="NOTSUPPORTED"
+ * @ejb:transaction type="REQUIRED"
  *
  * @jboss:destination-jndi-name name="topic/eventsTopic"
  */
