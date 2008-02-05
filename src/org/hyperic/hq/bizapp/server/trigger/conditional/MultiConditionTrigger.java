@@ -88,14 +88,14 @@ public class MultiConditionTrigger
     public static final String OR  = "|";
     
     private final Object lock = new Object();
+    
+    private final Object lastFulfillingEventsLock = new Object();
 
     private final Map currentSharedLockHolders = Collections.synchronizedMap(new HashMap());
         
     // make the lock reentrant just to be safe in preventing deadlocks
     private final ReadWriteLock rwLock = new ReentrantWriterPreferenceReadWriteLock();
-    
-    // this list must be synchronized or immutable since it will be accessed 
-    // by multiple threads    
+       
     private List lastFulfillingEvents = Collections.EMPTY_LIST;
 
     /** Holds value of property triggerIds. */
@@ -192,7 +192,9 @@ public class MultiConditionTrigger
      *         <code>false</code> if not.
      */
     public boolean triggeringConditionsFulfilled() {
-        return !lastFulfillingEvents.isEmpty();
+        synchronized (lastFulfillingEventsLock) {
+            return !lastFulfillingEvents.isEmpty();            
+        }
     }    
     
     /**
@@ -347,7 +349,7 @@ public class MultiConditionTrigger
             etracker = EventTrackerUtil.getLocalHome().create();
         } catch (Exception e) {
             throw new ActionExecuteException("Failed to evaluate multi condition " +
-            		                          "trigger id="+getId(), e);
+                                              "trigger id="+getId(), e);
         }
         
         TriggerFiredEvent target = prepareTargetEventOnFlush(event, etracker);
@@ -382,7 +384,7 @@ public class MultiConditionTrigger
                         // have to synchronize on the list iteration.                        
                         List copyOfLastFulfillingEvents = null;
                         
-                        synchronized (lastFulfillingEvents) {
+                        synchronized (lastFulfillingEventsLock) {
                             copyOfLastFulfillingEvents = 
                                 new ArrayList(lastFulfillingEvents);
                         }     
@@ -391,12 +393,19 @@ public class MultiConditionTrigger
 
                     } finally {
                         if (target != null) {
-                            lastFulfillingEvents.clear();                            
+                            synchronized (lastFulfillingEventsLock) {
+                                lastFulfillingEvents.clear();                                                            
+                            }
                         }
                     }
                 }                            
             } else {
-                lastFulfillingEvents = checkIfNewEventFulfillsConditions(event, etracker);
+                List tempLastFulfillingEvents = 
+                    checkIfNewEventFulfillsConditions(event, etracker);
+                
+                synchronized (lastFulfillingEventsLock) {
+                    lastFulfillingEvents = tempLastFulfillingEvents;                    
+                }
             }            
         }
         
@@ -497,7 +506,7 @@ public class MultiConditionTrigger
                     "Failed to update event references for trigger id="+getId(), e);
         }
         
-        return Collections.synchronizedList(new ArrayList(fulfilled.values()));
+        return new ArrayList(fulfilled.values());
     }
     
     private List getPriorEventsForTrigger(EventTrackerLocal etracker) 
