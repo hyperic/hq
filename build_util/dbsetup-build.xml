@@ -169,7 +169,7 @@
          jdbcPassword="${hq.jdbc.password}"
          typeMap="${hq.home}/sql/common-dbsetup-typemap.xml"
          data="${data}"
-         sqlFile="build/sql/dbsetup-all-${hq.server.ds-mapping}-install.sql"
+         sqlFile="${basedir}/build/sql/dbsetup-all-${hq.server.ds-mapping}-install.sql"
          noexec="false"
          uninstall="${uninstall}"
          appendToSqlFile="true" />
