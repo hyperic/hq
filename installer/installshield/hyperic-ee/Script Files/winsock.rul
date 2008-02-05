@@ -1,0 +1,246 @@
+#include "ifx.h"
+   
+ prototype STRING GetIPAddress();    
+ prototype STRING GetHostname(); 
+ prototype BOOL ValidatePort(SHORT);    
+    
+ #define WSADESCRIPTION_LEN      256
+ #define WSASYS_STATUS_LEN       128
+ #define AF_INET 2
+ #define SOCK_STREAM 1
+ #define IPPROTO_TCP 6
+ 
+ typedef
+  WSAData
+   begin
+         INT                    wVersion;
+         INT                    wHighVersion;
+         STRING                 szDescription[WSADESCRIPTION_LEN+1];
+         STRING                 szSystemStatus[WSASYS_STATUS_LEN+1];
+         short                  iMaxSockets;
+         short                  iMaxUdpDg;
+         POINTER                lpVendorInfo;
+ end;
+
+  typedef
+  SOCKET
+   begin
+         INT                    wVersion;
+         INT                    wHighVersion;
+         STRING                 szDescription[WSADESCRIPTION_LEN+1];
+         STRING                 szSystemStatus[WSASYS_STATUS_LEN+1];
+         short                  iMaxSockets;
+         short                  iMaxUdpDg;
+         POINTER                lpVendorInfo;
+ end;
+                 
+ typedef  HostEnt
+ begin
+         LPSTR    ph_name;           /* official name of host */
+         POINTER    ph_aliases;        /* alias list */
+         short      h_addrtype;        /* host address type */
+         short      h_length;          /* length of address */
+         POINTER    ph_addr_list;      /* list of addresses */
+ end;
+ 
+ typedef IPName
+  begin
+  STRING szIPAddr[100];
+ end;
+ 
+ typedef IPAddrList
+  begin
+  POINTER pIPAddr;
+ end;
+ 
+ typedef IPAddr
+ begin	
+ 	LONG s_addr;
+ end;
+ 
+ typedef SockAddPtr
+  begin
+  SHORT sin_family;
+  SHORT sin_port;
+  IPAddr sin_addr;
+  STRING sin_zero[8];
+ end;
+    
+ typedef ServerName
+   begin
+             STRING svLocalString[500];
+   end;
+ 
+ prototype POINTER wsock32.gethostbyname(BYVAL STRING);
+ prototype POINTER wsock32.gethostname(BYREF STRING, NUMBER);
+ prototype POINTER wsock32.WSAStartup(INT, POINTER);
+ prototype POINTER wsock32.inet_ntoa( NUMBER);    
+ prototype LONG wsock32.inet_addr(BYVAL STRING);   
+ prototype INT wsock32.socket( INT, INT, INT);  
+ prototype INT wsock32.bind(INT, POINTER, INT); 
+ prototype INT wsock32.closesocket(INT); 
+ prototype LONG wsock32.htonl( LONG);  
+ prototype SHORT wsock32.htons( SHORT);  
+ prototype POINTER wsock32.WSACleanup();
+ prototype int     wsock32.WSAGetLastError();  
+ 
+function BOOL ValidatePort(nPort)
+ HostEnt structHostEnt;
+ HostEnt POINTER pHostEnt;
+ SHORT nlen;
+ NUMBER nIPNetAddr, nVersion; 
+  
+ STRING szHostName, szDNSName, szMYIPAddr; 
+ POINTER pWinSockReturn;
+ WSAData structWSAData;
+ WSAData POINTER pWSAData;   
+ IPName LocalIPName;
+ IPName  POINTER pLocalIPName; 
+ IPAddrList  structIPAddrList;
+ IPAddrList  POINTER pIPAddrList;
+ IPAddr  structIPAddPtr;
+ IPAddr  POINTER pIPAddPtr;  
+ POINTER pIN_Addr_Struct;
+ ServerName POINTER pszLocalString;
+ INT nSocket, nFamily, nType, nProtocol, nResult;
+ BOOL bResult;
+ SockAddPtr structSockAddPtr;
+ SockAddPtr POINTER t;  
+ 
+ begin             
+	 pWSAData = &structWSAData;
+	 
+	 if (UseDLL ("wsock32.dll") < 0)  then
+	 	MessageBox("Failed to load required Windows library wsock32.dll", SEVERE);
+	 	abort;
+	 endif;
+	 
+	 pWSAData -> wHighVersion = 1;
+	 pWSAData -> wVersion     = 1;
+	 nVersion =  0x02000002;   // can be 0x01000001 for Windows NT but Windows 95 requires the version 2 settings
+
+	 pWinSockReturn = WSAStartup(nVersion, pWSAData); 
+
+	 pWinSockReturn = gethostname(szHostName,100);
+	 pHostEnt       = gethostbyname(szHostName);    
+	 
+	 nlen         = pHostEnt   -> h_length;   // debug check (should be 4)
+	 pIPAddPtr    = pHostEnt    -> ph_addr_list;
+	
+	pIPAddPtr   = *pIPAddPtr;
+	nIPNetAddr  = *pIPAddPtr;
+	
+	pLocalIPName =  inet_ntoa( nIPNetAddr );
+	
+	 nFamily = AF_INET;
+	 nType = SOCK_STREAM;
+	 nProtocol = IPPROTO_TCP;
+	 nSocket = socket(nFamily, nType, nProtocol); 
+	 
+	 t = &structSockAddPtr;
+	 t->sin_family = AF_INET;
+	 t->sin_port = htons(nPort);
+	 t->sin_addr.s_addr = inet_addr(pLocalIPName -> szIPAddr); 
+	 
+	 nResult = bind(nSocket, t, SizeOf(structSockAddPtr));
+	 closesocket(nSocket);    
+	 WSACleanup();  
+	UnUseDLL ("wsock32.dll");   
+	return (nResult = 0);	 
+end; 
+
+function STRING GetIPAddress()
+ HostEnt structHostEnt;
+ HostEnt POINTER pHostEnt;
+ SHORT nlen;
+ NUMBER nIPNetAddr, nVersion; 
+  
+ STRING szHostName, szDNSName, szMYIPAddr; 
+ POINTER pWinSockReturn;
+ WSAData structWSAData;
+ WSAData POINTER pWSAData;   
+ IPName LocalIPName;
+ IPName  POINTER pLocalIPName; 
+ IPAddrList  structIPAddrList;
+ IPAddrList  POINTER pIPAddrList;
+ IPAddr  structIPAddPtr;
+ IPAddr  POINTER pIPAddPtr;  
+ POINTER pIN_Addr_Struct;
+ ServerName POINTER pszLocalString;
+ INT nSocket, nFamily, nType, nProtocol, nResult;
+ BOOL bResult;
+ SockAddPtr structSockAddPtr;
+ SockAddPtr POINTER t;  
+ 
+ begin             
+	 pWSAData = &structWSAData;
+	 
+	 if (UseDLL ("wsock32.dll") < 0)  then
+	 	MessageBox("Failed to load required Windows library wsock32.dll", SEVERE);
+	 	abort;
+	 endif;
+	 
+	 pWSAData -> wHighVersion = 1;
+	 pWSAData -> wVersion     = 1;
+	 nVersion =  0x02000002;   // can be 0x01000001 for Windows NT but Windows 95 requires the version 2 settings
+
+	 pWinSockReturn = WSAStartup(nVersion, pWSAData); 
+
+	 pWinSockReturn = gethostname(szHostName,100);
+	 pHostEnt       = gethostbyname(szHostName);    
+	 
+	 nlen         = pHostEnt   -> h_length;   // debug check (should be 4)
+	 pIPAddPtr    = pHostEnt    -> ph_addr_list;
+	
+	pIPAddPtr   = *pIPAddPtr;
+	nIPNetAddr  = *pIPAddPtr;
+	
+	pLocalIPName =  inet_ntoa( nIPNetAddr );
+	WSACleanup();  
+	UnUseDLL ("wsock32.dll");   
+	return  pLocalIPName -> szIPAddr;   	 
+end; 
+
+function STRING GetHostname()
+ HostEnt structHostEnt;
+ HostEnt POINTER pHostEnt;
+ SHORT nlen;
+ NUMBER nIPNetAddr, nVersion; 
+  
+ STRING szHostName, szDNSName, szMYIPAddr; 
+ POINTER pWinSockReturn;
+ WSAData structWSAData;
+ WSAData POINTER pWSAData;   
+ IPName LocalIPName;
+ IPName  POINTER pLocalIPName; 
+ IPAddrList  structIPAddrList;
+ IPAddrList  POINTER pIPAddrList;
+ IPAddr  structIPAddPtr;
+ IPAddr  POINTER pIPAddPtr;  
+ POINTER pIN_Addr_Struct;
+ ServerName POINTER pszLocalString;
+ INT nSocket, nFamily, nType, nProtocol, nResult;
+ BOOL bResult;
+ SockAddPtr structSockAddPtr;
+ SockAddPtr POINTER t;  
+ 
+ begin             
+	 pWSAData = &structWSAData;
+	 
+	 if (UseDLL ("wsock32.dll") < 0)  then
+	 	MessageBox("Failed to load required Windows library wsock32.dll", SEVERE);
+	 	abort;
+	 endif;
+	 
+	 pWSAData -> wHighVersion = 1;
+	 pWSAData -> wVersion     = 1;
+	 nVersion =  0x02000002;   // can be 0x01000001 for Windows NT but Windows 95 requires the version 2 settings
+
+	 pWinSockReturn = WSAStartup(nVersion, pWSAData); 
+
+	 pWinSockReturn = gethostname(szHostName,100);
+  
+	UnUseDLL ("wsock32.dll");   
+	return  szHostName;   	 
+end; 
+                                                                                 

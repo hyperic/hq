@@ -1,0 +1,731 @@
+<?xml version="1.0"?>
+<!--
+	NOTE: This copyright does *not* cover user programs that use HQ
+	program services by normal system calls through the application
+	program interfaces provided as part of the Hyperic Plug-in Development
+	Kit or the Hyperic Client Development Kit - this is merely considered
+	normal use of the program, and does *not* fall under the heading of
+	"derived work".
+	
+	Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+	This file is part of HQ.
+	
+	HQ is free software; you can redistribute it and/or modify
+	it under the terms version 2 of the GNU General Public License as
+	published by the Free Software Foundation. This program is distributed
+	in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+	PARTICULAR PURPOSE. See the GNU General Public License for more
+	details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+	USA.
+-->
+<plugin package="org.hyperic.hq.plugin.oc4j" name="oc4j">
+
+	<classpath>
+		<include name="pdk/lib/mx4j" />
+		<!-- relative to auto-discovered installpath (see PROC_HOME_PROPERTY) -->
+		<include name="j2ee/home/lib/adminclient.jar" />
+		<include name="j2ee/home/lib/javax77.jar" />
+		<include name="j2ee/home/oc4jclient.jar" />
+		<include name="j2ee/home/lib/oc4j-internal.jar" />
+		<include name="lib/dms.jar" />
+	</classpath>
+
+	<filter name="template"
+		value="${OBJECT_NAME}:Stats.${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%" />
+
+	<metrics name="JVM">
+
+		<metric name="Availability"
+			template="${OBJECT_NAME}:ready:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+			indicator="true" />
+
+		<metric name="UpTime" indicator="true" units="epoch-millis"
+			collectionType="trendsup" />
+
+		<metric name="HeapSize" indicator="true" units="B"
+			collectionType="dynamic" />
+
+		<metric name="Free Heap Size" indicator="true" units="B"
+			collectionType="dynamic" />
+
+		<metric name="Active Threads" category="Throughput"
+			indicator="true" units="none" collectionType="dynamic" />
+
+	</metrics>
+
+	<metrics name="JMS">
+		<metric name="Pending Message Count" alias="pendingMessageCount"
+			units="none" collectionType="dynamic" />
+
+		<metric name="Messages Dequeued" alias="messageDequeued"
+			category="Throughput" units="none" collectionType="dynamic" />
+
+		<metric name="Messages Expired" alias="messageExpired"
+			category="Throughput" units="none" collectionType="dynamic" />
+
+		<metric name="Messages Committed" alias="messageCommitted"
+			category="Throughput" units="none" collectionType="dynamic" />
+
+		<metric name="Messages Rolled Back" alias="messageRolledBack"
+			units="none" collectionType="dynamic" />
+
+		<metric name="Messages Enqueued" alias="messageEnqueued"
+			category="Throughput" units="none" collectionType="dynamic" />
+
+		<metric name="Messages Recovered" alias="messageRecovered"
+			category="Throughput" units="none" collectionType="dynamic" />
+
+		<metric name="Messages Discarded" alias="messageDiscarded"
+			category="Throughput" units="none" collectionType="dynamic" />
+
+		<metric name="Messages Paged In" alias="messagePagedIn"
+			units="none" collectionType="dynamic" />
+
+		<metric name="Message Count" alias="messageCount"
+			category="Throughput" units="none" collectionType="dynamic" />
+
+		<metric name="Active Handlers" alias="activeHandlers"
+			units="none" collectionType="dynamic" />
+
+		<metric name="Active Connections" alias="activeConnections"
+			indicator="true" units="none" collectionType="dynamic" />
+	</metrics>
+
+	<metrics name="EJB">
+		<metric name="Availability"
+			template="${OBJECT_NAME}:Availability:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+			indicator="true" />
+
+		<metric name="Create Count" units="none"
+			collectionType="dynamic" />
+
+		<metric name="Remove Count" units="none"
+			collectionType="dynamic" />
+
+		<metric name="Active Instances" alias="activeInstances"
+			template="${OBJECT_NAME}:${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+			units="none" collectionType="dynamic" />
+
+		<metric name="Active Instances High Watermark"
+			alias="activeInstancesHighWaterMark"
+			template="${OBJECT_NAME}:${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+			units="none" collectionType="dynamic" />
+
+		<metric name="Max Instances" alias="maxInstances"
+			template="${OBJECT_NAME}:${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+			units="none" collectionType="dynamic" />
+
+		<metric name="Min Instances" alias="minInstances"
+			template="${OBJECT_NAME}:${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+			units="none" collectionType="dynamic" />
+
+	</metrics>
+
+	<server name ="OC4J" description="Oracle Containers for Java"
+		version="10">
+
+		<property name="domain" value="oc4j" />
+
+		<property name="DEFAULT_CONFIG_FILE"
+			value="j2ee/home/config/server.xml" />
+
+		<property name="DEFAULT_LOG_FILE"
+			value="j2ee/home/logs/oc4j/log.xml" />
+
+		<property name="DEFAULT_PROGRAM" value="bin/oc4j" />
+
+		<property name="HAS_BUILTIN_SERVICES" value="true" />
+
+		<!--  TODO oracle.home environment property is needed for autodetection -->
+		<property name="PROC_HOME_PROPERTY" value="oracle.home" />
+
+		<config>
+			<option name="jmx.url" description="JMX URL to MBeanServer"
+				default="service:jmx:rmi://localhost:23791" type="hidden"/>
+
+			<option name="jmx.username" description="JMX username"
+				default="oc4jadmin" />
+
+			<option name="jmx.password" description="JMX password"
+				type="secret" />
+
+			<option name="jmx.provider.pkgs"
+				description="Defines the protocols that can be used to connect to the OC4J MBean server."
+				type="hidden" default="oracle.oc4j.admin.jmx.remote" />
+
+		</config>
+
+		<!-- 
+			<config type="control">
+			<option name="start.args"
+			description="Server start program arguments" optional="true" />
+			<option name="stop.program"
+			description="Server stop program (default uses JMX)"
+			optional="true" />
+			<option name="stop.args"
+			description="Server stop program arguments" optional="true"
+			default="-port 23791 -password %jmx.password%" />
+			<option name="configSet"
+			description="Server config file set" optional="true"
+			default="default" />
+			<option name="process.query" description="PTQL for Java Process" default="State.Name.eq=java,Args.*.ct=proc.java.home"/>
+			</config>
+		-->
+		<property name="OBJECT_NAME"
+			value="${domain}:j2eeType=JVM,name=single,J2EEServer=standalone" />
+		<metrics include="JVM" />
+
+		<property name="OBJECT_NAME"
+			value="${domain}:j2eeType=JMSResource,name=&quot;JMS&quot;,J2EEServer=standalone" />
+		<metrics include="JMS" />
+
+		<properties>
+			<property name="${domain}:j2eeType=J2EEServer,name=standalone:serverVersion" description="Server Version" />
+			
+			<property name="${domain}:j2eeType=J2EEServer,name=standalone:serverVendor" description="Server Vendor" />
+			
+			<property name="${domain}:j2eeType=JVM,name=single,J2EEServer=standalone:javaVersion"
+			description="Java Version" />
+			
+			<property name="${domain}:j2eeType=JVM,name=single,J2EEServer=standalone:javaVendor"
+			description="Java Vendor" />
+		</properties>
+
+		<!-- derive installpath from JAVA_HOME env prop... -->
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.plugin.oc4j.Oc4jServerDetector" />
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.jmx.MxMeasurementPlugin" />
+		<!-- TODO -->
+		<!--
+			<plugin type="log_track"
+			class="org.hyperic.hq.product.Log4JLogTrackPlugin" />
+			
+			<plugin type="control"
+			class="org.hyperic.hq.product.jmx.MxServerControlPlugin" />
+		-->
+
+		<property name="DEFAULT_CONFIG_FILE"
+			value="j2ee/home/config/server.xml,j2ee/home/config/j2ee-logging.xml,j2ee/home/config/java2.policy,j2ee/home/config/system-jazn-data.xml" />
+
+		<plugin type="config_track"
+			class="org.hyperic.hq.product.ConfigFileTrackPlugin" />
+
+		<service name="Application">
+
+			<config>
+				<option name="name" description="Name" default="" />
+			</config>
+
+			<property name="OBJECT_NAME"
+				value="${domain}:j2eeType=J2EEApplication,name=*,J2EEServer=standalone" />
+
+			<metrics>
+				<metric name="Availability"
+					template="${OBJECT_NAME}:state:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					indicator="true" />
+
+				<metric name="Start Time" alias="startTime"
+					template="${OBJECT_NAME}:${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					indicator="true" units="epoch-millis" collectionType="static" />
+
+			</metrics>
+
+			<plugin type="autoinventory" />
+
+		</service>
+
+		<service name="Web Module">
+
+			<config>
+				<option name="name" description="Name" default="" />
+				<option name="application"
+					description="Application Name" default="" />
+			</config>
+
+			<property name="OBJECT_NAME"
+				value="${domain}:j2eeType=WebModule,name=*,J2EEApplication=*,J2EEServer=standalone" />
+
+			<metrics>
+				<metric name="Availability"
+					template="${OBJECT_NAME}:state:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					indicator="true" />
+
+				<!-- Unsupported -->
+				<metric name="ProcessRequestTime" unit="ms"
+					collectionType="dynamic" />
+
+				<metric name="ResolveServletTime" unit="ms"
+					collectionType="dynamic" />
+
+				<metric name="SessionActivationTime" unit="ms"
+					collectionType="dynamic" />
+
+
+				<metric name="ProcessRequestActive" unit="none"
+					collectionType="dynamic" />
+
+				<metric name="SessionActivationActive" unit="none"
+					collectionType="dynamic" />
+
+				<metric name="ResolveServletActive" unit="none"
+					collectionType="dynamic" />
+
+				<metric name="Start Time" alias="startTime"
+					indicator="true"
+					template="${OBJECT_NAME}:${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					units="epoch-millis" collectionType="static" />
+
+			</metrics>
+
+			<plugin type="autoinventory" />
+
+		</service>
+
+		<service name="JMS Destination">
+
+			<config>
+				<option name="name" description="Name" default="" />
+				<option name="JMSResource" description="JMSResource"
+					default="" />
+				<option name="JMSDestinationResource"
+					description="JMSDestinationResource" default="" />
+			</config>
+
+			<property name="OBJECT_NAME"
+				value="${domain}:j2eeType=JMSStoreResource,name=*,JMSDestinationResource=*,JMSResource=*,J2EEServer=standalone" />
+
+			<metrics>
+				<metric name="Availability"
+					template="${OBJECT_NAME}:Availability:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					indicator="true" />
+
+				<metric name="Pending Message Count"
+					alias="pendingMessageCount" units="none" collectionType="dynamic" />
+
+				<metric name="Message Dequeued" alias="messageDequeued"
+					units="none" collectionType="dynamic" />
+
+				<metric name="Message Expired" alias="messageExpired"
+					units="none" collectionType="dynamic" />
+
+				<metric name="Message Committed"
+					alias="messageCommitted" units="none" collectionType="dynamic" />
+
+				<metric name="Message Rolled Back"
+					alias="messageRolledBack" units="none" collectionType="dynamic" />
+
+				<metric name="Message Enqueued" alias="messageEnqueued"
+					units="none" collectionType="dynamic" />
+
+				<metric name="Message Recovered"
+					alias="messageRecovered" units="none" collectionType="dynamic" />
+
+				<metric name="Message Discarded"
+					alias="messageDiscarded" units="none" collectionType="dynamic" />
+
+				<metric name="Message Paged In" alias="messagePagedIn"
+					units="none" collectionType="dynamic" />
+
+				<metric name="Message Count" alias="messageCount"
+					units="none" collectionType="dynamic" />
+
+			</metrics>
+
+			<plugin type="autoinventory" />
+
+		</service>
+
+		<service name="JMS Topic">
+
+			<config>
+				<option name="name" description="Name" default="" />
+				<option name="JMSResource" description="JMSResource"
+					default="" />
+			</config>
+
+			<property name="OBJECT_NAME"
+				value="${domain}:j2eeType=JMSDestinationResource,name=*,JMSResource=*,J2EEServer=standalone" />
+
+			<metrics>
+				<metric name="Availability"
+					template="${OBJECT_NAME}:Availability:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					indicator="true" />
+			</metrics>
+
+			<plugin type="autoinventory" />
+
+		</service>
+
+		<service name="Entity Bean">
+
+			<config>
+				<option name="module" description="EJB Module"
+					default="" />
+				<option name="application"
+					description="J2EE Application" default="" />
+				<option name="name" description="Name" default="" />
+			</config>
+
+			<property name="OBJECT_NAME"
+				value="${domain}:EJBModule=*,J2EEApplication=*,J2EEServer=standalone,j2eeType=EntityBean,name=*" />
+
+			<plugin type="autoinventory" />
+
+			<metrics include="EJB" />
+
+		</service>
+
+		<service name="Stateless Session Bean">
+			<property name="OBJECT_NAME"
+				value="${domain}:EJBModule=*,J2EEApplication=*,J2EEServer=standalone,j2eeType=StatelessSessionBean,name=*" />
+			<config>
+				<option name="module" description="EJB Module"
+					default="" />
+				<option name="application"
+					description="J2EE Application" default="" />
+				<option name="name" description="Name" default="" />
+			</config>
+
+			<plugin type="autoinventory" />
+
+			<metrics include="EJB" />
+
+		</service>
+
+		<service name="Stateful Session Bean">
+			<property name="OBJECT_NAME"
+				value="${domain}:EJBModule=*,J2EEApplication=*,J2EEServer=standalone,j2eeType=StatefulSessionBean,name=*" />
+
+			<config>
+				<option name="module" description="EJB Module"
+					default="" />
+				<option name="application"
+					description="J2EE Application" default="" />
+				<option name="name" description="Name" default="" />
+			</config>
+
+			<plugin type="autoinventory" />
+
+			<metrics include="EJB" />
+
+		</service>
+
+		<service name="JCA Connection Pool">
+			<property name="OBJECT_NAME"
+				value="${domain}:j2eeType=JCAConnectionPool,name=*,ResourceAdapterModule=*,ResourceAdapter=*,J2EEApplication=*,J2EEServer=standalone" />
+
+			<actions include="setConfigProperty,getConfigProperty" />
+
+			<config>
+				<option name="application" description="application"
+					default="" />
+				<option name="resource" description="JCA Resource"
+					default="" />
+				<option name="adapter" description="Resource Adapter"
+					default="" />
+				<option name="module"
+					description="Resource Adapter Module" default="" />
+				<option name="name" description="Name" default="" />
+			</config>
+
+			<plugin type="autoinventory" />
+
+			<metrics>
+				<metric name="Availability"
+					template="${OBJECT_NAME}:Availability:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					indicator="true" />
+
+				<!--  Unsupported -->
+
+				<metric name="Use Time" units="ms"
+					collectionType="dynamic" />
+
+				<metric name="Wait Time" units="ms"
+					collectionType="dynamic" />
+
+
+				<metric name="Create Count" units="none"
+					collectionType="dynamic" />
+
+				<metric name="Error Count" units="none"
+					collectionType="dynamic" />
+
+				<metric name="Close Count" units="none"
+					collectionType="dynamic" />
+
+				<metric name="Waiting Thread Count" units="none"
+					collectionType="dynamic" />
+
+				<metric name="Pool Size" units="none"
+					collectionType="dynamic" />
+
+				<metric name="Free Pool Size" units="none"
+					collectionType="dynamic" />
+
+			</metrics>
+
+		</service>
+
+		<service name="JCA Resource">
+			<property name="OBJECT_NAME"
+				value="${domain}:j2eeType=JCAConnectionFactory,name=*,JCAResource=*,ResourceAdapter=*,ResourceAdapterModule=*,J2EEApplication=*,J2EEServer=standalone" />
+
+			<actions include="setConfigProperty,getConfigProperty" />
+
+			<config>
+				<option name="application" description="application"
+					default="" />
+				<option name="resource" description="JCA Resource"
+					default="" />
+				<option name="adapter" description="Resource Adapter"
+					default="" />
+				<option name="module"
+					description="Resource Adapter Module" default="" />
+				<option name="name" description="Name" default="" />
+			</config>
+
+			<plugin type="autoinventory" />
+
+			<metrics>
+				<metric name="Availability"
+					template="${OBJECT_NAME}:Availability:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					indicator="true" />
+
+				<!--  Unsupported -->
+
+				<metric name="Use Time" units="ms"
+					collectionType="dynamic" />
+
+				<metric name="Wait Time" units="ms"
+					collectionType="dynamic" />
+
+				<metric name="Create Count" units="none"
+					collectionType="dynamic" />
+
+				<metric name="Close Count" units="none"
+					collectionType="dynamic" />
+
+			</metrics>
+
+		</service>
+
+		<service name="JDBC Resource">
+			<property name="OBJECT_NAME"
+				value="${domain}:j2eeType=JDBCResource,name=*,J2EEApplication=*,J2EEServer=standalone" />
+
+			<actions include="setConfigProperty,getConfigProperty" />
+
+			<config>
+				<option name="application" description="application"
+					default="" />
+				<option name="name" description="Name" default="" />
+			</config>
+
+			<plugin type="autoinventory" />
+
+			<metrics>
+				<metric name="Availability"
+					template="${OBJECT_NAME}:Availability:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					indicator="true" />
+
+				<!--  Unsupported -->
+				<metric name="Use Time" units="ms"
+					collectionType="dynamic" />
+
+				<metric name="Wait Time" units="ms"
+					collectionType="dynamic" />
+
+				<metric name="Close Connection Count" units="none"
+					collectionType="dynamic" />
+
+				<metric name="Create Connection Count" units="none"
+					collectionType="dynamic" />
+
+				<metric name="Waiting Thread Count" units="none"
+					collectionType="dynamic" />
+
+				<metric name="Pool Size" units="none"
+					collectionType="dynamic" />
+
+				<metric name="Free Pool Size" units="none"
+					collectionType="dynamic" />
+
+				<metric name="Max Connections" alias="maxConnections"
+					template="${OBJECT_NAME}:${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					units="none" collectionType="static" />
+
+				<metric name="Min Connections" alias="minConnections"
+					template="${OBJECT_NAME}:${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					units="none" collectionType="static" />
+
+			</metrics>
+
+		</service>
+
+		<!--
+			<service name="JDBC Data Resource">
+			
+			<config>
+			<option name="J2EEApplication" description="application"
+			default="" />
+			<option name="name" description="Name" default="" />
+			<option name="JDBCResource" description="Resource"
+			default="" />
+			</config>
+			
+			<property name="OBJECT_NAME"
+			value="${domain}:j2eeType=JDBCDataSource,name=*,JDBCResource=*,J2EEApplication=*,J2EEServer=standalone" />
+			
+			<actions include="setConfigProperty,getConfigProperty" />
+			
+			<plugin type="autoinventory" />
+			
+			<metrics>
+			<metric name="Availability"
+			template="${OBJECT_NAME}:Availability" indicator="true" />
+			
+			<metric name="Use Time" units="ms"
+			collectionType="dynamic" />
+			
+			<metric name="Wait Time" units="ms"
+			collectionType="dynamic" />
+			
+			<metric name="Close Connection Count" units="none"
+			collectionType="dynamic" />
+			
+			<metric name="Create Connection Count" units="none"
+			collectionType="dynamic" />
+			
+			<metric name="Waiting Thread Count" units="none"
+			collectionType="dynamic" />
+			
+			<metric name="Pool Size" units="none"
+			collectionType="dynamic" />
+			
+			<metric name="Free Pool Size" units="none"
+			collectionType="dynamic" />
+			
+			</metrics>
+			
+			</service>
+		-->
+
+		<service name="JTA Resource">
+
+			<config>
+				<option name="name" description="Name" default="" />
+			</config>
+
+			<property name="OBJECT_NAME"
+				value="${domain}:j2eeType=JTAResource,name=*,J2EEServer=standalone" />
+
+			<actions include="setConfigProperty,getConfigProperty" />
+
+			<plugin type="autoinventory" />
+
+			<metrics>
+				<metric name="Availability"
+					template="${OBJECT_NAME}:Availability:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					indicator="true" />
+
+				<metric name="Max Concurrent Transactions"
+					alias="maxConcurrentTransactions"
+					template="${OBJECT_NAME}:${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					units="none" collectionType="static" />
+
+				<!--  Unsupported -->
+				<metric name="AverageCommitTime" units="none"
+					collectionType="dynamic" />
+				<metric name="RollbackCompletion" units="none"
+					collectionType="dynamic" />
+				<metric name="PerformTransaction" units="none"
+					collectionType="dynamic" />
+				<metric name="TransactionSuspended" units="none"
+					collectionType="dynamic" />
+				<metric name="SinglePhaseCommitCompletion" units="none"
+					collectionType="dynamic" />
+				<metric name="TwoPhaseCommitCompletion" units="none"
+					collectionType="dynamic" />
+
+				<metric name="RolledbackDueToResourceCount" units="none"
+					collectionType="dynamic" />
+				<metric name="RolledbackDueToTimedOutCount" units="none"
+					collectionType="dynamic" />
+				<metric name="HeuristicCommittedCount" units="none"
+					collectionType="dynamic" />
+				<metric name="RolledbackCount" units="none"
+					collectionType="dynamic" />
+				<metric name="RolledbackDueToAdminCount" units="none"
+					collectionType="dynamic" />
+				<metric name="CommittedCount" units="none"
+					collectionType="dynamic" />
+				<metric name="HeuristicCount" units="none"
+					collectionType="dynamic" />
+				<metric name="IllegalStateExceptionCount" units="none"
+					collectionType="dynamic" />
+				<metric name="HeuristicRolledbackCount" units="none"
+					collectionType="dynamic" />
+				<metric name="SystemExceptionCount" units="none"
+					collectionType="dynamic" />
+				<metric name="HeuristicMixedExceptionCount" units="none"
+					collectionType="dynamic" />
+				<metric name="SecurityExceptionCount" units="none"
+					collectionType="dynamic" />
+				<metric name="RolledbackDueToAppCount" units="none"
+					collectionType="dynamic" />
+				<metric name="ActiveCount" units="none"
+					collectionType="dynamic" />
+				<metric name="RollbackExceptionCount" units="none"
+					collectionType="dynamic" />
+
+			</metrics>
+
+		</service>
+
+		<service name="Thread Pool">
+
+			<property name="OBJECT_NAME"
+				value="${domain}:j2eeType=ThreadPool,name=*,J2EEServer=standalone" />
+
+			<filter name="template"
+				value="${OBJECT_NAME}:${alias}:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%" />
+
+			<actions include="setConfigProperty,getConfigProperty" />
+
+			<config>
+				<option name="name" description="Name" default="" />
+			</config>
+
+			<plugin type="autoinventory" />
+
+			<metrics>
+				<metric name="Availability"
+					template="${OBJECT_NAME}:Availability:jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%,jmx.provider.pkgs=%jmx.provider.pkgs%"
+					indicator="true" />
+
+				<metric name="Min Pool Size" alias="minPoolSize"
+					units="none" collectionType="static" />
+				<metric name="Max Pool Size" alias="maxPoolSize"
+					units="none" collectionType="static" />
+				<metric name="Queue Capacity" alias="queueCapacity"
+					units="none" collectionType="static" />
+				<metric name="Keep Alive Time" alias="keepAliveTime"
+					units="none" collectionType="static" />
+				<metric name="Pool Size" alias="poolSize" units="none"
+					collectionType="dynamic" />
+				<metric name="Queue Size" alias="queueSize" units="none"
+					collectionType="dynamic" />
+
+			</metrics>
+
+		</service>
+
+	</server>
+</plugin>

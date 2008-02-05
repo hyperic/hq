@@ -980,6 +980,8 @@
     <hqplugin name="iplanet"/>
 
     <hqplugin name="oracle"/>
+  	
+    <hqplugin name="oc4j"/> 	
 
     <hqplugin name="db2">
        <fileset dir="${db2monitor.dir}" includes="lib/*"/>

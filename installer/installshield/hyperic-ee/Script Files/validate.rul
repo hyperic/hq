@@ -1,0 +1,80 @@
+#include "ifx.h"   
+export prototype ValidateWebPorts(HWND);
+export prototype ValidateEnginePorts(HWND);
+export prototype ValidateAdminPassword(HWND);
+export prototype ValidateDBPassword(HWND);
+export prototype ValidateAgentPort(HWND);
+export prototype ValidateAgentPassword(HWND);   
+
+prototype ValidatePortProperty(HWND, STRING); 
+prototype ValidatePasswordProperty(HWND, STRING);
+ 
+function ValidateWebPorts(hMSI)
+STRING sPort;
+NUMBER nvBufferSize, nvPort;
+begin 
+	ValidatePortProperty(hMSI, "SERVER_WEBAPP_PORT"); 
+	ValidatePortProperty(hMSI, "SERVER_WEBAPP_SECURE_PORT"); 
+end;   
+
+function ValidateEnginePorts(hMSI)
+STRING sPort;
+NUMBER nvBufferSize, nvPort;
+begin 
+	ValidatePortProperty(hMSI, "HQ_ENGINE_PORT"); 
+	ValidatePortProperty(hMSI, "HQ_ENGINE_JNP_PORT"); 
+end;  
+
+function ValidateAgentPort(hMSI)
+STRING sPort;
+NUMBER nvBufferSize, nvPort;
+begin 
+	ValidatePortProperty(hMSI, "AGENT_PORT"); 
+end; 
+
+function ValidateAdminPassword(hMSI)
+STRING sPort;
+NUMBER nvBufferSize, nvPort;
+begin 
+	ValidatePasswordProperty(hMSI, "SERVER_ADMIN_PASSWORD");
+end;      
+
+function ValidateDBPassword(hMSI)
+STRING sPort;
+NUMBER nvBufferSize, nvPort;
+begin 
+	ValidatePasswordProperty(hMSI, "SERVER_DATABASE_PASSWORD");
+end;  
+
+function ValidateAgentPassword(hMSI)
+STRING sPort;
+NUMBER nvBufferSize, nvPort;
+begin 
+	ValidatePasswordProperty(hMSI, "AGENT_SERVER_PASSWORD");
+end; 
+    
+// validates the port specified in the given property
+// and sets its validation property if valid
+function ValidatePasswordProperty(hMSI, sProperty)
+STRING sPwd, sPwdRetype;
+NUMBER nvBufferSize;
+begin 
+  nvBufferSize = 100;            
+  MsiGetProperty ( hMSI , sProperty, sPwd , nvBufferSize );
+  MsiGetProperty ( hMSI , sProperty + "_RETYPE", sPwdRetype , nvBufferSize );
+  if (sPwd = sPwdRetype) then  
+  	  if (sPwd = "") then 
+  	  	// handle blank password as failure
+  	  	 MessageBox("Password field may not be blank!", SEVERE);   
+ 	 	 // unset the property
+  		 MsiSetProperty ( hMSI , "VALIDATED_" + sProperty , "0" );  	  	
+  	  else 
+  	  	MsiSetProperty ( hMSI , "VALIDATED_" + sProperty , "1" );
+  	  endif;
+  else             
+  	// unset the property
+  	 MsiSetProperty ( hMSI , "VALIDATED_" + sProperty , "0" );	
+  	  MessageBox("Password fields do not match! Please retype your password.",
+  	  	SEVERE); 
+  endif;
+end;    

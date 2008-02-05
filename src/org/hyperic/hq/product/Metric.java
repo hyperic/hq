@@ -175,7 +175,7 @@ public class Metric {
     /** The full JMX object name - domain : objectName 
      */ 
     public String getObjectName() {
-        return this.objectName;
+        return decode(this.objectName);
     }
 
     /** Set the JMX object name.
@@ -400,7 +400,6 @@ public class Metric {
         }
 
         metric.attributeName = decode(metric.attributeName);
-
         return metric;
     }
 
