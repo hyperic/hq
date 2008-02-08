@@ -408,8 +408,8 @@ public class ServerQuery
         else {
             type = WeblogicProductPlugin.SERVER_NAME;
         }
-
-        return TypeBuilder.composeServerTypeName(type, this.version);
+        String version = getDiscover().getVersion();
+        return TypeBuilder.composeServerTypeName(type, version);
     }
 
     public String getIdentifier() {

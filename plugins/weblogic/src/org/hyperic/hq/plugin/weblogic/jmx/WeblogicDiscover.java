@@ -47,6 +47,7 @@ public class WeblogicDiscover {
     private String adminName = null;
     private String domain = null;
     private Properties props;
+    private String version;
 
     private HashMap mbeanServers = new HashMap();
     private HashMap internalApps = new HashMap();
@@ -59,15 +60,13 @@ public class WeblogicDiscover {
         new JTAResourceQuery(),
     };
 
-    public WeblogicDiscover(Properties props) {
+    public WeblogicDiscover(String version, Properties props) {
+        this.version = version;
         this.props = props;
     }
 
-    public WeblogicDiscover(String adminURL,
-                            String username,
-                            String password) {
-
-        this.props = getProperties(adminURL, username, password);
+    public String getVersion() {
+        return this.version;
     }
 
     public static Log getLog() {
