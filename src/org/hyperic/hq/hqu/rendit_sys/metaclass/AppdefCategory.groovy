@@ -24,6 +24,8 @@ class AppdefCategory {
      * checkPerms(resource:myPlatform, operation:'view', permCheck:false)
      *   -- no-op, the permCheck flag immediately returns
      *
+     * @return the {@link Resource} represented by the passed AppdefResource
+     *
      * @throws PermissionException if denied
      *
      * XXX:  For 'create' operations, this doesn't work, since we use

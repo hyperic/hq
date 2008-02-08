@@ -15,6 +15,7 @@ import org.hyperic.hq.hqu.rendit.helpers.AgentHelper
 import org.hyperic.hq.hqu.rendit.helpers.AlertHelper
 import org.hyperic.hq.hqu.rendit.helpers.AuditHelper
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
+import org.hyperic.hq.hqu.rendit.helpers.MetricHelper
 import org.hyperic.hq.hqu.rendit.render.RenderFrame
 
 import org.hyperic.util.Runnee
@@ -279,6 +280,10 @@ abstract class BaseController {
         new ResourceHelper(user)
     }
     
+    protected MetricHelper getMetricHelper() {
+        new MetricHelper(user)
+    }
+
     /**
      * Get the attachment point for the view associated with the current 
      * request.

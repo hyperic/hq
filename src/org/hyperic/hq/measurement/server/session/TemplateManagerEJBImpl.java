@@ -50,6 +50,7 @@ import org.hibernate.Session;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.impl.SessionFactoryImpl;
 import org.hibernate.impl.SessionImpl;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -58,6 +59,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.measurement.server.session.Category;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.MeasurementArg;
@@ -170,6 +172,55 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             Collections.reverse(mts);
 
         return valuePager.seek(mts, pc);
+    }
+
+    
+    /**
+     * Get all the templates.  Must be superuser to execute.
+     *
+     * @param pInfo must contain a sort field of type 
+     *              {@link MeasurementTemplateSortField}
+     * @param enabled If non-null, return templates with defaultOn == defaultOn
+     * 
+     * @return a list of {@link MeasurementTemplate}s
+     * @ejb:interface-method
+     */
+    public List findTemplates(AuthzSubject user, PageInfo pInfo, 
+                              Boolean defaultOn) 
+        throws PermissionException
+    {
+        assertSuperUser(user);
+        return getMeasurementTemplateDAO().findAllTemplates(pInfo, defaultOn);
+    }
+                                  
+    /**
+     * Get all templates for a given MonitorableType
+     *
+     * @param pInfo must contain a sort field of type 
+     *              {@link MeasurementTemplateSortField}
+     * @param enabled If non-null, return templates with defaultOn == defaultOn
+     * 
+     * @return a list of {@link MeasurementTemplate}s
+     * @ejb:interface-method
+     */
+    public List findTemplatesByMonitorableType(AuthzSubject user, PageInfo pInfo,
+                                               String type, Boolean defaultOn) 
+        throws PermissionException
+    {
+        assertSuperUser(user);
+        return getMeasurementTemplateDAO()
+            .findTemplatesByMonitorableType(pInfo, type, defaultOn); 
+    }
+    
+    private void assertSuperUser(AuthzSubject s) 
+        throws PermissionException
+    {
+        boolean authorized = PermissionManagerFactory.getInstance() 
+            .hasAdminPermission(s.getId());
+
+        if (!authorized) {
+            throw new PermissionException("Permission denied");
+        }
     }
 
     /**
