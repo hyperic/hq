@@ -18,10 +18,10 @@ class AppdefCategory {
      *
      * This method is currently only useful on resources of type AppdefResource
      *
-     * checkPerms(resource:myPlatform, operation:'view')
+     * myPlatform.checkPerms(operation:'view', user:myUser)
      *   -- Throws PermissionException if platform cannot be viewed
      *
-     * checkPerms(resource:myPlatform, operation:'view', permCheck:false)
+     * myPlatform.checkPerms(operation:'view', permCheck:false, user:someUser)
      *   -- no-op, the permCheck flag immediately returns
      *
      * @throws PermissionException if denied

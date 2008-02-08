@@ -1,19 +1,32 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
+import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceType
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as rgmi
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.appdef.shared.AppdefEntityID
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants
+import org.hyperic.hq.appdef.server.session.Platform
+import org.hyperic.hq.appdef.server.session.Server
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
 import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.hyperic.util.config.ConfigResponse
+import org.hyperic.hq.hqu.rendit.util.ResourceConfig
 
 
 class ResourceCategory {
-    private static dman = DerivedMeasurementManagerEJBImpl.one
+    private static platMan = PlatMan.one
+    private static svcMan  = ServiceMan.one
+    private static svrMan  = ServerMan.one 
+    private static dman    = DerivedMeasurementManagerEJBImpl.one
     
     /**
      * Creates a URL for the resource.  This should typically only be called
@@ -29,6 +42,25 @@ class ResourceCategory {
         } 
         return "/Resource.do?eid=${r.entityID}"
     }
+
+    /**
+     * Get the appdef type (1 = platform, 2=server, etc.) of a resource
+     * which is a prototype.
+     */
+    static getAppdefType(Resource r) {
+        def typeId = r.resourceType.id
+        
+        if (typeId == AuthzConstants.authzPlatformProto) {
+            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM
+        } else if (typeId == AuthzConstants.authzServerProto) {
+            return AppdefEntityConstants.APPDEF_TYPE_SERVER
+	    } else if (typeId == AuthzConstants.authzServiceProto) {
+    	    return AppdefEntityConstants.APPDEF_TYPE_SERVICE
+	    } else {
+	        throw new RuntimeException("Resource [${r}] is not an appdef " + 
+	                                   "resource type")
+	    }
+    }
     
     static AppdefEntityID getEntityID(Resource r) {
         def typeId = r.resourceType.id
@@ -42,7 +74,7 @@ class ResourceCategory {
         } else if (typeId == AuthzConstants.authzGroup) {
             return AppdefEntityID.newGroupID(r.instanceId)
         } else {
-            throw RuntimeException("Resource [${r}] is not an appdef object")
+            throw new RuntimeException("Resource [${r}] is not an appdef object")
         }
     }
     
@@ -99,5 +131,59 @@ class ResourceCategory {
             cmds << new LiveDataCommand(r.entityID, cmd, cfg)
         }
         LiveDataManagerEJBImpl.one.getData(user, cmds as LiveDataCommand[]) as List
+    }
+    
+    static boolean isPlatform(Resource r) {
+        r.resourceType.id == AuthzConstants.authzPlatform
+    }
+    
+    private static boolean isServer(Resource r) {
+        r.resourceType.id == AuthzConstants.authzServer
+    }
+
+    static Platform toPlatform(Resource r) {
+        assert isPlatform(r)
+        platMan.findPlatformById(r.instanceId)
+    }
+    
+    private static Server toServer(Resource r) {
+        assert isServer(r)
+        svrMan.findServerById(r.instanceId)
+    }
+
+    static boolean isVirtual(Resource t) {
+        if (t.resourceType.id == AuthzConstants.authzServerProto) {
+            return svrMan.findServerType(t.instanceId)?.isVirtual() == true
+        }
+        false
+    }
+    
+    static ResourceConfig getConfig(Resource r) {
+        new ResourceConfig(r)
+    }
+    
+    /**
+     * Get all the children of a resource, viewable by the passed user.
+     */
+    static Collection viewableChildren(Resource r, AuthzSubject user) {
+        def res = []
+        if (isPlatform(r)) {
+            def plat    = toPlatform(r)
+            def servers = plat.servers.grep { 
+                it.checkPerms(operation: 'view', user:user)
+            }
+                                                            
+            res.addAll(servers*.resource)
+            res.addAll(svcMan.getPlatformServices(user.valueObject, 
+                                                  r.instanceId)*.resource)
+        } else if (isServer(r)) {
+            def svr = toServer(r)
+            def services = svr.services.grep { 
+                it.checkPerms(operation: 'view', user:user)
+            }
+            
+            res.addAll(services*.resource)
+        }
+        res
     }
 }
