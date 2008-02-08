@@ -53,6 +53,7 @@ public class ServerQuery
     private boolean isRunning = true; //innocent until proven guilty
     private String jvmType = "JVMRuntime";
     private File cwd;
+    private String wlsVersion;
 
     public static final String MBEAN_TYPE = "Server";
 
@@ -283,6 +284,7 @@ public class ServerQuery
                                  ObjectName name) {
 
         setName(name.getKeyProperty("Name"));
+        setVersion(getDiscover().getVersion()); //type version
 
         if (!super.getAttributes(mServer, name, SERVER_ATTRS)) {
             return false;
@@ -352,14 +354,14 @@ public class ServerQuery
         String serverVersion = getAttribute("ServerVersion");
 
         if (isValidVersion(serverVersion)) {
-            this.version = serverVersion.substring(0, 3);
+            this.wlsVersion = serverVersion.substring(0, 3);
         }
         else if ((serverVersion == null) ||
                  serverVersion.equals("unknown"))
         { 
             //6.1 does not have a ServerVersion attribute.
             //9.1 might be == "unknown"
-            this.version = getWeblogicVersion();
+            this.wlsVersion = getWeblogicVersion();
         }
 
         if (!this.isRunning) {
