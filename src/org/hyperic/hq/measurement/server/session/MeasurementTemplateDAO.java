@@ -31,8 +31,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.MeasurementInfo;
@@ -180,6 +182,25 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         }
     }
 
+    List findAllTemplates(PageInfo pInfo, Boolean defaultOn) {
+        String sql = "select t from MeasurementTemplate t " +
+            "where t.defaultInterval > 0 ";
+        
+        if (defaultOn != null) {
+            sql += "and t.defaultOn = :defaultOn ";
+        }
+        
+        sql += 
+            "order by " + 
+            ((MeasurementTemplateSortField)pInfo.getSort()).getSortString("t");
+        
+        Query q = getSession().createQuery(sql);
+        if (defaultOn != null) {
+            q.setParameter("defaultOn", defaultOn);
+        }
+        return pInfo.pageResults(q).list();
+    }
+    
     List findTemplates(Integer[] ids) {
         if (ids.length == 1) {
             Object res = get(ids[0]);
@@ -198,14 +219,35 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     }
 
     List findTemplatesByMonitorableType(String type) {
+        PageInfo pInfo = 
+            PageInfo.getAll(MeasurementTemplateSortField.TEMPLATE_NAME, true);
+        return findTemplatesByMonitorableType(pInfo, type, null);
+    }
+
+    List findTemplatesByMonitorableType(PageInfo pInfo, String type,
+                                        Boolean defaultOn) 
+    {
         String sql = 
             "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
-            "where mt.name=? and t.defaultInterval > 0 order by t.name";
-        return getSession().createQuery(sql).
-            setString(0, type).list();
-    }
+            "where mt.name=:typeName and t.defaultInterval > 0 ";
 
+        if (defaultOn != null) {
+            sql += " and t.defaultOn = :defaultOn ";
+        }
+        
+        sql += "order by " +  
+            ((MeasurementTemplateSortField)pInfo.getSort()).getSortString("t");
+            
+        Query q = getSession().createQuery(sql)
+            .setString("typeName", type);
+        
+        if (defaultOn != null)
+            q.setParameter("defaultOn", defaultOn);
+        
+        return pInfo.pageResults(q).list();
+    }
+    
     List findTemplatesByMonitorableTypeAndCategory(String type,
                                                    String cat) {
         String sql = 

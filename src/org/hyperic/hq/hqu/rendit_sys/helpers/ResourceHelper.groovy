@@ -51,7 +51,7 @@ class ResourceHelper extends BaseHelper {
      *   find service:serviceId
      *   find server:10001, service:'My Service'
      *
-     * See also: AppdefCategory.checkPerms
+     * Additional arguments are possible, See: AppdefCategory.checkPerms
      *
      * TODO: 
      *  Currently, this does not take permissions into account whe returning
