@@ -46,7 +46,7 @@ public class WeblogicQuery {
     protected Map attrs = new HashMap();
     private WeblogicQuery parent;
     private String name;
-    protected String version = null;
+    private String version;
 
     private static final WeblogicQuery[] NOOP_CHILD_QUERIES = 
         new WeblogicQuery[0];
