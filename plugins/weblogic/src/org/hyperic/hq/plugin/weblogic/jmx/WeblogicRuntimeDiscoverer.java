@@ -172,7 +172,7 @@ public class WeblogicRuntimeDiscoverer
 
         Properties props = config.toProperties();
 
-        WeblogicDiscover discover = new WeblogicDiscover(props);
+        WeblogicDiscover discover = new WeblogicDiscover(this.version, props);
 
         try {
             MBeanServer mServer = discover.getMBeanServer();
