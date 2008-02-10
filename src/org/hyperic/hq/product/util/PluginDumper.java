@@ -1086,11 +1086,8 @@ public class PluginDumper {
             }
         }
         else {
-            for (Iterator it = this.ppm.getPlugins().keySet().iterator();
-                 it.hasNext();)
-            {
-                String name = (String)it.next();
-                addDiscovery(discoverer, name);
+            for (int i=0; i<this.pPlugins.length; i++) {
+                addDiscovery(discoverer, this.pPlugins[i].getName());
             }
         }
         
