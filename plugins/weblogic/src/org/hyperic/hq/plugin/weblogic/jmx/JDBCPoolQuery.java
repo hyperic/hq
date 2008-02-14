@@ -39,7 +39,8 @@ public class JDBCPoolQuery extends ServiceQuery {
     public static final String MBEAN_TYPE = "JDBCConnectionPoolRuntime";
 
     private static final String[] CONFIG_ATTRS = {
-        "DriverName", "URL", ATTR_NOTES
+        "DriverName", "URL",
+        //XXX ATTR_NOTES
     };
     
     public String getMBeanType() {
