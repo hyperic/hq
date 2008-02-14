@@ -25,7 +25,8 @@
     prototype SubstituteToken(STRING, STRING, STRING); 
     prototype UpdateProgressBar(HWND, STRING); 
     prototype DeleteEnvironmentVariable(STRING);
-    prototype CreateFileWithContents(STRING, STRING, LIST);
+    prototype CreateFileWithContents(STRING, STRING, LIST);  
+    
     export prototype ValidatePorts(HWND);   
     prototype ForceDeleteDir(STRING, STRING);
     
@@ -114,7 +115,8 @@ begin
     DeleteFile(sWindowsTemp ^ SETUP_FILE);
     
    	// delete feature-specific stuff    
-	if (StrFind ( sAddLocal , "Server" )>=0) then
+	if ((StrFind ( sAddLocal , "Server" )>=0) || 
+		(sAddLocal = "ALL") || (sAddLocal = "")) then
     	// write out properties to file 
     	listProperties = ListCreate (STRINGLIST);  
 	    // populate the properties list before writing out to file
@@ -147,7 +149,8 @@ begin
     	WritePropertiesToFile(listProperties, sWindowsTemp, SETUP_FILE);   
     	ListDestroy ( listProperties );
 	endif;    
-    if (StrFind ( sAddLocal , "Agent" )>=0) then 
+    if ((StrFind ( sAddLocal , "Agent" )>=0) || 
+    	(sAddLocal = "ALL") || (sAddLocal = "")) then 
 	    listProperties = ListCreate (STRINGLIST);  
 	    // populate the properties list before writing out to file
 	    ListAddString ( listProperties, "agent.installdir=" + sFormattedDir, AFTER );
@@ -155,7 +158,8 @@ begin
 		WritePropertiesToFile(listProperties, sWindowsTemp, SETUP_FILE);  
 		ListDestroy ( listProperties );
 	endif;
-    if (StrFind ( sAddLocal , "Shell" )>=0) then    
+    if ((StrFind ( sAddLocal , "Shell" )>=0) || 
+    	(sAddLocal = "ALL") || (sAddLocal = "")) then  
 	    listProperties = ListCreate (STRINGLIST);  
 	    // populate the properties list before writing out to file
 	    ListAddString ( listProperties, "shell.installdir=" + sFormattedDir, AFTER );
@@ -228,7 +232,8 @@ begin
     sPassword = GetIndexedProperty(listProperties, 5);   
     ListDestroy ( listProperties );
     // Find the search string in the source file. 
-	if (StrFind ( sAddLocal , "Server" )>=0) then
+	if ((StrFind ( sAddLocal , "Server" )>=0) || 
+		(sAddLocal = "ALL") || (sAddLocal = "")) then
 		SubstituteToken("%WEB_HOST%", sServerAddress, sInstallDir ^ "server-summary.txt");
 		SubstituteToken("%WEB_PORT%", sServerPort, sInstallDir ^ "server-summary.txt");
 		SubstituteToken("%ADMIN_USER%", sUser, sInstallDir ^ "server-summary.txt");  
@@ -267,10 +272,7 @@ begin
         nvResult = FileGrep (sFile, sToken, svReturnLine, 
                             nvLineNumber, CONTINUE); 
     endwhile; 
-end; 
-
-
-                                                
+end;                                                 
                         
 function LIST GetMSIProperties(hMSI) 
 STRING sCustomActionData;
@@ -330,7 +332,7 @@ end;
 
 // clean up files before new install                      
 function RollbackFiles(hMSI)  
-    STRING  sInstallDir, sAddLocal, szFile, sRemoveFeatures; 
+    STRING  sInstallDir, sAddLocal, szFile; 
     LIST listProperties; 
 begin   
     listProperties = GetMSIProperties(hMSI); 
@@ -338,17 +340,18 @@ begin
     sAddLocal = GetIndexedProperty(listProperties, ADD_LOCAL_INDEX);
     ListDestroy ( listProperties );
 	// delete feature-specific stuff    
-	if (StrFind ( sAddLocal , "Server" )>=0) then                         
+	if ((StrFind ( sAddLocal , "Server" )>=0) ||
+		(sAddLocal = "ALL") || (sAddLocal = "")) then                       
 		ForceDeleteDir (sInstallDir, sInstallDir ^ "server-" + HQ_VERSION );  
 	endif;    
-    if (StrFind ( sAddLocal , "Agent" )>=0) then                       
+    if ((StrFind ( sAddLocal , "Agent" )>=0) ||
+    	(sAddLocal = "ALL") || (sAddLocal = "")) then                      
 		ForceDeleteDir ( sInstallDir, sInstallDir ^ "agent-" + HQ_VERSION ); 
 	endif;
-    if (StrFind ( sAddLocal , "Shell" )>=0) then                          
+    if ((StrFind ( sAddLocal , "Shell" )>=0) || 
+    	(sAddLocal = "ALL") || (sAddLocal = "")) then                        
 		ForceDeleteDir ( sInstallDir, sInstallDir ^ "shell-" + HQ_VERSION ); 
 	endif;  
-	// remove the install directory if it is empty
-	DeleteDir(sInstallDir, ONLYDIR); 
 end;
                       
 // clean up files before new install                      
@@ -360,34 +363,47 @@ begin
     listProperties = GetMSIProperties(hMSI); 
     sInstallDir = GetIndexedProperty(listProperties, INSTALLDIR_INDEX);
     sRemoveFeatures = GetIndexedProperty(listProperties, REMOVE_INDEX);
-    ListDestroy ( listProperties );
+    ListDestroy ( listProperties ); 
+    
+    // first, stop all services before deleting any files to 
+    // ensure they are not being used at deletion
     if ((StrFind ( sRemoveFeatures , "Server" )>=0) ||
-    	(sRemoveFeatures = "ALL" )) then   
-    	// try to stop the service        
+    	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then   
+    	// try to stop the service   
 		ServiceStopService ( "hyperic-hq-database"); 
 		ServiceStopService ( "Hyperic HQ Server");   
 		ServiceRemoveService ( "hyperic-hq-database");
-		ServiceRemoveService ( "Hyperic HQ Server");
+		ServiceRemoveService ( "Hyperic HQ Server");        
 		ForceDeleteDir(sInstallDir, sInstallDir ^ "server-" + HQ_VERSION ); 
 	endif;
     if ((StrFind ( sRemoveFeatures , "Agent" )>=0) ||
-    	(sRemoveFeatures = "ALL" )) then  
+    	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then 
     	// try to stop the service        
 		ServiceStopService ( "Hyperic HQ Agent"); 
 		ServiceRemoveService ( "Hyperic HQ Agent");                            
 		ForceDeleteDir(sInstallDir, sInstallDir ^ "agent-" + HQ_VERSION ); 
 	endif;
+	
+	// delete files now that all services have been stopped
+    if ((StrFind ( sRemoveFeatures , "Server" )>=0) ||
+    	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then        
+		ForceDeleteDir(sInstallDir, sInstallDir ^ "server-" + HQ_VERSION ); 
+	endif;
+    if ((StrFind ( sRemoveFeatures , "Agent" )>=0) ||
+    	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then                            
+		ForceDeleteDir(sInstallDir, sInstallDir ^ "agent-" + HQ_VERSION ); 
+	endif;	
     if ((StrFind ( sRemoveFeatures , "Shell" )>=0) ||
-    	(sRemoveFeatures = "ALL" )) then                           
-		ForceDeleteDir (sInstallDir, sInstallDir ^ "shell-" + HQ_VERSION );   
-	endif;		
-    if (sRemoveFeatures = "ALL") then
-   		DeleteFile ( sInstallDir ^  "hq-install.log" ); 
-		DeleteFile ( sInstallDir ^  "hq-install.log.debug" ); 
-		DeleteDir(sInstallDir ^ "install", ALLCONTENTS);
+    	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then  
+    	// TODO
+    	// MessageBox here                     
+		ForceDeleteDir (sInstallDir, sInstallDir ^ "shell-" + HQ_VERSION );    
+	endif;
+	// remove the generated log file so we can clean up properly		
+    if ((sRemoveFeatures = "ALL") || (sRemoveFeatures = "")) then
+   		DeleteFile ( sInstallDir ^  "install" ^ "installer-" + HQ_VERSION ^ "hq-install.log" ); 
+		DeleteFile ( sInstallDir ^  "install" ^ "installer-" + HQ_VERSION ^ "hq-install.log.debug" ); 
 	endif;		   
-	// remove the install directory if it is empty
-	DeleteDir(sInstallDir, ONLYDIR); 
 end;
 
 function CreateServerService(hMSI)
@@ -425,9 +441,18 @@ begin
 end;   
 
 function ForceDeleteDir(sInstallDir, sDelDir)
-begin
-   LaunchAppAndWait ( sInstallDir ^ "install" ^ "rd.bat" , "\"" + sDelDir + "\"" , 
-       	LAAW_OPTION_WAIT | LAAW_OPTION_HIDDEN ); 	
+STRING sCmd;
+NUMBER maxTimeOut, nTimeOut, count;              
+begin           
+	// wait at most 60 seconds before giving up on delete   
+	nTimeOut = 60 * 1000;
+	// try to read the cmd path from the environment variable
+	GetEnvVar ("Comspec", sCmd);
+	if (sCmd = "") then
+		sCmd = "cmd";
+	endif;	    
+   	LaunchApplication ( sCmd , "/c rd /Q /S \"" + sDelDir + "\"" , 
+       	sInstallDir , SW_FORCEMINIMIZE , nTimeOut  , LAAW_OPTION_WAIT );
 end;
 
 function StartServer(hMSI)      
@@ -533,37 +558,36 @@ end;
 
 function ValidateInstallDirs(hMSI)
 STRING sInstallDir, sAddLocal;  
-NUMBER nvInstallState, nvActionState;
-LIST listProperties; 
+NUMBER nvInstallState, nvActionState, nvSize;
 begin 
-    listProperties = GetMSIProperties(hMSI); 
-    sInstallDir = GetIndexedProperty(listProperties, INSTALLDIR_INDEX); 
-    sAddLocal = GetIndexedProperty(listProperties, ADD_LOCAL_INDEX); 
-	ListDestroy(listProperties);   	
-	if (StrFind ( sAddLocal , "Server" )>=0) then
+    nvSize = 100;                                                           
+    // set agent properties
+    MsiGetProperty ( hMSI , "INSTALLDIR" , sInstallDir , nvSize );
+    MsiGetProperty ( hMSI , "ADDLOCAL" , sAddLocal , nvSize ); 	
+	if ((StrFind ( sAddLocal , "Server" )>=0) || 
+		(sAddLocal = "ALL") || (sAddLocal = "")) then
 	    // verify that a server doesn't already exist in the install dir 
 	    // if it does, bail out
 	    if (ExistsDir ( sInstallDir  ^ "server-" + HQ_VERSION) = EXISTS) then
 	    	MessageBox ("A server already exists in directory " + sInstallDir, SEVERE); 
-	    	ListDestroy ( listProperties );
 	    	abort;
 	    endif;
 	endif;
-	if (StrFind ( sAddLocal , "Agent" )>=0) then
+	if ((StrFind ( sAddLocal , "Agent" )>=0) || 
+		(sAddLocal = "ALL") || (sAddLocal = "")) then
 	    // verify that a server doesn't already exist in the install dir 
 	    // if it does, bail out
 	    if (ExistsDir ( sInstallDir  ^ "agent-" + HQ_VERSION) = EXISTS) then
 	    	MessageBox ("An agent already exists in directory " + sInstallDir, SEVERE); 
-	    	ListDestroy ( listProperties );
 	    	abort;
 	    endif;  
 	endif; 
-	if (StrFind ( sAddLocal , "Shell" )>=0) then
+	if ((StrFind ( sAddLocal , "Shell" )>=0) || 
+		(sAddLocal = "ALL") || (sAddLocal = "")) then
 	    // verify that a server doesn't already exist in the install dir 
 	    // if it does, bail out
 	    if (ExistsDir ( sInstallDir  ^ "shell-" + HQ_VERSION) = EXISTS) then
 	    	MessageBox ("A shell already exists in directory " + sInstallDir, SEVERE); 
-	    	ListDestroy ( listProperties );
 	    	abort;
 	    endif;
 	endif;
@@ -581,7 +605,8 @@ begin
 	sBaseUrl = GetIndexedProperty(listProperties, SHORTCUT_WEBAPP_HOST_INDEX);
     ListDestroy ( listProperties );              
 
-	if (StrFind ( sAddLocal , "Server" )>=0) then 
+	if ((StrFind ( sAddLocal , "Server" )>=0) || 
+		(sAddLocal = "ALL") || (sAddLocal = "")) then
 	    // autodetect IP sAddLocal if none provided
 	    if (sBaseUrl = "") then
 	    	sBaseUrl = GetIPAddress(); 
@@ -596,14 +621,16 @@ begin
 			MessageBox("FileInsertLine failed into file " + sFile, SEVERE);
 		endif;       
 	endif;    
-    if (StrFind ( sAddLocal , "Agent" )>=0) then 
+    if ((StrFind ( sAddLocal , "Agent" )>=0) || 
+    	(sAddLocal = "ALL") || (sAddLocal = "")) then
 		nLineNumber = 0; 
 		sJavaHome =  sInstallDir + "agent-" + HQ_VERSION + "\\jre";
 		if (FileInsertLine ( sInstallDir ^ "start_agent.bat" , "set JAVA_HOME=" + sJavaHome, nLineNumber , AFTER ) < 0) then
 			MessageBox("FileInsertLine failed into file " + sFile, SEVERE);
 		endif;  	        
 	endif;
-    if (StrFind ( sAddLocal , "Shell" )>=0) then 
+    if ((StrFind ( sAddLocal , "Shell" )>=0) || 
+    	(sAddLocal = "ALL") || (sAddLocal = "")) then
 		nLineNumber = 0;
 		sJavaHome =  sInstallDir + "shell-" + HQ_VERSION + "\\jre";
 		if (FileInsertLine ( sInstallDir ^ "launch_shell.bat" , "set JAVA_HOME=" + sJavaHome, nLineNumber , AFTER ) < 0) then
@@ -624,7 +651,7 @@ end;
   begin  
   	nvSize = 100;                                                           
   	sIPAddress = GetIPAddress();
-  	sHostname = GetHostname(); 
+  	sHostname = GetHostname();  
     MsiGetProperty ( hMSI , "SERVER_MAIL_HOST" , sMailHost, nvSize );   	
     MsiGetProperty ( hMSI , "SERVER_ADMIN_EMAIL" , sAdminEmail , nvSize );
     MsiGetProperty ( hMSI , "SERVER_ADMIN_USER" , sAdminUser , nvSize ); 
@@ -671,9 +698,13 @@ end;
     MsiSetProperty ( hMSI , "AGENT_ADDRESS" , sProperty ); 
     
     // try to copy server configuration from server component configuration       
+    // if not set, default to the local machine's address
     MsiGetProperty ( hMSI , "AGENT_SERVER_ADDRESS" , sProperty , nvSize );
     if (sProperty = "") then
     	MsiGetProperty ( hMSI , "SERVER_WEBAPP_HOST" , sProperty , nvSize );
+    endif; 
+    if (sProperty = "") then
+    	sProperty = GetIPAddress();
     endif;  
     MsiSetProperty ( hMSI , "AGENT_SERVER_ADDRESS" , sProperty ); 
         
@@ -703,49 +734,32 @@ end;
                   
 end;
     
- 
 // used in standard install flow to default the password
 // if it is not already set
 function DefaultPasswords(hMSI)
 STRING sDefaultPassword, sPassword;
 NUMBER szBufferSize;
 begin
-	szBufferSize = 100;            
-	sDefaultPassword = "hqadmin";
-	MsiGetProperty ( hMSI, "SERVER_ADMIN_PASSWORD", sPassword, szBufferSize);
-	if (sPassword = "") then
-    	MsiSetProperty ( hMSI , "SERVER_ADMIN_PASSWORD" , sDefaultPassword ); 		
-	endif; 
+	szBufferSize = 100;            	
+	// try to default Server Admin password as the default password
+	// otherwise, use "hqadmin"
+	MsiGetProperty ( hMSI, "SERVER_ADMIN_PASSWORD", sDefaultPassword, szBufferSize);
+	if (sDefaultPassword = "") then
+		sDefaultPassword = "hqadmin";
+    	MsiSetProperty ( hMSI , "SERVER_ADMIN_PASSWORD" , sDefaultPassword );	
+	endif;    
+	
 	MsiGetProperty ( hMSI, "SERVER_DATABASE_PASSWORD", sPassword, szBufferSize);
 	if (sPassword = "") then
     	MsiSetProperty ( hMSI , "SERVER_DATABASE_PASSWORD" , sDefaultPassword ); 		
 	endif; 
+	
 	MsiGetProperty ( hMSI, "AGENT_SERVER_PASSWORD", sPassword, szBufferSize);
 	if (sPassword = "") then
     	MsiSetProperty ( hMSI , "AGENT_SERVER_PASSWORD" , sDefaultPassword ); 		
-	endif; 			
+	endif;
 end;                            
-
-// validates the port specified in the given property
-// and sets its validation property if valid
-function ValidatePortProperty(hMSI, sProperty)
-STRING sPort;
-NUMBER nvBufferSize, nvPort;
-begin
-  nvBufferSize = 100;            
-  MsiGetProperty ( hMSI , sProperty, sPort , nvBufferSize ); 
-  MsiGetProperty ( hMSI , sProperty, sPort , nvBufferSize );
-  StrToNum ( nvPort , sPort );
-  if (ValidatePort(nvPort)) then
-  	  MsiSetProperty ( hMSI , "VALIDATED_" + sProperty , "1" );
-  else 
-  	// unset the property
-  	 MsiSetProperty ( hMSI , "VALIDATED_" + sProperty , "0" );	
-  	  MessageBox("Port " + sPort + " is already taken. Please select a different port.",
-  	  	SEVERE); 
-  endif;
-end;     
-
+    
 // validates all the ports passed in as CustomData
 // this is useful to catch errors before invoking the ant script
 // which would otherwise silently fail
