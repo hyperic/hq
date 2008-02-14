@@ -282,7 +282,8 @@ public class WeblogicQuery {
     }
 
     public String getDescription() {
-        return getAttribute(ATTR_NOTES);
+        //return getAttribute(ATTR_NOTES);
+        return null; //XXX
     }
 
     public void configure(Properties props) {
