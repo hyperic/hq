@@ -104,6 +104,13 @@ public class Resource extends AuthzNamedBean {
     public boolean isSystem() {
         return _system;
     }
+    
+    /**
+     * Returns true of this is the root resource
+     */
+    public boolean isRoot() {
+        return getId().equals(AuthzConstants.rootResourceId);
+    }
 
     protected void setSystem(boolean fsystem) {
         _system = fsystem;
