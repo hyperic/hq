@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 import java.util.Collection;
 
@@ -47,6 +48,10 @@ public class ApplicationType extends AppdefResourceType
     public ApplicationType(Integer id)
     {
         super(id);
+    }
+
+    public int getAuthzType() {
+        return AuthzConstants.authzApplicationProto.intValue();
     }
 
     // Property accessors

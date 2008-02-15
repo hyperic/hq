@@ -40,6 +40,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class PlatformType extends AppdefResourceType {
     private String            _os;
@@ -57,7 +58,11 @@ public class PlatformType extends AppdefResourceType {
         setName(name);
         setPlugin(plugin);
     }
-    
+
+    public int getAuthzType() {
+        return AuthzConstants.authzPlatformProto.intValue();
+    }
+
     public String getOs() {
         return _os;
     }

@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -47,6 +48,10 @@ public class ServiceType extends AppdefResourceType
         super();
     }
 
+    public int getAuthzType() {
+        return AuthzConstants.authzServiceProto.intValue();
+    }
+    
     public String getPlugin() {
         return _plugin;
     }
