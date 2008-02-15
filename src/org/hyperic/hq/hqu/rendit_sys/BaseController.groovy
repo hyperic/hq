@@ -158,8 +158,10 @@ abstract class BaseController {
     				render(inline:"/* ${json} */", 
     				       contentType:'text/json-comment-filtered')
     		    } else if (action in xmlMethods) {
-    		        render(inline:"${xmlWriter}",
-    		               contentType:'text/xml')
+    		        if (xmlBuilder == methRes) 
+    		            render(inline:"${xmlWriter}", contentType:'text/xml')
+    		        else
+    		            render(inline:"${methRes}", contentType:'text/xml')
     		    } else {
     		        render([action : action])
     		    }

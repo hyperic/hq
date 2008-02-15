@@ -4,6 +4,7 @@ import org.hyperic.hq.hibernate.SessionManager
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResourceMan
 import org.hyperic.hq.appdef.server.session.AppdefResource
+import org.hyperic.hq.appdef.server.session.AppdefResourceType
 import org.hyperic.hq.authz.shared.PermissionManagerFactory as PermManFactory
 import org.hyperic.hq.authz.shared.PermissionManager
 
@@ -12,6 +13,10 @@ class AppdefCategory {
 		ResourceMan.one.findResource(r.entityId)
     }
 
+    static Resource getResource(AppdefResourceType r) {
+		ResourceMan.one.findResourcePojoByInstanceId(r.authzType, r.id)
+    }
+    
     /**
      * Assert permissions on a resource.  If the permission fails, a 
      * PermissionException will be thrown.

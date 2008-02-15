@@ -60,7 +60,9 @@ class ResourceHelper extends BaseHelper {
     def find(Map args) {
         args = args + [:]  // Don't modify caller's map 
         // Initialize all used arguments to null
-        ['count', 'platform', 'server', 'service'].each {args.get(it, null)}
+        ['count', 'platform', 'server', 'service',
+         'byPrototype', 'prototype', 'withPaging',
+        ].each {args.get(it, null)}
         args.get('user', user)         // Use default user  
         args.get('operation', 'view')  // Default permission required
         
@@ -73,6 +75,14 @@ class ResourceHelper extends BaseHelper {
                 throw new IllegalArgumentException('count must specify a ' + 
                                                    'valid resource type')
             }
+        }
+
+        if (args.prototype) {
+            return findPrototype(args)
+        }
+        
+        if (args.byPrototype) {
+            return findByPrototype(args)
         }
         
         def plat
@@ -121,6 +131,27 @@ class ResourceHelper extends BaseHelper {
         }
 
         throw new IllegalArgumentException('Unknown arguments passed to find()')
+    }
+     
+    private Resource findPrototype(Map args) {
+        rman.findResourcePrototypeByName(args.prototype)
+    }
+    
+    private List findByPrototype(Map args) {
+        def proto = args.byPrototype
+        
+        if (proto in String) {
+            proto = rman.findResourcePrototypeByName(proto)
+            if (proto == null) {
+                return []  // Correct?  We don't have a proto
+            }
+        } // else we assume it's already a Resource
+
+        def pageInfo = args.withPaging
+        if (!pageInfo) {
+            pageInfo = PageInfo.getAll(ResourceSortField.NAME, true)
+        }
+        rman.findResourcesOfPrototype(proto, pageInfo)
     }
      
     /**
@@ -196,6 +227,10 @@ class ResourceHelper extends BaseHelper {
         if (rsrc == null)
             return []
         rman.findResourcesOfPrototype(rsrc, pInfo)
+    }
+    
+    Resource findRootResource() {
+        rman.findRootResource()
     }
     
     Resource findResourcePrototype(String name) {
