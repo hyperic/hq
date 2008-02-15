@@ -2,6 +2,7 @@ package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceType
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as rgmi
@@ -14,19 +15,21 @@ import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl as DMMan
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
 import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.hyperic.util.config.ConfigResponse
 import org.hyperic.hq.hqu.rendit.util.ResourceConfig
+import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 
 
 class ResourceCategory {
-    private static platMan = PlatMan.one
-    private static svcMan  = ServiceMan.one
-    private static svrMan  = ServerMan.one 
-    private static dman    = DerivedMeasurementManagerEJBImpl.one
+    private static platMan  = PlatMan.one
+    private static svcMan   = ServiceMan.one
+    private static svrMan   = ServerMan.one 
+    private static dman     = DMMan.one
+    private static authzMan = AuthzMan.one 
     
     /**
      * Creates a URL for the resource.  This should typically only be called
@@ -165,7 +168,7 @@ class ResourceCategory {
     /**
      * Get all the children of a resource, viewable by the passed user.
      */
-    static Collection viewableChildren(Resource r, AuthzSubject user) {
+    static Collection getViewableChildren(Resource r, AuthzSubject user) {
         def res = []
         if (isPlatform(r)) {
             def plat    = toPlatform(r)
@@ -185,5 +188,36 @@ class ResourceCategory {
             res.addAll(services*.resource)
         }
         res
+    }
+    
+    static List getChildren(Resource r, Map args) {
+        if (r.isRoot()) {
+            // Need subsystem argument
+            assert args.inSubsystem, "Must specify an 'inSubsystem' argument " +
+                                     "[like 'appdef']"
+            if (args.inSubsystem == 'appdef') {
+                def overlord = authzMan.overlordPojo
+                def rhelp = new ResourceHelper(overlord)
+                return rhelp.findAllPlatforms()
+            } else {
+                throw new IllegalArgumentException("Unknown subsystem, " + 
+                                                   "[${args.inSubsystem}]")
+            }
+        }
+        []
+    }
+    
+    static List getChildrenByPrototype(Resource r, Resource proto) {
+        if (r.isRoot()) {
+            if (proto.resourceType.id != AuthzConstants.authzPlatformProto) {
+                // The only supported children of root is the platform
+                return []
+            }
+            def overlord = authzMan.overlordPojo
+            def rhelp    = new ResourceHelper(overlord)
+            def typeRsrc = platMan.findPlatformType(proto.instanceId).resource
+            return rhelp.find(byPrototype:typeRsrc)
+        }
+        []
     }
 }
