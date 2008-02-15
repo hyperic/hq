@@ -543,6 +543,9 @@ public class ScheduleThread
         for (Iterator i=items.iterator(); i.hasNext(); )
         {
             ScheduledMeasurement meas = (ScheduledMeasurement)i.next();
+            if (log.isDebugEnabled()) {
+                log.debug("verifying uniqueness for: "+meas);
+            }
             Integer dsnId = new Integer(meas.getDsnID());
             rtn.put(dsnId, meas);
         }
