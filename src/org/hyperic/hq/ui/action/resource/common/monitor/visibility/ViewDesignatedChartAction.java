@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -83,7 +83,8 @@ public class ViewDesignatedChartAction extends MetricDisplayRangeAction {
             mtv = boss.getAvailabilityMetricTemplate(sessionId, aeid, ctype);
         } catch (ParameterNotFoundException e) {
             forwardParams.put(Constants.MODE_PARAM,
-                              Constants.MODE_MON_CHART_SMSR);
+                              aeid.isGroup() ? Constants.MODE_MON_CHART_SMMR :
+                                               Constants.MODE_MON_CHART_SMSR);
             // Now we have to look up the designated metric template ID
             mtv = boss.getAvailabilityMetricTemplate(sessionId, aeid);
         }
