@@ -36,6 +36,7 @@ public abstract class AppdefResourceType extends AppdefBean
     protected String description;
 
     public abstract int getAppdefType();
+    public abstract int getAuthzType();
     
     /**
      * default constructor
