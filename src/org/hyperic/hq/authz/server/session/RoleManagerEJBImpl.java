@@ -788,6 +788,14 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         return theMap;
     }
 
+    /**
+     * @return a list of {@link Role}s
+     * @ejb:interface-method
+     */
+    public Collection getAllRoles() {
+        return getRoleDAO().findAll();
+    }
+    
     private Collection getAllRoles(AuthzSubjectValue subject, int sort,
                                    boolean asc) {
         switch (sort) {
