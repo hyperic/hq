@@ -27,6 +27,7 @@ package org.hyperic.hq.events.ext;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 
 import javax.ejb.FinderException;
@@ -268,7 +269,8 @@ public abstract class AbstractTrigger
                 triggerFiredLog.debug("Firing actions for trigger with id=" +
                                       getId() + "; alert def [" +
                                       alertDef.getName() + "] with id=" +
-                                      alertDef.getId());    
+                                      alertDef.getId()+"; triggering event ["+
+                                      event+"], event time="+new Date(event.getTimestamp()));    
             }
             
             EscalatableCreator creator = 
