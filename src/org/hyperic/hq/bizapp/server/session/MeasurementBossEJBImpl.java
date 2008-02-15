@@ -2103,9 +2103,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                         "Requested type (" + appdefType +
                         ") is not a platform, server, or service");
             }
-        } 
-        double[] data = getAvailability(subject, 
-                toAppdefEntityIDArray(resources));
+        }
+
+        AppdefEntityID[] resourceArray = toAppdefEntityIDArray(resources);
+        double[] data = getAvailability(subject, resourceArray);
     
         // Availability counts **this calls getLiveMeasurement
         int availCnt = 0;
@@ -2128,8 +2129,16 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 unavailCnt++;
             }
             else {
-                throw new IllegalStateException(data[i] + 
-                                " is not a valid availability state");
+                // If for some reason we have availability data that is not
+                // recognized as a valid state in MeasurementConstants.AVAIL_
+                // log as much info as possible and mark it as UNKNOWN.
+                unknownCnt++;
+                _log.error("Resource " + resourceArray[i] + " is reporting " +
+                           "an invalid availability state of " +
+                           data[i] + " (measurement id=" +
+                           findAvailabilityMetric(sessionId,
+                                                  resourceArray[i]).getId() +
+                           ")");
             }
         }
         
