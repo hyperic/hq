@@ -19,14 +19,15 @@
     export prototype UpdateShortcuts(HWND);     
     prototype NUMBER Shell32.ShellExecuteA(HWND, BYVAL STRING, BYVAL STRING,  BYVAL  STRING, BYVAL STRING, INT);            
     export prototype InitializeServerConfig(HWND);
-    export prototype InitializeAgentConfig(HWND);  
+    export prototype InitializeAgentConfig(HWND); 
+    export prototype CopyAgentConfigFromServer(HWND); 
     export prototype WriteAgentProperties(HWND);
     export prototype WriteInstallSummary(HWND); 
     prototype SubstituteToken(STRING, STRING, STRING); 
     prototype UpdateProgressBar(HWND, STRING); 
     prototype DeleteEnvironmentVariable(STRING);
     prototype CreateFileWithContents(STRING, STRING, LIST);  
-    
+    export prototype ValidateAdminPrivilege(HWND);
     export prototype ValidatePorts(HWND);   
     prototype ForceDeleteDir(STRING, STRING);
     
@@ -593,6 +594,19 @@ begin
 	endif;
 end;	
 
+function ValidateAdminPrivilege(hMSI)
+STRING sPrivileged;  
+NUMBER nvSize;
+begin 
+    nvSize = 100;                                                           
+    // set agent properties
+    MsiGetProperty ( hMSI , "Privileged" , sPrivileged , nvSize );
+	if (sPrivileged = "") then
+	    MessageBox ("The installation must be run with Administrator privileges!", SEVERE);
+		abort;
+	endif;
+end;
+
 function UpdateShortcuts(hMSI)  
 STRING sInstallDir, sAddLocal, sWebAppPort, sBaseUrl, sJavaHome, sFile;
 NUMBER nLineNumber;
@@ -680,11 +694,7 @@ end;
     MsiSetProperty ( hMSI , "SERVER_MAIL_SENDER" , sMailSender );    
     MsiSetProperty ( hMSI , "SERVER_WEBAPP_HOST" , sWebAppHost );      
   end;
-
-  // call this function after call to InitializeServerConfig
-  // since it depends on initialized server configuration
-  // by piggy-backing on server configuration we can avoid
-  // asking the user for duplicate information    
+ 
   function InitializeAgentConfig(hMSI)
   STRING sProperty; 
   NUMBER nvSize;
@@ -733,6 +743,31 @@ end;
     MsiSetProperty ( hMSI , "AGENT_SERVER_PASSWORD" , sProperty );        
                   
 end;
+
+// used to override agent properties when doing a server + agent
+// install through the UI. All agent properties will be populated from server
+function CopyAgentConfigFromServer(hMSI)
+  STRING sProperty; 
+  NUMBER nvSize;
+  begin  
+  	nvSize = 100;                                                           
+
+    MsiGetProperty ( hMSI , "SERVER_WEBAPP_HOST" , sProperty , nvSize );
+    MsiSetProperty ( hMSI , "AGENT_SERVER_ADDRESS" , sProperty );         
+
+    MsiGetProperty ( hMSI , "SERVER_WEBAPP_PORT" , sProperty , nvSize );
+    MsiSetProperty ( hMSI , "AGENT_SERVER_PORT" , sProperty );     
+    
+    MsiGetProperty ( hMSI , "SERVER_WEBAPP_SECURE_PORT" , sProperty , nvSize );  
+    MsiSetProperty ( hMSI , "AGENT_SERVER_SSL_PORT" , sProperty ); 
+        
+    MsiGetProperty ( hMSI , "SERVER_ADMIN_USER" , sProperty , nvSize );       
+    MsiSetProperty ( hMSI , "AGENT_SERVER_USER" , sProperty ); 
+      
+    MsiGetProperty ( hMSI , "SERVER_ADMIN_PASSWORD" , sProperty , nvSize );        
+    MsiSetProperty ( hMSI , "AGENT_SERVER_PASSWORD" , sProperty );        
+                  
+end;
     
 // used in standard install flow to default the password
 // if it is not already set
@@ -740,12 +775,10 @@ function DefaultPasswords(hMSI)
 STRING sDefaultPassword, sPassword;
 NUMBER szBufferSize;
 begin
-	szBufferSize = 100;            	
-	// try to default Server Admin password as the default password
-	// otherwise, use "hqadmin"
-	MsiGetProperty ( hMSI, "SERVER_ADMIN_PASSWORD", sDefaultPassword, szBufferSize);
-	if (sDefaultPassword = "") then
-		sDefaultPassword = "hqadmin";
+	szBufferSize = 100;
+	sDefaultPassword = "hqadmin";            	
+	MsiGetProperty ( hMSI, "SERVER_ADMIN_PASSWORD", sPassword, szBufferSize);
+	if (sPassword = "") then
     	MsiSetProperty ( hMSI , "SERVER_ADMIN_PASSWORD" , sDefaultPassword );	
 	endif;    
 	
