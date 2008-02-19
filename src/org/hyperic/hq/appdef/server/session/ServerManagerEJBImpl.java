@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -281,7 +281,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                VetoException
     {
         AppdefEntityID aeid = server.getEntityId();
-        Resource r = ResourceManagerEJBImpl.getOne().findResource(aeid);
+        Resource r = getAuthzResource(aeid);
         AuthzSubject svrPojo = AuthzSubjectManagerEJBImpl.getOne()
             .findSubjectById(subject.getId());
         Audit audit = ResourceAudit.deleteResource(r, svrPojo, 0, 0);
