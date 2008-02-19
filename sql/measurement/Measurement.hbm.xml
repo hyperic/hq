@@ -52,6 +52,9 @@
         <key on-delete="cascade" column="MEASUREMENT_ID"/>
         <one-to-many class="Baseline"/>
       </bag>
+      <many-to-one name="resource" class="org.hyperic.hq.authz.server.session.Resource" index="MEAS_RES_IDX">
+        <column name="RESOURCE_ID"/>
+      </many-to-one>
     </subclass>
 
     <subclass name="RawMeasurement" extends="Measurement" discriminator-value="R">
