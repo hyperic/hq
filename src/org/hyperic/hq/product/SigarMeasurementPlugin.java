@@ -60,7 +60,7 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
     //we can collect the given attribute.
     static {
         AVAIL_ATTRS.put("DirUsage", "Total");
-        AVAIL_ATTRS.put("FileInfo", "Total");
+        AVAIL_ATTRS.put("FileInfo", "Type");
         AVAIL_ATTRS.put("MultiProcCpu", "Processes");
         AVAIL_ATTRS.put("MultiProcMem", "Size");
     }
