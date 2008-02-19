@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 
 public class DerivedMeasurement extends Measurement
@@ -40,6 +41,7 @@ public class DerivedMeasurement extends Measurement
     private long       _interval;
     private String     _formula;
     private Collection _baselines = new ArrayList();
+    private Resource   _resource;
     
     public DerivedMeasurement() {
     }
@@ -140,5 +142,13 @@ public class DerivedMeasurement extends Measurement
 
     public boolean isDerived() {
         return true;
+    }
+
+    public Resource getResource() {
+        return _resource;
+    }
+
+    void setResource(Resource resource) {
+        _resource = resource;
     }
 }
