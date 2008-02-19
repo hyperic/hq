@@ -25,22 +25,21 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.hibernate.FlushMode;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class DerivedMeasurementDAO extends HibernateDAO {
@@ -62,14 +61,15 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         super.remove(entity);
     }
 
-    DerivedMeasurement create(Integer instanceId,
+    DerivedMeasurement create(Resource resource,
                               MeasurementTemplate mt,
                               long interval) {
-        DerivedMeasurement dm = new DerivedMeasurement(instanceId, mt,
-                                                       interval);
+        DerivedMeasurement dm = new DerivedMeasurement(resource.getInstanceId(),
+                                                       mt, interval);
 
         dm.setEnabled(interval != 0);
         dm.setFormula(mt.getTemplate());
+        dm.setResource(resource);
         save(dm);
         return dm;
     }
@@ -223,92 +223,15 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .executeUpdate();
     }
 
-    Map findByInstance(AppdefEntityID[] aeids)
+    List findByInstance(Resource resource)
     {
-        Map rtn = new HashMap(aeids.length);
-        String sql =
-            "select distinct m from DerivedMeasurement m " +
-            "join m.template t " +
-            "join t.monitorableType mt " +
-            "where mt.appdefType=? and m.instanceId=? and " +
-            "m.interval is not null";
-
-        Query query = getSession().createQuery(sql);
-
-        for (int i=0; i<aeids.length; i++)
-        {
-            if (aeids[i] == null)
-                continue;
-
-            int type = aeids[i].getType(),
-                id   = aeids[i].getID();
-
-            List list = query.setInteger(0, type)
-                .setInteger(1, id)
-                .setCacheable(true)
-                .setCacheRegion("DerivedMeasurement.findByInstance_with_interval")
-                .list();
-
-            rtn.put(aeids[i], list);
-        }
-        return rtn;
+        return createCriteria()
+            .add(Restrictions.eq("resource", resource))
+            .setCacheable(true)
+            .setCacheRegion("DerivedMeasurement.findByInstance_with_interval")
+            .list();
     }
 
-    List findByInstance(int type, int id)
-    {
-        AppdefEntityID[] aeids = new AppdefEntityID[] {
-            new AppdefEntityID(type, id)
-        };
-
-        Map map = findByInstance(aeids);
-        Iterator it = map.entrySet().iterator();
-        if (it.hasNext()) {
-            Map.Entry entry = (Map.Entry)it.next();
-            return (List)entry.getValue();
-        }
-        return new ArrayList();
-    }
-
-    List findByInstances(AppdefEntityID[] ids) {
-        Map map = AppdefUtil.groupByAppdefType(ids);
-        StringBuffer sql = new StringBuffer("from DerivedMeasurement where ");
-        for (int i = 0; i < map.size(); i++) {
-            if (i > 0) {
-                sql.append(" or ");
-            }
-            sql.append(" id in " +
-                       "(select m.id from DerivedMeasurement m " +
-                       "join m.template t " +
-                       "join t.monitorableType mt where " +
-                       "mt.appdefType=")
-                .append(":appdefType"+i)
-                .append(" and ")
-                .append("m.instanceId in (:list" + i + ")")
-                .append(") ");
-        }
-
-        // delete derived measurements
-        Query q = getSession().createQuery(sql.toString());
-        int j = 0;
-        for (Iterator i = map.keySet().iterator(); i.hasNext(); j++) {
-            Integer appdefType = (Integer)i.next();
-            List list = (List)map.get(appdefType);
-            q.setInteger("appdefType"+j, appdefType.intValue())
-                .setParameterList("list"+j, list);
-        }
-        
-        return q.list();
-    }
-
-    int deleteByInstances(AppdefEntityID[] ids) {
-        List v = findByInstances(ids);
-        
-        for (Iterator i=v.iterator(); i.hasNext(); ) {
-            remove((DerivedMeasurement)i.next());
-        }
-        return v.size();
-    }
-    
     int deleteByIds(Collection ids) {
         return getSession()
             .createQuery("delete from DerivedMeasurement where id in (:ids)")
@@ -316,18 +239,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .executeUpdate();
     }
 
-    public List findByInstance(int type, int id, boolean enabled) {
-        String sql =
-            "select distinct m from DerivedMeasurement m " +
-            "join m.template t " +
-            "join t.monitorableType mt " +
-            "where mt.appdefType=? and m.instanceId=? and " +
-            "m.enabled = ? and m.interval is not null";
-
-        return getSession().createQuery(sql)
-            .setInteger(0, type)
-            .setInteger(1, id)
-            .setBoolean(2, enabled)
+    public List findEnabledByInstance(Resource resource) {
+        return createCriteria()
+            .add(Restrictions.eq("resource", resource))
+            .add(Restrictions.eq("enabled", Boolean.TRUE))
             .setCacheable(true)
             .setCacheRegion("DerivedMeasurement.findByInstance")
             .list();
@@ -350,46 +265,35 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setString(2, cat).list();
     }
 
-    List findByInstanceForCategory(int type, int id, boolean enabled,
-                                   String cat) {
+    List findByInstanceForCategory(Resource resource, String cat) {
         String sql =
             "select m from DerivedMeasurement m " +
             "join m.template t " +
-            "join t.monitorableType mt " +
             "join t.category c " +
-            "where mt.appdefType = ? and " +
-            "m.instanceId = ? and " +
-            "m.enabled = ? " +
-            "c.name = ? and " +
-            "m.interval is not null " +
-            "order by t.name";
+            "where m.resource = ? and m.enabled = true and c.name = ? and " +
+            "m.interval is not null order by t.name";
 
         return getSession().createQuery(sql)
-            .setInteger(0, type)
-            .setInteger(1, id)
-            .setString(2, cat).list();
+            .setParameter(0, resource)
+            .setString(1, cat).list();
     }
     
-    DerivedMeasurement findByAliasAndID(String alias,
-                                        int appdefType, int appdefId) {
+    DerivedMeasurement findByAliasAndID(String alias, Resource resource) {
 
         String sql =
             "select distinct m from DerivedMeasurement m " +
             "join m.template t " +
-            "join t.monitorableType mt " +
-            "where t.alias = ? and mt.appdefType = ? " +
-            "and m.instanceId = ? and m.interval is not null";
+            "where t.alias = ? and m.resource = ?";
 
         return (DerivedMeasurement)getSession().createQuery(sql)
             .setString(0, alias)
-            .setInteger(1, appdefType)
-            .setInteger(2, appdefId).uniqueResult();
+            .setParameter(1, resource)
+            .uniqueResult();
     }
 
-    List findDesignatedByInstanceForCategory(int appdefType, int iid,
-                                             String cat) 
+    List findDesignatedByInstanceForCategory(Resource resource, String cat) 
     {
-        List res = findDesignatedByInstance(appdefType, iid);
+        List res = findDesignatedByInstance(resource);
         
         for (Iterator i=res.iterator(); i.hasNext(); ) {
             DerivedMeasurement dm = (DerivedMeasurement)i.next();
@@ -401,19 +305,16 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return res;
     }
 
-    List findDesignatedByInstance(int type, int id) {
+    List findDesignatedByInstance(Resource resource) {
         String sql =
             "select m from DerivedMeasurement m " +
             "join m.template t " +
-            "join t.monitorableType mt " +
-            "where m.instanceId = ? and " +
-            "mt.appdefType = ? and " +
+            "where m.resource = ? and " +
             "t.designate = true " +
             "order by t.name";
 
         return getSession().createQuery(sql)
-            .setInteger(0, id)
-            .setInteger(1, type)
+            .setParameter(0, resource)
             .setCacheable(true)
             .setCacheRegion("DerivedMeasurement.findDesignatedByInstance")
             .list();
@@ -638,15 +539,8 @@ public class DerivedMeasurementDAO extends HibernateDAO {
      */
     List findOrphanedMeasurements() {
         String sql =
-            "SELECT M.ID FROM EAM_MEASUREMENT M, EAM_MEASUREMENT_TEMPL T, " +
-            "EAM_MONITORABLE_TYPE MT WHERE M.TEMPLATE_ID = T.ID AND " +
-            "T.MONITORABLE_TYPE_ID = MT.ID AND M.MEASUREMENT_CLASS='D' AND " +
-            "((MT.APPDEF_TYPE = 1 AND M.INSTANCE_ID NOT IN " +
-            "(SELECT INSTANCE_ID FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 301)) OR " +
-            "(MT.APPDEF_TYPE = 2 AND M.INSTANCE_ID NOT IN " +
-            "(SELECT INSTANCE_ID FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 303)) OR " +
-            "(MT.APPDEF_TYPE = 3 AND M.INSTANCE_ID NOT IN " +
-            "(SELECT INSTANCE_ID FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 305)))";
+            "SELECT M.ID FROM EAM_MEASUREMENT M WHERE NOT EXISTS " +
+            "(SELECT R.ID FROM EAM_RESOURCE R WHERE R.ID = RESOURCE_ID)";
 
         return getSession().createSQLQuery(sql).list();
     }
