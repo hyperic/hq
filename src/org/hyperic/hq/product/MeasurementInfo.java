@@ -228,7 +228,7 @@ public class MeasurementInfo
      * @param defaultOn The defaultOn to set
      */
     public void setDefaultOn(boolean defaultOn) {
-        this.defaultOn = true;
+        this.defaultOn = defaultOn;
     }
 
     /**
