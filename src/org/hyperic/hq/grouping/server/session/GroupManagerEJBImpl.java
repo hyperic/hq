@@ -281,14 +281,13 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
                 gVal.setOwner       ( fetchGroupOwner(rgVo.getId()) );
 
                 /* Add the group members */
-                PageList resList = rgmLoc.getResources(subject, rgVo, 
-                                                       PageControl.PAGE_ALL);
+                Collection resList = rgmLoc.getResources(subject, rgVo.getId());
     
                 for (Iterator iter=resList.iterator();iter.hasNext();) {
-                    ResourceValue resVo = (ResourceValue) iter.next();
+                    Resource resVo = (Resource) iter.next();
                     GroupEntry ge = 
                         new GroupEntry(resVo.getInstanceId(),
-                                       resVo.getResourceTypeValue().getName());
+                                       resVo.getResourceType().getName());
                     gVal.addEntry(ge);
                 }
                 toBePaged.add(gVal);

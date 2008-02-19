@@ -28,7 +28,6 @@ package org.hyperic.hq.authz.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -39,11 +38,8 @@ import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -82,9 +78,6 @@ public class ResourceGroupManagerEJBImpl
     extends AuthzSession 
     implements SessionBean 
 {
-    private Log _log = LogFactory.getLog(ResourceGroupManagerEJBImpl.class);
-
-    private Pager _resourcePager;
     private Pager _groupPager;
     private Pager _ownedGroupPager;
     private final String RESOURCE_PAGER =
@@ -378,34 +371,10 @@ public class ResourceGroupManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public PageList getResources(AuthzSubjectValue whoami,
-                                 ResourceGroupValue groupValue,
-                                 PageControl pc) 
+    public Collection getResources(AuthzSubjectValue whoami, Integer id)
     {
-        Collection resources;
-        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
-
-        switch (pc.getSortattribute()) {
-        case (SortAttribute.RESOURCE_NAME) :
-        case (SortAttribute.RESGROUP_NAME) :
-            PermissionManager pm = PermissionManagerFactory.getInstance();
-            resources = pm.getGroupResources(whoami.getId(),
-                                             groupValue.getId(),
-                                             Boolean.FALSE);
-
-            if (pc.isDescending()) {
-                ArrayList reversed = new ArrayList(resources);
-                Collections.reverse(reversed);
-                return _resourcePager.seek(reversed, pc.getPagenum(),
-                                          pc.getPagesize());
-            } else {
-                return _resourcePager.seek(resources, pc.getPagenum(),
-                                           pc.getPagesize());
-            }
-        default:
-            throw new IllegalArgumentException("Invalid sort attribute:" +
-                                               pc.getSortattribute());
-        }
+        return PermissionManagerFactory.getInstance()
+            .getGroupResources(whoami.getId(), id, Boolean.FALSE);
     }
 
     /**
@@ -784,7 +753,7 @@ public class ResourceGroupManagerEJBImpl
     }
     public void ejbCreate() throws CreateException {
         try {
-            _resourcePager   = Pager.getPager(RESOURCE_PAGER);
+            Pager.getPager(RESOURCE_PAGER);
             _groupPager      = Pager.getPager(GROUP_PAGER);
             _ownedGroupPager = Pager.getPager(OWNEDGROUP_PAGER);
         } catch (Exception e) {
