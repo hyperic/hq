@@ -970,33 +970,49 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             .findDesignatedByInstanceForCategory(getResource(id), cat);
     }
 
+    private Cache getAvailabilityCache() {
+        return CacheManager.getInstance().getCache("AvailabilitySummary");
+    }
+
+    private DerivedMeasurement findAvailabilityMetric(AppdefEntityID id)
+        throws MeasurementNotFoundException {
+        List mlocals = getDerivedMeasurementDAO().
+            findDesignatedByInstanceForCategory(getResource(id),
+            MeasurementConstants.CAT_AVAILABILITY);
+        
+        if (mlocals.size() == 0) {
+            throw new MeasurementNotFoundException("No availability metric " +
+                                                   "found for " + id);
+        }
+    
+        DerivedMeasurement dm = (DerivedMeasurement) mlocals.get(0);
+        CacheEntry entry = new CacheEntry(dm);
+        getAvailabilityCache().put(new Element(id, entry));
+        return dm;
+    }
+
     /**
      * Look up an availability measurement EJBs for an instance
      * @throws MeasurementNotFoundException
      * @ejb:interface-method
      */
     public CacheEntry getAvailabilityCacheEntry(AuthzSubject subject,
-                                                        AppdefEntityID id) {
-        Cache cache =
-            CacheManager.getInstance().getCache("AvailabilitySummary");
-        Element e = cache.get(id);
+                                                AppdefEntityID id) {
+        Cache cache = getAvailabilityCache();
+        Element elm = cache.get(id);
 
-        if (e != null) {
-            return (CacheEntry) e.getObjectValue();
+        if (elm != null) {
+            return (CacheEntry) elm.getObjectValue();
         }
         
-        DerivedMeasurement dm;
         try {
-            dm = getAvailabilityMeasurement(subject, id);
-        } catch (MeasurementNotFoundException e1) {
+            DerivedMeasurement dm = findAvailabilityMetric(id);
+            return new CacheEntry(dm);
+        } catch (MeasurementNotFoundException e) {
             return null;
-        }
-        
-        CacheEntry entry = new CacheEntry(dm);
-        cache.put(new Element(id, entry));
-        return entry;
+        }        
     }
-        
+
     /**
      * Look up an availability measurement EJBs for an instance
      * @throws MeasurementNotFoundException
@@ -1006,16 +1022,14 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                          AppdefEntityID id)
         throws MeasurementNotFoundException
     {
-        List mlocals = getDerivedMeasurementDAO().
-            findDesignatedByInstanceForCategory(getResource(id),
-            MeasurementConstants.CAT_AVAILABILITY);
-        
-        if (mlocals.size() == 0) {
-            throw new MeasurementNotFoundException("No availability metric " +
-                                                   "found for " + id);
-        }
+        Element e = getAvailabilityCache().get(id);
 
-        return (DerivedMeasurement) mlocals.get(0);
+        if (e != null) {
+            CacheEntry entry = (CacheEntry) e.getObjectValue();
+            return getDerivedMeasurementDAO().findById(entry.getMetricId());
+        }
+        
+        return findAvailabilityMetric(id);
     }
 
     /**
@@ -1046,8 +1060,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             int type = ids[0].getType();
             
             List toget = new ArrayList();
-            Cache cache =
-                CacheManager.getInstance().getCache("AvailabilitySummary");
+            Cache cache = getAvailabilityCache();
             
             for (int i = 0; i < ids.length; i++) {
                 Element e = cache.get(ids[i]);
@@ -1171,64 +1184,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
 
         return intervals;
-    }
-
-    /**
-     * Set the interval of Measurements based their ID's
-     *
-     * @ejb:interface-method
-     */
-    public void enableMeasurements(AuthzSubject subject, Integer[] mids,
-                                   long interval)
-        throws MeasurementNotFoundException, MeasurementCreateException,
-               PermissionException {
-
-        // Organize by AppdefEntity
-        HashMap resMap = new HashMap();
-        
-        // Get the list of measurements
-        Collection measurements =
-            getDerivedMeasurementDAO().findByIds(mids);
-        
-        for (Iterator it = measurements.iterator(); it.hasNext(); ) {
-            DerivedMeasurement dm = (DerivedMeasurement)it.next();
-            if (dm.getTemplate().getMeasurementArgs() == null) {
-                throw new MeasurementNotFoundException(dm.getId() + " is a " +
-                                                       "raw measurement");
-            }
-
-            AppdefEntityID id = getAppdefEntityId(dm);
-
-            HashSet tids;
-            if (resMap.containsKey(id)) {
-                tids = (HashSet)resMap.get(id);
-            } else {
-                // Authz check
-                super.checkModifyPermission(subject.getId(), id);        
-                tids = new HashSet();
-                resMap.put(id, tids);
-            }
-                
-            tids.add(dm.getTemplate().getId());
-        }
-        
-        for (Iterator it = resMap.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) it.next();
-            AppdefEntityID id = (AppdefEntityID) entry.getKey();
-            HashSet mtidSet = (HashSet) entry.getValue();
-            Integer[] mtids = (Integer[]) mtidSet.toArray(new Integer[0]);
-            long[] intervals = new long[mtids.length];
-            Arrays.fill(intervals, interval);
-
-            // A little short-cut.  We just end up looking up the derived
-            // measurement twice.
-            try {
-                createMeasurements(subject, id, mtids, intervals, null);
-            } catch (TemplateNotFoundException e) {
-                // This shouldn't happen as the measurement is already created
-                throw new MeasurementNotFoundException("Template not found", e);
-            }
-        }
     }
 
     /**
