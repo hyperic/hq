@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2008], Hyperic, Inc.
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -45,13 +45,13 @@
     </td>
     <logic:messagesPresent property="name">
     <td width="30%" class="ErrorField">
-      <html:text size="30" maxlength="255" property="name"/>
+      <html:text size="30" maxlength="40" property="name"/>
       <br><span class="ErrorFieldContent">- <html:errors property="name"/></span>
     </td>
     </logic:messagesPresent>
     <logic:messagesNotPresent property="name">
     <td width="30%" class="BlockContent">
-      <html:text size="30" maxlength="255" property="name"/>
+      <html:text size="30" maxlength="40" property="name"/>
     </td>
     </logic:messagesNotPresent>
 
