@@ -207,10 +207,9 @@ public class EmailAction extends EmailActionConfig
         throws ActionExecuteException
     {
         // First, look up the addresses
-        int i = 0;
         HashSet prevRecipients = new HashSet();
         Map validRecipients = new HashMap();
-        for (Iterator it = getUsers().iterator(); it.hasNext(); i++) {
+        for (Iterator it = getUsers().iterator(); it.hasNext(); ) {
             try {
                 InternetAddress addr;
                 boolean useHtml = false;
