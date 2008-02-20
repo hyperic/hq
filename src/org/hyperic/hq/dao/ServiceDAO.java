@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
@@ -217,6 +218,21 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
+    public List findPlatformServicesByType(Platform p, ServiceType st) {
+        String sql = "select v from Service v " +  
+                  " join v.server s " +  
+                  " join s.platform p " + 
+                  " where " +  
+                  "     p = :platform " + 
+                  " and v.serviceType = :serviceType " + 
+                  " order by v.sortName";
+        
+        return getSession().createQuery(sql)
+            .setParameter("platform", p)
+            .setParameter("serviceType", st)
+            .list();
+    }
+    
     public Collection findPlatformServices_orderName(Integer platId,
                                                      boolean asc)
     {

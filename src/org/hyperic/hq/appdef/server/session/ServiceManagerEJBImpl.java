@@ -92,6 +92,7 @@ import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.ServiceClusterDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServerType;
@@ -902,6 +903,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         return filterAndPage(allServices, subject, typeId, pc);
     }
     
+    /**
+     * Get platform service POJOs
+     * @ejb:interface-method
+     */
+    public List findPlatformServicesByType(Platform p, ServiceType st) {
+        return getServiceDAO().findPlatformServicesByType(p, st);
+    }
+            
     /**
      * Get platform service POJOs
      * @ejb:interface-method
