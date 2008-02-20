@@ -11,7 +11,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.server.session.Platform
+import org.hyperic.hq.appdef.server.session.PlatformType
 import org.hyperic.hq.appdef.server.session.Server
+import org.hyperic.hq.appdef.server.session.Service
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
@@ -23,13 +25,22 @@ import org.hyperic.util.config.ConfigResponse
 import org.hyperic.hq.hqu.rendit.util.ResourceConfig
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 
+/**
+ * This class provides tonnes of abstractions over the Appdef layer.
+ *
+ * It makes Appdef Platform/Server/Services:
+ *   -- work in a hierarchy (getChildren())
+ *   
+ * It also takes advantage of the 'Resource' objects which act as prototypes
+ * (XXX:  Would be good to make a real subclass of Resource into ResourcePrototype)
+ */
 
 class ResourceCategory {
     private static platMan  = PlatMan.one
     private static svcMan   = ServiceMan.one
     private static svrMan   = ServerMan.one 
     private static dman     = DMMan.one
-    private static authzMan = AuthzMan.one 
+    private static authzMan = AuthzMan.one
     
     /**
      * Creates a URL for the resource.  This should typically only be called
@@ -140,18 +151,27 @@ class ResourceCategory {
         r.resourceType.id == AuthzConstants.authzPlatform
     }
     
-    private static boolean isServer(Resource r) {
+    static boolean isServer(Resource r) {
         r.resourceType.id == AuthzConstants.authzServer
     }
 
+    static boolean isService(Resource r) {
+        r.resourceType.id == AuthzConstants.authzService
+    }
+    
     static Platform toPlatform(Resource r) {
         assert isPlatform(r)
         platMan.findPlatformById(r.instanceId)
     }
     
-    private static Server toServer(Resource r) {
+    static Server toServer(Resource r) {
         assert isServer(r)
         svrMan.findServerById(r.instanceId)
+    }
+
+    static Service toService(Resource r) {
+        assert isService(r)
+        svcMan.findServiceById(r.instanceId)
     }
 
     static boolean isVirtual(Resource t) {
@@ -206,18 +226,96 @@ class ResourceCategory {
         }
         []
     }
-    
+
+    static boolean isPlatformPrototype(Resource r) {
+        return r.resourceType.id == AuthzConstants.authzPlatformProto
+    }
+
+    static boolean isServerPrototype(Resource r) {
+        return r.resourceType.id == AuthzConstants.authzServerProto
+    }
+
+    static boolean isServicePrototype(Resource r) {
+        return r.resourceType.id == AuthzConstants.authzServiceProto
+    }
+
+    /**
+     * Get the children of a resource, of a specific type.  Pass in the 
+     * root resource to get root-level appdef objects.
+     *
+     * "Give me the 'FileServer File' children of my 'Travistation.local' "
+     * 
+     * @return a list of {@link Resource}s
+     */
     static List getChildrenByPrototype(Resource r, Resource proto) {
         if (r.isRoot()) {
-            if (proto.resourceType.id != AuthzConstants.authzPlatformProto) {
-                // The only supported children of root is the platform
+            if (!proto.isPlatformPrototype()) {
+                // The only supported children of root is the platform, 
+                // but this could be expanded to also return things like 
+                // users, alert defs or any other resource types
                 return []
             }
-            def overlord = authzMan.overlordPojo
-            def rhelp    = new ResourceHelper(overlord)
             def typeRsrc = platMan.findPlatformType(proto.instanceId).resource
+            def rhelp    = new ResourceHelper(getOverlord())
             return rhelp.find(byPrototype:typeRsrc)
         }
+        
+        if (isPlatform(r)) {
+            Platform p = toPlatform(r)
+            if (proto.isServicePrototype()) {
+                def svcType = svcMan.findServiceType(proto.instanceId)
+                return svcMan.findPlatformServicesByType(p, svcType)
+            } else if (proto.isServerPrototype()) {
+                def svrType = svrMan.findServerType(proto.instanceId)
+                return svrMan.findServersByType(p, svrType)
+            } else {
+                // Else prototype is not a valid proto for the resource 
+                return []
+            }
+        }
+        
+        
         []
+    }
+
+    static createInstance(Resource proto, Resource parent, 
+                          String name, AuthzSubject subject, ResourceConfig cfg) 
+    {
+        if (parent.isRoot()) {
+            // All we can create here are platforms
+            if (!proto.isPlatformPrototype()) { 
+                throw new IllegalArgumentException("Resource (id=${parent.id}) " + 
+                            "cannot have children of type ${proto.name}")
+            }
+            def typeRsrc = platMan.findPlatformType(proto.instanceId)
+            // TODO:  When we are adding the feature of creating platforms,
+            //        just create a new instance of 'typeRsrc'
+            return null
+        }
+        
+        if (proto.isServicePrototype()) {
+            def serviceType = svcMan.findServiceType(proto.instanceId)
+            def serverType  = serviceType.serverType
+            
+            if (serverType.isVirtual()) {
+                // Parent points at the 'resource' version of the Platform, so
+                // we use the instanceId here, not the Resource.id
+                def servers = svrMan.getServersByPlatformServiceType(subject.valueObject,
+                                                                     parent.instanceId,
+                                                                     proto.instanceId)
+                assert servers.size() == 1, "All virtual servers should be created for Platform ${parent.name}" 
+                
+                def server = svrMan.findServerById(servers[0].id) // value -> pojo
+                return svcMan.createService(subject.valueObject, server, 
+                                            serviceType, name, "desc: ${name}",
+                                            "loc: ${name}", null).resource
+            }
+            return 'non-virtual server'
+        }
+        return 'falout'
+    }
+
+    private static getOverlord() {
+        return authzMan.overlordPojo
     }
 }
