@@ -558,6 +558,13 @@ public class JBossDetector
             server.setName(server.getName() + " " + serverName);
         }
 
+        File home = cfg.getJBossHome();
+        if (home != null) {
+            //normally setup in JBossProductPlugin
+            //this handles the case of the agent being started
+            //before the JBoss server
+            adjustClassPath(home.getPath());
+        }
         //pickup any jars found relative to this installpath
         adjustClassPath(installpath);
 

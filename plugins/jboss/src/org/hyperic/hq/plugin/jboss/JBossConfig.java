@@ -181,8 +181,8 @@ public class JBossConfig {
         return (val != null) && (val.length() != 0);
     }
 
-    private File getJBossHome(File configXML) {
-        File home = configXML.getParentFile();
+    public File getJBossHome() {
+        File home = this.serviceXML.getParentFile();
         while (home != null) {
             boolean isServer = home.getName().equals("server");
             home = home.getParentFile();
@@ -287,7 +287,7 @@ public class JBossConfig {
             else if ("StoreURL".equals(attrName)) {
                 String url = getText(attr);
 
-                File home = getJBossHome(this.serviceXML);
+                File home = getJBossHome();
                 if (home != null) {
                     log.debug("jboss.home.url=" + home);
                     url = StringUtil.replace(url,

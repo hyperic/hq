@@ -90,12 +90,17 @@ public class JBossProductPlugin
             from = "properties";
         }
         
-        if (installDir != null) {
-            getLog().debug("Setting " + PROP_INSTALLPATH + "=" +
+        String[] classpath = super.getClassPath(manager);
+
+        if (installDir == null) {
+            getLog().debug(prop + " not configured");
+            //may be resolved later by JBossDetector.adjustClassPath
+            return classpath;
+        }
+        else {
+            getLog().debug("Setting " + prop + "=" +
                            installDir + ", configured from " + from);
         }
-
-        String[] classpath = super.getClassPath(manager);
 
         for (int i=0; i<classpath.length; i++) {
             classpath[i] = installDir + "/" + classpath[i];
