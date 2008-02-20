@@ -143,8 +143,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                         AppdefEntityID gid)
         throws AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
-        List grpMembers = GroupUtil.getCompatGroupMembers(subject, gid, null,
-                                                          PageControl.PAGE_ALL);
+        List grpMembers = getResourceIds(subject, gid, null);
             
         // Get the list of group members
         Iterator it = grpMembers.iterator();
@@ -390,9 +389,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         {
             List grpMembers;
             try {
-                grpMembers =
-                    GroupUtil.getCompatGroupMembers(subj, aeid, null,
-                                                    PageControl.PAGE_ALL);
+                grpMembers = getResourceIds(subj, aeid, null);
             } catch (GroupNotCompatibleException e) {
                 throw new MeasurementNotFoundException(
                     "Incompatible group " + aeid +
@@ -495,10 +492,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Create list of measurements for a resource
      * @param id the resource ID
-     * @ejb:interface-method
      */
-    public void createMeasurements(int sessionId, AppdefEntityID id,
-                                   Integer[] tids, long interval)
+    private void createMeasurements(int sessionId, AppdefEntityID id,
+                                    Integer[] tids, long interval)
         throws SessionTimeoutException, SessionNotFoundException,
                ConfigFetchException, EncodingException, PermissionException,
                TemplateNotFoundException, AppdefEntityNotFoundException,
@@ -507,15 +503,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             // Recursively do this for each of the group members
-            List grpMembers =
-                GroupUtil.getCompatGroupMembers(subject, id, null,
-                                                PageControl.PAGE_ALL);
+            List grpMembers = getResourceIds(subject, id, null);
         
-            AppdefEntityID[] aeids = new AppdefEntityID[grpMembers.size()];
-            int i = 0;
-            for (Iterator it = grpMembers.iterator(); it.hasNext(); i++) {
-                aeids[i] = (AppdefEntityID) it.next();
-            }
+            AppdefEntityID[] aeids = (AppdefEntityID[])
+                grpMembers.toArray(new AppdefEntityID[grpMembers.size()]);
             getMetricManager().enableMeasurements(subject, aeids, tids,
                                                   interval);
         }
@@ -536,18 +527,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                       mergedCR);
             }
         }
-    }
-
-    /**
-     * Update the measurements - set the interval
-     * @ejb:interface-method
-     */
-    public void updateMeasurements(int sessionID, Integer[] mids, long interval)
-        throws SessionTimeoutException, SessionNotFoundException,
-               MeasurementNotFoundException, MeasurementCreateException,
-               PermissionException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        getMetricManager().enableMeasurements(subject, mids, interval);
     }
 
     /** Update the measurements - set the interval
@@ -655,9 +634,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                              false);
         } else if (id.isGroup()) {
             // Recursively do this for each of the group members
-            List grpMembers =
-                GroupUtil.getCompatGroupMembers(subject, id, null,
-                                                PageControl.PAGE_ALL);
+            List grpMembers = getResourceIds(subject, id, null);
     
             for (Iterator it = grpMembers.iterator(); it.hasNext();) {
                 dmm.disableMeasurements(subject, (AppdefEntityID) it.next(), 
@@ -757,9 +734,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         else if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             List grpMembers;
             try {
-                grpMembers =
-                    GroupUtil.getCompatGroupMembers(subj, id, null,
-                                                    PageControl.PAGE_ALL);
+                grpMembers = getResourceIds(subj, id, null);
             } catch (GroupNotCompatibleException e) {
                 throw new MeasurementNotFoundException(
                     "Incompatible group " + id +
@@ -894,9 +869,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        List grpMembers =
-            GroupUtil.getCompatGroupMembers(subject, gid, null, 
-                                            PageControl.PAGE_ALL);
+        List grpMembers = getResourceIds(subject, gid, null);
         return findGroupMeasurements(sessionId, grpMembers, cat, pc);
     }
     
@@ -1354,35 +1327,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 _log.debug("END findMeasurementData() - " + watch.getElapsed() +
                           " msec");
         }
-    }
-
-    /**
-     * Dumps a specific number of data points for a specific
-     * measurement template ID and resource id
-     * @return a List of MetricValue objects
-     * @ejb:interface-method
-     */
-    public List findMeasurementData(int sessionId, Integer tid, int iid,
-                                    int count)
-        throws SessionNotFoundException, SessionTimeoutException,
-               DataNotAvailableException, MeasurementNotFoundException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        DerivedMeasurement dmv =
-            getMetricManager().findMeasurement(subject, tid, new Integer(iid));
-    
-        return findMeasurementData(sessionId, dmv.getId(), count);
-    }
-
-    /**
-     * Dumps a specific number of data points for a specific measurement ID
-     * @return a List of MetricValue objects
-     * @ejb:interface-method
-     */
-    public List findMeasurementData(int sessionId, Integer mid, int count)
-        throws SessionNotFoundException, SessionTimeoutException,
-               DataNotAvailableException {
-        manager.getSubjectPojo(sessionId);
-        return getDataMan().getLastHistoricalData(mid, count);
     }
 
     /**
@@ -2065,9 +2009,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // we don't use AppdefEntityValue for groups but GroupUtil
             // will give us what we need
             try {
-                resources =
-                    GroupUtil.getCompatGroupMembers(subject, entId, null,
-                                                    PageControl.PAGE_ALL);
+                resources = getResourceIds(subject, entId, null);
             } catch (GroupNotCompatibleException e) {
                 throw new InvalidOptionException(
                     "Requested group (" + entId +
@@ -2184,9 +2126,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 cds.setNumResources(new Integer(size));
                 try {
                     // Replace the IDs with all of the members
-                    List memberIds = 
-                        GroupUtil.getCompatGroupMembers(subject, aid, null, 
-                                                        PageControl.PAGE_ALL);
+                    List memberIds = getResourceIds(subject, aid, null);
                     AppdefEntityID[] ids = (AppdefEntityID[])
                         memberIds.toArray(new AppdefEntityID[0]);
                     setResourceTypeDisplaySummary(subject, cds,
@@ -2326,8 +2266,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     {
         // Now get each category of measurements
         long end = System.currentTimeMillis();
-        long begin = end - MeasurementConstants.HEALTH_WINDOW_MILLIS;
-
+        
         summary.setResourceType(resType);
         
         StopWatch watch = new StopWatch(end);
