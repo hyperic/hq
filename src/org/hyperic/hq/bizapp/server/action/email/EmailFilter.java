@@ -259,11 +259,6 @@ public class EmailFilter {
             }
 
             m.setSubject(subject);
-            
-            if (_log.isDebugEnabled()) {
-                _log.debug("Sending Alert Email: " + body);
-                _log.debug("Sending HTML Alert Email: " + htmlBody);
-            }
 
             // If priority not null, set it in body
             if (priority != null) {
@@ -286,7 +281,13 @@ public class EmailFilter {
                 
                 if (addresses[i].useHtml()) {
                     m.setContent(htmlBody[i], "text/html");
+                    if (_log.isDebugEnabled()) {
+                        _log.debug("Sending HTML Alert Email: " + subject);
+                    }
                 } else {
+                    if (_log.isDebugEnabled()) {
+                        _log.debug("Sending Alert Email: " + subject);
+                    }
                     m.setContent(body[i], "text/plain");
                 }
                 
