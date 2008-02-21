@@ -26,10 +26,15 @@
 package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
 
 public class DownMetricZevent extends Zevent {
+
+    static {
+        ZeventManager.getInstance().registerEventClass(DownMetricZevent.class);
+    }
 
     private static class DownMetricZeventSource
         implements ZeventSourceId

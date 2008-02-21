@@ -31,11 +31,9 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
 
-public class MeasurementZevent 
-    extends Zevent
-{
+public class MeasurementZevent extends Zevent {
+    
     static {
-        // Pretty sure this is fine to do here.  Handy, even!
         ZeventManager.getInstance().registerEventClass(MeasurementZevent.class);
     }
     

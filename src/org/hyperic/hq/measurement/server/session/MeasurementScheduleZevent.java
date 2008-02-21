@@ -26,11 +26,17 @@
 package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
 
 public class MeasurementScheduleZevent extends Zevent {
-    
+
+    static {
+        ZeventManager.getInstance()
+            .registerEventClass(MeasurementScheduleZevent.class);
+    }
+
     public static class MeasurementScheduleZeventSource
         implements ZeventSourceId
     {

@@ -26,7 +26,9 @@
 package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.zevents.HeartBeatZevent;
 import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
 
@@ -35,6 +37,11 @@ import org.hyperic.hq.zevents.ZeventSourceId;
  * {@link AgentScheduleSynchronizer} to queue syncing agent's schedules.
  */
 public class AgentScheduleSyncZevent extends Zevent {
+
+    static {
+        ZeventManager.getInstance()
+            .registerEventClass(AgentScheduleSyncZevent.class);
+    }
 
     private static class AgentScheduleSyncZeventSource
         implements ZeventSourceId

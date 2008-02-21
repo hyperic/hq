@@ -34,8 +34,12 @@ public class HeartBeatZevent extends Zevent {
     
     public static final int HEART_BEAT_INTERVAL_MILLIS=30*1000;
 
+    static {
+        ZeventManager.getInstance().registerEventClass(HeartBeatZevent.class);
+    }
+
     /**
-     * There is only ever one instance of this source id so we can use object 
+     * There is only ever one instance of this source id so we can use object
      * identity for checking equality.
      */
     public static class HeartBeatZeventSource
