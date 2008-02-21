@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -94,7 +94,6 @@ public class ZeventManager {
     private long _maxTimeInQueue;
     private long _numEvents;
     
-    private QueueProcessor _queueProcessor;
     private BlockingQueue  _eventQueue; 
 
     
@@ -158,7 +157,6 @@ public class ZeventManager {
         QueueProcessor p = new QueueProcessor(this, _eventQueue, 
                                               (int)batchSize);
                                               
-        _queueProcessor = p;
         _processorThread = new Thread(_threadGroup, p, "ZeventProcessor"); 
         _processorThread.setDaemon(true);
         _processorThread.start();
@@ -260,6 +258,11 @@ public class ZeventManager {
                 return false;
             
             _listeners.put(eventClass, new ArrayList());
+            
+            if (_log.isDebugEnabled()) {
+                _log.debug("Register ZEvent " + eventClass);
+            }
+            
             return true;
         }
     }
@@ -316,10 +319,12 @@ public class ZeventManager {
         synchronized (_listenerLock) {
             List res = (List)_listeners.get(eventClass);
             
-            if (res == null)
-                throw new IllegalArgumentException("Event type [" + 
-                                                   eventClass.getName() + 
-                                                   "] not registered");
+            if (res == null) {
+                // Register it
+                registerEventClass(eventClass);
+                return (List) _listeners.get(eventClass);
+            }
+            
             return res;
         }
     }

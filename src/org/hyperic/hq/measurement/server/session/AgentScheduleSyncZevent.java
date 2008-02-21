@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -27,7 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.zevents.Zevent;
-import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
 
@@ -36,10 +35,6 @@ import org.hyperic.hq.zevents.ZeventSourceId;
  * {@link AgentScheduleSynchronizer} to queue syncing agent's schedules.
  */
 public class AgentScheduleSyncZevent extends Zevent {
-    static {
-        ZeventManager.getInstance().
-            registerEventClass(AgentScheduleSyncZevent.class);
-    }
 
     private static class AgentScheduleSyncZeventSource
         implements ZeventSourceId

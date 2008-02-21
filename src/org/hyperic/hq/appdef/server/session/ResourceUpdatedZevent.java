@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
@@ -33,11 +32,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
  * Event that indicates a resource has been updated.
  */
 public class ResourceUpdatedZevent extends ResourceZevent {
-
-     static {
-        ZeventManager.getInstance().
-            registerEventClass(ResourceUpdatedZevent.class);
-    }
 
     public ResourceUpdatedZevent(AuthzSubjectValue subject, AppdefEntityID id) {
         super(subject, id);

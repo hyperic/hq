@@ -1,5 +1,3 @@
-package org.hyperic.hq.measurement.server.session;
-
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
@@ -25,18 +23,14 @@ package org.hyperic.hq.measurement.server.session;
  * USA.
  */
 
+package org.hyperic.hq.measurement.server.session;
+
 import org.hyperic.hq.zevents.Zevent;
-import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
 
-public class MeasurementScheduleZevent extends Zevent 
-{
-    static {
-        ZeventManager.getInstance().
-            registerEventClass(MeasurementScheduleZevent.class);
-    }
-
+public class MeasurementScheduleZevent extends Zevent {
+    
     public static class MeasurementScheduleZeventSource
         implements ZeventSourceId
     {
