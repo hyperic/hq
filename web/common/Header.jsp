@@ -90,8 +90,8 @@
             </div>
 
             <div id="headUsrName">
+                <span id="nameHead">
                 <c:choose>
-                    <!--<fmt:message key="header.User"/> :-->
                     <c:when test="${useroperations['viewSubject']}">
                         <html:link page="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}">
                             <c:out value="${sessionScope.webUser.username}"/>
@@ -101,6 +101,7 @@
                         <c:out value="${sessionScope.webUser.username}"/>
                     </c:otherwise>
                 </c:choose>
+                    </span>
                <span style="font-size:0.95em;">
                    <span style="color:#333333;"> - </span>
                         <span style="padding-right:10px;">

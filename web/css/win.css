@@ -206,7 +206,12 @@ z-index:2;
  color: #003399;
  text-decoration:none;
  font-weight: bold;
-    font-size:10px;
+ font-size:10px;
+}
+
+#nameHead a {
+ font-style:oblique;
+  font-size:11px;  
 }
 
 .headAlertWrapper {
