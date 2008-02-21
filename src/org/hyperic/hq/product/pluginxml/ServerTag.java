@@ -375,6 +375,9 @@ class ServerTag
                 Map.Entry entry = (Map.Entry)plugins.next();
                 String serviceName = (String)entry.getKey();
                 String impl = (String)entry.getValue();
+                if (PluginData.getServiceExtension(serviceName) != null) {
+                    continue; //service extensions are not included
+                }
                 serviceName = StringUtil.replace(serviceName, include, serverType);
                 this.data.addServiceInventoryPlugin(this.typeName, serviceName, impl);
             }
