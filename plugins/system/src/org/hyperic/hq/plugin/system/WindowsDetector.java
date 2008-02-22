@@ -159,7 +159,9 @@ public class WindowsDetector
         return config;
     }
 
-    private AIServiceValue findWindowsService(String type, String serviceName) {
+    private AIServiceValue findWindowsService(String type,
+                                              String serviceName,
+                                              boolean enableControl) {
         AIServiceValue svc = createSystemService(type, serviceName);
         ServiceConfig config =
             setServiceInventoryProperties(serviceName, svc, false);
@@ -173,8 +175,10 @@ public class WindowsDetector
         productConfig.setValue(SystemPlugin.PROP_SVC, serviceName);
         try {
             svc.setProductConfig(productConfig.encode());
-            svc.setMeasurementConfig(new ConfigResponse().encode());
-            //XXX control config
+            svc.setMeasurementConfig(ConfigResponse.EMPTY_CONFIG);
+            if (enableControl) {
+                svc.setControlConfig(ConfigResponse.EMPTY_CONFIG);
+            }
         } catch (EncodingException e) {
             log.error("Error encoding config: " + e.getMessage());
             return null;
@@ -197,11 +201,17 @@ public class WindowsDetector
         for (int i=0; i<serviceNames.size(); i++) {
             String name = (String)serviceNames.get(i);
             AIServiceValue svc = 
-                findWindowsService(SystemPlugin.SVC_NAME, name);
+                findWindowsService(SystemPlugin.SVC_NAME, name, true);
             if (svc != null) {
                 services.add(svc);
             }
         }
+    }
+
+    boolean hasControlPlugin(String type) {
+        ProductPluginManager ppm =
+            (ProductPluginManager)getManager().getParent();
+        return ppm.getControlPlugin(type) != null;
     }
 
     private void discoverPluginServices(List services) {
@@ -221,9 +231,10 @@ public class WindowsDetector
                          "' property defined.");
                 continue;
             }
-            log.debug("Looking for " + type + " service=" + name);
-
-            AIServiceValue svc = findWindowsService(type, name);
+            boolean enableControl = hasControlPlugin(type);
+            log.debug("Looking for " + type + " service=" + name +
+                      " (control=" + enableControl + ")");
+            AIServiceValue svc = findWindowsService(type, name, enableControl);
             if (svc != null) {
                 services.add(svc);
             }
