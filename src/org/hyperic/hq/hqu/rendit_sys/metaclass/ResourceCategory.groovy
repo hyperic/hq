@@ -7,10 +7,12 @@ import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceType
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as rgmi
 import org.hyperic.hq.authz.shared.AuthzConstants
+import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.server.session.Platform
+import org.hyperic.hq.appdef.shared.PlatformValue
 import org.hyperic.hq.appdef.server.session.PlatformType
 import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.server.session.Service
@@ -181,8 +183,18 @@ class ResourceCategory {
         false
     }
     
-    static ResourceConfig getConfig(Resource r) {
-        new ResourceConfig(r)
+    /**
+     * @see documentation for ResourceConfig.  We don't return it directly
+     * here, as we'd like to abstract the thing doing the persisting
+     */
+    static Map getConfig(Resource r) {
+        def cfg = new ResourceConfig(r)
+        cfg.populate()
+        cfg.entries
+    }
+    
+    static void setConfig(Resource r, Map m, AuthzSubject subject) {
+        (new ResourceConfig(r)).setProperties(m, subject)
     }
     
     /**
@@ -264,10 +276,10 @@ class ResourceCategory {
             Platform p = toPlatform(r)
             if (proto.isServicePrototype()) {
                 def svcType = svcMan.findServiceType(proto.instanceId)
-                return svcMan.findPlatformServicesByType(p, svcType)
+                return svcMan.findPlatformServicesByType(p, svcType).resource
             } else if (proto.isServerPrototype()) {
                 def svrType = svrMan.findServerType(proto.instanceId)
-                return svrMan.findServersByType(p, svrType)
+                return svrMan.findServersByType(p, svrType).resource
             } else {
                 // Else prototype is not a valid proto for the resource 
                 return []
@@ -278,20 +290,53 @@ class ResourceCategory {
         []
     }
 
-    static createInstance(Resource proto, Resource parent, 
-                          String name, AuthzSubject subject, ResourceConfig cfg) 
+    static createInstance(Resource proto, Resource parent, String name,
+                          AuthzSubject subject, Map cfg, Agent agent, List ips)
     {
-        if (parent.isRoot()) {
-            // All we can create here are platforms
-            if (!proto.isPlatformPrototype()) { 
-                throw new IllegalArgumentException("Resource (id=${parent.id}) " + 
-                            "cannot have children of type ${proto.name}")
-            }
-            def typeRsrc = platMan.findPlatformType(proto.instanceId)
-            // TODO:  When we are adding the feature of creating platforms,
-            //        just create a new instance of 'typeRsrc'
-            return null
+        if (!proto.isPlatformPrototype()) {
+            throw new RuntimeException("createInstance called for non-platform " +
+                                       "prototype, when platproto was " + 
+                                       "expected")
         }
+        
+        if (!parent.isRoot())
+            throw new RuntimeException("Platforms can only be created as " + 
+                                       "children of root")
+
+        cfg = cfg + [:]
+        
+        def typeRsrc = platMan.findPlatformType(proto.instanceId)
+        def platVal = new PlatformValue()
+        ['fqdn'].each { 
+            if (!cfg[it]) 
+                throw new Exception("Must specify [${it}] when creating a " +
+                                    "platform")
+        }
+            
+        platVal.name     = name
+        platVal.fqdn     = cfg.fqdn
+        platVal.cpuCount = 1  // XXX:  How can we better gauge?
+
+        def plat  = platMan.createPlatform(subject.valueObject, proto.instanceId,
+                                           platVal, agent.id)
+        for (ip in ips) {
+            platMan.addIp(plat, ip.address, ip.netmask, ip.mac)
+        }
+              
+        def res = plat.resource
+        setConfig(res, cfg, subject)
+        return res
+    }
+     
+
+    /**
+     * Create a new instance of this prototype:
+     */
+    static createInstance(Resource proto, Resource parent, 
+                          String name, AuthzSubject subject, Map cfg)
+    {
+        cfg = cfg + [:]  // Clone to avoid modifying someone else's cfg
+        def subjectVal = subject.valueObject
         
         if (proto.isServicePrototype()) {
             def serviceType = svcMan.findServiceType(proto.instanceId)
@@ -300,15 +345,17 @@ class ResourceCategory {
             if (serverType.isVirtual()) {
                 // Parent points at the 'resource' version of the Platform, so
                 // we use the instanceId here, not the Resource.id
-                def servers = svrMan.getServersByPlatformServiceType(subject.valueObject,
+                def servers = svrMan.getServersByPlatformServiceType(subjectVal,
                                                                      parent.instanceId,
                                                                      proto.instanceId)
                 assert servers.size() == 1, "All virtual servers should be created for Platform ${parent.name}" 
                 
                 def server = svrMan.findServerById(servers[0].id) // value -> pojo
-                return svcMan.createService(subject.valueObject, server, 
-                                            serviceType, name, "desc: ${name}",
-                                            "loc: ${name}", null).resource
+                def res = svcMan.createService(subjectVal, server, 
+                                               serviceType, name, "desc: ${name}",
+                                               "loc: ${name}", null).resource
+                	setConfig(res, cfg, subject)
+                return res
             }
             return 'non-virtual server'
         }

@@ -1,13 +1,21 @@
 package org.hyperic.hq.hqu.rendit.util
 
+import org.hyperic.hq.appdef.Agent
+import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl as CPropMan
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl as ConfigMan
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
-import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl as CPropMan
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
+import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
+import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as ProductBoss
+import org.hyperic.hq.bizapp.shared.AllConfigResponses
+import org.hyperic.hq.product.ProductPlugin
+import org.hyperic.hq.product.PluginNotFoundException
 import org.hyperic.util.config.ConfigResponse
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl as ConfigMan
 
 /**
  * This class provides a layer of abstraction needed to get properties
@@ -20,7 +28,10 @@ import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl as ConfigMan
  * types (users?, roles?)
  */
 class ResourceConfig {
+    private static authzMan  = AuthzMan.one
     private static cpropMan  = CPropMan.one
+    private static appBoss   = AppdefBoss.one
+    private static prodBoss  = ProductBoss.one
     private static configMan = ConfigMan.one
     private static platMan   = PlatMan.one
     private static svrMan    = ServerMan.one
@@ -63,29 +74,28 @@ class ResourceConfig {
             fields: PLATFORM_FIELD_KEYS,
             targetForGet:  { r -> r.toPlatform() },
             targetForSet:  { r -> r.toPlatform().platformValue },
-            saveSetTarget: { subject, platVal ->
-                platMan.updatePlatformImpl(subject.valueObject, platVal)
+            saveSetTarget: { subjectVal, platVal ->
+                platMan.updatePlatformImpl(subjectVal, platVal)
             }
         ],
         'server': [
             fields: SERVER_FIELD_KEYS,
             targetForGet: { r -> r.toServer() },
             targetForSet: { r -> r.toServer().serverValue },
-            saveSetTarget: { subject, serverVal ->
-               svrMan.updateServer(subject.valueObject, serverVal)
+            saveSetTarget: { subjectVal, serverVal ->
+               svrMan.updateServer(subjectVal, serverVal)
             }
         ],
         'service': [
             fields: SERVICE_FIELD_KEYS,
             targetForGet: { r -> r.toService()} ,
             targetForSet: { r -> r.toService().serviceValue },
-            saveSetTarget: { subject, serviceVal ->
-                svcMan.updateService(subject.valueObject, serviceVal)
+            saveSetTarget: { subjectVal, serviceVal ->
+                svcMan.updateService(subjectVal, serviceVal)
             }
         ],
     ]
     
-
     private Resource resource
     private configResponses = [:]
     private cprops          = [:]
@@ -93,7 +103,6 @@ class ResourceConfig {
     
     ResourceConfig(Resource r) {
         resource = r
-        populate()
     }
 
     ResourceConfig() {
@@ -106,31 +115,43 @@ class ResourceConfig {
         fieldProps.clear()
     }
     
-    private populate() {
-        def response = configMan.getConfigResponse(resource.entityID)
-        
-        // configResponses will contain a map of these keys onto their
-        // decoded responses
-        ['product', 'control', 'autoInventory', 'measurement',
-         'responseTime'].each { type ->
-            def cfgResponse = response."${type}Response"
-            if (cfgResponse != null) {
-                configResponses[type] = [response: ConfigResponse.decode(cfgResponse),
-                                         bytes: cfgResponse]
+    void populate() {
+        clear()
+        def entityID = resource.entityID
+
+        // Fill out config responses
+        ProductPlugin.CONFIGURABLE_TYPES.each { type ->
+            def cfgSchema
+            def cfgResponse
+            try {
+                def schemaAndResponse = 
+                    prodBoss.getConfigSchemaAndBaseResponse(null, entityID,
+                                                            type, true)
+                cfgSchema   = schemaAndResponse.schema
+                cfgResponse = schemaAndResponse.response
+            } catch(PluginNotFoundException e) {
+                // This specified entity type does not support the TYPE_* plugin
+                return
             }
+            
+            configResponses[type] = [response: cfgResponse,
+                                     bytes: cfgResponse.encode(),
+                                     schema: cfgSchema]
         }
         
         def proto  = resource.prototype
         def typeId = proto.appdefType
         
+        // Fill out cprops
         for (cpropKey in cpropMan.getKeys(typeId, proto.instanceId)) {
             cprops.put(cpropKey.key, [key: cpropKey])
         }
         
-        cpropMan.getEntries(resource.entityID).each { key, val ->
+        cpropMan.getEntries(entityID).each { key, val ->
             cprops[key].value = val
         }
 
+        // Fill out pojo.field props
         def appdefHandler = getAppdefHandler(resource)
         def targ = appdefHandler.targetForGet(resource)
         appdefHandler.fields.each { keyName, keyInfo ->
@@ -149,10 +170,20 @@ class ResourceConfig {
     Map getEntries() {
         def res = [:]
         
-        configResponses.each { type, cfgResponse -> 
+        configResponses.each { type, cfgResponse ->
+            cfgResponse.schema.options.each { opt ->
+                res[opt.name] = [value: null, type: 'configResponse',
+                                 description: opt.description]
+            }
+            
             def props = cfgResponse.response.toProperties()
             props.each { key, val ->
-                res.put(key, [value: val, type: 'configResponse'])
+                if (res[key]) { 
+                    res[key].value = val
+                } else {
+                    // Not contained in the config schema?
+                    res[key] = [value: val, type: 'configResponse'] 
+                }
             }
         }
 
@@ -171,35 +202,12 @@ class ResourceConfig {
      * Set properties of the resource backing this configuration.  Only  
      * existing properties can be set -- new properties will be discarded.
      */
-    def setProperties(Map props, AuthzSubject subject) {
-        clear()
+    void setProperties(Map props, AuthzSubject subject) {
         populate()
 
-        def entityID = resource.entityID
+        def subjectVal = subject.valueObject
+        def entityID   = resource.entityID
 
-        // Config Response changes
-        def newResponses = [:]
-        configResponses.each { type, responseMap ->
-            def newResponse = new ConfigResponse()
-            responseMap.response.toProperties().each { key, val ->
-                if (props.containsKey(key) && props[key] != val) { 
-                    newResponse.setValue(key, props[key])
-                } else {
-                    newResponse.setValue(key, val)
-                }
-            }
-            newResponses[type] = newResponse.encode()
-        }
-        configMan.configureResource(subject.valueObject, 
-                                    entityID,
-                                    newResponses['product'],
-                                    newResponses['measurement'],
-                                    newResponses['control'],
-                                    newResponses['responseTime'],
-                                    true,  // User Managed
-                                    true,  // send reconfig zevent
-                                    false)  // force
-        
         // CProp changes
         def proto    = resource.prototype
         def typeId   = proto.appdefType
@@ -228,8 +236,44 @@ class ResourceConfig {
                 appdefHandler.fields[key]['set'](targetForSet, newVal)
             }
             
-            appdefHandler.saveSetTarget(subject, targetForSet)
+            appdefHandler.saveSetTarget(subjectVal, targetForSet)
         }
+        
+        // Config Response changes
+        def entVal     = new AppdefEntityValue(entityID, subject)
+        def appdefVal  = entVal.resourceValue
+        def allConfigs     = new AllConfigResponses()
+        allConfigs.resource = appdefVal
+        def allConfigsRoll = new AllConfigResponses()
+        allConfigsRoll.resource = appdefVal
+        def newResponses = [:]
+        
+        for (i in 0..<ProductPlugin.CONFIGURABLE_TYPES.length) {
+            def type        = ProductPlugin.CONFIGURABLE_TYPES[i]
+            def responseMap = configResponses[type]
+            if (responseMap == null) {
+                allConfigsRoll.setSupports(i, false)
+            } else {
+                def curResponse = responseMap.response
+                allConfigsRoll.setSupports(i, true)
+                allConfigsRoll.setConfig(i, curResponse)
+                allConfigs.setSupports(i, true)
+                
+                def newResponse = new ConfigResponse()
+                responseMap.schema.options.each { opt ->
+                    def key = opt.name
+                    def val = curResponse.getValue(key)
+                    if (props.containsKey(key) && props[key] != val) {
+                        newResponse.setValue(key, props[key])
+                    } else {
+                        newResponse.setValue(key, (String)val) 
+                    }
+                }
+                allConfigs.setConfig(i, newResponse)
+            }
+        }
+        // XXX:  Undo this rollback crap when Appdef gets itself figured out.
+        appBoss.setAllConfigResponses(subject, allConfigs, allConfigsRoll)
     }
     
     private getAppdefHandler(Resource r) {
@@ -240,5 +284,18 @@ class ResourceConfig {
         } else if (r.isService()) {
             return APPDEF_FIELD_HANDLERS['service']
         }
+    }
+
+    /**
+     * Find an agent given some arbitrary string.  This is used when
+     * configuring platforms via createInstance(), or when re-adjusting the
+     * agent servicing a platform.  
+     *
+     * Currently, we return an agent if it is monitoring a platform with 
+     * fqdn specified by the parameter
+     */
+    public static Agent findSuitableAgentFor(String s) {
+        def overlord = authzMan.overlordPojo
+        platMan.findPlatformByFqdn(overlord.valueObject, s)?.agent
     }
 }
