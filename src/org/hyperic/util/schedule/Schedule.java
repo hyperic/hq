@@ -29,6 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import java.text.DateFormat;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * A generic scheduler object which keeps track of events, when they should
  * be executed, deletion after invocation, etc.  The basetime used when
@@ -43,6 +48,8 @@ public class Schedule {
     private long   scheduleID;   // Used for assigning unique event IDs
     private Vector schedule;     // The actual events being scheduled, sorted
                                  // by ascending nextTime in the item
+
+    private Log log = LogFactory.getLog(Schedule.class);
 
     public Schedule(){
         this.schedule   = new Vector();
@@ -163,6 +170,10 @@ public class Schedule {
             ScheduledItem item = (ScheduledItem) this.schedule.get(i);
 
             if(item.getId() == id){
+                if (log.isDebugEnabled()) {
+                    log.debug("unscheduling "+item.getObj()+" getNextTime "+
+                    getDateStr(item.getNextTime()));
+                }
                 return (ScheduledItem)this.schedule.remove(i);
             }
         }
@@ -223,9 +234,15 @@ public class Schedule {
         baseNextTime = System.currentTimeMillis();
         res.add(base);
 
+        boolean debug = log.isDebugEnabled();
         // Now add other items if they occur at the same time 
         for(int i=1; i<size; i++){
             ScheduledItem other = (ScheduledItem) this.schedule.get(i);
+            if (debug) {
+                log.debug("checking "+other.getObj()+" baseNextTime: "+
+                    getDateStr(baseNextTime)+", getNextTime: "+
+                    getDateStr(other.getNextTime()));
+            }
 
             if(other.getNextTime() <= baseNextTime){
                 res.add(other);
@@ -243,15 +260,28 @@ public class Schedule {
         for(int i=0; i<res.size(); i++){
             ScheduledItem other = (ScheduledItem) res.get(i);
 
+            if (debug) {
+                log.debug("removing "+other.getObj());
+            }
             this.schedule.remove(other);
             if(other.isRepeat()){
                 other.stepNextTime();
+                if (debug) {
+                    log.debug("adding "+other.getObj()+" getNextTime "+
+                    getDateStr(other.getNextTime()));
+                }
                 this.insertScheduledItem(other);
             }
 
             res.set(i, other.getObj());
         }
         return res;
+    }
+
+    private static String getDateStr(long timems) {
+        return DateFormat.getDateTimeInstance(DateFormat.SHORT,
+                                              DateFormat.SHORT).
+            format(new java.util.Date(timems));
     }
     
     /**
