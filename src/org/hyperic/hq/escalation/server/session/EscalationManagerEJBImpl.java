@@ -59,9 +59,12 @@ import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
-import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
+import org.hyperic.util.units.FormattedNumber;
+import org.hyperic.util.units.UnitNumber;
+import org.hyperic.util.units.UnitsConstants;
+import org.hyperic.util.units.UnitsFormat;
 
 /**
  * @ejb:bean name="EscalationManager"
@@ -571,8 +574,13 @@ public class EscalationManagerEJBImpl
             long nextTime = System.currentTimeMillis() + pause;
             if (nextTime > state.getNextActionTime()) {
                 state.setNextActionTime(nextTime);
-                EscalationRuntime.getInstance().scheduleEscalation(state);    
+                EscalationRuntime.getInstance().scheduleEscalation(state);
             }
+            FormattedNumber fmtd =
+                UnitsFormat.format(new UnitNumber(pause,
+                                                  UnitsConstants.UNIT_DURATION,
+                                                  UnitsConstants.SCALE_MILLI));
+            moreInfo = " and paused escalation for " + fmtd;
         }
         fixOrNotify(subject, esc, state, type, false, moreInfo);
     }
