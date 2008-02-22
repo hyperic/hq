@@ -29,7 +29,7 @@
         <cache usage="read-write"/>
         <key column="OPT_ID"/>
         <list-index column="IDX"/>
-        <element type="string" column="VAL" not-null="true"/>
+        <element type="string" column="VAL" length="512" not-null="true"/>
     </list>    
        
   </class>
