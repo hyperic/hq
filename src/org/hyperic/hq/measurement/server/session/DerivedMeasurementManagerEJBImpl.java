@@ -129,14 +129,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      
     private Pager valuePager = null;
 
-    /**
-     * Needed for calls back into the manager that require setting up a new
-     * transaction. (i.e. creation of measurements.)
-     */
-    private DerivedMeasurementManagerLocal getDMManager() {
-        return DerivedMeasurementManagerEJBImpl.getOne();
-    }
-
     private RawMeasurementManagerLocal getRmMan() {
         return RawMeasurementManagerEJBImpl.getOne();
     }
@@ -444,8 +436,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         super.checkModifyPermission(subject.getId(), id);        
 
         // Call back into ourselves to force a new transaction to be created.
-        List dmList = getDMManager().createMeasurements(id, templates,
-                                                        intervals, props);
+        List dmList = getOne().createMeasurements(id, templates, intervals,
+                                                  props);
         sendAgentSchedule(id);
         return dmList;
     }
@@ -518,12 +510,12 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 intervals[i] = 0;
         }
 
-        return getDMManager().createMeasurements(subject, id, tids, intervals,
-                                                 props);
+        return getOne().createMeasurements(subject, id, tids, intervals, props);
     }
 
     /**
      * Update the derived measurements of a resource
+     * 
      * @ejb:interface-method
      */
     public void updateMeasurements(AuthzSubject subject,
