@@ -2526,19 +2526,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     summary.setMonitorable(Boolean.TRUE);
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                    AppdefGroupValue agv = (resource == null) ?
-                        rv.getAppdefGroupValue() : (AppdefGroupValue) resource;
-                    if (!agv.isGroupCompat()) {
-                        // geez, why are we here at all?  well, a user _could_
-                        // add a group to their dashboard's resourceHealth
-                        // portlet -- they're not going to see anything useful
-                        // if it's not a compatible group but the monitorable
-                        // flag is the only hint that the UI needs
-                        // see PR 8039
-                        summary.setMonitorable(Boolean.FALSE);
-                        break;
-                    }
-                    // Else fall through to set monitorable and availability
                 case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                     summary.setMonitorable(Boolean.TRUE);
                     // Set the availability now
@@ -2927,14 +2914,27 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     private double getAvailability(AuthzSubject subject, AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException {
         StopWatch watch = new StopWatch();
-        if (id.isApplication())
+        if (_log.isDebugEnabled())
             _log.debug("BEGIN getAvailability()");
     
-        AppdefEntityID[] ids = new AppdefEntityID[] { id };
         try {
+            if (id.isGroup()) {
+                // determine the aggregate from the AppdefEntityID's
+                List members = GroupUtil.getGroupMembers(subject, id, null);
+                return getAggregateAvailability(subject, 
+                                                toAppdefEntityIDArray(members));
+            }
+            else if (id.isApplication()) {
+                AppdefEntityValue appVal = new AppdefEntityValue(id, subject);
+                AppdefEntityID[] services = appVal.getFlattenedServiceIds();
+
+                return getAggregateAvailability(subject, services);
+            }
+            
+            AppdefEntityID[] ids = new AppdefEntityID[] { id };
             return getAvailability(subject, ids)[0];
         } finally {
-            if (id.isApplication())
+            if (_log.isDebugEnabled())
                 _log.debug("END getAvailability() -- " + watch);
         }
     }
