@@ -92,7 +92,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     {
         try {
             AuthzSubject guest =
-                getAuthzSubjectManager().findSubjectById(AuthzConstants.guestId);
+                getAuthzSubjectManager().getSubjectById(AuthzConstants.guestId);
             
             if (guest != null && guest.getActive()) {
                 return manager.put(guest);
