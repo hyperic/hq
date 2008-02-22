@@ -7963,6 +7963,18 @@ has already been defined.
                         columnType="VARCHAR2" />
   </schemaSpec>
 
+  <!-- Increase worker count and decrease batch size where the defaults from 3.2.0 have not been changed. -->
+  <schemaSpec version="3.96">
+    <schema-directSQL>
+      <statement>
+        UPDATE EAM_CONFIG_PROPS set PROPVALUE=10 WHERE PROPKEY='BATCH_AGGREGATE_WORKERS' and PROPVALUE=5
+      </statement>
+      <statement>
+        UPDATE EAM_CONFIG_PROPS set PROPVALUE=200 WHERE PROPKEY='BATCH_AGGREGATE_BATCHSIZE' and PROPVALUE=2000
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 
