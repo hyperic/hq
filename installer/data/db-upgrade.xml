@@ -6721,7 +6721,7 @@ has already been defined.
         <statement desc="Creating new EAM_CRISPO_ARRAY table">
           create table EAM_CRISPO_ARRAY (
             OPT_ID int not null,
-            VAL varchar (255) not null,
+            VAL varchar (512) not null,
             IDX int not null,
             primary key (OPT_ID, IDX)
           )
@@ -7957,7 +7957,13 @@ has already been defined.
     </schema-directSQL>    
   </schemaSpec>
 
+  <!-- Re-size again for upgrades to 3.2.0 which may not have this change -->
   <schemaSpec version="3.95">
+    <schema-alterColumn table="EAM_CRISPO_ARRAY" column="VAL" precision="512"
+                        columnType="VARCHAR2" />
+  </schemaSpec>
+
+  <schemaSpec version="3.96">
     <schema-addColumn table="EAM_MEASUREMENT" column="RESOURCE_ID" 
                       columnType="INTEGER"/>
       <schema-directSQL>
