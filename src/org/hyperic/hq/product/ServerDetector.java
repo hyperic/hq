@@ -426,7 +426,12 @@ public abstract class ServerDetector
         String installPathNoMatch = getTypeProperty(INSTALLPATH_NOMATCH);
 
         if (versionFile != null) {
-            File file = new File(installpath, versionFile);
+            File instPath = new File(installpath);
+            if (instPath.isFile() && !instPath.isDirectory()) {
+                instPath = instPath.getParentFile();
+            }
+            File file = (instPath != null) ? new File(instPath, versionFile) :
+                new File(installpath, versionFile);
             if (!file.exists()) {
                 String[] expanded = PluginLoader.expand(file);
                 if ((expanded == null) || (expanded.length == 0)) {
