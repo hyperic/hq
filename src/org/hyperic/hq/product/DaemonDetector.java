@@ -208,6 +208,9 @@ public class DaemonDetector
             if (type.getType() != TypeInfo.TYPE_SERVICE) {
                 continue;
             }
+            if (!this.getTypeInfo().getVersion().equals(type.getVersion())) {
+                continue;
+            }
 
             ServiceResource service = new ServiceResource();
             service.setType(type.getName());
