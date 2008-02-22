@@ -56,7 +56,7 @@ public class WeblogicRuntimeDiscoverer
     implements RuntimeDiscoverer, PrivilegedAction {
 
     private static final boolean useJAAS = WeblogicProductPlugin.useJAAS();
-
+    private static final String PROP_FQDN = "weblogic.discover.fqdn";
     private static Log log = LogFactory.getLog("WeblogicRuntimeDiscoverer");
 
     private int serverId;
@@ -66,18 +66,18 @@ public class WeblogicRuntimeDiscoverer
     private boolean usePlatformName = false;
     private WeblogicDetector plugin;
     private String version;
+    private Properties props;
 
     public WeblogicRuntimeDiscoverer(WeblogicDetector plugin) {
         this.plugin = plugin;
         this.version = plugin.getTypeInfo().getVersion();
 
-        Properties props = plugin.getManager().getProperties();
+        props = plugin.getManager().getProperties();
 
         //this property can be used to host foreign nodes on 
         //another platform.  if set to "same" will use the same fqdn
         //as the admin server.
-        this.targetFqdn =
-            props.getProperty("weblogic.discover.fqdn");
+        this.targetFqdn = props.getProperty(PROP_FQDN);
 
         //XXX cant do this by default because it will ruin DB
         //make it optional for acotel
@@ -285,6 +285,9 @@ public class WeblogicRuntimeDiscoverer
         AIPlatformValue aiplatform = new AIPlatformValue();
 
         String serverFqdn = server.getFqdn();
+        serverFqdn = //support mapping via agent.properties
+            this.props.getProperty(PROP_FQDN + "." + serverFqdn,
+                                   serverFqdn);
         String fqdn = serverFqdn;
 
         //let it be known if the platform does not exist in cam
