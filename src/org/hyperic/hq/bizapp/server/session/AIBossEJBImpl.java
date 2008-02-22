@@ -521,10 +521,28 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefEntityNotFoundException,
                AppdefGroupNotFoundException, GroupNotCompatibleException,
-               UpdateException, ConfigFetchException, EncodingException {
-
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
-
+               UpdateException, ConfigFetchException, EncodingException 
+    {
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
+        toggleRuntimeScan(subject, id, doEnable);
+    }
+    
+    /**
+     * Process queued AI resources.
+     * @param id The server to enable runtime-AI for.
+     * @param doEnable If true, runtime autodiscovery will be enabled,
+     * if false, it will be disabled.
+     * @ejb:interface-method
+     */
+    public void toggleRuntimeScan(AuthzSubject subject,
+                                  AppdefEntityID id,
+                                  boolean doEnable)
+        throws SessionNotFoundException, SessionTimeoutException,
+               PermissionException, AppdefEntityNotFoundException,
+               AppdefGroupNotFoundException, GroupNotCompatibleException,
+               UpdateException, ConfigFetchException, EncodingException 
+    {
+        AuthzSubjectValue subjectVal = subject.getAuthzSubjectValue();
         if (!id.isServer()) {
             log.warn("toggleRuntimeScan called for non-server type=" + id);
             return;
@@ -532,7 +550,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
         AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
         try {
-            aiManager.toggleRuntimeScan(subject, id, doEnable);
+            aiManager.toggleRuntimeScan(subjectVal, id, doEnable);
         } catch (Exception e) {
             log.error("Unable to disable runtime auto-discovery:" +
                       e.getMessage(), e);
