@@ -1725,15 +1725,31 @@ public class AppdefBossEJBImpl
                PermissionException, UpdateException,
                AppdefDuplicateNameException, CPropKeyNotFoundException
     {
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        return updateService(subject, aService, cProps);
+    }
+    
+    /**
+     * Update a service with cProps.
+     * @param cProps - the map with Custom Properties for the service
+     * @ejb:interface-method
+     */
+    public ServiceValue updateService(AuthzSubject subject, ServiceValue aService,
+                                      Map cProps)
+        throws FinderException, ValidationException,
+               SessionTimeoutException, SessionNotFoundException,
+               PermissionException, UpdateException,
+               AppdefDuplicateNameException, CPropKeyNotFoundException
+    {
         try {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
+            AuthzSubjectValue subjectVal = subject.getAuthzSubjectValue();
 
             Service updated
-                = getServiceManager().updateService(subject, aService);
+                = getServiceManager().updateService(subjectVal, aService);
 
             if(cProps != null ) {
                 AppdefEntityID entityId = aService.getEntityId();
-                setCPropValues(subject, entityId, cProps);
+                setCPropValues(subjectVal, entityId, cProps);
             }
             return updated.getServiceValue();
         } catch (Exception e) {
@@ -1771,9 +1787,23 @@ public class AppdefBossEJBImpl
                UpdateException, ApplicationException,
                AppdefDuplicateNameException, AppdefDuplicateFQDNException
     {
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        return updatePlatform(subject, aPlatform);
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public PlatformValue updatePlatform(AuthzSubject subject, 
+                                        PlatformValue aPlatform)
+        throws FinderException, ValidationException, PermissionException, 
+               SessionTimeoutException, SessionNotFoundException,
+               UpdateException, ApplicationException,
+               AppdefDuplicateNameException, AppdefDuplicateFQDNException
+    {
         try {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
-            return getPlatformManager().updatePlatform(subject, aPlatform);
+            AuthzSubjectValue subjectVal = subject.getAuthzSubjectValue();
+            return getPlatformManager().updatePlatform(subjectVal, aPlatform);
         } catch (Exception e) {
             log.error("Error updating platform: " + aPlatform.getId());
             // rollback();
@@ -3452,6 +3482,21 @@ public class AppdefBossEJBImpl
         return retVal;
     }
 
+    /**
+     * @ejb:interface-method 
+     */
+    public void setAllConfigResponses(int sessionInt, 
+                                      AllConfigResponses allConfigs,
+                                      AllConfigResponses allConfigsRollback )
+        throws PermissionException, ConfigFetchException, EncodingException,
+               PluginException, ApplicationException, FinderException,
+               ScheduleWillNeverFireException, AgentConnectionException,
+               AutoinventoryException          
+    {
+        AuthzSubject subject = manager.getSubjectPojo(sessionInt);
+        setAllConfigResponses(subject, allConfigs, allConfigsRollback);
+    }
+    
    /**
     * A method to set ALL the configs of a resource.  This includes the
     * resourceConfig, metricConfig, rtConfig and controlConfig.This also
@@ -3464,7 +3509,7 @@ public class AppdefBossEJBImpl
     *                           occurs.
     * @ejb:interface-method
     */
-    public void setAllConfigResponses(int sessionInt, 
+    public void setAllConfigResponses(AuthzSubject subject,
                                       AllConfigResponses allConfigs,
                                       AllConfigResponses allConfigsRollback )
         throws PermissionException, ConfigFetchException, EncodingException,
@@ -3474,11 +3519,10 @@ public class AppdefBossEJBImpl
     {
         boolean doRollback = true;
         boolean doValidation = (allConfigsRollback != null);
-        AuthzSubject subject = manager.getSubjectPojo(sessionInt);
         AppdefEntityID id = allConfigs.getResource().getEntityId();
 
         try {
-            doSetAll(subject, sessionInt, allConfigs, doValidation, false);
+            doSetAll(subject, allConfigs, doValidation, false);
             AuthzSubjectValue subj = subject.getAuthzSubjectValue();
             if (doValidation) {
                 getConfigManager().clearValidationError(subj, id);
@@ -3502,12 +3546,12 @@ public class AppdefBossEJBImpl
             throw e;
         } finally {
             if (doRollback && doValidation) {
-                doSetAll(subject, sessionInt, allConfigsRollback, false, true);
+                doSetAll(subject, allConfigsRollback, false, true);
             }
         }
     }
 
-    private void doSetAll(AuthzSubject subject, int sessionInt,
+    private void doSetAll(AuthzSubject subject, 
                           AllConfigResponses allConfigs, boolean doValidation,
                           boolean force)
         throws EncodingException, FinderException, PermissionException,
@@ -3518,11 +3562,10 @@ public class AppdefBossEJBImpl
         AppdefEntityID[] ids;
         try {
             if (entityId.isPlatform()) {
-                updatePlatform(sessionInt,
-                               (PlatformValue) allConfigs.getResource());
+                updatePlatform(subject, (PlatformValue) allConfigs.getResource());
             } else if (entityId.isService()) {
-                updateService(sessionInt,
-                              (ServiceValue) allConfigs.getResource());
+                updateService(subject, (ServiceValue) allConfigs.getResource(),
+                              null);
             }
 
             AuthzSubjectValue subj = subject.getAuthzSubjectValue();
@@ -3588,7 +3631,7 @@ public class AppdefBossEJBImpl
 
             if (entityId.isServer() || entityId.isService()) {
                 getAIBoss()
-                    .toggleRuntimeScan(sessionInt, entityId,
+                    .toggleRuntimeScan(subject, entityId,
                                        allConfigs.getEnableRuntimeAIScan());
             }
         } catch (UpdateException e) {

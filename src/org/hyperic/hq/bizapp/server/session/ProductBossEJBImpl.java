@@ -59,6 +59,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
+import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl.ConfigSchemaAndBaseResponse;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
@@ -258,6 +259,24 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         return this.getConfigSchema(subject, id, type, true);
     }
 
+    public static class ConfigSchemaAndBaseResponse {
+        private ConfigSchema   _schema;
+        private ConfigResponse _response;
+        
+        ConfigSchemaAndBaseResponse(ConfigSchema schema, ConfigResponse resp) {
+            _schema   = schema;
+            _response = resp;
+        }
+        
+        public ConfigSchema getSchema() {
+            return _schema;
+        }
+        
+        public ConfigResponse getResponse() {
+            return _response;
+        }
+    }
+    
     /**
      * Get a configuration schema.  
      *
@@ -269,9 +288,11 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
      *
      * @ejb:interface-method view-type="local"
      */
-    public ConfigSchema getConfigSchema(AuthzSubjectValue subject, 
-                                        AppdefEntityID id, String type,
-                                        boolean validateFlow)
+    public ConfigSchemaAndBaseResponse
+        getConfigSchemaAndBaseResponse(AuthzSubjectValue subject, 
+                                       AppdefEntityID id, 
+                                       String type,
+                                       boolean validateFlow)
         throws ConfigFetchException, EncodingException,
                PluginNotFoundException, PluginException, PermissionException,
                AppdefEntityNotFoundException
@@ -296,8 +317,24 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         if (baseResponse == null)
             baseResponse = cman.getMergedConfigResponse(getOverlord(), type, id, 
                                                         false);
-        
-        return getConfigSchema(id, type, baseResponse);
+
+        return new ConfigSchemaAndBaseResponse(getConfigSchema(id, type, 
+                                                               baseResponse),
+                                               baseResponse);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public ConfigSchema getConfigSchema(AuthzSubjectValue subject, 
+                                        AppdefEntityID id, String type,
+                                        boolean validateFlow)
+        throws ConfigFetchException, EncodingException,
+               PluginNotFoundException, PluginException, PermissionException,
+               AppdefEntityNotFoundException
+    {
+        return getConfigSchemaAndBaseResponse(subject, id, type, 
+                                              validateFlow).getSchema();
     }
     
     /**
