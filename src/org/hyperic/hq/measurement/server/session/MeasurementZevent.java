@@ -38,6 +38,9 @@ public class MeasurementZevent extends Zevent {
     }
     
     public static class MeasurementZeventSource implements ZeventSourceId {
+        
+        private static final long serialVersionUID = 8032357796841855478L;
+        
         private final int _id;
         
         public MeasurementZeventSource(int id) {

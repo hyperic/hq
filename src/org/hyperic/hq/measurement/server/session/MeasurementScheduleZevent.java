@@ -40,6 +40,8 @@ public class MeasurementScheduleZevent extends Zevent {
     public static class MeasurementScheduleZeventSource
         implements ZeventSourceId
     {
+        private static final long serialVersionUID = 4112168034565196596L;
+        
         private final int _id;
 
         public MeasurementScheduleZeventSource(int id) {

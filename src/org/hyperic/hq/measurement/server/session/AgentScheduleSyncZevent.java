@@ -26,7 +26,6 @@
 package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.zevents.HeartBeatZevent;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
@@ -46,6 +45,8 @@ public class AgentScheduleSyncZevent extends Zevent {
     private static class AgentScheduleSyncZeventSource
         implements ZeventSourceId
     {
+        private static final long serialVersionUID = 4776356140503377728L;
+
         public AgentScheduleSyncZeventSource() {
         }
     }

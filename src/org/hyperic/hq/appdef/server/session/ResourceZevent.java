@@ -55,6 +55,8 @@ public abstract class ResourceZevent extends Zevent {
     private static class ResourceZeventSource
         implements ZeventSourceId
     {
+        private static final long serialVersionUID = -2799620967593343325L;
+        
         private AppdefEntityID _id;
 
         public ResourceZeventSource(AppdefEntityID id) {

@@ -40,6 +40,8 @@ public class MergeServiceReportZevent extends Zevent {
     private static class MergeServiceReportZeventSource
         implements ZeventSourceId
     {
+        private static final long serialVersionUID = 5423507898667486049L;
+
         public MergeServiceReportZeventSource() {
         }
     }

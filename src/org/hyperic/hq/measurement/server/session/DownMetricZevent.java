@@ -39,6 +39,8 @@ public class DownMetricZevent extends Zevent {
     private static class DownMetricZeventSource
         implements ZeventSourceId
     {
+        private static final long serialVersionUID = 9016293780598803598L;
+
         public DownMetricZeventSource() {
         }
     }
