@@ -1,6 +1,5 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
-import org.hyperic.hq.appdef.server.session.AppdefResource
 import org.hyperic.hq.authz.shared.PermissionException
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
