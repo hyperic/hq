@@ -170,6 +170,10 @@ public class Schedule {
             ScheduledItem item = (ScheduledItem) this.schedule.get(i);
 
             if(item.getId() == id){
+                if (log.isDebugEnabled()) {
+                    log.debug("unscheduling "+item.getObj()+" getNextTime "+
+                    getDateStr(item.getNextTime()));
+                }
                 return (ScheduledItem)this.schedule.remove(i);
             }
         }
@@ -227,7 +231,7 @@ public class Schedule {
 
         // We always add the first item to the list of returned objects
         base = (ScheduledItem) this.schedule.get(0);
-        baseNextTime = base.getNextTime();
+        baseNextTime = System.currentTimeMillis();
         res.add(base);
 
         boolean debug = log.isDebugEnabled();
@@ -240,7 +244,7 @@ public class Schedule {
                     getDateStr(other.getNextTime()));
             }
 
-            if(other.getNextTime() == baseNextTime){
+            if(other.getNextTime() <= baseNextTime){
                 res.add(other);
             } else {
                 break;
@@ -256,9 +260,16 @@ public class Schedule {
         for(int i=0; i<res.size(); i++){
             ScheduledItem other = (ScheduledItem) res.get(i);
 
+            if (debug) {
+                log.debug("removing "+other.getObj());
+            }
             this.schedule.remove(other);
             if(other.isRepeat()){
                 other.stepNextTime();
+                if (debug) {
+                    log.debug("adding "+other.getObj()+" getNextTime "+
+                    getDateStr(other.getNextTime()));
+                }
                 this.insertScheduledItem(other);
             }
 
