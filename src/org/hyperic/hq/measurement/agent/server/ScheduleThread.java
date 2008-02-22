@@ -57,6 +57,7 @@ import org.hyperic.util.schedule.Schedule;
 import org.hyperic.util.schedule.ScheduleException;
 import org.hyperic.util.schedule.ScheduledItem;
 import org.hyperic.util.schedule.UnscheduledItemException;
+import org.hyperic.util.TimeUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -334,206 +335,219 @@ public class ScheduleThread
 
         while(this.shouldDie == false)
         {
-            MetricValue data = null;
-            List items;
-            Map itemsMap;
-            long timeOfNext;
-            long currTime = System.currentTimeMillis();
-            
-            try {
-                synchronized(this.entSchedule) {
-                    timeOfNext = this.schedule.getTimeOfNext();
-                }
-            } catch(EmptyScheduleException exc) {
-                timeOfNext = ScheduleThread.POLL_PERIOD+currTime;
-            }
-
-            if (timeOfNext > currTime)
+            try
             {
-                /*
-                String buf = TimeUtil.toString(currTime);
-                this.log.debug(buf + "("+currTime+"): Sleeping " +
-                               (timeOfNext-System.currentTimeMillis()) +
-                               " to next batch");
-                */
-                synchronized(this.interrupter)
-                {
-                    try
-                    {
-                        while (timeOfNext > System.currentTimeMillis()) {
-                            this.interrupter.wait(
-                                timeOfNext - System.currentTimeMillis());
-                        }
-                    } catch(InterruptedException exc) {
-                        this.log.debug("Schedule thread kicked");
-                    }
-                }
-            }
-
-            synchronized(this.entSchedule)
-            {
-                if(this.schedule.getNumItems() == 0)
-                    continue;
+                MetricValue data = null;
+                List items;
+                Map itemsMap;
+                long timeOfNext;
+                long currTime = System.currentTimeMillis();
                 
-                try
-                {
-                    if (System.currentTimeMillis() <
-                        this.schedule.getTimeOfNext()) {
-                        continue; // Not yet
-                    }
-                    itemsMap = getUniqItemsMap(schedule.consumeNextItems());
-                    items = new ArrayList(itemsMap.values());
-
-                    if (retry.size() != 0)
-                    {
-                        log.debug("Retrying " + retry.size() +
-                                  " items (MetricValue.FUTUREs)");
-                        for (Iterator i=retry.iterator(); i.hasNext(); )
-                        {
-                            ScheduledMeasurement meas =
-                                (ScheduledMeasurement)i.next();
-                            Integer dsnId = new Integer(meas.getDsnID());
-                            if (itemsMap.containsKey(dsnId))
-                                continue;
-                            items.add(meas);
-                            if (debug);
-                                log.debug("retrying -> "+meas);
-                        }
-                        retry.clear();
+                try {
+                    synchronized(this.entSchedule) {
+                        timeOfNext = this.schedule.getTimeOfNext();
                     }
                 } catch(EmptyScheduleException exc) {
-                    continue;
+                    timeOfNext = ScheduleThread.POLL_PERIOD+currTime;
                 }
-            }
 
-            /*
-            if (debug) {
-                String now = TimeUtil.toString(System.currentTimeMillis());
-                log.debug(now+": Start processing batch");
-            }
-            */
-
-            for(int i=0; i<items.size() && this.shouldDie == false; i++)
-            {
-                ScheduledMeasurement meas = (ScheduledMeasurement)items.get(i);
-                /*
-                if (debug) {
-                    String now = TimeUtil.toString(System.currentTimeMillis());
-                    log.debug(now+": Start processing meas=["+meas+"]");
-                }
-                */
-                AppdefEntityID aid = meas.getEntity();
-                String category = meas.getCategory();
-                int id = aid.getID();
-                int type = aid.getType();
-                IntHashMap unreachable = this.unreachable[type];
-                boolean success = false;
-                String dsn = meas.getDSN();
-                long getTime, timeDiff;
-
-                this.stat_numMetricsFetched++;
-                getTime = System.currentTimeMillis();
-
-                Long lastFailed = (Long)unreachable.get(id);
-                if (lastFailed != null)
+                if (timeOfNext > currTime)
                 {
-                    long elapsed = (getTime - lastFailed.longValue()); 
-                    if (elapsed > UNREACHABLE_EXPIRE) {
-                        unreachable.remove(id);
-                        this.log.info("Re-enabling metrics for type=" + type + 
-                                      " id=" + id);
-                    } else {
-                        if (!category.equals(MeasurementConstants.
-                                             CAT_AVAILABILITY)) {
-                            // Prevent stacktrace bombs if a resource is down,
-                            // but don't skip processing availability metrics.
-                            this.stat_numMetricsFailed++;
-                            continue;
+                    synchronized(this.interrupter)
+                    {
+                        try
+                        {
+                            long now = System.currentTimeMillis();
+                            long sleeptime = timeOfNext - now;
+                            while (sleeptime > 0l)
+                            {
+                                if (debug) {
+                                    log.debug("waiting " + sleeptime +
+                                        " ms until " +
+                                        TimeUtil.toString(now+sleeptime));
+                                }
+                                this.interrupter.wait(sleeptime);
+                                now = System.currentTimeMillis();
+                                sleeptime = timeOfNext - now;
+                            }
+                        } catch(InterruptedException exc) {
+                            this.log.debug("Schedule thread kicked");
                         }
                     }
                 }
 
-                // XXX -- We should do something with the exceptions here.
-                //        Maybe send some kind of error back to the
-                //        bizapp?
-                try {
-                    data    = getValue(meas);
-                    success = true;
-                    this.clearLogCache(dsn);
-                } catch(PluginNotFoundException exc){
-                    this.logCache("Plugin not found", dsn, exc);
-                } catch(PluginException exc){
-                    this.logCache("Measurement plugin error", dsn, exc);
-                } catch(MetricInvalidException exc){
-                    this.logCache("Invalid Metric requested", dsn, exc);
-                } catch(MetricNotFoundException exc){
-                    this.logCache("Metric Value not found", dsn, exc);
-                } catch(MetricUnreachableException exc){
-                    this.logCache("Metric unreachable", dsn, exc);
-                    lastFailed = new Long(getTime);
-                    unreachable.put(id, lastFailed);
-                    this.log.warn("Disabling metrics for type=" + type + 
-                                  " id=" + id);
-                } catch(Exception exc){
-                    // Unexpected exception
-                    this.logCache("Error getting measurement value",
-                                  dsn, exc.toString(), exc, true);
+                synchronized(this.entSchedule)
+                {
+                    if(this.schedule.getNumItems() == 0)
+                        continue;
+                    
+                    try
+                    {
+                        if (System.currentTimeMillis() <
+                            this.schedule.getTimeOfNext()) {
+                            continue; // Not yet
+                        }
+                        itemsMap = getUniqItemsMap(schedule.consumeNextItems());
+                        items = new ArrayList(itemsMap.values());
+
+                        if (retry.size() != 0)
+                        {
+                            log.debug("Retrying " + retry.size() +
+                                      " items (MetricValue.FUTUREs)");
+                            for (Iterator i=retry.iterator(); i.hasNext(); )
+                            {
+                                ScheduledMeasurement meas =
+                                    (ScheduledMeasurement)i.next();
+                                Integer dsnId = new Integer(meas.getDsnID());
+                                if (itemsMap.containsKey(dsnId))
+                                    continue;
+                                items.add(meas);
+                                if (debug);
+                                    log.debug("retrying -> "+meas);
+                            }
+                            retry.clear();
+                        }
+                    } catch(EmptyScheduleException exc) {
+                        continue;
+                    }
+                }
+
+                /*
+                if (debug) {
+                    String now = TimeUtil.toString(System.currentTimeMillis());
+                    log.debug(now+": Start processing batch");
+                }
+                */
+
+                for(int i=0; i<items.size() && this.shouldDie == false; i++)
+                {
+                    ScheduledMeasurement meas =
+                        (ScheduledMeasurement)items.get(i);
+                    /*
+                    if (debug) {
+                        String now =
+                            TimeUtil.toString(System.currentTimeMillis());
+                        log.debug(now+": Start processing meas=["+meas+"]");
+                    }
+                    */
+                    AppdefEntityID aid = meas.getEntity();
+                    String category = meas.getCategory();
+                    int id = aid.getID();
+                    int type = aid.getType();
+                    IntHashMap unreachable = this.unreachable[type];
+                    boolean success = false;
+                    String dsn = meas.getDSN();
+                    long getTime, timeDiff;
+
+                    this.stat_numMetricsFetched++;
+                    getTime = System.currentTimeMillis();
+
+                    Long lastFailed = (Long)unreachable.get(id);
+                    if (lastFailed != null)
+                    {
+                        long elapsed = (getTime - lastFailed.longValue()); 
+                        if (elapsed > UNREACHABLE_EXPIRE) {
+                            unreachable.remove(id);
+                            this.log.info("Re-enabling metrics for type="
+                                + type + " id=" + id);
+                        } else {
+                            if (!category.equals(MeasurementConstants.
+                                                 CAT_AVAILABILITY)) {
+                                // Prevent stacktrace bombs if a resource is
+                                // down, but don't skip processing
+                                // availability metrics.
+                                this.stat_numMetricsFailed++;
+                                continue;
+                            }
+                        }
+                    }
+
+                    // XXX -- We should do something with the exceptions here.
+                    //        Maybe send some kind of error back to the
+                    //        bizapp?
+                    try {
+                        data    = getValue(meas);
+                        success = true;
+                        this.clearLogCache(dsn);
+                    } catch(PluginNotFoundException exc){
+                        this.logCache("Plugin not found", dsn, exc);
+                    } catch(PluginException exc){
+                        this.logCache("Measurement plugin error", dsn, exc);
+                    } catch(MetricInvalidException exc){
+                        this.logCache("Invalid Metric requested", dsn, exc);
+                    } catch(MetricNotFoundException exc){
+                        this.logCache("Metric Value not found", dsn, exc);
+                    } catch(MetricUnreachableException exc){
+                        this.logCache("Metric unreachable", dsn, exc);
+                        lastFailed = new Long(getTime);
+                        unreachable.put(id, lastFailed);
+                        this.log.warn("Disabling metrics for type=" + type + 
+                                      " id=" + id);
+                    } catch(Exception exc){
+                        // Unexpected exception
+                        this.logCache("Error getting measurement value",
+                                      dsn, exc.toString(), exc, true);
+                    }
+                    /*
+                    if (debug) {
+                        String now =
+                            TimeUtil.toString(System.currentTimeMillis());
+                        log.debug(now+": Done processing meas=["+meas+"]");
+                    }
+                    */
+                    
+                    // Stats stuff
+                    timeDiff = System.currentTimeMillis() - getTime;
+                    this.stat_totFetchTime += timeDiff;
+                    if(timeDiff > this.stat_maxFetchTime)
+                        this.stat_maxFetchTime = timeDiff;
+
+                    if(timeDiff < this.stat_minFetchTime)
+                        this.stat_minFetchTime = timeDiff;
+
+                    if (timeDiff > WARN_FETCH_TIME) {
+                        this.log.warn("Collection of metric: '" + logMetric(dsn) + 
+                                      "' took: " + timeDiff + "ms");
+                    }
+
+                    if(success)
+                    {
+                        if (debug) {
+                            this.log.debug("[" + type + ":" + id + ":" + category +
+                                           "] Metric='" + dsn + "' -> " + data +
+                                           " timestamp=" + data.getTimestamp());
+                        }
+                        if (data.isNone()) {
+                            //wouldn't be inserted into the database anyhow
+                            //but might as well skip sending this to the server.
+                            continue;
+                        }
+                        else if (data.isFuture()) {
+                            //for example, first time collecting an exec: metric
+                            //adding to this list will cause the metric to be
+                            //collected next time the schedule has items to consume
+                            //rather than waiting for the metric's own interval
+                            //which could take much longer to hit
+                            //(e.g. Windows Updates on an 8 hour interval)
+                            retry.add(meas);
+                            continue;
+                        }
+                        this.sender.processData(meas.getDsnID(), data, 
+                                                meas.getDerivedID());
+                    } else {
+                        this.stat_numMetricsFailed++;
+                    }
                 }
                 /*
                 if (debug) {
                     String now = TimeUtil.toString(System.currentTimeMillis());
-                    log.debug(now+": Done processing meas=["+meas+"]");
+                    log.debug(now+": Done processing batch");
                 }
                 */
-                
-                // Stats stuff
-                timeDiff = System.currentTimeMillis() - getTime;
-                this.stat_totFetchTime += timeDiff;
-                if(timeDiff > this.stat_maxFetchTime)
-                    this.stat_maxFetchTime = timeDiff;
-
-                if(timeDiff < this.stat_minFetchTime)
-                    this.stat_minFetchTime = timeDiff;
-
-                if (timeDiff > WARN_FETCH_TIME) {
-                    this.log.warn("Collection of metric: '" + logMetric(dsn) + 
-                                  "' took: " + timeDiff + "ms");
-                }
-
-                if(success)
-                {
-                    if (debug) {
-                        this.log.debug("[" + type + ":" + id + ":" + category +
-                                       "] Metric='" + dsn + "' -> " + data +
-                                       " timestamp=" + data.getTimestamp());
-                    }
-                    if (data.isNone()) {
-                        //wouldn't be inserted into the database anyhow
-                        //but might as well skip sending this to the server.
-                        continue;
-                    }
-                    else if (data.isFuture()) {
-                        //for example, first time collecting an exec: metric
-                        //adding to this list will cause the metric to be
-                        //collected next time the schedule has items to consume
-                        //rather than waiting for the metric's own interval
-                        //which could take much longer to hit
-                        //(e.g. Windows Updates on an 8 hour interval)
-                        retry.add(meas);
-                        continue;
-                    }
-                    this.sender.processData(meas.getDsnID(), data, 
-                                            meas.getDerivedID());
-                } else {
-                    this.stat_numMetricsFailed++;
-                }
             }
-            /*
-            if (debug) {
-                String now = TimeUtil.toString(System.currentTimeMillis());
-                log.debug(now+": Done processing batch");
+            catch (Throwable e) {
+                log.error(e.getMessage(), e);
             }
-            */
         }
     }
 
