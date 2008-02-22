@@ -367,6 +367,23 @@
               indicator="true"
               category="Throughput"
               units="ms"/>
+
+      <help>
+      <![CDATA[
+<p>
+This service checks availability of <b>hostname</b> using the
+<b><a href="http://java.sun.com/j2se/1.5.0/docs/api/java/net/InetAddress.html#isReachable(int)"/>
+java.net.InetAddress.isReachable</a></b> method.  This method requires
+the HQ Agent to be running with a Java version 5 VM or higher.
+<p>
+The HQ Agent must also be running as user
+<b><a href="http://bordet.blogspot.com/2006/07/icmp-and-inetaddressisreachable.html">
+root</a></b> on Unix systems to perform an ICMP ping.
+<p>
+See also: <a href="http://support.hyperic.com/confluence/display/hypcomm/ICMP"/>pdk/examples/ping-plugin.xml</a>.
+<p>
+      ]]>
+      </help>
     </service>
 
     <service name="TCP Socket"
@@ -590,13 +607,17 @@
 
       <help>
       <![CDATA[
+<p>
 This service checks availability of a specific DNS server, as specified by the <b>hostname</b> property.
 The service will be considered available <img src="/images/icon_available_green.gif"> if the DNS server can be spoken to,
 even if there are no answers for the specified <b>lookupname</b>.
-The optional <b>match</b> property can be used to change this behavior, where the service availability report at the
+<p>
+The optional <b>match</b> property can be used to change this behavior, where the service availability will report at the
 warning level <img src="/images/icon_available_yellow.gif"> if there are no matches in the answer section.
+<p>
 The <b>match</b> property can be a regular expression or substring, where a value of <b>*</b> simply means
 one or more answers of any value is considered a successful lookup.
+<p>
       ]]>
       </help>
     </service>
