@@ -481,7 +481,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                 s.evict(j.next());
             }
         }
-        DerivedMeasurementManagerEJBImpl.getOne().preload();
     }
      
     /**

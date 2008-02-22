@@ -81,12 +81,6 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setParameterList("ids", ids)
             .list();
     }
-
-    List findAllCollected() {
-        return createCriteria()
-            .add(Restrictions.isNotNull("interval"))
-            .list();
-    }
     
     public DerivedMeasurement findByTemplateForInstance(Integer tid,
                                                         Integer iid) {

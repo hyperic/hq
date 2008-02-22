@@ -1411,14 +1411,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     
     /**
      * @ejb:interface-method
-     */
-    public void preload() {
-        getDerivedMeasurementDAO().findAllCollected();
-        getMeasurementTemplateDAO().findAllUsed();
-    }
-    
-    /**
-     * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public void syncPluginMetrics(String plugin) {
