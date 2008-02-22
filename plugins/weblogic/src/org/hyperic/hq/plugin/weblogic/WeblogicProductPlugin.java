@@ -35,6 +35,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.hyperic.hq.plugin.weblogic.jmx.AttributeGetter;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 
@@ -137,6 +138,11 @@ public class WeblogicProductPlugin extends ProductPlugin {
             }
 
             System.setProperty(key, (String)entry.getValue());
+        }
+
+        String expire = props.getProperty(AttributeGetter.PROP_ATTR_EXPIRE);
+        if (expire != null) {
+            System.setProperty(AttributeGetter.PROP_ATTR_EXPIRE, expire);
         }
 
         //the jars relative to installpath

@@ -51,12 +51,15 @@ import org.apache.commons.logging.LogFactory;
  */
 public class AttributeGetter {
 
+    public static final String PROP_ATTR_EXPIRE =
+        "weblogic.attrcache.expire";
     private static Log log = LogFactory.getLog("AttributeGetter");
 
     private static Map attrCache =
         Collections.synchronizedMap(new HashMap());
 
-    public static final int EXPIRE_DEFAULT = 30 * 1000; //30 seconds
+    private static final int MINUTE = 60 * 1000;
+    private static final int EXPIRE_DEFAULT = 5 * MINUTE;
     private long timestamp = 0;
     private int expire = EXPIRE_DEFAULT; //XXX make configurable
     private HashMap values = new HashMap();
@@ -76,6 +79,11 @@ public class AttributeGetter {
             getter = new AttributeGetter();
             getter.attrs = attrs;
             getter.name = name;
+            String expire = System.getProperty(PROP_ATTR_EXPIRE);
+            if (expire != null) {
+                getter.expire = Integer.parseInt(expire) * MINUTE;
+            }
+            log.debug(name + " expire=" + getter.expire / MINUTE);
             attrCache.put(name, getter);
         }
 
