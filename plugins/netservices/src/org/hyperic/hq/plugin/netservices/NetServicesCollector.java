@@ -61,7 +61,7 @@ public abstract class NetServicesCollector extends Collector {
     //XXX should just have a NetStat thread that is always
     //collecting, for these services and the platform to share.
     private static Sigar sigar = null;
-
+    
     protected int getDefaultTimeout() {
         return 10; //10 seconds
     }
@@ -108,7 +108,14 @@ public abstract class NetServicesCollector extends Collector {
                 sigar = new Sigar();
             }
         }
-        
+
+        try {
+            getHostAddress();
+        } catch (Exception e) {
+            throw new PluginException("Invalid " + PROP_HOSTNAME + "=" +
+                                      getHostname(), e);
+        }
+
         this.user = getProperty(PROP_USERNAME);
         this.pass = getProperty(PROP_PASSWORD);
 
