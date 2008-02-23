@@ -40,7 +40,7 @@
 <script type="text/javascript">
 
 
-function toggleSubmit(e){
+document.toggleSubmit = function(e){
     if(e && e.keyCode == 13){
         saveNewEscalation();
         e.stopPropagation ();
@@ -49,9 +49,9 @@ function toggleSubmit(e){
 }
 
 dojo.addOnLoad(function(){
-    document.addEventListener("keypress", toggleSubmit, false);
-    document.forms[0].addEventListener("keypress", toggleSubmit, false);
-    document.forms[1].addEventListener("keypress", toggleSubmit, false);
+    dojo.event.connect(document, 'onkeypress', document, 'toggleSubmit');
+    dojo.event.connect(document.forms[0], 'onkeypress', document, 'toggleSubmit');
+    dojo.event.connect(document.forms[1], 'onkeypress', document, 'toggleSubmit');
 });
 
 function showViewEscResponse(originalRequest) {
