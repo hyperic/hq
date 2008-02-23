@@ -50,6 +50,13 @@ public class MetricAuxLogDAO extends HibernateDAO {
         super.remove(log);
     }
     
+    int deleteByMetricIds(Collection ids) {
+        return getSession()
+            .createQuery("delete from MetricAuxLogPojo where metric.id in (:ids)")
+            .setParameterList("ids", ids)
+            .executeUpdate();
+    }
+
     MetricAuxLogPojo find(GalertAuxLog log) {
         return (MetricAuxLogPojo) createCriteria()
             .add(Expression.eq("auxLog", log))
