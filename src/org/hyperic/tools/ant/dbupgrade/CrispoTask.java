@@ -1,5 +1,6 @@
 package org.hyperic.tools.ant.dbupgrade;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -59,19 +60,19 @@ public class CrispoTask extends SchemaSpecTask {
         if (val == null || val.trim().equals(""))
             return;
 
-        Statement stmt = null;
+        PreparedStatement stmt = null;
         ResultSet rs = null;
         int id;
         String sql;
 
         try {
             sql = d.getSequenceNextValString(CRISPO_OPT_ID_SEQ);
-            stmt = getConnection().createStatement();
-            rs = stmt.executeQuery(sql);
+            stmt = getConnection().prepareStatement(sql);
+            rs = stmt.executeQuery();
             rs.next();
             id = rs.getInt(1);
 
-            DBUtil.closeResultSet(LOGCTX, rs);  // Done with the result set
+            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, rs);
 
             // See if the value is too long
             String[] elem = null;
@@ -84,6 +85,7 @@ public class CrispoTask extends SchemaSpecTask {
                         + " (id, version_col, propkey, crispo_id) "
                         + "VALUES (" + id + ", 1, '" + key + "', "
                         + crispoId + ")";
+                stmt = getConnection().prepareStatement(sql);
             } else {
                 if (elem != null)                    // No split, narrow string
                     val = val.substring(0, 3999);
@@ -91,23 +93,29 @@ public class CrispoTask extends SchemaSpecTask {
                 elem = null;
                 sql = "insert into " + CRISPO_OPT_TABLE
                         + " (id, version_col, propkey, val, crispo_id) "
-                        + "VALUES (" + id + ", 1, '" + key + "', '" + val
-                        + "', " + crispoId + ")";
+                        + "VALUES (" + id + ", 1, '" + key + "', ?, " + crispoId
+                        + ")";
+                stmt = getConnection().prepareStatement(sql);
+                stmt.setString(1, val);
             }
 
             log("executing query: " + sql);
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate();
+            DBUtil.closeStatement(LOGCTX, stmt);
             
             if (elem != null) {
+                stmt = getConnection()
+                    .prepareStatement("insert into " + CRISPO_ARR_TABLE
+                                      + " (opt_id, val, idx) VALUES (" + id
+                                      + ", ?, ?)");
                 for (int i = 0; i < elem.length; i++) {
-                    sql = "insert into " + CRISPO_ARR_TABLE
-                            + " (opt_id, val, idx) VALUES (" + id + ", '"
-                            + elem[i] + "', " + i + ")";
-                    log("executing query: " + sql);
+                    stmt.setString(1, elem[i]);
+                    stmt.setInt(2, i);
                     stmt.executeUpdate(sql);
                 }
             }
         } finally {
+            // Make sure everything's closed
             DBUtil.closeJDBCObjects(LOGCTX, null, stmt, rs);
         }
     }
