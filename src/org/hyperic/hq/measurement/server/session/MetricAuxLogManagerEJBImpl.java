@@ -43,7 +43,6 @@ import org.hyperic.hq.measurement.galerts.MetricAuxLog;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocal;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerUtil;
 import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 
 /**
  * @ejb:bean name="MetricAuxLogManager"
@@ -111,9 +110,10 @@ public class MetricAuxLogManagerEJBImpl
         GalertManagerLocal gam = GalertManagerEJBImpl.getOne();
         for (Iterator i = metAuxLogs.iterator(); i.hasNext();) {
             MetricAuxLogPojo p = (MetricAuxLogPojo) i.next();
-            dao.remove(p);
             gam.resetLogLink(p.getAuxLog());
         }
+        
+        dao.deleteByMetricIds(mids);
     }
 
     public void ejbCreate() { }
