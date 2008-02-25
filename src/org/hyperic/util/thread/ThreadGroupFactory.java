@@ -33,20 +33,56 @@ public class ThreadGroupFactory
     private ThreadGroup _group;
     private String      _namePrefix;
     private int         _numThreads;
-    private Object      _syncLock = new Object();
+    private boolean     _createDaemonThreads;
+    private final Object      _syncLock = new Object();
     
+    /**
+     * Creates an instance where the threads created by this factory are 
+     * assigned to the specified ThreadGroup.
+     *
+     * @param group The ThreadGroup.
+     * @param namePrefix The name prefix for each thread created by this factory.
+     */
     public ThreadGroupFactory(ThreadGroup group, String namePrefix) {
         _group      = group;
         _namePrefix = namePrefix;
         _numThreads = 0;
     }
     
+    /**
+     * Creates an instance where the threads created by this factory are 
+     * assigned to the current thread's ThreadGroup.
+     *
+     * @param namePrefix The name prefix for each thread created by this factory.
+     */
+    public ThreadGroupFactory(String namePrefix) {
+        this(Thread.currentThread().getThreadGroup(), namePrefix);
+    }
+    
+    /**
+     * Set the threads created by this factory to be daemon threads.
+     * 
+     * @param daemonThreads <code>true</code> to set threads created by this 
+     *                      factory to be daemon threads.
+     */
+    public void createDaemonThreads(boolean daemonThreads) {
+        synchronized (_syncLock) {
+            _createDaemonThreads = daemonThreads;            
+        }
+    }
+    
     public Thread newThread(Runnable r) {
         String name;
+        boolean daemon;
         
         synchronized (_syncLock) {
             name = _namePrefix + ++_numThreads; 
+            daemon = _createDaemonThreads;
         }
-        return new Thread(_group, r, name);
+        
+        Thread thread = new Thread(_group, r, name);
+        thread.setDaemon(daemon);
+        
+        return thread;
     }
 }
