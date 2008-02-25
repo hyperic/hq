@@ -166,7 +166,8 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         List mts = getMeasurementTemplateDAO().findTemplates(ids);
 
         if (ids.length != mts.size())
-            throw new TemplateNotFoundException("Could not look up " + ids);
+            throw new TemplateNotFoundException("Could not look up " +
+                                                StringUtil.arrayToString(ids));
 
         if (pc.getSortorder() == PageControl.SORT_DESC)
             Collections.reverse(mts);
