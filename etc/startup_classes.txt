@@ -14,3 +14,4 @@ org.hyperic.hq.control.server.session.ControlStartupListener
 org.hyperic.hq.ui.server.session.UIStartupListener
 org.hyperic.hq.bizapp.server.session.BossStartupListener
 org.hyperic.hq.ha.server.session.HAStartupListener
+org.hyperic.hq.events.server.session.HeartBeatServiceStartupListener
