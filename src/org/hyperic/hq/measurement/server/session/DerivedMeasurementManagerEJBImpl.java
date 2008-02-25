@@ -633,9 +633,15 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                  " measurements");
         try {
             getLiveMeasurementValues(subject, mids);
-        } catch (LiveMeasurementException e) {
+        } catch (LiveMeasurementException e) {            
             log.info("Resource " + id + " reports it is unavailable, setting " +
-                     "measurement ID " + availMeasurement + " to DOWN");
+                    "measurement ID " + availMeasurement + " to DOWN: "+e);
+
+            // Only print the full stack trace in debug mode
+            if (log.isDebugEnabled()) {
+                log.error("Exception details: ", e);
+            }
+
             if (availMeasurement != null) {
                 MetricValue val =
                     new MetricValue(MeasurementConstants.AVAIL_DOWN);
