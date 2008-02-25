@@ -21,7 +21,7 @@ loadJavaOpts () {
   . ${TMPPROPFILE} 2> /dev/null
   rm -f ${TMPPROPFILE}
   if [ "x${server_java_opts}" = "x" ] ; then
-    echo "-XX:MaxPermSize=192m -Xmx512m -Xms=512m"
+    echo "-XX:MaxPermSize=192m -Xmx512m -Xms512m"
   fi
   echo "${server_java_opts}"
 }
