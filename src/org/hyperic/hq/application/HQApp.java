@@ -70,6 +70,7 @@ public class HQApp {
     private File               _resourceDir;
     private File               _webAccessibleDir;
     private ThreadWatchdog     _watchdog;
+    private final Scheduler    _scheduler;
     
     private final Object       STAT_LOCK = new Object();
     private long               _numTx;
@@ -92,8 +93,11 @@ public class HQApp {
             _callbacks.generateCaller(StartupFinishedCallback.class);
         
         _watchdog = new ThreadWatchdog("ThreadWatchdog");
-        
         _watchdog.initialize();
+        
+        _scheduler = new Scheduler(4);
+        this.registerCallbackListener(ShutdownCallback.class, _scheduler);
+        
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 _log.info("Running shutdown hooks");
@@ -134,6 +138,10 @@ public class HQApp {
         synchronized (_watchdog) {
             return _watchdog;
         }
+    }
+    
+    public Scheduler getScheduler() {
+        return _scheduler;
     }
     
     public void setRestartStorageDir(File dir) {
