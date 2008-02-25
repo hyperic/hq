@@ -629,8 +629,8 @@ public class MeasurementGtrigger
             return;
         }
         
-        StringBuffer sr = new StringBuffer();
-        StringBuffer lr = new StringBuffer();
+        StringBuilder sr = new StringBuilder();
+        StringBuilder lr = new StringBuilder();
             
         sr.append(_sizeCompare)
             .append(" ")
