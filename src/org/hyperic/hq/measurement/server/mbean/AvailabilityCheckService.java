@@ -97,6 +97,11 @@ public class AvailabilityCheckService
     }
     
     protected void hitInSession(Date lDate) {
+        boolean debug = log.isDebugEnabled();
+        
+        if (debug) {
+            log.debug("Availability Check Service started executing: "+lDate);            
+        }
 
         StopWatch watch = new StopWatch();
         long current = lDate.getTime();
@@ -118,9 +123,10 @@ public class AvailabilityCheckService
         MetricDataCache cache = MetricDataCache.getInstance();
         watch.markTimeEnd("getEnabledAvailabilityMetrics");
         
-        if (log.isDebugEnabled())
-            log.debug("Total of " + dmList.size() +
-                      " availability metrics to check");
+        if (debug) {
+            log.debug("Total of " + dmList.size() + 
+                    " availability metrics to check");            
+        }
             
         // First check every platform derived measurement
         HashMap availMap = new HashMap();
@@ -161,9 +167,10 @@ public class AvailabilityCheckService
                                   dm.getMtime() + dm.getInterval());
             begin = TimingVoodoo.roundDownTime(begin, dm.getInterval());
 
-            if (log.isDebugEnabled())
+            if (debug) {
                 log.debug("Check metric ID: " + dm.getId() +
-                          " from " + begin + " to " + end);
+                        " from " + begin + " to " + end);                
+            }
 
             // If our time range is negative, then we just wait until next
             if (end < begin)
@@ -181,9 +188,10 @@ public class AvailabilityCheckService
             // Go through the data and add missing data points
             MetricValue mval;
             for (int i = theMissing.length - 1; i >= 0; i--) {
-                if (log.isDebugEnabled())
+                if (debug) {
                     log.debug("Metric ID: " + dm.getId() +
-                              " missing data at " + theMissing[i]);
+                            " missing data at " + theMissing[i]);                    
+                }
 
                 // Insert the missing data point
                 mval = new MetricValue(MeasurementConstants.AVAIL_DOWN, 
@@ -205,14 +213,16 @@ public class AvailabilityCheckService
                 if (srn == null)
                     continue;
                 
-                if (log.isDebugEnabled())
+                if (debug) {
                     log.debug("Compare missing " + theMissing[0] +
-                              " to last reported " + srn.getLastReported());
+                            " to last reported " + srn.getLastReported());                    
+                }
                 
                 // That's odd, why is there no data, then?
                 if (srn.getLastReported() > theMissing[0]) {
-                    if (log.isDebugEnabled())
-                        log.debug("Reset report time for " + aeid);
+                    if (debug) {
+                        log.debug("Reset report time for " + aeid);                        
+                    }
                     
                     // Let ScheduleVerification reschedule
                     srn.setLastReported(theMissing[0]);
@@ -274,9 +284,10 @@ public class AvailabilityCheckService
                                   dm.getMtime() + dm.getInterval());
             begin = TimingVoodoo.roundDownTime(begin, dm.getInterval());
 
-            if (log.isDebugEnabled())
+            if (debug) {
                 log.debug("Check metric ID: " + dm.getId() +
-                    " from " + begin + " to " + end);
+                        " from " + begin + " to " + end);                
+            }
 
             // If our time range is negative, then we just wait until next
             if (end < begin)
@@ -294,9 +305,10 @@ public class AvailabilityCheckService
             // Go through the data and add missing data points
             MetricValue mval;
             for (int i = theMissing.length - 1; i >= 0; i--) {
-                if (log.isDebugEnabled())
+                if (debug) {
                     log.debug("Metric ID: " + dm.getId() +
-                              " missing data at " + theMissing[i]);
+                            " missing data at " + theMissing[i]);                    
+                }
 
                 // Insert the missing data point
                 mval = new MetricValue(MeasurementConstants.AVAIL_DOWN, 
@@ -310,6 +322,11 @@ public class AvailabilityCheckService
         watch.markTimeEnd("addData");
         wait = 0;
         log.debug(watch);
+        
+        
+        if (debug) {
+            log.debug("Availability Check Service finished executing: "+lDate);            
+        }
     }
 
     /**

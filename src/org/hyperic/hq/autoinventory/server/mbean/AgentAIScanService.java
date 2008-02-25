@@ -33,7 +33,7 @@ import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerEJBImpl;
 import org.hyperic.hq.common.SessionMBeanBase;
 
 /**
- * This job is responsible for filling in missing availabilty metric values.
+ * This job is responsible for notifying agents needing an auto inventory scan.
  *
  * @jmx:mbean name="hyperic.jmx:type=Service,name=AgentAIScan"
  */
@@ -51,7 +51,11 @@ public class AgentAIScanService
     }
     
     protected void hitInSession(Date lDate) {
+        _log.debug("Agent AI Scan Service started executing: "+lDate);  
+        
         AutoinventoryManagerEJBImpl.getOne().notifyAgentsNeedingRuntimeScan();
+        
+        _log.debug("Agent AI Scan Service finished executing: "+lDate); 
     }
 
     /**
