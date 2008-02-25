@@ -7977,9 +7977,8 @@ has already been defined.
 
   <schemaSpec version="3.97">
     <schema-addColumn table="EAM_MEASUREMENT" column="RESOURCE_ID" 
-                      columnType="INTEGER"/>
-      <schema-directSQL>
-        <statement desc="Update new resource_id column">
+                      columnType="INTEGER">
+      <initializer>
           UPDATE EAM_MEASUREMENT SET RESOURCE_ID =
               (SELECT r.ID FROM EAM_RESOURCE r,
                (SELECT ID, 1 AS APPDEF_TYPE FROM EAM_RESOURCE_TYPE WHERE CID = 301
@@ -7993,7 +7992,11 @@ has already been defined.
                WHERE EAM_MEASUREMENT.INSTANCE_ID = r.INSTANCE_ID AND
                      r.RESOURCE_TYPE_ID = m.ID AND
                      mt.APPDEF_TYPE = m.APPDEF_TYPE)
-        </statement>
+      </initializer>
+      <foreignKey constraintName="FK3E0F978EFC176AE"
+                  references="EAM_RESOURCE(ID)"/>
+    </schema-addColumn>
+      <schema-directSQL>
         <statement desc="Create new index for resource_id">
           CREATE INDEX MEAS_RES_IDX ON EAM_MEASUREMENT ( RESOURCE_ID )
         </statement>
