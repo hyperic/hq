@@ -51,7 +51,11 @@ public class AgentAIScanService
     }
     
     protected void hitInSession(Date lDate) {
+        _log.debug("Agent AI Scan Service started executing: "+lDate);  
+        
         AutoinventoryManagerEJBImpl.getOne().notifyAgentsNeedingRuntimeScan();
+        
+        _log.debug("Agent AI Scan Service finished executing: "+lDate); 
     }
 
     /**
