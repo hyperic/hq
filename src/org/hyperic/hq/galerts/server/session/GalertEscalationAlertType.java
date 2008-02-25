@@ -76,8 +76,15 @@ public final class GalertEscalationAlertType
                                     EscalationStateChange newState) 
     {
         GalertLog alert = (GalertLog) esc.getAlertInfo();
-        if (newState.isFixed()) 
-            getGalertMan().fixAlert(alert);
+        if (newState.isFixed()) {
+            GalertManagerLocal gAlertMan = getGalertMan();
+            gAlertMan.fixAlert(alert);
+            
+            // HQ-1207: Reset the internal state of the group alert 
+            // after it is marked as fixed so the alert will not 
+            // be triggered off of old events.
+            gAlertMan.reloadAlertDef(alert.getAlertDef());
+        }
     }
 
     protected void logActionDetails(Escalatable esc, Action action, 
