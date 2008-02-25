@@ -576,7 +576,17 @@ public class MeasurementGtrigger
         return (endTime+startTime)/2L;
     }    
     
-    private void tryToFire(Map srcId2MetricValue, long startTime, long endTime) {                
+    private void tryToFire(Map srcId2MetricValue, long startTime, long endTime) { 
+        if (_groupSize == 0) {
+            if (_log.isDebugEnabled()) {
+                _log.debug("Trigger ["+getTriggerNameWithPartitionDesc()+
+                           "] has no resources in its group. Aborting " +
+                           "trigger evaluation.");                
+            }
+            
+            return;
+        }
+        
         int numMatched = 0;
         
         if (srcId2MetricValue.size()>0) {
