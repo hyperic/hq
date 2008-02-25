@@ -25,15 +25,12 @@
 
 package org.hyperic.hq.ha.server.mbean;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.server.MBeanUtil;
-import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
-import org.hyperic.hq.application.HQApp;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import java.util.List;
 
 /**
  * The HAService starts all internal HQ processes.
@@ -41,7 +38,7 @@ import java.util.List;
  * @jmx:mbean name="hyperic.jmx:type=Service,name=HAService"
  */
 public class HAService
-    implements HAServiceMBean, PluginsDeployedCallback
+    implements HAServiceMBean
 {
     private static Log _log = LogFactory.getLog(HAService.class);
 
@@ -54,10 +51,6 @@ public class HAService
             startDataPurgeService(server);
             startAvailCheckService(server);
             startAgentAIScanService(server);
-
-            HQApp.getInstance().
-                registerCallbackListener(PluginsDeployedCallback.class, this);
-
         } catch (Exception e) {
             _log.error("Error starting services", e);
         }
@@ -75,13 +68,6 @@ public class HAService
     {
         invoke(server, "hyperic.jmx:type=Service,name=DataPurge",
                "startPurgeService");
-    }
-
-    private void startHeartbeatService(MBeanServer server)
-        throws Exception
-    {
-        invoke(server, "hyperic.jmx:service=Scheduler,name=EventsHeartBeat",
-               "startSchedule");
     }
 
     private void startAvailCheckService(MBeanServer server)
@@ -106,12 +92,4 @@ public class HAService
         server.invoke(o, method, new Object[] {}, new String[] {});
     }
 
-    public void pluginsDeployed(List plugins) {
-        try {
-            MBeanServer server = MBeanUtil.getMBeanServer();
-            startHeartbeatService(server);
-        } catch (Exception e) {
-            _log.error("Error starting services", e);
-        }
-    }
 }
