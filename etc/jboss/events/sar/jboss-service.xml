@@ -34,22 +34,4 @@
     </attribute>
   </mbean>
 
-  <!-- This deploys the hearbeat service -->
-  <mbean code="org.hyperic.hq.events.server.mbean.HeartBeatService"
-	 name="hyperic.jmx:type=Service,name=EventsHeartBeat">
-    <attribute name="TopicName">topic/eventsTopic</attribute>
-  </mbean>
-
-  <!-- Service is defined here, but started in HAService -->
-  <mbean code="org.jboss.varia.scheduler.Scheduler" 
-	 name="hyperic.jmx:service=Scheduler,name=EventsHeartBeat">
-    <depends>hyperic.jmx:type=Service,name=EventsHeartBeat</depends>
-    <attribute name="StartAtStartup">false</attribute>
-    <attribute name="SchedulableMBean">hyperic.jmx:type=Service,name=EventsHeartBeat</attribute>
-    <attribute name="SchedulableMBeanMethod">hit( DATE )</attribute>
-    <attribute name="InitialStartDate">NOW</attribute>
-    <attribute name="SchedulePeriod">30000</attribute>
-    <attribute name="InitialRepetitions">-1</attribute>
-  </mbean>
-
 </server>
