@@ -787,7 +787,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         Resource proto = ResourceManagerEJBImpl.getOne()
             .findResourcePojoByInstanceId(appProto, at.getId());
         createAuthzResource(subject, getApplicationResourceType(), proto,
-                            app.getId(), app.getName());
+                            app.getId(), app.getName(), null);
     }
 
     private class GroupDeleteWatcher 

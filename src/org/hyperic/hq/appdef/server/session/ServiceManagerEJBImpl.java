@@ -75,6 +75,7 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -141,10 +142,10 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         if (server.getServerType().isVirtual()) {
             createAuthzService(name, service.getId(), 
                                server.getPlatform().getId(), false, subject, 
-                               type); 
+                               type, server); 
         } else {
             createAuthzService(name, service.getId(), server.getId(),
-                               true, subject, type);
+                               true, subject, type, server);
         }
 
         ResourceCreatedZevent zevent =
@@ -180,11 +181,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 // Look for the platform authorization
                 createAuthzService(sValue.getName(), service.getId(),
                                    server.getPlatform().getId(), false,
-                                   subject, serviceType);
+                                   subject, serviceType, server);
             } else {
                 // now add the authz resource
                 createAuthzService(sValue.getName(), service.getId(), serverId,
-                                   true, subject, serviceType);
+                                   true, subject, serviceType, server);
             }
 
             // Add Service to parent collection
@@ -215,7 +216,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     private void createAuthzService(String serviceName, Integer serviceId,
                                     Integer parentId, boolean isServer,
-                                    AuthzSubjectValue subject, ServiceType st)
+                                    AuthzSubjectValue subject, ServiceType st,
+                                    Server server)
         throws PermissionException 
     {
         log.debug("Begin Authz CreateService");
@@ -231,12 +233,18 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                 AuthzConstants.platformOpAddServer);
             }
 
+            ResourceManagerLocal rman = getResourceManager();
             ResourceType serviceProto = getServicePrototypeResourceType();
-            Resource prototype = ResourceManagerEJBImpl.getOne() 
-                .findResourcePojoByInstanceId(serviceProto, st.getId());
+            Resource prototype = 
+                rman.findResourcePojoByInstanceId(serviceProto, st.getId());
         
+            Resource parent = rman.findResource(server.getEntityId());
+            if (parent == null) {
+                throw new SystemException("Unable to find parent server [id=" +
+                                          server.getEntityId() + "]");
+            }
             createAuthzResource(subject, getServiceResourceType(), prototype, 
-                                serviceId, serviceName);
+                                serviceId, serviceName, parent);
         } catch(FinderException e) {
             throw new SystemException("Unable to find authz resource type", e);
         }
@@ -1486,7 +1494,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 stype.setServerType(servTypeEJB);
                 createAuthzResource(overlordValue, 
                                     getServicePrototypeResourceType(),
-                                    prototype, stype.getId(), stype.getName()); 
+                                    prototype, stype.getId(), stype.getName(),
+                                    null); 
             }
         } finally {
             stLHome.getSession().flush();

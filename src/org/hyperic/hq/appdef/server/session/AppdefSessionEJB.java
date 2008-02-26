@@ -153,8 +153,10 @@ public abstract class AppdefSessionEJB
     protected void createAuthzResource(AuthzSubjectValue who,
                                        ResourceType resType,
                                        Resource prototype,
-                                       Integer id,  String name) {
-        createAuthzResource(who, resType, prototype, id, name, false);
+                                       Integer id,  String name,
+                                       Resource parent) 
+    {
+        createAuthzResource(who, resType, prototype, id, name, false, parent);
     }
     
     /**
@@ -167,14 +169,12 @@ public abstract class AppdefSessionEJB
      * @param fsystem - true if the resource should be non-visible
      */
     protected void createAuthzResource(AuthzSubjectValue who, 
-    								   ResourceType resType,
-                                       Resource prototype,
-									   Integer id, 
-									   String name,
-                                       boolean fsystem) 
+    								   ResourceType resType, Resource prototype,
+									   Integer id, String name, 
+                                       boolean fsystem, Resource parent) 
     {
         getResourceManager().createResource(who, resType, prototype, id, name, 
-                                            fsystem);
+                                            fsystem, parent);
     }
 
     /**

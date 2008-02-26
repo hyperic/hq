@@ -82,7 +82,8 @@ import org.hyperic.util.pager.SortAttribute;
  */
 public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 {
-
+    private static final Integer RELATION_CONTAINMENT_ID = new Integer(1); 
+    
     private Pager resourcePager = null;
     private Pager resourceTypePager = null;
     
@@ -251,7 +252,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public Resource createResource(AuthzSubjectValue whoami,
                                    ResourceType rt, Resource prototype, 
                                    Integer instanceId, String name, 
-                                   boolean system) 
+                                   boolean system, Resource parent)
     {
         long start = System.currentTimeMillis();
         AuthzSubject owner =
@@ -259,10 +260,36 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 
         Resource res = getResourceDAO().create(rt, prototype, name, owner, 
                                                instanceId, system); 
+
+        DAOFactory daoFact        = DAOFactory.getDAOFactory();
+        ResourceEdgeDAO eDAO      = new ResourceEdgeDAO(daoFact);
+        ResourceRelation relation = getContainmentRelation();
+            
+        eDAO.create(res, res, 0, relation);  // Self-edge
+        if (parent != null) {
+            Collection ancestors = eDAO.findAncestorEdges(parent);
+            eDAO.create(res, parent, -1, relation);
+            eDAO.create(parent, res, 1, relation);
+            
+            for (Iterator i=ancestors.iterator(); i.hasNext(); ) {
+                ResourceEdge ancestorEdge = (ResourceEdge)i.next();
+                
+                int distance = ancestorEdge.getDistance() - 1;
+                
+                eDAO.create(res, ancestorEdge.getTo(), distance, relation);
+                eDAO.create(ancestorEdge.getTo(), res, -distance, relation);
+            }
+        }
         
         ResourceAudit.createResource(res, owner, start, 
                                      System.currentTimeMillis());
         return res;
+    }
+        
+    private ResourceRelation getContainmentRelation() {
+        ResourceRelationDAO rDAO = 
+            new ResourceRelationDAO(DAOFactory.getDAOFactory());
+        return rDAO.findById(RELATION_CONTAINMENT_ID); 
     }
     
     /**

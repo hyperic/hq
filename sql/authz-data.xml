@@ -45,6 +45,10 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data ID="604" CID="604" NAME="ApplicationPrototype" FSYSTEM="TRUE"/>
     </table>
 
+    <table name="EAM_RESOURCE_RELATION">
+        <data ID="1" NAME="containment" IS_HIER="TRUE"/>
+    </table>
+
     <table name="EAM_SUBJECT">
         <data ID="0" CID="0" NAME="admin" DSN="covalentAuthzInternalDsn"
               FIRST_NAME="System" LAST_NAME="User" DEPARTMENT="Administration" 

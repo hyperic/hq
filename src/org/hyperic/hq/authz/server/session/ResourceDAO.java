@@ -181,7 +181,8 @@ public class ResourceDAO
 
     public int deleteByInstances(AppdefEntityID[] ids) {
         ResourceStartupListener.getCallbackObj().preAppdefResourcesDelete(ids);
-        
+
+        new ResourceEdgeDAO(DAOFactory.getDAOFactory()).deleteEdges(ids);
         // kludge to work around hiberate's limitation to define
         // on-delete="cascade" on many-to-many relationships
         deleteResourceObject(ids, "ResGrpResMap", "id.resource.id");

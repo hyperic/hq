@@ -1232,7 +1232,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             .findResourcePojoByInstanceId(platProtoType, pType.getId());
         _log.debug("User has permission to create platform. Adding AuthzResource");
         createAuthzResource(subject, getPlatformResourceType(), proto, platId,
-                            platName);
+                            platName, null);
     }
 
     /**
@@ -1341,7 +1341,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             PlatformType pt = ptLHome.create(pinfo.getName(), plugin);
             createAuthzResource(overlordValue, 
                                 getPlatformPrototypeResourceType(),
-                                prototype, pt.getId(), pt.getName()); 
+                                prototype, pt.getId(), pt.getName(), null); 
         }
     }
 

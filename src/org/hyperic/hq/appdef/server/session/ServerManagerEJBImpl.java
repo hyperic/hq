@@ -1327,7 +1327,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             stype = stLHome.create(stype);
             createAuthzResource(overlordValue, 
                                 getServerPrototypeResourceType(),
-                                prototype, stype.getId(), stype.getName()); 
+                                prototype, stype.getId(), stype.getName(),
+                                null);  // No parent
         }
     }
 
@@ -1366,12 +1367,20 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
         checkPermission(subject, getPlatformResourceType(), platformId,
                         AuthzConstants.platformOpAddServer);
-        
+
         ResourceType serverProto = getServerPrototypeResourceType();
         Resource proto = ResourceManagerEJBImpl.getOne()
             .findResourcePojoByInstanceId(serverProto, st.getId());
+        AppdefEntityID platId = 
+            AppdefEntityID.newPlatformID(platformId.intValue());
+        Resource parent = getResourceManager().findResource(platId);
+
+        if (parent == null) {
+            throw new SystemException("Unable to find parent platform [id=" +
+                                      platId + "]");
+        }
         createAuthzResource(subject, getServerResourceType(), proto, serverId,
-                            serverName, isVirtual);
+                            serverName, isVirtual, parent);
     }
 
     /**

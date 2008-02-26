@@ -8002,6 +8002,230 @@ has already been defined.
         </statement>
       </schema-directSQL>
   </schemaSpec>
+  
+  <schemaSpec version="3.98">
+	<schema-directSQL>
+    <statement targetDB="postgresql">
+      create table EAM_RESOURCE_EDGE (
+          id integer not null,
+          version_col bigint DEFAULT 0 NOT NULL,
+          from_id     integer not null,
+          to_id       integer not null,
+          rel_id      integer not null,
+          distance    integer not null
+       )
+    </statement>
+    <statement targetDB="postgresql">
+      create table EAM_RESOURCE_RELATION (
+          id integer not null,
+          version_col bigint DEFAULT 0 NOT NULL,
+          name        character varying(255) not null,
+          is_hier     boolean not null
+       )
+    </statement>
+    <statement targetDB="postgresql">
+      CREATE SEQUENCE eam_resource_edge_id_seq start 10001 increment 1
+    </statement>
+    <statement targetDB="postgresql">
+      CREATE SEQUENCE eam_resource_relation_id_seq start 10001 increment 1
+    </statement>
+
+
+    <statement targetDB="mysql">
+      create table EAM_RESOURCE_EDGE (
+          id integer not null,
+          version_col bigint not null,
+          from_id     integer not null,
+          to_id       integer not null,
+          rel_id      integer not null,
+          distance    integer not null
+       ) ENGINE=InnoDB
+    </statement>
+    <statement targetDB="mysql">
+      create table EAM_RESOURCE_RELATION (
+          id integer not null,
+          version_col bigint not null,
+          name        char(255) not null,
+          is_hier     bit not null
+       ) ENGINE=InnoDB
+    </statement>
+
+    
+    <statement targetDB="oracle">
+      create table EAM_RESOURCE_EDGE (
+          id INTEGER not null,
+          version_col NUMBER(19,0) DEFAULT 0 NOT NULL,
+          from_id NUMBER(19,0) not null,
+          to_id NUMBER(19,0) not null,
+          rel_id NUMBER(19,0) not null,
+          distance NUMBER(10,0) not null
+       ) 
+    </statement>
+    <statement targetDB="oracle">
+      create table EAM_RESOURCE_RELATION (
+          id INTEGER not null,
+          version_col NUMBER(19,0) DEFAULT 0 NOT NULL,
+          name VARCHAR(255) NOT NULL,
+          is_hier NUMBER(1) not null
+       ) 
+    </statement>
+    <statement targetDB="oracle">
+      create sequence eam_resource_edge_id_seq start with 10001 increment by 1
+    </statement>
+    <statement targetDB="oracle">
+      create sequence eam_resource_relation_id_seq start with 10001 increment by 1
+    </statement>
+
+
+    <statement>
+      ALTER TABLE EAM_RESOURCE_RELATION
+        ADD CONSTRAINT eam_resource_relation_name_key UNIQUE (name)
+    </statement>
+    <statement>
+      ALTER TABLE EAM_RESOURCE_RELATION
+        ADD CONSTRAINT eam_resource_relation_pkey PRIMARY KEY (id)
+    </statement>
+    
+    <statement>
+      ALTER TABLE EAM_RESOURCE_EDGE
+        ADD CONSTRAINT eam_resource_edge_from_id_key UNIQUE (from_id, to_id, distance)
+    </statement>
+    <statement>
+      ALTER TABLE EAM_RESOURCE_EDGE
+        ADD CONSTRAINT eam_resource_edge_pkey PRIMARY KEY (id)
+    </statement>
+    <statement>
+      CREATE INDEX eam_resource_from_id_idx ON EAM_RESOURCE_EDGE (from_id)
+    </statement>
+    <statement>
+      CREATE INDEX eam_resource_to_id_idx ON EAM_RESOURCE_EDGE (to_id)
+    </statement>
+    <statement>
+      ALTER TABLE EAM_RESOURCE_EDGE
+        ADD CONSTRAINT fkd1fcb6c0a2bf2d92 FOREIGN KEY (from_id) REFERENCES EAM_RESOURCE(id)
+    </statement>
+    <statement>
+      ALTER TABLE EAM_RESOURCE_EDGE
+        ADD CONSTRAINT fkd1fcb6c0ccc27921 FOREIGN KEY (to_id) REFERENCES EAM_RESOURCE(id)
+    </statement>
+    <statement>
+      ALTER TABLE EAM_RESOURCE_EDGE
+        ADD CONSTRAINT fkd1fcb6c04405ae5f FOREIGN KEY (rel_id) REFERENCES EAM_RESOURCE_RELATION(id)
+    </statement>
+
+	</schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="3.99">
+	<schema-directSQL>
+    <statement targetDB="postgresql">
+      INSERT INTO EAM_RESOURCE_RELATION (ID, NAME, IS_HIER)
+           VALUES (1, 'containment', true)
+    </statement>
+    <statement targetDB="oracle">
+      INSERT INTO EAM_RESOURCE_RELATION (ID, NAME, IS_HIER)
+           VALUES (1, 'containment', 1)
+    </statement>
+    <statement targetDB="mysql">
+      INSERT INTO EAM_RESOURCE_RELATION (ID, NAME, IS_HIER)
+           VALUES (1, 'containment', true)
+    </statement>
+    </schema-directSQL>
+  </schemaSpec>
+  
+  <schemaSpec version="3.100">
+	<schema-directSQL>
+    <statement desc="Create self-edges for platforms">
+      insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
+        select r.id, 0 as version_col, r.id as from_id, r.id as to_id, 1 as rel_id, 0 as distance
+        from EAM_PLATFORM p
+        join EAM_RESOURCE r on r.instance_id = p.id
+        and r.resource_type_id = 301
+    </statement>
+    <statement desc="Create self-edges for servers">
+      insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
+        select r.id * 3 as id, 0 as version_col, r.id as from_id, r.id as to_id, 1 as rel_id, 0 as distance
+        from EAM_SERVER s
+        join EAM_RESOURCE r on r.instance_id = s.id
+        and r.resource_type_id = 303    
+    </statement>
+    <statement desc="Platform->server edges, distance of 1">
+      insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
+        select rServer.id * 3 + 1, 0, rPlat.id, rServer.id, 1, 1
+        from EAM_SERVER s
+        join EAM_PLATFORM p on s.platform_id = p.id
+        join EAM_RESOURCE rServer on rServer.instance_id = s.id
+        join EAM_RESOURCE rPlat on rPlat.instance_id = p.id
+        where 
+          rServer.resource_type_id = 303
+        and  rPlat.resource_type_id = 301
+    </statement>
+    <statement desc="Servers->Platform edges, distance of -1">
+      insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
+        select rServer.id * 3 + 2, 0, rServer.id, rPlat.id, 1, -1
+        from EAM_SERVER s
+        join EAM_PLATFORM p on s.platform_id = p.id
+        join EAM_RESOURCE rServer on rServer.instance_id = s.id
+        join EAM_RESOURCE rPlat on rPlat.instance_id = p.id
+        where 
+         rServer.resource_type_id = 303
+        and  rPlat.resource_type_id = 301    
+    </statement>
+    <statement desc="Service self-edges">
+      insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
+        select r.id * 5, 0, r.id, r.id, 1, 0
+        from EAM_SERVICE v
+        join EAM_RESOURCE r on r.instance_id = v.id
+        where r.resource_type_id = 305
+    </statement>
+    <statement desc="Platform->Service edges, distance of 2">
+      insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
+        select rService.id * 5 + 1, 0, rPlat.id, rService.id, 1, 2
+        from EAM_SERVICE v
+        join EAM_SERVER s on v.server_id = s.id
+        join EAM_PLATFORM p on s.platform_id = p.id
+        join EAM_RESOURCE rService on rService.instance_id = v.id
+        join EAM_RESOURCE rPlat on rPlat.instance_id = p.id
+      where
+        rService.resource_type_id = 305
+        and rPlat.resource_type_id = 301
+    </statement>
+    <statement desc="Server->Service edges, distance of 1">
+      insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
+        select rService.id * 5 + 2, 0, rServer.id, rService.id, 1, 1
+        from EAM_SERVICE v
+        join EAM_SERVER s on v.server_id = s.id
+        join EAM_RESOURCE rService on rService.instance_id = v.id
+        join EAM_RESOURCE rServer on rServer.instance_id = s.id
+      where
+        rService.resource_type_id = 305
+        and rServer.resource_type_id = 303    
+    </statement>
+    <statement desc="Services->Server edges, distance of -1">
+      insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
+        select rService.id * 5 + 3, 0, rService.id, rServer.id, 1, -1
+        from EAM_SERVICE v
+        join EAM_SERVER s on v.server_id = s.id
+        join EAM_RESOURCE rService on rService.instance_id = v.id
+        join EAM_RESOURCE rServer on rServer.instance_id = s.id
+      where
+        rService.resource_type_id = 305
+        and rServer.resource_type_id = 303    
+    </statement>
+    <statement desc="Services->Platform edges, distance of -2">
+      insert into eam_resource_edge (id, version_col, from_id, to_id, rel_id, distance)
+        select rService.id * 5 + 4, 0, rService.id, rPlat.id, 1, -2
+        from EAM_SERVICE v
+        join EAM_SERVER s on v.server_id = s.id
+        join EAM_PLATFORM p on s.platform_id = p.id
+        join EAM_RESOURCE rService on rService.instance_id = v.id
+        join EAM_RESOURCE rPlat on rPlat.instance_id = p.id
+      where
+        rService.resource_type_id = 305
+        and rPlat.resource_type_id = 301    
+    </statement>
+    </schema-directSQL>
+  </schemaSpec>
 
 </dbupgrade>
 </target>
