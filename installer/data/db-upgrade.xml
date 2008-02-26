@@ -8118,17 +8118,9 @@ has already been defined.
 
   <schemaSpec version="3.99">
 	<schema-directSQL>
-    <statement targetDB="postgresql">
-      INSERT INTO EAM_RESOURCE_RELATION (ID, NAME, IS_HIER)
-           VALUES (1, 'containment', true)
-    </statement>
-    <statement targetDB="oracle">
-      INSERT INTO EAM_RESOURCE_RELATION (ID, NAME, IS_HIER)
-           VALUES (1, 'containment', 1)
-    </statement>
-    <statement targetDB="mysql">
-      INSERT INTO EAM_RESOURCE_RELATION (ID, NAME, IS_HIER)
-           VALUES (1, 'containment', true)
+    <statement>
+      INSERT INTO EAM_RESOURCE_RELATION (ID, VERSION_COL, NAME, IS_HIER)
+           VALUES (1, 0, 'containment', %%TRUE%%)
     </statement>
     </schema-directSQL>
   </schemaSpec>
