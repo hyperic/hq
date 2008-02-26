@@ -8117,12 +8117,8 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.99">
-	<schema-directSQL>
-    <statement>
-      INSERT INTO EAM_RESOURCE_RELATION (ID, VERSION_COL, NAME, IS_HIER)
-           VALUES (1, 0, 'containment', %%TRUE%%)
-    </statement>
-    </schema-directSQL>
+    <schema-insert table="EAM_RESOURCE_RELATION"
+                   insertCmd="(ID, VERSION_COL, NAME, IS_HIER) VALUES (1, 0, 'containment', %%TRUE%%)"/>
   </schemaSpec>
   
   <schemaSpec version="3.100">
@@ -8215,6 +8211,11 @@ has already been defined.
       where
         rService.resource_type_id = 305
         and rPlat.resource_type_id = 301    
+    </statement>
+    
+    <!-- Update the next sequence value for the edge table -->
+    <statement targetDB="postgresql">
+      select setval('eam_resource_edge_id_seq', max(e.id) + 1) from eam_resource_edge e
     </statement>
     </schema-directSQL>
   </schemaSpec>
