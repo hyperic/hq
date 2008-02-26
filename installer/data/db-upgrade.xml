@@ -8045,7 +8045,7 @@ has already been defined.
       create table EAM_RESOURCE_RELATION (
           id integer not null,
           version_col bigint not null,
-          name        char(255) not null,
+          name        varchar(255) not null,
           is_hier     bit not null
        ) ENGINE=InnoDB
     </statement>
@@ -8205,7 +8205,7 @@ has already been defined.
         and rServer.resource_type_id = 303    
     </statement>
     <statement desc="Services->Platform edges, distance of -2">
-      insert into eam_resource_edge (id, version_col, from_id, to_id, rel_id, distance)
+      insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
         select rService.id * 5 + 4, 0, rService.id, rPlat.id, 1, -2
         from EAM_SERVICE v
         join EAM_SERVER s on v.server_id = s.id
