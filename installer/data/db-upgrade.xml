@@ -7986,21 +7986,20 @@ has already been defined.
                 SELECT ID, 2 AS APPDEF_TYPE FROM EAM_RESOURCE_TYPE WHERE CID = 303
                 UNION ALL
                 SELECT ID, 3 AS APPDEF_TYPE FROM EAM_RESOURCE_TYPE WHERE CID = 305) m,
-               (SELECT APPDEF_TYPE FROM EAM_MONITORABLE_TYPE mt INNER JOIN
-                EAM_MEASUREMENT_TEMPL t ON MONITORABLE_TYPE_ID = mt.ID AND
-                t.ID = EAM_MEASUREMENT.TEMPLATE_ID) mt
+               EAM_MONITORABLE_TYPE mt INNER JOIN EAM_MEASUREMENT_TEMPL t
+                 ON MONITORABLE_TYPE_ID = mt.ID
                WHERE EAM_MEASUREMENT.INSTANCE_ID = r.INSTANCE_ID AND
                      r.RESOURCE_TYPE_ID = m.ID AND
-                     mt.APPDEF_TYPE = m.APPDEF_TYPE)
+                     mt.APPDEF_TYPE = m.APPDEF_TYPE AND t.id = EAM_MEASUREMENT.TEMPLATE_ID)
       </initializer>
       <foreignKey constraintName="FK3E0F978EFC176AE"
                   references="EAM_RESOURCE(ID)"/>
     </schema-addColumn>
-      <schema-directSQL>
-        <statement desc="Create new index for resource_id">
-          CREATE INDEX MEAS_RES_IDX ON EAM_MEASUREMENT ( RESOURCE_ID )
-        </statement>
-      </schema-directSQL>
+    <schema-directSQL>
+      <statement desc="Create new index for resource_id">
+        CREATE INDEX MEAS_RES_IDX ON EAM_MEASUREMENT ( RESOURCE_ID )
+      </statement>
+    </schema-directSQL>
   </schemaSpec>
   
   <schemaSpec version="3.98">
