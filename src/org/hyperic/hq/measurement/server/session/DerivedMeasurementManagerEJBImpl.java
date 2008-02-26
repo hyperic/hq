@@ -1542,7 +1542,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Resource to be deleted, dissociate metrics from resource
      * @ejb:interface-method
      */
-    public void handleResourceCreateEvent(Resource r) {
+    public void handleResourceDelete(Resource r) {
         getDerivedMeasurementDAO().clearResource(r);
     }
     
