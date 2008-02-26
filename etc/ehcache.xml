@@ -411,6 +411,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceRelation"
+         maxElementsInMemory="1"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="Resource.findByInstanceId"
          maxElementsInMemory="10000"
          eternal="true"
