@@ -27,8 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -39,10 +37,11 @@ import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 import org.hyperic.hq.zevents.ZeventManager;
 
 public class MeasurementStartupListener
@@ -97,6 +96,17 @@ public class MeasurementStartupListener
             public void beforeMetricsDelete(Collection mids) {
                 MetricAuxLogManagerEJBImpl.getOne().metricsDeleted(mids);
             }
+        });
+        
+        app.registerCallbackListener(ResourceDeleteCallback.class,
+                                     new ResourceDeleteCallback() {
+
+            public void preResourceDelete(Resource r)
+                throws VetoException {
+                DerivedMeasurementManagerEJBImpl.getOne()
+                    .handleResourceCreateEvent(r);
+            }
+            
         });
 
         /*

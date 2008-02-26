@@ -1539,6 +1539,14 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
+     * Resource to be deleted, dissociate metrics from resource
+     * @ejb:interface-method
+     */
+    public void handleResourceCreateEvent(Resource r) {
+        getDerivedMeasurementDAO().clearResource(r);
+    }
+    
+    /**
      * Enable the default metrics for a resource.  This should only
      * be called by the {@link MeasurementEnabler}.  If you want the behavior
      * of this method, use the {@link MeasurementEnabler} 

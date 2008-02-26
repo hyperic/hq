@@ -232,6 +232,14 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setParameterList("ids", ids)
             .executeUpdate();
     }
+    
+    int clearResource(Resource resource) {
+        return getSession()
+            .createSQLQuery("update EAM_MEASUREMENT set resource_id = null "
+                            + "where resource_id = :res")
+            .setInteger("res", resource.getId())
+            .executeUpdate();
+    }
 
     public List findEnabledByInstance(Resource resource) {
         return createCriteria()
@@ -532,10 +540,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
      * @return A List of DerivedMeasurement ID's.
      */
     List findOrphanedMeasurements() {
-        String sql =
-            "SELECT M.ID FROM EAM_MEASUREMENT M WHERE NOT EXISTS " +
-            "(SELECT R.ID FROM EAM_RESOURCE R WHERE R.ID = RESOURCE_ID)";
-
-        return getSession().createSQLQuery(sql).list();
+        String sql = "SELECT id FROM DerivedMeasurement WHERE resource IS NULL";
+        return getSession().createQuery(sql).list();
     }
 }
