@@ -33,7 +33,7 @@ class MeasurementEnabler
     implements ZeventListener
 {
     public void processEvents(List e) {
-        DerivedMeasurementManagerEJBImpl.getOne().handleCreateRefreshEvents(e);
+        MeasurementManagerEJBImpl.getOne().handleCreateRefreshEvents(e);
     }
     
     public String toString() {

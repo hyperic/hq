@@ -80,8 +80,8 @@ import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -98,19 +98,18 @@ import org.hyperic.util.timer.StopWatch;
 /** The DerivedMeasurementManagerEJB class is a stateless session bean that can
  * be used to interact with DerivedMeasurement EJB's
  *
- * @ejb:bean name="DerivedMeasurementManager"
- *      jndi-name="ejb/measurement/DerivedMeasurementManager"
- *      local-jndi-name="LocalDerivedMeasurementManager"
+ * @ejb:bean name="MeasurementManager"
+ *      jndi-name="ejb/measurement/MeasurementManager"
+ *      local-jndi-name="LocalMeasurementManager"
  *      view-type="local"
  *      type="Stateless"
  * 
  * @ejb:transaction type="REQUIRED"
  */
-public class DerivedMeasurementManagerEJBImpl extends SessionEJB
+public class MeasurementManagerEJBImpl extends SessionEJB
     implements SessionBean 
 {
-    private final Log log =
-        LogFactory.getLog(DerivedMeasurementManagerEJBImpl.class);
+    private final Log log = LogFactory.getLog(MeasurementManagerEJBImpl.class);
 
     protected final String VALUE_PROCESSOR =
         PagerProcessor_measurement.class.getName();
@@ -1500,9 +1499,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    public static DerivedMeasurementManagerLocal getOne() {
+    public static MeasurementManagerLocal getOne() {
         try {
-            return DerivedMeasurementManagerUtil.getLocalHome().create();
+            return MeasurementManagerUtil.getLocalHome().create();
         } catch (Exception e) {
             throw new SystemException(e);
         }

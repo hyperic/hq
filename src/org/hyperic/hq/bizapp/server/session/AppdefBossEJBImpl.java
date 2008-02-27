@@ -163,7 +163,7 @@ import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
@@ -3949,7 +3949,7 @@ public class AppdefBossEJBImpl
         MeasurementTemplateValue mtv = (MeasurementTemplateValue) templs.get(0);
 
         // Find all measurement IDs
-        DerivedMeasurementManagerLocal dmMan = getMetricManager();
+        MeasurementManagerLocal dmMan = getMetricManager();
         
         Integer[] instIds = (Integer[])
             res.keySet().toArray(new Integer[services.size()]);

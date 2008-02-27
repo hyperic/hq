@@ -1,4 +1,4 @@
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl as DMM
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as MM
 import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as PB
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl
@@ -107,8 +107,8 @@ class HealthController
     private getAgentData(pageInfo) {
         def res = []
         def agents     = agentHelper.find(withPaging: pageInfo)
-        def offsetData = DMM.one.findAgentOffsetTuples()
-        def metricData = DMM.one.findNumMetricsPerAgent()
+        def offsetData = MM.one.findAgentOffsetTuples()
+        def metricData = MM.one.findNumMetricsPerAgent()
         for (a in agents) {
             def found = false
             def numMetrics = 0
@@ -229,7 +229,7 @@ class HealthController
     }
     
 	private getMetricsPerMinute() {
-	    def vals  = DMM.one.findMetricCountSummaries()
+	    def vals  = MM.one.findMetricCountSummaries()
 	    def total = 0.0
 	    
 	    for (v in vals) {

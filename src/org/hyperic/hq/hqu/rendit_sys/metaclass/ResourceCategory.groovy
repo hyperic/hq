@@ -19,7 +19,7 @@ import org.hyperic.hq.appdef.server.session.Service
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl as DMMan
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as DMan
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
 import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.hq.livedata.shared.LiveDataResult
@@ -41,7 +41,7 @@ class ResourceCategory {
     private static platMan  = PlatMan.one
     private static svcMan   = ServiceMan.one
     private static svrMan   = ServerMan.one 
-    private static dman     = DMMan.one
+    private static dman     = DMan.one
     private static authzMan = AuthzMan.one
     
     /**

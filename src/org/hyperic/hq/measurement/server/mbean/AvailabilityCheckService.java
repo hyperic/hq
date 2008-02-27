@@ -48,7 +48,7 @@ import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.*;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.timer.StopWatch;
 
@@ -67,21 +67,13 @@ public class AvailabilityCheckService
     private long interval = 0;
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
-    
-    private DataManagerLocal _dataMan;
+
     private DataManagerLocal getDataMan() {
-        if (_dataMan == null)
-            _dataMan = DataManagerEJBImpl.getOne();
-        
-        return _dataMan;
+        return DataManagerEJBImpl.getOne();
     }
 
-    private DerivedMeasurementManagerLocal _dmLocal;
-    private DerivedMeasurementManagerLocal getDMManager() {
-        if (_dmLocal == null) {
-            _dmLocal = DerivedMeasurementManagerEJBImpl.getOne();
-        }
-        return _dmLocal;
+    private MeasurementManagerLocal getMeasurementManager() {
+        return MeasurementManagerEJBImpl.getOne();
     }
 
     /**
@@ -113,7 +105,7 @@ public class AvailabilityCheckService
         
         // Fetch all derived availablity measurements
         watch.markTimeBegin("getEnabledAvailabilityMetrics");
-        List dmList = getDMManager().
+        List dmList = getMeasurementManager().
             findMeasurementsByCategory(MeasurementConstants.CAT_AVAILABILITY);
         MetricDataCache cache = MetricDataCache.getInstance();
         watch.markTimeEnd("getEnabledAvailabilityMetrics");

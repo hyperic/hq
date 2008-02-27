@@ -418,7 +418,7 @@ public class MeasurementDAO extends HibernateDAO {
     }
     
     /**
-     * @see DerivedMeasurementManagerEJBImpl#findAgentOffsetTuples()
+     * @see MeasurementManagerEJBImpl#findAgentOffsetTuples()
      */
     List findAgentOffsetTuples() {
         String sql = "select a, p, s, meas from Agent a " + 
@@ -440,7 +440,7 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     /**
-     * @see DerivedMeasurementManagerEJBImpl#findNumMetricsPerAgent()
+     * @see MeasurementManagerEJBImpl#findNumMetricsPerAgent()
      */
     Map findNumMetricsPerAgent() {
         String platSQL = 

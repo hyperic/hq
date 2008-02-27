@@ -67,7 +67,6 @@ import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;

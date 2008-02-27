@@ -107,7 +107,7 @@ import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
@@ -605,7 +605,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
-        DerivedMeasurementManagerLocal dmm = getMetricManager();
+        MeasurementManagerLocal dmm = getMetricManager();
         if (id == null) {
             getTemplateManager().setTemplateEnabledByDefault(subject, tids, 
                                                              false);

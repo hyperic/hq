@@ -38,7 +38,7 @@ import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
 import org.hyperic.hq.measurement.server.session.SRN;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 
@@ -338,8 +338,8 @@ public class SRNManagerEJBImpl extends SessionEJB
         return AuthzSubjectManagerEJBImpl.getOne().getOverlord();
     }
 
-    private DerivedMeasurementManagerLocal getDMan() {
-        return DerivedMeasurementManagerEJBImpl.getOne();
+    private MeasurementManagerLocal getDMan() {
+        return MeasurementManagerEJBImpl.getOne();
     }
 
     private void reschedule(AppdefEntityID entId, List dms)

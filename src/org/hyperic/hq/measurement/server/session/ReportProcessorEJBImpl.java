@@ -44,7 +44,7 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
@@ -67,8 +67,8 @@ public class ReportProcessorEJBImpl
 {
     private final Log log = LogFactory.getLog(ReportProcessorEJBImpl.class);
 
-    private final DerivedMeasurementManagerLocal _dmMan =
-        DerivedMeasurementManagerEJBImpl.getOne();
+    private final MeasurementManagerLocal _dmMan =
+        MeasurementManagerEJBImpl.getOne();
     private final MeasurementProcessorLocal _measurementProc =
         MeasurementProcessorEJBImpl.getOne();
     

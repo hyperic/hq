@@ -1,4 +1,4 @@
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl as DMM
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as MM
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.hqu.server.session.Attachment

@@ -100,7 +100,7 @@ public class MeasurementStartupListener
 
             public void preResourceDelete(Resource r)
                 throws VetoException {
-                DerivedMeasurementManagerEJBImpl.getOne()
+                MeasurementManagerEJBImpl.getOne()
                     .handleResourceDelete(r);
             }
             
