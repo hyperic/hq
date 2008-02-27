@@ -83,7 +83,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         = { "EAM_PLATFORM", "EAM_SERVER", "EAM_SERVICE", "EAM_CONFIG_RESPONSE",
             "EAM_AGENT", "EAM_IP", "EAM_RESOURCE", "EAM_CPROP_KEY",
             "EAM_TRIGGER_EVENT", "EAM_AUDIT", "EAM_AIQ_SERVER",
-            "EAM_AIQ_PLATFORM" };
+            "EAM_AIQ_PLATFORM", "EAM_RESOURCE_EDGE" };
     
     private final String[] DATA_TABLES 
         = { "EAM_MEASUREMENT_DATA_1D", "EAM_MEASUREMENT_DATA_6H",
