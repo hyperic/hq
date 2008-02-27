@@ -44,6 +44,8 @@ public class Resource extends AuthzNamedBean {
     private boolean      _system = false;
     private Collection   _resourceGroups = new ArrayList();
     private Collection   _virtuals = new ArrayList();
+    private Collection   _fromEdges = new ArrayList();
+    private Collection   _toEdges = new ArrayList();
 
     private ResourceValue resourceValue = new ResourceValue();
 
@@ -130,6 +132,22 @@ public class Resource extends AuthzNamedBean {
 
     protected Collection getResourceGroups() {
         return _resourceGroups;
+    }
+    
+    protected void setFromEdges(Collection e) {
+        _fromEdges = e;
+    }
+    
+    protected Collection getFromEdges() {
+        return _fromEdges;
+    }
+
+    protected void setToEdges(Collection e) {
+        _toEdges = e;
+    }
+    
+    protected Collection getToEdges() {
+        return _toEdges;
     }
 
     /**

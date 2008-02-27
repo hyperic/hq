@@ -59,6 +59,17 @@
       <one-to-many class="Virtual"/>
     </bag>
 
+    <!-- We primarily only want this bag so that Hibernate can use HQL joins
+         for us.  It should not be used from code -->
+    <bag inverse="true" cascade="none" name="fromEdges" table="EAM_RESOURCE_EDGE">
+      <key column="FROM_ID"/>
+      <one-to-many class="ResourceEdge"/>
+    </bag>
+    <bag inverse="true" cascade="none" name="toEdges" table="EAM_RESOURCE_EDGE">
+      <key column="TO_ID"/>
+      <one-to-many class="ResourceEdge"/>
+    </bag>
+
   </class>
 
 </hibernate-mapping>
