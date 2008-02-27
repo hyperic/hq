@@ -39,7 +39,9 @@ public class CrispoOption
     Log _log = LogFactory.getLog(CrispoOption.class.getName());
     
     private static final String[] ARRAY_DESCRIMINATORS = {".resources",
-                                                          ".portlets."};
+                                                          ".portlets.",
+                                                          ".indicator.views",
+                                                          ".charts"};
     private static final String ARRAY_DELIMITER = "|";
     
     private Crispo _crispo;
