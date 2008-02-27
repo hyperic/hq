@@ -50,7 +50,11 @@ import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
 import org.hyperic.hq.measurement.server.session.MeasurementDAO;
-import org.hyperic.hq.measurement.server.session.*;
+import org.hyperic.hq.measurement.server.session.CategoryDAO;
+import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
+import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
+import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
 
 public class HibernateDAOFactory extends DAOFactory {
     private static final SessionFactory sessionFactory = 
