@@ -29,6 +29,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.appdef.shared.AgentValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -37,8 +38,6 @@ import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.measurement.ext.MonitorInterface;
-import org.hyperic.hq.measurement.ext.ScheduleMetricInfo;
-import org.hyperic.hq.measurement.ext.UnscheduleMetricInfo;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.product.MetricValue;
@@ -46,6 +45,8 @@ import org.hyperic.util.collection.ExpireMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.List;
 
 /** 
  * The MoniteringInterface implementation that communicates with
@@ -101,7 +102,7 @@ public class AgentMonitor implements MonitorInterface
      * @param schedule Information about the schedule of metrics to collect
      */
     public void schedule(AgentValue agent, SRN srn, 
-                         ScheduleMetricInfo[] schedule)
+                         Measurement[] schedule)
         throws MonitorAgentException
     {
         SecureAgentConnection conn;
@@ -116,7 +117,7 @@ public class AgentMonitor implements MonitorInterface
             args.setSRN(srn);
 
             for(int i=0; i<schedule.length; i++){
-                Measurement m = schedule[i].getMeasurement();
+                Measurement m = schedule[i];
 
                 String category =
                     m.getTemplate().getCategory().getName();
@@ -144,10 +145,9 @@ public class AgentMonitor implements MonitorInterface
     /** 
      * Unschedule measurements
      *
-     * @param schedule array of items to unschedule
+     * @param ids Array of entities to unschedule
      */
-
-    public void unschedule(AgentValue agent, UnscheduleMetricInfo[] schedule)
+    public void unschedule(AgentValue agent, AppdefEntityID[] ids)
         throws MonitorAgentException 
     {
         SecureAgentConnection conn;
@@ -165,8 +165,8 @@ public class AgentMonitor implements MonitorInterface
             UnscheduleMeasurements_args args = 
                 new UnscheduleMeasurements_args();
             
-            for (int i = 0; i < schedule.length; i++) {
-                args.addEntity(schedule[i].getEntity());
+            for (int i = 0; i < ids.length; i++) {
+                args.addEntity(ids[i]);
             }
 
             client.unscheduleMeasurements(args);

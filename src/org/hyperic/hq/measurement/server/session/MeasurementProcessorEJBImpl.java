@@ -41,8 +41,6 @@ import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.measurement.ext.MonitorInterface;
-import org.hyperic.hq.measurement.ext.ScheduleMetricInfo;
-import org.hyperic.hq.measurement.ext.UnscheduleMetricInfo;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
@@ -124,13 +122,8 @@ public class MeasurementProcessorEJBImpl
     private void unschedule(AgentValue aconn, AppdefEntityID[] entIds)
         throws MeasurementUnscheduleException, MonitorAgentException {
         try {
-            // Create SRNs from the measurements
-            UnscheduleMetricInfo[] schedule =
-                new UnscheduleMetricInfo[entIds.length];
-            
             SRNManagerLocal srnManager = getSRNManager();
-            for (int i = 0; i < schedule.length; i++) {
-                schedule[i] = new UnscheduleMetricInfo(entIds[i]);
+            for (int i = 0; i < entIds.length; i++) {
                 try {
                     srnManager.removeSrn(entIds[i]);
                 } catch (ObjectNotFoundException e) {
@@ -140,7 +133,7 @@ public class MeasurementProcessorEJBImpl
             }
 
             MonitorInterface monitor = MonitorFactory.newInstance();
-            monitor.unschedule(aconn, schedule);
+            monitor.unschedule(aconn, entIds);
         } catch (MonitorCreateException e) {
             throw new MeasurementUnscheduleException(
                 "Could not create monitor", aconn.getId(), e);
@@ -203,18 +196,11 @@ public class MeasurementProcessorEJBImpl
 
         MonitorInterface monitor = MonitorFactory.newInstance();
 
-        ArrayList schedule = new ArrayList();
-
-        for(Iterator i=measurements.iterator(); i.hasNext(); ){
-            Measurement dm = (Measurement)i.next();
-            schedule.add(new ScheduleMetricInfo(dm));
-        }
-
-        ScheduleMetricInfo[] scheduleInfo = (ScheduleMetricInfo[])
-            schedule.toArray(new ScheduleMetricInfo[schedule.size()]);
+        Measurement[] meas = (Measurement[])
+            measurements.toArray(new Measurement[measurements.size()]);
 
         // Then schedule
-        monitor.schedule(aconn, srn, scheduleInfo);
+        monitor.schedule(aconn, srn, meas);
     }
 
     public static MeasurementProcessorLocal getOne() {

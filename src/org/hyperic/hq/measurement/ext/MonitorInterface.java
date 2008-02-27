@@ -26,10 +26,14 @@
 package org.hyperic.hq.measurement.ext;
 
 import org.hyperic.hq.appdef.shared.AgentValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.server.session.SRN;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.product.MetricValue;
+
+import java.util.List;
 
 /** 
  * The interface class to be implemented for any classes that
@@ -54,17 +58,16 @@ public interface MonitorInterface {
      * @throws MonitorAgentException if an error occurs communicating with 
      *         the agent
      */
-    public void schedule(AgentValue agent, SRN srn,
-                         ScheduleMetricInfo[] schedule)
+    public void schedule(AgentValue agent, SRN srn, Measurement[] schedule)
         throws MonitorAgentException;
 
     /** 
      * Unschedule measurements
      *
      * @param agent    Agent to contact to unschedule
-     * @param schedule Array of items to unschedule
+     * @param ids      Array of entities to unschedule
      */
-    public void unschedule(AgentValue agent, UnscheduleMetricInfo[] schedule)
+    public void unschedule(AgentValue agent, AppdefEntityID[] ids)
         throws MonitorAgentException;
 
     /** 
