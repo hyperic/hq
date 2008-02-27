@@ -8216,7 +8216,15 @@ has already been defined.
     <statement targetDB="postgresql">
       select setval('eam_resource_edge_id_seq', max(e.id) + 1) from eam_resource_edge e
     </statement>
+    <statement targetDB="oracle">
+      DROP SEQUENCE eam_resource_edge_id_seq
+    </statement>
     </schema-directSQL>
+    <groovy targetDB="oracle">
+      def maxId = SQL.firstRow('select max(id) as M from eam_resource_edge')['M'] + 1
+      String s = "create sequence eam_resource_edge_id_seq start with ${maxId} increment by 1"
+      SQL.execute(s)
+    </groovy> 
   </schemaSpec>
 
   <schemaSpec version="3.101">
