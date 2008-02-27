@@ -247,7 +247,7 @@ public class ResourceGroupDAO extends HibernateDAO
      */
     public List getMetricsCollecting(ResourceGroup g, Integer templateId) {
         String sql =
-            "select m from DerivedMeasurement m, " +
+            "select m from Measurement m, " +
             "ResourceGroup g join g.resourceSet r " +
             "where m.instanceId = r.instanceId and "+
             "g = ? and m.template.id = ? and m.enabled = true";
