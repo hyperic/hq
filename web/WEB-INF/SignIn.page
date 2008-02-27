@@ -6,6 +6,6 @@
     
 <page-specification class="org.hyperic.hq.ui.pages.SignIn">
 
-    <asset name="new" path="context:css/HQ_40_EE.css"/>
-   
+    <asset name="new" path="context:css/HQ_40_OS.css"/>
+    
 </page-specification>
