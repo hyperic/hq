@@ -53,7 +53,7 @@ public class EhCacheUpgrader extends Task {
     /**
      * A mapping of old cache names to new names.  During the upgrade process
      * any cache matching the old name will have it's size recored under the
-     * new cache name so upgrades do not loose
+     * new cache name so upgrades do not lose cache size modifications.
      */
     private static Map RN = new HashMap();
 
