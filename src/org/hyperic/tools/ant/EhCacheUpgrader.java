@@ -50,6 +50,33 @@ public class EhCacheUpgrader extends Task {
         System.out.println(log);
     }
 
+    /**
+     * A mapping of old cache names to new names.  During the upgrade process
+     * any cache matching the old name will have it's size recored under the
+     * new cache name so upgrades do not loose
+     */
+    private static Map RN = new HashMap();
+
+    static {
+        // DerivedMeasurement removal in 4.0
+        RN.put("org.hyperic.hq.measurement.server.session.DerivedMeasurement.baselinesBag",
+               "org.hyperic.hq.measurement.server.session.Measurement.baselinesBag");
+        RN.put("DerivedMeasurement.findDesignatedByInstanceForCategory",
+               "Measurement.findDesignatedByInstanceForCategory");
+        RN.put("DerivedMeasurement.findByInstance_with_interval",
+               "Measurement.findByInstance_with_interval");
+        RN.put("DerivedMeasurement.findByInstance",
+               "Measurement.findByInstance");
+        RN.put("DerivedMeasurement.findByTemplateForInstance",
+               "Measurement.findByTemplateForInstance");
+        RN.put("Measurement.findIdsByTemplateForInstances",
+               "DerivedMeasurement.findIdsByTemplateForInstances");
+        RN.put("Measurement.findByCategory",
+               "Measurement.findByCategory");
+        RN.put("DerivedMeasurement.findDesignatedByInstance",
+               "Measurement.findDesignatedByInstance");
+    }
+
     public void setExisting(String existingConfigFile) {
         _existingConfigFile = existingConfigFile;
     }
@@ -97,7 +124,13 @@ public class EhCacheUpgrader extends Task {
             String name = n.getAttributes().getNamedItem("name").getNodeValue();
             String size = n.getAttributes().getNamedItem("maxElementsInMemory").
                 getNodeValue();
-            ret.put(name, new Integer(size));
+
+            if (RN.containsKey(name)) {
+                String newName = (String)RN.get(name);
+                ret.put(newName, new Integer(size));
+            } else {
+                ret.put(name, new Integer(size));
+            }
         }
 
         return ret;
