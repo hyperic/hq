@@ -8310,6 +8310,14 @@ has already been defined.
       </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.102">
+      <schema-alterColumn table="EAM_MEASUREMENT"
+                          column="ENABLED"
+                          nullable="NOT NULL"/>
+      <schema-alterColumn table="EAM_MEASUREMENT"
+                          column="COLL_INTERVAL"
+                          nullable="NOT NULL"/>       
+  </schemaSpec>
 </dbupgrade>
 </target>
 

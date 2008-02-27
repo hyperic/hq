@@ -30,10 +30,10 @@
     </property>
 
     <property name="enabled" type="boolean">
-      <column name="ENABLED" not-null="false" index="MEAS_ENABLED_IDX"/>
+      <column name="ENABLED" not-null="true" index="MEAS_ENABLED_IDX"/>
     </property>
     <property name="interval" type="long">
-      <column name="COLL_INTERVAL"/>
+      <column name="COLL_INTERVAL" not-null="true"/>
     </property>
     <property name="formula" type="string">
       <column name="DSN" length="500"/>
