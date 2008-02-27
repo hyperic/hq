@@ -19,10 +19,6 @@
       <column name="NAME" not-null="true" length="100" index="TYPE_NAME_IDX"/>
     </property>
 
-    <property name="cid" type="integer">
-      <column name="CID"/>
-    </property>
-
     <property name="appdefType" type="integer">
       <column name="APPDEF_TYPE" not-null="true"/>
     </property>

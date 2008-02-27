@@ -26,12 +26,8 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -53,11 +49,8 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.data.AggregateObjectMeasurementValue;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.server.express.ExpressionManager;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
@@ -65,13 +58,10 @@ import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.product.MeasurementPluginManager;
-import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.product.shared.ProductManagerUtil;
-import org.hyperic.hq.scheduler.shared.SchedulerLocal;
-import org.hyperic.hq.scheduler.shared.SchedulerUtil;
 
 /** 
  *This is the base class to Measurement Session EJB's
@@ -91,7 +81,6 @@ public abstract class SessionEJB {
 
     private DataManagerLocal dataMan;
     private AgentManagerLocal agentMan;
-    private SchedulerLocal scheduler;
     private ProductManagerLocal prodMan;
     private AuthzSubjectManagerLocal ssmLocal;
     private TemplateManagerLocal templateMan;
@@ -107,12 +96,8 @@ public abstract class SessionEJB {
         return DAOFactory.getDAOFactory().getCategoryDAO();
     }
 
-    protected DerivedMeasurementDAO getDerivedMeasurementDAO() {
-        return DAOFactory.getDAOFactory().getDerivedMeasurementDAO();
-    }
-
-    protected MeasurementArgDAO getMeasurementArgDAO() {
-        return DAOFactory.getDAOFactory().getMeasurementArgDAO();
+    protected MeasurementDAO getMeasurementDAO() {
+        return DAOFactory.getDAOFactory().getMeasurementDAO();
     }
 
     protected MeasurementTemplateDAO getMeasurementTemplateDAO() {
@@ -127,10 +112,6 @@ public abstract class SessionEJB {
         return DAOFactory.getDAOFactory().getMonitorableTypeDAO();
     }
 
-    protected RawMeasurementDAO getRawMeasurementDAO() {
-        return DAOFactory.getDAOFactory().getRawMeasurementDAO();
-    }
-    
     protected ScheduleRevNumDAO getScheduleRevNumDAO() {
         return DAOFactory.getDAOFactory().getScheduleRevNumDAO();
     }
@@ -211,19 +192,6 @@ public abstract class SessionEJB {
         return mpm;
     }
 
-    protected SchedulerLocal getScheduler() {
-        if (scheduler == null) {
-            try {
-                scheduler = SchedulerUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return scheduler;
-    }
-
     protected SRNManagerLocal getSRNManager() {
         if (srnManager == null) {
             try {
@@ -246,27 +214,6 @@ public abstract class SessionEJB {
             }
         }
         return ic;
-    }
-
-    /**
-     * Utility to get measurement ID's that comprise the arguments
-     * of a DerivedMeasurement
-     */
-    protected Integer[] getArgumentIds(DerivedMeasurement dm)
-        throws FinderException {
-        Collection mcol = getRawMeasurementDAO().
-            findByDerivedMeasurement(dm.getId());
-
-        // Now make an array the size of the raw measurements
-        Integer[] rawIds = new Integer[mcol.size()];
-        int ind = 0;
-        for (Iterator i = mcol.iterator(); i.hasNext(); ind++) {
-            RawMeasurement rm = (RawMeasurement)i.next();
-            rawIds[ind] = rm.getId();
-        }
-
-        // XXX - need to reorder the IDs according to the template args
-        return rawIds;
     }
 
     protected AgentValue getAgentConnection(AppdefEntityID id)
@@ -364,90 +311,6 @@ public abstract class SessionEJB {
 
         if (begin < 0)
             throw new IllegalArgumentException(this.ERR_START);
-    }
-
-    /**
-     * Performs the evaluation of the expression.
-     **/
-    protected Double evaluateExpression(DerivedMeasurement measurement,
-                                        Map dataMap)
-        throws EvaluationException {
-
-        long evalStart = System.currentTimeMillis();
-        Double result = MeasurementConstants.EXPR_EVAL_RESULT_DEFAULT;
-        HashMap expValues = new HashMap();
-
-        // Iterate and build the instantJ properties
-        int idx = 0;
-        for (Iterator i = dataMap.keySet().iterator(); i.hasNext();) {
-            // dataMap contains MeasurementValues only.
-            Integer key = (Integer) i.next();
-            MetricValue mv = (MetricValue) dataMap.get(key);
-            if (mv instanceof AggregateObjectMeasurementValue)
-                expValues.put(
-                    MeasurementConstants.TEMPL_IDENTITY_PFX + (++idx),
-                    ((AggregateObjectMeasurementValue) mv).getAggArray());
-            else
-                expValues.put(
-                    MeasurementConstants.TEMPL_IDENTITY_PFX + (++idx),
-                    mv.getObjectValue());
-
-            if (log.isDebugEnabled())
-                if (mv instanceof AggregateObjectMeasurementValue)
-                    log.debug("InstantJ Properties to receive: " +
-                        MeasurementConstants.TEMPL_IDENTITY_PFX + idx + ":" +
-                        ((AggregateObjectMeasurementValue) mv).getAggArray());
-                else
-                    log.debug("InstantJ Properties to receive: " +
-                        MeasurementConstants.TEMPL_IDENTITY_PFX + (idx) + ":" +
-                        mv);
-        }
-
-        // Get the expression through the factory for caching
-        try {
-            ExpressionManager expMgr = ExpressionManager.getInstance();
-
-            /* If the expression is not memory cache, then attempt to
-               deserialize it from the database version. If it cannot
-               be deserialized, then mfg a new one and db store the
-               serialized object.
-            */
-            if (log.isDebugEnabled())
-                log.debug("SessionEJB- evaluating expression");
-
-            long expmgrstart = System.currentTimeMillis();
-            byte[] expressionData =
-                measurement.getTemplate().getExpressionData();
-            result =
-                ExpressionManager.getInstance().evaluate(
-                    measurement.getId(),
-                    measurement.getTemplate().getTemplate(),
-                    expValues,
-                    MeasurementConstants.EXPMGR_PACKAGE_IMPORTS,
-                    expressionData);
-            logTime("expressionEvaluate-expmgreval", expmgrstart);
-
-            if (expressionData == null) {
-                if (log.isDebugEnabled())
-                    log.debug("SessionEJB- caching expression");
-
-                measurement.getTemplate().setExpressionData(
-                    expMgr.getExpressionBytes(measurement.getId()));
-            }
-
-        } catch (Exception exc) {
-            throw new EvaluationException(exc);
-        }
-        logTime("evaluateExpression", evalStart);
-        return result;
-    }
-    
-    private void logTime(String method, long start) {
-        if (timingLog.isDebugEnabled()) {
-            long end = System.currentTimeMillis();
-            timingLog.debug("SesionEJB." + method + "() - " + end + "-" +
-                            start + "=" + (end - start));
-        }
     }
 
     protected void deleteMetricProblems(Collection mids) {

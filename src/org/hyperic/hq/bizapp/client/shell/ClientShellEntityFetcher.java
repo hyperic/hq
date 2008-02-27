@@ -107,15 +107,11 @@ import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
-import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConfigException;
-import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -627,7 +623,7 @@ public class ClientShellEntityFetcher {
         throws NamingException, ClientShellAuthenticationException,
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, MeasurementNotFoundException,
-               EvaluationException, LiveMeasurementException, RemoteException
+               LiveMeasurementException, RemoteException
     {
         MeasurementBoss boss;
 
@@ -988,24 +984,6 @@ public class ClientShellEntityFetcher {
         boss = this.bossManager.getAIBoss();
         boss.toggleRuntimeScan(this.auth.getAuthToken(), id, 
                                doEnable);
-    }
-
-    public Integer createDerivedMeasurementTemplate(String name, String alias,
-                                                    String monType, String cat,
-                                                    String expr, String units,
-                                                    int collectionType,
-                                                    MeasurementArgValue[] args)
-        throws SessionNotFoundException, SessionTimeoutException,
-               ClientShellAuthenticationException, RemoteException, 
-               NamingException
-    {
-        MeasurementBoss boss;
-
-        boss = this.bossManager.getMeasurementBoss();
-        return boss.createDerivedMeasurementTemplate(this.auth.getAuthToken(),
-                                                     name, alias, monType, cat,
-                                                     expr, units, 
-                                                     collectionType, args);
     }
 
     public void removeDerivedMeasurementTemplate(int metricId)

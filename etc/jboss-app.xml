@@ -6,9 +6,6 @@
     <service>measurement-mq-service.xml</service>
   </module>
   <module>
-    <service>measurement-prop-service.xml</service>
-  </module>
-  <module>
     <service>events-mq-service.xml</service>
   </module>
   <module>

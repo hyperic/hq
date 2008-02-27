@@ -15,8 +15,7 @@
     </version>
 
     <properties name="baselineId">
-      <many-to-one name="derivedMeasurement" unique="true" fetch="join" class="DerivedMeasurement">
-        
+      <many-to-one name="measurement" unique="true" fetch="join">      
         <column name="MEASUREMENT_ID" not-null="false" index="METRIC_BASELINE_CALCULATED_IDX"/>
       </many-to-one>
     </properties>

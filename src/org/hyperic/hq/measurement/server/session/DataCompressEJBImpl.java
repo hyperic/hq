@@ -125,7 +125,7 @@ public class DataCompressEJBImpl
         }
     }
 
-    private void truncateRawMeasurements(long truncateBefore)
+    private void truncateMeasurementData(long truncateBefore)
         throws SQLException, NamingException
     {
         // we can't get any accurate metric tablenames if truncateBefore
@@ -197,7 +197,7 @@ public class DataCompressEJBImpl
         String metricUnion = MeasTabManagerUtil.getUnionStatement((now-HOUR), now);
         last = compressData(metricUnion, TAB_DATA_1H, HOUR, now);
         // Purge, ensuring we don't purge data not yet compressed.
-        truncateRawMeasurements(Math.min(now - this.purgeRaw, last));
+        truncateMeasurementData(Math.min(now - this.purgeRaw, last));
 
         // Purge metric problems as well
         purgeMeasurements(TAB_PROB,

@@ -16,10 +16,6 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <property name="cid" type="integer">
-      <column name="CID"/>
-    </property>
-
     <property name="name" type="string">
       <column name="NAME" not-null="true" length="100"/>
     </property>
@@ -56,10 +52,6 @@
       <column name="PLUGIN" length="250"/>
     </property>
 
-    <property lazy="true" name="expressionData" type="binary">
-      <column name="EXPRESSION_DATA"/>
-    </property>
-
     <property name="ctime" type="long">
       <column name="CTIME" not-null="true"/>
     </property>
@@ -75,16 +67,6 @@
     <many-to-one name="category" class="Category">
       <column name="CATEGORY_ID" not-null="true" index="TEMPL_CATEGORY_IDX"/>
     </many-to-one>
-
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="measurementArgsBag" table="EAM_MEASUREMENT_ARG">
-      <key on-delete="cascade" column="MEASUREMENT_TEMPLATE_ID"/>
-      <one-to-many class="MeasurementArg"/>
-    </bag>
-
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="rawMeasurementArgs" table="EAM_MEASUREMENT_ARG">
-      <key on-delete="cascade" column="MEASUREMENT_TEMPLATE_ARG_ID"/>
-      <one-to-many class="MeasurementArg"/>
-    </bag>
 
   </class>
 

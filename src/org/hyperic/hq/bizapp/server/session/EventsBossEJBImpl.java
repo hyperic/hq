@@ -121,7 +121,7 @@ import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
@@ -362,10 +362,10 @@ public class EventsBossEJBImpl
                 case EventConstants.TYPE_CHANGE:
                     Integer tid = new Integer(clone.getMeasurementId());
                     
-                    // Don't need to synch the DerivedMeasurement with the db 
-                    // since changes to the DerivedMeasurement aren't cascaded 
+                    // Don't need to synch the Measurement with the db
+                    // since changes to the Measurement aren't cascaded
                     // on saving the AlertCondition.
-                    DerivedMeasurement dmv =
+                    Measurement dmv =
                         getMetricManager().findMeasurement(subject, tid,
                                                            id.getId(), true);
                     clone.setMeasurementId(dmv.getId().intValue());

@@ -31,10 +31,5 @@ public interface MetricDeleteCallback {
     /**
      * Called before metrics are deleted.
      */
-    void beforeMetricDelete(RawMeasurement m);
-
-    /**
-     * Called before metrics are deleted.
-     */
     void beforeMetricsDelete(Collection mids);
 }

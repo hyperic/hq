@@ -55,7 +55,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
@@ -310,7 +310,7 @@ public class ViewAction extends BaseAction {
         MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
 
         try {
-            DerivedMeasurement m = mBoss.findAvailabilityMetric(sessionId, id);
+            Measurement m = mBoss.findAvailabilityMetric(sessionId, id);
 
             CacheEntry res = new CacheEntry(m);
             cache.put(new Element(id, res));

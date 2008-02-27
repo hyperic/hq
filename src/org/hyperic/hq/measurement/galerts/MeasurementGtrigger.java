@@ -56,7 +56,7 @@ import org.hyperic.hq.galerts.processor.FireReason;
 import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategy;
 import org.hyperic.hq.measurement.TimingVoodoo;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
@@ -255,7 +255,7 @@ public class MeasurementGtrigger
         // Find resources that are just starting to collect and create 
         // a resource metric tracker for those resources.
         for (Iterator iter = derivedMeas.iterator(); iter.hasNext();) {
-            DerivedMeasurement meas = (DerivedMeasurement) iter.next();
+            Measurement meas = (Measurement) iter.next();
             int mid = meas.getId().intValue();
             MeasurementZeventSource srcId = new MeasurementZeventSource(mid);
             
@@ -277,7 +277,7 @@ public class MeasurementGtrigger
         _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
         
         for (Iterator iter = derivedMeas.iterator(); iter.hasNext();) {
-            DerivedMeasurement meas = (DerivedMeasurement) iter.next();
+            Measurement meas = (Measurement) iter.next();
             int mid = meas.getId().intValue();
             Long interval = new Long(meas.getInterval());
             _srcId2CollectionInterval.put(
@@ -682,7 +682,7 @@ public class MeasurementGtrigger
                     continue;                
             }
             
-            DerivedMeasurement metric = 
+            Measurement metric =
                 dmMan.getMeasurement(new Integer(src.getId()));
             
             if (metric == null) {
@@ -761,7 +761,7 @@ public class MeasurementGtrigger
             _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
             
             for (Iterator iter = derivedMeas.iterator(); iter.hasNext();) {
-                DerivedMeasurement meas = (DerivedMeasurement) iter.next();
+                Measurement meas = (Measurement) iter.next();
                 int mid = meas.getId().intValue();
                 Long interval = new Long(meas.getInterval());
                 
@@ -804,7 +804,7 @@ public class MeasurementGtrigger
     /**
      * Get the measurements collecting for each resource in the group.
      * 
-     * @return The list of {@link DerivedMeasurement} objects.
+     * @return The list of {@link org.hyperic.hq.measurement.server.session.Measurement} objects.
      */
     private List getMeasurementsCollecting() {
         return getRGMan().getMetricsCollecting(_resourceGroup, _templateId);

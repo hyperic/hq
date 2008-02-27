@@ -29,7 +29,7 @@ import java.io.Serializable;
 
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.measurement.server.session.Baseline;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.product.MetricValue;
 
@@ -46,7 +46,7 @@ public class MeasurementMetadataSummary implements Serializable {
     private Double _lastValue;
     private Integer _metricId;
 
-    public MeasurementMetadataSummary(DerivedMeasurement mm, MetricValue mv,
+    public MeasurementMetadataSummary(Measurement mm, MetricValue mv,
                                       AppdefResourceValue resource) {
         Baseline b = mm.getBaseline();
         setEnabled(Boolean.valueOf(mm.isEnabled()));

@@ -62,8 +62,8 @@ import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.util.NumberUtil;
 import org.hyperic.util.pager.PageControl;
@@ -453,7 +453,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *         value or <code>NOTAVAIL</code> if the value cannot be converted.
      */
     private String safeGetAlertConditionLogNumericValue(AlertConditionLog log, 
-                                                        DerivedMeasurement dm) {
+                                                        Measurement dm) {
         Number val = NumberUtil.stringAsNumber(log.getValue());
         
         if (NumberUtil.NaN.equals(val)) {
@@ -495,9 +495,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 //            TriggerFiredEvent event = (TriggerFiredEvent)
 //            eventMap.get( cond.getTriggerId() );
 
-            DerivedMeasurementDAO dmDao =
-                new DerivedMeasurementDAO(DAOFactory.getDAOFactory());
-            DerivedMeasurement dm;
+            MeasurementDAO dmDao =
+                new MeasurementDAO(DAOFactory.getDAOFactory());
+            Measurement dm;
             
             switch (cond.getType()) {
             case EventConstants.TYPE_THRESHOLD:

@@ -31,7 +31,6 @@ public class MonitorableType
     extends PersistedObject
 {
     private String     _name;
-    private Integer    _cid;
     private int        _appdefType;
     private String     _plugin;
     
@@ -50,14 +49,6 @@ public class MonitorableType
     
     protected void setName(String name) {
         _name = name;
-    }
-
-    public Integer getCid() {
-        return _cid;
-    }
-    
-    protected void setCid(Integer cid) {
-        _cid = cid;
     }
 
     public int getAppdefType() {

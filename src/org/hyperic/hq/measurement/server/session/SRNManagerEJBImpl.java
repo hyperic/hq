@@ -32,21 +32,13 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
-import org.hyperic.hq.measurement.ext.depgraph.DerivedNode;
-import org.hyperic.hq.measurement.ext.depgraph.Graph;
-import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
-import org.hyperic.hq.measurement.ext.depgraph.Node;
-import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 
@@ -58,7 +50,6 @@ import java.util.Iterator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * The tracker manager handles sending agents add and remove operations
@@ -351,108 +342,11 @@ public class SRNManagerEJBImpl extends SessionEJB
         return DerivedMeasurementManagerEJBImpl.getOne();
     }
 
-    private DerivedMeasurement 
-        getDMByTemplateAndInstance(DerivedMeasurementManagerLocal dman, 
-                                   Integer tid, Integer instanceId)
-        throws MeasurementNotFoundException
-    {
-        return dman.findMeasurement(tid, instanceId);
-    }
-
-    private RawMeasurement 
-        getRMByTemplateAndInstance(RawMeasurementManagerLocal rMan, Integer tid,
-                                   Integer instanceId) 
-    {
-        return rMan.findMeasurement(tid, instanceId);
-    }
-
-    private void reschedule(AppdefEntityID entId, List dmVos)
-        throws InvalidGraphException, PermissionException,
+    private void reschedule(AppdefEntityID entId, List dms)
+        throws PermissionException,
                MeasurementScheduleException, MonitorAgentException
     {
-        RawMeasurementManagerLocal rMan = RawMeasurementManagerEJBImpl.getOne();
-        DerivedMeasurementManagerLocal dMan = getDMan();
-        
-        Set agentSchedule  = new HashSet();
-        Graph[] graphs = new Graph[dmVos.size()];
-
-        Iterator it = dmVos.iterator();
-        for (int i = 0; it.hasNext(); i++) {
-            DerivedMeasurement dmVo = (DerivedMeasurement) it.next();
-            MeasurementTemplate tmpl = dmVo.getTemplate();
-            
-            graphs[i] = GraphBuilder.buildGraph(tmpl);
-            
-            DerivedNode derivedNode = (DerivedNode)
-                graphs[i].getNode( tmpl.getId().intValue() );
-
-            // first handle simple IDENTITY derived case
-            if (MeasurementConstants.TEMPL_IDENTITY.equals(tmpl.getTemplate()))
-            {
-                // If this node is an identity, there's only one node below...
-                // the raw node. Fetch it.
-                RawNode rawNode = (RawNode)
-                    derivedNode.getOutgoing().iterator().next();
-
-                MeasurementTemplate rawTemplate =
-                    rawNode.getMeasurementTemplate();
-
-                derivedNode.setInterval(dmVo.getInterval());
-
-                RawMeasurement rmVal =
-                    getRMByTemplateAndInstance(rMan, rawTemplate.getId(),
-                                               dmVo.getInstanceId());
-
-                if (rmVal == null) {    // Don't reschedule if no raw metric
-                    _log.error("AgentScheduleSynchronizer: Cannot look up " +
-                              "raw metric by template and instance IDs");
-                    continue;
-                }
-                
-                // Add the raw measurement to the schedule
-                agentSchedule.add( rmVal.getId() );
-            } else {
-                // we're not an identity DM template, so we need
-                // to make sure that measurements are enabled for
-                // the whole graph
-                for (Iterator graphNodes = graphs[i].getNodes().iterator();
-                     graphNodes.hasNext();) {
-
-                    // we don't yet know whether its an RM or DM
-                    Node node = (Node)graphNodes.next();
-
-                    // Fetch the template
-                    MeasurementTemplate templArg =
-                        node.getMeasurementTemplate();
-
-                    if (node instanceof DerivedNode) {
-                        try {
-                            DerivedMeasurement tmpDm =
-                                getDMByTemplateAndInstance(dMan, 
-                                    templArg.getId(), dmVo.getInstanceId());
-                            long targetInterval = tmpDm.getInterval();
-
-                            if ( dmVo.getId().equals( templArg.getId() ) )
-                                dmVo = tmpDm;
-
-                            ( (DerivedNode)node ).setInterval(targetInterval);
-                        } catch (MeasurementNotFoundException e) {
-                            continue;
-                        }
-                    } else {
-                        // we are a raw node
-                        RawMeasurement rmVal =
-                            getRMByTemplateAndInstance(rMan, templArg.getId(), 
-                                                       dmVo.getInstanceId());
-
-                        agentSchedule.add( rmVal.getId() );
-                    } 
-                } 
-            } 
-        }
-
-        MeasurementProcessorEJBImpl.getOne().schedule(entId, graphs, 
-                                                      agentSchedule);
+        MeasurementProcessorEJBImpl.getOne().schedule(entId, dms);
     }
     
     private void unschedule(AppdefEntityID eid)
@@ -470,7 +364,7 @@ public class SRNManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public void reschedule(AppdefEntityID eid)
-        throws InvalidGraphException, MeasurementScheduleException,
+        throws MeasurementScheduleException,
                MonitorAgentException, PermissionException,
                MeasurementUnscheduleException
     {

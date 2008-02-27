@@ -25,39 +25,28 @@
 
 package org.hyperic.hq.measurement.ext;
 
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.server.session.RawMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
 
 /**
  * This class simply wraps all the data needed to schedule measurements
  * on a MonitorInterface
  */
-
 public class ScheduleMetricInfo {
-    private DerivedMeasurement _derivedMetric;
-    private RawMeasurement[] _rawMetrics;
+    private Measurement _measurement;
 
     /**
      * Construct a new ScheduleMetricInfo object, encapsulating a bunch of
      * info needed for MonitorInterfaces to schedule the collection.
      *
-     * @param derived    The derived measurement used for reference for 
-     *                   interval and such
-     * @param rawMetrics The raw metrics which will be collected, and are
-     *                   constituents of 'derived'
+     * @param measurement The derived measurement used for reference for
+     *                    interval and such
      */
-    public ScheduleMetricInfo(DerivedMeasurement derived,
-                              RawMeasurement[] rawMetrics)
+    public ScheduleMetricInfo(Measurement measurement)
     {
-        _derivedMetric = derived;
-        _rawMetrics = rawMetrics;
+        _measurement = measurement;
     }
 
-    public DerivedMeasurement getDerivedMetric(){
-        return _derivedMetric;
-    }
-
-    public RawMeasurement[] getRawMetrics(){
-        return _rawMetrics;
+    public Measurement getMeasurement(){
+        return _measurement;
     }
 }

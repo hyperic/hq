@@ -60,7 +60,6 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
-import org.hyperic.hq.measurement.data.AggregateObjectMeasurementValue;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
@@ -1111,7 +1110,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch the list of historical data points given
      * a start and stop time range and interval
      *
-     * @param ids The id's of the DerivedMeasurement
+     * @param ids The id's of the Measurement
      * @param begin The start of the time range
      * @param end The end of the time range
      * @param interval Interval for the time range
@@ -1358,7 +1357,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch a list of historical data points of a specific size Note: There is
      * no guarantee that the list will be the size requested. It may be smaller.
      * 
-     * @param id The id of the DerivedMeasurement
+     * @param id The id of the Measurement
      * @param count The number of data points to return
      * @return the list of data points
      * @ejb:interface-method
@@ -1495,172 +1494,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Fetch a set of data points for a single measurement that fall along a
-     * given interval bounded by a range.
+     * Fetch the most recent data point for particular Measurements.
      *
-     * @param id the id of the Derived Measurement
-     * @param startTime the start time.
-     * @param intervalInMs the interval length in ms (i.e. 60000 = 60 seconds)
-     * @param ticks the the number of ticks desired.
-     * @return an array object
-     * @ejb:interface-method
-     */
-    public AggregateObjectMeasurementValue getTimedDataAggregate(
-        Integer id, long startTime, long intervalInMs, int ticks)
-        throws DataNotAvailableException {
-        // jwescott -- this really is voodoo
-        long[] bounds = TimingVoodoo.aggregate(startTime, intervalInMs, ticks);
-    
-        List data = this.getHistoricalData(id, bounds[0], bounds[1],
-                                           PageControl.PAGE_ALL);
-    
-        AggregateObjectMeasurementValue mval = null;
-    
-        // zero record count returns null which forces datanotfound ex.
-        if (data.size() > 0) {
-            mval = new AggregateObjectMeasurementValue();
-            // Create an array based on the values returned
-            Double[] mvArray = new Double[data.size()];
-            int i = 0;
-            for (Iterator it = data.iterator(); it.hasNext(); i++) {
-                MetricValue mv = (MetricValue) it.next();
-                mvArray[i] = new Double(mv.getValue());
-            }
-            mval.setAggArray(mvArray);
-        }
-    
-        return mval;
-    }
-
-    /**
-     * Fetch a data point around a particular interval. If there
-     * are more than one record that falls in range, then the closest
-     * value to the interval will be used.
-     *
-     * @param id the id of the Derived Measurement
-     * @param startTime start time.
-     * @param intervalInMs the interval length in ms (i.e. 60000 = 60 seconds)
-     * @param prev the measurement cycle relevent to now
-     *             (i.e. 3 = three cycles ago)
-     * @return the list of data points
-     * @ejb:interface-method
-     */
-    public MetricValue getTimedData(Integer id, long startTime,
-                                    long intervalInMs, int prev) 
-        throws DataNotAvailableException {
-        // jwescott -- this really is voodoo
-        long[] bounds = TimingVoodoo.previous(startTime, intervalInMs, prev);
-
-        Connection conn = null;
-        Statement  stmt = null;
-        ResultSet  rs   = null;
-
-        // The table to query from
-        String table = getDataTable(startTime, System.currentTimeMillis(),
-                                    id.intValue());
-        try
-        {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            final String sqlString =
-                "SELECT timestamp, value, "+
-                " abs(timestamp - " + bounds[2] + ") AS diff" +
-                " FROM " + table +
-                " WHERE timestamp BETWEEN " + bounds[0] + " AND " + bounds[1] +
-                " AND measurement_id = " + id.intValue()+
-                " ORDER BY diff ASC";
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sqlString);
-            if(rs.next())
-                return getMetricValue(rs);
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } catch (SQLException e) {
-            // Allow the DataNotAvailableException to be thrown
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-        }
-        throw new DataNotAvailableException(
-            "No data available for " + id + " at " + startTime);
-    }
-
-    /**
-     * Fetch the list of data points given a request time
-     *
-     * @param ids The id's of the Derived Measurement
-     * @return the list of data points
-     * @ejb:interface-method
-     */
-    public Map getTimedData(Integer[] ids, long reqTime, long interval) 
-        throws DataNotAvailableException {
-        HashMap values = new HashMap();
-
-        // If we have no ID's, then return empty map
-        if (ids.length == 0)
-            return values;
-        
-        Connection        conn = null;
-        PreparedStatement stmt = null;
-        ResultSet         rs   = null;
-
-        // The table to query from
-        String table = getDataTable(reqTime, System.currentTimeMillis(), ids);
-        try
-        {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            // DEBUG: connection tracking code
-
-            StringBuffer sqlBuf = new StringBuffer(
-                "SELECT * FROM " + table + " WHERE ")
-                .append("timestamp BETWEEN ? AND ? AND ")
-                .append(DBUtil.composeConjunctions("measurement_id", ids.length));
-
-            stmt = conn.prepareStatement(sqlBuf.toString());
-
-            int i = this.setStatementArguments(stmt, 1, ids);
-
-            // jwescott -- this really is voodoo
-            long[] bounds = TimingVoodoo.current(reqTime, interval);
-
-            // this is too verbose ... turn it off for now
-            if ( false &&_log.isDebugEnabled() ) {
-                _log.debug("sql: " + sqlBuf.toString());
-                StringBuffer sb = new StringBuffer();
-                sb.append(ids[0].intValue());
-                for (int idx=1; idx<ids.length; ++idx) {
-                    sb.append("," + ids[idx].intValue());
-                }
-                _log.debug("ids: " + sb.toString());
-                _log.debug("ts1: " + bounds[0]);
-                _log.debug("ts2: " + bounds[1]);
-            }
-
-            // Let's be generous and give a 5 second window
-            stmt.setLong(i++, bounds[0]);
-            stmt.setLong(i++, bounds[1]);
-            rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                Integer mid = new Integer(rs.getInt("measurement_id"));
-                values.put(mid, getMetricValue(rs));
-            }
-
-            return values;
-        } catch (SQLException e) {
-            throw new DataNotAvailableException(
-                "Can't get timed data for: " + StringUtil.arrayToString(ids),e);
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-        }
-    }
-
-    /**
-     * Fetch the most recent data point for particular DerivedMeasurements.
-     *
-     * @param ids The id's of the DerivedMeasurements
+     * @param ids The id's of the Measurements
      * @param timestamp Only use data points with collection times greater
      * than the given timestamp.
      * @return A Map of measurement ids to MetricValues.
@@ -1761,10 +1597,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Fetch the most recent non-zero data point for a particular
-     * DerivedMeasurement.
+     * Fetch the most recent non-zero data point for a particular Measurement.
      *
-     * @param id the ID of the DerivedMeasurement
+     * @param id the ID of the Measurement
      * @param timeAfter the result timestamps are greater than this value
      * @return a long time value
      */
@@ -2003,7 +1838,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Aggregate data across the given metric IDs, returning max, min, avg, and
      * count of number of unique metric IDs
      *
-     * @param mids The id's of the DerivedMeasurement
+     * @param mids The id's of the Measurement
      * @param begin The start of the time range
      * @param end The end of the time range
      * @return the An array of aggregate values

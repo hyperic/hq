@@ -34,7 +34,6 @@ import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.MeasurementReportConstructor;
 import org.hyperic.hq.measurement.data.ValueList;
-import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.product.MetricValue;
 
 import org.apache.commons.logging.Log;
@@ -127,30 +126,19 @@ public class MeasurementSendReport_args
             throw new LatherRemoteException("Measurement report mismatch");
         }
 
-        boolean trace = _log.isTraceEnabled();
-        int metricId = 0;
-        if (trace) {
-            metricId = getRawMetricDebugId().intValue();
-        }
         for(int i=0; i<dsnIdList.length; i++)
         {
-            if (trace && (metricId == -1 || metricId == cidList[i]))
-            {
-                _log.trace("Got data point for CID=" + cidList[i] +
-                           " DSN=" + dsnIdList[i] +
-                           " debugId=" + metricId +
-                           " Value=" + valueList[i] +
-                           " tStamp=" + ((long)tStampList[i]));
-            }
             con.addDataPoint(cidList[i], dsnIdList[i],
                              new MetricValue(valueList[i],
-                                                  (long)tStampList[i]));
+                                             (long)tStampList[i]));
         }
 
         res = new MeasurementReport();
         try {
             res.setAgentToken(this.getStringValue(PROP_AGENT_TOKEN));
-        } catch (LatherKeyNotFoundException e) {}
+        } catch (LatherKeyNotFoundException e) {
+            _log.error("Unable to find agent token", e);
+        }
 
         res.setClientIdList(con.constructDSNList());
 
@@ -166,19 +154,5 @@ public class MeasurementSendReport_args
 
         res.setSRNList(srnList);
         return res;
-    }
-
-    private Integer getRawMetricDebugId()
-    {
-        try {
-            return new Integer(MonitorFactory.getProperty("agent.metricDebug"));
-        } catch (Exception e) {
-            return new Integer(1);
-        }
-    }
-
-    public void validate()
-        throws LatherRemoteException
-    {
     }
 }

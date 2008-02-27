@@ -40,15 +40,12 @@ import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
-import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
-import org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer;
 import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
 import org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
@@ -81,9 +78,6 @@ public class ScheduleVerificationService
     private MeasurementProcessorLocal getMeasurementProcessor() {
         return MeasurementProcessorEJBImpl.getOne();
     }
-
-    private AgentScheduleSynchronizer agentSync =
-        AgentScheduleSynchronizer.getInstance();
 
     /**
      * @jmx:managed-operation
@@ -173,8 +167,6 @@ public class ScheduleVerificationService
                 _log.debug("Scheduling error during rescheduling of " + entId);
             } catch (MeasurementUnscheduleException e) {
                 _log.debug("Scheduling error during unscheduling of " + entId);
-            } catch (InvalidGraphException e) {
-                _log.debug("Invalid graph for rescheduling of " + entId);
             }
         }
     }

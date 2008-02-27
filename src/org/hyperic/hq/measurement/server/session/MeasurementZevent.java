@@ -48,7 +48,7 @@ public class MeasurementZevent extends Zevent {
         }
         
         /**
-         * Returns the id of the {@link DerivedMeasurement} that the event is
+         * Returns the id of the {@link Measurement} that the event is
          * for.
          */
         public int getId() {

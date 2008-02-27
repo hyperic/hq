@@ -71,12 +71,10 @@ import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.measurement.server.session.CategoryDAO;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
+import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
 import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
-import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
 
 public abstract class DAOFactory {
@@ -139,10 +137,8 @@ public abstract class DAOFactory {
     // Measurement DAOs
     public abstract CategoryDAO getCategoryDAO();
     public abstract MonitorableTypeDAO getMonitorableTypeDAO();
-    public abstract RawMeasurementDAO getRawMeasurementDAO();
-    public abstract DerivedMeasurementDAO getDerivedMeasurementDAO();
+    public abstract MeasurementDAO getMeasurementDAO();
     public abstract MeasurementTemplateDAO getMeasurementTemplateDAO();
-    public abstract MeasurementArgDAO getMeasurementArgDAO();
     public abstract MetricProblemDAO getMetricProblemDAO();
     public abstract ScheduleRevNumDAO getScheduleRevNumDAO();
 

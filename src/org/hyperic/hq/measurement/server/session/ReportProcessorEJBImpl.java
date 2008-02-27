@@ -43,10 +43,7 @@ import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
-import org.hyperic.hq.measurement.data.SingleMeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
-import org.hyperic.hq.measurement.ext.MonitorFactory;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
@@ -70,12 +67,10 @@ public class ReportProcessorEJBImpl
 {
     private final Log log = LogFactory.getLog(ReportProcessorEJBImpl.class);
 
-    private final DataManagerLocal _dataMan = DataManagerEJBImpl.getOne();
     private final DerivedMeasurementManagerLocal _dmMan =
         DerivedMeasurementManagerEJBImpl.getOne();
     private final MeasurementProcessorLocal _measurementProc =
         MeasurementProcessorEJBImpl.getOne();
-    private Integer _debugId;
     
     private void addPoint(List points, Integer metricId, MetricValue[] vals)
     {
@@ -94,12 +89,10 @@ public class ReportProcessorEJBImpl
         }
     }
     
-    private void addData(List dataPoints, DerivedMeasurement dm, int dsnId, 
+    private void addData(List dataPoints, Measurement dm, int dsnId,
                          MetricValue[] dpts, long current)
     {
         long interval = dm.getInterval();
-        boolean isPassThrough =
-            dm.getFormula().equals(MeasurementConstants.TEMPL_IDENTITY);
 
         // Safeguard against an anomaly
         if (interval <= 0) {
@@ -107,49 +100,25 @@ public class ReportProcessorEJBImpl
                      dm);
             interval = 60 * 1000;
         }
-        
-        
+
         // Each datapoint corresponds to a set of measurement
         // values for that cycle.
         MetricValue[] passThroughs = new MetricValue[dpts.length];
 
-        boolean trace = log.isTraceEnabled();
-        if (trace) {
-            setDebugID();
-        }
         for (int i = 0; i < dpts.length; i++)
         {
             // Save data point to DB.
             long retrieval = dpts[i].getTimestamp();
-            if (isPassThrough) {
-                long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
+            long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
 
-                // Debugging missing data points
-                if (trace && _debugId != null &&
-                        (_debugId.intValue() == -1 ||
-                         dm.getId().equals(_debugId))) {
-                    log.trace("metricDebug: ReportProcessor addData: " +
-                              "metric ID " + dm.getId() +
-                              " debug ID " + _debugId +
-                              " value=" + dpts[i].getValue() +
-                              " at " + adjust);
-                }
+            // Create new Measurement data point with the adjusted time
+            MetricValue modified = new MetricValue(dpts[i].getValue(),
+                                                   adjust);
+            passThroughs[i] = modified;
 
-                // Create new Measurement data point with the adjusted time
-                MetricValue modified = new MetricValue(dpts[i].getValue(),
-                                                       adjust);
-                passThroughs[i] = modified;
-            } else {
-                Integer rmid = new Integer(dsnId);
-
-                // Add the raw measurement if it's not a pass-thru
-                addPoint(dataPoints, rmid, dpts);
-            }
         }
 
-        if (isPassThrough) {
-            addPoint(dataPoints, dm.getId(), passThroughs);
-        }
+        addPoint(dataPoints, dm.getId(), passThroughs);
     }
 
     /**
@@ -171,7 +140,7 @@ public class ReportProcessorEJBImpl
         
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
-            DerivedMeasurement dm = _dmMan.getMeasurement(dmId);
+            Measurement dm = _dmMan.getMeasurement(dmId);
             
             // Can't do much if we can't look up the derived measurement
             // If the measurement is enabled, we just throw away their data
@@ -216,15 +185,7 @@ public class ReportProcessorEJBImpl
             }
         }
     }
-
-    /**
-     * @ejb:interface-method
-     */
-    public void handleMeasurementReport(SingleMeasurementReport single){
-        _dataMan.addData(single.getMeasurementId(), 
-                         single.getMeasurementValue(), true);
-    }
-
+    
     /**
      * Sends the actual data to the DB.
      */
@@ -241,16 +202,6 @@ public class ReportProcessorEJBImpl
         } catch(InterruptedException e) {
             throw new SystemException("Interrupted while attempting to " + 
                                       "insert data");
-        }
-    }
-
-    private void setDebugID()
-    {
-        try {
-            _debugId =
-                new Integer(MonitorFactory.getProperty("agent.metricDebug"));
-        } catch (Exception e) {
-            _debugId = null;
         }
     }
 

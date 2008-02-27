@@ -46,8 +46,8 @@ public class PagerProcessor_measurement implements PagerProcessor {
         // converted to use measurement pojo's.
         if (o instanceof MeasurementTemplate) {
             return ((MeasurementTemplate)o).getMeasurementTemplateValue();
-        } else if (o instanceof DerivedMeasurement) {
-            return ((DerivedMeasurement)o).getDerivedMeasurementValue();
+        } else if (o instanceof Measurement) {
+            return ((Measurement)o).getDerivedMeasurementValue();
         }
 
         if (!(o instanceof EJBLocalObject)) {

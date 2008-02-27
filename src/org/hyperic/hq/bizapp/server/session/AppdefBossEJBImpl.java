@@ -162,7 +162,7 @@ import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
@@ -3989,7 +3989,7 @@ public class AppdefBossEJBImpl
             Map.Entry entry = (Map.Entry) it.next();
             Integer mid = (Integer) entry.getKey();
             
-            DerivedMeasurement metric = dmMan.getMeasurement(mid);
+            Measurement metric = dmMan.getMeasurement(mid);
             CPropResource cpRes =
                 (CPropResource) res.get(metric.getInstanceId());
             

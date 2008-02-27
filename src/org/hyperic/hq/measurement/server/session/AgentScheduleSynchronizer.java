@@ -24,10 +24,8 @@
  */
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -36,21 +34,6 @@ import net.sf.ehcache.Element;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.MeasurementScheduleException;
-import org.hyperic.hq.measurement.MeasurementUnscheduleException;
-import org.hyperic.hq.measurement.ext.depgraph.DerivedNode;
-import org.hyperic.hq.measurement.ext.depgraph.Graph;
-import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
-import org.hyperic.hq.measurement.ext.depgraph.Node;
-import org.hyperic.hq.measurement.ext.depgraph.RawNode;
-import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -97,7 +80,7 @@ public class AgentScheduleSynchronizer {
                     AgentScheduleSyncZevent z = 
                         (AgentScheduleSyncZevent)i.next();
                     
-                    if (_inQueueCache.remove(z.getEntityId()) == false) {
+                    if (!_inQueueCache.remove(z.getEntityId())) {
                         _log.warn("Received eid=[" + z.getEntityId() + 
                                   "] but was not found in cache");
                     }

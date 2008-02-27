@@ -49,14 +49,8 @@ import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
-import org.hyperic.hq.measurement.server.session.CategoryDAO;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
-import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
-import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
-import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
-import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
+import org.hyperic.hq.measurement.server.session.MeasurementDAO;
+import org.hyperic.hq.measurement.server.session.*;
 
 public class HibernateDAOFactory extends DAOFactory {
     private static final SessionFactory sessionFactory = 
@@ -193,22 +187,14 @@ public class HibernateDAOFactory extends DAOFactory {
         return new MonitorableTypeDAO(this);
     }
 
-    public RawMeasurementDAO getRawMeasurementDAO() {
-        return new RawMeasurementDAO(this);
-    }
-
-    public DerivedMeasurementDAO getDerivedMeasurementDAO() {
-        return new DerivedMeasurementDAO(this);
+    public MeasurementDAO getMeasurementDAO() {
+        return new MeasurementDAO(this);
     }
 
     public MeasurementTemplateDAO getMeasurementTemplateDAO() {
         return new MeasurementTemplateDAO(this);
     }
-
-    public MeasurementArgDAO getMeasurementArgDAO() {
-        return new MeasurementArgDAO(this);
-    }
-
+    
     public MetricProblemDAO getMetricProblemDAO() {
         return new MetricProblemDAO(this);
     }

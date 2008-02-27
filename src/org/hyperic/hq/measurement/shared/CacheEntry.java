@@ -26,14 +26,14 @@
 package org.hyperic.hq.measurement.shared;
 
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
 
 public class CacheEntry {
     private AppdefResourceTypeValue _type;
     private Integer _metricId;
     private long _interval;
 
-    public CacheEntry(DerivedMeasurement metric) {
+    public CacheEntry(Measurement metric) {
         if (metric == null) {
             _metricId = null;
             _interval = 0;

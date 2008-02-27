@@ -90,9 +90,6 @@ public class MeasurementStartupListener
         
         app.registerCallbackListener(MetricDeleteCallback.class, 
                                      new MetricDeleteCallback() {
-            public void beforeMetricDelete(RawMeasurement m) {
-            }
-
             public void beforeMetricsDelete(Collection mids) {
                 MetricAuxLogManagerEJBImpl.getOne().metricsDeleted(mids);
             }

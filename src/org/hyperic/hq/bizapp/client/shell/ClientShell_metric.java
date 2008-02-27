@@ -46,7 +46,6 @@ public class ClientShell_metric
 
         registerSubHandler("list", new ClientShell_metric_list(this.shell));
         registerSubHandler("view", new ClientShell_metric_view(this.shell));
-        registerSubHandler("create", new ClientShell_metric_create(this.shell));
         registerSubHandler("delete", new ClientShell_metric_delete(this.shell));
         registerSubHandler("compact",
                            new ClientShell_metric_compact(this.shell));

@@ -35,7 +35,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -74,13 +73,12 @@ public class ConfigValidatorImpl
         throws EncodingException, PermissionException,
                AppdefEntityNotFoundException, InvalidConfigException
     {
-        DerivedMeasurementManagerLocal dmMan;
-        RawMeasurementManagerLocal rmMan;
-        TrackerManagerLocal trackerMan;
+        DerivedMeasurementManagerLocal dmMan = getMetricManager();
+        TrackerManagerLocal trackerMan = getTrackerManager();
+
         ConfigResponse[] responses;
         ConfigManagerLocal cman;
 
-        rmMan     = getRawMeasurementManager();
         cman      = getConfigManager();
         responses = new ConfigResponse[ids.length];
 
@@ -92,15 +90,12 @@ public class ConfigValidatorImpl
                                                  ProductPlugin.TYPE_MEASUREMENT,
                                                  ids[i], true);
                 
-                rmMan.checkConfiguration(subject, ids[i], responses[i]);
+                dmMan.checkConfiguration(subject, ids[i], responses[i]);
             } catch(ConfigFetchException exc){
                 responses[i] = null;
             } 
         }
 
-        dmMan = getMetricManager();
-        trackerMan = getTrackerManager();
-        
         for(int i=0; i<ids.length; i++){
             if(responses[i] == null){
                 // This is OK, since this resource may not have been

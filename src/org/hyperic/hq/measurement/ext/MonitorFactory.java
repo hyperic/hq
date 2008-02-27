@@ -26,34 +26,22 @@
 package org.hyperic.hq.measurement.ext;
 
 import java.util.Hashtable;
-import java.util.Properties;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
-import org.hyperic.hq.product.server.MBeanUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
+ * XXX: Remove this class.
  */
-
 public class MonitorFactory {
-    private static final Log log = LogFactory.getLog(MonitorFactory.class);
     private static final String logCtx      = MonitorFactory.class.getName();
+    private static final String MONITOR_CLASS =
+        "org.hyperic.hq.measurement.agent.client.AgentMonitor";
 
     private static Hashtable    monitors    = new Hashtable();
-    private static Properties   monitorCls  = new Properties();
-    
-    private static MBeanServer  mServer     = null;
-    private static ObjectName   propName    = null;
 
-    public static MonitorInterface newInstance(String protocol)
+    public static MonitorInterface newInstance()
         throws MonitorCreateException {
 
-        String monitorClass = getMonitorClass(protocol);
+        String monitorClass = MONITOR_CLASS;
 
         // See if we already have an instance cached
         MonitorInterface monitor =
@@ -74,56 +62,4 @@ public class MonitorFactory {
             throw new MonitorCreateException(logCtx, e);
         }
     }
-
-    private static String getMonitorClass(String protocol) {
-        final String spider = "covalent-eam";
-
-        if (!monitorCls.containsKey(spider)) {
-            try {
-                monitorCls.setProperty(protocol,
-                                       getProperty(spider + ".monitor"));
-            } catch (PropertyNotFoundException e) {
-                // Should never happen
-                log.error(e);
-            }
-        }
-
-        try {
-            monitorCls.setProperty(protocol,
-                                   getProperty(protocol + ".monitor"));
-        } catch (PropertyNotFoundException e) {
-            // Failsafe, dump it to the Spider agent, heh
-            protocol = spider;
-        }
-
-        // Look up the protocol
-        return monitorCls.getProperty(protocol);
-    }
-
-    public static String getProperty(String prop)
-        throws PropertyNotFoundException {
-        try {
-            if (mServer == null) {
-                mServer = MBeanUtil.getMBeanServer();
-            
-                propName = new ObjectName(
-                    "jboss:type=Service,name=MeasurementSystemProperties");
-            }
-            
-            Object obj = mServer.invoke(
-                            propName, "get", 
-                            new Object[] { prop, null },
-                            new String[] { String.class.getName(),
-                                           String.class.getName() });
-
-            if (obj == null) {
-                throw new PropertyNotFoundException(prop + " not found");
-            }
-
-            return (String) obj;
-        } catch (Exception e) {
-            throw new PropertyNotFoundException(e);
-        }
-    }
-
 }

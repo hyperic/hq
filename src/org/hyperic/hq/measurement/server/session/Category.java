@@ -32,19 +32,13 @@ public class Category extends PersistedObject
 
     // Fields    
      private String _name;
-     private Integer _cid;
 
-     // Constructors
+    // Constructors
     public Category() {
     }
 
     public Category(String name) {
         _name = name;
-    }
-
-    public Category(String name, Integer cid) {
-        _name = name;
-        _cid = cid;
     }
    
     // Property accessors
@@ -54,13 +48,5 @@ public class Category extends PersistedObject
     
     protected void setName(String name) {
         _name = name;
-    }
-    
-    public Integer getCid() {
-        return _cid;
-    }
-    
-    protected void setCid(Integer cid) {
-        _cid = cid;
     }
 }

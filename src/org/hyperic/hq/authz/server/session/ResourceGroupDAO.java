@@ -223,7 +223,7 @@ public class ResourceGroupDAO extends HibernateDAO
      */
     public Long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
         String sql =
-            "select max(m.interval) from DerivedMeasurement m, " +
+            "select max(m.interval) from Measurement m, " +
             "ResourceGroup g join g.resourceSet r " +
             "where m.instanceId = r.instanceId and "+
             "g = ? and m.template.id = ?";

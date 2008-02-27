@@ -41,7 +41,6 @@ public class MeasurementTemplate
     extends PersistedObject
     implements ContainerManagedTimestampTrackable, Serializable 
 {
-    private Integer _cid;
     private String  _name;
     private String  _alias;
     private String  _units;
@@ -51,14 +50,11 @@ public class MeasurementTemplate
     private boolean _designate = false;
     private String  _template;
     private String  _plugin;
-    private byte[]  _expressionData;
     private long    _ctime;
     private long    _mtime;
 
     private MonitorableType _monitorableType;
     private Category        _category;
-    private Collection      _measurementArgs = new ArrayList();
-    private Collection      _rawMeasurementArgs = new ArrayList();
 
     public MeasurementTemplate() {
     }
@@ -77,14 +73,6 @@ public class MeasurementTemplate
      */
     public boolean allowContainerManagedLastModifiedTime() {
         return true;
-    }
-   
-    public Integer getCid() {
-        return _cid;
-    }
-
-    void setCid(Integer cid) {
-        _cid = cid;
     }
 
     public String getName() {
@@ -159,14 +147,6 @@ public class MeasurementTemplate
         _plugin = plugin;
     }
 
-    public byte[] getExpressionData() {
-        return _expressionData;
-    }
-    
-    void setExpressionData(byte[] expressionData) {
-        _expressionData = expressionData;
-    }
-
     public long getCtime() {
         return _ctime;
     }
@@ -199,26 +179,6 @@ public class MeasurementTemplate
         _category = category;
     }
 
-    public Collection getMeasurementArgs() {
-        return Collections.unmodifiableCollection(getMeasurementArgsBag());
-    }
-    
-    Collection getMeasurementArgsBag() {
-        return _measurementArgs;
-    }
-    
-    void setMeasurementArgsBag(Collection measurementArgs) {
-        _measurementArgs = measurementArgs;
-    }
-
-    public Collection getRawMeasurementArgs() {
-        return _rawMeasurementArgs;
-    }
-
-    void setRawMeasurementArgs(Collection measurementArgs) {
-        _rawMeasurementArgs = measurementArgs;
-    }
-
     /**
      * Format a metric value, based on the units specified by this template
      */
@@ -245,7 +205,6 @@ public class MeasurementTemplate
         value.setDefaultInterval(getDefaultInterval());
         value.setDesignate(isDesignate());
         value.setTemplate(getTemplate());
-        value.setExpressionData(getExpressionData());
         value.setPlugin(getPlugin());
         value.setCtime(getCtime());
         value.setMtime(getMtime());

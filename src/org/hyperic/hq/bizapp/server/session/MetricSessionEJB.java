@@ -64,7 +64,7 @@ import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
@@ -425,8 +425,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return result;
     }
 
-    protected DerivedMeasurement findAvailabilityMetric(AuthzSubject subject,
-                                                        AppdefEntityID id)
+    protected Measurement findAvailabilityMetric(AuthzSubject subject,
+                                                 AppdefEntityID id)
     {
         try {
             return getMetricManager().getAvailabilityMeasurement(subject, id);

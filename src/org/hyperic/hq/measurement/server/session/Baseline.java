@@ -33,7 +33,7 @@ public class Baseline extends PersistedObject
     implements java.io.Serializable {
     
     // Fields
-    private DerivedMeasurement _derivedMeasurement;
+    private Measurement _measurement;
     private long _computeTime;
     private boolean _userEntered = false;
     private Double _mean;
@@ -44,10 +44,10 @@ public class Baseline extends PersistedObject
     public Baseline() {
     }
 
-    public Baseline(DerivedMeasurement derivedMeasurement, long computeTime,
+    public Baseline(Measurement measurement, long computeTime,
                     boolean userEntered, Double mean, Double minExpectedVal,
                     Double maxExpectedVal) {
-        _derivedMeasurement = derivedMeasurement;
+        _measurement = measurement;
         _computeTime = computeTime;
         _userEntered = userEntered;
         _mean = mean;
@@ -56,12 +56,12 @@ public class Baseline extends PersistedObject
     }
 
     // Property accessors
-    public DerivedMeasurement getDerivedMeasurement() {
-        return _derivedMeasurement;
+    public Measurement getMeasurement() {
+        return _measurement;
     }
     
-    public void setDerivedMeasurement(DerivedMeasurement derivedMeasurement) {
-        _derivedMeasurement = derivedMeasurement;
+    public void setMeasurement(Measurement measurement) {
+        _measurement = measurement;
     }
 
     public long getComputeTime() {
@@ -124,7 +124,7 @@ public class Baseline extends PersistedObject
     public BaselineValue getBaselineValue() {
         BaselineValue b = new BaselineValue();
         b.setId(getId());
-        b.setMeasurementId(getDerivedMeasurement().getId());
+        b.setMeasurementId(getMeasurement().getId());
         b.setComputeTime(getComputeTime());
         b.setUserEntered(isUserEntered());
         b.setMean(getMean());

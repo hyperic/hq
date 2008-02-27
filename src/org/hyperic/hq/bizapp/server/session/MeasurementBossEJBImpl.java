@@ -98,7 +98,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.DataPurgeJob;
-import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -106,11 +105,10 @@ import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.Baseline;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.MetricValue;
@@ -171,34 +169,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             
             // Now iterate through and throw out the metrics we don't need
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                DerivedMeasurement dm = (DerivedMeasurement) it.next();
+                Measurement dm = (Measurement) it.next();
                 if (!cats.contains(dm.getTemplate().getCategory().getName()))
                     it.remove();
             }
         }
 
         return metrics;
-    }
-
-    /** Create a measurement template
-     * @return the ID of the newly created template
-     * @ejb:interface-method
-     */
-    public Integer createDerivedMeasurementTemplate(int sessionId,
-                                                    String name, String alias,
-                                                    String type,
-                                                    String category,
-                                                    String template,
-                                                    String units,
-                                                    int collectionType,
-                                                    MeasurementArgValue[] args)
-        throws SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-            
-        MeasurementTemplate mtv = getTemplateManager()
-            .createTemplate(subject, name, alias, type, category, template,
-                            units, collectionType, args);
-        return mtv.getId();
     }
 
     /**
@@ -352,7 +329,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws AppdefEntityNotFoundException, PermissionException,
                MeasurementNotFoundException
     {
-        DerivedMeasurement dm = null;
+        Measurement dm = null;
         if (aeid.isApplication()) {
             // Get the appointed front-end service
             AppdefEntityValue aeval = new AppdefEntityValue(aeid, subj);
@@ -451,7 +428,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         ArrayList tmpls = new ArrayList(metrics.size());
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-            DerivedMeasurement dm = (DerivedMeasurement) it.next();
+            Measurement dm = (Measurement) it.next();
             tmpls.add(dm.getTemplate());
         }
             
@@ -722,7 +699,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 }
                 else if (metrics == null &&
                          cats.contains(MeasurementConstants.CAT_AVAILABILITY)) {
-                    DerivedMeasurement dm = findAvailabilityMetric(subj, id);
+                    Measurement dm = findAvailabilityMetric(subj, id);
                     
                     if (dm != null) {
                         metrics = new ArrayList(1);
@@ -762,7 +739,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
         // Now iterate through and throw out the metrics we don't need
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-            DerivedMeasurement dm = (DerivedMeasurement) it.next();
+            Measurement dm = (Measurement) it.next();
             if (!cats.contains(dm.getTemplate().getCategory().getName()))
                 it.remove();
         }
@@ -803,7 +780,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      public MetricValue getLiveMeasurementValue(int sessionId, Integer mid)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, MeasurementNotFoundException,
-               EvaluationException, LiveMeasurementException {
+               LiveMeasurementException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         Integer[] mids = new Integer[] { mid };
         return getMetricManager().getLiveMeasurementValues(subject, mids)[0];
@@ -826,7 +803,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         long interval = 0;
         for (int i = 0; i < tids.length; i++) {
             try {
-                DerivedMeasurement dmv = getMetricManager()
+                Measurement dmv = getMetricManager()
                     .findMeasurement(tids[i], aeid.getId());
                 mids[i] = dmv.getId();
                 interval = Math.max(interval, dmv.getInterval());
@@ -1080,7 +1057,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             getMetricManager().findEnabledMeasurements(subject, id, cat);
         
         for (Iterator it = enabledMetrics.iterator(); it.hasNext(); ) {
-            DerivedMeasurement dmv = (DerivedMeasurement) it.next();
+            Measurement dmv = (Measurement) it.next();
             dmvs.put(dmv.getTemplate().getId().intValue(), dmv);
         }
 
@@ -1094,8 +1071,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 new MetricConfigSummary(mtv.getId().intValue(), mtv.getName(),
                                         cat);
             
-            DerivedMeasurement dmv =
-                (DerivedMeasurement) dmvs.get(mtv.getId().intValue());
+            Measurement dmv =
+                (Measurement) dmvs.get(mtv.getId().intValue());
             if (dmv != null) {
                 mcs.setInterval(dmv.getInterval());
             }
@@ -1132,7 +1109,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                MeasurementNotFoundException, DataNotAvailableException {
         manager.getSubjectPojo(sessionId);
 
-        DerivedMeasurement dmv = getMetricManager().getMeasurement(mid);
+        Measurement dmv = getMetricManager().getMeasurement(mid);
         MeasurementTemplate tmpl = dmv.getTemplate();
         
         Integer[] mids = new Integer[] { mid };
@@ -1465,7 +1442,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         List mds = new ArrayList();
         List mms = getMetricManager().findMeasurements(subject, tid, iids);
         for (iter = mms.iterator(); iter.hasNext();) {
-            DerivedMeasurement mm = (DerivedMeasurement) iter.next();
+            Measurement mm = (Measurement) iter.next();
             Integer instanceId = mm.getInstanceId();
             AppdefResourceValue resource =
                 (AppdefResourceValue)resourceMap.get(instanceId.intValue());
@@ -1712,7 +1689,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         long end, double[] data, AppdefEntityID id)
         throws MeasurementNotFoundException {
         // Get baseline values
-        DerivedMeasurement dmval = getMetricManager()
+        Measurement dmval = getMetricManager()
             .findMeasurement(tmpl.getId(), id.getId());
 
         // Use previous function to set most values, including only 1 resource
@@ -2362,8 +2339,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * </p>
      * 
      * @param entId the appdef entity with child services
-     * @param internal indicates whether only internal services should be 
-     *                 accessed
      * @return List a list of ResourceTypeDisplaySummary beans
      * @ejb:interface-method
      */
@@ -2574,7 +2549,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         StopWatch watch = new StopWatch();
         
         if (categories.remove(MeasurementConstants.CAT_AVAILABILITY)) {
-            DerivedMeasurement dm = findAvailabilityMetric(subject, id);
+            Measurement dm = findAvailabilityMetric(subject, id);
             if (dm != null) {
                 summary.setAvailability(
                     new Double(getAvailability(subject, id)));
@@ -2593,7 +2568,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // metrics for each category
         HashSet done = new HashSet();
         for (Iterator it = measurements.iterator(); it.hasNext(); ) {
-            DerivedMeasurement dmv = (DerivedMeasurement) it.next();
+            Measurement dmv = (Measurement) it.next();
             MeasurementTemplate templ = dmv.getTemplate();
             String category = templ.getCategory().getName();
 
@@ -3165,7 +3140,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Get the availability metric for a given resource
      * @ejb:interface-method
      */
-    public DerivedMeasurement findAvailabilityMetric(int sessionId,
+    public Measurement findAvailabilityMetric(int sessionId,
                                                      AppdefEntityID id)
         throws SessionTimeoutException, SessionNotFoundException
     {

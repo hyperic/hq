@@ -61,13 +61,11 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.measurement.server.session.Category;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.server.session.MeasurementArg;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
-import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
@@ -98,51 +96,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         PagerProcessor_measurement.class.getName();
         
     private Pager valuePager = null;
-
-    /**
-     * Create a DerivedMeasurement Template
-     * @todo This needs to support Designate and DefaultOn
-     * @return a MeasurementTemplate ID
-     * @ejb:interface-method
-     */
-    public MeasurementTemplate createTemplate(AuthzSubjectValue subject,
-                                              String name, String alias,
-                                              String type,
-                                              String catName,
-                                              String template,
-                                              String units,
-                                              int collectionType,
-                                              MeasurementArgValue[] args) {
-        MonitorableType t = getMonitorableTypeDAO().findByName(type);
-        Category cat = null;
-        if (catName != null) { 
-           cat = getCategoryDAO().findByName(catName);
-        }
-        
-        ArrayList lis = null;
-            
-        if (args != null) {
-            lis = new ArrayList();
-            for (int i = 0; i < args.length; i++) {
-                MeasurementTemplate arg =
-                    getMeasurementTemplateDAO().findById(args[i].getId());
-                MeasurementArg li =
-                    getMeasurementArgDAO().create(i+1, arg,
-                                                  args[i].getTicks(),
-                                                  args[i].getWeight(),
-                                                  args[i].getPrevious());
-                lis.add(li);
-            }
-        }
-        
-        return
-            getMeasurementTemplateDAO().create(name, alias, units, 
-                                               collectionType, false, 
-                                               MeasurementConstants.
-                                               INTERVAL_DEFAULT_MILLIS,
-                                               false, template, t, cat, null,
-                                               lis);
-    }
 
     /**
      * Get a MeasurementTemplate
@@ -181,7 +134,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @param pInfo must contain a sort field of type 
      *              {@link MeasurementTemplateSortField}
-     * @param enabled If non-null, return templates with defaultOn == defaultOn
+     * @param defaultOn If non-null, return templates with defaultOn == defaultOn
      * 
      * @return a list of {@link MeasurementTemplate}s
      * @ejb:interface-method
@@ -199,7 +152,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @param pInfo must contain a sort field of type 
      *              {@link MeasurementTemplateSortField}
-     * @param enabled If non-null, return templates with defaultOn == defaultOn
+     * @param defaultOn If non-null, return templates with defaultOn == defaultOn
      * 
      * @return a list of {@link MeasurementTemplate}s
      * @ejb:interface-method
@@ -378,14 +331,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     public void removeTemplate(AuthzSubjectValue subject, Integer tid) {
         MeasurementTemplate t = getMeasurementTemplateDAO().findById(tid);
         getMeasurementTemplateDAO().remove(t);
-
-        Collection args = t.getMeasurementArgs();
-        // Remove raw measurement templates as well
-        for (Iterator i = args.iterator(); i.hasNext(); ) {
-            MeasurementArg arg = (MeasurementArg)i.next();
-            MeasurementTemplate raw = arg.getTemplateArg();
-            getMeasurementTemplateDAO().remove(raw);
-        }
     }
 
     /**
@@ -417,7 +362,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                                               long interval) {
         HashSet toReschedule = new HashSet();
         MeasurementTemplateDAO templDao = getMeasurementTemplateDAO();
-        DerivedMeasurementDAO dmDao = getDerivedMeasurementDAO();
+        MeasurementDAO dmDao = getMeasurementDAO();
                
         for (int i = 0; i < templIds.length; i++) {
             MeasurementTemplate template = templDao.findById(templIds[i]);
@@ -466,7 +411,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     public void setTemplateEnabledByDefault(AuthzSubject subject, 
                                             Integer[] templIds, boolean on) 
     { 
-        DerivedMeasurementDAO dmDao = getDerivedMeasurementDAO();
+        MeasurementDAO dmDao = getMeasurementDAO();
         MeasurementTemplateDAO tmpDao = getMeasurementTemplateDAO();
         SRNManagerLocal srnMan = getSRNManager();
         long current = System.currentTimeMillis();
@@ -478,7 +423,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
 
             List metrics = dmDao.findByTemplate(templIds[i]);
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                DerivedMeasurement dm = (DerivedMeasurement)it.next();
+                Measurement dm = (Measurement)it.next();
 
                 if (dm.isEnabled() == on || dm.getInterval() == 0)
                     continue;
@@ -579,11 +524,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 .getEntityPersister(MeasurementTemplate.class.getName())
                 .getIdentifierGenerator();
 
-            IdentifierGenerator argIdGenerator =
-                sessionFactory
-                .getEntityPersister(MeasurementArg.class.getName())
-                .getIdentifierGenerator();
-
             conn = session.connection();
 
             final String templatesql = "INSERT INTO EAM_MEASUREMENT_TEMPL " +
@@ -591,11 +531,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 "default_interval, designate, monitorable_type_id, " +
                 "category_id, template, plugin, ctime, mtime) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            
-            final String argsql = "INSERT INTO EAM_MEASUREMENT_ARG " +
-                "(id, measurement_template_id, measurement_template_arg_id, " +
-                "placement, ticks, weight, previous) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             long current = System.currentTimeMillis();
 
@@ -631,56 +566,17 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     tStmt.setString(col++, info.getAlias());
                     tStmt.setString(col++, info.getUnits());
                     tStmt.setInt(col++, info.getCollectionType());
-                    tStmt.setBoolean(col++, false);
-                    tStmt.setLong(col++, 0l);
-                    tStmt.setBoolean(col++, false);
-                    tStmt.setInt(col++, monitorableType.getId().intValue());
-                    tStmt.setInt(col++, cat.getId().intValue());
-                    tStmt.setString(col++, info.getTemplate());
-                    tStmt.setString(col++, pluginName);
-                    tStmt.setLong(col++, current);
-                    tStmt.setLong(col++, current);
-                    tStmt.execute();
-                    tStmt.close();
-
-                    Integer derivedid = (Integer)tmplIdGenerator.
-                        generate((SessionImpl)session, new MeasurementTemplate());
-                    
-                    // Next, create the derived measurement
-                    col = 1;
-                    tStmt = conn.prepareStatement(templatesql);
-                    tStmt.setInt(col++, derivedid.intValue());
-                    tStmt.setString(col++, info.getName());
-                    tStmt.setString(col++, info.getAlias());
-                    tStmt.setString(col++, info.getUnits());
-                    tStmt.setInt(col++, info.getCollectionType());
                     tStmt.setBoolean(col++, info.isDefaultOn());
                     tStmt.setLong(col++, info.getInterval());
                     tStmt.setBoolean(col++, info.isIndicator());
                     tStmt.setInt(col++, monitorableType.getId().intValue());
                     tStmt.setInt(col++, cat.getId().intValue());
-                    tStmt.setString(col++, MeasurementConstants.TEMPL_IDENTITY);
+                    tStmt.setString(col++, info.getTemplate());
                     tStmt.setString(col++, pluginName);
                     tStmt.setLong(col++, current);
-                    tStmt.setLong(col++, current);
+                    tStmt.setLong(col, current);
                     tStmt.execute();
                     tStmt.close();
-                
-                    Integer argid = (Integer)argIdGenerator.
-                        generate((SessionImpl)session, new MeasurementArg());
-
-                    // Lastly, create the line item
-                    col = 1;
-                    aStmt = conn.prepareStatement(argsql);
-                    aStmt.setInt(col++, argid.intValue());
-                    aStmt.setInt(col++, derivedid.intValue());
-                    aStmt.setInt(col++, rawid.intValue());
-                    aStmt.setInt(col++, 1);
-                    aStmt.setInt(col++, 0);
-                    aStmt.setFloat(col++, 0f);
-                    aStmt.setInt(col++, 0);
-                    aStmt.execute();
-                    aStmt.close();
                 }
             }
         } catch (SQLException e) {

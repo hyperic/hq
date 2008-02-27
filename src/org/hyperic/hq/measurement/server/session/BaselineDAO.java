@@ -45,11 +45,11 @@ public class BaselineDAO extends HibernateDAO {
     }
 
     public void remove(Baseline b) {
-        b.getDerivedMeasurement().clearBaseline();
+        b.getMeasurement().clearBaseline();
         super.remove(b);
     }
 
-    public Baseline create(DerivedMeasurement dm, long computeTime,
+    public Baseline create(Measurement dm, long computeTime,
                            boolean userEntered, Double mean,
                            Double minExpectedValue, Double maxExpectedValue) {
         Baseline b = new Baseline(dm, computeTime, userEntered, mean,

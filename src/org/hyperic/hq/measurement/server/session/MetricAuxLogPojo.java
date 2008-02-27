@@ -36,7 +36,7 @@ public class MetricAuxLogPojo
     extends PersistedObject
 {
     private GalertAuxLog       _auxLog;
-    private DerivedMeasurement _metric;
+    private Measurement        _metric;
     private GalertDef          _def;
     
     protected MetricAuxLogPojo() {
@@ -56,11 +56,11 @@ public class MetricAuxLogPojo
         _auxLog = log;
     }
     
-    public DerivedMeasurement getMetric() {
+    public Measurement getMetric() {
         return _metric;
     }
     
-    protected void setMetric(DerivedMeasurement metric) {
+    protected void setMetric(Measurement metric) {
         _metric = metric;
     }
 

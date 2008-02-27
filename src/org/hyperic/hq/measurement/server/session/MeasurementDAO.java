@@ -42,64 +42,65 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 
-public class DerivedMeasurementDAO extends HibernateDAO {
-    public DerivedMeasurementDAO(DAOFactory f) {
-        super(DerivedMeasurement.class, f);
+public class MeasurementDAO extends HibernateDAO {
+    public MeasurementDAO(DAOFactory f) {
+        super(Measurement.class, f);
     }
 
-    public DerivedMeasurement findById(Integer id) {
-        return (DerivedMeasurement)super.findById(id);
+    public Measurement findById(Integer id) {
+        return (Measurement)super.findById(id);
     }
 
-    public DerivedMeasurement get(Integer id) {
-        return (DerivedMeasurement)super.get(id);
+    public Measurement get(Integer id) {
+        return (Measurement)super.get(id);
     }
 
-    void remove(DerivedMeasurement entity) {
+    void remove(Measurement entity) {
         if (entity.getBaseline() != null)
             super.remove(entity.getBaseline());
         super.remove(entity);
     }
 
-    DerivedMeasurement create(Resource resource,
-                              MeasurementTemplate mt,
-                              long interval) {
-        DerivedMeasurement dm = new DerivedMeasurement(resource.getInstanceId(),
-                                                       mt, interval);
+    Measurement create(Resource resource,
+                       MeasurementTemplate mt,
+                       String dsn,
+                       long interval) {
+        Measurement m = new Measurement(resource.getInstanceId(),
+                                        mt, interval);
 
-        dm.setEnabled(interval != 0);
-        dm.setFormula(mt.getTemplate());
-        dm.setResource(resource);
-        save(dm);
-        return dm;
+        m.setEnabled(interval != 0);
+        m.setFormula(dsn);
+        m.setResource(resource);
+        save(m);
+        return m;
     }
 
     List findByIds(Integer ids[]) {
-        String sql = "from DerivedMeasurement where id IN (:ids)";
+        String sql = "from Measurement where id IN (:ids)";
 
         return getSession().createQuery(sql)
             .setParameterList("ids", ids)
             .list();
     }
     
-    public DerivedMeasurement findByTemplateForInstance(Integer tid,
-                                                        Integer iid) {
+    public Measurement findByTemplateForInstance(Integer tid,
+                                                 Integer iid) {
         String sql =
-            "select distinct m from DerivedMeasurement m " +
+            "select distinct m from Measurement m " +
             "join m.template t " +
             "where t.id=? and m.instanceId=?";
 
-        return (DerivedMeasurement)getSession().createQuery(sql)
+        return (Measurement)getSession().createQuery(sql)
             .setInteger(0, tid.intValue())
             .setInteger(1, iid.intValue())
             .setCacheable(true)
-            .setCacheRegion("DerivedMeasurement.findByTemplateForInstance")
+            .setCacheRegion("Measurement.findByTemplateForInstance")
             .uniqueResult();
     }
     
     /**
-     * Look up a derived measurement, allowing for the query to return a stale 
-     * copy of the derived measurement (for efficiency reasons).
+     * Look up a Measurement, allowing for the query to return a stale
+     * copy (for efficiency reasons).
      * 
      * @param tid
      * @param iid
@@ -107,11 +108,11 @@ public class DerivedMeasurementDAO extends HibernateDAO {
      *                   definition in the query results; <code>false</code> to 
      *                   never allow stale copies, potentially always forcing a 
      *                   sync with the database.
-     * @return The derived measurement or <code>null</code>.
+     * @return The Measurement or <code>null</code>.
      */
-    public DerivedMeasurement findByTemplateForInstance(Integer tid, 
-                                                        Integer iid, 
-                                                        boolean allowStale) {
+    public Measurement findByTemplateForInstance(Integer tid,
+                                                 Integer iid,
+                                                 boolean allowStale) {
         Session session = this.getSession();
         FlushMode oldFlushMode = session.getFlushMode();
         
@@ -130,19 +131,19 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         if (iids.length == 0)
             return new ArrayList(0);
         
-        String sql = "select id from DerivedMeasurement " +
+        String sql = "select id from Measurement " +
                      "where template.id = :tid and instanceId IN (:ids)";
 
         return getSession().createQuery(sql)
             .setInteger("tid", tid.intValue())
             .setParameterList("ids", iids)
             .setCacheable(true)
-            .setCacheRegion("DerivedMeasurement.findIdsByTemplateForInstances")
+            .setCacheRegion("Measurement.findIdsByTemplateForInstances")
             .list();
     }
 
     List findByTemplate(Integer id) {
-        String sql = "select distinct m from DerivedMeasurement m " +
+        String sql = "select distinct m from Measurement m " +
                      "join m.template t " +
                      "where t.id=?";
 
@@ -151,15 +152,15 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
     
     /**
-     * Find the AppdefEntityID objects for all the derived measurements 
-     * associated with the measurement template.
+     * Find the AppdefEntityID objects for all the Measurements
+     * associated with the MeasurementTemplate.
      * 
      * @param id The measurement template id.
      * @return A list of AppdefEntityID objects.
      */
     List findAppdefEntityIdsByTemplate(Integer id) {
         String sql = "select distinct mt.appdefType, m.instanceId from " +
-        		     "DerivedMeasurement m join m.template t " +
+        		     "Measurement m join m.template t " +
                      "join t.monitorableType mt where t.id=?";
         
         List results = getSession()
@@ -180,16 +181,16 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
     
     /**
-     * Set the interval for all the associated derived measurements to the 
-     * measurement template interval. Also, make sure that if the measurement 
-     * template has default on set, then the associated derived measurements 
+     * Set the interval for all the associated Measurements to the
+     * MeasurementTemplate interval. Also, make sure that if the
+     * MeasurementTemplate has default on set, then the associated Measurements
      * are enabled (and vice versa). 
      * 
-     * @param template The measurement template (that has been persisted, and 
+     * @param template The MeasurementTemplate (that has been persisted, and
      *                 thus, has its id set).
      */
     void updateIntervalToTemplateInterval(MeasurementTemplate template) {        
-        String sql = "update versioned DerivedMeasurement set " +
+        String sql = "update versioned Measurement set " +
                      "interval = :newInterval, enabled = :isEnabled " +
                      "where template.id = :tid";
         
@@ -207,7 +208,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         if (mids.size() == 0)
             return;
         
-        String sql = "UPDATE DerivedMeasurement " +
+        String sql = "UPDATE Measurement " +
                      "SET enabled = true, interval = :interval " +
                      "WHERE id IN (:ids)";
 
@@ -222,22 +223,14 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return createCriteria()
             .add(Restrictions.eq("resource", resource))
             .setCacheable(true)
-            .setCacheRegion("DerivedMeasurement.findByInstance_with_interval")
+            .setCacheRegion("Measurement.findByInstance_with_interval")
             .list();
     }
 
     int deleteByIds(Collection ids) {
         return getSession()
-            .createQuery("delete from DerivedMeasurement where id in (:ids)")
+            .createQuery("delete from Measurement where id in (:ids)")
             .setParameterList("ids", ids)
-            .executeUpdate();
-    }
-    
-    int clearResource(Resource resource) {
-        return getSession()
-            .createSQLQuery("update EAM_MEASUREMENT set resource_id = null "
-                            + "where resource_id = :res")
-            .setInteger("res", resource.getId())
             .executeUpdate();
     }
 
@@ -246,13 +239,13 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .add(Restrictions.eq("resource", resource))
             .add(Restrictions.eq("enabled", Boolean.TRUE))
             .setCacheable(true)
-            .setCacheRegion("DerivedMeasurement.findByInstance")
+            .setCacheRegion("Measurement.findByInstance")
             .list();
     }
 
     List findByInstanceForCategory(int type, int id, String cat) {
         String sql =
-            "select m from DerivedMeasurement m " +
+            "select m from Measurement m " +
             "join m.template t " +
             "join t.monitorableType mt " +
             "join t.category c " +
@@ -269,7 +262,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
 
     List findByInstanceForCategory(Resource resource, String cat) {
         String sql =
-            "select m from DerivedMeasurement m " +
+            "select m from Measurement m " +
             "join m.template t " +
             "join t.category c " +
             "where m.resource = ? and m.enabled = true and c.name = ? and " +
@@ -280,14 +273,14 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setString(1, cat).list();
     }
     
-    DerivedMeasurement findByAliasAndID(String alias, Resource resource) {
+    Measurement findByAliasAndID(String alias, Resource resource) {
 
         String sql =
-            "select distinct m from DerivedMeasurement m " +
+            "select distinct m from Measurement m " +
             "join m.template t " +
             "where t.alias = ? and m.resource = ?";
 
-        return (DerivedMeasurement)getSession().createQuery(sql)
+        return (Measurement)getSession().createQuery(sql)
             .setString(0, alias)
             .setParameter(1, resource)
             .uniqueResult();
@@ -298,7 +291,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         List res = findDesignatedByInstance(resource);
         
         for (Iterator i=res.iterator(); i.hasNext(); ) {
-            DerivedMeasurement dm = (DerivedMeasurement)i.next();
+            Measurement dm = (Measurement)i.next();
             
             if (!dm.getTemplate().getCategory().getName().equals(cat))
                 i.remove();
@@ -309,7 +302,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
 
     List findDesignatedByInstance(Resource resource) {
         String sql =
-            "select m from DerivedMeasurement m " +
+            "select m from Measurement m " +
             "join m.template t " +
             "where m.resource = ? and " +
             "t.designate = true " +
@@ -318,13 +311,13 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setParameter(0, resource)
             .setCacheable(true)
-            .setCacheRegion("DerivedMeasurement.findDesignatedByInstance")
+            .setCacheRegion("Measurement.findDesignatedByInstance")
             .list();
     }
 
     List findAvailabilityByInstances(int type, Integer[] ids) {
         String sql =
-            "select m from DerivedMeasurement m " +
+            "select m from Measurement m " +
             "join m.template t " +
             "join t.monitorableType mt " +
             "where mt.appdefType = :type and m.instanceId in (:ids) and " +
@@ -336,26 +329,9 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .list();
     }
 
-    List findByRawExcludeIdentity(Integer rid) {
-        String sql =
-            "select distinct d from DerivedMeasurement d " +
-            "join d.template t " +
-            "join t.measurementArgsBag a, " +
-            "RawMeasurement r " +
-            "where d.interval is not null and " +
-            "d.instanceId = r.instanceId and " +
-            "a.template.id = r.template.id and " +
-            "r.id = ? and " +
-            "t.template <> ?";
-
-        return getSession().createQuery(sql)
-                .setInteger(0, rid.intValue())
-                .setString(1, "ARG1").list();
-    }
-
     List findByCategory(String cat) {
         String sql =
-            "select distinct m from DerivedMeasurement m " +
+            "select distinct m from Measurement m " +
             "join m.template t " +
             "join t.monitorableType mt " +
             "join t.category c " +
@@ -366,7 +342,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setString(0, cat)
             .setCacheable(true)
-            .setCacheRegion("DerivedMeasurement.findByCategory")
+            .setCacheRegion("Measurement.findByCategory")
             .list();
     }
     
@@ -533,14 +509,22 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return res;
     }
 
+    int clearResource(Resource resource) {
+        return getSession()
+            .createSQLQuery("update EAM_MEASUREMENT set resource_id = null "
+                            + "where resource_id = :res")
+            .setInteger("res", resource.getId())
+            .executeUpdate();
+    }
+
     /**
      * Find a list of Measurement ID's that are no longer associated with a
      * resource.
      *
-     * @return A List of DerivedMeasurement ID's.
+     * @return A List of Measurement ID's.
      */
     List findOrphanedMeasurements() {
-        String sql = "SELECT id FROM DerivedMeasurement WHERE resource IS NULL";
+        String sql = "SELECT id FROM Measurement WHERE resource IS NULL";
         return getSession().createQuery(sql).list();
     }
 }

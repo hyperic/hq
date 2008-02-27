@@ -26,9 +26,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,7 +35,6 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.MeasurementInfo;
 
 public class MeasurementTemplateDAO extends HibernateDAO {
@@ -45,39 +42,18 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         super(MeasurementTemplate.class, f);
     }
 
+    public MeasurementTemplate get(Integer id) {
+        return (MeasurementTemplate)super.get(id);
+    }
+
     public MeasurementTemplate findById(Integer id) {
         return (MeasurementTemplate)super.findById(id);
     }
 
     /**
-     * Remove a raw template and it's associated derived measurement
+     * Remove a MeasurementTemplate and it's associated Measurements.
      */
     void remove(MeasurementTemplate mt) {
-        // Update the derived template
-        HashSet dm = new HashSet();
-        for (Iterator i = mt.getRawMeasurementArgs().iterator(); i.hasNext();) {
-            MeasurementArg raw = (MeasurementArg)i.next();
-            MeasurementTemplate derived = raw.getTemplate();
-            // clear measurement arg collection for cascade delete
-            derived.getMeasurementArgsBag().clear();
-            dm.add(derived);
-        }
-        // clear collection to avoid ObjectDeletedException
-        //
-        // must clear the raw measurement collection as
-        // the derived measurement template also references the same
-        // measurement arg instance. If we don't clear rawMeasurement
-        // collection, then Hibernate will throw a ObjectDeletedException
-        // complaining the RawMeasurement arg will be resaved..
-        mt.getRawMeasurementArgs().clear();
-        
-        // remove all dependent derived measurements and
-        // its measurements
-        for (Iterator i=dm.iterator(); i.hasNext();) {
-            MeasurementTemplate dmt = (MeasurementTemplate)i.next();
-            removeMeasurements(dmt);
-            super.remove(dmt);
-        }
         removeMeasurements(mt);
         super.remove(mt);
     }
@@ -92,19 +68,13 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setInteger(0, mt.getId().intValue())
             .list();
 
-        DerivedMeasurementDAO dDao =
-            new DerivedMeasurementDAO(DAOFactory.getDAOFactory());
-        RawMeasurementDAO rDao =
-            new RawMeasurementDAO(DAOFactory.getDAOFactory());
+        MeasurementDAO dao =
+            new MeasurementDAO(DAOFactory.getDAOFactory());
 
         for (Iterator it = measurements.iterator(); it.hasNext();) {
+
             Measurement meas = (Measurement) it.next();
-            if (meas.isDerived()) {
-                dDao.remove((DerivedMeasurement) meas);
-            }
-            else {
-                rDao.remove((RawMeasurement) meas);
-            }
+            dao.remove(meas);
         }
     }
 
@@ -112,7 +82,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
                                int collectionType, boolean defaultOn,
                                long defaultInterval, boolean designate,
                                String template, MonitorableType monitorableType,
-                               Category cat, String plugin, List args) {
+                               Category cat, String plugin) {
         MeasurementTemplate mt = new MeasurementTemplate();
 
         mt.setName(name); 
@@ -126,11 +96,6 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         mt.setMonitorableType(monitorableType);
         mt.setCategory(cat);
         mt.setPlugin(plugin);
-        
-        if (args != null) {
-            mt.setMeasurementArgsBag(args);
-        }
-
         save(mt);
         return mt;
     }
@@ -150,37 +115,15 @@ public class MeasurementTemplateDAO extends HibernateDAO {
                 cat = mt.getCategory();
             }
         } else {
-            throw new IllegalArgumentException("category has null value");
+            throw new IllegalArgumentException("Category is null");
         }
 
-        // Update raw template
+        // Update the MeasurementTemplate
         mt.setTemplate(info.getTemplate());
         mt.setCollectionType(info.getCollectionType());
         mt.setPlugin(pluginName);
         mt.setCategory(cat);
         save(mt);
-
-        // Update the derived template
-        for (Iterator i = mt.getRawMeasurementArgs().iterator(); i.hasNext();) {
-            MeasurementArg raw = (MeasurementArg)i.next();
-            MeasurementTemplate t = raw.getTemplate();
-            if (MeasurementConstants.TEMPL_IDENTITY.equals(t.getTemplate())) {
-                t.setAlias(info.getAlias());
-                t.setUnits(info.getUnits());
-                t.setCollectionType(info.getCollectionType());
-                t.setCategory(cat);
-
-                // Don't reset indicator, defaultOn or interval if it's been
-                // changed
-                if (t.getMtime() == t.getCtime()) {
-                    t.setDesignate(info.isIndicator());
-                    t.setDefaultOn(info.isDefaultOn());
-                    t.setDefaultInterval(info.getInterval());
-                }
-                save(mt);
-                return;
-            }
-        }
     }
 
     List findAllTemplates(PageInfo pInfo, Boolean defaultOn) {
@@ -295,28 +238,6 @@ public class MeasurementTemplateDAO extends HibernateDAO {
 
         return getSession().createQuery(sql)
             .setParameter(0, mt).list();
-    }
-
-    List findByMeasurementArg(Integer tId) {
-        String sql =
-            "select t from MeasurementTemplate t " +
-            "join fetch t.measurementArgsBag args " +
-            "where args.templateArg.id=?";
-
-        return getSession().createQuery(sql)
-            .setInteger(0, tId.intValue()).list();
-    }
-
-    MeasurementTemplate findByArgAndTemplate(Integer tId,
-                                             String template) {
-        String sql =
-            "select t from MeasurementTemplate t " +
-            "join fetch t.measurementArgsBag args " +
-            "where args.templateArg.id=? and t.template=?";
-        
-        return (MeasurementTemplate)getSession().createQuery(sql)
-            .setInteger(0, tId.intValue())
-            .setString(1, template).uniqueResult();
     }
     
     List findDerivedByMonitorableType(String name) {

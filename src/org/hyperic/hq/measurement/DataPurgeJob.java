@@ -42,7 +42,6 @@ import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.hq.measurement.shared.DataCompressLocal;
 import org.hyperic.hq.measurement.shared.DataCompressUtil;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.RawMeasurementManagerEJBImpl;
 import org.hyperic.util.TimeUtil;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -225,10 +224,7 @@ public class DataPurgeJob implements Job {
         try {
             int dcount =
                 DerivedMeasurementManagerEJBImpl.getOne().removeOrphanedMeasurements();
-            int rcount =
-                RawMeasurementManagerEJBImpl.getOne().removeOrphanedMeasurements();
-            _log.info("Removed " + dcount + " derived, " + rcount + " raw " +
-                      "measurements in " +
+            _log.info("Removed " + dcount + " measurements in " +
                       ((System.currentTimeMillis() - start)/1000) + " seconds.");
         } catch (Throwable t) {
             // Do not allow errors to cause other maintenance functions to

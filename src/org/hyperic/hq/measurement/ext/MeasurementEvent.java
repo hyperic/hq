@@ -33,8 +33,8 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.hq.product.MetricValue;
 
 public class MeasurementEvent extends AbstractEvent
@@ -79,9 +79,9 @@ public class MeasurementEvent extends AbstractEvent
             return;
         
         try {
-            DerivedMeasurementDAO dao =
-                new DerivedMeasurementDAO(DAOFactory.getDAOFactory());
-            DerivedMeasurement dm = dao.findById(getInstanceId());
+            MeasurementDAO dao =
+                new MeasurementDAO(DAOFactory.getDAOFactory());
+            Measurement dm = dao.findById(getInstanceId());
             int resourceId, resourceType;
 
             resourceId   = dm.getInstanceId().intValue();

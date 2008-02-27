@@ -2,10 +2,10 @@
 <Covalent.DBSetup name="measurement-init.xml" notice="DBSetup, Copyright (C) 2002, Covalent Technologies, Inc., All Rights Reserved.">
 
     <table name="EAM_MEASUREMENT_CAT">
-        <data ID="1" CID="1" NAME="AVAILABILITY" />
-        <data ID="2" CID="2" NAME="PERFORMANCE" />
-        <data ID="3" CID="3" NAME="THROUGHPUT" />
-        <data ID="4" CID="4" NAME="UTILIZATION" />
+        <data ID="1" NAME="AVAILABILITY" />
+        <data ID="2" NAME="PERFORMANCE" />
+        <data ID="3" NAME="THROUGHPUT" />
+        <data ID="4" NAME="UTILIZATION" />
     </table>
     
     <table name="EAM_NUMBERS">

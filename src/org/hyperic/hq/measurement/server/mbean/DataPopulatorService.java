@@ -6,7 +6,7 @@ import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import javax.naming.InitialContext;
 import java.util.Properties;
 import java.util.List;
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -88,13 +87,13 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
         List dps = new ArrayList();
         max = (max < measurements.size()) ? max : measurements.size(); 
         for (int i = 0; i < max; i++ ) {
-            DerivedMeasurement m = (DerivedMeasurement)measurements.get(i);
+            Measurement m = (Measurement)measurements.get(i);
             _log.info("Loaded last data point for " + m.getId());
             dps.add(getLastDataPoint(m.getId()));
         }
 
         for (int i = 0; i < dps.size(); i++) {
-            DerivedMeasurement m = (DerivedMeasurement)measurements.get(i);
+            Measurement m = (Measurement)measurements.get(i);
             DataPoint dp = (DataPoint)dps.get(i);
 
             if (dp == null) {
@@ -164,7 +163,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
         return Long.parseLong(purgeRawString);
     }
 
-    private List genData(DerivedMeasurement dm, DataPoint dp, long range) {
+    private List genData(Measurement dm, DataPoint dp, long range) {
 
         ArrayList data = new ArrayList();
         long last = dp.getMetricValue().getTimestamp();

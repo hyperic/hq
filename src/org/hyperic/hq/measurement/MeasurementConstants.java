@@ -84,34 +84,11 @@ public final class MeasurementConstants  {
      *  Set level to DEBUG */
     public static final String MEA_TIMING_LOG     = "measurement.timing";
 
-    /** First agent remote method invocation to a Jboss server starting
-     *  up will cause a Thread.sleep for this amount of time. This gives
-     *  Jboss a chance to finish binding its beans and services. */
-    public static final long   MEA_SUBSYS_BOOT_TIME_MS  = 45000;
-
-    /** The argument prefix for template arguments in an expression */
-    public static final String TEMPL_IDENTITY_PFX = "ARG";
-
-    /** The identity/passthrough template argument */
-    public static final String TEMPL_IDENTITY     = "ARG1";
-
-    /** The default result of evaluation of an expression */
-    public static final Double EXPR_EVAL_RESULT_DEFAULT = new Double(0.0);
-
-    /** Package imports for instantJ */
-    public static final String[] EXPMGR_PACKAGE_IMPORTS = {
-        Average.class.getName(), Sum.class.getName(),
-        HashMap.class.getName() 
-    };
-
     /** The default timing window percentage for scheduling */
     public static final double DEFAULT_TIMING_WINDOW_PERCENTAGE = 0.1;
 
     /** An estimated latency (b/t agent and server) value percentage. */
     public static final double DATA_DEFAULT_LATENCY_PERC= 0.1;
-
-    /** Default capacity for the FIFO expression cache */
-    public static final int    EXPRESSION_CACHE_SIZE    = 128;
 
     public static final long MINUTE   = 60000;
     public static final long HOUR     = MINUTE * 60;

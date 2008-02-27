@@ -78,7 +78,7 @@ public class ScheduleRevNumDAO extends HibernateDAO {
     public Collection getMinIntervals() {
         String sql =
             "select mt.appdefType, m.instanceId, min(m.interval) " +
-            "from DerivedMeasurement m, " +
+            "from Measurement m, " +
             "MonitorableType mt, " +
             "MeasurementTemplate t " +
             "where m.enabled = true and " +
@@ -95,7 +95,7 @@ public class ScheduleRevNumDAO extends HibernateDAO {
     public Long getMinInterval(AppdefEntityID id) {
         String sql =
             "select min(m.interval) " +
-            "from DerivedMeasurement m, " +
+            "from Measurement m, " +
             "MonitorableType mt, " +
             "MeasurementTemplate t " +
             "where m.enabled = true and " +
@@ -135,5 +135,4 @@ public class ScheduleRevNumDAO extends HibernateDAO {
             session.setFlushMode(oldFlushMode);
         } 
     }    
-     
 }

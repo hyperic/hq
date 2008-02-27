@@ -45,13 +45,8 @@ import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
-import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.DataPoint;
-import org.hyperic.hq.measurement.server.session.MetricDataCache;
-import org.hyperic.hq.measurement.server.session.SRNCache;
-import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.*;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
@@ -138,7 +133,7 @@ public class AvailabilityCheckService
         current = System.currentTimeMillis();
 
         for (Iterator it = dmList.iterator(); it.hasNext(); ) {
-            DerivedMeasurement dm = (DerivedMeasurement) it.next();
+            Measurement dm = (Measurement) it.next();
             if (!dm.getTemplate().getAlias().toUpperCase()
                     .equals(MeasurementConstants.CAT_AVAILABILITY))
                 continue;
@@ -264,7 +259,7 @@ public class AvailabilityCheckService
 
         // Go through the server and service metrics and backfill them
         for (Iterator it = metrics.iterator(); it.hasNext();) {
-            DerivedMeasurement dm = (DerivedMeasurement) it.next();
+            Measurement dm = (Measurement) it.next();
             if (!dm.getTemplate().getAlias().toUpperCase()
                     .equals(MeasurementConstants.CAT_AVAILABILITY))
                 continue;

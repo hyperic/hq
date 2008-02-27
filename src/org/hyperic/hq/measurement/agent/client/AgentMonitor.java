@@ -31,8 +31,7 @@ import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.measurement.server.session.SRN;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.server.session.RawMeasurement;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
@@ -101,7 +100,7 @@ public class AgentMonitor implements MonitorInterface
      * @param srn      The entity associated with the schedule
      * @param schedule Information about the schedule of metrics to collect
      */
-    public void schedule(AgentValue agent, SRN srn,
+    public void schedule(AgentValue agent, SRN srn, 
                          ScheduleMetricInfo[] schedule)
         throws MonitorAgentException
     {
@@ -117,18 +116,15 @@ public class AgentMonitor implements MonitorInterface
             args.setSRN(srn);
 
             for(int i=0; i<schedule.length; i++){
-                DerivedMeasurement dMetric = schedule[i].getDerivedMetric();
-                RawMeasurement[] rMetrics = schedule[i].getRawMetrics();
+                Measurement m = schedule[i].getMeasurement();
 
-                for(int j=0; j<rMetrics.length; j++) {
-                    String category = 
-                        rMetrics[j].getTemplate().getCategory().getName();
-                    args.addMeasurement(rMetrics[j].getDsn(),
-                                        dMetric.getInterval(),
-                                        dMetric.getId().intValue(),
-                                        rMetrics[j].getId().intValue(),
-                                        category);
-                }
+                String category =
+                    m.getTemplate().getCategory().getName();
+                args.addMeasurement(m.getFormula(),
+                                    m.getInterval(),
+                                    m.getId().intValue(),
+                                    m.getId().intValue(),
+                                    category);
             }
 
             client.scheduleMeasurements(args);

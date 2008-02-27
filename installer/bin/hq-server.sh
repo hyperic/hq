@@ -257,7 +257,6 @@ JBOSSHOME=${ENGINE_HOME} \
     -Dengine.home=${ENGINE_HOME} \
     -Djava.awt.headless=true \
     -Djava.net.preferIPv4Stack=true \
-    -Dinstantj.compile.compiler=instantj.compile.pizza.PizzaSourceCompiler \
     -classpath ${ENGINE_HOME}/bin/run.jar \
     org.jboss.Main > ${SERVER_LOG} 2>&1 &
 

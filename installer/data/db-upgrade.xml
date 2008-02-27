@@ -8219,6 +8219,89 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.101">
+
+      <schema-directSQL>
+        <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="postgresql">
+            UPDATE EAM_MEASUREMENT m SET dsn = (SELECT dsn FROM EAM_MEASUREMENT WHERE id = m.id - 1) WHERE MEASUREMENT_CLASS = 'D'
+        </statement>
+        <statement desc="Replace pass-through ARG1 with actual Template" targetDB="postgresql">
+            UPDATE EAM_MEASUREMENT_TEMPL t SET template = (SELECT template from EAM_MEASUREMENT_TEMPL WHERE id = t.id - 1) WHERE default_interval != 0
+        </statement>
+      </schema-directSQL>
+      <schema-directSQL>
+        <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="oracle">
+            UPDATE EAM_MEASUREMENT m SET dsn = (SELECT dsn FROM EAM_MEASUREMENT WHERE id = m.id - 1) WHERE MEASUREMENT_CLASS = 'D'
+        </statement>
+        <statement desc="Replace pass-through ARG1 with actual Template" targetDB="oracle">
+            UPDATE EAM_MEASUREMENT_TEMPL t SET template = (SELECT template from EAM_MEASUREMENT_TEMPL WHERE id = t.id - 1) WHERE default_interval != 0
+        </statement>
+      </schema-directSQL>
+      <schema-directSQL>
+        <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="oracle">
+            UPDATE EAM_MEASUREMENT m SET dsn = (SELECT dsn FROM EAM_MEASUREMENT WHERE id = m.id - 1) WHERE MEASUREMENT_CLASS = 'D'
+        </statement>
+        <statement desc="Replace pass-through ARG1 with actual Template" targetDB="oracle">
+            UPDATE EAM_MEASUREMENT_TEMPL t SET template = (SELECT template from EAM_MEASUREMENT_TEMPL WHERE id = t.id - 1) WHERE default_interval != 0
+        </statement>
+      </schema-directSQL>
+      <schema-directSQL>
+        <statement desc="Create TMP update Table" targetDB="mysql">
+            CREATE TABLE EAM_MEASUREMENT_TMP AS SELECT (ID+1) ID, DSN FROM EAM_MEASUREMENT WHERE MEASUREMENT_CLASS='R'
+        </statement>
+        <statement desc="Index TMP table for performance on UPDATE" targetDB="mysql">
+            ALTER TABLE EAM_MEASUREMENT_TMP ADD PRIMARY KEY (ID);
+        </statement>
+        <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="mysql">
+            UPDATE EAM_MEASUREMENT m SET m.dsn = (SELECT dsn FROM EAM_MEASUREMENT_TMP where id = m.id) WHERE MEASUREMENT_CLASS='D'
+        </statement>
+        <statement desc="Clean up TMP table" targetDB="mysql">
+           DROP TABLE EAM_MEASUREMENT_TMP
+        </statement>
+        <statement desc="Create TMP update Table" targetDB="mysql">
+            CREATE TABLE EAM_MEASUREMENT_TEMPL_TMP AS SELECT (ID+1) ID, TEMPLATE FROM EAM_MEASUREMENT_TEMPL WHERE DEFAULT_INTERVAL=0
+        </statement>
+        <statement desc="Index TMP table for performance on update" targetDB="mysql">
+            ALTER TABLE EAM_MEASUREMENT_TEMPL_TMP ADD PRIMARY KEY (ID)
+        </statement>
+        <statement desc="Replace pass-through ARG1 with actual Template" targetDB="mysql">
+            UPDATE EAM_MEASUREMENT_TEMPL T SET TEMPLATE = (SELECT TEMPLATE FROM EAM_MEASUREMENT_TEMPL_TMP WHERE ID = T.ID) WHERE DEFAULT_INTERVAL != 0
+        </statement>
+        <statement desc="Clean up TMP table" targetDB="mysql">
+            DROP TABLE EAM_MEASUREMENT_TEMPL_TMP
+        </statement>
+      </schema-directSQL>
+      <schema-directSQL>
+        <statement desc="Remove Raw Measurements">
+            DELETE FROM EAM_MEASUREMENT WHERE measurement_class='R'
+        </statement>
+        <statement desc="Remove Raw Templates">
+            DELETE FROM EAM_MEASUREMENT_TEMPL WHERE default_interval=0
+        </statement>
+        <statement desc="Drop unused expression_data column">
+            ALTER TABLE EAM_MEASUREMENT_TEMPL DROP COLUMN expression_data
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_MEASUREMENT_TEMPL DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_MEASUREMENT_CAT DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_MONITORABLE_TYPE DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_MEASUREMENT DROP COLUMN cid
+        </statement>
+        <statement desc="Drop discriminator column on EAM_MEASUREMENT">
+            ALTER TABLE EAM_MEASUREMENT DROP COLUMN measurement_class
+        </statement>
+        <statement desc="Drop unused Measurement argument table">
+            DROP TABLE EAM_MEASUREMENT_ARG
+        </statement>
+      </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 
