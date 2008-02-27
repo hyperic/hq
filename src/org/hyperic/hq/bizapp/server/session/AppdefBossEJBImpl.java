@@ -129,6 +129,7 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -3893,9 +3894,11 @@ public class AppdefBossEJBImpl
      * @param typeName the type name of the services
      * @param cprop a unique custom property name to be fetched
      */
-    public List getServicesView(AuthzSubject subject, String typeName,
+    public List getServicesView(AuthzSubject subject, Resource proto,
                                 String cprop, String metricName, PageInfo pi)
-        throws PermissionException, InvalidAppdefTypeException {
+        throws PermissionException, InvalidAppdefTypeException 
+    {
+        String typeName = proto.getName();
         // Find all resources of Nagios type
         List services =
             getServiceManager().getServicesByType(subject, typeName,
@@ -4006,14 +4009,14 @@ public class AppdefBossEJBImpl
         
         // Now get their last events
         EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
-        List events =
-            elMan.findLastLogs(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                               instIds, minTimestamp);
+        List events = elMan.findLastLogs(proto);
+                               
         for (Iterator it = events.iterator(); it.hasNext(); ) {
             EventLog log = (EventLog) it.next();
             CPropResource cpRes =
-                (CPropResource) res.get(new Integer(log.getEntityId()));
-            cpRes.setLastEvent(log);
+                (CPropResource) res.get(log.getResource().getInstanceId());
+            if (cpRes != null)
+                cpRes.setLastEvent(log);
         }
         
         // Sort the result set if not previously sorted

@@ -8319,6 +8319,53 @@ has already been defined.
                           nullable="NOT NULL"/>       
   </schemaSpec>
 
+  <schemaSpec version="3.103">
+    <schema-addColumn table="EAM_EVENT_LOG" column="RESOURCE_ID" 
+                      columnType="INTEGER">
+      <initializer>
+        update EAM_EVENT_LOG  set RESOURCE_ID =
+          (select r.ID from EAM_RESOURCE r,
+                  (select ID, 1 AS APPDEF_TYPE from EAM_RESOURCE_TYPE WHERE CID = 301
+                   union all
+                   select ID, 2 AS APPDEF_TYPE from EAM_RESOURCE_TYPE WHERE CID = 303
+                   union all
+                   select ID, 3 AS APPDEF_TYPE from EAM_RESOURCE_TYPE WHERE CID = 305) m
+           where eam_event_log.entity_id = r.INSTANCE_ID and
+                 r.RESOURCE_TYPE_ID = m.ID and
+                 eam_event_log.entity_type = m.APPDEF_TYPE )
+      </initializer>
+    </schema-addColumn>
+    <schema-directSQL>
+      <statement desc="Create new index for resource_id">
+        delete from eam_event_log where resource_id is null
+      </statement>
+      <statement>
+        alter table eam_event_log drop column entity_id
+      </statement>
+      <statement>
+        alter table eam_event_log drop column entity_type
+      </statement>
+    </schema-directSQL>
+    <schema-alterColumn table="EAM_EVENT_LOG" column="RESOURCE_ID"
+                        nullable="NOT NULL"/>
+  </schemaSpec>
+  
+  <schemaSpec version="3.104">
+    <schema-directSQL>
+      <statement fail="false">
+        drop index event_log_idx
+      </statement>                  
+      <statement>
+        create index event_log_idx on EAM_EVENT_LOG ("timestamp", resource_id)
+      </statement>
+      <statement>
+        alter table EAM_EVENT_LOG 
+          add constraint fk55818051fc176ae foreign key (resource_id) 
+              references EAM_RESOURCE(id)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
   <!--
   <schemaSpec version="3.103">
     <schema-directSQL>
@@ -8590,6 +8637,7 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
   -->
+  
 
 </dbupgrade>
 </target>

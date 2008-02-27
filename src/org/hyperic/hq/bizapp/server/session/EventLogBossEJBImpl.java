@@ -35,6 +35,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
 
@@ -99,13 +100,14 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
     public List getEvents(int sessionId, String eventType, 
                           AppdefEntityID ids[],
                           long beginTime, long endTime)
-        throws SessionNotFoundException, SessionTimeoutException {
-        // We ignore the subject for now.
-        manager.getSubjectPojo(sessionId);
+        throws SessionNotFoundException, SessionTimeoutException 
+    {
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         List events = new ArrayList();
     
         for (int i=0; i <ids.length; i++) {
-            events.addAll(getELM().findLogs(ids[i], new String[] { eventType },
+            events.addAll(getELM().findLogs(ids[i], subject, 
+                                            new String[] { eventType },
                                             beginTime, endTime));
         }
     
@@ -124,10 +126,10 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
      */
     public List getEvents(int sessionId, AppdefEntityID aeid,
                           String[] eventTypes, long beginTime, long endTime)
-        throws SessionNotFoundException, SessionTimeoutException {
-        // We ignore the subject for now.
-        manager.getSubjectPojo(sessionId);
-        return getELM().findLogs(aeid, eventTypes, beginTime, endTime);
+        throws SessionNotFoundException, SessionTimeoutException 
+    {
+        AuthzSubject user = manager.getSubjectPojo(sessionId);
+        return getELM().findLogs(aeid, user, eventTypes, beginTime, endTime);
     }
 
     /**
@@ -142,10 +144,10 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
      */
     public List getEvents(int sessionId, AppdefEntityID aeid,
                           String status, long beginTime, long endTime)
-        throws SessionNotFoundException, SessionTimeoutException {
-        // We ignore the subject for now.
-        manager.getSubjectPojo(sessionId);
-        return getELM().findLogs(aeid, status, beginTime, endTime);
+        throws SessionNotFoundException, SessionTimeoutException 
+    {
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        return getELM().findLogs(aeid, subject, status, beginTime, endTime);
     }
 
     /** 
@@ -160,10 +162,11 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
     public boolean[] logsExistPerInterval(int sessionId, AppdefEntityID aeid,
                                           long beginTime, long endTime,
                                           int intervals)
-        throws SessionNotFoundException, SessionTimeoutException {
+        throws SessionNotFoundException, SessionTimeoutException 
+    {
         // We ignore the subject for now.
-        manager.getSubjectPojo(sessionId);
-        return getELM().logsExistPerInterval(aeid, beginTime, endTime,
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        return getELM().logsExistPerInterval(aeid, subject, beginTime, endTime,
                                              intervals);
     }
 

@@ -24,23 +24,32 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class EventLogDAO extends HibernateDAO {
+    private static final List VIEW_PERMISSIONS = 
+        Arrays.asList(new String[] { 
+            AuthzConstants.platformOpViewPlatform,
+            AuthzConstants.serverOpViewServer,
+            AuthzConstants.serviceOpViewService,
+        });
+    
     private static final String TIMESTAMP = "timestamp";
-    private static final String ENTITY_ID = "entityId";
-    private static final String ENTITY_TYPE = "entityType";
 
     public EventLogDAO(DAOFactory f) {
         super(EventLog.class, f);
@@ -55,42 +64,65 @@ public class EventLogDAO extends HibernateDAO {
         return res;
     }
 
-    List findByEntityAndStatus(AppdefEntityID entId, long begin, long end,
+    List findByEntityAndStatus(Resource r, AuthzSubject user, 
+                               long begin, long end,
                                String status) 
     {
-        return createCriteria()
-            .add(Expression.between(TIMESTAMP, new Long(begin), 
-                                    new Long(end)))
-            .add(Expression.eq(ENTITY_ID, entId.getId()))
-            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())))
-            .add(Expression.eq("status", status))
-            .addOrder(Order.desc(TIMESTAMP))
-            .list();
-    }
-    
-    List findByEntity(AppdefEntityID entId, long begin, long end,
-                      String[] eventTypes) {
-        Criteria c = createCriteria()
-            .add(Expression.between(TIMESTAMP, new Long(begin), new Long(end)))
-            .add(Expression.eq(ENTITY_ID, entId.getId()))
-            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())));
+        EdgePermCheck wherePermCheck =
+            getPermissionManager().makePermCheckSql("rez");
+        String hql = "select l from EventLog l " +
+            "join l.resource rez " +
+            wherePermCheck +
+            "and l.timestamp between :begin and :end " + 
+            "and l.status = :status " +
+            "order by l.timestamp";
         
-        if (eventTypes != null && eventTypes.length > 0)
-            c.add(Expression.in("type", eventTypes));
-        c.addOrder(Order.desc(TIMESTAMP));
-        return c.list();
+        Query q = createQuery(hql)
+            .setParameter("status", status)
+            .setLong("begin", begin)
+            .setLong("end", end);
+        return wherePermCheck.addQueryParameters(q, user, r, 0, 
+                                                 VIEW_PERMISSIONS).list();
     }
     
-    List findLastByEntity(int type, Integer[] ids, long begin) 
+    List findByEntity(AuthzSubject subject, Resource r, long begin, long end,
+                      Collection eventTypes)
     {
-        return getSession().createQuery("from EventLog as el " +
-        		"where el.entityType = :type and " +
-        		"(el.entityId, el.timestamp) in " +
-        		"(select el.entityId, max(el.timestamp) from EventLog el where " +
-        		"el.entityType = :type and el.entityId in (:ids) group by el.entityId)")
-        		.setInteger("type", type)
-        		.setParameterList("ids", ids)
-        		.list();
+        EdgePermCheck wherePermCheck = 
+            getPermissionManager().makePermCheckSql("rez");
+        String hql = " select l from EventLog l " + 
+            "join l.resource rez " +
+            wherePermCheck +
+            "and l.timestamp between :begin and :end "; 
+        
+        if (!eventTypes.isEmpty())
+            hql += "and l.type in (:eventTypes) ";
+        
+        hql += "order by l.timestamp"; 
+        
+        Query q = createQuery(hql)
+            .setLong("begin", begin)
+            .setLong("end", end);
+        
+        if (!eventTypes.isEmpty()) 
+            q.setParameterList("eventTypes", eventTypes);
+
+        return wherePermCheck.addQueryParameters(q, subject, r,
+                                                 0, VIEW_PERMISSIONS).list();
+    }
+    
+    List findLastByType(Resource proto) {
+        String hql = "from EventLog as el " + 
+            "  where " +  
+            "(el.resource, el.timestamp) in ( " + 
+            "     select resource, max(timestamp) from EventLog el " +
+            "     where el.resource.prototype = :proto " + 
+            "     group by el.resource " + 
+            ")";
+        
+        return createQuery(hql)
+            .setParameter("proto", proto)
+            .list();
     }
     
     List findBySubject(String subject) {
@@ -99,17 +131,6 @@ public class EventLogDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setParameter("subject", subject)
             .list();
-    }
-
-    List findByCtime(long begin, long end, String[] eventTypes) {
-        Criteria c = createCriteria()
-            .add(Expression.between(TIMESTAMP, new Long(begin),
-                                    new Long(end)));
-        if (eventTypes != null && eventTypes.length > 0) {
-            c.add(Expression.in("type", eventTypes));
-        }
-        c.addOrder(Order.desc(TIMESTAMP));
-        return c.list();
     }
 
     /**
@@ -199,6 +220,42 @@ public class EventLogDAO extends HibernateDAO {
             session.setFlushMode(flushMode);
             session.setCacheMode(cacheMode);
         }
+    }
+    
+    boolean[] logsExistPerInterval(Resource resource, AuthzSubject subject,
+                                   long begin, long end,  
+                                   int intervals) 
+    {
+        EdgePermCheck wherePermCheck = 
+            getPermissionManager().makePermCheckSql("rez");
+        String hql = "select i.I from Number i " +
+            "where I < :intervals " +
+            " and exists (" +
+            "    select l.id from EventLog l " +
+            "    join l.resource rez  " +
+            wherePermCheck +
+            "     and timestamp between (:begin + (:interval * I))"+
+            "                    and ((:begin + (:interval * (I + 1))) - 1) " +
+            " ) "; 
+    
+        long interval = (end - begin) / intervals;
+        boolean[] eventLogsInIntervals = new boolean[intervals];
+    
+        Query q = createQuery(hql)
+            .setLong("begin", begin)
+            .setInteger("intervals", intervals)
+            .setLong("interval", interval);
+        
+        List result = 
+            wherePermCheck.addQueryParameters(q, subject, resource, 
+                                              0, VIEW_PERMISSIONS).list();
+        
+        for (Iterator i=result.iterator(); i.hasNext(); ) {
+            Number n = (Number)i.next();
+        
+            eventLogsInIntervals[n.intValue()] = true;
+        }        
+        return eventLogsInIntervals;
     }
     
     void remove(EventLog l) {

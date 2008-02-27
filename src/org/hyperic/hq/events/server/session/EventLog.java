@@ -26,16 +26,16 @@
 package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.util.data.IEventPoint;
 
 public class EventLog extends PersistedObject implements IEventPoint {
-    private String  _detail;
-    private String  _type;
-    private int     _entityType;
-    private int     _entityId;
-    private long    _timestamp;
-    private String  _subject;
-    private String  _status;
+    private String   _detail;
+    private String   _type;
+    private long     _timestamp;
+    private String   _subject;
+    private String   _status;
+    private Resource _resource;
     
     // Not persisted
     private int     _eventId;
@@ -57,22 +57,6 @@ public class EventLog extends PersistedObject implements IEventPoint {
     
     protected void setType(String type) {
         _type = type;
-    }
-    
-    public int getEntityType() {
-        return _entityType;
-    }
-    
-    protected void setEntityType(int entityType) {
-        _entityType = entityType;
-    }
-    
-    public int getEntityId() {
-        return _entityId;
-    }
-    
-    protected void setEntityId(int entityId) {
-        _entityId = entityId;
     }
     
     public long getTimestamp() {
@@ -97,6 +81,14 @@ public class EventLog extends PersistedObject implements IEventPoint {
     
     protected void setStatus(String status) {
         _status = status;
+    }
+    
+    public Resource getResource() {
+        return _resource;
+    }
+    
+    protected void setResource(Resource r) {
+        _resource = r;
     }
 
     public int getEventID() {

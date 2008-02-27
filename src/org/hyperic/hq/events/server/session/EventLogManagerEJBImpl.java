@@ -29,6 +29,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ejb.CreateException;
@@ -40,6 +43,9 @@ import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
@@ -118,8 +124,8 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         if (event instanceof ResourceEventInterface) {
             AppdefEntityID aeId =
                 ((ResourceEventInterface) event).getResource();
-            eval.setEntityType(aeId.getType());
-            eval.setEntityId(aeId.getID());
+            Resource r = ResourceManagerEJBImpl.getOne().findResource(aeId);
+            eval.setResource(r);
         }
 
         if (save) {
@@ -141,43 +147,51 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     }
     
     /** 
-     * Get the last log based on resource limited by time range
+     * Find the last event logs of all the resources of a given prototype.
+     * (i.e. 'Linux' or 'FileServer File')
      * 
      * @ejb:interface-method
      */
-    public List findLastLogs(int type, Integer[] ids, long begin)
-    {
-        return getEventLogDAO().findLastByEntity(type, ids, begin);
+    public List findLastLogs(Resource proto) {
+        return getEventLogDAO().findLastByType(proto);
     }
 
     /** 
-     * Get a list of log records based on resource, event type and time range
+     * Get a list of log records based on resource, event type and time range.
+     * All resources which are descendents of the passed resource will also
+     * have their event logs included
      * 
      * @ejb:interface-method
      */
-    public List findLogs(AppdefEntityID ent, String[] eventTypes,
-                         long begin, long end)
+    public List findLogs(AppdefEntityID ent, AuthzSubject user, 
+                         String[] eventTypes, long begin, long end)
     {
         EventLogDAO eDAO = getEventLogDAO();
-        return eDAO.findByEntity(ent, begin, end, eventTypes);
+        Resource r = ResourceManagerEJBImpl.getOne().findResource(ent);
+        Collection eTypes;
+        
+        if (eventTypes == null)
+            eTypes = Collections.EMPTY_LIST;
+        else
+            eTypes = Arrays.asList(eventTypes);
+        return eDAO.findByEntity(user, r, begin, end, eTypes);
     }
 
     /** 
-     * Get a list of log records based on resource, status and time range
+     * Get a list of log records based on resource, status and time range.
+     * All resources which are descendants of the passed resource will also
+     * have their event logs included
      *
      * @ejb:interface-method
      */
-    public List findLogs(AppdefEntityID ent, String status,
+    public List findLogs(AppdefEntityID ent, AuthzSubject user, String status,
                          long begin, long end) 
     {
-        return getEventLogDAO().findByEntityAndStatus(ent, begin, end, status);
+        Resource r = ResourceManagerEJBImpl.getOne().findResource(ent);
+        return getEventLogDAO().findByEntityAndStatus(r, user, begin, end, 
+                                                      status);
     }
 
-    public List findByCtime(long begin, long end, String[] eventTypes) {
-        EventLogDAO dao = getEventLogDAO();
-        return dao.findByCtime(begin, end, eventTypes);
-    }
-    
     /**
      * Retrieve the total number of event logs.
      * 
@@ -193,6 +207,9 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      * are log records for that respective interval, for a particular entity 
      * over a given time range.
      * 
+     * This method also takes descendents of the passed-resource into
+     * consideration.
+     * 
      * @param entityId The entity.
      * @param begin The begin timestamp for the time range.
      * @param end The end timestamp for the time range.
@@ -201,60 +218,14 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      *         specified.
      * @ejb:interface-method
      */
-    public boolean[] logsExistPerInterval(AppdefEntityID entityId, 
-                                          long begin, 
-                                          long end, 
-                                          int intervals) {
-        
-        boolean[] eventLogsInIntervals = new boolean[intervals];
-        long interval = (end - begin) / intervals;       
-
-        if (log.isDebugEnabled()) {
-            log.debug("Checking if logs exist per interval: entity_type="+
-                    entityId.getType()+", entity_id="+entityId.getID()+
-                    ", begin="+begin+", end="+end+", intervals="+intervals+
-                    ", interval="+interval);
-        }
-        
-        StringBuffer sql = new StringBuffer();
-        sql.append("SELECT i FROM ").append(TABLE_EAM_NUMBERS)
-           .append(" WHERE i < ").append(intervals)
-           .append(" AND EXISTS (SELECT id FROM ").append(TABLE_EVENT_LOG)
-           .append(" WHERE timestamp BETWEEN (")
-           .append(begin).append(" + (").append(interval).append(" * i)) AND ((")
-           .append(begin).append(" + (").append(interval).append(" * (i + 1))) - 1)")
-           .append(" AND entity_id = ").append(entityId.getID())
-           .append(" AND entity_type = ").append(entityId.getType())
-           .append(' ')
-           .append(Util.getHQDialect().getLimitString(1))
-           .append(')');
-        
-        if (log.isDebugEnabled()) {
-            log.debug(sql.toString());
-        }
-        
-        Session sess = DAOFactory.getDAOFactory().getCurrentSession();       
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = sess.connection();
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql.toString());
-
-            while (rs.next()) {
-                int index = rs.getInt(1);
-                eventLogsInIntervals[index] = true;
-            }
-        } catch (SQLException e) {
-            log.error("SQLException when fetching logs existence", e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
-            sess.disconnect();
-        }
-
-        return eventLogsInIntervals;
+    public boolean[] logsExistPerInterval(AppdefEntityID entityId,
+                                          AuthzSubject subject,
+                                          long begin, long end,  
+                                          int intervals) 
+    {
+        Resource r = ResourceManagerEJBImpl.getOne().findResource(entityId);
+        return getEventLogDAO().logsExistPerInterval(r, subject, begin, end, 
+                                                     intervals);
     }
 
     /** 
