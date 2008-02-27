@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -26,13 +26,9 @@
 package org.hyperic.hq.ui;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import javax.ejb.FinderException;
-import javax.security.auth.login.LoginException;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -45,118 +41,166 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.ui.action.authentication.AuthenticateUserAction;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AuthBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.pages.SignIn;
+import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.server.session.UserDashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManagerLocal;
+import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.encoding.Base64;
 
 public final class AuthenticationFilter extends BaseFilter {
-    
-    private static Log log =
-        LogFactory.getLog(AuthenticationFilter.class.getName());
-    
-    private static String LOGIN_URL = "/Login.do";
-    
-    /**
-     * @param request The servlet request we are processing
-     * @param result The servlet response we are creating
-     * @param chain The filter chain we are processing
-     */
+
+    private static Log log = LogFactory.getLog(AuthenticationFilter.class
+	    .getName());
+
     public void doFilter(ServletRequest req, ServletResponse res,
-                         FilterChain chain)
-        throws IOException, ServletException {
-        
-        HttpServletResponse response = (HttpServletResponse) res;
-        HttpServletRequest request = (HttpServletRequest) req;
-        
-        //if a session does not already exist this call will create one
-        HttpSession session = request.getSession();
-        
-        /* check if the user object is in the session.
-         * if not then the user is not validated
-         * and should be forwarded to the login page
-         */
-        WebUser webUser = SessionUtils.getWebUser(session);
-        
-        ServletContext ctx = session.getServletContext();
-        if (webUser == null) {
-            // See if there is authentication information
-            String auth = request.getHeader("Authorization");
-            if (auth != null) {
-                StringTokenizer token = new StringTokenizer(auth, " ");
-                if (token.countTokens() == 2) {
-                    String tok = token.nextToken();
-                    assert(tok.equals("Basic"));
-                    tok = token.nextToken();
-                    String userpass = new String(Base64.decode(tok));
-                    
-                    token = new StringTokenizer(userpass, ":");
-                    assert(token.countTokens() == 2);
-                    String user = token.nextToken();
-                    String pass = token.nextToken();
-                    try {
-                        webUser = AuthenticateUserAction.loginUser(request, ctx,
-                                                                   user, pass);
-                        session.setAttribute(Constants.WEBUSER_SES_ATTR,
-                                             webUser);
-                    } catch (Exception e) {
-                        // Unsuccessful login
-                        log.debug("User attempted to log in with " + userpass);
-                    }
-                }
-            }
-        }
-        
-        if (webUser == null) {
-            // See if there is a guest user
-            webUser = AuthenticateUserAction.loginGuest(request, ctx);            
-        }
-        
-        if (webUser == null ){
-            String path = request.getServletPath();
-            
-            if( LOGIN_URL.equals(path) || "/j_security_check.do".equals(path) )
-                chain.doFilter(request, response);
-            else{
-                //copy the url and request parameters so that the user can be
-                // forwarded to the originally requested page after
-                // authorization
-                if (path.indexOf("RecentAlerts") < 0 && path.indexOf("rss") < 0
-                        && path.indexOf("IndicatorCharts") < 0) {
-                    Map parameters = request.getParameterMap();
-                    if( !parameters.isEmpty() ){
-                        HashMap newMap = new HashMap();
-                        
-                        Iterator i = parameters.keySet().iterator();
-                        
-                        while( i.hasNext() ){
-                            String key = (String) i.next();
-                            newMap.put( key,  request.getParameter(key) );
-                        }
-                        
-                        session.setAttribute(Constants.LOGON_URL_PARAMETERS,
-                                             newMap);
-                    }
-                    
-                    session.setAttribute( Constants.LOGON_URL_KEY, path);
-                }
-                
-                response.sendRedirect(request.getContextPath() + LOGIN_URL);
-            }
-        }
-        else{            
-            HttpServletRequest hreq=(HttpServletRequest)request;
-            try {
-                chain.doFilter(request, response);
-            } catch (IOException e) {
-                log.warn("Caught IO Exception from client " +
-                         hreq.getRemoteAddr() + ": " + e.getMessage());
-            }
-        }
+	    FilterChain chain) throws IOException, ServletException {
+
+	HttpServletResponse response = (HttpServletResponse) res;
+	HttpServletRequest request = (HttpServletRequest) req;
+	HttpSession session = request.getSession();
+	ServletContext ctx = session.getServletContext();
+	WebUser webUser = SessionUtils.getWebUser(session);
+	String servletPath = request.getServletPath(), 
+	contextPath = request.getContextPath(),
+	queryString = request.getQueryString();
+	
+	if (webUser == null) {
+	    // See if there is authentication information
+	    String auth = request.getHeader("Authorization");
+	    if (auth != null) {
+		StringTokenizer token = new StringTokenizer(auth, " ");
+		if (token.countTokens() == 2) {
+		    String tok = token.nextToken();
+		    assert (tok.equals("Basic"));
+		    tok = token.nextToken();
+		    String userpass = new String(Base64.decode(tok));
+
+		    token = new StringTokenizer(userpass, ":");
+		    assert (token.countTokens() == 2);
+		    String user = token.nextToken();
+		    String pass = token.nextToken();
+		    try {
+			webUser = SignIn.loginUser(request, ctx, user, pass);
+			session.setAttribute(Constants.WEBUSER_SES_ATTR,
+				webUser);
+		    } catch (Exception e) {
+			// Unsuccessful login
+			log.debug("User attempted to log in with " + userpass);
+		    }
+		}
+	    }
+	}
+
+	if (webUser == null) {
+	    // See if there is a guest user
+	    webUser = loginGuest(request, ctx);
+	}
+	
+	if (webUser == null) {
+	    // if the user is requesting the login page continue
+	    if (PageListing.SIGN_IN_URL.equals(servletPath)
+		    || "/j_security_check.do".equals(servletPath))
+		chain.doFilter(request, response);
+	    else {
+		// not requesting the login page so add a callback and send them
+		// there
+		if (servletPath.indexOf("RecentAlerts") < 0
+			&& servletPath.indexOf("rss") < 0
+			&& servletPath.indexOf("IndicatorCharts") < 0) {
+		    session.setAttribute(Constants.POST_AUTH_CALLBACK_URL, servletPath
+			    + queryString == null ? "" : queryString);
+		}
+		String redirectURL = contextPath + PageListing.SIGN_IN_URL;
+		response.sendRedirect(redirectURL);
+		return;
+	    }
+	}
+	String callbackURL = (String) session
+		.getAttribute(Constants.POST_AUTH_CALLBACK_URL);
+	if (webUser != null && !PageListing.SIGN_IN_URL.equals(servletPath)
+		&& callbackURL != null) {
+	    session.setAttribute(Constants.POST_AUTH_CALLBACK_URL, null);
+	    response.sendRedirect(callbackURL);
+	} else if (webUser != null
+		&& (PageListing.SIGN_IN_URL.equals(servletPath) || "/j_security_check.do"
+			.equals(servletPath))) {
+	    response.sendRedirect(contextPath + PageListing.DASHBOARD_URL);
+	    return;
+	} else {
+	    try {
+		chain.doFilter(request, response);
+	    } catch (Exception e) {
+		log.warn("Caught IO Exception from client "
+			+ request.getRemoteAddr() + ": " + e.getMessage());
+	    }
+	}
     }
-   
+
     public void init(FilterConfig filterConfig) {
-        super.init(filterConfig);
-    }    
+	super.init(filterConfig);
+    }
+
+    private WebUser loginGuest(HttpServletRequest request, ServletContext ctx) {
+	AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
+	try {
+	    int sid = authBoss.loginGuest();
+
+	    ConfigResponse preferences = new ConfigResponse();
+
+	    // look up the user's preferences
+	    ConfigResponse defaultPreferences = (ConfigResponse) ctx
+		    .getAttribute(Constants.DEF_USER_PREFS);
+
+	    AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+	    AuthzSubjectValue subject = authzBoss.getCurrentSubject(sid)
+		    .getAuthzSubjectValue();
+
+	    Integer sessionId = new Integer(sid);
+	    preferences = authzBoss.getUserPrefs(sessionId, subject.getId());
+	    preferences.merge(defaultPreferences, false);
+
+	    WebUser webUser = new WebUser(subject, sessionId, preferences, true);
+
+	    Map userOpsMap = SignIn.loadUserPermissions(sessionId, authzBoss);
+	    request.getSession().setAttribute(Constants.USER_OPERATIONS_ATTR,
+		    userOpsMap);
+
+	    try {
+		DashboardManagerLocal dashManager = DashboardManagerEJBImpl
+			.getOne();
+		ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
+			.getAttribute(Constants.DEF_USER_DASH_PREFS);
+		AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
+			.findSubjectById(webUser.getSubject().getId());
+		UserDashboardConfig userDashboard = dashManager
+			.getUserDashboard(me, me);
+		if (userDashboard == null) {
+		    userDashboard = dashManager.createUserDashboard(me, me,
+			    webUser.getName());
+		    ConfigResponse userDashobardConfig = userDashboard
+			    .getConfig();
+		    userDashobardConfig.merge(defaultUserDashPrefs, false);
+		    dashManager.configureDashboard(me, userDashboard,
+			    userDashobardConfig);
+		}
+	    } catch (PermissionException e) {
+		e.printStackTrace();
+	    }
+
+	    return webUser;
+	} catch (Exception e) {
+	    // No guest account available
+	    return null;
+	}
+    }
+
 }
