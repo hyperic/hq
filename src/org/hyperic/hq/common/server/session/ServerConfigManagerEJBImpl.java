@@ -81,7 +81,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
 
     private final String[] APPDEF_TABLES
         = { "EAM_PLATFORM", "EAM_SERVER", "EAM_SERVICE", "EAM_CONFIG_RESPONSE",
-            "EAM_AGENT", "EAM_IP", "EAM_MEASUREMENT_ARG", "EAM_MEASUREMENT", 
+            "EAM_AGENT", "EAM_IP", "EAM_MEASUREMENT", 
             "EAM_SRN", "EAM_RESOURCE", "EAM_CPROP_KEY", "EAM_TRIGGER_EVENT",
             "EAM_AUDIT", "EAM_AIQ_SERVER", "EAM_AIQ_PLATFORM" };
     
