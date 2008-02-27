@@ -359,6 +359,14 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <!-- Resource caches -->
+  <cache name="org.hyperic.hq.authz.server.session.ResourceEdge"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
   <!-- Group caches -->
   <cache name="org.hyperic.hq.authz.server.session.ResourceGroup"
          maxElementsInMemory="100"
