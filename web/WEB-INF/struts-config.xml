@@ -342,7 +342,7 @@
 <!-- =================================== Global Forward Definitions -->
 
     <global-forwards>
-      <forward name="invalid.session" path="/Logout.do" redirect="true"/>
+      <forward name="invalid.session" path="/SignIn.html" redirect="true"/>
       <forward name="rss.feed" path="/common/RSSFormat.jsp"/>
       <forward name="ajax" path="/common/AJAXResponse.jsp"/>
     </global-forwards>
@@ -368,7 +368,7 @@
 
       <action path="/Logout" 
               type="org.hyperic.hq.ui.action.authentication.LogoutAction">              
-              <forward name="success" path="/Login.do"/>
+              <forward name="success" path="/SignIn.html"/>
       </action>
       
       <action path="/Login" 
