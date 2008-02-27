@@ -39,6 +39,7 @@
   <property name="thirdparty.lib" location="thirdparty/lib"/>
   <property name="xdoclet.lib" location="${thirdparty.lib}/xdoclet"/>
   <property name="hibernate.lib" location="${thirdparty.lib}/hibernate"/>
+  <property name="tapestry_lib" location="${thirdparty.lib}/tapestry"/>
 
   <property name="webapp.home" location="${hq.home}/web" />
   <property name="ear.dir" location="${build.dir}/hq.ear" />
@@ -83,6 +84,7 @@
              includes="postgresql-8.2-*.jdbc3.jar"/>
     <fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar"/>
     <fileset dir="${thirdparty.lib}/mx4j" includes="*.jar" />
+    <fileset dir="${thirdparty.lib}/tapestry" includes="*.jar" />
     <fileset dir="${xdoclet.lib}" includes="*.jar" />
     <fileset dir="${hibernate.lib}" includes="*.jar" />
     <fileset dir="${jboss.home}/server/default/lib"
@@ -403,7 +405,6 @@
 
     <copy todir="${ear.dir}/lib" >
       <fileset dir="${thirdparty.lib}" >
-        <include name="backport-util-concurrent.jar" />
         <include name="commons-beanutils.jar" />
         <include name="commons-lang-2.3.jar" />
         <include name="commons-logging.jar" />
@@ -452,6 +453,27 @@
         <include name="concurrent-1.3.2.jar" />
         <include name="dom4j-1.6.1.jar" />
         <include name="hibernate3.jar" />
+      </fileset>
+      <fileset dir="${tapestry_lib}">
+         <include name="backport-util-concurrent-3.1.jar" />
+         <include name="commons-fileupload-1.2.jar" />
+         <include name="commons-io-1.4.jar" />
+         <include name="commons-pool-1.4.jar" />
+         <include name="hivemind-1.1.1.jar" />
+         <include name="hivemind-lib-1.1.1.jar" />
+         <include name="javassist-3.6.ga.jar" />
+         <include name="ognl-2.7.2.jar" />
+         <include name="oro-2.0.8.jar" />
+         <include name="portlet-api-1.0.jar" />
+         <include name="tacos-core-4.1.2-20080213.jar" />
+         <include name="tacos-dojo-0.1.102-20071228.jar" />
+         <include name="tapdoc-0.7.0-20070512.jar" />
+         <include name="tapdoc-0.7.0-20071218-sources" />
+         <include name="tapestry-annotations-4.1.5.jar" />
+         <include name="tapestry-archetype-4.1.2.jar" />
+         <include name="tapestry-contrib-4.1.5.jar" />
+         <include name="tapestry-framework-4.1.5.jar" />
+         <include name="tapestry-portlet-4.1.5.jar" />
       </fileset>
     </copy>
 
