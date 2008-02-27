@@ -38,11 +38,9 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
+import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.ext.MonitorFactory;
-import org.hyperic.hq.measurement.ext.MonitorInterface;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.monitor.MonitorCreateException;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
@@ -73,10 +71,9 @@ public class MeasurementProcessorEJBImpl
      * @ejb:interface-method
      */
     public boolean ping(AgentValue aconn)
-        throws PermissionException, MonitorCreateException {
-        // Schedule RawMeasurements with a monitor
-        MonitorInterface monitor = MonitorFactory.newInstance();
-        
+        throws PermissionException {
+
+        AgentMonitor monitor = new AgentMonitor();
         return monitor.ping(aconn);
     }
 
@@ -91,7 +88,7 @@ public class MeasurementProcessorEJBImpl
      */
     public void schedule(AppdefEntityID entId, List measurements)
         throws PermissionException, MeasurementScheduleException,
-               MonitorAgentException 
+               MonitorAgentException
     {
         SRNManagerLocal srnManager = getSRNManager();
         long minInterval = Long.MAX_VALUE;
@@ -110,34 +107,25 @@ public class MeasurementProcessorEJBImpl
 
         // Schedule the measurements
         int srnNumber = srnManager.incrementSrn(entId, minInterval);
-        try {
-            scheduleMeasurements(entId, measurements, srnNumber);
-        } catch (MonitorCreateException e) {
-            throw new MeasurementScheduleException(e);
-        }
+        scheduleMeasurements(entId, measurements, srnNumber);
 
         ZeventManager.getInstance().enqueueEventsAfterCommit(events);
     }
 
     private void unschedule(AgentValue aconn, AppdefEntityID[] entIds)
         throws MeasurementUnscheduleException, MonitorAgentException {
-        try {
-            SRNManagerLocal srnManager = getSRNManager();
-            for (int i = 0; i < entIds.length; i++) {
-                try {
-                    srnManager.removeSrn(entIds[i]);
-                } catch (ObjectNotFoundException e) {
-                    // Ok to ignore, this is the first time scheduling metrics
-                    // for this resource.
-                }
+        SRNManagerLocal srnManager = getSRNManager();
+        for (int i = 0; i < entIds.length; i++) {
+            try {
+                srnManager.removeSrn(entIds[i]);
+            } catch (ObjectNotFoundException e) {
+                // Ok to ignore, this is the first time scheduling metrics
+                // for this resource.
             }
-
-            MonitorInterface monitor = MonitorFactory.newInstance();
-            monitor.unschedule(aconn, entIds);
-        } catch (MonitorCreateException e) {
-            throw new MeasurementUnscheduleException(
-                "Could not create monitor", aconn.getId(), e);
         }
+
+        AgentMonitor monitor = new AgentMonitor();
+        monitor.unschedule(aconn, entIds);
     }
     
     /** Unschedule metrics of multiple appdef entities
@@ -187,14 +175,12 @@ public class MeasurementProcessorEJBImpl
 
     private void scheduleMeasurements(AppdefEntityID entId,
                                       List measurements, int srnVersion)
-        throws PermissionException, MonitorCreateException,
-               MonitorAgentException
-    {
-        // Get the agent IP and Port from server ID
+        throws PermissionException, MonitorAgentException {
+
         AgentValue aconn = getAgentConnection(entId);
         SRN srn = new SRN(entId, srnVersion);
 
-        MonitorInterface monitor = MonitorFactory.newInstance();
+        AgentMonitor monitor = new AgentMonitor();
 
         Measurement[] meas = (Measurement[])
             measurements.toArray(new Measurement[measurements.size()]);

@@ -74,11 +74,9 @@ import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
-import org.hyperic.hq.measurement.ext.MonitorInterface;
-import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
-import org.hyperic.hq.measurement.monitor.MonitorCreateException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
@@ -1392,15 +1390,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         throws LiveMeasurementException, PermissionException
     {
         try {
-            MonitorInterface monitor;
-            AgentValue aconn;
-
-            aconn   = this.getAgentConnection(entity);
-            monitor = MonitorFactory.newInstance();
+            AgentMonitor monitor = new AgentMonitor();
+            AgentValue aconn = getAgentConnection(entity);
 
             return monitor.getLiveValues(aconn, dsns);
-        } catch(MonitorCreateException e){
-            throw new LiveMeasurementException(e.getMessage(), e);
         } catch(MonitorAgentException e){
             throw new LiveMeasurementException(e.getMessage(), e);
         }

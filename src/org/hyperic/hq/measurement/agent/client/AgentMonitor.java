@@ -37,7 +37,6 @@ import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
-import org.hyperic.hq.measurement.ext.MonitorInterface;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.product.MetricValue;
@@ -46,14 +45,11 @@ import org.hyperic.util.collection.ExpireMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.List;
-
 /** 
- * The MoniteringInterface implementation that communicates with
- * the AgentDaemon.
+ * The AgentMonitor is a wrapper around the MeasurementClient, providing
+ * commonly used routines.
  */
-
-public class AgentMonitor implements MonitorInterface
+public class AgentMonitor
 {
     private final Log log = 
         LogFactory.getLog(AgentMonitor.class.getName());

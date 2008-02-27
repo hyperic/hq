@@ -45,7 +45,6 @@ import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.monitor.MonitorCreateException;
 import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
 import org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
@@ -154,11 +153,6 @@ public class ScheduleVerificationService
             } catch (PermissionException e) {
                 _log.debug("Measurement Schedule Verification: " +
                            "No permission to look up " + entId);
-            } catch (MonitorCreateException e) {
-                _log.debug("Measurement Schedule Verification: " +
-                           "Could not create a monitor to connect to agent " +
-                          agentVal);
-                downAgents.add(agentVal);
             } catch (MonitorAgentException e) {
                 _log.debug("Measurement Schedule Verification: " +
                            "Could not connect to agent " + agentVal);
