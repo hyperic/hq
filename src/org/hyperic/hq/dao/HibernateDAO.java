@@ -34,6 +34,8 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -80,6 +82,10 @@ public abstract class HibernateDAO {
     
     protected Criteria createCriteria() {
         return getSession().createCriteria(_persistentClass);
+    }
+    
+    protected Query createQuery(String s) {
+        return getSession().createQuery(s);
     }
 
     /**
@@ -160,5 +166,9 @@ public abstract class HibernateDAO {
         }
         
         return new PageList(crit.list(), total.intValue());
+    }
+    
+    protected PermissionManager getPermissionManager() {
+        return PermissionManagerFactory.getInstance();
     }
 }
