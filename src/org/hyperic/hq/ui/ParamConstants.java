@@ -217,12 +217,6 @@ public interface ParamConstants {
      */
     public static final String LOGON_STATUS = "loginStatus";
     
-    /**
-     * The request parameters passed for the page requested
-     * to be called when the user is authenticated.
-     */
-    public static final String LOGON_URL_PARAMETERS = "forwardParams";
-    
     public static final String METRIC_PARAM = "m";
     public static final String METRIC_NAME_PARAM = "mname";
 

@@ -77,7 +77,7 @@ public interface KeyConstants {
     /** key that will contain the cam specific page title context. */
     public static final String PAGE_TITLE_KEY = "camTitle";
         
-    public static final String LOGON_URL_KEY = "forwardURL";
+    public static final String POST_AUTH_CALLBACK_URL = "forwardURL";
     
     public static final String SELECTED_DASHBOARD_ID = ".user.dashboard.selected.id";
     
