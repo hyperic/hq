@@ -23,6 +23,33 @@
     <param-value>false</param-value>
   </context-param>
   
+  <!-- Tapestry servelet and mappings -->
+  <servlet>
+    <servlet-name>hq</servlet-name>
+    <servlet-class>org.apache.tapestry.ApplicationServlet</servlet-class>
+    <load-on-startup>0</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>hq</servlet-name>
+    <url-pattern>*.html</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>hq</servlet-name>
+    <url-pattern>*.shtml</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>hq</servlet-name>
+    <url-pattern>*.sshq</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>hq</servlet-name>
+    <url-pattern>*.shq</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>hq</servlet-name>
+    <url-pattern>/assets/*</url-pattern>
+  </servlet-mapping>
+  
   <!-- Hibernate session filter -->
   <filter>
     <filter-name>Hibernate-Session-Filter</filter-name>
@@ -60,6 +87,10 @@
   <filter-mapping>
     <filter-name>Authentication-Filter</filter-name>
     <url-pattern>*.jsp</url-pattern>
+  </filter-mapping> 
+  <filter-mapping>
+    <filter-name>Authentication-Filter</filter-name>
+    <url-pattern>*.html</url-pattern>
   </filter-mapping> 
   
   <filter-mapping>
@@ -252,7 +283,6 @@
   <!-- The Usual Welcome File List -->
   <welcome-file-list>
     <welcome-file>Dashboard.do</welcome-file>
-    <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
   <error-page>
     <error-code>404</error-code>
