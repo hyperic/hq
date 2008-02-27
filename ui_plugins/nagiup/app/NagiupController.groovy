@@ -13,7 +13,8 @@ class NagiupController
     
     private final NAGIUP_SCHEMA = [
         getData: {pageInfo, params ->
-            AppdefBossEJBImpl.one.getServicesView(user, 'Nagios Plugin', 
+            def proto = resourceHelper.findResourcePrototype('Nagios Plugin') 
+            AppdefBossEJBImpl.one.getServicesView(user, proto, 
                                                   'nagiosHost', 'Return Code',
                                                   pageInfo)
         },
