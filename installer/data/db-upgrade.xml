@@ -8319,6 +8319,7 @@ has already been defined.
                           nullable="NOT NULL"/>       
   </schemaSpec>
 
+  <!--
   <schemaSpec version="3.103">
     <schema-directSQL>
       <statement desc="Creating new HQ_AVAIL_DATA_RLE table">
@@ -8588,6 +8589,7 @@ has already been defined.
       </statement>
     </schema-directSQL>
   </schemaSpec>
+  -->
 
 </dbupgrade>
 </target>
