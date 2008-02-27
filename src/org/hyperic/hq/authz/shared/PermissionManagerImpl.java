@@ -39,11 +39,12 @@ import javax.ejb.FinderException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.common.SystemException;
@@ -55,7 +56,7 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 
 public class PermissionManagerImpl 
-    extends AuthzSession implements PermissionManager
+    extends PermissionManager
 {
     private static Log _log =
         LogFactory.getLog(PermissionManagerImpl.class.getName());
@@ -363,5 +364,29 @@ public class PermissionManagerImpl
 
     public boolean hasGuestRole() {
         return false;
+    }
+
+    public EdgePermCheck
+        makePermCheckSql(String subjectParam, 
+                         String resourceVar, String resourceParam,
+                         String distanceParam, String opsParam)
+    {
+        String sql = 
+            "join " + resourceVar+ ".toEdges _e " + 
+            "join _e.from _fromResource " +  
+            "where " + 
+            "  _fromResource = :" + resourceParam + 
+            "  and _e.distance >= :" + distanceParam + " "; 
+
+        return new EdgePermCheck(sql, subjectParam, resourceVar,
+                                 resourceParam, distanceParam, opsParam) 
+        {
+            public Query addQueryParameters(Query q, AuthzSubject subject,
+                                            Resource r, int distance, List ops) 
+            {
+                return q.setInteger(getDistanceParam(), distance)
+                        .setParameter(getResourceParam(), r);
+            }  
+        };
     }
 }

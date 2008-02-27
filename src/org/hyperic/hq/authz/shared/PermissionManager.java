@@ -32,15 +32,17 @@ import java.util.List;
 
 import javax.ejb.FinderException;
 
+import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
-public interface PermissionManager {
+public abstract class PermissionManager extends AuthzSession {
 
-    final String OPERATION_PAGER = PagerProcessor_operation.class.getName();
+    public static final String OPERATION_PAGER = 
+        PagerProcessor_operation.class.getName();
 
     /**
      * Check permission.
@@ -54,7 +56,7 @@ public interface PermissionManager {
      * perform the given operation on the resource of the given type whose
      * id is instanceId.
      */
-    public void check(Integer subject, ResourceType type,
+    public abstract void check(Integer subject, ResourceType type,
                       Integer instanceId, String operation)
         throws PermissionException;
 
@@ -70,8 +72,8 @@ public interface PermissionManager {
      * perform the given operation on the resource of the given type whose
      * id is instanceId.
      */
-    public void check(Integer subjectId, Integer typeId, Integer instanceId,
-                      Integer operationId)
+    public abstract void check(Integer subjectId, Integer typeId, 
+                               Integer instanceId, Integer operationId)
         throws PermissionException;
 
     /**
@@ -86,8 +88,8 @@ public interface PermissionManager {
      * perform the given operation on the resource of the given type whose
      * id is instanceId.
      */
-    public void check(Integer subjectId, String resType, Integer instanceId,
-                      String operation)
+    public abstract void check(Integer subjectId, String resType, 
+                               Integer instanceId, String operation)
         throws PermissionException;
 
     /**
@@ -95,12 +97,12 @@ public interface PermissionManager {
      *
      * @return true - if user has administerCAM operation false otherwise
      */
-    public boolean hasAdminPermission(Integer who);
+    public abstract boolean hasAdminPermission(Integer who);
 
     /**
      * Check to see if user can see role dashboards
      */
-    public boolean hasGuestRole();
+    public abstract boolean hasGuestRole();
     
     /**
      * Find the list of instance ids for which a given subject id 
@@ -110,9 +112,10 @@ public interface PermissionManager {
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
-    public PageList findOperationScopeBySubject(AuthzSubjectValue subj,
-                                                String opName, String resType,
-                                                PageControl pc) 
+    public abstract PageList 
+        findOperationScopeBySubject(AuthzSubjectValue subj,
+                                    String opName, String resType,
+                                    PageControl pc) 
         throws FinderException, PermissionException;
 
     /**
@@ -120,9 +123,10 @@ public interface PermissionManager {
      * has a given operation.
      * @return List of integer instance ids
      */
-    public PageList findOperationScopeBySubject(AuthzSubjectValue subj,
-                                                Integer opId,
-                                                PageControl pc)
+    public abstract PageList 
+        findOperationScopeBySubject(AuthzSubjectValue subj,
+                                    Integer opId,
+                                    PageControl pc)
         throws FinderException, PermissionException;
 
     /**
@@ -138,7 +142,7 @@ public interface PermissionManager {
      * @return array of authz Resources
      * @exception FinderException
      */
-    public ResourceValue[]
+    public abstract ResourceValue[]
         findOperationScopeBySubjectBatch(AuthzSubjectValue whoami,
                                          ResourceValue[] resArr,
                                          String[] opArr)
@@ -153,7 +157,7 @@ public interface PermissionManager {
      *
      * @return a list of Integers representing instance ids
      */
-    public List findViewableResources(AuthzSubjectValue subj,
+    public abstract List findViewableResources(AuthzSubjectValue subj,
                                       String resType, 
                                       String resName, 
                                       String appdefTypeStr,
@@ -165,7 +169,8 @@ public interface PermissionManager {
      *
      * @return a list of Integers representing instance ids
      */
-    public List getAllOperations(AuthzSubjectValue subject, PageControl pc)
+    public abstract List 
+        getAllOperations(AuthzSubjectValue subject, PageControl pc)
         throws PermissionException, FinderException;
 
 
@@ -190,7 +195,7 @@ public interface PermissionManager {
      *
      * @return a WHERE clause that can be used to query against authz data.
      */
-    public String getSQLWhere(Integer subjectId, String resId);
+    public abstract String getSQLWhere(Integer subjectId, String resId);
 
     /**
      * Populate a prepared statement with the appropriate authz parameters.
@@ -207,30 +212,69 @@ public interface PermissionManager {
      * @return The new ps_idx value, in case the caller has more parameters
      * to set in the prepared statement.
      */
-    public int prepareSQL(PreparedStatement ps, int ps_idx, Integer subjectId, 
-                          Integer resType, Integer operationId) 
+    public abstract int 
+        prepareSQL(PreparedStatement ps, int ps_idx, Integer subjectId, 
+                   Integer resType, Integer operationId) 
         throws SQLException;
 
-    public String getResourceTypeSQL(String table);
+    public abstract String getResourceTypeSQL(String table);
 
-    public int prepareResourceTypeSQL(PreparedStatement ps,
-                                      int ps_idx,
-                                      int subjectId,
-                                      String resType,
-                                      String op)
+    public abstract int prepareResourceTypeSQL(PreparedStatement ps,
+                                               int ps_idx,
+                                               int subjectId,
+                                               String resType,
+                                               String op)
         throws SQLException;
 
-    public Collection getGroupResources(Integer subjectId,
-                                        Integer groupId, Boolean fsystem);
+    public abstract Collection 
+        getGroupResources(Integer subjectId, Integer groupId, Boolean fsystem);
+                                                 
+    public abstract Collection 
+        findServiceResources(AuthzSubject subj, Boolean fsystem);
+    
+    public abstract String getAlertsHQL();
+    
+    public abstract String getAlertDefsHQL();
 
-    public Collection findServiceResources(AuthzSubject subj, Boolean fsystem);
+    public abstract String getGroupAlertsHQL();
     
-    public String getAlertsHQL();
-    
-    public String getAlertDefsHQL();
+    public abstract String getGroupAlertDefsHQL();    
 
-    public String getGroupAlertsHQL();
+    /**
+     * Creates an edge perm check with default names of the replacement
+     * variables and parameters.
+     */
+    public EdgePermCheck makePermCheckSql(String resourceVar) {
+        return makePermCheckSql("subject", resourceVar, "resource",
+                                "distance", "ops");
+    }
+
     
-    public String getGroupAlertDefsHQL();    
-    
+    /**
+     * Generates an object which aids in the creation of hierarchical,
+     * permission checking SQL.
+     * 
+     * This method spits out a piece of SQL, like:
+     *   join r.toEdges _e 
+     *  ... 
+     *  where _e.fromDistance > :distance
+     *   and ...
+     *   and ...
+     *   
+     * Therefore, it must used between the select and last parts of the
+     * where clause, preceded by an 'and'
+     * 
+     * The arguments ending with 'Param' are used to identify names of
+     * Query parameters which will later passed in. 
+     *   (e.g. query.setParameter("subject", s)
+     *   
+     * The arguments ending in 'Var' are the SQL variable names used
+     * straight in the SQL text.  
+     *   (e.g.  "select rez from Resource rez "... , you would specify
+     *    the name of your resourceVar as 'rez')
+     */
+    public abstract EdgePermCheck
+        makePermCheckSql(String subjectParam, 
+                         String resourceVar, String resourceParam,
+                         String distanceParam, String opsParam); 
 }
