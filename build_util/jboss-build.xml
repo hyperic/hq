@@ -166,6 +166,9 @@
 
     <!-- Remove jboss bundled hibernate libararies.  We are using version 3.1.3 -->
     <delete failonerror="false" dir="${jboss-deploy-dir}/jboss-hibernate.deployer" />
+    
+    <!-- Remove jboss aop directory. Javaassist conflicts with tapestry's version 3.6.GA. -->
+    <delete verbose="true" dir="${jboss.home}/server/default/deploy/jboss-aop.deployer"/>
 
     <delete dir="${jboss-deploy-dir}/lather-jboss.sar" />
     <unzip src="${lather.lib}/lather-jboss.sar"
