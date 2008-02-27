@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<module id="org.hyperic.ui.hq" version="1.0.0">
+
+<!-- ASO(s) -->
+<!--
+    <contribution
+        configuration-id="tapestry.state.ApplicationObjects">
+        <state-object name="hqPageSession" scope="session">
+            <create-instance class="org.hyperic.ui.hq.session.HQPageSession" />
+        </state-object>
+    </contribution>
+
+    <contribution configuration-id="tapestry.form.validator.Validators">
+        <validator name="firstAvailableDate" configurable="false"
+            class="org.hyperic.ui.tapestry.validators.FirstAvailableDateValidator" />
+    </contribution>
+    -->
+<!-- Friendly URL configuration -->
+  <contribution configuration-id="tapestry.url.ServiceEncoders">
+    <page-service-encoder id="page" extension="html"
+    service="page" />
+
+    <direct-service-encoder id="direct" stateless-extension="sshq"
+    stateful-extension="shq" />
+
+    <asset-encoder id="asset" path="/assets" />
+
+    <extension-encoder id="extension" extension="shtml" after="*" />
+  </contribution>
+</module>
+
