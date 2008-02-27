@@ -81,16 +81,17 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
 
     private final String[] APPDEF_TABLES
         = { "EAM_PLATFORM", "EAM_SERVER", "EAM_SERVICE", "EAM_CONFIG_RESPONSE",
-            "EAM_AGENT", "EAM_IP", "EAM_MEASUREMENT", 
-            "EAM_SRN", "EAM_RESOURCE", "EAM_CPROP_KEY", "EAM_TRIGGER_EVENT",
-            "EAM_AUDIT", "EAM_AIQ_SERVER", "EAM_AIQ_PLATFORM" };
+            "EAM_AGENT", "EAM_IP", "EAM_RESOURCE", "EAM_CPROP_KEY",
+            "EAM_TRIGGER_EVENT", "EAM_AUDIT", "EAM_AIQ_SERVER",
+            "EAM_AIQ_PLATFORM" };
     
     private final String[] DATA_TABLES 
         = { "EAM_MEASUREMENT_DATA_1D", "EAM_MEASUREMENT_DATA_6H",
             "EAM_MEASUREMENT_DATA_1H", "HQ_METRIC_DATA_COMPAT",
             "EAM_METRIC_PROB", "EAM_REQUEST_STAT",
             "EAM_ALERT_ACTION_LOG", "EAM_ALERT_CONDITION_LOG",
-            "EAM_ALERT", "EAM_EVENT_LOG", "EAM_CPROP", "EAM_MEASUREMENT" };
+            "EAM_ALERT", "EAM_EVENT_LOG", "EAM_CPROP", "EAM_MEASUREMENT",
+            "EAM_SRN"};
                          
     public final String logCtx
         = "org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl";
