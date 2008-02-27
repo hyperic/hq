@@ -1,0 +1,15 @@
+body {	font: 76% Arial,Helvetica,sans-serif;	background: #D8D8D8;	margin: 0px;	border: 0px;}a:visited,a:hover,a {	color: #003399;	text-decoration: none;}#header {	height: 55px;	background: url('/images/3.2/HeaderBkgd.gif') repeat-x;}#headerLogo {	padding:40px 0 0 10px;	background: url('/images/3.2/logos/logo32.gif') no-repeat 1% 88%;	width: 370px;}#headerBottom {	height: 25px;	background: url('/images/3.2/HeaderBtmBkgd.gif') repeat-x;}#headerLinks {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 200px;
+	height: 20px;
+	text-align: right;
+	padding: 3px 8px 0 0
+}
+
+#headerLinks span {
+	margin-left: 8px;
+	color: #fff
+}
+#headerLinks span {	margin-left: 6px;}#footer {	height: 65px;	background: #000 none repeat scroll 0;}.fieldRow {	margin-bottom: 2px;	padding: 6px 0pt 5px 6px;	clear: right;	height: 22px;}.active {	background: #EBF7FA none repeat scroll 0;}.error {	background: #FFDFDF none repeat scroll 0;	color: #FF0000;}.hint{	height:32px;}.req {	color: red!important;	font-weight: 700}.msgPanel {	margin-bottom: 9px;	background-color: #FFF;	height: 20px;	background: url('/images/3.2/icons/exclamation.png') no-repeat 2% 40%;	padding: 10px 2px 5px 28px}.msgError {	color: red;	border: 1px solid red}.fieldRow label {	float: left;	width: 65px;	text-align: right;	padding: 4px 5px 0 0;	font-weight: 700}.fieldRow img {	float:left;	padding:2px 5px 0pt 3px;	cursor: pointer;}.fieldRow input {	float: left}.fieldHint {	margin-left:75px;	color:gray;	font-size:10px;	float:left;	padding-top:2px;}input[type=password],input[type=text] {	border: 1px solid gray;	padding: 2px;	width: 200px}fieldset {	border: 0;	margin: 6px 0 0}.loginPanel {	width: 330px;	border: 1px solid #E66C19;	margin: 150px auto;	padding: 12px;	background: white;}.fieldsetTitle {	padding: 2px;	height: 17px;	font-weight: bold;	font-size: 15px;}.fieldsetNote {	padding: 3px 2px 8px;	height: 15px;	font-size: 13px;	color: #444444;	border-bottom: 1px dotted gray;	margin-bottom: 10px}a.buttonGreen {	background: transparent url('/images/3.2/buttons/button_green_right.gif') no-repeat scroll top right;	color: #FFF;	display: block;	float: left;	font: 400 12px arial, sans-serif;	height: 24px;	margin-right: 6px;	padding-right: 18px;	text-decoration: none;	font-weight: 700}a.buttonGreen span {	background: transparent url('/images/3.2/buttons/button_green_left.gif') no-repeat;	display: block;	line-height: 14px;	color: #FFF;	padding: 5px 0 5px 18px}a.buttonGreen:active {	background: transparent url('/images/3.2/buttons/button_green_right.gif') no-repeat scroll top right;	background-position: bottom right;	color: #FFF;	outline: none}a.buttonGreen:active span {	background: transparent url('/images/3.2/buttons/button_green_left.gif') no-repeat;	background-position: bottom left;	padding: 6px 0 4px 18px}

@@ -1,0 +1,190 @@
+body {
+	font: 76% Arial,Helvetica,sans-serif;
+	background: #D8D8D8;
+	margin: 0;
+	border: 0
+}
+
+a:visited,a:hover,a {
+	color: #57CBDB;
+	text-decoration: none
+}
+
+#header {
+	height: 65px;
+	background: #000 none repeat scroll 0
+}
+
+#headerLogo {
+	padding:36px 0 0 10px;
+	background: url('/images/4.0/logos/logo40.png') no-repeat 3% 99%;
+	width: 370px;
+}
+
+#headerBottom {
+	height: 5px;
+	background: #2D6EBE none repeat scroll 0;
+	/*background: #FF5A00 2D6EBE none repeat scroll 0%;*/
+}
+
+#headerLinks {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 200px;
+	height: 20px;
+	text-align: right;
+	padding: 3px 8px 0 0
+}
+
+#headerLinks span {
+	margin-left: 8px;
+	font-weight:bold;
+	color: #fff
+}
+
+#container {
+	margin: 0 10px 0 10px;
+	padding:10px;
+	background: #FFF;
+	border-left: 1px solid gray;
+	border-right: 1px solid gray;
+}
+
+#footer {
+	height: 65px;
+	background: #000 none repeat scroll 0;
+}
+
+.fieldRow {
+	margin-bottom: 2px;
+	padding: 6px 0pt 5px 6px;
+	clear: right;
+	height: 22px;
+}
+
+.active {
+	background: #D9E4F1 none repeat scroll 0;
+}
+
+.error {
+	background: #FFDFDF none repeat scroll 0;
+	color: #FF0000;
+}
+
+.hint{
+	height:32px;
+}
+
+.req {
+	color: red!important;
+	font-weight: 700
+}
+
+.msgPanel {
+	margin-bottom: 9px;
+	background-color: #FFF;
+	height: 20px;
+	background: url('/images/4.0/icons/exclamation.png') no-repeat 2% 40%;
+	padding: 10px 2px 5px 28px
+}
+
+.msgError {
+	color: red;
+	border: 1px solid red
+}
+
+.fieldRow label {
+	float: left;
+	width: 65px;
+	text-align: right;
+	padding: 4px 5px 0 0;
+	font-weight: 700
+}
+
+.fieldRow img {
+	float:left;
+	padding:2px 5px 0pt 3px;
+	cursor: pointer;
+}
+
+.fieldRow input {
+	float: left
+}
+
+.fieldHint {
+	margin-left:75px;
+	color:gray;
+	font-size:10px;
+	float:left;
+	padding-top:2px;
+}
+
+input[type=password],input[type=text] {
+	border: 1px solid gray;
+	padding: 2px;
+	width: 200px
+}
+
+fieldset {
+	border: 0;
+	margin: 6px 0 0
+}
+
+.loginPanel {
+	width: 330px;
+	border: 1px solid #8EAFD6;
+	margin: 150px auto 0;
+	padding: 12px;
+	background: #fff
+}
+
+.fieldsetTitle {
+	padding: 2px;
+	height: 17px;
+	font-weight: 700;
+	font-size: 15px
+}
+
+.fieldsetNote {
+	padding: 3px 2px 8px;
+	height: 15px;
+	font-size: 13px;
+	color: #444;
+	border-bottom: 1px dotted gray;
+	margin-bottom: 20px
+}
+
+a.buttonGreen {
+	background: transparent url('/images/4.0/buttons/button_green_right.gif') no-repeat scroll top right;
+	color: #FFF;
+	display: block;
+	float: left;
+	font: 400 12px arial, sans-serif;
+	height: 24px;
+	margin-right: 6px;
+	padding-right: 18px;
+	text-decoration: none;
+	font-weight: 700
+}
+
+a.buttonGreen span {
+	background: transparent url('/images/4.0/buttons/button_green_left.gif') no-repeat;
+	display: block;
+	line-height: 14px;
+	padding: 5px 0 5px 18px;
+	color: #FFF
+}
+
+a.buttonGreen:active {
+	background: transparent url('/images/4.0/buttons/button_green_right.gif') no-repeat scroll top right;
+	background-position: bottom right;
+	color: #FFF;
+	outline: none
+}
+
+a.buttonGreen:active span {
+	background: transparent url('/images/4.0/buttons/button_green_left.gif') no-repeat;
+	background-position: bottom left;
+	padding: 6px 0 4px 18px
+}
