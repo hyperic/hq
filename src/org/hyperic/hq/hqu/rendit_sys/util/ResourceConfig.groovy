@@ -7,6 +7,7 @@ import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
@@ -296,6 +297,10 @@ class ResourceConfig {
      */
     public static Agent findSuitableAgentFor(String s) {
         def overlord = authzMan.overlordPojo
-        platMan.findPlatformByFqdn(overlord.valueObject, s)?.agent
+        try {
+            return platMan.findPlatformByFqdn(overlord.valueObject, s)?.agent
+        } catch(PlatformNotFoundException e) {
+            return null
+        }
     }
 }
