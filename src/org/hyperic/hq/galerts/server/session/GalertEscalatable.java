@@ -33,15 +33,25 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.galerts.ResourceAuxLogProvider;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.AlertInterface;
+import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
 
 public class GalertEscalatable
     implements Escalatable
 {
+    static {
+        AlertAuxLogProvider[] types = new AlertAuxLogProvider[] {
+                GalertAuxLogProvider.INSTANCE,
+                MetricAuxLogProvider.INSTANCE,
+                ResourceAuxLogProvider.INSTANCE
+        };
+    }
+    
     private static final Log _log = LogFactory.getLog(GalertEscalatable.class);
     private GalertLog _alert;
     private List      _auxLogs;
