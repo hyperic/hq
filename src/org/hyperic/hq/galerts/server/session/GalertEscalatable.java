@@ -44,6 +44,9 @@ import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
 public class GalertEscalatable
     implements Escalatable
 {
+    // Statically instantiate the AuxLogProviders because JRE 1.5 does not
+    // automatically statically initialize the AuxLogProviders when the classes
+    // are loaded as in JRE 1.4
     static {
         AlertAuxLogProvider[] types = new AlertAuxLogProvider[] {
                 GalertAuxLogProvider.INSTANCE,
