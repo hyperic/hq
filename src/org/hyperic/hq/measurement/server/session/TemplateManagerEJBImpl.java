@@ -322,6 +322,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public void removeTemplate(AuthzSubjectValue subject, Integer tid) {
         MeasurementTemplate t = getMeasurementTemplateDAO().findById(tid);
+        getMeasurementDAO().remove(t);
         getMeasurementTemplateDAO().remove(t);
     }
 
@@ -483,6 +484,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             MeasurementInfo info = (MeasurementInfo) tmap.remove(mt.getAlias());
 
             if (info == null) {
+                getMeasurementDAO().remove(mt);
                 dao.remove(mt);
             } else {
                 dao.update(mt, pluginName, info);

@@ -61,6 +61,26 @@ public class MeasurementDAO extends HibernateDAO {
         super.remove(entity);
     }
 
+    /**
+     * Remove all measurements associated with a MeasurementTemplate
+     * @param mt The MeasurementTemplate for the Measurements to be removed.
+     */
+    void remove(MeasurementTemplate mt) {
+        String sql = "from Measurement where template.id=?";
+        List measurements = getSession().createQuery(sql)
+            .setInteger(0, mt.getId().intValue())
+            .list();
+
+        MeasurementDAO dao =
+            new MeasurementDAO(DAOFactory.getDAOFactory());
+
+        for (Iterator it = measurements.iterator(); it.hasNext();) {
+
+            Measurement meas = (Measurement) it.next();
+            dao.remove(meas);
+        }
+    }
+
     Measurement create(Resource resource,
                        MeasurementTemplate mt,
                        String dsn,
