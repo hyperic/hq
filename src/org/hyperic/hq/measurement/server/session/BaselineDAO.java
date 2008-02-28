@@ -49,18 +49,18 @@ public class BaselineDAO extends HibernateDAO {
         super.remove(b);
     }
 
-    public Baseline create(Measurement dm, long computeTime,
+    public Baseline create(Measurement m, long computeTime,
                            boolean userEntered, Double mean,
                            Double minExpectedValue, Double maxExpectedValue) {
-        Baseline b = new Baseline(dm, computeTime, userEntered, mean,
+        Baseline b = new Baseline(m, computeTime, userEntered, mean,
                                   minExpectedValue, maxExpectedValue);
-        dm.setBaseline(b);
+        m.setBaseline(b);
         save(b);
         return b;
     }
 
     public Baseline findByMeasurementId(Integer mid) {
-        String sql = "from Baseline b where b.derivedMeasurement.id = ?";
+        String sql = "from Baseline b where b.measurement.id = ?";
 
         return (Baseline)getSession().createQuery(sql)
             .setInteger(0, mid.intValue())
@@ -72,9 +72,9 @@ public class BaselineDAO extends HibernateDAO {
     public List findByInstance(int appdefType, int appdefId) {
         String sql =
             "select b from Baseline b " +
-            "where b.derivedMeasurement.appdefType = ? and " +
-            "b.derivedMeasurement.instanceId = ? and " +
-            "b.derivedMeasurement.interval is not null";
+            "where b.measurement.appdefType = ? and " +
+            "b.measurement.instanceId = ? and " +
+            "b.measurement.interval is not null";
 
         return getSession().createQuery(sql)
             .setInteger(0, appdefType)
@@ -85,8 +85,8 @@ public class BaselineDAO extends HibernateDAO {
                                               Integer instanceId) {
         String sql =
             "select b from Baseline b " +
-            "where b.derivedMeasurement.template.id = ? and " +
-            "b.derivedMeasurement.instanceId = ?";
+            "where b.measurement.template.id = ? and " +
+            "b.measurement.instanceId = ?";
 
         return (Baseline)getSession().createQuery(sql)
             .setInteger(0, mtId.intValue())
@@ -95,7 +95,7 @@ public class BaselineDAO extends HibernateDAO {
 
     int deleteByIds(Collection ids) {
         return getSession()
-            .createQuery("delete from Baseline where derivedMeasurement.id in (:ids)")
+            .createQuery("delete from Baseline where measurement.id in (:ids)")
             .setParameterList("ids", ids)
             .executeUpdate();
     }
