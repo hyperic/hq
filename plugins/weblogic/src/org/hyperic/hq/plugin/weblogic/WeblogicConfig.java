@@ -322,20 +322,11 @@ public class WeblogicConfig {
                     if (srvTag.equals("name")) {
                         server.name = getText(srv);
                     }
-                    else if (srvTag.equals("network-access-point")) {
-                        NodeList netNodes = srv.getChildNodes();
-
-                        for (int k=0; k<netNodes.getLength(); k++) {
-                            Node net = netNodes.item(k);
-                            String netTag = net.getNodeName();
-                            if (netTag.equals("listen-port")) {
-                                port = getText(net);
-                            }
-                            else if (netTag.equals("listen-address")) {
-                                addr = getText(net);
-                            }
-                        }
-                        server.setURL(protocol, addr, port);
+                    else if (srvTag.equals("listen-port")) {
+                        port = getText(srv);
+                    }
+                    else if (srvTag.equals("listen-address")) {
+                        addr = getText(srv);
                     }
                 }
                 server.setURL(protocol, addr, port);
