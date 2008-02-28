@@ -101,8 +101,8 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.timer.StopWatch;
 
-/** The DerivedMeasurementManagerEJB class is a stateless session bean that can
- * be used to interact with DerivedMeasurement EJB's
+/**
+ * The MeasurementManager provides APIs to deal with Measurement objects.
  *
  * @ejb:bean name="MeasurementManager"
  *      jndi-name="ejb/measurement/MeasurementManager"
@@ -155,9 +155,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     
     /**
      * Enqueue a {@link MeasurementScheduleZevent} on the zevent queue 
-     * corresponding to the change in schedule for the derived measurement.
+     * corresponding to the change in schedule for the measurement.
      * 
-     * @param dm The derived measurement.
+     * @param dm The Measurement
      * @param interval The new collection interval.
      */
     private void enqueueZeventForMeasScheduleChange(Measurement dm,
@@ -170,9 +170,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     
     /**
      * Enqueue a {@link MeasurementScheduleZevent} on the zevent queue 
-     * corresponding to collection disabled for the derived measurements.
+     * corresponding to collection disabled for the measurements.
      * 
-     * @param mids The derived measurement ids.
+     * @param mids The measurement ids.
      */
     private void enqueueZeventsForMeasScheduleCollectionDisabled(Integer[] mids) {
         List events = new ArrayList(mids.length);
@@ -188,10 +188,10 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         ZeventManager.getInstance().enqueueEventsAfterCommit(events);
     }
 
-    private Measurement createDerivedMeasurement(Resource instanceId,
-                                                        MeasurementTemplate mt,
-                                                        ConfigResponse props,
-                                                        long interval)
+    private Measurement createMeasurement(Resource instanceId,
+                                          MeasurementTemplate mt,
+                                          ConfigResponse props,
+                                          long interval)
         throws MeasurementCreateException
     {
         String dsn = translate(mt.getTemplate(), props);
@@ -200,10 +200,12 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a derived measurement's appdef entity ID
+     * Look up a Measurement's appdef entity ID
+     * @param m The Measurement
+     * @return The AppdefEntityID for the given Measurement
      */
-    private AppdefEntityID getAppdefEntityId(Measurement dm) {
-        return new AppdefEntityID(dm.getAppdefType(), dm.getInstanceId());
+    private AppdefEntityID getAppdefEntityId(Measurement m) {
+        return new AppdefEntityID(m.getAppdefType(), m.getInstanceId());
     }
 
     private void sendAgentSchedule(final Serializable obj) {
@@ -226,8 +228,12 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             log.error("Unable to send agent schedule post commit", t);
         }
     }
-    
-    private void unscheduleJobs(Integer[] mids) {
+
+    /**
+     * Remove Measurements that have been deleted from the DataCache
+     * @param mids
+     */
+    private void removeMeasurementsFromCache(Integer[] mids) {
         MetricDataCache cache = MetricDataCache.getInstance();
         for (int i = 0; i < mids.length; i++) {
             cache.remove(mids[i]);
@@ -268,8 +274,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                                                               resource.getInstanceId());
                 if (m == null) {
                     // No measurement, create it
-                    m = createDerivedMeasurement(resource, t, props,
-                                                 intervals[i]);
+                    m = createMeasurement(resource, t, props, intervals[i]);
                 } else {
                     updateMeasurementInterval(templates[i],
                                               resource.getInstanceId(),
@@ -312,7 +317,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @param id          instance ID (appdef resource) the templates are for
      * @param props       Configuration data for the instance
      *
-     * @return a List of the associated DerivedMeasurementValue objects
+     * @return a List of the associated Measurement objects
      * @ejb:interface-method
      */
     public List createMeasurements(AuthzSubject subject, 
@@ -340,7 +345,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @param mtype       The string name of the plugin type
      * @param props       Configuration data for the instance
      *
-     * @return a List of the associated DerivedMeasurementValue objects
+     * @return a List of the associated Measurement objects
      */
     private List createDefaultMeasurements(AuthzSubject subject,
                                            AppdefEntityID id,
@@ -377,7 +382,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Update the derived measurements of a resource
+     * Update the Measurements of a resource
      * 
      * @ejb:interface-method
      */
@@ -386,9 +391,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         throws PermissionException, MeasurementCreateException
     {
         try {
-            //XXX: Fix ME!!! No update here to derived measurements?
-            
-            // Now see which derived measurements need to be rescheduled
+            // Now see which Measurements need to be rescheduled
             List mcol = getMeasurementDAO()
                 .findEnabledByInstance(getResource(id));
 
@@ -413,6 +416,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * Remove all measurements no longer associated with a resource.
      *
      * @ejb:interface-method
+     * @return The number of Measurement objects removed.
      */
     public int removeOrphanedMeasurements() {
         StopWatch watch = new StopWatch();
@@ -428,22 +432,21 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("DerivedMeasurementManager.removeOrphanedMeasurements() "+
+            log.debug("MeasurementManager.removeOrphanedMeasurements() "+
             		  watch);
         }
         return mids.size();
     }
 
     /** 
-     * Look up a derived measurement for an instance and an alias
-     * and an alias.
+     * Look up a derived measurement for an instance and an alias and an alias.
      *
-     * @return a DerivedMeasurement value
+     * @return a Measurement value
      * @ejb:interface-method
      */
     public Measurement getMeasurement(AuthzSubject subject,
-                                             AppdefEntityID id,
-                                             String alias)
+                                      AppdefEntityID id,
+                                      String alias)
         throws MeasurementNotFoundException {
 
         Measurement m =
@@ -457,7 +460,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a DerivedMeasurement by Id.
+     * Get a Measurement by Id.
      * @ejb:interface-method
      */
     public Measurement getMeasurement(Integer mid) {
@@ -516,7 +519,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     /**
      * Count of metrics enabled for a particular entity
      *
-     * @return a list of DerivedMeasurement value
+     * @return a The number of metrics enabled for the given entity
      * @ejb:interface-method
      */
     public int getEnabledMetricsCount(AuthzSubjectValue subject,
@@ -527,35 +530,19 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a derived measurement value for a resource
+     * Find the Measurement corresponding to the given MeasurementTemplate id
+     * and instance id.
      *
-     * @return a DerivedMeasurement value
-     * @ejb:interface-method
-     */
-    public Measurement findMeasurement(Integer tid, Integer iid)
-        throws MeasurementNotFoundException {
-        Measurement dm =
-            getMeasurementDAO().findByTemplateForInstance(tid, iid);
-            
-        if (dm == null) {
-            throw new MeasurementNotFoundException("No measurement found " +
-                                                   "for " + iid + " with " +
-                                                   "template " + tid);
-        }
-        return dm;
-    }
-
-    /**
-     * Look up a derived measurement POJO
-     *
-     * @return a DerivedMeasurement value
+     * @param tid The MeasurementTemplate id
+     * @param iid The instance id.
+     * @return a Measurement value
      * @ejb:interface-method
      */
     public Measurement findMeasurement(AuthzSubject subject,
-                                              Integer tid, Integer iid)
+                                       Integer tid, Integer iid)
         throws MeasurementNotFoundException {
-        Measurement dm = findMeasurement(tid, iid);
-            
+        Measurement dm =
+            getMeasurementDAO().findByTemplateForInstance(tid, iid);
         if (dm == null) {
             throw new MeasurementNotFoundException("No measurement found " +
                                                    "for " + iid + " with " +
@@ -565,8 +552,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a derived measurement POJO, allowing for the query to return a 
-     * stale copy of the derived measurement (for efficiency reasons).
+     * Look up a Measurement, allowing for the query to return a stale copy of
+     * the derived measurement (for efficiency reasons).
      *
      * @param subject The subject.
      * @param tid The template Id.
@@ -575,7 +562,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      *                   definition in the query results; <code>false</code> to 
      *                   never allow stale copies, potentially always forcing a 
      *                   sync with the database.
-     * @return a DerivedMeasurement value
+     * @return The Measurement
      * @ejb:interface-method
      */
     public Measurement findMeasurement(AuthzSubjectValue subject,
@@ -597,9 +584,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
         
     /**
-     * Look up a list of derived measurement EJBs for a template and instances
+     * Look up a list of  Measurements for a template and instances
      *
-     * @return a list of DerivedMeasurement value
+     * @return a list of Measurement's
      * @ejb:interface-method
      */
     public List findMeasurements(AuthzSubject subject, Integer tid,
@@ -616,9 +603,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a list of derived measurement EJBs for a template and instances
+     * Look up a list of Measurements for a template and instances
      *
-     * @return a list of DerivedMeasurement value
+     * @return An array of Measurement ids.
      * @ejb:interface-method
      */
     public Integer[] findMeasurementIds(AuthzSubject subject, Integer tid,
@@ -663,7 +650,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     /**
      * Look up a list of derived measurement EJBs for a category
      *
-     * @return a list of DerivedMeasurement value
+     * @return a list of DerivedMeasurementValue objects.
      * @ejb:interface-method
      */
     public PageList findMeasurements(AuthzSubject subject,
@@ -710,9 +697,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a list of designated measurement EJBs for an entity
+     * Look up a List of designated Measurements for an entity
      *
-     * @return a list of DerivedMeasurement value
+     * @return A List of Measurements
      * @ejb:interface-method
      */
     public List findDesignatedMeasurements(AppdefEntityID id) {
@@ -721,10 +708,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a list of designated measurement EJBs for an entity for
-     * a category
+     * Look up a list of designated Measurements for an entity for a category
      *
-     * @return a list of DerivedMeasurement value
+     * @return A List of Measurements
      * @ejb:interface-method
      */
     public List findDesignatedMeasurements(AuthzSubject subject,
@@ -796,7 +782,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a list of DerivedMeasurement objects by category
+     * Look up a list of Measurement objects by category
      *
      * @ejb:interface-method
      */
@@ -806,9 +792,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a list of derived measurement EJBs for a category
+     * Look up a list of Measurements  for a category
      *
-     * @return a list of DerivedMeasurement value
+     * @return A List of Measurements 
      * @ejb:interface-method
      */
     public Map findDesignatedMeasurementIds(AuthzSubject subject,
@@ -882,7 +868,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a list of derived metric intervals for template IDs.
+     * Look up a list of Measurement intervals for template IDs.
      *
      * @return a map keyed by template ID and values of metric intervals
      * There is no entry if a metric is disabled or does not exist for the
@@ -1008,8 +994,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 mids[j] = dm.getId();
             }
 
-            // Now unschedule the DerivedMeasurment
-            unscheduleJobs(mids);
+            removeMeasurementsFromCache(mids);
             
             enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         }
@@ -1044,8 +1029,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             mids[i] = dm.getId();
         }
 
-        // Now unschedule the DerivedMeasurment
-        unscheduleJobs(mids);
+        removeMeasurementsFromCache(mids);
         
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
 
@@ -1085,8 +1069,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             m.setEnabled(false);
         }
 
-        // Now unschedule the DerivedMeasurment
-        unscheduleJobs(mids);
+        removeMeasurementsFromCache(mids);
         
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         
@@ -1123,11 +1106,10 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             toUnschedule.add(dm.getId());
         }
 
-        // Now unschedule the DerivedMeasurment
         Integer[] mids = 
             (Integer[])toUnschedule.toArray(new Integer[toUnschedule.size()]);
         
-        unscheduleJobs(mids);
+        removeMeasurementsFromCache(mids);
         
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         

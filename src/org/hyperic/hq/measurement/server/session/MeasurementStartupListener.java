@@ -110,8 +110,8 @@ public class MeasurementStartupListener
         app.registerCallbackListener(PluginsDeployedCallback.class,
                                      new PluginsDeployedCallback() {
             public void pluginsDeployed(List plugins) {
-                DerivedMeasurementManagerLocal dman =
-                    DerivedMeasurementManagerEJBImpl.getOne();
+                MeasurementManagerLocal dman =
+                    MeasurementManagerEJBImpl.getOne();
                 for (Iterator i = plugins.iterator(); i.hasNext();) {
                     String pluginName = (String)i.next();
                     dman.syncPluginMetrics(pluginName);

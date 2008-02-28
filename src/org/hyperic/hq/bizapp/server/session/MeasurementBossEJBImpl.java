@@ -797,14 +797,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                             Integer[] tids)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException {
-        manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
         Integer mids[] = new Integer[tids.length];
         long interval = 0;
         for (int i = 0; i < tids.length; i++) {
             try {
                 Measurement dmv = getMetricManager()
-                    .findMeasurement(tids[i], aeid.getId());
+                    .findMeasurement(subject, tids[i], aeid.getId());
                 mids[i] = dmv.getId();
                 interval = Math.max(interval, dmv.getInterval());
             } catch (MeasurementNotFoundException e) {
@@ -1684,18 +1684,23 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     }
 
-    private MetricDisplaySummary getMetricDisplaySummary(
-        AuthzSubjectValue subject, MeasurementTemplateValue tmpl, long begin,
-        long end, double[] data, AppdefEntityID id)
-        throws MeasurementNotFoundException {
+    private MetricDisplaySummary getMetricDisplaySummary(AuthzSubject subject,
+                                                         MeasurementTemplateValue tmpl,
+                                                         long begin,
+                                                         long end,
+                                                         double[] data,
+                                                         AppdefEntityID id)
+        throws MeasurementNotFoundException
+    {
         // Get baseline values
-        Measurement dmval = getMetricManager()
-            .findMeasurement(tmpl.getId(), id.getId());
+        Measurement dmval = getMetricManager().findMeasurement(subject,
+                                                               tmpl.getId(),
+                                                               id.getId());
 
         // Use previous function to set most values, including only 1 resource
         MetricDisplaySummary summary =
             getMetricDisplaySummary(tmpl, new Long(dmval.getInterval()),
-                                         begin, end, data, 1);
+                                    begin, end, data, 1);
 
         if (dmval.getBaseline() != null) {
             Baseline bval = dmval.getBaseline();
@@ -1770,7 +1775,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException, 
                AppdefEntityNotFoundException, MeasurementNotFoundException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         // Assuming that all AppdefEntityIDs of the same type, use the first one
         AppdefEntityValue rv = new AppdefEntityValue(entIds[0], subject);
