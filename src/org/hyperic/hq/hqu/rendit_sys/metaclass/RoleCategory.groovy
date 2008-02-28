@@ -3,6 +3,7 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Role
 import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl as RoleMan
+import org.hyperic.hq.authz.shared.OperationValue
 import org.hyperic.hq.authz.shared.AuthzSubjectValue
 import org.hyperic.hq.authz.shared.ResourceGroupValue
 
@@ -21,5 +22,11 @@ class RoleCategory {
                                      (role.resourceGroups.collect {it.id}) as Integer[])
         roleMan.addResourceGroups(user.valueObject, role.valueObject,
                                   (groups.collect {it.id}) as Integer[])
+    }
+    
+    static void setOperations(Role role, AuthzSubject user, Collection ops) {
+        roleMan.removeAllOperations(user.valueObject, role.valueObject)
+        roleMan.addOperations(user.valueObject, role.valueObject,
+                              (ops.collect { it.valueObject }) as OperationValue[])
     }
 }

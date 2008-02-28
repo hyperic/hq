@@ -353,7 +353,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         Role roleLocal = lookupRole(role);
 
 //        roleLocal.setWhoami(lookupSubject(whoami));
-        roleLocal.getOperations().add(opLocals);
+        roleLocal.getOperations().addAll(opLocals);
     }
 
     /**
@@ -1711,6 +1711,16 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         
         Set sLocals = toPojos(subjects);
         roleLocal.setSubjects(sLocals);
+    }
+    
+    /** 
+     * Find all {@link Operation} objects
+     * @ejb:interface-method
+     */
+    public Collection findAllOperations() {
+        OperationDAO aDao = new OperationDAO(DAOFactory.getDAOFactory());
+        
+        return aDao.findAllOrderByName();
     }
 
     public static RoleManagerLocal getOne() {
