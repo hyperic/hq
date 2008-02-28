@@ -56,6 +56,9 @@ public class MeasurementTemplate
     private MonitorableType _monitorableType;
     private Category        _category;
 
+    public MeasurementTemplate() {
+    }
+
     public MeasurementTemplate(String name, String alias, String units,
                                int collectionType, boolean defaultOn,
                                long defaultInterval, boolean designate,
