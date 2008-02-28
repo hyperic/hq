@@ -55,6 +55,10 @@
   <property name="pdk.productStub"
             value="plugins/etc/ProductPluginXML.stub"/>
 
+  <!-- Java Service Wrapper destination -->
+  <property name="wrapper.lib" location="${hq.bin}/wrapper_bin/lib" />
+  <property name="wrapper.bin" location="${hq.bin}/wrapper_bin/bin" />
+	
   <!-- Server plugins destination -->
   <property name="server.plugin.dir" location="${ear.dir}/hq-plugins" />
   <!-- Location to pack plugins (pre-copy to PDK and Server) -->
@@ -1116,6 +1120,7 @@
     <mkdir dir="${agent.dir}/log" />
     <mkdir dir="${agent.dir}/rcfiles" />
     <mkdir dir="${agent.dir}/tmp" />
+  	<mkdir dir="${agent.dir}/conf" />
 
     <!-- Touch the agent log file so that "smart" unzippers don't forget
          to create the log directory -->
@@ -1125,7 +1130,15 @@
     <copy todir="${agent.dir}/lib" >
       <fileset dir="${lather.lib}" includes="lather.jar" />
     </copy>
-
+  	
+    <copy todir="${agent.dir}/sbin" >
+      <fileset dir="${wrapper.bin}" includes="*" />
+    </copy> 	
+  	
+    <copy todir="${agent.dir}/lib/boot" >
+      <fileset dir="${wrapper.lib}" includes="*" />
+    </copy> 	
+  	
     <!-- Autoinventory jars -->
     <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/AgentAutoinventoryServer.jar">
       <include name="org/hyperic/hq/autoinventory/**"/>
@@ -1220,9 +1233,20 @@
     <copy file="bin/hq-agent.sh"
         tofile="${agent.dir}/hq-agent.sh"/>
 
+    <copy file="bin/hq-agent-wrapper.bat"
+        tofile="${agent.dir}/bin/hq-agent.bat" />
+    <copy file="bin/hq-agent-wrapper.sh"
+        tofile="${agent.dir}/bin/hq-agent.sh"/> 	
+  	
+    <copy file="etc/wrapper.conf"
+        tofile="${agent.dir}/conf/wrapper.conf"/> 		
+  	
     <antcall target="chmod-exec">
       <param name="chmod.dir" value="${agent.dir}"/>
     </antcall>
+  	
+  	<chmod file="${agent.dir}/sbin/*" perm="a+rx"/>
+  
   </target>
 
   <target name="build-agent" description="Build and pack the agent directory structure" 
