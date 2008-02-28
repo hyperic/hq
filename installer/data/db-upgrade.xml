@@ -8307,6 +8307,9 @@ has already been defined.
         <statement desc="Drop unused Measurement argument table">
             DROP TABLE EAM_MEASUREMENT_ARG
         </statement>
+        <statement>
+            DROP SEQUENCE EAM_MEASUREMENT_ARG_ID_SEQ
+        </statement>
       </schema-directSQL>
   </schemaSpec>
 
