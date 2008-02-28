@@ -8311,12 +8311,34 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.102">
-      <schema-alterColumn table="EAM_MEASUREMENT"
+      <!-- XXX: Need to fix MySQL SST_AlterColumn -->
+      <schema-alterColumn targetDB="oracle"
+                          table="EAM_MEASUREMENT"
                           column="ENABLED"
                           nullable="NOT NULL"/>
-      <schema-alterColumn table="EAM_MEASUREMENT"
+      <schema-alterColumn targetDB="postgres"
+                          table="EAM_MEASUREMENT"
+                          column="ENABLED"
+                          nullable="NOT NULL"/>
+      <schema-alterColumn targetDB="mysql"
+                          columnType="BIT"
+                          table="EAM_MEASUREMENT"
+                          column="ENABLED"
+                          nullable="NOT NULL"/>
+
+      <schema-alterColumn targetDB="oracle"
+                          table="EAM_MEASUREMENT"
                           column="COLL_INTERVAL"
                           nullable="NOT NULL"/>       
+      <schema-alterColumn targetDB="postgres"
+                          table="EAM_MEASUREMENT"
+                          column="COLL_INTERVAL"
+                          nullable="NOT NULL"/>
+      <schema-alterColumn targetDB="mysql"
+                          columnType="BIT"
+                          table="EAM_MEASUREMENT"
+                          column="COLL_INTERVAL"
+                          nullable="NOT NULL"/>
   </schemaSpec>
 
   <schemaSpec version="3.103">
