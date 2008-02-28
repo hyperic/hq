@@ -44,6 +44,12 @@ public final class ObjectNameCache {
     public static ObjectName getInstance(String name)
         throws MalformedObjectNameException {
 
+        //XXX hack for HHQ-1710 JDBCConnectionPool w/o app runtime
+        final String APP_RT = ",ApplicationRuntime=%application%";
+        if (name.endsWith(APP_RT)) {
+            name = name.substring(0, name.length() - APP_RT.length());
+        }
+
         ObjectName obj = (ObjectName)cache.get(name);
 
         if (obj == null) {
