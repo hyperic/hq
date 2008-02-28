@@ -48,6 +48,8 @@ public class CategoryDAO extends HibernateDAO {
     Category findByName(String name) {
         String sql = "from Category where name=?";
         return (Category)getSession().createQuery(sql).
-            setString(0, name).uniqueResult();
+            setString(0, name).
+            setCacheable(true).
+            setCacheRegion("Category.findByName").uniqueResult();
     }
 }

@@ -83,19 +83,14 @@ public class MeasurementTemplateDAO extends HibernateDAO {
                                long defaultInterval, boolean designate,
                                String template, MonitorableType monitorableType,
                                Category cat, String plugin) {
-        MeasurementTemplate mt = new MeasurementTemplate();
-
-        mt.setName(name); 
-        mt.setAlias(alias);
-        mt.setUnits(units);
-        mt.setCollectionType(collectionType);
-        mt.setDefaultOn(defaultOn);
-        mt.setDefaultInterval(defaultInterval);
-        mt.setDesignate(designate);
-        mt.setTemplate(template);
-        mt.setMonitorableType(monitorableType);
-        mt.setCategory(cat);
-        mt.setPlugin(plugin);
+        MeasurementTemplate mt = new MeasurementTemplate(name, alias,
+                                                         units, collectionType,
+                                                         defaultOn,
+                                                         defaultInterval,
+                                                         designate,
+                                                         template,
+                                                         monitorableType,
+                                                         cat, plugin);
         save(mt);
         return mt;
     }

@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,12 +43,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Session;
-import org.hibernate.id.IdentifierGenerator;
-import org.hibernate.impl.SessionFactoryImpl;
-import org.hibernate.impl.SessionImpl;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -509,81 +501,37 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public void createTemplates(String pluginName, Map toAdd)
         throws CreateException {
-        // Add the new templates
-        Connection conn = null;
-        PreparedStatement tStmt = null;
-        PreparedStatement aStmt = null;
 
-        SessionFactoryImpl sessionFactory =
-            (SessionFactoryImpl)Util.getSessionFactory();
-        Session session =
-            getMeasurementTemplateDAO().getSession();
-        try {
-            IdentifierGenerator tmplIdGenerator =
-                sessionFactory
-                .getEntityPersister(MeasurementTemplate.class.getName())
-                .getIdentifierGenerator();
+        MeasurementTemplateDAO dao = getMeasurementTemplateDAO();
 
-            conn = session.connection();
+        int template_count = 0;
+        for (Iterator i = toAdd.entrySet().iterator(); i.hasNext();) {
+            Map.Entry entry = (Map.Entry) i.next();
+            MonitorableType monitorableType = (MonitorableType) entry.getKey();
+            Map newMetrics = (Map) entry.getValue();
 
-            final String templatesql = "INSERT INTO EAM_MEASUREMENT_TEMPL " +
-                "(id, name, alias, units, collection_type, default_on, " +
-                "default_interval, designate, monitorable_type_id, " +
-                "category_id, template, plugin, ctime, mtime) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            for (Iterator j = newMetrics.values().iterator(); j.hasNext();
+                 template_count++) {
+                MeasurementInfo info = (MeasurementInfo) j.next();
 
-            long current = System.currentTimeMillis();
+                Category cat = getCategoryDAO().findByName(info.getCategory());
+                dao.create(info.getName(),
+                           info.getAlias(),
+                           info.getUnits(),
+                           info.getCollectionType(),
+                           info.isDefaultOn(),
+                           info.getInterval(),
+                           info.isIndicator(),
+                           info.getTemplate(),
+                           monitorableType,
+                           cat,
+                           pluginName);
 
-            // can assume this is called in a single thread
-            // This is called at hq server startup
-            HashMap cats = new HashMap();
-            for (Iterator i = toAdd.entrySet().iterator(); i.hasNext();) {
-                Map.Entry entry = (Map.Entry) i.next();
-                MonitorableType monitorableType =
-                    (MonitorableType) entry.getKey();
-                Map newMetrics = (Map) entry.getValue();
-                
-                for (Iterator j = newMetrics.values().iterator(); j.hasNext();){
-                    MeasurementInfo info = (MeasurementInfo)j.next();
-
-                    Category cat =
-                        (Category) cats.get(info.getCategory());
-                    if (cat == null) {
-                        cat = getCategoryDAO().findByName(info.getCategory());
-                        if (cat == null) {
-                            cat = getCategoryDAO().create(info.getCategory());
-                        }
-                        cats.put(info.getCategory(), cat);
-                    }
-
-                    int col = 1;
-                    Integer rawid = (Integer)tmplIdGenerator.
-                        generate((SessionImpl)session, new MeasurementTemplate());
-
-                    tStmt = conn.prepareStatement(templatesql);
-                    tStmt.setInt(col++, rawid.intValue());
-                    tStmt.setString(col++, info.getName());
-                    tStmt.setString(col++, info.getAlias());
-                    tStmt.setString(col++, info.getUnits());
-                    tStmt.setInt(col++, info.getCollectionType());
-                    tStmt.setBoolean(col++, info.isDefaultOn());
-                    tStmt.setLong(col++, info.getInterval());
-                    tStmt.setBoolean(col++, info.isIndicator());
-                    tStmt.setInt(col++, monitorableType.getId().intValue());
-                    tStmt.setInt(col++, cat.getId().intValue());
-                    tStmt.setString(col++, info.getTemplate());
-                    tStmt.setString(col++, pluginName);
-                    tStmt.setLong(col++, current);
-                    tStmt.setLong(col, current);
-                    tStmt.execute();
-                    tStmt.close();
+                if (template_count % 30 == 0) { // Same as hibernate.jdbc.batch_size
+                    dao.getSession().flush();
+                    dao.getSession().clear();
                 }
             }
-        } catch (SQLException e) {
-            this.log.error("Unable to add measurements for: " +
-                           pluginName, e);
-        } finally {
-            session.disconnect();
         }
     }
  

@@ -56,9 +56,25 @@ public class MeasurementTemplate
     private MonitorableType _monitorableType;
     private Category        _category;
 
-    public MeasurementTemplate() {
+    public MeasurementTemplate(String name, String alias, String units,
+                               int collectionType, boolean defaultOn,
+                               long defaultInterval, boolean designate,
+                               String template, MonitorableType type,
+                               Category category, String plugin)
+    {
+        _name = name;
+        _alias = alias;
+        _units = units;
+        _collectionType = collectionType;
+        _defaultOn = defaultOn;
+        _defaultInterval = defaultInterval;
+        _designate = designate;
+        _template = template;
+        _monitorableType = type;
+        _category = category;
+        _plugin = plugin;
     }
-    
+
     /**
      * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
      * @return <code>true</code> by default.
