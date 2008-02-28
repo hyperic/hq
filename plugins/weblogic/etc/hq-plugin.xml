@@ -822,9 +822,7 @@
             alias="TxTotal"
             template="${TxResourceRuntime}:TransactionTotalCount"
             category="THROUGHPUT"
-            indicator="true"
-            units="none"
-            collectionType="trendsup"/>
+            units="none"/>
   </metrics>
 
   <help name="weblogic-admin">
