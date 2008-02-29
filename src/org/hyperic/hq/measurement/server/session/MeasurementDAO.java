@@ -533,7 +533,7 @@ public class MeasurementDAO extends HibernateDAO {
         return getSession()
             .createSQLQuery("update EAM_MEASUREMENT set resource_id = null "
                             + "where resource_id = :res")
-            .setInteger("res", resource.getId())
+            .setInteger("res", resource.getId().intValue())
             .executeUpdate();
     }
 
