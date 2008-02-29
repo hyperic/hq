@@ -42,8 +42,12 @@ import org.hyperic.hq.agent.commands.AgentDie_result;
 import org.hyperic.hq.agent.commands.AgentPing_args;
 import org.hyperic.hq.agent.commands.AgentPing_result;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
+import org.hyperic.hq.agent.commands.AgentRestart_args;
+import org.hyperic.hq.agent.commands.AgentRestart_result;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.util.math.MathUtil;
+
+import org.tanukisoftware.wrapper.WrapperManager;
 
 /**
  * The set of commands a client can call to a remote agent.  This object
@@ -98,6 +102,21 @@ public class AgentCommandsClient {
         return recvTime - sendTime;
     }
 
+    public void restart()
+        throws AgentRemoteException, AgentConnectionException 
+{
+        AgentRestart_args args = new AgentRestart_args();
+        AgentRestart_result result;
+        AgentRemoteValue cmdRes;
+
+        cmdRes = this.agentConn.sendCommand(AgentCommandsAPI.command_restart,
+                                            this.verAPI.getVersion(), args);
+
+        // We don't really do anything with this result object -- it's just
+        // here for future expansion.
+        result = new AgentRestart_result(cmdRes);
+}    
+    
     /**
      * Tell the agent to die.
      *

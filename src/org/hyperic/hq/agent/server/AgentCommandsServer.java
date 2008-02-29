@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import java.io.File;
 
@@ -43,9 +45,12 @@ import org.hyperic.hq.agent.commands.AgentDie_result;
 import org.hyperic.hq.agent.commands.AgentPing_args;
 import org.hyperic.hq.agent.commands.AgentPing_result;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
+import org.hyperic.hq.agent.commands.AgentRestart_args;
+import org.hyperic.hq.agent.commands.AgentRestart_result;
 
 import org.hyperic.util.file.FileWriter;
 import org.hyperic.util.math.MathUtil;
+import org.tanukisoftware.wrapper.WrapperManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,6 +95,14 @@ public class AgentCommandsServer
 
             //this.dumpMonitorInfos();
             return new AgentPing_result();
+        } else if(cmd.equals(AgentCommandsAPI.command_restart)){
+            new AgentRestart_args(args);  // Just parse the args
+            Timer t = new Timer();
+            t.schedule(new TimerTask()  { 
+                public void run() {
+                    WrapperManager.restart();
+                }}  , 0);
+            return new AgentRestart_result();
         } else if(cmd.equals(AgentCommandsAPI.command_die)){
             new AgentDie_args(args);  // Just parse the args
 

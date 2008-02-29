@@ -245,6 +245,20 @@ public class AgentClient {
         throw new AgentRemoteException("Unable to kill agent within timeout");
     }
 
+    private void cmdRestart()
+    throws AgentConnectionException, AgentRemoteException
+{
+    try {
+        this.agtCommands.restart();
+    } catch(AgentConnectionException exc){
+        throw new AgentConnectionException("Unable to connect to agent: " +
+                                           "already dead?");
+    } catch(AgentRemoteException exc){
+        throw new AgentRemoteException("Error making remote agent call: "+
+                                       exc.getMessage());
+    }
+}    
+    
     private class AutoQuestionException extends Exception {
         AutoQuestionException(String s){
             super(s);
@@ -1088,6 +1102,7 @@ public class AgentClient {
              args[0].equals("die")  ||
              args[0].equals("start") ||
              args[0].equals("status") ||
+             args[0].equals("restart") ||
              args[0].equals("setup")))
         {
             SYSTEM_ERR.println("Syntax: program " +
@@ -1136,6 +1151,8 @@ public class AgentClient {
                 errVal = client.cmdStatus();
             } else if(args[0].equals("setup")){
                 client.cmdSetup();
+            } else if(args[0].equals("restart")){
+                client.cmdRestart();           
             } else
                 throw new IllegalStateException("Unhandled condition");
         } catch(AutoQuestionException exc){
