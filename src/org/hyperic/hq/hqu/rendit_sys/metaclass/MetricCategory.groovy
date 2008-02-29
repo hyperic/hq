@@ -1,12 +1,53 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
+import java.util.HashMap;
+import java.util.Locale;
+
 import org.hyperic.hq.product.MetricValue
+import org.hyperic.hq.measurement.UnitsConvert
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement
+import org.hyperic.util.pager.PageControl
+
 
 class MetricCategory {
-    static String urlFor(DerivedMeasurement d, String context) {
-        "/resource/common/monitor/Visibility.do?m=${d.template.id}&eid=${d.entityId}&mode=chartSingleMetricSingleResource"
+    private static dataMan = DataManagerEJBImpl.one
+    
+    static String urlFor(DerivedMeasurement d, Map context) {
+        def template = d.template
+        if (context?.chart) {
+            def units    = template.units
+            def unitInt  = UnitsConvert.getUnitForUnit(units)
+            def scale    = UnitsConvert.getScaleForUnit(units)
+            def collType = template.collectionType
+            def end      = context.get('end', System.currentTimeMillis())
+            def start    = context.get('start', end - (8 * 60 * 60 * 1000))
+            def showAvg  = context.get('showAverage', true)
+            def showPeak = context.get('showPeak', true)
+            def showLow  = context.get('showLow', true)
+            def showEvents = context.get('showEvents', true)
+            return "/resource/MetricChart" + 
+                   "?unitUnits=$unitInt" + 
+                   "&unitScale=$scale" +
+                   "&showPeak=$showPeak" + 
+                   "&showHighRange=true" + 
+                   "&showValues=true" +
+                   "&showAverage=$showAvg" +
+                   "&showLowRange=true" + 
+                   "&showLow=$showLow" +
+                   "&collectionType=$collType" +
+                   "&showEvents=$showEvents" + 
+                   "&showBaseline=false" + 
+                   "&baseline=" +
+                   "&highRange=" + 
+                   "&lowRange=" + 
+                   "&start=$start" + 
+                   "&end=$end" +
+                   "&m=${d.template.id}" +
+                   "&eid=${d.entityId}"
+        }
+        
+        "/resource/common/monitor/Visibility.do?m=${template.id}&eid=${d.entityId}&mode=chartSingleMetricSingleResource"
     }
     
     
@@ -31,7 +72,7 @@ class MetricCategory {
             idToMetric[m.id] = m
         }
         
-        def vals = DataManagerEJBImpl.one.getLastDataPoints(mids, timeWindow)
+        def vals = dataMan.getLastDataPoints(mids, timeWindow)
         def res  = [:]
         mids.each { mid ->
             def metric = idToMetric[mid]
@@ -55,5 +96,9 @@ class MetricCategory {
      */
     static MetricValue getLastDataPoint(DerivedMeasurement m) {
         m.getLastDataPoint(0)
+    }
+    
+    static List getData(DerivedMeasurement m, long start, long end) {
+        dataMan.getHistoricalData(m.id, start, end, new PageControl()) 
     }
 }
