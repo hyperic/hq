@@ -42,8 +42,6 @@
 
   </target>
 
-  <!-- The agent and shell use 1.4 JREs except for the AMD 64 linux install 
-	   that uses a 1.5 JRE. -->	
   <target name="pick-jre" if="use.builtin.jre">
     <condition property="jre.tar.name" value="amd64-linux-jre-1_5.tar.gz">
         <available file="${install.dir}/jres/amd64-linux-jre-1_5.tar.gz"/>
@@ -95,12 +93,6 @@
 
   <target name="install-agent-jre" depends="pick-jre" if="use.builtin.jre">
     <echo>^^^INFO: Installing the agent JRE ...</echo>
-    <antcall target="install-jre-tar"/>
-    <antcall target="install-jre-exe"/>
-  </target>
-
-  <target name="install-shell-jre" depends="pick-jre" if="use.builtin.jre">
-    <echo>^^^INFO: Installing the shell JRE ...</echo>
     <antcall target="install-jre-tar"/>
     <antcall target="install-jre-exe"/>
   </target>
@@ -194,7 +186,6 @@ Setup properties will be written to %WRITABLEFILE% instead.
       <and>
         <not><isset property="server.installdir"/></not>
         <not><isset property="agent.installdir"/></not>
-        <not><isset property="shell.installdir"/></not>
       </and>
       <then>
         <property name="nothing-to-install" value="true"/>
@@ -206,7 +197,7 @@ Setup properties will be written to %WRITABLEFILE% instead.
   </target>
 
   <target name="all"
-          depends="validate-any,agent.valid-props,shell.valid-props,server.valid-props,agent,shell,server">
+          depends="validate-any,agent.valid-props,server.valid-props,agent,server">
     <echo>^^^INFO:
 __ll__
 Setup completed.
@@ -266,39 +257,6 @@ __ll__
     <concatWithPrefix failOnMissing="false" file="${setup}.agent-summary.txt" prefix="^^^INFO:"/>
   </target>
   
-  <target name="shell.valid-props" if="shell.installdir">
-    <echo>^^^DEBUG: Validating shell install configuration...</echo>
-  </target>
-
-  <target name="shell" 
-          depends="shell.valid-props"
-          if="shell.installdir"
-          description="Install the HQ command shell.">
-    <echo>^^^INFO: Installing the shell...</echo>
-    <echo>
-      ^^^INFO: Unpacking shell to: ${shell.installdir}/shell-${version}...
-    </echo>
-    <untar src="${base}/shell-${version}.tgz"
-           dest="${shell.installdir}"
-           compression="gzip"/>
-    
-    <antcall target="install-shell-jre">
-      <param name="destination" value="${shell.installdir}/shell-${version}" />
-    </antcall>
-    <echo>^^^INFO: Setting permissions on shell binaries...</echo>
-    <antcall target="chmod-exec">
-      <param name="chmod.dir" value="${shell.installdir}/shell-${version}"/>
-    </antcall>
-    <echo>^^^INFO: Fixing line endings on text files...</echo>
-    <antcall target="fix-text-files">
-      <param name="crlf.dir" value="${shell.installdir}/shell-${version}"/>
-    </antcall>
-    <echo>^^^COMPLETION:
-      Command shell successfully installed to: ${shell.installdir}/shell-${version}
-    </echo>
-    <concatWithPrefix failOnMissing="false" file="${setup}.shell-summary.txt" prefix="^^^INFO:"/>
-  </target>
-
   <target name="validate-user-privs"
           if="server.database-url"
           unless="using.builtin.db">

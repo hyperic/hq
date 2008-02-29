@@ -15,15 +15,6 @@
            replaceInstallDir="true" />
       </option>
 
-      <option name="Hyperic HQ Shell">
-        <configSchema inputPrefix="^^^INPUT:" outputPrefix="^^^INFO:"
-           class="org.hyperic.hq.install.ShellConfig"
-           file="${setup}.new"
-           completionFile="${setup}.shell-summary.txt"
-           installDirPropName="installdir"
-           replaceInstallDir="true" />
-      </option>
-
       <option name="Hyperic HQ Agent">
         <configSchema inputPrefix="^^^INPUT:" outputPrefix="^^^INFO:"
            class="org.hyperic.hq.install.AgentConfig"

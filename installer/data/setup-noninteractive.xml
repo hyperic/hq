@@ -3,7 +3,7 @@
 <project name="setup-noninteractive" default="generate-props" basedir=".">
 
   <target name="generate-props"
-          depends="generate-server-props,generate-agent-props,generate-shell-props"/>
+          depends="generate-server-props,generate-agent-props"/>
 
   <target name="generate-server-props">
     <configSchema inputPrefix="^^^INPUT:" outputPrefix="^^^INFO:"
@@ -11,14 +11,6 @@
            loadFile="${setup.absolute}"
            ifDefined="server.installdir"
            completionFile="${setup}.server-summary.txt" />
-  </target>
-
-  <target name="generate-shell-props">
-    <configSchema inputPrefix="^^^INPUT:" outputPrefix="^^^INFO:"
-           class="org.hyperic.hq.install.ShellConfig"
-           loadFile="${setup.absolute}"
-           ifDefined="shell.installdir"
-           completionFile="${setup}.shell-summary.txt" />
   </target>
 
   <target name="generate-agent-props">

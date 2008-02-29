@@ -162,7 +162,7 @@
     <macrodef name="hq-javac">
       <attribute name="destdir"      default="${build.dir}/classes"/>
       <attribute name="source"       default="${hq.javac.source}"/>
-	  <attribute name="target"	     default="${hq.javac.target}"/>
+      <attribute name="target"	     default="${hq.javac.target}"/>
       <attribute name="deprecation"  default=""/>
       <element name="javac-body" implicit="yes"/>      
 
@@ -379,7 +379,6 @@
       <include name="images/**" />
       <include name="org/hyperic/**" />
       <exclude name="org/hyperic/hq/ui/**" />
-      <exclude name="org/hyperic/hq/bizapp/client/shell/**" />
       <exclude name="org/hyperic/tools/ant/**" />
       <exclude name="org/hyperic/tools/db/**" />
       <exclude name="org/hyperic/hq/plugin/**"/>
@@ -1346,90 +1345,10 @@
           file="${servlet.base}/WEB-INF/lib/hq-filter.jar" />
   </target>
 
-  <!-- ==================== Shell packaging ==================== -->
-
-  <target name="pack-shell" description="Create shell dirs">
-
-    <mkdir dir="${build.dir}/shell/lib" />
-
-    <!-- Pack version info in hq-shell.jar -->
-    <antcall target="write-version-file">
-      <param name="version-file"
-             value="${build.dir}/src/version.properties"/>
-    </antcall>
-
-    <jar jarfile="${build.dir}/shell/lib/hq-shell.jar">
-      <fileset dir="${hq.home}/build/classes">
-        <include name="org/hyperic/**"/>
-        <exclude name="org/hyperic/hq/plugin/**"/>
-        <excludesfile name="${hq.home}/etc/shell-jar-excludes.txt"/>
-      </fileset>
-      <fileset dir="${hq.home}/build/tools/txsnatch/classes">
-        <include name="org/hyperic/**"/>
-      </fileset>
-      <fileset dir="${hq.home}/build/classes">
-        <include name="org/hyperic/hq/**/server/**/*Exception.class"/>
-        <include name="org/hyperic/hq/**/agent/**/*Exception.class"/>
-        <include name="org/hyperic/hq/agent/AgentRemoteValue.class"/>
-        <include name="org/hyperic/hq/agent/FileDataResult.class"/>
-      </fileset>
-      <fileset dir="${build.dir}/src">
-        <include name="version.properties"/>
-      </fileset>      
-    </jar>
-
-    <copy todir="${build.dir}/shell" >
-      <fileset dir="${hq.home}/bin" includes="hq-shell**" />
-      <fileset dir="${hq.home}/bin" includes="shell**" />
-    </copy>
-    
-    <chmod perm="+x" dir="${build.dir}/shell" includes="*.sh"/>
-    
-    <copy todir="${build.dir}/shell/lib" >
-      <fileset dir="${thirdparty.lib}" >
-        <include name="log4j-1.2.14.jar" />
-        <include name="quartz-1.5.1.jar" />
-        <include name="quartz-oracle-1.5.1.jar" />
-        <include name="commons-validator.jar" />
-        <include name="commons-collections.jar" />
-        <include name="commons-digester.jar" />
-        <include name="commons-beanutils.jar" />
-        <include name="commons-logging.jar" />
-        <include name="jdom_b8.jar" />
-        <include name="jsch-0.1.34.jar"/>
-        <include name="getopt.jar"/>
-        <!-- For live data translation -->
-        <include name="json.jar"/>
-        <include name="xstream-1.2.1.jar"/>
-        <include name="xpp3_min-1.1.3.4.O.jar"/>
-      </fileset>
-
-      <fileset dir="${hibernate.lib}" >
-        <include name="asm-attrs.jar"/>
-        <include name="asm.jar"/>
-        <include name="cglib-2.1.3.jar"/>
-        <include name="dom4j-1.6.1.jar"/>
-        <include name="hibernate3.jar"/>
-        <include name="hibernate-tools.jar"/>
-      </fileset>
-
-      <fileset dir="${sigar.lib}" includes="*.*" />
-      <fileset dir="${jboss.home}/client" includes="jbossall-client.jar"/>
-        
-      <!-- The following is needed for the TxSnatch code.  Not sure why
-           this is tried to load on the client, but don't have lots of 
-           time to look into it ATM ..  JMT 01/05/07 -->
-      <fileset dir="${jboss.home}/server/all/lib" includes="jboss.jar"/>
-    </copy>
-  </target>
-
-  <target name="build-shell" description="Build and create the shell directory structure" 
-          depends="compile,pack-shell" />
-
   <!-- ==================== Generic targets ==================== -->
 
   <target name="pack" description="Create the jars and copy descriptors" 
-          depends="init,pack-agent,pack-pdk,pack-ear,pack-war,pack-shell,pack-servlet" >
+          depends="init,pack-agent,pack-pdk,pack-ear,pack-war,pack-servlet" >
   </target>
 
   <target name="all" description="xdoclet, compile and pack for everything" 
@@ -1719,13 +1638,6 @@
       </fileset>
     </copy>
 
-    <!-- Copy shell dir -->
-    <copy toDir="${archive-dir}/shell-${version}">
-      <fileset dir="${build.dir}/shell">
-        <include name="**" />
-      </fileset>
-    </copy>
-
     <!-- Copy installer dir -->
     <copy toDir="${archive-dir}/installer-${version}">
       <fileset dir="${build.dir}/installer">
@@ -1826,7 +1738,7 @@
       <param name="chmod.dir" value="${archive.build.dir}"/>
     </antcall>
 
-    <!-- Packup the agent, server, shell, and servlet dirs -->
+    <!-- Packup the agent, server and servlet dirs -->
     <antcall target="compress-dir">
       <param name="archive-dir" value="${archive-dir}/agent-${version}"/>
       <param name="archive-file" value="${archive-dir}/agent-${version}.tgz"/>
@@ -1835,11 +1747,6 @@
     <antcall target="compress-dir">
       <param name="archive-dir" value="${archive-dir}/server-${version}"/>
       <param name="archive-file" value="${archive-dir}/server-${version}.tgz"/>
-      <param name="remove-archive-dir" value="true"/>
-    </antcall>
-    <antcall target="compress-dir">
-      <param name="archive-dir" value="${archive-dir}/shell-${version}"/>
-      <param name="archive-file" value="${archive-dir}/shell-${version}.tgz"/>
       <param name="remove-archive-dir" value="true"/>
     </antcall>
 
