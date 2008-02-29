@@ -14,6 +14,8 @@ class SaneController
         def svc    = params.getOne('service')
         def svcId  = params.getOne('serviceId')
         def ctx    = params.getOne('context')
+        def chart  = params.getOne('chart')
+        def link   = params.getOne('link')
         
         log.info "Redirecting from ${params}"
         
@@ -41,9 +43,32 @@ class SaneController
             findArgs['service'] = svc
         }
 
-        log.info "finding with ${findArgs}"
         def rsrc = resourceHelper.find(findArgs)
+        if (rsrc == null) {
+            log.warn "Resource specified by [${findArgs}] not found"
+            return "Resource specified by [${findArgs}] not found"
+        }
         args['resource'] = rsrc
+
+        if (chart) {
+            def metric = rsrc.enabledMetrics.find { it.template.name == chart }
+            if (!metric) {
+                log.warn "No metric [${chart}] found for resource"
+                return "No metric [${chart}] found for resource"
+            }
+            args['resource'] = metric
+            def end   = params.getOne('end', "${System.currentTimeMillis()}").toLong()
+            def start = params.getOne('start')?.toLong()
+                
+            if (start == null)
+                start = end - (8 * 60 * 60 * 1000)
+             
+            if (link?.toBoolean())
+                args.resourceContext = null
+            else
+            	args.resourceContext = [chart: true, start: start, end: end] 
+        }
+        
         redirectTo(args)
     }
 }
