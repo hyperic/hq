@@ -72,7 +72,7 @@
             value="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu"/>
   <property name="hqu.deployed.rendit_sys.dir"
 	        value="${jboss.home}/server/default/deploy/hq.ear/rendit_sys"/>
-	
+
   <path id="pdknative">
     <fileset dir="${sigar.lib}" includes="*.jar" />
     <fileset dir="${db2monitor.dir}" includes="lib/db2monitor.jar" />
@@ -246,6 +246,8 @@
             <include name="*/src"/>
           </dirset>
         </src>
+        <exclude name="**/ui" />
+        <exclude name="**/tapestry" />
         <!--exclude name="**/*_test.java" /-->
       </hq-javac>
   </target>
@@ -289,7 +291,7 @@
   </target>
 
   <target name="compile" description="Compile sources" 
-          depends="compile-txsnatch,compile-app-sources,copy-resources"/>
+          depends="compile-txsnatch,compile-app-sources,copy-resources,compile-ui"/>
 
   <!-- ==================== JSP precompile ============================ -->
   
@@ -478,6 +480,7 @@
          <include name="tapestry-contrib-4.1.5.jar" />
          <include name="tapestry-framework-4.1.5.jar" />
          <include name="tapestry-portlet-4.1.5.jar" />
+         <include name="tapestry-prop-1.0.0.jar" />
       </fileset>
     </copy>
 
@@ -552,74 +555,6 @@
     </copy>
   </target>
 
-  <target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )"
-          depends="pack-ear,pack-test">
-    <mkdir dir="${ear.dir}/hq.war" />
-    <mkdir dir="${ear.dir}/hq.war/WEB-INF/lib" />
-    
-    <copy todir="${ear.dir}/hq.war" >
-      <fileset dir="${webapp.home}">
-        <include name="**"/>
-        <exclude name="**/*.in"/>
-      </fileset>
-    </copy>
-
-    <delete dir="${ear.dir}/hq.war/WEB-INF/classes/net"/>
-
-    <!-- Copy and replace params in hq.properties -->
-    <delete file="${ear.dir}/hq.war/WEB-INF/hq.properties"/>
-    <copy tofile="${ear.dir}/hq.war/WEB-INF/hq.properties"
-          file="${webapp.home}/WEB-INF/hq.properties.in"/>
-    <replace file="${ear.dir}/hq.war/WEB-INF/hq.properties">
-      <replacefilter token="@@@PROVIDER_URL@@@" 
-                     value="${hq.ejb.remote.config.ip}:2099"/>
-      <replacefilter token="@@@WEBAPP_ATTACH_REMOTELY_FLAG@@@" value="${hq.attach-remote-flag}"/>
-    </replace>
-
-    <copy todir="${ear.dir}/hq.war/WEB-INF/lib/" >
-      <fileset dir="${thirdparty.lib}" >
-        <include name="commons-beanutils.jar" />
-        <include name="commons-digester.jar" />
-        <include name="commons-collections.jar" />
-        <include name="commons-validator.jar" />
-        <include name="commons-dbcp.jar" />        
-        <include name="jstl.jar" />
-        <include name="standard.jar" />
-        <include name="struts.jar" />               
-        <include name="struts-el.jar" />
-      </fileset>
-    </copy>
-
-    <!--copy todir="${ear.dir}/hq.war/WEB-INF/classes" >
-      <fileset dir="${build.dir}/classes" includes="**/*Test*.class" />
-    </copy-->
-
-    <jar file="${ear.dir}/hq.war/WEB-INF/lib/hq-ui.jar" basedir="${build.dir}/classes" >
-      <include name="org/hyperic/hq/ui/**" />
-      <include name="servletunit/struts/**" />
-      <exclude name="org/hyperic/hq/ui/server/session/**" />
-      <exclude name="org/hyperic/hq/ui/shared/**" />
-    </jar>
-
-    <jar file="${ear.dir}/hq.war/WEB-INF/lib/display-taglib.jar" basedir="${build.dir}/classes" >
-      <include name="org/apache/taglibs/display/**" />
-    </jar>
-
-    <!-- Pack ROOT.war used for startup progress -->
-    <mkdir dir="${ROOT.war}" />
-    <mkdir dir="${ROOT.war}/WEB-INF" />
-    <mkdir dir="${ROOT.war}/WEB-INF/lib" />
-    <jar file="${ROOT.war}/WEB-INF/lib/boot-ui.jar" basedir="${build.dir}/classes" >
-      <include name="org/hyperic/util/notReady/StartupServlet.class" />
-      <include name="org/hyperic/util/notReady/NotReadyAppender*" />
-    </jar>
-    <copy tofile="${ROOT.war}/WEB-INF/web.xml"
-          file="src/org/hyperic/util/notReady/web.xml"/>
-
-    <!-- Pack UI plugins -->
-    <hqu-copy eardir="${ear.dir}"/>
-  </target>
-  
   <target name="build-ear" description="Build and create the ear directory structure" 
           depends="compile,pack-ear,pack-war" />
 
@@ -692,109 +627,178 @@
   </target>
 	  	
   <!-- ==================== UI packaging ==================== -->
-  
-  <target name="compile-ui" depends="init">
-    <!-- Compile all of the ui classes -->
 
-    <hq-javac deprecation="${hq.remote-dev.deprecation}">
-      <classpath refid="remotejars"/>
+  <target name="compile-ui" description="compiles the ui classes" depends="init">
+    <property name="jboss.deploy.dir"
+              value="${jboss.home}/server/default/deploy" />
+
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties"
+             classpathref="alljars"/>
+
+    <mkdir dir="${build.dir}/classes" />
+    <mkdir dir="${ear.dir}/hq.war/WEB-INF/lib" />
+
+    <hq-javac destdir="${build.dir}/classes">
+      <classpath>
+        <path refid="alljars" />
+        <path refid="testjars" />
+      </classpath>
       <src path="src"/>
-      <include name="**/hq/ui/**"/>
-      <exclude name="**/test/**" />
+      <include name="**/hq/ui/**" />
+      <include name="**/ui/tapestry/**" />
     </hq-javac>
-   </target>
 
-  <target name="pack-remote" description="Create the remote war directory structure ( use if you modify .jsp or other web files, but no sources )"
+  </target>
+  
+  <target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )"
           depends="pack-ear,pack-test">
-    <property name="web.ear" value="${build.dir}/web.ear"/>
-    <mkdir dir="${web.ear}/META-INF" />
-    <copy tofile="${web.ear}/META-INF/application.xml"
-          file="etc/web-ear-application.xml"/>
-
-    <property name="remote.war" value="${web.ear}/hq.war"/>
-    <mkdir dir="${remote.war}/WEB-INF/lib" />
+    <mkdir dir="${ear.dir}/hq.war" />
+    <mkdir dir="${ear.dir}/hq.war/WEB-INF/lib" />
     
-    <copy todir="${remote.war}" >
+    <copy todir="${ear.dir}/hq.war" >
       <fileset dir="${webapp.home}">
         <include name="**"/>
         <exclude name="**/*.in"/>
-        <exclude name="**/*.production"/>
-        <exclude name="mockup/**"/> 
       </fileset>
     </copy>
 
+    <delete dir="${ear.dir}/hq.war/WEB-INF/classes/net"/>
+
     <!-- Copy and replace params in hq.properties -->
-    <copy tofile="${remote.war}/WEB-INF/hq.properties"
+    <delete file="${ear.dir}/hq.war/WEB-INF/hq.properties"/>
+    <copy tofile="${ear.dir}/hq.war/WEB-INF/hq.properties"
           file="${webapp.home}/WEB-INF/hq.properties.in"/>
-    <replace file="${remote.war}/WEB-INF/hq.properties">
+    <replace file="${ear.dir}/hq.war/WEB-INF/hq.properties">
       <replacefilter token="@@@PROVIDER_URL@@@" 
                      value="${hq.ejb.remote.config.ip}:2099"/>
       <replacefilter token="@@@WEBAPP_ATTACH_REMOTELY_FLAG@@@" value="${hq.attach-remote-flag}"/>
     </replace>
 
-    <copy todir="${remote.war}/WEB-INF/lib/" >
+    <replace file="${ear.dir}/hq.war/META-INF/context.xml">
+      <replacefilter token="@@@HYPERIC_UI_HOTDEPLOY@@@" value="${hq.ui.hot-deploy}"/>
+    </replace>
+
+    <copy todir="${ear.dir}/hq.war/WEB-INF/lib/" >
       <fileset dir="${thirdparty.lib}" >
         <include name="commons-beanutils.jar" />
         <include name="commons-digester.jar" />
-        <include name="commons-logging.jar" />
-        <include name="commons-collections.jar" />        
+        <include name="commons-collections.jar" />
         <include name="commons-validator.jar" />
         <include name="commons-dbcp.jar" />        
-        <include name="log4j-1.2.14.jar" />
         <include name="jstl.jar" />
         <include name="standard.jar" />
         <include name="struts.jar" />               
         <include name="struts-el.jar" />
-        <include name="snmp4j.jar" />
-      </fileset> 
-    </copy>
-
-    <delete dir="${remote.war}/WEB-INF/classes/net"/>
-    <copy todir="${remote.war}/WEB-INF/classes/" >
-      <fileset dir="${build.dir}/classes" >
-        <include name="org/hyperic/hq/ui/**" />
-        <include name="servletunit/struts/**" />
-        <exclude name="org/hyperic/hq/ui/server/**" />
-        <exclude name="org/hyperic/hq/ui/shared/**" />
       </fileset>
     </copy>
 
-    <jar file="${remote.war}/WEB-INF/lib/display-taglib.jar" basedir="${build.dir}/classes" >
+    <!--copy todir="${ear.dir}/hq.war/WEB-INF/classes" >
+      <fileset dir="${build.dir}/classes" includes="**/*Test*.class" />
+    </copy-->
+
+    <copy todir="${ear.dir}/hq.war" >
+     <fileset dir="${webapp.home}" includes="**/*.js*">
+        <include name="**/*.js"/>
+        <include name="**/*.css"/>
+        <include name="**/images/*"/>
+        <include name="**/*.page"/>
+        <include name="**/*.property"/>
+        <include name="**/*.html"/>
+        <exclude name="**/*.jsp"/>
+      </fileset>
+    </copy>
+
+    <jar file="${ear.dir}/hq.war/WEB-INF/lib/hq-ui.jar" basedir="${build.dir}/classes" update="true">
+      <include name="org/hyperic/hq/ui/**" />
+      <fileset dir="${basedir}/src">
+        <include name="org/hyperic/hq/ui/**/*.html" />
+        <include name="org/hyperic/hq/ui/**/*.page" />
+        <include name="org/hyperic/hq/ui/**/*.properties" />
+      </fileset>
+      <include name="servletunit/struts/**" />
+      <exclude name="org/hyperic/hq/ui/server/session/**" />
+      <exclude name="org/hyperic/hq/ui/shared/**" />
+      <exclude name="org/hyperic/hq/ui/tapestry/**" />
+    </jar>
+
+    <jar file="${ear.dir}/hq.war/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${build.dir}/classes" update="true">
+      <include name="org/hyperic/ui/tapestry/**" />
+      <fileset dir="${basedir}/src">
+        <include name="org/hyperic/ui/tapestry/**/*.html" />
+        <include name="org/hyperic/ui/tapestry/**/*.page" />
+        <include name="org/hyperic/ui/tapestry/**/*.jwc" />
+        <include name="org/hyperic/ui/tapestry/**/*.library" />
+        <include name="org/hyperic/ui/tapestry/**/*.script" />
+        <include name="org/hyperic/ui/tapestry/**/*.js" />
+        <include name="org/hyperic/ui/tapestry/**/*.properties" />
+      </fileset>
+    </jar>
+
+    <jar file="${ear.dir}/hq.war/WEB-INF/lib/display-taglib.jar" basedir="${build.dir}/classes" >
       <include name="org/apache/taglibs/display/**" />
     </jar>
 
+    <!-- Pack ROOT.war used for startup progress -->
+    <mkdir dir="${ROOT.war}" />
+    <mkdir dir="${ROOT.war}/WEB-INF" />
+    <mkdir dir="${ROOT.war}/WEB-INF/lib" />
+    <jar file="${ROOT.war}/WEB-INF/lib/boot-ui.jar" basedir="${build.dir}/classes" >
+      <include name="org/hyperic/util/notReady/StartupServlet.class" />
+      <include name="org/hyperic/util/notReady/NotReadyAppender*" />
+    </jar>
+    <copy tofile="${ROOT.war}/WEB-INF/web.xml"
+          file="src/org/hyperic/util/notReady/web.xml"/>
+
+    <!-- Pack UI plugins -->
+    <hqu-copy eardir="${ear.dir}"/>
   </target>
-  
-  <target name="remote-jsp">
+
+  <target name="deploy-ui" description="" depends="compile-ui">
     <property name="jboss.deploy.dir"
               value="${jboss.home}/server/default/deploy"/>
 
+    <!-- Copy updated assets -->
     <copy todir="${jboss.deploy.dir}/web.ear/hq.war" >
-      <fileset dir="${webapp.home}" includes="**/*.js*" />
-      <fileset dir="${webapp.home}" includes="**/*.css" />
-      <fileset dir="${webapp.home}" includes="**/images/*" />
+      <fileset dir="${webapp.home}" includes="**/*.js*">
+        <include name="**/*.js"/>
+        <include name="**/*.css"/>
+        <include name="**/images/*"/>
+        <exclude name="**/dojo/*"/>
+        <exclude name="**/*.jsp"/>
+      </fileset>
     </copy>
+
+    <jar file="${jboss.deploy.dir}/hq.ear/hq.war/WEB-INF/lib/hq-ui.jar" basedir="${build.dir}/classes" update="true">
+      <include name="org/hyperic/hq/ui/**" />
+      <fileset dir="${basedir}/src">
+        <include name="org/hyperic/hq/ui/**/*.html" />
+        <include name="org/hyperic/hq/ui/**/*.page" />
+        <include name="org/hyperic/hq/ui/**/*.properties" />
+      </fileset>
+      <include name="servletunit/struts/**" />
+      <exclude name="org/hyperic/hq/ui/server/session/**" />
+      <exclude name="org/hyperic/hq/ui/shared/**" />
+      <exclude name="org/hyperic/hq/ui/tapestry/**" />
+    </jar>
+
+    <jar file="${jboss.deploy.dir}/hq.ear/hq.war/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${build.dir}/classes" update="true">
+      <include name="org/hyperic/ui/tapestry/**" />
+      <fileset dir="${basedir}/src">
+        <include name="org/hyperic/ui/tapestry/**/*.html" />
+        <include name="org/hyperic/ui/tapestry/**/*.page" />
+        <include name="org/hyperic/ui/tapestry/**/*.jwc" />
+        <include name="org/hyperic/ui/tapestry/**/*.library" />
+        <include name="org/hyperic/ui/tapestry/**/*.script" />
+        <include name="org/hyperic/ui/tapestry/**/*.js" />
+        <include name="org/hyperic/ui/tapestry/**/*.properties" />
+      </fileset>
+    </jar>
 
   </target>
 
-  <target name="remote-dev" depends="compile-ui, pack-remote">
-    <property name="jboss.deploy.dir"
-              value="${jboss.home}/server/default/deploy"/>
-
-    <copy todir="${jboss.deploy.dir}/web.ear" >
-      <fileset dir="${web.ear}" includes="**" />
-    </copy>
-
-    <!-- Make sure the webapp gets redeployed -->
-    <touch file="${jboss.deploy.dir}/web.ear/META-INF/application.xml"/>
-
-  </target>
-
-  <target name="undeploy-remote-dev">
-    <property name="jboss.deploy.dir"
-              value="${jboss.home}/server/default/deploy"/>
-
-    <delete dir="${jboss.deploy.dir}/web.ear"/>
+  <target name="undeploy-ui">
+    <delete file="${jboss.deploy.dir}/hq.ear/hq.war/WEB-INF/lib/hq-tapestry-lib.jar"/>
+    <delete file="${jboss.deploy.dir}/hq.ear/hq.war/WEB-INF/lib/hq-ui.jar"/>
   </target>
 
   <!-- ==================== PDK packaging ==================== -->
@@ -1592,6 +1596,7 @@
     <antcall target="chmod-exec">
       <param name="chmod.dir" value="${installer.dir}"/>
     </antcall>
+    
   </target>
 
   <target name="installer-jar" depends="init,init-taskdefs">
