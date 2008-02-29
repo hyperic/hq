@@ -26,9 +26,6 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.Collections;
 
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
