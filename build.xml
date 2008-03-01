@@ -171,7 +171,7 @@
                optimize="${hq.javac.optimize}"
                debug="${hq.javac.debug}"
                source="@{source}"
-			   target="@{target}">
+               target="@{target}">
           <javac-body/>
         </javac>
       </sequential>
@@ -246,8 +246,8 @@
             <include name="*/src"/>
           </dirset>
         </src>
-        <exclude name="**/ui" />
-        <exclude name="**/tapestry" />
+        <exclude name="org/hyperic/hq/ui/**/*.java" />
+        <exclude name="org/hyperic/tapestry/**/*.java" />
         <!--exclude name="**/*_test.java" /-->
       </hq-javac>
   </target>
@@ -637,7 +637,8 @@
     <mkdir dir="${build.dir}/classes" />
     <mkdir dir="${ear.dir}/hq.war/WEB-INF/lib" />
 
-    <hq-javac destdir="${build.dir}/classes">
+    <hq-javac destdir="${build.dir}/classes" source="1.5" target="1.5">
+      <!-- The UI needs to be built with 1.5 features -->
       <classpath>
         <path refid="alljars" />
         <path refid="testjars" />
