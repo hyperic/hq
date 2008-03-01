@@ -70,7 +70,8 @@ public class WeblogicDetector
     private static final String PROP_MX_SERVER =
         "-Dweblogic.management.server";
 
-    private Log log = LogFactory.getLog("WeblogicDetector");
+    private static final Log _log = LogFactory.getLog("WeblogicDetector");
+    private Log log = _log; //XXX cleanup
 
     public WeblogicDetector() {
         super();
@@ -170,10 +171,10 @@ public class WeblogicDetector
                           configXML + ": " +
                           e.getMessage());
             return null;
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             this.log.warn("Failed to parse " +
                           configXML + ": " +
-                          e.getMessage());
+                          e.getMessage(), e);
             return null;
         }
 
@@ -368,31 +369,52 @@ public class WeblogicDetector
     }
 
     public static String getRunningInstallPath() {
-        final String policyProp = "-Djava.security.policy=";
-
         String installpath = null;
         long[] pids = getPids(PTQL_QUERY);
 
         for (int i=0; i<pids.length; i++) {
             String[] args = getProcArgs(pids[i]);
 
-            for (int j=0; j<args.length; j++) {
+            for (int j=1; j<args.length; j++) {
                 String arg = args[j];
-                if (arg.startsWith(policyProp)) {
-                    arg = arg.substring(policyProp.length(), arg.length());
-                    //6.1 petstore is  -Djava.security.policy==...
+
+                if (arg.startsWith("-D")) {
+                    //e.g. -Dplatform.home=$PWD
+                    int ix = arg.indexOf("=");
+                    if (ix == -1) {
+                        continue;
+                    }
+                    //e.g. 6.1 petstore is  -Djava.security.policy==...
                     if (arg.startsWith("=")) {
                         arg = arg.substring(1, arg.length());
                     }
 
-                    //strip lib/weblogic.policy for 6.1
-                    //strip server/lib/weblogic.policy for 7.0+
-                    File dir = new File(arg).getParentFile().getParentFile();
-                    if (dir.getName().equals("server")) {
-                        dir = dir.getParentFile();
+                    arg = arg.substring(ix+1).trim();
+                    if (!new File(arg).exists()) {
+                        continue;
                     }
+                }
+                else {
+                    continue;
+                }
 
+                final String jar =
+                    "server" + File.separator +
+                    "lib" + File.separator +
+                    "weblogic.jar";
+
+                File dir = new File(arg);
+                while (dir != null) {
+                    if (new File(dir, jar).exists()) {
+                        break;
+                    }
+                    dir = dir.getParentFile();
+                }
+                       
+                if (dir != null) {
                     installpath = dir.getAbsolutePath();
+                    _log.debug(WeblogicProductPlugin.PROP_INSTALLPATH + "=" +
+                               installpath + " (derived from " + args[j] + ")");
                     break;
                 }
             }
