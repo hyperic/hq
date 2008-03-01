@@ -124,6 +124,12 @@ public class ActionManagerEJBImpl implements SessionBean {
     public ActionValue updateAction(ActionValue val) { 
         // First update the primary action
         Action action = _actDAO.findById(val.getId());
+        
+        // Delete it if no configuration
+        if (val.getConfig() == null) {
+            _actDAO.removeAction(action);
+            return null;
+        }
             
         action.setActionValue(val);
         setParentAction(val, action);

@@ -66,6 +66,21 @@ public class ActionDAO extends HibernateDAO {
         }
         def.clearActions();
     }
+    
+    void removeAction(Action action) {
+        if (action.getParent() != null) {
+            action.getParent().getChildrenBag().remove(action);
+        }
+        
+        if (action.getAlertDefinition() != null) {
+            action.getAlertDefinition().getActionsBag().remove(action);
+        }
+
+        for (Iterator ait = action.getLogEntries().iterator(); ait.hasNext();) {
+            remove(ait.next());
+        }
+        remove(action);
+    }
 
     /**
      * Find all the actions which triggered the alert in the alert log
