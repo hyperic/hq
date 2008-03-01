@@ -246,6 +246,22 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
+    public ActionForward viewOpenNMS(ActionMapping mapping,
+                                     ActionForm form,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response)
+        throws Exception
+    {
+        setResource(request);
+        Portal portal = Portal.createPortal();
+        setTitle(request, portal,
+                 "alert.config.platform.props.ViewDef.openNMS.Title");
+        portal.addPortlet(new Portlet(".events.config.view.opennms"),1);
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+        
+        return null;
+    }
+
     public ActionForward monitorConfigureAlerts(ActionMapping mapping,
                                                 ActionForm form,
                                                 HttpServletRequest request,
