@@ -149,9 +149,7 @@ public class EmailAction extends EmailActionConfig
                 alert.getAlertDefinitionInterface();
             AppdefEntityID appEnt = getResource(alertDef);
 
-            ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
-            Resource resource = rDao.findByInstanceId(appEnt.getAuthzTypeId(),
-                                                      appEnt.getId());
+            Resource resource = alertDef.getResource();
 
             String[] body = new String[addrs.size()];
             String[] htmlBody = new String[addrs.size()];
