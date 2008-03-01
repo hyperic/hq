@@ -204,17 +204,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /**
-     * Delete a derived measurement template
-     * @ejb:interface-method
-     */
-    public void removeDerivedMeasurementTemplate(int sessionId, Integer arg)
-        throws SessionNotFoundException, SessionTimeoutException,
-               RemoveException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        getTemplateManager().removeTemplate(subject, arg);
-    }
-
-    /**
      * @ejb:interface-method
      * @return a PageList of MeasurementTemplateValue objects
      */
@@ -567,7 +556,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param agentId The entity id to use to look up the agent connection
      * @param ids The list of entitys to unschedule
      * @ejb:interface-method
-     * 
+     *
      * NOTE: This method requires all entity ids to be monitored by the same
      * agent as specified by the agentId
      */
@@ -578,18 +567,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
         getMetricManager().disableMeasurements(subject, agentId, ids);
-    }
-
-    /**
-     * Disable measurements so that they no longer collect data
-     * @param mids the array of measurement ID's
-     * @ejb:interface-method
-     */
-    public void disableMeasurements(int sessionId, Integer[] mids)
-        throws SessionTimeoutException, SessionNotFoundException,
-               MeasurementNotFoundException, PermissionException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        getMetricManager().disableMeasurements(subject, mids);
     }
 
     /**
@@ -771,19 +748,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getMetricManager()
             .getMeasurement(subject, id, alias).getDerivedMeasurementValue();
-    }
-
-    /** Get the live measurement value
-     * @param mid The measurement ID to get
-     * @ejb:interface-method
-     */
-     public MetricValue getLiveMeasurementValue(int sessionId, Integer mid)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException, MeasurementNotFoundException,
-               LiveMeasurementException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        Integer[] mids = new Integer[] { mid };
-        return getMetricManager().getLiveMeasurementValues(subject, mids)[0];
     }
 
     /**
@@ -1095,27 +1059,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         } catch (DataNotAvailableException e) {
             throw new SystemException(e);
         }
-    }
-
-    /**
-     * Dumps data for a specific measurement on an interval
-     * @return a PageList of MetricValue objects
-     * @ejb:interface-method
-     */
-    public PageList findMeasurementData(int sessionId, Integer mid,
-                                        long begin, long end, long interval,
-                                        boolean returnNulls, PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException,
-               MeasurementNotFoundException, DataNotAvailableException {
-        manager.getSubjectPojo(sessionId);
-
-        Measurement dmv = getMetricManager().getMeasurement(mid);
-        MeasurementTemplate tmpl = dmv.getTemplate();
-        
-        Integer[] mids = new Integer[] { mid };
-        return getDataMan().getHistoricalData(mids, begin, end, interval,
-                                              tmpl.getCollectionType(),
-                                              returnNulls, pc);
     }
 
     /**
@@ -3090,21 +3033,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
 
         return result;
-    }
-
-    /** Invoke data compact.
-     * @ejb:interface-method
-     */
-    public void invokeDataCompact(int sessionId)
-        throws SessionTimeoutException, SessionNotFoundException
-    {
-        try {
-            DataPurgeJob.compressData();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
     }
 
     /**
