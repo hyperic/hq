@@ -323,10 +323,16 @@ public class WeblogicConfig {
                         server.name = getText(srv);
                     }
                     else if (srvTag.equals("listen-port")) {
-                        port = getText(srv);
+                        String val = getText(srv);
+                        if (val != null) {
+                            port = val;
+                        }
                     }
                     else if (srvTag.equals("listen-address")) {
-                        addr = getText(srv);
+                        String val = getText(srv);
+                        if (val != null) {
+                            addr = val;
+                        }
                     }
                 }
                 server.setURL(protocol, addr, port);
@@ -357,7 +363,15 @@ public class WeblogicConfig {
     }
 
     private String getText(Node node) {
-        return node.getFirstChild().getNodeValue().trim();
+        Node child = node.getFirstChild();
+        if (child == null) {
+            return null;
+        }
+        String value = child.getNodeValue();
+        if (value == null) {
+            return null;
+        }
+        return value.trim();
     }
     
     private static void testConfig(String file) throws Exception {
