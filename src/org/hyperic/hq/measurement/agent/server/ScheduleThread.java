@@ -73,22 +73,23 @@ public class ScheduleThread
     private static final int POLL_PERIOD = 1000;
     private static final int UNREACHABLE_EXPIRE = (60 * 1000) * 5;
     private static final long WARN_FETCH_TIME = 5 * 1000; // 5 seconds.
+    private static final Log _log =
+        LogFactory.getLog(ScheduleThread.class.getName());
 
-    private          Map       _schedules;  // AppdefID -> Schedule
-    private volatile boolean   shouldDie;   // Should I shut down?
-    private          Object    interrupter; // Interrupt object
-    private          HashMap   dsnErrors;   // Hash of DSNs to their errors
+    private          Map       _schedules;   // AppdefID -> Schedule
+    private volatile boolean   _shouldDie;   // Should I shut down?
+    private          Object    _interrupter; // Interrupt object
+    private          HashMap   _errors;      // Hash of DSNs to their errors
 
-    private MeasurementPluginManager manager;
-    private Log                      log;
-    private SenderThread             sender;  // Guy handling the results
+    private MeasurementPluginManager _manager;
+    private SenderThread             _sender;  // Guy handling the results
 
-    private long stat_numMetricsFetched = 0;
-    private long stat_numMetricsFailed  = 0;
-    private long stat_totFetchTime      = 0;
-    private long stat_numMetricsScheduled = 0;
-    private long stat_maxFetchTime      = Long.MIN_VALUE;
-    private long stat_minFetchTime      = Long.MAX_VALUE;
+    private long _stat_numMetricsFetched = 0;
+    private long _stat_numMetricsFailed  = 0;
+    private long _stat_totFetchTime      = 0;
+    private long _stat_numMetricsScheduled = 0;
+    private long _stat_maxFetchTime      = Long.MIN_VALUE;
+    private long _stat_minFetchTime      = Long.MAX_VALUE;
 
     private static class ResourceSchedule {
         private Schedule _schedule = new Schedule();
@@ -101,13 +102,12 @@ public class ScheduleThread
     ScheduleThread(SenderThread sender, MeasurementPluginManager manager)
         throws AgentStartException 
     {
-        _schedules        = Collections.synchronizedMap(new HashMap());
-        this.shouldDie    = false;
-        this.interrupter  = new Object();
-        this.manager      = manager;
-        this.log          = LogFactory.getLog(ScheduleThread.class);
-        this.sender       = sender;               
-        this.dsnErrors    = new HashMap();
+        _schedules    = Collections.synchronizedMap(new HashMap());
+        _shouldDie    = false;
+        _interrupter  = new Object();
+        _manager      = manager;
+        _sender       = sender;               
+        _errors       = new HashMap();
     }
 
     private ResourceSchedule getSchedule(ScheduledMeasurement meas) {
@@ -117,14 +117,14 @@ public class ScheduleThread
             schedule = new ResourceSchedule();
             schedule._id = meas.getEntity();
             _schedules.put(key, schedule);
-            log.debug("Created ResourceSchedule for: " + key);
+            _log.debug("Created ResourceSchedule for: " + key);
         }
         return schedule;
     }
 
     private void interruptMe(){
-        synchronized(this.interrupter){
-            this.interrupter.notify();
+        synchronized (_interrupter) {
+            _interrupter.notify();
         }
     }
 
@@ -146,8 +146,8 @@ public class ScheduleThread
         }
 
         ScheduledItem[] items = rs._schedule.getScheduledItems();
-        log.debug("Unscheduling " + items.length + " metrics for " + ent);
-        this.stat_numMetricsScheduled -= items.length;
+        _log.debug("Unscheduling " + items.length + " metrics for " + ent);
+        _stat_numMetricsScheduled -= items.length;
 
         for (int i=0; i<items.length; i++) {
             ScheduledMeasurement meas =
@@ -168,16 +168,16 @@ public class ScheduleThread
         ResourceSchedule rs = getSchedule(meas);
         try {
             rs._schedule.scheduleItem(meas, meas.getInterval(), true, true);
-            this.stat_numMetricsScheduled++;
+            _stat_numMetricsScheduled++;
         } catch (ScheduleException e) {
-            log.error("Unable to schedule metric '" +
+            _log.error("Unable to schedule metric '" +
                       logMetric(meas.getDSN()) + "', skipping. Cause is " +
                       e.getMessage(), e);
             return;
         }
 
         //XXX older rev would call interruptMe() if newNextTime < oldNextTime
-        //but interruptMe() and run() both synchronize on this.interrupter
+        //but interruptMe() and run() both synchronize on _interrupter
     }
 
     /**
@@ -185,17 +185,17 @@ public class ScheduleThread
      */
 
     void die(){
-        this.shouldDie = true;
-        this.interruptMe();
+        _shouldDie = true;
+        interruptMe();
     }
 
     private void logCache(String basicMsg, String dsn, String msg,
                           Exception exc, boolean printStack){
         String oldMsg;
-        boolean isDebug = this.log.isDebugEnabled();
+        boolean isDebug = _log.isDebugEnabled();
 
-        synchronized(this.dsnErrors){
-            oldMsg = (String)this.dsnErrors.get(dsn);
+        synchronized(_errors){
+            oldMsg = (String)_errors.get(dsn);
         }
 
         if(!isDebug && oldMsg != null && oldMsg.equals(msg)){
@@ -203,17 +203,16 @@ public class ScheduleThread
         }
 
         if(isDebug){
-            this.log.error(basicMsg + " while processing Metric '" + dsn + "'",
-                           exc);
+            _log.error(basicMsg + " while processing Metric '" + dsn + "'", exc);
         } else {
-            this.log.error(basicMsg + ": " + msg);
+            _log.error(basicMsg + ": " + msg);
             if (printStack) {
-                this.log.error("Stack trace follows:", exc);
+                _log.error("Stack trace follows:", exc);
             }
         }
 
-        synchronized(this.dsnErrors){
-            this.dsnErrors.put(dsn, msg);
+        synchronized(_errors){
+            _errors.put(dsn, msg);
         }
     }
 
@@ -227,14 +226,14 @@ public class ScheduleThread
     }
 
     private void clearLogCache(String dsn){
-        synchronized(this.dsnErrors){
-            this.dsnErrors.remove(dsn);
+        synchronized(_errors){
+            _errors.remove(dsn);
         }
     }
 
     //remove connections properties, if any, to avoid logging passwords
     private String logMetric(String metric) {
-        if (log.isDebugEnabled()) {
+        if (_log.isDebugEnabled()) {
             return metric;
         }
         StringTokenizer tok = new StringTokenizer(metric, ":");
@@ -276,7 +275,7 @@ public class ScheduleThread
         tmpl.metric.setId(type, id);
         tmpl.metric.setCategory(meas.getCategory());
         tmpl.metric.setInterval(meas.getInterval());
-        return this.manager.getValue(tmpl.plugin, tmpl.metric);
+        return _manager.getValue(tmpl.plugin, tmpl.metric);
     }
 
     private long collect(ResourceSchedule rs) {
@@ -293,7 +292,7 @@ public class ScheduleThread
         if (rs._lastUnreachble != 0) {
             if ((now - rs._lastUnreachble) > UNREACHABLE_EXPIRE) {
                 rs._lastUnreachble = 0;
-                log.info("Re-enabling metrics for: " + rs._id);
+                _log.info("Re-enabling metrics for: " + rs._id);
             }
             else {
                 isUnreachable = true;
@@ -303,9 +302,9 @@ public class ScheduleThread
         rs._collected.clear();
 
         if (rs._retry.size() != 0) {
-            if (log.isDebugEnabled()) {
-                log.debug("Retrying " + rs._retry.size() +
-                          " items (MetricValue.FUTUREs)");
+            if (_log.isDebugEnabled()) {
+                _log.debug("Retrying " + rs._retry.size() +
+                           " items (MetricValue.FUTUREs)");
             }
             collect(rs, rs._retry, isUnreachable);
             rs._retry.clear();
@@ -330,9 +329,9 @@ public class ScheduleThread
                          List items,
                          boolean isUnreachable) {
  
-        boolean isDebug = log.isDebugEnabled();
+        boolean isDebug = _log.isDebugEnabled();
 
-        for (int i=0; i<items.size() && (shouldDie == false); i++) {
+        for (int i=0; i<items.size() && (_shouldDie == false); i++) {
             ScheduledMeasurement meas =
                 (ScheduledMeasurement)items.get(i);
 
@@ -347,7 +346,7 @@ public class ScheduleThread
                 if (!category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
                     // Prevent stacktrace bombs if a resource is
                     // down, but don't skip processing availability metrics.
-                    this.stat_numMetricsFailed++;
+                    _stat_numMetricsFailed++;
                     continue;
                 }
             }
@@ -360,8 +359,8 @@ public class ScheduleThread
                 int mid = meas.getDsnID();
                 if (rs._collected.get(mid) == Boolean.TRUE) {
                     if (isDebug) {
-                        log.debug("Skipping duplicate mid=" + mid +
-                                  ", aid=" + rs._id);
+                        _log.debug("Skipping duplicate mid=" + mid +
+                                   ", aid=" + rs._id);
                     }
                     continue; //avoid dups
                 }
@@ -370,36 +369,36 @@ public class ScheduleThread
                 success = true;
                 clearLogCache(dsn);
             } catch(PluginNotFoundException exc){
-                this.logCache("Plugin not found", dsn, exc);
+                logCache("Plugin not found", dsn, exc);
             } catch(PluginException exc){
-                this.logCache("Measurement plugin error", dsn, exc);
+                logCache("Measurement plugin error", dsn, exc);
             } catch(MetricInvalidException exc){
-                this.logCache("Invalid Metric requested", dsn, exc);
+                logCache("Invalid Metric requested", dsn, exc);
             } catch(MetricNotFoundException exc){
-                this.logCache("Metric Value not found", dsn, exc);
+                logCache("Metric Value not found", dsn, exc);
             } catch(MetricUnreachableException exc){
-                this.logCache("Metric unreachable", dsn, exc);
+                logCache("Metric unreachable", dsn, exc);
                 rs._lastUnreachble = currTime;
                 isUnreachable = true;
-                log.warn("Disabling metrics for: " + rs._id);
+                _log.warn("Disabling metrics for: " + rs._id);
             } catch(Exception exc){
                 // Unexpected exception
-                this.logCache("Error getting measurement value",
-                              dsn, exc.toString(), exc, true);
+                logCache("Error getting measurement value",
+                         dsn, exc.toString(), exc, true);
             }
             
             // Stats stuff
             timeDiff = System.currentTimeMillis() - currTime;
-            this.stat_totFetchTime += timeDiff;
-            if(timeDiff > this.stat_maxFetchTime)
-                this.stat_maxFetchTime = timeDiff;
+            _stat_totFetchTime += timeDiff;
+            if(timeDiff > _stat_maxFetchTime)
+                _stat_maxFetchTime = timeDiff;
 
-            if(timeDiff < this.stat_minFetchTime)
-                this.stat_minFetchTime = timeDiff;
+            if(timeDiff < _stat_minFetchTime)
+                _stat_minFetchTime = timeDiff;
 
             if (timeDiff > WARN_FETCH_TIME) {
-                log.warn("Collection of metric: '" + logMetric(dsn) + 
-                         "' took: " + timeDiff + "ms");
+                _log.warn("Collection of metric: '" + logMetric(dsn) + 
+                          "' took: " + timeDiff + "ms");
             }
 
             if (success) {
@@ -407,7 +406,7 @@ public class ScheduleThread
                     String msg =
                         "[" + aid + ":" + category +
                         "] Metric='" + dsn + "' -> " + data;
-                    log.debug(msg + " timestamp=" + data.getTimestamp());
+                    _log.debug(msg + " timestamp=" + data.getTimestamp());
                 }
                 if (data.isNone()) {
                     //wouldn't be inserted into the database anyhow
@@ -424,11 +423,11 @@ public class ScheduleThread
                     rs._retry.add(meas);
                     continue;
                 }
-                this.sender.processData(meas.getDsnID(), data, 
-                                        meas.getDerivedID());
-                this.stat_numMetricsFetched++;
+                _sender.processData(meas.getDsnID(), data, 
+                                    meas.getDerivedID());
+                _stat_numMetricsFetched++;
             } else {
-                this.stat_numMetricsFailed++;
+                _stat_numMetricsFailed++;
             }
         }
     }
@@ -437,7 +436,7 @@ public class ScheduleThread
         long timeOfNext = 0;
         synchronized (_schedules) {
             for (Iterator it = _schedules.values().iterator();
-                 it.hasNext() && (shouldDie == false);) {
+                 it.hasNext() && (_shouldDie == false);) {
                 
                 ResourceSchedule rs = (ResourceSchedule)it.next();
 
@@ -450,7 +449,7 @@ public class ScheduleThread
                         timeOfNext = Math.min(next, timeOfNext);
                     }
                 } catch (Throwable e) {
-                    log.error(e.getMessage(), e);
+                    _log.error(e.getMessage(), e);
                 }
             }
         }
@@ -462,22 +461,22 @@ public class ScheduleThread
      * waits the appropriate time, and executes scheduled operations.
      */
     public void run(){
-        boolean isDebug = log.isDebugEnabled();
-        while (shouldDie == false) {
+        boolean isDebug = _log.isDebugEnabled();
+        while (_shouldDie == false) {
             long timeOfNext = collect();
             long now = System.currentTimeMillis();
             if (timeOfNext > now) {
                 long wait = timeOfNext - now;
                 if (isDebug) {
-                    log.debug("Waiting " + wait + " ms until " +
-                              TimeUtil.toString(now+wait));
+                    _log.debug("Waiting " + wait + " ms until " +
+                               TimeUtil.toString(now+wait));
                 }
                 try {
-                    synchronized (interrupter) {
-                        interrupter.wait(wait);
+                    synchronized (_interrupter) {
+                        _interrupter.wait(wait);
                     }
                 } catch (InterruptedException e) {
-                    log.debug("Schedule thread kicked");
+                    _log.debug("Schedule thread kicked");
                 }
             }
         }
@@ -489,7 +488,7 @@ public class ScheduleThread
     public double getNumMetricsScheduled() 
         throws AgentMonitorException 
     {
-        return this.stat_numMetricsScheduled;
+        return _stat_numMetricsScheduled;
     }
 
     /**
@@ -499,7 +498,7 @@ public class ScheduleThread
     public double getNumMetricsFetched() 
         throws AgentMonitorException 
     {
-        return this.stat_numMetricsFetched;
+        return _stat_numMetricsFetched;
     }
 
     /**
@@ -509,7 +508,7 @@ public class ScheduleThread
     public double getNumMetricsFailed() 
         throws AgentMonitorException 
     {
-        return this.stat_numMetricsFailed;
+        return _stat_numMetricsFailed;
     }
 
     /**
@@ -518,7 +517,7 @@ public class ScheduleThread
     public double getTotFetchTime() 
         throws AgentMonitorException 
     {
-        return this.stat_totFetchTime;
+        return _stat_totFetchTime;
     }
 
     /**
@@ -527,10 +526,10 @@ public class ScheduleThread
     public double getMaxFetchTime() 
         throws AgentMonitorException 
     {
-        if(this.stat_maxFetchTime == Long.MIN_VALUE)
+        if(_stat_maxFetchTime == Long.MIN_VALUE)
             throw new AgentMonitorIncalculableException("No fetches yet");
 
-        return this.stat_maxFetchTime;
+        return _stat_maxFetchTime;
     }
 
     /**
@@ -539,9 +538,9 @@ public class ScheduleThread
     public double getMinFetchTime() 
         throws AgentMonitorException 
     {
-        if(this.stat_minFetchTime == Long.MAX_VALUE)
+        if(_stat_minFetchTime == Long.MAX_VALUE)
             throw new AgentMonitorIncalculableException("No fetches yet");
 
-        return this.stat_minFetchTime;
+        return _stat_minFetchTime;
     }
 }
