@@ -127,11 +127,11 @@ public class Measurement extends PersistedObject
         _interval = interval;
     }
 
-    public String getFormula() {
+    public String getDsn() {
         return _formula;
     }
 
-    protected void setFormula(String formula) {
+    protected void setDsn(String formula) {
         _formula = formula;
     }
 
@@ -202,7 +202,7 @@ public class Measurement extends PersistedObject
         val.setId(getId());
         val.setEnabled(isEnabled());
         val.setInterval(getInterval());
-        val.setFormula(getFormula());
+        val.setFormula(getDsn());
         val.setAppdefType(getAppdefType());
         val.setInstanceId(getInstanceId());
         val.setMtime(getMtime());

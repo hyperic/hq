@@ -89,7 +89,7 @@ public class MeasurementDAO extends HibernateDAO {
                                         mt, interval);
 
         m.setEnabled(interval != 0);
-        m.setFormula(dsn);
+        m.setDsn(dsn);
         m.setResource(resource);
         save(m);
         return m;

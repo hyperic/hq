@@ -1401,7 +1401,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
         for (int i = 0; i < mids.length; i++) {
             Measurement dm = getMeasurement(mids[i]);
-            dsns[i] = dm.getFormula();
+            dsns[i] = dm.getDsn();
         }
 
         return getLiveMeasurementValues(entity, dsns);

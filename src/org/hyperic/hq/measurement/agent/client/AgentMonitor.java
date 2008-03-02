@@ -117,7 +117,7 @@ public class AgentMonitor
 
                 String category =
                     m.getTemplate().getCategory().getName();
-                args.addMeasurement(m.getFormula(),
+                args.addMeasurement(m.getDsn(),
                                     m.getInterval(),
                                     m.getId().intValue(),
                                     m.getId().intValue(),
