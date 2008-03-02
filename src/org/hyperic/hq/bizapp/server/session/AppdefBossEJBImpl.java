@@ -249,11 +249,11 @@ public class AppdefBossEJBImpl
      
         return retArt;
     }
-    
+
     /**
      * Find all the platform types defined in the system.
      *
-     * @return A list of PlatformTypeValue objects. 
+     * @return A list of PlatformTypeValue objects.
      * @ejb:interface-method
      */
     public PageList findAllPlatformTypes(int sessionID, PageControl pc)
@@ -379,32 +379,6 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * Generate a resource tree based on the root resources and
-     * the traversal (one of ResourceTreeGenerator.TRAVERSE_*)
-     *
-     * @ejb:interface-method
-     */
-    public ResourceTree getResourceTree(int sessionID,
-                                        AppdefEntityID[] ids, int traversal)
-        throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException
-    {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        return getApplicationManager().getResourceTree(subject, ids, traversal);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public PageList findAllApps(int sessionID, PageControl pc)
-        throws FinderException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getApplicationManager().getAllApplications ( subject, pc );
-    }
-
-    /**
      * @ejb:interface-method
      */
     public ApplicationValue findApplicationById(int sessionID, Integer id)
@@ -413,16 +387,6 @@ public class AppdefBossEJBImpl
 
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         return getApplicationManager().getApplicationById(subject, id);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public ApplicationValue findApplicationByName(int sessionID, String name)
-        throws PermissionException, AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getApplicationManager().findApplicationByName(subject, name);
     }
 
     /**
@@ -500,20 +464,6 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public Map findMappedPlatformServices(int sessionID, Integer platformId,
-                                          PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
-    {
-        // Get the AuthzSubject for the user's session
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getServiceManager().getMappedPlatformServices(subject,
-                                                             platformId, pc);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
     public PageList findPlatformServices(int sessionID, Integer platformId,
                                          PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
@@ -539,18 +489,6 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * @ejb:interface-method
-     */
-    public PageList findServicesByApplication(int sessionID, Integer appId, 
-                                              PageControl pc)
-        throws AppdefEntityNotFoundException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException 
-    {
-        AppdefEntityID aeid = AppdefEntityID.newAppID(appId.intValue());
-        return findServices(sessionID, aeid, false, pc);
-    }
-
-    /**
      * Find service inventory by application - including services and clusters
      * @ejb:interface-method
      */
@@ -563,17 +501,6 @@ public class AppdefBossEJBImpl
         AppdefEntityID aeid = AppdefEntityID.newAppID(appId.intValue());
                                
         return findServices(sessionID, aeid, true, pc);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public PageList findServicesById(int sessionID, Integer[] serviceIds,
-                                     PageControl pc)
-        throws ApplicationException 
-    {
-        AuthzSubjectValue caller = manager.getSubject(sessionID);
-        return getServiceManager().findServicesById(caller, serviceIds, pc);
     }
 
     /**
@@ -639,20 +566,6 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * @ejb:interface-method
-     */
-    public PageList findPlatformsByApplication(int sessionID, Integer appId,
-                                               PageControl pc)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getPlatformManager().getPlatformsByApplication(subject, appId, 
-                                                              pc);
-    }
-
-    /**
      * Find the platform by service.
      * @ejb:interface-method
      */
@@ -707,31 +620,6 @@ public class AppdefBossEJBImpl
                            platformId, adResTypeId, pc);
     }
 
-    /**
-     * Get the virtual servers for a given platform
-     * @ejb:interface-method
-     */
-    public PageList findVirtualServersByPlatform(int sessionID,
-                                                 Integer platformId,
-                                                 PageControl pc)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        List allSvrs =
-            getServerManager().getServersByPlatform(subject, platformId, 
-                                                    false, pc);
-        PageList virtualS = new PageList();
-        for(int i = 0; i < allSvrs.size(); i++) {
-            ServerValue sv = (ServerValue)allSvrs.get(i);
-            if(sv.getServerType().getVirtual()) {
-                virtualS.add(sv);
-            }
-        }
-        return virtualS;
-    }
-    
     /**
      * Get the virtual server for a given platform and service type
      * @ejb:interface-method
@@ -1029,30 +917,6 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public PlatformValue findPlatformByName(int sessionID, String name)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getPlatformManager().getPlatformByName(subject, name);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public PageList findAllServers(int sessionID, PageControl pc)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-
-        return getServerManager().getAllServers(subject, pc);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
     public ServerValue findServerById(int sessionID, Integer id)
         throws AppdefEntityNotFoundException, SessionTimeoutException,
                SessionNotFoundException, PermissionException
@@ -1064,49 +928,12 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public ServerValue[] findServersByName(int sessionID, String name)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getServerManager().getServersByName(subject, name);
-    }
-
-
-    /**
-     * @return a List of ServiceValue objects
-     * @ejb:interface-method
-     */
-    public PageList findAllServices(int sessionID, PageControl pc)
-        throws FinderException, SessionTimeoutException, 
-               SessionNotFoundException, PermissionException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getServiceManager().getAllServices(subject, pc);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
     public ServiceValue findServiceById(int sessionID, Integer id)
         throws AppdefEntityNotFoundException, SessionTimeoutException,
                SessionNotFoundException, PermissionException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         return getServiceManager().getServiceById(subject, id);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public ServiceValue[] findServicesByName(int sessionID, String name)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getServiceManager().findServicesByName(subject, name);
     }
     
     /**
@@ -1291,17 +1118,6 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public ServiceTypeValue findServiceTypeByName(int sessionID, String name)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException 
-    {
-        manager.getSubjectPojo(sessionID);
-        return getServiceManager().findServiceTypeByName(name);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
     public PageList findServiceTypesByServerType(int sessionID, 
                                                  int serverTypeId)
         throws SessionTimeoutException, SessionNotFoundException 
@@ -1320,18 +1136,6 @@ public class AppdefBossEJBImpl
     {
         manager.getSubjectPojo(sessionID);
         return getServerManager().findServerTypeById(id);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public ServerTypeValue findServerTypeByName(int sessionID,
-                                                String name)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException 
-    {
-        manager.getSubjectPojo(sessionID);
-        return getServerManager().findServerTypeByName(name);
     }
 
     /**
@@ -1355,29 +1159,6 @@ public class AppdefBossEJBImpl
             String key = (String)i.next();
 
             cpropMan.setValue(entityId, typeId, key, (String)cProps.get(key));
-        }
-    }
-
-    /**
-     * @param platformPK - the pk of the host platform
-     * @param serverTypePK - the type of server
-     * @return ServerValue - the saved server
-     * @ejb:interface-method
-     */
-    public ServerValue createServer(int sessionID, ServerValue serverVal,
-                                    Integer platformPK,
-                                    Integer serverTypePK)
-        throws NamingException, CreateException, ValidationException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException, AppdefDuplicateNameException
-    {
-        try {
-            return createServer(sessionID, serverVal, platformPK,
-                                serverTypePK, null);
-        } catch(CPropKeyNotFoundException exc){
-            log.error("Error setting no properties for new server");
-            throw new SystemException("Error setting no properties.  Hmm",
-                                      exc);
         }
     }
 
@@ -1475,43 +1256,16 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * @param serviceTypePK -
-     *            the type of service
-     * @param serverPK -
-     *            the server host
-     * @return ServiceValue - the saved ServiceValue
-     * @ejb:interface-method
-     */
-    public ServiceValue createService(int sessionID,
-                                      ServiceValue serviceVal,
-                                      Integer serviceTypePK,
-                                      Integer serverPK)
-        throws NamingException, CreateException, ValidationException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException, AppdefDuplicateNameException
-    {
-        try {
-            return createService(sessionID, serviceVal, serviceTypePK,
-                                 serverPK, null);
-        } catch(CPropKeyNotFoundException exc){
-            log.error("Error setting no properties for new service");
-            throw new SystemException("Error setting no properties.  Hmm",
-                                      exc);
-        }
-    }
-
-    /**
      * Create a service with CProps
      * @param serviceTypePK - the type of service
      * @param serverPK - the server host
      * @param cProps - the map with Custom Properties for the service
      * @return ServiceValue - the saved ServiceValue
-     * @ejb:interface-method
      */
-    public ServiceValue createService(int sessionID,
-                                      ServiceValue serviceVal,
-                                      Integer serviceTypePK,
-                                      Integer serverPK, Map cProps)
+    private ServiceValue createService(int sessionID,
+                                       ServiceValue serviceVal,
+                                       Integer serviceTypePK,
+                                       Integer serverPK, Map cProps)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefDuplicateNameException, ValidationException,
                PermissionException, CreateException, CPropKeyNotFoundException
@@ -2210,16 +1964,6 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public AppdefGroupValue findGroupByName (int sessionId, String groupName)
-        throws AppdefGroupNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
-    {
-        return findGroupByName(sessionId, groupName, PageControl.PAGE_ALL);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
     public ResourceGroup findGroupById(int sessionId, Integer groupId) 
         throws AppdefGroupNotFoundException, PermissionException,
                SessionException
@@ -2231,24 +1975,6 @@ public class AppdefBossEJBImpl
                                                                    groupId);
         } catch (FinderException e) {
             throw new AppdefGroupNotFoundException(groupId);
-        }
-    }
-    
-    /**
-     * @ejb:interface-method
-     */
-    public AppdefGroupValue findGroupByName(int sessionId, String groupName,
-                                            PageControl pc)
-        throws AppdefGroupNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
-    {
-        try {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
-            return getAppdefGroupManager().findGroupByName(subject, groupName,
-                                                           pc);
-        } catch (AppdefGroupNotFoundException e) {
-            log.debug("Caught 'group not found' exception.");
-            throw e;
         }
     }
 
@@ -2294,42 +2020,6 @@ public class AppdefBossEJBImpl
 
     /**
      * Produce list of all groups where caller is authorized
-     * to modify. Include just those groups that are of types
-     * other than "group of group".
-     * @return List containing AppdefGroupValue.
-     * @ejb:interface-method
-     * 
-     */
-    public PageList findAllGroupsForGroupAdd (int sessionId, PageControl pc,
-                                              Integer[] removeIds)
-        throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException 
-    {
-        List filterList  = new ArrayList();
-        
-        // XXX - rewire to reflect new types
-        // Define group member exclusionary filter
-        //filterList.add(new AppdefGroupPagerFilterGrpTypeExclude (
-        //AppdefEntityConstants.APPDEF_TYPE_GROUP_OF_GROUP));
-        
-        if (removeIds != null) {
-            // convert to set and define exlusion filter on group set.
-            Set grpExcludeSet = new HashSet();
-            for (int i=0; i < removeIds.length; i++) {
-                AppdefEntityID id = 
-                    AppdefEntityID.newGroupID(removeIds[i].intValue());
-
-                grpExcludeSet.add(id);
-                filterList.add(new AppdefGroupPagerFilterExclude(grpExcludeSet));
-            }
-        }
-        
-        return findAllGroups(sessionId, pc, (AppdefPagerFilter[])
-                             filterList.toArray(new AppdefPagerFilter[0]));
-    }
-
-    /**
-     * Produce list of all groups where caller is authorized
      * to modify. Include just those groups that contain the
      * specified appdef entity.
      * @param entity for use in group member filtering.
@@ -2348,43 +2038,22 @@ public class AppdefBossEJBImpl
     /**
      * Produce list of all groups where caller is authorized
      * to modify. Include just those groups that contain the
-     * specified appdef entity.
-     * @param entity for use in group member filtering.
-     * @param removeIds of group ids for removing.
-     * @return List containing AppdefGroupValue.
-     * @ejb:interface-method
-     * */
-    public PageList findAllGroupsMemberInclusive(int sessionId, PageControl pc,
-                                                 AppdefEntityID entity, 
-                                                 Integer[] removeIds)
-        throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException, ApplicationException 
-    {
-        return findAllGroupsMemberInclusive(sessionId, pc, entity,
-                                            removeIds, null);
-    }
-
-    /**
-     * Produce list of all groups where caller is authorized
-     * to modify. Include just those groups that contain the
      * specified appdef entity. Apply group filter to remove unwanted
      * groups.
      * @param entity for use in group member filtering.
      * @return List containing AppdefGroupValue.
-     * @ejb:interface-method
      * */
-    public PageList 
-        findAllGroupsMemberInclusive(int sessionId, PageControl pc,
-                                     AppdefEntityID entity, 
-                                     Integer[] removeIds,
-                                     AppdefResourceTypeValue resType)
+    private PageList findAllGroupsMemberInclusive(int sessionId, PageControl pc,
+                                                  AppdefEntityID entity,
+                                                  Integer[] removeIds,
+                                                  AppdefResourceTypeValue resType)
         throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException, ApplicationException 
+               SessionNotFoundException, ApplicationException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        
+
         List filterList  = new ArrayList();
-        
+
         if (removeIds != null) {
             // convert to set and define exlusion filter on group set.
             Set grpExcludeSet = new HashSet();
@@ -2395,8 +2064,8 @@ public class AppdefBossEJBImpl
             }
             filterList.add(new AppdefGroupPagerFilterExclude(grpExcludeSet));
         }
-        
-        return getAppdefGroupManager().findAllGroups(subject, entity, pc, 
+
+        return getAppdefGroupManager().findAllGroups(subject, entity, pc,
                                                (AppdefPagerFilter[])
                                                filterList.toArray(new AppdefPagerFilter[0]));
     }
@@ -2411,7 +2080,7 @@ public class AppdefBossEJBImpl
     public PageList findAllGroupsMemberExclusive(int sessionId, PageControl pc,
                                                  AppdefEntityID entity)
         throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException 
+               SessionNotFoundException
     {
         return findAllGroupsMemberExclusive(sessionId, pc, entity, null, null);
     }
@@ -2424,10 +2093,10 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      * */
     public PageList findAllGroupsMemberExclusive(int sessionId, PageControl pc,
-                                                 AppdefEntityID entity, 
+                                                 AppdefEntityID entity,
                                                  Integer[] removeIds)
         throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException 
+               SessionNotFoundException
     {
         return findAllGroupsMemberExclusive(sessionId, pc, entity,
                                             removeIds, null);
@@ -2499,19 +2168,6 @@ public class AppdefBossEJBImpl
             }
         }
         return resGrps;
-    }
-
-    /**
-     * Produce list of all groups where caller is authorized
-     * to modify.
-     * @return List containing AppdefGroupValue.
-     * @ejb:interface-method
-     * */
-    public PageList findAllGroups(int sessionId, PageControl pc)
-        throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException 
-    {
-        return findAllGroups(sessionId, pc, null);
     }
 
     private PageList findAllGroups(int sessionId, PageControl pc,
@@ -2934,65 +2590,6 @@ public class AppdefBossEJBImpl
     }
 
    /**
-     * Find SERVICE compatible inventory. Specifically, find either all viewable
-     * services or service clusters.  Services that are assigned to clusters
-     * are not returned by this method. Value objects returned by this
-     * method include ServiceValue and/or AppdefGroupValue. An array of pending
-     * AppdefEntityID can also be specified for filtering. Additionally, a flag
-     * indicating whether internal (true) or deployed (false) services should
-     * be included in the return set.
-     *
-     * NOTE: This method returns an empty page list when no compatible
-     *       inventory is found.
-     * @param appdefTypeId    - the id correponding to the type of entity
-     *                          valid values include: [SERVICE|GROUP]
-     * @param appdefResTypeId - the id corresponding to the type of resource
-     *                          example: linux, jboss, vhost
-     * @param internalFlag    - show internal services (true) or
-     *                          deployed services (false)
-     * @return page list of value objects that extend AppdefResourceValue
-     * @ejb:interface-method
-     */
-    public PageList 
-        findCompatServiceInventory(int sessionId, int appdefTypeId,
-                                   int appdefResTypeId, 
-                                   AppdefEntityID[] pendingEntities, 
-                                   boolean internalFlag, PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        switch (appdefTypeId) {
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            List filterList = new ArrayList();
-            
-            if (internalFlag) {
-                // show just internal services
-                filterList.add(new AppdefPagerFilterInternalService(subject,
-                                                                     true));
-            } else {
-                // filter out the internal services
-                filterList.add( new AppdefPagerFilterInternalService(subject));
-            }
-            
-            return findCompatInventory(sessionId, appdefTypeId,
-                                       appdefResTypeId,
-                                       APPDEF_GROUP_TYPE_UNDEFINED, null,
-                                       false, pendingEntities,
-                                       null, filterList,
-                                       APPDEF_GROUP_TYPE_UNDEFINED, pc);
-        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return findCompatInventory(sessionId, appdefTypeId,
-                                       appdefResTypeId,
-                                       APPDEF_GROUP_TYPE_UNDEFINED, null,
-                                       false, pendingEntities,
-                                       null, null, APPDEF_GROUP_TYPE_UNDEFINED, pc);
-        default:
-            throw new IllegalArgumentException("Unsupported appdef type");
-        }
-    }
-
-   /**
      * Find SERVICE compatible inventory. Specifically, find all viewable
      * services and service clusters.  Services that are assigned to clusters
      * are not returned by this method. Value objects returned by this
@@ -3109,22 +2706,6 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public void deleteGroup(int sessionId, AppdefEntityID entity)
-        throws  AppdefGroupNotFoundException, SessionTimeoutException,
-                SessionNotFoundException, PermissionException,
-                VetoException 
-    {
-        try {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
-            getAppdefGroupManager().deleteGroup(subject,entity);
-        } catch (AppdefGroupNotFoundException e) {
-            log.debug("Unable to locate group for removal");
-            throw e;
-        }
-    }
-    /**
-     * @ejb:interface-method
-     */
     public void deleteGroup(int sessionId, Integer groupId)
         throws AppdefGroupNotFoundException, SessionTimeoutException,
                SessionNotFoundException, PermissionException,
@@ -3175,7 +2756,7 @@ public class AppdefBossEJBImpl
     public void resetResourceOwnership(int sessionId,
                                        AuthzSubjectValue currentOwner)
         throws FinderException, UpdateException,
-               PermissionException, AppdefEntityNotFoundException 
+               PermissionException, AppdefEntityNotFoundException
     {
         try {
             // first look up the appdef resources by owner
@@ -3358,43 +2939,6 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * Get a custom property for a resource.
-     * @param id  Appdef entity to get the value for
-     * @param key Key of the value to get
-     * @return The value associated with 'key' if found, else null
-     *
-     * @ejb:interface-method
-     */
-    public String getCPropValue(int sessionId, AppdefEntityID id, String key)
-        throws SessionNotFoundException, SessionTimeoutException,
-               AppdefEntityNotFoundException, PermissionException,
-               CPropKeyNotFoundException
-    {
-        AuthzSubject who = manager.getSubjectPojo(sessionId);
-        return getCPropManager().getValue(new AppdefEntityValue(id, who),
-                                               key);
-    }
-
-    /**
-     * Get a map which holds the keys & their associated values
-     * for an appdef entity.
-     * @param id  Appdef entity to get the custom entities for
-     * @return The properties stored for a specific entity ID
-     *         An empty Properties object will be returned if there are
-     *         no custom properties defined for the resource
-     * @ejb:interface-method
-     */
-    public Properties getCPropEntries(int sessionId, AppdefEntityID id)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException, AppdefEntityNotFoundException
-    {
-        AuthzSubjectValue who;
-
-        who = manager.getSubject(sessionId);
-        return getCPropManager().getEntries(id);
-    }
-
-    /**
      * Get a map which holds the descriptions & their associated values
      * for an appdef entity.
      * @param id  Appdef entity to get the custom entities for
@@ -3455,17 +2999,6 @@ public class AppdefBossEJBImpl
     {
         AuthzSubjectValue who = manager.getSubject(sessionId);
         return new AppdefInventorySummary(who, countTypes);
-    }
-
-    /**
-     * Get a list of appdef properties based on the appdef id
-     * @ejb:interface-method
-     */
-    public Properties getResourceProperties(int sessionId, AppdefEntityID id)
-        throws SessionNotFoundException, SessionTimeoutException
-    {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        return EntityPropertyFetcher.getProperties(id, subject);
     }
 
     /**
@@ -3891,7 +3424,7 @@ public class AppdefBossEJBImpl
      * Get Service resources and their display information
      * @ejb:interface-method
      * @param subject the caller
-     * @param typeName the type name of the services
+     * @param proto the type name of the services
      * @param cprop a unique custom property name to be fetched
      */
     public List getServicesView(AuthzSubject subject, Resource proto,
