@@ -91,7 +91,6 @@ public class MeasurementCommandsServer
 
     private MeasurementCommandsAPI   verAPI;         // Common API specifics
     private Thread                   scheduleThread; // Thread of scheduler
-    private Thread                   availThread;    // Thread for platform avail
     private ScheduleThread           scheduleObject; // Our scheduler
     private Thread                   senderThread;   // Thread of sender
     private SenderThread             senderObject;   // Our sender
@@ -111,7 +110,6 @@ public class MeasurementCommandsServer
     public MeasurementCommandsServer(){
         this.verAPI         = new MeasurementCommandsAPI();
         this.scheduleThread = null;
-        this.availThread    = null;
         this.scheduleObject = null;
         this.senderThread   = null;
         this.senderObject   = null;
@@ -156,7 +154,6 @@ public class MeasurementCommandsServer
 
         this.senderThread.start();
         this.scheduleThread.start();
-        this.availThread.start();
         this.trackerThread.start();
     }
 
@@ -581,7 +578,6 @@ public class MeasurementCommandsServer
         try {
             this.interruptThread(this.senderThread);
             this.interruptThread(this.scheduleThread);
-            this.interruptThread(this.availThread);
         } catch(InterruptedException exc){
             // Someone wants us to die badly .... ok 
             this.log.warn("shutdown interrupted");
