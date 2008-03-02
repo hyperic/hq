@@ -26,20 +26,17 @@
 package org.hyperic.hq.measurement.agent.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
-import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorIncalculableException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -51,13 +48,13 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.util.TimeUtil;
 import org.hyperic.util.collection.IntHashMap;
 import org.hyperic.util.schedule.EmptyScheduleException;
 import org.hyperic.util.schedule.Schedule;
 import org.hyperic.util.schedule.ScheduleException;
 import org.hyperic.util.schedule.ScheduledItem;
 import org.hyperic.util.schedule.UnscheduledItemException;
-import org.hyperic.util.TimeUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,15 +70,12 @@ public class ScheduleThread
     implements Runnable 
 {
     // How often we check schedules when we think they are empty.
-    private static final  int  POLL_PERIOD = 1000;
+    private static final int POLL_PERIOD = 1000;
     private static final int UNREACHABLE_EXPIRE = (60 * 1000) * 5;
     private static final long WARN_FETCH_TIME = 5 * 1000; // 5 seconds.
 
-    private          IntHashMap[] unreachable; // IDs -> last time unreachable
-    private          Schedule  schedule;    // Internal schedule of DSNs, etc
-    private          Hashtable entSchedule; // Hash of ent IDs->schedule IDs
+    private          Map       _schedules;  // AppdefID -> Schedule
     private volatile boolean   shouldDie;   // Should I shut down?
-    private volatile Thread    myThread;    // Thread the 'run' is running in
     private          Object    interrupter; // Interrupt object
     private          HashMap   dsnErrors;   // Hash of DSNs to their errors
 
@@ -92,28 +86,40 @@ public class ScheduleThread
     private long stat_numMetricsFetched = 0;
     private long stat_numMetricsFailed  = 0;
     private long stat_totFetchTime      = 0;
+    private long stat_numMetricsScheduled = 0;
     private long stat_maxFetchTime      = Long.MIN_VALUE;
     private long stat_minFetchTime      = Long.MAX_VALUE;
+
+    private static class ResourceSchedule {
+        private Schedule _schedule = new Schedule();
+        private AppdefEntityID _id;
+        private long _lastUnreachble = 0;
+        private List _retry = new ArrayList();
+        private IntHashMap _collected = new IntHashMap();
+    }
 
     ScheduleThread(SenderThread sender, MeasurementPluginManager manager)
         throws AgentStartException 
     {
-        this.unreachable  = new IntHashMap[4];
-        this.unreachable[AppdefEntityConstants.APPDEF_TYPE_PLATFORM] =
-            new IntHashMap();
-        this.unreachable[AppdefEntityConstants.APPDEF_TYPE_SERVER] =
-            new IntHashMap();
-        this.unreachable[AppdefEntityConstants.APPDEF_TYPE_SERVICE] =
-            new IntHashMap();
-        
-        this.schedule     = new Schedule();
-        this.entSchedule  = new Hashtable();
+        _schedules        = Collections.synchronizedMap(new HashMap());
         this.shouldDie    = false;
         this.interrupter  = new Object();
         this.manager      = manager;
         this.log          = LogFactory.getLog(ScheduleThread.class);
         this.sender       = sender;               
         this.dsnErrors    = new HashMap();
+    }
+
+    private ResourceSchedule getSchedule(ScheduledMeasurement meas) {
+        String key = meas.getEntity().getAppdefKey();
+        ResourceSchedule schedule = (ResourceSchedule)_schedules.get(key);
+        if (schedule == null) {
+            schedule = new ResourceSchedule();
+            schedule._id = meas.getEntity();
+            _schedules.put(key, schedule);
+            log.debug("Created ResourceSchedule for: " + key);
+        }
+        return schedule;
     }
 
     private void interruptMe(){
@@ -132,38 +138,23 @@ public class ScheduleThread
     void unscheduleMeasurements(AppdefEntityID ent)
         throws UnscheduledItemException
     {
-        // Synchronize on the hash to make sure someone isn't trying to 
-        // add to an entity when we are trying to delete it
-        synchronized(this.entSchedule){
-            Vector mIDList = (Vector)this.entSchedule.get(ent);
+        String key = ent.getAppdefKey();
+        ResourceSchedule rs =
+            (ResourceSchedule)_schedules.remove(key);
+        if (rs == null) {
+            throw new UnscheduledItemException("No measurement schedule for: " + key);
+        }
 
-            if(mIDList == null){
-                this.log.debug("Unscheduling of metrics for " + ent + 
-                               " failed:  No metrics scheduled for that " + 
-                               "entity");
-                return;
-            }
-            
-            if(this.log.isDebugEnabled()){
-                this.log.debug("Unscheduling metrics for " + ent + ": " +
-                               mIDList);
-            }
+        ScheduledItem[] items = rs._schedule.getScheduledItems();
+        log.debug("Unscheduling " + items.length + " metrics for " + ent);
+        this.stat_numMetricsScheduled -= items.length;
 
-            for(int i=0; i<mIDList.size(); i++){
-                Long mID = (Long)mIDList.get(i);
-
-                try {
-                    ScheduledItem item =
-                        this.schedule.unscheduleItem(mID.longValue());
-                    unscheduleMetric((ScheduledMeasurement)item.getObj());
-                } catch(UnscheduledItemException exc){
-                    throw new AgentAssertionException("Tried to unschedule " +
-                                                      "something which wasnt" +
-                                                      " scheduled", exc);
-                }
-            }
-            
-            this.entSchedule.remove(ent);
+        for (int i=0; i<items.length; i++) {
+            ScheduledMeasurement meas =
+                (ScheduledMeasurement)items[i].getObj();
+            //For plugin/Collector awareness
+            ParsedTemplate tmpl = getParsedTemplate(meas);
+            tmpl.metric.setInterval(-1);
         }
     }
 
@@ -174,50 +165,19 @@ public class ScheduleThread
      */
 
     void scheduleMeasurement(ScheduledMeasurement meas){
-        long oldNextTime, newNextTime = 0;
-
-        synchronized(this.entSchedule){
-            Vector  mIDList;
-            long    mID;
-
-            try {
-                oldNextTime = this.schedule.getTimeOfNext();
-            } catch(EmptyScheduleException exc){
-                oldNextTime = 0;
-            }
-
-            try {
-                mID = this.schedule.scheduleItem(meas, meas.getInterval(), 
-                                                 true, true);
-            } catch (ScheduleException e) {
-                //XXX: We continue through the schedule rather than bail with
-                //     an Exception.
-                log.error("Unable to schedule metric '" +
-                          logMetric(meas.getDSN()) + "', skipping. Cause is " +
-                          e.getMessage(), e);
-                return;
-            }
-
-            mIDList = (Vector)this.entSchedule.get(meas.getEntity());
-            if(mIDList == null){
-                mIDList = new Vector();
-                this.entSchedule.put(meas.getEntity(), mIDList);
-            } 
-            mIDList.add(new Long(mID));
-            
-            try {
-                newNextTime = this.schedule.getTimeOfNext();
-            } catch(EmptyScheduleException exc){
-                throw new AgentAssertionException("Schedule should have at " +
-                                                  "least one entry", exc);
-            }
+        ResourceSchedule rs = getSchedule(meas);
+        try {
+            rs._schedule.scheduleItem(meas, meas.getInterval(), true, true);
+            this.stat_numMetricsScheduled++;
+        } catch (ScheduleException e) {
+            log.error("Unable to schedule metric '" +
+                      logMetric(meas.getDSN()) + "', skipping. Cause is " +
+                      e.getMessage(), e);
+            return;
         }
 
-        // Check to see if we scheduled something sooner than the
-        // running thread is expecting
-        if(newNextTime < oldNextTime){
-            this.interruptMe();
-        }
+        //XXX older rev would call interruptMe() if newNextTime < oldNextTime
+        //but interruptMe() and run() both synchronize on this.interrupter
     }
 
     /**
@@ -319,10 +279,182 @@ public class ScheduleThread
         return this.manager.getValue(tmpl.plugin, tmpl.metric);
     }
 
-    //For plugin/Collector awareness
-    private void unscheduleMetric(ScheduledMeasurement meas) {
-        ParsedTemplate tmpl = getParsedTemplate(meas);
-        tmpl.metric.setInterval(-1);
+    private long collect(ResourceSchedule rs) {
+        long timeOfNext;
+        long now = System.currentTimeMillis();
+        Schedule schedule = rs._schedule;
+        try {
+            timeOfNext = schedule.getTimeOfNext();
+        } catch (EmptyScheduleException e) {
+            return POLL_PERIOD + now;
+        }
+ 
+        boolean isUnreachable = false;
+        if (rs._lastUnreachble != 0) {
+            if ((now - rs._lastUnreachble) > UNREACHABLE_EXPIRE) {
+                rs._lastUnreachble = 0;
+                log.info("Re-enabling metrics for: " + rs._id);
+            }
+            else {
+                isUnreachable = true;
+            }
+        }
+
+        rs._collected.clear();
+
+        if (rs._retry.size() != 0) {
+            if (log.isDebugEnabled()) {
+                log.debug("Retrying " + rs._retry.size() +
+                          " items (MetricValue.FUTUREs)");
+            }
+            collect(rs, rs._retry, isUnreachable);
+            rs._retry.clear();
+        }
+
+        if (now < timeOfNext) {
+            return timeOfNext;
+        }
+
+        List items;
+        try {
+            items = schedule.consumeNextItems();
+            timeOfNext = schedule.getTimeOfNext();
+        } catch (EmptyScheduleException e) {
+            return POLL_PERIOD + now;
+        }
+        collect(rs, items, isUnreachable);
+        return timeOfNext;
+    }
+
+    private void collect(ResourceSchedule rs,
+                         List items,
+                         boolean isUnreachable) {
+ 
+        boolean isDebug = log.isDebugEnabled();
+
+        for (int i=0; i<items.size() && (shouldDie == false); i++) {
+            ScheduledMeasurement meas =
+                (ScheduledMeasurement)items.get(i);
+
+            AppdefEntityID aid = meas.getEntity();
+            String category = meas.getCategory();
+            String dsn = meas.getDSN();
+            MetricValue data = null;
+            long currTime, timeDiff;
+            boolean success = false;
+
+            if (isUnreachable) {
+                if (!category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
+                    // Prevent stacktrace bombs if a resource is
+                    // down, but don't skip processing availability metrics.
+                    this.stat_numMetricsFailed++;
+                    continue;
+                }
+            }
+
+            currTime = System.currentTimeMillis();
+            // XXX -- We should do something with the exceptions here.
+            //        Maybe send some kind of error back to the
+            //        bizapp?
+            try {
+                int mid = meas.getDsnID();
+                if (rs._collected.get(mid) == Boolean.TRUE) {
+                    if (isDebug) {
+                        log.debug("Skipping duplicate mid=" + mid +
+                                  ", aid=" + rs._id);
+                    }
+                    continue; //avoid dups
+                }
+                data = getValue(meas);
+                rs._collected.put(mid, Boolean.TRUE);
+                success = true;
+                clearLogCache(dsn);
+            } catch(PluginNotFoundException exc){
+                this.logCache("Plugin not found", dsn, exc);
+            } catch(PluginException exc){
+                this.logCache("Measurement plugin error", dsn, exc);
+            } catch(MetricInvalidException exc){
+                this.logCache("Invalid Metric requested", dsn, exc);
+            } catch(MetricNotFoundException exc){
+                this.logCache("Metric Value not found", dsn, exc);
+            } catch(MetricUnreachableException exc){
+                this.logCache("Metric unreachable", dsn, exc);
+                rs._lastUnreachble = currTime;
+                isUnreachable = true;
+                log.warn("Disabling metrics for: " + rs._id);
+            } catch(Exception exc){
+                // Unexpected exception
+                this.logCache("Error getting measurement value",
+                              dsn, exc.toString(), exc, true);
+            }
+            
+            // Stats stuff
+            timeDiff = System.currentTimeMillis() - currTime;
+            this.stat_totFetchTime += timeDiff;
+            if(timeDiff > this.stat_maxFetchTime)
+                this.stat_maxFetchTime = timeDiff;
+
+            if(timeDiff < this.stat_minFetchTime)
+                this.stat_minFetchTime = timeDiff;
+
+            if (timeDiff > WARN_FETCH_TIME) {
+                log.warn("Collection of metric: '" + logMetric(dsn) + 
+                         "' took: " + timeDiff + "ms");
+            }
+
+            if (success) {
+                if (isDebug) {
+                    String msg =
+                        "[" + aid + ":" + category +
+                        "] Metric='" + dsn + "' -> " + data;
+                    log.debug(msg + " timestamp=" + data.getTimestamp());
+                }
+                if (data.isNone()) {
+                    //wouldn't be inserted into the database anyhow
+                    //but might as well skip sending this to the server.
+                    continue;
+                }
+                else if (data.isFuture()) {
+                    //for example, first time collecting an exec: metric
+                    //adding to this list will cause the metric to be
+                    //collected next time the schedule has items to consume
+                    //rather than waiting for the metric's own interval
+                    //which could take much longer to hit
+                    //(e.g. Windows Updates on an 8 hour interval)
+                    rs._retry.add(meas);
+                    continue;
+                }
+                this.sender.processData(meas.getDsnID(), data, 
+                                        meas.getDerivedID());
+                this.stat_numMetricsFetched++;
+            } else {
+                this.stat_numMetricsFailed++;
+            }
+        }
+    }
+
+    private long collect() {
+        long timeOfNext = 0;
+        synchronized (_schedules) {
+            for (Iterator it = _schedules.values().iterator();
+                 it.hasNext() && (shouldDie == false);) {
+                
+                ResourceSchedule rs = (ResourceSchedule)it.next();
+
+                try {
+                    long next = collect(rs);
+                    if (timeOfNext == 0) {
+                        timeOfNext = next;
+                    }
+                    else {
+                        timeOfNext = Math.min(next, timeOfNext);
+                    }
+                } catch (Throwable e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        }
+        return timeOfNext;
     }
 
     /**
@@ -330,240 +462,25 @@ public class ScheduleThread
      * waits the appropriate time, and executes scheduled operations.
      */
     public void run(){
-        ArrayList retry = new ArrayList();
-        boolean debug = log.isDebugEnabled();
-
-        while(this.shouldDie == false)
-        {
-            try
-            {
-                MetricValue data = null;
-                List items;
-                Map itemsMap;
-                long timeOfNext;
-                long currTime = System.currentTimeMillis();
-                
+        boolean isDebug = log.isDebugEnabled();
+        while (shouldDie == false) {
+            long timeOfNext = collect();
+            long now = System.currentTimeMillis();
+            if (timeOfNext > now) {
+                long wait = timeOfNext - now;
+                if (isDebug) {
+                    log.debug("Waiting " + wait + " ms until " +
+                              TimeUtil.toString(now+wait));
+                }
                 try {
-                    synchronized(this.entSchedule) {
-                        timeOfNext = this.schedule.getTimeOfNext();
+                    synchronized (interrupter) {
+                        interrupter.wait(wait);
                     }
-                } catch(EmptyScheduleException exc) {
-                    timeOfNext = ScheduleThread.POLL_PERIOD+currTime;
+                } catch (InterruptedException e) {
+                    log.debug("Schedule thread kicked");
                 }
-
-                if (timeOfNext > currTime)
-                {
-                    synchronized(this.interrupter)
-                    {
-                        try
-                        {
-                            long now = System.currentTimeMillis();
-                            long sleeptime = timeOfNext - now;
-                            while (sleeptime > 0l)
-                            {
-                                if (debug) {
-                                    log.debug("waiting " + sleeptime +
-                                        " ms until " +
-                                        TimeUtil.toString(now+sleeptime));
-                                }
-                                this.interrupter.wait(sleeptime);
-                                now = System.currentTimeMillis();
-                                sleeptime = timeOfNext - now;
-                            }
-                        } catch(InterruptedException exc) {
-                            this.log.debug("Schedule thread kicked");
-                        }
-                    }
-                }
-
-                synchronized(this.entSchedule)
-                {
-                    if(this.schedule.getNumItems() == 0)
-                        continue;
-                    
-                    try
-                    {
-                        if (System.currentTimeMillis() <
-                            this.schedule.getTimeOfNext()) {
-                            continue; // Not yet
-                        }
-                        itemsMap = getUniqItemsMap(schedule.consumeNextItems());
-                        items = new ArrayList(itemsMap.values());
-
-                        if (retry.size() != 0)
-                        {
-                            log.debug("Retrying " + retry.size() +
-                                      " items (MetricValue.FUTUREs)");
-                            for (Iterator i=retry.iterator(); i.hasNext(); )
-                            {
-                                ScheduledMeasurement meas =
-                                    (ScheduledMeasurement)i.next();
-                                Integer dsnId = new Integer(meas.getDsnID());
-                                if (itemsMap.containsKey(dsnId))
-                                    continue;
-                                items.add(meas);
-                                if (debug);
-                                    log.debug("retrying -> "+meas);
-                            }
-                            retry.clear();
-                        }
-                    } catch(EmptyScheduleException exc) {
-                        continue;
-                    }
-                }
-
-                /*
-                if (debug) {
-                    String now = TimeUtil.toString(System.currentTimeMillis());
-                    log.debug(now+": Start processing batch");
-                }
-                */
-
-                for(int i=0; i<items.size() && this.shouldDie == false; i++)
-                {
-                    ScheduledMeasurement meas =
-                        (ScheduledMeasurement)items.get(i);
-                    /*
-                    if (debug) {
-                        String now =
-                            TimeUtil.toString(System.currentTimeMillis());
-                        log.debug(now+": Start processing meas=["+meas+"]");
-                    }
-                    */
-                    AppdefEntityID aid = meas.getEntity();
-                    String category = meas.getCategory();
-                    int id = aid.getID();
-                    int type = aid.getType();
-                    IntHashMap unreachable = this.unreachable[type];
-                    boolean success = false;
-                    String dsn = meas.getDSN();
-                    long getTime, timeDiff;
-
-                    this.stat_numMetricsFetched++;
-                    getTime = System.currentTimeMillis();
-
-                    Long lastFailed = (Long)unreachable.get(id);
-                    if (lastFailed != null)
-                    {
-                        long elapsed = (getTime - lastFailed.longValue()); 
-                        if (elapsed > UNREACHABLE_EXPIRE) {
-                            unreachable.remove(id);
-                            this.log.info("Re-enabling metrics for type="
-                                + type + " id=" + id);
-                        } else {
-                            if (!category.equals(MeasurementConstants.
-                                                 CAT_AVAILABILITY)) {
-                                // Prevent stacktrace bombs if a resource is
-                                // down, but don't skip processing
-                                // availability metrics.
-                                this.stat_numMetricsFailed++;
-                                continue;
-                            }
-                        }
-                    }
-
-                    // XXX -- We should do something with the exceptions here.
-                    //        Maybe send some kind of error back to the
-                    //        bizapp?
-                    try {
-                        data    = getValue(meas);
-                        success = true;
-                        this.clearLogCache(dsn);
-                    } catch(PluginNotFoundException exc){
-                        this.logCache("Plugin not found", dsn, exc);
-                    } catch(PluginException exc){
-                        this.logCache("Measurement plugin error", dsn, exc);
-                    } catch(MetricInvalidException exc){
-                        this.logCache("Invalid Metric requested", dsn, exc);
-                    } catch(MetricNotFoundException exc){
-                        this.logCache("Metric Value not found", dsn, exc);
-                    } catch(MetricUnreachableException exc){
-                        this.logCache("Metric unreachable", dsn, exc);
-                        lastFailed = new Long(getTime);
-                        unreachable.put(id, lastFailed);
-                        this.log.warn("Disabling metrics for type=" + type + 
-                                      " id=" + id);
-                    } catch(Exception exc){
-                        // Unexpected exception
-                        this.logCache("Error getting measurement value",
-                                      dsn, exc.toString(), exc, true);
-                    }
-                    /*
-                    if (debug) {
-                        String now =
-                            TimeUtil.toString(System.currentTimeMillis());
-                        log.debug(now+": Done processing meas=["+meas+"]");
-                    }
-                    */
-                    
-                    // Stats stuff
-                    timeDiff = System.currentTimeMillis() - getTime;
-                    this.stat_totFetchTime += timeDiff;
-                    if(timeDiff > this.stat_maxFetchTime)
-                        this.stat_maxFetchTime = timeDiff;
-
-                    if(timeDiff < this.stat_minFetchTime)
-                        this.stat_minFetchTime = timeDiff;
-
-                    if (timeDiff > WARN_FETCH_TIME) {
-                        this.log.warn("Collection of metric: '" + logMetric(dsn) + 
-                                      "' took: " + timeDiff + "ms");
-                    }
-
-                    if(success)
-                    {
-                        if (debug) {
-                            this.log.debug("[" + type + ":" + id + ":" + category +
-                                           "] Metric='" + dsn + "' -> " + data +
-                                           " timestamp=" + data.getTimestamp());
-                        }
-                        if (data.isNone()) {
-                            //wouldn't be inserted into the database anyhow
-                            //but might as well skip sending this to the server.
-                            continue;
-                        }
-                        else if (data.isFuture()) {
-                            //for example, first time collecting an exec: metric
-                            //adding to this list will cause the metric to be
-                            //collected next time the schedule has items to consume
-                            //rather than waiting for the metric's own interval
-                            //which could take much longer to hit
-                            //(e.g. Windows Updates on an 8 hour interval)
-                            retry.add(meas);
-                            continue;
-                        }
-                        this.sender.processData(meas.getDsnID(), data, 
-                                                meas.getDerivedID());
-                    } else {
-                        this.stat_numMetricsFailed++;
-                    }
-                }
-                /*
-                if (debug) {
-                    String now = TimeUtil.toString(System.currentTimeMillis());
-                    log.debug(now+": Done processing batch");
-                }
-                */
-            }
-            catch (Throwable e) {
-                log.error(e.getMessage(), e);
             }
         }
-    }
-
-    private Map getUniqItemsMap(List items)
-    {
-        Map rtn = new HashMap();
-        for (Iterator i=items.iterator(); i.hasNext(); )
-        {
-            ScheduledMeasurement meas = (ScheduledMeasurement)i.next();
-            if (log.isDebugEnabled()) {
-                log.debug("verifying uniqueness for: "+meas);
-            }
-            Integer dsnId = new Integer(meas.getDsnID());
-            rtn.put(dsnId, meas);
-        }
-        return rtn;
     }
 
     /**
@@ -572,7 +489,7 @@ public class ScheduleThread
     public double getNumMetricsScheduled() 
         throws AgentMonitorException 
     {
-        return this.schedule.getNumItems();
+        return this.stat_numMetricsScheduled;
     }
 
     /**
