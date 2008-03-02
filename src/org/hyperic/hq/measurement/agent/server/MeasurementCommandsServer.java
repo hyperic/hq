@@ -66,7 +66,6 @@ import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_result;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_result;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.LogTrackPluginManager;
@@ -94,7 +93,6 @@ public class MeasurementCommandsServer
     private Thread                   scheduleThread; // Thread of scheduler
     private Thread                   availThread;    // Thread for platform avail
     private ScheduleThread           scheduleObject; // Our scheduler
-    private ScheduleThread           availObject;    // Scheduler for avail
     private Thread                   senderThread;   // Thread of sender
     private SenderThread             senderObject;   // Our sender
     private AgentStorageProvider     storage;        // Agent storage
@@ -115,7 +113,6 @@ public class MeasurementCommandsServer
         this.scheduleThread = null;
         this.availThread    = null;
         this.scheduleObject = null;
-        this.availObject    = null;
         this.senderThread   = null;
         this.senderObject   = null;
         this.storage        = null;
@@ -144,10 +141,6 @@ public class MeasurementCommandsServer
                                this.storage, this.schedStorage);
         this.scheduleObject = new ScheduleThread(this.senderObject, 
                                                  this.pluginManager);
-
-        this.availObject = new ScheduleThread(this.senderObject,
-                                              this.pluginManager);
-
         this.trackerObject =
             new TrackerThread(this.ctPluginManager,
                               this.ltPluginManager,
@@ -158,8 +151,6 @@ public class MeasurementCommandsServer
         senderThread.setDaemon(true);
         this.scheduleThread = new Thread(this.scheduleObject,"ScheduleThread");
         scheduleThread.setDaemon(true);
-        this.availThread = new Thread(this.availObject, "AvailScheduleThread");
-        availThread.setDaemon(true);
         this.trackerThread = new Thread(this.trackerObject, "TrackerThread");
         this.trackerThread.setDaemon(true);
 
@@ -542,21 +533,13 @@ public class MeasurementCommandsServer
     }
 
     private void scheduleMeasurement(ScheduledMeasurement m) {
-        // Temporary workaround for delayed availability measurements for
-        // platforms.  Collect them in their own thread.
-        if (m.getEntity().isPlatform() &&
-            m.getDSN().endsWith("system.avail:Type=Platform:Availability")) {
-            this.availObject.scheduleMeasurement(m);
-        } else {
-            this.scheduleObject.scheduleMeasurement(m);
-        }
+        this.scheduleObject.scheduleMeasurement(m);
     }
 
     private void unscheduleMeasurements(AppdefEntityID id)
         throws UnscheduledItemException
     {
         this.scheduleObject.unscheduleMeasurements(id);
-        this.availObject.unscheduleMeasurements(id);
     }
 
     public void handleNotification(String msgClass, String msg){
@@ -593,7 +576,6 @@ public class MeasurementCommandsServer
     public void shutdown(){
         this.log.info("Measurement Commands Server shutting down");
         this.scheduleObject.die();
-        this.availObject.die();
         this.senderObject.die();
 
         try {
