@@ -527,7 +527,7 @@ public class ScheduleThread
         throws AgentMonitorException 
     {
         if(_stat_maxFetchTime == Long.MIN_VALUE)
-            throw new AgentMonitorIncalculableException("No fetches yet");
+            return MetricValue.VALUE_NONE;
 
         return _stat_maxFetchTime;
     }
@@ -539,7 +539,7 @@ public class ScheduleThread
         throws AgentMonitorException 
     {
         if(_stat_minFetchTime == Long.MAX_VALUE)
-            throw new AgentMonitorIncalculableException("No fetches yet");
+            return MetricValue.VALUE_NONE;
 
         return _stat_minFetchTime;
     }
