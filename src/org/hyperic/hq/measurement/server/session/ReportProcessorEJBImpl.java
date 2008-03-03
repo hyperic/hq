@@ -44,11 +44,12 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
+import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
-import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorUtil;
+import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
 
@@ -67,6 +68,8 @@ public class ReportProcessorEJBImpl
 {
     private final Log log = LogFactory.getLog(ReportProcessorEJBImpl.class);
 
+    private final AvailabilityManagerLocal _availMan =
+        AvailabilityManagerEJBImpl.getOne();
     private final MeasurementManagerLocal _dmMan =
         MeasurementManagerEJBImpl.getOne();
     private final MeasurementProcessorLocal _measurementProc =
@@ -89,8 +92,8 @@ public class ReportProcessorEJBImpl
         }
     }
     
-    private void addData(List dataPoints, Measurement dm, int dsnId,
-                         MetricValue[] dpts, long current)
+    private void addData(List points, Measurement dm, int dsnId, 
+                         MetricValue[] dpts)
     {
         long interval = dm.getInterval();
 
@@ -115,10 +118,8 @@ public class ReportProcessorEJBImpl
             MetricValue modified = new MetricValue(dpts[i].getValue(),
                                                    adjust);
             passThroughs[i] = modified;
-
         }
-
-        addPoint(dataPoints, dm.getId(), passThroughs);
+        addPoint(points, dm.getId(), passThroughs);
     }
 
     /**
@@ -131,12 +132,10 @@ public class ReportProcessorEJBImpl
     public void handleMeasurementReport(MeasurementReport report)
         throws DataInserterException
     {
-        // get current time so that we can use to check for old data
-        long current = System.currentTimeMillis();
-
         DSNList[] dsnLists = report.getClientIdList();
 
-        List dataPoints = new ArrayList();
+        List dataPoints = new ArrayList(dsnLists.length);
+        List availPoints = new ArrayList(dsnLists.length);
         
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
@@ -152,23 +151,40 @@ public class ReportProcessorEJBImpl
                 continue;
             
             // If this is an availability metric, then tell the cache about it
+            boolean availMetric = false;
             MeasurementTemplate tmpl = dm.getTemplate();
             if (tmpl.getAlias().toUpperCase()
                     .equals(MeasurementConstants.CAT_AVAILABILITY) &&
                 tmpl.getCategory().getName()
                     .equals(MeasurementConstants.CAT_AVAILABILITY)) {
                 MetricDataCache.getInstance().setAvailMetric(dmId);
+                availMetric = true;
             }
-            
+
+            boolean trace = log.isTraceEnabled();
             ValueList[] valLists = dsnLists[i].getDsns();
             for (int j = 0; j < valLists.length; j++) {
                 int dsnId = valLists[j].getDsnId();
                 MetricValue[] vals = valLists[j].getValues();
-                addData(dataPoints, dm, dsnId, vals, current);
+                
+                if (trace) {
+                    log.trace("metricDebug: ReportProcessor addData: " +
+                        "metric ID " + dm.getId() +
+                        " tmpl " + tmpl.getAlias() +
+                        " isAvail " + availMetric +
+                        " value=" + vals[j].getValue());
+                }
+
+                if (availMetric) {
+                    addData(availPoints, dm, dsnId, vals);
+                } else {
+                    addData(dataPoints, dm, dsnId, vals);
+                }
             }
         }
 
-        sendDataToDB(dataPoints);
+        sendAvailDataToDB(availPoints);
+        sendMetricDataToDB(dataPoints);
         // Check the SRNs to make sure the agent is up-to-date
         SRNManagerLocal srnManager = getSRNManager();
         Collection nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
@@ -185,11 +201,15 @@ public class ReportProcessorEJBImpl
             }
         }
     }
-    
+
+    private void sendAvailDataToDB(List availPoints) {
+        _availMan.addData(availPoints);
+    }
+
     /**
      * Sends the actual data to the DB.
      */
-    private void sendDataToDB(List dataPoints) 
+    private void sendMetricDataToDB(List dataPoints) 
         throws DataInserterException
     {
         DataInserter d = MeasurementStartupListener.getDataInserter();

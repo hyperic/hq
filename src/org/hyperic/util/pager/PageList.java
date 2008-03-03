@@ -47,6 +47,11 @@ public class PageList extends ArrayList implements Serializable {
     private boolean      isUnbounded;   // Is the total size of the list known?
     private Serializable metaData;
 
+    public PageList(int initialSize) {
+        super(initialSize);
+        this.isUnbounded = false;
+    }
+
     public PageList() {
         super();
         this.isUnbounded = false;

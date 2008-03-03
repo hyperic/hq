@@ -65,6 +65,12 @@ public final class MeasurementConstants  {
     /** Measurement baseline max option. */
     public static final String BASELINE_OPT_MAX   = "max";
     
+    /**
+     * Null Availability, just a place holder for availability
+     * before it is cached
+     */
+    public static final double AVAIL_NULL         = -999.99;
+
     /** Availability error */
     public static final double AVAIL_DOWN         = 0.0;
 

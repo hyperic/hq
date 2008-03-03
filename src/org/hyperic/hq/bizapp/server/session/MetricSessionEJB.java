@@ -28,6 +28,7 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -64,7 +65,9 @@ import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
@@ -75,6 +78,11 @@ public class MetricSessionEJB extends BizappSessionEJB {
     private Log log = LogFactory.getLog(MetricSessionEJB.class.getName());
 
     protected SessionManager manager = SessionManager.getInstance();
+    private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
+    private static final long TIMERANGE_UNLIMITED =
+        MeasurementConstants.TIMERANGE_UNLIMITED;
+    protected final AvailabilityManagerLocal _availMan =
+        AvailabilityManagerEJBImpl.getOne();
 
     /**
      * Fetch the metric summaries for specified resources and templates
@@ -136,7 +144,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
             if (resource instanceof AppdefResourceValue) {
                 AppdefResourceValue resVal = (AppdefResourceValue) resource;
                 aeid = resVal.getEntityId();
-                
+
                 // Increase count
                 String type = resVal.getAppdefResourceTypeValue().getName();
                 int count = 0;
@@ -165,8 +173,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
         timer.reset();
             
         // Now get the aggregate data, keyed by template ID's
-        Map datamap = getDataMan().getAggregateData(mtids, eids, begin, 
-                                                         end);
+        Map availmap = _availMan.getAggregateData(mtids, eids, begin, end);
+        Map datamap = getDataMan().getAggregateData(mtids, eids, begin, end);
+        datamap.putAll(availmap);
         
         if (log.isTraceEnabled()) {
             log.trace("getResourceMetrics -> getAggregateData took " +
@@ -336,7 +345,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         }
         return entIds;
     }
-
+    
     protected double[] getAvailability(AuthzSubject subject,
                                        AppdefEntityID[] ids)
         throws AppdefEntityNotFoundException, PermissionException {
@@ -369,7 +378,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         if (midMap.size() > 0) {
             Integer[] mids =
                 (Integer[]) midMap.values().toArray(new Integer[0]);
-            data = getDataMan().getLastDataPoints(mids, acceptable);
+            data = _availMan.getLastAvail(mids, acceptable);
         }
     
         // Organize by agent
@@ -387,15 +396,15 @@ public class MetricSessionEJB extends BizappSessionEJB {
                     try {
                         AgentValue agent = agentMan.getAgent(ids[i]);
                         
-                        if (!toGetLive.containsKey(agent)) {
-                            toGetLive.put(agent, new ArrayList());
+                        List toGetLiveList;
+                        if (null == (toGetLiveList = (List)toGetLive.get(agent))) {
+                            toGetLiveList = new ArrayList();
+                            toGetLive.put(agent, toGetLiveList);
                         }
-                        
                         // Now add to list
-                        List toGetLiveList = (List) toGetLive.get(agent);
                         toGetLiveList.add(new Integer(i));
                     } catch (AgentNotFoundException e) {
-                        result[i] = MeasurementConstants.AVAIL_DOWN;
+                        result[i] = AVAIL_DOWN;
                     }
                 }
             } else {
@@ -758,4 +767,5 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return getResourceMetrics(subject, group, resourceType, filters,
                                   keyword, begin, end, showAll);
     }
+    
 }

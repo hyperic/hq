@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -146,6 +146,7 @@ import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
 import org.hyperic.hq.bizapp.shared.AppdefBossUtil;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
+import org.hyperic.hq.bizapp.shared.MeasurementSeparator;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportData;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportException;
@@ -163,7 +164,9 @@ import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
+import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
@@ -201,6 +204,7 @@ public class AppdefBossEJBImpl
     protected static final int APPDEF_TYPE_UNDEFINED     = -1;
     protected static final int APPDEF_RES_TYPE_UNDEFINED = -1;
     protected static final int APPDEF_GROUP_TYPE_UNDEFINED = -1;
+    protected final MeasurementSeparator _measSep = new MeasurementSeparator();
 
     public AppdefBossEJBImpl() {}
 
@@ -3234,7 +3238,7 @@ public class AppdefBossEJBImpl
                                               PageInfo info)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException {
-        List unavailEnts = getMetricManager().getUnavailEntities(null);
+        List unavailEnts = getAvailManager().getUnavailEntities(null);
         
         if (unavailEnts.size() == 0)
             return unavailEnts;
@@ -3306,7 +3310,7 @@ public class AppdefBossEJBImpl
         final String SERVERS   = "Servers";
         final String SERVICES  = "Services";
         
-        List unavailEnts = getMetricManager().getUnavailEntities(null);
+        List unavailEnts = getAvailManager().getUnavailEntities(null);
         Map ret = new LinkedHashMap();
         ret.put(PLATFORMS, new ArrayList());
         ret.put(SERVERS,   new ArrayList());
@@ -3486,17 +3490,16 @@ public class AppdefBossEJBImpl
 
         // Find all measurement IDs
         MeasurementManagerLocal dmMan = getMetricManager();
+        AvailabilityManagerLocal availMan = getAvailManager();
         
         Integer[] instIds = (Integer[])
             res.keySet().toArray(new Integer[services.size()]);
 
-        Integer[] mids =
+        Integer[] avIds =
             dmMan.findMeasurementIds(subject, mtv.getId(), instIds);
-        
+
         // Now get the metric values
-        Map avail = getDataMan()
-            .getLastDataPoints(mids, MeasurementConstants
-                               .ACCEPTABLE_SERVICE_LIVE_MILLIS);
+        Map avail = getAvailManager().getLastAvail(avIds);
         
         // Get the sort field
         SortField sf = pi.getSort();

@@ -46,6 +46,10 @@
     <many-to-one name="resource" class="org.hyperic.hq.authz.server.session.Resource" index="MEAS_RES_IDX">
       <column name="RESOURCE_ID"/>
     </many-to-one>
+    <set inverse="true" cascade="all" name="availabilityData" table="HQ_AVAIL_DATA_RLE">
+      <key on-delete="cascade" column="MEASUREMENT_ID"/>
+      <one-to-many class="AvailabilityDataRLE"/>
+    </set>
 
   </class>
 

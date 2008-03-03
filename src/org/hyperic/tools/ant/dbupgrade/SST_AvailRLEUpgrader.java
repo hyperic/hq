@@ -56,16 +56,15 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
             stmt = conn.createStatement();
             log(SCHEMA_MOD_IN_PROGRESS);
             rs = stmt.executeQuery("select startime, endtime, measurement_id, "
-                                        + "resource_id, availval from "
+                                        + "availval from "
                                         + TAB_AVAIL_RLE +
-                                  " order by resource_id, startime");
+                                  " order by startime");
             
             ArrayList avails = new ArrayList();
             
             while (rs.next()) {
                 avails.add(new AvailData(rs.getInt(1), rs.getInt(2),
-                                         rs.getInt(3), rs.getInt(4),
-                                         rs.getDouble(5)));
+                                         rs.getInt(3), rs.getDouble(4)));
             }
             
             // Close the result set
@@ -77,21 +76,20 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
             
             for (Iterator it = avails.iterator(); it.hasNext(); ) {
                 AvailData current = (AvailData) it.next();
-                if (prev == null || prev.getResource() != current.getResource())
+                if (prev == null || prev.getMetric() != current.getMetric())
                 {
-                    // check old resource
+                    // check old measurement
                     if (count > 1) {            // Only need to delete multiples
                         deleteRow(stmt, prev);
                         stmt.execute("insert into " + TAB_AVAIL_RLE +
                                      "(startime, measurement_id, " +
-                                      "resource_id, availval) values (" +
+                                      "availval) values (" +
                                       prev.getStartTime() + ", " +
                                       prev.getMetric() + ", " +
-                                      prev.getResource() + ", " +
                                       prev.getAvailVal() + ")");
                     }
                     
-                    // set new resource
+                    // set new measurement
                     prev = current;
                     count = 1;
                 }
@@ -99,11 +97,10 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
                     deleteRow(stmt, prev);      // In case there were multiples
                     stmt.execute("insert into " + TAB_AVAIL_RLE +
                                  "(startime, endtime, measurement_id, " +
-                                  "resource_id, availval) values (" +
+                                  "availval) values (" +
                                   prev.getStartTime() + ", " +
                                   current.getStartTime() + ", " +
                                   prev.getMetric() + ", " +
-                                  prev.getResource() + ", " +
                                   prev.getAvailVal() + ")");
                     
                     // set new row
@@ -115,7 +112,7 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
                     deleteRow(stmt, current);
                 }
                 else {
-                    // Same time, same resource
+                    // Same time, same measurement
                     count++;
                 }
             }
@@ -130,24 +127,22 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
 
     private void deleteRow(Statement stmt, AvailData ad)
         throws SQLException {
-        stmt.execute("delete from " + TAB_AVAIL_RLE + " where resource_id = " +
-                     ad.getResource() + " and startime = " + ad.getStartTime());
+        stmt.execute("delete from " + TAB_AVAIL_RLE + " where startime = " + ad.getStartTime() +
+                    " measurement_id = " + ad.getMetric());
     }
     
     private class AvailData {
         int _starttime;
         int _endtime;
         int _metric_id;
-        int _resource_id;
         double _availval;
         
         public AvailData(int starttime, int endtime, int metric_id,
-                         int resource_id, double availval) {
+                         double availval) {
             super();
             _starttime = starttime;
             _endtime = endtime;
             _metric_id = metric_id;
-            _resource_id = resource_id;
             _availval = availval;
         }
 
@@ -161,10 +156,6 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
 
         public int getMetric() {
             return _metric_id;
-        }
-
-        public int getResource() {
-            return _resource_id;
         }
 
         public double getAvailVal() {

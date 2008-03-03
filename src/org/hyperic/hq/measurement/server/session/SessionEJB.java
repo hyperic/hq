@@ -96,6 +96,10 @@ public abstract class SessionEJB {
         return DAOFactory.getDAOFactory().getCategoryDAO();
     }
 
+    protected AvailabilityDataDAO getAvailabilityDataDAO() {
+        return DAOFactory.getDAOFactory().getAvailabilityDataDAO();
+    }
+
     protected MeasurementDAO getMeasurementDAO() {
         return DAOFactory.getDAOFactory().getMeasurementDAO();
     }

@@ -1126,7 +1126,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         final int    MAX_IDS  = 30;
         
         if (ids == null || ids.length < 1) {
-            throw new DataNotAvailableException("No IDs were passed");
+            return new PageList();
         }
         
         // Always return NULLs if there are more IDs than we can handle

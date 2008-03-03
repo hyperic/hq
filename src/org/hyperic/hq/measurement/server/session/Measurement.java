@@ -29,6 +29,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
@@ -45,6 +47,7 @@ public class Measurement extends PersistedObject
     private long                _interval;
     private String              _formula;
     private Collection          _baselines = new ArrayList();
+    private Set                 _availabilityData = new HashSet();
     private Resource            _resource;
 
     public Measurement() {
@@ -144,6 +147,14 @@ public class Measurement extends PersistedObject
 
     protected void setBaselinesBag(Collection baselines) {
         _baselines = baselines;
+    }
+    
+    protected Set getAvailabilityData() {
+        return _availabilityData;
+    }
+    
+    protected void setAvailabilityData(Set availabilityData) {
+        _availabilityData = availabilityData;
     }
 
     protected Collection getBaselinesBag() {

@@ -8391,15 +8391,13 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
-  <!--
-  <schemaSpec version="3.103">
+  <schemaSpec version="3.105">
     <schema-directSQL>
       <statement desc="Creating new HQ_AVAIL_DATA_RLE table">
         create table HQ_AVAIL_DATA_RLE (
           STARTIME int not null,
           ENDTIME int default 2147483647 not null,
-          MEASUREMENT_ID int not null,
-          RESOURCE_ID int not null
+          MEASUREMENT_ID int not null
         )
       </statement>
       <statement targetDB="postgresql">
@@ -8411,18 +8409,14 @@ has already been defined.
       <statement targetDB="mysql">
         alter table HQ_AVAIL_DATA_RLE add AVAILVAL numeric(24,5)
       </statement>
-      <statement desc="Add foreign key constraint for resource_id">
-        alter table HQ_AVAIL_DATA_RLE add constraint FK6E8F9E9CFC176AE foreign key (RESOURCE_ID)
-          references EAM_RESOURCE (ID) on delete cascade
-      </statement>
       <statement desc="Add foreign key constraint for measurement_id">
         alter table HQ_AVAIL_DATA_RLE add constraint FK6E8F9E9CAE18683B foreign key (MEASUREMENT_ID)
           references EAM_MEASUREMENT (ID) on delete cascade
       </statement>
 
       <statement desc="Insert data from HQ_METRIC_DATA_0D_0S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_0D_0S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_0D_0S d2
@@ -8432,8 +8426,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_0D_1S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_1D_0S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_1D_0S d2
@@ -8443,8 +8437,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_1D_0S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_1D_0S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_1D_0S d2
@@ -8454,8 +8448,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_1D_1S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_1D_1S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_1D_1S d2
@@ -8465,8 +8459,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_2D_0S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_2D_0S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_2D_0S d2
@@ -8476,8 +8470,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_2D_1S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_2D_1S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_2D_1S d2
@@ -8487,8 +8481,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_3D_0S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_3D_0S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_3D_0S d2
@@ -8498,8 +8492,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_3D_1S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_3D_1S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_3D_1S d2
@@ -8509,8 +8503,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_4D_0S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_4D_0S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_4D_0S d2
@@ -8520,8 +8514,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_4D_1S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_4D_1S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_4D_1S d2
@@ -8531,8 +8525,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_5D_0S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_5D_0S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_5D_0S d2
@@ -8542,8 +8536,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_5D_1S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_5D_1S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_5D_1S d2
@@ -8553,8 +8547,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_6D_0S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_6D_0S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_6D_0S d2
@@ -8564,8 +8558,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_6D_1S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_6D_1S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_6D_1S d2
@@ -8575,8 +8569,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_7D_0S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_7D_0S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_7D_0S d2
@@ -8586,8 +8580,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_7D_1S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_7D_1S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_7D_1S d2
@@ -8597,8 +8591,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_8D_0S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_8D_0S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_8D_0S d2
@@ -8608,8 +8602,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from HQ_METRIC_DATA_8D_1S table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from HQ_METRIC_DATA_8D_1S d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from HQ_METRIC_DATA_8D_1S d2
@@ -8619,8 +8613,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from EAM_MEASUREMENT_DATA_1H table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from EAM_MEASUREMENT_DATA_1H d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from EAM_MEASUREMENT_DATA_1H d2
@@ -8630,8 +8624,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from EAM_MEASUREMENT_DATA_6H table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from EAM_MEASUREMENT_DATA_6H d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from EAM_MEASUREMENT_DATA_6H d2
@@ -8641,8 +8635,8 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
       <statement desc="Insert data from EAM_MEASUREMENT_DATA_1D table">
-        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id, resource_id)
-          select d1.timestamp / 1000, d1.value, d1.measurement_id, m.resource_id
+        insert into HQ_AVAIL_DATA_RLE (startime, availval, measurement_id)
+          select d1.timestamp / 1000, d1.value, d1.measurement_id
           from EAM_MEASUREMENT_DATA_1D d1, EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t
           where alias = 'Availability' and m.template_id = t.id and measurement_id = m.id and
                 (not value = (select value from EAM_MEASUREMENT_DATA_1D d2
@@ -8659,10 +8653,23 @@ has already been defined.
       <statement desc="Add primary key to HQ_AVAIL_DATA_RLE">
         alter table HQ_AVAIL_DATA_RLE add primary key (STARTIME , MEASUREMENT_ID)
       </statement>
+      <statement desc="adding index to HQ_AVAIL_DATA_RLE (AVAILVAL)">
+        create index AVAIL_RLE_VAL_IDX ON HQ_AVAIL_DATA_RLE (AVAILVAL)
+      </statement>
+      <statement desc="adding index to HQ_AVAIL_DATA_RLE (ENDTIME,AVAILVAL)">
+        create index AVAIL_RLE_ENDTIME_VAL_IDX ON HQ_AVAIL_DATA_RLE (ENDTIME,AVAILVAL)
+      </statement>
+      <statement desc="adding index to HQ_AVAIL_DATA_RLE (ENDTIME)">
+        create index AVAIL_RLE_ENDTIME_IDX ON HQ_AVAIL_DATA_RLE (ENDTIME)
+      </statement>
+      <statement desc="adding index to HQ_AVAIL_DATA_RLE (MEASUREMENT_ID)">
+        create index AVAIL_RLE_MEASID_IDX on HQ_AVAIL_DATA_RLE (MEASUREMENT_ID)
+      </statement>
+      <statement targetDB="mysql" desc="(MySQL only) adding index to HQ_AVAIL_DATA_RLE (MEASUREMENT_ID)">
+        create index MEASUREMENT_ID_YY on HQ_AVAIL_DATA_RLE (MEASUREMENT_ID)
+      </statement>
     </schema-directSQL>
   </schemaSpec>
-  -->
-  
 
 </dbupgrade>
 </target>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.measurement.server.session">
+
+  <class name="AvailabilityDataRLE" table="HQ_AVAIL_DATA_RLE">
+
+    <composite-id name="availabilityDataId" class="AvailabilityDataId">
+      <key-property name="startime" type="integer">
+        <column name="STARTIME" not-null="true"/>
+      </key-property>
+
+      <key-many-to-one name="measurement" class="Measurement">
+        <column name="MEASUREMENT_ID" not-null="true" index="AVAIL_RLE_MEASID_IDX"/>
+      </key-many-to-one>
+    </composite-id>
+
+    <!-- default value is Integer.MAX_VALUE -->
+    <property name="endtime" type="integer">
+      <column name="ENDTIME" not-null="true" default="2147483647" index="AVAIL_RLE_ENDTIME_IDX,AVAIL_RLE_ENDTIME_VAL_IDX"/>
+    </property>
+
+    <property name="availVal" type="double">
+      <column name="AVAILVAL" not-null="true" index="AVAIL_RLE_VAL_IDX,AVAIL_RLE_ENDTIME_VAL_IDX"/>
+    </property>
+
+  </class>
+
+</hibernate-mapping>

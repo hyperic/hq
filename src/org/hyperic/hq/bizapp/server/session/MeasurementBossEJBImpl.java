@@ -79,6 +79,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
+import org.hyperic.hq.bizapp.shared.MeasurementSeparator;
 import org.hyperic.hq.bizapp.shared.uibeans.AutogroupDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.ClusterDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.GroupMetricDisplaySummary;
@@ -102,9 +103,11 @@ import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
+import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
@@ -133,6 +136,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 {
     protected static Log _log =
         LogFactory.getLog(MeasurementBossEJBImpl.class.getName());
+    private MeasurementSeparator _measSep = new MeasurementSeparator();
+    private static final long DEFAULT_MEAS_INTERVAL = 60;
 
     private Integer[] getGroupMemberIDs(AuthzSubject subject,
                                         AppdefEntityID gid)
@@ -784,12 +789,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                             long interval)
     {
         MetricValue[] ret = new MetricValue[mids.length];
-        Map data = getDataMan().getLastDataPoints(mids,
-                                                  System.currentTimeMillis() -
-                                                  (3 * interval));
-        for (int i = 0; i < mids.length; i++) {
-            if (data.containsKey(mids[i]))
+        long after =  System.currentTimeMillis() - (3 * interval);
+        _measSep.set(mids);
+        Integer[] sepMids = _measSep.getMids();
+        Integer[] avIds = _measSep.getAvIds();
+        Map data = getDataMan().getLastDataPoints(sepMids, after);
+        data.putAll(_availMan.getLastAvail(avIds, after));
+        int i=0;
+        for (i = 0; i < mids.length; i++) {
+            if (data.containsKey(mids[i])) {
                 ret[i] = (MetricValue) data.get(mids[i]);
+            }
         }
 
         return ret;
@@ -1045,7 +1055,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public PageList findMeasurementData(int sessionId, Integer mid,
                                         long begin, long end, PageControl pc) {
         try {
-            return getDataMan().getHistoricalData(mid, begin, end, pc);
+            if (_measSep.isAvailMeas(mid)) {
+	            return _availMan.getHistoricalAvailData(mid, begin, end,
+	                DEFAULT_MEAS_INTERVAL, pc);
+	        } else {
+	            return getDataMan().getHistoricalData(mid, begin, end, pc);
+	        }
         } catch (DataNotAvailableException e) {
             throw new SystemException(e);
         }
@@ -1081,9 +1096,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 "There is no measurement for " + aid + " with template " + tid);
         }
 
-        return getDataMan().getHistoricalData(mids, begin, end, interval,
-                                              tmpl.getCollectionType(),
-                                              returnNulls, pc);
+        _measSep.set(mids);
+        mids = _measSep.getMids();
+        Integer[] avIds = _measSep.getAvIds();
+        PageList rtn = _availMan.getHistoricalAvailData(avIds, begin, end,
+                                            interval, pc);
+        rtn.addAll(getDataMan().getHistoricalData(mids, begin, end,
+                                            interval, tmpl.getCollectionType(),
+                                            returnNulls, pc));
+        return rtn;
     }
 
     /**
@@ -1153,8 +1174,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         Integer[] mids =
             getMetricManager().findMeasurementIds(subject, tid, ids);
     
-        return getDataMan().getHistoricalData(mids, begin, end, interval,
-            tmpl.getCollectionType(), returnNulls, pc);
+        _measSep.set(mids);
+        mids = _measSep.getMids();
+        Integer[] avIds = _measSep.getAvIds();
+        PageList rtn = _availMan.getHistoricalAvailData(avIds, begin, end,
+                                            interval, pc);
+        rtn.addAll(getDataMan().getHistoricalData(mids, begin, end,
+                                            interval, tmpl.getCollectionType(),
+                                            returnNulls, pc));
+        return rtn;
     }
 
     /**
@@ -1230,8 +1258,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
 
         try {
-            return getDataMan().getHistoricalData(mids, begin, end, interval,
-                tmpl.getCollectionType(), returnNulls, pc);
+            _measSep.set(mids);
+	        mids = _measSep.getMids();
+	        Integer[] avIds = _measSep.getAvIds();
+	        PageList rtn = _availMan.getHistoricalAvailData(avIds, begin, end,
+                                            interval, pc);
+	        rtn.addAll(getDataMan().getHistoricalData(mids, begin, end,
+                                            interval, tmpl.getCollectionType(),
+                                            returnNulls, pc));
+	        return rtn;
         } finally {
             if (aid.isApplication())
                 _log.debug("END findMeasurementData() - " + watch.getElapsed() +
@@ -1301,8 +1336,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         Integer[] mids =
             getMetricManager().findMeasurementIds(subject, tmpl.getId(), ids);
     
-        return getDataMan().getHistoricalData(mids, begin, end, interval,
-            tmpl.getCollectionType(), returnNulls, pc);
+        _measSep.set(mids);
+        mids = _measSep.getMids();
+        Integer[] avIds = _measSep.getAvIds();
+        PageList rtn = _availMan.getHistoricalAvailData(avIds, begin, end,
+                                            interval, pc);
+        rtn.addAll(getDataMan().getHistoricalData(mids, begin, end,
+                                            interval, tmpl.getCollectionType(),
+                                            returnNulls, pc));
+        return rtn;
     }
 
     /**
@@ -1383,8 +1425,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // Fetch the last data point
             MetricValue mv = null;
             try {
-                Collection mvs =
-                    getDataMan().getLastHistoricalData(mm.getId(), 1);
+                Collection mvs = null;
+                if (_measSep.isAvailMeas(mm.getId())) {
+                    mvs = _availMan.getLastAvail(mm.getId());
+                } else {
+                    mvs = getDataMan().getLastHistoricalData(mm.getId(), 1);
+                }
                 
                 if (mvs.size() > 0) {
                     mv = (MetricValue) mvs.iterator().next();

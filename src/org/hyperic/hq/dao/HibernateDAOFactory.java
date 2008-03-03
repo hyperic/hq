@@ -49,6 +49,7 @@ import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
+import org.hyperic.hq.measurement.server.session.AvailabilityDataDAO;
 import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.hq.measurement.server.session.CategoryDAO;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
@@ -113,6 +114,10 @@ public class HibernateDAOFactory extends DAOFactory {
 
     public AppSvcDependencyDAO getAppSvcDepencyDAO() {
         return new AppSvcDependencyDAO(this);
+    }
+
+    public AvailabilityDataDAO getAvailabilityDataDAO() {
+        return new AvailabilityDataDAO(this);
     }
 
     public ConfigResponseDAO getConfigResponseDAO() {
