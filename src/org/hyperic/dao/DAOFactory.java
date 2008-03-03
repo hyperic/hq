@@ -76,6 +76,7 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
 import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
+import org.hyperic.hq.measurement.server.session.AvailabilityDataDAO;
 
 public abstract class DAOFactory {
     public abstract Session getCurrentSession();
@@ -141,7 +142,8 @@ public abstract class DAOFactory {
     public abstract MeasurementTemplateDAO getMeasurementTemplateDAO();
     public abstract MetricProblemDAO getMetricProblemDAO();
     public abstract ScheduleRevNumDAO getScheduleRevNumDAO();
-
+    public abstract AvailabilityDataDAO getAvailabilityDataDAO();
+    
     // Events DAOs
     public abstract EventLogDAO getEventLogDAO();
 
