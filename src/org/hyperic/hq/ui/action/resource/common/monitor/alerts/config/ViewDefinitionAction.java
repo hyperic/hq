@@ -39,10 +39,10 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
@@ -122,6 +122,7 @@ public class ViewDefinitionAction extends TilesAction {
                 sessionID, request, mb, acvList,
                 EventConstants.TYPE_ALERT_DEF_ID.equals(adv.getParentId()));
         request.setAttribute("alertDefConditions", alertDefConditions);
+        request.setAttribute("openNMSEnabled", OpenNMSAction.isLoaded());
 
         // enablement
         AlertDefUtil.setEnablementRequestAttributes(request, adv);

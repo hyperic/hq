@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -33,6 +33,7 @@ import java.util.Set;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -244,5 +245,9 @@ public class GalertDef
     
     public String toString() {
         return getName();
+    }
+
+    public Resource getResource() {
+        return getGroup().getResource();
     }
 }

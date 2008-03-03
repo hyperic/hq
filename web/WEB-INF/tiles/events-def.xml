@@ -248,6 +248,21 @@
      <put name="notificationsTile" value=".events.config.view.notifications.escalation" />
   </definition>
 
+  <definition name=".events.config.view.opennms"
+              extends=".events.config.view.definition"
+              controllerUrl="/alerts/ViewDefinition.do">
+     <put name="notificationsTile" value=".events.config.view.notifications.opennms" />
+  </definition>
+
+  <definition name=".events.config.view.notifications.opennms"
+              extends=".events.config.view.notifications">
+     <put name="notificationsTile" value=".events.config.view.notifications.opennms.details"/>
+  </definition>
+
+  <definition name=".events.config.view.notifications.opennms.details"
+        path="/resource/common/monitor/alerts/config/OpenNMSActionProps.jsp"
+        controllerUrl="/alerts/ViewOpenNMSAction.do"/>
+
   <definition name=".events.alert.view.escalation"
               page="/resource/common/monitor/alerts/ViewAlertEscalation.jsp">
   </definition>

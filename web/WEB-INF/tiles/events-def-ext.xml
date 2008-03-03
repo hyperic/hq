@@ -22,6 +22,8 @@
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Others" link="viewOthers"
             classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="OpenNMS" link="viewOpenNMS"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
    </putList> 
   </definition>
 

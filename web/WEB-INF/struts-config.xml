@@ -191,6 +191,9 @@
         <form-bean name="RemoveNotificationsForm"
                    type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveNotificationsForm"/>
 
+        <form-bean name="OpenNMSForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.OpenNMSForm"/>
+
         <form-bean name="EditAlertDefinitionSyslogActionForm"
                    type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.SyslogActionForm"/>
 
@@ -2041,6 +2044,20 @@
               name="EscalationSchemeForm"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewEscalationAction">
         <set-property property="title" value="Alert.Edit"/>
+      </action>
+
+      <action path="/alerts/ViewOpenNMSAction"
+              scope="request"
+              name="OpenNMSForm"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.OpenNMSFormPrepareAction"/>
+
+      <action path="/alerts/SetOpenNMSAction"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.OpenNMSFormAction" 
+              name="OpenNMSForm"
+              scope="request"
+              input="/alerts/Config.do?mode=viewOpenNMS">
+              <forward name="success" path="/alerts/Config.do?mode=viewOpenNMS" redirect="true"/>
+              <forward name="failure" path="/alerts/Config.do?mode=list" redirect="true"/>
       </action>
 
       <action path="/alerts/ViewSyslogAction"

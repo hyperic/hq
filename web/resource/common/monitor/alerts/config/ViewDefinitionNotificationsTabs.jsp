@@ -12,7 +12,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -36,6 +36,7 @@
 <tiles:importAttribute name="viewRolesUrl" ignore="true"/>
 <tiles:importAttribute name="viewEscalationUrl"/>
 <tiles:importAttribute name="viewSnmpUrl" ignore="true"/>
+<tiles:importAttribute name="viewOpenNMSUrl" ignore="true"/>
 
 <c:set var="mode" value="${param.mode}"/>
 <c:if test="${mode == 'viewDefinition'}">
@@ -43,11 +44,9 @@
 </c:if>
 
 <!-- MINI-TABS -->
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-bottom: 3px solid #D9D9D9;">
   <tr> 
-    <td class="MiniTabEmpty"><html:img page="/images/spacer.gif"
-      width="20" height="1" alt="" border="0"/>
-    </td>
+    <td class="MiniTabEmpty" width="20">&nbsp;</td>
 
     <td nowrap>
       <table width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -69,41 +68,36 @@
     <c:when test="${tab.value == 'SNMP'}">
       <c:set var="tabUrl" value="${viewSnmpUrl}"/>
     </c:when>
+    <c:when test="${tab.value == 'OpenNMS'}">
+      <c:set var="tabUrl" value="${viewOpenNMSUrl}"/>
+    </c:when>
   </c:choose>
 
-    <c:if test="${snmpEnabled || tab.value != 'SNMP'}">
-        <c:choose>
-          <c:when test="${mode == tab.link}">
-            <td valign="top" width="15"><html:img page="/images/miniTabs_left_on.gif" width="11" height="19" alt="" border="0"/></td>
-            <td class="MiniTabOn" nowrap><fmt:message key="monitoring.events.MiniTabs.${tab.value}"/></td>
-            <td valign="top" width="17"><html:img page="/images/miniTabs_right_on.gif" width="11" height="19" alt="" border="0"/></td>
-          </c:when>
-          <c:otherwise>
-            <td valign="top" width="15"><html:img page="/images/miniTabs_left_off.gif" width="11" height="19" alt="" border="0"/></td>
-            <td class="MiniTabOff" nowrap>
-              <html:link href="${tabUrl}">
-              <fmt:message key="monitoring.events.MiniTabs.${tab.value}"/>
-              </html:link></td>
-            <td valign="top" width="17"><html:img page="/images/miniTabs_right_off.gif" width="11" height="19" alt="" border="0"/></td>
-          </c:otherwise>
-        </c:choose>
-  </c:if>
+  <c:choose>
+    <c:when test="${mode == tab.link}">
+      <td valign="top" width="15"><html:img page="/images/miniTabs_left_on.gif" width="11" height="19" alt="" border="0"/></td>
+      <td class="MiniTabOn" nowrap><fmt:message key="monitoring.events.MiniTabs.${tab.value}"/></td>
+      <td valign="top" width="17"><html:img page="/images/miniTabs_right_on.gif" width="11" height="19" alt="" border="0"/></td>
+    </c:when>
+    <c:when test="${tab.value == 'SNMP' && not snmpEnabled}">
+        <!-- Skip SNMP -->
+    </c:when>
+    <c:when test="${tab.value == 'OpenNMS' && not openNMSEnabled}">
+        <!-- Skip OpenNMS -->
+    </c:when>
+    <c:otherwise>
+      <td valign="top" width="15"><html:img page="/images/miniTabs_left_off.gif" width="11" height="19" alt="" border="0"/></td>
+      <td class="MiniTabOff" nowrap>
+        <html:link href="${tabUrl}"><fmt:message key="monitoring.events.MiniTabs.${tab.value}"/></html:link></td>
+      <td valign="top" width="17"><html:img page="/images/miniTabs_right_off.gif" width="11" height="19" alt="" border="0"/></td>
+    </c:otherwise>
+  </c:choose>
 </c:forEach>
         </tr>
       </table>
     </td>
 
-    <td width="100%" class="MiniTabEmpty"><html:img
-      page="/images/spacer.gif" width="1" height="1" alt=""
-      border="0"/>
-    </td>
-  </tr>
-  
-  <tr> 
-    <td colspan="6" width="100%" class="SubTabCell"><html:img
-      page="/images/spacer.gif" width="1" height="3" alt=""
-      border="0"/>
-    </td>
+    <td width="100%" class="MiniTabEmpty">&nbsp;</td>
   </tr>
 </table>
 <!-- / MINI-TABS -->

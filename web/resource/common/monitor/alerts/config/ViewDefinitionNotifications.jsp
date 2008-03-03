@@ -59,11 +59,15 @@
 <c:url var="viewEscalationUrl" value="${viewUrl}">
   <c:param name="mode" value="viewEscalation"/>
 </c:url>
+<c:url var="viewOpenNMSUrl" value="${viewUrl}">
+  <c:param name="mode" value="viewOpenNMS"/>
+</c:url>
 
 <tiles:insert definition=".events.config.view.notifications.tabs">
   <tiles:put name="viewUsersUrl" beanName="viewUsersUrl"/>
   <tiles:put name="viewOthersUrl" beanName="viewOthersUrl"/>
   <tiles:put name="viewEscalationUrl" beanName="viewEscalationUrl"/>
+  <tiles:put name="viewEscalationUrl" beanName="viewOpenNMSUrl"/>
 </tiles:insert>
 
 <script language="JavaScript" src="<html:rewrite page='/js/listWidget.js'/>" type="text/javascript"></script>
