@@ -54,7 +54,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
@@ -311,13 +311,12 @@ public class ViewAction extends BaseAction {
 
         try {
             AppdefResourceValue val = aBoss.findById(sessionId, id);
-            DerivedMeasurementValue dm =
-                mBoss.getMeasurement(sessionId, id, template.getAlias());
-            if (dm == null) {
+            Measurement m = mBoss.getMeasurement(sessionId, id, template.getAlias());
+            if (m == null) {
                 return null; // No metric scheduled.
             }
 
-            CacheData data = new CacheData(val, dm.getId(), dm.getInterval());
+            CacheData data = new CacheData(val, m.getId(), m.getInterval());
             cache.put(new Element(key, data));
             return data;
         } catch (AppdefEntityNotFoundException ex) {

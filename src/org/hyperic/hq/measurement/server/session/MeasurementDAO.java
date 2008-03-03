@@ -34,7 +34,9 @@ import java.util.Map;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
+import org.hibernate.FetchMode;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
@@ -255,12 +257,18 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     public List findEnabledByInstance(Resource resource) {
-        return createCriteria()
-            .add(Restrictions.eq("resource", resource))
-            .add(Restrictions.eq("enabled", Boolean.TRUE))
+        String sql =
+            "select m from Measurement m " +
+            "join m.template t " +
+            "where m.enabled = ? and " +
+            "m.resource = ?" +
+            "order by t.name";
+
+        return getSession().createQuery(sql)
+            .setBoolean(0, true)
+            .setParameter(1, resource)
             .setCacheable(true)
-            .setCacheRegion("Measurement.findByInstance")
-            .list();
+            .setCacheRegion("Measurement.findByInstance").list();
     }
 
     List findByInstanceForCategory(int type, int id, String cat) {

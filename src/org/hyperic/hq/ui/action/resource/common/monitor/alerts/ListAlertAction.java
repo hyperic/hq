@@ -47,7 +47,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.AlertBean;
@@ -201,8 +201,8 @@ public class ListAlertAction extends TilesAction {
         case EventConstants.TYPE_BASELINE:
         case EventConstants.TYPE_CHANGE:
             // format threshold and value
-            DerivedMeasurementValue dmv = mb.getMeasurement
-                ( sessionId, new Integer( cond.getMeasurementId() ) );
+            Measurement m = mb.getMeasurement(sessionId, 
+                                              new Integer(cond.getMeasurementId()));
             FormatSpecifics precMax = new FormatSpecifics();
             precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
 
@@ -214,7 +214,7 @@ public class ListAlertAction extends TilesAction {
                     NumberUtil.stringAsNumber( value ).doubleValue();
 
                 FormattedNumber val =
-                    UnitsConvert.convert( dval, dmv.getTemplate().getUnits() );
+                    UnitsConvert.convert(dval, m.getTemplate().getUnits());
                 
                 bean.setValue( val.toString() );
             }
@@ -222,7 +222,7 @@ public class ListAlertAction extends TilesAction {
             if ( cond.getType() == EventConstants.TYPE_THRESHOLD ) {
                 bean.setComparator( cond.getComparator() );
                 FormattedNumber th = UnitsConvert.convert(cond.getThreshold(),
-                        dmv.getTemplate().getUnits(),
+                        m.getTemplate().getUnits(),
                         precMax);
                 bean.setThreshold( th.toString() );
             }
@@ -276,5 +276,3 @@ public class ListAlertAction extends TilesAction {
             ( RequestUtils.message(request, "alert.current.list.MultiConditionValue") );
     }
 }
-
-// EOF

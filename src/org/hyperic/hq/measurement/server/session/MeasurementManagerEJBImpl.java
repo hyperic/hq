@@ -29,8 +29,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -97,7 +95,6 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.timer.StopWatch;
 
@@ -116,11 +113,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     implements SessionBean 
 {
     private final Log log = LogFactory.getLog(MeasurementManagerEJBImpl.class);
-
-    protected final String VALUE_PROCESSOR =
-        PagerProcessor_measurement.class.getName();
-     
-    private Pager valuePager = null;
 
     /**
      * Translate a template string into a DSN
@@ -439,7 +431,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /** 
-     * Look up a derived measurement for an instance and an alias and an alias.
+     * Look up a Measurement for an instance and an alias and an alias.
      *
      * @return a Measurement value
      * @ejb:interface-method
@@ -553,7 +545,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Look up a Measurement, allowing for the query to return a stale copy of
-     * the derived measurement (for efficiency reasons).
+     * the Measurement (for efficiency reasons).
      *
      * @param subject The subject.
      * @param tid The template Id.
@@ -614,68 +606,31 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             getMeasurementDAO().findIdsByTemplateForInstances(tid, ids);
         return (Integer[]) results.toArray(new Integer[results.size()]);
     }
-
-    private List sortMetrics(List mcol, PageControl pc) {
-        // Clearly, assuming that we are sorting by name, in the future we may
-        // need to pay attention to the PageControl passed in if we sort by
-        // more attributes
-        if (pc.getSortorder() == PageControl.SORT_DESC) {
-            Collections.sort(mcol, new Comparator() {
-                
-                public int compare(Object arg0, Object arg1) {
-                    Measurement dm0 = (Measurement) arg0;
-                    Measurement dm1 = (Measurement) arg1;
-                    return dm1.getTemplate().getName()
-                        .compareTo(dm0.getTemplate().getName());
-                }
-                
-            });
-        }
-        else {
-            Collections.sort(mcol, new Comparator() {
-                
-                public int compare(Object arg0, Object arg1) {
-                    Measurement dm0 = (Measurement) arg0;
-                    Measurement dm1 = (Measurement) arg1;
-                    return dm0.getTemplate().getName()
-                        .compareTo(dm1.getTemplate().getName());
-                }
-                
-            });
-        }
-        
-        return mcol;
-    }
     
     /**
-     * Look up a list of derived measurement EJBs for a category
+     * Look up a list of Measurements for a category
      *
-     * @return a list of DerivedMeasurementValue objects.
+     * @return a List of Measurement objects.
      * @ejb:interface-method
      */
-    public PageList findMeasurements(AuthzSubject subject,
-                                     AppdefEntityID id, String cat,
-                                     PageControl pc) {
-        List mcol;
+    public List findMeasurements(AuthzSubject subject,
+                                 AppdefEntityID id, String cat,
+                                 PageControl pc) {
+        List meas;
             
         // See if category is valid
         if (cat == null || Arrays.binarySearch(
             MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
-            mcol = getMeasurementDAO()
-                .findEnabledByInstance(getResource(id));
+            meas = getMeasurementDAO().findEnabledByInstance(getResource(id));
         } else {
-            mcol = getMeasurementDAO()
-                .findByInstanceForCategory(getResource(id), cat);
+            meas = getMeasurementDAO().findByInstanceForCategory(getResource(id), cat);
         }
-
-        // Need to order the metrics, as the HQL does not allow us to order
-        mcol = sortMetrics(mcol, pc);
     
-        return valuePager.seek(mcol, pc);
+        return meas;
     }
 
     /**
-     * Look up a list of enabled derived measurements for a category
+     * Look up a list of enabled Measurements for a category
      *
      * @return a list of {@link Measurement}
      * @ejb:interface-method
@@ -1010,7 +965,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Disable all derived measurement's for a resource
+     * Disable all Measurements for a resource
      *
      * @ejb:interface-method
      */
@@ -1044,7 +999,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Disable all derived measurements for an instance
+     * Disable all Measurements for an instance
      *
      * @ejb:interface-method
      */
@@ -1498,14 +1453,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     /**
      * @ejb:create-method
      */
-    public void ejbCreate() throws CreateException {
-        try {
-            valuePager = Pager.getPager(VALUE_PROCESSOR);
-        } catch (Exception e) {
-            throw new CreateException("Could not create value pager:" + e);
-        }
-    }
-
+    public void ejbCreate() throws CreateException {}
     public void ejbPostCreate() {}
     public void ejbActivate() {}
     public void ejbPassivate() {}

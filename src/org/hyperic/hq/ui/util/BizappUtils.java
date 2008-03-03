@@ -78,8 +78,8 @@ import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.grouping.shared.GroupVisitorException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.hq.measurement.shared.BaselineValue;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.server.session.Baseline;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.PlatformServiceDetector;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
@@ -743,18 +743,18 @@ public class BizappUtils {
     }
 
     public static String getBaselineText(String baselineOption,
-                                         DerivedMeasurementValue dmv) {
+                                         Measurement m) {
         final String minText  = "Min Value";
         final String meanText = "Baseline Value";
         final String maxText  = "Max Value";
 
-        if (null != dmv && null != dmv.getBaseline()) {
-            BaselineValue bv = dmv.getBaseline();
+        if (null != m && null != m.getBaseline()) {
+            Baseline b = m.getBaseline();
             if (baselineOption.equals(MeasurementConstants.BASELINE_OPT_MIN)) {
-                if (null != bv.getMinExpectedValue()) {
+                if (null != b.getMaxExpectedVal()) {
                     FormattedNumber min = UnitsConvert.convert(
-                        bv.getMinExpectedValue().doubleValue(),
-                        dmv.getTemplate().getUnits());
+                        b.getMinExpectedVal().doubleValue(),
+                        m.getTemplate().getUnits());
                     return min.toString() + " (" + minText + ')';
                 }
                 else
@@ -762,10 +762,10 @@ public class BizappUtils {
             }
             
             if (baselineOption.equals(MeasurementConstants.BASELINE_OPT_MEAN)) {
-                if (null != bv.getMean()) {
+                if (null != b.getMean()) {
                     FormattedNumber mean =
-                        UnitsConvert.convert(bv.getMean().doubleValue(),
-                                             dmv.getTemplate().getUnits());
+                        UnitsConvert.convert(b.getMean().doubleValue(),
+                                             m.getTemplate().getUnits());
                     return mean.toString() + " (" + meanText + ')';
                 }
                 else
@@ -773,10 +773,10 @@ public class BizappUtils {
             }
             
             if (baselineOption.equals(MeasurementConstants.BASELINE_OPT_MAX)) {
-                if (null != bv.getMaxExpectedValue()) {
+                if (null != b.getMaxExpectedVal()) {
                     FormattedNumber max = UnitsConvert.convert(
-                        bv.getMaxExpectedValue().doubleValue(),
-                        dmv.getTemplate().getUnits());
+                        b.getMaxExpectedVal().doubleValue(),
+                        m.getTemplate().getUnits());
                     return max.toString() + " (" + maxText + ')';
                 }
                 else

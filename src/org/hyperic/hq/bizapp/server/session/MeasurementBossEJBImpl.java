@@ -97,18 +97,15 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
-import org.hyperic.hq.measurement.DataPurgeJob;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
-import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.MetricValue;
@@ -401,7 +398,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Get the the designated measurement template for the given resource
      * and corresponding category.
-     * @return array of derived measurement IDs
+     * @return Array of Measurement IDs
      * @ejb:interface-method
      */
     public List getDesignatedTemplates(int sessionId, AppdefEntityID id,
@@ -428,7 +425,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Get the the designated measurement template for the autogroup given
      * a type and corresponding category.
      * @param ctype the AppdefEntityTypeID of the AG members
-     * @return array of derived measurement IDs
+     * @return Array of Measuremnt ids
      * @ejb:interface-method
      */
     public List getAGDesignatedTemplates(int sessionId, AppdefEntityID[] aids, 
@@ -623,7 +620,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Get the the designated measurement for the given resource
      * and corresponding category.
-     * @return array of derived measurement IDs
+     * @return Array of Measurement IDs
      */
     private List getDesignatedMetrics(int sessionId, AppdefEntityID id, Set cats) 
         throws SessionNotFoundException, SessionTimeoutException,
@@ -729,25 +726,22 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param id measurement id
      * @ejb:interface-method
      */
-    public DerivedMeasurementValue getMeasurement(int sessionID, Integer id)
+    public Measurement getMeasurement(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException {
-        return getMetricManager().getMeasurement(id)
-            .getDerivedMeasurementValue();
+        return getMetricManager().getMeasurement(id);
     }
 
     /**
      * Find a measurement using the alias and appdef entity ID
      * @ejb:interface-method
      */
-    public DerivedMeasurementValue getMeasurement(int sessionID, 
-                                                  AppdefEntityID id,
-                                                  String alias)
+    public Measurement getMeasurement(int sessionID, AppdefEntityID id,
+                                      String alias)
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        return getMetricManager()
-            .getMeasurement(subject, id, alias).getDerivedMeasurementValue();
+        return getMetricManager().getMeasurement(subject, id, alias);
     }
 
     /**
@@ -835,22 +829,21 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
     
             // Get the list of measurements for this resource
-            PageList metrics = getMetricManager()
+            List metrics = getMetricManager()
                 .findMeasurements(subject, id, cat, PageControl.PAGE_ALL);
                 
             // Iterate through the measurements to get the interval
             for (Iterator it2 = metrics.iterator(); it2.hasNext(); ) {
-                DerivedMeasurementValue dmv =
-                    (DerivedMeasurementValue) it2.next();
+                Measurement m = (Measurement) it2.next();
     
-                MeasurementTemplateValue tmpl = dmv.getTemplate();
+                MeasurementTemplateValue tmpl = m.getTemplate().getMeasurementTemplateValue();
                 GroupMetricDisplaySummary gmds = (GroupMetricDisplaySummary)
                     summaryMap.get(tmpl.getId().intValue());
                 if (gmds == null) {
                     gmds = new GroupMetricDisplaySummary(
                         tmpl.getId().intValue(), tmpl.getName(),
                         tmpl.getCategory().getName());
-                    gmds.setInterval(dmv.getInterval());
+                    gmds.setInterval(m.getInterval());
                     
                     // Now put it into the map
                     summaryMap.put(tmpl.getId().intValue(), gmds);
@@ -860,7 +853,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 gmds.incrementMember();
                 
                 // Check the interval
-                if (gmds.getInterval() != dmv.getInterval()) {
+                if (gmds.getInterval() != m.getInterval()) {
                     // Set it to 0, because the intervals don't agree
                     gmds.setInterval(0);
                 }
@@ -900,32 +893,29 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return result;
     }
 
-    /** Retrieve a measurement for a specific instance
-     * @return a PageList of DerivedMeasurementValue objects
+    /** Retrieve a Measurement for a specific instance
+     *
      * @ejb:interface-method
      */
-    public DerivedMeasurementValue findMeasurement(int sessionId,
-                                                   Integer tid,
-                                                   AppdefEntityID id)
+    public Measurement findMeasurement(int sessionId, Integer tid,
+                                       AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, MeasurementNotFoundException,
                AppdefEntityNotFoundException {
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
-            return (DerivedMeasurementValue)
-                findMeasurements(sessionId, tid,
-                                 new AppdefEntityID[] { id }).get(0);
+            return (Measurement)findMeasurements(sessionId, tid,
+                                                 new AppdefEntityID[] { id }).get(0);
 
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        return getMetricManager().findMeasurement(subject, tid, id.getId())
-                .getDerivedMeasurementValue();
+        return getMetricManager().findMeasurement(subject, tid, id.getId());
     }
 
-    /** Retrieve list of measurements for a specific instance
-     * @return a PageList of DerivedMeasurementValue objects
+    /** Retrieve List of measurements for a specific instance
+     * @return List of Measurement objects
      * @ejb:interface-method
      */
-    public PageList findMeasurements(int sessionId, AppdefEntityID id,
-                                     PageControl pc)
+    public List findMeasurements(int sessionId, AppdefEntityID id,
+                                 PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
@@ -943,7 +933,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      *            the template ID
      * @param entIds
      *            the array of entity IDs
-     * @return a List of DerivedMeasurementValue objects
+     * @return a List of Measurement objects
      * @ejb:interface-method
      */
     public List findMeasurements(int sessionId, Integer tid,
@@ -983,14 +973,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Get the enabled measurements for an auto group
      * @param parentId - the parent resource appdefEntityID
      * @param childType - the type of child in the autogroup
-     * @return a PageList of DerivedMeasurementValue objects
+     * @return a PageList of Measurement objects
      * @ejb:interface-method
      */
-    public PageList findEnabledAGMeasurements(int sessionId,
-                                              AppdefEntityID parentId,
-                                              AppdefEntityTypeID childType,
-                                              String cat,
-                                              PageControl pc)
+    public List findEnabledAGMeasurements(int sessionId,
+                                          AppdefEntityID parentId,
+                                          AppdefEntityTypeID childType,
+                                          String cat,
+                                          PageControl pc)
     throws SessionNotFoundException, SessionTimeoutException,
            AppdefEntityNotFoundException, GroupNotCompatibleException,
            PermissionException {
@@ -1001,7 +991,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
     
     /** Retrieve list of measurements for a specific instance and category
-     * @return a PageList of DerivedMeasurementValue objects
+     * @return a PageList of Measurement objects
      * @ejb:interface-method
      */
     public PageList findEnabledMeasurements(int sessionId, AppdefEntityID id,

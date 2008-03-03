@@ -44,7 +44,7 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.NumberUtil;
@@ -62,9 +62,6 @@ public final class ConditionBean {
 
     private Log log = LogFactory.getLog(ConditionBean.class.getName());
 
-    //-------------------------------------instance variables
-
-    // alert definition properties
     private Integer id; // nullable
     private boolean required;
     private String trigger;
@@ -361,9 +358,8 @@ public final class ConditionBean {
                         unit = mtv.getUnits();
                     }
                     else {
-                        DerivedMeasurementValue dmv =
-                            mb.getMeasurement(sessionId, metricId);
-                        unit = dmv.getTemplate().getUnits();
+                        Measurement m = mb.getMeasurement(sessionId, metricId);
+                        unit = m.getTemplate().getUnits();
                     }
                     
                     FormattedNumber absoluteFmt = UnitsConvert.convert
@@ -433,9 +429,8 @@ public final class ConditionBean {
                 }
                 else {
                     // parse the value
-                    DerivedMeasurementValue dmv =
-                        mb.getMeasurement(sessionId, getMetricId());
-                    unit = dmv.getTemplate().getUnits();
+                    Measurement m = mb.getMeasurement(sessionId, getMetricId());
+                    unit = m.getTemplate().getUnits();
                 }
 
                 try {

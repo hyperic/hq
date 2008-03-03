@@ -45,7 +45,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.GroupMetricDisplaySummary;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -64,8 +64,6 @@ import org.apache.struts.action.ActionMapping;
 public class NewDefinitionAction extends BaseAction {
 
     private Log log = LogFactory.getLog(NewDefinitionAction.class.getName());
-
-    // ---------------------------------------------------- Public Methods
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -146,8 +144,8 @@ public class NewDefinitionAction extends BaseAction {
             // enabled status of these measurements for groups, so
             // don't do anything here.
             try {
-                DerivedMeasurementValue dmv = (DerivedMeasurementValue)it.next();
-                metricEnabledFlags.put( dmv.getId(), new Boolean( dmv.getEnabled() ) );
+                Measurement m = (Measurement)it.next();
+                metricEnabledFlags.put( m.getId(), new Boolean(m.isEnabled()));
             } catch (ClassCastException e) {
                 GroupMetricDisplaySummary gds = (GroupMetricDisplaySummary)it.next();
             }
@@ -157,10 +155,10 @@ public class NewDefinitionAction extends BaseAction {
         // being used are disabled
         for (int i=0; i<adv.getConditions().length; ++i) {
             if ( adv.getConditions()[i].measurementIdHasBeenSet() ) {
-                Integer mid = new Integer( adv.getConditions()[i].getMeasurementId() );
+                Integer mid = new Integer( adv.getConditions()[i].getMeasurementId());
                 Boolean metricEnabled = (Boolean)metricEnabledFlags.get(mid);
                 if (null != metricEnabled) {
-                    if (! metricEnabled.booleanValue() ) {
+                    if (!metricEnabled.booleanValue()) {
                         return true;
                     }
                 }

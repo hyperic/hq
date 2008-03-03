@@ -51,7 +51,7 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -177,7 +177,7 @@ public class AlertDefUtil {
                 textValue.append(' ');
                 
                 MeasurementTemplateValue mtv = null;
-                DerivedMeasurementValue dmv = null;
+                Measurement m = null;
                 try {
                     if (template) {
                         List mtvs = mb.findMeasurementTemplates(
@@ -189,9 +189,9 @@ public class AlertDefUtil {
                             mtv = (MeasurementTemplateValue) mtvs.get(0);
                     }
                     else {
-                        dmv = mb.getMeasurement(
-                            sessionID, new Integer(acv.getMeasurementId()));
-                        mtv = dmv.getTemplate();
+                        m = mb.getMeasurement(sessionID,
+                                              new Integer(acv.getMeasurementId()));
+                        mtv = m.getTemplate().getMeasurementTemplateValue();
                     }
                 } catch (Exception e) {
                     // Use NULL values
@@ -216,7 +216,7 @@ public class AlertDefUtil {
                 if (acv.getType() == EventConstants.TYPE_BASELINE) {
                     textValue.append(" of ");
                     textValue.append(
-                        BizappUtils.getBaselineText(acv.getOption(), dmv) );
+                        BizappUtils.getBaselineText(acv.getOption(), m) );
                 }
                 break;
 
@@ -275,7 +275,7 @@ public class AlertDefUtil {
      * </ul>
      *
      * @param request the http request
-     * @param acv the condition
+     * @param adv the condition
      */   
     public static void setEnablementRequestAttributes(HttpServletRequest request,
                                                       AlertDefinitionValue adv)

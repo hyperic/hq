@@ -55,7 +55,7 @@ import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -137,9 +137,8 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
 
             if (adeId.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP) {
                 for (Iterator it = metrics.iterator(); it.hasNext();) {
-                    DerivedMeasurementValue dmv =
-                        (DerivedMeasurementValue) it.next();
-                    if (dmv.getEnabled())
+                    Measurement m = (Measurement) it.next();
+                    if (m.isEnabled())
                         numMetricsEnabled++;
                 }
             }

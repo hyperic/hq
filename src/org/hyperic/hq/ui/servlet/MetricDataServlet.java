@@ -33,8 +33,8 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -152,8 +152,8 @@ public class MetricDataServlet extends HttpServlet {
         // Load template
         MeasurementTemplateValue templ;
         try {
-            DerivedMeasurementValue dm = _mboss.getMeasurement(sessionId, mid);
-            templ = dm.getTemplate();
+            Measurement m = _mboss.getMeasurement(sessionId, mid);
+            templ = m.getTemplate().getMeasurementTemplateValue();
         } catch (Exception e) {
             throw new ServletException("Error looking up measurement.", e);
         }
@@ -161,11 +161,11 @@ public class MetricDataServlet extends HttpServlet {
         ArrayList rows = new ArrayList();
         for (Iterator i = resources.iterator(); i.hasNext(); ) {
             AppdefResourceValue rValue = (AppdefResourceValue)i.next();
-            DerivedMeasurementValue dm;
+            Measurement m;
             try {
-                dm = _mboss.findMeasurement(sessionId, templ.getId(),
-                                            rValue.getEntityId());
-                PageList list = _mboss.findMeasurementData(sessionId, dm.getId(),
+                m = _mboss.findMeasurement(sessionId, templ.getId(),
+                                           rValue.getEntityId());
+                PageList list = _mboss.findMeasurementData(sessionId, m.getId(),
                                                            begin.longValue(),
                                                            end.longValue(),
                                                            PageControl.PAGE_ALL);

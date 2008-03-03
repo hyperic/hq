@@ -26,6 +26,7 @@
 package org.hyperic.hq.ui.action.resource.autogroup.monitor.config;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -45,7 +46,6 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,9 +75,6 @@ public class AutoGroupConfigMetricsFormPrepareAction
         throws Exception {
 
         log.trace("Preparing auto-group resource metrics action.");
-
-        MonitoringConfigForm cForm = (MonitoringConfigForm) form;
-        HashMap parms = new HashMap();
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
         ServletContext ctx = getServlet().getServletContext();
@@ -134,33 +131,33 @@ public class AutoGroupConfigMetricsFormPrepareAction
         // obtain the different categories of measurements
         log.debug("obtaining metrics for resource " + appdefId +
                   " autogroup type " + childTypeId);
-        PageList availMetrics =
+        List availMetrics =
             mBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId,
             MeasurementConstants.CAT_AVAILABILITY, PageControl.PAGE_ALL);
         request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR,
                              availMetrics);
-        totalSize += availMetrics.getTotalSize();
+        totalSize += availMetrics.size();
         
-        PageList perfMetrics =
+        List perfMetrics =
             mBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId, 
             MeasurementConstants.CAT_PERFORMANCE, PageControl.PAGE_ALL);
         request.setAttribute(Constants.CAT_PERFORMANCE_METRICS_ATTR,
                              perfMetrics);
-        totalSize += perfMetrics.getTotalSize();
+        totalSize += perfMetrics.size();
         
-        PageList throughMetrics =
+        List throughMetrics =
             mBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId, 
             MeasurementConstants.CAT_THROUGHPUT, PageControl.PAGE_ALL);
         request.setAttribute(Constants.CAT_THROUGHPUT_METRICS_ATTR,
                              throughMetrics);
-        totalSize += throughMetrics.getTotalSize();
+        totalSize += throughMetrics.size();
         
-        PageList utilMetrics =
+        List utilMetrics =
             mBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId,
             MeasurementConstants.CAT_UTILIZATION, PageControl.PAGE_ALL);
         request.setAttribute(Constants.CAT_UTILIZATION_METRICS_ATTR,
                              utilMetrics);
-        totalSize += utilMetrics.getTotalSize();
+        totalSize += utilMetrics.size();
         
         // set total size as aggregate of all
         request.setAttribute(Constants.LIST_SIZE_ATTR, new Integer(totalSize));

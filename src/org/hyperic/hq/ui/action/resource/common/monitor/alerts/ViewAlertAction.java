@@ -49,7 +49,7 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.AlertConditionBean;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -136,14 +136,13 @@ public class ViewAlertAction extends TilesAction {
                     Integer mid =
                         new Integer(condLogs[i].getCondition()
                                                .getMeasurementId());
-                    DerivedMeasurementValue dmv =
-                        mb.getMeasurement(sessionID, mid);
+                    Measurement m = mb.getMeasurement(sessionID, mid);
                     FormatSpecifics precMax = new FormatSpecifics();
                     precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
 
                     FormattedNumber val =
                         UnitsConvert.convert(value,
-                                             dmv.getTemplate().getUnits());
+                                             m.getTemplate().getUnits());
                     ab.setActualValue( val.toString() );
                 }
                 break;

@@ -67,9 +67,9 @@ import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.measurement.BaselineCreationException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.shared.BaselineValue;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.beans.ChartedMetricBean;
@@ -96,8 +96,6 @@ import org.hyperic.util.pager.PageList;
 public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAction {
     protected static Log log =
         LogFactory.getLog( ViewChartFormPrepareAction.class.getName() );
-
-    // ---------------------------------------------------- Public Methods
 
     /**
      * Retrieve data needed to display a Metrics Display Form. Respond
@@ -436,7 +434,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                AppdefEntityNotFoundException, PermissionException,
                AppdefCompatException, RemoteException,
                MeasurementNotFoundException, BaselineCreationException {
-        List mtids = (List)Arrays.asList( chartForm.getOrigM() );
+        List mtids = Arrays.asList( chartForm.getOrigM() );
         ArrayList metricSummaries = new ArrayList();
         for (int i=0; i<resources.length; ++i) {
             Map metrics =
@@ -451,8 +449,8 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         }
         Collections.sort(metricSummaries, comp);
         request.setAttribute("metricSummaries", metricSummaries);
-        request.setAttribute( "metricSummariesSize",
-                              new Integer( metricSummaries.size() ) );
+        request.setAttribute("metricSummariesSize",
+                             new Integer(metricSummaries.size()));
 
         // pick out the charted metrics from the metric summaries
         ChartedMetricBean[] chartedMetrics =
@@ -493,26 +491,26 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                AppdefEntityNotFoundException,
                RemoteException
     {
-        DerivedMeasurementValue dmv = null;
+        Measurement m = null;
         
         if (chartForm.getMode().equals(Constants.MODE_MON_CHART_SMSR) ||
             chartForm.getMode().equals(Constants.MODE_MON_CHART_SMMR)) {
-            dmv = mb.findMeasurement(sessionId, chartForm.getM()[0],
-                                     resources[0].getEntityId());
-            request.setAttribute("metric", dmv);
+            m = mb.findMeasurement(sessionId, chartForm.getM()[0],
+                                   resources[0].getEntityId());
+            request.setAttribute("metric", m);
         
             // Set the name to be displayed
-            chartForm.setChartName(dmv.getTemplate().getName());
+            chartForm.setChartName(m.getTemplate().getName());
         } else if (chartForm.getMode().equals(Constants.MODE_MON_CHART_MMSR)) {
             AppdefEntityID aeid = resources[0].getEntityId();
             for (int i = 0; i < chartedMetrics.length; i++) {
                 if (chartedMetrics[i] == null)
                     continue;
                 
-                dmv = mb.findMeasurement(sessionId,
-                                         chartedMetrics[i].getTemplateId(),
-                                         aeid);
-                BaselineValue baselineValue = dmv.getBaseline();
+                m = mb.findMeasurement(sessionId,
+                                       chartedMetrics[i].getTemplateId(),
+                                       aeid);
+                BaselineValue baselineValue = m.getBaseline().getBaselineValue();
                 if (null != baselineValue) {
                     if (null != baselineValue.getMean())
                         chartedMetrics[i].setBaselineRaw(

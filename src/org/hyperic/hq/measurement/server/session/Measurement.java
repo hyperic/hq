@@ -33,7 +33,6 @@ import java.util.Collections;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 public class Measurement extends PersistedObject
@@ -191,28 +190,5 @@ public class Measurement extends PersistedObject
         result = 37*result + (_instanceId != null ? _instanceId.hashCode(): 0);
         result = 37*result + (_template != null ? _template.hashCode(): 0);
         return result;
-    }
-
-    /**
-     * Legacy EJB DTO pattern
-     * @deprecated Use (this) DerivedMeasurement object instead
-     */
-    public DerivedMeasurementValue getDerivedMeasurementValue() {
-        DerivedMeasurementValue val = new DerivedMeasurementValue();
-        val.setId(getId());
-        val.setEnabled(isEnabled());
-        val.setInterval(getInterval());
-        val.setFormula(getDsn());
-        val.setAppdefType(getAppdefType());
-        val.setInstanceId(getInstanceId());
-        val.setMtime(getMtime());
-        val.setTemplate(getTemplate().getMeasurementTemplateValue());
-
-        if (!getBaselines().isEmpty()) {
-            Baseline b = (Baseline)getBaselines().iterator().next();
-
-            val.setBaseline(b.getBaselineValue());
-        }
-        return val;
     }
 }
