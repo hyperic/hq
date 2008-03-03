@@ -82,13 +82,13 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="Measurement.findByInstance_with_interval"
+  <cache name="Measurement.findByResource"
          maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="Measurement.findByInstance"
+  <cache name="Measurement.findEnabledByResource"
          maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
@@ -118,7 +118,7 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="Measurement.findDesignatedByInstance"
+  <cache name="Measurement.findDesignatedByResource"
          maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"

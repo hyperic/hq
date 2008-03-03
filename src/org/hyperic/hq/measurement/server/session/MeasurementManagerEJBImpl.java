@@ -95,7 +95,6 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.Pager;
 import org.hyperic.util.timer.StopWatch;
 
 /**
@@ -385,7 +384,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         try {
             // Now see which Measurements need to be rescheduled
             List mcol = getMeasurementDAO()
-                .findEnabledByInstance(getResource(id));
+                .findEnabledByResource(getResource(id));
 
             Integer[] templates = new Integer[mcol.size()];
             long[] intervals = new long[mcol.size()];
@@ -470,7 +469,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                MeasurementNotFoundException
     {
         List mcol = 
-            getMeasurementDAO().findEnabledByInstance(getResource(id));
+            getMeasurementDAO().findEnabledByResource(getResource(id));
         Integer[] mids = new Integer[mcol.size()];
         Integer availMeasurement = null; // For insert of AVAIL down
         Iterator it = mcol.iterator();
@@ -517,7 +516,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     public int getEnabledMetricsCount(AuthzSubjectValue subject,
                                       AppdefEntityID id) {
         List mcol = 
-            getMeasurementDAO().findEnabledByInstance(getResource(id));
+            getMeasurementDAO().findEnabledByResource(getResource(id));
         return mcol.size();
     }
 
@@ -621,9 +620,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         // See if category is valid
         if (cat == null || Arrays.binarySearch(
             MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
-            meas = getMeasurementDAO().findEnabledByInstance(getResource(id));
+            meas = getMeasurementDAO().findEnabledByResource(getResource(id));
         } else {
-            meas = getMeasurementDAO().findByInstanceForCategory(getResource(id), cat);
+            meas = getMeasurementDAO().findByResourceForCategory(getResource(id), cat);
         }
     
         return meas;
@@ -643,10 +642,10 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         if (cat == null || Arrays.binarySearch(
             MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
             mcol = getMeasurementDAO()
-                .findEnabledByInstance(getResource(id));
+                .findEnabledByResource(getResource(id));
         } else {
             mcol = getMeasurementDAO().
-                findByInstanceForCategory(getResource(id), cat);
+                findByResourceForCategory(getResource(id), cat);
         }
         return mcol;
     }
@@ -659,7 +658,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      */
     public List findDesignatedMeasurements(AppdefEntityID id) {
         return getMeasurementDAO()
-            .findDesignatedByInstance(getResource(id));
+            .findDesignatedByResource(getResource(id));
     }
 
     /**
@@ -671,7 +670,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     public List findDesignatedMeasurements(AuthzSubject subject,
                                            AppdefEntityID id, String cat) {
         return getMeasurementDAO()
-            .findDesignatedByInstanceForCategory(getResource(id), cat);
+            .findDesignatedByResourceForCategory(getResource(id), cat);
     }
 
     private Cache getAvailabilityCache() {
@@ -681,7 +680,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     private Measurement findAvailabilityMetric(AppdefEntityID id)
         throws MeasurementNotFoundException {
         List mlocals = getMeasurementDAO().
-            findDesignatedByInstanceForCategory(getResource(id),
+            findDesignatedByResourceForCategory(getResource(id),
             MeasurementConstants.CAT_AVAILABILITY);
         
         if (mlocals.size() == 0) {
@@ -800,7 +799,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 AppdefEntityID id = ids[i];
                 try {
                     List metrics = getMeasurementDAO().
-                        findDesignatedByInstanceForCategory(getResource(id),
+                        findDesignatedByResourceForCategory(getResource(id),
                                                             cat);
     
                     if (metrics.size() == 0)
@@ -843,7 +842,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         
         for (int ind = 0; ind < aeids.length; ind++) {
             Resource res = resMan.findResource(aeids[ind]);
-            List metrics = ddao.findByInstance(res);
+            List metrics = ddao.findByResource(res);
 
             for (Iterator i = metrics.iterator(); i.hasNext();)
             {
@@ -939,7 +938,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         for (int i = 0; i < ids.length; i++) {
             checkModifyPermission(subject.getId(), ids[i]);
 
-            List mcol = dao.findEnabledByInstance(getResource(ids[i]));
+            List mcol = dao.findEnabledByResource(getResource(ids[i]));
             
             Integer[] mids = new Integer[mcol.size()];
             Iterator it = mcol.iterator();
@@ -975,7 +974,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         checkModifyPermission(subject.getId(), id);        
 
         List mcol =
-            getMeasurementDAO().findEnabledByInstance(getResource(id));
+            getMeasurementDAO().findEnabledByResource(getResource(id));
         Integer[] mids = new Integer[mcol.size()];
         Iterator it = mcol.iterator();
         for (int i = 0; it.hasNext(); i++) {
@@ -1043,7 +1042,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         checkModifyPermission(subject.getId(), id);
         
         Resource resource = getResource(id);
-        List mcol = getMeasurementDAO().findByInstance(resource);
+        List mcol = getMeasurementDAO().findByResource(resource);
         HashSet tidSet = null;
         if (tids != null) {
             tidSet = new HashSet(Arrays.asList(tids));

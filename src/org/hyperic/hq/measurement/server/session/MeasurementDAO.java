@@ -34,9 +34,7 @@ import java.util.Map;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
-import org.hibernate.FetchMode;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
@@ -240,12 +238,12 @@ public class MeasurementDAO extends HibernateDAO {
             .executeUpdate();
     }
 
-    List findByInstance(Resource resource)
+    List findByResource(Resource resource)
     {
         return createCriteria()
             .add(Restrictions.eq("resource", resource))
             .setCacheable(true)
-            .setCacheRegion("Measurement.findByInstance_with_interval")
+            .setCacheRegion("Measurement.findByResource")
             .list();
     }
 
@@ -256,7 +254,7 @@ public class MeasurementDAO extends HibernateDAO {
             .executeUpdate();
     }
 
-    public List findEnabledByInstance(Resource resource) {
+    public List findEnabledByResource(Resource resource) {
         String sql =
             "select m from Measurement m " +
             "join m.template t " +
@@ -268,7 +266,7 @@ public class MeasurementDAO extends HibernateDAO {
             .setBoolean(0, true)
             .setParameter(1, resource)
             .setCacheable(true)
-            .setCacheRegion("Measurement.findByInstance").list();
+            .setCacheRegion("Measurement.findEnabledByResource").list();
     }
 
     List findByInstanceForCategory(int type, int id, String cat) {
@@ -288,7 +286,7 @@ public class MeasurementDAO extends HibernateDAO {
             .setString(2, cat).list();
     }
 
-    List findByInstanceForCategory(Resource resource, String cat) {
+    List findByResourceForCategory(Resource resource, String cat) {
         String sql =
             "select m from Measurement m " +
             "join m.template t " +
@@ -314,9 +312,9 @@ public class MeasurementDAO extends HibernateDAO {
             .uniqueResult();
     }
 
-    List findDesignatedByInstanceForCategory(Resource resource, String cat) 
+    List findDesignatedByResourceForCategory(Resource resource, String cat)
     {
-        List res = findDesignatedByInstance(resource);
+        List res = findDesignatedByResource(resource);
         
         for (Iterator i=res.iterator(); i.hasNext(); ) {
             Measurement dm = (Measurement)i.next();
@@ -328,7 +326,7 @@ public class MeasurementDAO extends HibernateDAO {
         return res;
     }
 
-    List findDesignatedByInstance(Resource resource) {
+    List findDesignatedByResource(Resource resource) {
         String sql =
             "select m from Measurement m " +
             "join m.template t " +
@@ -339,7 +337,7 @@ public class MeasurementDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setParameter(0, resource)
             .setCacheable(true)
-            .setCacheRegion("Measurement.findDesignatedByInstance")
+            .setCacheRegion("Measurement.findDesignatedByResource")
             .list();
     }
 
@@ -538,6 +536,8 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     int clearResource(Resource resource) {
+        // XXX: Shouldn't this reference Measurement rather than the mapped
+        //      table? -RPM
         return getSession()
             .createSQLQuery("update EAM_MEASUREMENT set resource_id = null "
                             + "where resource_id = :res")

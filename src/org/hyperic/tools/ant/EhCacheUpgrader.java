@@ -75,6 +75,12 @@ public class EhCacheUpgrader extends Task {
                "Measurement.findByCategory");
         RN.put("DerivedMeasurement.findDesignatedByInstance",
                "Measurement.findDesignatedByInstance");
+        RN.put("Measurement.findByInstance",
+               "Measurement.findEnabledByResource");
+        RN.put("Measurement.findByInstance_with_interval",
+               "Measurement.findByResource");
+        RN.put("Measurement.findDesignatedByInstance",
+               "Measurement.findDesignatedByResource");
     }
 
     public void setExisting(String existingConfigFile) {
