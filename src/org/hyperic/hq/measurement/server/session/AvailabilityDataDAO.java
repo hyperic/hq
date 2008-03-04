@@ -25,23 +25,17 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.AvailState;
-import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class AvailabilityDataDAO extends HibernateDAO {
     
@@ -50,21 +44,10 @@ public class AvailabilityDataDAO extends HibernateDAO {
     
     private static final long MAX_TIMESTAMP =
         AvailabilityDataRLE.getLastTimestamp();
-    private static final double AVAIL_UNKNOWN =
-        MeasurementConstants.AVAIL_UNKNOWN;
-    private static final double AVAIL_UP =
-        MeasurementConstants.AVAIL_UP;
-    private static final double AVAIL_DOWN =
-        MeasurementConstants.AVAIL_DOWN;
-    private static final double AVAIL_WARN =
-        MeasurementConstants.AVAIL_WARN;
-    private static final double AVAIL_PAUSED =
-        MeasurementConstants.AVAIL_PAUSED;
-    private static final String CAT_AVAILABILITY =
-        MeasurementConstants.CAT_AVAILABILITY;
-    private static final int PLATFORM_TYPE =
-        AuthzConstants.authzPlatform.intValue();
-
+    private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
+    private static final String ALIAS_CLAUSE = " upper(t.alias) like '" +
+    				MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
+    
     public AvailabilityDataDAO(DAOFactory f) {
         super(AvailabilityDataDAO.class, f);
     }
@@ -267,19 +250,6 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .list();
     }
 
-    /**
-     *
-     * XXX: This does not look right...
-     */
-    List findAvailabilityByResource(Resource resource, long startime,
-                                    long interval) {
-        String sql = "from AvailabilityDataRLE where resource.id = :rid";
-        return getSession()
-            .createQuery(sql)
-            .setInteger("rid", resource.getId().intValue())
-            .list();
-    }
-
     void remove(AvailabilityDataRLE avail) {
         super.remove(avail);
     }
@@ -296,40 +266,49 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * @return List of all measurement ids for availability, ordered
      */
     List getAllAvailIds() {
-        String sql = "SELECT m.id from Measurement m" +
-				     " JOIN m.template t" +
-				 	 " WHERE upper(t.alias) like '%" +
-				 	 CAT_AVAILABILITY.toUpperCase() + "%' order by m.id";
+        String sql = "SELECT m.id from Measurement m" + " JOIN m.template t" +
+                     " WHERE " + ALIAS_CLAUSE + " order by m.id";
         return getSession()
             .createQuery(sql)
             .list();
     }
 
     Measurement getAvailMeasurement(Resource resource) {
-        String sql = "SELECT m from Measurement m" +
-                     " JOIN m.resource r" +
+        String sql = "SELECT m FROM Measurement m" +
 				     " JOIN m.template t" +
-				 	 " WHERE  r.id = " + resource.getId() +
-				 	 " AND upper(t.alias) like '%" +
-				 	 CAT_AVAILABILITY.toUpperCase() + "%'";
-        return (Measurement)getSession()
-            .createQuery(sql)
-            .list().get(0);
+				 	 " WHERE  m.resource = :res AND " + ALIAS_CLAUSE;
+        return (Measurement) getSession().createQuery(sql)
+            .setParameter("res", resource)
+            .uniqueResult();
+    }
+
+    List findAvailabilityByInstances(int type, Integer[] ids) {
+        boolean checkIds = ids != null && ids.length > 0;
+        String sql = "SELECT m FROM Measurement m " +
+                     "join m.template t " +
+                     "join t.monitorableType mt " +
+                     "where mt.appdefType = :type and " +
+                     (checkIds ? "m.instanceId in (:ids) and " : "") +
+                     ALIAS_CLAUSE;
+
+        Query q = getSession().createQuery(sql).setInteger("type", type);
+        
+        if (checkIds)
+            q.setParameterList("ids", ids);
+
+        return q.list();
     }
 
     /**
-     * param List of resourceIds
-     * return List of Availability Measurements which are children of the
-     * resourceIds
+     * param List of resourceIds return List of Availability Measurements which
+     * are children of the resourceIds
      */
     List getAvailMeasurementChildren(List resourceIds) {
-        String sql = "SELECT m from Measurement m" +
+        String sql = "SELECT m FROM Measurement m" +
                      " JOIN m.resource.toEdges e" +
         			 " JOIN m.template t" +
         			 " WHERE e.distance > 0" +
-        			 " AND e.from in (:ids)" +
-				 	 " AND upper(t.alias) like '%" +
-				 	 CAT_AVAILABILITY.toUpperCase() + "%'";
+        			 " AND e.from in (:ids) AND " + ALIAS_CLAUSE;
         return getSession()
             .createQuery(sql)
             .setParameterList("ids", resourceIds, new IntegerType())
@@ -340,29 +319,12 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * @return List of down Measurements
      */
     List getDownMeasurements() {
-        String sql = "SELECT m, rle.availabilityDataId.startime" +
-                     " FROM Measurement m" +
+        String sql = " FROM AvailabilityDataRLE rle" +
+                     " JOIN rle.availabilityDataId.measurement m" +
 				     " JOIN m.template t" +
-				 	 " JOIN m.availabilityData rle" +
 				 	 " WHERE rle.endtime = " + MAX_TIMESTAMP +
 				 	 " AND rle.availVal = " + AVAIL_DOWN + 
-				 	 " AND upper(t.alias) like '%" +
-				 	 CAT_AVAILABILITY.toUpperCase() + "%'";
-        return getSession()
-            .createQuery(sql)
-            .list();
-    }
-
-    /**
-     * @return List of Object[].  Object[0] is Measurement Object[1] is Resource
-     */
-    List getPlatformResources() {
-        String sql = "SELECT m, r FROM Measurement m" +
-                     " JOIN m.resource r" +
-				     " JOIN m.template t" +
-				 	 " WHERE r.resourceType = " + PLATFORM_TYPE +
-				 	 " AND upper(t.alias) like '%" +
-				 	 CAT_AVAILABILITY.toUpperCase() + "%'";
+				 	 " AND " + ALIAS_CLAUSE;
         return getSession()
             .createQuery(sql)
             .list();

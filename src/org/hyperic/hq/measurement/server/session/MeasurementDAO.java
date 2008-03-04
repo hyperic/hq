@@ -341,20 +341,6 @@ public class MeasurementDAO extends HibernateDAO {
             .list();
     }
 
-    List findAvailabilityByInstances(int type, Integer[] ids) {
-        String sql =
-            "select m from Measurement m " +
-            "join m.template t " +
-            "join t.monitorableType mt " +
-            "where mt.appdefType = :type and m.instanceId in (:ids) and " +
-            "t.name = 'Availability'";
-
-        return getSession().createQuery(sql)
-            .setInteger("type", type)
-            .setParameterList("ids", ids)
-            .list();
-    }
-
     List findByCategory(String cat) {
         String sql =
             "select distinct m from Measurement m " +

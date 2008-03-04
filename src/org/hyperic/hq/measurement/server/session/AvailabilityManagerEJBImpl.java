@@ -39,6 +39,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
@@ -102,7 +103,8 @@ public class AvailabilityManagerEJBImpl
      */
     public List getPlatformResources() {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
-        return dao.getPlatformResources();
+        return dao.findAvailabilityByInstances(
+            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null);
     }
 
     /**
@@ -126,11 +128,12 @@ public class AvailabilityManagerEJBImpl
     }
     
     /**
+     * TODO: Can this method be combined with the one that takes an array?
+     * 
      * @ejb:interface-method
      */
     public PageList getHistoricalAvailData(Integer mid, long begin, long end,
                                            long interval, PageControl pc) {
-
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List availInfo = dao.getHistoricalAvails(mid.intValue(), begin,
                                                  end, pc.isDescending());
@@ -362,14 +365,14 @@ public class AvailabilityManagerEJBImpl
         List rtn = new ArrayList();
         List down = dao.getDownMeasurements();
         for (Iterator i=down.iterator(); i.hasNext(); ) {
-            Object[] obj = (Object[])i.next();
-            Measurement meas = (Measurement)obj[0];
-            Long timestamp = (Long)obj[1];
+            AvailabilityDataRLE rle = (AvailabilityDataRLE) i.next();
+            Measurement meas = rle.getMeasurement();
+            long timestamp = rle.getEndtime();
             Integer mid = meas.getId();
             if (includes != null && !includes.contains(mid)) {
                 continue;
             }
-            MetricValue val = new MetricValue(AVAIL_DOWN, timestamp.intValue());
+            MetricValue val = new MetricValue(AVAIL_DOWN, timestamp);
             rtn.add(new DownMetricValue(meas.getEntityId(), mid, val));
         }
         return rtn;

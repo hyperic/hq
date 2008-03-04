@@ -26,42 +26,23 @@
 package org.hyperic.hq.measurement.server.mbean;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.TimingVoodoo;
-import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.LastAvailUpObj;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.DataPoint;
-import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
-import org.hyperic.hq.measurement.server.session.SRNCache;
-import org.hyperic.hq.measurement.server.session.MetricDataCache;
 import org.hyperic.hq.measurement.shared.AvailState;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.TimeUtil;
-import org.hyperic.util.timer.StopWatch;
 
 /**
  * This job is responsible for filling in missing availabilty metric values.
@@ -95,10 +76,8 @@ public class AvailabilityCheckService
         List platformResources = availMan.getPlatformResources();
         List rtn = new ArrayList(platformResources.size());
         synchronized (avail) {
-            for (Iterator i=platformResources.iterator(); i.hasNext(); ) {
-                Object[] array = (Object[])i.next();
-                Measurement meas = (Measurement)array[0];
-                Resource resource = (Resource)array[1];
+            for (Iterator i = platformResources.iterator(); i.hasNext();) {
+                Measurement meas = (Measurement)i.next();
                 long interval = meas.getInterval();
                 AvailState last = avail.get(meas.getId(),
                     new AvailState(meas.getId().intValue(), AVAIL_NULL, now));
@@ -115,7 +94,7 @@ public class AvailabilityCheckService
                         new MetricValue(AVAIL_DOWN,
                                         last.getTimestamp()+ interval * 2));
                     ResourceDataPoint rdp =
-                        new ResourceDataPoint(resource, point);
+                        new ResourceDataPoint(meas.getResource(), point);
                     rtn.add(rdp);
                 }
             }

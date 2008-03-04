@@ -679,16 +679,12 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     private Measurement findAvailabilityMetric(AppdefEntityID id)
         throws MeasurementNotFoundException {
-        List mlocals = getMeasurementDAO().
-            findDesignatedByResourceForCategory(getResource(id),
-            MeasurementConstants.CAT_AVAILABILITY);
-        
-        if (mlocals.size() == 0) {
+        Measurement dm =
+            getAvailabilityDataDAO().getAvailMeasurement(getResource(id));
+        if (dm == null) {
             throw new MeasurementNotFoundException("No availability metric " +
                                                    "found for " + id);
         }
-    
-        Measurement dm = (Measurement) mlocals.get(0);
         CacheEntry entry = new CacheEntry(dm);
         getAvailabilityCache().put(new Element(id, entry));
         return dm;
@@ -781,7 +777,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 Integer[] iids =
                     (Integer[]) toget.toArray(new Integer[toget.size()]);
 
-                List metrics = getMeasurementDAO()
+                List metrics = getAvailabilityDataDAO()
                     .findAvailabilityByInstances(type, iids);
                 for (Iterator it = metrics.iterator(); it.hasNext();) {
                     Measurement dm = (Measurement) it.next();
