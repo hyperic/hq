@@ -1235,10 +1235,12 @@
     <copy file="bin/agent.rc"
         tofile="${agent.dir}/rcfiles/agent.rc"/>
 
+    <!-- DEPRECATED: replaced hq-agent.exe with Java Service Wrapper
     <copy file="${launcher.dir}/hq-agent.exe"
         tofile="${agent.dir}/hq-agent.exe" />
+    -->
     <copy file="bin/hq-agent.sh"
-        tofile="${agent.dir}/hq-agent.sh"/>
+        tofile="${agent.dir}/bin/hq-agent-nowrapper.sh"/>
 
     <copy file="bin/hq-agent-wrapper.bat"
         tofile="${agent.dir}/bin/hq-agent.bat" />
