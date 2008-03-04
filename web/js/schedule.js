@@ -235,7 +235,7 @@ function getSelectValue(sel) {
 }
 
 function changeMonthDropdown (monthDropDown, selectedMonthValue, startMonthIndex){
-  var newMonthIndex = selectedMonthValue -1;
+  var newMonthIndex = selectedMonthValue -2;
 
   monthDropDown.options.length = 0;
   monthDropDown.options.length = 12-startMonthIndex;
@@ -294,7 +294,7 @@ function changeDropDown(monthId, dateId, yearId) {
 
   var startMonthIndex = 0;
   var startDateIndex = 0;
-  
+
   if (selectedYearValue == START_YEAR) {
     startMonthIndex = START_MONTH;
     if (selectedMonthValue < START_MONTH)
