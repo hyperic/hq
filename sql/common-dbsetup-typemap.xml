@@ -58,7 +58,7 @@
             <map db="oracle" type="NUMBER(1)"/>
             <map db="pointbase" type="BOOLEAN" />
             <map db="java" type="BOOLEAN" />
-            <map db="mysql" type="BOOLEAN" />
+            <map db="mysql" type="BIT" />
         </typemap>
         <typemap type="BYTES">
             <map db="postgres" type="BYTEA" />

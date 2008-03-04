@@ -8121,7 +8121,7 @@ has already been defined.
   </schemaSpec>
   
   <schemaSpec version="3.100">
-	<schema-directSQL>
+    <schema-directSQL>
     <statement desc="Create self-edges for platforms">
       insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
         select r.id, 0 as version_col, r.id as from_id, r.id as to_id, 1 as rel_id, 0 as distance
@@ -8216,6 +8216,10 @@ has already been defined.
     <statement targetDB="postgresql">
       select setval('eam_resource_edge_id_seq', max(e.id) + 1) from eam_resource_edge e
     </statement>
+    <statement targetDB="mysql">
+      insert into HQ_SEQUENCE (seq_name, seq_val) 
+        select 'EAM_RESOURCE_EDGE', ifnull(max(id), 10000)/100+1 from EAM_RESOURCE_EDGE
+    </statement>
     <statement targetDB="oracle">
       DROP SEQUENCE eam_resource_edge_id_seq
     </statement>
@@ -8307,38 +8311,25 @@ has already been defined.
         <statement desc="Drop unused Measurement argument table">
             DROP TABLE EAM_MEASUREMENT_ARG
         </statement>
-        <statement>
+        <statement targetDB='postgresql'>
             DROP SEQUENCE EAM_MEASUREMENT_ARG_ID_SEQ
+        </statement>
+        <statement targetDB='oracle'>
+            DROP SEQUENCE EAM_MEASUREMENT_ARG_ID_SEQ
+        </statement>
+        <statement>
+            DELETE FROM HQ_SEQUENCE where seq_name = 'EAM_MEASUREMENT_ARG_ID_SEQ'
         </statement>
       </schema-directSQL>
   </schemaSpec>
 
   <schemaSpec version="3.102">
-      <!-- XXX: Need to fix MySQL SST_AlterColumn -->
-      <schema-alterColumn targetDB="oracle"
-                          table="EAM_MEASUREMENT"
-                          column="ENABLED"
-                          nullable="NOT NULL"/>
-      <schema-alterColumn targetDB="postgres"
-                          table="EAM_MEASUREMENT"
-                          column="ENABLED"
-                          nullable="NOT NULL"/>
-      <schema-alterColumn targetDB="mysql"
-                          columnType="BIT"
+      <schema-alterColumn columnType="BOOLEAN"
                           table="EAM_MEASUREMENT"
                           column="ENABLED"
                           nullable="NOT NULL"/>
 
-      <schema-alterColumn targetDB="oracle"
-                          table="EAM_MEASUREMENT"
-                          column="COLL_INTERVAL"
-                          nullable="NOT NULL"/>       
-      <schema-alterColumn targetDB="postgres"
-                          table="EAM_MEASUREMENT"
-                          column="COLL_INTERVAL"
-                          nullable="NOT NULL"/>
-      <schema-alterColumn targetDB="mysql"
-                          columnType="BIT"
+      <schema-alterColumn columnType="BOOLEAN"
                           table="EAM_MEASUREMENT"
                           column="COLL_INTERVAL"
                           nullable="NOT NULL"/>
@@ -8355,33 +8346,41 @@ has already been defined.
                    select ID, 2 AS APPDEF_TYPE from EAM_RESOURCE_TYPE WHERE CID = 303
                    union all
                    select ID, 3 AS APPDEF_TYPE from EAM_RESOURCE_TYPE WHERE CID = 305) m
-           where eam_event_log.entity_id = r.INSTANCE_ID and
+           where EAM_EVENT_LOG.entity_id = r.INSTANCE_ID and
                  r.RESOURCE_TYPE_ID = m.ID and
-                 eam_event_log.entity_type = m.APPDEF_TYPE )
+                 EAM_EVENT_LOG.entity_type = m.APPDEF_TYPE )
       </initializer>
     </schema-addColumn>
     <schema-directSQL>
       <statement desc="Create new index for resource_id">
-        delete from eam_event_log where resource_id is null
+        delete from EAM_EVENT_LOG where resource_id is null
       </statement>
       <statement>
-        alter table eam_event_log drop column entity_id
+        alter table EAM_EVENT_LOG drop column entity_id
       </statement>
       <statement>
-        alter table eam_event_log drop column entity_type
+        alter table EAM_EVENT_LOG drop column entity_type
       </statement>
     </schema-directSQL>
-    <schema-alterColumn table="EAM_EVENT_LOG" column="RESOURCE_ID"
+    <schema-alterColumn table="EAM_EVENT_LOG"
+                        column="RESOURCE_ID"
+                        columnType="INTEGER"
                         nullable="NOT NULL"/>
   </schemaSpec>
   
   <schemaSpec version="3.104">
     <schema-directSQL>
-      <statement fail="false">
+      <statement targetDB="oracle" fail="false">
         drop index event_log_idx
       </statement>                  
+      <statement targetDB="postgresql" fail="false">
+        drop index event_log_idx
+      </statement>                  
+      <statement targetDB="mysql" fail="false">
+        drop index event_log_idx on EAM_EVENT_LOG
+      </statement>                  
       <statement>
-        create index event_log_idx on EAM_EVENT_LOG ("timestamp", resource_id)
+        create index EVENT_LOG_IDX on EAM_EVENT_LOG (timestamp, resource_id)
       </statement>
       <statement>
         alter table EAM_EVENT_LOG 
@@ -8402,7 +8401,7 @@ has already been defined.
         alter table HQ_AVAIL_DATA_RLE add AVAILVAL numeric(24,5)
       </statement>
       <statement targetDB="postgresql">
-        alter table HQ_AVAIL_DATA_RLE add STARTTIME int8 NOT NULL
+        alter table HQ_AVAIL_DATA_RLE add STARTIME int8 NOT NULL
       </statement>
       <statement targetDB="postgresql">
         alter table HQ_AVAIL_DATA_RLE add ENDTIME int8 default 9223372036854775807 NOT NULL
@@ -8411,7 +8410,7 @@ has already been defined.
         alter table HQ_AVAIL_DATA_RLE add AVAILVAL number(24,5)
       </statement>
       <statement targetDB="oracle">
-        alter table HQ_AVAIL_DATA_RLE add STARTTIME number(19,0) NOT NULL
+        alter table HQ_AVAIL_DATA_RLE add STARTIME number(19,0) NOT NULL
       </statement>
       <statement targetDB="oracle">
         alter table HQ_AVAIL_DATA_RLE add ENDTIME number(19,0) default 9223372036854775807 NOT NULL
@@ -8420,7 +8419,7 @@ has already been defined.
         alter table HQ_AVAIL_DATA_RLE add AVAILVAL numeric(24,5)
       </statement>
       <statement targetDB="mysql">
-        alter table HQ_AVAIL_DATA_RLE add STARTTIME bigint NOT NULL
+        alter table HQ_AVAIL_DATA_RLE add STARTIME bigint NOT NULL
       </statement>
       <statement targetDB="mysql">
         alter table HQ_AVAIL_DATA_RLE add ENDTIME bigint default 9223372036854775807 NOT NULL
