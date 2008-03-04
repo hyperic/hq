@@ -72,8 +72,7 @@ public class AvailabilityCheckService
     extends SessionMBeanBase
     implements AvailabilityCheckServiceMBean
 {
-    private final String _logCtx = AvailabilityCheckService.class.getName();
-    private Log _log = LogFactory.getLog(_logCtx);
+    private Log _log = LogFactory.getLog(AvailabilityCheckService.class);
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
     private static final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
 
