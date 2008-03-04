@@ -25,10 +25,7 @@
 
 package org.hyperic.hq.auth;
 
-import org.hyperic.hq.auth.shared.PrincipalsValue;
 import org.hyperic.hibernate.PersistedObject;
-
-import java.io.Serializable;
 
 /**
  * Pojo for hibernate
@@ -60,22 +57,6 @@ public class Principal extends PersistedObject
     public void setPassword(String password)
     {
         this.password = password;
-    }
-
-    private PrincipalsValue principalsValue = new PrincipalsValue();
-    /**
-     * legacy EJB DTO pattern (value objects)
-     * @deprecated
-     * @return
-     */
-    public PrincipalsValue getPrincipalsValue()
-    {
-        principalsValue.setId(getId());
-        principalsValue.setPrincipal(
-            (getPrincipal() == null) ? "" : getPrincipal());
-        principalsValue.setPassword(
-            (getPassword() == null) ? "" : getPassword());
-        return principalsValue;
     }
 
     public boolean equals(Object obj)
