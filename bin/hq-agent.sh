@@ -16,7 +16,7 @@ while [ -h $FINDNAME ] ; do FINDNAME=`ls -ld $FINDNAME | awk '{print $NF}'` ; do
 RUNDIR=`echo $FINDNAME | sed -e 's@/[^/]*$@@'` 
 unset FINDNAME
 if test -d $RUNDIR; then
-  cd $RUNDIR
+  cd $RUNDIR/..
 fi
 
 if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
