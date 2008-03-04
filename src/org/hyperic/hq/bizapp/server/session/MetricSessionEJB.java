@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,7 +28,6 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -79,8 +78,6 @@ public class MetricSessionEJB extends BizappSessionEJB {
 
     protected SessionManager manager = SessionManager.getInstance();
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
-    private static final long TIMERANGE_UNLIMITED =
-        MeasurementConstants.TIMERANGE_UNLIMITED;
     protected final AvailabilityManagerLocal _availMan =
         AvailabilityManagerEJBImpl.getOne();
 

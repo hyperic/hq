@@ -103,11 +103,9 @@ import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
-import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
@@ -2242,32 +2240,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     subject, ids, MeasurementConstants.CAT_AVAILABILITY);
             
             if (midMap.size() > 0) {
-                Integer[] mids =
-                    (Integer[]) midMap.values().toArray(new Integer[0]);
-                
-                // Get absolute last data point
-                Map avails = getDataMan().getLastDataPoints(mids, end -
-                    (resType.getAppdefType() ==
-                        AppdefEntityConstants.APPDEF_TYPE_PLATFORM ?
-                    MeasurementConstants.ACCEPTABLE_LIVE_MILLIS :            
-                    MeasurementConstants.ACCEPTABLE_SERVICE_LIVE_MILLIS));
+                double[] data = getAvailability(subject, ids);
 
-                if (avails.size() == 0)
-                    summary.setAvailability(
-                        new Double(MeasurementConstants.AVAIL_UNKNOWN));
-                else {
-                    double sum = 0;
-                    for (Iterator it = avails.values().iterator(); it.hasNext();
-                        ) {
-                        MetricValue mv = (MetricValue) it.next();
-                        sum += mv.getValue();
-                    }
-                    
-                    summary.setAvailability(
-                        new Double(sum / (double) midMap.size()));
+                double sum = 0;
+                for (int i = 0; i < data.length; i++) {
+                    sum += data[i];
                 }
+                
+                summary.setAvailability(
+                    new Double(sum / (double) midMap.size()));
             }
-        } catch (MeasurementNotFoundException e) {
+        } catch (Exception e) {
             // No Availability data
             summary.setAvailability(
                 new Double(MeasurementConstants.AVAIL_UNKNOWN));
