@@ -119,20 +119,38 @@ public class Scheduler_test extends TestCase {
         scheduler.shutdown();
     }
     
-    public void testExecuteTaskWithInitialDelay() throws Exception {
+    public void testExecuteAtFixedRateWithInitialDelay() throws Exception {
         Scheduler scheduler = new Scheduler(1);
         
-        RunnableCounter counter = new RunnableCounter(110, false);
+        RunnableCounter counter = new RunnableCounter(50, false);
         
         ScheduledFuture future = 
             scheduler.scheduleAtFixedRate(counter, 100, 100);
         
-        Thread.sleep(210);
+        Thread.sleep(250);
         
         assertFalse(future.isDone());
         assertFalse(future.isCancelled());
         
-        assertEquals(1, counter.numRuns());
+        assertEquals(2, counter.numRuns());
+        
+        scheduler.shutdown();        
+    }
+    
+    public void testExecuteWithFixedDelayWithInitialDelay() throws Exception {
+        Scheduler scheduler = new Scheduler(1);
+        
+        RunnableCounter counter = new RunnableCounter(50, false);
+        
+        ScheduledFuture future = 
+            scheduler.scheduleWithFixedDelay(counter, 100, 50);
+        
+        Thread.sleep(300);
+        
+        assertFalse(future.isDone());
+        assertFalse(future.isCancelled());
+        
+        assertEquals(2, counter.numRuns());
         
         scheduler.shutdown();        
     }
@@ -224,6 +242,7 @@ public class Scheduler_test extends TestCase {
         public synchronized int numRuns() {
             return _numRuns;
         }
+        
     }
     
 }
