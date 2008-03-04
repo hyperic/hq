@@ -81,18 +81,6 @@ public class AvailabilityCheckService
     private long _startTime = 0;
     private long _wait = 5 * MeasurementConstants.MINUTE;
 
-    private AvailabilityManagerLocal getAvailMan() {
-        return AvailabilityManagerEJBImpl.getOne();
-    }
-
-    private DataManagerLocal getDataMan() {
-        return DataManagerEJBImpl.getOne();
-    }
-
-    private MeasurementManagerLocal getMeasurementManager() {
-        return MeasurementManagerEJBImpl.getOne();
-    }
-
     /**
      * @jmx:managed-operation
      */
@@ -102,8 +90,7 @@ public class AvailabilityCheckService
 
     private List getDownPlatforms(Date lDate) {
         boolean debug = _log.isDebugEnabled();
-        long lnow = lDate.getTime();
-        int inow = (new Long(lnow/1000)).intValue();
+        long now = lDate.getTime();
         LastAvailUpObj avail = LastAvailUpObj.getInst();
         AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
         List platformResources = availMan.getPlatformResources();
@@ -113,22 +100,21 @@ public class AvailabilityCheckService
                 Object[] array = (Object[])i.next();
                 Measurement meas = (Measurement)array[0];
                 Resource resource = (Resource)array[1];
-                int interval = new Long(meas.getInterval()/1000).intValue();
+                long interval = meas.getInterval();
                 AvailState last = avail.get(meas.getId(),
-                    new AvailState(meas.getId().intValue(), AVAIL_NULL, inow));
+                    new AvailState(meas.getId().intValue(), AVAIL_NULL, now));
                 if (debug) {
-                    long t = new Long(last.getTimestamp()).longValue()*1000;
+                    long t = last.getTimestamp();
                     String msg = "Checking availability for " + last +
                         ", " + TimeUtil.toString(t) +
-                        " vs. " + TimeUtil.toString(lnow) + " (checktime)";
+                        " vs. " + TimeUtil.toString(now) + " (checktime)";
                     _log.debug(msg);
                 }
                 if (last.getVal() != AVAIL_DOWN &&
-                    (inow - last.getTimestamp()) >= interval*2) {
+                    (now - last.getTimestamp()) >= interval*2) {
                     DataPoint point =  new DataPoint(meas.getId(),
                         new MetricValue(AVAIL_DOWN,
-                        (new Long(last.getTimestamp()+interval*2))
-                            .longValue()*1000));
+                                        last.getTimestamp()+ interval * 2));
                     ResourceDataPoint rdp =
                         new ResourceDataPoint(resource, point);
                     rtn.add(rdp);
@@ -165,7 +151,7 @@ public class AvailabilityCheckService
         }
         AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
         List downPlatforms = getDownPlatforms(lDate);
-        List backfillList = new ArrayList(downPlatforms.size()*50);
+        List backfillList = new ArrayList();
         for (Iterator i=downPlatforms.iterator(); i.hasNext(); ) {
             ResourceDataPoint rdp = (ResourceDataPoint)i.next();
             Resource platform = rdp.getResource();
@@ -181,7 +167,7 @@ public class AvailabilityCheckService
                 Measurement meas = (Measurement)j.next();
                 if (debug) {
                     _log.debug("measurement id " + meas.getId() + " is " +
-                        "being marked down");
+                               "being marked down");
                 }
                 point = new DataPoint(meas.getId(),
                     new MetricValue(AVAIL_DOWN, current));
@@ -216,7 +202,7 @@ public class AvailabilityCheckService
      * @jmx:managed-attribute
      */
     public void setInterval(long interval) {
-        this._interval = interval;
+        _interval = interval;
     }
     
     /**
@@ -225,7 +211,7 @@ public class AvailabilityCheckService
      * @jmx:managed-attribute
      */
     public long getWait() {
-        return this._wait;
+        return _wait;
     }
 
     /**
@@ -234,7 +220,7 @@ public class AvailabilityCheckService
      * @jmx:managed-attribute
      */
     public void setWait(long wait) {
-        this._wait = wait;
+        _wait = wait;
     }
 
     /**
