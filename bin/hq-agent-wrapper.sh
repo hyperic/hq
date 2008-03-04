@@ -10,53 +10,6 @@
 #-----------------------------------------------------------------------------
 # These settings can be modified to fit the needs of your application
 
-AGENT_LIB=../lib
-PDK_LIB=../pdk/lib
-
-if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
-    HQ_JAVA_HOME=${HQ_JAVA_HOME}
-elif [ -d jre ]; then
-    HQ_JAVA_HOME=jre
-    # Just in case
-    chmod -R +x jre/bin/*
-elif [ "x$JAVA_HOME" != "x" ] ; then
-    HQ_JAVA_HOME=${JAVA_HOME}
-else
-    case "`uname`" in
-    Darwin)
-        HQ_JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
-        ;;
-    *)
-        echo "HQ_JAVA_HOME or JAVA_HOME must be set when invoking the agent"
-        exit 1
-        ;;
-    esac
-fi
-
-HQ_JAVA="${HQ_JAVA_HOME}/bin/java"
-
-CLIENT_CLASSPATH="${AGENT_LIB}/AgentClient.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-logging.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/log4j-1.2.14.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hyperic-util.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/sigar.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-product.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-httpclient-2.0.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-codec-1.3.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/lather.jar"
-
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${JDK13_COMPAT}"
-
-CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
-
-CLIENT_CMD="${HQ_JAVA} \
-    -Djava.net.preferIPv4Stack=true \
-    -D${AGENTPROPFILE_PROP}=${AGENT_PROPS} \
-    -cp ${CLIENT_CLASSPATH} ${CLIENT_CLASS}"
-
-PING_CMD="${CLIENT_CMD} ping"
-SETUP_CMD="${CLIENT_CMD} setup"
-
 # Application
 APP_NAME="hq-agent"
 APP_LONG_NAME="HQ Agent"
@@ -170,6 +123,63 @@ done
 # Change the current directory to the location of the script
 cd "`dirname "$REALPATH"`"
 REALDIR=`pwd`
+
+# ------------- 
+# Begin HQ Agent specific logic
+# ------------- 
+AGENTPROPFILE_PROP=agent.propFile
+AGENT_PROPS=../agent.properties
+AGENT_LIB=../lib
+PDK_LIB=../pdk/lib
+# for /proc/net/tcp mirror
+SIGAR_PROC_NET=../tmp
+
+if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
+    HQ_JAVA_HOME=${HQ_JAVA_HOME}
+elif [ -d ../jre ]; then
+    HQ_JAVA_HOME=../jre
+    # Just in case
+    chmod -R +x ../jre/bin/*
+elif [ "x$JAVA_HOME" != "x" ] ; then
+    HQ_JAVA_HOME=${JAVA_HOME}
+else
+    case "`uname`" in
+    Darwin)
+        HQ_JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
+        ;;
+    *)
+        echo "HQ_JAVA_HOME or JAVA_HOME must be set when invoking the agent"
+        exit 1
+        ;;
+    esac
+fi
+
+chmod +x ../pdk/scripts/*
+
+HQ_JAVA="${HQ_JAVA_HOME}/bin/java"
+
+CLIENT_CLASSPATH="${AGENT_LIB}/AgentClient.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-logging.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/log4j-1.2.14.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hyperic-util.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/sigar.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-product.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-httpclient-2.0.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-codec-1.3.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/lather.jar"
+
+CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
+
+CLIENT_CMD="${HQ_JAVA} \
+    -Djava.net.preferIPv4Stack=true \
+    -D${AGENTPROPFILE_PROP}=${AGENT_PROPS} \
+    -cp ${CLIENT_CLASSPATH} ${CLIENT_CLASS}"
+
+PING_CMD="${CLIENT_CMD} ping"
+SETUP_CMD="${CLIENT_CMD} setup"
+# ------------- 
+# End HQ specific logic
+# ------------- 
 
 # If the PIDDIR is relative, set its value relative to the full REALPATH to avoid problems if
 #  the working directory is later changed.
