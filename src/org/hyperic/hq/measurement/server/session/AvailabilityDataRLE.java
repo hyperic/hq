@@ -5,31 +5,30 @@ import org.hyperic.hibernate.PersistedObject;
 public class AvailabilityDataRLE
     extends PersistedObject {
 
-    private static final long serialVersionUID = 1L;
-    private int _startime;
-    private int _endtime;
+    private long _startime;
+    private long _endtime;
     private double _availVal;
     private Measurement _measurement;
-    private static final int MAX_ENDTIME = Integer.MAX_VALUE;
+    private static final long MAX_ENDTIME = Long.MAX_VALUE;
     
     public AvailabilityDataRLE() {
     }
 
-    public AvailabilityDataRLE(Measurement meas, int startime,
-        int endtime, double availType) {
+    public AvailabilityDataRLE(Measurement meas, long startime,
+                               long endtime, double availType) {
         init(meas, startime, endtime, availType);
     }
 
-    public AvailabilityDataRLE(Measurement meas, int startime,
-        double availType) {
+    public AvailabilityDataRLE(Measurement meas, long startime,
+                               double availType) {
         init(meas, startime, MAX_ENDTIME, availType);
     }
     
-    public static final int getLastTimestamp() {
+    public static long getLastTimestamp() {
         return MAX_ENDTIME;
     }
     
-    private void init(Measurement meas, int startime, int endtime,
+    private void init(Measurement meas, long startime, long endtime,
             double availVal) {
         _measurement = meas;
         _startime = startime;
@@ -54,19 +53,19 @@ public class AvailabilityDataRLE
         return new AvailabilityDataId(_startime, _measurement);
     }
 
-    public int getStartime() {
+    public long getStartime() {
         return _startime;
     }
 
-    public void setStartime(int startime) {
+    public void setStartime(long startime) {
         _startime = startime;
     }
 
-    public int getEndtime() {
+    public long getEndtime() {
         return _endtime;
     }
 
-    public void setEndtime(int endtime) {
+    public void setEndtime(long endtime) {
         _endtime = endtime;
     }
 

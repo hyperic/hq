@@ -28,15 +28,19 @@ package org.hyperic.hq.measurement.shared;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.product.MetricValue;
 
+/**
+ * We don't need this class.  Remove it.
+ * -RPM 3/4/08
+ */
 public class AvailState extends DataPoint {
     private int _id;
-    private int _timestamp;
+    private long _timestamp;
     private double _val;
 
-    public AvailState(int id, double val, int timestamp) {
+    public AvailState(int id, double val, long timestamp) {
         // don't like this, but since we are changing the long timestamp
         // to integer soon it will be fine for now
-        super(new Integer(id), new MetricValue(val, (long)timestamp*1000));
+        super(new Integer(id), new MetricValue(val, timestamp));
         _id = id;
         _val = val;
         _timestamp = timestamp;
@@ -50,7 +54,7 @@ public class AvailState extends DataPoint {
         return _val;
     }
 
-    public int getTimestamp() {
+    public long getTimestamp() {
         return _timestamp;
     }
     
@@ -60,5 +64,4 @@ public class AvailState extends DataPoint {
             .append(" val -> ").append(_val)
             .append(" timestamp -> ").append(_timestamp).toString();
     }
-
 }

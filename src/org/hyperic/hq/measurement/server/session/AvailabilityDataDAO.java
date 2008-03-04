@@ -48,7 +48,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     private static final String logCtx = AvailabilityDataDAO.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
     
-    private static final int MAX_TIMESTAMP =
+    private static final long MAX_TIMESTAMP =
         AvailabilityDataRLE.getLastTimestamp();
     private static final double AVAIL_UNKNOWN =
         MeasurementConstants.AVAIL_UNKNOWN;
@@ -69,14 +69,14 @@ public class AvailabilityDataDAO extends HibernateDAO {
         super(AvailabilityDataDAO.class, f);
     }
 
-    List findLastAvail(List mids, int after) {
+    List findLastAvail(List mids, long after) {
         String sql = "from AvailabilityDataRLE" +
                      " WHERE endtime > :endtime" +
                      " AND availabilityDataId.measurement in (:ids)" +
                      " order by endtime desc";
         return getSession()
             .createQuery(sql)
-            .setInteger("endtime", after)
+            .setLong("endtime", after)
             .setParameterList("ids", mids, new IntegerType())
             .list();
     }
@@ -88,19 +88,19 @@ public class AvailabilityDataDAO extends HibernateDAO {
                      " order by endtime desc";
         return getSession()
             .createQuery(sql)
-            .setInteger("endtime", MAX_TIMESTAMP)
+            .setLong("endtime", MAX_TIMESTAMP)
             .setParameterList("ids", mids, new IntegerType())
             .list();
     }
 
-    int updateStartime(AvailabilityDataRLE avail, int startime) {
+    int updateStartime(AvailabilityDataRLE avail, long starttime) {
         remove(avail);
-        avail.setStartime(startime);
+        avail.setStartime(starttime);
         save(avail);
         return 1;
     }
 
-    int updateEndtime(AvailabilityDataRLE avail, int endtime) {
+    long updateEndtime(AvailabilityDataRLE avail, long endtime) {
         avail.setEndtime(endtime);
         save(avail);
         return 1;
@@ -112,7 +112,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                      " AND availabilityDataId.measurement = :meas ";
         List list =
             getSession().createQuery(sql)
-            .setInteger("startime", state.getTimestamp())
+            .setLong("startime", state.getTimestamp())
             .setInteger("meas", state.getId())
         	.list();
         if (list.size() == 0) {
@@ -127,7 +127,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                      " AND availabilityDataId.measurement = :meas "+
                      "order by startime asc";
         return  getSession().createQuery(sql)
-            .setInteger("startime", state.getTimestamp())
+            .setLong("startime", state.getTimestamp())
             .setInteger("meas", state.getId())
         	.list();
     }
@@ -139,7 +139,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                      "order by startime asc";
         List list =
             getSession().createQuery(sql)
-            .setInteger("startime", state.getTimestamp())
+            .setLong("startime", state.getTimestamp())
             .setInteger("meas", state.getId())
         	.setMaxResults(1).list();
         if (list.size() == 0) {
@@ -160,7 +160,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                      "order by startime desc";
         List list =
             getSession().createQuery(sql)
-            .setInteger("startime", state.getTimestamp())
+            .setLong("startime", state.getTimestamp())
             .setInteger("meas", state.getId())
         	.setMaxResults(1).list();
         if (list.size() == 0) {
@@ -178,12 +178,16 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     /**
+     * XXX: Why does this return a composite object? Why not just the RLE
+     *      in question?
+     *
+     *
      * @return List of Object[3].  Object[0] -> (Integer)startime.
      * Object[1] -> (Integer)endtime. Object[2] -> (Double)availVal.
      */
-    List getHistoricalAvails(int mid, int start,
-            int end, boolean descending) {
-        String sql = new StringBuffer(512)
+    List getHistoricalAvails(int mid, long start,
+                             long end, boolean descending) {
+        String sql = new StringBuffer()
                     .append("SELECT rle.availabilityDataId.startime,")
                     .append(" rle.endtime, rle.availVal")
                     .append(" FROM AvailabilityDataRLE rle")
@@ -197,8 +201,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
 				 	.append(((descending) ? " DESC" : " ASC")).toString();
         return getSession()
             .createQuery(sql)
-            .setInteger("startime", start)
-            .setInteger("endtime", end)
+            .setLong("startime", start)
+            .setLong("endtime", end)
             .setInteger("mid", mid)
             .list();
     }
@@ -207,9 +211,9 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * @return List of Object[3].  Object[0] -> (Integer)startime.
      * Object[1] -> (Integer)endtime. Object[2] -> (Double)availVal.
      */
-    List getHistoricalAvails(Integer[] mids, int start,
-            int end, boolean descending) {
-        String sql = new StringBuffer(512)
+    List getHistoricalAvails(Integer[] mids, long start,
+                             long end, boolean descending) {
+        String sql = new StringBuffer()
                     .append("SELECT rle.availabilityDataId.startime,")
                     .append(" rle.endtime, avg(rle.availVal)")
                     .append(" FROM AvailabilityDataRLE rle")
@@ -225,8 +229,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
 				 	.append(((descending) ? " DESC" : " ASC")).toString();
         return getSession()
             .createQuery(sql)
-            .setInteger("startime", start)
-            .setInteger("endtime", end)
+            .setLong("startime", start)
+            .setLong("endtime", end)
             .setParameterList("mids", mids, new IntegerType())
             .list();
     }
@@ -237,8 +241,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
      *  [4] = startime, [5] = endtime, [6] = availVal
      */
     List findAggregateAvailability(Integer[] tids, Integer[] iids,
-            int start, int end) {
-        String sql = new StringBuffer(512)
+                                   long start, long end) {
+        String sql = new StringBuffer()
                     .append("SELECT m.template.id, min(rle.availVal),")
                     .append(" avg(rle.availVal), max(rle.availVal),")
                     .append(" rle.availabilityDataId.startime, rle.endtime,")
@@ -256,21 +260,19 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     .append(" rle.endtime").toString();
         return getSession()
             .createQuery(sql)
-            .setInteger("startime", start)
-            .setInteger("endtime", end)
+            .setLong("startime", start)
+            .setLong("endtime", end)
             .setParameterList("tids", tids, new IntegerType())
             .setParameterList("iids", iids, new IntegerType())
             .list();
     }
 
     /**
-     * @param resource - resource to query
-     * @param startime - start time in seconds
-     * @param interval - time interval in seconds
-     * @return - List of availability
+     *
+     * XXX: This does not look right...
      */
-    List findAvailabilityByResource(
-        Resource resource, int startime, int interval) {
+    List findAvailabilityByResource(Resource resource, long startime,
+                                    long interval) {
         String sql = "from AvailabilityDataRLE where resource.id = :rid";
         return getSession()
             .createQuery(sql)
@@ -282,10 +284,10 @@ public class AvailabilityDataDAO extends HibernateDAO {
         super.remove(avail);
     }
 
-    AvailabilityDataRLE create(Measurement meas, int startime,
-            int endtime, double availVal) {
-        AvailabilityDataRLE availObj = new AvailabilityDataRLE(meas, startime,
-            endtime, availVal);
+    AvailabilityDataRLE create(Measurement meas, long startime,
+                               long endtime, double availVal) {
+        AvailabilityDataRLE availObj =
+            new AvailabilityDataRLE(meas, startime, endtime, availVal);
         save(availObj);
         return availObj;
     }
@@ -366,10 +368,10 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .list();
     }
 
-    AvailabilityDataRLE create(Measurement meas, int startime,
-            double availVal) {
+    AvailabilityDataRLE create(Measurement meas, long startime, double availVal)
+    {
         AvailabilityDataRLE availObj = new AvailabilityDataRLE(meas, startime,
-            availVal);
+                                                               availVal);
         _log.debug("creating Avail: "+availObj);
         save(availObj);
         return availObj;

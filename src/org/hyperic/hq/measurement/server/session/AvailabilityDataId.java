@@ -29,18 +29,18 @@ import java.io.Serializable;
 
 public class AvailabilityDataId implements Serializable {
     private static final long serialVersionUID = 1L;
-    private int _startime;
+    private long _startime;
     private Measurement _measurement;
     
     public AvailabilityDataId() {
     }
     
-    public AvailabilityDataId(int startime, Measurement measurement) {
+    public AvailabilityDataId(long startime, Measurement measurement) {
         _startime = startime;
         _measurement = measurement;
     }
 
-    public int getStartime() {
+    public long getStartime() {
         return _startime;
     }
 
@@ -52,8 +52,7 @@ public class AvailabilityDataId implements Serializable {
         _measurement = measurement;
     }
 
-    public void setStartime(int startime) {
+    public void setStartime(long startime) {
         _startime = startime;
     }
-
 }

@@ -47,11 +47,6 @@ public class PageList extends ArrayList implements Serializable {
     private boolean      isUnbounded;   // Is the total size of the list known?
     private Serializable metaData;
 
-    public PageList(int initialSize) {
-        super(initialSize);
-        this.isUnbounded = false;
-    }
-
     public PageList() {
         super();
         this.isUnbounded = false;
@@ -64,13 +59,14 @@ public class PageList extends ArrayList implements Serializable {
     }
     
     public String toString() {
-        StringBuffer s = new StringBuffer("{");
-
-        s.append("totalSize=" + totalSize + " ");
-        s.append("}");
+        StringBuffer s = new StringBuffer("{")
+            .append("totalSize=")
+            .append(totalSize).append(" ")
+            .append("}");
         return super.toString() + s.toString();
 
     }
+    
     
     /** returns the total size of the "masterlist" that this page is a 
      *  subset of.

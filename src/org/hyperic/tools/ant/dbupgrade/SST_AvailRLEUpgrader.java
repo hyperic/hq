@@ -61,7 +61,7 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
             ArrayList avails = new ArrayList();
             
             while (rs.next()) {
-                avails.add(new AvailData(rs.getInt(1), rs.getInt(2),
+                avails.add(new AvailData(rs.getLong(1), rs.getLong(2),
                                          rs.getInt(3), rs.getDouble(4)));
             }
             
@@ -131,12 +131,12 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
     }
     
     private class AvailData {
-        int _starttime;
-        int _endtime;
+        long _starttime;
+        long _endtime;
         int _metric_id;
         double _availval;
         
-        public AvailData(int starttime, int endtime, int metric_id,
+        public AvailData(long starttime, long endtime, int metric_id,
                          double availval) {
             super();
             _starttime = starttime;
@@ -145,11 +145,11 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
             _availval = availval;
         }
 
-        public int getStartTime() {
+        public long getStartTime() {
             return _starttime;
         }
 
-        public int getEndTime() {
+        public long getEndTime() {
             return _endtime;
         }
 
@@ -160,7 +160,5 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
         public double getAvailVal() {
             return _availval;
         }
-        
-        
     }
 }

@@ -793,8 +793,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         Integer[] avIds = _measSep.getAvIds();
         Map data = getDataMan().getLastDataPoints(sepMids, after);
         data.putAll(_availMan.getLastAvail(avIds, after));
-        int i=0;
-        for (i = 0; i < mids.length; i++) {
+        for (int i = 0; i < mids.length; i++) {
             if (data.containsKey(mids[i])) {
                 ret[i] = (MetricValue) data.get(mids[i]);
             }
