@@ -170,9 +170,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
         timer.reset();
             
         // Now get the aggregate data, keyed by template ID's
-        Map availmap = _availMan.getAggregateData(mtids, eids, begin, end);
-        Map datamap = getDataMan().getAggregateData(mtids, eids, begin, end);
-        datamap.putAll(availmap);
+        Map datamap = _availMan.getAggregateData(mtids, eids, begin, end);
+        datamap.putAll(getDataMan().getAggregateData(mtids, eids, begin, end));
         
         if (log.isTraceEnabled()) {
             log.trace("getResourceMetrics -> getAggregateData took " +

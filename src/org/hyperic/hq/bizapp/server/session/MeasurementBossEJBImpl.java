@@ -1785,8 +1785,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         for (int i = 0; i < entIds.length; i++) {            
             Integer[] eid = new Integer[] { entIds[i].getId() };
             // Now get the aggregate data, keyed by template ID's
-            Map datamap = getDataMan().getAggregateData(mtids, eid,
-                                                        begin, end);
+            Map datamap = _availMan.getAggregateData(mtids, eid, begin, end);
+            datamap.putAll(getDataMan().getAggregateData(mtids, eid, begin, end));
     
             // For each template, add a new summary
             for (it = datamap.entrySet().iterator(); it.hasNext(); ) {
@@ -2549,6 +2549,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             Map dataMap;
             dataMap = getDataMan().
                 getLastDataPoints(mids, now - MeasurementConstants.HOUR);
+            dataMap.putAll(_availMan.getLastAvail(mids));
 
             if (dataMap.size() < 1)
                 continue;

@@ -273,6 +273,7 @@ public class AvailabilityManagerEJBImpl
             return rtn;
         }
         int i = 0;
+        Map lastMap = new HashMap();
         Object[] objs = (Object[])avails.get(i++);
         for (int curr=begin; curr<end; curr+=interval) {
             Integer tid = (Integer)objs[0];
@@ -284,46 +285,34 @@ public class AvailabilityManagerEJBImpl
             data[IND_AVG] = ((Double)objs[2]).doubleValue();
             data[IND_MAX] = ((Double)objs[3]).doubleValue();
             data[IND_CFG_COUNT] = (double)interval;
-            double endtime = ((Integer)objs[5]).doubleValue()*1000;
-            data[IND_LAST_TIME] = (endtime == MAX_AVAIL_TIMESTAMP) ?
-                now : endtime;
+            Integer endtime = (Integer)objs[5];
+            Double availVal = (Double)objs[6];
+            MetricValue mval;
+            long lendtime = endtime.longValue()*1000;
+            if (null == (mval = (MetricValue)lastMap.get(tid)) ||
+                    mval.getTimestamp() > lendtime) {
+                mval = new MetricValue(availVal, lendtime);
+                lastMap.put(tid, mval);
+            }
             rtn.put(tid, data);
+        }
+        for (Iterator it=lastMap.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)it.next();
+            Integer tid = (Integer)entry.getKey();
+            MetricValue lastVal = (MetricValue)entry.getValue();
+            double[] data = (double[])rtn.get(tid);
+            data[IND_LAST_TIME] = lastVal.getValue();
         }
         return rtn;
     }
 
-    private double[] getAggData(List aggList, double interval,
-            double timestamp) {
-        double[] data = new double[5];
-        if (aggList.size() == 0) {
-            data[IND_MIN] = ((Double)((Object[])aggList.get(0))[1]).doubleValue();
-            data[IND_AVG] = ((Double)((Object[])aggList.get(0))[2]).doubleValue();
-            data[IND_MAX] = ((Double)((Object[])aggList.get(0))[3]).doubleValue();
-            data[IND_CFG_COUNT] = interval;
-            data[IND_LAST_TIME] = timestamp;
-            return data;
-        }
-        double min = 0;
-        double avg = 0;
-        double max = 0;
-        for (Iterator i=aggList.iterator(); i.hasNext(); ) {
-            min += ((Double)((Object[])aggList.get(0))[1]).doubleValue();
-            avg += ((Double)((Object[])aggList.get(0))[2]).doubleValue();
-            max += ((Double)((Object[])aggList.get(0))[3]).doubleValue();
-        }
-        data[IND_MIN] = min/aggList.size();
-        data[IND_AVG] = avg/aggList.size();
-        data[IND_MAX] = max/aggList.size();
-        return data;
-    }
-    
     private double[] getDefaultData(double interval, double timestamp) {
         double[] data = new double[5];
         data[IND_MIN] = AVAIL_UNKNOWN;
         data[IND_AVG] = AVAIL_UNKNOWN;
         data[IND_MAX] = AVAIL_UNKNOWN;
         data[IND_CFG_COUNT] = interval;
-        data[IND_LAST_TIME] = timestamp;
+        data[IND_LAST_TIME] = AVAIL_UNKNOWN;
         return data;
     }
 
@@ -374,16 +363,22 @@ public class AvailabilityManagerEJBImpl
         long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000l);
         for (Iterator i=list.iterator(); i.hasNext(); ) {
             AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
+            Integer mid = avail.getMeasurement().getId();
             long endtime = 0;
             if (avail.getEndtime() == MAX_AVAIL_TIMESTAMP) {
                 endtime = now;
             } else {
                 endtime = new Long(avail.getEndtime()).longValue()*1000;
             }
-            MetricValue mVal = new MetricValue(avail.getAvailVal(), endtime);
-            rtn.put(avail.getMeasurement().getId(), mVal);
-            midList.remove(avail.getMeasurement().getId());
+            MetricValue tmp;
+            if (null == (tmp = (MetricValue)rtn.get(mid)) ||
+                    endtime > tmp.getTimestamp()) {
+                MetricValue mVal = new MetricValue(avail.getAvailVal(), endtime);
+                rtn.put(avail.getMeasurement().getId(), mVal);
+                midList.remove(avail.getMeasurement().getId());
+            }
         }
+        // fill in missing measurements
         if (midList.size() > 0) {
             for (Iterator i=midList.iterator(); i.hasNext(); ) {
                 Integer mid = (Integer)i.next();

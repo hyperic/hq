@@ -72,7 +72,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
     List findLastAvail(List mids, int after) {
         String sql = "from AvailabilityDataRLE" +
                      " WHERE endtime > :endtime" +
-                     " AND availabilityDataId.measurement in (:ids)";
+                     " AND availabilityDataId.measurement in (:ids)" +
+                     " order by endtime desc";
         return getSession()
             .createQuery(sql)
             .setInteger("endtime", after)
@@ -233,14 +234,15 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of Object[].  [0] = measurement template id,
      *  [1] = min(availVal), [2] = avg(availVal), [3] max(availVal)
-     *  [4] = startime, [5] = endtime
+     *  [4] = startime, [5] = endtime, [6] = availVal
      */
     List findAggregateAvailability(Integer[] tids, Integer[] iids,
             int start, int end) {
         String sql = new StringBuffer(512)
                     .append("SELECT m.template.id, min(rle.availVal),")
                     .append(" avg(rle.availVal), max(rle.availVal),")
-                    .append(" rle.availabilityDataId.startime, rle.endtime")
+                    .append(" rle.availabilityDataId.startime, rle.endtime,")
+                    .append(" rle.availVal")
                     .append(" FROM Measurement m")
                     .append(" JOIN m.availabilityData rle")
                     .append(" WHERE m.template in (:tids)")
@@ -250,7 +252,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     .append(" AND (rle.availabilityDataId.startime < :endtime")
                     .append("   OR rle.endtime < :endtime)")
                     .append(" group by m.template.id,")
-                    .append(" rle.availabilityDataId.startime,")
+                    .append(" rle.availabilityDataId.startime, rle.availVal,")
                     .append(" rle.endtime").toString();
         return getSession()
             .createQuery(sql)
