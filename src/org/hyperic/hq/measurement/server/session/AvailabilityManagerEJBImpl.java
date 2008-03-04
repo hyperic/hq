@@ -68,7 +68,7 @@ import org.hyperic.util.pager.PageList;
  *      view-type="local"
  *      type="Stateless"
  *      
- * @ejb:transaction type="RequiresNew"
+ * @ejb:transaction type="Required"
  */
 public class AvailabilityManagerEJBImpl
     extends SessionEJB implements SessionBean {
@@ -381,7 +381,8 @@ public class AvailabilityManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
-    public void addData(List availPoints) {
+    public void addData(List availPoints)
+    {
         List updateList = new ArrayList(availPoints.size());
         List outOfOrderAvail = new ArrayList(availPoints.size());
         LastAvailUpObj avail = LastAvailUpObj.getInst();
