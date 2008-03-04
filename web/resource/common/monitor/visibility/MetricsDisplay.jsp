@@ -160,7 +160,7 @@ sometimes we don't want any left side buttons or checkboxes at all
 
           function initLiveMetrics() {
             metricsUpdater = new MetricsUpdater();
-            ajaxEngine.registerRequest( 'getLiveMetrics', '<html:rewrite page="/resource/common/monitor/visibility/CurrentMetricValues.do"/>');
+            //ajaxEngine.registerRequest( 'getLiveMetrics', '<html:rewrite page="/resource/common/monitor/visibility/CurrentMetricValues.do"/>');
             ajaxEngine.registerAjaxObject( 'metricsUpdater', metricsUpdater );
             setMetricsRefresh();
           }

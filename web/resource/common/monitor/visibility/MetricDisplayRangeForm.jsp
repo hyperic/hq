@@ -265,13 +265,14 @@
   function showAdvanced() {
     if ($('advancedAnchor') != null) {
       $('advancedDisplay').style.display = "";
-      new Rico.Effect.Position('advancedDisplay',
+      /*new Rico.Effect.Position('advancedDisplay',
                                null, // move across y axis
                                $('advancedAnchor').offsetTop - $('advancedDisplay').offsetHeight,
                                0,
                                1, // 1 steps
                                {}
-                             );
+                             );*/
+         new Effect.Grow($('advancedAnchor'))
     }
 
     new Effect.Appear('advancedDisplay', {to: 0.85});

@@ -88,14 +88,15 @@
 <script language="javascript">
   function hideAdvanced() {
     var advancedDiv = $('advancedDisplay');
-    new Rico.Effect.Position( 'advancedDisplay',
+   /* new Rico.Effect.Position( 'advancedDisplay',
                                advancedDisplay.offsetLeft - advancedDisplay.offsetWidth,
                                advancedDisplay.offsetTop - advancedDisplay.offsetHeight,
                                0,
                                1, // 1 steps
                                {}
-                             );
-    new Effect.Fade(advancedDiv, {duration: 0});
+                             );*/
+    new Effect.Shrink(advancedDiv)
+    //new Effect.Fade(advancedDiv, {duration: 0});
   }
 
   onloads.push( hideAdvanced );

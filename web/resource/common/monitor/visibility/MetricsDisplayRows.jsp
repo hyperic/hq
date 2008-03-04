@@ -124,7 +124,6 @@
 </c:choose>
 
 <script language="JavaScript1.2">
-<!--
   MetricsUpdater = Class.create();
 
   MetricAttributes = new Array( "min", "average", "max", "last", "avail" );
@@ -191,22 +190,27 @@
   function getLiveMetrics() {
     var now = new Date();
     if (liveUpdate && (now - lastUpdate) >= refreshInterval) {
-      ajaxEngine.sendRequest( 'getLiveMetrics',
+      <%--ajaxEngine.sendRequest( 'getLiveMetrics',
                               "eid=<c:out value="${eid}"/>"
                             <c:if test="${not empty childResourceType}">
                               ,"ctype=<c:out value="${ctype}"/>"
                             </c:if>
-                            );
-      lastUpdate = now;
+                            );--%>
+    dojo.io.bind({
+    url:'<html:rewrite page="/resource/common/monitor/visibility/CurrentMetricValues.do"/>',
+    content: 'eid=' + <c:out value="${eid}"/><c:if test="${not empty childResourceType}">  + 'ctype=' + <c:out value="${ctype}"/></c:if>',
+    load: function(type, data, evt){lastUpdate = now;setMetricsRefresh();},
+    method:'POST'
+});
+      //lastUpdate = now;
     }
-    setMetricsRefresh();
+    //setMetricsRefresh();
   }
 
   function setMetricsRefresh() {
     setTimeout( "getLiveMetrics()", 60*1000 );
   }
 
--->
 </script>
 
 <c:forEach var="metricDisplaySummary" items="${rows}">

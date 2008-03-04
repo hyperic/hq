@@ -187,15 +187,16 @@
 <script language="javascript">
   function hideAdvanced() {
     var advancedDiv = $('advancedDisplay');
-    new Rico.Effect.Position( 'advancedDisplay',
+    /*new Rico.Effect.Position( 'advancedDisplay',
                                null, // move across y axis
                                advancedDiv.offsetTop - advancedDiv.offsetHeight,
                                0,
                                1, // 1 steps
                                {}
                              );
-    Rico.Corner.round(advancedDiv , {border:'#F35E0C',compact:true});
-    new Effect.Fade(advancedDiv, {duration: 0});
+    Rico.Corner.round(advancedDiv , {border:'#F35E0C',compact:true});*/
+    new Effect.Shrink(advancedDiv)
+    //new Effect.Fade(advancedDiv, {duration: 0});
   }
 
   onloads.push( hideAdvanced );
