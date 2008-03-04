@@ -1253,8 +1253,6 @@
     <antcall target="chmod-exec">
       <param name="chmod.dir" value="${agent.dir}"/>
     </antcall>
-  	
-  	<chmod file="${agent.dir}/sbin/*" perm="a+rx"/>
   
   </target>
 
