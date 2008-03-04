@@ -247,6 +247,12 @@ __ll__
     <antcall target="chmod-exec">
       <param name="chmod.dir" value="${agent.installdir}/agent-${version}"/>
     </antcall>
+    <antcall target="chmod-exec">
+      <param name="chmod.dir" value="${agent.installdir}/agent-${version}/bin"/>
+    </antcall>
+    <antcall target="chmod-exec">
+      <param name="chmod.dir" value="${agent.installdir}/agent-${version}/sbin"/>
+    </antcall>
     <echo>^^^INFO: Fixing line endings on text files...</echo>
     <antcall target="fix-text-files">
       <param name="crlf.dir" value="${agent.installdir}/agent-${version}"/>
