@@ -218,7 +218,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
 				 	.append("   OR rle.endtime > :startime)")
 				 	.append(" AND (rle.availabilityDataId.startime < :endtime")
 				 	.append("   OR rle.endtime < :endtime)")
-				 	.append(" GROUP BY rle.availabilityDataId.startime")
+				 	.append(" GROUP BY rle.availabilityDataId.startime,")
+				 	.append(" rle.endtime")
 				 	.append(" ORDER BY rle.availabilityDataId.startime")
 				 	.append(((descending) ? " DESC" : " ASC")).toString();
         return getSession()
