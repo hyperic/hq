@@ -1382,7 +1382,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      */
     public ResourceValue getServerResourceValue(Integer pk)
         throws FinderException {
-        return getServerResourceValue(pk);
+        return getAuthzResource(getServerResourceType(), pk);
     }
 
     /**
