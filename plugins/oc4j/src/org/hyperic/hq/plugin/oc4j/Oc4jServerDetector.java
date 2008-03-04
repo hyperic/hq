@@ -55,10 +55,12 @@ extends MxServerDetector {
     private static final String OC4J_JAR = "oc4j.jar";
     private static final String J2EE_HOME = "j2ee" + File.separator + "home";
     private static final String RMI_XML = J2EE_HOME + File.separator + "config" + File.separator + "rmi.xml";
-
-    private static final String JMX_URL_BASE = "service:jmx:rmi://localhost:";
-    private static final Pattern RMI_PORT_PATTERN = Pattern.compile("\\s*port\\s*=\"(.*)\".*");
-
+    private static final String OPMN_XML = "opmn" + File.separator + "conf" + File.separator + "opmn.xml";
+    
+    private static final String OC4J_JMX_URL_BASE = "service:jmx:rmi://localhost:";
+    private static final String OPMN_JMX_URL_BASE = "service:jmx:rmi:///opmn://localhost:";
+    private static final Pattern RMI_PORT_PATTERN = Pattern.compile(".*\\s*port\\s*=\"(.*)\".*");
+    private static final Pattern OPMN_PORT_PATTERN = Pattern.compile(".*\\s*request\\s*=\"(.*)\".*");
 
     public List getServerResources(ConfigResponse platformConfig)
     throws PluginException {
@@ -99,10 +101,6 @@ extends MxServerDetector {
                 config.setValue(MxUtil.PROP_JMX_URL,
                         process.getURL());
             }
-            else {
-                config.setValue(MxUtil.PROP_JMX_URL,
-                        getJMXUrl(dir));
-            }
 
             // default anything not auto-configured
             setProductConfig(server, config);
@@ -126,24 +124,54 @@ extends MxServerDetector {
 
 
     // auto-detects the RMI port for the JMX URL
-    private String getJMXUrl(String dir) {
-        try {
-            BufferedReader in = new BufferedReader(new FileReader(dir + File.separator + RMI_XML));
+    private String getJMXUrl(String dir, String instanceName) {
+        BufferedReader in = null;
+        String sourceFile;
+        Pattern pattern;
+        String url;
+        String port = null;
+        if (instanceName == null) {
+            sourceFile = dir + File.separator + RMI_XML;
+            pattern = RMI_PORT_PATTERN;
+        }
+        else {
+            sourceFile = dir + File.separator + OPMN_XML;
+            pattern = OPMN_PORT_PATTERN;
+        }
+        
+        try {            
+            in = new BufferedReader(new FileReader(sourceFile));
             String str;
             Matcher matcher;
             while ((str = in.readLine()) != null) {
-                matcher = RMI_PORT_PATTERN.matcher(str);
+                matcher = pattern.matcher(str);
                 if (matcher.matches()) {
-                    String port = matcher.group(1);
-                    log.debug("Auto-detected RMI port to " + port);
-                    return JMX_URL_BASE + port;
+                    port = matcher.group(1);
+                    if (pattern == RMI_PORT_PATTERN)
+                        log.debug("Auto-detected JMX RMI port to " + port);
+                    else if (pattern == OPMN_PORT_PATTERN)
+                        log.debug("Auto-detected JMX OPMN port to " + port);
+                    break;
                 }
-            }
-            in.close();
+            }    
         } catch (IOException e) {
-            log.error("Failed to detect RMI port in file " + RMI_XML, e);
+            log.error("Failed to detect JMX URI port in file " + sourceFile, e);
         }
-        return null;
+        finally {
+            if (in != null)
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    log.warn("Failed to close file " + sourceFile, e);
+                }
+        }
+        if (instanceName == null) {
+            url = OC4J_JMX_URL_BASE + port;
+        }
+        else {
+            url = OPMN_JMX_URL_BASE +  port + "/" + instanceName;
+        }
+        return url;
     }
 
 
@@ -153,11 +181,12 @@ extends MxServerDetector {
         String procQuery = PROC_JAVA + ",Args.*.ct=" + OC4J_JAR;
         long[] pids = getPids(procQuery);
         log.debug(procQuery + " matched " + pids.length + " processes");
-
+        
         for (int i=0; i<pids.length; i++) {
             long pid = pids[i];
             String[] args = getProcArgs(pid);
             String path = null;
+            String instanceName = null;
 
             for (int j=1; j<args.length; j++) {
                 String arg = args[j];
@@ -172,11 +201,16 @@ extends MxServerDetector {
                             path = jar.getAbsolutePath();
                     }
                     if (path != null) {
-                        log.debug("Got path for oc4j.jar: " + path);;
+                        log.debug("Got path for oc4j.jar: " + path);
                         int index = path.lastIndexOf(J2EE_HOME + File.separator + OC4J_JAR);
                         path = path.substring(0, index - 1);
                         break;
                     }
+                }
+                // use this argument to detect an OC4J Instance running under Oracle Application Server
+                if (arg.startsWith("-Doracle.oc4j.instancename=")) {
+                    instanceName = arg.replace("-Doracle.oc4j.instancename=", "");
+                    log.debug("Auto-detected OC4J instance " + instanceName);
                 }
             }
 
@@ -185,6 +219,7 @@ extends MxServerDetector {
                     new Oc4jProcess(pid,
                             args,
                             path);    
+                process.setURL(getJMXUrl(process.getInstallPath(), instanceName));
                 procs.add(process);
             }
         }

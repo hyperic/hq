@@ -141,18 +141,12 @@
 
 		<property name="HAS_BUILTIN_SERVICES" value="true" />
 
-		<!--  TODO oracle.home environment property is needed for autodetection -->
-		<property name="PROC_HOME_PROPERTY" value="oracle.home" />
-
 		<config>
-			<option name="jmx.url" description="JMX URL to MBeanServer"
-				default="service:jmx:rmi://localhost:23791" type="hidden"/>
+			<option name="jmx.url" description="JMX URL to MBeanServer" type="hidden"/>
 
-			<option name="jmx.username" description="JMX username"
-				default="oc4jadmin" />
+			<option name="jmx.username" description="JMX username" default="oc4jadmin" />
 
-			<option name="jmx.password" description="JMX password"
-				type="secret" />
+			<option name="jmx.password" description="JMX password" type="secret" />
 
 			<option name="jmx.provider.pkgs"
 				description="Defines the protocols that can be used to connect to the OC4J MBean server."
