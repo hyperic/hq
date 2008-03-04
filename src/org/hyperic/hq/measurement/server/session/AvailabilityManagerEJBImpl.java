@@ -99,6 +99,7 @@ public class AvailabilityManagerEJBImpl
         AvailabilityDataRLE.getLastTimestamp();
     private static final String ALL_EVENTS_INTERESTING_PROP = 
         "org.hq.triggers.all.events.interesting";
+    private static final int DEFAULT_INTERVAL = 60;
     
     /**
      * @ejb:interface-method
@@ -176,9 +177,9 @@ public class AvailabilityManagerEJBImpl
         return getPageList(availInfo, begin, end, interval);
     }
     
-    private Collection getDefaultHistoricalAvail(int interval) {
-        Double[] rtn = new Double[interval];
-        Arrays.fill(rtn, new Double(AVAIL_UNKNOWN));
+    private Collection getDefaultHistoricalAvail(int interval, long timestamp) {
+        HighLowMetricValue[] rtn = new HighLowMetricValue[interval];
+        Arrays.fill(rtn, new HighLowMetricValue(AVAIL_UNKNOWN, timestamp));
         return Arrays.asList(rtn);
     }
 
@@ -217,23 +218,24 @@ public class AvailabilityManagerEJBImpl
                 if (curr > availStartime) {
                     val = getMetricValue(queue, curr);
                 } else {
-                    val = new HighLowMetricValue(AVAIL_UNKNOWN, curr);
+                    val = new HighLowMetricValue(AVAIL_UNKNOWN,
+                        new Long(curr).longValue()*1000);
                 }
                 rtn.add(val);
             }
         }
         if (rtn.size() == 0) {
-            rtn.addAll(getDefaultHistoricalAvail(interval));
+            rtn.addAll(getDefaultHistoricalAvail(DEFAULT_INTERVAL,
+                new Long(end).longValue()*1000));
         }
         return rtn;
     }
 
-    private HighLowMetricValue getMetricValue(List avails, int timestamp) {
-        long ltimestamp = new Long(timestamp).longValue()*1000;
+    private HighLowMetricValue getMetricValue(List avails, long timestamp) {
         if (avails.size() == 1) {
             Object[] objs = (Object[])avails.get(0);
             return new HighLowMetricValue(
-                ((Double)objs[2]).doubleValue(), ltimestamp);
+                ((Double)objs[2]).doubleValue(), timestamp);
         }
         double value = 0;
         for (Iterator i=avails.iterator(); i.hasNext(); ) {
@@ -250,12 +252,50 @@ public class AvailabilityManagerEJBImpl
      */
     public Map getAggregateData(Integer[] tids, Integer[] iids,
             long begin, long end) {
-        int ibegin = new Long(begin/1000).intValue();
-        // if the end time is around now then just grab everything
-        int iend = new Long(end/1000).intValue();
+        return getAggregateData(tids, iids, new Long(begin/1000).intValue(),
+            new Long(end/1000).intValue());
+    }
+
+    private Map getAggregateData(Integer[] tids, Integer[] iids,
+            int begin, int end) {
+        List tidList = new ArrayList(Arrays.asList(tids));
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
-        List avails = dao.findAggregateAvailability(tids, iids, ibegin, iend);
-        int interval = (iend-ibegin)/60;
+        List avails = dao.findAggregateAvailability(tids, iids, begin, end);
+        int interval = (end-begin)/DEFAULT_INTERVAL;
+//        if (avails.size() > 1) {
+//            return getAggMap(avails, begin, end, DEFAULT_INTERVAL);
+//        }
+        Map rtn = new HashMap();
+        double now =
+            TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000);
+        if (avails.size() == 0) {
+            for (Iterator i=tidList.iterator(); i.hasNext(); ) {
+                Integer tid = (Integer)i.next();
+                rtn.put(tid, getDefaultData(interval, now));
+            }
+            return rtn;
+        }
+        int i = 0;
+        Object[] objs = (Object[])avails.get(i++);
+        for (int curr=begin; curr<end; curr+=interval) {
+            Integer tid = (Integer)objs[0];
+            while (begin > ((Integer)objs[5]).intValue()) {
+                objs = (Object[])avails.get(i++);
+            }
+            double[] data = new double[5];
+            data[IND_MIN] = ((Double)objs[1]).doubleValue();
+            data[IND_AVG] = ((Double)objs[2]).doubleValue();
+            data[IND_MAX] = ((Double)objs[3]).doubleValue();
+            data[IND_CFG_COUNT] = (double)interval;
+            double endtime = ((Integer)objs[5]).doubleValue()*1000;
+            data[IND_LAST_TIME] = (endtime == MAX_AVAIL_TIMESTAMP) ?
+                now : endtime;
+            rtn.put(tid, data);
+        }
+        return rtn;
+    }
+
+/*
         Map rtn = new HashMap(avails.size());
         for (Iterator it=avails.iterator(); it.hasNext(); ) {
             Object[] obj = (Object[])it.next();
@@ -263,13 +303,110 @@ public class AvailabilityManagerEJBImpl
             Integer tid = meas.getTemplate().getId();
             double[] data = new double[5];
             data[IND_MIN] = ((Double)obj[1]).doubleValue();
-            data[IND_AVG] = 1-((Double)obj[2]).doubleValue();
+            data[IND_AVG] = ((Double)obj[2]).doubleValue();
             data[IND_MAX] = ((Double)obj[3]).doubleValue();
             data[IND_CFG_COUNT] = (double)interval;
             data[IND_LAST_TIME] = (double)end;
             rtn.put(tid, data);
+            tidList.remove(tid);
+        }
+
+        if (tidList.size() > 0) {
+            for (Iterator i=tidList.iterator(); i.hasNext(); ) {
+                Integer mid = (Integer)i.next();
+                rtn.put(mid, getDefaultData(interval,
+                    new Double(end).doubleValue()));
+            }
         }
         return rtn;
+    }
+*/
+
+    private Map getAggMap(List availInfo, int begin, int end, int interval) {
+        Map rtn = new HashMap(interval);
+        for (Iterator it=availInfo.iterator(); it.hasNext(); ) {
+            Object[] objs = (Object[])it.next();
+            int availStartime = ((Integer)objs[4]).intValue();
+            int availEndtime = ((Integer)objs[5]).intValue();
+            Integer tid = (Integer)objs[0];
+            double[] data = new double[5];
+            data[IND_MIN] = ((Double)objs[1]).doubleValue();
+            data[IND_AVG] = ((Double)objs[2]).doubleValue();
+            data[IND_MAX] = ((Double)objs[3]).doubleValue();
+            data[IND_CFG_COUNT] = (double)interval;
+            data[IND_LAST_TIME] = (double)end;
+
+            LinkedList queue = new LinkedList();
+            queue.add(objs);
+            for (int curr=begin; curr<end; curr+=interval) {
+                int next = curr+interval;
+                int endtime =
+                    ((Integer)((Object[])queue.getFirst())[5]).intValue();
+                while (next > endtime) {
+                    Object[] tmp = (Object[])it.next();
+                    queue.addFirst(tmp);
+                    endtime = ((Integer)tmp[5]).intValue();
+                }
+                endtime = availEndtime;
+                while (curr > endtime) {
+                    queue.removeLast();
+                    objs = (Object[])queue.getLast();
+                    data = new double[5];
+                    data[IND_MIN] = ((Double)objs[1]).doubleValue();
+                    data[IND_AVG] = ((Double)objs[2]).doubleValue();
+                    data[IND_MAX] = ((Double)objs[3]).doubleValue();
+                    data[IND_CFG_COUNT] = (double)interval;
+                    data[IND_LAST_TIME] = (double)end;
+                }
+                if (curr > availStartime) {
+                    data = getAggData(queue, interval, curr);
+                } else {
+                    data = getDefaultData(interval,
+                        new Double(availEndtime).doubleValue());
+                }
+                rtn.put(tid, data);
+            }
+        }
+//        if (rtn.size() == 0) {
+//            rtn.addAll(getDefaultHistoricalAvail(DEFAULT_INTERVAL,
+//                new Long(end).longValue()*1000));
+//        }
+        return rtn;
+    }
+
+    private double[] getAggData(List aggList, double interval,
+            double timestamp) {
+        double[] data = new double[5];
+        if (aggList.size() == 0) {
+            data[IND_MIN] = ((Double)((Object[])aggList.get(0))[1]).doubleValue();
+            data[IND_AVG] = ((Double)((Object[])aggList.get(0))[2]).doubleValue();
+            data[IND_MAX] = ((Double)((Object[])aggList.get(0))[3]).doubleValue();
+            data[IND_CFG_COUNT] = interval;
+            data[IND_LAST_TIME] = timestamp;
+            return data;
+        }
+        double min = 0;
+        double avg = 0;
+        double max = 0;
+        for (Iterator i=aggList.iterator(); i.hasNext(); ) {
+            min += ((Double)((Object[])aggList.get(0))[1]).doubleValue();
+            avg += ((Double)((Object[])aggList.get(0))[2]).doubleValue();
+            max += ((Double)((Object[])aggList.get(0))[3]).doubleValue();
+        }
+        data[IND_MIN] = min/aggList.size();
+        data[IND_AVG] = avg/aggList.size();
+        data[IND_MAX] = max/aggList.size();
+        return data;
+    }
+    
+    private double[] getDefaultData(double interval, double timestamp) {
+        double[] data = new double[5];
+        data[IND_MIN] = AVAIL_UNKNOWN;
+        data[IND_AVG] = AVAIL_UNKNOWN;
+        data[IND_MAX] = AVAIL_UNKNOWN;
+        data[IND_CFG_COUNT] = interval;
+        data[IND_LAST_TIME] = timestamp;
+        return data;
     }
 
     /**
@@ -310,20 +447,31 @@ public class AvailabilityManagerEJBImpl
         }
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List list;
+        List midList = new ArrayList(Arrays.asList(mids));
         if (after != -1) {
-            list = dao.findLastAvail(Arrays.asList(mids), after);
+            list = dao.findLastAvail(midList, after);
         } else {
-            list = dao.findLastAvail(Arrays.asList(mids));
+            list = dao.findLastAvail(midList);
         }
-        long now = System.currentTimeMillis();
+        long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000l);
         for (Iterator i=list.iterator(); i.hasNext(); ) {
             AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
-            long endtime = new Long(avail.getEndtime()).longValue()*1000;
-            if (endtime == MAX_AVAIL_TIMESTAMP) {
-                endtime = TimingVoodoo.roundDownTime(now, 60000l);
+            long endtime = 0;
+            if (avail.getEndtime() == MAX_AVAIL_TIMESTAMP) {
+                endtime = now;
+            } else {
+                endtime = new Long(avail.getEndtime()).longValue()*1000;
             }
             MetricValue mVal = new MetricValue(avail.getAvailVal(), endtime);
             rtn.put(avail.getMeasurement().getId(), mVal);
+            midList.remove(avail.getMeasurement().getId());
+        }
+        if (midList.size() > 0) {
+            for (Iterator i=midList.iterator(); i.hasNext(); ) {
+                Integer mid = (Integer)i.next();
+                MetricValue mVal = new MetricValue(AVAIL_UNKNOWN, now);
+                rtn.put(mid, mVal);
+            }
         }
         return rtn;
     }

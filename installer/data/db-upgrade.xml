@@ -8411,7 +8411,7 @@ has already been defined.
       </statement>
       <statement desc="Add foreign key constraint for measurement_id">
         alter table HQ_AVAIL_DATA_RLE add constraint FK6E8F9E9CAE18683B foreign key (MEASUREMENT_ID)
-          references EAM_MEASUREMENT (ID) on delete cascade
+          references EAM_MEASUREMENT (ID)
       </statement>
 
       <statement desc="Insert data from HQ_METRIC_DATA_0D_0S table">

@@ -36,8 +36,8 @@ public class MeasurementSeparator {
     private final AvailabilityManagerLocal _availMan =
         AvailabilityManagerEJBImpl.getOne();
     private List _orderedAvailIds;
-    private Object[] _mids;
-    private Object[] _avIds;
+    private Integer[] _mids;
+    private Integer[] _avIds;
     public MeasurementSeparator() {
         _orderedAvailIds = _availMan.getAllAvailIds();
     }
@@ -63,8 +63,8 @@ public class MeasurementSeparator {
                 midList.add(mids[i]);
             }
         }
-        _mids = midList.toArray();
-        _avIds = aidList.toArray();
+        _mids = (Integer[])midList.toArray(new Integer[midList.size()]);
+        _avIds = (Integer[])aidList.toArray(new Integer[aidList.size()]);
     }
     public boolean isAvailMeas(Integer id) {
         int res =

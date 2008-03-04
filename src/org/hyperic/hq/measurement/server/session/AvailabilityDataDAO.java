@@ -69,7 +69,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         super(AvailabilityDataDAO.class, f);
     }
 
-    public List findLastAvail(List mids, int after) {
+    List findLastAvail(List mids, int after) {
         String sql = "from AvailabilityDataRLE" +
                      " WHERE endtime > :endtime" +
                      " AND availabilityDataId.measurement in (:ids)";
@@ -80,7 +80,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .list();
     }
 
-    public List findLastAvail(List mids) {
+    List findLastAvail(List mids) {
         String sql = "from AvailabilityDataRLE" +
                      " WHERE endtime = :endtime" +
                      " AND availabilityDataId.measurement in (:ids)" +
@@ -92,20 +92,20 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .list();
     }
 
-    public int updateStartime(AvailabilityDataRLE avail, int startime) {
+    int updateStartime(AvailabilityDataRLE avail, int startime) {
         remove(avail);
         avail.setStartime(startime);
         save(avail);
         return 1;
     }
 
-    public int updateEndtime(AvailabilityDataRLE avail, int endtime) {
+    int updateEndtime(AvailabilityDataRLE avail, int endtime) {
         avail.setEndtime(endtime);
         save(avail);
         return 1;
     }
 
-    public AvailabilityDataRLE findAvail(AvailState state) {
+    AvailabilityDataRLE findAvail(AvailState state) {
         String sql = "FROM AvailabilityDataRLE" +
                      " WHERE availabilityDataId.startime = :startime" +
                      " AND availabilityDataId.measurement = :meas ";
@@ -120,7 +120,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         return (AvailabilityDataRLE)list.get(0);
     }
     
-    public List findAllAvailsAfter(AvailState state) {
+    List findAllAvailsAfter(AvailState state) {
         String sql = "FROM AvailabilityDataRLE" +
                      " WHERE availabilityDataId.startime > :startime" +
                      " AND availabilityDataId.measurement = :meas "+
@@ -131,7 +131,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         	.list();
     }
 
-    public AvailabilityDataRLE findAvailAfter(AvailState state) {
+    AvailabilityDataRLE findAvailAfter(AvailState state) {
         String sql = "FROM AvailabilityDataRLE" +
                      " WHERE availabilityDataId.startime > :startime" +
                      " AND availabilityDataId.measurement = :meas "+
@@ -147,12 +147,12 @@ public class AvailabilityDataDAO extends HibernateDAO {
         return (AvailabilityDataRLE)list.get(0);
     }
 
-    public void updateVal(AvailabilityDataRLE avail, double newVal) {
+    void updateVal(AvailabilityDataRLE avail, double newVal) {
         avail.setAvailVal(newVal);
         save(avail);
     }
 
-    public AvailabilityDataRLE findAvailBefore(AvailState state) {
+    AvailabilityDataRLE findAvailBefore(AvailState state) {
         String sql = "from AvailabilityDataRLE" +
                      " WHERE availabilityDataId.startime < :startime" +
                      " AND availabilityDataId.measurement = :meas "+
@@ -168,7 +168,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         return (AvailabilityDataRLE)list.get(0);
     }
 
-    public List findLastDownAvailability() {
+    List findLastDownAvailability() {
         String sql = "from AvailabilityDataRLE where availval=?";
         return getSession()
             .createQuery(sql)
@@ -180,7 +180,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * @return List of Object[3].  Object[0] -> (Integer)startime.
      * Object[1] -> (Integer)endtime. Object[2] -> (Double)availVal.
      */
-    public List getHistoricalAvails(int mid, int start,
+    List getHistoricalAvails(int mid, int start,
             int end, boolean descending) {
         String sql = new StringBuffer(512)
                     .append("SELECT rle.availabilityDataId.startime,")
@@ -206,7 +206,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * @return List of Object[3].  Object[0] -> (Integer)startime.
      * Object[1] -> (Integer)endtime. Object[2] -> (Double)availVal.
      */
-    public List getHistoricalAvails(Integer[] mids, int start,
+    List getHistoricalAvails(Integer[] mids, int start,
             int end, boolean descending) {
         String sql = new StringBuffer(512)
                     .append("SELECT rle.availabilityDataId.startime,")
@@ -229,11 +229,17 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .list();
     }
 
-    public List findAggregateAvailability(Integer[] tids, Integer[] iids,
+    /**
+     * @return List of Object[].  [0] = measurement template id,
+     *  [1] = min(availVal), [2] = avg(availVal), [3] max(availVal)
+     *  [4] = startime, [5] = endtime
+     */
+    List findAggregateAvailability(Integer[] tids, Integer[] iids,
             int start, int end) {
         String sql = new StringBuffer(512)
-                    .append("SELECT m, min(rle.availVal), avg(rle.availVal),")
-                    .append(" max(rle.availVal), count(*)")
+                    .append("SELECT m.template.id, min(rle.availVal),")
+                    .append(" avg(rle.availVal), max(rle.availVal),")
+                    .append(" rle.availabilityDataId.startime, rle.endtime")
                     .append(" FROM Measurement m")
                     .append(" JOIN m.availabilityData rle")
                     .append(" WHERE m.template in (:tids)")
@@ -242,7 +248,9 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     .append("   OR rle.endtime > :startime)")
                     .append(" AND (rle.availabilityDataId.startime < :endtime")
                     .append("   OR rle.endtime < :endtime)")
-                    .append(" group by m.template").toString();
+                    .append(" group by m.template.id,")
+                    .append(" rle.availabilityDataId.startime,")
+                    .append(" rle.endtime").toString();
         return getSession()
             .createQuery(sql)
             .setInteger("startime", start)
@@ -258,7 +266,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * @param interval - time interval in seconds
      * @return - List of availability
      */
-    public List findAvailabilityByResource(
+    List findAvailabilityByResource(
         Resource resource, int startime, int interval) {
         String sql = "from AvailabilityDataRLE where resource.id = :rid";
         return getSession()
@@ -267,11 +275,11 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .list();
     }
 
-    public void remove(AvailabilityDataRLE avail) {
+    void remove(AvailabilityDataRLE avail) {
         super.remove(avail);
     }
 
-    public AvailabilityDataRLE create(Measurement meas, int startime,
+    AvailabilityDataRLE create(Measurement meas, int startime,
             int endtime, double availVal) {
         AvailabilityDataRLE availObj = new AvailabilityDataRLE(meas, startime,
             endtime, availVal);
@@ -282,22 +290,22 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of all measurement ids for availability, ordered
      */
-    public List getAllAvailIds() {
+    List getAllAvailIds() {
         String sql = "SELECT m.id from Measurement m" +
 				     " JOIN m.template t" +
-				 	 " WHERE upper(t.name) like '%" +
+				 	 " WHERE upper(t.alias) like '%" +
 				 	 CAT_AVAILABILITY.toUpperCase() + "%' order by m.id";
         return getSession()
             .createQuery(sql)
             .list();
     }
 
-    public Measurement getAvailMeasurement(Resource resource) {
+    Measurement getAvailMeasurement(Resource resource) {
         String sql = "SELECT m from Measurement m" +
                      " JOIN m.resource r" +
 				     " JOIN m.template t" +
 				 	 " WHERE  r.id = " + resource.getId() +
-				 	 " AND upper(t.name) like '%" +
+				 	 " AND upper(t.alias) like '%" +
 				 	 CAT_AVAILABILITY.toUpperCase() + "%'";
         return (Measurement)getSession()
             .createQuery(sql)
@@ -309,13 +317,13 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * return List of Availability Measurements which are children of the
      * resourceIds
      */
-    public List getAvailMeasurementChildren(List resourceIds) {
+    List getAvailMeasurementChildren(List resourceIds) {
         String sql = "SELECT m from Measurement m" +
                      " JOIN m.resource.toEdges e" +
         			 " JOIN m.template t" +
         			 " WHERE e.distance > 0" +
         			 " AND e.from in (:ids)" +
-				 	 " AND upper(t.name) like '%" +
+				 	 " AND upper(t.alias) like '%" +
 				 	 CAT_AVAILABILITY.toUpperCase() + "%'";
         return getSession()
             .createQuery(sql)
@@ -326,14 +334,14 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of down Measurements
      */
-    public List getDownMeasurements() {
+    List getDownMeasurements() {
         String sql = "SELECT m, rle.availabilityDataId.startime" +
                      " FROM Measurement m" +
 				     " JOIN m.template t" +
 				 	 " JOIN m.availabilityData rle" +
 				 	 " WHERE rle.endtime = " + MAX_TIMESTAMP +
 				 	 " AND rle.availVal = " + AVAIL_DOWN + 
-				 	 " AND upper(t.name) like '%" +
+				 	 " AND upper(t.alias) like '%" +
 				 	 CAT_AVAILABILITY.toUpperCase() + "%'";
         return getSession()
             .createQuery(sql)
@@ -343,19 +351,19 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of Object[].  Object[0] is Measurement Object[1] is Resource
      */
-    public List getPlatformResources() {
+    List getPlatformResources() {
         String sql = "SELECT m, r FROM Measurement m" +
                      " JOIN m.resource r" +
 				     " JOIN m.template t" +
 				 	 " WHERE r.resourceType = " + PLATFORM_TYPE +
-				 	 " AND upper(t.name) like '%" +
+				 	 " AND upper(t.alias) like '%" +
 				 	 CAT_AVAILABILITY.toUpperCase() + "%'";
         return getSession()
             .createQuery(sql)
             .list();
     }
 
-    public AvailabilityDataRLE create(Measurement meas, int startime,
+    AvailabilityDataRLE create(Measurement meas, int startime,
             double availVal) {
         AvailabilityDataRLE availObj = new AvailabilityDataRLE(meas, startime,
             availVal);

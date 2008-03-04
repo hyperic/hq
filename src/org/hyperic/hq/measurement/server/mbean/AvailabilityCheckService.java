@@ -100,12 +100,12 @@ public class AvailabilityCheckService
         super.hit(lDate);
     }
 
-    private List getDownPlatforms(Date lDate,
-        AvailabilityManagerLocal availMan) {
+    private List getDownPlatforms(Date lDate) {
         boolean debug = _log.isDebugEnabled();
         long lnow = lDate.getTime();
         int inow = (new Long(lnow/1000)).intValue();
         LastAvailUpObj avail = LastAvailUpObj.getInst();
+        AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
         List platformResources = availMan.getPlatformResources();
         List rtn = new ArrayList(platformResources.size());
         synchronized (avail) {
@@ -164,7 +164,7 @@ public class AvailabilityCheckService
             return;
         }
         AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
-        List downPlatforms = getDownPlatforms(lDate, availMan);
+        List downPlatforms = getDownPlatforms(lDate);
         List backfillList = new ArrayList(downPlatforms.size()*50);
         for (Iterator i=downPlatforms.iterator(); i.hasNext(); ) {
             ResourceDataPoint rdp = (ResourceDataPoint)i.next();
