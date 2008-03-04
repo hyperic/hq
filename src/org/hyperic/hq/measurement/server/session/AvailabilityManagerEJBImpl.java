@@ -262,9 +262,6 @@ public class AvailabilityManagerEJBImpl
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List avails = dao.findAggregateAvailability(tids, iids, begin, end);
         int interval = (end-begin)/DEFAULT_INTERVAL;
-//        if (avails.size() > 1) {
-//            return getAggMap(avails, begin, end, DEFAULT_INTERVAL);
-//        }
         Map rtn = new HashMap();
         double now =
             TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000);
@@ -292,85 +289,6 @@ public class AvailabilityManagerEJBImpl
                 now : endtime;
             rtn.put(tid, data);
         }
-        return rtn;
-    }
-
-/*
-        Map rtn = new HashMap(avails.size());
-        for (Iterator it=avails.iterator(); it.hasNext(); ) {
-            Object[] obj = (Object[])it.next();
-            Measurement meas = (Measurement)obj[0];
-            Integer tid = meas.getTemplate().getId();
-            double[] data = new double[5];
-            data[IND_MIN] = ((Double)obj[1]).doubleValue();
-            data[IND_AVG] = ((Double)obj[2]).doubleValue();
-            data[IND_MAX] = ((Double)obj[3]).doubleValue();
-            data[IND_CFG_COUNT] = (double)interval;
-            data[IND_LAST_TIME] = (double)end;
-            rtn.put(tid, data);
-            tidList.remove(tid);
-        }
-
-        if (tidList.size() > 0) {
-            for (Iterator i=tidList.iterator(); i.hasNext(); ) {
-                Integer mid = (Integer)i.next();
-                rtn.put(mid, getDefaultData(interval,
-                    new Double(end).doubleValue()));
-            }
-        }
-        return rtn;
-    }
-*/
-
-    private Map getAggMap(List availInfo, int begin, int end, int interval) {
-        Map rtn = new HashMap(interval);
-        for (Iterator it=availInfo.iterator(); it.hasNext(); ) {
-            Object[] objs = (Object[])it.next();
-            int availStartime = ((Integer)objs[4]).intValue();
-            int availEndtime = ((Integer)objs[5]).intValue();
-            Integer tid = (Integer)objs[0];
-            double[] data = new double[5];
-            data[IND_MIN] = ((Double)objs[1]).doubleValue();
-            data[IND_AVG] = ((Double)objs[2]).doubleValue();
-            data[IND_MAX] = ((Double)objs[3]).doubleValue();
-            data[IND_CFG_COUNT] = (double)interval;
-            data[IND_LAST_TIME] = (double)end;
-
-            LinkedList queue = new LinkedList();
-            queue.add(objs);
-            for (int curr=begin; curr<end; curr+=interval) {
-                int next = curr+interval;
-                int endtime =
-                    ((Integer)((Object[])queue.getFirst())[5]).intValue();
-                while (next > endtime) {
-                    Object[] tmp = (Object[])it.next();
-                    queue.addFirst(tmp);
-                    endtime = ((Integer)tmp[5]).intValue();
-                }
-                endtime = availEndtime;
-                while (curr > endtime) {
-                    queue.removeLast();
-                    objs = (Object[])queue.getLast();
-                    data = new double[5];
-                    data[IND_MIN] = ((Double)objs[1]).doubleValue();
-                    data[IND_AVG] = ((Double)objs[2]).doubleValue();
-                    data[IND_MAX] = ((Double)objs[3]).doubleValue();
-                    data[IND_CFG_COUNT] = (double)interval;
-                    data[IND_LAST_TIME] = (double)end;
-                }
-                if (curr > availStartime) {
-                    data = getAggData(queue, interval, curr);
-                } else {
-                    data = getDefaultData(interval,
-                        new Double(availEndtime).doubleValue());
-                }
-                rtn.put(tid, data);
-            }
-        }
-//        if (rtn.size() == 0) {
-//            rtn.addAll(getDefaultHistoricalAvail(DEFAULT_INTERVAL,
-//                new Long(end).longValue()*1000));
-//        }
         return rtn;
     }
 
