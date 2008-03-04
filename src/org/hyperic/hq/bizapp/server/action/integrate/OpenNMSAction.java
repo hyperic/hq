@@ -87,9 +87,9 @@ public class OpenNMSAction implements ActionInterface {
         params.put("alert", alert);
         params.put("action", info);
         params.put("resource", resource);
-        params.put("server", _server);
-        params.put("server", _ip);
-        params.put("server", _port);
+        params.put("host", _server);
+        params.put("ip", _ip);
+        params.put("port", _port);
 
         // Look up the platform
         AppdefEntityID aeid = new AppdefEntityID(alertdef.getAppdefType(),
@@ -105,7 +105,7 @@ public class OpenNMSAction implements ActionInterface {
         } catch (PermissionException e) {
             // Should never happen
             _log.error("Overlord does not have permission to look up " +
-            		   "associated platform for " + aeid);
+                       "associated platform for " + aeid);
             params.put("platform", null);
         }
         
@@ -122,8 +122,13 @@ public class OpenNMSAction implements ActionInterface {
         throws InvalidOptionException, InvalidOptionValueException {
         ConfigResponse response = new ConfigResponse();
         response.setValue(SERVER, _server);
-        response.setValue(IP, _ip);
-        response.setValue(PORT, _port);
+        
+        if (_ip != null && _ip.length() > 0)
+            response.setValue(IP, _ip);
+        
+        if (_port != null && _port.length() > 0)
+            response.setValue(PORT, _port);
+        
         return response;
     }
 
@@ -139,14 +144,14 @@ public class OpenNMSAction implements ActionInterface {
 
         // IP
         StringConfigOption ip =
-            new StringConfigOption(SERVER, "OpenNMS IP", "127.0.0.1");
+            new StringConfigOption(IP, "OpenNMS IP", "127.0.0.1");
         ip.setMinLength(7);
         ip.setOptional(true);
         res.addOption(ip);
 
         // Port
         StringConfigOption port =
-            new StringConfigOption(SERVER, "OpenNMS Port", "127.0.0.1");
+            new StringConfigOption(PORT, "OpenNMS Port", "127.0.0.1");
         port.setMinLength(1);
         port.setOptional(true);
         res.addOption(port);
