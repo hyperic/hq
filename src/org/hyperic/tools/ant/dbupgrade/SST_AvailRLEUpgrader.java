@@ -33,8 +33,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.tools.ant.BuildException;
-import org.hyperic.hq.measurement.shared.MeasRange;
-import org.hyperic.util.TimeUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class SST_AvailRLEUpgrader extends SchemaSpecTask {
@@ -58,7 +56,7 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
             rs = stmt.executeQuery("select startime, endtime, measurement_id, "
                                         + "availval from "
                                         + TAB_AVAIL_RLE +
-                                  " order by startime");
+                                  " order by measurement_id, startime");
             
             ArrayList avails = new ArrayList();
             
@@ -127,8 +125,9 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
 
     private void deleteRow(Statement stmt, AvailData ad)
         throws SQLException {
-        stmt.execute("delete from " + TAB_AVAIL_RLE + " where startime = " + ad.getStartTime() +
-                    " measurement_id = " + ad.getMetric());
+        stmt.execute("delete from " + TAB_AVAIL_RLE + " where startime = " +
+                     ad.getStartTime() + " and measurement_id = " +
+                     ad.getMetric());
     }
     
     private class AvailData {
