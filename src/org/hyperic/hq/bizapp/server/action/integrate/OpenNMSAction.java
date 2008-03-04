@@ -64,7 +64,7 @@ public class OpenNMSAction implements ActionInterface {
     
     private String _server;
     private String _ip;
-    private String _port;
+    private String _port = "5817";
 
     public OpenNMSAction() {
         _loaded = true;
@@ -105,7 +105,7 @@ public class OpenNMSAction implements ActionInterface {
         } catch (PermissionException e) {
             // Should never happen
             _log.error("Overlord does not have permission to look up " +
-            		   "associated platform for " + aeid);
+                       "associated platform for " + aeid);
             params.put("platform", null);
         }
         
@@ -126,8 +126,7 @@ public class OpenNMSAction implements ActionInterface {
         if (_ip != null && _ip.length() > 0)
             response.setValue(IP, _ip);
         
-        if (_port != null && _port.length() > 0)
-            response.setValue(PORT, _port);
+        response.setValue(PORT, _port);
         
         return response;
     }
@@ -137,7 +136,7 @@ public class OpenNMSAction implements ActionInterface {
 
         // Server
         StringConfigOption server =
-            new StringConfigOption(SERVER, "OpenNMS Server", "127.0.0.1");
+            new StringConfigOption(SERVER, "OpenNMS Server", "localhost");
         server.setMinLength(1);
         server.setOptional(false);
         res.addOption(server);
@@ -151,9 +150,9 @@ public class OpenNMSAction implements ActionInterface {
 
         // Port
         StringConfigOption port =
-            new StringConfigOption(PORT, "OpenNMS Port", "127.0.0.1");
+            new StringConfigOption(PORT, "OpenNMS Port", "5817");
         port.setMinLength(1);
-        port.setOptional(true);
+        port.setOptional(false);
         res.addOption(port);
 
         return res;
@@ -210,6 +209,8 @@ public class OpenNMSAction implements ActionInterface {
     }
 
     public void setPort(String port) {
-        _port = port;
+        // Keep default unless explicitly change
+        if (port != null && port.length() > 0)
+            _port = port;
     }
 }

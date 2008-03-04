@@ -18,7 +18,7 @@ import org.hyperic.hq.hqu.rendit.util.HQUtil
 Date timestamp = new Date()
 String hostname = InetAddress.getLocalHost().hostName
 
-Socket socket = new Socket(host, 5817)
+Socket socket = new Socket(host, Integer.valueOf(port))
 socket.outputStream.withWriter { out ->
         
     def xml = new MarkupBuilder(out)
