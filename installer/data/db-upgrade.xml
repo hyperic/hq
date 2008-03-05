@@ -8328,7 +8328,7 @@ has already been defined.
             DROP SEQUENCE EAM_MEASUREMENT_ARG_ID_SEQ
         </statement>
         <statement targetDB="mysql">
-            DELETE FROM HQ_SEQUENCE where seq_name = 'EAM_MEASUREMENT_ARG_ID_SEQ'
+            DELETE FROM HQ_SEQUENCE where seq_name = 'EAM_MEASUREMENT_ARG'
         </statement>
       </schema-directSQL>
   </schemaSpec>
