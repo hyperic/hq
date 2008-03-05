@@ -440,10 +440,6 @@ fi
     <plugin type="autoinventory"
             class="OracleServerDetector"/>
 
-    <scan registry="SOFTWARE\ORACLE">
-      <include name="ORACLE_HOME"/>
-    </scan>
-
     <scan type="file">
       <include name="/**/bin/oracle"/>
     </scan>
