@@ -589,6 +589,9 @@ fi
     </service>
   </server>
 
+  <server name="Oracle" version="11g"
+          include="10g"/>
+
   <!-- ==================== Plugin Help =========================== -->
 
   <help name="Oracle">
@@ -678,5 +681,7 @@ fi
     </pre>
     ]]>
   </help>
+
+  <help name="Oracle 11g" include="Oracle 10g"/>
 
 </plugin>
