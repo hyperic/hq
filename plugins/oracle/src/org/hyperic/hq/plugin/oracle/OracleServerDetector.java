@@ -44,13 +44,10 @@ import java.util.regex.Pattern;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.FileServerDetector;
-import org.hyperic.hq.product.JDBCMeasurementPlugin;
-import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 
-import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -60,7 +57,6 @@ import org.apache.commons.logging.LogFactory;
 public class OracleServerDetector 
     extends ServerDetector
     implements FileServerDetector,
-               RegistryServerDetector,
                AutoServerDetector {
 
     private Log log =  LogFactory.getLog("OracleServerDetector");
@@ -117,7 +113,7 @@ public class OracleServerDetector
                 continue;
             }
 
-            File binary = new File(exe);
+            File binary = new File(exe.toLowerCase());
 
             if (!binary.isAbsolute()) {
                 continue;
@@ -130,6 +126,18 @@ public class OracleServerDetector
         return servers;
     }
 
+    private boolean hasExe(File bin, String name) {
+        if (isWin32()) {
+            return
+                new File(bin, name + ".exe").exists() ||
+                new File(bin, name + ".bat").exists();
+        }
+        else {
+            return
+                new File(bin, name).exists();
+        }
+    }
+
     /**
      * Utility method to determine oracle version by file layout
      */
@@ -137,56 +145,33 @@ public class OracleServerDetector
         throws PluginException
     {
         List servers = new ArrayList();
-        String version;
+        String version = getTypeInfo().getVersion();
+        boolean found = false;
 
-        if(path.endsWith("oracle")) {
-            // Move up 2 dirs
-            path = getParentDir(path, 2);
+        File oracle = new File(path);
+        File bin = oracle.getParentFile();
+        if (bin.getName().equals("bin")) {
+            path = oracle.getParent();
         }
-
-        File oracle  = new File(path, "bin/oracle");
-        File dgmgrl  = new File(path, "bin/dgmgrl");
-        File trcsess = new File(path, "bin/trcsess");
-        File adrci   = new File(path, "bin/adrci");
 
         // Make sure that oracle exists, and is a normal file
         if (oracle.exists() && oracle.isFile()) {
-
-            if (adrci.exists()) {
-                if (getTypeInfo().getVersion().
-                    equals(VERSION_11g)) {
-                    version = VERSION_11g;
-                } else {
-                    // 8i, 9i or 10g detector
-                    return servers;
-                }
-            } else if (trcsess.exists()) {
-                if (getTypeInfo().getVersion().
-                    equals(VERSION_10g)) {
-                    version = VERSION_10g;
-                } else {
-                    // 8i, 9i or 11g detector
-                    return servers;
-                }
-            } else if (dgmgrl.exists()) {
-                if (getTypeInfo().getVersion().
-                    equals(VERSION_9i)) {
-                    version = VERSION_9i;
-                } else {
-                    // 10g, 8i or 11g detector
-                    return servers;
-                }
-            } else {
-                // No dgmgrl or trcess, assume Oracle 8i
-                if (getTypeInfo().getVersion().
-                    equals(VERSION_8i)) {
-                    version = VERSION_8i;
-                } else {
-                    // 9i or 10g detector
-                    return servers;
-                }
+            if (hasExe(bin, "adrci")) {
+                found = version.equals(VERSION_11g);
             }
+            else if (hasExe(bin, "trcsess")) {
+                found = version.equals(VERSION_10g);
+            }
+            else if (hasExe(bin, "dgmgrl")) {
+                found = version.equals(VERSION_9i);
+            }
+            else {
+                //assume Oracle 8i
+                found = version.equals(VERSION_8i);
+            }
+        }
 
+        if (found) {
             ConfigResponse productConfig = new ConfigResponse();
             ServerResource server = createServerResource(path);
             productConfig.setValue("installpath", path);
@@ -258,34 +243,6 @@ public class OracleServerDetector
         throws PluginException
     {
         return getServerList(path);
-    }
-
-    // Registry scan
-    public List getServerResources (ConfigResponse platformConfig, String path, RegistryKey current) 
-        throws PluginException
-    {
-        List servers = new ArrayList();
-        String version;
-        if (path.indexOf("ora92") != -1)
-        {
-            if (getTypeInfo().getVersion().equals(VERSION_9i))
-                version = VERSION_9i;
-            else
-                return null;
-        }
-        else if (path.indexOf("10.") != -1)
-        {
-            if (getTypeInfo().getVersion().equals(VERSION_10g))
-                version = VERSION_10g;
-            else
-                return null;
-        }
-        else {
-            // Assume 8i
-            version = VERSION_8i;
-        }
-        servers.add(createServerResource(path));
-        return servers;
     }
 
     // Discover Oracle services
