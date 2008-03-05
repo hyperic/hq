@@ -8129,24 +8129,26 @@ has already been defined.
   </schemaSpec>
   
   <schemaSpec version="3.100">
+    <!-- For these statements we have to give the target table so the next id
+         generator knows which table to generate ids for. -->
     <schema-directSQL>
-    <statement desc="Create self-edges for platforms">
+    <statement desc="Create self-edges for platforms" table="EAM_RESOURCE_EDGE">
       insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
         select r.id, 0 as version_col, r.id as from_id, r.id as to_id, 1 as rel_id, 0 as distance
         from EAM_PLATFORM p
         join EAM_RESOURCE r on r.instance_id = p.id
         and r.resource_type_id = 301
     </statement>
-    <statement desc="Create self-edges for servers">
+    <statement desc="Create self-edges for servers" table="EAM_RESOURCE_EDGE">
       insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
-        select r.id * 3 as id, 0 as version_col, r.id as from_id, r.id as to_id, 1 as rel_id, 0 as distance
+        select %%NEXTID%% + r.id as id, 0 as version_col, r.id as from_id, r.id as to_id, 1 as rel_id, 0 as distance
         from EAM_SERVER s
         join EAM_RESOURCE r on r.instance_id = s.id
         and r.resource_type_id = 303    
     </statement>
-    <statement desc="Platform->server edges, distance of 1">
+    <statement desc="Platform->server edges, distance of 1" table="EAM_RESOURCE_EDGE">
       insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
-        select rServer.id * 3 + 1, 0, rPlat.id, rServer.id, 1, 1
+        select %%NEXTID%% + rServer.id, 0, rPlat.id, rServer.id, 1, 1
         from EAM_SERVER s
         join EAM_PLATFORM p on s.platform_id = p.id
         join EAM_RESOURCE rServer on rServer.instance_id = s.id
@@ -8155,9 +8157,9 @@ has already been defined.
           rServer.resource_type_id = 303
         and  rPlat.resource_type_id = 301
     </statement>
-    <statement desc="Servers->Platform edges, distance of -1">
+    <statement desc="Servers->Platform edges, distance of -1" table="EAM_RESOURCE_EDGE">
       insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
-        select rServer.id * 3 + 2, 0, rServer.id, rPlat.id, 1, -1
+        select %%NEXTID%% + rServer.id, 0, rServer.id, rPlat.id, 1, -1
         from EAM_SERVER s
         join EAM_PLATFORM p on s.platform_id = p.id
         join EAM_RESOURCE rServer on rServer.instance_id = s.id
@@ -8166,16 +8168,16 @@ has already been defined.
          rServer.resource_type_id = 303
         and  rPlat.resource_type_id = 301    
     </statement>
-    <statement desc="Service self-edges">
+    <statement desc="Service self-edges" table="EAM_RESOURCE_EDGE">
       insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
-        select r.id * 5, 0, r.id, r.id, 1, 0
+        select %%NEXTID%% + r.id, 0, r.id, r.id, 1, 0
         from EAM_SERVICE v
         join EAM_RESOURCE r on r.instance_id = v.id
         where r.resource_type_id = 305
     </statement>
-    <statement desc="Platform->Service edges, distance of 2">
+    <statement desc="Platform->Service edges, distance of 2" table="EAM_RESOURCE_EDGE">
       insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
-        select rService.id * 5 + 1, 0, rPlat.id, rService.id, 1, 2
+        select %%NEXTID%% + rService.id, 0, rPlat.id, rService.id, 1, 2
         from EAM_SERVICE v
         join EAM_SERVER s on v.server_id = s.id
         join EAM_PLATFORM p on s.platform_id = p.id
@@ -8185,9 +8187,9 @@ has already been defined.
         rService.resource_type_id = 305
         and rPlat.resource_type_id = 301
     </statement>
-    <statement desc="Server->Service edges, distance of 1">
+    <statement desc="Server->Service edges, distance of 1" table="EAM_RESOURCE_EDGE">
       insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
-        select rService.id * 5 + 2, 0, rServer.id, rService.id, 1, 1
+        select %%NEXTID%% + rService.id, 0, rServer.id, rService.id, 1, 1
         from EAM_SERVICE v
         join EAM_SERVER s on v.server_id = s.id
         join EAM_RESOURCE rService on rService.instance_id = v.id
@@ -8196,9 +8198,9 @@ has already been defined.
         rService.resource_type_id = 305
         and rServer.resource_type_id = 303    
     </statement>
-    <statement desc="Services->Server edges, distance of -1">
+    <statement desc="Services->Server edges, distance of -1" table="EAM_RESOURCE_EDGE">
       insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
-        select rService.id * 5 + 3, 0, rService.id, rServer.id, 1, -1
+        select %%NEXTID%% + rService.id, 0, rService.id, rServer.id, 1, -1
         from EAM_SERVICE v
         join EAM_SERVER s on v.server_id = s.id
         join EAM_RESOURCE rService on rService.instance_id = v.id
@@ -8207,9 +8209,9 @@ has already been defined.
         rService.resource_type_id = 305
         and rServer.resource_type_id = 303    
     </statement>
-    <statement desc="Services->Platform edges, distance of -2">
+    <statement desc="Services->Platform edges, distance of -2" table="EAM_RESOURCE_EDGE">
       insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance)
-        select rService.id * 5 + 4, 0, rService.id, rPlat.id, 1, -2
+        select %%NEXTID%% + rService.id, 0, rService.id, rPlat.id, 1, -2
         from EAM_SERVICE v
         join EAM_SERVER s on v.server_id = s.id
         join EAM_PLATFORM p on s.platform_id = p.id

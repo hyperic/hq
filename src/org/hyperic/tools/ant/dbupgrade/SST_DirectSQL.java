@@ -28,6 +28,7 @@ package org.hyperic.tools.ant.dbupgrade;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -39,12 +40,35 @@ import org.hyperic.util.jdbc.DBUtil;
 
 public class SST_DirectSQL extends SchemaSpecTask {
 
+    private static final int ID_START = 10001;
+
     private VerifySchema verifySchema;
     private List statements;
 
     public SST_DirectSQL () {
         verifySchema = null;
         statements = null;
+    }
+
+    /**
+     * Get the next available ID from the given table.
+     *
+     * @param table The table to get the next ID from.
+     */
+    public int getNextId(String table) {
+        String sql = "SELECT MAX(id) from " + table;
+
+        try {
+            Connection c = getConnection();
+            ResultSet rs = c.createStatement().executeQuery(sql);
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                return ID_START;
+            }
+        } catch (Exception e) {
+            throw new BuildException("Unable to initialize ID generator", e);
+        }
     }
 
     public void execute () throws BuildException {
@@ -94,6 +118,7 @@ public class SST_DirectSQL extends SchemaSpecTask {
         private Connection conn = null;
         private String desc = null;
         private String targetDB = null;
+        private String _table = null;
         private boolean fail = true;
 
         public Statement () {}
@@ -107,6 +132,14 @@ public class SST_DirectSQL extends SchemaSpecTask {
 
         public String getDesc() {
             return desc;
+        }
+
+        public void setTable(String table) {
+            _table = table;
+        }
+
+        public String getTable() {
+            return _table;
         }
 
         public boolean isFail() {
@@ -163,6 +196,19 @@ public class SST_DirectSQL extends SchemaSpecTask {
                 sqlStmt
                     = StringUtil.replace(sqlStmt, "%%FALSE%%", 
                                          DBUtil.getBooleanValue(false, conn));
+
+                // Check for existance of %%NEXTID%%
+                if (sqlStmt.indexOf("%%NEXTID%%") != -1) {
+                    String table = getTable();
+                    if (table == null) {
+                        throw new BuildException("%%NEXTID%% found but no " +
+                                                 "table attribute given.");
+                    }
+                    int nextId = getNextId(table);
+                    log(">>>>> Generated new starting id of " + nextId);
+                    sqlStmt = StringUtil.replace(sqlStmt, "%%NEXTID%%",
+                                                 Integer.toString(nextId));
+                }
 
                 ps = conn.prepareStatement(sqlStmt);
                 log(">>>>> Processing statement desc=["+desc+"] " +
