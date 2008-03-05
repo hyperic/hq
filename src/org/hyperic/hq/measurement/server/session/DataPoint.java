@@ -12,6 +12,11 @@ public class DataPoint implements Serializable {
     private Integer     _metricId;
     private MetricValue _val;
     
+    public DataPoint(int metricId, double val, long timestamp) {
+        _val = new MetricValue(val, timestamp);
+        _metricId = new Integer(metricId);
+    }
+    
     public DataPoint(Integer metricId, MetricValue val) {
         _metricId = metricId;
         _val      = val;
@@ -23,6 +28,14 @@ public class DataPoint implements Serializable {
     
     public MetricValue getMetricValue() {
         return _val;
+    }
+    
+    public double getValue() {
+        return _val.getValue();
+    }
+    
+    public long getTimestamp() {
+        return _val.getTimestamp();
     }
     
     public String toString() {
