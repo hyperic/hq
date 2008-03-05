@@ -154,6 +154,16 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
+     * Look up measurement templates for an array of template IDs
+     *
+     * @ejb:interface-method
+     */
+    public List getTemplates(List ids) {
+        Integer[] mtids = (Integer[]) ids.toArray(new Integer[ids.size()]);
+        return getMeasurementTemplateDAO().findTemplates(mtids);
+    }
+
+    /**
      * Look up a measurement templates for an array of template IDs
      *
      * @throws FinderException if no measurement templates are found.
