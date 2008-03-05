@@ -15,8 +15,8 @@ APP_NAME="hq-agent"
 APP_LONG_NAME="HQ Agent"
 
 # Wrapper
-WRAPPER_CMD="../sbin/wrapper"
-WRAPPER_CONF="../conf/wrapper.conf"
+WRAPPER_CMD="sbin/wrapper"
+WRAPPER_CONF="conf/wrapper.conf"
 
 # Priority at which to run the wrapper.  See "man nice" for valid priorities.
 #  nice is only used if a priority is specified.
@@ -120,26 +120,26 @@ do
     fi
 done
 
-# Change the current directory to the location of the script
-cd "`dirname "$REALPATH"`"
+# Change the current directory to the HQ Agent Home
+cd "`dirname "$REALPATH"`/.."
 REALDIR=`pwd`
 
 # ------------- 
 # Begin HQ Agent specific logic
 # ------------- 
 AGENTPROPFILE_PROP=agent.propFile
-AGENT_PROPS=../agent.properties
-AGENT_LIB=../lib
-PDK_LIB=../pdk/lib
+AGENT_PROPS=agent.properties
+AGENT_LIB=./lib
+PDK_LIB=./pdk/lib
 # for /proc/net/tcp mirror
-SIGAR_PROC_NET=../tmp
+SIGAR_PROC_NET=./tmp
 
 if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
     HQ_JAVA_HOME=${HQ_JAVA_HOME}
-elif [ -d ../jre ]; then
-    HQ_JAVA_HOME=../jre
+elif [ -d jre ]; then
+    HQ_JAVA_HOME=jre
     # Just in case
-    chmod -R +x ../jre/bin/*
+    chmod -R +x jre/bin/*
 elif [ "x$JAVA_HOME" != "x" ] ; then
     HQ_JAVA_HOME=${JAVA_HOME}
 else
@@ -154,7 +154,7 @@ else
     esac
 fi
 
-chmod +x ../pdk/scripts/*
+chmod +x ./pdk/scripts/*
 
 HQ_JAVA="${HQ_JAVA_HOME}/bin/java"
 
