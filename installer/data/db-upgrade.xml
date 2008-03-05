@@ -8329,7 +8329,7 @@ has already been defined.
                           column="ENABLED"
                           nullable="NOT NULL"/>
 
-      <schema-alterColumn columnType="BOOLEAN"
+      <schema-alterColumn columnType="INTEGER"
                           table="EAM_MEASUREMENT"
                           column="COLL_INTERVAL"
                           nullable="NOT NULL"/>
