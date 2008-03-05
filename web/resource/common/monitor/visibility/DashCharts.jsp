@@ -54,44 +54,20 @@
 <script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
-
+ <script src="<html:rewrite page="/js/dojo/dojo.js"/>" type="text/javascript"></script>
 <script language="JavaScript">
   var baseUrl = "<html:rewrite page="/resource/common/monitor/visibility/IndicatorCharts.do"/>";
-
-  // Register the remove metric chart method
- // ajaxEngine.registerRequest( 'indicatorCharts', baseUrl );
-
   function removeMetric(metric) {
-    <%--ajaxEngine.sendRequest(
-        'indicatorCharts',
-        'metric=' + metric,
-        'action=remove',
-        'eid=' + '<c:out value="${eid}"/>', 
-        <c:if test="${not empty ctype}">
-          'ctype=' + '<c:out value="${ctype}"/>',
-        </c:if>
-        'view=' + '<c:out value="${IndicatorViewsForm.view}"/>');--%>
-
     dojo.io.bind({
     url:baseUrl,
     content: 'metric=' + metric +'action=remove' + 'eid=' + '<c:out value="${eid}"/>'+ <c:if test="${not empty ctype}">'ctype=' + '<c:out value="${ctype}"/>'</c:if> + 'view=' + '<c:out value="${IndicatorViewsForm.view}"/>',
     load: function(type, data, evt){ new Effect.Fade(metric); },
-        method:'POST',
+        method:'POST'
 });
 
   }
 
   function moveMetricUp(metric) {
-    <%--ajaxEngine.sendRequest(
-        'indicatorCharts',
-        'metric=' + metric,
-        'action=moveUp',
-        'eid=' + '<c:out value="${eid}"/>', 
-        <c:if test="${not empty ctype}">
-          'ctype=' + '<c:out value="${ctype}"/>',
-        </c:if>
-        'view=' + '<c:out value="${IndicatorViewsForm.view}"/>');--%>
     var root = $('root');
     var elem = $(metric);
     dojo.io.bind({
@@ -103,18 +79,9 @@
   }
 
   function moveMetricDown(metric) {
-    <%--ajaxEngine.sendRequest(
-        'indicatorCharts',
-        'metric=' + metric,
-        'action=moveDown',
-        'eid=' + '<c:out value="${eid}"/>', 
-        <c:if test="${not empty ctype}">
-          'ctype=' + '<c:out value="${ctype}"/>',
-        </c:if>
-        'view=' + '<c:out value="${IndicatorViewsForm.view}"/>');--%>
     var root = $('root');
     var elem = $(metric);
-       dojo.io.bind({
+    dojo.io.bind({
     url:baseUrl,
     content: 'metric=' + metric +'action=moveDown' + 'eid=' + '<c:out value="${eid}"/>'+ <c:if test="${not empty ctype}">'ctype=' + '<c:out value="${ctype}"/>'</c:if> + 'view=' + '<c:out value="${IndicatorViewsForm.view}"/>',
     load: function(type, data, evt){moveElementDown(elem, root);},
