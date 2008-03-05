@@ -7975,6 +7975,14 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.96.1">
+    <schema-directSQL>
+      <statement desc="Clean up orphaned group resource IDs in eam_crispo_array">
+        DELETE FROM EAM_CRISPO_ARRAY WHERE VAL LIKE '5:%' AND VAL NOT IN (SELECT '5:'||ID FROM EAM_RESOURCE_GROUP)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
   <schemaSpec version="3.97">
     <schema-addColumn table="EAM_MEASUREMENT" column="RESOURCE_ID" 
                       columnType="INTEGER">
@@ -8682,6 +8690,14 @@ has already been defined.
       </statement>
       <statement targetDB="mysql" desc="(MySQL only) adding index to HQ_AVAIL_DATA_RLE (MEASUREMENT_ID)">
         create index MEASUREMENT_ID_YY on HQ_AVAIL_DATA_RLE (MEASUREMENT_ID)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="3.106">
+    <schema-directSQL>
+      <statement desc="Clean up orphaned group resource IDs in eam_crispo_array">
+        DELETE FROM EAM_CRISPO_ARRAY WHERE VAL LIKE '5:%' AND VAL NOT IN (SELECT '5:'||ID FROM EAM_RESOURCE_GROUP)
       </statement>
     </schema-directSQL>
   </schemaSpec>
