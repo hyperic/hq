@@ -80,6 +80,7 @@ import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.grouping.shared.GroupNotFoundException;
 import org.hyperic.hq.grouping.server.session.GroupManagerEJBImpl;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -839,6 +840,13 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                 removeServiceCluster (subject,gv.getClusterId());
             }
             manager.deleteGroup(subject, groupId );
+            
+            // Send resource delete event
+            ResourceDeletedZevent zevent =
+                new ResourceDeletedZevent(subject,
+                    new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
+                                       groupId));
+            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         } catch (GroupNotFoundException e) {
             throw new AppdefGroupNotFoundException ("caught group not " +
                         "found exc looking for:" + groupId);
