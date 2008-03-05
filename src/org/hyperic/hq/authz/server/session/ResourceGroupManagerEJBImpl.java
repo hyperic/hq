@@ -39,6 +39,7 @@ import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -292,7 +293,7 @@ public class ResourceGroupManagerEJBImpl
      */
     public void removeResources(AuthzSubjectValue whoami,
                                 ResourceGroupValue group,
-                                ResourceValue[] resVals)
+                                Resource[] resources)
         throws PermissionException 
     {
         ResourceGroupDAO grpDao = getResourceGroupDAO();
@@ -304,11 +305,6 @@ public class ResourceGroupManagerEJBImpl
                  groupLocal.getId(),
                  AuthzConstants.perm_modifyResourceGroup);
         
-        ResourceDAO resDao = getResourceDAO();
-        Resource[] resources = new Resource[resVals.length];
-        for (int i = 0; i < resVals.length; i++) {
-            resources[i] = resDao.findById(resVals[i].getId());
-        }
         grpDao.removeResources(groupLocal, resources);
         GroupingStartupListener.getCallbackObj().groupMembersChanged(groupLocal);
     }

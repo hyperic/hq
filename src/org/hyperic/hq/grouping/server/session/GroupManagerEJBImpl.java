@@ -383,14 +383,9 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             
             // only call remove if there's stuff to delete
             if(!resToDel.isEmpty()) {
-                ResourceValue[] resToDelArr =
-                    new ResourceValue[resToDel.size()];
-                int i = 0;
-                for (Iterator it = resToDel.iterator(); it.hasNext(); i++) {
-                    Resource res = (Resource) it.next();
-                    resToDelArr[i] = res.getResourceValue();
-                }
-                rgmLoc.removeResources(subject,rgVo,resToDelArr);
+                Resource[] resToDelArr = (Resource[]) resToDel
+                        .toArray(new Resource[resToDel.size()]);
+                rgmLoc.removeResources(subject, rgVo, resToDelArr);
             }
             // now apply additions
             iter = groupVo.getGroupEntries().iterator();
