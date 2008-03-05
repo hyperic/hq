@@ -451,11 +451,7 @@ fi
       <option name="jdbcUser"
               description="JDBC User"/>
       <option name="jdbcPassword" type="secret"
-              optional="true"
               description="JDBC Password"/>
-      <option name="installpath"
-              default="/oracle"
-              description="Oracle Install Path"/>
       <option name="tnsnames"
               description="TNS Listener File"
               default="network/admin/tnsnames.ora"/>
