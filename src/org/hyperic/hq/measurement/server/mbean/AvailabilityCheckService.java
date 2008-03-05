@@ -154,9 +154,9 @@ public class AvailabilityCheckService
                 continue;
             }
 
-            // End is at least more than 1/2 interval away
-            long end = TimingVoodoo.closestTime(
-                current - dm.getInterval(), dm.getInterval());
+            // End is at least more than 1 interval away
+            long end = TimingVoodoo.roundDownTime(current - dm.getInterval(),
+                                                  dm.getInterval());
 
             // We have to get at least the measurement interval
             long maxInterval =
