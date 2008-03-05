@@ -28,8 +28,6 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hyperic.hq.measurement.shared.AvailState;
-
 public class LastAvailUpObj {
     private static final LastAvailUpObj _only = new LastAvailUpObj();
     private Map _availState = new HashMap();
@@ -41,10 +39,10 @@ public class LastAvailUpObj {
         return _only;
     }
 
-    public AvailState get(Integer id, AvailState defaultState) {
+    public DataPoint get(Integer id, DataPoint defaultState) {
         synchronized (_availState) {
-            AvailState rtn;
-            if (null == (rtn = (AvailState)_availState.get(id))) {
+            DataPoint rtn;
+            if (null == (rtn = (DataPoint)_availState.get(id))) {
                 _availState.put(id, defaultState);
                 return defaultState;
             }
@@ -52,10 +50,10 @@ public class LastAvailUpObj {
         }
     }
 
-    public AvailState get(Integer id) {
+    public DataPoint get(Integer id) {
         synchronized (_availState) {
-            AvailState rtn;
-            if (null == (rtn = (AvailState)_availState.get(id)))
+            DataPoint rtn;
+            if (null == (rtn = (DataPoint)_availState.get(id)))
                 return null;
             return rtn;
         }
@@ -67,7 +65,7 @@ public class LastAvailUpObj {
         }
     }
     
-    public void put(Integer id, AvailState state) {
+    public void put(Integer id, DataPoint state) {
         synchronized (_availState) {
             _availState.put(id, state);
         }

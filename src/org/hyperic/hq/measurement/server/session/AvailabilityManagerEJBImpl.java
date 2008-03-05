@@ -50,7 +50,6 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.AvailState;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
@@ -192,7 +191,7 @@ public class AvailabilityManagerEJBImpl
                     endtime = availEndtime;
                 }
                 HighLowMetricValue val;
-                if (curr > availStartime) {
+                if (curr >= availStartime) {
                     val = getMetricValue(queue, curr);
                 } else {
                     val = new HighLowMetricValue(AVAIL_UNKNOWN, curr);
@@ -397,25 +396,25 @@ public class AvailabilityManagerEJBImpl
         sendDataToEventHandlers(availPoints);
     }
 
-    private void updateDup(AvailState state, AvailabilityDataRLE dup)
+    private void updateDup(DataPoint state, AvailabilityDataRLE dup)
             throws BadAvailStateException {
         updateDup(state, dup, false);
     }
 
-    private void updateDup(AvailState state, AvailabilityDataRLE dup,
+    private void updateDup(DataPoint state, AvailabilityDataRLE dup,
             boolean ignoreInvalidState) throws BadAvailStateException {
-        if (dup.getAvailVal() == state.getVal()) {
+        if (dup.getAvailVal() == state.getValue()) {
             // nothing to do
         } else  if (!ignoreInvalidState && dup.getAvailVal() != AVAIL_DOWN) {
-            String msg = "New AvailState and current DB value for " +
-             "MeasurementId " + state.getId() + " / timestamp " +
+            String msg = "New DataPoint and current DB value for " +
+             "MeasurementId " + state.getMetricId() + " / timestamp " +
              state.getTimestamp() + " have conflicting states, no update";
             throw new BadAvailStateException(msg);
         } else {
             Measurement meas = dup.getMeasurement();
             long interval = meas.getInterval();
             long newStartime = dup.getStartime()+interval;
-            resolveStarttime(dup, newStartime, state.getVal());
+            resolveStarttime(dup, newStartime, state.getValue());
         }
     }
 
@@ -431,8 +430,8 @@ public class AvailabilityManagerEJBImpl
             dao.remove(avail);
             return;
         } else if (newStartime == avail.getEndtime()) {
-            AvailState state =
-                new AvailState(avail.getMeasurement().getId().intValue(),
+            DataPoint state =
+                new DataPoint(avail.getMeasurement().getId().intValue(),
                                avail.getAvailVal(), avail.getStartime());
             AvailabilityDataRLE after = dao.findAvailAfter(state);
             dao.remove(avail);
@@ -450,14 +449,14 @@ public class AvailabilityManagerEJBImpl
             } else  if (newStartime >= after.getStartime()) {
                 dao.remove(after);
 	            dao.create(avail.getMeasurement(), avail.getStartime(),
-	                       after.getEndtime(), state.getVal());
+	                       after.getEndtime(), state.getValue());
             }
             return;
         }
         dao.updateStartime(avail, newStartime);
     }
 
-    private void merge(AvailState state)
+    private void merge(DataPoint state)
             throws BadAvailStateException {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         AvailabilityDataRLE dup = dao.findAvail(state);
@@ -469,12 +468,12 @@ public class AvailabilityManagerEJBImpl
         AvailabilityDataRLE after = dao.findAvailAfter(state);
         if (before == null && after == null) {
             // this shouldn't happen here
-            Measurement meas = getMeasurement(state.getId());
+            Measurement meas = getMeasurement(state.getMetricId().intValue());
             dao.create(meas, state.getTimestamp(),
                        MAX_AVAIL_TIMESTAMP,
-                       state.getVal());
+                       state.getValue());
         } else if (before == null) {
-            if (after.getAvailVal() != state.getVal()) {
+            if (after.getAvailVal() != state.getValue()) {
                 prependState(state, after);
             } else {
                 dao.updateStartime(after, state.getTimestamp());
@@ -488,26 +487,26 @@ public class AvailabilityManagerEJBImpl
     }
 
     private void insertAvail(AvailabilityDataRLE before,
-        AvailabilityDataRLE after, AvailState state) {
+        AvailabilityDataRLE after, DataPoint state) {
 
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
-        if (state.getVal() != after.getAvailVal() &&
-                state.getVal() != before.getAvailVal()) {
-            Measurement meas = getMeasurement(state.getId());
+        if (state.getValue() != after.getAvailVal() &&
+                state.getValue() != before.getAvailVal()) {
+            Measurement meas = getMeasurement(state.getMetricId().intValue());
             long pivotime = meas.getInterval();
             dao.create(meas, state.getTimestamp(), pivotime,
-                       state.getVal());
+                       state.getValue());
             dao.updateEndtime(before, state.getTimestamp());
             dao.updateStartime(after, pivotime);
-        } else if (state.getVal() == after.getAvailVal() &&
-                   state.getVal() != before.getAvailVal()) {
+        } else if (state.getValue() == after.getAvailVal() &&
+                   state.getValue() != before.getAvailVal()) {
             dao.updateEndtime(before, state.getTimestamp());
             dao.updateStartime(after, state.getTimestamp());
-        } else if (state.getVal() != after.getAvailVal() &&
-                   state.getVal() == before.getAvailVal()) {
+        } else if (state.getValue() != after.getAvailVal() &&
+                   state.getValue() == before.getAvailVal()) {
             // this is fine
-        } else if (state.getVal() == after.getAvailVal() &&
-                   state.getVal() == before.getAvailVal()) {
+        } else if (state.getValue() == after.getAvailVal() &&
+                   state.getValue() == before.getAvailVal()) {
             // this should never happen or else there is something wrong
             // in the code
             String msg = "AvailabilityData [" + before + "] and [" + after +
@@ -519,52 +518,52 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private boolean prependState(AvailState state) {
+    private boolean prependState(DataPoint state) {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         AvailabilityDataRLE avail = dao.findAvailAfter(state);
         if (avail == null) {
-            Measurement meas = getMeasurement(state.getId());
+            Measurement meas = getMeasurement(state.getMetricId().intValue());
             dao.create(meas, state.getTimestamp(), MAX_AVAIL_TIMESTAMP,
-                state.getVal());
+                state.getValue());
             return true;
         }
         return prependState(state, avail);
     }
 
-    private boolean prependState(AvailState state, AvailabilityDataRLE avail) {
+    private boolean prependState(DataPoint state, AvailabilityDataRLE avail) {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         Measurement meas = avail.getMeasurement();
         long newStart =  state.getTimestamp() + meas.getInterval();
         long endtime = newStart;
         dao.updateStartime(avail, newStart);
         dao.create(avail.getMeasurement(), state.getTimestamp(),
-            endtime, state.getVal());
+            endtime, state.getValue());
         return true;
     }
 
-    private boolean updateState(AvailState state)
+    private boolean updateState(DataPoint state)
         throws BadAvailStateException {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List mids = new ArrayList();
-        mids.add(new Integer(state.getId()));
+        mids.add(state.getMetricId());
         List avails = dao.findLastAvail(mids);
         AvailabilityDataRLE avail = null;
         if (avails.size() > 0) {
             avail = (AvailabilityDataRLE)avails.get(0);
         }
 	    if (avail == null) {
-	        Measurement meas = getMeasurement(state.getId());
+	        Measurement meas = getMeasurement(state.getMetricId().intValue());
 	        dao.create(meas,
-	            state.getTimestamp(), state.getVal());
+	            state.getTimestamp(), state.getValue());
 	        return true;
 	    } else if (state.getTimestamp() < avail.getStartime()) {
 	        merge(state);
 	        return true;
 	    } else if (state.getTimestamp() == avail.getStartime() &&
-                   state.getVal() != avail.getAvailVal()) {
+                   state.getValue() != avail.getAvailVal()) {
 	        updateDup(state, avail);
 	        return true;
-	    } else if (state.getVal() == avail.getAvailVal()) {
+	    } else if (state.getValue() == avail.getAvailVal()) {
 	        _log.debug("no update state == avail " + state + " == " + avail);
 	        return false;
 	    }
@@ -572,25 +571,25 @@ public class AvailabilityManagerEJBImpl
 	        ", updating to state -> " + state);
 	    dao.updateEndtime(avail, state.getTimestamp());
 	    dao.create(avail.getMeasurement(), state.getTimestamp(),
-	        state.getVal());
+	        state.getValue());
 	    return true;
     }
 
     private void updateStates(List states) {
         LastAvailUpObj avail = LastAvailUpObj.getInst();
         for (Iterator i=states.iterator(); i.hasNext(); ) {
-            AvailState state = (AvailState)i.next();
+            DataPoint state = (DataPoint)i.next();
             try {
                 // need to check again since there could be multiple
                 // states with the same id in the list
-                AvailState currState = avail.get(new Integer(state.getId()));
+                DataPoint currState = avail.get(state.getMetricId());
                 if (currState != null &&
-                    currState.getVal() == state.getVal()) {
+                    currState.getValue() == state.getValue()) {
                     continue;
                 }
                 boolean update = updateState(state);
                 _log.debug("state " + state + " was updated, status " + update);
-                avail.put(new Integer(state.getId()), state);
+                avail.put(state.getMetricId(), state);
             } catch (BadAvailStateException e) {
                 _log.warn(e.getMessage());
             }
@@ -600,7 +599,7 @@ public class AvailabilityManagerEJBImpl
     private void updateOutOfOrderState(List outOfOrderAvail) {
         for (Iterator i=outOfOrderAvail.iterator(); i.hasNext(); ) {
             try {
-            	AvailState state = (AvailState)i.next();
+            	DataPoint state = (DataPoint)i.next();
             	// do not update the cache here, the timestamp is out of order
                 merge(state);
             } catch (BadAvailStateException e) {
@@ -619,16 +618,16 @@ public class AvailabilityManagerEJBImpl
             MetricValue mval = pt.getMetricValue();
             double val = mval.getValue();
             long timestamp = mval.getTimestamp();
-            AvailState newState = new AvailState(id, val, timestamp);
-            AvailState oldState = avail.get(new Integer(id));
+            DataPoint newState = new DataPoint(id, val, timestamp);
+            DataPoint oldState = avail.get(new Integer(id));
             // we do not want to update the state if it changes
             // instead change it when the db is changed in order
             // to ensure the state of memory to db
             // ONLY update memory state here if there is no change
             if (oldState != null && timestamp < oldState.getTimestamp()) {
                 outOfOrderAvail.add(newState);
-            } else if (oldState == null || oldState.getVal() == AVAIL_NULL ||
-                    oldState.getVal() != val) {
+            } else if (oldState == null || oldState.getValue() == AVAIL_NULL ||
+                    oldState.getValue() != val) {
                 updateList.add(newState);
                 _log.debug("value of state " + newState + " differs from" +
                            " current value" + ((oldState == null) ?

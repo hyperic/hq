@@ -39,7 +39,6 @@ import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.LastAvailUpObj;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.AvailState;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.TimeUtil;
@@ -79,8 +78,8 @@ public class AvailabilityCheckService
             for (Iterator i = platformResources.iterator(); i.hasNext();) {
                 Measurement meas = (Measurement)i.next();
                 long interval = meas.getInterval();
-                AvailState last = avail.get(meas.getId(),
-                    new AvailState(meas.getId().intValue(), AVAIL_NULL, now));
+                DataPoint last = avail.get(meas.getId(),
+                    new DataPoint(meas.getId().intValue(), AVAIL_NULL, now));
                 if (debug) {
                     long t = last.getTimestamp();
                     String msg = "Checking availability for " + last +
@@ -88,7 +87,7 @@ public class AvailabilityCheckService
                         " vs. " + TimeUtil.toString(now) + " (checktime)";
                     _log.debug(msg);
                 }
-                if (last.getVal() != AVAIL_DOWN &&
+                if (last.getValue() != AVAIL_DOWN &&
                     (now - last.getTimestamp()) >= interval*2) {
                     DataPoint point =  new DataPoint(meas.getId(),
                         new MetricValue(AVAIL_DOWN,

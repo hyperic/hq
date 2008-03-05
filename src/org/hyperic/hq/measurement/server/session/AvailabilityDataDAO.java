@@ -35,7 +35,6 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.shared.AvailState;
 
 public class AvailabilityDataDAO extends HibernateDAO {
     
@@ -76,9 +75,9 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .list();
     }
 
-    int updateStartime(AvailabilityDataRLE avail, long starttime) {
+    int updateStartime(AvailabilityDataRLE avail, long startime) {
         remove(avail);
-        avail.setStartime(starttime);
+        avail.setStartime(startime);
         save(avail);
         return 1;
     }
@@ -89,14 +88,14 @@ public class AvailabilityDataDAO extends HibernateDAO {
         return 1;
     }
 
-    AvailabilityDataRLE findAvail(AvailState state) {
+    AvailabilityDataRLE findAvail(DataPoint state) {
         String sql = "FROM AvailabilityDataRLE" +
                      " WHERE availabilityDataId.startime = :startime" +
                      " AND availabilityDataId.measurement = :meas ";
         List list =
             getSession().createQuery(sql)
             .setLong("startime", state.getTimestamp())
-            .setInteger("meas", state.getId())
+            .setInteger("meas", state.getMetricId().intValue())
         	.list();
         if (list.size() == 0) {
             return null;
@@ -104,18 +103,18 @@ public class AvailabilityDataDAO extends HibernateDAO {
         return (AvailabilityDataRLE)list.get(0);
     }
     
-    List findAllAvailsAfter(AvailState state) {
+    List findAllAvailsAfter(DataPoint state) {
         String sql = "FROM AvailabilityDataRLE" +
                      " WHERE availabilityDataId.startime > :startime" +
                      " AND availabilityDataId.measurement = :meas "+
                      "order by startime asc";
         return  getSession().createQuery(sql)
             .setLong("startime", state.getTimestamp())
-            .setInteger("meas", state.getId())
+            .setInteger("meas", state.getMetricId().intValue())
         	.list();
     }
 
-    AvailabilityDataRLE findAvailAfter(AvailState state) {
+    AvailabilityDataRLE findAvailAfter(DataPoint state) {
         String sql = "FROM AvailabilityDataRLE" +
                      " WHERE availabilityDataId.startime > :startime" +
                      " AND availabilityDataId.measurement = :meas "+
@@ -123,7 +122,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         List list =
             getSession().createQuery(sql)
             .setLong("startime", state.getTimestamp())
-            .setInteger("meas", state.getId())
+            .setInteger("meas", state.getMetricId().intValue())
         	.setMaxResults(1).list();
         if (list.size() == 0) {
             return null;
@@ -136,7 +135,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         save(avail);
     }
 
-    AvailabilityDataRLE findAvailBefore(AvailState state) {
+    AvailabilityDataRLE findAvailBefore(DataPoint state) {
         String sql = "from AvailabilityDataRLE" +
                      " WHERE availabilityDataId.startime < :startime" +
                      " AND availabilityDataId.measurement = :meas "+
@@ -144,7 +143,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         List list =
             getSession().createQuery(sql)
             .setLong("startime", state.getTimestamp())
-            .setInteger("meas", state.getId())
+            .setInteger("meas", state.getMetricId().intValue())
         	.setMaxResults(1).list();
         if (list.size() == 0) {
             return null;
