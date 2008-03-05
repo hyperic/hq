@@ -44,6 +44,7 @@ import java.util.regex.Pattern;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.FileServerDetector;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
@@ -138,6 +139,25 @@ public class OracleServerDetector
         }
     }
 
+    //for use w/ -jar hq-product.jar or agent.properties
+    private boolean configureProperties(ConfigResponse config) {
+        boolean hasCreds = false;
+        String[] keys =
+            getConfigSchema(getTypeInfo(), config).getOptionNames();
+
+        for (int i=0; i<keys.length; i++) {
+            String key = keys[i];
+            String val = getManager().getProperty(key);
+            if (val != null) {
+                config.setValue(key, val);
+                if (key.startsWith("jdbc")) {
+                    hasCreds = true;
+                }
+            }
+        }
+        return hasCreds;
+    }
+
     /**
      * Utility method to determine oracle version by file layout
      */
@@ -174,13 +194,15 @@ public class OracleServerDetector
         if (found) {
             ConfigResponse productConfig = new ConfigResponse();
             ServerResource server = createServerResource(path);
-            productConfig.setValue("installpath", path);
+
             // Set custom properties
             ConfigResponse cprop = new ConfigResponse();
             cprop.setValue("version", version);
             server.setCustomProperties(cprop);
             setProductConfig(server, productConfig);
-            server.setMeasurementConfig();
+            if (configureProperties(productConfig)) {
+                server.setMeasurementConfig();
+            }
             servers.add(server);
         }
 
@@ -506,7 +528,7 @@ public class OracleServerDetector
         String line;
         BufferedReader reader = null;
         String tnsnames = config.getValue("tnsnames"),
-               installpath = config.getValue("installpath");
+               installpath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
         List rtn = new ArrayList();
         try
         {
