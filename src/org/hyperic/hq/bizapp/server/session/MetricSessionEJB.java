@@ -66,6 +66,7 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
@@ -565,6 +566,18 @@ public class MetricSessionEJB extends BizappSessionEJB {
             PermissionException, AppdefEntityNotFoundException,
             AppdefCompatException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        
+        boolean bPlatforms = false, bServers = false, bServices = false;
+        
+        // Let's get the templates to see what resources to gather
+        List templates = getTemplateManager().getTemplates(mtids);
+        for (Iterator it = templates.iterator(); it.hasNext(); ) {
+            MeasurementTemplate templ = (MeasurementTemplate) it.next();
+            int type = templ.getMonitorableType().getAppdefType();
+            bPlatforms |= type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+            bServers   |= type == AppdefEntityConstants.APPDEF_TYPE_SERVER;
+            bServices  |= type == AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+        }
     
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         List platforms = null, servers = null, services = null;
@@ -576,13 +589,16 @@ public class MetricSessionEJB extends BizappSessionEJB {
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 // Get the platforms
-                platforms = rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
+                if (bPlatforms)
+                    platforms = rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 // Get the servers
-                servers = rv.getAssociatedServers(PageControl.PAGE_ALL);
+                if (bServers)
+                    servers = rv.getAssociatedServers(PageControl.PAGE_ALL);
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 // Get the services
-                services = rv.getAssociatedServices(PageControl.PAGE_ALL);
+                if (bServices)
+                    services = rv.getAssociatedServices(PageControl.PAGE_ALL);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 // Does not matter what kind of group this is, just use platform
@@ -600,13 +616,13 @@ public class MetricSessionEJB extends BizappSessionEJB {
 
         // Look up the metric summaries of all associated resources
         Map results = new HashMap();
-        if (platforms != null)
+        if (bPlatforms)
             results.putAll(getResourceMetrics(subject, platforms, mtids,
                                               begin, end, Boolean.TRUE));
-        if (servers != null)
+        if (bServers)
             results.putAll(getResourceMetrics(subject, servers, mtids,
                                               begin, end, Boolean.TRUE));
-        if (services != null)
+        if (bServices)
             results.putAll(getResourceMetrics(subject, services, mtids,
                                               begin, end, Boolean.TRUE));
         return results;
