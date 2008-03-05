@@ -51,8 +51,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerUtil;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
@@ -82,7 +80,6 @@ public abstract class SessionEJB {
     protected static MeasurementPluginManager mpm = null;
 
     private DataManagerLocal dataMan;
-    private AvailabilityManagerLocal availMan;
     private AgentManagerLocal agentMan;
     private ProductManagerLocal prodMan;
     private AuthzSubjectManagerLocal ssmLocal;
@@ -145,19 +142,6 @@ public abstract class SessionEJB {
             }
         }
         return this.ssmLocal;
-    }
-
-    protected AvailabilityManagerLocal getAvailMan() {
-        if (availMan == null) {
-            try {
-                availMan = AvailabilityManagerUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return availMan;
     }
 
     protected DataManagerLocal getDataMan() {

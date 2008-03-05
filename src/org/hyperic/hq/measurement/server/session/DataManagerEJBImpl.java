@@ -68,6 +68,7 @@ import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
@@ -950,7 +951,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                       PageControl pc)
         throws DataNotAvailableException {
         if (_measSep.isAvailMeas(id)) {
-            return getAvailMan().getHistoricalAvailData(id, begin, end, pc);
+            return AvailabilityManagerEJBImpl.getOne().
+                getHistoricalAvailData(id, begin, end, pc);
         } else {
             return getHistData(id, begin, end, pc);
         }
@@ -1137,8 +1139,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         _measSep.set(ids);
         Integer[] mids = _measSep.getMids();
         Integer[] avIds = _measSep.getAvIds();
-        PageList rtn = getAvailMan().getHistoricalAvailData(avIds, begin,
-                                                            end, pc);
+        PageList rtn = AvailabilityManagerEJBImpl.getOne().
+            getHistoricalAvailData(avIds, begin, end, pc);
         rtn.addAll(getHistData(mids, begin, end, interval,
                                type, returnNulls, pc));
         return rtn;
@@ -1390,7 +1392,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public List getLastHistoricalData(Integer id, int count)
         throws DataNotAvailableException {
         if (_measSep.isAvailMeas(id)) {
-            return getAvailMan().getLastAvail(id);
+            return AvailabilityManagerEJBImpl.getOne().getLastAvail(id);
         } else {
             return getLastHistData(id, 1);
         }
@@ -1542,7 +1544,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         Integer[] sepMids = _measSep.getMids();
         Integer[] avIds = _measSep.getAvIds();
         Map data = getLastDataPts(sepMids, timestamp);
-        data.putAll(getAvailMan().getLastAvail(avIds, timestamp)); 
+        data.putAll(AvailabilityManagerEJBImpl.getOne().getLastAvail(avIds,
+                                                                     timestamp));
         return data;
     }
 
@@ -1833,7 +1836,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public Map getAggregateData(Integer[] tids, Integer[] iids,
                                 long begin, long end)
     {
-        Map rtn = getAvailMan().getAggregateData(tids, iids, begin, end);
+        Map rtn = AvailabilityManagerEJBImpl.getOne().
+            getAggregateData(tids, iids, begin, end);
         rtn.putAll(getAggData(tids, iids, begin, end));
         return rtn;
     }
@@ -2349,7 +2353,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         private Integer[] _mids;
         private Integer[] _avIds;
         MeasurementSeparator() {
-            _orderedAvailIds = getAvailMan().getAllAvailIds();
+            _orderedAvailIds = AvailabilityManagerEJBImpl.getOne()
+                .getAllAvailIds();
         }
         public Integer[] getAvIds() {
             Integer[] rtn = new Integer[_avIds.length];
