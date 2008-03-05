@@ -79,8 +79,6 @@ public class MetricSessionEJB extends BizappSessionEJB {
 
     protected SessionManager manager = SessionManager.getInstance();
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
-    protected final AvailabilityManagerLocal _availMan =
-        AvailabilityManagerEJBImpl.getOne();
 
     /**
      * Fetch the metric summaries for specified resources and templates
@@ -171,8 +169,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         timer.reset();
             
         // Now get the aggregate data, keyed by template ID's
-        Map datamap = _availMan.getAggregateData(mtids, eids, begin, end);
-        datamap.putAll(getDataMan().getAggregateData(mtids, eids, begin, end));
+        Map datamap = getDataMan().getAggregateData(mtids, eids, begin, end);
         
         if (log.isTraceEnabled()) {
             log.trace("getResourceMetrics -> getAggregateData took " +
@@ -375,7 +372,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         if (midMap.size() > 0) {
             Integer[] mids =
                 (Integer[]) midMap.values().toArray(new Integer[0]);
-            data = _availMan.getLastAvail(mids, acceptable);
+            data = getAvailManager().getLastAvail(mids, acceptable);
         }
     
         // Organize by agent

@@ -90,6 +90,7 @@ import org.hyperic.util.timer.StopWatch;
 public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final String logCtx = DataManagerEJBImpl.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
+    private final MeasurementSeparator _measSep = new MeasurementSeparator();
     
     // The boolean system property that makes all events interesting. This 
     // property is provided as a testing hook so we can flood the event 
@@ -948,6 +949,16 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public PageList getHistoricalData(Integer id, long begin, long end,
                                       PageControl pc)
         throws DataNotAvailableException {
+        if (_measSep.isAvailMeas(id)) {
+            return getAvailMan().getHistoricalAvailData(id, begin, end, pc);
+        } else {
+            return getHistData(id, begin, end, pc);
+        }
+    }
+
+    private PageList getHistData(Integer id, long begin, long end,
+                                      PageControl pc)
+        throws DataNotAvailableException {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
@@ -1120,6 +1131,20 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public PageList getHistoricalData(Integer[] ids, long begin, long end,
+                                      long interval, int type,
+                                      boolean returnNulls, PageControl pc)
+        throws DataNotAvailableException {
+        _measSep.set(ids);
+        Integer[] mids = _measSep.getMids();
+        Integer[] avIds = _measSep.getAvIds();
+        PageList rtn = getAvailMan().getHistoricalAvailData(avIds, begin,
+                                                            end, pc);
+        rtn.addAll(getHistData(mids, begin, end, interval,
+                               type, returnNulls, pc));
+        return rtn;
+    }
+
+    private PageList getHistData(Integer[] ids, long begin, long end,
                                       long interval, int type,
                                       boolean returnNulls, PageControl pc)
         throws DataNotAvailableException {
@@ -1364,6 +1389,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public List getLastHistoricalData(Integer id, int count)
         throws DataNotAvailableException {
+        if (_measSep.isAvailMeas(id)) {
+            return getAvailMan().getLastAvail(id);
+        } else {
+            return getLastHistData(id, 1);
+        }
+    }
+
+    private List getLastHistData(Integer id, int count)
+        throws DataNotAvailableException {
         // Make sure that client hasn't asked for more than we can provide
         if (count > 60)
             throw new DataNotAvailableException(
@@ -1503,6 +1537,16 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public Map getLastDataPoints(Integer[] ids, long timestamp)
+    {
+        _measSep.set(ids);
+        Integer[] sepMids = _measSep.getMids();
+        Integer[] avIds = _measSep.getAvIds();
+        Map data = getLastDataPts(sepMids, timestamp);
+        data.putAll(getAvailMan().getLastAvail(avIds, timestamp)); 
+        return data;
+    }
+
+    private Map getLastDataPts(Integer[] ids, long timestamp)
     {
         final int MAX_ID_LEN = 10;
         // The return map
@@ -1787,6 +1831,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public Map getAggregateData(Integer[] tids, Integer[] iids,
+                                long begin, long end)
+    {
+        Map rtn = getAvailMan().getAggregateData(tids, iids, begin, end);
+        rtn.putAll(getAggData(tids, iids, begin, end));
+        return rtn;
+    }
+
+    private Map getAggData(Integer[] tids, Integer[] iids,
                                 long begin, long end)
     {
         // Check the begin and end times
@@ -2291,4 +2343,46 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public void ejbPassivate() {}
     public void ejbRemove() {}
     public void setSessionContext(SessionContext ctx) {}
+    
+    private class MeasurementSeparator {
+        private List _orderedAvailIds;
+        private Integer[] _mids;
+        private Integer[] _avIds;
+        MeasurementSeparator() {
+            _orderedAvailIds = getAvailMan().getAllAvailIds();
+        }
+        public Integer[] getAvIds() {
+            Integer[] rtn = new Integer[_avIds.length];
+            System.arraycopy(_avIds, 0, rtn, 0, _avIds.length);
+            return rtn;
+        }
+        public Integer[] getMids() {
+            Integer[] rtn = new Integer[_mids.length];
+            System.arraycopy(_mids, 0, rtn, 0, _mids.length);
+            return rtn;
+        }
+        public void set(Integer[] mids) {
+            List midList = new ArrayList(mids.length);
+            List aidList = new ArrayList(mids.length);
+            for (int i=0; i<mids.length; i++) {
+                if (mids[i] == null) {
+                    continue;
+                } else if (isAvailMeas(mids[i])) {
+                    aidList.add(mids[i]);
+                } else {
+                    midList.add(mids[i]);
+                }
+            }
+            _mids = (Integer[])midList.toArray(new Integer[midList.size()]);
+            _avIds = (Integer[])aidList.toArray(new Integer[aidList.size()]);
+        }
+        public boolean isAvailMeas(Integer id) {
+            int res =
+                Collections.binarySearch(_orderedAvailIds, id);
+            if (res >= 0) {
+                return true;
+            }
+            return false;
+        }
+    }
 }

@@ -132,37 +132,38 @@ public class AvailabilityManagerEJBImpl
      * @ejb:interface-method
      */
     public PageList getHistoricalAvailData(Integer mid, long begin, long end,
-                                           long interval, PageControl pc) {
+                                           PageControl pc) {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List availInfo = dao.getHistoricalAvails(mid.intValue(), begin,
                                                  end, pc.isDescending());
-        return getPageList(availInfo, begin, end, interval);
+        return getPageList(availInfo, begin, end);
     }
 
     /**
      * @ejb:interface-method
      */
     public PageList getHistoricalAvailData(Integer[] mids, long begin, long end,
-                                           long interval, PageControl pc) {
+                                           PageControl pc) {
         if (mids.length == 0) {
             return new PageList();
         }
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List availInfo = dao.getHistoricalAvails(mids, begin,
             end, pc.isDescending());
-        return getPageList(availInfo, begin, end, interval);
+        return getPageList(availInfo, begin, end);
     }
     
-    private Collection getDefaultHistoricalAvail(int interval, long timestamp)
+    private Collection getDefaultHistoricalAvail(long timestamp)
     {
-        HighLowMetricValue[] rtn = new HighLowMetricValue[interval];
+        HighLowMetricValue[] rtn = new HighLowMetricValue[DEFAULT_INTERVAL];
         Arrays.fill(rtn, new HighLowMetricValue(AVAIL_UNKNOWN, timestamp));
         return Arrays.asList(rtn);
     }
 
     private PageList getPageList(List availInfo, long begin,
-                                 long end, long interval) {
+                                 long end) {
         PageList rtn = new PageList();
+        long interval = (end-begin)/DEFAULT_INTERVAL;
         for (Iterator it=availInfo.iterator(); it.hasNext(); ) {
             // XXX: Fix me.
             Object[] objs = (Object[])it.next();
@@ -200,7 +201,7 @@ public class AvailabilityManagerEJBImpl
             }
         }
         if (rtn.size() == 0) {
-            rtn.addAll(getDefaultHistoricalAvail(DEFAULT_INTERVAL, end));
+            rtn.addAll(getDefaultHistoricalAvail(end));
         }
         return rtn;
     }
@@ -290,7 +291,7 @@ public class AvailabilityManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public Collection getLastAvail(Integer mid) {
+    public List getLastAvail(Integer mid) {
         Integer[] mids = new Integer[1];
         List rtn = new ArrayList();
         mids[0] = mid;
@@ -366,7 +367,7 @@ public class AvailabilityManagerEJBImpl
         for (Iterator i=down.iterator(); i.hasNext(); ) {
             AvailabilityDataRLE rle = (AvailabilityDataRLE) i.next();
             Measurement meas = rle.getMeasurement();
-            long timestamp = rle.getEndtime();
+            long timestamp = rle.getStartime();
             Integer mid = meas.getId();
             if (includes != null && !includes.contains(mid)) {
                 continue;

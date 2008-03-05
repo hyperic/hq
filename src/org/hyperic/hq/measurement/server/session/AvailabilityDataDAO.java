@@ -318,7 +318,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * @return List of down Measurements
      */
     List getDownMeasurements() {
-        String sql = " FROM AvailabilityDataRLE rle" +
+        String sql = " select rle FROM AvailabilityDataRLE rle" +
                      " JOIN rle.availabilityDataId.measurement m" +
 				     " JOIN m.template t" +
 				 	 " WHERE rle.endtime = " + MAX_TIMESTAMP +

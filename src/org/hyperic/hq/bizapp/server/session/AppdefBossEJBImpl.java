@@ -146,7 +146,6 @@ import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
 import org.hyperic.hq.bizapp.shared.AppdefBossUtil;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
-import org.hyperic.hq.bizapp.shared.MeasurementSeparator;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportData;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportException;
@@ -204,7 +203,6 @@ public class AppdefBossEJBImpl
     protected static final int APPDEF_TYPE_UNDEFINED     = -1;
     protected static final int APPDEF_RES_TYPE_UNDEFINED = -1;
     protected static final int APPDEF_GROUP_TYPE_UNDEFINED = -1;
-    protected final MeasurementSeparator _measSep = new MeasurementSeparator();
 
     public AppdefBossEJBImpl() {}
 
