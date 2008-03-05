@@ -53,7 +53,6 @@ import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.ui.tapestry.page.PageListing;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.encoding.Base64;
 
@@ -117,9 +116,8 @@ public final class AuthenticationFilter extends BaseFilter {
 		if (servletPath.indexOf("RecentAlerts") < 0
 			&& servletPath.indexOf("rss") < 0
 			&& servletPath.indexOf("IndicatorCharts") < 0) {
-		    StringBuffer forwardURL = new StringBuffer();
-		    forwardURL.append(servletPath).append("?").append(queryString == null ? "" : queryString);
-		    session.setAttribute(Constants.POST_AUTH_CALLBACK_URL, forwardURL.toString());
+		    session.setAttribute(Constants.POST_AUTH_CALLBACK_URL, servletPath
+			    + queryString == null ? "" : queryString);
 		}
 		String redirectURL = contextPath + PageListing.SIGN_IN_URL;
 		response.sendRedirect(redirectURL);
