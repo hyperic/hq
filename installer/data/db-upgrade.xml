@@ -8315,6 +8315,14 @@ has already been defined.
         <statement desc="Drop unused cid column">
             ALTER TABLE EAM_MEASUREMENT DROP COLUMN cid
         </statement>
+        <statement targetDB="postgresql" desc="Drop index on discriminator column" >
+            DROP INDEX meas_id_class
+        </statement>
+        <statement targetDB="oracle" desc="Drop index on discriminator column" >
+            DROP INDEX meas_id_class
+        </statement>
+        <statement targetDB="mysql" desc="Drop index on discriminator column" >
+            DROP INDEX meas_id_class on EAM_MEASUREMENT
         <statement desc="Drop discriminator column on EAM_MEASUREMENT">
             ALTER TABLE EAM_MEASUREMENT DROP COLUMN measurement_class
         </statement>
