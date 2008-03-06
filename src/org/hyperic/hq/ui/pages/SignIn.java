@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006, 2007, 2008], Hyperic, Inc.
+ * Copyright (C) [2004 - 2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -41,6 +41,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.RedirectException;
 import org.apache.tapestry.annotations.Component;
+import org.apache.tapestry.annotations.InitialValue;
+import org.apache.tapestry.annotations.Meta;
 import org.apache.tapestry.annotations.Persist;
 import org.apache.tapestry.callback.ICallback;
 import org.apache.tapestry.engine.ILink;
@@ -56,16 +58,17 @@ import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.PageListing;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.image.widget.ResourceTree;
+import org.hyperic.ui.tapestry.page.PageListing;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 
+@Meta({"org.apache.tapestry.default-binding-prefix=ognl"})
 public abstract class SignIn extends BasePage {
 
     static Log log = LogFactory.getLog(SignIn.class);
@@ -79,6 +82,7 @@ public abstract class SignIn extends BasePage {
     public abstract void setPassword(String password);
 
     @Persist()
+    @InitialValue("literal:")
     public abstract String getMessage();
     public abstract void setMessage(String msg);
 
@@ -116,6 +120,7 @@ public abstract class SignIn extends BasePage {
 	} catch (Exception e) {
 	    String msg = e.getMessage().toLowerCase();
 	    if (msg.indexOf("username") >= 0 || msg.indexOf("password") >= 0)
+		//setMessage("FUBAR");
 		setMessage(this.getMessages().getMessage("credentialError"));
 	    else if (msg.indexOf("disabled") >= 0)
 		setMessage(this.getMessages().getMessage("userDisabled"));

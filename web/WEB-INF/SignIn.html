@@ -1,38 +1,14 @@
-<div jwcid="@Shell" title="message:title" stylesheet="asset:new" preventBackButtonFix="ongl:true">
-    <body jwcid="@Body">
-    <div id="wrapper">
-        <div id="header">
-            <div id="headerLogo">&nbsp;</div>
-            <div></div>
-            <div id="headerLinks"><span><span key="signedIn">You are not signed in.</span><span><span><a href="#">Help</a></span></div>
-        </div>
-        <div id="headerBottom">&nbsp;</div>
-            <div class="loginPanel">
-                <form jwcid="@Form" clientValidationEnabled="true" port="ognl:7080">
-                <div class="fieldsetTitle"><span key="signInTitle">Sign in to Hyperic HQ Enterprise</span></div>
-                <div class="fieldsetNote"><span key="signInNote">Please enter your username and password to sign in.</span></div>
-                <if jwcid="@If" condition="ognl:message">
-                    <div jwcid="@Insert" renderTag="true" class="msgPanel msgError" value="ognl:message"></div>
-                </if>
-                <fieldset>
-                    <div class="fieldRow">
-                        <fieldlabel jwcid="@FieldLabel" field="component:userName" displayName="message:userName">User Name</fieldlabel>
-                        <input jwcid="userName@TextField" value="ognl:userName"/>
-                        <img src="images/icons/help.png" onclick="alert('help')" title=""/>
-                        <span class="fieldHint" style="display:none;">User Name is required</span>
-                    </div>
-                    <div class="fieldRow">
-                        <fieldlabel jwcid="@FieldLabel" field="component:password" displayName="message:password">Password</fieldlabel>
-                        <input jwcid="password@TextField" value="ognl:password" hidden="true"/>
-                        <span class="fieldHint" style="display:none;">Password is required</span>
-                    </div>
-                    <div style="float:right;margin-top:10px;">
-                        <a jwcid="@LinkSubmit" listener="listener:signinButtonListener" class="buttonGreen" ><span>Sign In</span></a>
-                    </div>
-                </fieldset>
-                </form>
-            </div>
+<div jwcid="@hyperic:Layout1Col" pageTitle="message:title">
+    <div class="loginPanel">
+        <form jwcid="@Form" clientValidationEnabled="true" port="ognl:7080">
+        <fieldset jwcid="@hyperic:FieldSet" title="message:signInTitle" note="message:signInNote">
+            <div jwcid="@hyperic:MessagePanel" message="ognl:message"/>
+            <input jwcid="@hyperic:InputField" fieldValue="ognl:userName" 
+                fieldTitle="message:userName" fieldLabel="message:userName"/>
+            <input jwcid="@hyperic:InputField" fieldValue="ognl:password" isPassword="ognl:true"
+                fieldTitle="message:password" fieldLabel="message:password"/>
+            <a jwcid="@hyperic:Button" listener="listener:signinButtonListener" label="message:signInButton"/>
+        </fieldset>
+        </form>
     </div>
-    </body>
 </div>
-
