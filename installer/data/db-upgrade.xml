@@ -8245,26 +8245,18 @@ has already been defined.
 
       <schema-directSQL>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="postgresql">
-            UPDATE EAM_MEASUREMENT m SET dsn = (SELECT dsn FROM EAM_MEASUREMENT WHERE id = m.id - 1) WHERE MEASUREMENT_CLASS = 'D'
+            UPDATE EAM_MEASUREMENT SET dsn = (SELECT m.dsn FROM EAM_MEASUREMENT m WHERE m.id = EAM_MEASUREMENT.id - 1) WHERE MEASUREMENT_CLASS = 'D'
         </statement>
         <statement desc="Replace pass-through ARG1 with actual Template" targetDB="postgresql">
-            UPDATE EAM_MEASUREMENT_TEMPL t SET template = (SELECT template from EAM_MEASUREMENT_TEMPL WHERE id = t.id - 1) WHERE default_interval != 0
+            UPDATE EAM_MEASUREMENT_TEMPL SET template = (SELECT template from EAM_MEASUREMENT_TEMPL t WHERE id = EAM_MEASUREMENT_TEMPL.id - 1) WHERE default_interval != 0
         </statement>
       </schema-directSQL>
       <schema-directSQL>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="oracle">
-            UPDATE EAM_MEASUREMENT m SET dsn = (SELECT dsn FROM EAM_MEASUREMENT WHERE id = m.id - 1) WHERE MEASUREMENT_CLASS = 'D'
+            UPDATE EAM_MEASUREMENT SET dsn = (SELECT m.dsn FROM EAM_MEASUREMENT m WHERE m.id = EAM_MEASUREMENT.id - 1) WHERE MEASUREMENT_CLASS = 'D'
         </statement>
         <statement desc="Replace pass-through ARG1 with actual Template" targetDB="oracle">
-            UPDATE EAM_MEASUREMENT_TEMPL t SET template = (SELECT template from EAM_MEASUREMENT_TEMPL WHERE id = t.id - 1) WHERE default_interval != 0
-        </statement>
-      </schema-directSQL>
-      <schema-directSQL>
-        <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="oracle">
-            UPDATE EAM_MEASUREMENT m SET dsn = (SELECT dsn FROM EAM_MEASUREMENT WHERE id = m.id - 1) WHERE MEASUREMENT_CLASS = 'D'
-        </statement>
-        <statement desc="Replace pass-through ARG1 with actual Template" targetDB="oracle">
-            UPDATE EAM_MEASUREMENT_TEMPL t SET template = (SELECT template from EAM_MEASUREMENT_TEMPL WHERE id = t.id - 1) WHERE default_interval != 0
+            UPDATE EAM_MEASUREMENT_TEMPL SET template = (SELECT template from EAM_MEASUREMENT_TEMPL t WHERE id = EAM_MEASUREMENT_TEMPL.id - 1) WHERE default_interval != 0
         </statement>
       </schema-directSQL>
       <schema-directSQL>
@@ -8275,7 +8267,7 @@ has already been defined.
             ALTER TABLE EAM_MEASUREMENT_TMP ADD PRIMARY KEY (ID);
         </statement>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="mysql">
-            UPDATE EAM_MEASUREMENT m SET m.dsn = (SELECT dsn FROM EAM_MEASUREMENT_TMP where id = m.id) WHERE MEASUREMENT_CLASS='D'
+            UPDATE EAM_MEASUREMENT SET dsn = (SELECT m.dsn FROM EAM_MEASUREMENT_TMP m where m.id = EAM_MEASUREMENT.id) WHERE MEASUREMENT_CLASS='D'
         </statement>
         <statement desc="Clean up TMP table" targetDB="mysql">
            DROP TABLE EAM_MEASUREMENT_TMP
@@ -8287,7 +8279,7 @@ has already been defined.
             ALTER TABLE EAM_MEASUREMENT_TEMPL_TMP ADD PRIMARY KEY (ID)
         </statement>
         <statement desc="Replace pass-through ARG1 with actual Template" targetDB="mysql">
-            UPDATE EAM_MEASUREMENT_TEMPL T SET TEMPLATE = (SELECT TEMPLATE FROM EAM_MEASUREMENT_TEMPL_TMP WHERE ID = T.ID) WHERE DEFAULT_INTERVAL != 0
+            UPDATE EAM_MEASUREMENT_TEMPL SET template = (SELECT t.template FROM EAM_MEASUREMENT_TEMPL_TMP t WHERE t.ID = EAM_MEASUREMENT_TEMPL.ID) WHERE DEFAULT_INTERVAL != 0
         </statement>
         <statement desc="Clean up TMP table" targetDB="mysql">
             DROP TABLE EAM_MEASUREMENT_TEMPL_TMP
