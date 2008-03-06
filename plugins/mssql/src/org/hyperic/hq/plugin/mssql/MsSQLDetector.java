@@ -48,7 +48,7 @@ public class MsSQLDetector
     extends ServerDetector
     implements AutoServerDetector {
 
-    private static final String PROP_DB      = "db.name";
+    static final String PROP_DB      = "db.name";
     private static final String DB_NAME      = "Database";
     private static final String DEFAULT_NAME = "MSSQL";
     static final String DEFAULT_SERVICE_NAME =
