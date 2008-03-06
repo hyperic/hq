@@ -1,0 +1,26 @@
+<div jwcid="@Shell" title="message:pageTitle" stylesheet="asset:HQ4_Theme" preventBackButtonFix="true">
+    <body jwcid="@Body" style="background-color:white;">
+	<form jwcid="@Form">
+	<h2>Message Panels</h2>
+	<h3>Component: Message Panel - error</h3>
+	   <div jwcid="@hyperic:MessagePanel" message="message:errorMsg"/>
+	<h2>Input Fields</h2>
+	<h3>Component: Input Field - required, password, hint</h3>
+		<input jwcid="@hyperic:InputField" isPassword="ognl:true" isRequired="ognl:true"
+		    fieldValue="value" fieldTitle="message:title" fieldLabel="message:label"
+		    fieldHint="message:hint" helpTitle="message:helpTitle"/>
+	<h3>Component: Input Field - disabled, hint</h3>	    
+		<input jwcid="@hyperic:InputField" disabled="ognl:true"
+		    fieldValue="value1" fieldTitle="message:title" fieldLabel="message:label"
+		    fieldHint="message:hint" helpTitle="message:helpTitle"/>
+    <h3>Component: Input Field - not required, no hint</h3>     
+        <input jwcid="@hyperic:InputField" fieldValue="value2" 
+            fieldTitle="message:title" fieldLabel="message:label"
+            helpTitle="message:helpTitle"/>
+    <h2>Buttons</h2>
+    <h3>Component: Buton - Green</h3>
+        <a jwcid="@hyperic:Button" listener="listener:buttonListener" label="message:button1"/>
+    <h3>Header</h3>
+	</form>
+    </body>
+</div>
