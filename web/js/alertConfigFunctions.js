@@ -115,7 +115,7 @@ function checkEnableNT() {
 }
 
 function checkRecover() {
-  if (document.forms[0].disableForRecovery.checked == true) {
+  if (document.forms[0].disableForRecovery.checked) {
     document.forms[0].recoverId.disabled = true;
   }
   else {
@@ -124,9 +124,22 @@ function checkRecover() {
 
   if (document.forms[0].recoverId.value == '') {
     document.forms[0].disableForRecovery.disabled = false;
+    document.forms[0].whenEnabled[2].disabled = false;
+    document.forms[0].numTimesNT.disabled = false;
+    document.forms[0].howLongNT.disabled = false;
+    document.forms[0].howLongUnitsNT.disabled = false;
   }
   else {
     document.forms[0].disableForRecovery.disabled = true;
+
+    if (document.forms[0].whenEnabled[2].checked) {
+        document.forms[0].whenEnabled[0].checked = true;
+    }
+
+    document.forms[0].whenEnabled[2].disabled = true;
+    document.forms[0].numTimesNT.disabled = true;
+    document.forms[0].howLongNT.disabled = true;
+    document.forms[0].howLongUnitsNT.disabled = true;
   }
 }
 
