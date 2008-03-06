@@ -1,0 +1,20 @@
+<shell jwcid="@Shell" title="ognl:pageTitle" stylesheets='ognl:{HQ40Theme}' 
+       delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.remainingHead)" >
+<block jwcid="remainingHead@Block">
+<link rel="shortcut icon" href="/images/icons/favicon.ico"/>
+<script language="JavaScript" type="text/javascript" src="/js/lib/lib.js"></script>
+</block>
+<body jwcid="@Body">
+
+<div id="wrapper">
+        
+<span jwcid="@Header"/>
+
+<div id="wrapper">
+	<div id="content">
+	    <span jwcid="@RenderBody">Page content goes here.</span>
+	</div>
+</div>
+</div>
+</body>
+</shell>

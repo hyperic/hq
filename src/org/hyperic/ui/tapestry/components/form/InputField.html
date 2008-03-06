@@ -1,0 +1,9 @@
+<div jwcid="@Any" class="ognl:fieldHint!=''?'fieldRow hint':'fieldRow'">
+  <fieldlabel jwcid="@FieldLabel" field="component:textfield" raw="true" 
+              displayName="ognl:label"></fieldlabel>
+  <input jwcid="textfield@TextField" disabled="ognl:isDisabled" hidden="ognl:isHidden" 
+         validators="ognl:validators" value="ognl:fieldValue" onfocus="fieldFocus(this);" 
+         onblur="fieldBlur(this)" title="ognl:fieldTitle"/>
+  <span jwcid="@If" condition="ognl:helpTitle!=''"><span jwcid="@Any" class="help" title="ognl:helpTitle">&nbsp;</span></span>
+  <div jwcid="@Any" class="fieldHint" style="ognl:hintStyle"><span jwcid="@Insert" value="ognl:fieldHint"></span></div>
+</div>

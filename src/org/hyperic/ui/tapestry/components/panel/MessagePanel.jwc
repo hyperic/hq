@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE component-specification PUBLIC 
+  "-//Apache Software Foundation//Tapestry Specification 4.1//EN" 
+  "http://jakarta.apache.org/tapestry/dtd/Tapestry_4_1.dtd">
+
+<component-specification  allow-body="no" allow-informal-parameters="no" class="org.hyperic.ui.tapestry.components.panel.MessagePanel">
+</component-specification>

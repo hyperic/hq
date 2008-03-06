@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE library-specification PUBLIC 
+  "-//Apache Software Foundation//Tapestry Specification 4.0//EN" 
+  "http://jakarta.apache.org/tapestry/dtd/Tapestry_4_0.dtd">
+<!-- 
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+    "derived work".
+      
+    Copyright (C) [2004-2008], Hyperic, Inc.
+    This file is part of HQ.
+    
+    HQ is free software; you can redistribute it and/or modify
+    it under the terms version 2 of the GNU General Public License as
+    published by the Free Software Foundation. This program is distributed
+    in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+    even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+    PARTICULAR PURPOSE. See the GNU General Public License for more
+    details.
+    
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+    USA.
+
+-->
+
+<library-specification>
+
+    <library id="tacos" specification-path="/net/sf/tacos/Tacos.library"/>
+	<meta key="org.apache.tapestry.component-class-packages" value="org.hyperic.ui.tapestry.components"/>
+
+    <component-type type="InputField" specification-path="form/InputField.jwc"/>
+    <component-type type="Button" specification-path="form/Button.jwc"/>
+    <component-type type="FieldSet" specification-path="form/FieldSet.jwc"/>
+    
+    <component-type type="Layout1Col" specification-path="layout/Layout1Col.jwc"/>
+    
+    <component-type type="Header" specification-path="navigation/Header.jwc"/>
+    <component-type type="NavigationTabs" specification-path="navigation/NavigationTabs.jwc"/>
+    
+    <component-type type="MessagePanel" specification-path="panel/MessagePanel.jwc"/>
+    
+</library-specification>
