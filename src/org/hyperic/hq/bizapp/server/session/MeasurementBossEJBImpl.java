@@ -763,7 +763,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         for (int i = 0; i < tids.length; i++) {
             try {
                 Measurement dmv = getMetricManager()
-                    .findMeasurement(subject, tids[i], aeid.getId());
+                    .findMeasurement(subject, tids[i], aeid);
                 mids[i] = dmv.getId();
                 interval = Math.max(interval, dmv.getInterval());
             } catch (MeasurementNotFoundException e) {
@@ -908,7 +908,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                  new AppdefEntityID[] { id }).get(0);
 
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        return getMetricManager().findMeasurement(subject, tid, id.getId());
+        return getMetricManager().findMeasurement(subject, tid, id);
     }
 
     /** Retrieve List of measurements for a specific instance
@@ -966,8 +966,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 ids.add(entIds[i].getId());
             }
         }
-        return getMetricManager().findMeasurements(
-            subject, tid, (Integer[]) ids.toArray(new Integer[0]));
+        return getMetricManager().findMeasurements(subject, tid, entIds);
     }
 
     /**
@@ -1369,19 +1368,19 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             entities.add(entVal.getResourceValue());
         }
         
-        Integer[] iids = new Integer[entities.size()];
+        AppdefEntityID[] aeids = new AppdefEntityID[entities.size()];
         IntHashMap resourceMap = new IntHashMap();
         Iterator iter = entities.iterator();
         for (int i = 0; iter.hasNext(); i++) {
             AppdefResourceValue resource = (AppdefResourceValue) iter.next();
-            iids[i] = resource.getEntityId().getId();
-            resourceMap.put(iids[i].intValue(), resource);
+            aeids[i] = resource.getEntityId();
+            resourceMap.put(aeids[i].getID(), resource);
         }
 
         // get measurement summaries, enriched with metadata
         // tastes good and it's good for you 
         List mds = new ArrayList();
-        List mms = getMetricManager().findMeasurements(subject, tid, iids);
+        List mms = getMetricManager().findMeasurements(subject, tid, aeids);
         for (iter = mms.iterator(); iter.hasNext();) {
             Measurement mm = (Measurement) iter.next();
             Integer instanceId = mm.getInstanceId();
@@ -1636,7 +1635,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // Get baseline values
         Measurement dmval = getMetricManager().findMeasurement(subject,
                                                                tmpl.getId(),
-                                                               id.getId());
+                                                               id);
 
         // Use previous function to set most values, including only 1 resource
         MetricDisplaySummary summary =

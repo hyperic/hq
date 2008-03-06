@@ -524,16 +524,17 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public Measurement findMeasurement(AuthzSubject subject,
-                                       Integer tid, Integer iid)
+                                       Integer tid, AppdefEntityID aeid)
         throws MeasurementNotFoundException {
-        Measurement dm =
-            getMeasurementDAO().findByTemplateForInstance(tid, iid);
-        if (dm == null) {
+        List metrics = getMeasurementDAO()
+            .findByTemplatesForInstance(new Integer[] {tid}, getResource(aeid));
+
+        if (metrics.size() == 0) {
             throw new MeasurementNotFoundException("No measurement found " +
-                                                   "for " + iid + " with " +
+                                                   "for " + aeid + " with " +
                                                    "template " + tid);
         }
-        return dm;
+        return (Measurement) metrics.get(0);
     }
 
     /**
@@ -575,14 +576,12 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public List findMeasurements(AuthzSubject subject, Integer tid,
-                                 Integer[] ids) {
+                                 AppdefEntityID[] aeids) {
+        MeasurementDAO dao = getMeasurementDAO();
         ArrayList results = new ArrayList();
-        for (int i = 0; i < ids.length; i++) {
-            try {
-                results.add(findMeasurement(subject, tid, ids[i])); 
-            } catch (MeasurementNotFoundException e) {
-                continue;
-            }
+        for (int i = 0; i < aeids.length; i++) {
+            results.addAll(dao.findByTemplatesForInstance(new Integer[] { tid },
+                                                          getResource(aeids[i])));
         }
         return results;
     }

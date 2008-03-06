@@ -103,21 +103,6 @@ public class MeasurementDAO extends HibernateDAO {
             .list();
     }
     
-    public Measurement findByTemplateForInstance(Integer tid,
-                                                 Integer iid) {
-        String sql =
-            "select distinct m from Measurement m " +
-            "join m.template t " +
-            "where t.id=? and m.instanceId=?";
-
-        return (Measurement)getSession().createQuery(sql)
-            .setInteger(0, tid.intValue())
-            .setInteger(1, iid.intValue())
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findByTemplateForInstance")
-            .uniqueResult();
-    }
-    
     /**
      * Look up a Measurement, allowing for the query to return a stale
      * copy (for efficiency reasons).
@@ -130,9 +115,8 @@ public class MeasurementDAO extends HibernateDAO {
      *                   sync with the database.
      * @return The Measurement or <code>null</code>.
      */
-    public Measurement findByTemplateForInstance(Integer tid,
-                                                 Integer iid,
-                                                 boolean allowStale) {
+    Measurement findByTemplateForInstance(Integer tid, Integer iid,
+                                          boolean allowStale) {
         Session session = getSession();
         FlushMode oldFlushMode = session.getFlushMode();
         
@@ -141,7 +125,17 @@ public class MeasurementDAO extends HibernateDAO {
                 session.setFlushMode(FlushMode.MANUAL);                
             }
             
-            return findByTemplateForInstance(tid, iid); 
+            String sql =
+                "select distinct m from Measurement m " +
+                "join m.template t " +
+                "where t.id=? and m.instanceId=?";
+            
+            return (Measurement) getSession().createQuery(sql)
+                .setInteger(0, tid.intValue())
+                .setInteger(1, iid.intValue())
+                .setCacheable(true)
+                .setCacheRegion("Measurement.findByTemplateForInstance")
+                .uniqueResult(); 
         } finally {
             session.setFlushMode(oldFlushMode);
         } 
