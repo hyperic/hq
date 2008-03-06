@@ -247,8 +247,11 @@
           </dirset>
         </src>
         <exclude name="org/hyperic/hq/ui/**/*.java" />
-        <exclude name="org/hyperic/tapestry/**/*.java" />
+        <exclude name="org/hyperic/ui/tapestry/**/*.java" />
         <!--exclude name="**/*_test.java" /-->
+        <src>
+          <path location="src/org/hyperic/hq/ui/server" />
+        </src>
       </hq-javac>
   </target>
     
