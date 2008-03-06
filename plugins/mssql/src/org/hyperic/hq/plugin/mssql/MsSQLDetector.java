@@ -28,11 +28,7 @@ package org.hyperic.hq.plugin.mssql;
 import java.io.File;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.util.config.ConfigResponse;
 
@@ -44,7 +40,6 @@ import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.hq.product.Win32ControlPlugin;
 
 import org.hyperic.sigar.win32.Pdh;
-import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.ServiceConfig;
 import org.hyperic.sigar.win32.Win32Exception;
@@ -53,60 +48,15 @@ public class MsSQLDetector
     extends ServerDetector
     implements AutoServerDetector {
 
-    static Log log = LogFactory.getLog("MsSQLDetector");
-    
-    static final String PROP_DB      = "db.name";
-    static final String DB_NAME      = "Database";
-    static final String DEFAULT_NAME = "MSSQL";
+    private static final String PROP_DB      = "db.name";
+    private static final String DB_NAME      = "Database";
+    private static final String DEFAULT_NAME = "MSSQL";
     static final String DEFAULT_SERVICE_NAME =
         DEFAULT_NAME + "SERVER";
-
-    private static final String MSSQL_DEFAULT_NAME = "MSSQLServer"; 
-    private static final String MSKEY = "SOFTWARE\\Microsoft\\";
-    private static final String MSSQL_DEFAULT = 
-        MSKEY + MSSQL_DEFAULT_NAME;
-
-    private static final String MSSQL_INSTANCE =
-        MSKEY + "Microsoft SQL Server";
 
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException {
 
-        String wantedVersion =
-            getTypeProperty("mssql.version") + ".";
-        ArrayList servers = new ArrayList();
-        List found =
-            getServerResources(platformConfig,
-                               MSSQL_INSTANCE,
-                               wantedVersion);
-        if (found != null) {
-            servers.addAll(found);
-        }
-        RegistryKey root;
-
-        try {
-            root = RegistryKey.LocalMachine.openSubKey(MSSQL_DEFAULT);
-            ServerResource server =
-                detectServer(root, MSSQL_DEFAULT_NAME, wantedVersion);
-            if (server != null) {
-                servers.add(server);
-            }
-            root.close();
-        } catch (Win32Exception e) {
-            log.debug(MSSQL_DEFAULT + " regkey does not exist");
-        }
-
-        found = findWindowsServices();
-        if (found != null){
-            servers.addAll(found);
-        }
-
-        return servers;
-    }
-
-    //XXX introduced for detection of 64-bit SQL server by 32-bit process,
-    //but could do this by default.
-    private List findWindowsServices() {
         String versionFile =
             getTypeProperty("mssql.version.file");
 
@@ -166,124 +116,6 @@ public class MsSQLDetector
         server.setControlConfig();
 
         return server;
-    }
-
-    private ServerResource detectServer(RegistryKey key,
-                                        String name,
-                                        String wantedVersion) {
-        RegistryKey setup;
-        File dir;
-
-        try {
-            setup = key.openSubKey("Setup");            
-        } catch (Win32Exception e) {
-            return null;
-        }
-
-        try {
-            dir = new File(setup.getStringValue("SQLPath"));
-        } catch (Win32Exception e) {
-            setup.close();
-            return null;
-        }
-
-        setup.close();
-
-        log.debug("checking path=" + dir);
-
-        boolean isDefault = false;
-        
-        //the default install
-        if (name.equals(DEFAULT_NAME) ||
-            name.equals(MSSQL_DEFAULT_NAME))
-        {
-            name = DEFAULT_SERVICE_NAME;
-            dir = dir.getParentFile();
-            isDefault = true;
-        }
-        else {
-            //non-default install (multiple instances)
-            name = DEFAULT_NAME + "$" + name;
-        }
-
-        RegistryKey versionKey;
-        String productVersion;
-
-        try {
-            versionKey =
-                key.openSubKey("MSSQLServer\\CurrentVersion");            
-        } catch (Win32Exception e) {
-            return null;
-        }
-
-        try {
-            productVersion =
-                versionKey.getStringValue("CurrentVersion").trim();
-        } catch (Win32Exception e) {
-            versionKey.close();
-            return null;
-        }
-
-        versionKey.close();
-
-        if (!productVersion.startsWith(wantedVersion)) {
-            return null;
-        }
-
-        ServerResource server =
-            createServerResource(dir.getAbsolutePath(),
-                                 name, isDefault);
-
-        ConfigResponse cprops = new ConfigResponse();
-        cprops.setValue("version", productVersion);
-        server.setCustomProperties(cprops);
-
-        return server;
-    }
-
-    private List getServerResources(ConfigResponse platformConfig,
-                                    String rootName,
-                                    String wantedVersion)
-        throws PluginException {
-
-
-        RegistryKey root;
-
-        try {
-            root = RegistryKey.LocalMachine.openSubKey(rootName);
-        } catch (Win32Exception e) {
-            log.debug(rootName + " regkey does not exist");
-            return null;
-        }
-
-        String[] keys = root.getSubKeyNames();
-        ArrayList servers = new ArrayList();
-
-        if (log.isDebugEnabled()) {
-            log.debug("Scanning keys=" + rootName + "\\" +
-                      Arrays.asList(keys));
-        }
-        
-        for (int i=0; i<keys.length; i++) {
-            String name = keys[i];
-            RegistryKey key;
-
-            try {
-                key = root.openSubKey(name);
-            } catch (Win32Exception e) {
-                continue;
-            }
-
-            ServerResource server =
-                detectServer(key, name, wantedVersion);
-            if (server != null) {
-                servers.add(server);
-            }
-
-            key.close();
-        }
-
-        return servers;
     }
 
     protected List discoverServices(ConfigResponse serverConfig)
