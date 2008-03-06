@@ -9,12 +9,13 @@
     <meta key="org.apache.tapestry.messages-encoding" value="UTF-8"/> 
 	<meta key="org.apache.tapestry.accepted-locales" value="en"/> 
     
-	<meta key="org.apache.tapestry.page-class-packages" value="org.hyperic.ui.hq.page"/>
+	<meta key="org.apache.tapestry.page-class-packages" value="org.hyperic.ui.hq.pages"/>
 	<meta key="org.apache.tapestry.component-class-packages" value="org.hyperic.ui.tapestry.components"/>
     
+    <library id="hyperic" specification-path="classpath:/org/hyperic/ui/tapestry/components/hypericTapUI.library"/>
+    
     <library id="contrib" specification-path="classpath:/org/apache/tapestry/contrib/Contrib.library"/>
-    <!-- <library id="contrib" specification-path="classpath:/org/apache/tapestry/contrib/Contrib.library"/> 
-    <library id="contrib" specification-path="classpath:/org/apache/tapestry/contrib/Contrib.library"/>
-    <library id="hqTapUI" specification-path="/com/seesaw/ui/tapestry/components/hqTapUI.library"/>
-    -->
+    <library id="tacos" specification-path="classpath:/net/sf/tacos/Tacos.library"/>
+    <library id="dojo" specification-path="classpath:/net/sf/tacos/Dojo.library"/>
+    
 </application>

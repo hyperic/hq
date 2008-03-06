@@ -1,31 +1,47 @@
 <?xml version="1.0"?>
 <module id="org.hyperic.ui.hq" version="1.0.0">
 
-<!-- ASO(s) -->
+<!-- Application State Object(s) -->
 <!--
-    <contribution
-        configuration-id="tapestry.state.ApplicationObjects">
-        <state-object name="hqPageSession" scope="session">
-            <create-instance class="org.hyperic.ui.hq.session.HQPageSession" />
-        </state-object>
-    </contribution>
+<contribution configuration-id="tapestry.state.ApplicationObjects">
+  <state-object name="hqPageSession" scope="session">
+      <create-instance class="org.hyperic.ui.hq.session.HQPageSession" />
+  </state-object>
+</contribution>
 
-    <contribution configuration-id="tapestry.form.validator.Validators">
-        <validator name="firstAvailableDate" configurable="false"
-            class="org.hyperic.ui.tapestry.validators.FirstAvailableDateValidator" />
-    </contribution>
-    -->
+<contribution configuration-id="tapestry.form.validator.Validators">
+  <validator name="firstAvailableDate" configurable="false"
+    class="org.hyperic.ui.tapestry.validators.FirstAvailableDateValidator" />
+</contribution>
+-->
+
 <!-- Friendly URL configuration -->
-  <contribution configuration-id="tapestry.url.ServiceEncoders">
-    <page-service-encoder id="page" extension="html"
-    service="page" />
+<contribution configuration-id="tapestry.url.ServiceEncoders">
+  <page-service-encoder id="page" extension="html" service="page" />
+  <direct-service-encoder id="direct" stateless-extension="sshq" stateful-extension="shq" />
+  <asset-encoder id="asset" path="/assets" />
+  <extension-encoder id="extension" extension="shtml" after="*" />
+</contribution>
 
-    <direct-service-encoder id="direct" stateless-extension="sshq"
-    stateful-extension="shq" />
+<!-- Classpath page specification resolvers -->
+<implementation service-id="tapestry.page.SpecificationResolverDelegate">
+  <invoke-factory>
+    <construct class="net.sf.tacos.resolvers.ClasspathSpecResolverDelegate">
+      <set-object property="classFinder" value="infrastructure:classFinder"/>
+    </construct>
+  </invoke-factory>
+</implementation>
 
-    <asset-encoder id="asset" path="/assets" />
+<implementation service-id="tapestry.page.ComponentSpecificationResolver">
+  <invoke-factory model="threaded">
+    <construct class="net.sf.tacos.resolvers.ClasspathComponentSpecResolver">
+	  <set-object property="specificationSource" value="infrastructure:specificationSource"/>
+      <set-service property="delegate" service-id="tapestry.page.SpecificationResolverDelegate"/>
+      <set-object property="applicationId" value="infrastructure:applicationId"/>
+      <set-object property="contextRoot" value="infrastructure:contextRoot"/>
+      <set-object property="classFinder" value="infrastructure:classFinder"/>
+    </construct>
+  </invoke-factory>
+</implementation>
 
-    <extension-encoder id="extension" extension="shtml" after="*" />
-  </contribution>
 </module>
-
