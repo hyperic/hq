@@ -8323,6 +8323,7 @@ has already been defined.
         </statement>
         <statement targetDB="mysql" desc="Drop index on discriminator column" >
             DROP INDEX meas_id_class on EAM_MEASUREMENT
+        </statement>
         <statement desc="Drop discriminator column on EAM_MEASUREMENT">
             ALTER TABLE EAM_MEASUREMENT DROP COLUMN measurement_class
         </statement>
