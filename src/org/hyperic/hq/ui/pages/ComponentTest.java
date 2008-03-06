@@ -19,5 +19,10 @@ public abstract class ComponentTest extends BasePage {
 
     public void buttonListener(IRequestCycle cycle) {
     }
+    
+    /**
+     * This placeholder test was added so that this unit test would not fail. 
+     */
+    public final void testPlaceHolder() {}
 
 }
