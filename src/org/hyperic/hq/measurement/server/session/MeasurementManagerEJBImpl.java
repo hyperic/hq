@@ -124,18 +124,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    private Measurement updateMeasurementInterval(Integer tid,
-                                                  Integer iid,
-                                                  long interval)
-        throws FinderException
-    {
-        Measurement m =
-            getMeasurementDAO().findByTemplateForInstance(tid, iid);
-        if (m == null) {
-            // Fix me
-            throw new FinderException();
-        }
-
+    private Measurement updateMeasurementInterval(Measurement m,
+                                                  long interval) {
         m.setEnabled(interval != 0);
         m.setInterval(interval);
 
@@ -256,25 +246,29 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         }
 
         try {
-
             MeasurementTemplateDAO tDao = getMeasurementTemplateDAO();
             MeasurementDAO dao = getMeasurementDAO();
+            List metrics = dao.findByTemplatesForInstance(templates, resource);
+            
+            // Put the metrics in a map for lookup
+            Map lookup = new HashMap(metrics.size());
+            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+                Measurement m = (Measurement) it.next();
+                lookup.put(m.getTemplate().getId(), m);
+            }
+
             for (int i = 0; i < templates.length; i++) {
                 MeasurementTemplate t = tDao.get(templates[i]);
-                Measurement m = dao.findByTemplateForInstance(templates[i],
-                                                              resource.getInstanceId());
+                Measurement m = (Measurement) lookup.get(templates[i]);
+                
                 if (m == null) {
                     // No measurement, create it
                     m = createMeasurement(resource, t, props, intervals[i]);
                 } else {
-                    updateMeasurementInterval(templates[i],
-                                              resource.getInstanceId(),
-                                              intervals[i]);
+                    updateMeasurementInterval(m, intervals[i]);
                 }
                 dmList.add(m);
             }
-        } catch (FinderException e) {
-            log.error("Unable to update measurements for " + id, e);
         } finally {
             // Force a flush to ensure the metrics are stored
             getMeasurementDAO().getSession().flush();
@@ -838,7 +832,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         
         for (int ind = 0; ind < aeids.length; ind++) {
             Resource res = resMan.findResource(aeids[ind]);
-            List metrics = ddao.findByResource(res);
+            List metrics = ddao.findByTemplatesForInstance(tids, res);
 
             for (Iterator i = metrics.iterator(); i.hasNext();)
             {
@@ -869,14 +863,12 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 intervals.put(tids[i], null);
         }
         
-        List tidList = Arrays.asList(tids);
         // Copy the keys, since we are going to be modifying the interval map
         Set keys = new HashSet(intervals.keySet());
         for (Iterator i = keys.iterator(); i.hasNext();) {
             Integer templateId = (Integer) i.next();
 
-            if (tidList.indexOf(templateId) == -1 || // Wasn't asked for
-                disabled.equals(intervals.get(templateId))) { // Disabled
+            if (disabled.equals(intervals.get(templateId))) { // Disabled
                 // so don't return it
                 intervals.remove(templateId);
             }
@@ -1064,10 +1056,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         
         sendAgentSchedule(id);
-    }
-
-    private Resource getResource(AppdefEntityID id) {
-        return ResourceManagerEJBImpl.getOne().findResource(id);
     }
 
     /**
@@ -1381,7 +1369,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         try {
             if (id.isPlatform() || id.isServer() | id.isService()) {
-                AppdefEntityValue av = new AppdefEntityValue(id, subject);
+                AppdefEntityValue av = new AppdefEntityValue(id, subj);
                 try {
                     mtype = av.getMonitorableType();
                 } catch (AppdefEntityNotFoundException e) {

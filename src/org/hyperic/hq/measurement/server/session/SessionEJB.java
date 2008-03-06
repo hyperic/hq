@@ -41,6 +41,8 @@ import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -319,5 +321,9 @@ public abstract class SessionEJB {
 
     protected void deleteMetricProblems(Collection mids) {
         getMetricProblemDAO().deleteByMetricIds(mids);
+    }
+
+    protected Resource getResource(AppdefEntityID id) {
+        return ResourceManagerEJBImpl.getOne().findResource(id);
     }
 }

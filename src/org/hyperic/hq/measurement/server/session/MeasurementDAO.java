@@ -133,7 +133,7 @@ public class MeasurementDAO extends HibernateDAO {
     public Measurement findByTemplateForInstance(Integer tid,
                                                  Integer iid,
                                                  boolean allowStale) {
-        Session session = this.getSession();
+        Session session = getSession();
         FlushMode oldFlushMode = session.getFlushMode();
         
         try {
@@ -141,12 +141,26 @@ public class MeasurementDAO extends HibernateDAO {
                 session.setFlushMode(FlushMode.MANUAL);                
             }
             
-            return this.findByTemplateForInstance(tid, iid); 
+            return findByTemplateForInstance(tid, iid); 
         } finally {
             session.setFlushMode(oldFlushMode);
         } 
     }
 
+    public List findByTemplatesForInstance(Integer[] tids, Resource res) {
+        String sql =
+            "select m from Measurement m " +
+            "join m.template t " +
+            "where t.id in (:tids) and m.resource = :res";
+
+        return getSession().createQuery(sql)
+            .setParameterList("tids", tids)
+            .setParameter("res", res)
+            .setCacheable(true)     // Share the cache for now
+            .setCacheRegion("Measurement.findByTemplateForInstance")
+            .list();
+    }
+    
     public List findIdsByTemplateForInstances(Integer tid, Integer[] iids) {
         if (iids.length == 0)
             return new ArrayList(0);
