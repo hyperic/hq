@@ -42,18 +42,19 @@
 
   </target>
 
+  <!-- The agent uses a 1.5 JRE. -->	
   <target name="pick-jre" if="use.builtin.jre">
     <condition property="jre.tar.name" value="amd64-linux-jre-1_5.tar.gz">
         <available file="${install.dir}/jres/amd64-linux-jre-1_5.tar.gz"/>
     </condition>
-    <condition property="jre.tar.name" value="x86-linux-glibc2-jre.tar.gz">
-        <available file="${install.dir}/jres/x86-linux-glibc2-jre.tar.gz"/>
+    <condition property="jre.tar.name" value="x86-linux-glibc2-jre-1_5.tar.gz">
+        <available file="${install.dir}/jres/x86-linux-glibc2-jre-1_5.tar.gz"/>
     </condition>
-    <condition property="jre.tar.name" value="sparc-sun-solaris-jre.tar.gz">
-        <available file="${install.dir}/jres/sparc-sun-solaris-jre.tar.gz"/>
+    <condition property="jre.tar.name" value="sparc-sun-solaris-jre-1_5.tar.gz">
+        <available file="${install.dir}/jres/sparc-sun-solaris-jre-1_5.tar.gz"/>
     </condition>
-    <condition property="jre.exe.name" value="x86-win32-jre.exe">
-        <available file="${install.dir}/jres/x86-win32-jre.exe"/>
+    <condition property="jre.exe.name" value="x86-win32-jre-1_5.exe">
+        <available file="${install.dir}/jres/x86-win32-jre-1_5.exe"/>
     </condition>
   </target>
 	
