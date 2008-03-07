@@ -67,7 +67,7 @@
           </tarfileset>
           <tarfileset dir="${compress-dir}">
             <exclude name="**/bin/*"/>
-            <include name="**/sbin/*"/>
+            <exclude name="**/sbin/*"/>
             <exclude name="**/*.sh"/>
             <exclude name="**/*.bat"/>
             <exclude name="**/*.cmd"/>
