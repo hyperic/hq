@@ -387,12 +387,6 @@ class GroupController extends BaseController {
     }
     
     def list(xmlOut, params) {
-        use (MyResourceGroupCategory) {
-            return _list(xmlOut, params)
-        }
-    }
-    
-    private _list(xmlOut, params) {
         boolean includeSystem = params.getOne('includeSystem')?.toBoolean()
         boolean verbose = params.getOne('verbose')?.toBoolean()
         xmlOut.groups() {

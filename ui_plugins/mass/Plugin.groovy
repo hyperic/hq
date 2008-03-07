@@ -1,6 +1,6 @@
 import org.hyperic.hq.hqu.rendit.HQUPlugin
 
-import MassController
+import GroupController
 
 class Plugin extends HQUPlugin {
     Plugin() {
