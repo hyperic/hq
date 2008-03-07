@@ -40,7 +40,6 @@
   <property name="xdoclet.lib" location="${thirdparty.lib}/xdoclet"/>
   <property name="hibernate.lib" location="${thirdparty.lib}/hibernate"/>
   <property name="tapestry_lib" location="${thirdparty.lib}/tapestry"/>
-  <property name="wrapper.lib" location="${thirdparty.lib}/wrapper"/>
 
   <property name="webapp.home" location="${hq.home}/web" />
   <property name="ear.dir" location="${build.dir}/hq.ear" />
@@ -90,7 +89,7 @@
     <fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar"/>
     <fileset dir="${thirdparty.lib}/mx4j" includes="*.jar" />
     <fileset dir="${thirdparty.lib}/tapestry" includes="*.jar" />
-    <fileset dir="${thirdparty.lib}/wrapper" includes="*.jar" />
+    <fileset dir="${wrapper.lib}" includes="*.jar" />
     <fileset dir="${xdoclet.lib}" includes="*.jar" />
     <fileset dir="${hibernate.lib}" includes="*.jar" />
     <fileset dir="${jboss.home}/server/default/lib"
@@ -1151,9 +1150,6 @@
       <fileset dir="${wrapper.lib}" includes="*" />
     </copy> 	
 
-    <copy file="${wrapper.lib}/license-wrapper.txt"
-        tofile="${agent.dir}/lib/boot/license-wrapper.txt"/>
-  	
     <!-- Autoinventory jars -->
     <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/AgentAutoinventoryServer.jar">
       <include name="org/hyperic/hq/autoinventory/**"/>
