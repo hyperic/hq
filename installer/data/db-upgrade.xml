@@ -7983,6 +7983,17 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.96.2">
+    <schema-directSQL>
+      <statement desc="Add unique dashboard config key for users">
+        CREATE UNIQUE INDEX EAM_DASH_CONFIG_USER_ID_KEY ON EAM_DASH_CONFIG (USER_ID)
+      </statement>
+      <statement desc="Add unique dashboard config key for roles">
+        CREATE UNIQUE INDEX EAM_DASH_CONFIG_ROLE_ID_KEY  ON EAM_DASH_CONFIG (ROLE_ID)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
   <schemaSpec version="3.97">
     <schema-addColumn table="EAM_MEASUREMENT" column="RESOURCE_ID" 
                       columnType="INTEGER">
