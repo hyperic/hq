@@ -187,10 +187,10 @@ public class ServerLifecycle {
         if (_isStarted) {
             shutdownJboss();
                      
-            System.clearProperty(HOME_DIR);
-            System.clearProperty(SERVER_NAME);
-            System.clearProperty(BLOCKING_SHUTDOWN);
-            System.clearProperty(JAVA_ENDORSED_DIRS);
+//            System.clearProperty(HOME_DIR);
+//            System.clearProperty(SERVER_NAME);
+//            System.clearProperty(BLOCKING_SHUTDOWN);
+//            System.clearProperty(JAVA_ENDORSED_DIRS);
             
             _isStarted = false;
         }
