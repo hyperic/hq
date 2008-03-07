@@ -45,6 +45,8 @@ public abstract class AuthzNamedBean extends PersistedObject
     }
 
     public void setName(String name) {
+        if (name == null)
+            name = "";
         _name = name;
         setSortName(name);
     }
@@ -92,6 +94,7 @@ public abstract class AuthzNamedBean extends PersistedObject
                     !(arg1 instanceof AuthzNamedBean))
                 return 0;
 
+            
             return ((AuthzNamedBean) arg0).getName().compareTo(
                    ((AuthzNamedBean) arg1).getName());
         }
