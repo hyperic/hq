@@ -61,7 +61,7 @@
             indicator="true"/>
 
     <metric name="Memory Percentage Used"
-            units="percentage"/>
+            units="percent"/>
   </metrics>
 
   <config name="destination">
@@ -177,9 +177,10 @@
               collectionType="trendsup"/>
 
       <metric name="Memory Percentage Used"
-              units="percentage"/>
+              units="percent"/>
 
-      <metric name="Memory Limit"/>
+      <metric name="Memory Limit"
+              units="B"/>
 
     </service>
 
