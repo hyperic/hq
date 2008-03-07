@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
 
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
 
   HQ is free software; you can redistribute it and/or modify
@@ -270,9 +270,9 @@ function showViewEscResponse(originalRequest) {
 	                }
 	
 	                if (configSms == "true") {
-	                    usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> via SMS: " + displayEmails + "<br>";
+	                    usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> <fmt:message key="alert.config.action.notify.via.sms"/> " + displayEmails + "<br>";
 	                } else {
-	                    usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> via Email: " + displayEmails + "<br>";
+	                    usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> <fmt:message key="alert.config.action.notify.via.email"/> " + displayEmails + "<br>";
 	
 	                }
 	                //usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + displayEmails + "<br>";
@@ -291,9 +291,9 @@ function showViewEscResponse(originalRequest) {
 	            }
 	
 	            if (configSms == "true") {
-	                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> via SMS: " + userNames + "<br>";
+	                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> <fmt:message key="alert.config.action.notify.via.sms"/> " + userNames + "<br>";
 	            } else {
-	                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> via Email: " + userNames + "<br>";
+	                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> <fmt:message key="alert.config.action.notify.via.email"/> " + userNames + "<br>";
 	
 	            }
 	        } else  if (configListType == "3") {
@@ -307,7 +307,11 @@ function showViewEscResponse(originalRequest) {
 	            </c:forEach>
 	            }
 	
-	            usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/>: " + roleNames + "<br>";
+	            if (configSms == "true") {
+	                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/> <fmt:message key="alert.config.action.notify.via.sms"/> " + roleNames + "<br>";
+	            } else {
+	                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/> <fmt:message key="alert.config.action.notify.via.email"/> " + roleNames + "<br>";
+	            }
 	        }
 	
 	        escTr2.appendChild(td3);
