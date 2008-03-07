@@ -512,4 +512,15 @@ public class ResourceDAO
             .setParameter("svcProto", AuthzConstants.authzServiceProto)
             .uniqueResult();
     }
+    
+    List findAllAppdefPrototypes() {
+        String sql = "select r from Resource r " +
+            "where r.resourceType.id in (:platProto, :svrProto, :svcProto)";
+        
+        return (List)getSession().createQuery(sql)
+            .setParameter("platProto", AuthzConstants.authzPlatformProto)
+            .setParameter("svrProto", AuthzConstants.authzServerProto)
+            .setParameter("svcProto", AuthzConstants.authzServiceProto)
+            .list();
+    }
 }

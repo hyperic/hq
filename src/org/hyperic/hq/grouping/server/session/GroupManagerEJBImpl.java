@@ -27,6 +27,7 @@ package org.hyperic.hq.grouping.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,9 +37,12 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -90,11 +94,9 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
     public GroupValue createGroup(AuthzSubjectValue subject, GroupValue group)
         throws GroupCreationException, GroupDuplicateNameException 
     {
+        AuthzSubject subjectPojo = 
+            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId());
         try {
-            ResourceGroupValue  rgVo;
-            RoleValue[]         roArr = null;
-            ResourceValue[]     reArr = null;
-
             // To avoid groups with duplicate names, we're now performing a
             // a case-insensitive name based find before creation.
             if (groupNameExists(subject, group)) {
@@ -104,25 +106,28 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             }
 
             /* Create the resource group. */
-            rgVo = new ResourceGroupValue();
-            rgVo.setName            (group.getName());
-            rgVo.setDescription     (group.getDescription());
-            rgVo.setLocation        (group.getLocation());
-            rgVo.setGroupType       (group.getGroupType());
-            rgVo.setGroupEntType    (group.getGroupEntType());
-            rgVo.setGroupEntResType (group.getGroupEntResType());
-            rgVo.setClusterId       (group.getClusterId());
-
+            ResourceGroupCreateInfo createInfo = 
+                new ResourceGroupCreateInfo(group.getName(), 
+                                            group.getDescription(),
+                                            group.getGroupType(), 
+                                            group.getGroupEntType(),
+                                            group.getGroupEntResType(),
+                                            group.getLocation(),
+                                            group.getClusterId(), 
+                                            false /* system = false */);
+            
             ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
             ResourceGroup rg =
-                rgmLoc.createResourceGroup(subject, rgVo, roArr, reArr);
+                rgmLoc.createResourceGroup(subjectPojo, createInfo,
+                                           Collections.EMPTY_LIST,  // Roles
+                                           Collections.EMPTY_LIST); // Resources
 
             /* Create our return group vo */
             group.setId            ( rg.getId() );
             group.setName          ( rg.getName() );
             group.setDescription   ( rg.getDescription() );
             group.setLocation      ( rg.getLocation() );
-            group.setGroupType     ( rgVo.getGroupType() );
+            group.setGroupType     ( createInfo.getGroupType() );
             group.setSubject       ( subject );
             group.setCTime         ( new Long(rg.getCtime()) );
             group.setMTime         ( new Long(rg.getMtime()) );

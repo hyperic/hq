@@ -29,8 +29,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -42,15 +42,9 @@ public class ResourceGroupDAO extends HibernateDAO
     }
 
     public ResourceGroup create(AuthzSubject creator,
-                                ResourceGroupValue createInfo) {
-        return create(creator, createInfo, false);
-    }
-
-    public ResourceGroup create(AuthzSubject creator,
-                                ResourceGroupValue createInfo,
-                                boolean isSystem) 
+                                ResourceGroupCreateInfo cInfo)
     {
-        ResourceGroup resGrp = new ResourceGroup(createInfo);
+        ResourceGroup resGrp = new ResourceGroup(cInfo, creator);
 
         ResourceType resType = new ResourceTypeDAO(DAOFactory.getDAOFactory())
             .findById(AuthzConstants.authzGroup);
@@ -63,7 +57,7 @@ public class ResourceGroupDAO extends HibernateDAO
         ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
         Resource proto = rDao.findById(AuthzConstants.rootResourceId);
         Resource r = rDao.create(resType, proto, resGrp.getName(), creator,  
-                                 resGrp.getId(), isSystem);
+                                 resGrp.getId(), cInfo.getSystem());
                                  
         resGrp.setResource(r);
         save(resGrp);

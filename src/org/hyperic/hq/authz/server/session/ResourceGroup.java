@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 
@@ -54,12 +55,62 @@ public class ResourceGroup extends AuthzNamedBean
 
     private ResourceGroupValue _resourceGroupValue = new ResourceGroupValue();
 
+    public static class ResourceGroupCreateInfo {
+        private String  _name;
+        private String  _description;
+        private String  _location;
+        private int     _groupType;
+        private int     _groupEntType;
+        private int     _groupEntResType;
+        private int     _clusterId;
+        private boolean _system;
+        
+        public ResourceGroupCreateInfo(String name, String description,
+                                       int groupType, int groupEntType,
+                                       int groupEntResType,
+                                       String location,
+                                       int clusterId, boolean system)  
+                                       
+        {
+            _name            = name;
+            _description     = description;
+            _groupEntResType = groupEntResType;
+            _groupEntType    = groupEntType;
+            _groupType       = groupType;
+            _location        = location;
+            _clusterId       = clusterId;
+            _system          = system;
+        }
+        
+        public String  getName() { return _name; }
+        public String  getDescription() { return _description; }
+        public String  getLocation() { return _location; }
+        public int getGroupType() { return _groupType; }
+        public int getGroupEntType() { return _groupEntType; }
+        public int getGroupEntResType() { return _groupEntResType; }
+        public int getClusterId() { return _clusterId; }
+        public boolean getSystem() { return _system; }
+    }
+    
     protected ResourceGroup() {
         super();
     }
 
     ResourceGroup(ResourceGroupValue val) {
         setResourceGroupValue(val);
+    }
+
+    ResourceGroup(ResourceGroupCreateInfo cInfo, AuthzSubject creator) {
+        setName(cInfo.getName());
+        _clusterId       = new Integer(cInfo.getClusterId());
+        _description     = cInfo.getDescription();
+        _location        = cInfo.getLocation();
+        _system          = cInfo.getSystem();
+        _groupType       = new Integer(cInfo.getGroupType());
+        _groupEntType    = new Integer(cInfo.getGroupEntType());
+        _groupEntResType = new Integer(cInfo.getGroupEntResType());
+        _ctime = _mtime  = System.currentTimeMillis();
+        _modifiedBy      = creator.getName();
     }
     
     /**
@@ -201,12 +252,23 @@ public class ResourceGroup extends AuthzNamedBean
         resource.getResourceGroups().add(resource);
         _resourceSet.add(resource);
     }
+    
+    public void addResources(Collection r) {
+        for (Iterator i = r.iterator(); i.hasNext(); ) {
+            addResource((Resource)i.next());
+        }
+    }
 
     public void removeResource(Resource resource) {
         _resourceSet.remove(resource);
     }
 
     public void removeAllResources() {
+        /**
+         * Why is this not symmetrical?  addResource also adds the group to
+         * the resource's list.  we should remove ourselves here as well
+         * XXX
+         */
         _resourceSet.clear();
     }
 
