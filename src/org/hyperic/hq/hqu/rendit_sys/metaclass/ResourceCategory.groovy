@@ -5,7 +5,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceType
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as rgmi
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
@@ -43,6 +43,7 @@ class ResourceCategory {
     private static svrMan   = ServerMan.one 
     private static dman     = DMMan.one
     private static authzMan = AuthzMan.one
+    private static groupMan = GroupMan.one
     
     /**
      * Creates a URL for the resource.  This should typically only be called
@@ -120,7 +121,7 @@ class ResourceCategory {
             return Collections.EMPTY_LIST
         }
         
-        rgmi.one.findResourceGroupById(user.authzSubjectValue,
+        groupMan.findResourceGroupById(user.authzSubjectValue,
                                        r.instanceId).resources
     }
     
@@ -231,7 +232,7 @@ class ResourceCategory {
                 def overlord = authzMan.overlordPojo
                 def rhelp = new ResourceHelper(overlord)
                 return rhelp.findAllPlatforms()
-            } else {
+            } else { 
                 throw new IllegalArgumentException("Unknown subsystem, " + 
                                                    "[${args.inSubsystem}]")
             }

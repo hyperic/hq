@@ -508,6 +508,16 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
     
     /**
+     * Get all resources which are prototypes of platforms, servers, and
+     * services.
+     * 
+     * @ejb:interface-method
+     */
+    public List findAllAppdefPrototypes() {
+        return getResourceDAO().findAllAppdefPrototypes();
+    }
+    
+    /**
      * Get viewable service resources. Service resources include individual
      * cluster unassigned services as well as service clusters. 
      *

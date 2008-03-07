@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
@@ -86,9 +87,19 @@ public class RoleDAO extends HibernateDAO {
          Fix for Bug #5219
         **/
         ResourceGroupValue grpVal = new ResourceGroupValue();
-        grpVal.setName(AuthzConstants.privateRoleGroupName + role.getId());
+        String groupName = AuthzConstants.privateRoleGroupName + role.getId(); 
         grpVal.setSystem(true);
-        ResourceGroup group = resourceGroupDAO.create(creator, grpVal, true);
+        ResourceGroupCreateInfo cInfo = 
+            new ResourceGroupCreateInfo(groupName,
+                                        "",    // Description
+                                        0,     // Group type
+                                        0,     // Group entity type
+                                        0,     // Group entity resource type
+                                        null,  // Location
+                                        0,     // clusterId
+                                        true); // system
+        
+        ResourceGroup group = resourceGroupDAO.create(creator, cInfo);
         // add our resource
         group.addResource(myResource);
         groups.add(group);

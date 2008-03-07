@@ -45,6 +45,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -109,36 +110,28 @@ public class ResourceGroupManagerEJBImpl
     }
 
     /**
-     * Create a ResourceGroup.
-     * @param whoami The current running user.
-     * @param group The group o be created.
-     * @param roles Roles to associate with the new ResourceGroup. Use null
-     *              if you want to associate operations later.
-     * @param resources Resources to add to the new role. Use null to add 
-     *                  subjects later.
-     * @exception PermissionException whoami may not perform createResource 
-     *                                on the given type.
+     * Create a resource group.  Currently no permission checking.
+     * 
+     * @param roles     List of {@link Role}s
+     * @param resources List of {@link Resource}s
+     * 
      * @ejb:interface-method
      */
-    public ResourceGroup createResourceGroup(AuthzSubjectValue whoami,
-                                             ResourceGroupValue group,
-                                             RoleValue[] roles,
-                                             ResourceValue[] resources)
-        throws PermissionException 
+    public ResourceGroup createResourceGroup(AuthzSubject whoami,
+                                             ResourceGroupCreateInfo cInfo,
+                                             Collection roles,
+                                             Collection resources)
     {
-		AuthzSubject whoamiLocal = getSubjectDAO().findById(whoami.getId());
         ResourceGroup res;
 
-        group.setModifiedBy(whoamiLocal.getName());
-
-        res = getResourceGroupDAO().create(whoamiLocal, group);
-        res.setResourceSet(toPojos(resources));
-        res.setRoles(toPojos(roles));
+        res = getResourceGroupDAO().create(whoami, cInfo);
+        res.setResourceSet(new HashSet(resources));
+        res.setRoles(new HashSet(roles));
 
         GroupingStartupListener.getCallbackObj().postGroupCreate(res);
         return res;
     }
-
+    
     /**
      * Find the group that has the given ID.
      * @param whoami user requesting to find the group
@@ -370,6 +363,27 @@ public class ResourceGroupManagerEJBImpl
     }
 
     /**
+     * Change the resource contents of a group to the specified list
+     * of resources.
+     * 
+     * @param resources  A list of {@link Resource}s to be in the group
+     * @ejb:interface-method
+     */
+    public void setResources(AuthzSubject whoami,
+                             ResourceGroup group, Collection resources) 
+        throws PermissionException 
+    {
+        PermissionManager pm = PermissionManagerFactory.getInstance(); 
+        pm.check(whoami.getId(),
+                 AuthzConstants.authzGroup, group.getId(),
+                 AuthzConstants.perm_modifyResourceGroup);
+
+        group.removeAllResources();
+        group.addResources(resources);
+        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
+    }
+
+    /**
      * List the resources in this group that the caller is authorized to see.
      * @param whoami The current running user.
      * @param groupValue This group.
@@ -503,6 +517,17 @@ public class ResourceGroupManagerEJBImpl
         
         return groups;
     }
+    
+    /**
+     * Get all {@link ResourceGroup}s 
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public Collection getAllResourceGroups() {
+        return getResourceGroupDAO().findAll();
+    }
+    
 
     /**
      * Get all compatible resource groups of the given entity type and
@@ -739,6 +764,27 @@ public class ResourceGroupManagerEJBImpl
         groupLocal.setModifiedBy(whoami.getName());
     }
 
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void updateGroupType(AuthzSubject subject, ResourceGroup g,
+                                int groupType, int groupEntType,
+                                int groupEntResType)
+        throws PermissionException
+    {
+        PermissionManager pm = PermissionManagerFactory.getInstance(); 
+        pm.check(subject.getId(),
+                 AuthzConstants.authzGroup,
+                 g.getId(), AuthzConstants.perm_modifyResourceGroup);
+        
+        g.setGroupType(new Integer(groupType));
+        g.setGroupEntType(new Integer(groupEntType));
+        g.setGroupEntResType(new Integer(groupEntResType));
+    }
+    
+    
     /**
      * Get the maximum collection interval for a scheduled metric within a
      * compatible group of resources.
