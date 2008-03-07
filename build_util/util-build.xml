@@ -58,6 +58,7 @@
              compression="gzip">
           <tarfileset dir="${compress-dir}" mode="755">
             <include name="**/bin/*"/>
+            <include name="**/sbin/*"/>
             <include name="**/*.sh"/>
             <include name="**/*.bat"/>
             <include name="**/*.cmd"/>
@@ -66,6 +67,7 @@
           </tarfileset>
           <tarfileset dir="${compress-dir}">
             <exclude name="**/bin/*"/>
+            <include name="**/sbin/*"/>
             <exclude name="**/*.sh"/>
             <exclude name="**/*.bat"/>
             <exclude name="**/*.cmd"/>
