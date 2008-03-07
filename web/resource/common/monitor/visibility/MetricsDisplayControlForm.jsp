@@ -159,7 +159,7 @@
           </td>
           <td><html:image property="range" page="/images/dash-button_go-arrow.gif" border="0"/></td>
           <td width="100%" style="padding-left: 5px;">
-            <html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
+            <html:link href="javascript:moveIt($('advancedDisplay'), '-100px',null);showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
           </td>
         </tr>
       </table>
@@ -175,7 +175,7 @@
 </c:choose>
 </table>
   <div id="advancedAnchor" style="position: relative; visibility: hidden;"></div>
-  <div id="advancedDisplay" class="dialog" style="width:600px;filter: alpha(opacity=0);opacity: 0;">
+  <div id="advancedDisplay" class="dialog" style="width:600px;height:160px;filter: alpha(opacity=0);opacity: 0;">
     <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
       <c:if test="${not empty form}">
         <tiles:put name="form" beanName="form"/>
@@ -187,11 +187,17 @@
 <script language="javascript">
   function hideAdvanced() {
     var advancedDiv = $('advancedDisplay');
+    advancedDiv.style.display='none';
     new Effect.MoveBy(advancedDiv.parentNode, 0, 0 );
-    new Effect.Shrink(advancedDiv)
-    //new Effect.Fade(advancedDiv, {duration: 0});
   }
 
-  onloads.push( hideAdvanced );
+  function moveIt(obj, mvTop, mvLeft) {
+	obj.style.position = "absolute";
+	obj.style.top = mvTop;
+	obj.style.left = mvLeft;
+    obj.style.display = '';
+}
+
+onloads.push( hideAdvanced );
 
 </script>
