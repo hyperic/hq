@@ -8671,9 +8671,13 @@ has already been defined.
                                  where measurement_id = d1.measurement_id))
       </statement>
     </schema-directSQL>
+  </schemaSpec>
 
+  <schemaSpec version="3.105.1">
     <availRLEUpgrade/>
+  </schemaSpec>
 
+  <schemaSpec version="3.105.2">
     <schema-directSQL>
       <statement desc="Add primary key to HQ_AVAIL_DATA_RLE">
         alter table HQ_AVAIL_DATA_RLE add primary key (STARTIME , MEASUREMENT_ID)
