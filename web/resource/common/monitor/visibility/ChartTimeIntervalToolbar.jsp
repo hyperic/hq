@@ -44,7 +44,7 @@
 <c:set var="nextProperty" value="nextRange"/>
 </c:if>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" id="advancedTbl">
   <tr>
     <td class="BlockBottomLine" colspan="3"><html:img
       page="/images/spacer.gif" width="1" height="1" border="0"/></td>
@@ -70,16 +70,17 @@
     </td>
   </tr>
   <tr>
-    <td colspan="2" class="BlockContent" align="right">
-    <html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link>
+    <td colspan="3" class="BlockContent" align="right">
+    <html:link href="javascript:moveIt($('advancedDisplay'), null,'75px');showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link>
     </td>
-    <td class="BlockContent">
-      <div id="advancedDisplay" class="dialog" style="width:600px;filter: alpha(opacity=0);opacity: 0;">
+    </tr>
+    <tr>
+    <td class="BlockContent" colspan="3">
+      <div id="advancedDisplay" class="dialog" style="filter: alpha(opacity=0);opacity: 0;">
         <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
           <tiles:put name="form" beanName="form"/>
           <tiles:put name="formName" beanName="formName"/>
         </tiles:insert>
-      </td>
     </div>
     </td>
   </tr>
@@ -88,10 +89,18 @@
 <script language="javascript">
   function hideAdvanced() {
     var advancedDiv = $('advancedDisplay');
-    new Effect.MoveBy(advancedDiv.parentNode, 0, 0 ); 
-    new Effect.Shrink(advancedDiv)
-    //new Effect.Fade(advancedDiv, {duration: 0});
+    advancedDiv.style.display='none';
+    new Effect.MoveBy(advancedDiv.parentNode, 0, 0 );
   }
 
+function moveIt(obj, mvTop, mvLeft) {
+	obj.style.position = "absolute";
+	obj.style.top = mvTop;
+	obj.style.left = mvLeft;
+    obj.style.display = '';
+}
+
   onloads.push( hideAdvanced );
+
+    
 </script>
