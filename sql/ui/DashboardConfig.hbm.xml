@@ -27,13 +27,13 @@
 
     <subclass name="RoleDashboardConfig" discriminator-value="ROLE">
       <many-to-one name="role">
-        <column name="ROLE_ID"/>
+        <column name="ROLE_ID" unique-key="role_dash"/>
       </many-to-one>
     </subclass>
     
     <subclass name="UserDashboardConfig" discriminator-value="USER">
       <many-to-one name="user">
-        <column name="USER_ID"/>
+        <column name="USER_ID" unique-key="user_dash"/>
       </many-to-one>
     </subclass>
 
