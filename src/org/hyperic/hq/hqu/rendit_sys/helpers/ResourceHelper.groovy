@@ -1,6 +1,7 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hq.authz.shared.PermissionException
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
@@ -17,6 +18,7 @@ import org.hyperic.hq.authz.HasAuthzOperations
 
 class ResourceHelper extends BaseHelper {
     private rman = ResourceManagerEJBImpl.one
+    private groupMan = GroupMan.one
     
     ResourceHelper(AuthzSubject user) {
         super(user)
@@ -227,12 +229,30 @@ class ResourceHelper extends BaseHelper {
             return []
         rman.findResourcesOfPrototype(rsrc, pInfo)
     }
+
+    List findResourcesOfType(Resource prototype, PageInfo pInfo) {
+        rman.findResourcesOfPrototype(prototype, pInfo)
+    }
+
+    List findResourcesOfType(Resource prototype) {
+        rman.findResourcesOfPrototype(prototype, 
+                                      PageInfo.getAll(ResourceSortField.NAME,
+                                                      true))
+    }
     
     Resource findRootResource() {
         rman.findRootResource()
     }
+
+    List findAllGroups() {
+        groupMan.getAllResourceGroups()
+    }
     
     Resource findResourcePrototype(String name) {
         rman.findResourcePrototypeByName(name)
+    }
+
+    List findAllAppdefPrototypes() {
+        rman.findAllAppdefPrototypes()
     }
 }
