@@ -3,7 +3,7 @@ package org.hyperic.hq.ui.pages;
 import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.annotations.Persist;
 
-public abstract class ComponentTest extends BasePage {
+public abstract class ComponentListing extends BasePage {
 
     @Persist
     public abstract String getValue();
@@ -19,10 +19,5 @@ public abstract class ComponentTest extends BasePage {
 
     public void buttonListener(IRequestCycle cycle) {
     }
-    
-    /**
-     * This placeholder test was added so that this unit test would not fail. 
-     */
-    public final void testPlaceHolder() {}
 
 }
