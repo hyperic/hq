@@ -390,7 +390,6 @@ public class ResourceGroupManagerEJBImpl
     /**
      * Get all the resource groups including the root resource group.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public List getAllResourceGroups(AuthzSubjectValue subject, PageControl pc)
         throws PermissionException, FinderException 
@@ -403,7 +402,6 @@ public class ResourceGroupManagerEJBImpl
      * the root resource group. 
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList 
         getAllResourceGroupsResourceInclusive(AuthzSubjectValue subject, 
@@ -452,7 +450,6 @@ public class ResourceGroupManagerEJBImpl
     /**
      * Get all the resource groups excluding the root resource group.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public Collection getAllResourceGroups(AuthzSubjectValue subject,
                                            boolean excludeRoot)
@@ -499,7 +496,6 @@ public class ResourceGroupManagerEJBImpl
      * resource type.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public Collection getCompatibleResourceGroups(AuthzSubject subject,
                                                   Integer groupEntType,
@@ -529,7 +525,6 @@ public class ResourceGroupManagerEJBImpl
     /**
      * Get all the resource groups excluding the root resource group and paged
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList getAllResourceGroups(AuthzSubjectValue subject,
                                          PageControl pc,
@@ -545,8 +540,6 @@ public class ResourceGroupManagerEJBImpl
      * @param ids the resource group ids
      * @param pc Paging information for the request
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
-     *
      */
     public PageList getResourceGroupsById(AuthzSubjectValue whoami,
                                           Integer[] ids,
@@ -680,7 +673,6 @@ public class ResourceGroupManagerEJBImpl
      * @exception PermissionException whoami is not allowed to perform listRoles 
      *                                on this group.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public RoleValue[] getRoles(AuthzSubjectValue whoami,
                                 ResourceGroupValue groupValue) 
@@ -703,7 +695,6 @@ public class ResourceGroupManagerEJBImpl
      * @exception NamingException - JNDI failure
      * @exception FinderException Unable to find a group by id
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public AuthzSubjectValue getResourceGroupOwner(Integer gid)
         throws NamingException, FinderException, CreateException 

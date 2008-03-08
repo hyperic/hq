@@ -88,10 +88,13 @@ class ResourceCategory {
             return AppdefEntityID.newServerID(r.instanceId)
         } else if (typeId == AuthzConstants.authzService) {
             return AppdefEntityID.newServiceID(r.instanceId)
+        } else if (typeId == AuthzConstants.authzApplication) {
+            return AppdefEntityID.newAppID(r.instanceId)
         } else if (typeId == AuthzConstants.authzGroup) {
             return AppdefEntityID.newGroupID(r.instanceId)
         } else {
-            throw new RuntimeException("Resource [${r}] is not an appdef object")
+            throw new RuntimeException("Resource [${r}] is not an appdef object.  " + 
+                                       "typeId=${typeId}")
         }
     }
     
