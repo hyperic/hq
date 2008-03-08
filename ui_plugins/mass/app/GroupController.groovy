@@ -6,14 +6,15 @@ import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hibernate.PageInfo
-import org.hyperic.hq.grouping.server.session.GroupManagerEJBImpl as GroupMan
+import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl as AGroupMan
 import org.hyperic.hq.appdef.shared.AppdefGroupValue
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
+import org.hyperic.util.Runnee
 
 
 class GroupController extends BaseController {
     private rgroupMan    = RGroupMan.one
-    private groupMan     = GroupMan.one
+    private agroupMan    = AGroupMan.one
     private resourceMan  = ResourceMan.one
     
     private def groupTypeToName = [
@@ -27,22 +28,22 @@ class GroupController extends BaseController {
     private def typeToMethods = [
         compat:  [create: { groupDef -> createCompatGroup(groupDef) },
                   getPrototypes: { groupDef -> getCompatPrototypes(groupDef) },
-                  updateGroupType: { ResourceGroup g, groupDef ->
+                  updateGroupType: { AppdefGroupValue g, groupDef ->
                       updateCompatGroupType(g, groupDef)
                   }],
         resources:  [create: { groupDef -> createMixedGroup(groupDef) },
                      getPrototypes: { groupDef -> getAllAppdefPrototypes() },
-                     updateGroupType: { ResourceGroup g, groupDef ->
+                     updateGroupType: { AppdefGroupValue g, groupDef ->
                          updateMixedGroupType(g, groupDef)
                      }],
         applications:  [create: { groupDef -> createAppGroup(groupDef) },
                         getPrototypes: { [] /* Special cased */ },
-                        updateGroupType: { ResourceGroup g, groupDef ->
+                        updateGroupType: { AppdefGroupValue g, groupDef ->
                             updateAppGroupType(g, groupDef)
                         }],
         groups: [create: { groupDef -> createGroupOfGroups(groupDef) },
                            getPrototypes: { [] /* Special cased */ }, 
-                           updateGroupType: { ResourceGroup g, groupDef ->
+                           updateGroupType: { AppdefGroupValue g, groupDef ->
                                updateGroupOfGroupsType(g, groupDef)
                            }],
     ]
@@ -79,8 +80,7 @@ class GroupController extends BaseController {
     def sync(xmlOut, params) {
         def xmlDef = new XmlParser().parse(new StringReader(params.getOne('args')))
         def deleteMissing = xmlDef.'@deleteMissing'?.toBoolean()
-        
-
+            
         def found     = []
         def allGroups = resourceHelper.findAllGroups()
         for (groupDef in xmlDef.group) {
@@ -89,6 +89,7 @@ class GroupController extends BaseController {
                 
             if (group)
                 found << group
+            log.info "Syncing group ${groupDef.'@name'}"
             syncGroup(group, groupDef)
         }
         
@@ -100,8 +101,8 @@ class GroupController extends BaseController {
                     log.warn "Not deleting system group [${group.name}]"
                     continue
                 }
-                rgroupMan.removeResourceGroup(user.valueObject,
-                                              group.valueObject)
+                log.info "Deleting group ${group.name}"
+                agroupMan.deleteGroup(user.valueObject, group.id)
             }
         }
         
@@ -132,41 +133,25 @@ class GroupController extends BaseController {
                                         pInfo)
     }
     
-    private void updateAppGroupType(ResourceGroup group, def groupDef) {
-        if (group.groupType != AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP ||
-            group.groupEntType != -1 ||
-            group.groupEntResType != -1)
-        {
-            groupMan.updateGroupType(user, group, 
-                                     AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP,
-                                     -1, -1)
-        }
+    private void updateAppGroupType(AppdefGroupValue group, def groupDef) {
+        group.groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP
+        group.groupEntType = -1
+        group.groupEntResType = -1
     }
 
-    private void updateGroupOfGroupsType(ResourceGroup group, def groupDef) {
-        if (group.groupType != AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP ||
-            group.groupEntType != AppdefEntityConstants.APPDEF_TYPE_GROUP ||
-            group.groupEntResType != -1)
-        {
-            groupMan.updateGroupType(user, group, 
-                                     AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP,
-                                     AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                                     -1)
-        }
+    private void updateGroupOfGroupsType(AppdefGroupValue group, def groupDef) {
+        group.groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP
+        group.groupEntType = AppdefEntityConstants.APPDEF_TYPE_GROUP
+        group.groupEntResType = -1
     }
     
-    private void updateMixedGroupType(ResourceGroup group, def groupDef) {
-        if (group.groupType != AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS ||
-            group.groupEntType != -1 ||
-            group.groupEntResType != -1)
-        {
-            rgroupMan.updateGroupType(user, group, 
-                                      AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS,
-                                      -1, -1)
-        }
+    private void updateMixedGroupType(AppdefGroupValue group, def groupDef) {
+        group.groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS
+        group.groupEntType = -1
+        group.groupEntResType = -1
     }
     
-    private void updateCompatGroupType(ResourceGroup group, def groupDef) {
+    private void updateCompatGroupType(AppdefGroupValue group, def groupDef) {
         def compatProto = getCompatPrototypes(groupDef)
         
         assert compatProto.size() == 1, 'Should have prototype here'
@@ -174,25 +159,17 @@ class GroupController extends BaseController {
 
         def defGroupType
         if (compatProto.isServicePrototype()) {
-            defGroupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC
+            group.groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC
         } else if(compatProto.isPlatformPrototype() ||
                   compatProto.isServerPrototype()) 
         {
-            defGroupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS
+            group.groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS
         } else {
             assert "Unhandled prototype -> appdef type conversion"
         }
 
-        if (group.groupType != defGroupType ||
-            group.groupEntType != compatProto.appdefType ||
-            group.groupEntResType != compatProto.instanceId)
-        {
-            log.info "Changing group ${group.name} type to ${compatProto.name} " + 
-                     "type=${group.groupType}"
-            rgroupMan.updateGroupType(user, group, defGroupType,
-                                      compatProto.appdefType,
-                                      compatProto.instanceId)
-        }
+        group.groupEntType    = compatProto.appdefType
+        group.groupEntResType = compatProto.instanceId
     }
     
     private void fillGroupProperties(AppdefGroupValue groupVal, def groupDef) {
@@ -205,35 +182,30 @@ class GroupController extends BaseController {
         groupVal.clusterId       = -1
     }
     
-    private ResourceGroup createAppGroup(def groupDef) {
-        AppdefGroupValue groupVal = new AppdefGroupValue()
-
-        fillGroupProperties(groupVal, groupDef)
-        groupVal.groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP
-        def resVal = groupMan.createGroup(user.valueObject, groupVal)
-        rgroupMan.findResourceGroupById(user.valueObject, resVal.id)
+    private AppdefGroupValue createAppGroup(def groupDef) {
+        agroupMan.createGroup(user.valueObject,
+                              AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
+                              groupDef.'@name',
+                              groupDef.'@description',
+                              groupDef.'@location')
     }
     
-    private ResourceGroup createGroupOfGroups(def groupDef) {
-        AppdefGroupValue groupVal = new AppdefGroupValue()
-
-        fillGroupProperties(groupVal, groupDef)
-        groupVal.groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP
-        groupVal.groupEntType  = AppdefEntityConstants.APPDEF_TYPE_GROUP
-        def resVal = groupMan.createGroup(user.valueObject, groupVal)
-        rgroupMan.findResourceGroupById(user.valueObject, resVal.id)
+    private AppdefGroupValue createGroupOfGroups(def groupDef) {
+        agroupMan.createGroup(user.valueObject,
+                              AppdefEntityConstants.APPDEF_TYPE_GROUP,
+                              groupDef.'@name',
+                              groupDef.'@description',
+                              groupDef.'@location')
     }
 
-    private ResourceGroup createMixedGroup(def groupDef) {
+    private AppdefGroupValue createMixedGroup(def groupDef) {
         log.info "Creating mixed group [${groupDef.'@name'}]"
-        AppdefGroupValue groupVal = new AppdefGroupValue()
-        fillGroupProperties(groupVal, groupDef)
-        groupVal.groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS
-        def resVal = groupMan.createGroup(user.valueObject, groupVal)
-        rgroupMan.findResourceGroupById(user.valueObject, resVal.id)
+        agroupMan.createGroup(user.valueObject, groupDef.'@name',
+                              groupDef.'@description', 
+                              groupDef.'@location')
     }
     
-    private ResourceGroup createCompatGroup(def groupDef) {
+    private AppdefGroupValue createCompatGroup(def groupDef) {
         def protoName = groupDef.'@resourceType'
         if (!protoName) {
             throw new Exception("Group [${groupDef.'@name'}] is compat, and " +
@@ -245,22 +217,11 @@ class GroupController extends BaseController {
             throw new Exception("Resource type [$protoName] not found ")
         }
         
-        AppdefGroupValue groupVal = new AppdefGroupValue()
-        fillGroupProperties(groupVal, groupDef)
-        if (proto.isPlatformPrototype()) {
-            groupVal.groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS
-        } else if (proto.isServerPrototype()) {
-            groupVal.groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS
-        } else if (proto.isServicePrototype()) {
-            groupVal.groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC
-        } else {
-            throw new IllegalArgumentException("Resource type [$protoName] " +
-                                               "unsupported as compat group")
-        }
-        groupVal.groupEntType    = proto.appdefType
-        groupVal.groupEntResType = proto.instanceId
-        def resVal = groupMan.createGroup(user.valueObject, groupVal)
-        rgroupMan.findResourceGroupById(user.valueObject, resVal.id)
+        agroupMan.createGroup(user.valueObject, proto.appdefType, 
+                              proto.instanceId, 
+                              groupDef.'@name',
+                              groupDef.'@description',
+                              groupDef.'@location')
     }
     
     private boolean isGroupOfGroups(ResourceGroup group) {
@@ -272,7 +233,9 @@ class GroupController extends BaseController {
     }
     
     private ResourceGroup syncGroup(ResourceGroup group, def groupDef) {
+        AppdefGroupValue groupVal
         def typeMethods
+
         if (!group) {
             // Create!
             def type = groupDef.'@type'
@@ -280,10 +243,14 @@ class GroupController extends BaseController {
             if (!typeMethods) {
                 throw new IllegalArgumentException("Invalid group type [${type}]")
             }
-            group = typeMethods.create(groupDef)
+            groupVal = typeMethods.create(groupDef)
+            group    = rgroupMan.findResourceGroupByName(user.valueObject, 
+                                                         groupDef.'@name')
         } else { 
+            groupVal = agroupMan.findGroupByName(user.valueObject,
+                                                 group.name)
             typeMethods = typeToMethods[groupTypeToName[group.groupType]]
-            typeMethods.updateGroupType(group, groupDef)
+            typeMethods.updateGroupType(groupVal, groupDef)
         }
         
         def shouldContain = []
@@ -329,7 +296,10 @@ class GroupController extends BaseController {
             }
         }
         
-        group.setResources(user, shouldContain.unique() as List)
+        for (r in shouldContain) {
+            groupVal.addAppdefEntity(r.entityID)
+        }
+        agroupMan.saveGroup(user.valueObject, groupVal)
         group
     }
     
@@ -423,7 +393,6 @@ class GroupController extends BaseController {
         }
         xmlOut
     }
-    
     
     /**
      * Return a map of Resource (prototypes) onto Resources of that type
