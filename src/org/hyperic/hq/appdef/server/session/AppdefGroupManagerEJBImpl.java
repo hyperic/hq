@@ -286,7 +286,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throws AppdefGroupNotFoundException when group cannot be located in db.
      * @throws PermissionException if the caller is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public AppdefGroupValue findGroupByName(AuthzSubjectValue subject,
                                             String groupName)
@@ -303,7 +302,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throws AppdefGroupNotFoundException when group cannot be located in db.
      * @throws PermissionException if the caller is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public AppdefGroupValue findGroupByName(AuthzSubjectValue subject,
                                             String groupName, PageControl pc)
@@ -759,7 +757,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @return PageList containing AppdefGroupValues.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      * */
     public Integer[] findClusterIds(AuthzSubjectValue subject, 
                                     AppdefEntityID id)
