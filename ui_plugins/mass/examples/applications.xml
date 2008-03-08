@@ -1,0 +1,7 @@
+<groups>
+  <group name='My Applications' type='applications'>
+    <resourceType name='Application'>
+      <resource name='regex:.*'/>
+    </resourceType>
+  </group>
+</groups>
