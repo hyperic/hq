@@ -26,6 +26,30 @@
 package org.hyperic.util.unittest.server;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import org.dbunit.DatabaseUnitException;
+import org.dbunit.database.DatabaseConnection;
+import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSet;
+import org.dbunit.operation.DatabaseOperation;
+import org.hyperic.util.jdbc.DBUtil;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 
 import junit.framework.TestCase;
 
@@ -37,6 +61,15 @@ import junit.framework.TestCase;
  * that has already had the Ant <code>prepare-jboss</code> target run against it.
  */
 public abstract class BaseServerTestCase extends TestCase {
+    
+    private static final String logCtx = BaseServerTestCase.class.getName();
+    private static final String DUMP_FILE = "dbdump.xml.gz";
+    
+    /**
+     * Path designated for file in the current run
+     * contents may be deleted while not running
+     */
+    private static final String WORKING_DIR = "/tmp";
     
     /**
      * The environment variable specifying the path to the jboss deployment 
@@ -52,6 +85,100 @@ public abstract class BaseServerTestCase extends TestCase {
     
     private static ServerLifecycle server;
     
+    protected Connection getConnection(boolean forRestore)
+            throws UnitTestDBException {
+        try {
+            File file = new File("server/default/deploy/hq-ds.xml");
+            Document doc =  new SAXBuilder().build(file);
+            Element element =
+                doc.getRootElement().getChild("local-tx-datasource");
+            String url = element.getChild("connection-url").getText();
+            String user = element.getChild("user-name").getText();
+            String passwd = element.getChild("password").getText();
+            String driverClass = element.getChild("driver-class").getText();
+            if (forRestore && driverClass.toLowerCase().contains("mysql")) {
+                String buf = "?";
+                if (driverClass.toLowerCase().contains("?")) {
+                    buf = "&";
+                }
+                driverClass = driverClass +
+                    buf + "sessionVariables=FOREIGN_KEY_CHECKS=0";
+            }
+            Driver driver = (Driver)Class.forName(driverClass).newInstance();
+            Properties props = new Properties();
+            props.setProperty("user", user);
+            props.setProperty("password", passwd);
+            return driver.connect(url, props);
+        } catch (JDOMException e) {
+            throw new UnitTestDBException(e);
+        } catch (IOException e) {
+            throw new UnitTestDBException(e);
+        } catch (InstantiationException e) {
+            throw new UnitTestDBException(e);
+        } catch (SQLException e) {
+            throw new UnitTestDBException(e);
+        } catch (IllegalAccessException e) {
+            throw new UnitTestDBException(e);
+        } catch (ClassNotFoundException e) {
+            throw new UnitTestDBException(e);
+        }
+    }
+
+    protected void restoreDatabase()
+            throws UnitTestDBException {
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = getConnection(true);
+            IDatabaseConnection idbConn = new DatabaseConnection(conn);
+            conn.setAutoCommit(false);
+            stmt = conn.createStatement();
+            // this is done for MySQL via another method
+            if (DBUtil.isPostgreSQL(conn)) {
+                stmt.execute("set constraints all deferred");
+            } else if (DBUtil.isOracle(conn)) {
+                stmt.execute("alter session set constraints = deferred");
+            }
+            IDataSet dataset = new FlatXmlDataSet(new GZIPInputStream(
+                new FileInputStream(WORKING_DIR+"/"+DUMP_FILE)));
+            DatabaseOperation.CLEAN_INSERT.execute(idbConn, dataset);
+            conn.commit();
+        } catch (SQLException e) {
+            throw new UnitTestDBException(e);
+        } catch (DataSetException e) {
+            throw new UnitTestDBException(e);
+        } catch (FileNotFoundException e) {
+            throw new UnitTestDBException(e);
+        } catch (IOException e) {
+            throw new UnitTestDBException(e);
+        } catch (DatabaseUnitException e) {
+            throw new UnitTestDBException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+        }
+    }
+
+    protected void dumpDatabase(Connection conn)
+            throws UnitTestDBException {
+        try {
+            IDatabaseConnection idbConn = new DatabaseConnection(conn);
+            IDataSet fullDataSet;
+            fullDataSet = idbConn.createDataSet();
+            GZIPOutputStream gstream =
+                new GZIPOutputStream(
+                    new FileOutputStream(WORKING_DIR+"/"+DUMP_FILE));
+            FlatXmlDataSet.write(fullDataSet, gstream);
+            gstream.finish();
+        } catch (SQLException e) {
+            throw new UnitTestDBException(e);
+        } catch (FileNotFoundException e) {
+            throw new UnitTestDBException(e);
+        } catch (IOException e) {
+            throw new UnitTestDBException(e);
+        } catch (DataSetException e) {
+            throw new UnitTestDBException(e);
+        }
+    }
 
     public BaseServerTestCase(String name) {
         super(name);
