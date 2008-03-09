@@ -26,6 +26,11 @@
 package org.hyperic.util.xmlparser;
 
 import org.hyperic.util.StringUtil;
+import org.jdom.Attribute;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -37,11 +42,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.jdom.Attribute;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
 import org.xml.sax.EntityResolver;
 
 /**
@@ -277,6 +277,8 @@ public class XmlParser {
             }
         } catch(JDOMException exc){
             throw new XmlParseException(exc.getMessage());
+        } catch (IOException exc) {
+            throw new XmlParseException(exc.getMessage());
         }
 
         generalParse(tag, doc);
@@ -301,13 +303,10 @@ public class XmlParser {
         //method escapes " " -> "%20" and bombs
         try {
             is = new FileInputStream(in);
-        } catch (IOException e) {
-            throw new XmlParseException(e.getMessage());
-        }
-        
-        try {
             doc = builder.build(is);
-        } catch(JDOMException exc){
+        } catch (IOException exc) {
+            throw new XmlParseException(exc.getMessage());
+        } catch (JDOMException exc) {
             throw new XmlParseException(exc.getMessage());
         } finally {
             if (is != null) {

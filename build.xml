@@ -508,8 +508,8 @@
     <copy tofile="${ear.dir}/lib/jakarta-oro.jar" 
           file="${thirdparty.lib}/jakarta-oro-2.0.7.jar" />
       
-    <copy tofile="${ear.dir}/lib/jdomb8.jar"
-          file="${thirdparty.lib}/jdom_b8.jar" />
+    <copy tofile="${ear.dir}/lib/jdom-1.1.jar"
+          file="${thirdparty.lib}/jdom-1.1.jar" />
 
     <touch file="${ear.dir}/META-INF/application.xml" />
   </target>
@@ -934,7 +934,7 @@
         <!-- WebSphere: must be in the main classloader for reasons unknown -->
         <include name="activation.jar" />
         <!-- for hq-plugin.xml parser -->
-        <include name="jdom_b8.jar" />
+        <include name="jdom-1.1.jar" />
         <!-- for PluginDumper args parser -->
         <include name="getopt.jar" />
         <include name="tomcat-jk.jar" />
