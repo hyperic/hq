@@ -33,9 +33,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -99,7 +101,12 @@ public class OpenNMSAction implements ActionInterface {
                                           .getOverlordPojo());
         try {
             List platforms = arv.getAssociatedPlatforms(PageControl.PAGE_ALL);
-            params.put("platform", platforms.get(0));
+            PlatformValue platVal = (PlatformValue) platforms.get(0);
+            
+            // Now get the POJO            
+            params.put("platform",
+                       PlatformManagerEJBImpl.getOne()
+                           .findPlatformById(platVal.getId()));
         } catch (AppdefEntityNotFoundException e) {
             params.put("platform", null);
         } catch (PermissionException e) {
