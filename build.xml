@@ -43,6 +43,7 @@
 
   <property name="webapp.home" location="${hq.home}/web" />
   <property name="ear.dir" location="${build.dir}/hq.ear" />
+  <property name="war.dir" location="${build.dir}/hq.ear/hq.war" />
   <property name="ROOT.war" location="${build.dir}/ROOT.war"/>
   <property name="agent.dir" location="${build.dir}/agent" />
 
@@ -73,6 +74,15 @@
   <property name="hqu.deployed.rendit_sys.dir"
 	        value="${jboss.home}/server/default/deploy/hq.ear/rendit_sys"/>
 
+  <property name="jboss.deploy.dir"
+              value="${jboss.home}/server/default/deploy" />
+              
+  <property name="jboss.deploy.ear.dir"
+              value="${jboss.home}/server/default/deploy/hq.ear" />
+              
+  <property name="jboss.deploy.war.dir"
+              value="${jboss.home}/server/default/deploy/hq.ear/hq.war" />
+              
   <path id="pdknative">
     <fileset dir="${sigar.lib}" includes="*.jar" />
     <fileset dir="${db2monitor.dir}" includes="lib/db2monitor.jar" />
@@ -180,13 +190,14 @@
 
     <macrodef name="hqu-copy">
       <attribute name="eardir"/>
+      <attribute name="wardir"/>
       <sequential>
         <mkdir dir="@{eardir}/rendit_sys/org/hyperic/hq/hqu/rendit"/>
         <copy todir="@{eardir}/rendit_sys/org/hyperic/hq/hqu/rendit">
           <fileset dir="${rendit_sys.dir}"/>
         </copy>
-        <mkdir dir="@{eardir}/hq.war/hqu"/>
-        <copy todir="@{eardir}/hq.war/hqu">
+        <mkdir dir="@{wardir}/hqu"/>
+        <copy todir="@{wardir}/hqu">
           <fileset dir="${basedir}/ui_plugins">
             <exclude name="scaffold/**"/>
             <exclude name="extra/**"/>
@@ -198,11 +209,12 @@
     
     <macrodef name="hqu-redeploy-plugin">
       <attribute name="eardir"/>
+      <attribute name="wardir"/>
       <attribute name="plugin"/>
       <sequential>
         <delete dir="${hqu.deployed.dir}/@{plugin}"/>
         <sleep seconds="2"/>
-        <copy todir="@{eardir}/hq.war/hqu/@{plugin}">
+        <copy todir="@{wardir}/hqu/@{plugin}">
           <fileset dir="${basedir}/ui_plugins/@{plugin}"/>
         </copy>
       </sequential>
@@ -540,10 +552,10 @@
   </target>
 
   <target name="pack-test">
-    <mkdir dir="${ear.dir}/hq.war" />
-    <mkdir dir="${ear.dir}/hq.war/WEB-INF/lib" />
+    <mkdir dir="${war.dir}" />
+    <mkdir dir="${war.dir}/WEB-INF/lib" />
 
-    <copy todir="${ear.dir}/hq.war/WEB-INF/lib/" >
+    <copy todir="${war.dir}/WEB-INF/lib/" >
       <fileset dir="${thirdparty.lib}" >
         <include name="strutstest-2.1.3.jar" />
         <include name="cactus-1.7.2.jar" />
@@ -551,7 +563,7 @@
       </fileset>
     </copy>
 
-    <copy todir="${ear.dir}/hq.war/WEB-INF/classes" >
+    <copy todir="${war.dir}/WEB-INF/classes" >
       <fileset dir="${hq.home}/etc" includes="cactus.properties" />
       <fileset dir="${build.dir}/classes"
                includes="**/*CactusTest.class,**/HQCactusBase.class" />
@@ -566,7 +578,7 @@
   
   <!-- HQU == UI Plugins -->
   <target name="hqu-deploy" depends="init">
-    <hqu-copy eardir="${jboss.home}/server/default/deploy/hq.ear"/>
+    <hqu-copy eardir="${jboss.home}/server/default/deploy/hq.ear" wardir="${jboss.home}/server/default/deploy/hq.ear/hq.war"/>
   </target>
 
   <target name="hqu-undeploy" depends="init">
@@ -577,6 +589,7 @@
 
   <target name="hqu-redeploy-plugin" depends="init">
     <hqu-redeploy-plugin eardir="${jboss.home}/server/default/deploy/hq.ear"
+                         wardir="${jboss.home}/server/default/deploy/hq.ear/hq.war"
                          plugin="${plugin}"/>
   </target>
     
@@ -632,14 +645,13 @@
   <!-- ==================== UI packaging ==================== -->
 
   <target name="compile-ui" description="compiles the ui classes" depends="init">
-    <property name="jboss.deploy.dir"
-              value="${jboss.home}/server/default/deploy" />
+    
 
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"
              classpathref="alljars"/>
 
     <mkdir dir="${build.dir}/classes" />
-    <mkdir dir="${ear.dir}/hq.war/WEB-INF/lib" />
+    <mkdir dir="${war.dir}/WEB-INF/lib" />
 
     <hq-javac destdir="${build.dir}/classes" source="1.5" target="1.5">
       <!-- The UI needs to be built with 1.5 features -->
@@ -656,33 +668,33 @@
   
   <target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )"
           depends="pack-ear,pack-test">
-    <mkdir dir="${ear.dir}/hq.war" />
-    <mkdir dir="${ear.dir}/hq.war/WEB-INF/lib" />
+    <mkdir dir="${war.dir}" />
+    <mkdir dir="${war.dir}/WEB-INF/lib" />
     
-    <copy todir="${ear.dir}/hq.war" >
+    <copy todir="${war.dir}" >
       <fileset dir="${webapp.home}">
         <include name="**"/>
         <exclude name="**/*.in"/>
       </fileset>
     </copy>
 
-    <delete dir="${ear.dir}/hq.war/WEB-INF/classes/net"/>
+    <delete dir="${war.dir}/WEB-INF/classes/net"/>
 
     <!-- Copy and replace params in hq.properties -->
-    <delete file="${ear.dir}/hq.war/WEB-INF/hq.properties"/>
-    <copy tofile="${ear.dir}/hq.war/WEB-INF/hq.properties"
+    <delete file="${war.dir}/WEB-INF/hq.properties"/>
+    <copy tofile="${war.dir}/WEB-INF/hq.properties"
           file="${webapp.home}/WEB-INF/hq.properties.in"/>
-    <replace file="${ear.dir}/hq.war/WEB-INF/hq.properties">
+    <replace file="${war.dir}/WEB-INF/hq.properties">
       <replacefilter token="@@@PROVIDER_URL@@@" 
                      value="${hq.ejb.remote.config.ip}:2099"/>
       <replacefilter token="@@@WEBAPP_ATTACH_REMOTELY_FLAG@@@" value="${hq.attach-remote-flag}"/>
     </replace>
 
-    <replace file="${ear.dir}/hq.war/META-INF/context.xml">
+    <replace file="${war.dir}/META-INF/context.xml">
       <replacefilter token="@@@HYPERIC_UI_HOTDEPLOY@@@" value="${hq.ui.hot-deploy}"/>
     </replace>
 
-    <copy todir="${ear.dir}/hq.war/WEB-INF/lib/" >
+    <copy todir="${war.dir}/WEB-INF/lib/" >
       <fileset dir="${thirdparty.lib}" >
         <include name="commons-beanutils.jar" />
         <include name="commons-digester.jar" />
@@ -696,11 +708,11 @@
       </fileset>
     </copy>
 
-    <!--copy todir="${ear.dir}/hq.war/WEB-INF/classes" >
+    <!--copy todir="${war.dir}/WEB-INF/classes" >
       <fileset dir="${build.dir}/classes" includes="**/*Test*.class" />
     </copy-->
 
-    <copy todir="${ear.dir}/hq.war" >
+    <copy todir="${war.dir}/" >
      <fileset dir="${webapp.home}" includes="**/*.js*">
         <include name="**/*.js"/>
         <include name="**/*.css"/>
@@ -712,7 +724,7 @@
       </fileset>
     </copy>
 
-    <jar file="${ear.dir}/hq.war/WEB-INF/lib/hq-ui.jar" basedir="${build.dir}/classes" update="true">
+    <jar file="${war.dir}/WEB-INF/lib/hq-ui.jar" basedir="${build.dir}/classes" update="true">
       <include name="org/hyperic/hq/ui/**" />
       <fileset dir="${basedir}/src">
         <include name="org/hyperic/hq/ui/**/*.html" />
@@ -725,7 +737,7 @@
       <exclude name="org/hyperic/hq/ui/tapestry/**" />
     </jar>
 
-    <jar file="${ear.dir}/hq.war/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${build.dir}/classes" update="true">
+    <jar file="${war.dir}/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${build.dir}/classes" update="true">
       <include name="org/hyperic/ui/tapestry/**" />
       <fileset dir="${basedir}/src">
         <include name="org/hyperic/ui/tapestry/**/*.html" />
@@ -738,7 +750,7 @@
       </fileset>
     </jar>
 
-    <jar file="${ear.dir}/hq.war/WEB-INF/lib/display-taglib.jar" basedir="${build.dir}/classes" >
+    <jar file="${war.dir}/WEB-INF/lib/display-taglib.jar" basedir="${build.dir}/classes" >
       <include name="org/apache/taglibs/display/**" />
     </jar>
 
@@ -754,25 +766,26 @@
           file="src/org/hyperic/util/notReady/web.xml"/>
 
     <!-- Pack UI plugins -->
-    <hqu-copy eardir="${ear.dir}"/>
+    <hqu-copy eardir="${ear.dir}" wardir="${war.dir}"/>
   </target>
 
   <target name="deploy-ui" description="" depends="compile-ui">
-    <property name="jboss.deploy.dir"
-              value="${jboss.home}/server/default/deploy"/>
 
     <!-- Copy updated assets -->
-    <copy todir="${jboss.deploy.dir}/web.ear/hq.war" >
-      <fileset dir="${webapp.home}" includes="**/*.js*">
+    <copy todir="${jboss.deploy.war.dir}" >
+      <fileset dir="${webapp.home}">
         <include name="**/*.js"/>
         <include name="**/*.css"/>
         <include name="**/images/*"/>
+        <include name="**/*.jsp"/>
+        <include name="**/*.properties"/>
+        <include name="**/*.page"/>
+        <include name="**/*.html"/>
         <exclude name="**/dojo/*"/>
-        <exclude name="**/*.jsp"/>
       </fileset>
     </copy>
 
-    <jar file="${jboss.deploy.dir}/hq.ear/hq.war/WEB-INF/lib/hq-ui.jar" basedir="${build.dir}/classes" update="true">
+    <jar file="${jboss.deploy.war.dir}/WEB-INF/lib/hq-ui.jar" basedir="${build.dir}/classes" update="true">
       <include name="org/hyperic/hq/ui/**" />
       <fileset dir="${basedir}/src">
         <include name="org/hyperic/hq/ui/**/*.html" />
@@ -785,7 +798,7 @@
       <exclude name="org/hyperic/hq/ui/tapestry/**" />
     </jar>
 
-    <jar file="${jboss.deploy.dir}/hq.ear/hq.war/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${build.dir}/classes" update="true">
+    <jar file="${jboss.deploy.war.dir}/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${build.dir}/classes" update="true">
       <include name="org/hyperic/ui/tapestry/**" />
       <fileset dir="${basedir}/src">
         <include name="org/hyperic/ui/tapestry/**/*.html" />
@@ -801,9 +814,11 @@
   </target>
 
   <target name="undeploy-ui">
-    <delete file="${jboss.deploy.dir}/hq.ear/hq.war/WEB-INF/lib/hq-tapestry-lib.jar"/>
-    <delete file="${jboss.deploy.dir}/hq.ear/hq.war/WEB-INF/lib/hq-ui.jar"/>
+    <delete file="${jboss.deploy.war.dir}/WEB-INF/lib/hq-tapestry-lib.jar"/>
+    <delete file="${jboss.deploy.war.dir}/WEB-INF/lib/hq-ui.jar"/>
   </target>
+
+  <target name="redeploy-ui" depends="undeploy-ui, deploy-ui"/>
 
   <!-- ==================== PDK packaging ==================== -->
   <target name="pdk-javadoc">
@@ -1413,12 +1428,17 @@
     <copy todir="${jboss.deploy.dir}/hq.ear" >
       <fileset dir="${ear.dir}" includes="**" />
     </copy>
+    <mkdir dir="${jboss.deploy.dir}/hq.ear/hq.war" />
+    <copy todir="${jboss.deploy.dir}/hq.ear/hq.war" >
+      <fileset dir="${war.dir}" includes="**" />
+    </copy>
   </target>
 
   <target name="redeploy" depends="undeploy,deploy"/>
   <target name="undeploy" depends="init-taskdefs"
           description="Remove the ear from jboss deploy dir">
     <delete dir="${jboss.home}/server/default/deploy/hq.ear"/>
+    <delete dir="${jboss.home}/server/default/deploy/hq.ear/hq.war"/>
   </target>
 
   <!--
@@ -1607,22 +1627,22 @@
 
   <target name="remove-tests" unless="debug.enable">
     <delete includeEmptyDirs="true">
-      <fileset dir="${ear.dir}/hq.war/WEB-INF/classes" >
+      <fileset dir="${war.dir}/WEB-INF/classes" >
         <include name="**/test/*"/>
         <include name="**/test"/>
       </fileset>
     </delete>
-    <delete dir="${ear.dir}/hq.war/test" />
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/junit.jar"/>
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/cactus-*.jar" />
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/strutstest-*.jar" />
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/mockejb.jar" />
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/mockrunner-ejb.jar" />
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/jakarta-oro-*.jar" />
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/strutstest.jar" />
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/commons-httpclient-2.0.jar" />    
-    <delete file="${ear.dir}/hq.war/WEB-INF/classes/cactus.properties"/>
-    <delete file="${ear.dir}/hq.war/WEB-INF/classes/log_client.properties"/>
+    <delete dir="${war.dir}/test" />
+    <delete file="${war.dir}/WEB-INF/lib/junit.jar"/>
+    <delete file="${war.dir}/WEB-INF/lib/cactus-*.jar" />
+    <delete file="${war.dir}/WEB-INF/lib/strutstest-*.jar" />
+    <delete file="${war.dir}/WEB-INF/lib/mockejb.jar" />
+    <delete file="${war.dir}/WEB-INF/lib/mockrunner-ejb.jar" />
+    <delete file="${war.dir}/WEB-INF/lib/jakarta-oro-*.jar" />
+    <delete file="${war.dir}/WEB-INF/lib/strutstest.jar" />
+    <delete file="${war.dir}/WEB-INF/lib/commons-httpclient-2.0.jar" />    
+    <delete file="${war.dir}/WEB-INF/classes/cactus.properties"/>
+    <delete file="${war.dir}/WEB-INF/classes/log_client.properties"/>
   </target>
 
   <!-- Bring in tasks for rolling the archives -->
