@@ -44,7 +44,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     private static final long MAX_TIMESTAMP =
         AvailabilityDataRLE.getLastTimestamp();
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
-    private static final String ALIAS_CLAUSE = " upper(t.alias) like '" +
+    private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
     				MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
     
     public AvailabilityDataDAO(DAOFactory f) {
@@ -266,7 +266,9 @@ public class AvailabilityDataDAO extends HibernateDAO {
      */
     List getAllAvailIds() {
         String sql = "SELECT m.id from Measurement m" + " JOIN m.template t" +
-                     " WHERE " + ALIAS_CLAUSE + " order by m.id";
+                     " WHERE " + ALIAS_CLAUSE +
+                     " AND m.resource is not null" +
+                     " ORDER BY m.id";
         return getSession()
             .createQuery(sql)
             .list();
@@ -282,7 +284,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     List findAvailabilityByInstances(int type, Integer[] ids) {
-        boolean checkIds = ids != null && ids.length > 0;
+        boolean checkIds = (ids != null && ids.length > 0);
         String sql = "SELECT m FROM Measurement m " +
                      "join m.template t " +
                      "join t.monitorableType mt " +
@@ -306,7 +308,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
         String sql = "SELECT m FROM Measurement m" +
                      " JOIN m.resource.toEdges e" +
         			 " JOIN m.template t" +
-        			 " WHERE e.distance > 0" +
+        			 " WHERE m.resource is not null" +
+        			 " AND e.distance > 0" +
         			 " AND e.from in (:ids) AND " + ALIAS_CLAUSE;
         return getSession()
             .createQuery(sql)
@@ -322,6 +325,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                      " JOIN rle.availabilityDataId.measurement m" +
 				     " JOIN m.template t" +
 				 	 " WHERE rle.endtime = " + MAX_TIMESTAMP +
+				 	 " AND m.resource is not null " +
 				 	 " AND rle.availVal = " + AVAIL_DOWN + 
 				 	 " AND " + ALIAS_CLAUSE;
         return getSession()
