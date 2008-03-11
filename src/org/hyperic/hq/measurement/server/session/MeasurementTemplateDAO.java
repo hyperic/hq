@@ -27,7 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -101,11 +100,10 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     }
 
     List findAllTemplates(PageInfo pInfo, Boolean defaultOn) {
-        String sql = "select t from MeasurementTemplate t " +
-            "where t.defaultInterval > 0 ";
+        String sql = "select t from MeasurementTemplate t";
         
         if (defaultOn != null) {
-            sql += "and t.defaultOn = :defaultOn ";
+            sql += " where t.defaultOn = :defaultOn ";
         }
         
         sql += 
@@ -148,13 +146,13 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         String sql = 
             "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
-            "where mt.name=:typeName and t.defaultInterval > 0 ";
+            "where mt.name=:typeName";
 
         if (defaultOn != null) {
-            sql += " and t.defaultOn = :defaultOn ";
+            sql += " and t.defaultOn = :defaultOn";
         }
         
-        sql += "order by " +  
+        sql += " order by " +
             ((MeasurementTemplateSortField)pInfo.getSort()).getSortString("t");
             
         Query q = getSession().createQuery(sql)
@@ -170,7 +168,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
                                                    String cat) {
         String sql = 
             "select t from MeasurementTemplate t " +
-            "where t.monitorableType.name=? and t.defaultInterval > 0 " +
+            "where t.monitorableType.name=? " +
             "and t.category.name=? " +
             "order by t.name";
         
@@ -184,7 +182,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
             "where mt.name=? and mt.appdefType=? " +
-            "and t.defaultInterval > 0 and t.defaultOn = true " +
+            "and t.defaultOn = true " +
             "order by mt.name";
  
         return getSession().createQuery(sql)
@@ -197,7 +195,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
             "where mt.name=? and mt.appdefType=? " +
-            "and t.defaultInterval > 0 and t.designate = true " +
+            "and t.designate = true " +
             "order by mt.name";
  
         return getSession().createQuery(sql)
@@ -208,7 +206,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     List findRawByMonitorableType(MonitorableType mt) {
         String sql =
             "select t from MeasurementTemplate t " +
-            "where t.monitorableType=? and t.defaultInterval=0";
+            "where t.monitorableType=?";
 
         return getSession().createQuery(sql)
             .setParameter(0, mt).list();
@@ -233,8 +231,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         String sql =
             "select m from MeasurementTemplate m " +
             "join fetch m.monitorableType mt " +
-            "where mt.name = ? and " +
-            "m.defaultInterval > 0 " +
+            "where mt.name = ? " +
             "order by m.name asc ";
 
         return getSession().createQuery(sql)
