@@ -234,6 +234,8 @@
              classpathref="alljars"/>
     <taskdef name="for" classname="net.sf.antcontrib.logic.For"
              classpathref="alljars"/>
+    <taskdef name="post" classname="net.sf.antcontrib.net.PostTask"
+             classpathref="alljars"/>
     <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
              classpathref="custom-ant-tasks.path"/>
     <taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc"
@@ -819,7 +821,17 @@
     <delete file="${jboss.deploy.war.dir}/WEB-INF/lib/hq-ui.jar"/>
   </target>
 
-  <target name="redeploy-ui" depends="undeploy-ui, deploy-ui"/>
+  <target name="trigger-jboss-reload" depends="init-taskdefs">
+    <post to="http://localhost:7080/jmx-console/HtmlAdaptor"
+          wantresponse="false">
+      <prop name="action" value="invokeOp"/>
+      <prop name="name" value="jboss.system:service=MainDeployer"/>
+      <prop name="methodIndex" value="18"/>
+      <prop name="arg0" value="file:${jboss.home}/server/default/deploy/hq.ear/hq.war/"/>
+    </post>
+  </target>
+
+  <target name="redeploy-ui" depends="undeploy-ui,deploy-ui,trigger-jboss-reload"/>
 
   <!-- ==================== PDK packaging ==================== -->
   <target name="pdk-javadoc">
