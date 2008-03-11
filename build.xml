@@ -822,8 +822,7 @@
   </target>
 
   <target name="trigger-jboss-reload" depends="init-taskdefs">
-    <post to="http://localhost:7080/jmx-console/HtmlAdaptor"
-          wantresponse="false">
+    <post to="http://localhost:7080/jmx-console/HtmlAdaptor">
       <prop name="action" value="invokeOp"/>
       <prop name="name" value="jboss.system:service=MainDeployer"/>
       <prop name="methodIndex" value="18"/>
