@@ -5,8 +5,11 @@
 	
 <property name="unittest.jboss.home" location="${ENV.UNITTEST_JBOSS_HOME}" />
 
-<target name="test" depends="init,init-taskdefs">
-	<delete dir="${junitResults.dir}"/>
+<target name="init-tests">
+	<delete dir="${junitResults.dir}"/>  
+</target>	
+	
+<target name="test" depends="init,init-taskdefs,init-tests">
     <mkdir dir="${junitResults.dir}"/>
     <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltonerror="no">
 	  <jvmarg value="-Xmx512m"/>
@@ -44,8 +47,7 @@
 
   </target>
 
-  <target name="cactus" depends="init,init-taskdefs">
-	<delete dir="${junitResults.dir}"/>  
+  <target name="cactus" depends="init,init-taskdefs,init-tests">
     <mkdir dir="${junitResults.dir}"/>
     <junit reloading="no" fork="no" printsummary="yes" haltonerror="no">
       <classpath>
