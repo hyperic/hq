@@ -8261,16 +8261,12 @@ has already been defined.
         <statement desc="Replace pass-through ARG1 with actual Template" targetDB="postgresql">
             UPDATE EAM_MEASUREMENT_TEMPL SET template = (SELECT template from EAM_MEASUREMENT_TEMPL t WHERE id = EAM_MEASUREMENT_TEMPL.id - 1) WHERE default_interval != 0
         </statement>
-      </schema-directSQL>
-      <schema-directSQL>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="oracle">
             UPDATE EAM_MEASUREMENT SET dsn = (SELECT m.dsn FROM EAM_MEASUREMENT m WHERE m.id = EAM_MEASUREMENT.id - 1) WHERE MEASUREMENT_CLASS = 'D'
         </statement>
         <statement desc="Replace pass-through ARG1 with actual Template" targetDB="oracle">
             UPDATE EAM_MEASUREMENT_TEMPL SET template = (SELECT template from EAM_MEASUREMENT_TEMPL t WHERE id = EAM_MEASUREMENT_TEMPL.id - 1) WHERE default_interval != 0
         </statement>
-      </schema-directSQL>
-      <schema-directSQL>
         <statement desc="Create TMP update Table" targetDB="mysql">
             CREATE TABLE EAM_MEASUREMENT_TMP AS SELECT (ID+1) ID, DSN FROM EAM_MEASUREMENT WHERE MEASUREMENT_CLASS='R'
         </statement>
@@ -8295,8 +8291,7 @@ has already been defined.
         <statement desc="Clean up TMP table" targetDB="mysql">
             DROP TABLE EAM_MEASUREMENT_TEMPL_TMP
         </statement>
-      </schema-directSQL>
-      <schema-directSQL>
+        <!-- Remove Raw measurements and templates. -->
         <statement desc="Remove Raw Measurements">
             DELETE FROM EAM_MEASUREMENT WHERE measurement_class='R'
         </statement>
@@ -8332,13 +8327,13 @@ has already been defined.
         <statement desc="Drop unused Measurement argument table">
             DROP TABLE EAM_MEASUREMENT_ARG
         </statement>
-        <statement targetDB='postgresql'>
+        <statement desc="Drop EAM_MEASUREMENT_ARG sequence" targetDB='postgresql'>
             DROP SEQUENCE EAM_MEASUREMENT_ARG_ID_SEQ
         </statement>
-        <statement targetDB='oracle'>
+        <statement desc="Drop EAM_MEASUREMENT_ARG sequence" targetDB='oracle'>
             DROP SEQUENCE EAM_MEASUREMENT_ARG_ID_SEQ
         </statement>
-        <statement targetDB="mysql">
+        <statement desc="Drop EAM_MEASUREMENT_ARG sequence" targetDB="mysql">
             DELETE FROM HQ_SEQUENCE where seq_name = 'EAM_MEASUREMENT_ARG'
         </statement>
       </schema-directSQL>
