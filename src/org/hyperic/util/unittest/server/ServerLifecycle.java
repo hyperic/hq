@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLClassLoader;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -66,14 +65,6 @@ public class ServerLifecycle {
      * See org.jboss.system.server.ServerConfig.BLOCKING_SHUTDOWN
      */
     private static final String BLOCKING_SHUTDOWN = "jboss.server.blockingshutdown";
-    
-    /**
-     * The system property to set the path to the log4j configuration file 
-     * that the jboss server will use.
-     */
-    private static final String LOG4J_CONFIGURATION = "log4j.configuration";
-    
-    private static final String JAVA_ENDORSED_DIRS = "java.endorsed.dirs";
     
     private final String _jbossHomeDir;
     
@@ -141,37 +132,45 @@ public class ServerLifecycle {
         // we will block on server shutdown
         System.setProperty(BLOCKING_SHUTDOWN, Boolean.TRUE.toString());
         
-        // set java.endorsed.dirs
-        System.setProperty(JAVA_ENDORSED_DIRS, _jbossHomeDir+"/lib/endorsed/");
-        
-        // set the log4j config file if it's not set already
-//        if (System.getProperty(LOG4J_CONFIGURATION) == null) {
-//            System.setProperty(LOG4J_CONFIGURATION, 
-//                    _jbossHomeDir+"/server/"+_configuration+"/conf/log4j.xml");            
-//        }
-
         _log.debug("Starting server at: "+_jbossHomeDir+"; " +
         		   "configuration="+_configuration);
-        _log.debug("java.endorsed.dirs="+
-                    System.getProperty(JAVA_ENDORSED_DIRS));
 
-        // When running junit within an IDE environment, we don't want jboss 
-        // to boot off of classes from the IDE environment. Instead, jboss 
-        // should boot off of classes from the jboss home dir.
-        // Therefore, we will set up our own class loader hierarchy for jboss, 
-        // rooted directly off the bootstrap loader.
-        URI runJar = new URI("file:"+_jbossHomeDir+"/bin/run.jar");
+        // When booting jboss within a junit framework, we don't want jboss 
+        // to boot off of the classpath where the junit framework classes 
+        // reside. Instead, jboss should boot off of classes and resources 
+        // from the jboss home dir. Therefore, we will set up our own class 
+        // loader hierarchy for jboss, using our own system classloader that 
+        // delegates to the *parent* of the default system classloader.
+
+        Thread bootThread = new Thread("jboss-main") {
+            public void run() {
+                IsolatingDefaultSystemClassLoader cl = 
+                    (IsolatingDefaultSystemClassLoader)ClassLoader.getSystemClassLoader();
                 
-        ClassLoader jbossLoader = new URLClassLoader(new URL[] {runJar.toURL()}, null);
+                cl.setIsolateDefaultSystemClassloader();
+                
+                try {
+                    URI runJar = new URI("file:"+_jbossHomeDir+"/bin/run.jar");
+                    
+                    cl.addURL(runJar.toURL());
+                    
+                    Thread.currentThread().setContextClassLoader(cl);
+                                        
+                    Object main = cl.loadClass("org.jboss.Main").newInstance();
+                    
+                    // the boot operation is blocking
+                    Method method = main.getClass().getMethod("boot", new Class[] {String[].class});
+                    
+                    method.invoke(main, new Object[]{new String[0]});    
+                } catch (Exception e) {
+                    throw new IllegalStateException("jboss boot did not succeed", e);
+                }
+
+            }
+        };
         
-        Thread.currentThread().setContextClassLoader(jbossLoader);
-        
-        Object main = Class.forName("org.jboss.Main", true, jbossLoader).newInstance();        
-  
-        // the boot operation is blocking
-        Method method = main.getClass().getMethod("boot", new Class[] {String[].class});
-        
-        method.invoke(main, new Object[]{new String[0]});
+        bootThread.start();
+        bootThread.join();
         
         _isStarted = true;
     }
@@ -182,16 +181,9 @@ public class ServerLifecycle {
     public void stopServer() {
         _log.debug("Stopping server at: "+_jbossHomeDir+"; " +
                    "configuration="+_configuration);
-
         
         if (_isStarted) {
             shutdownJboss();
-                     
-//            System.clearProperty(HOME_DIR);
-//            System.clearProperty(SERVER_NAME);
-//            System.clearProperty(BLOCKING_SHUTDOWN);
-//            System.clearProperty(JAVA_ENDORSED_DIRS);
-            
             _isStarted = false;
         }
     }
