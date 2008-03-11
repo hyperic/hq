@@ -75,7 +75,7 @@
     <mkdir dir="${server.installdir}/server-${version}/lib"/>
     <copy todir="${server.installdir}/server-${version}/lib">
       <fileset dir="${install.dir}/lib">
-        <include name="postgresql-8.0-*.jdbc3.jar"/>
+        <include name="postgresql-8.2-505.jdbc3.jar"/>
       </fileset>
     </copy>
 
