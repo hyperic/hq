@@ -7967,10 +7967,10 @@ has already been defined.
   <schemaSpec version="3.96">
     <schema-directSQL>
       <statement>
-        UPDATE EAM_CONFIG_PROPS set PROPVALUE=10 WHERE PROPKEY='BATCH_AGGREGATE_WORKERS' and PROPVALUE=5
+        UPDATE EAM_CONFIG_PROPS set PROPVALUE='10' WHERE PROPKEY='BATCH_AGGREGATE_WORKERS' and PROPVALUE='5'
       </statement>
       <statement>
-        UPDATE EAM_CONFIG_PROPS set PROPVALUE=200 WHERE PROPKEY='BATCH_AGGREGATE_BATCHSIZE' and PROPVALUE=2000
+        UPDATE EAM_CONFIG_PROPS set PROPVALUE='200' WHERE PROPKEY='BATCH_AGGREGATE_BATCHSIZE' and PROPVALUE='2000'
       </statement>
     </schema-directSQL>
   </schemaSpec>
