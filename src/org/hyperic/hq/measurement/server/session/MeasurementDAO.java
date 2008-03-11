@@ -276,7 +276,7 @@ public class MeasurementDAO extends HibernateDAO {
             "select m from Measurement m " +
             "join m.template t " +
             "where m.enabled = ? and " +
-            "m.resource = ?" +
+            "m.resource = ? " +
             "order by t.name";
 
         return getSession().createQuery(sql)
