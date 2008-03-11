@@ -85,7 +85,35 @@ public abstract class BaseServerTestCase extends TestCase {
     
     private static ServerLifecycle server;
     
-    protected Connection getConnection(boolean forRestore)
+    
+    /**
+     * Creates an instance.
+     *
+     * @param name The test case name.
+     */
+    public BaseServerTestCase(String name) {
+        super(name);
+    }
+    
+    /**
+     * Delegates to the super class.
+     * 
+     * @see junit.framework.TestCase#setUp()
+     */
+    public void setUp() throws Exception {
+        super.setUp();
+    }
+    
+    /**
+     * Delegates to the super class.
+     * 
+     * @see junit.framework.TestCase#tearDown()
+     */
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
+    
+    protected final Connection getConnection(boolean forRestore)
             throws UnitTestDBException {
         try {
             File file = new File("server/default/deploy/hq-ds.xml");
@@ -124,7 +152,7 @@ public abstract class BaseServerTestCase extends TestCase {
         }
     }
 
-    protected void restoreDatabase()
+    protected final void restoreDatabase()
             throws UnitTestDBException {
         Connection conn = null;
         Statement stmt = null;
@@ -158,7 +186,7 @@ public abstract class BaseServerTestCase extends TestCase {
         }
     }
 
-    protected void dumpDatabase(Connection conn)
+    protected final void dumpDatabase(Connection conn)
             throws UnitTestDBException {
         try {
             IDatabaseConnection idbConn = new DatabaseConnection(conn);
@@ -178,18 +206,6 @@ public abstract class BaseServerTestCase extends TestCase {
         } catch (DataSetException e) {
             throw new UnitTestDBException(e);
         }
-    }
-
-    public BaseServerTestCase(String name) {
-        super(name);
-    }
-    
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-    
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
     
     protected final void startServer() throws Exception {        
