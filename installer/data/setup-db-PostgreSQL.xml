@@ -40,6 +40,8 @@
              target="dbsetup"/>
       </then>
       <else>
+        <echo>^^^INFO: Analyzing database...</echo>
+        <antcall target="analyze"/>
         <echo>^^^INFO: Upgrading database...</echo>
         <ant antfile="setup-db-common.xml"
              target="upgrade-db"/>
@@ -134,6 +136,8 @@
             <if>
               <istrue value="${setup.upgrade}" />
             <then>
+              <echo>^^^INFO: Analyzing database...</echo>
+              <antcall target="analyze"/>
               <!-- Upgrade the database to new schema -->
               <ant antfile="setup-db-common.xml"
                    target="upgrade-db"/>
@@ -143,9 +147,6 @@
               <ant antfile="setup-db-common.xml" target="dbsetup"/>
             </else>
             </if>
-            <echo>^^^DEBUG: Vacuuming database...</echo>
-            <!-- Disable VACUUM FULL ANALYZE on upgrade -->
-            <!-- <antcall target="vacuum"/> -->
           </sequential>
         </parallel>
       </try>
@@ -194,13 +195,13 @@
          target="stop-postgresql"/>
   </target>
 
-  <target name="vacuum">
+  <target name="analyze">
     <sql driver="${server.database-driver}"
          url="${server.database-url}"
          userid="${server.database-user}"
          password="${server.database-password}"
          autocommit="true">
-      VACUUM FULL ANALYZE;
+      ANALYZE;
     </sql>
   </target>
 
