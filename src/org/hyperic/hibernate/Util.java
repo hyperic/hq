@@ -25,55 +25,47 @@
 
 package org.hyperic.hibernate;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.NotCompliantMBeanException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.hibernate.EmptyInterceptor;
-import org.hibernate.Interceptor;
-import org.hibernate.SessionFactory;
-import org.hibernate.Hibernate;
-import org.hibernate.id.IdentifierGenerator;
-import org.hibernate.jmx.StatisticsService;
-import org.hibernate.cache.NoCacheProvider;
-import org.hibernate.transaction.JTATransactionFactory;
-
-import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
-
-import org.hibernate.dialect.Dialect;
-import org.hyperic.hibernate.dialect.HQDialect;
-import org.hibernate.dialect.function.ClassicAvgFunction;
-import org.hibernate.dialect.function.ClassicSumFunction;
-import org.hibernate.dialect.function.ClassicCountFunction;
-
-import org.hibernate.engine.SessionFactoryImplementor;
-import org.hibernate.engine.SessionImplementor;
-import org.hyperic.hq.common.DiagnosticThread;
-import org.hyperic.hq.common.DiagnosticObject;
-import org.hyperic.hq.product.server.MBeanUtil;
-import org.hyperic.util.PrintfFormat;
-import org.hyperic.util.StringUtil;
-
-import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Properties;
 import java.util.Iterator;
+import java.util.List;
 
-import net.sf.ehcache.CacheManager;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.EmptyInterceptor;
+import org.hibernate.Hibernate;
+import org.hibernate.Interceptor;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
+import org.hibernate.dialect.Dialect;
+import org.hibernate.dialect.function.ClassicAvgFunction;
+import org.hibernate.dialect.function.ClassicCountFunction;
+import org.hibernate.dialect.function.ClassicSumFunction;
+import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.engine.SessionImplementor;
+import org.hibernate.id.IdentifierGenerator;
+import org.hibernate.jmx.StatisticsService;
+import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hq.common.DiagnosticObject;
+import org.hyperic.hq.common.DiagnosticThread;
+import org.hyperic.hq.product.server.MBeanUtil;
+import org.hyperic.util.PrintfFormat;
+import org.hyperic.util.StringUtil;
 
 /**
  * from hibernate caveat emptor with modifications to optimize initial 
@@ -89,7 +81,6 @@ public class Util {
     private static SessionFactory sessionFactory;
 
     static {
-        boolean mocktest = System.getProperty("hq.mocktest") != null;
         // Create the initial SessionFactory from the default configuration
         // files
         try {
@@ -99,9 +90,7 @@ public class Util {
 
             // Read not only hibernate.properties, but also hibernate.cfg.xml
             configuration.configure("META-INF/hibernate.cfg.xml");
-            if (mocktest) {
-                mockTestConfig();
-            }
+
             hibernateVersionConfig();
             // Set global interceptor from configuration
             setInterceptor(configuration, null);
@@ -211,29 +200,6 @@ public class Util {
         mBean.setSessionFactory(getSessionFactory());
         server.registerMBean(mBean, on);
         log.info("HQ Hibernate Statistics MBean registered " + on);
-    }
-
-    private static void mockTestConfig() {
-        // set the proper hibernate configuration for mockejb test
-        Properties prop = configuration.getProperties();
-        String jta = System.getProperty(Environment.USER_TRANSACTION);
-        if (jta == null) {
-            jta = "javax.transaction.UserTransaction";
-        }
-        prop.setProperty(Environment.USE_QUERY_CACHE, "false");
-        prop.setProperty(Environment.USE_SECOND_LEVEL_CACHE, "false");
-        prop.setProperty(Environment.CACHE_PROVIDER,
-                         NoCacheProvider.class.getName());
-        prop.setProperty(Environment.TRANSACTION_STRATEGY,
-                         JTATransactionFactory.class.getName());
-        prop.remove(Environment.TRANSACTION_MANAGER_STRATEGY);
-        prop.setProperty(Environment.USER_TRANSACTION, jta);
-        
-        // Setup a managed 'current session' context, since the tests
-        // will setup & destroy the session in setup(), teardown()
-        prop.setProperty(Environment.CURRENT_SESSION_CONTEXT_CLASS,
-                         "managed");
-        configuration.setProperties(prop);
     }
 
     private static void hibernateVersionConfig() {
