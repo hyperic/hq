@@ -22,7 +22,7 @@
         <path location="${build.dir}/src" />
       </classpath>
       <formatter type="xml"/>
-      <batchtest todir="${`}">
+      <batchtest todir="${junitResults.dir}">
         <fileset dir="src">
           <include name="**/*Test.java"/>
           <exclude name="**/*CactusTest.java"/>
