@@ -116,7 +116,10 @@ public abstract class BaseServerTestCase extends TestCase {
     protected final Connection getConnection(boolean forRestore)
             throws UnitTestDBException {
         try {
-            File file = new File("server/default/deploy/hq-ds.xml");
+            String deployDir = 
+                getJBossHomeDir()+"/server/"+JBOSS_UNIT_TEST_CONFIGURATION+"/deploy/";
+            
+            File file = new File(deployDir, "hq-ds.xml");
             Document doc =  new SAXBuilder().build(file);
             Element element =
                 doc.getRootElement().getChild("local-tx-datasource");
@@ -210,12 +213,7 @@ public abstract class BaseServerTestCase extends TestCase {
     
     protected final void startServer() throws Exception {        
         if (server == null || !server.isStarted()) {
-            String jbossHomeDir = System.getenv(JBOSS_HOME_DIR_ENV_VAR);
-            
-            if (jbossHomeDir == null) {
-                throw new IllegalStateException("The "+JBOSS_HOME_DIR_ENV_VAR+
-                                " environment variable was not set");
-            }
+            String jbossHomeDir = getJBossHomeDir();
             
             server = new ServerLifecycle(new File(jbossHomeDir), 
                                          JBOSS_UNIT_TEST_CONFIGURATION);
@@ -231,6 +229,17 @@ public abstract class BaseServerTestCase extends TestCase {
             assertFalse(server.isStarted());
             server = null;
         }
+    }
+    
+    private String getJBossHomeDir() {
+        String jbossHomeDir = System.getenv(JBOSS_HOME_DIR_ENV_VAR);
+        
+        if (jbossHomeDir == null) {
+            throw new IllegalStateException("The "+JBOSS_HOME_DIR_ENV_VAR+
+                            " environment variable was not set");
+        }
+        
+        return jbossHomeDir;
     }
     
 }
