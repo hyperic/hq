@@ -91,7 +91,7 @@
   <path id="alljars">
     <path refid="pdknative" />
     <fileset dir="${lather.lib}" includes="lather.jar" />
-    <fileset dir="${thirdparty.lib}" includes="*.jar" excludes="strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar"/>
+    <fileset dir="${thirdparty.lib}" includes="*.jar" excludes="strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar"/>
     <fileset dir="${thirdparty.lib}" includes="*.zip" />      
     <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
     <fileset dir="${thirdparty.lib}/postgresql"
@@ -118,6 +118,7 @@
     <path location="${thirdparty.lib}/strutstest-2.1.3.jar" />
     <path location="${thirdparty.lib}/mockejb.jar" />
     <path location="${thirdparty.lib}/mockrunner-ejb.jar" />
+	<path location="${thirdparty.lib}/dbunit-2.2.jar" />
   </path>
 
   <path id="emma.lib">
