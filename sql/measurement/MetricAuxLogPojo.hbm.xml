@@ -19,7 +19,7 @@
     </many-to-one>
     
     <many-to-one name="metric">
-      <column name="METRIC_ID" not-null="true"/>
+      <column name="METRIC_ID" index="AUX_LOG_METRIC_ID_IDX" not-null="true"/>
     </many-to-one>
 
     <many-to-one name="alertDef">
