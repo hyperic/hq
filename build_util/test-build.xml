@@ -6,6 +6,7 @@
 <property name="unittest.jboss.home" location="${ENV.UNITTEST_JBOSS_HOME}" />
 
 <target name="test" depends="init,init-taskdefs">
+	<delete dir="${junitResults.dir}"/>
     <mkdir dir="${junitResults.dir}"/>
     <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltonerror="no">
 	  <jvmarg value="-Xmx512m"/>
@@ -18,7 +19,7 @@
         <path location="${build.dir}/src" />
       </classpath>
       <formatter type="xml"/>
-      <batchtest todir="${junitResults.dir}">
+      <batchtest todir="${`}">
         <fileset dir="src">
           <include name="**/*Test.java"/>
           <exclude name="**/*CactusTest.java"/>
@@ -44,6 +45,7 @@
   </target>
 
   <target name="cactus" depends="init,init-taskdefs">
+	<delete dir="${junitResults.dir}"/>  
     <mkdir dir="${junitResults.dir}"/>
     <junit reloading="no" fork="no" printsummary="yes" haltonerror="no">
       <classpath>
