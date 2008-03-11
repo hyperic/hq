@@ -7994,6 +7994,15 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <!-- Create missing index on metric_id causing slow deletes on EAM_MEASUREMENT -->
+  <schemaSpec version="3.96.3">
+    <schema-directSQL>
+      <statement desc="Add missing index on foreign key to EAM_MEASUREMENT">
+          CREATE INDEX AUX_LOG_METRIC_ID_IDX ON EAM_METRIC_AUX_LOGS(metric_id)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
   <schemaSpec version="3.97">
     <schema-addColumn table="EAM_MEASUREMENT" column="RESOURCE_ID" 
                       columnType="INTEGER">
