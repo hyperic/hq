@@ -1,25 +1,34 @@
 <?xml version="1.0"?>
 
 <project name="test-build" basedir="..">
+	
+	
+<property name="unittest.jboss.home" location="${ENV.UNITTEST_JBOSS_HOME}" />
 
 <target name="test" depends="init,init-taskdefs">
     <mkdir dir="${junitResults.dir}"/>
-    <junit reloading="no" fork="no" printsummary="yes" haltonerror="no">
-      <classpath>
+    <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltonerror="no">
+	  <jvmarg value="-Xmx512m"/>
+      <jvmarg value="-Xms512m"/>	
+	  <jvmarg value="-Djava.system.class.loader=org.hyperic.util.unittest.server.IsolatingDefaultSystemClassLoader"/>
+	  <classpath>
         <path refid="alljars"/>
         <path refid="testjars"/>
         <path location="${build.dir}/classes" />
-        <path location="${build.dir}/src" />            
-        <path>
-          <fileset dir="${thirdparty.lib}" includes="*.jar" />
-        </path>
+        <path location="${build.dir}/src" />
       </classpath>
       <formatter type="xml"/>
       <batchtest todir="${junitResults.dir}">
         <fileset dir="src">
           <include name="**/*Test.java"/>
           <exclude name="**/*CactusTest.java"/>
-          <include name="**/*_test.java"/>			
+          <include name="**/*_test.java"/>
+
+		  <!-- This unit test should be enabled only when testing the 
+			   unit test framework itself -->
+		  <!--	
+		  <include name="**/TestServerLifecycleManagement.java"/>
+		  -->	  			
         </fileset>
       </batchtest>
       <sysproperty key="hq.example.plugins" value="${hq.home}/plugins/examples"/>
