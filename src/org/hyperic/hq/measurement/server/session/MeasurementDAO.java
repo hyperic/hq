@@ -294,8 +294,7 @@ public class MeasurementDAO extends HibernateDAO {
             "join t.category c " +
             "where mt.appdefType = ? and " +
             "m.instanceId = ? and " +
-            "c.name = ? and " +
-            "m.interval is not null";
+            "c.name = ?";
 
         return getSession().createQuery(sql)
             .setInteger(0, type)
@@ -308,8 +307,8 @@ public class MeasurementDAO extends HibernateDAO {
             "select m from Measurement m " +
             "join m.template t " +
             "join t.category c " +
-            "where m.resource = ? and m.enabled = true and c.name = ? and " +
-            "m.interval is not null order by t.name";
+            "where m.resource = ? and m.enabled = true and c.name = ? " +
+            "order by t.name";
 
         return getSession().createQuery(sql)
             .setParameter(0, resource)
@@ -365,8 +364,7 @@ public class MeasurementDAO extends HibernateDAO {
             "join t.monitorableType mt " +
             "join t.category c " +
             "where m.enabled = true " +
-            "and m.interval is not null and " +
-            "c.name = ?";
+            "and c.name = ?";
 
         return getSession().createQuery(sql)
             .setString(0, cat)
