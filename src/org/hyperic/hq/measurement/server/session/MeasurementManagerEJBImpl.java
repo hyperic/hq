@@ -345,7 +345,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         Collection mts =
             getMeasurementTemplateDAO().findTemplatesByMonitorableType(mtype);
 
-        if (dms.size() != 0 && dms.size() == mts.size()) {
+        if (mts.size() == 0 || (dms.size() != 0 && dms.size() == mts.size())) {
             return dms;
         }
 

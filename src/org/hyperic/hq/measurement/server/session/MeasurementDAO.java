@@ -96,6 +96,9 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     List findByIds(Integer ids[]) {
+        if (ids.length == 0)   // Nothing to do
+            return new ArrayList(0);
+        
         String sql = "from Measurement where id IN (:ids)";
 
         return getSession().createQuery(sql)
@@ -142,6 +145,9 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     public List findByTemplatesForInstance(Integer[] tids, Resource res) {
+        if (tids.length == 0)   // Nothing to do
+            return new ArrayList(0);
+        
         String sql =
             "select m from Measurement m " +
             "join m.template t " +
@@ -256,6 +262,9 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     int deleteByIds(Collection ids) {
+        if (ids.size() == 0)   // Nothing to do
+            return 0;
+
         return getSession()
             .createQuery("delete from Measurement where id in (:ids)")
             .setParameterList("ids", ids)
