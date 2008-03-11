@@ -349,11 +349,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             return dms;
         }
 
-        if (mts.size() == 0) {
-            log.debug("No default templates for " + mtype);
-            return new ArrayList();
-        }
-
         Integer[] tids = new Integer[mts.size()];
         long[] intervals = new long[mts.size()];
 
