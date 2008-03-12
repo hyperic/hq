@@ -30,6 +30,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
@@ -37,6 +39,8 @@ import java.sql.Statement;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import junit.framework.TestCase;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConnection;
@@ -51,14 +55,18 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
-import junit.framework.TestCase;
-
 /**
  * The test case that all server-side unit tests should extend. Before starting 
  * the server, the user must set the <code>UNITTEST_JBOSS_HOME</code> environment 
- * variable to the path where the jboss deployment that will be used for testing 
- * is deployed. That deployed jboss instance must contain a "unittest" configuration 
- * that has already had the Ant <code>prepare-jboss</code> target run against it.
+ * variable to the path where the jboss server that will be used for unit testing 
+ * resides. That jboss instance must contain a "unittest" configuration that has 
+ * already had the Ant <code>prepare-jboss</code> target run against it. The 
+ * <code>hq-ds.xml</code> datasource file must be configured to point to the 
+ * *preexisting* unit testing server database.
+ * 
+ * In addition, the <code>HQ_HOME</code> and <code>HQEE_HOME</code> environment 
+ * variables must be set, respectively, to the local path where the HQEE and HQ.ORG 
+ * src trees reside.
  */
 public abstract class BaseServerTestCase extends TestCase {
     
@@ -78,12 +86,26 @@ public abstract class BaseServerTestCase extends TestCase {
     public static final String JBOSS_HOME_DIR_ENV_VAR = "UNITTEST_JBOSS_HOME";
     
     /**
+     * The environment variable specifying the path to the HQ home directory. 
+     * The HQ.ORG server will be deployed from the HQ home "build" subdirectory.
+     */
+    public static final String HQ_HOME_DIR_ENV_VAR = "HQ_HOME";
+    
+    /**
+     * The environment variable specifying the path to the HQEE home directory. 
+     * The HQEE server will be deployed from the HQEE home "build" subdirectory.
+     */
+    public static final String HQEE_HOME_DIR_ENV_VAR = "HQEE_HOME";
+    
+    /**
      * The "unittest" configuration that the jboss deployment must have installed 
      * and prepared using the Ant "prepare-jboss" target.
      */
     public static final String JBOSS_UNIT_TEST_CONFIGURATION = "unittest";
     
     private static ServerLifecycle server;
+            
+    private static URL deployment;
     
     
     /**
@@ -211,6 +233,11 @@ public abstract class BaseServerTestCase extends TestCase {
         }
     }
     
+    /**
+     * Start the jboss server with the "unittest" configuration.
+     * 
+     * @throws Exception
+     */
     protected final void startServer() throws Exception {        
         if (server == null || !server.isStarted()) {
             String jbossHomeDir = getJBossHomeDir();
@@ -223,11 +250,45 @@ public abstract class BaseServerTestCase extends TestCase {
         assertTrue(server.isStarted());
     }
     
+    /**
+     * Deploy the HQ application into the jboss server, starting the jboss server 
+     * first if necessary.
+     * 
+     * @param isEE <code>true</code> to deploy the HQEE EAR file; 
+     *             <code>false</code> to deploy the HQ.ORG EAR file.
+     * @throws Exception
+     */
+    protected final void deployHQ(boolean isEE) throws Exception {
+        if (server == null || !server.isStarted()) {
+            startServer();
+        }
+        
+        deployment = getHQDeployment(isEE);
+        
+        server.deploy(deployment);
+    }
+    
+    /**
+     * Undeploy the HQ or HQEE application from the jboss server.
+     * 
+     * @throws Exception
+     */
+    protected final void undeployHQ() throws Exception {
+        if (server != null && server.isStarted() && deployment != null) {
+            server.undeploy(deployment);
+            deployment = null;
+        }
+    }
+    
+    /**
+     * Stop the jboss server.
+     */
     protected final void stopServer() {
         if (server != null) {
             server.stopServer();
             assertFalse(server.isStarted());
             server = null;
+            deployment = null;
         }
     }
     
@@ -240,6 +301,36 @@ public abstract class BaseServerTestCase extends TestCase {
         }
         
         return jbossHomeDir;
+    }
+        
+    private URL getHQDeployment(boolean isEE) throws MalformedURLException {
+        if (isEE) {
+            return new URL("file:"+getHQEEHomeDir()+"/build/hq.ear/");
+        } else {
+            return new URL("file:"+getHQHomeDir()+"/build/hq.ear/");
+        }
+    }
+    
+    private String getHQHomeDir() {
+        String hqHomeDir = System.getenv(HQ_HOME_DIR_ENV_VAR);
+        
+        if (hqHomeDir == null) {
+            throw new IllegalStateException("The "+HQ_HOME_DIR_ENV_VAR+
+                            " environment variable was not set");
+        }
+        
+        return hqHomeDir;
+    }
+    
+    private String getHQEEHomeDir() {
+        String hqHomeDir = System.getenv(HQEE_HOME_DIR_ENV_VAR);
+        
+        if (hqHomeDir == null) {
+            throw new IllegalStateException("The "+HQEE_HOME_DIR_ENV_VAR+
+                            " environment variable was not set");
+        }
+        
+        return hqHomeDir;
     }
     
 }
