@@ -195,7 +195,7 @@ public class AvailabilityManagerEJBImpl
                     val = getMetricValue(queue, curr);
                 } else {
                     val = new HighLowMetricValue(AVAIL_UNKNOWN, curr);
-//                    val.incrementCount();
+                    val.incrementCount();
                 }
                 if (rtn.size() <= i) {
                     rtn.add(val);
@@ -232,7 +232,7 @@ public class AvailabilityManagerEJBImpl
             double value =
                 ((newVal.getValue()+(oldVal.getValue()*count)))/(count+1);
             oldVal.setValue(value);
-//            oldVal.incrementCount();
+            oldVal.incrementCount();
         }
         return oldVal;
     }
@@ -250,7 +250,7 @@ public class AvailabilityManagerEJBImpl
         }
         value = value/avails.size();
 	    HighLowMetricValue val = new HighLowMetricValue(value, timestamp);
-//	    val.incrementCount();
+            val.incrementCount();
 	    return val;
 	}
 
