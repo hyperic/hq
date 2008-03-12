@@ -24,6 +24,9 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.CacheMode;
@@ -34,8 +37,12 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.EventLogStatus;
 
 public class EventLogDAO extends HibernateDAO {
     private static final String TIMESTAMP = "timestamp";
@@ -54,7 +61,112 @@ public class EventLogDAO extends HibernateDAO {
         save(res);
         return res;
     }
-
+    
+    public static class ResourceEventLog {
+        private Resource _r;
+        private EventLog _e;
+        
+        ResourceEventLog(Resource r, EventLog e) {
+            _r = r;
+            _e = e;
+        }
+        
+        public Resource getResource() {
+            return _r;
+        }
+        
+        public EventLog getEventLog() {
+            return _e;
+        }
+    }
+    
+    /**
+     * Gets a list of {@link ResourceEventLog}s.  Most arguments
+     * are required.  pInfo is required to have a sort field of
+     * type {@link EventLogSortField}
+     * 
+     * @param typeClass  Not required.  If specified, the results will
+     *                   all be of this class (.org.hy...ResourceLogEvent)
+     * @param inGroups   Not required.  If specified, a list of 
+     *                   {@link ResourceGroup}s which will contain the resulting
+     *                   logs 
+     */
+    List findLogs(long begin, long end, PageInfo pInfo,
+                  EventLogStatus maxStatus, String typeClass, 
+                  Collection inGroups)
+    {
+        EventLogSortField sort = (EventLogSortField)pInfo.getSort();
+               
+        String sql = "select distinct(e.id), {r.*}, {e.*} " + 
+            "from eam_resource r " + 
+            "    join eam_resource_type rt on r.resource_type_id = rt.id " + 
+            "    join eam_event_log e on e.entity_id = r.instance_id " + 
+            "    join eam_res_grp_res_map rgm on r.id = rgm.resource_id " +
+            "    join eam_resource_group g on rgm.resource_group_id = g.id " +
+            "where " +
+            "    e.timestamp >= :begin and " +
+            "    e.timestamp < :end and " +
+            "    e.entity_type = case " +  
+            "        when rt.id = 301 then 1 " +  
+            "        when rt.id = 303 then 2 " +  
+            "        when rt.id = 305 then 3 " +  
+            "        else null " +  
+            "    end " + 
+            "    and case " + 
+            "        when e.status = 'ANY' then -1 " + 
+            "        when e.status = 'ERR' then 3 " + 
+            "        when e.status = 'WRN' then 4 " + 
+            "        when e.status = 'INF' then 6 " + 
+            "        when e.status = 'DBG' then 7 " + 
+            "        else -1 " +
+            "    end <= :maxStatus ";
+        
+        if (typeClass != null) {
+            sql += "    and type = :type ";
+        }
+        
+        if (inGroups != null) {
+            sql += "    and g.id in (:inGroups) ";
+        }
+            
+        sql += " order by " + sort.getSortString("r", "e") + 
+            (pInfo.isAscending() ? "" : " DESC");
+        
+        if (!sort.equals(EventLogSortField.DATE)) {
+            sql += ", " + EventLogSortField.DATE.getSortString("r", "e") + 
+                   " DESC";
+        }
+        
+        Query q = getSession().createSQLQuery(sql)
+            .addEntity("r", Resource.class)
+            .addEntity("e", EventLog.class)
+            .setLong("begin", begin)
+            .setLong("end", end)
+            .setInteger("maxStatus", maxStatus.getCode());
+        
+        if (typeClass != null) {
+            q.setString("type", typeClass);
+        }
+        
+        if (inGroups != null) {
+            List inGroupIds = new ArrayList(inGroups.size());
+            for (Iterator i=inGroups.iterator(); i.hasNext(); ) {
+                ResourceGroup g = (ResourceGroup)i.next();
+                inGroupIds.add(g.getId());
+            }
+            q.setParameterList("inGroups", inGroupIds);
+        }
+        
+        List vals = pInfo.pageResults(q).list();
+        List res = new ArrayList(vals.size());
+        for (Iterator i=vals.iterator(); i.hasNext(); ) { 
+            Object[] elem = (Object[])i.next();
+            
+            res.add(new ResourceEventLog((Resource)elem[0], (EventLog)elem[1]));
+        }
+        return res;
+    }
+    
     List findByEntityAndStatus(AppdefEntityID entId, long begin, long end,
                                String status) 
     {
