@@ -41,6 +41,7 @@ import javax.naming.NamingException;
 
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -48,6 +49,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
@@ -154,6 +156,26 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public List findLastLogs(Resource proto) {
         return getEventLogDAO().findLastByType(proto);
+    }
+    
+    /** 
+     * Get a list of {@link ResourceEventLog}s in a given interval, with
+     * the maximum specified status.
+     * 
+     * If specified, typeClass dictates the full classname of the rows
+     * to check (i.e. org.hyperic.hq.....ResourceLogEvent)
+     * 
+     * If specified, inGroups must be a collection of {@link ResourceGroup}s
+     * which the resulting logs will be associated with.
+     * 
+     * @ejb:interface-method
+     */
+    public List findLogs(long begin, long end, PageInfo pInfo,
+                         EventLogStatus maxStatus, String typeClass,
+                         Collection inGroups)
+    {
+        return getEventLogDAO().findLogs(begin, end, pInfo, maxStatus, 
+                                         typeClass, inGroups);
     }
 
     /** 

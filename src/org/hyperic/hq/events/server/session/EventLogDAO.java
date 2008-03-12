@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -34,11 +35,14 @@ import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.EventLogStatus;
 
 public class EventLogDAO extends HibernateDAO {
     private static final List VIEW_PERMISSIONS = 
@@ -63,6 +67,103 @@ public class EventLogDAO extends HibernateDAO {
         return res;
     }
 
+    public static class ResourceEventLog {
+        private Resource _r;
+        private EventLog _e;
+        
+        ResourceEventLog(Resource r, EventLog e) {
+            _r = r;
+            _e = e;
+        }
+        
+        public Resource getResource() {
+            return _r;
+        }
+        
+        public EventLog getEventLog() {
+            return _e;
+        }
+    }
+         
+    /**
+     * Gets a list of {@link ResourceEventLog}s.  Most arguments
+     * are required.  pInfo is required to have a sort field of
+     * type {@link EventLogSortField}
+     * 
+     * @param typeClass  Not required.  If specified, the results will
+     *                   all be of this class (.org.hy...ResourceLogEvent)
+     * @param inGroups   Not required.  If specified, a list of 
+     *                   {@link ResourceGroup}s which will contain the resulting
+     *                   logs 
+     */
+    List findLogs(long begin, long end, PageInfo pInfo,
+                  EventLogStatus maxStatus, String typeClass, 
+                  Collection inGroups)
+     {  
+        EventLogSortField sort = (EventLogSortField)pInfo.getSort();
+            
+        String sql = "select distinct(e.id), {e.*}, r.* " + 
+            "from EAM_RESOURCE r " + 
+            "    join EAM_RESOURCE_TYPE rt on r.resource_type_id = rt.id " + 
+            "    join EAM_EVENT_LOG e on e.resource_id = r.id " + 
+            "    join EAM_RES_GRP_RES_MAP rgm on r.id = rgm.resource_id " +
+            "    join EAM_RESOURCE_GROUP g on rgm.resource_group_id = g.id " +
+            "where " +
+            "    e.timestamp >= :begin and " +
+            "    e.timestamp < :end and " +
+            "    case " + 
+            "        when e.status = 'ANY' then -1 " + 
+            "        when e.status = 'ERR' then 3 " + 
+            "        when e.status = 'WRN' then 4 " + 
+            "        when e.status = 'INF' then 6 " + 
+            "        when e.status = 'DBG' then 7 " + 
+            "        else -1 " +
+            "    end <= :maxStatus ";
+        
+        if (typeClass != null) {
+            sql += "    and type = :type ";
+        }
+        
+        if (inGroups != null) {
+            sql += "    and g.id in (:inGroups) ";
+        }
+        
+        sql += " order by " + sort.getSortString("r", "e") + 
+            (pInfo.isAscending() ? "" : " DESC");
+        
+        if (!sort.equals(EventLogSortField.DATE)) {
+            sql += ", " + EventLogSortField.DATE.getSortString("r", "e") + 
+                " DESC";
+        }
+        
+        Query q = getSession().createSQLQuery(sql)
+            .addEntity("e", EventLog.class)
+            .setLong("begin", begin)
+            .setLong("end", end)
+            .setInteger("maxStatus", maxStatus.getCode());
+             
+        if (typeClass != null) {
+            q.setString("type", typeClass);
+        }
+             
+        if (inGroups != null) {
+            List inGroupIds = new ArrayList(inGroups.size());
+            for (Iterator i=inGroups.iterator(); i.hasNext(); ) {
+                ResourceGroup g = (ResourceGroup)i.next();
+                inGroupIds.add(g.getId());
+            }
+            q.setParameterList("inGroups", inGroupIds);
+        }
+        
+        List vals = pInfo.pageResults(q).list();
+        List res = new ArrayList(vals.size());
+        for (Iterator i=vals.iterator(); i.hasNext(); ) { 
+            EventLog e = (EventLog)i.next();
+            res.add(new ResourceEventLog(e.getResource(), e));
+        }
+        return res;
+    }
+    
     List findByEntityAndStatus(Resource r, AuthzSubject user, 
                                long begin, long end,
                                String status) 
