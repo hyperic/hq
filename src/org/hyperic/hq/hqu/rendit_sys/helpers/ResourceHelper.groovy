@@ -13,6 +13,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
 import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
 import org.hyperic.hq.authz.HasAuthzOperations
 
@@ -254,6 +255,13 @@ class ResourceHelper extends BaseHelper {
     }
 
     /**
+     * Find all {@link ResourceGroup}s viewable to the passed user.
+     */
+    List findViewableGroups() {
+        groupMan.getAllResourceGroups(userValue, true) // excludeRoot
+    }
+     
+    /**
      * Find a prototype by name.
      */
     Resource findResourcePrototype(String name) {
@@ -267,5 +275,12 @@ class ResourceHelper extends BaseHelper {
      */
     List findAllAppdefPrototypes() {
         rman.findAllAppdefPrototypes()
+    }
+     
+    /**
+     * Find a group by id.  Permission checking is performed.
+     */
+    ResourceGroup findGroup(int id) {
+         groupMan.findResourceGroupById(userValue, id)
     }
 }
