@@ -98,11 +98,11 @@ public class EventLogDAO extends HibernateDAO {
         EventLogSortField sort = (EventLogSortField)pInfo.getSort();
                
         String sql = "select distinct(e.id), {r.*}, {e.*} " + 
-            "from eam_resource r " + 
-            "    join eam_resource_type rt on r.resource_type_id = rt.id " + 
-            "    join eam_event_log e on e.entity_id = r.instance_id " + 
-            "    join eam_res_grp_res_map rgm on r.id = rgm.resource_id " +
-            "    join eam_resource_group g on rgm.resource_group_id = g.id " +
+            "from EAM_RESOURCE r " + 
+            "    join EAM_RESOURCE_TYPE rt on r.resource_type_id = rt.id " + 
+            "    join EAM_EVENT_LOG e on e.entity_id = r.instance_id " + 
+            "    join EAM_RES_GRP_RES_MAP rgm on r.id = rgm.resource_id " +
+            "    join EAM_RESOURCE_GROUP g on rgm.resource_group_id = g.id " +
             "where " +
             "    e.timestamp >= :begin and " +
             "    e.timestamp < :end and " +
