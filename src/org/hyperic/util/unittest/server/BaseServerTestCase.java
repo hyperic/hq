@@ -281,7 +281,13 @@ public abstract class BaseServerTestCase extends TestCase {
     }
     
     /**
-     * Stop the jboss server.
+     * Stop the jboss server. This facility is provided for completeness, but 
+     * if back to back server restarts are performed then unit tests may fail 
+     * because of server socket binding issues (the jboss server socket 
+     * factories do not have SO_REUSEADDR set to true).
+     * 
+     * In general, it should be left up to the framework to stop the server 
+     * once it has been started. The 
      */
     protected final void stopServer() {
         if (server != null) {
