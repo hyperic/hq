@@ -106,7 +106,7 @@ class ResourceCategory {
         def ent = getEntityID(r)
         ent.isPlatform() || ent.isServer() || ent.isService()
     }
-    
+
     static Collection getDesignatedMetrics(Resource r) {
 		dman.findDesignatedMeasurements(r.entityID)
     }
@@ -196,13 +196,18 @@ class ResourceCategory {
         cfg.populate()
         cfg.entries
     }
-    
+
+    /**
+     * @see ResourceConfig
+     */
     static void setConfig(Resource r, Map m, AuthzSubject subject) {
         (new ResourceConfig(r)).setProperties(m, subject)
     }
     
     /**
      * Get all the children of a resource, viewable by the passed user.
+     *
+     * @return a list of {@link Resource}s
      */
     static Collection getViewableChildren(Resource r, AuthzSubject user) {
         def res = []
@@ -226,6 +231,11 @@ class ResourceCategory {
         res
     }
     
+    /**
+     * Convoluted way to get the children from the root resource.
+     *
+     * @deprecated
+     */
     static List getChildren(Resource r, Map args) {
         if (r.isRoot()) {
             // Need subsystem argument
