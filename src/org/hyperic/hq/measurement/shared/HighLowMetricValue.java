@@ -124,6 +124,9 @@ public class HighLowMetricValue extends MetricValue
     public void setHighValue(double highValue) {
         this.highValue = highValue;
     }
+    public void incrementCount() {
+        this.count++;
+    }
     public void setCount(int count) {
         this.count = count;
     }
