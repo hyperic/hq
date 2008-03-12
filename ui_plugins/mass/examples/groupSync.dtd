@@ -1,0 +1,12 @@
+<!ELEMENT groups (group*)>
+<!ELEMENT group (resourceType*)>
+<!ELEMENT resourceType (resource*)>
+<!ELEMENT resource EMPTY>
+
+<!ATTLIST groups deleteMissing CDATA "false">
+<!ATTLIST group name CDATA #REQUIRED>
+<!ATTLIST group type (compat|resources|groups|applications) #REQUIRED>
+<!ATTLIST group resourceType CDATA "mixed">
+<!ATTLIST resourceType name CDATA #REQUIRED>
+<!ATTLIST resource name CDATA #REQUIRED>
+

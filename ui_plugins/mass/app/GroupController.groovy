@@ -9,7 +9,6 @@ import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl as AGroupMan
 import org.hyperic.hq.appdef.shared.AppdefGroupValue
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
-import org.hyperic.util.Runnee
 
 
 class GroupController extends BaseController {
@@ -83,6 +82,7 @@ class GroupController extends BaseController {
             
         def found     = []
         def allGroups = resourceHelper.findAllGroups()
+        def processed = []
         for (groupDef in xmlDef.group) {
             def groupName = groupDef.'@name'
             def group = allGroups.find { it.name == groupName }
@@ -90,7 +90,7 @@ class GroupController extends BaseController {
             if (group)
                 found << group
             log.info "Syncing group ${groupDef.'@name'}"
-            syncGroup(group, groupDef)
+            processed << syncGroup(group, groupDef)
         }
         
         if (deleteMissing) {
@@ -105,8 +105,8 @@ class GroupController extends BaseController {
                 agroupMan.deleteGroup(user.valueObject, group.id)
             }
         }
-        
-        xmlOut.success()
+    
+        _list(xmlOut, params, processed)
         xmlOut
     }
     
@@ -300,7 +300,8 @@ class GroupController extends BaseController {
             groupVal.addAppdefEntity(r.entityID)
         }
         agroupMan.saveGroup(user.valueObject, groupVal)
-        group
+        return rgroupMan.findResourceGroupByName(user.valueObject, 
+                                                 groupDef.'@name')
     }
     
     /**
@@ -357,10 +358,14 @@ class GroupController extends BaseController {
     }
     
     def list(xmlOut, params) {
+        _list(xmlOut, params, resourceHelper.findAllGroups())
+    }
+    
+    private _list(xmlOut, params, groups) {
         boolean includeSystem = params.getOne('includeSystem')?.toBoolean()
         boolean verbose = params.getOne('verbose')?.toBoolean()
         xmlOut.groups() {
-            for (g in resourceHelper.findAllGroups()) {
+            for (g in groups) {
                 if (g.isSystem() && !includeSystem)
                     continue
         
