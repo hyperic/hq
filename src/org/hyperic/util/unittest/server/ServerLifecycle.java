@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 
+import javax.management.Attribute;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
@@ -46,6 +47,8 @@ import org.hyperic.hq.product.server.MBeanUtil;
  * that this is a clean instance of jboss that does not include an HQ EAR 
  * deployment and there is no other instance of the Hyperic server currently 
  * running on the host.
+ * 
+ * This class is not thread safe. It should be synchronized externally.
  */
 public class ServerLifecycle {
     
@@ -64,13 +67,13 @@ public class ServerLifecycle {
     /**
      * See org.jboss.system.server.ServerConfig.BLOCKING_SHUTDOWN
      */
-    private static final String BLOCKING_SHUTDOWN = "jboss.server.blockingshutdown";
+    private static final String BLOCKING_SHUTDOWN = "jboss.server.blockingshutdown";    
     
     private final String _jbossHomeDir;
     
     private final String _configuration;
             
-    private volatile boolean _isStarted;
+    private boolean _isStarted;
     
     /**
      * Create an instance using the "default" configuration in the jboss home dir.
@@ -126,55 +129,24 @@ public class ServerLifecycle {
      * @throws Exception if the server fails to start.
      */
     public void startServer() throws Exception {
-        System.setProperty(HOME_DIR, _jbossHomeDir);
-        System.setProperty(SERVER_NAME, _configuration);
-        
-        // we will block on server shutdown
-        System.setProperty(BLOCKING_SHUTDOWN, Boolean.TRUE.toString());
-        
-        _log.debug("Starting server at: "+_jbossHomeDir+"; " +
-        		   "configuration="+_configuration);
+        if (!_isStarted) {
+            System.setProperty(HOME_DIR, _jbossHomeDir);
+            System.setProperty(SERVER_NAME, _configuration);
+            
+            // we will block on server shutdown
+            System.setProperty(BLOCKING_SHUTDOWN, Boolean.TRUE.toString());
+                    
+            _log.debug("Starting server at: "+_jbossHomeDir+"; " +
+                       "configuration="+_configuration);
 
-        // When booting jboss within a junit framework, we don't want jboss 
-        // to boot off of the classpath where the junit framework classes 
-        // reside. Instead, jboss should boot off of classes and resources 
-        // from the jboss home dir. Therefore, we will set up our own class 
-        // loader hierarchy for jboss, using our own system classloader that 
-        // delegates to the *parent* of the default system classloader.
-
-        Thread bootThread = new Thread("jboss-main") {
-            public void run() {
-                IsolatingDefaultSystemClassLoader cl = 
-                    (IsolatingDefaultSystemClassLoader)ClassLoader.getSystemClassLoader();
-                
-                cl.setIsolateDefaultSystemClassloader();
-                
-                try {
-                    URI runJar = new URI("file:"+_jbossHomeDir+"/bin/run.jar");
-                    
-                    cl.addURL(runJar.toURL());
-                    
-                    Thread.currentThread().setContextClassLoader(cl);
-                                        
-                    Object main = cl.loadClass("org.jboss.Main").newInstance();
-                    
-                    // the boot operation is blocking
-                    Method method = main.getClass().getMethod("boot", new Class[] {String[].class});
-                    
-                    method.invoke(main, new Object[]{new String[0]});    
-                } catch (Exception e) {
-                    throw new IllegalStateException("jboss boot did not succeed", e);
-                }
-
-            }
-        };
-        
-        bootThread.start();
-        bootThread.join();
-        
-        _isStarted = true;
+            bootJboss();
+            
+            setVMNotExitOnServerShutdown();
+            
+            _isStarted = true;            
+        }
     }
-    
+        
     /**
      * Stop the server iff it is already started.
      */
@@ -195,14 +167,14 @@ public class ServerLifecycle {
      * @throws IllegalStateException if the server is not started.
      * @throws Exception if the package cannot be deployed.
      */
-    public void deploy(URL url) throws Exception {
+    public void deploy(final URL url) throws Exception {
         if (!_isStarted) {
             throw new IllegalStateException("the server is not started.");
         }
         
-        deployOrUnDeploy(true, url);
+        deployOrUnDeploy(true, url);        
     }
-    
+        
     /**
      * Undeploy the package represented by the URL iff the server is started.
      * 
@@ -215,30 +187,203 @@ public class ServerLifecycle {
         }
     }
     
-    private void shutdownJboss() {
-        MBeanServer server = MBeanUtil.getMBeanServer();
+    private void bootJboss() throws Exception {
+        // We want to register an uncaught exception handler to try 
+        // and prevent the host vm from being shutdown in case jboss 
+        // fails on boot (since we may want to run other unit tests 
+        // in the vm).
+        ExceptionHandlingThreadGroup group = 
+            new ExceptionHandlingThreadGroup("jboss-boot-group");
         
-        try {
-            server.invoke(new ObjectName("jboss.system:type=Server"), 
-                          "shutdown", new Object[0], new String[0]);
-        } catch (Exception e) {
-            _log.error("Error shutting down server.", e);
+        group.setUncaughtExceptionAction(new Runnable() {
+            public void run() {
+                try {
+                    setVMNotExitOnServerShutdown();
+                } catch (Exception e) {
+                    _log.error("Setting the vm to not exit on server shutdown failed.", e);
+                }
+            }
+            
+        });
+        
+        // When booting jboss within a junit framework, we don't want jboss 
+        // to boot off of the classpath where the junit framework classes 
+        // reside. Instead, jboss should boot off of classes and resources 
+        // from the jboss home dir. Therefore, we will set up our own class 
+        // loader hierarchy for jboss, using our own system classloader that 
+        // delegates to the *parent* of the default system classloader.
+        Thread bootThread = new Thread(group, "jboss-main") {
+            public void run() {
+                IsolatingDefaultSystemClassLoader cl = 
+                    (IsolatingDefaultSystemClassLoader)ClassLoader.getSystemClassLoader();
+                
+                cl.setIsolateDefaultSystemClassloader();
+                
+                try {
+                    URI runJar = new URI("file:"+_jbossHomeDir+"/bin/run.jar");
+                    
+                    cl.addURL(runJar.toURL());
+                    
+                    Thread.currentThread().setContextClassLoader(cl);
+                                        
+                    Object main = cl.loadClass("org.jboss.Main").newInstance();
+                    
+                    // the boot operation is blocking
+                    Method method = main.getClass().getMethod("boot", new Class[] {String[].class});
+                    
+                    method.invoke(main, new Object[]{new String[0]});    
+                } catch (Exception e) {
+                    throw new RuntimeException("jboss boot did not succeed", e);
+                }
+
+            }
+        };
+        
+        bootThread.start();
+        bootThread.join();
+        
+        if (group.getUncaughtException() != null) {
+            throw new Exception(group.getUncaughtException());
         }
     }
     
-    private void deployOrUnDeploy(boolean deploy, URL url) throws Exception {
-        String methodName;
+    private void shutdownJboss() {
+        Thread shutdownThread = new Thread("jboss-shutdown") {
+            public void run() {
+                IsolatingDefaultSystemClassLoader cl = 
+                    (IsolatingDefaultSystemClassLoader)ClassLoader.getSystemClassLoader();
+                
+                cl.setIsolateDefaultSystemClassloader();
+                
+                Thread.currentThread().setContextClassLoader(cl);
+                                    
+                MBeanServer server = MBeanUtil.getMBeanServer();
+                
+                try {
+                    server.invoke(new ObjectName("jboss.system:type=Server"), 
+                                  "shutdown", new Object[0], new String[0]);
+                } catch (Exception e) {
+                    _log.error("Error shutting down server.", e);
+                }  
+            }
+        };
         
-        if (deploy) {
-            methodName = "deploy";
-        } else {
-            methodName = "undeploy";
+        shutdownThread.start();
+        
+        try {
+            shutdownThread.join();
+        } catch (InterruptedException e) {
+            // swallow
         }
+    }
+    
+    /**
+     * Deploy or undeploy a package at the give URL.
+     * 
+     * @param deploy <code>true</code> to deploy; <code>false</code> to undeploy.
+     * @param url The URL.
+     * @throws Exception if the deploy/undeploy fails.
+     */
+    private void deployOrUnDeploy(final boolean deploy, final URL url) throws Exception {
+        ExceptionHandlingThreadGroup group = 
+            new ExceptionHandlingThreadGroup("jboss-deploy-group");
         
+        Thread deployThread = new Thread(group, "jboss-deploy") {
+            public void run() {
+                IsolatingDefaultSystemClassLoader cl = 
+                    (IsolatingDefaultSystemClassLoader)ClassLoader.getSystemClassLoader();
+                
+                cl.setIsolateDefaultSystemClassloader();
+                
+                Thread.currentThread().setContextClassLoader(cl);
+                
+                String methodName;
+                
+                if (deploy) {
+                    methodName = "deploy";
+                } else {
+                    methodName = "undeploy";
+                }
+                
+                MBeanServer server = MBeanUtil.getMBeanServer();
+                
+                try {
+                    server.invoke(new ObjectName("jboss.system:service=MainDeployer"), 
+                                  methodName, new Object[]{url}, new String[]{"java.net.URL"});
+                } catch (Exception e) {
+                    throw new RuntimeException("Could not "+methodName+
+                                               " package at: "+url, e); 
+                }
+            }
+        };
+        
+        deployThread.start();
+        deployThread.join();    
+        
+        if (group.getUncaughtException() != null) {
+            throw new Exception(group.getUncaughtException());
+        }
+    }
+    
+    /**
+     * There is a system property to not exit the vm on server shutdown, but 
+     * the jboss Main class has been hardcoded to exit the vm. We can override 
+     * this setting with a jmx call to the server configuration mbean.
+     * 
+     * See org.jboss.system.server.ServerConfig.EXIT_ON_SHUTDOWN
+     */
+    private void setVMNotExitOnServerShutdown() throws Exception {        
         MBeanServer server = MBeanUtil.getMBeanServer();
         
-        server.invoke(new ObjectName("jboss.system:service=MainDeployer"), 
-                      methodName, new Object[]{url}, new String[0]);          
+        server.setAttribute(new ObjectName("jboss.system:type=ServerConfig"), 
+                new Attribute("ExitOnShutdown", Boolean.FALSE));    
     }
+    
+    /**
+     * A thread group that a client may use for registering an action to perform 
+     * if an uncaught exception is handled. The uncaught exception may also be 
+     * retrieved.
+     */
+    private static class ExceptionHandlingThreadGroup extends ThreadGroup {
+        
+        private final Object _lock = new Object();
+        private Runnable _runnable;
+        private Throwable _uncaughtException;
+        
+        
+        public ExceptionHandlingThreadGroup(String name) {
+            super(name);
+        }
+        
+        /**
+         * @return The uncaught exception or <code>null</code>.
+         */
+        public Throwable getUncaughtException() {
+            synchronized (_lock) {
+                return _uncaughtException;
+            }
+        }
+        
+        /**
+         * Set an action to execute in the uncaught exception handler.
+         * 
+         * @param runnable The runnable representing the action to execute.
+         */
+        public void setUncaughtExceptionAction(Runnable runnable) {
+            synchronized (_lock) {
+                _runnable = runnable;
+            }
+        }
+        
+        public void uncaughtException(Thread t, Throwable e) {
+            synchronized (_lock) {
+                _uncaughtException = e;
+                
+                if (_runnable != null) {
+                    _runnable.run();
+                }
+            }
+        }        
+    }    
 
 }
