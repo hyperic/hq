@@ -170,12 +170,15 @@ public class OracleServerDetector
 
         File oracle = new File(path);
         File bin = oracle.getParentFile();
+        if (!isWin32()) {
+            bin = new File(oracle, "bin");
+        }
         if (bin.getName().equals("bin")) {
             path = oracle.getParent();
         }
 
         // Make sure that oracle exists, and is a normal file
-        if (oracle.exists() && oracle.isFile()) {
+        if (oracle.exists() && bin.isDirectory()) {
             if (hasExe(bin, "adrci")) {
                 found = version.equals(VERSION_11g);
             }
