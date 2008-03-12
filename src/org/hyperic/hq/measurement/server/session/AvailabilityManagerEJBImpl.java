@@ -160,35 +160,34 @@ public class AvailabilityManagerEJBImpl
         return Arrays.asList(rtn);
     }
 
-    private PageList getPageList(List availInfo, long begin,
-                                 long end) {
+    private PageList getPageList(List availInfo, long begin, long end) {
         PageList rtn = new PageList();
         long interval = (end-begin)/DEFAULT_INTERVAL;
         for (Iterator it=availInfo.iterator(); it.hasNext(); ) {
-            // XXX: Fix me.
-            Object[] objs = (Object[])it.next();
-            long availStartime = ((Long)objs[0]).longValue();
-            long availEndtime = ((Long)objs[1]).longValue();
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
+            long availStartime = rle.getStartime();
+            long availEndtime = rle.getEndtime();
             if (availEndtime < begin) {
                 continue;
             }
             LinkedList queue = new LinkedList();
-            queue.add(objs);
+            queue.add(rle);
+            int i=0;
             for (long curr=begin; curr<end; curr+=interval) {
                 long next = curr+interval;
                 long endtime =
-                    ((Long)((Object[])queue.getFirst())[1]).longValue();
+                    ((AvailabilityDataRLE)queue.getFirst()).getEndtime();
                 while (next > endtime) {
-                    Object[] tmp = (Object[])it.next();
+                    AvailabilityDataRLE tmp = (AvailabilityDataRLE)it.next();
                     queue.addFirst(tmp);
-                    endtime = ((Long)tmp[1]).longValue();
+                    endtime = tmp.getEndtime();
                 }
                 endtime = availEndtime;
                 while (curr > endtime) {
                     queue.removeLast();
-                    objs = (Object[])queue.getLast();
-                    availStartime = ((Long)objs[0]).longValue();
-                    availEndtime = ((Long)objs[1]).longValue();
+                    rle = (AvailabilityDataRLE)queue.getLast();
+                    availStartime = rle.getStartime();
+                    availEndtime = rle.getEndtime();
                     endtime = availEndtime;
                 }
                 HighLowMetricValue val;
@@ -196,8 +195,14 @@ public class AvailabilityManagerEJBImpl
                     val = getMetricValue(queue, curr);
                 } else {
                     val = new HighLowMetricValue(AVAIL_UNKNOWN, curr);
+                    val.incrementCount();
                 }
-                rtn.add(val);
+                if (rtn.size() <= i) {
+                    rtn.add(val);
+                } else {
+                    updateMetricValue(val, (HighLowMetricValue)rtn.get(i));
+                }
+                i++;
             }
         }
         if (rtn.size() == 0) {
@@ -206,20 +211,47 @@ public class AvailabilityManagerEJBImpl
         return rtn;
     }
 
+    private HighLowMetricValue updateMetricValue(HighLowMetricValue newVal,
+                                                 HighLowMetricValue oldVal) {
+        if (newVal.getHighValue() == AVAIL_UNKNOWN ||
+                newVal.getHighValue() > oldVal.getHighValue()) {
+            oldVal.setHighValue(newVal.getHighValue());
+        }
+        if (newVal.getLowValue() == AVAIL_UNKNOWN ||
+                newVal.getLowValue() < oldVal.getLowValue()) {
+            oldVal.setLowValue(newVal.getLowValue());
+        }
+        int count = oldVal.getCount();
+        if (oldVal.getValue() == AVAIL_UNKNOWN) {
+            double value = newVal.getValue();
+            oldVal.setValue(value);
+            oldVal.setCount(1);
+        } else if (newVal.getValue() == AVAIL_UNKNOWN) {
+            return oldVal;
+        } else {
+            double value =
+                ((newVal.getValue()+(oldVal.getValue()*count)))/(count+1);
+            oldVal.setValue(value);
+            oldVal.incrementCount();
+        }
+        return oldVal;
+    }
+
     private HighLowMetricValue getMetricValue(List avails, long timestamp) {
         if (avails.size() == 1) {
-            Object[] objs = (Object[])avails.get(0);
-            return new HighLowMetricValue(
-                ((Double)objs[2]).doubleValue(), timestamp);
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)avails.get(0);
+            return new HighLowMetricValue(rle.getAvailVal(), timestamp);
         }
         double value = 0;
         for (Iterator i=avails.iterator(); i.hasNext(); ) {
-            Object[] objs = (Object[])i.next();
-            double availVal = ((Double)objs[2]).doubleValue();
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)i.next();
+            double availVal = rle.getAvailVal();
             value += availVal;
         }
         value = value/avails.size();
-	    return new HighLowMetricValue(value, timestamp);
+	    HighLowMetricValue val = new HighLowMetricValue(value, timestamp);
+	    val.incrementCount();
+	    return val;
 	}
 
     /**
@@ -536,10 +568,27 @@ public class AvailabilityManagerEJBImpl
         Measurement meas = avail.getMeasurement();
         long newStart =  state.getTimestamp() + meas.getInterval();
         long endtime = newStart;
-        dao.updateStartime(avail, newStart);
+        updateStartime(avail, newStart);
         dao.create(avail.getMeasurement(), state.getTimestamp(),
             endtime, state.getValue());
         return true;
+    }
+    
+    /*
+     * !!!need to move all calls to this
+     */
+    private void updateStartime(AvailabilityDataRLE avail, long start) {
+        AvailabilityDataDAO dao = getAvailabilityDataDAO();
+        // this should not be the case here, but want to make sure and
+        // avoid HibernateUniqueKeyExceptions :(
+        AvailabilityDataRLE tmp;
+        DataPoint tmpState = new DataPoint(
+            avail.getMeasurement().getId().intValue(),
+            avail.getAvailVal(), start);
+        if (null != (tmp = dao.findAvail(tmpState))) {
+            dao.remove(tmp);
+        }
+        dao.updateStartime(avail, start);
     }
 
     private boolean updateState(DataPoint state)

@@ -160,18 +160,12 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     /**
-     * XXX: Why does this return a composite object? Why not just the RLE
-     *      in question?
-     *
-     *
-     * @return List of Object[3].  Object[0] -> (Integer)startime.
-     * Object[1] -> (Integer)endtime. Object[2] -> (Double)availVal.
+     * @return List of AvailabilityDataRLE objs
      */
     List getHistoricalAvails(int mid, long start,
                              long end, boolean descending) {
         String sql = new StringBuffer()
-                    .append("SELECT rle.availabilityDataId.startime,")
-                    .append(" rle.endtime, rle.availVal")
+                    .append("SELECT rle")
                     .append(" FROM AvailabilityDataRLE rle")
 				    .append(" JOIN rle.availabilityDataId.measurement m")
 				 	.append(" WHERE m.id = :mid")
@@ -179,7 +173,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
 				 	.append("   OR rle.endtime > :startime)")
 				 	.append(" AND (rle.availabilityDataId.startime < :endtime")
 				 	.append("   OR rle.endtime < :endtime)")
-				 	.append(" ORDER BY rle.availabilityDataId.startime")
+				 	.append(" ORDER BY rle.availabilityDataId.measurement,")
+				 	.append(" rle.availabilityDataId.startime")
 				 	.append(((descending) ? " DESC" : " ASC")).toString();
         return getSession()
             .createQuery(sql)
@@ -190,14 +185,12 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     /**
-     * @return List of Object[3].  Object[0] -> (Integer)startime.
-     * Object[1] -> (Integer)endtime. Object[2] -> (Double)availVal.
+     * @return List of AvailabilityDataRLE objs
      */
     List getHistoricalAvails(Integer[] mids, long start,
                              long end, boolean descending) {
         String sql = new StringBuffer()
-                    .append("SELECT rle.availabilityDataId.startime,")
-                    .append(" rle.endtime, avg(rle.availVal)")
+                    .append("SELECT rle")
                     .append(" FROM AvailabilityDataRLE rle")
 				    .append(" JOIN rle.availabilityDataId.measurement m")
 				 	.append(" WHERE m.id in (:mids)")
@@ -205,9 +198,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
 				 	.append("   OR rle.endtime > :startime)")
 				 	.append(" AND (rle.availabilityDataId.startime < :endtime")
 				 	.append("   OR rle.endtime < :endtime)")
-				 	.append(" GROUP BY rle.availabilityDataId.startime,")
-				 	.append(" rle.endtime")
-				 	.append(" ORDER BY rle.availabilityDataId.startime")
+				 	.append(" ORDER BY rle.availabilityDataId.measurement,")
+				 	.append(" rle.availabilityDataId.startime")
 				 	.append(((descending) ? " DESC" : " ASC")).toString();
         return getSession()
             .createQuery(sql)
