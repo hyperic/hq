@@ -54,6 +54,8 @@ import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
 import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -459,6 +461,17 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         getAuthzSubjectManager().setUserPrefs(who, subjectId, prefs);
         prefs = getUserPrefs(sessionId, subjectId);
         // log.debug("LOADED PREFS=" + prefs);
+    }
+    
+    /**
+     * Get the current user's dashboard
+     * @ejb:interface-method
+     */
+    public DashboardConfig getUserDashboard(Integer sessionId)
+        throws SessionNotFoundException, SessionTimeoutException,
+               PermissionException {
+        AuthzSubject subj = manager.getSubjectPojo(sessionId.intValue());
+        return DashboardManagerEJBImpl.getOne().getUserDashboard(subj, subj);
     }
 
     /**
