@@ -244,14 +244,27 @@ class ResourceHelper extends BaseHelper {
         rman.findRootResource()
     }
 
+    /**
+     * Find all resource groups:
+     *
+     * Returns a list of {@link ResourceGroup}s
+     */
     List findAllGroups() {
         groupMan.getAllResourceGroups()
     }
-    
+
+    /**
+     * Find a prototype by name.
+     */
     Resource findResourcePrototype(String name) {
         rman.findResourcePrototypeByName(name)
     }
 
+    /**
+     * Find all prototypes of platforms, servers, and services
+     *
+     * @return a list of {@link Resource}s which are prototypes.
+     */
     List findAllAppdefPrototypes() {
         rman.findAllAppdefPrototypes()
     }
