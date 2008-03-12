@@ -47,8 +47,6 @@ import org.hyperic.hq.product.server.MBeanUtil;
  * that this is a clean instance of jboss that does not include an HQ EAR 
  * deployment and there is no other instance of the Hyperic server currently 
  * running on the host.
- * 
- * This class is not thread safe. It should be synchronized externally.
  */
 public class ServerLifecycle {
     
@@ -68,12 +66,15 @@ public class ServerLifecycle {
      * See org.jboss.system.server.ServerConfig.BLOCKING_SHUTDOWN
      */
     private static final String BLOCKING_SHUTDOWN = "jboss.server.blockingshutdown";    
+   
+    private final Object _lifecycleLock = new Object();
     
     private final String _jbossHomeDir;
     
     private final String _configuration;
             
     private boolean _isStarted;
+   
     
     /**
      * Create an instance using the "default" configuration in the jboss home dir.
@@ -120,7 +121,9 @@ public class ServerLifecycle {
      *         <code>false</code> otherwise.
      */
     public boolean isStarted() {
-        return _isStarted;
+        synchronized (_lifecycleLock) {
+            return _isStarted;            
+        }
     }
     
     /**
@@ -129,21 +132,23 @@ public class ServerLifecycle {
      * @throws Exception if the server fails to start.
      */
     public void startServer() throws Exception {
-        if (!_isStarted) {
-            System.setProperty(HOME_DIR, _jbossHomeDir);
-            System.setProperty(SERVER_NAME, _configuration);
-            
-            // we will block on server shutdown
-            System.setProperty(BLOCKING_SHUTDOWN, Boolean.TRUE.toString());
-                    
-            _log.debug("Starting server at: "+_jbossHomeDir+"; " +
-                       "configuration="+_configuration);
+        synchronized (_lifecycleLock) {
+            if (!_isStarted) {
+                System.setProperty(HOME_DIR, _jbossHomeDir);
+                System.setProperty(SERVER_NAME, _configuration);
+                
+                // we will block on server shutdown
+                System.setProperty(BLOCKING_SHUTDOWN, Boolean.TRUE.toString());
+                        
+                _log.debug("Starting server at: "+_jbossHomeDir+"; " +
+                           "configuration="+_configuration);
 
-            bootJboss();
-            
-            setVMNotExitOnServerShutdown();
-            
-            _isStarted = true;            
+                bootJboss();
+                
+                setVMNotExitOnServerShutdown();
+                
+                _isStarted = true;            
+            }            
         }
     }
         
@@ -154,12 +159,14 @@ public class ServerLifecycle {
         _log.debug("Stopping server at: "+_jbossHomeDir+"; " +
                    "configuration="+_configuration);
         
-        if (_isStarted) {
-            shutdownJboss();
-            _isStarted = false;
-        }
+        synchronized (_lifecycleLock) {
+            if (_isStarted) {
+                shutdownJboss();
+                _isStarted = false;
+            }   
+        }        
     }
-    
+        
     /**
      * Deploy the package represented by the URL.
      * 
@@ -168,11 +175,13 @@ public class ServerLifecycle {
      * @throws Exception if the package cannot be deployed.
      */
     public void deploy(final URL url) throws Exception {
-        if (!_isStarted) {
-            throw new IllegalStateException("the server is not started.");
+        synchronized (_lifecycleLock) {
+            if (!_isStarted) {
+                throw new IllegalStateException("the server is not started.");
+            }
+            
+            deployOrUnDeploy(true, url);                    
         }
-        
-        deployOrUnDeploy(true, url);        
     }
         
     /**
@@ -182,9 +191,11 @@ public class ServerLifecycle {
      * @throws Exception if the package cannot be undeployed.
      */
     public void undeploy(URL url) throws Exception {
-        if (_isStarted) {
-            deployOrUnDeploy(false, url);
-        }
+        synchronized (_lifecycleLock) {
+            if (_isStarted) {
+                deployOrUnDeploy(false, url);
+            }            
+        }        
     }
     
     private void bootJboss() throws Exception {
@@ -220,9 +231,9 @@ public class ServerLifecycle {
                 cl.setIsolateDefaultSystemClassloader();
                 
                 try {
-                    URI runJar = new URI("file:"+_jbossHomeDir+"/bin/run.jar");
+                    URL runJar = new URL("file:"+_jbossHomeDir+"/bin/run.jar");
                     
-                    cl.addURL(runJar.toURL());
+                    cl.addURL(runJar);
                     
                     Thread.currentThread().setContextClassLoader(cl);
                                         
@@ -276,7 +287,7 @@ public class ServerLifecycle {
             // swallow
         }
     }
-    
+        
     /**
      * Deploy or undeploy a package at the give URL.
      * 
@@ -308,6 +319,8 @@ public class ServerLifecycle {
                 MBeanServer server = MBeanUtil.getMBeanServer();
                 
                 try {
+                    loadSigar(url, cl);
+                    
                     server.invoke(new ObjectName("jboss.system:service=MainDeployer"), 
                                   methodName, new Object[]{url}, new String[]{"java.net.URL"});
                 } catch (Exception e) {
@@ -323,6 +336,32 @@ public class ServerLifecycle {
         if (group.getUncaughtException() != null) {
             throw new Exception(group.getUncaughtException());
         }
+    }
+    
+    /**
+     * Force sigar to load the correct dlls.
+     * 
+     * @param url The URL for the deployment package.
+     * @param cl The isolating system classloader.
+     * @throws Exception
+     */
+    private void loadSigar(final URL url,
+            IsolatingDefaultSystemClassLoader cl) throws Exception {
+        File deployDir = new File(new URI(url.toString()));
+
+        URL sigarJar = new URL("file:"+deployDir.getCanonicalPath()+"/lib/sigar.jar");
+
+        cl.addURL(sigarJar);                        
+
+        File sigarBinDir = new File(deployDir, "sigar_bin/lib/");
+
+        System.setProperty("org.hyperic.sigar.path", sigarBinDir.getCanonicalPath());
+
+        Class clazz = cl.loadClass("org.hyperic.sigar.OperatingSystem");
+
+        Method method = clazz.getMethod("getInstance", new Class[0]);
+
+        method.invoke(clazz, new Object[0]);
     }
     
     /**
