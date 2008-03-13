@@ -52,10 +52,11 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     List findLastAvail(List mids, long after) {
-        String sql = "from AvailabilityDataRLE" +
-                     " WHERE endtime > :endtime" +
-                     " AND availabilityDataId.measurement in (:ids)" +
-                     " order by endtime desc";
+        String sql = new StringBuffer()
+                     .append("from AvailabilityDataRLE")
+                     .append(" WHERE endtime > :endtime")
+                     .append(" AND availabilityDataId.measurement in (:ids)")
+                     .append(" ORDER BY endtime desc").toString();
         return getSession()
             .createQuery(sql)
             .setLong("endtime", after)
@@ -64,10 +65,11 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     List findLastAvail(List mids) {
-        String sql = "from AvailabilityDataRLE" +
-                     " WHERE endtime = :endtime" +
-                     " AND availabilityDataId.measurement in (:ids)" +
-                     " order by endtime desc";
+        String sql = new StringBuffer()
+			         .append("from AvailabilityDataRLE")
+                     .append(" WHERE endtime = :endtime")
+                     .append(" AND availabilityDataId.measurement in (:ids)")
+                     .append(" ORDER BY endtime desc").toString();
         return getSession()
             .createQuery(sql)
             .setLong("endtime", MAX_TIMESTAMP)
@@ -89,9 +91,11 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     AvailabilityDataRLE findAvail(DataPoint state) {
-        String sql = "FROM AvailabilityDataRLE" +
-                     " WHERE availabilityDataId.startime = :startime" +
-                     " AND availabilityDataId.measurement = :meas ";
+        String sql = new StringBuffer()
+                     .append("FROM AvailabilityDataRLE")
+                     .append(" WHERE availabilityDataId.measurement = :meas")
+                     .append(" AND availabilityDataId.startime = :startime")
+                     .toString();
         List list =
             getSession().createQuery(sql)
             .setLong("startime", state.getTimestamp())
@@ -104,10 +108,11 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
     
     List findAllAvailsAfter(DataPoint state) {
-        String sql = "FROM AvailabilityDataRLE" +
-                     " WHERE availabilityDataId.startime > :startime" +
-                     " AND availabilityDataId.measurement = :meas "+
-                     "order by startime asc";
+        String sql = new StringBuffer()
+                     .append("FROM AvailabilityDataRLE")
+                     .append(" WHERE availabilityDataId.measurement = :meas")
+                     .append(" AND availabilityDataId.startime > :startime")
+                     .append(" ORDER BY startime asc").toString();
         return  getSession().createQuery(sql)
             .setLong("startime", state.getTimestamp())
             .setInteger("meas", state.getMetricId().intValue())
@@ -115,10 +120,11 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     AvailabilityDataRLE findAvailAfter(DataPoint state) {
-        String sql = "FROM AvailabilityDataRLE" +
-                     " WHERE availabilityDataId.startime > :startime" +
-                     " AND availabilityDataId.measurement = :meas "+
-                     "order by startime asc";
+        String sql = new StringBuffer()
+                     .append("FROM AvailabilityDataRLE")
+                     .append(" WHERE availabilityDataId.measurement = :meas")
+                     .append(" AND availabilityDataId.startime > :startime")
+                     .append(" ORDER BY startime asc").toString();
         List list =
             getSession().createQuery(sql)
             .setLong("startime", state.getTimestamp())
@@ -136,10 +142,11 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     AvailabilityDataRLE findAvailBefore(DataPoint state) {
-        String sql = "from AvailabilityDataRLE" +
-                     " WHERE availabilityDataId.startime < :startime" +
-                     " AND availabilityDataId.measurement = :meas "+
-                     "order by startime desc";
+        String sql = new StringBuffer()
+                     .append("FROM AvailabilityDataRLE")
+                     .append(" WHERE availabilityDataId.measurement = :meas")
+                     .append(" AND availabilityDataId.startime < :startime")
+                     .append(" ORDER BY startime desc").toString();
         List list =
             getSession().createQuery(sql)
             .setLong("startime", state.getTimestamp())
@@ -257,19 +264,23 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * @return List of all measurement ids for availability, ordered
      */
     List getAllAvailIds() {
-        String sql = "SELECT m.id from Measurement m" + " JOIN m.template t" +
-                     " WHERE " + ALIAS_CLAUSE +
-                     " AND m.resource is not null" +
-                     " ORDER BY m.id";
+        String sql = new StringBuffer()
+                     .append("SELECT m.id from Measurement m")
+                     .append(" JOIN m.template t")
+                     .append(" WHERE " + ALIAS_CLAUSE)
+                     .append(" AND m.resource is not null")
+                     .append(" ORDER BY m.id").toString();
         return getSession()
             .createQuery(sql)
             .list();
     }
 
     Measurement getAvailMeasurement(Resource resource) {
-        String sql = "SELECT m FROM Measurement m" +
-				     " JOIN m.template t" +
-				 	 " WHERE  m.resource = :res AND " + ALIAS_CLAUSE;
+        String sql = new StringBuffer()
+                     .append("SELECT m FROM Measurement m")
+				     .append(" JOIN m.template t")
+				 	 .append(" WHERE m.resource = :res AND ")
+				 	 .append(ALIAS_CLAUSE).toString();
         return (Measurement) getSession().createQuery(sql)
             .setParameter("res", resource)
             .uniqueResult();
@@ -277,12 +288,13 @@ public class AvailabilityDataDAO extends HibernateDAO {
 
     List findAvailabilityByInstances(int type, Integer[] ids) {
         boolean checkIds = (ids != null && ids.length > 0);
-        String sql = "SELECT m FROM Measurement m " +
-                     "join m.template t " +
-                     "join t.monitorableType mt " +
-                     "where mt.appdefType = :type and " +
-                     (checkIds ? "m.instanceId in (:ids) and " : "") +
-                     ALIAS_CLAUSE;
+        String sql = new StringBuffer()
+                     .append("SELECT m FROM Measurement m ")
+                     .append("join m.template t ")
+                     .append("join t.monitorableType mt ")
+                     .append("where mt.appdefType = :type and ")
+                     .append((checkIds ? "m.instanceId in (:ids) and " : ""))
+                     .append(ALIAS_CLAUSE).toString();
 
         Query q = getSession().createQuery(sql).setInteger("type", type);
         
@@ -297,12 +309,14 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * are children of the resourceIds
      */
     List getAvailMeasurementChildren(List resourceIds) {
-        String sql = "SELECT m FROM Measurement m" +
-                     " JOIN m.resource.toEdges e" +
-        			 " JOIN m.template t" +
-        			 " WHERE m.resource is not null" +
-        			 " AND e.distance > 0" +
-        			 " AND e.from in (:ids) AND " + ALIAS_CLAUSE;
+        String sql = new StringBuffer()
+                     .append("SELECT m FROM Measurement m")
+                     .append(" JOIN m.resource.toEdges e")
+                     .append(" JOIN m.template t")
+                     .append(" WHERE m.resource is not null")
+                     .append(" AND e.distance > 0")
+                     .append(" AND e.from in (:ids) AND ")
+                     .append(ALIAS_CLAUSE).toString();
         return getSession()
             .createQuery(sql)
             .setParameterList("ids", resourceIds, new IntegerType())
@@ -313,13 +327,14 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * @return List of down Measurements
      */
     List getDownMeasurements() {
-        String sql = " select rle FROM AvailabilityDataRLE rle" +
-                     " JOIN rle.availabilityDataId.measurement m" +
-				     " JOIN m.template t" +
-				 	 " WHERE rle.endtime = " + MAX_TIMESTAMP +
-				 	 " AND m.resource is not null " +
-				 	 " AND rle.availVal = " + AVAIL_DOWN + 
-				 	 " AND " + ALIAS_CLAUSE;
+        String sql = new StringBuffer()
+                     .append("SELECT rle FROM AvailabilityDataRLE rle")
+                     .append(" JOIN rle.availabilityDataId.measurement m")
+				     .append(" JOIN m.template t")
+				 	 .append(" WHERE rle.endtime = " + MAX_TIMESTAMP)
+				 	 .append(" AND m.resource is not null ")
+				 	 .append(" AND rle.availVal = " + AVAIL_DOWN)
+				 	 .append(" AND " + ALIAS_CLAUSE).toString();
         return getSession()
             .createQuery(sql)
             .list();
