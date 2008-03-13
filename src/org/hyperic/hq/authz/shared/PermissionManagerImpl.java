@@ -198,6 +198,10 @@ public class PermissionManagerImpl
             
             if (resName != null)
             {
+                // Support wildcards
+                resName = resName.replace('*', '%');
+                resName = resName.replace('?', '_');
+
                 sql += VIEWABLE_BYNAME_SQL;
                 sql = StringUtil.replace(sql, "$$resName$$", resName);
             }
@@ -218,9 +222,6 @@ public class PermissionManagerImpl
             stmt.setString(i++, resType);
             
             if (resName != null) {
-                // Support wildcards
-                resName = resName.replace('*', '%');
-                resName = resName.replace('?', '_');
                 stmt.setInt(i++, AppdefUtil.resNameToAppdefTypeId(resType));
             }
             
