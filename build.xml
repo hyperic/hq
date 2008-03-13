@@ -779,7 +779,10 @@
       <fileset dir="${webapp.home}">
         <include name="**/*.js"/>
         <include name="**/*.css"/>
-        <include name="**/images/*"/>
+        <include name="**/*.gif"/>
+        <include name="**/*.png"/>
+        <include name="**/*.jpg"/>
+        <include name="**/*.ico"/>
         <include name="**/*.jsp"/>
         <include name="**/*.properties"/>
         <include name="**/*.page"/>
