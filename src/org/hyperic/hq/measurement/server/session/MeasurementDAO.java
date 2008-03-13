@@ -398,7 +398,7 @@ public class MeasurementDAO extends HibernateDAO {
 
     Measurement getAvailMeasurement(Resource resource) {
         String sql = new StringBuffer()
-            .append("select m from Measurement m ")
+            .append("select distinct m from Measurement m ")
             .append("join m.template t ")
             .append("where m.resource = :res AND ")
             .append(ALIAS_CLAUSE).toString();
@@ -410,7 +410,7 @@ public class MeasurementDAO extends HibernateDAO {
     List findAvailabilityByInstances(int type, Integer[] ids) {
         boolean checkIds = (ids != null && ids.length > 0);
         String sql = new StringBuffer()
-            .append("from Measurement m ")
+            .append("select m from Measurement m ")
             .append("join m.template t ")
             .append("join t.monitorableType mt ")
             .append("where mt.appdefType = :type and ")
