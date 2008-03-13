@@ -1,13 +1,15 @@
 <div jwcid="@hyperic:Layout1Col" pageTitle="message:title">
     <div class="loginPanel">
         <form jwcid="@Form" clientValidationEnabled="true" port="ognl:7080">
+        <div jwcid="status@contrib:AjaxStatus" class="statusElement">&nbsp;</div> 
         <fieldset jwcid="@hyperic:FieldSet" title="message:signInTitle" note="message:signInNote">
             <div jwcid="@hyperic:MessagePanel" message="ognl:message"/>
             <input jwcid="@hyperic:InputField" fieldValue="ognl:userName" 
                 fieldTitle="message:userName" fieldLabel="message:userName"/>
             <input jwcid="@hyperic:InputField" fieldValue="ognl:password" isPassword="ognl:true"
                 fieldTitle="message:password" fieldLabel="message:password"/>
-            <a jwcid="@hyperic:Button" listener="listener:signinButtonListener" label="message:signInButton"/>
+            <a jwcid="@hyperic:Button" listener="listener:signinButtonListener" 
+               label="message:signInButton" enableKeyListener="ognl:true" />
         </fieldset>
         </form>
     </div>
