@@ -959,17 +959,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     private PageList getHistData(Integer id, long begin, long end,
-                                      PageControl pc)
+                                 PageControl pc)
         throws DataNotAvailableException {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
-
-        // Push begin to at least current - 1 min, avoid row contention with
-        // current writes
         long current = System.currentTimeMillis();
-        begin = Math.min(begin, current - 60000);
 
         ArrayList history = new ArrayList();
 
@@ -1147,8 +1143,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     private PageList getHistData(Integer[] ids, long begin, long end,
-                                      long interval, int type,
-                                      boolean returnNulls, PageControl pc)
+                                 long interval, int type,
+                                 boolean returnNulls, PageControl pc)
         throws DataNotAvailableException {
         final int    MAX_IDS  = 30;
         
@@ -1164,11 +1160,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         this.checkTimeArguments(begin, end, interval);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
-        
-        // Push begin to at least current - 1 min, avoid row contention with
-        // current writes
         long current = System.currentTimeMillis();
-        begin = Math.min(begin, current - 60000);
 
         ArrayList history = new ArrayList();
     
