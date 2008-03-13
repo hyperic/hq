@@ -2,9 +2,6 @@
 
 <project name="test-build" basedir="..">
 	
-	
-<property name="unittest.jboss.home" location="${ENV.UNITTEST_JBOSS_HOME}" />
-
 <target name="init-tests">
 	<delete dir="${junitResults.dir}"/>
 	<mkdir dir="${junitResults.dir}"/>  
@@ -13,8 +10,10 @@
 <target name="test" depends="init,init-taskdefs,init-tests">
     <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltonerror="no">
 	  <jvmarg value="-Xmx512m"/>
-      <jvmarg value="-Xms512m"/>	
+      <jvmarg value="-Xms512m"/>
+	  <jvmarg value="-XX:MaxPermSize=128m"/>		
 	  <jvmarg value="-Djava.system.class.loader=org.hyperic.util.unittest.server.IsolatingDefaultSystemClassLoader"/>
+	  <jvmarg value="-Dhq.unittest.run=true"/>
 	  <classpath>
         <path refid="alljars"/>
         <path refid="testjars"/>
@@ -30,7 +29,7 @@
 
 		  <!-- This unit test should be enabled only when testing the 
 			   unit test framework itself -->
-		  <!--	
+		  <!--
 		  <include name="**/TestServerLifecycleManagement.java"/>
 		  -->	  			
         </fileset>
