@@ -34,6 +34,8 @@ import java.util.Map;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
+import org.hibernate.Query;
+import org.hibernate.type.IntegerType;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
@@ -41,8 +43,13 @@ import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.measurement.MeasurementConstants;
 
 public class MeasurementDAO extends HibernateDAO {
+
+    private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
+    				MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
+
     public MeasurementDAO(DAOFactory f) {
         super(Measurement.class, f);
     }
@@ -372,7 +379,72 @@ public class MeasurementDAO extends HibernateDAO {
             .setCacheRegion("Measurement.findByCategory")
             .list();
     }
-    
+
+    /**
+     * @return List of all measurement ids for availability, ordered
+     */
+    List getAllAvailIds() {
+        String sql = new StringBuffer()
+            .append("select m.id from Measurement m ")
+            .append("join m.template t ")
+            .append("where ")
+            .append(ALIAS_CLAUSE)
+            .append("and m.resource is not null ")
+            .append("order BY m.id").toString();
+        return getSession()
+            .createQuery(sql)
+            .list();
+    }
+
+    Measurement getAvailMeasurement(Resource resource) {
+        String sql = new StringBuffer()
+            .append("select m from Measurement m ")
+            .append("join m.template t ")
+            .append("where m.resource = :res AND ")
+            .append(ALIAS_CLAUSE).toString();
+        return (Measurement) getSession().createQuery(sql)
+            .setParameter("res", resource)
+            .uniqueResult();
+    }
+
+    List findAvailabilityByInstances(int type, Integer[] ids) {
+        boolean checkIds = (ids != null && ids.length > 0);
+        String sql = new StringBuffer()
+            .append("from Measurement m ")
+            .append("join m.template t ")
+            .append("join t.monitorableType mt ")
+            .append("where mt.appdefType = :type and ")
+            .append((checkIds ? "m.instanceId in (:ids) and " : ""))
+            .append(ALIAS_CLAUSE).toString();
+
+        Query q = getSession().createQuery(sql).setInteger("type", type);
+
+        if (checkIds) {
+            q.setParameterList("ids", ids);
+        }
+
+        return q.list();
+    }
+
+    /**
+     * param List of resourceIds return List of Availability Measurements which
+     * are children of the resourceIds
+     */
+    List getAvailMeasurementChildren(List resourceIds) {
+        String sql = new StringBuffer()
+            .append("from Measurement m ")
+            .append("join m.resource.toEdges e ")
+            .append("join m.template t ")
+            .append("where m.resource is not null ")
+            .append("and e.distance > 0 ")
+            .append("and e.from in (:ids) and ")
+            .append(ALIAS_CLAUSE).toString();
+        return getSession()
+            .createQuery(sql)
+            .setParameterList("ids", resourceIds, new IntegerType())
+            .list();
+    }
+
     List findMetricsCountMismatch(String plugin) {
         return getSession().createSQLQuery(
             "SELECT 1, S.ID FROM EAM_MONITORABLE_TYPE MT, EAM_PLATFORM_TYPE ST "

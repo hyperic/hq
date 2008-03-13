@@ -93,16 +93,14 @@ public class AvailabilityManagerEJBImpl
      * @ejb:interface-method
      */
     public Measurement getAvailMeasurement(Resource resource) {
-        AvailabilityDataDAO dao = getAvailabilityDataDAO();
-        return dao.getAvailMeasurement(resource);
+        return getMeasurementDAO().getAvailMeasurement(resource);
     }
     
     /**
      * @ejb:interface-method
      */
     public List getPlatformResources() {
-        AvailabilityDataDAO dao = getAvailabilityDataDAO();
-        return dao.findAvailabilityByInstances(
+        return getMeasurementDAO().findAvailabilityByInstances(
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null);
     }
 
@@ -112,18 +110,16 @@ public class AvailabilityManagerEJBImpl
      * @ejb:interface-method
      */
     public List getAllAvailIds() {
-        AvailabilityDataDAO dao = getAvailabilityDataDAO();
-        return dao.getAllAvailIds();
+        return getMeasurementDAO().getAllAvailIds();
     }
 
     /**
      * @ejb:interface-method
      */
     public List getAvailMeasurementChildren(Resource resource) {
-        AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List list = new ArrayList();
         list.add(resource.getId());
-        return dao.getAvailMeasurementChildren(list);
+        return getMeasurementDAO().getAvailMeasurementChildren(list);
     }
     
     /**

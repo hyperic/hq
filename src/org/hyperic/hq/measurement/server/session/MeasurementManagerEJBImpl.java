@@ -519,7 +519,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * and instance id.
      *
      * @param tid The MeasurementTemplate id
-     * @param iid The instance id.
+     * @param aeid The entity id.
      * @return a Measurement value
      * @ejb:interface-method
      */
@@ -673,7 +673,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     private Measurement findAvailabilityMetric(AppdefEntityID id)
         throws MeasurementNotFoundException {
         Measurement dm =
-            getAvailabilityDataDAO().getAvailMeasurement(getResource(id));
+            getMeasurementDAO().getAvailMeasurement(getResource(id));
         if (dm == null) {
             throw new MeasurementNotFoundException("No availability metric " +
                                                    "found for " + id);
@@ -770,7 +770,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 Integer[] iids =
                     (Integer[]) toget.toArray(new Integer[toget.size()]);
 
-                List metrics = getAvailabilityDataDAO()
+                List metrics = getMeasurementDAO()
                     .findAvailabilityByInstances(type, iids);
                 for (Iterator it = metrics.iterator(); it.hasNext();) {
                     Measurement dm = (Measurement) it.next();

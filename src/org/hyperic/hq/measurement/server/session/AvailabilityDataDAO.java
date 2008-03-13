@@ -29,10 +29,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Query;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 
@@ -258,69 +256,6 @@ public class AvailabilityDataDAO extends HibernateDAO {
             new AvailabilityDataRLE(meas, startime, endtime, availVal);
         save(availObj);
         return availObj;
-    }
-
-    /**
-     * @return List of all measurement ids for availability, ordered
-     */
-    List getAllAvailIds() {
-        String sql = new StringBuffer()
-                     .append("SELECT m.id from Measurement m")
-                     .append(" JOIN m.template t")
-                     .append(" WHERE " + ALIAS_CLAUSE)
-                     .append(" AND m.resource is not null")
-                     .append(" ORDER BY m.id").toString();
-        return getSession()
-            .createQuery(sql)
-            .list();
-    }
-
-    Measurement getAvailMeasurement(Resource resource) {
-        String sql = new StringBuffer()
-                     .append("SELECT m FROM Measurement m")
-				     .append(" JOIN m.template t")
-				 	 .append(" WHERE m.resource = :res AND ")
-				 	 .append(ALIAS_CLAUSE).toString();
-        return (Measurement) getSession().createQuery(sql)
-            .setParameter("res", resource)
-            .uniqueResult();
-    }
-
-    List findAvailabilityByInstances(int type, Integer[] ids) {
-        boolean checkIds = (ids != null && ids.length > 0);
-        String sql = new StringBuffer()
-                     .append("SELECT m FROM Measurement m ")
-                     .append("join m.template t ")
-                     .append("join t.monitorableType mt ")
-                     .append("where mt.appdefType = :type and ")
-                     .append((checkIds ? "m.instanceId in (:ids) and " : ""))
-                     .append(ALIAS_CLAUSE).toString();
-
-        Query q = getSession().createQuery(sql).setInteger("type", type);
-        
-        if (checkIds)
-            q.setParameterList("ids", ids);
-
-        return q.list();
-    }
-
-    /**
-     * param List of resourceIds return List of Availability Measurements which
-     * are children of the resourceIds
-     */
-    List getAvailMeasurementChildren(List resourceIds) {
-        String sql = new StringBuffer()
-                     .append("SELECT m FROM Measurement m")
-                     .append(" JOIN m.resource.toEdges e")
-                     .append(" JOIN m.template t")
-                     .append(" WHERE m.resource is not null")
-                     .append(" AND e.distance > 0")
-                     .append(" AND e.from in (:ids) AND ")
-                     .append(ALIAS_CLAUSE).toString();
-        return getSession()
-            .createQuery(sql)
-            .setParameterList("ids", resourceIds, new IntegerType())
-            .list();
     }
 
     /**
