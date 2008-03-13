@@ -55,4 +55,26 @@ public class AvailabilityDataId implements Serializable {
     public void setStartime(long startime) {
         _startime = startime;
     }
+    
+    public int hashCode() {
+        return (new Long(_startime)).hashCode() +
+            _measurement.getId().hashCode();
+    }
+    
+    public boolean equals(Object rhs) {
+        if (this == rhs) {
+            return true;
+        } else if (rhs instanceof AvailabilityDataId) {
+            return equals((AvailabilityDataId)rhs);
+        }
+        return false;
+    }
+    
+    private boolean equals(AvailabilityDataId rhs) {
+        if (_startime == rhs._startime &&
+                _measurement.getId().equals(rhs._measurement.getId())) {
+            return true;
+        }
+        return false;
+    }
 }
