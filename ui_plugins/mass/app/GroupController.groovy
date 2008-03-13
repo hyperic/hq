@@ -299,6 +299,12 @@ class GroupController extends BaseController {
         for (r in shouldContain) {
             groupVal.addAppdefEntity(r.entityID)
         }
+        
+        if (groupDef.'@description')
+            groupVal.description = groupDef.'@description'
+        if (groupDef.'@location')
+            groupVal.location = groupDef.'@location'
+            
         agroupMan.saveGroup(user.valueObject, groupVal)
         return rgroupMan.findResourceGroupByName(user.valueObject, 
                                                  groupDef.'@name')
@@ -369,7 +375,8 @@ class GroupController extends BaseController {
                 if (g.isSystem() && !includeSystem)
                     continue
         
-                def groupAttrs = [name: g.name, 
+                def groupAttrs = [name: g.name, description:g.description,
+                                  location:g.location,
                                   type:groupTypeToName[g.groupType]]
                 if (verbose)
                     groupAttrs.id = g.id

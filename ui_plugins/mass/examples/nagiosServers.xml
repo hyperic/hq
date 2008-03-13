@@ -1,5 +1,6 @@
 <groups deleteMissing="false">
-  <group name='Nagios Servers' type='compat' resourceType='Nagios'>
+  <group name='Nagios Servers' type='compat' 
+         description="All my Nagios servers" location="West Coast" resourceType='Nagios'>
     <resourceType name='regex:.*'>
       <resource name='regex:.*'/>
     </resourceType>
