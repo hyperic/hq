@@ -24,9 +24,20 @@
  */
 package org.hyperic.ui.tapestry.components.form;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.tapestry.BaseComponent;
 import org.apache.tapestry.IActionListener;
+import org.apache.tapestry.IComponent;
+import org.apache.tapestry.IMarkupWriter;
+import org.apache.tapestry.IRequestCycle;
+import org.apache.tapestry.IScript;
+import org.apache.tapestry.PageRenderSupport;
+import org.apache.tapestry.TapestryUtils;
+import org.apache.tapestry.annotations.InjectScript;
 import org.apache.tapestry.annotations.Parameter;
+import org.apache.tapestry.form.AbstractFormComponent;
 
 public abstract class Button extends BaseComponent {
 
@@ -38,6 +49,9 @@ public abstract class Button extends BaseComponent {
     public static final String SUBMIT_TYPE_SUBMIT = "submit";
     public static final String SUBMIT_TYPE_CANCEL = "cancel";
     public static final String SUBMITE_TYPE_RESET = "reset";
+    
+    public static final String KEYPRESS_SCOPE_FORM = "form";
+    public static final String KEYPRESS_SCOPE_WINDOW = "window";
     
     @Parameter(name = "listener")
     public abstract IActionListener getListener();
@@ -81,4 +95,34 @@ public abstract class Button extends BaseComponent {
     public abstract String getLabel();
     public abstract void setLabel(String label);
     
+    @Parameter(name = "enableKeyListener", defaultValue = "false")
+    public abstract boolean getEnableKeyListener();
+    public abstract void setEnableKeyListener(boolean enableKeyListener);
+    
+    @Parameter(name = "keypressScopeObject", defaultValue = "@org.hyperic.ui.tapestry.components.form.Button@KEYPRESS_SCOPE_FORM")
+    public abstract String getScopeObjectName();
+    public abstract void setScopeObjectName(String scopeObj);
+    
+    @InjectScript("Button.script")
+    public abstract IScript getScript();
+    
+    public void renderComponent(IMarkupWriter writer, IRequestCycle cycle){
+        super.renderComponent(writer, cycle);
+        if (!cycle.isRewinding()) {
+	    if (getEnableKeyListener()) {
+		Map map = new HashMap();
+		if (getScopeObjectName() == KEYPRESS_SCOPE_FORM) {
+		    IComponent form = TapestryUtils.getForm(cycle, this);
+		    map.put("scopeObjName", form.getClientId());
+		} else {
+		    map.put("scopeObjName", KEYPRESS_SCOPE_WINDOW);
+		}
+		AbstractFormComponent linksubmit = (AbstractFormComponent) this.getComponent("linksubmit");
+		map.put("buttonClientId", linksubmit.getName());
+		PageRenderSupport pageRenderSupport = TapestryUtils
+			.getPageRenderSupport(cycle, this);
+		getScript().execute(this, cycle, pageRenderSupport, map);
+	    }
+        }
+    }
 }

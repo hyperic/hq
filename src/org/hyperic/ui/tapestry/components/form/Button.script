@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script PUBLIC
+  "-//Apache Software Foundation//Tapestry Script Specification 3.0//EN"
+  "http://jakarta.apache.org/tapestry/dtd/Script_3_0.dtd">
+    
+<script>
+<input-symbol key="buttonClientId" />
+<input-symbol key="scopeObjName"/>
+<body>
+document.${buttonClientId}Connect = function(){
+    hyperic.utils.key.registerListener(dojo.byId('${scopeObjName}'), hyperic.utils.key.enterKeyHandler);
+    dojo.subscribe('enter', null, function(){tapestry.form.submit('${scopeObjName}', '${buttonClientId}');});
+}
+dojo.connect(window, "onload", document, "${buttonClientId}Connect");
+</body>
+</script>
