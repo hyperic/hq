@@ -432,7 +432,7 @@ public class MeasurementDAO extends HibernateDAO {
      */
     List getAvailMeasurementChildren(List resourceIds) {
         String sql = new StringBuffer()
-            .append("sekect m from Measurement m ")
+            .append("select m from Measurement m ")
             .append("join m.resource.toEdges e ")
             .append("join m.template t ")
             .append("where m.resource is not null ")
