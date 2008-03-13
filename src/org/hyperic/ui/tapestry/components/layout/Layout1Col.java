@@ -43,6 +43,10 @@ public abstract class Layout1Col extends BaseComponent{
     public abstract String getSubTitle();
     public abstract void setSubTitle(String title);
     
+    @Parameter(name = "statusElement", defaultValue = "false")
+    public abstract boolean getStatusElement();
+    public abstract void setStatusElement(boolean statusElement);
+    
     @Asset("context:css/HQ_40_OS.css")
     public abstract IAsset getHQ40Theme();
 

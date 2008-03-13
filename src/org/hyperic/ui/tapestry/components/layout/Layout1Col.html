@@ -1,14 +1,14 @@
 <shell jwcid="@Shell" title="ognl:pageTitle" stylesheets='ognl:{HQ40Theme}' 
        delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.remainingHead)" >
 <block jwcid="remainingHead@Block">
-<link rel="shortcut icon" href="/images/icons/favicon.ico"/>
+<link rel="icon" href="/images/4.0/icons/favicon.ico"/>
 <script language="JavaScript" type="text/javascript" src="/js/lib/lib.js"></script>
 </block>
 <body jwcid="@Body">
 
 <div id="wrapper">
         
-<span jwcid="@Header"/>
+<span jwcid="@Header" statusElement="ognl:statusElement"/>
 
 <div id="wrapper">
 	<div id="content">

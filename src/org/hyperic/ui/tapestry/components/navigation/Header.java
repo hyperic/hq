@@ -25,8 +25,13 @@
 package org.hyperic.ui.tapestry.components.navigation;
 
 import org.apache.tapestry.BaseComponent;
+import org.apache.tapestry.annotations.Parameter;
 
 public abstract class Header extends BaseComponent{
+    
+    @Parameter(name = "statusElement", defaultValue = "false")
+    public abstract boolean getStatusElement();
+    public abstract void setStatusElement(boolean statusElement);
     
 
 }
