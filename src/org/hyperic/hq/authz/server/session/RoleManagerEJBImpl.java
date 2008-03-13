@@ -257,6 +257,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
             roleLocal.setResourceGroups(gLocals);
         }
 
+        AuthzStartupListener.getRoleCreateCallback().roleCreated(roleLocal);
         return roleLocal.getId();
     }
 
