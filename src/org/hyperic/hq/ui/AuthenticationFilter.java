@@ -197,7 +197,8 @@ public final class AuthenticationFilter extends BaseFilter {
 	    } catch (PermissionException e) {
 		e.printStackTrace();
 	    }
-
+	    request.getSession().setAttribute(Constants.WEBUSER_SES_ATTR,
+			webUser);
 	    return webUser;
 	} catch (Exception e) {
 	    // No guest account available
