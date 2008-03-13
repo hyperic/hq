@@ -148,12 +148,6 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="RawMeasurement.findByTemplateForInstance"
-         maxElementsInMemory="5000"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Appdef config responses -->
   <cache name="org.hyperic.hq.appdef.ConfigResponseDB"
