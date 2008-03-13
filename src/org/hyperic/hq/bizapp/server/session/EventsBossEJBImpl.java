@@ -244,8 +244,9 @@ public class EventsBossEJBImpl
                                                alertdef.getAppdefId());
         // Get the frequency type
         int freqType = alertdef.getFrequencyType();
-        long count = alertdef.getCount();
-        long range = alertdef.getRange();
+        long range = (freqType == EventConstants.FREQ_DURATION ||
+                      freqType == EventConstants.FREQ_COUNTER) ?
+                     alertdef.getRange() : 0;
 
         AlertConditionValue[] conds = alertdef.getConditions();
         if (conds.length == 1) {
@@ -326,6 +327,8 @@ public class EventsBossEJBImpl
             RegisteredTriggerValue rt = new RegisteredTriggerValue();
             rt.setClassname(ftrig.getClass().getName());
         
+            long count = alertdef.getCount();
+            
             // Get the config response
             ConfigResponse resp =
                 ftrig.getConfigResponse(last.getId(), range, count);
