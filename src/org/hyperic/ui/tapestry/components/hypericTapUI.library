@@ -31,6 +31,8 @@
 <library-specification>
 
     <library id="tacos" specification-path="/net/sf/tacos/Tacos.library"/>
+    <library id="contrib" specification-path="classpath:/org/apache/tapestry/contrib/Contrib.library"/>
+    
 	<meta key="org.apache.tapestry.component-class-packages" value="org.hyperic.ui.tapestry.components"/>
 
     <component-type type="InputField" specification-path="form/InputField.jwc"/>
