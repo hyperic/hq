@@ -44,6 +44,7 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.server.session.RoleCreateCallback;
 import org.hyperic.hq.authz.server.session.RoleRemoveCallback;
 import org.hyperic.hq.authz.server.session.RoleRemoveFromSubjectCallback;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
@@ -64,7 +65,6 @@ import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.StringUtil;
-import org.hyperic.util.config.ConfigResponse;
 
 /**
  * @ejb:bean name="DashboardManager"
@@ -309,6 +309,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
     public void startup() {
         _log.info("Dashboard Manager starting up");
         
+        // Register callback for subject removal
         HQApp.getInstance()
             .registerCallbackListener(SubjectRemoveCallback.class,
                  new SubjectRemoveCallback() {
@@ -317,6 +318,8 @@ public class DashboardManagerEJBImpl implements SessionBean {
                     }
                 }
             );
+
+        // Register callback for role removal
         HQApp.getInstance()
             .registerCallbackListener(RoleRemoveCallback.class,
                 new RoleRemoveCallback() {
@@ -344,6 +347,23 @@ public class DashboardManagerEJBImpl implements SessionBean {
                     }
                 }
             );
+
+        // Register callback for role creation
+        HQApp.getInstance()
+            .registerCallbackListener(RoleCreateCallback.class,
+                new RoleCreateCallback() {
+                    public void roleCreated(Role r) {
+                        Crispo cfg = CrispoManagerEJBImpl
+                            .getOne().create(getDefaultConfig());
+                        RoleDashboardConfig dash =
+                            new RoleDashboardConfig(r, r.getName()  +
+                                                       " Role Dashboard", cfg);
+                        _dashDAO.save(dash);
+                    }
+                }
+            );
+
+        // Register callback for subject removed from role
         HQApp.getInstance()
             .registerCallbackListener(RoleRemoveFromSubjectCallback.class,
                  new RoleRemoveFromSubjectCallback() {
