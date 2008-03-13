@@ -161,19 +161,10 @@ public class ReportProcessorEJBImpl
                 availMetric = true;
             }
 
-            boolean trace = log.isTraceEnabled();
             ValueList[] valLists = dsnLists[i].getDsns();
             for (int j = 0; j < valLists.length; j++) {
                 int dsnId = valLists[j].getDsnId();
                 MetricValue[] vals = valLists[j].getValues();
-                
-                if (trace) {
-                    log.trace("metricDebug: ReportProcessor addData: " +
-                        "metric ID " + dm.getId() +
-                        " tmpl " + tmpl.getAlias() +
-                        " isAvail " + availMetric +
-                        " value=" + vals[j].getValue());
-                }
 
                 if (availMetric) {
                     addData(availPoints, dm, dsnId, vals);
