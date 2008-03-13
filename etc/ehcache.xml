@@ -185,13 +185,6 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
-  <cache name="DownMetricsCache"
-         maxElementsInMemory="20000"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU">
-  </cache>
-
   <!-- Cache used outside Hibernate which contains ent IDs which are in the
        zevent queue -->
   <cache name="AgentScheduleInQueue"

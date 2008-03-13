@@ -1059,48 +1059,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * @ejb:interface-method
-     */
-    public int getNumUnavailEntities() {
-        return MetricDataCache.getInstance().getUnavailableMetricsSize();
-    }
-    
-    /**
-     * Get the list of DownMetricValues that represent the resources that are
-     * currently down
-     * 
-     * @ejb:interface-method
-     */
-    public List getUnavailEntities(List includes) {
-        MetricDataCache cache = MetricDataCache.getInstance();
-        Map unavailMetrics = cache.getUnavailableMetrics();
-        List unavailEntities = new ArrayList();
-        MeasurementDAO dao = getMeasurementDAO();
-        for (Iterator it = unavailMetrics.entrySet().iterator(); it.hasNext(); )
-        {
-            Map.Entry el = (Map.Entry) it.next();
-            Integer mid = (Integer) el.getKey();
-            
-            if (includes != null && !includes.contains(mid)) {
-                continue;
-            }
-            
-            MetricValue mv = (MetricValue) el.getValue();
-            
-            // Look up the metric for the appdef entity ID
-            Measurement dm = dao.get(mid);
-            
-            if (dm == null) {
-                cache.remove(mid);
-                continue;
-            }
-            
-            unavailEntities.add(new DownMetricValue(dm.getEntityId(), mid, mv));
-        }
-        return unavailEntities;
-    }
-    
-    /**
-     * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public void syncPluginMetrics(String plugin) {

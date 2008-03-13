@@ -157,7 +157,6 @@ public class ReportProcessorEJBImpl
                     .equals(MeasurementConstants.CAT_AVAILABILITY) &&
                 tmpl.getCategory().getName()
                     .equals(MeasurementConstants.CAT_AVAILABILITY)) {
-                MetricDataCache.getInstance().setAvailMetric(dmId);
                 availMetric = true;
             }
 

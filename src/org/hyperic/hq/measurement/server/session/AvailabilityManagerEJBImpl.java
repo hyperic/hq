@@ -100,7 +100,7 @@ public class AvailabilityManagerEJBImpl
      * @ejb:interface-method
      */
     public List getPlatformResources() {
-        return getMeasurementDAO().findAvailabilityByInstances(
+        return getMeasurementDAO().findAvailMeasurementsByInstances(
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null);
     }
 

@@ -26,19 +26,14 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.zevents.ZeventManager;
 
 /**
  * The MetricDataCache caches the last measurement keyed on the derived
@@ -52,17 +47,12 @@ import org.hyperic.hq.zevents.ZeventManager;
  */
 
 public class MetricDataCache {
-    private final Log _log = LogFactory.getLog(MetricDataCache.class);
-    
     // The cache name, must match what is in ehcache.xml
     private static final String CACHENAME = "MetricDataCache";
-    private static final String DOWNCACHENAME = "DownMetricsCache";
 
     private static final Object _cacheLock = new Object();
-    private static final Object _downCacheLock = new Object();
-    
+
     private static Cache _cache;
-    private static Cache _downCache;
 
     private static final MetricDataCache _singleton = new MetricDataCache();
 
@@ -72,7 +62,6 @@ public class MetricDataCache {
 
     private MetricDataCache() {
         _cache = CacheManager.getInstance().getCache(CACHENAME);
-        _downCache = CacheManager.getInstance().getCache(DOWNCACHENAME);
     }
     
     /**
@@ -132,53 +121,6 @@ public class MetricDataCache {
             _cache.put(new Element(mid, mval));
         }
 
-        // Could be an availability metric
-        DownMetricZevent sendDown = null;
-        synchronized(_downCacheLock) {
-            Element el = _downCache.get(mid);
-            if (el == null) {
-                return true;
-            }
-            
-            MetricValue val = (MetricValue) el.getObjectValue();
-            if (mval.getValue() == 1) {
-                if (val == null ||  // place holder or is now available
-                    val.getTimestamp() < mval.getTimestamp()) 
-                {
-                    _downCache.remove(mid);
-                            
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("Remove available metric: " + mid);
-                    }
-                }
-            } else if (mval.getValue() == 0) {
-                if (val == null) {
-                    _downCache.put(new Element(mid, mval));
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("Add unavailable metric: " + mid +
-                                   " at " + mval.getTimestamp());
-                    }
-                    sendDown = new DownMetricZevent(mid);
-                } else if (val.getTimestamp() > mval.getTimestamp()) {
-                    val.setTimestamp(mval.getTimestamp());
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("Update unavailable metric: " + mid +
-                                   " to " + mval.getTimestamp());
-                    }
-                }
-            }
-        }
-        
-        if (sendDown != null) {
-            // Queue up DownMetricsCalculator to find the last
-            // time this resource was available.
-            try {
-                ZeventManager.getInstance().enqueueEvent(sendDown);
-            } catch (InterruptedException ex) {
-                _log.warn("Interrupted queueing down metric event", ex);
-            }
-        }
-        
         return true;            
     }
 
@@ -207,64 +149,11 @@ public class MetricDataCache {
     
     /**
      * Remove a MetricValue from cache
+     * @param mid The measurement id to remove.
      */
     public void remove(Integer mid) {
         synchronized (_cacheLock) {
             _cache.remove(mid);
-        }
-        
-        synchronized (_downCacheLock) {
-            _downCache.remove(mid);
-        }
-    }
-    
-    /**
-     * Create placeholder (if necessary) for Availability metric
-     *
-     * @param mid The measurement id.
-     */
-    public void setAvailMetric(Integer mid) {
-        synchronized(_downCacheLock) {
-            if (!_downCache.isKeyInCache(mid)) {
-                _downCache.put(new Element(mid, null));
-            }
-        }
-    }
-
-    /**
-     * Get the availability metric for the given metric id
-     */
-    public MetricValue getAvailMetric(Integer mid) {
-        synchronized(_downCacheLock) {
-            Element e = _downCache.get(mid);
-            if (e != null) {
-                return (MetricValue)e.getObjectValue();
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * Get the map of unavailable metrics
-     * @return A map of unavailable MetricValues, keyed by metric id.
-     */
-    public Map getUnavailableMetrics() {
-        synchronized (_downCacheLock) {
-            List keys = _downCache.getKeys();
-            Map downMetrics = new HashMap(keys.size());
-            for (Iterator it = keys.iterator(); it.hasNext(); ) {
-                Element el = _downCache.get(it.next());
-                if (el != null && el.getValue() != null) {
-                    downMetrics.put(el.getKey(), el.getValue());
-                }
-            }
-            return downMetrics;
-        }
-    }
-    
-    public int getUnavailableMetricsSize() {
-        synchronized (_downCacheLock) {
-            return _downCache.getKeys().size();
         }
     }
 }
