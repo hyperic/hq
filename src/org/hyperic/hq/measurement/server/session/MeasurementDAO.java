@@ -393,6 +393,8 @@ public class MeasurementDAO extends HibernateDAO {
             .append("order BY m.id").toString();
         return getSession()
             .createQuery(sql)
+            .setCacheable(true)
+            .setCacheRegion("Measurement.getAllAvailIds")
             .list();
     }
 
@@ -404,10 +406,12 @@ public class MeasurementDAO extends HibernateDAO {
             .append(ALIAS_CLAUSE).toString();
         return (Measurement) getSession().createQuery(sql)
             .setParameter("res", resource)
+            .setCacheable(true)
+            .setCacheRegion("Measurement.getAvailMeasurement")
             .uniqueResult();
     }
 
-    List findAvailabilityByInstances(int type, Integer[] ids) {
+    List findAvailMeasurementsByInstances(int type, Integer[] ids) {
         boolean checkIds = (ids != null && ids.length > 0);
         String sql = new StringBuffer()
             .append("select m from Measurement m ")
@@ -423,6 +427,8 @@ public class MeasurementDAO extends HibernateDAO {
             q.setParameterList("ids", ids);
         }
 
+        q.setCacheable(true);
+        q.setCacheRegion("Measurement.findAvailMeasurementsByInstances");
         return q.list();
     }
 
@@ -442,6 +448,8 @@ public class MeasurementDAO extends HibernateDAO {
         return getSession()
             .createQuery(sql)
             .setParameterList("ids", resourceIds, new IntegerType())
+            .setCacheable(true)
+            .setCacheRegion("Measurement.getAvailMeasurementChildren")
             .list();
     }
 

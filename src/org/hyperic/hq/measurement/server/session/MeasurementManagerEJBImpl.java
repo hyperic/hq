@@ -771,7 +771,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                     (Integer[]) toget.toArray(new Integer[toget.size()]);
 
                 List metrics = getMeasurementDAO()
-                    .findAvailabilityByInstances(type, iids);
+                    .findAvailMeasurementsByInstances(type, iids);
                 for (Iterator it = metrics.iterator(); it.hasNext();) {
                     Measurement dm = (Measurement) it.next();
                     AppdefEntityID aeid =
