@@ -4,13 +4,13 @@
   <class name="AvailabilityDataRLE" table="HQ_AVAIL_DATA_RLE">
 
     <composite-id name="availabilityDataId" class="AvailabilityDataId">
-      <key-property name="startime" type="long">
-        <column name="STARTIME" not-null="true"/>
-      </key-property>
-
       <key-many-to-one name="measurement" class="Measurement">
         <column name="MEASUREMENT_ID" not-null="true" index="AVAIL_RLE_MEASID_IDX"/>
       </key-many-to-one>
+
+      <key-property name="startime" type="long">
+        <column name="STARTIME" not-null="true"/>
+      </key-property>
     </composite-id>
 
     <!-- default value is Long.MAX_VALUE -->
