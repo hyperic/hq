@@ -897,7 +897,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private boolean usesMetricUnion(long begin, long end,
                                     boolean useAggressiveRollup)
     {
-        long now = System.currentTimeMillis();
         if (!useAggressiveRollup && usesMetricUnion(begin) ||
             (useAggressiveRollup && ((end-begin)/HOUR) < HOURS_PER_MEAS_TAB))
             return true;
@@ -1093,7 +1092,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    private String getSelectType(int type, long begin, long end)
+    private String getSelectType(int type, long begin)
     {
         switch(type)
         {
@@ -1187,7 +1186,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
 
             // Construct SQL command
-            String selectType = getSelectType(type, begin, end);
+            String selectType = getSelectType(type, begin);
 
             final int pagesize =
                 (int) Math.min(Math.max(pc.getPagesize(),
@@ -1257,7 +1256,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     
                     for (int row = 0; row < pagesize; row++)
                     {
-                        long fillEnd = curTime;
+                        long fillEnd;
                         
                         if (rs.next()) {
                             fillEnd = rs.getLong("timestamp");
@@ -1373,40 +1372,29 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
     /**
      *
-     * Fetch a list of historical data points of a specific size Note: There is
-     * no guarantee that the list will be the size requested. It may be smaller.
+     * Get the last MetricValue for the given metric id.
      * 
      * @param id The id of the Measurement
-     * @param count The number of data points to return
-     * @return the list of data points
+     * @return The MetricValue or null if one does not exist.
      * @ejb:interface-method
      */
-    public List getLastHistoricalData(Integer id, int count)
+    public MetricValue getLastHistoricalData(Integer id)
         throws DataNotAvailableException {
         if (_measSep.isAvailMeas(id)) {
             return AvailabilityManagerEJBImpl.getOne().getLastAvail(id);
         } else {
-            return getLastHistData(id, 1);
+            return getLastHistData(id);
         }
     }
 
-    private List getLastHistData(Integer id, int count)
+    private MetricValue getLastHistData(Integer id)
         throws DataNotAvailableException {
-        // Make sure that client hasn't asked for more than we can provide
-        if (count > 60)
-            throw new DataNotAvailableException(
-                "Cannot ask for more than 60 data points");
-        
-        ArrayList history = new ArrayList();
-        
-        if (count == 1) {
-            // Check the cache
-            MetricDataCache cache = MetricDataCache.getInstance();
-            MetricValue mval = cache.get(id, 0);
-            if (mval != null) {
-                history.add(mval);
-                return history;
-            }
+
+        // Check the cache
+        MetricDataCache cache = MetricDataCache.getInstance();
+        MetricValue mval = cache.get(id, 0);
+        if (mval != null) {
+            return mval;
         }
         
         //Get the data points and add to the ArrayList
@@ -1415,27 +1403,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ResultSet  rs   = null;
 
         try {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-    
-            /*
-             * SELECT timestamp, value FROM EAM_MEASUREMENT_DATA, EAM_NUMBERS,
-             * (SELECT id, interval, MAX(timestamp) AS maxt FROM
-             * EAM_MEASUREMENT_data, EAM_MEASUREMENT WHERE measurement_id = id
-             * AND id=10012 GROUP BY id,interval) mt WHERE MEASUREMENT_ID = id
-             * AND TIMESTAMP = (maxt - i * interval);
-             */
-            String metricUnion = 
-                MeasTabManagerUtil.getUnionStatement(getPurgeRaw(), id.intValue());
+            conn = DBUtil.getConnByContext(getInitialContext(),
+                                           DATASOURCE_NAME);
+
+            String metricUnion =
+                MeasTabManagerUtil.getUnionStatement(getPurgeRaw(),
+                                                     id.intValue());
             StringBuffer sqlBuf = new StringBuffer(
                 "SELECT timestamp, value FROM " + metricUnion +
-                                              ", " + TAB_NUMS + ", " +
-                    "(SELECT id, interval, MAX(timestamp) AS maxt" +
-                    " FROM " + metricUnion + ", "+TAB_MEAS+
-                    " WHERE measurement_id = id AND id = " + id +
-                    " GROUP BY id, interval) mt " +
-                "WHERE measurement_id = id AND" +
-                    " timestamp = (maxt - i * interval)");
+                    "(SELECT MAX(timestamp) AS maxt" +
+                    " FROM " + metricUnion + ") mt " +
+                "WHERE measurement_id = id AND timestamp = maxt");
 
             stmt = conn.createStatement();
             
@@ -1444,13 +1422,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
     
             rs = stmt.executeQuery(sqlBuf.toString());
-    
-            for (int i = 0; rs.next() && i < count; i++) {
-                history.add(getMetricValue(rs));
+
+            if (rs.next()) {
+                return getMetricValue(rs);
+            } else {
+                // No cached value, nothing in the database
+                return null;
             }
-    
-            // Now return a PageList
-            return history;
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
@@ -1835,7 +1813,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     private Map getAggData(Integer[] tids, Integer[] iids,
-                                long begin, long end)
+                           long begin, long end)
     {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);

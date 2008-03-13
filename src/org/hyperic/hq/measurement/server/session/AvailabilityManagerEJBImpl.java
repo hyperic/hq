@@ -261,12 +261,11 @@ public class AvailabilityManagerEJBImpl
         List avails = dao.findAggregateAvailability(tids, iids, begin, end);
         long interval = (end - begin)/DEFAULT_INTERVAL;
         Map rtn = new HashMap();
-        double now = TimingVoodoo.roundDownTime(System.currentTimeMillis(),
-                                                60000);
+
         if (avails.size() == 0) {
             for (Iterator i=tidList.iterator(); i.hasNext(); ) {
                 Integer tid = (Integer)i.next();
-                rtn.put(tid, getDefaultData(interval, now));
+                rtn.put(tid, getDefaultData(interval));
             }
             return rtn;
         }
@@ -306,7 +305,7 @@ public class AvailabilityManagerEJBImpl
         return rtn;
     }
 
-    private double[] getDefaultData(double interval, double timestamp) {
+    private double[] getDefaultData(double interval) {
         double[] data = new double[5];
         data[IND_MIN] = AVAIL_UNKNOWN;
         data[IND_AVG] = AVAIL_UNKNOWN;
@@ -319,18 +318,15 @@ public class AvailabilityManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public List getLastAvail(Integer mid) {
-        Integer[] mids = new Integer[1];
-        List rtn = new ArrayList();
-        mids[0] = mid;
-        Map map = getLastAvail(mids, MAX_AVAIL_TIMESTAMP - 1);
-        MetricValue mVal = (MetricValue)map.get(mid);
-        if (mVal == null) {
-            rtn.add(new MetricValue(AVAIL_UNKNOWN, System.currentTimeMillis()));
+    public MetricValue getLastAvail(Integer mid) {
+
+        Map map = getLastAvail(new Integer[] { mid }, MAX_AVAIL_TIMESTAMP - 1);
+        MetricValue mv = (MetricValue)map.get(mid);
+        if (mv == null) {
+            return new MetricValue(AVAIL_UNKNOWN, System.currentTimeMillis());
         } else {
-            rtn.add(mVal);
+            return mv;
         }
-        return rtn;
     }
 
     /**
@@ -547,18 +543,6 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private boolean prependState(DataPoint state) {
-        AvailabilityDataDAO dao = getAvailabilityDataDAO();
-        AvailabilityDataRLE avail = dao.findAvailAfter(state);
-        if (avail == null) {
-            Measurement meas = getMeasurement(state.getMetricId().intValue());
-            dao.create(meas, state.getTimestamp(), MAX_AVAIL_TIMESTAMP,
-                state.getValue());
-            return true;
-        }
-        return prependState(state, avail);
-    }
-
     private boolean prependState(DataPoint state, AvailabilityDataRLE avail) {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         Measurement meas = avail.getMeasurement();
@@ -566,7 +550,7 @@ public class AvailabilityManagerEJBImpl
         long endtime = newStart;
         updateStartime(avail, newStart);
         dao.create(avail.getMeasurement(), state.getTimestamp(),
-            endtime, state.getValue());
+                   endtime, state.getValue());
         return true;
     }
     

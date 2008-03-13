@@ -1390,12 +1390,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // Fetch the last data point
             MetricValue mv = null;
             try {
-                Collection mvs =
-                    getDataMan().getLastHistoricalData(mm.getId(), 1);
-                
-                if (mvs.size() > 0) {
-                    mv = (MetricValue) mvs.iterator().next();
-                }
+                mv = getDataMan().getLastHistoricalData(mm.getId());
             } catch (DataNotAvailableException e) {
                 // mv still NULL
             }
