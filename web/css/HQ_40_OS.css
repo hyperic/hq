@@ -107,6 +107,21 @@ a:visited,a:hover,a {
     padding: 10px
 }
 
+#statusElementBox{
+    float: right;
+    position:absolute;
+    top: 78px;
+    right: 11px
+}
+
+.statusElement{
+    display: none;
+    background: url('/images/4.0/icons/progress_small.gif') no-repeat left top;
+    height: 16px;
+    width: 16px;
+    float: right
+}
+
 .fieldRow {
     margin-bottom: 2px;
     clear: right;
