@@ -8723,6 +8723,28 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <!-- Clean up Measurement schema null constraints -->
+  <schemaSpec version="3.107">
+
+      <schema-alterColumn columnType="VARCHAR2"
+                          table="EAM_MEASUREMENT"
+                          column="DSN"
+                          nullable="NOT NULL"/>
+      <schema-alterColumn columnType="VARCHAR2"
+                          table="EAM_MEASUREMENT_TEMPL"
+                          column="UNITS"
+                          nullable="NOT NULL"/>
+      <schema-alterColumn columnType="VARCHAR2"
+                          table="EAM_MEASUREMENT_TEMPL"
+                          column="PLUGIN"
+                          nullable="NOT NULL"/>
+      <schema-alterColumn columnType="INTEGER"
+                          table="EAM_MEASUREMENT_TEMPL"
+                          column="MONITORABLE_TYPE_ID"
+                          nullable="NOT NULL"/>
+
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 

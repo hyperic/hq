@@ -36,7 +36,7 @@
       <column name="COLL_INTERVAL" not-null="true"/>
     </property>
     <property name="dsn" type="string">
-      <column name="DSN" length="500"/>
+      <column name="DSN" not-null="true" length="500"/>
     </property>
     <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="baselinesBag" table="EAM_MEASUREMENT_BL">
       <cache usage="read-write"/>
