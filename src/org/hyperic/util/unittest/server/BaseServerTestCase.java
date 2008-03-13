@@ -287,7 +287,13 @@ public abstract class BaseServerTestCase extends TestCase {
      * factories do not have SO_REUSEADDR set to true).
      * 
      * In general, it should be left up to the framework to stop the server 
-     * once it has been started. The 
+     * once it has been started. If a unit test does not explicitly stop the 
+     * server, then a shutdown hook stops the server automatically before the 
+     * unit tests finish executing within their forked vm. 
+     * 
+     * If the user must stop the server, then any future server restarts within 
+     * the same unit test vm should be delayed until the jboss server sockets 
+     * can move from a TIME_WAIT to CLOSED state.
      */
     protected final void stopServer() {
         if (server != null) {
