@@ -1411,9 +1411,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                                      id.intValue());
             StringBuffer sqlBuf = new StringBuffer(
                 "SELECT timestamp, value FROM " + metricUnion +
-                    "(SELECT MAX(timestamp) AS maxt" +
+                    ", (SELECT MAX(timestamp) AS maxt" +
                     " FROM " + metricUnion + ") mt " +
-                "WHERE measurement_id = id AND timestamp = maxt");
+                "WHERE measurement_id = " + id + " AND timestamp = maxt");
 
             stmt = conn.createStatement();
             
@@ -1432,8 +1432,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
-            throw new DataNotAvailableException(
-                "Can't lookup historical data for " + id, e);
+            _log.error("Unable to look up historical data for " + id, e);
+            throw new DataNotAvailableException(e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
