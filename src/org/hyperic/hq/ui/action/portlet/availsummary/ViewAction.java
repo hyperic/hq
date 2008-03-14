@@ -56,7 +56,6 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -127,8 +126,8 @@ public class ViewAction extends BaseAction {
             it.remove();
         }
 
-        AppdefEntityID[] arrayIds =
-            (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
+        AppdefEntityID[] arrayIds = (AppdefEntityID[])
+            entityIds.toArray(new AppdefEntityID[entityIds.size()]);
         int count = Integer.parseInt(dashPrefs.getValue(numKey, "10"));
         int sessionId = user.getSessionId().intValue();
 
@@ -322,19 +321,35 @@ public class ViewAction extends BaseAction {
     }
 
     // Classes for caching dashboard data
+    private class CacheEntry {
+        private AppdefResourceTypeValue _type;
+        private Integer _metricId;
+        private long _interval;
 
-    public class CacheKey {
-        private AppdefEntityID _id;
-        private int _sessionId;
-
-        public boolean equals(Object o) {
-            return (o instanceof CacheKey) &&
-                ((CacheKey)o)._id.equals(_id) &&
-                ((CacheKey)o)._sessionId == _sessionId;
+        public CacheEntry(Measurement metric) {
+            if (metric == null) {
+                _metricId = null;
+                _interval = 0;
+            } else {
+                _metricId = metric.getId();
+                _interval = metric.getInterval();
+            }
         }
 
-        public int hashCode() {
-            return _id.hashCode() + _sessionId;
+        public AppdefResourceTypeValue getType() {
+            return _type;
+        }
+
+        public void setType(AppdefResourceTypeValue type) {
+            _type = type;
+        }
+
+        public Integer getMetricId() {
+            return _metricId;
+        }
+
+        public long getInterval() {
+            return _interval;
         }
     }
 }

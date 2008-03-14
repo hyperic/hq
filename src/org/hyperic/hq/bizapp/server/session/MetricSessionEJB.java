@@ -68,7 +68,6 @@ import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
-import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;

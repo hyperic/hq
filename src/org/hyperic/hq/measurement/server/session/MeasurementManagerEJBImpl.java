@@ -81,7 +81,6 @@ import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerUtil;
