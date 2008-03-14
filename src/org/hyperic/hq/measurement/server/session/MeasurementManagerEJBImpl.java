@@ -484,7 +484,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             getLiveMeasurementValues(subject, mids);
         } catch (LiveMeasurementException e) {            
             log.info("Resource " + id + " reports it is unavailable, setting " +
-                    "measurement ID " + availMeasurement + " to DOWN: "+e);
+                     "measurement ID " + availMeasurement + " to DOWN: "+ e);
 
             // Only print the full stack trace in debug mode
             if (log.isDebugEnabled()) {
@@ -492,10 +492,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             }
 
             if (availMeasurement != null) {
-                MetricValue val =
-                    new MetricValue(MeasurementConstants.AVAIL_DOWN);
-                DataManagerLocal dataMan = getDataMan();
-                dataMan.addData(availMeasurement, val, true);
+                MetricValue val = new MetricValue(MeasurementConstants.AVAIL_DOWN);
+                AvailabilityManagerEJBImpl.getOne().addData(availMeasurement,
+                                                            val);
             }
         }
     }

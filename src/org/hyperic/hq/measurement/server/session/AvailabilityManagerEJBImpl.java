@@ -403,7 +403,21 @@ public class AvailabilityManagerEJBImpl
     }
 
     /**
-     * @param availPoints list of availability points
+     * Add a single Availablility Data point.
+     * @mid The Measurement id
+     * @mval The MetricValue to store.
+     * @ejb:interface-method
+     */
+    public void addData(Integer mid, MetricValue mval) {
+        List l = new ArrayList(1);
+        l.add(new DataPoint(mid, mval));
+        addData(l);
+    }
+
+    /**
+     * Process Availability data.
+     *
+     * @param availPoints List of DataPoints
      * 
      * @ejb:interface-method
      */
