@@ -1,6 +1,7 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hibernate.PageInfo
+import org.hyperic.hq.events.server.session.AlertDefSortField
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl
@@ -90,6 +91,13 @@ class AlertHelper extends BaseHelper {
         defMan.findAlertDefinitions(userValue, severity, enabled, 
                                     excludeTypeBased, pInfo)
     }
+     
+    def findDefinitions(AlertSeverity severity, Boolean enabled,
+                        boolean excludeTypeBased) 
+    {
+        findDefinitions(severity, enabled, excludeTypeBased, 
+                        PageInfo.getAll(AlertDefSortField.NAME, true))
+    }
 
     /**
      * Find type-based alert definitions.  These are the templates for
@@ -102,6 +110,12 @@ class AlertHelper extends BaseHelper {
      */
     def findTypeBasedDefinitions(Boolean enabled, PageInfo pInfo) { 
         defMan.findTypeBasedDefinitions(userValue, enabled, pInfo) 
+    }
+     
+    def findTypeBasedDefinitions() {
+        defMan.findTypeBasedDefinitions(userValue, null, 
+                                        PageInfo.getAll(AlertDefSortField.NAME,
+                                                        true))
     }
     
     /**
