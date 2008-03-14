@@ -560,7 +560,6 @@ public class LatherDispatcher
             tree = getAgentManager().getEntitiesForAgent(overlord,
                                                          args.getAgentToken());
         } catch(PermissionException exc){
-            exc.printStackTrace();
             throw new SystemException("Overlord unable to get resource " +
                                       "tree list");
         } catch(AgentNotFoundException exc){
