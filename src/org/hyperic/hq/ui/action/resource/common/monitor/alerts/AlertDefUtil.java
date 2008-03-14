@@ -52,7 +52,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.ui.Constants;
@@ -176,7 +176,7 @@ public class AlertDefUtil {
                 textValue.append( acv.getComparator() );
                 textValue.append(' ');
                 
-                MeasurementTemplateValue mtv = null;
+                MeasurementTemplate mt = null;
                 Measurement m = null;
                 try {
                     if (template) {
@@ -186,12 +186,12 @@ public class AlertDefUtil {
                             PageControl.PAGE_ALL);
                         
                         if (mtvs.size() > 0)
-                            mtv = (MeasurementTemplateValue) mtvs.get(0);
+                            mt = (MeasurementTemplate) mtvs.get(0);
                     }
                     else {
                         m = mb.getMeasurement(sessionID,
                                               new Integer(acv.getMeasurementId()));
-                        mtv = m.getTemplate().getMeasurementTemplateValue();
+                        mt = m.getTemplate();
                     }
                 } catch (Exception e) {
                     // Use NULL values
@@ -200,8 +200,8 @@ public class AlertDefUtil {
                 String format = MeasurementConstants.UNITS_NONE;
                 double value = acv.getThreshold();
                 if (acv.getType() != EventConstants.TYPE_BASELINE) {
-                    if (mtv != null)
-                        format = mtv.getUnits();
+                    if (mt != null)
+                        format = mt.getUnits();
                 }
                 else {
                     format = MeasurementConstants.UNITS_PERCENTAGE;

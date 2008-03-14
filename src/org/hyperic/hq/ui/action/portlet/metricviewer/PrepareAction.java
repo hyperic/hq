@@ -156,9 +156,9 @@ public class PrepareAction extends TilesAction {
         
         if (typeVal != null) {
             pForm.setResourceType(typeVal.getAppdefTypeKey());
-            PageList metrics = measBoss.findMeasurementTemplates(sessionId,
-                                                        typeVal.getName(),
-                                                        PageControl.PAGE_ALL);
+            List metrics = measBoss.findMeasurementTemplates(sessionId,
+                                                             typeVal.getName(),
+                                                             PageControl.PAGE_ALL);
             request.setAttribute("metrics", metrics);
         }
 

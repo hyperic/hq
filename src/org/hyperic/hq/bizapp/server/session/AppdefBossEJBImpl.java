@@ -165,9 +165,9 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -2571,7 +2571,7 @@ public class AppdefBossEJBImpl
      *
      * NOTE: This method returns an empty page list when no compatible
      *       inventory is found.
-     * @param grpEntId        - the appdef entity of a group value who's
+     * @param groupEntity        - the appdef entity of a group value who's
      *                          members are to be filtered for result set.
      * @param resourceName    - resource name (or name substring) to search for.
      * @return page list of value objects that extend AppdefResourceValue
@@ -3484,7 +3484,7 @@ public class AppdefBossEJBImpl
         
         // There should at least one template
         assert(templs.size() > 0);
-        MeasurementTemplateValue mtv = (MeasurementTemplateValue) templs.get(0);
+        MeasurementTemplate mt = (MeasurementTemplate) templs.get(0);
 
         // Find all measurement IDs
         MeasurementManagerLocal dmMan = getMetricManager();
@@ -3494,7 +3494,7 @@ public class AppdefBossEJBImpl
             res.keySet().toArray(new Integer[services.size()]);
 
         Integer[] avIds =
-            dmMan.findMeasurementIds(subject, mtv.getId(), instIds);
+            dmMan.findMeasurementIds(subject, mt.getId(), instIds);
 
         // Now get the metric values
         Map avail = getAvailManager().getLastAvail(avIds);

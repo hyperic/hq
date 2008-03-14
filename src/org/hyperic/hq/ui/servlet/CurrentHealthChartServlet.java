@@ -43,8 +43,8 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -215,11 +215,7 @@ public abstract class CurrentHealthChartServlet extends VerticalChartServlet {
         List templates =
             mb.findMeasurementTemplates(user, tids, PageControl.PAGE_ALL);
 
-        MeasurementTemplateValue tmpv =
-            (MeasurementTemplateValue) templates.get(0);
-
-        if (log.isDebugEnabled())
-            log.debug("template ID=" + tmpv.getId());
+        MeasurementTemplate tmpv = (MeasurementTemplate) templates.get(0);
 
         setChartUnits(chart, tmpv);
 
@@ -246,8 +242,7 @@ public abstract class CurrentHealthChartServlet extends VerticalChartServlet {
         List templates =
             mb.findMeasurementTemplates(sessionID, tids, PageControl.PAGE_ALL);
 
-        MeasurementTemplateValue tmpv =
-            (MeasurementTemplateValue) templates.get(0);
+        MeasurementTemplate tmpv = (MeasurementTemplate) templates.get(0);
 
         if (log.isDebugEnabled())
             log.debug("template ID=" + tmpv.getId());
@@ -266,15 +261,14 @@ public abstract class CurrentHealthChartServlet extends VerticalChartServlet {
     }
     
     private void setChartUnits(VerticalChart chart,
-                               MeasurementTemplateValue tmpv) {
+                               MeasurementTemplate mt) {
         // override default / parsed units with the one from the metric
-        int unitUnits = UnitsConvert.getUnitForUnit(tmpv.getUnits());
-        int unitScale = UnitsConvert.getScaleForUnit(tmpv.getUnits());
+        int unitUnits = UnitsConvert.getUnitForUnit(mt.getUnits());
+        int unitScale = UnitsConvert.getScaleForUnit(mt.getUnits());
         chart.setFormat(unitUnits, unitScale);
         int cumulativeTrend =
-            getTrendForCollectionType(tmpv.getCollectionType());
+            getTrendForCollectionType(mt.getCollectionType());
         chart.setCumulativeTrend(cumulativeTrend);
     }
 }
 
-// EOF

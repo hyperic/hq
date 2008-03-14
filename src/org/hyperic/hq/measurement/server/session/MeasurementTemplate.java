@@ -30,7 +30,6 @@ import java.io.Serializable;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.units.FormattedNumber;
 
@@ -204,30 +203,5 @@ public class MeasurementTemplate
         
         FormattedNumber th = UnitsConvert.convert(val.getValue(), getUnits());
         return th.toString();
-    }
-    
-    /**
-     * Legacy EJB DTO pattern
-     * @deprecated Use (this) MeasurementTemplate object instead
-     */
-    public MeasurementTemplateValue getMeasurementTemplateValue() {
-        MeasurementTemplateValue value = new MeasurementTemplateValue();
-        value.setId(getId());
-        value.setName(getName());
-        value.setAlias(getAlias());
-        value.setUnits(getUnits());
-        value.setCollectionType(getCollectionType());
-        value.setDefaultOn(isDefaultOn());
-        value.setDefaultInterval(getDefaultInterval());
-        value.setDesignate(isDesignate());
-        value.setTemplate(getTemplate());
-        value.setPlugin(getPlugin());
-        value.setCtime(getCtime());
-        value.setMtime(getMtime());
-
-        value.setMonitorableType(getMonitorableType());
-        value.setCategory(getCategory());
-
-        return value;
     }
 }

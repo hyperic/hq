@@ -45,7 +45,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -73,8 +73,6 @@ public class AutoGroupCurrentHealthAction extends CurrentHealthAction {
         LogFactory.getLog(AutoGroupCurrentHealthAction.class.getName());
 
     private PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
-
-    // ---------------------------------------------------- Public Methods
 
     /**
      * Retrieve data needed to display an autogroup's current health
@@ -138,7 +136,7 @@ public class AutoGroupCurrentHealthAction extends CurrentHealthAction {
         WebUser user = SessionUtils.getWebUser(request.getSession());
 
         try {
-            MeasurementTemplateValue mtv =
+            MeasurementTemplate mt =
                 boss.getAvailabilityMetricTemplate(sessionId.intValue(),
                                                    entityIds[0], childTypeId);
             
@@ -150,7 +148,7 @@ public class AutoGroupCurrentHealthAction extends CurrentHealthAction {
 
             List data =
                 boss.findAGMeasurementData(sessionId.intValue(), entityIds,
-                                           mtv, childTypeId, begin, end,
+                                           mt, childTypeId, begin, end,
                                            interval, true, pc);
             
             // Seems like sometimes Postgres does not average cleanly, and

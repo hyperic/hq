@@ -33,8 +33,8 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -150,10 +150,10 @@ public class MetricDataServlet extends HttpServlet {
         }
 
         // Load template
-        MeasurementTemplateValue templ;
+        MeasurementTemplate templ;
         try {
             Measurement m = _mboss.getMeasurement(sessionId, mid);
-            templ = m.getTemplate().getMeasurementTemplateValue();
+            templ = m.getTemplate();
         } catch (Exception e) {
             throw new ServletException("Error looking up measurement.", e);
         }

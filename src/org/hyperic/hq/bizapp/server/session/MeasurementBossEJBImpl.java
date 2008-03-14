@@ -106,7 +106,6 @@ import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
@@ -131,10 +130,7 @@ import org.hyperic.util.timer.StopWatch;
 public class MeasurementBossEJBImpl extends MetricSessionEJB
     implements SessionBean 
 {
-    protected static Log _log =
-        LogFactory.getLog(MeasurementBossEJBImpl.class.getName());
-    private static final long DEFAULT_MEAS_INTERVAL = 60;
-
+    protected static Log _log = LogFactory.getLog(MeasurementBossEJBImpl.class);
     private Integer[] getGroupMemberIDs(AuthzSubject subject,
                                         AppdefEntityID gid)
         throws AppdefEntityNotFoundException, GroupNotCompatibleException,
@@ -205,10 +201,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @ejb:interface-method
      * @return a PageList of MeasurementTemplateValue objects
      */
-    public PageList findMeasurementTemplates(int sessionId, 
-                                             AppdefEntityTypeID typeId,
-                                             String category,
-                                             PageControl pc)
+    public List findMeasurementTemplates(int sessionId,
+                                         AppdefEntityTypeID typeId,
+                                         String category,
+                                         PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException {
         manager.getSubjectPojo(sessionId);
         String typeName = typeId.getAppdefResourceType().getName();
@@ -220,8 +216,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @ejb:interface-method
      * @return a PageList of MeasurementTemplateValue objects based on entity
      */
-    public PageList findMeasurementTemplates(int sessionId, 
-                                             AppdefEntityID aeid)
+    public List findMeasurementTemplates(int sessionId,
+                                         AppdefEntityID aeid)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
@@ -236,13 +232,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Retrieve list of measurement templates applicable to a monitorable type
      * 
-     * @param mtype
-     *            the monitorableType
+     * @param mtype the monitorableType
      * @return a List of MeasurementTemplateValue objects
      * @ejb:interface-method
      */
-    public PageList findMeasurementTemplates(int sessionId, String mtype,
-                                             PageControl pc)
+    public List findMeasurementTemplates(int sessionId, String mtype,
+                                         PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException {
         manager.getSubjectPojo(sessionId);
         return getTemplateManager().findTemplates(mtype, null, null, pc);
@@ -251,8 +246,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /** Retrieve list of measurement templates given specific IDs
      * @ejb:interface-method
      */
-    public PageList findMeasurementTemplates(String user, Integer[] ids,
-                                             PageControl pc)
+    public List findMeasurementTemplates(String user, Integer[] ids,
+                                         PageControl pc)
         throws LoginException, ApplicationException, ConfigPropertyException {
         int sessionId = getAuthManager().getUnauthSessionId(user);
         return findMeasurementTemplates(sessionId, ids, pc);
@@ -262,7 +257,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return a List of MeasurementTemplateValue objects
      * @ejb:interface-method
      */
-    public PageList findMeasurementTemplates(int sessionId, Integer[] ids,
+    public List findMeasurementTemplates(int sessionId, Integer[] ids,
                                              PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
                TemplateNotFoundException {
@@ -285,7 +280,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return The availabililty metric template.
      * @ejb:interface-method
      */
-    public MeasurementTemplateValue getAvailabilityMetricTemplate(
+    public MeasurementTemplate getAvailabilityMetricTemplate(
             int sessionId, AppdefEntityID aid, AppdefEntityTypeID ctype)
         throws SessionNotFoundException, SessionTimeoutException,
                MeasurementNotFoundException, AppdefEntityNotFoundException,
@@ -386,14 +381,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return template of availabililty metric
      * @ejb:interface-method
      */
-    public MeasurementTemplateValue getAvailabilityMetricTemplate(
+    public MeasurementTemplate getAvailabilityMetricTemplate(
         int sessionId, AppdefEntityID aeid)
         throws MeasurementNotFoundException, SessionNotFoundException,
                SessionTimeoutException, AppdefEntityNotFoundException,
                PermissionException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        return getAvailabilityMetricTemplate(subject, aeid)
-            .getMeasurementTemplateValue();
+        return getAvailabilityMetricTemplate(subject, aeid);
     }
 
     /**
@@ -837,7 +831,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             for (Iterator it2 = metrics.iterator(); it2.hasNext(); ) {
                 Measurement m = (Measurement) it2.next();
     
-                MeasurementTemplateValue tmpl = m.getTemplate().getMeasurementTemplateValue();
+                MeasurementTemplate tmpl = m.getTemplate();
                 GroupMetricDisplaySummary gmds = (GroupMetricDisplaySummary)
                     summaryMap.get(tmpl.getId().intValue());
                 if (gmds == null) {
@@ -866,13 +860,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             return new PageList();
         }
         
-        PageList tmpls =
-            getTemplateManager().findTemplates(mtype, cat, null, pc);
+        List tmpls = getTemplateManager().findTemplates(mtype, cat, null, pc);
             
         PageList result = new PageList();
         for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
-            MeasurementTemplateValue tmpl =
-                (MeasurementTemplateValue) it.next();
+            MeasurementTemplate tmpl =
+                (MeasurementTemplate) it.next();
             GroupMetricDisplaySummary gmds = (GroupMetricDisplaySummary)
                 summaryMap.get(tmpl.getId().intValue());
     
@@ -889,7 +882,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         
         // Total size is equal to the total size of the templates
-        result.setTotalSize(tmpls.getTotalSize());
+        result.setTotalSize(tmpls.size());
         
         return result;
     }
@@ -1016,11 +1009,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
 
         // Create MetricConfigSummary beans
-        PageList tmpls =
-            getTemplateManager().findTemplates(mtype, cat, null, pc);
+        List tmpls = getTemplateManager().findTemplates(mtype, cat, null, pc);
         ArrayList beans = new ArrayList(tmpls.size());
         for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
-            MeasurementTemplateValue mtv = (MeasurementTemplateValue) it.next();
+            MeasurementTemplate mtv = (MeasurementTemplate) it.next();
             MetricConfigSummary mcs =
                 new MetricConfigSummary(mtv.getId().intValue(), mtv.getName(),
                                         cat);
@@ -1034,7 +1026,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             beans.add(mcs);
         }
         
-        return new PageList(beans, tmpls.getTotalSize());
+        return new PageList(beans, tmpls.size());
     }
 
     /**
@@ -1172,7 +1164,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @ejb:interface-method
      */
     public PageList findMeasurementData(String user, AppdefEntityID aid,
-                                        MeasurementTemplateValue tmpl,
+                                        MeasurementTemplate tmpl,
                                         long begin, long end, long interval,
                                         boolean returnNulls, PageControl pc)
         throws LoginException, ApplicationException, ConfigPropertyException {
@@ -1193,7 +1185,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @ejb:interface-method
      */
     public PageList findMeasurementData(int sessionId, AppdefEntityID aid,
-                                        MeasurementTemplateValue tmpl,
+                                        MeasurementTemplate tmpl,
                                         long begin, long end, long interval,
                                         boolean returnNulls, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -1259,7 +1251,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @ejb:interface-method
      */
     public PageList findAGMeasurementData(String user, AppdefEntityID[] aids,
-                                          MeasurementTemplateValue tmpl,
+                                          MeasurementTemplate tmpl,
                                           AppdefEntityTypeID ctype,
                                           long begin, long end, long interval,
                                           boolean returnNulls, PageControl pc)
@@ -1281,7 +1273,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @ejb:interface-method
      */
     public PageList findAGMeasurementData(int sessionId, AppdefEntityID[] aids,
-                                          MeasurementTemplateValue tmpl,
+                                          MeasurementTemplate tmpl,
                                           AppdefEntityTypeID ctype,
                                           long begin, long end, long interval,
                                           boolean returnNulls,
@@ -1620,7 +1612,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     private MetricDisplaySummary getMetricDisplaySummary(AuthzSubject subject,
-                                                         MeasurementTemplateValue tmpl,
+                                                         MeasurementTemplate tmpl,
                                                          long begin,
                                                          long end,
                                                          double[] data,
@@ -1728,8 +1720,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         Integer[] mtids = new Integer[tmpls.size()];
         Iterator it = tmpls.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            MeasurementTemplateValue tmpl =
-                (MeasurementTemplateValue) it.next();
+            MeasurementTemplate tmpl =
+                (MeasurementTemplate) it.next();
             mtids[i] = tmpl.getId();
             tmplMap.put(mtids[i].intValue(), tmpl);
         }
@@ -1751,8 +1743,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     
                 Integer mtid = (Integer) entry.getKey();
                 // Get the MeasurementTemplateValue
-                MeasurementTemplateValue tmpl =
-                    (MeasurementTemplateValue) tmplMap.get(mtid.intValue());
+                MeasurementTemplate tmpl =
+                    (MeasurementTemplate) tmplMap.get(mtid.intValue());
                         
                 // Use the MeasurementTemplateValue id to get the array List
                 List resSummaries =

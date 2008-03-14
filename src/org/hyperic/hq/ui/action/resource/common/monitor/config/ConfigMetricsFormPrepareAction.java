@@ -52,6 +52,8 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 
+import java.util.List;
+
 /**
  * This populates the ConfigMetrics/Update metrics pages' request attributes.
  */
@@ -68,7 +70,7 @@ public class ConfigMetricsFormPrepareAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception {
 
-        Log log = LogFactory.getLog(ConfigMetricsFormPrepareAction.class.getName());    
+        Log log = LogFactory.getLog(ConfigMetricsFormPrepareAction.class);
         log.trace("Preparing resource metrics action.");
         
         int sessionId = RequestUtils.getSessionId(request).intValue();
@@ -94,7 +96,7 @@ public class ConfigMetricsFormPrepareAction extends TilesAction {
         
         int totalSize = 0;
         
-        PageList availMetrics, perfMetrics, throughMetrics, utilMetrics;
+        List availMetrics, perfMetrics, throughMetrics, utilMetrics;
         try {
             AppdefEntityTypeID atid = new AppdefEntityTypeID(RequestUtils
                 .getStringParameter(request, Constants.APPDEF_RES_TYPE_ID));
@@ -128,7 +130,7 @@ public class ConfigMetricsFormPrepareAction extends TilesAction {
 	            log.debug("config enabled: " + configEnabled);
 	        }
 	        request.setAttribute(Constants.MONITOR_ENABLED_ATTR,
-	                             new Boolean(configEnabled));
+                                 Boolean.valueOf(configEnabled));
 	        
 	        // obtain the different categories of measurements
 	        log.debug("obtaining metrics for resource " + appdefId);
@@ -145,16 +147,16 @@ public class ConfigMetricsFormPrepareAction extends TilesAction {
         // finally set all the lists
         request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR,
                              availMetrics);
-        totalSize += availMetrics.getTotalSize();
+        totalSize += availMetrics.size();
         request.setAttribute(Constants.CAT_PERFORMANCE_METRICS_ATTR,
                              perfMetrics);
-        totalSize += perfMetrics.getTotalSize();
+        totalSize += perfMetrics.size();
         request.setAttribute(Constants.CAT_THROUGHPUT_METRICS_ATTR,
                              throughMetrics);
-        totalSize += throughMetrics.getTotalSize();
+        totalSize += throughMetrics.size();
         request.setAttribute(Constants.CAT_UTILIZATION_METRICS_ATTR,
                              utilMetrics);
-        totalSize += utilMetrics.getTotalSize();
+        totalSize += utilMetrics.size();
         
         // set total size as aggregate of all
         request.setAttribute(Constants.LIST_SIZE_ATTR, new Integer(totalSize));
@@ -163,5 +165,4 @@ public class ConfigMetricsFormPrepareAction extends TilesAction {
         
         return null;
     }
-
 }

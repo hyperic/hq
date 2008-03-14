@@ -55,7 +55,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -135,7 +135,7 @@ public class ViewAction extends BaseAction {
         // Load resources
         List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
         AppdefEntityID[] arrayIds =
-            (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
+            (AppdefEntityID[]) entityIds.toArray(new AppdefEntityID[entityIds.size()]);
         int count = Integer.parseInt(dashPrefs.getValue(numKey, "10"));
         String metric = dashPrefs.getValue(metricKey, "");
         boolean isDescending =
@@ -149,11 +149,10 @@ public class ViewAction extends BaseAction {
         }
 
         Integer[] tids = new Integer[] { new Integer(metric) };
-        PageList metricTemplates =
-            mBoss.findMeasurementTemplates(sessionId, tids,
-                                           PageControl.PAGE_ALL);
-        MeasurementTemplateValue template =
-            (MeasurementTemplateValue)metricTemplates.get(0);
+        List metricTemplates = mBoss.findMeasurementTemplates(sessionId, tids,
+                                                              PageControl.PAGE_ALL);
+        MeasurementTemplate template =
+            (MeasurementTemplate)metricTemplates.get(0);
 
         String resource = dashPrefs.getValue(resTypeKey);
         AppdefEntityTypeID typeId = new AppdefEntityTypeID(resource);
@@ -218,7 +217,7 @@ public class ViewAction extends BaseAction {
 
         if (toRemove.size() > 0) {
             _log.debug("Removing " + toRemove.size() + " missing resources.");
-            DashboardUtils.removeResources((String[])toRemove.toArray(new String[0]),
+            DashboardUtils.removeResources((String[]) toRemove.toArray(new String[toRemove.size()]),
                                            resKey, dashPrefs);
         }
 
@@ -227,11 +226,11 @@ public class ViewAction extends BaseAction {
 
     private class MetricSummary {
         private AppdefResourceValue _resource;
-        private MeasurementTemplateValue _template;
+        private MeasurementTemplate _template;
         private MetricValue _val;
 
         public MetricSummary(AppdefResourceValue resource,
-                             MeasurementTemplateValue template,
+                             MeasurementTemplate template,
                              MetricValue val) {
             _resource = resource;
             _template = template;
@@ -293,7 +292,7 @@ public class ViewAction extends BaseAction {
     }
 
     private CacheData loadData(int sessionId, AppdefEntityID id,
-                               MeasurementTemplateValue template)
+                               MeasurementTemplate template)
         throws AppdefEntityNotFoundException
     {
         Cache cache = CacheManager.getInstance().getCache("MetricViewer");
@@ -332,10 +331,10 @@ public class ViewAction extends BaseAction {
     public class CacheKey {
         private int _sessionId;
         private AppdefEntityID _id;
-        private MeasurementTemplateValue _template;
+        private MeasurementTemplate _template;
 
         public CacheKey(int sessionId, AppdefEntityID id,
-                        MeasurementTemplateValue template) {
+                        MeasurementTemplate template) {
             _sessionId = sessionId;
             _id = id;
             _template = template;

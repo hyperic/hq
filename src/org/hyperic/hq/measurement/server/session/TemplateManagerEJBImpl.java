@@ -92,11 +92,6 @@ import org.hyperic.util.pager.Pager;
 public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     private final Log log = LogFactory.getLog(TemplateManagerEJBImpl.class);
 
-    protected final String VALUE_PROCESSOR =
-        PagerProcessor_measurement.class.getName();
-        
-    private Pager valuePager = null;
-
     /**
      * Get a MeasurementTemplate
      *
@@ -124,7 +119,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * 
      * @ejb:interface-method
      */
-    public PageList getTemplates(Integer[] ids, PageControl pc)
+    public List getTemplates(Integer[] ids, PageControl pc)
         throws TemplateNotFoundException {
         List mts = getMeasurementTemplateDAO().findTemplates(ids);
 
@@ -135,10 +130,9 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         if (pc.getSortorder() == PageControl.SORT_DESC)
             Collections.reverse(mts);
 
-        return valuePager.seek(mts, pc);
+        return mts;
     }
 
-    
     /**
      * Get all the templates.  Must be superuser to execute.
      *
@@ -194,8 +188,8 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return a MeasurementTemplate value
      * @ejb:interface-method
      */
-    public PageList findTemplates(String type, String cat,
-                                  Integer[] excludeIds, PageControl pc) {
+    public List findTemplates(String type, String cat,
+                              Integer[] excludeIds, PageControl pc) {
         MeasurementTemplateDAO dao = getMeasurementTemplateDAO();
 
         List templates;
@@ -228,8 +222,8 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         pc = PageControl.initDefaults(pc, -1);
         if (pc.getSortorder() == PageControl.SORT_DESC)
             Collections.reverse(includes);
-        
-        return valuePager.seek(includes, pc);
+
+        return templates;
     }
 
     /**
@@ -306,7 +300,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         }
         
-        return valuePager.seek(mts, PageControl.PAGE_ALL);
+        return mts;
     }
 
     /**
@@ -638,13 +632,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * @ejb:create-method
      */
-    public void ejbCreate() throws CreateException {
-        try {
-            valuePager = Pager.getPager(VALUE_PROCESSOR);
-        } catch (Exception e) {
-            throw new CreateException("Could not create value pager: " + e);
-        }
-    }
+    public void ejbCreate() throws CreateException {}
 
     public void ejbPostCreate() {}
     public void ejbActivate() {}

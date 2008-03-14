@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -69,7 +69,7 @@ public class ViewDesignatedChartAction extends MetricDisplayRangeAction {
         MeasurementBoss boss =
             ContextUtils.getMeasurementBoss(getServlet().getServletContext());
         int sessionId  = RequestUtils.getSessionId(request).intValue();
-        MeasurementTemplateValue mtv;
+        MeasurementTemplate mt;
         try {
             AppdefEntityTypeID ctype =
                 RequestUtils.getChildResourceTypeId(request);
@@ -80,16 +80,16 @@ public class ViewDesignatedChartAction extends MetricDisplayRangeAction {
                               Constants.MODE_MON_CHART_SMMR);
 
             // Now we have to look up the designated metric template ID
-            mtv = boss.getAvailabilityMetricTemplate(sessionId, aeid, ctype);
+            mt = boss.getAvailabilityMetricTemplate(sessionId, aeid, ctype);
         } catch (ParameterNotFoundException e) {
             forwardParams.put(Constants.MODE_PARAM,
                               aeid.isGroup() ? Constants.MODE_MON_CHART_SMMR :
                                                Constants.MODE_MON_CHART_SMSR);
             // Now we have to look up the designated metric template ID
-            mtv = boss.getAvailabilityMetricTemplate(sessionId, aeid);
+            mt = boss.getAvailabilityMetricTemplate(sessionId, aeid);
         }
         
-        forwardParams.put(Constants.METRIC_PARAM, mtv.getId());
+        forwardParams.put(Constants.METRIC_PARAM, mt.getId());
         
         return constructForward(request, mapping, Constants.REDRAW_URL, 
                                 forwardParams, false);

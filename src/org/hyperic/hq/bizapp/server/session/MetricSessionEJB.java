@@ -69,7 +69,6 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.CacheEntry;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
@@ -108,12 +107,12 @@ public class MetricSessionEJB extends BizappSessionEJB {
             return resmap;
             
         // If templates are just ID's, we have to look them up
-        if (tmpls.get(0) instanceof MeasurementTemplateValue) {
+        if (tmpls.get(0) instanceof MeasurementTemplate) {
             mtVals = tmpls;
             // Iterate through them
             for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
-                MeasurementTemplateValue tmpl =
-                    (MeasurementTemplateValue) it.next();
+                MeasurementTemplate tmpl =
+                    (MeasurementTemplate) it.next();
                 mtids[i++] = tmpl.getId();
             }
         }
@@ -181,8 +180,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
             getMetricManager().findMetricIntervals(subject, aeids, mtids);
 
         for (it = mtVals.iterator(); it.hasNext(); ) {
-            MeasurementTemplateValue tmpl =
-                (MeasurementTemplateValue) it.next();
+            MeasurementTemplate tmpl =
+                (MeasurementTemplate) it.next();
     
             int total = eids.length;
             String type = tmpl.getMonitorableType().getName();
@@ -240,7 +239,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
     }
 
     protected MetricDisplaySummary
-        getMetricDisplaySummary(MeasurementTemplateValue tmpl, Long interval,
+        getMetricDisplaySummary(MeasurementTemplate tmpl, Long interval,
                                 long begin, long end, double[] data,
                                 int totalConfigured) {
         // Create a new metric summary bean
@@ -257,7 +256,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         summary.setCategory(tmpl.getCategory().getName());
         summary.setUnits(tmpl.getUnits());
         summary.setCollectionType(new Integer(tmpl.getCollectionType()));
-        summary.setDesignated(Boolean.valueOf(tmpl.getDesignate()));
+        summary.setDesignated(Boolean.valueOf(tmpl.isDesignate()));
         summary.setMetricSource(tmpl.getMonitorableType().getName());
         
         summary.setCollecting(interval != null);

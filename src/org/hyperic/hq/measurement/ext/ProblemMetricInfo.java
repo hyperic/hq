@@ -30,10 +30,9 @@ import java.util.HashSet;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 
 /**
- *
  * Encapsulate measurement information for problem metrics
  */
 public class ProblemMetricInfo implements Comparable, Serializable {
@@ -43,7 +42,7 @@ public class ProblemMetricInfo implements Comparable, Serializable {
     public static final int FLAG_OOB        = 0x01000;
     public static final int FLAG_OUTLIER    = 0x10000;
     
-    private MeasurementTemplateValue tmpl;
+    private MeasurementTemplate tmpl;
     private double[] data;
     private int      alertCount = 0;
     private HashSet  aids       = new HashSet(1);      // Start with size of 1
@@ -56,26 +55,26 @@ public class ProblemMetricInfo implements Comparable, Serializable {
     public ProblemMetricInfo() {
     }
     
-    public ProblemMetricInfo(MeasurementTemplateValue tmpl){
+    public ProblemMetricInfo(MeasurementTemplate tmpl){
         this.setMeasurementTemplate(tmpl);
     }
 
-    public ProblemMetricInfo(MeasurementTemplateValue tmpl, AppdefEntityID aid){
+    public ProblemMetricInfo(MeasurementTemplate tmpl, AppdefEntityID aid){
         this(tmpl);
         this.aids.add(aid);
     }
 
-    public ProblemMetricInfo(MeasurementTemplateValue tmpl, AppdefEntityID aid,
+    public ProblemMetricInfo(MeasurementTemplate tmpl, AppdefEntityID aid,
                              double[] data) {
         this(tmpl, aid);
         this.setMeasurementData(data);
     }
 
-    public MeasurementTemplateValue getMeasurementTemplate() {
+    public MeasurementTemplate getMeasurementTemplate() {
         return this.tmpl;
     }
     
-    public void setMeasurementTemplate(MeasurementTemplateValue val) {
+    public void setMeasurementTemplate(MeasurementTemplate val) {
         this.tmpl = val;
     }
     

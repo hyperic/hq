@@ -43,7 +43,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceMetricDisplaySummary;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -63,10 +63,7 @@ import org.apache.struts.tiles.ComponentContext;
 public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
     protected static Log log =
         LogFactory.getLog(CompareMetricsFormPrepareAction.class.getName());
-        
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.ui.action.WorkflowPrepareAction#workflow(org.apache.struts.tiles.ComponentContext, org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
+
     public ActionForward workflow(ComponentContext context,
                                   ActionMapping mapping, ActionForm form,
                                   HttpServletRequest request,
@@ -91,35 +88,25 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
                 idx.put(val, val);
             }
         }
-        Integer[] rids = (Integer[]) cooked.toArray(new Integer[0]);
+        Integer[] rids = (Integer[]) cooked.toArray(new Integer[cooked.size()]);
 
         AppdefEntityID[] entIds = new AppdefEntityID[rids.length];        
         for (int i = 0; i < rids.length; i++) {
             entIds[i] = new AppdefEntityID(cform.getAppdefType().intValue(),
                                            rids[i].intValue());
-            if (log.isTraceEnabled())
-                log.trace("will compare metrics for " + entIds[i]);
         }
-        // get the metrics
+
         try {
-            long start = 0;
-            long finish = 0;
             MeasurementBoss boss =
                 ContextUtils.getMeasurementBoss(getServlet().getServletContext());
-            if (log.isDebugEnabled())
-                start = System.currentTimeMillis();
+
             Map metrics = boss.findResourceMetricSummary(sessionId, entIds,
                                                          begin, end);
-            if (log.isDebugEnabled()) {
-                finish = System.currentTimeMillis();
-                long elapsed = finish - start;
-                log.debug("Elapsed time: " + elapsed + " ms");            
-            }
+
             formatComparisonMetrics(metrics, request.getLocale());
             cform.setMetrics(mapCategorizedMetrics(metrics));
         }
         catch (Exception e) {
-            log.debug("findResourceMetricSummary(...) failed: ", e);
             throw e;
         }
 
@@ -186,14 +173,14 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
         Map returnMap = new HashMap();
         for (Iterator iter = metrics.entrySet().iterator(); iter.hasNext();) {
             Map.Entry entry = (Map.Entry) iter.next();
-            MeasurementTemplateValue mt =
-                (MeasurementTemplateValue) entry.getKey();
+            MeasurementTemplate mt =
+                (MeasurementTemplate) entry.getKey();
             if (mt.getCategory().getName().equals(category)) {
                 List metricList = (List) entry.getValue();
                 returnMap.put(mt, metricList);
             }
         } 
-        return sortMetricMap(returnMap);               
+        return returnMap;               
     }
 
     private static void formatComparisonMetrics(Map metrics, Locale userLocale)
@@ -201,10 +188,9 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
         for (Iterator categoryIter = metrics.entrySet().iterator();
              categoryIter.hasNext(); ) {
             Map.Entry entry = (Map.Entry) categoryIter.next();
-            MeasurementTemplateValue mt =
-                (MeasurementTemplateValue) entry.getKey();  
+            MeasurementTemplate mt =
+                (MeasurementTemplate) entry.getKey();
             List metricList = (List) entry.getValue();
-            //List metricList = (List)metrics.get(mt);
             if (metricList == null) {
                 // apparently, there may be meaurement templates populated but
                 // none of the included resources are config'd for it, so 
@@ -233,24 +219,4 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
             }
         }
     }
-
-    /**
-     * Alpha sort on the MeasurementTemplateValue names and stuff them into a 
-     * TreeMap they're always ordered consistently
-     */
-    private static Map sortMetricMap(Map metrics) {
-        Map returnMap = new TreeMap();
-        for (Iterator mtvIter = metrics.entrySet().iterator();
-             mtvIter.hasNext();) {
-            Map.Entry entry = (Map.Entry) mtvIter.next();
-            MeasurementTemplateValue mt =
-                (MeasurementTemplateValue) entry.getKey();
-            ComparableMeasurementTemplateValue cmtv =
-                new ComparableMeasurementTemplateValue(mt);
-            List metricList = (List) entry.getValue();
-            returnMap.put(cmtv, metricList);
-        }
-        return returnMap;
-    }
-
 }

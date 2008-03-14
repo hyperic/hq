@@ -40,7 +40,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -108,7 +108,7 @@ public class CurrentHealthAction extends TilesAction {
         WebUser user = SessionUtils.getWebUser(request.getSession());
 
         try {
-            MeasurementTemplateValue mtv =
+            MeasurementTemplate mt =
                 boss.getAvailabilityMetricTemplate(sessionId, aeid);
             
             Map pref = user.getMetricRangePreference(true);
@@ -117,7 +117,7 @@ public class CurrentHealthAction extends TilesAction {
             long interval = TimeUtil.getInterval(begin, end,
                     Constants.DEFAULT_CHART_POINTS);
 
-            List data = boss.findMeasurementData(sessionId, aeid, mtv, begin,
+            List data = boss.findMeasurementData(sessionId, aeid, mt, begin,
                                                  end, interval, true, pc);
 
             // Seems like sometimes Postgres does not average cleanly for
