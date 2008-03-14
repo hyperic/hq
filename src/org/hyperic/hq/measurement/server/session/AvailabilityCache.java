@@ -25,14 +25,23 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.HashMap;
-import java.util.Map;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
 
 public class AvailabilityCache {
+
+    // The cache name, must match what is in ehcache.xml
+    private static final String CACHENAME = "AvailabilityCache";
+
+    private static final Object _cacheLock = new Object();
+
+    private static Cache _cache;
+
     private static final AvailabilityCache _instance = new AvailabilityCache();
-    private Map _availState = new HashMap();
-    
+
     private AvailabilityCache() {
+        _cache = CacheManager.getInstance().getCache(CACHENAME);
     }
     
     public static AvailabilityCache getInstance() {
@@ -40,34 +49,39 @@ public class AvailabilityCache {
     }
 
     public DataPoint get(Integer id, DataPoint defaultState) {
-        synchronized (_availState) {
-            DataPoint rtn;
-            if (null == (rtn = (DataPoint)_availState.get(id))) {
-                _availState.put(id, defaultState);
+        synchronized (_cacheLock) {
+            Element e = _cache.get(id);
+
+            if (e == null) {
+                _cache.put(new Element(id, defaultState));
                 return defaultState;
             }
-            return rtn;
+
+            return (DataPoint)e.getObjectValue();
         }
     }
 
     public DataPoint get(Integer id) {
-        synchronized (_availState) {
-            DataPoint rtn;
-            if (null == (rtn = (DataPoint)_availState.get(id)))
-                return null;
-            return rtn;
+        synchronized (_cacheLock) {
+            Element e = _cache.get(id);
+
+            if (e != null) {
+                return (DataPoint)e.getObjectValue();
+            }
+
+            return null;
         }
     }
     
     public void clear() {
-        synchronized (_availState) {
-            _availState.clear();
+        synchronized (_cacheLock) {
+            _cache.removeAll();
         }
     }
     
     public void put(Integer id, DataPoint state) {
-        synchronized (_availState) {
-            _availState.put(id, state);
+        synchronized (_cacheLock) {
+            _cache.put(new Element(id, state));
         }
     }
 }
