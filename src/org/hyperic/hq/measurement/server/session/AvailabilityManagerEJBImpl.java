@@ -406,7 +406,6 @@ public class AvailabilityManagerEJBImpl
      * @param availPoints list of availability points
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public void addData(List availPoints)
     {
