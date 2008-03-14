@@ -6,62 +6,44 @@
 
 <link rel=stylesheet href="/hqu/public/hqu.css" type="text/css">
 
+<%  hquTwoPanedFilter() { w ->
+        w.filter(l.filter) {
+            w.filterElement(l.minStatus) { 
+                out.write(selectList(allStatusVals, 
+     	                             [id:'statusSelect',
+                                      onchange:'EventLogs_refreshTable(); ']))
+            }
+            
+            w.filterElement(l.type) {
+                out.write(selectList(allTypes,
+     	                             [id:'typeSelect',
+                                      onchange:'EventLogs_refreshTable(); ']))
+            }
+            
+            w.filterElement(l.timeRange) {
+                out.write(selectList(timePeriods,
+     	                             [id:'timeSelect',
+                                      onchange:'EventLogs_refreshTable(); ']))
+            }
 
-<div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">
-  <div style="float:left;width:18%;margin-right:10px;">
-    <div class="filters">
-      <div class="BlockTitle">${l.filter}</div>
-      <div class="filterBox">
-        <div class="fieldSetStacked" style="margin-bottom:8px;">
-          <span><strong>${l.minStatus}</strong></span>
-          <div><%= selectList(allStatusVals, 
-     	                     [id:'statusSelect',
-     	                      onchange:'EventLogs_refreshTable(); ']) %>
-     	  </div>
-        </div>          
+            w.filterElement(l.inGroups) { %>
+                <select id="groupSelect" multiple="true" name="groupSelect"
+			            style="height:200px; width:175px; border:5px solid #ededed;"
+			            onchange="EventLogs_refreshTable();">
+     	        <% for (g in allGroups) { %>
+			      <option value="${g.id}">${g.name}</option>
+                <% } %>
+                </select>
+            <%
+            }
+        }
+        w.pane {
+            out.write(dojoTable(id:'EventLogs', title:l.logs,
+                                refresh:600, url:urlFor(action:'logData'),
+                                schema:logSchema, numRows:15))
+        }
+    }%>
 
-        <div class="fieldSetStacked" style="margin-bottom:8px;">
-          <span><strong>${l.type}</strong></span>
-          <div><%= selectList(allTypes,
-     	                     [id:'typeSelect',
-     	                      onchange:'EventLogs_refreshTable(); ']) %>
-     	  </div>
-     	</div>
-     	
-        <div class="fieldSetStacked" style="margin-bottom:8px;">
-          <span><strong>${l.timeRange}</strong></span>
-          <div><%= selectList(timePeriods,
-     	                     [id:'timeSelect',
-     	                      onchange:'EventLogs_refreshTable(); ']) %>
-     	  </div>
-     	</div>
-     	
-        <div class="fieldSetStacked" style="margin-bottom:8px;">
-          <span><strong>${l.inGroups}</strong></span>
-     	  <div>
-            <select id="groupSelect" multiple="true" name="groupSelect"
-			        style="height:200px; width:175px; border:5px solid #ededed;"
-			        onchange="EventLogs_refreshTable();">
-     	      <% for (g in allGroups) { %>
-			    <option value="${g.id}">${g.name}</option>
-     	     <% } %>
-		    </select>
-     	  </div>
-        </div>          
-        
-      </div>
-    </div>
-  </div>
-  <div style="float:right;width:78%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" 
-       id="logsCont">
-    <div>
-      <%= dojoTable(id:'EventLogs', title:l.logs,
-                    refresh:600, url:urlFor(action:'logData'),
-                    schema:logSchema, numRows:15) %>
-    </div>
-  </div>
-</div>
-             
 <script type="text/javascript">
     function getEventLogsUrlMap(id) {
         var res = {};
