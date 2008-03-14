@@ -3,6 +3,7 @@ package org.hyperic.hq.hqu.rendit.render
 import org.codehaus.groovy.runtime.MethodClosure
 import java.lang.reflect.Modifier
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
+import org.hyperic.hq.hqu.rendit.html.HQUWebUtil
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.html.FormGenerator
 import org.apache.commons.logging.Log
@@ -107,6 +108,7 @@ class RenderFrame {
 
         res += staticMethodsToMap(varMap, DojoUtil)        
         res += staticMethodsToMap(varMap, HtmlUtil)        
+        res += staticMethodsToMap(varMap, HQUWebUtil)        
         
         // Override general methods which generate links so that URLs can
         // be re-written
