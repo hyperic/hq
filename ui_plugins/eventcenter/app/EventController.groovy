@@ -89,7 +89,6 @@ class EventController
     }
     
     def logData(params) {
-        log.info "params = ${params}"
         DojoUtil.processTableRequest(LOG_SCHEMA, params)
     }
 
@@ -110,7 +109,6 @@ class EventController
             v.code == code
         }.delta
         
-        log.info "Delta for $code is $res"
         res
     }
     
