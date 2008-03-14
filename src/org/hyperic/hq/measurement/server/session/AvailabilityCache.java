@@ -28,15 +28,15 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LastAvailUpObj {
-    private static final LastAvailUpObj _only = new LastAvailUpObj();
+public class AvailabilityCache {
+    private static final AvailabilityCache _instance = new AvailabilityCache();
     private Map _availState = new HashMap();
     
-    private LastAvailUpObj() {
+    private AvailabilityCache() {
     }
     
-    public static LastAvailUpObj getInst() {
-        return _only;
+    public static AvailabilityCache getInstance() {
+        return _instance;
     }
 
     public DataPoint get(Integer id, DataPoint defaultState) {

@@ -37,7 +37,7 @@ import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.DataPoint;
-import org.hyperic.hq.measurement.server.session.LastAvailUpObj;
+import org.hyperic.hq.measurement.server.session.AvailabilityCache;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.product.MetricValue;
@@ -70,7 +70,7 @@ public class AvailabilityCheckService
     private List getDownPlatforms(Date lDate) {
         boolean debug = _log.isDebugEnabled();
         long now = lDate.getTime();
-        LastAvailUpObj avail = LastAvailUpObj.getInst();
+        AvailabilityCache avail = AvailabilityCache.getInstance();
         AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
         List platformResources = availMan.getPlatformResources();
         List rtn = new ArrayList(platformResources.size());

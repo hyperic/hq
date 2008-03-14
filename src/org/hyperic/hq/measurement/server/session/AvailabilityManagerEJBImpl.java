@@ -412,7 +412,7 @@ public class AvailabilityManagerEJBImpl
     {
         List updateList = new ArrayList(availPoints.size());
         List outOfOrderAvail = new ArrayList(availPoints.size());
-        LastAvailUpObj avail = LastAvailUpObj.getInst();
+        AvailabilityCache avail = AvailabilityCache.getInstance();
         synchronized (avail) {
             updateCache(availPoints, updateList, outOfOrderAvail);
             updateStates(updateList);
@@ -606,7 +606,7 @@ public class AvailabilityManagerEJBImpl
     }
 
     private void updateStates(List states) {
-        LastAvailUpObj avail = LastAvailUpObj.getInst();
+        AvailabilityCache avail = AvailabilityCache.getInstance();
         for (Iterator i=states.iterator(); i.hasNext(); ) {
             DataPoint state = (DataPoint)i.next();
             try {
@@ -641,7 +641,7 @@ public class AvailabilityManagerEJBImpl
     private void updateCache(List availPoints, List updateList,
                              List outOfOrderAvail)
     {
-        LastAvailUpObj avail = LastAvailUpObj.getInst();
+        AvailabilityCache avail = AvailabilityCache.getInstance();
         for (Iterator i=availPoints.iterator(); i.hasNext(); ) {
             DataPoint pt = (DataPoint)i.next();
 			int id = pt.getMetricId().intValue();
