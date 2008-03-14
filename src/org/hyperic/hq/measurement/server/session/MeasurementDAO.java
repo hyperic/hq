@@ -539,7 +539,6 @@ public class MeasurementDAO extends HibernateDAO {
             "where " +  
             "pt.plugin = 'system' " +
             "and templ.name = 'Server Offset' " + 
-            "and templ.template = 'ARG1' " + 
             "and meas.instanceId = s.id " + 
             "and st.name = 'HQ Agent' "; 
 
