@@ -7,7 +7,10 @@ import org.hyperic.hq.product.MetricValue
 import org.hyperic.hq.measurement.UnitsConvert
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.util.pager.PageControl
+import org.hyperic.util.units.UnitNumber
+import org.hyperic.util.units.UnitsFormat
 
 
 class MetricCategory {
@@ -49,7 +52,20 @@ class MetricCategory {
         
         "/resource/common/monitor/Visibility.do?m=${template.id}&eid=${d.entityId}&mode=chartSingleMetricSingleResource"
     }
+
+    /**
+     * Use the 'units' specified by the measurement template to get a 
+     * UnitNumber with the passed value.
+     */
+    static UnitNumber getUnitOf(MeasurementTemplate t, double value) {
+        def units = UnitsConvert.getUnitForUnit(t.units)
+        def scale = UnitsConvert.getScaleForUnit(t.units)
+        new UnitNumber(value, units, scale)
+    }
     
+    static String renderWithUnits(MeasurementTemplate t, double value) {
+        UnitsFormat.format(getUnitOf(t, value)).toString()
+    }
     
     /**
      * Get the last data point for a collection of DerivedMeasurements

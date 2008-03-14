@@ -72,4 +72,8 @@ class MetricHelper extends BaseHelper {
          
          throw new IllegalArgumentException("Unsupported find args")
      }
+     
+     MeasurementTemplate findTemplateById(int id) {
+         tmplMan.getTemplate(id)
+     }
 }
