@@ -68,7 +68,6 @@ import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
@@ -940,7 +939,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch the list of historical data points given
      * a start and stop time range
      *
-     * @param id the id of the Derived Measurement
+     * @param id the id of the Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
      * @return the list of data points
@@ -1442,7 +1441,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * Fetch an array of timestamps for which there is missing data
      *
-     * @param id the id of the Derived Measurement
+     * @param id the id of the Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
      * @return the list of data points
@@ -1771,7 +1770,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch a map of aggregate data values keyed by metric templates given
      * a start and stop time range
      *
-     * @param tids The id's of the Derived Measurement
+     * @param tids The id's of the Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
      * @return the map of data points
@@ -1780,6 +1779,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public Map getAggregateData(Integer[] tids, Integer[] iids,
                                 long begin, long end)
     {
+        // XXX: This should only call the AvailablityManager with the
+        //      template ids for Availability.
         Map rtn = AvailabilityManagerEJBImpl.getOne().
             getAggregateData(tids, iids, begin, end);
         rtn.putAll(getAggData(tids, iids, begin, end));
@@ -1930,8 +1931,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch a map of aggregate data values keyed by metrics given
      * a start and stop time range
      *
-     * @param tids The template id's of the Derived Measurement
-     * @param iids The instance id's of the Derived Measurement
+     * @param tids The template id's of the Measurement
+     * @param iids The instance id's of the Measurement
      * @param begin The start of the time range
      * @param end The end of the time range
      * @param useAggressiveRollup uses a measurement rollup table to fetch the
@@ -2039,7 +2040,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch a map of aggregate data values keyed by metrics given
      * a start and stop time range
      *
-     * @param mids The id's of the Derived Measurement
+     * @param mids The id's of the Measurement
      * @param begin The start of the time range
      * @param end The end of the time range
      * @param useAggressiveRollup uses a measurement rollup table to fetch the 
