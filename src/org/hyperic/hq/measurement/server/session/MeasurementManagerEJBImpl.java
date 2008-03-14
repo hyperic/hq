@@ -664,62 +664,15 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             .findDesignatedByResourceForCategory(getResource(id), cat);
     }
 
-    private Cache getAvailabilityCache() {
-        return CacheManager.getInstance().getCache("AvailabilitySummary");
-    }
-
-    private Measurement findAvailabilityMetric(AppdefEntityID id)
-        throws MeasurementNotFoundException {
-        Measurement dm =
-            getMeasurementDAO().findAvailMeasurement(getResource(id));
-        if (dm == null) {
-            throw new MeasurementNotFoundException("No availability metric " +
-                                                   "found for " + id);
-        }
-        CacheEntry entry = new CacheEntry(dm);
-        getAvailabilityCache().put(new Element(id, entry));
-        return dm;
-    }
-
     /**
-     * Look up an availability measurement EJBs for an instance
-     * @throws MeasurementNotFoundException
-     * @ejb:interface-method
-     */
-    public CacheEntry getAvailabilityCacheEntry(AuthzSubject subject,
-                                                AppdefEntityID id) {
-        Cache cache = getAvailabilityCache();
-        Element elm = cache.get(id);
-
-        if (elm != null) {
-            return (CacheEntry) elm.getObjectValue();
-        }
-        
-        try {
-            Measurement dm = findAvailabilityMetric(id);
-            return new CacheEntry(dm);
-        } catch (MeasurementNotFoundException e) {
-            return null;
-        }        
-    }
-
-    /**
-     * Look up an availability measurement EJBs for an instance
-     * @throws MeasurementNotFoundException
+     * Get an Availabilty Measurement by AppdefEntityId
+     *
      * @ejb:interface-method
      */
     public Measurement getAvailabilityMeasurement(AuthzSubject subject,
                                                   AppdefEntityID id)
-        throws MeasurementNotFoundException
     {
-        Element e = getAvailabilityCache().get(id);
-
-        if (e != null) {
-            CacheEntry entry = (CacheEntry) e.getObjectValue();
-            return getMeasurementDAO().findById(entry.getMetricId());
-        }
-        
-        return findAvailabilityMetric(id);
+        return getMeasurementDAO().findAvailMeasurement(getResource(id));
     }
 
     /**
@@ -733,9 +686,14 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a list of Measurements  for a category
+     * Look up a Map of Measurements for a Category
      *
-     * @return A List of Measurements 
+     * XXX: This method needs to be re-thought.  It only returns a single
+     *      designated metric per category even though HQ supports multiple
+     *      designates per category.
+     *
+     *  @return A List of designated Measurements keyed by AppdefEntityID
+     *
      * @ejb:interface-method
      */
     public Map findDesignatedMeasurementIds(AuthzSubject subject,
@@ -745,63 +703,26 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         Map midMap = new HashMap();
         if (ids.length == 0)
             return midMap;
-        
-        if (MeasurementConstants.CAT_AVAILABILITY.equals(cat)) {
-            int type = ids[0].getType();
-            
-            List toget = new ArrayList();
-            Cache cache = getAvailabilityCache();
-            
-            for (int i = 0; i < ids.length; i++) {
-                Element e = cache.get(ids[i]);
-                
-                if (e != null) {
-                    CacheEntry entry = (CacheEntry) e.getObjectValue();
-                    midMap.put(ids[i], entry.getMetricId());
-                    continue;
-                }
-                
-                toget.add(ids[i].getId());
-            }
-            
-            if (toget.size() > 0) {
-                Integer[] iids =
-                    (Integer[]) toget.toArray(new Integer[toget.size()]);
 
-                List metrics = getMeasurementDAO()
-                    .findAvailMeasurementsByInstances(type, iids);
-                for (Iterator it = metrics.iterator(); it.hasNext();) {
-                    Measurement dm = (Measurement) it.next();
-                    AppdefEntityID aeid =
-                        new AppdefEntityID(type, dm.getInstanceId());
+        for (int i = 0; i < ids.length; i++) {
+            AppdefEntityID id = ids[i];
+            try {
+                List metrics = getMeasurementDAO().
+                    findDesignatedByResourceForCategory(getResource(id),
+                                                        cat);
 
-                    midMap.put(aeid, dm.getId());
-                    CacheEntry res = new CacheEntry(dm);
-                    cache.put(new Element(aeid, res));
+                if (metrics.size() == 0) {
+                    throw new FinderException("No metrics found");
                 }
-            }
-        }
-        else {
-            for (int i = 0; i < ids.length; i++) {
-                AppdefEntityID id = ids[i];
-                try {
-                    List metrics = getMeasurementDAO().
-                        findDesignatedByResourceForCategory(getResource(id),
-                                                            cat);
-    
-                    if (metrics.size() == 0)
-                        throw new FinderException("No metrics found");
-                    
-                    Measurement dm = (Measurement) metrics.get(0);
-                    midMap.put(id, dm.getId());
-                } catch (FinderException e) {
-                    // Throw an exception if we're only looking for one
-                    // measurement
-                    if (ids.length == 1)
-                        throw new MeasurementNotFoundException(cat +
-                                                               " metric for " +
-                                                               id +
-                                                               " not found");
+
+                Measurement dm = (Measurement) metrics.get(0);
+                midMap.put(id, dm.getId());
+            } catch (FinderException e) {
+                // Throw an exception if we're only looking for one
+                // measurement
+                if (ids.length == 1) {
+                    throw new MeasurementNotFoundException(cat + " metric for " +
+                                                           id + " not found");
                 }
             }
         }

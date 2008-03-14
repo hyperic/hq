@@ -235,7 +235,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
     
         // Look up the metric summaries of associated servers
         return getResourceMetrics(subject, resources, tmpls, begin, end,
-                                  new Boolean(showNoCollect));
+                                  Boolean.valueOf(showNoCollect));
     }
 
     protected MetricDisplaySummary
@@ -351,12 +351,12 @@ public class MetricSessionEJB extends BizappSessionEJB {
         // Allow for the maximum window based on collection interval
         Map midMap = new HashMap(ids.length);        
         for (int i = 0; i < ids.length; i++) {
-            CacheEntry dmv =  getMetricManager()
-                .getAvailabilityCacheEntry(subject, ids[i]);
+            Measurement m =  getMetricManager()
+                .getAvailabilityMeasurement(subject, ids[i]);
     
-            if (dmv != null) {
-                liveMillis = Math.max(liveMillis, 3 * dmv.getInterval());
-                midMap.put(ids[i], dmv.getMetricId());
+            if (m != null) {
+                liveMillis = Math.max(liveMillis, 3 * m.getInterval());
+                midMap.put(ids[i], m.getId());
             }
         }
         
@@ -369,8 +369,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
         
         Map data = new HashMap(0);
         if (midMap.size() > 0) {
-            Integer[] mids =
-                (Integer[]) midMap.values().toArray(new Integer[0]);
+            Integer[] mids = (Integer[]) midMap.values().
+                toArray(new Integer[midMap.values().size()]);
             data = getAvailManager().getLastAvail(mids, acceptable);
         }
     
@@ -430,11 +430,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
     protected Measurement findAvailabilityMetric(AuthzSubject subject,
                                                  AppdefEntityID id)
     {
-        try {
-            return getMetricManager().getAvailabilityMeasurement(subject, id);
-        } catch (MeasurementNotFoundException e) {
-            return null;
-        }
+        return getMetricManager().getAvailabilityMeasurement(subject, id);
     }
 
     protected AppdefEntityID[] toAppdefEntityIDArray(List entities) {
@@ -775,5 +771,4 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return getResourceMetrics(subject, group, resourceType, filters,
                                   keyword, begin, end, showAll);
     }
-    
 }
