@@ -46,6 +46,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
+import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;

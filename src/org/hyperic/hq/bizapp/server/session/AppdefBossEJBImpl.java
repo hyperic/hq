@@ -95,7 +95,6 @@ import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.DependencyTree;
-import org.hyperic.hq.appdef.shared.EntityPropertyFetcher;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
