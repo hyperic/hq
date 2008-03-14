@@ -383,7 +383,7 @@ public class MeasurementDAO extends HibernateDAO {
     /**
      * @return List of all measurement ids for availability, ordered
      */
-    List getAllAvailIds() {
+    List findAllAvailIds() {
         String sql = new StringBuffer()
             .append("select m.id from Measurement m ")
             .append("join m.template t ")
@@ -394,11 +394,11 @@ public class MeasurementDAO extends HibernateDAO {
         return getSession()
             .createQuery(sql)
             .setCacheable(true)
-            .setCacheRegion("Measurement.getAllAvailIds")
+            .setCacheRegion("Measurement.findAllAvailIds")
             .list();
     }
 
-    Measurement getAvailMeasurement(Resource resource) {
+    Measurement findAvailMeasurement(Resource resource) {
         String sql = new StringBuffer()
             .append("select distinct m from Measurement m ")
             .append("join m.template t ")
@@ -407,7 +407,7 @@ public class MeasurementDAO extends HibernateDAO {
         return (Measurement) getSession().createQuery(sql)
             .setParameter("res", resource)
             .setCacheable(true)
-            .setCacheRegion("Measurement.getAvailMeasurement")
+            .setCacheRegion("Measurement.findAvailMeasurement")
             .uniqueResult();
     }
 
@@ -436,7 +436,7 @@ public class MeasurementDAO extends HibernateDAO {
      * param List of resourceIds return List of Availability Measurements which
      * are children of the resourceIds
      */
-    List getAvailMeasurementChildren(List resourceIds) {
+    List findAvailMeasurements(List resourceIds) {
         String sql = new StringBuffer()
             .append("select m from Measurement m ")
             .append("join m.resource.toEdges e ")
@@ -449,7 +449,7 @@ public class MeasurementDAO extends HibernateDAO {
             .createQuery(sql)
             .setParameterList("ids", resourceIds, new IntegerType())
             .setCacheable(true)
-            .setCacheRegion("Measurement.getAvailMeasurementChildren")
+            .setCacheRegion("Measurement.findAvailMeasurements")
             .list();
     }
 

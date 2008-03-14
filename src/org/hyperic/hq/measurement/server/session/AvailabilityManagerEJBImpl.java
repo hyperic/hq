@@ -93,7 +93,7 @@ public class AvailabilityManagerEJBImpl
      * @ejb:interface-method
      */
     public Measurement getAvailMeasurement(Resource resource) {
-        return getMeasurementDAO().getAvailMeasurement(resource);
+        return getMeasurementDAO().findAvailMeasurement(resource);
     }
     
     /**
@@ -110,7 +110,7 @@ public class AvailabilityManagerEJBImpl
      * @ejb:interface-method
      */
     public List getAllAvailIds() {
-        return getMeasurementDAO().getAllAvailIds();
+        return getMeasurementDAO().findAllAvailIds();
     }
 
     /**
@@ -119,7 +119,7 @@ public class AvailabilityManagerEJBImpl
     public List getAvailMeasurementChildren(Resource resource) {
         List list = new ArrayList();
         list.add(resource.getId());
-        return getMeasurementDAO().getAvailMeasurementChildren(list);
+        return getMeasurementDAO().findAvailMeasurements(list);
     }
     
     /**

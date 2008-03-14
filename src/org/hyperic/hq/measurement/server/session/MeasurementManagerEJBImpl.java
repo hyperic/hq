@@ -79,7 +79,6 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
-import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.CacheEntry;
@@ -673,7 +672,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     private Measurement findAvailabilityMetric(AppdefEntityID id)
         throws MeasurementNotFoundException {
         Measurement dm =
-            getMeasurementDAO().getAvailMeasurement(getResource(id));
+            getMeasurementDAO().findAvailMeasurement(getResource(id));
         if (dm == null) {
             throw new MeasurementNotFoundException("No availability metric " +
                                                    "found for " + id);
