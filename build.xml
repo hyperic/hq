@@ -456,6 +456,7 @@
         <!--  in container test jar files -->
         <include name="mockejb.jar" />
         <include name="mockrunner-ejb.jar" />
+        <include name="easymock-2.3.jar" />
       </fileset>
       <fileset dir="${sigar.lib}" >
         <include name="sigar.jar" />
@@ -499,6 +500,7 @@
          <include name="tapestry-framework-4.1.5.jar" />
          <include name="tapestry-portlet-4.1.5.jar" />
          <include name="tapestry-prop-1.0.0.jar" />
+         <include name="tapestry-test-4.1.4-20080130.jar" />
       </fileset>
     </copy>
 
