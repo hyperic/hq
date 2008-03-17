@@ -8695,7 +8695,7 @@ has already been defined.
   <schemaSpec version="3.105.2">
     <schema-directSQL>
       <statement desc="Add primary key to HQ_AVAIL_DATA_RLE">
-        alter table HQ_AVAIL_DATA_RLE add primary key (STARTIME , MEASUREMENT_ID)
+        alter table HQ_AVAIL_DATA_RLE add primary key (MEASUREMENT_ID, STARTIME)
       </statement>
       <statement desc="adding index to HQ_AVAIL_DATA_RLE (AVAILVAL)">
         create index AVAIL_RLE_VAL_IDX ON HQ_AVAIL_DATA_RLE (AVAILVAL)
