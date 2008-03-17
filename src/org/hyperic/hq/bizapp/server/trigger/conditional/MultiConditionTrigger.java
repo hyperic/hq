@@ -95,6 +95,13 @@ public class MultiConditionTrigger
         
     // make the lock reentrant just to be safe in preventing deadlocks
     private final ReadWriteLock rwLock = new ReentrantWriterPreferenceReadWriteLock();
+    
+    private static final ThreadLocal IGNORE_NEXT_EXCLUSIVE_LOCK_RELEASE = 
+        new ThreadLocal() {
+            protected Object initialValue() {
+                return Boolean.FALSE;
+            }
+        };
        
     private List lastFulfillingEvents = Collections.EMPTY_LIST;
 
@@ -233,7 +240,23 @@ public class MultiConditionTrigger
      * Release the exclusive lock for processing events.
      */
     public void releaseExclusiveLock() {
-        rwLock.writeLock().release();
+        if (ignoreNextExclusiveLockRelease()) {
+            resetIgnoreNextExclusiveLockRelease();
+        } else {
+            rwLock.writeLock().release();            
+        }
+    }
+    
+    private void setIgnoreNextExclusiveLockRelease() {
+        IGNORE_NEXT_EXCLUSIVE_LOCK_RELEASE.set(Boolean.TRUE);
+    }
+    
+    private boolean ignoreNextExclusiveLockRelease() {
+        return ((Boolean)IGNORE_NEXT_EXCLUSIVE_LOCK_RELEASE.get()).booleanValue();
+    }
+    
+    private void resetIgnoreNextExclusiveLockRelease() {
+        IGNORE_NEXT_EXCLUSIVE_LOCK_RELEASE.set(Boolean.FALSE);    
     }
 
     /**
@@ -355,6 +378,12 @@ public class MultiConditionTrigger
         TriggerFiredEvent target = prepareTargetEventOnFlush(event, etracker);
                 
         if (target != null) {
+            this.releaseExclusiveLock();
+            
+            // HHQ-1791: We only need the exclusive lock when evaluating if 
+            // we should fire actions. Release the lock before firing.
+            this.setIgnoreNextExclusiveLockRelease();
+            
             try {
                 // Fire actions using the target event
                 super.fireActions(target);
