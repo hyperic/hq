@@ -1,3 +1,4 @@
+import org.hyperic.hq.events.AlertFiredEvent
 import org.hyperic.hq.measurement.shared.ResourceLogEvent
 import org.hyperic.hq.measurement.shared.ConfigChangedEvent
 import org.hyperic.hq.hqu.rendit.BaseController
@@ -25,8 +26,8 @@ class EventController
                                                 findTypeByCode(typeCode),
                                                 getInGroups(params))
         },
-        defaultSort: EventLogSortField.RESOURCE,
-        defaultSortOrder: 1,
+        defaultSort: EventLogSortField.DATE,
+        defaultSortOrder: 0,
         rowId: {it.eventLog.id},
         columns: [
             [field:EventLogSortField.DATE, width:'12%',
@@ -101,7 +102,8 @@ class EventController
     private getAllTypes() {
     	[[code: 0, value: localeBundle.All,         className: null],
     	 [code: 1, value: localeBundle.LogTrack,    className: ResourceLogEvent.class.name], 
-    	 [code: 2, value: localeBundle.ConfigTrack, className: ConfigChangedEvent.class.name]]
+    	 [code: 2, value: localeBundle.ConfigTrack, className: ConfigChangedEvent.class.name],
+    	 [code: 3, value: localeBundle.Alert,       className: AlertFiredEvent.class.name]]
     }
     
     private findTimeDeltaByCode(int code) {
@@ -113,11 +115,11 @@ class EventController
     }
     
     private getTimePeriods() {
-        [[code: 0, value: localeBundle.last8Hours, delta: 8 * 60 * 60 * 1000],
-         [code: 1, value: localeBundle.lastDay,    delta: 24 * 60 * 60 * 1000],
-         [code: 2, value: localeBundle.lastWeek,   delta: 7 * 24 * 60 * 60 * 1000],
-         [code: 3, value: localeBundle.lastMonth,  
-          delta: 30L * 24 * 60 * 60 * 1000]]
+        [[code: 0, value: localeBundle.last4Hours, delta: 4 * 60 * 60 * 1000],
+         [code: 1, value: localeBundle.last8Hours, delta: 8 * 60 * 60 * 1000],
+         [code: 2, value: localeBundle.lastDay,    delta: 24 * 60 * 60 * 1000],
+         [code: 3, value: localeBundle.lastWeek,   delta: 7 * 24 * 60 * 60 * 1000],
+         [code: 4, value: localeBundle.lastMonth,  delta: 30L * 24 * 60 * 60 * 1000]]  
     }
     
     def index(params) {

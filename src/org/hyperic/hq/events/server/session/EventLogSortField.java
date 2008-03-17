@@ -40,7 +40,7 @@ public abstract class EventLogSortField
         new EventLogSortField(0, "Resource", "eventLog.sortField.resource")  
     {
         public boolean isSortable() {
-            return true;
+            return false;
         }
 
         String getSortString(String resource, String eventLog) {
@@ -64,7 +64,7 @@ public abstract class EventLogSortField
         new EventLogSortField(2, "Status", "eventLog.sortField.status")  
     {
         public boolean isSortable() {
-            return true;
+            return false;
         }
 
         String getSortString(String resource, String eventLog) {
@@ -76,7 +76,7 @@ public abstract class EventLogSortField
         new EventLogSortField(3, "Subject", "eventLog.sortField.subject")  
     {
         public boolean isSortable() {
-            return true;
+            return false;
         }
 
         String getSortString(String resource, String eventLog) {
@@ -88,7 +88,7 @@ public abstract class EventLogSortField
         new EventLogSortField(4, "Type", "eventLog.sortField.type")  
     {
         public boolean isSortable() {
-            return true;
+            return false;
         }
 
         String getSortString(String resource, String eventLog) {
@@ -100,7 +100,7 @@ public abstract class EventLogSortField
         new EventLogSortField(5, "Detail", "eventLog.sortField.detail")  
     {
         public boolean isSortable() {
-            return true;
+            return false;
         }
 
         String getSortString(String resource, String eventLog) {
