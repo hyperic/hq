@@ -96,6 +96,10 @@ public class EventLogDAO extends HibernateDAO {
                   Collection inGroups)
     {
         EventLogSortField sort = (EventLogSortField)pInfo.getSort();
+        String groupFilterSql = " and g.id in (:inGroups) ";
+        
+        if (inGroups == null || inGroups.isEmpty())
+            groupFilterSql = "";
                
         String sql = "select {r.*}, {e.*} " + 
             "from EAM_RESOURCE r " + 
@@ -105,7 +109,7 @@ public class EventLogDAO extends HibernateDAO {
             "    e.timestamp between :begin and :end and " +
             "    exists (select rgm.resource_id from EAM_RES_GRP_RES_MAP rgm "+
             "        join EAM_RESOURCE_GROUP g on rgm.resource_group_id = g.id" +
-            "        where rgm.resource_id = r.id) and " +
+            "        where rgm.resource_id = r.id " + groupFilterSql + ") and "+
             "    e.entity_type = case " +  
             "        when rt.id = 301 then 1 " +  
             "        when rt.id = 303 then 2 " +  
@@ -125,10 +129,6 @@ public class EventLogDAO extends HibernateDAO {
             sql += "    and type = :type ";
         }
         
-        if (inGroups != null) {
-            sql += "    and g.id in (:inGroups) ";
-        }
-            
         sql += " order by " + sort.getSortString("r", "e") + 
             (pInfo.isAscending() ? "" : " DESC");
         
@@ -148,7 +148,7 @@ public class EventLogDAO extends HibernateDAO {
             q.setString("type", typeClass);
         }
         
-        if (inGroups != null) {
+        if (inGroups != null && !inGroups.isEmpty()) {
             List inGroupIds = new ArrayList(inGroups.size());
             for (Iterator i=inGroups.iterator(); i.hasNext(); ) {
                 ResourceGroup g = (ResourceGroup)i.next();
