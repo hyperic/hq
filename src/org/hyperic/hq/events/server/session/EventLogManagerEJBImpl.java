@@ -42,6 +42,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventLogStatus;
@@ -177,11 +178,12 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      * 
      * @ejb:interface-method
      */
-    public List findLogs(long begin, long end, PageInfo pInfo,
+    public List findLogs(AuthzSubject subject, long begin, long end, 
+                         PageInfo pInfo,
                          EventLogStatus maxStatus, String typeClass,
                          Collection inGroups)
     {
-        return getEventLogDAO().findLogs(begin, end, pInfo, maxStatus, 
+        return getEventLogDAO().findLogs(subject, begin, end, pInfo, maxStatus, 
                                          typeClass, inGroups);
     }
 

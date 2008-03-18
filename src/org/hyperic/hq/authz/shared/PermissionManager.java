@@ -32,6 +32,7 @@ import java.util.List;
 
 import javax.ejb.FinderException;
 
+import org.hibernate.Query;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.authz.server.session.ResourceType;
@@ -224,6 +225,15 @@ public interface PermissionManager {
                                         Integer groupId, Boolean fsystem);
 
     public Collection findServiceResources(AuthzSubject subj, Boolean fsystem);
+
+    public interface RolePermNativeSQL { 
+        String getSQL();
+        Query bindParams(Query q, AuthzSubject subject, List operations);
+    };
+    
+    public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar,
+                                                        String subjectParam,
+                                                        String opListParam); 
     
     public String getAlertsHQL();
     

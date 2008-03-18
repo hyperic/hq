@@ -39,6 +39,7 @@ import javax.ejb.FinderException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSession;
@@ -46,6 +47,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.shared.PermissionManager.RolePermNativeSQL;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -333,6 +335,21 @@ public class PermissionManagerImpl
         return getResourceDAO().findSvcRes_orderName(fsystem);
     }
 
+    public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar,
+                                                        String subjectParam,
+                                                        String opListParam) 
+    {
+        return new RolePermNativeSQL() {
+            public String getSQL() {
+                return "";
+            }
+            
+            public Query bindParams(Query q, AuthzSubject subject, List ops) {
+                return q;
+            }
+        };
+    }
+    
     public String getAlertsHQL() {
         // Join with Resource for sorting
         return "select a from Alert a " +
