@@ -62,7 +62,7 @@ class AutodiscoveryController extends BaseController {
             .append(numPlats).append(" platforms")
             .append(", ").append(numServers).append(" servers.\n")
         }
-        render([inline : res.toString()])
+        render(inline : res.toString())
     }
 
     private List processPlatform(AuthzSubjectValue overlord,
