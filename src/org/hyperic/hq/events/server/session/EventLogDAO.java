@@ -41,6 +41,8 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.EdgePermCheck;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.PermissionManager.RolePermNativeSQL;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.EventLogStatus;
 
@@ -96,25 +98,43 @@ public class EventLogDAO extends HibernateDAO {
      *                   {@link ResourceGroup}s which will contain the resulting
      *                   logs 
      */
-    List findLogs(long begin, long end, PageInfo pInfo,
+    List findLogs(AuthzSubject subject, long begin, long end, PageInfo pInfo,
                   EventLogStatus maxStatus, String typeClass, 
                   Collection inGroups)
-     {  
+    {
+        String[] OPS = {
+            AuthzConstants.platformOpViewPlatform,
+            AuthzConstants.serverOpViewServer,
+            AuthzConstants.serviceOpViewService,
+        };
+        
         EventLogSortField sort = (EventLogSortField)pInfo.getSort();
-        String groupFilterSql = " and g.id in (:inGroups) ";
+        boolean doGroupFilter = false;
+        String groupFilterSql;
+                  
+        RolePermNativeSQL roleSql  = PermissionManagerFactory
+            .getInstance() 
+            .getRolePermissionNativeSQL("r", "subject", "opList");
+        
         
         if (inGroups == null || inGroups.isEmpty())
             groupFilterSql = "";
+        else {
+            doGroupFilter = true;
+            groupFilterSql = " and exists ( " +
+            "select rgm.resource_id from EAM_RES_GRP_RES_MAP rgm " + 
+            " join EAM_RESOURCE_GROUP g on rgm.resource_group_id = g.id " + 
+            " where rgm.resource_id = r.id and g.id in (:inGroups) ) ";
+        }
         
         String sql = "select {e.*}, r.* " + 
             "from EAM_RESOURCE r " + 
             "    join EAM_RESOURCE_TYPE rt on r.resource_type_id = rt.id " + 
             "    join EAM_EVENT_LOG e on e.resource_id = r.id " + 
             "where " +
-            "    e.timestamp between :begin and :end and " +
-            "    exists (select rgm.resource_id from EAM_RES_GRP_RES_MAP rgm "+
-            "        join EAM_RESOURCE_GROUP g on rgm.resource_group_id = g.id"+
-            "        where rgm.resource_id = r.id " + groupFilterSql + ") and "+
+            "    e.timestamp between :begin and :end " +
+            groupFilterSql +
+            roleSql.getSQL() + " and " +
             "    case " + 
             "        when e.status = 'ANY' then -1 " + 
             "        when e.status = 'ERR' then 3 " + 
@@ -141,12 +161,13 @@ public class EventLogDAO extends HibernateDAO {
             .setLong("begin", begin)
             .setLong("end", end)
             .setInteger("maxStatus", maxStatus.getCode());
-             
+        roleSql.bindParams(q, subject, Arrays.asList(OPS));
+        
         if (typeClass != null) {
             q.setString("type", typeClass);
         }
              
-        if (inGroups != null && !inGroups.isEmpty()) {
+        if (doGroupFilter) {
             List inGroupIds = new ArrayList(inGroups.size());
             for (Iterator i=inGroups.iterator(); i.hasNext(); ) {
                 ResourceGroup g = (ResourceGroup)i.next();
