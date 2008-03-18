@@ -52,9 +52,6 @@ public class MeasTabManagerUtil {
     public static final String OLD_MEAS_TABLE = MEAS_TABLE + "_COMPAT";
     private static final String TAB_DATA = MeasurementConstants.TAB_DATA;
     private static final String TAB_MEAS = MeasurementConstants.TAB_MEAS;
-    private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
-    private static final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
-    private static final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
 
     static {
         _baseCal.set(2006, 0, 1, 0, 0);
@@ -74,12 +71,11 @@ public class MeasTabManagerUtil {
     public static String getUnionStatement(long begin, long end) {
         StringBuffer sql = new StringBuffer();
         sql.append("(");
-        Calendar cal = Calendar.getInstance();
         List ranges = MeasRangeObj.getInstance().getRanges();
         for (Iterator i=ranges.iterator(); i.hasNext(); )
         {
             MeasRange range = (MeasRange)i.next();
-            String table = MeasRangeObj.getInstance().getTable(end);
+            String table = MeasRangeObj.getInstance().getTable(ranges, end);
             sql.append("SELECT * FROM ").
                 append(table).
                 append(getTimeInStmt(begin, end));
