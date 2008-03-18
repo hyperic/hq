@@ -161,6 +161,7 @@ public class IisDetector
         }
 
         Map websites = getWebSites();
+        boolean hasWebsites = websites.size() != 0;
 
         List services = new ArrayList();
 
@@ -184,7 +185,14 @@ public class IisDetector
                 }
             }
             else {
-                //XXX vista
+                if (hasWebsites) {
+                    //deleting a web site from iis admin does not
+                    //delete the performance counter entry.
+                    getLog().debug("Configuration not found for site: " +
+                                   siteName);
+                    continue;
+                }
+                //XXX iis7
                 metricProps = new ConfigResponse();
             }
 
