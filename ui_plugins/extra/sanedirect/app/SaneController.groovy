@@ -1,8 +1,12 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
+
 class SaneController 
 	extends BaseController
 {
+    private resourceMan = ResourceManagerEJBImpl.one
+    
     def SaneController() {
     }
     
@@ -13,6 +17,7 @@ class SaneController
         def svrId  = params.getOne('serverId')
         def svc    = params.getOne('service')
         def svcId  = params.getOne('serviceId')
+        def rsrcId = params.getOne('resourceId')
         def ctx    = params.getOne('context')
         def chart  = params.getOne('chart')
         def link   = params.getOne('link')
@@ -43,7 +48,13 @@ class SaneController
             findArgs['service'] = svc
         }
 
-        def rsrc = resourceHelper.find(findArgs)
+        def rsrc
+        if (rsrcId != null) {
+            rsrc = resourceMan.findResourcePojoById(rsrcId.toInteger())
+        } else {
+            rsrc = resourceHelper.find(findArgs)
+        }
+        
         if (rsrc == null) {
             log.warn "Resource specified by [${findArgs}] not found"
             return "Resource specified by [${findArgs}] not found"
