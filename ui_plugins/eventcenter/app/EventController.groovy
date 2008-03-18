@@ -21,8 +21,8 @@ class EventController
             def typeCode = params.getOne('type', '0').toInteger()
             def timeCode = params.getOne('timeRange', '0').toInteger()
             def delta    = findTimeDeltaByCode(timeCode)
-            EventLogManagerEJBImpl.one.findLogs(now() - delta, now(), pageInfo,
-                                                getStatus(params),
+            EventLogManagerEJBImpl.one.findLogs(user, now() - delta, now(), 
+                                                pageInfo, getStatus(params),
                                                 findTypeByCode(typeCode),
                                                 getInGroups(params))
         },
@@ -59,6 +59,7 @@ class EventController
     
     private getSexyStatus(EventLog l) {
         switch (l.status) {
+        case 'ALR': return localeBundle.Alert
         case 'ANY': return EventLogStatus.ANY.value
         case 'ERR': return EventLogStatus.ERROR.value
         case 'WRN': return EventLogStatus.WARN.value
@@ -103,7 +104,7 @@ class EventController
     	[[code: 0, value: localeBundle.All,         className: null],
     	 [code: 1, value: localeBundle.LogTrack,    className: ResourceLogEvent.class.name], 
     	 [code: 2, value: localeBundle.ConfigTrack, className: ConfigChangedEvent.class.name],
-    	 [code: 3, value: localeBundle.Alert,       className: AlertFiredEvent.class.name]]
+    	 [code: 3, value: localeBundle.Alerts,      className: AlertFiredEvent.class.name]]
     }
     
     private findTimeDeltaByCode(int code) {
@@ -127,7 +128,8 @@ class EventController
     	    [logSchema: LOG_SCHEMA,
     	     allTypes: getAllTypes(),
     	     allStatusVals:  (EventLogStatus.getAll() + []).sort { a, b -> b.code <=> a.code },
-    	     allGroups: resourceHelper.findViewableGroups().sort { a, b -> a.name <=> b.name },
+    	     allGroups: resourceHelper.findViewableGroups().sort { a, b -> 
+    	         a.name <=> b.name }.grep { !it.isSystem() },
     	     timePeriods: getTimePeriods(),
     	    ])
     }
