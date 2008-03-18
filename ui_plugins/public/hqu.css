@@ -497,7 +497,10 @@ font-size:12px;
 }
 
 .printButton {border:1px solid #cccccc;padding:2px 6px 2px 6px;margin-left:5px;margin-top:5px;background-color:#F2F4F7;width:35px;}
-
-
+.clickText {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline
+}
 
 
