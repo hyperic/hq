@@ -218,7 +218,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * 
      * @ejb:interface-method
      */
-    public Alert findLastUnfixedByDefinition(AuthzSubjectValue subj, Integer id)
+    public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id)
     {
         try {
             AlertDefinition def = getAlertDefDAO().findById(id);

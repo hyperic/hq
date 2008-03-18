@@ -440,7 +440,7 @@ public class AlertDefinitionManagerEJBImpl
      * @return <code>true</code> if the enable/disable succeeded.
      * @ejb:interface-method
      */
-    public boolean updateAlertDefinitionInternalEnable(AuthzSubjectValue subj,
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj,
                                                        AlertDefinition def, 
                                                        boolean enable)
         throws PermissionException {
@@ -448,7 +448,7 @@ public class AlertDefinitionManagerEJBImpl
         boolean succeeded = false;
         
         if (def.isEnabled() != enable) {
-            canManageAlerts(subj, def);
+            canManageAlerts(subj.getId(), def.getAppdefEntityId());
             def.setEnabledStatus(enable);
             succeeded = true;
         }
@@ -463,7 +463,7 @@ public class AlertDefinitionManagerEJBImpl
      * @return <code>true</code> if the enable/disable succeeded.
      * @ejb:interface-method
      */
-    public boolean updateAlertDefinitionInternalEnable(AuthzSubjectValue subj,
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj,
                                                        Integer defId, 
                                                        boolean enable)
         throws FinderException, PermissionException {
@@ -482,7 +482,7 @@ public class AlertDefinitionManagerEJBImpl
      * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
-    public boolean updateAlertDefinitionInternalEnableForceNewTxn(AuthzSubjectValue subj,
+    public boolean updateAlertDefinitionInternalEnableForceNewTxn(AuthzSubject subj,
                                                                   Integer defId, 
                                                                   boolean enable)
         throws PermissionException {

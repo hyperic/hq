@@ -328,9 +328,9 @@ public abstract class AbstractTrigger
             
             try {
                 succeeded = aman.updateAlertDefinitionInternalEnable(
-                            AuthzSubjectManagerEJBImpl.getOne().findOverlord(),
-                            alertDef, 
-                            false);                
+                          AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(),
+                          alertDef, 
+                          false);                
             } finally {
                 if (succeeded) {
                     setUncommitedAlertDefEnabledStatusToDisabled();                    
