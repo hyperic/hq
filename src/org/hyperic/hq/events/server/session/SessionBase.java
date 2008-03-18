@@ -141,6 +141,9 @@ public abstract class SessionBase {
 
     protected void canManageAlerts(AuthzSubjectValue who, AlertDefinition ad)
         throws PermissionException {
+        if (ad.isDeleted())     // Don't need to check deleted alert defs
+            return;
+        
         Integer parentId = ad.getParent() != null ? ad.getParent().getId()
                 : null;
         if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId))
