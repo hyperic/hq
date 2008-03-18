@@ -159,7 +159,7 @@ class RenderFrame {
         
         try {
             def gspFile
-    	    if (opts.inline) {
+    	    if (opts.inline != null) {
                 output.write(opts.inline, 0, opts.inline.length())
                 output.flush()
                 return
