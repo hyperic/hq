@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# List platforms currently in the auto-inventory queue.
+# List platforms currently in the auto-discovery queue.
 # 
 # This script takes 1 optional fqdn argument.  This can be either an exact fqdn or a regex.
 #
