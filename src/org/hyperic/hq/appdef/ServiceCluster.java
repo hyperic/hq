@@ -170,29 +170,20 @@ public class ServiceCluster extends AppdefBean
     }
     
     /**
-     * Validate a new service to be added to this cluster. This enforces
-     * service type compatibility as well as only allowing services to be in
-     * one cluster at a time
+     * Checks whether aService's Service Type is compatible with this cluster.
+     * @throws AppSvcClustIncompatSvcException if aService is incompatible
+     * with this Service Cluster
      */
     public void validateMemberService(Service aService)
-        throws AppSvcClustDuplicateAssignException,
-               AppSvcClustIncompatSvcException
+        throws  AppSvcClustIncompatSvcException
     {
-        // validate its not assigned to a cluster already or if it is
-        // its assigned to this cluster.
-        if(aService.getServiceCluster() != null &&
-           !aService.getServiceCluster().equals(this)) {
-            throw new AppSvcClustDuplicateAssignException ("Service: "
-                + aService.getId()
-                + " is already assigned to a cluster");
-        }
         // validate compatibility
         if(!getServiceType().equals(aService.getServiceType())) {
-            throw new AppSvcClustIncompatSvcException("Service: "+ aService.getId()
-
+            String msg =  "Service: " + aService.getId()
                 + " has type: " + aService.getServiceType().getName()
                 + " which does not match the clusters service type: "
-                + this.getServiceType());
+                + this.getServiceType();
+            throw new AppSvcClustIncompatSvcException(msg);
         }
     }
 }
