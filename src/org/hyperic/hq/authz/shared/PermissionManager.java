@@ -236,7 +236,7 @@ public abstract class PermissionManager extends AuthzSession {
     public interface RolePermNativeSQL { 
         String getSQL();
         Query bindParams(Query q, AuthzSubject subject, List operations);
-    };
+    }
           
     public abstract RolePermNativeSQL 
         getRolePermissionNativeSQL(String resourceVar, String subjectParam,
