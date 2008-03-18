@@ -107,7 +107,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                            aiplatform.getAIPlatformValue());
                 aid = platform.getEntityId();
                 setCustomProperties(aiplatform, platform, cpropMgr);
-                createdResources.add(platform.getEntityId());
+                createdResources.add(platform);
             } catch (PermissionException e) {
                 throw e;
             }
@@ -249,7 +249,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
         PageList serverValues;
         AIServerValue aiserverValue;
         boolean foundServer;
-        AppdefEntityID appdefEntityId;
         Integer serverTypePK;
 
         // Get the aiplatform for this server
@@ -320,7 +319,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
                 setCustomProperties(aiserver, server, cpropMgr);
                 
-                createdResources.add(server.getEntityId());
+                createdResources.add(server);
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {

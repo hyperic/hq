@@ -471,10 +471,13 @@ public class AIQueueManagerEJBImpl
      * @param action One of the AIQueueConstants.Q_DECISION_XXX constants
      * indicating what to do with the platforms, ips and servers.
      *
+     * @return A List of AppdefResource's that were created as a result of
+     * processing the queue.
+     *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void processQueue(AuthzSubjectValue subject,
+    public List processQueue(AuthzSubjectValue subject,
                              List platformList,
                              List serverList,
                              List ipList,
@@ -493,14 +496,15 @@ public class AIQueueManagerEJBImpl
                 AuditManagerEJBImpl.getOne()
                                    .pushContainer(AIAudit.newImportAudit(s));
             }
-            _processQueue(subject, platformList, serverList, ipList, action);
+            return _processQueue(subject, platformList, serverList, ipList,
+                                 action);
         } finally {
             if (approved)
                 AuditManagerEJBImpl.getOne().popContainer(false);
         }
     } 
     
-    private void _processQueue(AuthzSubjectValue subject,
+    private List _processQueue(AuthzSubjectValue subject,
                                List platformList,
                                List serverList,
                                List ipList,
@@ -648,6 +652,8 @@ public class AIQueueManagerEJBImpl
                 }
             }
         }
+
+        return createdResources;
     }
 
     /**
