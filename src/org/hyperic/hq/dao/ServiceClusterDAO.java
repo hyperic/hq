@@ -13,7 +13,6 @@ import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -137,16 +136,17 @@ public class ServiceClusterDAO extends HibernateDAO {
 
     /**
      * Add a service to this cluster
-     * @throws AppSvcClustDuplicateAssignException - if the service is already
-                                                     assigned to a cluster
-     * @throws AppSvcClustIncompatSvcException     - If service is incompatible
+     * @throws AppSvcClustIncompatSvcException - If service is incompatible
      */
     public void addService(ServiceCluster sc, Integer serviceId)
-        throws AppSvcClustDuplicateAssignException,
-               AppSvcClustIncompatSvcException
+        throws AppSvcClustIncompatSvcException
     {
         ServiceDAO sdao = DAOFactory.getDAOFactory().getServiceDAO();
         Service aService = sdao.findById(serviceId);
+        if (aService.getServiceCluster() == null ||
+            !sc.equals(aService.getServiceCluster())) {
+            return;
+        }
         sc.validateMemberService(aService);
         if (sc.getServices() == null) {
             sc.setServices(new HashSet());
@@ -181,8 +181,7 @@ public class ServiceClusterDAO extends HibernateDAO {
 
     public void updateCluster(ServiceClusterValue serviceCluster,
                               List serviceIds)
-        throws AppSvcClustIncompatSvcException,
-               AppSvcClustDuplicateAssignException
+        throws AppSvcClustIncompatSvcException
     {
         // reassociate service cluster
         ServiceCluster sc = findById(serviceCluster.getId());
@@ -204,6 +203,10 @@ public class ServiceClusterDAO extends HibernateDAO {
             // find the service by its ID
             ServiceDAO sdao = DAOFactory.getDAOFactory().getServiceDAO();
             Service s = sdao.findById((Integer)serviceIds.get(i));
+            if (s.getServiceCluster() == null ||
+                !sc.equals(s.getServiceCluster())) {
+                return;
+            }
             sc.validateMemberService(s);
             services.add(s);
         }
