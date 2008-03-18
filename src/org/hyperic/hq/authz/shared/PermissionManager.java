@@ -229,7 +229,7 @@ public interface PermissionManager {
     public interface RolePermNativeSQL { 
         String getSQL();
         Query bindParams(Query q, AuthzSubject subject, List operations);
-    };
+    }
     
     public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar,
                                                         String subjectParam,
