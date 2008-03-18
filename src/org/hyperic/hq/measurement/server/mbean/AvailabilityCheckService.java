@@ -77,9 +77,6 @@ public class AvailabilityCheckService
         synchronized (avail) {
             for (Iterator i = platformResources.iterator(); i.hasNext();) {
                 Measurement meas = (Measurement)i.next();
-                if (meas.getResource() == null) {
-                    continue;
-                }
                 long interval = meas.getInterval();
                 DataPoint last = avail.get(meas.getId(),
                     new DataPoint(meas.getId().intValue(), AVAIL_NULL, now));

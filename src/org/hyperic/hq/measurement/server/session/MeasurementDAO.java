@@ -418,6 +418,7 @@ public class MeasurementDAO extends HibernateDAO {
             .append("join m.template t ")
             .append("join t.monitorableType mt ")
             .append("where mt.appdefType = :type and ")
+            .append("m.resource is not null and ")
             .append((checkIds ? "m.instanceId in (:ids) and " : ""))
             .append(ALIAS_CLAUSE).toString();
 
