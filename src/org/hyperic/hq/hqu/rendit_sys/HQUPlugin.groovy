@@ -1,12 +1,15 @@
 package org.hyperic.hq.hqu.rendit
 
+
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResourceMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
+import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.server.session.Attachment
 import org.hyperic.hq.hqu.server.session.UIPlugin
 import org.hyperic.hq.hqu.AttachmentDescriptor
@@ -179,16 +182,12 @@ class HQUPlugin implements IHQUPlugin {
      * e.g.:
          addView(description:  'LiveExec',
                  attachType:   'resource',
-                 toRoot:       true,
-                 platforms:    'all',
+                 resourceType: ['Linux', 'FileServer File', 'Nagios Plugin'],
                  controller:   LiveController,
-                 action:       'index',
-                 showAttachmentIf: {a, r, u -> attachmentIsShown(a, r, u)})        
+                 action:       'index')
+                 
      *
-     *
-     * toRoot:  If true, also attach to the root resource 
-     *          (i.e. all resources)                                                           
-     * platforms: 'all'  (only possible value, currently)
+     * resourceType:  Defines a list a of resource types to attach type
      */
     private void createAndAttachResource(UIPlugin me, String name, Map p) {
         def pMan = PluginMan.one
@@ -214,6 +213,21 @@ class HQUPlugin implements IHQUPlugin {
 
                 pMan.attachView(view, ViewResourceCategory.VIEWS, r)
             }
+        } 
+
+        def rHelper = new ResourceHelper(getOverlord())
+        if (p.resourceType) {
+            for (typeName in p.resourceType) {
+                def type = rHelper.findResourcePrototype(typeName)
+                if (type == null) {
+                    log.error("Unable to find resource prototype [" + 
+                              "${typeName}]")
+                    continue
+                }
+                if (!resourceAttached(view, type)) {
+                    pMan.attachView(view, ViewResourceCategory.VIEWS, type)
+                }
+            }
         }
         
         if (p.toRoot) {
@@ -238,6 +252,10 @@ class HQUPlugin implements IHQUPlugin {
     
     String getName() {
         descriptor.getProperty('plugin.name')
+    }
+    
+    protected AuthzSubject getOverlord() {
+        AuthzMan.one.getOverlordPojo() 
     }
     
     AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r,
