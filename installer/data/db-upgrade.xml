@@ -8006,11 +8006,20 @@ has already been defined.
   <!-- Create missing index on EAM_GALERT_AUX_LOGS.GALERT_ID -->
   <schemaSpec version="3.96.4">
     <schema-directSQL>
-      <statement desc="Add missing index on foreign key to EAM_MEASUREMENT">
+      <statement desc="Add missing index on foreign key to EAM_GALERT_LOG">
           CREATE INDEX AUX_LOG_GALERT_ID ON EAM_GALERT_AUX_LOGS(GALERT_ID)
       </statement>
     </schema-directSQL>
   </schemaSpec>
+
+  <schemaSpec version="3.96.5">
+    <schema-directSQL>
+      <statement desc="Add missing index on timestamp for Alert Center">
+          CREATE INDEX EAM_GALERT_LOGS_TIME_IDX ON EAM_GALERT_LOGS(TIMESTAMP)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 
