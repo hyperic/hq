@@ -30,8 +30,11 @@ class DefaultControllerDispatcher {
         def appDir    = new File(pluginDir, "app")
         def etcDir    = new File(pluginDir, "etc")
         def contFile  = new File(appDir, controllerName + ".groovy")
-        if (!contFile.isFile())
-            return false
+        if (!contFile.isFile()) {
+            log.warn "Unable to find controller: ${controllerName} for " +
+                     "path = ${path}"
+            throw new Exception("Invalid request path")
+        }
         
         def loader = this.class.classLoader
         loader.addURL(appDir.toURL())
