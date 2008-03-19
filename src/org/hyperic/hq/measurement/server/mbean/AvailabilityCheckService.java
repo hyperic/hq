@@ -143,8 +143,6 @@ public class AvailabilityCheckService
                     .equals(MeasurementConstants.CAT_AVAILABILITY))
                 continue;
             
-            cache.setAvailMetric(dm.getId());
-
             AppdefEntityID aeid =
                 new AppdefEntityID(dm.getAppdefType(), dm.getInstanceId());
                                                  
@@ -206,6 +204,8 @@ public class AvailabilityCheckService
                     theMissing[theMissing.length - 1] + 1) != null)
                     continue;
                 
+                cache.setAvailMetric(dm.getId());
+
                 downPlatforms.add(aeid);
                 
                 ScheduleRevNum srn = srnCache.get(aeid);
@@ -269,8 +269,6 @@ public class AvailabilityCheckService
                     .equals(MeasurementConstants.CAT_AVAILABILITY))
                 continue;
 
-            cache.setAvailMetric(dm.getId());
-
             // End is at least more than 1/2 interval away
             long end = TimingVoodoo.closestTime(
                 current - dm.getInterval(), dm.getInterval());
@@ -314,6 +312,10 @@ public class AvailabilityCheckService
                 mval = new MetricValue(MeasurementConstants.AVAIL_DOWN, 
                                        theMissing[i]);
                 addData.add(new DataPoint(dm.getId(), mval));
+            }
+            
+            if (theMissing.length > 0) {
+                cache.setAvailMetric(dm.getId());
             }
         }
         watch.markTimeBegin("addData");
