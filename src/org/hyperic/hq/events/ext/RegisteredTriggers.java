@@ -119,8 +119,7 @@ public class RegisteredTriggers {
             for (Iterator it = toRemove.iterator(); it.hasNext(); ) {
                 this.unregisterTrigger((Integer) it.next());
             }
-            
-            
+                   
             HQApp app = HQApp.getInstance();
             app.registerCallbackListener(TriggerChangeCallback.class,
                                          new RegisteredTriggersUpdater());
