@@ -87,6 +87,7 @@ public class ScheduleThread
 
     private MeasurementPluginManager manager;
     private Log                      log;
+    private Log                      traceLog;
     private SenderThread             sender;  // Guy handling the results
 
     private long stat_numMetricsFetched = 0;
@@ -112,6 +113,8 @@ public class ScheduleThread
         this.interrupter  = new Object();
         this.manager      = manager;
         this.log          = LogFactory.getLog(ScheduleThread.class);
+        this.traceLog     =
+            LogFactory.getLog(ScheduleThread.class.getName()+"Trace");
         this.sender       = sender;               
         this.dsnErrors    = new HashMap();
     }
@@ -332,6 +335,7 @@ public class ScheduleThread
     public void run(){
         ArrayList retry = new ArrayList();
         boolean debug = log.isDebugEnabled();
+        boolean traceDebug = traceLog.isDebugEnabled();
 
         while(this.shouldDie == false)
         {
@@ -361,7 +365,7 @@ public class ScheduleThread
                             long sleeptime = timeOfNext - now;
                             while (sleeptime > 0l)
                             {
-                                if (debug) {
+                                if (traceDebug) {
                                     log.debug("waiting " + sleeptime +
                                         " ms until " +
                                         TimeUtil.toString(now+sleeptime));
@@ -557,8 +561,8 @@ public class ScheduleThread
         for (Iterator i=items.iterator(); i.hasNext(); )
         {
             ScheduledMeasurement meas = (ScheduledMeasurement)i.next();
-            if (log.isDebugEnabled()) {
-                log.debug("verifying uniqueness for: "+meas);
+            if (traceLog.isDebugEnabled()) {
+                traceLog.debug("verifying uniqueness for: "+meas);
             }
             Integer dsnId = new Integer(meas.getDsnID());
             rtn.put(dsnId, meas);

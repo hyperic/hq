@@ -50,6 +50,7 @@ public class Schedule {
                                  // by ascending nextTime in the item
 
     private Log log = LogFactory.getLog(Schedule.class);
+    private Log traceLog = LogFactory.getLog(Schedule.class.getName()+"Trace");
 
     public Schedule(){
         this.schedule   = new Vector();
@@ -234,12 +235,12 @@ public class Schedule {
         baseNextTime = System.currentTimeMillis();
         res.add(base);
 
-        boolean debug = log.isDebugEnabled();
+        boolean debug = traceLog.isDebugEnabled();
         // Now add other items if they occur at the same time 
         for(int i=1; i<size; i++){
             ScheduledItem other = (ScheduledItem) this.schedule.get(i);
             if (debug) {
-                log.debug("checking "+other.getObj()+" baseNextTime: "+
+                traceLog.debug("checking "+other.getObj()+" baseNextTime: "+
                     getDateStr(baseNextTime)+", getNextTime: "+
                     getDateStr(other.getNextTime()));
             }
@@ -261,14 +262,14 @@ public class Schedule {
             ScheduledItem other = (ScheduledItem) res.get(i);
 
             if (debug) {
-                log.debug("removing "+other.getObj());
+                traceLog.debug("removing "+other.getObj());
             }
             this.schedule.remove(other);
             if(other.isRepeat()){
                 other.stepNextTime();
                 if (debug) {
-                    log.debug("adding "+other.getObj()+" getNextTime "+
-                    getDateStr(other.getNextTime()));
+                    traceLog.debug("adding "+other.getObj()+" getNextTime "+
+                        getDateStr(other.getNextTime()));
                 }
                 this.insertScheduledItem(other);
             }
