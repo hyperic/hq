@@ -145,16 +145,31 @@ public class RegisteredDispatcherEJBImpl
         // Just to be safe, start with a fresh queue.
         Messenger.resetThreadLocalQueue();
         final Set visitedMCTriggers = new HashSet();
-
+        boolean debug = log.isDebugEnabled();
+        
         try {
             ObjectMessage om = (ObjectMessage) inMessage;
             Object obj = om.getObject();
+            
+            if (debug) {
+                log.debug("Redelivering message="+inMessage.getJMSRedelivered());
+            }
                        
             if (obj instanceof AbstractEvent) {
                 AbstractEvent event = (AbstractEvent) obj;
+                
+                if (debug) {
+                    log.debug("1 event in the message");
+                }
+                
                 dispatchEvent(event, visitedMCTriggers);
             } else if (obj instanceof Collection) {
                 Collection events = (Collection) obj;
+                
+                if (debug) {
+                    log.debug(events.size()+" events in the message");
+                }
+                
                 for (Iterator it = events.iterator(); it.hasNext(); ) {
                     AbstractEvent event = (AbstractEvent) it.next();
                     dispatchEvent(event, visitedMCTriggers);
@@ -239,10 +254,20 @@ public class RegisteredDispatcherEJBImpl
     }
     
     private void dispatchEnqueuedEvents() {
+        boolean debug = log.isDebugEnabled();
+        
         List enqueuedEvents = Messenger.drainEnqueuedMessages();
+        
+        if (debug) {
+            log.debug("Found "+enqueuedEvents.size()+" enqueued events");
+        }
         
         if (enqueuedEvents.isEmpty()) {
             return;
+        }
+        
+        if (debug) {
+            log.debug("Registering events publishing handler");
         }
             
         EventsHandler eventsPublishHandler = 
@@ -257,6 +282,10 @@ public class RegisteredDispatcherEJBImpl
         handleEventsPostCommit(enqueuedEvents, 
                                eventsPublishHandler, 
                                true);
+        
+        if (debug) {
+            log.debug("Finished registering events publishing handler");
+        }
     }
         
     /**
