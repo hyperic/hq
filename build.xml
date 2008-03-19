@@ -457,6 +457,7 @@
         <include name="mockejb.jar" />
         <include name="mockrunner-ejb.jar" />
         <include name="easymock-2.3.jar" />
+        <include name="easymockclassextension-2.3.jar" />
       </fileset>
       <fileset dir="${sigar.lib}" >
         <include name="sigar.jar" />
@@ -500,7 +501,7 @@
          <include name="tapestry-framework-4.1.5.jar" />
          <include name="tapestry-portlet-4.1.5.jar" />
          <include name="tapestry-prop-1.0.0.jar" />
-         <include name="tapestry-test-4.1.4-20080130.jar" />
+         <include name="tapestry-test-4.1.4-20080130-JUnit.jar" />
       </fileset>
     </copy>
 
@@ -564,7 +565,8 @@
       <fileset dir="${thirdparty.lib}" >
         <include name="strutstest-2.1.3.jar" />
         <include name="cactus-1.7.2.jar" />
-        <include name="junit.jar" />
+        <include name="junit-3.8.jar" />
+        <include name="junit-4.4.jar" />
       </fileset>
     </copy>
 
@@ -780,6 +782,7 @@
     <copy todir="${jboss.deploy.war.dir}" >
       <fileset dir="${webapp.home}">
         <include name="**/*.js"/>
+        <include name="**/*.xml"/>
         <include name="**/*.css"/>
         <include name="**/*.gif"/>
         <include name="**/*.png"/>
@@ -960,7 +963,8 @@
         <include name="jakarta-oro*.jar" />   <!-- RT -->
         <include name="snmp4j.jar" />        <!-- All SNMP monitoring -->
         <include name="ant.jar" />  <!-- AI scans + util.TokenReplacer -->
-        <include name="junit.jar" />  <!-- test to help with support issues -->
+        <include name="junit-3.8.jar" />  <!-- test to help with support issues -->
+        <include name="junit-4.4.jar" />
         <include name="commons-httpclient-2.0.jar" /> <!-- Lather -->
         <include name="commons-codec-1.3.jar" /> <!-- HTTPClient dep -->
         <!-- WebSphere: must be in the main classloader for reasons unknown -->
@@ -1650,7 +1654,8 @@
       </fileset>
     </delete>
     <delete dir="${war.dir}/test" />
-    <delete file="${war.dir}/WEB-INF/lib/junit.jar"/>
+    <delete file="${war.dir}/WEB-INF/lib/junit-3.8.jar"/>
+    <delete file="${war.dir}/WEB-INF/lib/junit-4.4.jar"/>
     <delete file="${war.dir}/WEB-INF/lib/cactus-*.jar" />
     <delete file="${war.dir}/WEB-INF/lib/strutstest-*.jar" />
     <delete file="${war.dir}/WEB-INF/lib/mockejb.jar" />
