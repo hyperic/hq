@@ -184,17 +184,27 @@ public class ReportProcessorEJBImpl
             
             // If this is an availability metric, then tell the cache about it
             MeasurementTemplate tmpl = dm.getTemplate();
-            if (tmpl.getAlias().toUpperCase()
+            boolean isAvailability =
+                tmpl.getAlias().toUpperCase()
                     .equals(MeasurementConstants.CAT_AVAILABILITY) &&
                 tmpl.getCategory().getName()
-                    .equals(MeasurementConstants.CAT_AVAILABILITY)) {
-                MetricDataCache.getInstance().setAvailMetric(dmId);
-            }
-            
+                    .equals(MeasurementConstants.CAT_AVAILABILITY);
+
             ValueList[] valLists = dsnLists[i].getDsns();
             for (int j = 0; j < valLists.length; j++) {
                 int dsnId = valLists[j].getDsnId();
                 MetricValue[] vals = valLists[j].getValues();
+                
+                if (isAvailability) {
+                    for (int ia = 0; ia < vals.length; ia++) {
+                        if (vals[ia].getValue() == 0) {
+                            MetricDataCache.getInstance().setAvailMetric(dmId);
+                            isAvailability = false; // Only need to add it once
+                            break;
+                        }
+                    }
+                }
+                
                 addData(dataPoints, dm, dsnId, vals, current);
             }
         }
