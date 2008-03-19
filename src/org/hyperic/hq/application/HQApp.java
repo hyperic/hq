@@ -362,6 +362,10 @@ public class HQApp {
                 try {
                     tx.registerSynchronization(new TxSynch(tx));
                 } catch(Exception e) {
+                    synchronized (_txSynchs) {
+                        _txSynchs.remove(tx);
+                    }
+                    
                     _log.error("Unable to register synchronization!", e);
                 }
             }
@@ -390,7 +394,9 @@ public class HQApp {
                     _log.trace("invokeNext: tx=" + v.getTransaction() + 
                                " meth=" + methName);
                 }
-                if (v.getTransaction() != null) {
+                if (v.getTransaction() != null && 
+                    (v.getTransaction().getStatus() == Status.STATUS_ACTIVE ||
+                     v.getTransaction().getStatus() == Status.STATUS_PREPARING)) {
                     attemptRegisterSynch(v.getTransaction(), 
                                          SessionManager.currentSession());
                 }
