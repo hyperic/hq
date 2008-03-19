@@ -406,6 +406,7 @@
       <fileset dir="${thirdparty.lib}" >
         <include name="backport-util-concurrent.jar" />
         <include name="commons-beanutils.jar" />
+        <include name="commons-fileupload-1.2.1.jar" />
         <include name="commons-lang-2.3.jar" />
         <include name="commons-logging.jar" />
         <include name="commons-modeler.jar" />

@@ -18,6 +18,10 @@ import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.rendit.helpers.MetricHelper
 import org.hyperic.hq.hqu.rendit.render.RenderFrame
 
+import org.apache.commons.fileupload.servlet.ServletFileUpload
+import org.apache.commons.fileupload.FileItemIterator
+import org.apache.commons.fileupload.FileItemStream
+
 import org.hyperic.util.Runnee
 
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl
@@ -78,6 +82,20 @@ abstract class BaseController {
 
     protected boolean getDumpScripts() {
         false
+    }
+
+    /**
+     * Repeatedly calls the passed closure with a {@link FileItemStream} 
+     * containing upload data.
+     */
+    protected void eachUpload(Closure yield) {
+        ServletFileUpload upload = new ServletFileUpload()
+        FileItemIterator iter = upload.getItemIterator(invokeArgs.request)
+        while (iter.hasNext()) {
+            FileItemStream item = iter.next()
+
+            yield(item)
+        }
     }
     
     def getLocaleBundle() {
