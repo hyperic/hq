@@ -27,7 +27,7 @@
             }
 
             w.filterElement([label: l.inGroups, 
-                             labelMarkup: '<span style="margin-left:15px"><span class="clickText" onclick="selectAll(\'groupSelect\');EventLogs_refreshTable();">Select All</span> | <span class="clickText" onclick="deselectAll(\'groupSelect\');EventLogs_refreshTable();">Unselect All</span></span>' ]) { %>
+                             labelMarkup: '<span style="margin-left:15px"> | <span class="clickText" onclick="deselectAll(\'groupSelect\');EventLogs_refreshTable();">Unselect All</span></span>' ]) { %>
                 <select id="groupSelect" multiple="true" name="groupSelect"
 			            style="height:200px; width:185px; border:5px solid #ededed;"
 			            onchange="EventLogs_refreshTable();">
