@@ -42,19 +42,16 @@ class AutodiscoveryController extends BaseController {
 
         String fqdn = params.getOne('fqdn')
 
-        AuthzSubjectManagerLocal subMan = AuthzSubjectManagerEJBImpl.one;
-        AuthzSubjectValue overlord = subMan.overlord
-
         AIQueueManagerLocal aiMan = AIQueueManagerEJBImpl.one
 
-        PageList list = aiMan.getQueue(overlord, true, true,
-                                       PageControl.PAGE_ALL)
+        def subject = user.authzSubjectValue
+        PageList list = aiMan.getQueue(subject, true, true, PageControl.PAGE_ALL)
 
         List matching = getMatchingPlatforms(list, fqdn)
 
         def res = new StringBuffer()
         for (plat in matching) {
-            List imported = processPlatform(overlord, aiMan, plat)
+            List imported = processPlatform(subject, aiMan, plat)
             def numPlats = imported.findAll { it instanceof Platform }.size();
             def numServers = imported.findAll { it instanceof Server }.size();
             res.append("Processed platform '")
