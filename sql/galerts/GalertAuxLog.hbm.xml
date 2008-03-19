@@ -33,7 +33,7 @@
 	</property>
 	
     <many-to-one name="alert">
-      <column name="GALERT_ID" not-null="true"/>
+      <column name="GALERT_ID" index="AUX_LOG_GALERT_ID" not-null="true"/>
     </many-to-one>
 
     <many-to-one name="parent">

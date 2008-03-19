@@ -8003,6 +8003,14 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <!-- Create missing index on EAM_GALERT_AUX_LOGS.GALERT_ID -->
+  <schemaSpec version="3.96.4">
+    <schema-directSQL>
+      <statement desc="Add missing index on foreign key to EAM_MEASUREMENT">
+          CREATE INDEX AUX_LOG_GALERT_ID ON EAM_GALERT_AUX_LOGS(GALERT_ID)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
 </dbupgrade>
 </target>
 
