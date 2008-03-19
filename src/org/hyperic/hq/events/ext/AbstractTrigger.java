@@ -26,9 +26,7 @@
 package org.hyperic.hq.events.ext;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 
 import javax.ejb.FinderException;
 import javax.management.AttributeNotFoundException;
@@ -51,14 +49,11 @@ import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
-import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.TriggerFireActionsFailureHandler;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
-import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.ClassicEscalatableCreator;
@@ -137,90 +132,12 @@ public abstract class AbstractTrigger
     protected final void publishEvent(AbstractEvent event) {
         Messenger.enqueueMessage(event);
     }
-    
+
     protected final void notFired() {
         publishEvent(new TriggerNotFiredEvent(getId()));
     }
-    
-    /** 
-     * The utility method which fires the actions of a trigger. We assume 
-     * that the last trigger operation before firing actions is to clear 
-     * any trigger state. If clearing trigger state fails, then event 
-     * processing must have been aborted already and the current transaction 
-     * rolled back. This will guarantee that the trigger will be able to 
-     * resume event processing and possible action firing the next time 
-     * an interesting event is processed.
-     */   
-    protected final void fireActions(TriggerFiredEvent event) 
-        throws ActionExecuteException, AlertCreateException {
-        
-        try {
-            doFireActions(event);
-        } finally {
-            boolean addedTxnListener = false;
-            
-            try {
-                // Try adding a transaction listener that will call any 
-                // TriggerFireActionsFailureHandlers if the current 
-                // transaction is rolled back.
-                HQApp.getInstance()
-                    .addTransactionListener(new TransactionListener() {
-
-                    public void afterCommit(boolean success) {
-                        if (!success) {
-                            invokeTriggerFireActionsFailureHandlers();
-                        }
-                    }
-
-                    public void beforeCommit() {
-                    }
-                    
-                });
-                
-                addedTxnListener = true;
-            } finally {
-                // If the current transaction has been marked for rollback 
-                // already, then adding the transaction listener will cause an 
-                // exception.  If this occurs, then invoke the 
-                // TriggerFireActionsFailureHandlers immediately.
-                if (!addedTxnListener) {
-                    invokeTriggerFireActionsFailureHandlers();
-                }
-            }             
-        }
-    }
-    
-    private void invokeTriggerFireActionsFailureHandlers() {        
-        AlertDefinitionManagerLocal aman = 
-            AlertDefinitionManagerEJBImpl.getOne();
-        Integer adId = aman.getIdFromTrigger(getId());
-            
-        if (adId == null) 
-            return;
-        
-        try {
-            AlertDefinition alertDef = aman.getByIdNoCheck(adId);
-            
-            Collection actions = alertDef.getActions();
-            
-            for (Iterator iter = actions.iterator(); iter.hasNext();) {
-                Action action = (Action) iter.next();
-                
-                ActionInterface actionInterface = action.getInitializedAction();
-                
-                if (actionInterface instanceof TriggerFireActionsFailureHandler)
-                {
-                    ((TriggerFireActionsFailureHandler) actionInterface)
-                        .onFailure();
-                }
-            }
-        } catch (FinderException e) {
-            // If we can't find the alert definition then there's not 
-            // much else we can do.
-        }        
-    }
      
-    private void doFireActions(TriggerFiredEvent event)
+    protected final void fireActions(TriggerFiredEvent event) 
         throws ActionExecuteException, AlertCreateException {
             
         // If the system is not ready, do nothing
@@ -234,7 +151,7 @@ public abstract class AbstractTrigger
             log.debug("Alert not firing because they are not allowed");
             return;
         }
-        
+
         // No matter what, send a message to let people know that this trigger
         // has fired
         publishEvent(event);
@@ -243,56 +160,56 @@ public abstract class AbstractTrigger
             Integer adId = aman.getIdFromTrigger(getId());
             if (adId == null)
                 return;
-            
+
             AlertDefinition alertDef = null;
-            
+
             // HQ-902: Retrieving the alert def and checking if the actions 
             // should fire must be guarded by a mutex.
             synchronized (alertDefEnabledStatusLock) {
                 // Check cached alert def status
                 if (!uncommitedAlertDefEnabledStatus.isAlertDefinitionEnabled())
                     return;
-                
+
                 // Check persisted alert def status
                 if (!shouldTriggerAlert(aman, adId))
                     return;
-        
+
                 alertDef = aman.getByIdNoCheck(adId);
-                
+
                 // See if the alert def is actually enabled and if it's our job
                 // to fire the actions
                 if (!shouldFireActions(aman, alertDef))
                     return;
             }
-            
+
             if (triggerFiredLog.isDebugEnabled()) {
                 triggerFiredLog.debug("Firing actions for trigger with id=" +
-                                      getId() + "; alert def [" +
-                                      alertDef.getName() + "] with id=" +
-                                      alertDef.getId()+"; triggering event ["+
-                                      event+"], event time="+new Date(event.getTimestamp()));    
+                        getId() + "; alert def [" +
+                        alertDef.getName() + "] with id=" +
+                        alertDef.getId()+"; triggering event ["+
+                        event+"], event time="+new Date(event.getTimestamp()));    
             }
-            
+
             EscalatableCreator creator = 
                 new ClassicEscalatableCreator(alertDef, event);
-            
+
             // Now start escalation
             if (alertDef.getEscalation() != null) {
                 EscalationManagerEJBImpl.getOne().startEscalation(alertDef,
-                                                                  creator); 
+                        creator); 
             } else {
                 creator.createEscalatable();
             }
 
         } catch (FinderException e) {
             throw new ActionExecuteException(
-                "Alert Definition not found for trigger: " + getId());
+                    "Alert Definition not found for trigger: " + getId());
         } catch (PermissionException e) {
             throw new ActionExecuteException(
-                "Overlord does not have permission to disable definition");
+                    "Overlord does not have permission to disable definition");
         }
     }
-    
+        
     private boolean shouldTriggerAlert(AlertDefinitionManagerLocal adman,
                                        Integer id) {
         Object[] flags = adman.getEnabledAndTriggerId(id);
