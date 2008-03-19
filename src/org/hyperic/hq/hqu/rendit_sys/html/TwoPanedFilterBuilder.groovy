@@ -29,7 +29,17 @@ class TwoPanedFilterBuilder extends BuilderSupport {
     def output
     
     def createNode(name, value) {
-        def res = [nodeType: name, name: value]
+	    createNode(name, [label: value]);
+    }
+    
+    def createNode(name) {
+        createNode(name, 'unspecified')
+    }
+    
+    def createNode(name, Map attributes) {
+	   if(attributes.labelMarkup == null)
+	       attributes.labelMarkup = '';
+        def res = [nodeType: name, name: attributes.label, markup: attributes.labelMarkup]
         if (name == 'filterAndPane') {
             output.write("""
     <div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">""")
@@ -38,7 +48,7 @@ class TwoPanedFilterBuilder extends BuilderSupport {
 """  }
         } else if (name == 'filter') {
             output.write("""
-        <div style="float:left;width:18%;margin-right:10px;">
+        <div style="float:left;width:200px;margin-right:10px;">
           <div class="filters">
             <div class="BlockTitle">${res.name}</div>
             <div class="filterBox">""")
@@ -50,7 +60,7 @@ class TwoPanedFilterBuilder extends BuilderSupport {
         } else if (name == 'filterElement') {
             output.write("""
              <div class="fieldSetStacked" style="margin-bottom:8px;">
-               <span><strong>${res.name}</strong></span>
+               <span><strong>${res.name}</strong></span>${res.markup}
                <div>""")
             res.finish = { """
      	       </div>
@@ -58,7 +68,7 @@ class TwoPanedFilterBuilder extends BuilderSupport {
 """ }
         } else if (name == 'pane') {
             output.write("""
-        <div style="float:right;width:78%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" 
+        <div style="width:81%;height: 445px;overflow-x: hidden; overflow-y: auto;" 
              id="logsCont">
           <div>""")
             res.finish = { """
@@ -69,14 +79,6 @@ class TwoPanedFilterBuilder extends BuilderSupport {
             throw new RuntimeException("Unknown type: [$name]")
         }
         res
-    }
-    
-    def createNode(name) {
-        createNode(name, 'unspecified')
-    }
-    
-    def createNode(name, Map attributes) {
-        createNode(name)
     }
     
     def createNode(name, Map Attributes, value) {
