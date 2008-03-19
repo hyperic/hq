@@ -608,8 +608,8 @@
     Syntax:  hqu-gen-scaffold -Dplugin=cool -Dcontroller=Registry -DcontrollerDir=registry
     
     Where:  -Dplugin=         used to specify the short, plugin directory name
-            -Dcontroller=     Must be upper-case, specifies controlller in /app
-            -DcontrollerDir=  must be lower-case, specifies views in /views/{dir}
+            -Dcontroller=     Must be upper-case, specifies controlller in /app (ex:  Alert)
+            -DcontrollerDir=  must be lower-case, specifies views in /views/{dir}  (ex: alert)
     </echo>
 
     <fail unless="plugin"/>
@@ -644,7 +644,7 @@
     
   	<echo>
  		Your plugin is in:           ${targetDir}
-  		To deploy it to your server:  ant hqu-deploy
+  		To deploy it to your server:  ant hqu-redeploy-plugin -Dplugin=${plugin}
   		The URL to access it:  localhost:7080/hqu/${plugin}/${controllerDir}/index.hqu
   	</echo>
   </target>
