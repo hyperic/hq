@@ -20,7 +20,7 @@
     </version>
     
     <property name="timestamp">
-      <column name="TIMESTAMP" not-null="true"/>
+      <column name="TIMESTAMP" index="EAM_GALERT_LOGS_TIME_IDX" not-null="true"/>
     </property>
 
     <property name="fixed" type="boolean">
