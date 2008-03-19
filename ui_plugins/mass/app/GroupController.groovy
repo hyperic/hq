@@ -380,7 +380,11 @@ class GroupController extends BaseController {
                                   type:groupTypeToName[g.groupType]]
                 if (verbose)
                     groupAttrs.id = g.id
-                                  
+
+                if (g.isCompatible()) {
+                    groupAttrs.resourceType = g.compatibleType.name
+                }
+                    
                 xmlOut.group(groupAttrs) {
                     bucketizeResourcesByType(g.resources).each { proto, resources ->
                         def typeAttrs = [name:proto.name]
