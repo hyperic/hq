@@ -31,6 +31,7 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.server.MBeanUtil;
+import org.hyperic.hq.events.ext.RegisteredTriggers;
 
 /**
  * The HAService starts all internal HQ processes.
@@ -48,6 +49,9 @@ public class HAService
     public void startSingleton() {
         MBeanServer server = MBeanUtil.getMBeanServer();
         try {
+            // Re-initialize the Registered Trigger cache in case this is
+            // a failover
+            RegisteredTriggers.reinitialize();
             startDataPurgeService(server);
             startAvailCheckService(server);
             startAgentAIScanService(server);
@@ -91,5 +95,4 @@ public class HAService
         _log.info("Invoking " + o.getCanonicalName() + "." + method);
         server.invoke(o, method, new Object[] {}, new String[] {});
     }
-
 }

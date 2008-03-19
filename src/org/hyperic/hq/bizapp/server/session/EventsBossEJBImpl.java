@@ -1420,18 +1420,6 @@ public class EventsBossEJBImpl
         manager.getSubjectPojo(sessionID);
         return getRTM().getAllTriggers();
     }
-    
-    /**
-     * Flush registered triggers cache
-     * @throws SessionTimeoutException 
-     * @throws SessionNotFoundException 
-     * @ejb:interface-method
-     */
-    public void flushRegisteredTriggers(int sessionID)
-        throws SessionNotFoundException, SessionTimeoutException {
-        manager.getSubjectPojo(sessionID);
-        RegisteredTriggers.reinitialize();
-    }
 
     /**
      * @ejb:interface-method
@@ -1473,7 +1461,6 @@ public class EventsBossEJBImpl
             escMan.deleteEscalation(subject, e);
         }
     }
-
 
     /**
      * retrieve escalation by alert definition id.
