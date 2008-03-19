@@ -84,7 +84,8 @@ public class ContextUtils {
                 ctx.getInitParameter(Constants.SERVICE_LOCATOR_CTX_ATTR);
             if (className != null && className.length() > 0) {
                 try {
-                    Class slClass = Class.forName(className);
+                    Class slClass = Class.forName(className, false, 
+                            Thread.currentThread().getContextClassLoader());
                     Constructor slConst =
                         slClass.getConstructor(new Class[] { Map.class });
                     sl = (ServiceLocator)
