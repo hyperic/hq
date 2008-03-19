@@ -7,14 +7,12 @@
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
   <logic:messagesPresent>
   <tr>
-    <td colspan="6" align="left" class="ErrorField"><html:errors/></td>
+    <td colspan="4" align="left" class="ErrorField"><html:errors/></td>
   </tr>
   </logic:messagesPresent>
   <tr>
     <td class="BlockLabel"><fmt:message key="alert.config.edit.opennms.server"/></td>
     <td class="BlockContent"><html:text property="server"/></td>
-    <td class="BlockLabel"><fmt:message key="alert.config.edit.opennms.ip"/></td>
-    <td class="BlockContent"><html:text property="ip"/></td>
     <td class="BlockLabel"><fmt:message key="alert.config.edit.opennms.port"/></td>
     <td class="BlockContent"><html:text property="port"/></td>
   </tr>
