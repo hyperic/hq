@@ -226,6 +226,13 @@ public class AIServerValue
 
    }
 
+   //see ScanState; can't setMeasurementConfig(null)
+   //or Lather throws IllegalArgumentException
+   public void unsetMeasurementConfig(){
+       this.measurementConfig = null;
+       measurementConfigHasBeenSet = false;
+   }
+
    public boolean measurementConfigHasBeenSet(){
 	  return measurementConfigHasBeenSet;
    }
