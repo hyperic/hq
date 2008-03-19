@@ -592,7 +592,7 @@ public class ScanState {
                 //turn off AutoEnable
                 server.setAutoEnable(false);
                 //disable metric collection
-                server.setMeasurementConfig(null);
+                server.unsetMeasurementConfig();
 
                 if (logger != null) {
                     logger.info("Turning off AutoEnable for server " +
