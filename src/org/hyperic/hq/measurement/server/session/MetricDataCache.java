@@ -135,11 +135,11 @@ public class MetricDataCache {
         // Could be an availability metric
         DownMetricZevent sendDown = null;
         synchronized(_downCacheLock) {
-            Element el = _downCache.get(mid);
-            if (el == null) {
+            if (!_downCache.isKeyInCache(mid)) {
                 return true;
             }
             
+            Element el = _downCache.get(mid);
             MetricValue val = (MetricValue) el.getObjectValue();
             if (mval.getValue() == 1) {
                 if (val == null ||  // place holder or is now available
