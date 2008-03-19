@@ -398,6 +398,13 @@ class HealthController
           aiqIP: [ 
              name: localeBundle['queryAIQIP'], 
              query: "select * from EAM_AIQ_IP"], 
+          resourceAlertsActiveButDisabled: [ 
+             name: localeBundle['queryResourceAlertDefsActiveButDisabled'], 
+             query: {conn -> "select id, name, description, resource_id from EAM_ALERT_DEFINITION where "+
+                    "(parent_id is null or parent_id > 0) and active="+
+                    DBUtil.getBooleanValue(true, conn)+" and enabled="+
+                    DBUtil.getBooleanValue(false, conn)+" and deleted="+
+                    DBUtil.getBooleanValue(false, conn)}],
         ]
         
         def res = [:]
@@ -425,7 +432,17 @@ class HealthController
     
     def runQuery(params) {
         def id    = params.getOne('query')
-        def query = databaseQueries[id].query
+        
+        def query
+        
+        if (databaseQueries[id].query in Closure) {
+            query = withConnection() { conn -> 
+                databaseQueries[id].query(conn)       
+            }
+        } else {
+            query = databaseQueries[id].query        
+        }    
+        
         def name  = databaseQueries[id].name
         def start = now()
 
