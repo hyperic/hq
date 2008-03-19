@@ -1226,23 +1226,25 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // See if this exists
             if (sinfo == null) {
                 log.debug("Removing ServerType: " + serverName);
-
-                // Find resource groups of this type and remove
-                AppdefGroupPagerFilterGrpEntRes filter =
-                    new AppdefGroupPagerFilterGrpEntRes (
-                        AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                        stlocal.getId().intValue(), true);
+                
+                int groupEntType = AppdefEntityConstants.APPDEF_TYPE_SERVER;
+                int groupEntResType = stlocal.getId().intValue();
                 
                 try {
                     List groups = grpMgr
                         .findAllGroups(overlordValue, PageControl.PAGE_ALL,
-                                       new AppdefPagerFilter[] { filter });
+                                       new AppdefPagerFilter[0]);
                     for (Iterator grpIt = groups.iterator();
                          grpIt.hasNext(); ) {
                         try {
                             AppdefGroupValue grp =
                                 (AppdefGroupValue) grpIt.next();
-                            grpMgr.deleteGroup(overlordValue, grp.getId());
+                            if (grp.isGroupCompat() &&
+                                grp.getGroupEntType() == groupEntType &&
+                                grp.getGroupEntResType() == groupEntResType)
+                            {
+                                grpMgr.deleteGroup(overlordValue, grp.getId());
+                            }
                         } catch (AppdefGroupNotFoundException e) {
                             assert false :
                                 "Delete based on a group should not " +

@@ -1252,18 +1252,21 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             _log.debug("Removing PlatformType: " + pt.getName());
 
             // Find resource groups of this type and remove
-            AppdefGroupPagerFilterGrpEntRes filter =
-                new AppdefGroupPagerFilterGrpEntRes (
-                    AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                    pt.getId().intValue(), true);
+            int groupEntType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+            int groupEntResType = pt.getId().intValue();
 
             List groups = grpMgr.findAllGroups(overlordValue, 
-                                            PageControl.PAGE_ALL,
-                                            new AppdefPagerFilter[] { filter });
+                                               PageControl.PAGE_ALL,
+                                               new AppdefPagerFilter[0]);
             for (Iterator i = groups.iterator(); i.hasNext(); ) {
                 try {
                     AppdefGroupValue grp = (AppdefGroupValue) i.next();
-                    grpMgr.deleteGroup(overlordValue, grp.getId());
+                    if (grp.isGroupCompat() &&
+                        grp.getGroupEntType() == groupEntType &&
+                        grp.getGroupEntResType() == groupEntResType)
+                    {
+                        grpMgr.deleteGroup(overlordValue, grp.getId());
+                    }
                 } catch (AppdefGroupNotFoundException e) {
                     /*                            assert false :
                     "Delete based on a group should not " +
