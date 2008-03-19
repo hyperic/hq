@@ -27,6 +27,16 @@ package org.hyperic.hq.bizapp.server.mdb;
 
 import java.util.List;
 
+/**
+ * A generic event handler used by the resource alerting system.
+ */
 interface EventsHandler {
+    
+    /**
+     * Handle the events.
+     * 
+     * @param events The events.
+     */
     void handleEvents(List events);
+
 }
