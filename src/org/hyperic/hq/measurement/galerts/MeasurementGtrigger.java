@@ -184,6 +184,8 @@ public class MeasurementGtrigger
             if (!isOlderThanTimeWindowStartTime(me, _startOfTimeWindow)) {
                 track(me);       
             }
+            
+            return;
         }
         
         if (!shouldStartEvaluatingMetrics()) {
