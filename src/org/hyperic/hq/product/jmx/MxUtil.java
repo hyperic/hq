@@ -47,6 +47,8 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.j2ee.statistics.CountStatistic;
 import javax.management.j2ee.statistics.RangeStatistic;
+import javax.management.j2ee.statistics.TimeStatistic;
+
 import javax.management.j2ee.statistics.Statistic;
 import javax.management.j2ee.statistics.Stats;
 import javax.management.openmbean.CompositeData;
@@ -74,6 +76,7 @@ public class MxUtil {
     public static final String PROP_JMX_URL = "jmx.url";
     public static final String PROP_JMX_USERNAME = "jmx.username";
     public static final String PROP_JMX_PASSWORD = "jmx.password";
+    public static final String PROP_JMX_PROVIDER_PKGS = "jmx.provider.pkgs";
 
     private static final String STATS_PREFIX = "Stats.";
     private static final String COMPOSITE_PREFIX = "Composite.";
@@ -232,6 +235,14 @@ public class MxUtil {
         }
         else if (stat instanceof RangeStatistic) {
             value = ((RangeStatistic)stat).getCurrent();
+        }
+        else if (stat instanceof TimeStatistic) {
+            // get the average time
+            long count = ((TimeStatistic)stat).getCount();
+            if (count == 0)
+                value = 0;
+            else
+            value = ((TimeStatistic)stat).getTotalTime() / count;
         }
         else {
             String msg =
@@ -396,6 +407,11 @@ public class MxUtil {
         map.put(JMXConnector.CREDENTIALS,
                 new String[] {user, pass});
 
+        // required for Oracle AS
+        String providerPackages = config.getProperty(PROP_JMX_PROVIDER_PKGS);
+        if (providerPackages != null)
+            map.put(JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES, providerPackages);
+        
         if (jmxUrl == null) {
             throw new MalformedURLException(PROP_JMX_URL + "==null");
         }
