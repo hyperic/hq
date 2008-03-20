@@ -56,7 +56,9 @@ class ResourceConfig {
     
     private static SERVER_FIELD_KEYS = [
         'installPath': [get: { svr -> svr.installPath },
-                        set: { svrVal -> svrVal.installPath = installPath} ],
+                        set: { svrVal, installPath -> svrVal.installPath = installPath} ],
+        'autoIdentifier': [get: {svr -> svr.autoinventoryIdentifier },
+                           set: {svrVal, autoIdentifier -> svrVal.autoinventoryIdentifier = autoIdentifier } ],
         'description': [get: { svr -> svr.description },
                         set: { svrVal, desc -> svrVal.description = desc} ],
         'location':    [get: { svr -> svr.location },
