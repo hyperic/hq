@@ -281,8 +281,8 @@ class GroupController extends BaseController {
                 }
             } else {
                 def validPrototypes = typeMethods.getPrototypes(groupDef)
-                def typeMatcher = makeTypeMatcher(typeDef.'@name')
-                def matchingTypes = validPrototypes.grep { Resource proto ->
+                def typeMatcher     = makeNameMatcher(typeDef.'@name')
+                def matchingTypes   = validPrototypes.grep { Resource proto ->
                     typeMatcher(proto)
                 }
 
@@ -310,20 +310,14 @@ class GroupController extends BaseController {
                                                  groupDef.'@name')
     }
     
-    /**
-     * Make a closure which will return true when a prototype matches 
-     * the given 'name'
-     *
-     * @param s:  A string that must equal the prototype name.  Wil aso 
-     *            return true if it starts with regex: and the remainder
-     *            matches the prototype name.
-     */
-    private Closure makeTypeMatcher(String s) {
-        if (s.startsWith('regex')) {
+    private Closure makeNameMatcher(String s) {
+        if (!s) {
+            return { true }
+        } else if (s.startsWith('regex')) {
             def regex = ~s[6..-1]
-            return { Resource proto -> proto.name ==~ regex }
+            return { r -> r.name ==~ regex }
         } else {
-            return { Resource proto -> proto.name == s }
+            return { r -> r.name == s }
         }
     }
     
@@ -370,8 +364,12 @@ class GroupController extends BaseController {
     private _list(xmlOut, params, groups) {
         boolean includeSystem = params.getOne('includeSystem')?.toBoolean()
         boolean verbose = params.getOne('verbose')?.toBoolean()
+        Closure matcher = makeNameMatcher(params.getOne('name'))
         xmlOut.groups() {
             for (g in groups) {
+                if (!matcher(g))
+                    continue
+                    
                 if (g.isSystem() && !includeSystem)
                     continue
         
