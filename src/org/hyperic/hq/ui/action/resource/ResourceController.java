@@ -95,7 +95,7 @@ public abstract class ResourceController extends BaseDispatchAction {
         ServletContext ctx = getServlet().getServletContext();            
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-        AppdefEntityTypeID aetid = null;
+        AppdefEntityTypeID aetid;
         if (null == entityId || entityId instanceof AppdefEntityTypeID) {
             // this can happen if we're an auto-group of platforms
             request.setAttribute(Constants.CONTROL_ENABLED_ATTR,
@@ -119,7 +119,7 @@ public abstract class ResourceController extends BaseDispatchAction {
                 request.setAttribute(Constants.TITLE_PARAM_ATTR,
                                      resourceTypeVal.getName());
             } catch (Exception e) {
-                // if this param isnt found, leave aetid null 
+                log.debug("Error setting resource attributes", e);
             }
         } else {
             try {
@@ -192,7 +192,8 @@ public abstract class ResourceController extends BaseDispatchAction {
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {
-                throw AppdefEntityNotFoundException.build(entityId);
+                log.error("Unable to find resource", e);
+                throw AppdefEntityNotFoundException.build(entityId, e);
             }
         }
         return entityId;
