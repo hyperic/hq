@@ -592,6 +592,17 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     }
  
     /** 
+     * @ejb:interface-method
+     */
+    public void setDesignated(MeasurementTemplate tmpl, boolean designated) {
+        String alias = tmpl.getAlias(); 
+        if (alias.equalsIgnoreCase(MeasurementConstants.CAT_AVAILABILITY)) 
+            return;
+            
+        tmpl.setDesignate(designated);
+    }
+    
+    /** 
      * Set the measurement templates to be "designated" for a monitorable type.
      *
      * @ejb:interface-method
