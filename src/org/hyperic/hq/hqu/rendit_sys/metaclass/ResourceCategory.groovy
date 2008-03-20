@@ -16,6 +16,7 @@ import org.hyperic.hq.appdef.shared.PlatformValue
 import org.hyperic.hq.appdef.server.session.PlatformType
 import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.server.session.Service
+import org.hyperic.hq.appdef.shared.ServerValue
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
@@ -368,12 +369,31 @@ class ResourceCategory {
                 def res = svcMan.createService(subjectVal, server, 
                                                serviceType, name, "desc: ${name}",
                                                "loc: ${name}", null).resource
-                	setConfig(res, cfg, subject)
+                setConfig(res, cfg, subject)
+                return res
+            } else {
+                Server server = toServer(parent)
+                def res = svcMan.createService(subjectVal, server,
+                                               serviceType, name, "desc: ${name}",
+                                               "loc: ${name}", null).resource
+                setConfig(res, cfg, subject)
                 return res
             }
-            return 'non-virtual server'
+        } else if (proto.isServerPrototype()) {
+            Platform platform = toPlatform(parent)
+            ServerValue sv = new ServerValue()
+            sv.name        = name
+            sv.description = "desc: ${name}"
+            sv.installPath = 'dummy install path'
+            def res = svrMan.createServer(subjectVal, platform.id,
+                                          proto.instanceId, sv).resource
+            setConfig(res, cfg, subject)
+            return res
+        } else {
+            throw new IllegalArgumentException("Resource prototype [" + 
+                                               "${proto.name} not available " + 
+                                               "to createInstance()")
         }
-        return 'falout'
     }
 
     private static getOverlord() {
