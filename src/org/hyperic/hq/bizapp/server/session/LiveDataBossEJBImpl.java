@@ -57,7 +57,7 @@ import java.rmi.RemoteException;
  * @ejb:bean name="LiveDataBoss"
  *      jndi-name="ejb/bizapp/LiveDataBoss"
  *      local-jndi-name="LocalLiveDataBoss"
- *      view-type="both"
+ *      view-type="local"
  *      type="Stateless"
  * @ejb:transaction type="Required"
  */
