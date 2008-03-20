@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,13 +25,21 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.util.jdbc.DBUtil;
 
 public class BaselineDAO extends HibernateDAO {
+    private Log _log = LogFactory.getLog(BaselineDAO.class);
+    
     public BaselineDAO(DAOFactory f) {
         super(Baseline.class, f);
     }
@@ -94,9 +102,27 @@ public class BaselineDAO extends HibernateDAO {
     }
 
     int deleteByIds(Collection ids) {
-        return getSession()
-            .createQuery("delete from Baseline where measurement.id in (:ids)")
-            .setParameterList("ids", ids)
-            .executeUpdate();
+        final String hql =
+            "delete from Baseline where measurement.id in (:ids)";
+        
+        Session session = getSession();
+        int count = 0;
+        for (Iterator it = ids.iterator(); it.hasNext(); ) {
+            ArrayList subIds = new ArrayList();
+            
+            for (int i = 0; i < DBUtil.IN_CHUNK_SIZE && it.hasNext(); i++) {
+                subIds.add(it.next());
+            }
+            
+            count += session.createQuery(hql).setParameterList("ids", subIds)
+                            .executeUpdate();
+            
+            if (_log.isDebugEnabled()) {
+                _log.debug("deleteByMetricIds() " + subIds.size() + " of " +
+                           ids.size() + " metric IDs");
+            }
+        }
+        
+        return count;
     }
 }

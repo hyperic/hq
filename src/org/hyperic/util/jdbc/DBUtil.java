@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -77,6 +77,8 @@ public class DBUtil {
     public static final int DATABASE_ORACLE_11 = 10;
     public static final int DATABASE_MYSQL5 = 9;
 
+    public static final int IN_CHUNK_SIZE = 200;
+    
     private static Map _dbTypes = new HashMap();
 
     /**
@@ -556,10 +558,6 @@ public class DBUtil {
             // No conditions at all
             return " 1=1 ";
         }
-    }
-
-    private static String changeNullAndTrim(String val) {
-        return (val == null) ? "" : val.trim();
     }
 
     public static void replacePlaceHolder(StringBuffer buf, String repl) {
