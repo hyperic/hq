@@ -91,7 +91,7 @@
               value="${instance}:${name}"/>
 
       <metric name="Availability"
-              template="${instance},Type=Availability:Bytes in Queue"/>
+              template="${instance},Type=Availability:Bytes in Queue"
               indicator="true"/>
 
       <metric name="Bytes in Queue"
