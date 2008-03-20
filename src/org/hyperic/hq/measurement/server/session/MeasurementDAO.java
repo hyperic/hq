@@ -32,11 +32,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
-import org.hibernate.Session;
 import org.hibernate.Query;
-import org.hibernate.type.IntegerType;
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
@@ -44,8 +46,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.util.jdbc.DBUtil;
 
 public class MeasurementDAO extends HibernateDAO {
+    private static Log _log = LogFactory.getLog(MeasurementDAO.class);
 
     private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
     				MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
@@ -269,13 +273,27 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     int deleteByIds(Collection ids) {
-        if (ids.size() == 0)   // Nothing to do
-            return 0;
+        final String hql = "delete from Measurement where id in (:ids)";
 
-        return getSession()
-            .createQuery("delete from Measurement where id in (:ids)")
-            .setParameterList("ids", ids)
-            .executeUpdate();
+        Session session = getSession();
+        int count = 0;
+        for (Iterator it = ids.iterator(); it.hasNext(); ) {
+            ArrayList subIds = new ArrayList();
+            
+            for (int i = 0; i < DBUtil.IN_CHUNK_SIZE && it.hasNext(); i++) {
+                subIds.add(it.next());
+            }
+            
+            count += session.createQuery(hql).setParameterList("ids", subIds)
+                            .executeUpdate();
+            
+            if (_log.isDebugEnabled()) {
+                _log.debug("deleteByIds() " + subIds.size() + " of " +
+                           ids.size() + " metric IDs");
+            }
+        }
+        
+        return count;
     }
 
     public List findEnabledByResource(Resource resource) {
