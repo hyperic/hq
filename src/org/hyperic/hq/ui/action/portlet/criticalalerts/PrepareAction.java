@@ -48,7 +48,6 @@ import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -100,39 +99,22 @@ public class PrepareAction extends TilesAction {
         // shouldn't
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
 
-        // Set all the form properties, falling back to the default user
-        // preferences if the key is not set. (In the case of multi-portlet)
-        Integer numberOfAlerts;
-        long past;
-        String priority;
-        String selectedOrAll;
-
         pForm.setTitle(dashPrefs.getValue(titleKey, ""));
         
-        try {
-            numberOfAlerts = new Integer(dashPrefs.getValue(countKey));
-        } catch (InvalidOptionException e) {
-            numberOfAlerts =
-                new Integer(dashPrefs.getValue(PropertiesForm.ALERT_NUMBER)); 
-        }
+        Integer numberOfAlerts = new Integer(dashPrefs.getValue(countKey,
+                              dashPrefs.getValue(PropertiesForm.ALERT_NUMBER)));
 
-        try {
-            past = Long.parseLong(dashPrefs.getValue(timeKey));
-        } catch (InvalidOptionException e) {
-            past = Long.parseLong(dashPrefs.getValue(PropertiesForm.PAST));
-        }
+        long past =
+            Long.parseLong(dashPrefs.getValue(timeKey,
+                                      dashPrefs.getValue(PropertiesForm.PAST)));
 
-        try {
-            priority = dashPrefs.getValue(priorityKey);
-        } catch (InvalidOptionException e) {
-            priority = dashPrefs.getValue(PropertiesForm.PRIORITY);
-        }
-
-        try {
-            selectedOrAll = dashPrefs.getValue(selOrAllKey);
-        } catch (InvalidOptionException e) {
-            selectedOrAll = dashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL);
-        }
+        String priority =
+            dashPrefs.getValue(priorityKey,
+                               dashPrefs.getValue(PropertiesForm.PRIORITY));
+        
+        String selectedOrAll =
+            dashPrefs.getValue(selOrAllKey,
+                               dashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL));
 
         DashboardUtils.verifyResources(resKey, ctx, dashPrefs, user);
 
