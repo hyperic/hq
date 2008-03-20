@@ -25,25 +25,29 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.util.jdbc.DBUtil;
 
 public class DerivedMeasurementDAO extends HibernateDAO {
+    private static Log _log = LogFactory.getLog(DerivedMeasurementDAO.class);
+    
     public DerivedMeasurementDAO(DAOFactory f) {
         super(DerivedMeasurement.class, f);
     }
@@ -304,10 +308,27 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
     
     int deleteByIds(Collection ids) {
-        return getSession()
-            .createQuery("delete from DerivedMeasurement where id in (:ids)")
-            .setParameterList("ids", ids)
-            .executeUpdate();
+        final String hql = "delete from DerivedMeasurement where id in (:ids)";
+
+        Session session = getSession();
+        int count = 0;
+        for (Iterator it = ids.iterator(); it.hasNext(); ) {
+            ArrayList subIds = new ArrayList();
+            
+            for (int i = 0; i < DBUtil.IN_CHUNK_SIZE && it.hasNext(); i++) {
+                subIds.add(it.next());
+            }
+            
+            count += session.createQuery(hql).setParameterList("ids", subIds)
+                            .executeUpdate();
+            
+            if (_log.isDebugEnabled()) {
+                _log.debug("deleteByIds() " + subIds.size() + " of " +
+                           ids.size() + " metric IDs");
+            }
+        }
+        
+        return count;
     }
 
     public List findByInstance(int type, int id, boolean enabled) {
