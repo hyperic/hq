@@ -75,16 +75,17 @@ public abstract class AppdefEntityNotFoundException
     public abstract int getAppdefType();
 
     /** Create an exception of the appropriate subclass based on id.getType() */
-    public static AppdefEntityNotFoundException build (AppdefEntityID id) {
+    public static AppdefEntityNotFoundException build (AppdefEntityID id,
+                                                       Exception e) {
         switch(id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return new PlatformNotFoundException(id);
+            return new PlatformNotFoundException(id.getId(), e);
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            return new ServerNotFoundException(id);
+            return new ServerNotFoundException(id.getType(),  e);
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return new ServiceNotFoundException(id);
+            return new ServiceNotFoundException(id.getType(), e);
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            return new ApplicationNotFoundException(id);
+            return new ApplicationNotFoundException(id.getType(), e);
         default:
             throw new IllegalArgumentException("Unrecognized entity type: "
                                                + id.getType());
