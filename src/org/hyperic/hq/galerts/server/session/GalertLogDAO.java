@@ -120,8 +120,6 @@ class GalertLogDAO
                                     new Long(endTime)))
             .addOrder(Order.desc("timestamp"))
             .setMaxResults(count)
-            .setCacheable(true)
-            .setCacheRegion("GalertLog.findByCreateTime")
             .list();
     }
     
