@@ -15,6 +15,7 @@
     /* IE issue loosing table border on left side - do not remove */
     *margin-left:1px;
     cursor: default;
+    table-layout: fixed
 }
 
 #alertsCont  table th {
@@ -77,6 +78,7 @@
       /* IE issue loosing table border on left side - do not remove */
     *margin-left:1px;
     cursor: default;
+    table-layout: fixed
 }
 
 #defsCont table th {
@@ -320,6 +322,7 @@ font-weight:bold;
       /* IE issue loosing table border on left side - do not remove */
     *margin-left:1px;
     cursor: default;
+    table-layout: fixed
 }
 #downCont  table th {font-weight: bold;padding: 3px;padding-left: 5px;border-right: 1px solid #7bafff;border-top: 1px solid #7bafff;}
 #downCont table td {padding: 3px;font-weight: normal;padding-left: 5px;}
@@ -337,7 +340,7 @@ font-weight:bold;
 /* Nagios page */
 .nagContainer{margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
 .nagTableContainer{border: 1px solid rgb(96, 165, 234); overflow-x: hidden; overflow-y: auto; float: right;display:inline; width: 99%; height: 442px;}
-#nagCont table { font-family: Lucida Grande, Verdana;font-size: 11px;width: 100%;border: 1px solid #ccc;border-collapse: collapse;cursor: default;}
+#nagCont table { font-family: Lucida Grande, Verdana;font-size: 11px;width: 100%;border: 1px solid #ccc;border-collapse: collapse;cursor: default; table-layout: fixed}
 #nagCont  table th {font-weight: bold;padding: 3px;padding-left: 5px;border-right: 1px solid #7bafff;border-top: 1px solid #7bafff;}
 #nagCont table td {padding: 3px;font-weight: normal;padding-left: 5px; }
 #nagCont table thead td, table thead th {background-image: url( "images/ft-head.gif" );background-repeat: no-repeat;background-position: top right;}
@@ -367,7 +370,7 @@ font-weight:bold;
 #results_msgLive {padding:3px;padding-bottom:5px;font-weight:bold;}
 #result thead {width:100%;padding:0px;margin:0px;}
 #result table thead td {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;padding:3px;margin:0px;}
-#result table{width:100%;padding:0px;}
+#result table{width:100%;padding:0px;table-layout:fixed}
 #result table td {padding:3px;border-bottom:1px solid #cccccc;}
 .fivepad {padding:5px 5px 0px 5px;}
 .instruction1 {padding-bottom:3px;font-weight:bold;}
@@ -503,4 +506,9 @@ font-size:12px;
     text-decoration: underline
 }
 
+#EventLogs table{
+    width: 100%;
+    table-layout: fixed;
+    *margin-left:1px
+}
 
