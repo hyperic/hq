@@ -2409,6 +2409,16 @@ public class AppdefBossEJBImpl
         }
         return ret;
     }
+    
+    /**
+     * Perform a search for resources
+     * @ejb:interface-method
+     */
+    public PageList search(int sessionId, String searchFor, PageControl pc)
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException, FinderException {
+        return findAllPlatforms(sessionId, pc);
+    }
 
     private PageList findCompatInventory(int sessionId, int appdefTypeId,
                                          int appdefResTypeId, 
