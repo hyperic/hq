@@ -506,7 +506,7 @@ font-size:12px;
     text-decoration: underline
 }
 
-#EventLogs table{
+#EventLogs {
     width: 100%;
     table-layout: fixed;
     *margin-left:1px
