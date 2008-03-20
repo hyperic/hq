@@ -53,30 +53,19 @@ public class TestServerLifecycleManagement extends BaseServerTestCase {
      */
     public void testStartServerDeployAndUndeployHQ() throws Exception {
         startServer();
-        deployHQ(false);
+        deployHQ();
         undeployHQ();
     }
-    
+        
     /**
-     * Test starting the jboss server and deploying then undeploying the HQEE application.
-     * 
-     * @throws Exception
-     */
-    public void testStartServerDeployAndUndeployHQEE() throws Exception {
-        startServer();
-        deployHQ(true);
-        undeployHQ();
-    }
-    
-    /**
-     * Test deploying then undeploying the HQEE application without explicitly 
+     * Test deploying then undeploying the HQ application without explicitly 
      * starting the server. The server is started automatically before the 
      * deployment if necessary.
      * 
      * @throws Exception
      */
-    public void testDeployAndUndeployHQEE() throws Exception {
-        deployHQ(true);
+    public void testDeployAndUndeployHQ() throws Exception {
+        deployHQ();
         undeployHQ();        
     }
     
@@ -90,7 +79,7 @@ public class TestServerLifecycleManagement extends BaseServerTestCase {
     public void XXXtestRestartServerAndDeploy() throws Exception {
         stopServer();
         Thread.sleep(10000);
-        deployHQ(true);
+        deployHQ();
         undeployHQ();
     }
 

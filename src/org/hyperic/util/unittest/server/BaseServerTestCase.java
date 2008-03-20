@@ -57,16 +57,16 @@ import org.jdom.input.SAXBuilder;
 
 /**
  * The test case that all server-side unit tests should extend. Before starting 
- * the server, the user must set the <code>UNITTEST_JBOSS_HOME</code> environment 
- * variable to the path where the jboss server that will be used for unit testing 
+ * the server, the user must set the <code>hq.unittest.jboss.home</code> system  
+ * property to the path where the jboss server that will be used for unit testing 
  * resides. That jboss instance must contain a "unittest" configuration that has 
  * already had the Ant <code>prepare-jboss</code> target run against it. The 
  * <code>hq-ds.xml</code> datasource file must be configured to point to the 
  * *preexisting* unit testing server database.
  * 
- * In addition, the <code>HQ_HOME</code> and <code>HQEE_HOME</code> environment 
- * variables must be set, respectively, to the local path where the HQEE and HQ.ORG 
- * src trees reside.
+ * In addition, the <code>hq.unittest.hq.home</code> system property must be set 
+ * to the local path where the HQ src resides (.ORG or EE versions depending 
+ * on the type of unit test).
  */
 public abstract class BaseServerTestCase extends TestCase {
     
@@ -80,22 +80,16 @@ public abstract class BaseServerTestCase extends TestCase {
     private static final String WORKING_DIR = "/tmp";
     
     /**
-     * The environment variable specifying the path to the jboss deployment 
+     * The system property specifying the path to the jboss deployment 
      * that will be used for unit testing.
      */
-    public static final String JBOSS_HOME_DIR_ENV_VAR = "UNITTEST_JBOSS_HOME";
+    public static final String JBOSS_HOME_DIR = "hq.unittest.jboss.home";
     
     /**
-     * The environment variable specifying the path to the HQ home directory. 
-     * The HQ.ORG server will be deployed from the HQ home "build" subdirectory.
+     * The system property specifying the path to the HQ home directory. 
+     * The HQ server will be deployed from the HQ home "build" subdirectory.
      */
-    public static final String HQ_HOME_DIR_ENV_VAR = "HQ_HOME";
-    
-    /**
-     * The environment variable specifying the path to the HQEE home directory. 
-     * The HQEE server will be deployed from the HQEE home "build" subdirectory.
-     */
-    public static final String HQEE_HOME_DIR_ENV_VAR = "HQEE_HOME";
+    public static final String HQ_HOME_DIR = "hq.unittest.hq.home";
     
     /**
      * The "unittest" configuration that the jboss deployment must have installed 
@@ -254,16 +248,16 @@ public abstract class BaseServerTestCase extends TestCase {
      * Deploy the HQ application into the jboss server, starting the jboss server 
      * first if necessary.
      * 
-     * @param isEE <code>true</code> to deploy the HQEE EAR file; 
-     *             <code>false</code> to deploy the HQ.ORG EAR file.
      * @throws Exception
      */
-    protected final void deployHQ(boolean isEE) throws Exception {
+    protected final void deployHQ() throws Exception {
         if (server == null || !server.isStarted()) {
             startServer();
         }
         
-        deployment = getHQDeployment(isEE);
+        deployment = getHQDeployment();
+        
+		//                restoreDatabase();
         
         server.deploy(deployment);
     }
@@ -305,41 +299,26 @@ public abstract class BaseServerTestCase extends TestCase {
     }
     
     private String getJBossHomeDir() {
-        String jbossHomeDir = System.getenv(JBOSS_HOME_DIR_ENV_VAR);
+        String jbossHomeDir = System.getProperty(JBOSS_HOME_DIR);
         
         if (jbossHomeDir == null) {
-            throw new IllegalStateException("The "+JBOSS_HOME_DIR_ENV_VAR+
-                            " environment variable was not set");
+            throw new IllegalStateException("The "+JBOSS_HOME_DIR+
+                            " system property was not set");
         }
         
         return jbossHomeDir;
     }
         
-    private URL getHQDeployment(boolean isEE) throws MalformedURLException {
-        if (isEE) {
-            return new URL("file:"+getHQEEHomeDir()+"/build/hq.ear/");
-        } else {
-            return new URL("file:"+getHQHomeDir()+"/build/hq.ear/");
-        }
+    private URL getHQDeployment() throws MalformedURLException {
+        return new URL("file:"+getHQHomeDir()+"/build/hq.ear/");
     }
     
     private String getHQHomeDir() {
-        String hqHomeDir = System.getenv(HQ_HOME_DIR_ENV_VAR);
+        String hqHomeDir = System.getProperty(HQ_HOME_DIR);
         
         if (hqHomeDir == null) {
-            throw new IllegalStateException("The "+HQ_HOME_DIR_ENV_VAR+
-                            " environment variable was not set");
-        }
-        
-        return hqHomeDir;
-    }
-    
-    private String getHQEEHomeDir() {
-        String hqHomeDir = System.getenv(HQEE_HOME_DIR_ENV_VAR);
-        
-        if (hqHomeDir == null) {
-            throw new IllegalStateException("The "+HQEE_HOME_DIR_ENV_VAR+
-                            " environment variable was not set");
+            throw new IllegalStateException("The "+HQ_HOME_DIR+
+                                    " system property was not set");
         }
         
         return hqHomeDir;
