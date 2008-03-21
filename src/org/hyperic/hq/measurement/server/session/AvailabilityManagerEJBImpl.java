@@ -159,6 +159,7 @@ public class AvailabilityManagerEJBImpl
     private PageList getPageList(List availInfo, long begin, long end) {
         PageList rtn = new PageList();
         long interval = (end-begin)/DEFAULT_INTERVAL;
+        begin += interval;
         for (Iterator it=availInfo.iterator(); it.hasNext(); ) {
             AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
             long availStartime = rle.getStartime();
@@ -169,7 +170,7 @@ public class AvailabilityManagerEJBImpl
             LinkedList queue = new LinkedList();
             queue.add(rle);
             int i=0;
-            for (long curr=begin; curr<end; curr+=interval) {
+            for (long curr=begin; curr<=end; curr+=interval) {
                 long next = curr+interval;
                 long endtime =
                     ((AvailabilityDataRLE)queue.getFirst()).getEndtime();
