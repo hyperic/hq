@@ -47,7 +47,7 @@
       <column name="RESOURCE_ID"/>
     </many-to-one>
     <set inverse="true" cascade="all" name="availabilityData" table="HQ_AVAIL_DATA_RLE">
-      <key column="MEASUREMENT_ID"/>
+      <key on-delete="cascade" column="MEASUREMENT_ID"/>
       <one-to-many class="AvailabilityDataRLE"/>
     </set>
 
