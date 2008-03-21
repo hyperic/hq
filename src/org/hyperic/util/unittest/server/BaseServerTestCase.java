@@ -25,11 +25,13 @@
 
 package org.hyperic.util.unittest.server;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
@@ -226,7 +228,66 @@ public abstract class BaseServerTestCase extends TestCase {
             throw new UnitTestDBException(e);
         }
     }
-    
+
+    /**
+     * Used to insert new data, will fail if data already exists in db.
+     * @param schema File to extract XML data from.
+     * @throws UnitTestDBException 
+     */
+    protected final void insertFromSchema(File schema)
+        throws UnitTestDBException {
+        overlayDBData(schema, DatabaseOperation.INSERT);
+    }
+
+    /**
+     * Used to refresh data, will either update existing data or insert fresh.
+     * This will not perform as well as insert.
+     * @param schema File to extract XML data from.
+     * @throws UnitTestDBException 
+     */
+    protected final void refreshFromSchema(File schema)
+        throws UnitTestDBException {
+        overlayDBData(schema, DatabaseOperation.REFRESH);
+    }
+
+    private void overlayDBData(File schema, DatabaseOperation operation)
+        throws UnitTestDBException {
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = getConnection(true);
+            conn.setAutoCommit(false);
+            IDatabaseConnection iconn = new DatabaseConnection(conn);
+            // this is done for MySQL via another method
+            if (DBUtil.isPostgreSQL(conn)) {
+                stmt.execute("set constraints all deferred");
+            } else if (DBUtil.isOracle(conn)) {
+                stmt.execute("alter session set constraints = deferred");
+            }
+            InputStream stream;
+            if (schema.getName().endsWith(".gz")) {
+                stream = new GZIPInputStream(new FileInputStream(schema));
+            } else {
+                stream = new BufferedInputStream(new FileInputStream(schema));
+            }
+            IDataSet dataset = new FlatXmlDataSet(stream);
+            operation.execute(iconn, dataset);
+            conn.commit();
+        } catch (UnitTestDBException e) {
+            throw new UnitTestDBException(e);
+        } catch (SQLException e) {
+            throw new UnitTestDBException(e);
+        } catch (DatabaseUnitException e) {
+            throw new UnitTestDBException(e);
+        } catch (FileNotFoundException e) {
+            throw new UnitTestDBException(e);
+        } catch (IOException e) {
+            throw new UnitTestDBException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+        }
+    }
+
     /**
      * Start the jboss server with the "unittest" configuration.
      * 
