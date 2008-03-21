@@ -103,6 +103,18 @@ public abstract class BaseServerTestCase extends TestCase {
             
     private static URL deployment;
     
+    static 
+    {
+        // Set properties required to contact the jboss JNDI
+        System.setProperty("java.naming.factory.initial",
+                "org.jnp.interfaces.NamingContextFactory");
+        
+        System.setProperty("java.naming.factory.url.pkgs",
+                "org.jboss.naming:org.jnp.interfaces");
+        
+        System.setProperty("java.naming.provider.url",
+                "jnp://localhost:2099");
+    }
     
     /**
      * Creates an instance.
@@ -230,24 +242,23 @@ public abstract class BaseServerTestCase extends TestCase {
     }
 
     /**
-     * Used to insert new data, will fail if data already exists in db.
+     * Used to insert new data, will either update existing data or insert fresh.
      * @param schema File to extract XML data from.
      * @throws UnitTestDBException 
      */
-    protected final void insertFromSchema(File schema)
-        throws UnitTestDBException {
-        overlayDBData(schema, DatabaseOperation.INSERT);
-    }
-
-    /**
-     * Used to refresh data, will either update existing data or insert fresh.
-     * This will not perform as well as insert.
-     * @param schema File to extract XML data from.
-     * @throws UnitTestDBException 
-     */
-    protected final void refreshFromSchema(File schema)
+    protected final void insertSchemaData(File schema)
         throws UnitTestDBException {
         overlayDBData(schema, DatabaseOperation.REFRESH);
+    }
+    
+    /**
+     * Used to delete data that was specified by the schema.
+     * @param schema File to extract XML data from.
+     * @throws UnitTestDBException 
+     */
+    protected final void deleteSchemaData(File schema)
+        throws UnitTestDBException {
+        overlayDBData(schema, DatabaseOperation.DELETE);
     }
 
     private void overlayDBData(File schema, DatabaseOperation operation)
