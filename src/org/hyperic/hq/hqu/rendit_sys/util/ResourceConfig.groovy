@@ -62,7 +62,9 @@ class ResourceConfig {
         'description': [get: { svr -> svr.description },
                         set: { svrVal, desc -> svrVal.description = desc} ],
         'location':    [get: { svr -> svr.location },
-                        set: { svrVal, loc -> svr.location = loc} ],
+                        set: { svrVal, loc -> svrVal.location = loc} ],
+        'runtimeDiscovery':  [get: { svr -> svr.runtimeAutodiscovery.toString() },
+                              set: { svrVal, enabled -> svrVal.runtimeAutodiscovery = enabled.toBoolean() } ], 
     ]
      
     private static SERVICE_FIELD_KEYS = [
@@ -79,7 +81,9 @@ class ResourceConfig {
             targetForSet:  { r -> r.toPlatform().platformValue },
             saveSetTarget: { subjectVal, platVal ->
                 platMan.updatePlatformImpl(subjectVal, platVal)
-            }
+            },
+            populateAllCfg: { allCfg, platform ->
+            },
         ],
         'server': [
             fields: SERVER_FIELD_KEYS,
@@ -87,7 +91,10 @@ class ResourceConfig {
             targetForSet: { r -> r.toServer().serverValue },
             saveSetTarget: { subjectVal, serverVal ->
                svrMan.updateServer(subjectVal, serverVal)
-            }
+            },
+            populateAllCfg: { allCfg, server ->
+                allCfg.enableRuntimeAIScan = server.getRuntimeAutodiscovery() 
+            },
         ],
         'service': [
             fields: SERVICE_FIELD_KEYS,
@@ -95,7 +102,9 @@ class ResourceConfig {
             targetForSet: { r -> r.toService().serviceValue },
             saveSetTarget: { subjectVal, serviceVal ->
                 svcMan.updateService(subjectVal, serviceVal)
-            }
+            },
+            populateAllCfg: { allCfg, service ->
+            },
         ],
     ]
     
@@ -220,7 +229,6 @@ class ResourceConfig {
             }
         }
         
-        
         // POJO (field) level changes
         def appdefHandler = getAppdefHandler(resource)
         def targetForGet  = appdefHandler.targetForGet(resource)
@@ -233,21 +241,24 @@ class ResourceConfig {
             }
         }
         
+        println "Changed fields for ${appdefHandler.targetForSet(resource)}"
+        println "Fields = ${changedFields}"
         if (!changedFields.empty) {
             def targetForSet = appdefHandler.targetForSet(resource)
             changedFields.each { key, newVal ->
                 appdefHandler.fields[key]['set'](targetForSet, newVal)
             }
             
+            println "Saving target ${targetForSet.name}: ${targetForSet}"
             appdefHandler.saveSetTarget(subjectVal, targetForSet)
         }
         
         // Config Response changes
-        def entVal     = new AppdefEntityValue(entityID, subject)
-        def appdefVal  = entVal.resourceValue
-        def allConfigs     = new AllConfigResponses()
+        def entVal          = new AppdefEntityValue(entityID, subject)
+        def appdefVal       = entVal.resourceValue
+        def allConfigs      = new AllConfigResponses()
         allConfigs.resource = appdefVal
-        def allConfigsRoll = new AllConfigResponses()
+        def allConfigsRoll  = new AllConfigResponses()
         allConfigsRoll.resource = appdefVal
         def newResponses = [:]
         
@@ -275,6 +286,8 @@ class ResourceConfig {
                 allConfigs.setConfig(i, newResponse)
             }
         }
+        
+        appdefHandler.populateAllCfg(allConfigs, targetForGet)
         // XXX:  Undo this rollback crap when Appdef gets itself figured out.
         appBoss.setAllConfigResponses(subject, allConfigs, allConfigsRoll)
     }
