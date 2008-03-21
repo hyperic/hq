@@ -55,6 +55,16 @@ abstract class BaseController {
     private         jsonMethods = []   /* Names of methods which will 
                                           automatically encode JSON */
     private         xmlMethods= []     /* Names of methods going to XML */
+
+    /**
+     * Called immediately after the controller is fully constructed.
+     *
+     * This method should be over-written to setup instance variables.
+     * Usage of the constructor in controllers is not recommended and
+     * soon deprecated.
+     */
+    protected void init() {
+    }
     
     /**
      * Add a closure that will be executed prior to any controller action 

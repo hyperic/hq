@@ -58,6 +58,7 @@ class DefaultControllerDispatcher {
         controller.setInvokeArgs(invokeArgs)
         controller.setPlugin(p)
         
+        controller.init()
         return controller.dispatchRequest()
 	}
 }
