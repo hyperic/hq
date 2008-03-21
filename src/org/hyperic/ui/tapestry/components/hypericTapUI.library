@@ -45,5 +45,6 @@
     <component-type type="NavigationTabs" specification-path="navigation/NavigationTabs.jwc"/>
     
     <component-type type="MessagePanel" specification-path="panel/MessagePanel.jwc"/>
+    <component-type type="SearchPanel" specification-path="panel/SearchPanel.jwc"/>
     
 </library-specification>
