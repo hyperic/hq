@@ -59,9 +59,9 @@ import org.jdom.input.SAXBuilder;
  * The test case that all server-side unit tests should extend. Before starting 
  * the server, the user must set the <code>hq.unittest.jboss.home</code> system  
  * property to the path where the jboss server that will be used for unit testing 
- * resides. That jboss instance must contain a "unittest" configuration that has 
- * already had the Ant <code>prepare-jboss</code> target run against it. The 
- * <code>hq-ds.xml</code> datasource file must be configured to point to the 
+ * resides. That jboss instance must contain a "unittest" configuration created 
+ * with the <code>unittest-prepare-jboss</code> Ant target. The datasource file 
+ * (<code>hq-ds.xml</code>) in the "unittest" configuration must point to the 
  * *preexisting* unit testing server database.
  * 
  * In addition, the <code>hq.unittest.hq.home</code> system property must be set 
