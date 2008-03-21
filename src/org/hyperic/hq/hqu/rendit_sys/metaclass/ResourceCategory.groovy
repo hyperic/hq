@@ -299,8 +299,11 @@ class ResourceCategory {
                 // Else prototype is not a valid proto for the resource 
                 return []
             }
+        } else if (isServer(r)) {
+            Server s = toServer(r)
+            def svcType = svcMan.findServiceType(proto.instanceId)
+            return svcMan.findServicesByType(s, svcType).resource
         }
-        
         
         []
     }

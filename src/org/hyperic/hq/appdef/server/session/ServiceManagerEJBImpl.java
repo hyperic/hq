@@ -904,6 +904,16 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
     
     /**
+     * Get {@link Service}s which are children of the server, and of the
+     * specified type.
+     * @ejb:interface-method
+     */
+    public List findServicesByType(Server server, ServiceType st) { 
+        return getServiceDAO().findByServerAndType_orderName(server.getId(),
+                                                             st.getId());
+    }
+    
+    /**
      * Get platform service POJOs
      * @ejb:interface-method
      */
