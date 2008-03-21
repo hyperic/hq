@@ -12,7 +12,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -31,11 +31,16 @@
 
 <plugin package="org.hyperic.hq.plugin.coldfusion">
 
-  <server name="Coldfusion"
-          version="7.x">
+  <config name="cfconfig">
+    <option name="process.query"
+            description="Sigar PTQL Process Query"/>
+    <option name="logfile"
+            description="Coldfusion stats and events file"/>
+  </config>
 
-    <property name="DEFAULT_LOG_FILE"
-              value="logs/server.log"/>
+  <server name="Coldfusion"
+          version="6.x">
+
     <plugin type="log_track"
             class="ColdfusionErrorLogPlugin"/>
 
@@ -46,26 +51,28 @@
     <plugin type="collector"
             class="org.hyperic.hq.plugin.coldfusion.ColdfusionCollector"/>
 
+    <!-- must be in <installpath>/lib dir -->
+    <property name="version.file"
+              value="sniffer.jar"/>
     <properties>
        <property name="version"
                  description="Coldfusion Version"/>
     </properties>
 
-    <config>
-      <option name="installpath"
-              default="/opt/coldfusionmx7"
-              description="Coldfusion Install Path"/>
-      <option name="coldfusion-ptql"
-              default="State.Name.re=cfmx7|java,Args.*.ct=coldfusion,State.Name.Pne=$1"
-              description="Sigar PTQL Process Query"/>
-    </config>
+    <property name="process.query"
+              value="State.Name.eq=jrun,Args.*.ct=cfusion"/>
+    <property name="logfile"
+              value="logs/cfusion-event.log"/>
+
+    <config include="cfconfig"/>
 
     <metric name="Availability"
-            template="sigar:Type=ProcState,Arg=%coldfusion-ptql%:State"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
             indicator="true"/>
 
+    &process-metrics;
     <filter name="template"
-            value="coldfusion-stats:installpath=%installpath%:${alias}"/>
+            value="coldfusion-stats:installpath=%installpath%,logfile=%logfile%:${alias}"/>
 
     <metric name="Threads Listening For A New Connection"
             alias="listenTh"
@@ -180,16 +187,23 @@
     </service>
 
     <service name="Java Process Metrics">
-      <config>
-        <option name="process.query"
-                default="%coldfusion-ptql%"
-                description="PTQL for Coldfusion Java Process"/>
-      </config>
       <metric name="Availability"
               template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
-      &process-metrics;
     </service>
+  </server>
+
+  <server name="Coldfusion"
+          version="7.x"
+          include="6.x">
+    <!-- must be in <installpath>/lib dir -->
+    <property name="version.file"
+              value="cfmx-ssl.jar"/>
+    <property name="process.query"
+              value="State.Name.re=cfmx7,Args.*.ct=coldfusion,State.Name.Pne=$1"/>
+    <property name="logfile"
+              value="logs/server.log"/>
+    <config include="cfconfig"/>
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
@@ -261,4 +275,5 @@
   ]]>
   </help>
   <help name="Coldfusion 7.x" include="Coldfusion"/>
+  <help name="Coldfusion 6.x" include="Coldfusion"/>
 </plugin>

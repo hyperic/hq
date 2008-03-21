@@ -26,17 +26,12 @@
 package org.hyperic.hq.plugin.coldfusion;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,7 +51,6 @@ public class ColdfusionCollector extends Collector
     private String myStatsFile;
     private FileTail myWatcher;
     private BufferedReader myReader;
-    private Map myAliasMap = new HashMap();
     private static Log myLog = LogFactory.getLog(ColdfusionCollector.class);
     private static final Pattern LINE_PATTERN = 
         Pattern.compile("\\w+=\\d+\\.?(\\d+)?");
@@ -69,8 +63,8 @@ public class ColdfusionCollector extends Collector
         {
             //read 1st line of filename and create a List or String[] 
             //of the field names
-            myStatsFile = getProperty(ProductPlugin.PROP_INSTALLPATH)+
-                          "/logs/cfserver.log";
+            myStatsFile = getProperty(ProductPlugin.PROP_INSTALLPATH) + "/" +
+                          getProperty("logfile");
 
             myWatcher = getWatcher();
 
