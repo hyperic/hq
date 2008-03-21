@@ -27,7 +27,9 @@ package org.hyperic.tools.ant.dbupgrade;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -159,6 +161,42 @@ public class SST_AlterColumn extends SchemaSpecTask {
         sql.add(alterSql);
         doAlter(c, sql);
     }
+    
+    private String getPgsqlColumnType(Connection conn) throws BuildException {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = conn.createStatement();
+            String sql = "select udt_name, data_type, numeric_scale," +
+                " numeric_precision, character_maximum_length" +
+                " FROM information_schema.columns" +
+                " WHERE lower(table_name) = '" + _table.toLowerCase() + "'" +
+                " AND lower(column_name) = '" + _column.toLowerCase() + "'";
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                String type = rs.getString("data_type");
+                if (type.equalsIgnoreCase("numeric")) {
+                    String scale = rs.getString("numeric_scale");
+                    String precision = rs.getString("numeric_precision");
+                    return type + "(" + scale + "," + precision + ")";
+                } else if (type.equalsIgnoreCase("character varying")) {
+                    type = rs.getString("udt_name");
+                    String len = rs.getString("character_maximum_length");
+                    return type + "(" + len + ")";
+                } else if (type.equalsIgnoreCase("character")) {
+                    String len = rs.getString("character_maximum_length");
+                    return "char(" + len + ")";
+                }
+                return type;
+            }
+            throw new SQLException();
+        } catch (SQLException e) {
+            throw new BuildException("Error retrieving pg columntype from " +
+                "table, " + _table + " column, " + _column);
+        } finally {
+            DBUtil.closeJDBCObjects(getClass().getName(), null, stmt, rs);
+        }
+    }
 
     private void alter_pgsql (Connection c) throws BuildException {
         String columnTypeName = null;
@@ -166,21 +204,15 @@ public class SST_AlterColumn extends SchemaSpecTask {
 
         if (_columnType != null) {
             columnTypeName =  getDBSpecificTypeName(_columnType);
-            if ( _precision != null ) { 
-                columnTypeName += " (" + _precision + ")";
+            String currColType = getPgsqlColumnType(c);
+            if (!currColType.replaceAll("\\s+", "").equalsIgnoreCase(columnTypeName))
+            {
+                if ( _precision != null ) { 
+                    columnTypeName += " (" + _precision + ")";
+                }
+                sqlList.add("ALTER TABLE " + _table + " ALTER COLUMN " + _column +
+                            " TYPE " + columnTypeName);
             }
-            // In PostgreSQL you are not allowed to change a column type.
-            // So instead, we rename the column, create a new column with the
-            // desired datatype, copy the data over from the renamed/old column,
-            // and then drop the renamed/old column.
-            sqlList.add("ALTER TABLE " + _table
-                        + " RENAME " + _column + " TO tmp_" + _column);
-            sqlList.add("ALTER TABLE " + _table 
-                        + " ADD " + _column + " " + columnTypeName);
-            sqlList.add("UPDATE " + _table 
-                        + " SET " + _column + " = tmp_" + _column);
-            sqlList.add("ALTER TABLE " + _table
-                        + " DROP COLUMN tmp_" + _column);
         }
 
         if (_defval != null) {
@@ -201,7 +233,8 @@ public class SST_AlterColumn extends SchemaSpecTask {
                 sqlList.add("ALTER TABLE " + _table
                             + " ALTER " + _column + " DROP NOT NULL");
             } else {
-                throw new BuildException("Invalid nullable attribute: " + _nullable);
+                throw new BuildException("Invalid nullable attribute: " +
+                    _nullable);
             }
         }
 
