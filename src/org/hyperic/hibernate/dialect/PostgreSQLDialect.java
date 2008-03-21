@@ -40,6 +40,10 @@ public class PostgreSQLDialect
     implements HQDialect
 {
     private static final String logCtx = PostgreSQLDialect.class.getName();
+    
+    public boolean supportsDeferrableConstraints() {
+        return true;
+    }
 
     public String getCascadeConstraintsString() {
         return " cascade ";

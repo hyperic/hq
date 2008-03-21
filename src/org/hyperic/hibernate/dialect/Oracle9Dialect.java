@@ -50,6 +50,10 @@ public class Oracle9Dialect
     public Oracle9Dialect() {
         registerColumnType(Types.VARBINARY, 2000, "blob");
     }
+    
+    public boolean supportsDeferrableConstraints() {
+        return true;
+    }
 
 	public String getCreateSequenceString(String sequenceName) {
         return new StringBuffer()
