@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <module id="org.hyperic.ui.hq" version="1.0.0">
 
+<sub-module descriptor="hyperic.services.xml" />
+
 <!-- Application State Object(s) -->
 <!--
 <contribution configuration-id="tapestry.state.ApplicationObjects">

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<module id="hq.service" version="1.0.0" package="org.hyperic.hq.ui.service">
+
+<service-point id="SearchService" interface="org.apache.tapestry.engine.IEngineService">
+    <invoke-factory>
+        <construct class="SearchService">
+            <set-object property="request" value="service:tapestry.globals.HttpServletRequest"/>
+            <set-object property="response" value="service:tapestry.globals.HttpServletResponse"/>
+            <set-object property="linkFactory" value="infrastructure:linkFactory"/>
+            <set-object property="servletContext" value="service:tapestry.globals.ServletContext"/>
+        </construct>
+    </invoke-factory>
+</service-point>
+
+<contribution configuration-id="tapestry.Infrastructure">
+    <property name="searchService" object="service:SearchService"/>
+</contribution>
+
+</module>
