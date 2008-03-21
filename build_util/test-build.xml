@@ -9,6 +9,8 @@
 		
 <target name="test" depends="init,init-taskdefs,init-tests">
 	<echo message="Using the following system properties..."/>
+    <echo message="-Djava.system.class.loader=org.hyperic.util.unittest.server.IsolatingDefaultSystemClassLoader"/>	
+	<echo message="-Dhq.unittest.run=true"/>
 	<echo message="-Dhq.unittest.jboss.home=${jboss.home}"/>
 	<echo message="-Dhq.unittest.hq.home=${basedir}"/>
 			
