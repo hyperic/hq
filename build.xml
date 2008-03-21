@@ -1472,6 +1472,32 @@
           depends="pre-prepare-jboss,post-prepare-jboss"
           description="Prepare jboss - copy required drivers"/>
 
+  <!-- This extension to the "prepare-jboss" target is necessary since the 
+	   in-container unit tests deploy from the ${ear.dir} directory 
+	   that does *not* reside under ${jboss.home}. Unfortunately plugins 
+	   are deployed relative to ${jboss.home} so we have to copy over the 
+	   plugins to an hq.ear directory residing under ${jboss.home}.
+	   (see the "URLs" attribute for the URLDeploymentScanner in 
+	    product-plugin-service.xml) -->		
+  <target name="unittest-prepare-jboss" 
+          depends="all,prepare-jboss"
+          description="Prepare jboss for in-container unit testing">
+
+	  <echo message="Creating 'unittest' configuration - a copy of the prepared 'default' configuration"/>
+	  	
+      <copy todir="${jboss.home}/server/unittest">
+        <fileset dir="${jboss.home}/server/default" excludes="**/hq.ear/**"/>
+      </copy>
+	    
+	  <echo message="Copying hq-plugins to 'unittest' configuration..."/>
+	  
+	  <copy todir="${jboss.home}/server/unittest/deploy/hq.ear/hq-plugins">
+		<fileset dir="${server.plugin.dir}"/>
+	  </copy>
+	  	  
+	  <echo message="Before running unit tests DON'T FORGET to set the connectionURL in the 'unittest' configuration hq-ds.xml to point at the unit test database."/>
+  </target>
+	  
   <target name="pack-installer" description="Pack the installer" 
           depends="dbsetup-uncombine,dbsetup-combine">
 
