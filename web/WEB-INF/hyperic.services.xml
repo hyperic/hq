@@ -17,4 +17,8 @@
     <property name="searchService" object="service:SearchService"/>
 </contribution>
 
+<contribution configuration-id="tapestry.services.ApplicationServices">
+    <service name="search" object="service:SearchService"/>
+</contribution>
+
 </module>
