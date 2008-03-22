@@ -38,17 +38,17 @@ import org.hyperic.util.pager.PageList;
  */
 public class SearchService implements IEngineService {
     static Log log = LogFactory.getLog(SearchService.class);
-    
+
     public static final String SERVICE_NAME = "search";
-    
+
     public static final String SEARCH_PARAM = "q";
 
     public static final String PAGE_SIZE_PARAM = "n";
 
     public static final String PAGE_NUM_PARAM = "p";
-    
+
     public static final int DEFAULT_PAGE_SIZE = 10;
-    
+
     private HttpServletRequest _request;
 
     private HttpServletResponse _response;
@@ -59,74 +59,73 @@ public class SearchService implements IEngineService {
 
     public ILink getLink(boolean post, Object parameter) {
 
-	Map<String, Object> parameters = new HashMap<String, Object>();
-	parameters.put(ServiceConstants.SERVICE, getName());
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put(ServiceConstants.SERVICE, getName());
 
-	// The map can contain the SEARCH_STRING, SIZE and NUM params
-	// all optionally
-	if (parameter != null)
-	    parameters.putAll((Map) parameter);
-	return _linkFactory.constructLink(this, post, parameters, true);
+        // The map can contain the SEARCH_STRING, SIZE and NUM params
+        // all optionally
+        if (parameter != null)
+            parameters.putAll((Map) parameter);
+        return _linkFactory.constructLink(this, post, parameters, true);
     }
 
     public void service(IRequestCycle cycle) throws IOException {
-	String query = cycle.getParameter(SEARCH_PARAM);
-	String pageSize = cycle.getParameter(PAGE_SIZE_PARAM);
-	String pageNum = cycle.getParameter(PAGE_NUM_PARAM);
+        String query = cycle.getParameter(SEARCH_PARAM);
+        String pageSize = cycle.getParameter(PAGE_SIZE_PARAM);
+        String pageNum = cycle.getParameter(PAGE_NUM_PARAM);
 
-	// Holds the page size and page number
-	PageControl page;
+        // Holds the page size and page number
+        PageControl page;
 
-	if (query == null)
-	    return;
+        if (query == null)
+            return;
 
-	if (pageSize == null)
-	    page = new PageControl(1, DEFAULT_PAGE_SIZE);
+        if (pageSize == null)
+            page = new PageControl(1, DEFAULT_PAGE_SIZE);
 
-	else if (pageNum == null)
-	    page = new PageControl(1, Integer.parseInt(pageSize));
+        else if (pageNum == null)
+            page = new PageControl(1, Integer.parseInt(pageSize));
 
-	else
-	    page = new PageControl(Integer.parseInt(pageNum), Integer
-		    .parseInt(pageSize));
+        else
+            page = new PageControl(Integer.parseInt(pageNum), Integer
+                    .parseInt(pageSize));
 
-	WebUser user = (WebUser) _request.getSession().getAttribute(
-		Constants.WEBUSER_SES_ATTR);
-	AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(_servletContext);
+        WebUser user = (WebUser) _request.getSession().getAttribute(
+                Constants.WEBUSER_SES_ATTR);
+        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(_servletContext);
 
-	PageList res;
-	try {
-	    res = appdefBoss.search(user.getSessionId(), query, page);
-	} catch (Exception e) {
-	    log.error(e.getMessage());
-	    return;
-	}
-	_response.getWriter().write(getJsonResutls(res));
-
+        PageList res;
+        try {
+            res = appdefBoss.search(user.getSessionId(), query, page);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return;
+        }
+        _response.getWriter().write(getJsonResutls(res));
     }
-    
+
     public String getName() {
-	return SERVICE_NAME;
+        return SERVICE_NAME;
     }
 
     private String getJsonResutls(PageList res) {
-	//TODO convert to JSON
-	return res.toString();
+        //TODO convert to JSON
+        return res.toString();
     }
 
     public void setRequest(HttpServletRequest request) {
-	_request = request;
+        _request = request;
     }
 
     public void setResponse(HttpServletResponse response) {
-	_response = response;
+        _response = response;
     }
 
     public void setLinkFactory(LinkFactory linkFactory) {
-	_linkFactory = linkFactory;
+        _linkFactory = linkFactory;
     }
 
     public void setServletContext(ServletContext context) {
-	_servletContext = context;
+        _servletContext = context;
     }
 }
