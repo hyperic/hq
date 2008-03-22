@@ -2559,9 +2559,7 @@ public class AppdefBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, FinderException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        List list = getResourceManager().findViewables(subject, searchFor, pc);
-        Pager pager = Pager.getDefaultPager();
-        return pager.seek(list, pc);
+        return getResourceManager().findViewables(subject, searchFor, pc);
     }
 
     /**

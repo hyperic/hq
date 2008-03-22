@@ -485,16 +485,21 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return Map of resource values
      * @ejb:interface-method
      */
-    public List findViewables(AuthzSubject subject, String searchFor,
-                              PageControl pc) {
+    public PageList findViewables(AuthzSubject subject, String searchFor,
+                                  PageControl pc) {
         ResourceDAO dao = getResourceDAO();
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         List resIds = pm.findViewableResources(subject, searchFor, pc);
-        List resources = new ArrayList(resIds.size());
-        for (Iterator it = resIds.iterator(); it.hasNext(); ) {
+        Pager pager = Pager.getDefaultPager();
+        List paged = pager.seek(resIds, pc);
+
+        PageList resources = new PageList();
+        for (Iterator it = paged.iterator(); it.hasNext(); ) {
             Integer id = (Integer) it.next();
             resources.add(dao.findById(id));
         }
+        
+        resources.setTotalSize(resIds.size());
         return resources;
     }
 
