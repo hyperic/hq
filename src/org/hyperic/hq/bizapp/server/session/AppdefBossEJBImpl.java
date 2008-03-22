@@ -2558,21 +2558,28 @@ public class AppdefBossEJBImpl
     public PageList search(int sessionId, String searchFor, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, FinderException {
-        return findAllPlatforms(sessionId, pc);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        List list = getResourceManager().findViewables(subject, searchFor, pc);
+        Pager pager = Pager.getDefaultPager();
+        return pager.seek(list, pc);
     }
 
     /**
-     * Produce list of compatible, viewable inventory items.
-     * The returned list of value objects will be filtered
-     * on Group -- if the group contains the entity.
-     *
-     * NOTE: This method returns an empty page list when no compatible
-     *       inventory is found.
-     * @param groupEntity        - the appdef entity of a group value who's
-     *                          members are to be filtered for result set.
-     * @param resourceName    - resource name (or name substring) to search for.
+     * Produce list of compatible, viewable inventory items. The returned list
+     * of value objects will be filtered on Group -- if the group contains the
+     * entity.
+     * 
+     * NOTE: This method returns an empty page list when no compatible inventory
+     * is found.
+     * 
+     * @param groupEntity -
+     *            the appdef entity of a group value who's members are to be
+     *            filtered for result set.
+     * @param resourceName -
+     *            resource name (or name substring) to search for.
      * @return page list of value objects that extend AppdefResourceValue
-     * @throws AppdefGroupNotFoundException if the group is not found
+     * @throws AppdefGroupNotFoundException
+     *             if the group is not found
      * @ejb:interface-method
      */
     public PageList findCompatInventory(int sessionId, int appdefTypeId,

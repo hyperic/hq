@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.util.StringUtil;
 
 /**
@@ -132,8 +132,8 @@ public class AppdefEntityID
         this(entityType, entityID.intValue());
     }
 
-    public AppdefEntityID(ResourceValue rv) {
-        String rtName = rv.getResourceTypeValue().getName();
+    public AppdefEntityID(Resource rv) {
+        String rtName = rv.getResourceType().getName();
         _entityID = rv.getInstanceId().intValue();
         if(rtName.equals(AuthzConstants.platformResType)) {
             _entityType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;

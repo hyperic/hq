@@ -88,9 +88,9 @@ public class PermissionManagerImpl
     
     private static final String VIEWABLE_SEARCH =
         "WHERE EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND NOT PROTO_ID = 0 AND "+
-              "(SORT_NAME LIKE '%?%' OR " +
+              "(SORT_NAME LIKE ? OR " +
                "PROTO_ID IN (SELECT ID FROM EAM_RESOURCE " +
-                            "WHERE PROTO_ID = 0 AND SORT_NAME LIKE '%?%')) ";
+                            "WHERE PROTO_ID = 0 AND SORT_NAME LIKE ?)) ";
 
     private Connection getConnection() {
         return DAOFactory.getDAOFactory().getCurrentSession().connection();
@@ -268,10 +268,10 @@ public class PermissionManagerImpl
             sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", _falseToken);
  
             if (searchFor == null) {
-                searchFor = "";
+                searchFor = "%";
             }
             else {
-                searchFor = searchFor.toUpperCase();
+                searchFor = '%' + searchFor.toUpperCase() + '%';
             }
             
             stmt = conn.prepareStatement(sql);

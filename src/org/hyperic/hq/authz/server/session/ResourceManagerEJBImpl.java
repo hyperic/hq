@@ -479,6 +479,26 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
+     * Get viewable resources  by "type" OR "resource name"
+     *
+     * @param subject
+     * @return Map of resource values
+     * @ejb:interface-method
+     */
+    public List findViewables(AuthzSubject subject, String searchFor,
+                              PageControl pc) {
+        ResourceDAO dao = getResourceDAO();
+        PermissionManager pm = PermissionManagerFactory.getInstance(); 
+        List resIds = pm.findViewableResources(subject, searchFor, pc);
+        List resources = new ArrayList(resIds.size());
+        for (Iterator it = resIds.iterator(); it.hasNext(); ) {
+            Integer id = (Integer) it.next();
+            resources.add(dao.findById(id));
+        }
+        return resources;
+    }
+
+    /**
      * Get viewable resources either by "type" OR "resource name"
      * OR "type AND resource name".
      *
