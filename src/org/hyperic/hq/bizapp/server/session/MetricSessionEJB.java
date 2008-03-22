@@ -692,8 +692,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return result;
     }
 
-    protected List getPlatformAG(AuthzSubjectValue subject,
-                                 AppdefEntityTypeID ctype)
+    protected List getPlatformAG(AuthzSubject subject, AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, PermissionException {
         if(ctype.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
             throw new IllegalArgumentException(ctype.getType() + 
@@ -720,8 +719,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         // Get the member IDs
-        List platforms = getPlatformAG(subject.getAuthzSubjectValue(),
-                                       platTypeId);
+        List platforms = getPlatformAG(subject, platTypeId);
         
         // Get resource type name
         PlatformTypeValue platType =

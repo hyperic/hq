@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -64,7 +64,8 @@ public class PermissionManagerImpl
     private String _falseToken = null;
 
     private static final String VIEWABLE_SELECT =
-        "SELECT instance_id, EAM_RESOURCE.sort_name FROM EAM_RESOURCE ";
+        "SELECT instance_id, EAM_RESOURCE.sort_name, EAM_RESOURCE.id " +
+        "FROM EAM_RESOURCE ";
 
     private static final String VIEWABLE_CLAUSE =
         " EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND " +
@@ -84,6 +85,12 @@ public class PermissionManagerImpl
     private static final String AUTHZ_WHERE_OVERLORD_INSTANCE
         = " AND authz_r.RESOURCE_TYPE_ID = ? "
         + "AND authz_r.INSTANCE_ID = %%RESID%%";
+    
+    private static final String VIEWABLE_SEARCH =
+        "WHERE EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND NOT PROTO_ID = 0 AND "+
+              "(SORT_NAME LIKE '%?%' OR " +
+               "PROTO_ID IN (SELECT ID FROM EAM_RESOURCE " +
+                            "WHERE PROTO_ID = 0 AND SORT_NAME LIKE '%?%')) ";
 
     private Connection getConnection() {
         return DAOFactory.getDAOFactory().getCurrentSession().connection();
@@ -121,7 +128,7 @@ public class PermissionManagerImpl
         return true;
     }
     
-    public PageList findOperationScopeBySubject(AuthzSubjectValue subj,
+    public PageList findOperationScopeBySubject(AuthzSubject subj,
                                                 String opName, String resType,
                                                 PageControl pc) 
         throws FinderException, PermissionException
@@ -141,7 +148,7 @@ public class PermissionManagerImpl
         return new PageList();
     }
 
-    public PageList findOperationScopeBySubject(AuthzSubjectValue subj,
+    public PageList findOperationScopeBySubject(AuthzSubject subj,
                                                 Integer opId, PageControl pc) 
         throws FinderException, PermissionException
     {
@@ -159,7 +166,7 @@ public class PermissionManagerImpl
     }
 
     public ResourceValue[]
-        findOperationScopeBySubjectBatch(AuthzSubjectValue whoami,
+        findOperationScopeBySubjectBatch(AuthzSubject whoami,
                                          ResourceValue[] resArr, 
                                          String[] opArr)
         throws FinderException
@@ -177,7 +184,7 @@ public class PermissionManagerImpl
         return (ResourceValue[]) fromLocals(resLocArr, ResourceValue.class);
     }
 
-    public List findViewableResources(AuthzSubjectValue subj, String resType,
+    public List findViewableResources(AuthzSubject subj, String resType,
                                       String resName, String appdefTypeStr,
                                       Integer typeId, PageControl pc) {
         List viewableInstances = new ArrayList();
@@ -242,7 +249,57 @@ public class PermissionManagerImpl
         }
     }
 
-    private PageList findScopeBySQL(AuthzSubjectValue subj, Integer opId, 
+    public List findViewableResources(AuthzSubject subj, String searchFor,
+                                      PageControl pc) {
+        List viewableInstances = new ArrayList();
+        
+        PreparedStatement stmt = null;
+        ResultSet rs = null;        
+        try {
+            Connection conn = getConnection();
+            String sql = VIEWABLE_SELECT + VIEWABLE_SEARCH;
+            
+            // TODO: change sort by
+            sql += "ORDER BY EAM_RESOURCE.sort_name ";
+            
+            if(!pc.isAscending()) {
+                sql = sql + "DESC";
+            }
+            sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", _falseToken);
+ 
+            if (searchFor == null) {
+                searchFor = "";
+            }
+            else {
+                searchFor = searchFor.toUpperCase();
+            }
+            
+            stmt = conn.prepareStatement(sql);
+            int i = 1;
+            
+            stmt.setString(i++, searchFor);
+            stmt.setString(i++, searchFor);
+            
+            if (_log.isDebugEnabled())
+                _log.debug("Viewable search for (" + searchFor + ") SQL: " +
+                           sql);
+            
+            rs = stmt.executeQuery();
+
+            for(i = 1; rs.next(); i++) {
+                viewableInstances.add(new Integer(rs.getInt(3)));
+            }
+            return viewableInstances;
+        } catch (SQLException e) {
+            _log.error("Error search by SQL", e);
+            throw new SystemException("SQL Error search: " + e.getMessage());
+        } finally {
+            DBUtil.closeJDBCObjects(ctx, null, stmt, rs);
+            disconnectSession();
+        }
+    }
+
+    private PageList findScopeBySQL(AuthzSubject subj, Integer opId, 
                                     PageControl pc)
         throws FinderException, PermissionException 
     {
@@ -308,7 +365,7 @@ public class PermissionManagerImpl
         return ps_idx;
     }
 
-    public List getAllOperations(AuthzSubjectValue subject, PageControl pc)
+    public List getAllOperations(AuthzSubject subject, PageControl pc)
         throws PermissionException, FinderException 
     {
         Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
@@ -321,8 +378,7 @@ public class PermissionManagerImpl
         } catch (Exception e) {
             return null;
         }
-        return operationPager.seek(ops, pc.getPagenum(),
-                                   pc.getPagesize());
+        return operationPager.seek(ops, pc.getPagenum(), pc.getPagesize());
     }
 
     public Collection getGroupResources(Integer subjectId,

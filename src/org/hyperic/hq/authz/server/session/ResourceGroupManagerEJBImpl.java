@@ -132,7 +132,7 @@ public class ResourceGroupManagerEJBImpl
      * @param id The ID of the role you're looking for.
      * @ejb:interface-method
      */
-    public ResourceGroup findResourceGroupById(AuthzSubjectValue whoami,
+    public ResourceGroup findResourceGroupById(AuthzSubject whoami,
                                                Integer id)
         throws PermissionException, FinderException
     {
@@ -391,7 +391,7 @@ public class ResourceGroupManagerEJBImpl
      * Get all the resource groups including the root resource group.
      * @ejb:interface-method
      */
-    public List getAllResourceGroups(AuthzSubjectValue subject, PageControl pc)
+    public List getAllResourceGroups(AuthzSubject subject, PageControl pc)
         throws PermissionException, FinderException 
     {
         return getAllResourceGroups(subject, pc, false);
@@ -404,7 +404,7 @@ public class ResourceGroupManagerEJBImpl
      * @ejb:interface-method
      */
     public PageList 
-        getAllResourceGroupsResourceInclusive(AuthzSubjectValue subject, 
+        getAllResourceGroupsResourceInclusive(AuthzSubject subject, 
                                               PageControl pc,
                                               ResourceValue resource)
         throws PermissionException, FinderException 
@@ -451,7 +451,7 @@ public class ResourceGroupManagerEJBImpl
      * Get all the resource groups excluding the root resource group.
      * @ejb:interface-method
      */
-    public Collection getAllResourceGroups(AuthzSubjectValue subject,
+    public Collection getAllResourceGroups(AuthzSubject subject,
                                            boolean excludeRoot)
         throws PermissionException, FinderException 
     {
@@ -505,7 +505,7 @@ public class ResourceGroupManagerEJBImpl
         // first get the list of groups subject can view
         PermissionManager pm = PermissionManagerFactory.getInstance();
         List groupIds =
-            pm.findOperationScopeBySubject(subject.getAuthzSubjectValue(),
+            pm.findOperationScopeBySubject(subject,
                                            AuthzConstants.groupOpViewResourceGroup,
                                            AuthzConstants.groupResourceTypeName,
                                            PageControl.PAGE_ALL);
@@ -526,7 +526,7 @@ public class ResourceGroupManagerEJBImpl
      * Get all the resource groups excluding the root resource group and paged
      * @ejb:interface-method
      */
-    public PageList getAllResourceGroups(AuthzSubjectValue subject,
+    public PageList getAllResourceGroups(AuthzSubject subject,
                                          PageControl pc,
                                          boolean excludeRoot)
         throws PermissionException, FinderException 
@@ -541,7 +541,7 @@ public class ResourceGroupManagerEJBImpl
      * @param pc Paging information for the request
      * @ejb:interface-method
      */
-    public PageList getResourceGroupsById(AuthzSubjectValue whoami,
+    public PageList getResourceGroupsById(AuthzSubject whoami,
                                           Integer[] ids,
                                           PageControl pc)
         throws PermissionException, FinderException 
@@ -715,7 +715,7 @@ public class ResourceGroupManagerEJBImpl
      * @param id The ID of the role you're looking for.
      * @ejb:interface-method
      */
-    public void setGroupModifiedBy(AuthzSubjectValue whoami, Integer id) {
+    public void setGroupModifiedBy(AuthzSubject whoami, Integer id) {
         ResourceGroup groupLocal = getResourceGroupDAO().findById(id);
         groupLocal.setModifiedBy(whoami.getName());
     }

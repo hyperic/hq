@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -64,6 +64,7 @@ import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -142,7 +143,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:interface-method
      */
-    public AppdefGroupValue createGroup(AuthzSubjectValue subject, String name,
+    public AppdefGroupValue createGroup(AuthzSubject subject, String name,
                                         String description, String location )
         throws GroupCreationException, GroupDuplicateNameException {
 
@@ -172,7 +173,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:interface-method
      */
-    public AppdefGroupValue createGroup(AuthzSubjectValue subject, int adType,
+    public AppdefGroupValue createGroup(AuthzSubject subject, int adType,
                                         String name, String description,
                                         String location)
         throws GroupCreationException, GroupDuplicateNameException {
@@ -212,7 +213,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:interface-method
      */
-    public AppdefGroupValue createGroup(AuthzSubjectValue subject, int adType,
+    public AppdefGroupValue createGroup(AuthzSubject subject, int adType,
         int adResType, String name, String description, String location)
         throws  GroupCreationException, GroupDuplicateNameException {
         int groupType;
@@ -236,7 +237,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     // XXX- hit appdef service manager with list of services.
     // XXX- add cluster_id
     // XXX- authz checks
-    private AppdefGroupValue createGroup(AuthzSubjectValue subject, int gType,
+    private AppdefGroupValue createGroup(AuthzSubject subject, int gType,
                                          int adType, int adResType, String name,
                                          String description, String location)
         throws GroupCreationException, GroupDuplicateNameException 
@@ -268,7 +269,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
 
         GroupManagerLocal manager = getGroupManager();
 
-        gv = (AppdefGroupValue) manager.createGroup(subject,gv);
+        gv = (AppdefGroupValue) manager.createGroup(subject, gv);
 
         // Setup the group to contain a valid type object. 
         setGroupAppdefResourceType(subject,gv);
@@ -288,7 +289,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AppdefGroupValue findGroupByName(AuthzSubjectValue subject,
+    public AppdefGroupValue findGroupByName(AuthzSubject subject,
                                             String groupName)
         throws AppdefGroupNotFoundException, PermissionException 
     {
@@ -305,7 +306,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AppdefGroupValue findGroupByName(AuthzSubjectValue subject,
+    public AppdefGroupValue findGroupByName(AuthzSubject subject,
                                             String groupName, PageControl pc)
         throws AppdefGroupNotFoundException, PermissionException 
     {
@@ -322,7 +323,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
      */
-    public AppdefGroupValue findGroup(AuthzSubjectValue subject, Integer id)
+    public AppdefGroupValue findGroup(AuthzSubject subject, Integer id)
         throws AppdefGroupNotFoundException, PermissionException {
         AppdefEntityID aeid = AppdefEntityID.newGroupID(id.intValue());
         return findGroup(subject, aeid);
@@ -337,7 +338,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throws AppdefGroupNotFoundException when group cannot be located in db.
      * @throws PermissionException if the caller is not authorized.
      */
-    public AppdefGroupValue findGroup(AuthzSubjectValue subject,
+    public AppdefGroupValue findGroup(AuthzSubject subject,
                                       AppdefEntityID id)
         throws AppdefGroupNotFoundException, PermissionException {
         return findGroup(subject, id, true);
@@ -353,7 +354,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throws AppdefGroupNotFoundException when group cannot be located in db.
      * @throws PermissionException if the caller is not authorized.
      */
-    public AppdefGroupValue findGroup(AuthzSubjectValue subject,
+    public AppdefGroupValue findGroup(AuthzSubject subject,
                                       AppdefEntityID id, boolean full)
         throws AppdefGroupNotFoundException, PermissionException {
         return findGroup(subject, id, null, full);
@@ -362,7 +363,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     /*
      * Lookup and return a group value object by either its name or identifier.
      */
-    private AppdefGroupValue findGroup(AuthzSubjectValue subject,
+    private AppdefGroupValue findGroup(AuthzSubject subject,
                                        AppdefEntityID id,
                                        String groupName, boolean full)
         throws AppdefGroupNotFoundException, PermissionException
@@ -428,7 +429,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
       * @throws PermissionException           - unable to view group
       * @ejb:interface-method
       */
-    public PageList getGroupMemberValues(AuthzSubjectValue subject,
+    public PageList getGroupMemberValues(AuthzSubject subject,
                                          Integer gid, PageControl pc)
         throws AppdefGroupNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
@@ -530,7 +531,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                ancillary resources can't be found)
      * @ejb:interface-method
      */
-    public void saveGroup(AuthzSubjectValue subject, AppdefGroupValue gv)
+    public void saveGroup(AuthzSubject subject, AppdefGroupValue gv)
         throws GroupNotCompatibleException, GroupModificationException, 
                GroupDuplicateNameException, AppSvcClustDuplicateAssignException, 
                PermissionException, VetoException 
@@ -542,7 +543,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
 
             if (gv.getGroupType() == 
                     AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
-                manageServiceCluster(subject, gv);
+                manageServiceCluster(subject.getAuthzSubjectValue(), gv);
             }
             GroupManagerLocal manager = getGroupManager();
             manager.saveGroup(subject, gv);
@@ -579,7 +580,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     // Enforce group strictness and compatibility. This is no longer 
     // implemented as a visitor and therefore will only be performed
     // at time of group save.
-    private void validateGroup (AuthzSubjectValue subject, AppdefGroupValue gv) 
+    private void validateGroup (AuthzSubject subject, AppdefGroupValue gv) 
         throws GroupNotCompatibleException, AppdefEntityNotFoundException, 
                PermissionException, GroupModificationException {
 
@@ -633,7 +634,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
      */
-    public PageList findAllGroups(AuthzSubjectValue subject, PageControl pc)
+    public PageList findAllGroups(AuthzSubject subject, PageControl pc)
         throws PermissionException {
         return findAllGroups(subject, (ResourceValue) null, pc, null);
     }
@@ -648,7 +649,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
      */
-    public PageList findAllGroups(AuthzSubjectValue subject, PageControl pc,
+    public PageList findAllGroups(AuthzSubject subject, PageControl pc,
                                   AppdefPagerFilter[] grpFilters)
         throws PermissionException {
         return findAllGroups(subject, (ResourceValue) null, pc, grpFilters);
@@ -666,7 +667,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
      * */
-    public PageList findAllGroups(AuthzSubjectValue subject, AppdefEntityID id,
+    public PageList findAllGroups(AuthzSubject subject, AppdefEntityID id,
                                   PageControl pc,
                                   AppdefPagerFilter[] grpFilters)
         throws PermissionException, ApplicationException {
@@ -689,8 +690,9 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         return findAllGroups(subject,rv,pc,grpFilters);
     }
 
-    private PageList findAllGroups(AuthzSubjectValue subject, 
-        ResourceValue rv, PageControl pc, AppdefPagerFilter[] grpFilters)
+    private PageList findAllGroups(AuthzSubject subject, 
+                                   ResourceValue rv, PageControl pc,
+                                   AppdefPagerFilter[] grpFilters)
         throws PermissionException {
         PageList retVal = null;
 
@@ -761,8 +763,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      * */
-    public Integer[] findClusterIds(AuthzSubjectValue subject, 
-                                    AppdefEntityID id)
+    public Integer[] findClusterIds(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException, ApplicationException {
         ResourceValue rv = null;
         try {
@@ -815,7 +816,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
      */
-    public void deleteGroup(AuthzSubjectValue subject, AppdefEntityID entityId)
+    public void deleteGroup(AuthzSubject subject, AppdefEntityID entityId)
         throws AppdefGroupNotFoundException, PermissionException, VetoException 
     {
         deleteGroup(subject, entityId.getId());
@@ -827,24 +828,25 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
      */
-    public void deleteGroup(AuthzSubjectValue subject, Integer groupId)
+    public void deleteGroup(AuthzSubject subject, Integer groupId)
         throws AppdefGroupNotFoundException, PermissionException, VetoException 
     {
         try {
             GroupManagerLocal manager = getGroupManager();
             AppdefGroupValue gv = findGroup(subject,groupId);
+            AuthzSubjectValue subjVal = subject.getAuthzSubjectValue();
 
             if (gv.getGroupType() == 
                 AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC && 
                 gv.getClusterId() != CLUSTER_UNDEFINED) {
-                removeServiceCluster (subject,gv.getClusterId());
+                removeServiceCluster (subjVal, gv.getClusterId());
             }
-            manager.deleteGroup(subject, groupId );
+            manager.deleteGroup(subjVal, groupId );
 
                     
             // Send resource delete event
             ResourceDeletedZevent zevent =
-                new ResourceDeletedZevent(subject,
+                new ResourceDeletedZevent(subjVal,
                     new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
                                        groupId));
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
@@ -867,16 +869,16 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
      */
-    public AppdefGroupValue changeGroupOwner(AuthzSubjectValue subject,
+    public AppdefGroupValue changeGroupOwner(AuthzSubject subject,
                                              Integer groupId,
-                                             AuthzSubjectValue newOwner)
+                                             AuthzSubject newOwner)
         throws AppdefGroupNotFoundException, PermissionException {
         try {
             GroupManagerLocal manager = getGroupManager();
 
             // first lookup the group to test permissions
             AppdefGroupValue agv;
-            agv = this.findGroup(subject, groupId);
+            agv = findGroup(subject, groupId);
 
             // now change the owner.
             manager.changeGroupOwner(subject, agv, newOwner);
@@ -931,7 +933,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     /* This had to be adopted from appdef boss's similar version. This will
      * eventually be available from a new EJB that will represent all of the
      * appdef entities agnostically.*/
-    private AppdefResourceValue findById(AuthzSubjectValue subject,
+    private AppdefResourceValue findById(AuthzSubject subject,
                                          AppdefEntityID entityId)
         throws AppdefEntityNotFoundException, PermissionException {
 
@@ -978,7 +980,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     // is not an actual appdef entity, we set the group up as a surrogate
     // for either a dummy type (GroupTypeValue) or a copy of one of its
     // member's type objects.
-    private void setGroupAppdefResourceType(AuthzSubjectValue subject,
+    private void setGroupAppdefResourceType(AuthzSubject subject,
                                             AppdefGroupValue gv) {
 
         try {

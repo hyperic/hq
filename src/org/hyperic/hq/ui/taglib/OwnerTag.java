@@ -28,13 +28,12 @@ package org.hyperic.hq.ui.taglib;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.BizappUtils;
-
 import org.apache.struts.util.ResponseUtils;
 import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.util.BizappUtils;
 
 /**
  * A JSP tag that formats and prints the "owner information" commonly
@@ -86,7 +85,7 @@ public class OwnerTag extends VarSetterBaseTag {
             throw new JspTagException(je.toString());
         }
 
-        /* XXX: would be nice if WebUser and AuthzSubjectValue
+        /* XXX: would be nice if WebUser and AuthzSubject
          * implemented a common interface or something
          */
         String username;
@@ -99,7 +98,7 @@ public class OwnerTag extends VarSetterBaseTag {
             full = BizappUtils.makeSubjectFullName(webUser.getFirstName(),
                                                    webUser.getLastName());
         } else {
-            AuthzSubjectValue subject = (AuthzSubjectValue) owner;
+            AuthzSubject subject = (AuthzSubject) owner;
             username = subject.getName();
             email = subject.getEmailAddress();
             full = BizappUtils.makeSubjectFullName(subject.getFirstName(),

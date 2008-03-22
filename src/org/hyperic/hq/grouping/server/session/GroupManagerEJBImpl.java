@@ -83,7 +83,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
     /**
      *  Create a persistent group according to options specified.
      * 
-     * @param subject subject
+     * @param subj subject
      * @param group value object ref to populate. Visitors can be pre-registered
      * @return GroupValue object.
      * @throws GroupCreationException during finding of resource types and
@@ -91,15 +91,14 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public GroupValue createGroup(AuthzSubjectValue subject, GroupValue group)
+    public GroupValue createGroup(AuthzSubject subj, GroupValue group)
         throws GroupCreationException, GroupDuplicateNameException 
     {
-        AuthzSubject subjectPojo = 
-            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId());
+        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         try {
             // To avoid groups with duplicate names, we're now performing a
             // a case-insensitive name based find before creation.
-            if (groupNameExists(subject, group)) {
+            if (groupNameExists(subj, group)) {
                 throw new GroupDuplicateNameException ("A Group "+
                                                        "with same name "+
                                                        "exists.");
@@ -118,7 +117,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             
             ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
             ResourceGroup rg =
-                rgmLoc.createResourceGroup(subjectPojo, createInfo,
+                rgmLoc.createResourceGroup(subj, createInfo,
                                            Collections.EMPTY_LIST,  // Roles
                                            Collections.EMPTY_LIST); // Resources
 
@@ -132,7 +131,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             group.setCTime         ( new Long(rg.getCtime()) );
             group.setMTime         ( new Long(rg.getMtime()) );
             group.setModifiedBy    ( rg.getModifiedBy() );
-            group.setOwner         ( subject.getName() );
+            group.setOwner         ( subj.getName() );
 
            // Here's where we add our own group resource to our group.
             rgmLoc.addResource(subject, rg,
@@ -173,10 +172,11 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public GroupValue findGroup (AuthzSubjectValue subject, GroupValue retVal,
+    public GroupValue findGroup (AuthzSubject subj, GroupValue retVal,
                                  boolean full)
         throws PermissionException, GroupNotFoundException 
     {
+        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         try {
             ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
 
@@ -185,7 +185,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
                 group = rgmLoc.findResourceGroupByName(subject,
                                                        retVal.getName());
             } else { 
-                group = rgmLoc.findResourceGroupById(subject,retVal.getId());
+                group = rgmLoc.findResourceGroupById(subj,retVal.getId());
             }
 
             if (group == null) {
@@ -233,29 +233,29 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
     /**
      *  Lookup and return a group from the specified identifier.
      * 
-     * @param subject subject
+     * @param subj subject
      * @param gv for filtering
      * @param rv for filtering
      * @param pc for paging
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public PageList findAllGroups (AuthzSubjectValue subject, GroupValue gv, 
+    public PageList findAllGroups (AuthzSubject subj, GroupValue gv, 
                                    ResourceValue rv, PageControl pc) 
         throws  GroupNotFoundException, PermissionException,
                 CloneNotSupportedException 
     {
+        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         PageList retVal = null;
-
         try {
             ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
 
             List rgList;
             if (rv != null) {
-                rgList = rgmLoc.getAllResourceGroupsResourceInclusive(subject,
+                rgList = rgmLoc.getAllResourceGroupsResourceInclusive(subj,
                                                                       pc,rv);
             } else {
-                rgList = rgmLoc.getAllResourceGroups(subject,pc,true);
+                rgList = rgmLoc.getAllResourceGroups(subj,pc,true);
             }
 
             List toBePaged = new ArrayList();
@@ -325,24 +325,23 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
      *  initiating save operation. Contents of group overwrite any
      *  previous group data.
      * 
-     * @param subject The authz subject
+     * @param subj The authz subject
      * @param groupVo The group value object
      * @throws GroupModificationException when group save fails.
      * @throws PermissionException when consumer is not owner or priv'd.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void saveGroup(AuthzSubjectValue subject, GroupValue groupVo)
-        throws GroupModificationException,
-               GroupDuplicateNameException,
-               PermissionException,
-               GroupVisitorException
+    public void saveGroup(AuthzSubject subj, GroupValue groupVo)
+        throws GroupModificationException, GroupDuplicateNameException,
+               PermissionException, GroupVisitorException
     {
+        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         try {
             ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
             
             // First, lookup the group to preserve non-updatable fields
-            ResourceGroup rg = rgmLoc.findResourceGroupById(subject,
+            ResourceGroup rg = rgmLoc.findResourceGroupById(subj,
                                                             groupVo.getId());
             ResourceGroupValue rgVo = rg.getResourceGroupValue();
 
@@ -351,7 +350,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             // case-insensitive name based find before saving.
             if (!groupVo.getName().toLowerCase().equals( 
                     rgVo.getName().toLowerCase()) &&
-                groupNameExists(subject,groupVo)) {
+                groupNameExists(subj,groupVo)) {
                 throw new GroupDuplicateNameException ("A Group "+
                                                        "with same name "+
                                                        "exists.");
@@ -364,10 +363,10 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             rgVo.setDescription (groupVo.getDescription());
             rgVo.setLocation    (groupVo.getLocation());
             rgVo.setMTime       ( new Long(System.currentTimeMillis()) );
-            rgVo.setModifiedBy  (subject.getName());
+            rgVo.setModifiedBy  (subj.getName());
             rgVo.setClusterId   (groupVo.getClusterId());
 
-            rgmLoc.saveResourceGroup(subject,rgVo);
+            rgmLoc.saveResourceGroup(subject, rgVo);
 
             // Fetch existing entries
             Collection resList = rg.getResources();
@@ -456,9 +455,9 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public GroupValue changeGroupOwner(AuthzSubjectValue subject,
+    public GroupValue changeGroupOwner(AuthzSubject subject,
                                        GroupValue groupVo,
-                                       AuthzSubjectValue newOwner)
+                                       AuthzSubject newOwner)
         throws GroupNotFoundException, PermissionException 
     {
         try {
@@ -510,7 +509,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
 
     // To avoid groups with duplicate names, we're now performing a
     // a case-insensitive name based find before creation.
-    private boolean groupNameExists(AuthzSubjectValue subject, GroupValue gVo) {
+    private boolean groupNameExists(AuthzSubject subject, GroupValue gVo) {
         try {
             findGroup(subject, gVo, false);
         } catch (GroupNotFoundException e) {

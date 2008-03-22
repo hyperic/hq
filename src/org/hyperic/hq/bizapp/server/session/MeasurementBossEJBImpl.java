@@ -2265,8 +2265,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
         ServiceManagerLocal svcMgr = ServiceManagerEJBImpl.getOne();
         Collection services =
-            svcMgr.getPlatformServices(subject.getAuthzSubjectValue(),
-                                       entId.getId());
+            svcMgr.getPlatformServices(subject, entId.getId());
         return getSummarizedResourceCurrentHealth(subject, services);
     }
     
@@ -2608,9 +2607,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
             
             if (virtIds.size() > 0)
-                hosts = getPlatformManager()
-                    .getPlatformsByServers(subject.getAuthzSubjectValue(),
-                                           virtIds);
+                hosts = getPlatformManager().getPlatformsByServers(subject,
+                                                                   virtIds);
             break;
         default:
             return new PageList();
@@ -2669,11 +2667,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
         PlatformManagerLocal platMan = getPlatformManager();
         PlatformType pt = platMan.findPlatformType(platTypeId);
-        PageList platforms =
-            platMan.getPlatformsByType(subject.getAuthzSubjectValue(),
-                                       pt.getName());
+        PageList platforms = platMan.getPlatformsByType(subject, pt.getName());
         
-        // Return a paged list of current health        
+        // Return a paged list of current health
         return getResourcesCurrentHealth(subject, platforms);
     }
 

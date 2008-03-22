@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -30,11 +30,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,11 +40,11 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -200,7 +198,7 @@ public class GalertBossEJBImpl
     public PageList findDefinitions(int sessionId, Integer gid, PageControl pc)
         throws SessionException, PermissionException
     {
-        AuthzSubjectValue subj = _sessMan.getSubject(sessionId);
+        AuthzSubject subj = _sessMan.getSubjectPojo(sessionId);
         
         // Find the ResourceGroup
         ResourceGroup g;
@@ -301,7 +299,7 @@ public class GalertBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubjectValue subj = _sessMan.getSubject(sessionId);
+        AuthzSubject subj = _sessMan.getSubjectPojo(sessionId);
 
         ResourceGroup g;
         try {
@@ -334,7 +332,7 @@ public class GalertBossEJBImpl
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubjectValue subj = _sessMan.getSubject(sessionId);
+        AuthzSubject subj = _sessMan.getSubjectPojo(sessionId);
 
         ResourceGroup g;
         try {

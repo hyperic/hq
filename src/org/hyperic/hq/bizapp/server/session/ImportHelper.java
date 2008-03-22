@@ -251,11 +251,11 @@ class ImportHelper
 
         try {
             try {
-                Platform plat  = _platMan.createPlatform(_subject,
+                Platform plat  = _platMan.createPlatform(_subjPojo,
                                                          pType.getId(),
                                                          aPlatform, agentPk);
                 aPlatform =
-                    _platMan.getPlatformValueById(_subject, plat.getId());
+                    _platMan.getPlatformValueById(_subjPojo, plat.getId());
             } catch (PlatformNotFoundException e) {
                 throw new BatchImportException("Unable to find the platform " +
                                                " we just created");
@@ -376,7 +376,7 @@ class ImportHelper
         aServer.setLocation(server.getLocation());
 
         try {
-            Server newServer = _servMan.createServer(_subject, plat.getId(),
+            Server newServer = _servMan.createServer(_subjPojo, plat.getId(),
                                                      sType.getId(), aServer);
             aServer.setId(newServer.getId());
         } catch(PlatformNotFoundException exc){
@@ -498,12 +498,12 @@ class ImportHelper
         }
 
         try {
-            Integer pk = _serviceMan.createService(_subject,
+            Integer pk = _serviceMan.createService(_subjPojo,
                                                    server.getId(),
                                                    sType.getId(),
                                                    aService);
             try {
-                aService = _serviceMan.getServiceById(_subject, pk);
+                aService = _serviceMan.getServiceById(_subjPojo, pk);
             } catch (ServiceNotFoundException e) {  
                 throw new BatchImportException("Could not find service we " +
                                                "just created");
@@ -543,7 +543,7 @@ class ImportHelper
         String name = service.getName();
 
         try {
-            aServices = _serviceMan.findServicesByName(_subject, name);
+            aServices = _serviceMan.findServicesByName(_subjPojo, name);
             if (aServices.length > 1) {
                 throw new BatchImportException("Multiple matches for " + name);
             }
@@ -610,7 +610,7 @@ class ImportHelper
         }
 
         try {
-            _appMan.setServiceDepsForApp(_subject, dt);
+            _appMan.setServiceDepsForApp(_subjPojo, dt);
         } catch(ApplicationNotFoundException exc){
             throw new SystemException("Unable to find application that " +
                                          "was just created, '" + 
@@ -685,7 +685,7 @@ class ImportHelper
 
         try {
             Application pk =
-                _appMan.createApplication(_subject, aApp, serviceList);
+                _appMan.createApplication(_subjPojo, aApp, serviceList);
             aApp = pk.getApplicationValue();
         } catch(CreateException exc){
             throw new BatchImportException("Failed to create application '" +
@@ -896,21 +896,21 @@ class ImportHelper
                                                     memberType + "'");
                 }
                 
-                aGroup = _groupMan.createGroup(_subject,
+                aGroup = _groupMan.createGroup(_subjPojo,
                                                resVal.getAppdefType(),
                                                resVal.getId().intValue(),
                                                name, description,
                                                location);
             } else if(groupType.equals(XmlGroupValue.T_ADHOC)){
                 if(memberType.equals(XmlGroupValue.N_MIXED)){
-                    aGroup = _groupMan.createGroup(_subject, name,
+                    aGroup = _groupMan.createGroup(_subjPojo, name,
                                                    description, location);
                 } else if(memberType.equals(XmlGroupValue.N_GROUP)){
-                    aGroup = _groupMan.createGroup(_subject,
+                    aGroup = _groupMan.createGroup(_subjPojo,
                                       AppdefEntityConstants.APPDEF_TYPE_GROUP,
                                       name, description, location);
                 } else if(memberType.equals(XmlGroupValue.N_APP)){
-                    aGroup = _groupMan.createGroup(_subject,
+                    aGroup = _groupMan.createGroup(_subjPojo,
                                AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
                                name, description, location);
                 } else {
@@ -988,7 +988,7 @@ class ImportHelper
         }
 
         try {
-            _groupMan.saveGroup(_subject, aGroup);
+            _groupMan.saveGroup(_subjPojo, aGroup);
         } catch(VetoException exc) {
             throw new BatchImportException(ERR_BEGIN + exc.getMessage());
         } catch(GroupNotCompatibleException exc){
@@ -1043,31 +1043,31 @@ class ImportHelper
     private ServiceValue[] findServicesByName(String name)
         throws ServiceNotFoundException, PermissionException
     {
-        return _serviceMan.findServicesByName(_subject, name);
+        return _serviceMan.findServicesByName(_subjPojo, name);
     }
 
     private ServerValue[] findServersByName(String name)
         throws ServerNotFoundException
     {
-        return _servMan.findServersByName(_subject, name);
+        return _servMan.findServersByName(_subjPojo, name);
     }
 
     private PlatformValue findPlatformByName(String name)
         throws PlatformNotFoundException, PermissionException
     {
-        return _platMan.getPlatformByName(_subject, name);
+        return _platMan.getPlatformByName(_subjPojo, name);
     }
 
     private ApplicationValue findApplicationByName(String name)
         throws ApplicationNotFoundException, PermissionException
     {
-        return _appMan.findApplicationByName(_subject, name);
+        return _appMan.findApplicationByName(_subjPojo, name);
     }
 
     private AppdefGroupValue findGroupByName(String name)
         throws AppdefGroupNotFoundException, PermissionException
     {
-        return _groupMan.findGroupByName(_subject, name);
+        return _groupMan.findGroupByName(_subjPojo, name);
     }
 
     private PlatformTypeValue findPlatformTypeByName(String typeName)

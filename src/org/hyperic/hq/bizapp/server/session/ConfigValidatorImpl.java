@@ -60,7 +60,7 @@ public class ConfigValidatorImpl
 
         if(type.equals(ProductPlugin.TYPE_PRODUCT) ||
            type.equals(ProductPlugin.TYPE_CONTROL)) {
-            updateControlConfigs(subject.getAuthzSubjectValue(), ids);
+            updateControlConfigs(subject, ids);
         }
     }
 
@@ -122,7 +122,7 @@ public class ConfigValidatorImpl
         }
     }
 
-    private void updateControlConfigs(AuthzSubjectValue subject,
+    private void updateControlConfigs(AuthzSubject subject,
                                       AppdefEntityID[] ids)
         throws PermissionException, ConfigFetchException, EncodingException,
                InvalidConfigException
@@ -137,7 +137,8 @@ public class ConfigValidatorImpl
 
         for (int i=0; i<ids.length; i++) {
             try {
-                cLocal.checkControlEnabled(subject, ids[i]);
+                cLocal.checkControlEnabled(subject.getAuthzSubjectValue(),
+                                           ids[i]);
             } catch (PluginException e) {
                 // Not configured for control
                 continue;

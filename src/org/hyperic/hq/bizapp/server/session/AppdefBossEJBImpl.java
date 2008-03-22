@@ -67,6 +67,7 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentValue;
@@ -112,7 +113,6 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterGrpEntRes;
 import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterMemExclude;
@@ -121,8 +121,6 @@ import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterAssignSvc;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupEntityResource;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupMemExclude;
-import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterInternalService;
-import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -162,7 +160,6 @@ import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
-import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
@@ -279,8 +276,7 @@ public class AppdefBossEJBImpl
     public PageList findViewablePlatformTypes(int sessionID, PageControl pc)
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
-
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         PageList platTypeList = null ;
 
         platTypeList =
@@ -312,7 +308,7 @@ public class AppdefBossEJBImpl
     public PageList findViewableServerTypes(int sessionID, PageControl pc)
         throws FinderException, SessionNotFoundException, 
                SessionTimeoutException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getServerManager().getViewableServerTypes(subject, pc);
     }
 
@@ -321,7 +317,7 @@ public class AppdefBossEJBImpl
      */
     public List findAllApplicationTypes(int sessionID)
         throws ApplicationException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         try {
             return getApplicationManager().getAllApplicationTypes(subject);
         } catch (FinderException e) {
@@ -362,7 +358,7 @@ public class AppdefBossEJBImpl
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
 
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getServiceManager().getViewableServiceTypes(subject, pc);
     }
 
@@ -386,7 +382,7 @@ public class AppdefBossEJBImpl
         throws AppdefEntityNotFoundException, PermissionException,
                SessionTimeoutException, SessionNotFoundException {
 
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getApplicationManager().getApplicationById(subject, id);
     }
 
@@ -471,7 +467,7 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException 
     {
         // Get the AuthzSubject for the user's session
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getServiceManager().getPlatformServices(subject, platformId, pc);
     }
 
@@ -484,7 +480,7 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException 
     {
         // Get the AuthzSubject for the user's session
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getServiceManager().getPlatformServices(subject, platformId,
                                                        typeId, pc);
     }
@@ -525,14 +521,13 @@ public class AppdefBossEJBImpl
         throws AppdefEntityNotFoundException, PermissionException,
                SessionTimeoutException, SessionNotFoundException 
     {
-        AuthzSubjectValue subject = null;
         PageList res = null;
 
         if (pc == null)
             pc = PageControl.PAGE_ALL;
 
         // Get the AuthzSubject for the user's session
-        subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
         AppdefEntityValue aeval = new AppdefEntityValue(aeid, subject);
         switch  (aeid.getType()) {
@@ -576,7 +571,7 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         Integer id;
         id = entityId.getId();
         switch(entityId.getType()){
@@ -632,7 +627,7 @@ public class AppdefBossEJBImpl
                PermissionException, SessionNotFoundException,
                SessionTimeoutException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         List servers = getServerManager()
             .getServersByPlatformServiceType(subject, platId, svcTypeId);
 
@@ -666,7 +661,7 @@ public class AppdefBossEJBImpl
         throws AppdefEntityNotFoundException, PermissionException,
                SessionTimeoutException, SessionNotFoundException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getServerManager().getServersByPlatform(subject, platformId,
                                                        true, pc);
     }
@@ -681,10 +676,9 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException,
                PermissionException 
     {
-       AuthzSubjectValue subject = manager.getSubject(sessionID);
-
-       return getServerManager().getServerTypesByPlatform(subject, platformId, 
-                                                          true, pc);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        return getServerManager().getServerTypesByPlatform(subject, platformId, 
+                                                           true, pc);
     }
 
     /**
@@ -720,11 +714,10 @@ public class AppdefBossEJBImpl
                PermissionException 
     {
         ServerManagerLocal serverMan = getServerManager();
-        AuthzSubjectValue subject;
         PageList res;
 
         // Get the AuthzSubject for the user's session
-        subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
         switch (findByType) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM :
@@ -768,8 +761,7 @@ public class AppdefBossEJBImpl
         throws FinderException, SessionTimeoutException, 
                SessionNotFoundException, PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-    
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getPlatformManager().getAllPlatforms(subject, pc);
     }
 
@@ -786,7 +778,7 @@ public class AppdefBossEJBImpl
         throws FinderException, SessionTimeoutException, 
                SessionNotFoundException, PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getPlatformManager().getRecentPlatforms(subject, range, size);
     }
 
@@ -900,7 +892,7 @@ public class AppdefBossEJBImpl
         throws AppdefEntityNotFoundException, SessionTimeoutException,
                SessionNotFoundException, PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getPlatformManager().getPlatformValueById(subject, id);
     }
 
@@ -922,7 +914,7 @@ public class AppdefBossEJBImpl
         throws AppdefEntityNotFoundException, SessionTimeoutException,
                SessionNotFoundException, PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getServerManager().getServerById(subject, id);
     }
 
@@ -933,7 +925,7 @@ public class AppdefBossEJBImpl
         throws AppdefEntityNotFoundException, SessionTimeoutException,
                SessionNotFoundException, PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getServiceManager().getServiceById(subject, id);
     }
     
@@ -960,7 +952,7 @@ public class AppdefBossEJBImpl
     {
         List toBePaged;
         Pager defaultPager;
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         
         toBePaged    = new ArrayList();  // at very least, return empty list.
         defaultPager = Pager.getDefaultPager();
@@ -1034,7 +1026,7 @@ public class AppdefBossEJBImpl
     {
         try {
             // Get the AuthzSubject for the user's session
-            AuthzSubjectValue subject = manager.getSubject(sessionID);
+            AuthzSubject subject = manager.getSubjectPojo(sessionID);
             Platform platform =
                 getPlatformManager().createPlatform(subject, platTypePK,
                                                     platformVal, agent);
@@ -1144,7 +1136,7 @@ public class AppdefBossEJBImpl
      * @param subject  Subject setting the values
      * @param cProps A map of String key/value pairs to set
      */
-    private void setCPropValues(AuthzSubjectValue subject,
+    private void setCPropValues(AuthzSubject subject,
                                 AppdefEntityID entityId, Map cProps)
         throws SessionNotFoundException, SessionTimeoutException,
                CPropKeyNotFoundException, AppdefEntityNotFoundException,
@@ -1181,7 +1173,7 @@ public class AppdefBossEJBImpl
     {
         try {
             // Get the AuthzSubject for the user's session
-            AuthzSubjectValue subject = manager.getSubject(sessionID);
+            AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
             // Call into appdef to create the platform.
             ServerManagerLocal serverMan = getServerManager();
@@ -1212,7 +1204,7 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefDuplicateNameException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         ApplicationManagerLocal appMan = getApplicationManager();
             
         Application pk = appMan.createApplication(subject, appVal, services);
@@ -1233,7 +1225,7 @@ public class AppdefBossEJBImpl
                PermissionException, AppdefDuplicateNameException,
                ValidationException, CreateException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         try {
             Integer serverPK;
             if (aeid.isPlatform()) {
@@ -1273,7 +1265,7 @@ public class AppdefBossEJBImpl
     {
         try {
             // Get the AuthzSubject for the user's session
-            AuthzSubjectValue subject = manager.getSubject(sessionID);
+            AuthzSubject subject = manager.getSubjectPojo(sessionID);
             ServiceManagerLocal svcMan = getServiceManager();
             Integer pk = svcMan.createService(subject, serverPK,
                                               serviceTypePK, serviceVal);
@@ -1305,8 +1297,7 @@ public class AppdefBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                ApplicationException, VetoException 
     {
-        AuthzSubject subjectPojo = manager.getSubjectPojo(sessionId); 
-        AuthzSubjectValue subject = subjectPojo.getAuthzSubjectValue();
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
             
         try {
             // Lookup the platform (make sure someone else hasn't deleted it)
@@ -1416,7 +1407,7 @@ public class AppdefBossEJBImpl
                AppdefDuplicateNameException, CPropKeyNotFoundException
     {
         try {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
+            AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
             Server updated = getServerManager().updateServer(subject, aServer);
 
@@ -1498,14 +1489,12 @@ public class AppdefBossEJBImpl
                AppdefDuplicateNameException, CPropKeyNotFoundException
     {
         try {
-            AuthzSubjectValue subjectVal = subject.getAuthzSubjectValue();
-
             Service updated
-                = getServiceManager().updateService(subjectVal, aService);
+                = getServiceManager().updateService(subject, aService);
 
             if(cProps != null ) {
                 AppdefEntityID entityId = aService.getEntityId();
-                setCPropValues(subjectVal, entityId, cProps);
+                setCPropValues(subject, entityId, cProps);
             }
             return updated.getServiceValue();
         } catch (Exception e) {
@@ -1558,8 +1547,7 @@ public class AppdefBossEJBImpl
                AppdefDuplicateNameException, AppdefDuplicateFQDNException
     {
         try {
-            AuthzSubjectValue subjectVal = subject.getAuthzSubjectValue();
-            return getPlatformManager().updatePlatform(subjectVal, aPlatform);
+            return getPlatformManager().updatePlatform(subject, aPlatform);
         } catch (Exception e) {
             log.error("Error updating platform: " + aPlatform.getId());
             // rollback();
@@ -1596,7 +1584,7 @@ public class AppdefBossEJBImpl
         throws ApplicationException, PermissionException 
     {
         try {
-            AuthzSubjectValue caller = manager.getSubject(sessionId);
+            AuthzSubject caller = manager.getSubjectPojo(sessionId);
             return getApplicationManager().updateApplication(caller, app);
         } catch (PermissionException e) {
             rollback();
@@ -1623,7 +1611,7 @@ public class AppdefBossEJBImpl
         throws ApplicationException, PermissionException 
     {
         try {
-            AuthzSubjectValue caller = manager.getSubject(sessionId);
+            AuthzSubject caller = manager.getSubjectPojo(sessionId);
             getApplicationManager().setApplicationServices(caller, appId, 
                                                            entityIds);
         } catch (PermissionException e) {
@@ -1643,7 +1631,7 @@ public class AppdefBossEJBImpl
         throws ApplicationException, PermissionException 
     {
         try {
-            AuthzSubjectValue caller = manager.getSubject(sessionId);
+            AuthzSubject caller = manager.getSubjectPojo(sessionId);
             return getApplicationManager().getServiceDepsForApp(caller, appId);
         } catch (PermissionException e) {
             rollback();
@@ -1661,7 +1649,7 @@ public class AppdefBossEJBImpl
         throws ApplicationException, PermissionException 
     {
         try {
-            AuthzSubjectValue caller = manager.getSubject(sessionId);
+            AuthzSubject caller = manager.getSubjectPojo(sessionId);
             getApplicationManager().setServiceDepsForApp(caller, depTree);
         } catch (PermissionException e) {
             rollback();
@@ -1681,7 +1669,7 @@ public class AppdefBossEJBImpl
         throws PermissionException, ServerNotFoundException,
                SessionException, VetoException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
         try {
             ServerManagerLocal smLoc = getServerManager();
@@ -1720,7 +1708,7 @@ public class AppdefBossEJBImpl
 
             try {
                 AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
-                aiManager.toggleRuntimeScan(getOverlord(),
+                aiManager.toggleRuntimeScan(getOverlordVal(),
                                             serverRes.getEntityId(),
                                             false);
             } catch (Exception e) {
@@ -1754,7 +1742,7 @@ public class AppdefBossEJBImpl
         throws ApplicationException, VetoException 
     {
         try {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
+            AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
             AppdefEntityID id = 
                 AppdefEntityID.newServiceID(serviceId.intValue());
@@ -1793,7 +1781,7 @@ public class AppdefBossEJBImpl
                SessionException, VetoException
     {
         try {
-            AuthzSubjectValue caller = manager.getSubject(sessionId);
+            AuthzSubject caller = manager.getSubjectPojo(sessionId);
             getApplicationManager().removeApplication(caller, appId);
         } catch (SessionNotFoundException e) {
             rollback();
@@ -1822,7 +1810,7 @@ public class AppdefBossEJBImpl
                SessionNotFoundException 
     {
         try {
-            AuthzSubjectValue caller = manager.getSubject(sessionId);
+            AuthzSubject caller = manager.getSubjectPojo(sessionId);
             getApplicationManager().removeAppService(caller, appId, serviceId);
         } catch (SystemException e) {
             rollback();
@@ -1854,11 +1842,13 @@ public class AppdefBossEJBImpl
      */
     public AppdefResourceValue changeResourceOwner(int sessionId,
                                                    AppdefEntityID eid,
-                                                   AuthzSubjectValue newOwner)
+                                                   Integer newOwnerId)
         throws ApplicationException, PermissionException 
     {
         try {
-            AuthzSubjectValue caller = manager.getSubject(sessionId);
+            AuthzSubject caller = manager.getSubjectPojo(sessionId);
+            AuthzSubject newOwner =
+                getAuthzSubjectManager().findSubjectById(newOwnerId);
             Integer id = eid.getId();
             switch(eid.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -1871,8 +1861,8 @@ public class AppdefBossEJBImpl
                 getServiceManager().changeServiceOwner(caller, id, newOwner);
                 return findServiceById(sessionId, id);
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                getApplicationManager().changeApplicationOwner(caller, id, 
-                                                               newOwner);
+                getApplicationManager()
+                    .changeApplicationOwner(caller, id, newOwner);
                 return findApplicationById(sessionId, id);
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 getAppdefGroupManager().changeGroupOwner(caller, id, newOwner);
@@ -1906,7 +1896,7 @@ public class AppdefBossEJBImpl
         throws GroupCreationException, GroupDuplicateNameException,
                SessionTimeoutException, SessionNotFoundException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         return getAppdefGroupManager().createGroup(subject, name, description,
                                                    location);
     }
@@ -1931,8 +1921,7 @@ public class AppdefBossEJBImpl
         throws GroupCreationException, GroupDuplicateNameException,
                SessionTimeoutException, SessionNotFoundException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         return getAppdefGroupManager().createGroup(subject, adType, name,
                                                    description, location);
     }
@@ -1957,7 +1946,7 @@ public class AppdefBossEJBImpl
         throws GroupCreationException, GroupDuplicateNameException,
                SessionTimeoutException, SessionNotFoundException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         return getAppdefGroupManager().createGroup(subject, adType, adResType,
                                                    name, description, location);
     }
@@ -1969,7 +1958,7 @@ public class AppdefBossEJBImpl
         throws AppdefGroupNotFoundException, PermissionException,
                SessionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
         try {
             return getResourceGroupManager().findResourceGroupById(subject,
@@ -1987,7 +1976,7 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException 
     {
         try {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
+            AuthzSubject subject = manager.getSubjectPojo(sessionId);
             return getAppdefGroupManager().findGroup(subject, id);
         } catch (AppdefGroupNotFoundException e) {
             log.error("Caught 'group not found' exception.");
@@ -2009,7 +1998,7 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException,
                SystemException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
         
         List toBePaged = new ArrayList(groupIds.length);
@@ -2051,7 +2040,7 @@ public class AppdefBossEJBImpl
         throws PermissionException, SessionTimeoutException,
                SessionNotFoundException, ApplicationException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
         List filterList  = new ArrayList();
 
@@ -2066,9 +2055,9 @@ public class AppdefBossEJBImpl
             filterList.add(new AppdefGroupPagerFilterExclude(grpExcludeSet));
         }
 
-        return getAppdefGroupManager().findAllGroups(subject, entity, pc,
-                                               (AppdefPagerFilter[])
-                                               filterList.toArray(new AppdefPagerFilter[0]));
+        return getAppdefGroupManager()
+            .findAllGroups(subject, entity, pc, (AppdefPagerFilter[])
+                           filterList.toArray(new AppdefPagerFilter[0]));
     }
 
     /**
@@ -2156,7 +2145,7 @@ public class AppdefBossEJBImpl
         throws PermissionException, SessionTimeoutException,
                SessionNotFoundException, FinderException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         ResourceGroupManagerLocal mgr = ResourceGroupManagerEJBImpl.getOne();
         
         Collection resGrps = mgr.getAllResourceGroups(subject, true);
@@ -2178,7 +2167,7 @@ public class AppdefBossEJBImpl
     {
         PageList retVal;
 
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         retVal = getAppdefGroupManager().findAllGroups(subject, pc, grpFilters);
         if (retVal == null)
             retVal = new PageList();  // return empty list if no groups.
@@ -2193,12 +2182,12 @@ public class AppdefBossEJBImpl
                                     List aeids)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, FinderException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         ResourceGroupManagerLocal resMan = ResourceGroupManagerEJBImpl.getOne();
         ResourceGroup rg = resMan.findResourceGroupById(subject, gv.getId());
         for (Iterator it = aeids.iterator(); it.hasNext(); ) {
             AppdefEntityID aeid = (AppdefEntityID) it.next();
-            resMan.addResource(subject, rg, aeid);
+            resMan.addResource(subject.getAuthzSubjectValue(), rg, aeid);
         }
     }
 
@@ -2206,7 +2195,7 @@ public class AppdefBossEJBImpl
      * Save a group back to persistent storage.
      * @ejb:interface-method
      */
-    public void saveGroup(int sessionID, AppdefGroupValue gv)
+    public void saveGroup(int sessionId, AppdefGroupValue gv)
         throws GroupNotCompatibleException, GroupModificationException,
                GroupDuplicateNameException, 
                AppSvcClustDuplicateAssignException,
@@ -2214,7 +2203,7 @@ public class AppdefBossEJBImpl
                PermissionException, VetoException 
     {
         try {
-            AuthzSubjectValue subject = manager.getSubject(sessionID);
+            AuthzSubject subject = manager.getSubjectPojo(sessionId);
             getAppdefGroupManager().saveGroup(subject, gv);
         } catch (GroupModificationException e) {
             log.debug("Caught group modification exception on save.");
@@ -2223,7 +2212,7 @@ public class AppdefBossEJBImpl
     }
     
     // Return a PageList of authz resources.
-    private List findViewableEntityIds(AuthzSubjectValue subject, 
+    private List findViewableEntityIds(AuthzSubject subject, 
                                        int appdefTypeId, String rName,
                                        Integer filterType, PageControl pc) 
     {
@@ -2390,7 +2379,7 @@ public class AppdefBossEJBImpl
         if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER ||
             appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVICE) 
         {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
+            AuthzSubject subject = manager.getSubjectPojo(sessionId);
             
             for (Iterator i = ret.iterator(); i.hasNext(); ) {
                 AppdefResourceValue res = (AppdefResourceValue) i.next();
@@ -2410,16 +2399,6 @@ public class AppdefBossEJBImpl
         return ret;
     }
     
-    /**
-     * Perform a search for resources
-     * @ejb:interface-method
-     */
-    public PageList search(int sessionId, String searchFor, PageControl pc)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException, FinderException {
-        return findAllPlatforms(sessionId, pc);
-    }
-
     private PageList findCompatInventory(int sessionId, int appdefTypeId,
                                          int appdefResTypeId, 
                                          int grpEntId, 
@@ -2434,13 +2413,12 @@ public class AppdefBossEJBImpl
     {
         List toBePaged;
 
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subj = manager.getSubjectPojo(sessionId);
         AppdefPagerFilterGroupEntityResource erFilter;
         AppdefPagerFilterAssignSvc assignedSvcFilter;
         AppdefPagerFilterGroupMemExclude groupMemberFilter;
-        boolean groupEntContext =
-            groupType != APPDEF_GROUP_TYPE_UNDEFINED ||
-            grpEntId != APPDEF_GROUP_TYPE_UNDEFINED;
+        boolean groupEntContext = groupType != APPDEF_GROUP_TYPE_UNDEFINED ||
+                                  grpEntId != APPDEF_GROUP_TYPE_UNDEFINED;
 
         StopWatch watch = new StopWatch();
         watch.markTimeBegin("findCompatInventory");
@@ -2491,7 +2469,7 @@ public class AppdefBossEJBImpl
         // the HTML selectors that appear all over the product.
         if (groupEntContext) {
             erFilter =
-                new AppdefPagerFilterGroupEntityResource (subject,
+                new AppdefPagerFilterGroupEntityResource (subj,
                                                           groupType,
                                                           grpEntId,
                                                           appdefResTypeId,
@@ -2499,7 +2477,7 @@ public class AppdefBossEJBImpl
             filterList.add( erFilter );
         } else if (groupEntity != null) {
             erFilter =
-                new AppdefPagerFilterGroupEntityResource (subject,
+                new AppdefPagerFilterGroupEntityResource (subj,
                                                           groupType,
                                                           appdefTypeId,
                                                           appdefResTypeId,
@@ -2516,10 +2494,10 @@ public class AppdefBossEJBImpl
         // We have to create a new page control because we are no
         // longer limiting the size of the record set in authz.
         watch.markTimeBegin("findViewableEntityIds");
-        Integer filterType =
-            appdefResTypeId != -1 ? new Integer(appdefResTypeId) : null;
-        
-        toBePaged = findViewableEntityIds(subject,  appdefTypeId,
+        Integer filterType = appdefResTypeId != -1 ?
+                             new Integer(appdefResTypeId) : null;
+
+        toBePaged = findViewableEntityIds(subj,  appdefTypeId,
                                           resourceName, filterType, pc);
         watch.markTimeEnd("findViewableEntityIds");
 
@@ -2531,8 +2509,8 @@ public class AppdefBossEJBImpl
 
         for (Iterator itr = pl.iterator(); itr.hasNext();) {
             AppdefEntityID ent = (AppdefEntityID) itr.next();
-            AppdefEntityValue aev = new AppdefEntityValue(ent, subject);
-            
+            AppdefEntityValue aev = new AppdefEntityValue(ent, subj);
+
             try {
                 if (ent.isGroup()) {
                     finalList.add(aev.getAppdefGroupValue());
@@ -2573,7 +2551,17 @@ public class AppdefBossEJBImpl
         return new PageList(finalList,adjustedSize);
     }
 
-   /**
+    /**
+     * Perform a search for resources
+     * @ejb:interface-method
+     */
+    public PageList search(int sessionId, String searchFor, PageControl pc)
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException, FinderException {
+        return findAllPlatforms(sessionId, pc);
+    }
+
+    /**
      * Produce list of compatible, viewable inventory items.
      * The returned list of value objects will be filtered
      * on Group -- if the group contains the entity.
@@ -2723,7 +2711,7 @@ public class AppdefBossEJBImpl
                VetoException
     {
         try {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
+            AuthzSubject subject = manager.getSubjectPojo(sessionId);
             getAppdefGroupManager().deleteGroup(subject,groupId);
         } catch (AppdefGroupNotFoundException e) {
             log.debug("Unable to locate group for removal");
@@ -2747,7 +2735,7 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException,
                VetoException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
 
         for (int i=0;i<groupIds.length;i++) {
@@ -2764,8 +2752,7 @@ public class AppdefBossEJBImpl
      * should only get called before a user is about to be deleted
      * @ejb:interface-method
      */
-    public void resetResourceOwnership(int sessionId,
-                                       AuthzSubjectValue currentOwner)
+    public void resetResourceOwnership(int sessionId, AuthzSubject currentOwner)
         throws FinderException, UpdateException,
                PermissionException, AppdefEntityNotFoundException
     {
@@ -2773,7 +2760,7 @@ public class AppdefBossEJBImpl
             // first look up the appdef resources by owner
             ResourceValue[] resources
                 = getResourceManager().findResourceByOwner(currentOwner);
-            AuthzSubjectValue root = getAuthzSubjectManager().getRoot();
+            AuthzSubject overlord = getAuthzSubjectManager().getOverlordPojo();
             for(int i = 0; i < resources.length; i++) {
                 ResourceValue aRes = resources[i];
                 String resType = aRes.getResourceTypeValue().getName();
@@ -2781,32 +2768,35 @@ public class AppdefBossEJBImpl
                 if(resType.equals(AuthzConstants.platformResType)) {
                     // change platform owner
                     getPlatformManager()
-                        .changePlatformOwner(root,
+                        .changePlatformOwner(overlord,
                                              aRes.getInstanceId(),
-                                             root);
+                                             overlord);
                 }
                 // servers
                 if(resType.equals(AuthzConstants.serverResType)) {
                     // change server owner
                     getServerManager()
-                        .changeServerOwner(root, aRes.getInstanceId(), root);
+                        .changeServerOwner(overlord, aRes.getInstanceId(),
+                                           overlord);
                 }
                 if(resType.equals(AuthzConstants.serviceResType)) {
                     // change service owner
                     getServiceManager()
-                        .changeServiceOwner(root, aRes.getInstanceId(), root);
+                        .changeServiceOwner(overlord, aRes.getInstanceId(),
+                                            overlord);
                 }
                 if(resType.equals(AuthzConstants.applicationResType)) {
                     // change app owner
                     getApplicationManager()
-                        .changeApplicationOwner(root, aRes.getInstanceId(),
-                                                root);
+                        .changeApplicationOwner(overlord, aRes.getInstanceId(),
+                                                overlord);
                 }
                 if(resType.equals(AuthzConstants.groupResType)) {
                     try {
                         // change group owner
                         getAppdefGroupManager()
-                            .changeGroupOwner(root, aRes.getInstanceId(), root);
+                            .changeGroupOwner(overlord, aRes.getInstanceId(),
+                                              overlord);
                     } catch (AppdefGroupNotFoundException e) {
                         // Group may not be an appdef group
                         log.info("Group " + aRes.getInstanceId() +
@@ -2833,7 +2823,7 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException,
                VetoException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
 
         for (int i=0;i<groupIds.length;i++) {
@@ -2851,7 +2841,7 @@ public class AppdefBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                FinderException 
     {
-        AuthzSubjectValue who = manager.getSubject(sessionId);
+        AuthzSubject who = manager.getSubjectPojo(sessionId);
         return getPlatformManager().getResourcePermissions(who, id);
     }
 
@@ -3197,7 +3187,7 @@ public class AppdefBossEJBImpl
                PermissionException,
                AppdefEntityNotFoundException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         AppdefStatManagerLocal local = getAppdefStatManager();
         switch (adeId.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -3266,8 +3256,7 @@ public class AppdefBossEJBImpl
             }
         }
         
-        List viewables = findViewableEntityIds(user.getAuthzSubjectValue(),
-                                               APPDEF_TYPE_UNDEFINED,
+        List viewables = findViewableEntityIds(user, APPDEF_TYPE_UNDEFINED,
                                                null, null, null);
         for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
             DownMetricValue dmv = (DownMetricValue) it.next();
@@ -3326,8 +3315,7 @@ public class AppdefBossEJBImpl
         if (unavailEnts.size() == 0)
             return ret;
         
-        List viewables = findViewableEntityIds(user.getAuthzSubjectValue(),
-                                               APPDEF_TYPE_UNDEFINED,
+        List viewables = findViewableEntityIds(user, APPDEF_TYPE_UNDEFINED,
                                                null, null, null);
         for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
             DownMetricValue dmv = (DownMetricValue) it.next();

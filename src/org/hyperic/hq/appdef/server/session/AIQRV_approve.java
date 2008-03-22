@@ -25,38 +25,34 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.CreateException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.autoinventory.AIPlatform;
-import org.hyperic.hq.autoinventory.AIIp;
-import org.hyperic.hq.autoinventory.AIServer;
-import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.util.pager.PageList;
 
 /**
  * The AIQueueConstants.Q_DECISION_APPROVE means to add the queued
@@ -70,7 +66,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
     public AIQRV_approve () {}
 
     public void visitPlatform(AIPlatform aiplatform,
-                              AuthzSubjectValue subject,
+                              AuthzSubject subject,
                               PlatformManagerLocal pmLocal,
                               ConfigManagerLocal configMgr,
                               CPropManagerLocal cpropMgr,
@@ -125,7 +121,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             
             try {
                 configMgr.
-                    configureResource(subject,
+                    configureResource(subject.getAuthzSubjectValue(),
                                       aid,
                                       aiplatform.getProductConfig(),
                                       aiplatform.getMeasurementConfig(),
@@ -159,7 +155,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             if (aiplatformValue.isPlatformDevice()) {
                 try {
                     configMgr.
-                        configureResource(subject,
+                        configureResource(subject.getAuthzSubjectValue(),
                                           existingPlatform.getEntityId(),
                                           aiplatform.getProductConfig(),
                                           aiplatform.getMeasurementConfig(),
@@ -201,7 +197,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         }
     }
 
-    public void visitIp(AIIp aiip, AuthzSubjectValue subject,
+    public void visitIp(AIIp aiip, AuthzSubject subject,
                         PlatformManagerLocal platformMan)
         throws AIQApprovalException, PermissionException
     {
@@ -232,7 +228,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
     }
 
     public void visitServer(AIServer aiserver,
-                            AuthzSubjectValue subject,
+                            AuthzSubject subject,
                             PlatformManagerLocal pmLocal,
                             ServerManagerLocal smLocal,
                             ConfigManagerLocal configMgr,
@@ -304,7 +300,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
                 try {
                     configMgr.
-                        configureResource(subject,
+                        configureResource(subject.getAuthzSubjectValue(),
                                           server.getEntityId(),
                                           aiserver.getProductConfig(),
                                           aiserver.getMeasurementConfig(),
@@ -359,7 +355,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                         try {
                             serverValue
                                 = smLocal.findServerValueById(subject,
-                                                         server.getId());
+                                                              server.getId());
                         } catch (Exception e) {
                             throw new SystemException("Error fetching server " +
                                                       "with id=" +
@@ -379,7 +375,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 Server updated = smLocal.updateServer(subject, serverValue);
                 try {
                     configMgr.
-                        configureResource(subject,
+                        configureResource(subject.getAuthzSubjectValue(),
                                           serverValue.getEntityId(),
                                           aiserver.getProductConfig(),
                                           aiserver.getMeasurementConfig(),
@@ -448,7 +444,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         }
     }
 
-    private Platform getExistingPlatform(AuthzSubjectValue subject,
+    private Platform getExistingPlatform(AuthzSubject subject,
                                          PlatformManagerLocal pmLocal,
                                          AIPlatformValue aiplatform) {
         try {

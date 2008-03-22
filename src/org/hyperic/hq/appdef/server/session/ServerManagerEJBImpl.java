@@ -59,7 +59,6 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
-import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterGrpEntRes;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -156,7 +155,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @exception CreateException - if it fails to add the server
      * @ejb:interface-method
      */
-    public Server createServer(AuthzSubjectValue subject, Integer platformId,
+    public Server createServer(AuthzSubject subject, Integer platformId,
                                Integer serverTypeId, ServerValue sValue)
         throws CreateException, ValidationException, PermissionException,
                PlatformNotFoundException, AppdefDuplicateNameException 
@@ -189,7 +188,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
             // Send resource create event
             ResourceCreatedZevent zevent =
-                new ResourceCreatedZevent(subject, server.getEntityId());
+                new ResourceCreatedZevent(subject.getAuthzSubjectValue(),
+                                          server.getEntityId());
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
 
             return server;
@@ -216,7 +216,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @throws PermissionException 
      * @ejb:interface-method
      */
-    public Server createVirtualServer(AuthzSubjectValue subject,
+    public Server createVirtualServer(AuthzSubject subject,
                                       Platform platform, ServerType st)
         throws PermissionException, CreateException, FinderException {
         // First of all, make sure this is a virtual type
@@ -259,7 +259,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      *            The id of the Server.
      * @ejb:interface-method
      */
-    public void removeServer(AuthzSubjectValue subject, Integer id)
+    public void removeServer(AuthzSubject subject, Integer id)
         throws ServerNotFoundException, RemoveException, PermissionException,
                VetoException
     {
@@ -276,7 +276,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * PlatformManager.removePlatform when cascading removal to servers.
      * @ejb:interface-method
      */
-    public void removeServer(AuthzSubjectValue subject, Server server)
+    public void removeServer(AuthzSubject subject, Server server)
         throws ServerNotFoundException, RemoveException, PermissionException,
                VetoException
     {
@@ -366,7 +366,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return list of serverTypeValues
      * @ejb:interface-method
      */
-    public PageList getViewableServerTypes(AuthzSubjectValue subject,
+    public PageList getViewableServerTypes(AuthzSubject subject,
                                            PageControl pc)
         throws FinderException, PermissionException {
         // build the server types from the visible list of servers
@@ -384,7 +384,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return list of serverTypeValues
      * @ejb:interface-method
      */
-    public PageList getServerTypesByPlatform(AuthzSubjectValue subject,
+    public PageList getServerTypesByPlatform(AuthzSubject subject,
                                              Integer platId,
                                              PageControl pc)
         throws PermissionException, PlatformNotFoundException, 
@@ -396,7 +396,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return list of serverTypeValues
      * @ejb:interface-method
      */
-    public PageList getServerTypesByPlatform(AuthzSubjectValue subject,
+    public PageList getServerTypesByPlatform(AuthzSubject subject,
                                              Integer platId,
                                              boolean excludeVirtual,
                                              PageControl pc)
@@ -443,8 +443,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @deprecated Use findServerById instead.
      */
-    public ServerValue findServerValueById(AuthzSubjectValue subject,
-                                           Integer id)
+    public ServerValue findServerValueById(AuthzSubject subject, Integer id)
         throws ServerNotFoundException {
         return findServerById(id).getServerValue();
     }
@@ -478,8 +477,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param name - name of server
      * @ejb:interface-method
      */
-    public ServerValue[] findServersByName(AuthzSubjectValue subject,
-                                           String name)
+    public ServerValue[] findServersByName(AuthzSubject subject, String name)
         throws ServerNotFoundException
     {
         List serverLocals = getServerDAO().findByName(name);
@@ -545,7 +543,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get server lite value by id.  Does not check permission.
      * @ejb:interface-method
      */
-    public Server getServerPOJOById(AuthzSubjectValue subject, Integer id)
+    public Server getServerPOJOById(AuthzSubject subject, Integer id)
         throws ServerNotFoundException, PermissionException {
         Server server = findServerById(id);
         checkViewPermission(subject, server.getEntityId());
@@ -560,7 +558,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param servTypeId server type id.
      * @return An array of Server IDs.
      */
-    public Integer[] getServerIds(AuthzSubjectValue subject, Integer servTypeId)
+    public Integer[] getServerIds(AuthzSubject subject, Integer servTypeId)
         throws PermissionException {
         ServerDAO sLHome;
         try {
@@ -595,7 +593,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get server by id.
      * @ejb:interface-method
      */
-    public ServerValue getServerById(AuthzSubjectValue subject, Integer id)
+    public ServerValue getServerById(AuthzSubject subject, Integer id)
         throws ServerNotFoundException, PermissionException {
 
         Server s = findServerById(id);
@@ -608,8 +606,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @param name - name of server
      */
-    public ServerValue[] getServersByName(AuthzSubjectValue subject,
-                                          String name)
+    public ServerValue[] getServersByName(AuthzSubject subject, String name)
         throws ServerNotFoundException {
         return findServersByName(subject, name);
     }
@@ -626,8 +623,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get server by service.
      * @ejb:interface-method
      */
-    public ServerValue getServerByService(AuthzSubjectValue subject,
-                                          Integer sID) 
+    public ServerValue getServerByService(AuthzSubject subject, Integer sID) 
         throws ServerNotFoundException, ServiceNotFoundException, 
                PermissionException
     {
@@ -672,7 +668,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ServerValue objects representing all of the
      * servers that the given subject is allowed to view.
      */
-    public PageList getAllServers(AuthzSubjectValue subject, PageControl pc)
+    public PageList getAllServers(AuthzSubject subject, PageControl pc)
         throws FinderException, PermissionException {
         Collection servers = getViewableServers(subject, pc);
         
@@ -687,7 +683,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return List of ServerLocals for which subject has 
      * AuthzConstants.serverOpViewServer
      */
-    private Collection getViewableServers(AuthzSubjectValue subject,
+    private Collection getViewableServers(AuthzSubject subject,
                                           PageControl pc)
         throws PermissionException, FinderException {
         Collection servers;
@@ -715,7 +711,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         return servers;
     }
 
-    private Collection getServersByPlatformImpl( AuthzSubjectValue subject,
+    private Collection getServersByPlatformImpl( AuthzSubject subject,
                                                  Integer platId,
                                                  Integer servTypeId,
                                                  boolean excludeVirtual,
@@ -785,7 +781,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public PageList getServersByPlatform ( AuthzSubjectValue subject,
+    public PageList getServersByPlatform ( AuthzSubject subject,
                                            Integer platId,
                                            boolean excludeVirtual,
                                            PageControl pc) 
@@ -812,7 +808,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
-    public PageList getServersByPlatform ( AuthzSubjectValue subject,
+    public PageList getServersByPlatform ( AuthzSubject subject,
                                            Integer platId,
                                            Integer servTypeId,
                                            boolean excludeVirtual,
@@ -838,7 +834,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public PageList getServersByPlatformServiceType( AuthzSubjectValue subject,
+    public PageList getServersByPlatformServiceType( AuthzSubject subject,
                                                      Integer platId,
                                                      Integer svcTypeId)
         throws ServerNotFoundException, PlatformNotFoundException, 
@@ -869,7 +865,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public List getServersByType( AuthzSubjectValue subject, String name)
+    public List getServersByType( AuthzSubject subject, String name)
         throws PermissionException, InvalidAppdefTypeException {
         try {
             ServerType ejb = getServerTypeDAO().findByName(name);
@@ -905,7 +901,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public Integer[] getServerIdsByPlatform(AuthzSubjectValue subject,
+    public Integer[] getServerIdsByPlatform(AuthzSubject subject,
                                             Integer platId, Integer servTypeId)
         throws ServerNotFoundException, PlatformNotFoundException, 
                PermissionException 
@@ -924,7 +920,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public Integer[] getServerIdsByPlatform(AuthzSubjectValue subject,
+    public Integer[] getServerIdsByPlatform(AuthzSubject subject,
                                             Integer platId, 
                                             Integer servTypeId,
                                             boolean excludeVirtual)
@@ -953,7 +949,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ServerValue objects representing servers that support
      * the given application that the subject is allowed to view.
      */
-    private Collection getServersByApplicationImpl(AuthzSubjectValue subject,
+    private Collection getServersByApplicationImpl(AuthzSubject subject,
                                                    Integer appId,
                                                    Integer servTypeId)
         throws ServerNotFoundException, ApplicationNotFoundException,
@@ -1052,7 +1048,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ServerValue objects representing servers that support 
      * the given application that the subject is allowed to view.
      */
-    public PageList getServersByApplication(AuthzSubjectValue subject,
+    public PageList getServersByApplication(AuthzSubject subject,
                                             Integer appId, PageControl pc)
         throws ServerNotFoundException, ApplicationNotFoundException,
                PermissionException {
@@ -1070,9 +1066,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ServerValue objects representing servers that support 
      * the given application that the subject is allowed to view.
      */
-    public PageList getServersByApplication(AuthzSubjectValue subject,
-                                            Integer appId, Integer servTypeId,
-                                            PageControl pc)
+    public PageList getServersByApplication(AuthzSubject subject, Integer appId,
+                                            Integer servTypeId, PageControl pc)
         throws ServerNotFoundException, ApplicationNotFoundException,
                PermissionException {
         Collection serverCollection =
@@ -1092,7 +1087,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ServerValue objects representing servers that support
      * the given application that the subject is allowed to view.
      */
-    public Integer[] getServerIdsByApplication(AuthzSubjectValue subject,
+    public Integer[] getServerIdsByApplication(AuthzSubject subject,
                                                Integer appId,
                                                Integer servTypeId)
         throws ServerNotFoundException, ApplicationNotFoundException,
@@ -1124,7 +1119,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param existing 
      * @ejb:interface-method
      */
-    public Server updateServer(AuthzSubjectValue subject, ServerValue existing)
+    public Server updateServer(AuthzSubject subject, ServerValue existing)
         throws PermissionException, UpdateException,
                AppdefDuplicateNameException, ServerNotFoundException {
         try {
@@ -1156,8 +1151,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:interface-method
      */
-    public void changeServerOwner(AuthzSubjectValue who, Integer serverId,
-                                  AuthzSubjectValue newOwner)
+    public void changeServerOwner(AuthzSubject who, Integer serverId,
+                                  AuthzSubject newOwner)
         throws PermissionException, ServerNotFoundException {
         Server server;
         try {
@@ -1215,7 +1210,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
         AuthzSubject overlord = 
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-        AuthzSubjectValue overlordValue = overlord.getAuthzSubjectValue();
         AppdefGroupManagerLocal grpMgr = AppdefGroupManagerEJBImpl.getOne();
         for (Iterator i = curServers.iterator(); i.hasNext();) {
             ServerType stlocal = (ServerType) i.next();
@@ -1232,7 +1226,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 
                 try {
                     List groups = grpMgr
-                        .findAllGroups(overlordValue, PageControl.PAGE_ALL,
+                        .findAllGroups(overlord, PageControl.PAGE_ALL,
                                        new AppdefPagerFilter[0]);
                     for (Iterator grpIt = groups.iterator();
                          grpIt.hasNext(); ) {
@@ -1243,7 +1237,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                 grp.getGroupEntType() == groupEntType &&
                                 grp.getGroupEntResType() == groupEntResType)
                             {
-                                grpMgr.deleteGroup(overlordValue, grp.getId());
+                                grpMgr.deleteGroup(overlord, grp.getId());
                             }
                         } catch (AppdefGroupNotFoundException e) {
                             assert false :
@@ -1260,7 +1254,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                          svrIt.hasNext(); ) {
                         Server svrLocal = (Server) svrIt.next();
                         try {
-                            removeServer(overlordValue, svrLocal);
+                            removeServer(overlord, svrLocal);
                         } catch (ServerNotFoundException e) {
                             assert false :
                                 "Delete based on a server should not " +
@@ -1327,8 +1321,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             findAndSetPlatformType(newPlats, stype);
             
             stype = stLHome.create(stype);
-            createAuthzResource(overlordValue, 
-                                getServerPrototypeResourceType(),
+            createAuthzResource(overlord, getServerPrototypeResourceType(),
                                 prototype, stype.getId(), stype.getName(),
                                 null);  // No parent
         }
@@ -1359,7 +1352,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      */
     private void createAuthzServer(String serverName, Integer serverId, 
                                    Integer platformId, boolean isVirtual, 
-                                   AuthzSubjectValue subject, ServerType st)
+                                   AuthzSubject subject, ServerType st)
         throws CreateException, FinderException, PermissionException 
     {
         log.debug("Being Authz CreateServer");

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -114,9 +114,8 @@ public abstract class PermissionManager extends AuthzSession {
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public abstract PageList 
-        findOperationScopeBySubject(AuthzSubjectValue subj,
-                                    String opName, String resType,
-                                    PageControl pc) 
+        findOperationScopeBySubject(AuthzSubject subj, String opName,
+                                    String resType, PageControl pc) 
         throws FinderException, PermissionException;
 
     /**
@@ -125,8 +124,7 @@ public abstract class PermissionManager extends AuthzSession {
      * @return List of integer instance ids
      */
     public abstract PageList 
-        findOperationScopeBySubject(AuthzSubjectValue subj,
-                                    Integer opId,
+        findOperationScopeBySubject(AuthzSubject subj, Integer opId,
                                     PageControl pc)
         throws FinderException, PermissionException;
 
@@ -144,7 +142,7 @@ public abstract class PermissionManager extends AuthzSession {
      * @exception FinderException
      */
     public abstract ResourceValue[]
-        findOperationScopeBySubjectBatch(AuthzSubjectValue whoami,
+        findOperationScopeBySubjectBatch(AuthzSubject whoami,
                                          ResourceValue[] resArr,
                                          String[] opArr)
         throws FinderException;
@@ -158,12 +156,21 @@ public abstract class PermissionManager extends AuthzSession {
      *
      * @return a list of Integers representing instance ids
      */
-    public abstract List findViewableResources(AuthzSubjectValue subj,
-                                      String resType, 
-                                      String resName, 
-                                      String appdefTypeStr,
-                                      Integer typeId,
-                                      PageControl pc);
+    public abstract List findViewableResources(AuthzSubject subj,
+                                               String resType, 
+                                               String resName, 
+                                               String appdefTypeStr,
+                                               Integer typeId,
+                                               PageControl pc);
+    
+    /**
+     * Search viewable resources of any type
+     * @return a list of Integers representing instance ids
+     */
+    public abstract List findViewableResources(AuthzSubject subj,
+                                               String searchFor, 
+                                               PageControl pc);
+    
 
     /**
      * Get all operations for a given subject
@@ -171,7 +178,7 @@ public abstract class PermissionManager extends AuthzSession {
      * @return a list of Integers representing instance ids
      */
     public abstract List 
-        getAllOperations(AuthzSubjectValue subject, PageControl pc)
+        getAllOperations(AuthzSubject subject, PageControl pc)
         throws PermissionException, FinderException;
 
 

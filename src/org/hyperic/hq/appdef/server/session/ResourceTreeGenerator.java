@@ -249,7 +249,7 @@ public class ResourceTreeGenerator {
             upPlats.add(platform.getId());
             try {
                 servers = serverMan.getServersByPlatform(
-                    subject.getAuthzSubjectValue(), platformID, true, null);
+                    subject, platformID, true, null);
             } catch(AppdefEntityNotFoundException exc){
                 throw new SystemException("Internal inconsistancy: " +
                                              "could not find servers for " +
@@ -313,9 +313,8 @@ public class ResourceTreeGenerator {
 
             upServers.add(serverID);
             try {
-                services = serviceMan.getServicesByServer(
-                    subject.getAuthzSubjectValue(), serverID,
-                    PageControl.PAGE_ALL);
+                services = serviceMan.getServicesByServer(subject, serverID,
+                                                          PageControl.PAGE_ALL);
             } catch(AppdefEntityNotFoundException exc){
                 throw new SystemException("Internal inconsistancy: " +
                                              "could not find services for " +
@@ -414,9 +413,9 @@ public class ResourceTreeGenerator {
 
         if((direction & GO_DOWN) != 0){
             try {
-                services = serviceMan.getServicesByApplication(
-                    subject.getAuthzSubjectValue(), app.getId(),
-                    PageControl.PAGE_ALL);
+                services =
+                    serviceMan.getServicesByApplication(subject, app.getId(),
+                                                        PageControl.PAGE_ALL);
             } catch(AppdefEntityNotFoundException exc){
                 throw new SystemException("Internal inconsistancy: could " +
                                              "not get services on which " +

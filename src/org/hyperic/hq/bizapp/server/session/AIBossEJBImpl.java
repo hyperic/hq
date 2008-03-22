@@ -366,7 +366,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                              PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException {
 
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
 
         // TODO: pagecontrol is currently ignored here...
         return getAIManager().getQueue(subject, showIgnored,
@@ -495,7 +495,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                AIQApprovalException, PermissionException, ValidationException {
 
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
 
         try {
             getAIManager().processQueue(subject,
@@ -573,8 +573,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                 getAIManager().getAIPlatformByPlatformID(subject, platformID);
             if (aiplatform != null)
                 return aiplatform;
-        } catch(NamingException exc){
-            throw new SystemException(exc);
         } catch(FinderException exc){
             throw new PlatformNotFoundException(platformID);
         }

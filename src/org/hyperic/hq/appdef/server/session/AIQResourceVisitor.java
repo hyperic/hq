@@ -32,18 +32,16 @@ import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
-
-import org.apache.commons.logging.Log;
 
 public interface AIQResourceVisitor {
 
     public void visitPlatform(AIPlatform aiplatform,
-                              AuthzSubjectValue subject,
+                              AuthzSubject subject,
                               PlatformManagerLocal pmLocal,
                               ConfigManagerLocal configMgr,
                               CPropManagerLocal cpropMgr,
@@ -51,12 +49,12 @@ public interface AIQResourceVisitor {
         throws AIQApprovalException, PermissionException;
 
     public void visitIp(AIIp aiip,
-                        AuthzSubjectValue subject,
+                        AuthzSubject subject,
                         PlatformManagerLocal pmLocal)
         throws AIQApprovalException, PermissionException;
 
     public void visitServer(AIServer aiserver,
-                            AuthzSubjectValue subject,
+                            AuthzSubject subject,
                             PlatformManagerLocal pmLocal,
                             ServerManagerLocal smLocal,
                             ConfigManagerLocal configMgr,

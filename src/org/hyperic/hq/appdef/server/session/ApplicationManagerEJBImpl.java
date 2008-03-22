@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -66,7 +66,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
@@ -110,7 +109,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @return list of ApplicationTypeValue objects
      * @ejb:interface-method
      */
-    public List getAllApplicationTypes(AuthzSubjectValue who) 
+    public List getAllApplicationTypes(AuthzSubject who) 
         throws FinderException {
         Collection ejbs = getApplicationTypeDAO().findAll();
 
@@ -149,7 +148,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * null if you are creating an empty application.
      * @ejb:interface-method
      */
-    public Application createApplication(AuthzSubjectValue subject,
+    public Application createApplication(AuthzSubject subject,
                                          ApplicationValue newApp,
                                          Collection services)
         throws ValidationException, PermissionException, CreateException,
@@ -205,7 +204,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ApplicationValue updateApplication(AuthzSubjectValue subject,
+    public ApplicationValue updateApplication(AuthzSubject subject,
                                               ApplicationValue newValue)
         throws ApplicationNotFoundException, PermissionException,
                UpdateException,  AppdefDuplicateNameException, FinderException {
@@ -243,7 +242,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:interface-method
      */
-    public void removeApplication(AuthzSubjectValue subject, Integer id)
+    public void removeApplication(AuthzSubject subject, Integer id)
         throws ApplicationNotFoundException, PermissionException,
                RemoveException, VetoException 
     {
@@ -265,7 +264,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:interface-method
      */
-    public void removeAppService(AuthzSubjectValue caller, Integer appId, 
+    public void removeAppService(AuthzSubject caller, Integer appId, 
                                  Integer appServiceId)
         throws ApplicationException, ApplicationNotFoundException,
                PermissionException {
@@ -291,9 +290,9 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:interface-method
      */
-    public void changeApplicationOwner(AuthzSubjectValue who,
+    public void changeApplicationOwner(AuthzSubject who,
                                        Integer appId,
-                                       AuthzSubjectValue newOwner)
+                                       AuthzSubject newOwner)
         throws ApplicationNotFoundException,
                PermissionException, CreateException {
         try {
@@ -319,8 +318,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @param subject
      * @param appId
      */
-    public DependencyTree getServiceDepsForApp(AuthzSubjectValue subject, 
-                                               Integer pk)
+    public DependencyTree getServiceDepsForApp(AuthzSubject subject, Integer pk)
         throws ApplicationNotFoundException, PermissionException {
         try {
             // find the app
@@ -339,7 +337,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @param depTree
      * @param subject
      */
-    public void setServiceDepsForApp(AuthzSubjectValue subject, 
+    public void setServiceDepsForApp(AuthzSubject subject, 
                                      DependencyTree depTree) 
         throws ApplicationNotFoundException, RemoveException, 
                PermissionException, CreateException {
@@ -361,7 +359,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @param name - name of app
      * @ejb:interface-method
      */
-    public ApplicationValue findApplicationByName(AuthzSubjectValue subject,
+    public ApplicationValue findApplicationByName(AuthzSubject subject,
                                                   String name)
         throws ApplicationNotFoundException, PermissionException {
         Application app = getApplicationDAO().findByName(name);
@@ -377,8 +375,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @deprecated
      */
-    public ApplicationValue getApplicationById(AuthzSubjectValue subject, 
-                                               Integer id) 
+    public ApplicationValue getApplicationById(AuthzSubject subject, Integer id)
         throws ApplicationNotFoundException, PermissionException {
         return findApplicationById(subject, id).getApplicationValue();
     }
@@ -388,8 +385,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * 
      * @ejb:interface-method
      */
-    public Application findApplicationById(AuthzSubjectValue subject, 
-                                           Integer id) 
+    public Application findApplicationById(AuthzSubject subject,  Integer id) 
         throws ApplicationNotFoundException, PermissionException {
         try {
             Application app = getApplicationDAO().findById(id);
@@ -408,7 +404,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ApplicationValue objects representing all of the
      * applications that the given subject is allowed to view.
      */
-    public PageList getAllApplications ( AuthzSubjectValue subject,
+    public PageList getAllApplications ( AuthzSubject subject,
                                          PageControl pc ) 
         throws FinderException, PermissionException {
         Collection authzPks = getViewableApplications(subject);
@@ -444,8 +440,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @retur list of AppServiceValue objects
      * @ejb:interface-method
      */
-    public List getApplicationServices(AuthzSubjectValue subject,
-                                       Integer appId) 
+    public List getApplicationServices(AuthzSubject subject, Integer appId) 
         throws ApplicationNotFoundException,
                PermissionException {
         // find the application
@@ -472,8 +467,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * that the service is an entry point
      * @ejb:interface-method
      */
-    public void setApplicationServices(AuthzSubjectValue subject,
-                                       Integer appId,
+    public void setApplicationServices(AuthzSubject subject, Integer appId,
                                        List entityIds) 
         throws ApplicationNotFoundException, CreateException,
                AppdefGroupNotFoundException, 
@@ -771,8 +765,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * Create the authz resource and verify the subject has the createApplication
      * permission. 
      */
-    private void createAuthzApplication(Application app,
-                                        AuthzSubjectValue subject,
+    private void createAuthzApplication(Application app, AuthzSubject subject,
                                         ApplicationType at)
         throws FinderException, PermissionException 
     {

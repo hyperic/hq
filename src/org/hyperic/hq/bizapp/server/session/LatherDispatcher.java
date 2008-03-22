@@ -29,7 +29,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -217,11 +216,11 @@ public class LatherDispatcher
         throws PermissionException
     {
         try {
-            AuthzSubjectValue subject;
+            AuthzSubject subject;
             int sessionId;
 
             sessionId = getAuthManager().getSessionId(user, pword);
-            subject   = sessionManager.getSubject(sessionId);
+            subject   = sessionManager.getSubjectPojo(sessionId);
             getServerManager().checkCreatePlatformPermission(subject);
         } catch(SecurityException exc){
             log.warn("Security exception when '" + user + 
@@ -375,12 +374,13 @@ public class LatherDispatcher
             try {
                 List zevents = new ArrayList();
                 ResourceRefreshZevent zevent;
+                AuthzSubjectValue overlord = getOverlordVal();
                 for (Iterator it = ids.iterator(); it.hasNext();) {
                     Integer id = (Integer) it.next();
                     Platform platform = getPlatformManager()
                         .findPlatformById(id);
 
-                    zevent = new ResourceRefreshZevent(getOverlord(),
+                    zevent = new ResourceRefreshZevent(overlord,
                                                        platform.getEntityId());
                     zevents.add(zevent);
 
@@ -388,7 +388,7 @@ public class LatherDispatcher
                     for (Iterator i = servers.iterator(); i.hasNext(); ) {
                         Server server = (Server)i.next();
 
-                        zevent = new ResourceRefreshZevent(getOverlord(),
+                        zevent = new ResourceRefreshZevent(overlord,
                                                            server.getEntityId());
                         zevents.add(zevent);
 
@@ -397,7 +397,7 @@ public class LatherDispatcher
                              serviceItr.hasNext(); )
                         {
                             Service service = (Service)serviceItr.next();
-                            zevent = new ResourceRefreshZevent(getOverlord(),
+                            zevent = new ResourceRefreshZevent(overlord,
                                                                service.getEntityId());
                             zevents.add(zevent);
                         }
@@ -625,7 +625,7 @@ public class LatherDispatcher
 
         try {
             response = getConfigManager().
-                getMergedConfigResponse(getOverlord(),
+                getMergedConfigResponse(getOverlordVal(),
                                         ProductPlugin.TYPE_MEASUREMENT,
                                         id, true);
 

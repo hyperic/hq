@@ -86,17 +86,13 @@ public class ChangeResourceOwnerAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        log.trace("getting subject [" + ownerId + "]");
-        AuthzSubjectValue owner = ContextUtils.getAuthzBoss(ctx)
-            .findSubject(sessionId, ownerId);
-
         AppdefEntityID entityId =
             new AppdefEntityID(resourceType.intValue(),
                                resourceId.intValue());
         log.trace("setting owner [" + ownerId + "] for resource [" +
                   entityId + "]");
         ContextUtils.getAppdefBoss(ctx)
-            .changeResourceOwner(sessionId.intValue(), entityId, owner);
+            .changeResourceOwner(sessionId.intValue(), entityId, ownerId);
 
         RequestUtils.setConfirmation(request,
                                      "resource.common.inventory.confirm.ChangeResourceOwner");

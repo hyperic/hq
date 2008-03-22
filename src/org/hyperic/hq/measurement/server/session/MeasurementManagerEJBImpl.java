@@ -41,10 +41,6 @@ import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
@@ -81,7 +77,6 @@ import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
@@ -455,7 +450,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @param id The id of the resource
      * @ejb:interface-method
      */
-    public void getLiveMeasurementValues(AuthzSubjectValue subject,
+    public void getLiveMeasurementValues(AuthzSubject subject,
                                          AppdefEntityID id)
         throws PermissionException, LiveMeasurementException,
                MeasurementNotFoundException
@@ -1205,7 +1200,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @param mids Measurements to get the value of.
      * @ejb:interface-method
      */
-    public MetricValue[] getLiveMeasurementValues(AuthzSubjectValue subject,
+    public MetricValue[] getLiveMeasurementValues(AuthzSubject subject,
                                                   Integer[] mids)
         throws LiveMeasurementException, PermissionException
     {

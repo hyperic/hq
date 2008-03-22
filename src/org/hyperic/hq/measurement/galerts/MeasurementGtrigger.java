@@ -752,7 +752,8 @@ public class MeasurementGtrigger
             TemplateManagerLocal tMan = 
                 TemplateManagerUtil.getLocalHome().create();
             
-            AppdefGroupValue g = gMan.findGroup(sMan.getOverlord(), rg.getId());
+            AppdefGroupValue g = gMan.findGroup(sMan.getOverlordPojo(),
+                                                rg.getId());
             
             _groupSize = g.getTotalSize();
             

@@ -36,8 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -45,7 +44,6 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 
 /**
  * An <code>WorkflowAction</code> subclass that creates a user
@@ -99,7 +97,7 @@ public class NewAction extends BaseAction {
                          userForm.getNewPassword());
 
         log.trace("finding subject [" + userForm.getName() + "]");
-        AuthzSubjectValue newUser =
+        AuthzSubject newUser =
             authzBoss.findSubjectByName(sessionId, userForm.getName());
 
         HashMap parms = new HashMap(1);

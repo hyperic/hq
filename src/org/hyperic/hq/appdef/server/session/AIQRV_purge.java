@@ -27,19 +27,19 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
-import org.hyperic.dao.DAOFactory;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * The AIQueueConstants.Q_DECISION_PURGE means to remove the resource
@@ -50,7 +50,7 @@ public class AIQRV_purge implements AIQResourceVisitor {
     private static Log _log = LogFactory.getLog(AIQRV_purge.class);
 
     public void visitPlatform(AIPlatform aiplatform,
-                              AuthzSubjectValue subject,
+                              AuthzSubject subject,
                               PlatformManagerLocal pmLocal,
                               ConfigManagerLocal configMgr,
                               CPropManagerLocal cpropMgr,
@@ -64,7 +64,7 @@ public class AIQRV_purge implements AIQResourceVisitor {
     }
 
     public void visitIp(AIIp aiip,
-                        AuthzSubjectValue subject,
+                        AuthzSubject subject,
                         PlatformManagerLocal pmLocal)
         throws AIQApprovalException, PermissionException
     {
@@ -75,7 +75,7 @@ public class AIQRV_purge implements AIQResourceVisitor {
     }
 
     public void visitServer(AIServer aiserver,
-                            AuthzSubjectValue subject,
+                            AuthzSubject subject,
                             PlatformManagerLocal pmLocal,
                             ServerManagerLocal smLocal,
                             ConfigManagerLocal configMgr,

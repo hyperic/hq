@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -314,7 +315,8 @@ public class UIPluginManagerEJBImpl
         Resource r;
         
         if (ent.isGroup()) {
-            AuthzSubjectValue overlord = rman.findOverlord(); 
+            AuthzSubject overlord =
+                AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(); 
             AppdefGroupValue grp;
             
             try {

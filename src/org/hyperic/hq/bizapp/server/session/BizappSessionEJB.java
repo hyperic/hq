@@ -52,6 +52,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
@@ -261,8 +262,12 @@ public abstract class BizappSessionEJB {
      * bean which wants to call an authz bound method while bypassing the check
      * use with discretion.
      */
-    protected AuthzSubjectValue getOverlord() {
-        return getAuthzSubjectManager().findOverlord();
+    protected AuthzSubject getOverlord() {
+        return getAuthzSubjectManager().getOverlordPojo();
+    }
+
+    protected AuthzSubjectValue getOverlordVal() {
+        return getOverlord().getAuthzSubjectValue();
     }
 
     public void setSessionContext(SessionContext aCtx) throws RemoteException {

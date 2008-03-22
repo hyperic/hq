@@ -25,30 +25,29 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.autoinventory.AICompare;
+import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.appdef.shared.AIIpValue;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AIQueueConstants;
+import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIIpValue;
-import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.autoinventory.AICompare;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -69,7 +68,7 @@ public class AI2AppdefDiff {
      * set of IPs and servers that should be queued (IPs and servers that are 
      * already identical to those in appdef are removed from the value object).  
      */
-    public AIPlatformValue diffAgainstAppdef(AuthzSubjectValue subject,
+    public AIPlatformValue diffAgainstAppdef(AuthzSubject subject,
                                              PlatformManagerLocal pmLH,
                                              ConfigManagerLocal cmLocal,
                                              CPropManagerLocal cpropMgr,

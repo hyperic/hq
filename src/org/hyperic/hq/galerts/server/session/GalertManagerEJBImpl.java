@@ -484,7 +484,7 @@ public class GalertManagerEJBImpl
      * Get the number of alerts for the given array of AppdefEntityID's
      * @ejb:interface-method
      */
-    public int[] fillAlertCount(AuthzSubjectValue subj, AppdefEntityID[] ids,
+    public int[] fillAlertCount(AuthzSubject subj, AppdefEntityID[] ids,
                                 int[] counts)
         throws PermissionException, FinderException {
         ResourceGroupManagerLocal resMan = ResourceGroupManagerEJBImpl.getOne();

@@ -105,7 +105,7 @@ public class RuntimeReportProcessor {
     
     public RuntimeReportProcessor () {}
 
-    public void processRuntimeReport(AuthzSubjectValue subject,
+    public void processRuntimeReport(AuthzSubject subject,
                                      String agentToken,
                                      CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, CreateException, 
@@ -130,7 +130,7 @@ public class RuntimeReportProcessor {
         }
     }
 
-    private void _processRuntimeReport(AuthzSubjectValue subject,
+    private void _processRuntimeReport(AuthzSubject subject,
                                        CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, CreateException, 
                PermissionException, ValidationException, 
@@ -232,7 +232,7 @@ public class RuntimeReportProcessor {
                  endTime/1000 + " seconds.");
     }
 
-    private void mergePlatformIntoInventory(AuthzSubjectValue subject,
+    private void mergePlatformIntoInventory(AuthzSubject subject,
                                             AIPlatformValue aiplatform,
                                             ServerValue reportingServer)
         throws CreateException, PermissionException, ValidationException,
@@ -333,7 +333,7 @@ public class RuntimeReportProcessor {
      * if the aiserver is found amongs the appdefServers.
      * @param reportingServer The server that reported the aiserver.
      */
-    private void mergeServerIntoInventory(AuthzSubjectValue subject,
+    private void mergeServerIntoInventory(AuthzSubject subject,
                                           PlatformValue platform,
                                           AIServerValue aiserver,
                                           List appdefServers,
@@ -410,7 +410,7 @@ public class RuntimeReportProcessor {
                 
                 // The server will be owned by whomever owns the platform
                 String serverOwnerName = platform.getOwner();
-                AuthzSubjectValue serverOwner
+                AuthzSubject serverOwner
                     = _subjectMgr.findSubjectByName(subject, serverOwnerName);
                 Integer platformPK = platform.getId();
                 Server server = _serverMgr.createServer(serverOwner,
@@ -450,20 +450,21 @@ public class RuntimeReportProcessor {
             aiserverExt = (AIServerExtValue) aiserver;
         }
 
+        AuthzSubjectValue subjectValue = subject.getAuthzSubjectValue();
         if (!isPlaceholder(aiserverExt)) {             
             // CONFIGURE SERVER
             try {
                 // Configure resource, telling the config manager to send
                 // an update event if this resource has been updated.
-                _configMgr.configureResource(subject,
-                                            foundAppdefServer.getEntityId(),
-                                            aiserver.getProductConfig(),
-                                            aiserver.getMeasurementConfig(),
-                                            aiserver.getControlConfig(),
-                                            null, //RT config
-                                            null,
-                                            update,
-                                            false);
+                _configMgr.configureResource(subjectValue,
+                                             foundAppdefServer.getEntityId(),
+                                             aiserver.getProductConfig(),
+                                             aiserver.getMeasurementConfig(),
+                                             aiserver.getControlConfig(),
+                                             null, //RT config
+                                             null,
+                                             update,
+                                             false);
             } catch (Exception e) {
                 _log.error("Error configuring server: " 
                           + foundAppdefServer.getId() + ": " + e, e);
@@ -554,23 +555,24 @@ public class RuntimeReportProcessor {
     }
 
     public static class ServiceMergeInfo {
-        public AuthzSubjectValue subject;
-        public Integer           serverId;
-        public AIServiceValue    aiservice;
-        public String            agentToken;
+        public AuthzSubject   subject;
+        public Integer        serverId;
+        public AIServiceValue aiservice;
+        public String         agentToken;
     }
     
     public List getServiceMerges() {
         return _serviceMerges;
     }
 
-    private boolean turnOffRuntimeDiscovery(AuthzSubjectValue subject,
+    private boolean turnOffRuntimeDiscovery(AuthzSubject subject,
                                             Integer serverId) 
     {
         AppdefEntityID aid = AppdefEntityID.newServerID(serverId.intValue());
         _log.info("Disabling RuntimeDiscovery for server: " + serverId);
         try {
-            _aiMgr.turnOffRuntimeDiscovery(subject, aid, _agentToken);
+            _aiMgr.turnOffRuntimeDiscovery(subject.getAuthzSubjectValue(), aid,
+                                           _agentToken);
             return true;
         } catch (Exception e) {
             _log.error("Error turning off runtime scans for " +

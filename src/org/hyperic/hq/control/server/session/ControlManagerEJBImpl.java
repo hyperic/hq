@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -138,8 +138,7 @@ public class ControlManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      *
      **/
-    public void configureControlPlugin(AuthzSubjectValue subject,
-                                       AppdefEntityID id)
+    public void configureControlPlugin(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException, PluginException, ConfigFetchException,
                AppdefEntityNotFoundException, AgentNotFoundException
     {
@@ -156,7 +155,7 @@ public class ControlManagerEJBImpl implements SessionBean {
             ConfigManagerLocal cMan = 
                 ConfigManagerUtil.getLocalHome().create();
             mergedResponse = 
-                cMan.getMergedConfigResponse(subject, 
+                cMan.getMergedConfigResponse(subject.getAuthzSubjectValue(), 
                                              ProductPlugin.TYPE_CONTROL,
                                              id, true);
             ControlCommandsClient client =
@@ -191,7 +190,7 @@ public class ControlManagerEJBImpl implements SessionBean {
     
         AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         checkControlEnabled(subject, id);
-        checkControlPermission(subject, id);
+        checkControlPermission(subj, id);
     
         _controlScheduleManager.doSingleAction(id, subject, action,
                                                args, null);
@@ -202,7 +201,7 @@ public class ControlManagerEJBImpl implements SessionBean {
      * 
      * @ejb:interface-method view-type="local"
      */
-    public void doAction(AuthzSubjectValue subject, AppdefEntityID id,
+    public void doAction(AuthzSubject subj, AppdefEntityID id,
                          String action, ScheduleValue schedule)
         throws PluginException, PermissionException, SchedulerException
     {
@@ -211,8 +210,9 @@ public class ControlManagerEJBImpl implements SessionBean {
             throw new IllegalArgumentException ("Cannot perform single "+
                                                 "action on a group.");
     
+        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         checkControlEnabled(subject, id);
-        checkControlPermission(subject, id);
+        checkControlPermission(subj, id);
     
         _controlScheduleManager.doScheduledAction(id, subject, action,
                                                   schedule, null);
@@ -239,7 +239,7 @@ public class ControlManagerEJBImpl implements SessionBean {
             AppdefEntityID entity = (AppdefEntityID) i.next();
 
             checkControlEnabled(subj, entity);
-            checkControlPermission(subj, entity);
+            checkControlPermission(subject, entity);
         }
        
         _controlScheduleManager.doSingleAction(id, subj, action,
@@ -269,7 +269,7 @@ public class ControlManagerEJBImpl implements SessionBean {
             AppdefEntityID entity = (AppdefEntityID) i.next();
 
             checkControlEnabled(subj, entity);
-            checkControlPermission(subj, entity);
+            checkControlPermission(subject, entity);
         }
 
         _controlScheduleManager.doScheduledAction(id, subj, action,
@@ -594,8 +594,7 @@ public class ControlManagerEJBImpl implements SessionBean {
             try {
                 PermissionManager pm = PermissionManagerFactory.getInstance();
                 ResourceValue[] authz =
-                    pm.findOperationScopeBySubjectBatch(
-                        caller.getAuthzSubjectValue(),resArr,opArr);
+                    pm.findOperationScopeBySubjectBatch( caller, resArr, opArr);
                 for (int x=0;x<authz.length;x++) {
                     retVal.add(AppdefUtil.resValToAppdefEntityId(authz[x]));
                 }
@@ -612,7 +611,7 @@ public class ControlManagerEJBImpl implements SessionBean {
      * Check control modify permission for an appdef entity
      * Control Modify ops are treated as regular modify operations
      */
-    protected void checkModifyPermission(AuthzSubjectValue caller,
+    protected void checkModifyPermission(AuthzSubject caller,
                                          AppdefEntityID id)
         throws PermissionException
     {
@@ -648,7 +647,7 @@ public class ControlManagerEJBImpl implements SessionBean {
     }
 
     /** Check control permission for an appdef entity */
-    protected void checkControlPermission(AuthzSubjectValue caller,
+    protected void checkControlPermission(AuthzSubject caller,
                                           AppdefEntityID id)
         throws PermissionException 
     {

@@ -124,6 +124,6 @@ public class GroupUtil {
                                               PageControl pc )
         throws AppdefEntityNotFoundException, PermissionException {
         AppdefGroupManagerLocal groupMgr = AppdefGroupManagerEJBImpl.getOne();
-        return groupMgr.findGroup(subject.getAuthzSubjectValue(), entity);
+        return groupMgr.findGroup(subject, entity);
     }
 }

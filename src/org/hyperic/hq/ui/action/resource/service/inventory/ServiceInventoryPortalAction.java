@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
@@ -242,7 +243,7 @@ public class ServiceInventoryPortalAction extends ResourceInventoryPortalAction 
         request.setAttribute(Constants.TITLE_PARAM_ATTR, service.getName());
 
         log.trace("getting owner for service");            
-        AuthzSubjectValue owner = ContextUtils.getAuthzBoss(ctx)
+        AuthzSubject owner = ContextUtils.getAuthzBoss(ctx)
             .findSubjectByNameNoAuthz(sessionId, service.getOwner());
         request.setAttribute(Constants.RESOURCE_OWNER_ATTR, owner);
 

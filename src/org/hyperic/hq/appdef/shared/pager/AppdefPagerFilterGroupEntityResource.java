@@ -32,7 +32,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 
 /** Pager Processor filter that filters object instances of
@@ -76,7 +76,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     private int _groupType;
     private int _entityType;
     private int _resourceType;
-    private AuthzSubjectValue _subject;
+    private AuthzSubject _subject;
     private boolean _exclusive;
     private static final int UNDEFINED = -1;
     private int _filterCount;
@@ -107,7 +107,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         return _resourceType;
     }
 
-    public AuthzSubjectValue getSubject() {
+    public AuthzSubject getSubject() {
         return _subject;
     }
 
@@ -123,9 +123,9 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         this.groupSelected = b;
     }
 
-    public AppdefPagerFilterGroupEntityResource(AuthzSubjectValue subject,
-                                                int gt, int et, int rt,
-                                                boolean negate) {
+    public AppdefPagerFilterGroupEntityResource(AuthzSubject subject, int gt,
+                                                int et, int rt, boolean negate)
+    {
         _subject = subject;
         _groupType = gt;
         _entityType = et;

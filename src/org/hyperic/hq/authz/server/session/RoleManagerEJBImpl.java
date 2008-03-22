@@ -718,7 +718,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         OwnedRoleValue value =
             new OwnedRoleValue(local.getRoleValue(), 
                                local.getResource().getOwner()
-                               .getAuthzSubjectValue());
+                                    .getAuthzSubjectValue());
         value.setMemberCount(numSubjects);
 
         return value;
@@ -1335,7 +1335,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * Get the resource groups applicable to a given role
      * @ejb:interface-method
      */
-    public PageList getResourceGroupsByRoleIdAndSystem(AuthzSubjectValue subject, 
+    public PageList getResourceGroupsByRoleIdAndSystem(AuthzSubject subject, 
                                                        Integer roleId, 
                                                        boolean system,
                                                        PageControl pc)
@@ -1423,7 +1423,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @throws NamingException 
      * @ejb:interface-method
      */
-    public PageList getAvailableResourceGroups(AuthzSubjectValue whoami,
+    public PageList getAvailableResourceGroups(AuthzSubject whoami,
                                                Integer roleId,
                                                Integer[] groupIds,
                                                PageControl pc) 

@@ -45,8 +45,8 @@ import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -100,7 +100,6 @@ import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
-import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinition;
@@ -438,7 +437,7 @@ public class EventsBossEJBImpl
     public int[] getAlertCount(int sessionID, AppdefEntityID[] ids)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, FinderException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
         int[] counts = getAM().getAlertCount(ids);
         counts = GalertManagerEJBImpl.getOne().fillAlertCount(subject, ids,
@@ -544,7 +543,8 @@ public class EventsBossEJBImpl
                PermissionException, InvalidOptionException,
                InvalidOptionValueException, 
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubjectValue subjVal = subject.getAuthzSubjectValue();
 
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length == 0) {
@@ -561,7 +561,7 @@ public class EventsBossEJBImpl
         
         try {
             // Now create the alert definition
-            parent = getADM().createAlertDefinition(subject, adval);
+            parent = getADM().createAlertDefinition(subjVal, adval);
         } catch (FinderException e) {
             throw new AlertDefinitionCreateException(e.getMessage());
         }
@@ -602,10 +602,10 @@ public class EventsBossEJBImpl
             // Scrub the triggers just in case
             adval.removeAllTriggers();
 
-            cloneParentConditions(subject, id, adval, parent.getConditions());
+            cloneParentConditions(subjVal, id, adval, parent.getConditions());
                         
             // Create the triggers
-            createTriggers(subject, adval);
+            createTriggers(subjVal, adval);
             triggers.addAll(Arrays.asList(adval.getTriggers()));
 
             // Make sure the actions have the proper parentId
@@ -616,7 +616,7 @@ public class EventsBossEJBImpl
 
             try {
                 // Now create the alert definition
-                adm.createAlertDefinition(subject, adval);
+                adm.createAlertDefinition(subjVal, adval);
             } catch (FinderException e) {
                 throw new AlertDefinitionCreateException(e.getMessage());
             }
@@ -1244,7 +1244,8 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubjectValue subject  = manager.getSubject(sessionID);
+        AuthzSubject subject  = manager.getSubjectPojo(sessionID);
+        AuthzSubjectValue subjVal = subject.getAuthzSubjectValue();
         long cur = System.currentTimeMillis();
         
         List appentResources =
@@ -1252,7 +1253,7 @@ public class EventsBossEJBImpl
         
         // Assume if user can be alerted, then they can view resource,
         // otherwise, it'll be filtered out later anyways
-        List alerts = getAM().findEscalatables(subject, count, priority, 
+        List alerts = getAM().findEscalatables(subjVal, count, priority, 
                                                timeRange, cur, appentResources);
 
         // CheckAlertingScope now only used for galerts
@@ -1262,7 +1263,7 @@ public class EventsBossEJBImpl
         }
         
         GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
-        List galerts = gMan.findEscalatables(subject, count, priority, 
+        List galerts = gMan.findEscalatables(subjVal, count, priority, 
                                              timeRange, cur, appentResources);   
         alerts.addAll(galerts);
 

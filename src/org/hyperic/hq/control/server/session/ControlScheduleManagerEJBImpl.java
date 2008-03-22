@@ -55,6 +55,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
@@ -199,7 +200,7 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public PageList getRecentControlActions(AuthzSubjectValue subject,
+    public PageList getRecentControlActions(AuthzSubject subject,
                                             int rows, long window)
         throws ApplicationException {
         StopWatch watch = new StopWatch();
@@ -252,8 +253,7 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public PageList getPendingControlActions(AuthzSubjectValue subject,
-                                             int rows)
+    public PageList getPendingControlActions(AuthzSubject subject, int rows)
         throws ApplicationException
     {
         StopWatch watch = new StopWatch();
@@ -304,7 +304,7 @@ public class ControlScheduleManagerEJBImpl
      * XXX: This could also take a page control, although we would ignore
      *      everything except for the size
      */
-    public PageList getOnDemandControlFrequency(AuthzSubjectValue subject,
+    public PageList getOnDemandControlFrequency(AuthzSubject subject,
                                                 int numToReturn)
         throws ApplicationException
     {
@@ -314,8 +314,8 @@ public class ControlScheduleManagerEJBImpl
         PageList list = new PageList();
 
         try {
-            conn = DBUtil.getConnByContext(getInitialContext(), 
-                                           org.hyperic.hq.common.shared.HQConstants.DATASOURCE);
+            conn = DBUtil.getConnByContext(getInitialContext(),
+                                           HQConstants.DATASOURCE);
             
             String sqlStr = 
                 "SELECT entity_type, entity_id, action, COUNT(id) AS num " +
@@ -986,8 +986,7 @@ public class ControlScheduleManagerEJBImpl
      * @throws PermissionException if the user does not have the
      *         modify Operation for the given resource.
      */
-    private void checkViewPermission(AuthzSubjectValue caller,
-                                     AppdefEntityID id)
+    private void checkViewPermission(AuthzSubject caller, AppdefEntityID id)
         throws PermissionException {
         getAppdefMan().checkViewPermission(caller, id);
     }

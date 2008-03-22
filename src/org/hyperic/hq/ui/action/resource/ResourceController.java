@@ -41,7 +41,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -128,13 +128,13 @@ public abstract class ResourceController extends BaseDispatchAction {
                     appdefBoss.findById(sessionId.intValue(), entityId);
 
                 log.trace("finding owner for resource [" + entityId + "]");
-                AuthzSubjectValue owner =
+                AuthzSubject owner =
                     authzBoss.findSubjectByNameNoAuthz(sessionId,
                                                        resource.getOwner());
 
                 log.trace("finding most recent modifier for resource [" +
                           entityId + "]");
-                AuthzSubjectValue modifier =
+                AuthzSubject modifier =
                     authzBoss.findSubjectByNameNoAuthz(sessionId,
                                                        resource.getModifiedBy());
 

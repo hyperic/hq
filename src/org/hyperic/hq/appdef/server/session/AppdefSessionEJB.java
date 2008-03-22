@@ -58,7 +58,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -150,7 +149,7 @@ public abstract class AppdefSessionEJB
      * @param resTypeVal - the type
      * @param id - the id of the object
      */
-    protected void createAuthzResource(AuthzSubjectValue who,
+    protected void createAuthzResource(AuthzSubject who,
                                        ResourceType resType,
                                        Resource prototype,
                                        Integer id,  String name,
@@ -168,10 +167,10 @@ public abstract class AppdefSessionEJB
      * @param name - the name of the resource
      * @param fsystem - true if the resource should be non-visible
      */
-    protected void createAuthzResource(AuthzSubjectValue who, 
-    								   ResourceType resType, Resource prototype,
-									   Integer id, String name, 
-                                       boolean fsystem, Resource parent) 
+    protected void createAuthzResource(AuthzSubject who, ResourceType resType,
+                                       Resource prototype, Integer id,
+                                       String name, boolean fsystem,
+                                       Resource parent) 
     {
         getResourceManager().createResource(who, resType, prototype, id, name, 
                                             fsystem, parent);
@@ -227,7 +226,7 @@ public abstract class AppdefSessionEJB
     /**
      * remove the authz resource entry
      */
-    protected void removeAuthzResource(AuthzSubjectValue subject,
+    protected void removeAuthzResource(AuthzSubject subject,
                                        AppdefEntityID aeid)
         throws RemoveException, PermissionException, VetoException 
     {
@@ -241,7 +240,7 @@ public abstract class AppdefSessionEJB
         
         // Send resource delete event
         ResourceDeletedZevent zevent =
-            new ResourceDeletedZevent(subject, aeid);
+            new ResourceDeletedZevent(subject.getAuthzSubjectValue(), aeid);
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
 
@@ -273,7 +272,7 @@ public abstract class AppdefSessionEJB
      * @throw AppdefGroupNotFoundException - when group doesn't exist
      * @throw PermissionException - when subject isn't authz.
      */
-    protected AppdefGroupValue findGroupById(AuthzSubjectValue subject,
+    protected AppdefGroupValue findGroupById(AuthzSubject subject,
                                              Integer groupId)
         throws AppdefGroupNotFoundException, PermissionException {
         return getAppdefGroupManagerLocal().findGroup(subject,groupId);
@@ -286,7 +285,7 @@ public abstract class AppdefSessionEJB
      * @param id - the id of the object
      * @param operation - the name of the operation to perform
      */
-    protected void checkPermission(AuthzSubjectValue subject, ResourceType rtV,
+    protected void checkPermission(AuthzSubject subject, ResourceType rtV,
                                    Integer id, String operation)
         throws PermissionException 
     {
@@ -303,8 +302,8 @@ public abstract class AppdefSessionEJB
     /**
      * Check a permission
      */
-    protected void checkPermission(AuthzSubjectValue subject, 
-                                   AppdefEntityID id, String operation) 
+    protected void checkPermission(AuthzSubject subject, AppdefEntityID id,
+                                   String operation) 
         throws PermissionException 
     {
         ResourceType rtv = null;            
@@ -328,7 +327,7 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void checkCreatePlatformPermission(AuthzSubjectValue subject)
+    public void checkCreatePlatformPermission(AuthzSubject subject)
         throws PermissionException {
         try {    
             checkPermission(subject, getRootResourceType(), 
@@ -345,8 +344,7 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void checkModifyPermission(AuthzSubjectValue subject,
-                                      AppdefEntityID id)
+    public void checkModifyPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException 
     {
         int type = id.getType();
@@ -381,8 +379,7 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void checkViewPermission(AuthzSubjectValue subject,
-                                    AppdefEntityID id)
+    public void checkViewPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
         int type = id.getType();
         String opName = null;
@@ -414,8 +411,7 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void checkControlPermission(AuthzSubjectValue subject,
-                                       AppdefEntityID id)
+    public void checkControlPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException 
     {
         int type = id.getType();
@@ -448,8 +444,7 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void checkRemovePermission(AuthzSubjectValue subject,
-                                      AppdefEntityID id)
+    public void checkRemovePermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
         int type = id.getType();
         String opName = null;
@@ -481,8 +476,7 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void checkMonitorPermission(AuthzSubjectValue subject,
-                                       AppdefEntityID id)
+    public void checkMonitorPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
         int type = id.getType();
         String opName;
@@ -514,8 +508,7 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void checkAlertingPermission(AuthzSubjectValue subject,
-                                        AppdefEntityID id)
+    public void checkAlertingPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
         int type = id.getType();
         String opName;
@@ -548,7 +541,7 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public List checkAlertingScope(AuthzSubjectValue subj) {
+    public List checkAlertingScope(AuthzSubject subj) {
         List entityIds = new ArrayList();
         try {
             PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -622,8 +615,7 @@ public abstract class AppdefSessionEJB
         // subject must have modify platform permissions on all platforms
         // in the group), AND the global "add server" permission.
         if (id.isPlatform()) {
-            checkAIScanPermissionForPlatform(subject.getAuthzSubjectValue(),
-                                             id);
+            checkAIScanPermissionForPlatform(subject, id);
 
         } else if (id.isGroup()) {
 
@@ -641,10 +633,9 @@ public abstract class AppdefSessionEJB
                                           "scan on an empty group");
             }
 
-            AuthzSubjectValue subj = subject.getAuthzSubjectValue();
             for (Iterator i = groupMembers.iterator(); i.hasNext();) {
                 AppdefEntityID platformEntityID = (AppdefEntityID) i.next();
-                checkAIScanPermissionForPlatform(subj, platformEntityID);
+                checkAIScanPermissionForPlatform(subject, platformEntityID);
             }
         } else {
             throw new SystemException("Autoinventory scans may only be " +
@@ -658,7 +649,7 @@ public abstract class AppdefSessionEJB
      * on a platform.  Don't use this method - instead use checkAIScanPermission
      * which will call this method as necessary.
      */
-    private void checkAIScanPermissionForPlatform(AuthzSubjectValue subject,
+    private void checkAIScanPermissionForPlatform(AuthzSubject subject,
                                                   AppdefEntityID platformID)
         throws PermissionException {
         
@@ -693,7 +684,7 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void checkCreateChildPermission(AuthzSubjectValue subject,
+    public void checkCreateChildPermission(AuthzSubject subject,
                                            AppdefEntityID id)
         throws PermissionException {
         int type = id.getType();
@@ -723,8 +714,7 @@ public abstract class AppdefSessionEJB
      *
      */ 
     public AppdefResourcePermissions 
-        getResourcePermissions(AuthzSubjectValue who,
-                               AppdefEntityID eid)
+        getResourcePermissions(AuthzSubject who, AppdefEntityID eid)
         throws FinderException {
             boolean canView = false;
             boolean canModify = false;
@@ -772,7 +762,8 @@ public abstract class AppdefSessionEJB
             } catch (InvalidAppdefTypeException e) {
             }
             // finally create the object
-            return new AppdefResourcePermissions(who, eid, canView,
+            return new AppdefResourcePermissions(who.getAuthzSubjectValue(),
+                                                 eid, canView,
                                                  canCreateChild,
                                                  canModify, canRemove,
                                                  canControl,
@@ -948,7 +939,7 @@ public abstract class AppdefSessionEJB
      * @param whoami - the user
      * @return List of ServicePK's for which subject has AuthzConstants.serviceOpViewService
      */
-    protected List getViewableServices(AuthzSubjectValue whoami) 
+    protected List getViewableServices(AuthzSubject whoami) 
         throws FinderException, PermissionException
     {
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -969,7 +960,7 @@ public abstract class AppdefSessionEJB
     /* Return a list of appdef entity ids that represent the total set of
        service inventory that the subject is authorized to see. This includes
        all services as well as all clusters */
-    protected List getViewableServiceInventory (AuthzSubjectValue whoami)
+    protected List getViewableServiceInventory (AuthzSubject whoami)
         throws FinderException, PermissionException
     {
         List idList = getViewableServices(whoami);
@@ -997,7 +988,7 @@ public abstract class AppdefSessionEJB
      * @return list of ApplicationPKs for which the subject has
      * AuthzConstants.applicationOpViewApplication
      */
-    protected List getViewableApplications(AuthzSubjectValue whoami)
+    protected List getViewableApplications(AuthzSubject whoami)
         throws FinderException, PermissionException
     {
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -1019,7 +1010,7 @@ public abstract class AppdefSessionEJB
      * @return List of ServerPK's for which subject has 
      * AuthzConstants.serverOpViewServer
      */
-    protected List getViewableServers(AuthzSubjectValue whoami) 
+    protected List getViewableServers(AuthzSubject whoami) 
         throws FinderException, PermissionException
     {
         if (log.isDebugEnabled()) {
@@ -1082,7 +1073,7 @@ public abstract class AppdefSessionEJB
      * @return List of PlatformLocals for which subject has 
      * AuthzConstants.platformOpViewPlatform
      */
-    protected Collection getViewablePlatforms(AuthzSubjectValue whoami, 
+    protected Collection getViewablePlatforms(AuthzSubject whoami, 
                                               PageControl pc)
         throws FinderException, PermissionException, NamingException
     {
@@ -1122,7 +1113,7 @@ public abstract class AppdefSessionEJB
         return platforms;
     } 
 
-    protected List getViewablePlatformPKs(AuthzSubjectValue who)
+    protected List getViewablePlatformPKs(AuthzSubject who)
         throws FinderException, PermissionException, NamingException {
         // now get a list of all the viewable items
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -1138,7 +1129,7 @@ public abstract class AppdefSessionEJB
      * @return List of AppdefGroup value objects for which subject has 
      * AuthzConstants.groupOpViewResourceGroup
      */
-    protected List getViewableGroups(AuthzSubjectValue whoami) 
+    protected List getViewableGroups(AuthzSubject whoami) 
         throws FinderException, AppdefGroupNotFoundException,
                PermissionException {
         
@@ -1208,8 +1199,8 @@ public abstract class AppdefSessionEJB
      * Get the overlord. This method should be used by any bizapp session
      * bean which wants to call an authz bound method while bypassing the check.
      */
-    protected AuthzSubjectValue getOverlord() {
-        return AuthzSubjectManagerEJBImpl.getOne().findOverlord();             
+    protected AuthzSubject getOverlord() {
+        return AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();             
     }
 
     protected InitialContext getInitialContext() {

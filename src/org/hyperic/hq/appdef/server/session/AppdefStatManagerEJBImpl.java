@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -507,8 +507,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public ResourceTreeNode[] getNavMapDataForPlatform (AuthzSubjectValue 
-        subject, Integer platformId) 
+    public ResourceTreeNode[] getNavMapDataForPlatform(AuthzSubject subject,
+                                                       Integer platformId) 
         throws PlatformNotFoundException, PermissionException {
         try {
             Platform platVo = 
@@ -522,8 +522,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    private ResourceTreeNode[] getNavMapDataForPlatform (AuthzSubjectValue
-        subject, Platform platVo)
+    private ResourceTreeNode[] getNavMapDataForPlatform(AuthzSubject subject,
+                                                        Platform platVo)
         throws PermissionException, SQLException {
         ResourceTreeNode[] retVal;
         PreparedStatement    stmt;
@@ -710,8 +710,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public ResourceTreeNode[] getNavMapDataForServer (AuthzSubjectValue 
-        subject, Integer serverId) 
+    public ResourceTreeNode[] getNavMapDataForServer(AuthzSubject subject,
+                                                     Integer serverId) 
         throws ServerNotFoundException, PermissionException {
         Server serverVo = getServerMgrLocal().findServerById(serverId);
 
@@ -918,8 +918,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public ResourceTreeNode[] getNavMapDataForService (AuthzSubjectValue 
-        subject, Integer serviceId) 
+    public ResourceTreeNode[] getNavMapDataForService(AuthzSubject subject,
+                                                      Integer serviceId) 
         throws ServiceNotFoundException, PermissionException {
         Service serviceVo = getServiceMgrLocal().findServiceById(serviceId);
 
@@ -1178,8 +1178,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public ResourceTreeNode[] getNavMapDataForApplication (AuthzSubjectValue
-        subject, Integer appId)
+    public ResourceTreeNode[] getNavMapDataForApplication(AuthzSubject subject,
+                                                          Integer appId)
         throws ApplicationNotFoundException, PermissionException {
         ApplicationValue appVo =
             getApplicationMgrLocal().getApplicationById(subject,appId);
@@ -1602,14 +1602,15 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public ResourceTreeNode[] getNavMapDataForGroup (AuthzSubjectValue
-        subject, Integer groupId)
+    public ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject,
+                                                    Integer groupId)
         throws AppdefEntityNotFoundException, PermissionException {
         try {
             AppdefGroupValue groupVo = 
                 getAppdefGroupManagerLocal().findGroup(subject,groupId);
 
-            return getNavMapDataForGroup(subject,groupVo);
+            return getNavMapDataForGroup(subject.getAuthzSubjectValue(),
+                                         groupVo);
         } catch (SQLException e) {
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);

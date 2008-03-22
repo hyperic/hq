@@ -290,11 +290,10 @@ public class AuthzSubjectManagerEJBImpl
     /** 
      * @ejb:interface-method
      */
-    public AuthzSubjectValue findSubjectByName(AuthzSubjectValue whoami,
-                                               String name)
+    public AuthzSubject findSubjectByName(AuthzSubject whoami, String name)
         throws PermissionException 
     {
-        return findSubjectByName(name).getAuthzSubjectValue();
+        return findSubjectByName(name);
     }
 
     /** 

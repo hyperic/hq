@@ -348,7 +348,7 @@ public abstract class AuthzSession {
      * Filter a collection of groupLocal objects to only include those viewable
      * by the specified user
      */
-    protected Collection filterViewableGroups(AuthzSubjectValue who,
+    protected Collection filterViewableGroups(AuthzSubject who,
                                               Collection groups)
         throws PermissionException, FinderException
     {

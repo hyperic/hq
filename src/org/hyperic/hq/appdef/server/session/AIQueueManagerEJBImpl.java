@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -118,7 +118,7 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIPlatformValue queue(AuthzSubjectValue subject,
+    public AIPlatformValue queue(AuthzSubject subject,
                                  AIPlatformValue aiplatform,
                                  boolean updateServers,
                                  boolean isApproval,
@@ -152,13 +152,14 @@ public class AIQueueManagerEJBImpl
         }
 
         // Synchronize current AI data into existing queue.
-        revisedAIplatform = queueSynchronizer.sync(subject,
-                                                   aiqLocal,
-                                                   aiplatformLH, 
-                                                   revisedAIplatform,
-                                                   updateServers,
-                                                   isApproval,
-                                                   isReport);
+        revisedAIplatform =
+            queueSynchronizer.sync(subject.getAuthzSubjectValue(),
+                                   aiqLocal,
+                                   aiplatformLH, 
+                                   revisedAIplatform,
+                                   updateServers,
+                                   isApproval,
+                                   isReport);
 
         if (revisedAIplatform == null) {
             return null;
@@ -192,8 +193,8 @@ public class AIQueueManagerEJBImpl
                FinderException 
     {
         // Act as admin for now
-        AuthzSubjectValue subject = 
-            AuthzSubjectManagerEJBImpl.getOne().findOverlord();
+        AuthzSubject subject = 
+            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
 
         return queue(subject, aiplatform, true, isApproval, false);
     }
@@ -216,7 +217,7 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PageList getQueue(AuthzSubjectValue subject, boolean showIgnored,
+    public PageList getQueue(AuthzSubject subject, boolean showIgnored,
                              boolean showPlaceholders, PageControl pc) {
         return getQueue(subject, showIgnored, showPlaceholders, false, pc);
     }
@@ -237,7 +238,7 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PageList getQueue(AuthzSubjectValue subject, boolean showIgnored,
+    public PageList getQueue(AuthzSubject subject, boolean showIgnored,
                              boolean showPlaceholders,
                              boolean showAlreadyProcessed, PageControl pc)
     {
@@ -477,7 +478,7 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public List processQueue(AuthzSubjectValue subject,
+    public List processQueue(AuthzSubject subject,
                              List platformList,
                              List serverList,
                              List ipList,
@@ -504,7 +505,7 @@ public class AIQueueManagerEJBImpl
         }
     } 
     
-    private List _processQueue(AuthzSubjectValue subject,
+    private List _processQueue(AuthzSubject subject,
                                List platformList,
                                List serverList,
                                List ipList,
@@ -671,7 +672,7 @@ public class AIQueueManagerEJBImpl
      * Find a platform given an AI platform id
      * @ejb:interface-method
      */
-    public PlatformValue getPlatformByAI(AuthzSubjectValue subject,
+    public PlatformValue getPlatformByAI(AuthzSubject subject,
                                          int aiPlatformID)
         throws FinderException, NamingException, CreateException,
                PermissionException,PlatformNotFoundException
@@ -689,7 +690,7 @@ public class AIQueueManagerEJBImpl
      */
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubjectValue subject,
                                                      int platformID)
-        throws FinderException, NamingException, PermissionException
+        throws FinderException, PermissionException
     {
         Platform pLocal = getPlatformDAO().findById(new Integer(platformID));
 
@@ -742,7 +743,7 @@ public class AIQueueManagerEJBImpl
      * Find an AI platform given an platform 
      * @ejb:interface-method
      */
-    public PlatformValue getPlatformByAI(AuthzSubjectValue subject, 
+    public PlatformValue getPlatformByAI(AuthzSubject subject, 
                                          AIPlatform aipLocal)
         throws FinderException, CreateException, NamingException,
                PermissionException, PlatformNotFoundException

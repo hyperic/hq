@@ -40,7 +40,6 @@ import javax.naming.NamingException;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.server.session.AIAudit;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -249,14 +248,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * 
      * @ejb:interface-method
      */
-    public Resource createResource(AuthzSubjectValue whoami,
-                                   ResourceType rt, Resource prototype, 
-                                   Integer instanceId, String name, 
-                                   boolean system, Resource parent)
+    public Resource createResource(AuthzSubject owner, ResourceType rt,
+                                   Resource prototype, Integer instanceId,
+                                   String name, boolean system, Resource parent)
     {
         long start = System.currentTimeMillis();
-        AuthzSubject owner =
-            getSubjectDAO().findByAuth(whoami.getName(), whoami.getAuthDsn());
 
         Resource res = getResourceDAO().create(rt, prototype, name, owner, 
                                                instanceId, system); 
@@ -428,15 +424,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @throws PermissionException whoami does not own the resource.
      * @ejb:interface-method
      */
-    public void setResourceOwner(AuthzSubjectValue whoami, ResourceValue res,
-                                 AuthzSubjectValue newOwner)
+    public void setResourceOwner(AuthzSubject whoami, ResourceValue res,
+                                 AuthzSubject newOwner)
         throws PermissionException {
         Resource resource = lookupResourcePojo(res);
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
 
         if (pm.hasAdminPermission(whoami.getId()) ||
             getResourceDAO().isOwner(resource, whoami.getId())) {
-            resource.setOwner(lookupSubjectPojo(newOwner));
+            resource.setOwner(newOwner);
         }
         else {
             throw new PermissionException("Only an owner or admin may " +
@@ -450,7 +446,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param pc Paging information for the request
      * @ejb:interface-method
      */
-    public List getAllResourceTypes(AuthzSubjectValue subject, PageControl pc) {
+    public List getAllResourceTypes(AuthzSubject subject, PageControl pc) {
         Collection resTypes = getResourceTypeDAO().findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.RESTYPE_NAME);
         return resourceTypePager.seek(resTypes, pc.getPagenum(),
@@ -465,7 +461,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return Map of resource values
      * @ejb:interface-method
      */
-    public List findViewableInstances(AuthzSubjectValue subject,
+    public List findViewableInstances(AuthzSubject subject,
                                       String typeName, 
                                       String resName,
                                       String appdefTypeStr,
@@ -478,8 +474,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         }
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        return pm.findViewableResources(subject, typeName, resName, appdefTypeStr,
-                                        typeId, pc);
+        return pm.findViewableResources(subject, typeName, resName,
+                                        appdefTypeStr, typeId, pc);
     }
 
     /**
@@ -490,7 +486,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return Map of resource values
      * @ejb:interface-method
      */
-    public Map findAllViewableInstances(AuthzSubjectValue subject) {
+    public Map findAllViewableInstances(AuthzSubject subject) {
         // First get all resource types
         HashMap resourceMap = new HashMap();
     
@@ -502,10 +498,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             String typeName = type.getName();
                     
             // Now fetch list by the type
-            List ids = this.findViewableInstances(subject, 
-                                                  typeName, 
-                                                  null, null, null,
-                                                  PageControl.PAGE_ALL);
+            List ids = findViewableInstances(subject,  typeName,  null, null,
+                                             null, PageControl.PAGE_ALL);
             if (ids.size() > 0)
                 resourceMap.put(typeName, ids);
         }
@@ -596,8 +590,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return Array of resources owned by the given subject.
      * @ejb:interface-method
      */
-    public ResourceValue[] findResourceByOwner(AuthzSubjectValue subject) {
-        AuthzSubject owner = getSubjectDAO().findById(subject.getId());
+    public ResourceValue[] findResourceByOwner(AuthzSubject owner) {
         return (ResourceValue[]) this
                 .fromPojos(getResourceDAO().findByOwner(owner),
                            org.hyperic.hq.authz.shared.ResourceValue.class);

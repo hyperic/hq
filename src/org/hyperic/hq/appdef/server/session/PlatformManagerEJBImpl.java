@@ -67,7 +67,6 @@ import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterGrpEntRes;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
@@ -203,7 +202,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @return List of PlatformTypeValues
      * @ejb:interface-method
      */
-    public PageList getViewablePlatformTypes(AuthzSubjectValue subject,
+    public PageList getViewablePlatformTypes(AuthzSubject subject,
                                              PageControl pc) 
         throws FinderException, PermissionException {
         
@@ -259,7 +258,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         } else if(id.isGroup()) {
             try {
                 AppdefGroupValue agv = AppdefGroupManagerEJBImpl.getOne()
-                .findGroup(getOverlord(), id);
+                    .findGroup(getOverlord(), id);
                 return agv.getGroupTypeLabel();
             } catch (PermissionException e) {
                 // never happens... its the overlord.
@@ -283,14 +282,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param id - The id of the Platform
      * @ejb:interface-method
      */
-    public void removePlatform(AuthzSubjectValue subject, Integer id)
+    public void removePlatform(AuthzSubject subject, Integer id)
         throws RemoveException, PlatformNotFoundException, PermissionException,
                VetoException
     {
         removePlatform(subject, findPlatformById(id));
     }
     
-    private void removePlatform(AuthzSubjectValue subject, Platform platform)
+    private void removePlatform(AuthzSubject subject, Platform platform)
         throws RemoveException, PermissionException, PlatformNotFoundException,
                VetoException
     {
@@ -361,9 +360,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Create a Platform of a specified type
      * @ejb:interface-method
      */
-    public Platform createPlatform(AuthzSubjectValue subject,
-                                  Integer platformTypeId,
-                                  PlatformValue pValue, Integer agentPK)
+    public Platform createPlatform(AuthzSubject subject, Integer platformTypeId,
+                                   PlatformValue pValue, Integer agentPK)
         throws CreateException, ValidationException, PermissionException,
                AppdefDuplicateNameException, AppdefDuplicateFQDNException,
                ApplicationException 
@@ -430,7 +428,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             
             // Send resource create event
             ResourceCreatedZevent zevent =
-                new ResourceCreatedZevent(subject, platform.getEntityId());
+                new ResourceCreatedZevent(subject.getAuthzSubjectValue(),
+                                          platform.getEntityId());
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
 
             return platform;
@@ -453,7 +452,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param aipValue the AIPlatform to create as a regular appdef platform.
      * @ejb:interface-method
      */
-    public Platform createPlatform(AuthzSubjectValue subject,
+    public Platform createPlatform(AuthzSubject subject,
                                    AIPlatformValue aipValue)
         throws ApplicationException, CreateException
     {
@@ -496,7 +495,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
         // Send resource create event
         ResourceCreatedZevent zevent =
-            new ResourceCreatedZevent(subject, platform.getEntityId());
+            new ResourceCreatedZevent(subject.getAuthzSubjectValue(),
+                                      platform.getEntityId());
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         
         return platform;
@@ -511,8 +511,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @return A List of PlatformValue objects representing all of the
      * platforms that the given subject is allowed to view.
      */
-    public PageList getAllPlatforms(AuthzSubjectValue subject,
-                                    PageControl pc)
+    public PageList getAllPlatforms(AuthzSubject subject, PageControl pc)
         throws FinderException, PermissionException {
 
         Collection ejbs;
@@ -536,7 +535,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * platforms that the given subject is allowed to view that were created
      * within the given range.
      */
-    public PageList getRecentPlatforms(AuthzSubjectValue subject,
+    public PageList getRecentPlatforms(AuthzSubject subject,
                                        long range, int size)
         throws FinderException, PermissionException {
 
@@ -570,7 +569,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get platform light value by id.  Does not check permission.
      * @ejb:interface-method
      */
-    public Platform getPlatformById(AuthzSubjectValue subject, Integer id)
+    public Platform getPlatformById(AuthzSubject subject, Integer id)
         throws PlatformNotFoundException, PermissionException 
     {
         Platform platform = findPlatformById(id);
@@ -600,8 +599,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @deprecated use findPlatformById instead.
      * @ejb:interface-method
      */
-    public PlatformValue getPlatformValueById(AuthzSubjectValue subject,
-                                              Integer id)
+    public PlatformValue getPlatformValueById(AuthzSubject subject, Integer id)
         throws PlatformNotFoundException, PermissionException
     {
         Platform platform = findPlatformById(id);
@@ -613,7 +611,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get the Platform object based on an AIPlatformValue.
      * @ejb:interface-method
      */
-    public Platform getPlatformByAIPlatform(AuthzSubjectValue subject,
+    public Platform getPlatformByAIPlatform(AuthzSubject subject,
                                             AIPlatformValue aiPlatform)
         throws PermissionException {
         
@@ -643,8 +641,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param subject - who is trying this
      * @param name - the name of the platform
      */
-    public PlatformValue getPlatformByName(AuthzSubjectValue subject,
-                                           String name)
+    public PlatformValue getPlatformByName(AuthzSubject subject, String name)
         throws PlatformNotFoundException, PermissionException {
         Platform p = getPlatformDAO().findByName(name);
         if (p == null) {
@@ -666,8 +663,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the platform that has the specified CertDN
      */
-    private Platform getPlatformByCertDN(AuthzSubjectValue subject,
-                                         String certDN)
+    private Platform getPlatformByCertDN(AuthzSubject subject, String certDN)
         throws PlatformNotFoundException, PermissionException {
         Platform p;
         try {
@@ -688,8 +684,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get the Platform that has the specified Fqdn
      * @ejb:interface-method
      */
-    public Platform findPlatformByFqdn(AuthzSubjectValue subject,
-                                       String fqdn)
+    public Platform findPlatformByFqdn(AuthzSubject subject, String fqdn)
         throws PlatformNotFoundException, PermissionException
     {
         Platform p;
@@ -711,10 +706,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get the Collection of platforms that have the specified Ip address
      * @ejb:interface-method
      */
-    public Collection getPlatformByIpAddr(AuthzSubjectValue subject,
-                                          String address)
-        throws FinderException, PermissionException
-    {
+    public Collection getPlatformByIpAddr(AuthzSubject subject, String address)
+        throws PermissionException {
         return getPlatformDAO().findByIpAddr(address);
     }
 
@@ -722,7 +715,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get the platform by agent token
      * @ejb:interface-method
      */
-    public Collection getPlatformPksByAgentToken(AuthzSubjectValue subject,
+    public Collection getPlatformPksByAgentToken(AuthzSubject subject,
                                                  String agentToken)
         throws PlatformNotFoundException
     {
@@ -748,7 +741,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param serviceId service ID.
      * @return the Platform
      */
-    public PlatformValue getPlatformByService ( AuthzSubjectValue subject,
+    public PlatformValue getPlatformByService ( AuthzSubject subject,
                                                 Integer serviceId ) 
         throws PlatformNotFoundException, PermissionException {
         Platform p = getPlatformDAO().findByServiceId(serviceId);
@@ -785,7 +778,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param subject The subject trying to list services.
      * @param serverId Server ID.
      */
-    public PlatformValue getPlatformByServer(AuthzSubjectValue subject,
+    public PlatformValue getPlatformByServer(AuthzSubject subject,
                                              Integer serverId ) 
         throws PlatformNotFoundException, PermissionException 
     {
@@ -825,8 +818,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @param subject The subject trying to list services.
      */
-    public PageList getPlatformsByServers(AuthzSubjectValue subject,
-                                          List sIDs) 
+    public PageList getPlatformsByServers(AuthzSubject subject, List sIDs) 
         throws PlatformNotFoundException, PermissionException {
         List authzPks;
         try {
@@ -869,7 +861,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ApplicationValue objects representing all of the
      * services that the given subject is allowed to view.
      */
-    public PageList getPlatformsByApplication ( AuthzSubjectValue subject,
+    public PageList getPlatformsByApplication ( AuthzSubject subject,
                                                 Integer appId,
                                                 PageControl pc ) 
         throws ApplicationNotFoundException, PlatformNotFoundException, 
@@ -933,8 +925,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public Integer[] getPlatformIds(AuthzSubjectValue subject,
-                                    Integer platTypeId)
+    public Integer[] getPlatformIds(AuthzSubject subject, Integer platTypeId)
         throws PermissionException {
         PlatformDAO pLHome;
         try {
@@ -972,7 +963,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public PageList getPlatformsByType(AuthzSubjectValue subject, String type)
+    public PageList getPlatformsByType(AuthzSubject subject, String type)
         throws PermissionException, InvalidAppdefTypeException {
         try {
             PlatformType ptype = getPlatformTypeDAO().findByName(type);
@@ -1012,7 +1003,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * PlatformNotFoundException, rather it returns an empty PageList.
      * @ejb:interface-method
      */
-    public PageList findPlatformsByIpAddr ( AuthzSubjectValue subject,
+    public PageList findPlatformsByIpAddr ( AuthzSubject subject,
                                             String addr,
                                             PageControl pc ) 
         throws PermissionException
@@ -1041,14 +1032,15 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param existing - the value object for the platform you want to save
      * @ejb:interface-method
      */
-    public boolean updatePlatformImpl(AuthzSubjectValue subject,
+    public boolean updatePlatformImpl(AuthzSubject subject,
                                       PlatformValue existing)
         throws UpdateException, PermissionException,
                AppdefDuplicateNameException, PlatformNotFoundException, 
                AppdefDuplicateFQDNException, ApplicationException {
         try {
             checkPermission(subject, getPlatformResourceType(),
-                    existing.getId(), AuthzConstants.platformOpModifyPlatform);
+                            existing.getId(),
+                            AuthzConstants.platformOpModifyPlatform);
             existing.setModifiedBy(subject.getName());
             existing.setMTime(new Long(System.currentTimeMillis()));
             trimStrings(existing);
@@ -1131,8 +1123,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                     }
 
                     try {
-                        aiqManagerLocal.queue(subject, aiPlatform,
-                                              false, false, true);
+                        aiqManagerLocal.queue(subject, aiPlatform, false,
+                                              false, true);
                     } catch (CreateException e) {
                         _log.error("Cannot create AIPlatform for " +
                                   existing.getName(), e);
@@ -1158,7 +1150,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * save
      * @ejb:interface-method
      */
-    public PlatformValue updatePlatform(AuthzSubjectValue subject,
+    public PlatformValue updatePlatform(AuthzSubject subject,
                                         PlatformValue existing)
         throws UpdateException, PermissionException,
                AppdefDuplicateNameException, PlatformNotFoundException, 
@@ -1175,9 +1167,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:interface-method
      */
-    public void changePlatformOwner(AuthzSubjectValue who,
+    public void changePlatformOwner(AuthzSubject who,
                                     Integer platformId,
-                                    AuthzSubjectValue newOwner)
+                                    AuthzSubject newOwner)
         throws FinderException, PermissionException {
         // first lookup the platform
         Platform platform = getPlatformDAO().findById(platformId);
@@ -1217,8 +1209,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param subject - the user creating
      */
     private void createAuthzPlatform(String platName, Integer platId,
-                                     AuthzSubjectValue subject,
-                                     PlatformType pType)
+                                     AuthzSubject subject, PlatformType pType)
         throws CreateException, NamingException, FinderException,
                PermissionException 
     {
@@ -1244,9 +1235,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         throws VetoException, RemoveException
     { 
         AppdefGroupManagerLocal grpMgr = AppdefGroupManagerEJBImpl.getOne();
-        AuthzSubject overlord = 
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-        AuthzSubjectValue overlordValue = overlord.getAuthzSubjectValue();
+        AuthzSubject overlord = getOverlord();
         
         try {
             _log.debug("Removing PlatformType: " + pt.getName());
@@ -1255,7 +1244,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             int groupEntType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
             int groupEntResType = pt.getId().intValue();
 
-            List groups = grpMgr.findAllGroups(overlordValue, 
+            List groups = grpMgr.findAllGroups(overlord, 
                                                PageControl.PAGE_ALL,
                                                new AppdefPagerFilter[0]);
             for (Iterator i = groups.iterator(); i.hasNext(); ) {
@@ -1265,7 +1254,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                         grp.getGroupEntType() == groupEntType &&
                         grp.getGroupEntResType() == groupEntResType)
                     {
-                        grpMgr.deleteGroup(overlordValue, grp.getId());
+                        grpMgr.deleteGroup(overlord, grp.getId());
                     }
                 } catch (AppdefGroupNotFoundException e) {
                     /*                            assert false :
@@ -1281,7 +1270,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             for (Iterator i= pt.getPlatforms().iterator(); i.hasNext();) {
                 Platform platform = (Platform) i.next();
                 try {
-                    removePlatform(overlordValue, platform);
+                    removePlatform(overlord, platform);
                 } catch (PlatformNotFoundException e) {
                     assert false :
                         "Delete based on a platform should not " +
@@ -1335,15 +1324,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             ResourceManagerEJBImpl.getOne().findRootResource();
         AuthzSubject overlord = 
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-        AuthzSubjectValue overlordValue = overlord.getAuthzSubjectValue();
+        
         // Now create the left-overs
         for (Iterator i = infoMap.values().iterator(); i.hasNext(); ) {
             PlatformTypeInfo pinfo = (PlatformTypeInfo) i.next();
                 
             _log.debug("Creating new PlatformType: " + pinfo.getName());
             PlatformType pt = ptLHome.create(pinfo.getName(), plugin);
-            createAuthzResource(overlordValue, 
-                                getPlatformPrototypeResourceType(),
+            createAuthzResource(overlord,  getPlatformPrototypeResourceType(),
                                 prototype, pt.getId(), pt.getName(), null); 
         }
     }

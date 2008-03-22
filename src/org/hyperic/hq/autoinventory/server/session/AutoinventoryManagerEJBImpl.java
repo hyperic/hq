@@ -88,9 +88,9 @@ import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -256,8 +256,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void turnOffRuntimeDiscovery(AuthzSubjectValue subject,
-                                        AppdefEntityID id)
+    public void turnOffRuntimeDiscovery(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException
     {
         AICommandsClient client;
@@ -481,7 +480,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         PlatformValue pValue;
         try {
             pValue = getAIQueueManagerLocal().getPlatformByAI
-                (subject.getAuthzSubjectValue(), aipLocal.getId().intValue());
+                (subject, aipLocal.getId().intValue());
 
             // It does exist.  Call the other startScan method so that 
             // authz checks will apply
@@ -702,7 +701,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         // agent is reporting itself to the server for the first time.
         // In that case, we'd have to act as admin and be careful about 
         // what we allow that codepath to do.
-        AuthzSubjectValue subject = getOverlord();
+        AuthzSubject subject = getOverlord();
 
         AIPlatformValue aiPlatform = state.getPlatform();
         aiPlatform.setAgentToken(agentToken);
@@ -848,7 +847,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                          CompositeRuntimeResourceReport crrr)
         throws ApplicationException, AutoinventoryException
     {
-        AuthzSubjectValue subject = getOverlord();
+        AuthzSubject subject = getOverlord();
 
         RuntimeReportProcessor rrp = new RuntimeReportProcessor();
         try {
@@ -918,7 +917,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
                 
         // CONFIGURE SERVICE
-        _configMan.configureResource(sInfo.subject,
+        _configMan.configureResource(sInfo.subject.getAuthzSubjectValue(),
                                      service.getEntityId(),
                                      aiservice.getProductConfig(),
                                      aiservice.getMeasurementConfig(),
@@ -1080,14 +1079,12 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     public void ejbActivate() { }
     public void ejbPassivate() { }
     
-    private AuthzSubjectValue getOverlord () throws AutoinventoryException {
-        AuthzSubjectValue subject;
+    private AuthzSubject getOverlord () throws AutoinventoryException {
         try {
-            subject = getAuthzSubjectManagerLocalHome().create().findOverlord();
+             return AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         } catch ( Exception e ) {
             throw new AutoinventoryException("Error looking up subject", e);
         }
-        return subject;
     }
 
     /**
