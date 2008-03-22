@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.product;
 
+import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
@@ -52,7 +53,13 @@ public class LiveDataPluginManager extends PluginManager {
         throws PluginException
     {
         LiveDataPlugin p = getLiveDataPlugin(type);
-        Object o = p.getData(command, config);
+        PluginLoader.setClassLoader(p);
+        Object o;
+        try {
+            o = p.getData(command, config);
+        } finally {
+            PluginLoader.resetClassLoader(p);
+        }
 
         XStream xstream = new XStream();
         return xstream.toXML(o);
