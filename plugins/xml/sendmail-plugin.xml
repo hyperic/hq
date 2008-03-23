@@ -47,12 +47,12 @@
 [ -z "$msgdir" -o ! -r "$msgdir" ] &amp;&amp;
     exit 1
 
-cd $msgdir > /dev/null 2>&1
+cd $msgdir > /dev/null 2>&amp;1
 [ $? != 0 ] &amp;&amp;
     exit 1
 messfiles=`find * -print 2>/dev/null | wc -w`
 
-cd $premsgdir > /dev/null 2>&1
+cd $premsgdir > /dev/null 2>&amp;1
 [ $? != 0 ] &amp;&amp;
     exit 1
 premessfiles=`find * -print 2>/dev/null | wc -w`
