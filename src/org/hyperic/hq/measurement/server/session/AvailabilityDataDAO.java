@@ -217,7 +217,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of Object[].  [0] = measurement template id,
      *  [1] = min(availVal), [2] = avg(availVal), [3] max(availVal)
-     *  [4] = startime, [5] = endtime, [6] = availVal
+     *  [4] = startime, [5] = endtime, [6] = availVal, [7] mid count
      */
     List findAggregateAvailability(Integer[] tids, Integer[] iids,
                                    long start, long end) {
@@ -225,7 +225,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     .append("SELECT m.template.id, min(rle.availVal),")
                     .append(" avg(rle.availVal), max(rle.availVal),")
                     .append(" rle.availabilityDataId.startime, rle.endtime,")
-                    .append(" rle.availVal")
+                    .append(" rle.availVal, count(m.id)")
                     .append(" FROM Measurement m")
                     .append(" JOIN m.availabilityData rle")
                     .append(" WHERE m.template in (:tids)")

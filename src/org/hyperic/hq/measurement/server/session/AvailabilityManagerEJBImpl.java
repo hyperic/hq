@@ -282,7 +282,7 @@ public class AvailabilityManagerEJBImpl
             data[IND_MIN] = ((Double)objs[1]).doubleValue();
             data[IND_AVG] = ((Double)objs[2]).doubleValue();
             data[IND_MAX] = ((Double)objs[3]).doubleValue();
-            data[IND_CFG_COUNT] = (double)interval;
+            data[IND_CFG_COUNT] =  ((Integer)objs[7]).doubleValue();
             Long endtime = (Long)objs[5];
             Double availVal = (Double)objs[6];
             MetricValue mval;
