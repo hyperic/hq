@@ -132,21 +132,21 @@ public class AvailabilityManagerEJBImpl
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List availInfo = dao.getHistoricalAvails(mid.intValue(), begin,
                                                  end, pc.isDescending());
-        return getPageList(availInfo, begin, end);
+        return getPageList(availInfo, begin, end, (end-begin)/DEFAULT_INTERVAL);
     }
 
     /**
      * @ejb:interface-method
      */
     public PageList getHistoricalAvailData(Integer[] mids, long begin, long end,
-                                           PageControl pc) {
+                                           long interval, PageControl pc) {
         if (mids.length == 0) {
             return new PageList();
         }
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List availInfo = dao.getHistoricalAvails(mids, begin,
             end, pc.isDescending());
-        return getPageList(availInfo, begin, end);
+        return getPageList(availInfo, begin, end, interval);
     }
     
     private Collection getDefaultHistoricalAvail(long timestamp)
@@ -156,9 +156,9 @@ public class AvailabilityManagerEJBImpl
         return Arrays.asList(rtn);
     }
 
-    private PageList getPageList(List availInfo, long begin, long end) {
+    private PageList getPageList(List availInfo, long begin, long end,
+                                 long interval) {
         PageList rtn = new PageList();
-        long interval = (end-begin)/DEFAULT_INTERVAL;
         begin += interval;
         for (Iterator it=availInfo.iterator(); it.hasNext(); ) {
             AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();

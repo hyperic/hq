@@ -1134,7 +1134,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         Integer[] mids = _measSep.getMids();
         Integer[] avIds = _measSep.getAvIds();
         PageList rtn = AvailabilityManagerEJBImpl.getOne().
-            getHistoricalAvailData(avIds, begin, end, pc);
+            getHistoricalAvailData(avIds, begin, end, interval, pc);
         rtn.addAll(getHistData(mids, begin, end, interval,
                                type, returnNulls, pc));
         return rtn;
