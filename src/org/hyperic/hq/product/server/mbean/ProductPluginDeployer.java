@@ -28,6 +28,7 @@ package org.hyperic.hq.product.server.mbean;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -183,6 +184,8 @@ public class ProductPluginDeployer
      * won't work.  So far that doesn't seem to be a problem, but if it 
      * ends up being one, we can split the plugin loading into more stages so
      * that everyone has access to everyone.
+     * 
+     * @jmx:managed-operation
      */
     public void handleNotification(Notification n, Object o) {
         loadStartupClasses();
@@ -213,11 +216,32 @@ public class ProductPluginDeployer
         //hq-plugins at anytime.
         pluginNotify("deployer", DEPLOYER_CLEARED);
         
+        registerEJBDeployerClassLoader();
+        
         setReady(true);
         
-        if (n.getType().equals("org.jboss.system.server.started")) {
+        if (n != null && n.getType().equals("org.jboss.system.server.started")) {
             SystemAudit.createUpAudit(((Number)n.getUserData()).longValue());
         }
+    }
+    
+    private void registerEJBDeployerClassLoader() {
+        if (Boolean.getBoolean("hq.unittest.run")) {
+            // Make the current classloader accessible to the unit tests.
+            // Have to use reflection - else we will get a ClassCastException
+            ClassLoader cl = ClassLoader.getSystemClassLoader();
+
+            _log.info("Registering EJB deployer classloader for unit tests");
+            
+            try {                
+                Method method = cl.getClass().getMethod("registerEJBClassLoader", 
+                        new Class[]{ClassLoader.class});
+
+                method.invoke(cl, new Object[]{this.getClass().getClassLoader()});                
+            } catch (Exception e) {
+                throw new RuntimeException("failed to register EJB classloader", e);
+            }
+        }        
     }
 
     protected void processNestedDeployments(DeploymentInfo di)
