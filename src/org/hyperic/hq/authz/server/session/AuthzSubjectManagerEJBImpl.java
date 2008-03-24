@@ -294,7 +294,11 @@ public class AuthzSubjectManagerEJBImpl
                                                String name)
         throws PermissionException 
     {
-        return findSubjectByName(name).getAuthzSubjectValue();
+        AuthzSubject s = findSubjectByName(name);
+        if (s != null) {
+            return s.getAuthzSubjectValue();
+        }
+        return null;
     }
 
     /** 
