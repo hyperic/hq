@@ -35,7 +35,6 @@ import java.util.StringTokenizer;
 
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
-import org.hyperic.hq.agent.server.monitor.AgentMonitorIncalculableException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
@@ -435,6 +434,10 @@ public class ScheduleThread
     private long collect() {
         long timeOfNext = 0;
         synchronized (_schedules) {
+            if (_schedules.size() == 0) {
+                //nothing scheduled
+                return POLL_PERIOD + System.currentTimeMillis();
+            }
             for (Iterator it = _schedules.values().iterator();
                  it.hasNext() && (_shouldDie == false);) {
                 
