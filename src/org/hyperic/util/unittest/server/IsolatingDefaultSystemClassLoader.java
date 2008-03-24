@@ -51,6 +51,10 @@ public class IsolatingDefaultSystemClassLoader extends URLClassLoader {
     
     private final ClassLoader _defaultSystemClassLoader;
     
+    private final Object _lock = new Object();
+    
+    private ClassLoader _ejbClassLoader;
+        
     
     /**
      * This constructor is required when registering this classloader as the 
@@ -160,5 +164,26 @@ public class IsolatingDefaultSystemClassLoader extends URLClassLoader {
         
         return loadedClass;
     }
+    
+    /**
+     * Register the EJB deployer classloader.
+     * 
+     * @param classLoader The EJB deployer classloader.
+     */
+    public void registerEJBClassLoader(ClassLoader classLoader) {
+        synchronized (_lock) {
+            _ejbClassLoader = classLoader;
+        }
+    }
+    
+    /**
+     * @return The registered EJB deployer classloader.
+     */
+    public ClassLoader getEJBClassLoader() {
+        synchronized (_lock) {
+            return _ejbClassLoader;
+        }
+    }
+    
 
 }
