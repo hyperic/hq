@@ -102,20 +102,7 @@ public abstract class BaseServerTestCase extends TestCase {
     private static ServerLifecycle server;
             
     private static URL deployment;
-    
-    static 
-    {
-        // Set properties required to contact the jboss JNDI
-        System.setProperty("java.naming.factory.initial",
-                "org.jnp.interfaces.NamingContextFactory");
         
-        System.setProperty("java.naming.factory.url.pkgs",
-                "org.jboss.naming:org.jnp.interfaces");
-        
-        System.setProperty("java.naming.provider.url",
-                "jnp://localhost:2099");
-    }
-    
     /**
      * Creates an instance.
      *
@@ -314,9 +301,9 @@ public abstract class BaseServerTestCase extends TestCase {
             server.startServer();
         }
         
-        assertTrue(server.isStarted());
+        assertTrue(server.isStarted());        
     }
-    
+        
     /**
      * Deploy the HQ application into the jboss server, starting the jboss server 
      * first if necessary.
@@ -380,7 +367,7 @@ public abstract class BaseServerTestCase extends TestCase {
             deployment = null;
         }
     }
-    
+        
     private String getJBossHomeDir() {
         String jbossHomeDir = System.getProperty(JBOSS_HOME_DIR);
         
