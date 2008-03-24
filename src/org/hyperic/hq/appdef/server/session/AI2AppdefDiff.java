@@ -414,7 +414,16 @@ public class AI2AppdefDiff {
                     revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
                     addDiff(revisedAIplatform, AIQueueConstants.Q_PLATFORM_SERVERS_CHANGED);
                 }
-                
+                if (!scannedServer.getName().equals(appdefServer.getName())) {
+                    // Name has changed
+                    scannedServer.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
+                    addDiff(scannedServer, AIQueueConstants.Q_SERVER_NAME_CHANGED);
+
+                    // Push changes up to platform
+                    revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
+                    addDiff(revisedAIplatform, AIQueueConstants.Q_PLATFORM_SERVERS_CHANGED);   
+                }
+
                 AppdefEntityID aID =
                     AppdefEntityID.newServerID(appdefServer.getId().intValue());
                 boolean configChanged = false;
