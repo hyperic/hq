@@ -73,13 +73,13 @@ import org.jdom.input.SAXBuilder;
 public abstract class BaseServerTestCase extends TestCase {
     
     private static final String logCtx = BaseServerTestCase.class.getName();
-    private static final String DUMP_FILE = "dbdump.xml.gz";
+    private static final String DUMP_FILE = "hqdb.dump.xml.gz";
     
     /**
      * Path designated for file in the current run
      * contents may be deleted while not running
      */
-    private static final String WORKING_DIR = "/tmp";
+    private static final String WORKING_DIR = "hq.unittest.working.dir";
     
     /**
      * The system property specifying the path to the jboss deployment 
@@ -201,7 +201,7 @@ public abstract class BaseServerTestCase extends TestCase {
                 stmt.execute("alter session set constraints = deferred");
             }
             IDataSet dataset = new FlatXmlDataSet(new GZIPInputStream(
-                new FileInputStream(WORKING_DIR+"/"+DUMP_FILE)));
+                new FileInputStream(getHQWorkingDir()+"/"+DUMP_FILE)));
             DatabaseOperation.CLEAN_INSERT.execute(idbConn, dataset);
             conn.commit();
         } catch (SQLException e) {
@@ -227,7 +227,7 @@ public abstract class BaseServerTestCase extends TestCase {
             fullDataSet = idbConn.createDataSet();
             GZIPOutputStream gstream =
                 new GZIPOutputStream(
-                    new FileOutputStream(WORKING_DIR+"/"+DUMP_FILE));
+                    new FileOutputStream(getHQWorkingDir()+"/"+DUMP_FILE));
             FlatXmlDataSet.write(fullDataSet, gstream);
             gstream.finish();
         } catch (SQLException e) {
@@ -394,6 +394,17 @@ public abstract class BaseServerTestCase extends TestCase {
         }
         
         return hqHomeDir;
+    }
+    
+    private String getHQWorkingDir() {
+        String hqWorkingDir = System.getProperty(WORKING_DIR);
+
+        if (hqWorkingDir == null) {
+            throw new IllegalStateException("The "+WORKING_DIR+
+                                    " system property was not set");
+        }
+
+        return hqWorkingDir;
     }
     
 }

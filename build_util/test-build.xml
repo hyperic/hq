@@ -13,6 +13,7 @@
 	<echo message="-Dhq.unittest.run=true"/>
 	<echo message="-Dhq.unittest.jboss.home=${jboss.home}"/>
 	<echo message="-Dhq.unittest.hq.home=${basedir}"/>
+	<echo message="-Dhq.unittest.working.dir=${basedir}/unittest/data"/>
 			
     <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltonerror="no">
 	  <jvmarg value="-Xmx512m"/>
@@ -22,6 +23,7 @@
 	  <jvmarg value="-Dhq.unittest.run=true"/>
 	  <jvmarg value="-Dhq.unittest.jboss.home=${jboss.home}"/>
 	  <jvmarg value="-Dhq.unittest.hq.home=${basedir}"/>
+	  <jvmarg value="-Dhq.unittest.working.dir=${basedir}/unittest/data"/>
 	  <classpath>
         <path refid="alljars"/>
         <path refid="testjars"/>
