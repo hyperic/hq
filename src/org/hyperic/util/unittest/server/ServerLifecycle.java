@@ -308,24 +308,14 @@ public class ServerLifecycle {
                 
                 Thread.currentThread().setContextClassLoader(cl);
                 
-                String methodName;
-                
                 if (deploy) {
-                    methodName = "deploy";
-                } else {
-                    methodName = "undeploy";
+                    loadSigar(url, cl);                    
                 }
                 
-                MBeanServer server = MBeanUtil.getMBeanServer();
+                deployURL(deploy, url);
                 
-                try {
-                    loadSigar(url, cl);
-                    
-                    server.invoke(new ObjectName("jboss.system:service=MainDeployer"), 
-                                  methodName, new Object[]{url}, new String[]{"java.net.URL"});
-                } catch (Exception e) {
-                    throw new RuntimeException("Could not "+methodName+
-                                               " package at: "+url, e); 
+                if (deploy) {
+                    deployPlugins();                    
                 }
             }
         };
@@ -337,31 +327,75 @@ public class ServerLifecycle {
             throw new Exception(group.getUncaughtException());
         }
     }
-    
+        
     /**
      * Force sigar to load the correct dlls.
      * 
      * @param url The URL for the deployment package.
      * @param cl The isolating system classloader.
-     * @throws Exception
      */
-    private void loadSigar(final URL url,
-            IsolatingDefaultSystemClassLoader cl) throws Exception {
-        File deployDir = new File(new URI(url.toString()));
+    private void loadSigar(final URL url, IsolatingDefaultSystemClassLoader cl) {
+        try {
+            
+            File deployDir = new File(new URI(url.toString()));
 
-        URL sigarJar = new URL("file:"+deployDir.getCanonicalPath()+"/lib/sigar.jar");
+            URL sigarJar = new URL("file:"+deployDir.getCanonicalPath()+"/lib/sigar.jar");
 
-        cl.addURL(sigarJar);                        
+            cl.addURL(sigarJar);                        
 
-        File sigarBinDir = new File(deployDir, "sigar_bin/lib/");
+            File sigarBinDir = new File(deployDir, "sigar_bin/lib/");
 
-        System.setProperty("org.hyperic.sigar.path", sigarBinDir.getCanonicalPath());
+            System.setProperty("org.hyperic.sigar.path", sigarBinDir.getCanonicalPath());
 
-        Class clazz = cl.loadClass("org.hyperic.sigar.OperatingSystem");
+            Class clazz = cl.loadClass("org.hyperic.sigar.OperatingSystem");
 
-        Method method = clazz.getMethod("getInstance", new Class[0]);
+            Method method = clazz.getMethod("getInstance", new Class[0]);
 
-        method.invoke(clazz, new Object[0]);
+            method.invoke(clazz, new Object[0]);            
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load sigar", e);
+        }
+    }
+    
+    /**
+     * Deploy or undeploy a package at the give URL.
+     * 
+     * @param deploy <code>true</code> to deploy; <code>false</code> to undeploy.
+     * @param url The URL.
+     */
+    private void deployURL(boolean deploy, URL url) {
+        String methodName;
+        
+        if (deploy) {
+            methodName = "deploy";
+        } else {
+            methodName = "undeploy";
+        }
+        
+        MBeanServer server = MBeanUtil.getMBeanServer();
+        
+        try {                    
+            server.invoke(new ObjectName("jboss.system:service=MainDeployer"), 
+                          methodName, new Object[]{url}, new String[]{"java.net.URL"});
+        } catch (Exception e) {
+            throw new RuntimeException("Could not "+methodName+
+                                       " package at: "+url, e); 
+        }
+    }
+    
+    /**
+     * Deploy the HQ plugins.
+     */
+    private void deployPlugins() {
+        MBeanServer server = MBeanUtil.getMBeanServer();
+        
+        try {
+            server.invoke(new ObjectName("hyperic.jmx:type=Service,name=ProductPluginDeployer"), 
+                          "handleNotification", new Object[]{null, null}, 
+                          new String[]{"javax.management.Notification", "java.lang.Object"});
+        } catch (Exception e) {
+            throw new RuntimeException("Could not deploy hq plugins", e); 
+        }        
     }
     
     /**
