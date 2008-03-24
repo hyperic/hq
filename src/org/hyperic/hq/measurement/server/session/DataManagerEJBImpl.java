@@ -948,6 +948,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public PageList getHistoricalData(Integer id, long begin, long end,
                                       PageControl pc)
         throws DataNotAvailableException {
+        _measSep.init();
         if (_measSep.isAvailMeas(id)) {
             return AvailabilityManagerEJBImpl.getOne().
                 getHistoricalAvailData(id, begin, end, pc);
@@ -1130,6 +1131,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                       long interval, int type,
                                       boolean returnNulls, PageControl pc)
         throws DataNotAvailableException {
+        _measSep.init();
         _measSep.set(ids);
         Integer[] mids = _measSep.getMids();
         Integer[] avIds = _measSep.getAvIds();
@@ -1379,6 +1381,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public MetricValue getLastHistoricalData(Integer id)
         throws DataNotAvailableException {
+        _measSep.init();
         if (_measSep.isAvailMeas(id)) {
             return AvailabilityManagerEJBImpl.getOne().getLastAvail(id);
         } else {
@@ -1509,6 +1512,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public Map getLastDataPoints(Integer[] ids, long timestamp)
     {
+        _measSep.init();
         _measSep.set(ids);
         Integer[] sepMids = _measSep.getMids();
         Integer[] avIds = _measSep.getAvIds();
@@ -2298,6 +2302,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         private Integer[] _mids;
         private Integer[] _avIds;
         MeasurementSeparator() {
+        }
+        void init() {
             _orderedAvailIds = AvailabilityManagerEJBImpl.getOne()
                 .getAllAvailIds();
         }
