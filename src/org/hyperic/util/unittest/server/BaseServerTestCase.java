@@ -219,7 +219,7 @@ public abstract class BaseServerTestCase extends TestCase {
         }
     }
 
-    protected final void dumpDatabase(Connection conn)
+    private final void dumpDatabase(Connection conn)
             throws UnitTestDBException {
         try {
             IDatabaseConnection idbConn = new DatabaseConnection(conn);
@@ -246,9 +246,9 @@ public abstract class BaseServerTestCase extends TestCase {
      * @param schema File to extract XML data from.
      * @throws UnitTestDBException 
      */
-    protected final void insertSchemaData(File schema)
+    protected final void insertSchemaData(String filename)
         throws UnitTestDBException {
-        overlayDBData(schema, DatabaseOperation.REFRESH);
+        overlayDBData(filename, DatabaseOperation.REFRESH);
     }
     
     /**
@@ -256,12 +256,12 @@ public abstract class BaseServerTestCase extends TestCase {
      * @param schema File to extract XML data from.
      * @throws UnitTestDBException 
      */
-    protected final void deleteSchemaData(File schema)
+    protected final void deleteSchemaData(String filename)
         throws UnitTestDBException {
-        overlayDBData(schema, DatabaseOperation.DELETE);
+        overlayDBData(filename, DatabaseOperation.DELETE);
     }
 
-    private void overlayDBData(File schema, DatabaseOperation operation)
+    private void overlayDBData(String filename, DatabaseOperation operation)
         throws UnitTestDBException {
         Connection conn = null;
         Statement stmt = null;
@@ -276,10 +276,11 @@ public abstract class BaseServerTestCase extends TestCase {
                 stmt.execute("alter session set constraints = deferred");
             }
             InputStream stream;
-            if (schema.getName().endsWith(".gz")) {
-                stream = new GZIPInputStream(new FileInputStream(schema));
+            File overlayFile = new File(getHQWorkingDir(), filename);
+            if (filename.endsWith(".gz")) {
+                stream = new GZIPInputStream(new FileInputStream(overlayFile));
             } else {
-                stream = new BufferedInputStream(new FileInputStream(schema));
+                stream = new BufferedInputStream(new FileInputStream(overlayFile));
             }
             IDataSet dataset = new FlatXmlDataSet(stream);
             operation.execute(iconn, dataset);
@@ -328,8 +329,18 @@ public abstract class BaseServerTestCase extends TestCase {
         }
         
         deployment = getHQDeployment();
-        
-		//                restoreDatabase();
+        File dbdump = new File(getHQWorkingDir(), DUMP_FILE);
+        Connection conn = null;
+        if (!dbdump.exists()) {
+            try {
+                conn = getConnection(false);
+            	dumpDatabase(conn);
+            } finally {
+                DBUtil.closeConnection(logCtx, conn);
+        	}
+        } else {
+            restoreDatabase();
+        }
         
         server.deploy(deployment);
     }
