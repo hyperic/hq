@@ -71,6 +71,13 @@
     </filter-class>
   </filter>
 
+  <filter>
+    <filter-name>HQU-Filter</filter-name>
+    <filter-class>
+        org.hyperic.hq.ui.RenditFilter
+    </filter-class>
+  </filter>  
+
   <filter-mapping>
     <filter-name>Hibernate-Session-Filter</filter-name>
     <url-pattern>/*</url-pattern>
@@ -105,7 +112,11 @@
     <filter-name>Resource-Filter</filter-name>
     <url-pattern>/js/*</url-pattern>
   </filter-mapping>
-  
+  <filter-mapping>
+    <filter-name>HQU-Filter</filter-name>
+    <url-pattern>/hqu/*</url-pattern>
+  </filter-mapping>
+    
   <listener>
     <listener-class>org.hyperic.hq.ui.Configurator</listener-class>
   </listener>
@@ -228,6 +239,10 @@
     <servlet-name>hqu</servlet-name>
     <url-pattern>*.groovy</url-pattern>
   </servlet-mapping>
+   <servlet-mapping>
+    <servlet-name>hqu</servlet-name>
+    <url-pattern>/hqu</url-pattern>
+  </servlet-mapping>  
   <servlet-mapping>
     <servlet-name>metricdata</servlet-name>
     <url-pattern>/resource/MetricData</url-pattern>

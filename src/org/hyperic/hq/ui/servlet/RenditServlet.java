@@ -31,6 +31,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletRequest;
 
 import org.apache.catalina.Globals;
 import org.apache.commons.logging.Log;
@@ -58,6 +59,47 @@ public class RenditServlet
         throws ServletException, IOException 
     {
         handleRequest(req, resp);
+    }
+    
+    public static boolean requestIsValid(HttpServletRequest req) {
+        String reqUri = (String)
+            req.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR);
+        boolean useInclude = false;
+        
+        if (reqUri != null)
+            useInclude = true;
+        if (reqUri == null && !useInclude)
+            reqUri = req.getRequestURI();
+        
+        List fullPath = StringUtil.explode(reqUri, "/");
+        int pathSize = fullPath.size();
+        
+        if (_log.isDebugEnabled()) {
+            _log.debug("Examining path: " + fullPath);
+        }
+
+        if (pathSize < 3) { 
+            _log.warn("Illegal request path [" + fullPath + "]");
+            return false;
+        }
+        String elem1 = (String)fullPath.get(1);
+        String elem2 = (String)fullPath.get(2);
+
+        if (elem1.equals("public") || elem2.equals("public"))
+            return true;
+        
+        if (pathSize < 4 || !fullPath.get(pathSize - 4).equals("hqu")) {
+            _log.warn("Illegal request path [" + fullPath + "]");
+            return false;
+        }
+
+        String lastElem = (String)fullPath.get(pathSize - 1);
+        if (lastElem.endsWith(".hqu") == false) {
+            _log.warn("non .hqu file requested [" + fullPath + "]");
+            return false;
+        }
+        
+        return true;
     }
     
     protected void handleRequest(HttpServletRequest req, 
@@ -117,7 +159,7 @@ public class RenditServlet
                                        "]");
         }
         
-        if (pathSize < 4 || !fullPath.get(pathSize - 4).equals("hqu")) {
+        if (!requestIsValid(req)) {
             throw new ServletException("Illegal request path [" + fullPath + 
                                        "]");
         }
