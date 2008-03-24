@@ -1,4 +1,4 @@
-package org.hyperic.hq.ui.service;
+package org.hyperic.hq.bizapp.shared.uibeans;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +12,13 @@ public class SearchResult {
     private String _name;
     private String _resType;
     private String _adeId;
+
+    public SearchResult(String name, String type, String id) {
+        super();
+        _name = name;
+        _resType = type;
+        _adeId = id;
+    }
 
     public String getName() {
         return _name;

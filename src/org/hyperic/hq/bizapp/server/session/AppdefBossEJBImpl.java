@@ -148,6 +148,7 @@ import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportData;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportException;
 import org.hyperic.hq.bizapp.shared.resourceImport.Validator;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
+import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -2559,7 +2560,23 @@ public class AppdefBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, FinderException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        return getResourceManager().findViewables(subject, searchFor, pc);
+        PageList resources =
+            getResourceManager().findViewables(subject, searchFor, pc);
+        
+        List searchResults = new ArrayList(resources.size());
+        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+            Resource res = (Resource) it.next();
+            AppdefEntityID aeid = new AppdefEntityID(res);
+            searchResults
+                .add(new SearchResult(res.getName(),
+                                      AppdefEntityConstants
+                                          .typeToString(aeid.getType()),
+                                      aeid.getAppdefKey()));
+        }
+        
+        resources.clear();
+        resources.addAll(searchResults);
+        return resources;        
     }
 
     /**
