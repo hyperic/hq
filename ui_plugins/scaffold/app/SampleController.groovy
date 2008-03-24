@@ -3,7 +3,7 @@ import org.hyperic.hq.hqu.rendit.BaseController
 class @CONTROLLER_NAME@Controller 
 	extends BaseController
 {
-    def @CONTROLLER_NAME@Controller() {
+    protected void init() {
         onlyAllowSuperUsers()
     }
     
