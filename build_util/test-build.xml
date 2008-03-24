@@ -36,6 +36,10 @@
           <include name="**/*Test.java"/>
           <exclude name="**/*CactusTest.java"/>
           <include name="**/*_test.java"/>
+		 
+		  <!-- This unit test shows how to use the in-container unit test 
+			   framework. We shouldn't need to run it on each build. -->	
+		  <exclude name="**/ExampleInContainerTest.java"/>	
 
 		  <!-- This unit test should be enabled only when testing the 
 			   unit test framework itself -->
