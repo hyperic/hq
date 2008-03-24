@@ -18,7 +18,7 @@
     <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltonerror="no">
 	  <jvmarg value="-Xmx512m"/>
       <jvmarg value="-Xms512m"/>
-	  <jvmarg value="-XX:MaxPermSize=128m"/>		
+	  <jvmarg value="-XX:MaxPermSize=192m"/>		
 	  <jvmarg value="-Djava.system.class.loader=org.hyperic.util.unittest.server.IsolatingDefaultSystemClassLoader"/>
 	  <jvmarg value="-Dhq.unittest.run=true"/>
 	  <jvmarg value="-Dhq.unittest.jboss.home=${jboss.home}"/>
