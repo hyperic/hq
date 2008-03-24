@@ -7,7 +7,7 @@ class ManageController
 {
     private pMan = UIPluginManagerEJBImpl.one
     
-    def ManageController() {
+    protected void init() {
         onlyAllowSuperUsers()
         setTemplate('standard')  // in views/templates/standard.gsp
         setJSONMethods(['pluginData'])
