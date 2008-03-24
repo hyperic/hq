@@ -4,6 +4,9 @@
 
   <!-- ==================== DBSetup ==================== -->
   <target name="dbsetup-init" depends="init-taskdefs" unless="dbsetup-init.isLoaded">
+
+    <!-- this file is used for hqdb data dump during test framework execution -->
+    <delete file="${hq.home}/unittest/data/hqdb.dump.xml.gz" />
   
     <switch value="${hq.server.ds-mapping}">
       <case value="Oracle8">
@@ -185,6 +188,10 @@
           description="Create an empty schema in the database, without any data."/>
 
   <target name="dbsetup-upgrade" depends="init-taskdefs">
+
+    <!-- this file is used for hqdb data dump during test framework execution -->
+    <delete file="${hq.home}/unittest/data/hqdb.dump.xml.gz" />
+
     <ant antfile="${hq.home}/installer/data/db-upgrade.xml"
          target="upgrade"
          inheritAll="true"
