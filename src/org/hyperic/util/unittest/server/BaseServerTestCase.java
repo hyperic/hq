@@ -69,6 +69,9 @@ import org.jdom.input.SAXBuilder;
  * In addition, the <code>hq.unittest.hq.home</code> system property must be set 
  * to the local path where the HQ src resides (.ORG or EE versions depending 
  * on the type of unit test).
+ * 
+ * Finally (and most importantly), the system classloader must be 
+ * set to the {@link IsolatingDefaultSystemClassLoader}.
  */
 public abstract class BaseServerTestCase extends TestCase {
     
@@ -303,38 +306,49 @@ public abstract class BaseServerTestCase extends TestCase {
         
         assertTrue(server.isStarted());        
     }
-        
+                
     /**
      * Deploy the HQ application into the jboss server, starting the jboss server 
      * first if necessary.
      * 
+     * @boolean prepareOrRestoreDB <code>true</code> to let HQ app deployment 
+     *                               include preparing the dump file containing 
+     *                               the initial database or restoring the 
+     *                               database from the dump file if it exists 
+     *                               already.
+     * @return The local interface registry for looking up local interfaces for 
+     *          the deployed EJBs.
      * @throws Exception
      */
-    protected final void deployHQ() throws Exception {
+    protected final LocalInterfaceRegistry deployHQ(boolean prepareOrRestoreDB) throws Exception {
         if (server == null || !server.isStarted()) {
             startServer();
         }
         
         deployment = getHQDeployment();
-        File dbdump = new File(getHQWorkingDir(), DUMP_FILE);
-        Connection conn = null;
-        if (!dbdump.exists()) {
-            try {
-                conn = getConnection(false);
-                // we need the ear to initially deploy so that we can
-                // capture the plugins which take a lot more time
-                // to initially deploy
-                server.deploy(deployment);
-                server.undeploy(deployment);
-            	dumpDatabase(conn);
-            } finally {
-                DBUtil.closeConnection(logCtx, conn);
-        	}
-        } else {
-            restoreDatabase();
+        
+        if (prepareOrRestoreDB) {
+            File dbdump = new File(getHQWorkingDir(), DUMP_FILE);
+            Connection conn = null;
+            if (!dbdump.exists()) {
+                try {
+                    conn = getConnection(false);
+                    // we need the ear to initially deploy so that we can
+                    // capture the plugins which take a lot more time
+                    // to initially deploy
+                    server.deploy(deployment);
+                    server.undeploy(deployment);
+                    dumpDatabase(conn);
+                } finally {
+                    DBUtil.closeConnection(logCtx, conn);
+                }
+            } else {
+                restoreDatabase();
+            }            
         }
-        server.deploy(deployment);
-    }
+        
+        return server.deploy(deployment);
+    }    
     
     /**
      * Undeploy the HQ or HQEE application from the jboss server.

@@ -53,7 +53,7 @@ public class TestServerLifecycleManagement extends BaseServerTestCase {
      */
     public void testStartServerDeployAndUndeployHQ() throws Exception {
         startServer();
-        deployHQ();
+        deployHQ(false);
         undeployHQ();
     }
         
@@ -65,7 +65,7 @@ public class TestServerLifecycleManagement extends BaseServerTestCase {
      * @throws Exception
      */
     public void testDeployAndUndeployHQ() throws Exception {
-        deployHQ();
+        deployHQ(false);
         undeployHQ();        
     }
     
@@ -79,7 +79,7 @@ public class TestServerLifecycleManagement extends BaseServerTestCase {
     public void XXXtestRestartServerAndDeploy() throws Exception {
         stopServer();
         Thread.sleep(10000);
-        deployHQ();
+        deployHQ(false);
         undeployHQ();
     }
 
