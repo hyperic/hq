@@ -1,4 +1,4 @@
-<div id="headerSearch" onclick="toggleSearchBox()">Search</div>
+<div id="headerSearch"><span key="search"></span></div>
 <div id="headerSearchBox" style="display:none">
     <div style="float:left;margin:3px 0px 3px 0px;">
         <input type="text" id="searchBox" value="search for..."></input>
@@ -6,22 +6,22 @@
     <div class="goButton" style="float:left" onclick="showResults()"></div>
 </div>
 <div id="headerSearchResults" class="none">
-    <a jwcid="@PageLink" page="Hub" class="all left">Show All Results</a>
+    <a jwcid="@PageLink" page="Hub" class="all left"><span key="allResults"><span></a>
     <div id="searchClose" class="cancelButton right" ></div>
     <div class="clear">&nbsp;</div>
     <div class="resultsGroup">
-        <div class="category">Resources (<span id="resourceResultsCount"></span>)</div>
+        <div class="category"><span key="resources"><span> (<span id="resourceResultsCount"></span>)</div>
         <ul id="resourceResults">
         </ul>
     </div>
     <div class="resultsGroup">
-        <div class="category">Alerts (0)</div>
+        <div class="category"><span key="alerts"><span> (0)</div>
         <ul>
             <li></li>
         </ul>
     </div>
     <div class="resultsGroup">
-        <div class="category">Events (0)</div>
+        <div class="category"><span key="events"><span> (0)</div>
         <ul>
             <li></li>
         </ul>
