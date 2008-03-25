@@ -5,32 +5,36 @@ body {
     margin: 0
 }
 
+#wrapper {
+    min-width: 1038px
+}
+
 a:visited,a:hover,a {
     color: #57CBDB;
     text-decoration: none
 }
 
+/* HEADER */
 #headerLogo {
     background: url('/images/4.0/logos/HQ.jpg') no-repeat 10% 99%;
-    width: 370px;
+    width: 352px;
     padding: 40px 0 0 10px;
     cursor: pointer;
-    float: left;
+    float: left
 }
 
 #headerBottom {
     height: 5px;
-    background: #2D6EBE none repeat scroll 0
+    background: #FF5A00 none repeat scroll 0
 }
 
 #headerLinks {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 55px;
     width: 200px;
     height: 20px;
     text-align: right;
-    color: #FFF;
     padding: 3px 8px 0 0
 }
 
@@ -40,6 +44,130 @@ a:visited,a:hover,a {
     color: #fff
 }
 
+/* HEADER SEARCH */
+#headerSearch {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50px;
+    height: 17px;
+    background-color: #F96115;
+    color: #FFF;
+    padding: 3px 8px 3px 0px;
+    text-align: right;
+    cursor: pointer;
+    font-weight: bold
+}
+
+#headerSearch a:hover {
+    color: #57CBDB
+}
+
+#headerSearch a,a:visited {
+    color: #FFF
+}
+
+#headerSearchBox {
+    position: absolute;
+    top: 22px;
+    right: 0px;
+    height: 29px;
+    width: 248px;
+    background-color: #F96115;
+    color: #FFF;
+    padding: 0px 5px 0px 7px;
+    text-align: right;
+    cursor: pointer
+}
+
+#headerSearchBox input[type=text] {
+    color: gray;
+    padding: 1px 30px 1px 0px;
+    width: 191px
+}
+
+#headerSearchResults {
+    position: absolute;
+    top: 48px;
+    right: 0px;
+    height: auto;
+    border: solid 1px #F96115;
+    background-color: #FFF;
+    width: 250px;
+    padding: 4px;
+    z-index: 9;
+}
+
+#headerSearchResults .category {
+    margin-bottom: 3px;
+    background: #92C1FD;
+    color: #FFF;
+    height: 12px;
+    padding: 2px
+}
+
+#headerSearchResults .all {
+    margin-top: 3px;
+    margin-bottom: 4px
+}
+
+#headerSearchResults li {
+    margin: 2px 0px;
+    padding: 1px 0px;
+    width: 100%;
+    border: 1px solid #FFF
+}
+
+#headerSearchResults li:hover {
+    border: 1px dotted gray;
+}
+
+#headerSearchResults ul {
+    margin: 0px;
+    padding: 4px;
+    list-style: none
+}
+
+#headerSearchResults li a {
+    background: #FFF url('/images/4.0/icons/platform.png') no-repeat 0% 50%;
+    padding-left: 22px;
+    color: #666;
+    text-decoration: none
+}
+
+#headerSearchResults li a:hover {
+    color: #222
+}
+
+.searchActive {
+    background: #FFF url('/images/4.0/icons/progress2.gif') no-repeat 99% 50%
+}
+
+.searchComplete {
+    background: #FFF
+}
+
+.platform {
+    background: #FFF url('/images/4.0/icons/platform.png') no-repeat 0% 50%;
+}
+
+.server {
+    background: #FFF url('/images/4.0/icons/server.png') no-repeat 0% 50%;
+}
+
+.service {
+    background: #FFF url('/images/4.0/icons/service.png') no-repeat 0% 50%;
+}
+
+.application {
+    background: #FFF url('/images/4.0/icons/application.png') no-repeat 0% 50%;
+}
+
+.group {
+    background: #FFF url('/images/4.0/icons/group.png') no-repeat 0% 50%;
+}
+
+/* HEADER SEARCH */
 #navTabContainer {
     float: left;
     margin: 35px 0 0 20px
@@ -48,7 +176,7 @@ a:visited,a:hover,a {
 #navTabContainer ul {
     list-style: none;
     margin: 0;
-    padding: 5px 10px 0
+    padding: 5px 8px 0
 }
 
 #navTabContainer li {
@@ -58,7 +186,7 @@ a:visited,a:hover,a {
 }
 
 #navTabContainer a {
-    background: url('/images/4.0/tabs/tab_cap1.gif') no-repeat right top;
+    background: url("/images/4.0/tabs/tab_cap.gif") no-repeat right top;
     border-bottom: 0 solid #fff;
     float: left;
     margin: 0 1px 0 0;
@@ -67,25 +195,25 @@ a:visited,a:hover,a {
 }
 
 #navTabContainer a span {
-    background: url('/images/4.0/tabs/tab_main1.gif') no-repeat left top;
+    background: url("/images/4.0/tabs/tab_main.gif") no-repeat left top;
     color: #FFF;
     display: block;
     float: left;
     font-family: Helvetica,Arial,Verdana;
     font-size: 1.2em;
     font-weight: 700;
-    margin-right: 4px;
+    margin-right: 3px;
     padding: 8px 15px 6px
 }
 
 #navTabContainer .active a {
-    background: url('/images/4.0/tabs/tab_cap_active.gif') no-repeat right top;
+    background: url("/images/4.0/tabs/tab_cap_active.gif") no-repeat right top;
     border-width: 0;
     margin-top: -3px
 }
 
 #navTabContainer .active a span {
-    background: url('/images/4.0/tabs/tab_main_active.gif') no-repeat left top;
+    background: url("/images/4.0/tabs/tab_main_active.gif") no-repeat left top;
     color: #fff;
     padding-bottom: 7px;
     padding-top: 10px
@@ -105,21 +233,6 @@ a:visited,a:hover,a {
     border-right: 1px solid gray;
     margin: 0 10px;
     padding: 10px
-}
-
-#statusElementBox{
-    float: right;
-    position:absolute;
-    top: 78px;
-    right: 11px
-}
-
-.statusElement{
-    display: none;
-    background: url('/images/4.0/icons/progress_small.gif') no-repeat left top;
-    height: 16px;
-    width: 16px;
-    float: right
 }
 
 .fieldRow {
@@ -172,24 +285,24 @@ a:visited,a:hover,a {
     cursor: pointer;
     margin: 2px 0px 0px 4px;
     padding: 5px 10px 0 3px;
-    background: url('/images/4.0/icons/help.png') no-repeat;
+    background: url(/images/4.0/icons/help.png) no-repeat
 }
 
 .fieldRow input {
     float: left
 }
 
-.fieldRow input[readonly=readonly]{
-    background: #EFEFEF;
+.fieldRow input[readonly="readonly"] {
+    background: #EFEFEF
 }
 
 .fieldHint {
-    clear: both;
     margin-left: 85px;
     color: gray;
     font-size: 10px;
     float: left;
     padding-top: 2px
+    clear:both
 }
 
 input[type=password],input[type=text] {
@@ -226,9 +339,10 @@ fieldset {
     margin-bottom: 10px;
     padding: 3px 2px 8px
 }
+
 .button {
-    float:right;
-    margin-top:10px
+    float: right;
+    margin-top: 10px
 }
 
 a.buttonGreen {
@@ -265,7 +379,37 @@ a.buttonGreen:active span {
     padding: 6px 0 4px 18px
 }
 
+.goButton {
+    background: transparent url('/images/4.0/icons/accept.png') no-repeat;
+    height: 16px;
+    width: 16px;
+    margin: 3px 2px 0px 5px
+}
+
+.cancelButton {
+    background: transparent url('/images/4.0/icons/close.png') no-repeat;
+    height: 16px;
+    width: 16px;
+    cursor: pointer
+}
+
 #header,#footer {
     height: 65px;
     background: #000 none repeat scroll 0
+}
+
+.right {
+    float: right
+}
+
+.left {
+    float: left
+}
+
+.clear {
+    clear: both
+}
+
+.none {
+    display:none
 }
