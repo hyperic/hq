@@ -319,10 +319,10 @@ public class AvailabilityManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public MetricValue getLastAvail(Integer mid) {
+    public MetricValue getLastAvail(Measurement m) {
 
-        Map map = getLastAvail(new Integer[] { mid }, MAX_AVAIL_TIMESTAMP - 1);
-        MetricValue mv = (MetricValue)map.get(mid);
+        Map map = getLastAvail(new Integer[] { m.getId() }, MAX_AVAIL_TIMESTAMP - 1);
+        MetricValue mv = (MetricValue)map.get(m.getId());
         if (mv == null) {
             return new MetricValue(AVAIL_UNKNOWN, System.currentTimeMillis());
         } else {

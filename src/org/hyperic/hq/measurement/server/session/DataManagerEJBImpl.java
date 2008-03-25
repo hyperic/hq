@@ -1373,28 +1373,28 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
     /**
      *
-     * Get the last MetricValue for the given metric id.
+     * Get the last MetricValue for the given Measurement.
      * 
-     * @param id The id of the Measurement
+     * @param id The Measurement
      * @return The MetricValue or null if one does not exist.
      * @ejb:interface-method
      */
-    public MetricValue getLastHistoricalData(Integer id)
+    public MetricValue getLastHistoricalData(Measurement m)
         throws DataNotAvailableException {
-        _measSep.init();
-        if (_measSep.isAvailMeas(id)) {
-            return AvailabilityManagerEJBImpl.getOne().getLastAvail(id);
+
+        if (m.getTemplate().isAvailability()) {
+            return AvailabilityManagerEJBImpl.getOne().getLastAvail(m);
         } else {
-            return getLastHistData(id);
+            return getLastHistData(m);
         }
     }
 
-    private MetricValue getLastHistData(Integer id)
+    private MetricValue getLastHistData(Measurement m)
         throws DataNotAvailableException {
 
         // Check the cache
         MetricDataCache cache = MetricDataCache.getInstance();
-        MetricValue mval = cache.get(id, 0);
+        MetricValue mval = cache.get(m.getId(), 0);
         if (mval != null) {
             return mval;
         }
@@ -1410,12 +1410,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
             String metricUnion =
                 MeasTabManagerUtil.getUnionStatement(getPurgeRaw(),
-                                                     id.intValue());
+                                                     m.getId().intValue());
             StringBuffer sqlBuf = new StringBuffer(
                 "SELECT timestamp, value FROM " + metricUnion +
                     ", (SELECT MAX(timestamp) AS maxt" +
                     " FROM " + metricUnion + ") mt " +
-                "WHERE measurement_id = " + id + " AND timestamp = maxt");
+                "WHERE measurement_id = " + m.getId() + " AND timestamp = maxt");
 
             stmt = conn.createStatement();
             
@@ -1434,7 +1434,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
-            _log.error("Unable to look up historical data for " + id, e);
+            _log.error("Unable to look up historical data for " + m, e);
             throw new DataNotAvailableException(e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
