@@ -36,11 +36,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.ejb.FinderException;
+import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
@@ -48,6 +48,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
@@ -92,23 +93,25 @@ public class PermissionManagerImpl
                "PROTO_ID IN (SELECT ID FROM EAM_RESOURCE " +
                             "WHERE PROTO_ID = 0 AND SORT_NAME LIKE ?)) ";
 
-    private Connection getConnection() {
-        return DAOFactory.getDAOFactory().getCurrentSession().connection();
-    }
-    
-    private void disconnectSession() {
-        DAOFactory.getDAOFactory().getCurrentSession().disconnect();
+    private Connection getConnection() throws SQLException {
+        try {
+            return DBUtil.getConnByContext(getInitialContext(), HQConstants.DATASOURCE);            
+        } catch (NamingException e) {
+            throw new SQLException("Failed to retrieve datasource: "+e);
+        }
     }
 
-    public PermissionManagerImpl() {
+    public PermissionManagerImpl() { 
+        Connection conn = null;
+        
         try {
-            Connection conn = getConnection();
+            conn = getConnection();
             _falseToken = DBUtil.getBooleanValue(false, conn);                
         } catch (Exception e) {
             throw new SystemException("Unable to initialize " +
                                       "PermissionManager:" + e, e);
         } finally {
-            disconnectSession();
+            DBUtil.closeConnection(ctx, conn);
         }
     }
 
@@ -188,11 +191,13 @@ public class PermissionManagerImpl
                                       String resName, String appdefTypeStr,
                                       Integer typeId, PageControl pc) {
         List viewableInstances = new ArrayList();
-        
+
+        Connection conn = null;
         PreparedStatement stmt = null;
-        ResultSet rs = null;        
+        ResultSet rs = null;
+        
         try {
-            Connection conn = getConnection();
+            conn = getConnection();
             String sql = VIEWABLE_SELECT;
             if (appdefTypeStr != null && typeId != null) {
                 sql += ", EAM_" + appdefTypeStr.toUpperCase() +
@@ -244,8 +249,7 @@ public class PermissionManagerImpl
             _log.error("Error getting scope by SQL", e);
             throw new SystemException("SQL Error getting scope: " + e.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(ctx, null, stmt, rs);
-            disconnectSession();
+            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
         }
     }
 
@@ -253,10 +257,11 @@ public class PermissionManagerImpl
                                       PageControl pc) {
         List viewableInstances = new ArrayList();
         
+        Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;        
         try {
-            Connection conn = getConnection();
+            conn = getConnection();
             String sql = VIEWABLE_SELECT + VIEWABLE_SEARCH;
             
             // TODO: change sort by
@@ -294,8 +299,7 @@ public class PermissionManagerImpl
             _log.error("Error search by SQL", e);
             throw new SystemException("SQL Error search: " + e.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(ctx, null, stmt, rs);
-            disconnectSession();
+            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
         }
     }
 
@@ -304,11 +308,12 @@ public class PermissionManagerImpl
         throws FinderException, PermissionException 
     {
         Pager defaultPager = Pager.getDefaultPager();
+        Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List instanceIds = null;
         try {
-            Connection conn = getConnection();
+            conn = getConnection();
             // Always return all resources
             stmt = conn.prepareStatement(ALL_RESOURCE_SQL);
             stmt.setInt(1, opId.intValue());
@@ -323,8 +328,7 @@ public class PermissionManagerImpl
             _log.error("Error getting scope by SQL", e);
             throw new FinderException("Error getting scope: " + e.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(ctx, null, stmt, rs);
-            disconnectSession();
+            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
         }
     }
 
