@@ -27,7 +27,7 @@ socket.outputStream.withWriter { out ->
         events {
             event {
                 uei("uei.opennms.org/external/hyperic/alert")
-                source("hq-server")
+                source("HQ")
                 time(timestamp)
                 host(hostname)
                 parms {
