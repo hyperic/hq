@@ -690,8 +690,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      *
      * @ejb:interface-method
      */
-    public Map findDesignatedMeasurementIds(AuthzSubject subject,
-                                            AppdefEntityID[] ids, String cat)
+    public Map findDesignatedMeasurements(AuthzSubject subject,
+                                          AppdefEntityID[] ids, String cat)
         throws MeasurementNotFoundException {
 
         Map midMap = new HashMap();
@@ -709,8 +709,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                     throw new FinderException("No metrics found");
                 }
 
-                Measurement dm = (Measurement) metrics.get(0);
-                midMap.put(id, dm.getId());
+                Measurement m = (Measurement) metrics.get(0);
+                midMap.put(id, m);
             } catch (FinderException e) {
                 // Throw an exception if we're only looking for one
                 // measurement

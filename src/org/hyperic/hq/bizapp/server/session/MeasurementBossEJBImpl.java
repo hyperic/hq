@@ -131,21 +131,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     implements SessionBean 
 {
     protected static Log _log = LogFactory.getLog(MeasurementBossEJBImpl.class);
-    private Integer[] getGroupMemberIDs(AuthzSubject subject,
-                                        AppdefEntityID gid)
+
+    private AppdefEntityID[] getGroupMemberIDs(AuthzSubject subject,
+                                               AppdefEntityID gid)
         throws AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
-        List grpMembers = getResourceIds(subject, gid, null);
-            
-        // Get the list of group members
-        Iterator it = grpMembers.iterator();
-        Integer[] ids = new Integer[grpMembers.size()];
-        for (int i = 0; it.hasNext(); i++) {
-            AppdefEntityID id = (AppdefEntityID) it.next();
-            ids[i] = id.getId();
-        }
-        
-        return ids;
+
+        List members = getResourceIds(subject, gid, null);
+        return (AppdefEntityID[])members.toArray(new AppdefEntityID[members.size()]);
     }
 
     private List findDesignatedMetrics(AuthzSubject subject, AppdefEntityID id,
@@ -947,8 +940,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             
             if (type == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
                 try {
-                    Integer[] memIds = getGroupMemberIDs(subject, entIds[i]);
-                    ids.addAll(Arrays.asList(memIds));
+                    AppdefEntityID[] memberIds = getGroupMemberIDs(subject, entIds[i]);
+                    ids.addAll(Arrays.asList(memberIds));
                 } catch (GroupNotCompatibleException e) {
                     throw new MeasurementNotFoundException(
                         "Incompatible group " + entIds[i] +
@@ -1067,16 +1060,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         MeasurementTemplate tmpl = getTemplateManager().getTemplate(tid);
             
-        Integer[] mids = getMetricIdsForResource(subject, aid, tmpl);
-        if (mids == null || mids.length == 0) {
+        List measurements = getMeasurementsForResource(subject, aid, tmpl);
+        if (measurements == null || measurements.size() == 0) {
             throw new MeasurementNotFoundException(
                 "There is no measurement for " + aid + " with template " + tid);
         }
 
-        PageList rtn = getDataMan().getHistoricalData(mids, begin, end,
-                                            interval, tmpl.getCollectionType(),
-                                            returnNulls, pc);
-        return rtn;
+        return getDataMan().getHistoricalData(measurements, begin, end,
+                                              interval, tmpl.getCollectionType(),
+                                              returnNulls, pc);
     }
 
     /**
@@ -1136,20 +1128,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         // Find the measurement IDs of the members in the autogroup for the
         // template
-        Integer[] ids = new Integer[entIds.size()];
-        Iterator it = entIds.iterator();
-        for (int i = 0; it.hasNext(); i++) {
-            AppdefEntityID entId = (AppdefEntityID) it.next();
-            ids[i] = entId.getId();
-        }
+        AppdefEntityID[] ids =
+            (AppdefEntityID[])entIds.toArray(new AppdefEntityID[entIds.size()]);
         
-        Integer[] mids =
-            getMetricManager().findMeasurementIds(subject, tid, ids);
+        List measurements =
+            getMetricManager().findMeasurements(subject, tid, ids);
     
-        PageList rtn = getDataMan().getHistoricalData(mids, begin, end,
-                                            interval, tmpl.getCollectionType(),
-                                            returnNulls, pc);
-        return rtn;
+        return getDataMan().getHistoricalData(measurements, begin, end,
+                                             interval, tmpl.getCollectionType(),
+                                             returnNulls, pc);
     }
 
     /**
@@ -1194,7 +1181,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
-        Integer[] mids;
+        List measurements;
         StopWatch watch = new StopWatch();
 
         if (aid.isApplication() && tmpl.isAvailability()) {
@@ -1207,29 +1194,22 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             AppdefEntityID[] serviceIds = aeval.getFlattenedServiceIds();
             
             Map midMap = getMetricManager()
-                .findDesignatedMeasurementIds(subject, serviceIds,
-                                         MeasurementConstants.CAT_AVAILABILITY);
-            mids = (Integer[]) midMap.values().toArray(new Integer[midMap.values().size()]);
+                .findDesignatedMeasurements(subject, serviceIds,
+                                            MeasurementConstants.CAT_AVAILABILITY);
+            measurements = new ArrayList(midMap.entrySet());
         }
         else {
-            mids = getMetricIdsForResource(subject, aid, tmpl);
-            if (mids == null || mids.length == 0) {
+            measurements = getMeasurementsForResource(subject, aid, tmpl);
+            if (measurements == null || measurements.size() == 0) {
                 throw new MeasurementNotFoundException(
                     "There is no measurement for " + aid + " with template " + 
                     tmpl.getId());
             }
         }
 
-        try {
-	        PageList rtn = getDataMan().getHistoricalData(mids, begin, end,
-                                            interval, tmpl.getCollectionType(),
-                                            returnNulls, pc);
-	        return rtn;
-        } finally {
-            if (aid.isApplication())
-                _log.debug("END findMeasurementData() - " + watch.getElapsed() +
-                          " msec");
-        }
+	    return getDataMan().getHistoricalData(measurements, begin, end,
+                                              interval, tmpl.getCollectionType(),
+                                              returnNulls, pc);
     }
 
     /**
@@ -1284,20 +1264,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
         // Find the measurement IDs of the members in the autogroup for the
         // template
-        Integer[] ids = new Integer[entIds.size()];
-        Iterator it = entIds.iterator();
-        for (int i = 0; it.hasNext(); i++) {
-            AppdefEntityID entId = (AppdefEntityID) it.next();
-            ids[i] = entId.getId();
-        }
-        
-        Integer[] mids =
-            getMetricManager().findMeasurementIds(subject, tmpl.getId(), ids);
-    
-        PageList rtn = getDataMan().getHistoricalData(mids, begin, end,
-                                            interval, tmpl.getCollectionType(),
-                                            returnNulls, pc);
-        return rtn;
+        AppdefEntityID[] ids =
+            (AppdefEntityID[])entIds.toArray(new AppdefEntityID[entIds.size()]);
+
+        List measurements =
+            getMetricManager().findMeasurements(subject, tmpl.getId(), ids);
+
+        return getDataMan().getHistoricalData(measurements, begin, end,
+                                              interval, tmpl.getCollectionType(),
+                                              returnNulls, pc);
     }
 
     /**
@@ -1541,10 +1516,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         List pruned = new ArrayList();
         for (int i=0; i<resources.length; ++i) {
-            Integer[] metrics =
-                getMetricIdsForResource(subject, resources[i].getEntityId(),
-                                        tmpl);
-            if (metrics.length > 0) {
+            List measurements =
+                getMeasurementsForResource(subject, resources[i].getEntityId(),
+                                           tmpl);
+            if (measurements.size() > 0) {
                 pruned.add(resources[i]);
             }
         }
@@ -1553,9 +1528,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return (AppdefResourceValue[])pruned.toArray(prunedResources);
     }
 
-    private Integer[] getMetricIdsForResource(AuthzSubject subject,
-                                              AppdefEntityID aid,
-                                              MeasurementTemplate tmpl)
+    private List getMeasurementsForResource(AuthzSubject subject,
+                                            AppdefEntityID aid,
+                                            MeasurementTemplate tmpl)
         throws PermissionException, AppdefEntityNotFoundException,
                MeasurementNotFoundException {
         // Find the measurement ID based on entity type
@@ -1582,8 +1557,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     }
                     
                     try {
-                        return getMetricIdsForResource(subject, id, tmpl);
-                    } catch (MeasurementNotFoundException ignore) {}
+                        return getMeasurementsForResource(subject, id, tmpl);
+                    } catch (MeasurementNotFoundException ignore) {
+                    }
                 }
             }
             
@@ -1591,19 +1567,19 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                    aid);
         } else if (aid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             try {
-                Integer[] ids = getGroupMemberIDs(subject, aid);
+                AppdefEntityID[] ids = getGroupMemberIDs(subject, aid);
             
                 // Get the list of measurements
-                return getMetricManager().findMeasurementIds(subject,
-                                                             tmpl.getId(), ids);
+                return getMetricManager().findMeasurements(subject,
+                                                           tmpl.getId(), ids);
             } catch (GroupNotCompatibleException e) {
                 throw new MeasurementNotFoundException(
                     "Incompatible group members: " + aid);
             }
         } else {
-            Integer[] aids = { aid.getId() };
-            return getMetricManager().findMeasurementIds(subject, tmpl.getId(),
-                                                         aids);
+            AppdefEntityID[] aids = { aid };
+            return getMetricManager().findMeasurements(subject, tmpl.getId(),
+                                                       aids);
         }
     }
 
@@ -1639,7 +1615,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         return summary;
     }
-    
+
+    /**
+     * Get a List of AppdefEntityIDs for the given resource.
+     * @param subject The user to use for searches.
+     * @param aeid The entity in question.
+     * @param ctype The entity type in question.
+     * @return A List of AppdefEntityIDs for the given resource.
+     */
     private List getResourceIds(AuthzSubject subject, AppdefEntityID aeid,
                                 AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, GroupNotCompatibleException,
@@ -2181,7 +2164,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // Availability
         try {
             Map midMap = getMetricManager()
-                .findDesignatedMeasurementIds(
+                .findDesignatedMeasurements(
                     subject, ids, MeasurementConstants.CAT_AVAILABILITY);
             
             if (midMap.size() > 0) {
@@ -2229,7 +2212,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         List servers = rv.getAssociatedServers(PageControl.PAGE_ALL);
         return getSummarizedResourceCurrentHealth(subject, 
-            (AppdefResourceValue[])servers.toArray(new AppdefResourceValue[0]));
+            (AppdefResourceValue[])servers.toArray(new AppdefResourceValue[servers.size()]));
     }
 
     /**

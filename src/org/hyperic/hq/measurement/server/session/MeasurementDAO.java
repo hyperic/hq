@@ -248,6 +248,8 @@ public class MeasurementDAO extends HibernateDAO {
     
     /**
      * Set the interval for all metrics to the specified interval
+     * @param mids  The list of Measurement id's to update
+     * @param interval The new interval in milliseconds
      */
     void updateInterval(List mids, long interval) {
         if (mids.size() == 0)

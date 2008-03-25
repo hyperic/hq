@@ -1118,7 +1118,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch the list of historical data points given
      * a start and stop time range and interval
      *
-     * @param ids The id's of the Measurement
+     * @param measurements The List of Measurements to query
      * @param begin The start of the time range
      * @param end The end of the time range
      * @param interval Interval for the time range
@@ -1127,16 +1127,31 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return the list of data points
      * @ejb:interface-method
      */
-    public PageList getHistoricalData(Integer[] ids, long begin, long end,
+    public PageList getHistoricalData(List measurements, long begin, long end,
                                       long interval, int type,
                                       boolean returnNulls, PageControl pc)
         throws DataNotAvailableException {
-        _measSep.init();
-        _measSep.set(ids);
-        Integer[] mids = _measSep.getMids();
-        Integer[] avIds = _measSep.getAvIds();
+
+        List availIds = new ArrayList();
+        List measurementIds = new ArrayList();
+
+        for (Iterator i = measurements.iterator(); i.hasNext(); ) {
+            Measurement m = (Measurement)i.next();
+            if (m.getTemplate().isAvailability()) {
+                availIds.add(m.getId());
+            } else {
+                measurementIds.add(m.getId());
+            }
+        }
+
+        Integer[] avIds =
+            (Integer[])availIds.toArray(new Integer[availIds.size()]);
+        Integer[] mids =
+            (Integer[])measurementIds.toArray(new Integer[measurementIds.size()]);
+
         PageList rtn = AvailabilityManagerEJBImpl.getOne().
             getHistoricalAvailData(avIds, begin, end, interval, pc);
+
         rtn.addAll(getHistData(mids, begin, end, interval,
                                type, returnNulls, pc));
         return rtn;
