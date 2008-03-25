@@ -30,13 +30,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
@@ -216,7 +220,9 @@ public class ProductPluginDeployer
         //hq-plugins at anytime.
         pluginNotify("deployer", DEPLOYER_CLEARED);
         
-        registerEJBDeployerClassLoader();
+        if (Boolean.getBoolean("hq.unittest.run")) {
+            doInContainerUnitTestFrameworkSetup();            
+        }
         
         setReady(true);
         
@@ -225,21 +231,102 @@ public class ProductPluginDeployer
         }
     }
     
-    private void registerEJBDeployerClassLoader() {
-        if (Boolean.getBoolean("hq.unittest.run")) {
-            // Make the current classloader accessible to the unit tests.
-            // Have to use reflection - else we will get a ClassCastException
-            ClassLoader cl = ClassLoader.getSystemClassLoader();
+    /**
+     * Do the setup necessary to run the in-container unit test framework.
+     */
+    private void doInContainerUnitTestFrameworkSetup() {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-            _log.info("Registering EJB deployer classloader for unit tests");
-            
-            try {                
-                Method method = cl.getClass().getMethod("registerEJBClassLoader", 
-                        new Class[]{ClassLoader.class});
+        URL hqJar = classLoader.getResource("hq.jar");
 
-                method.invoke(cl, new Object[]{this.getClass().getClassLoader()});                
+        if (hqJar != null) {
+            try {
+                _log.info("Preloading instance pools for Util classes in "+hqJar);
+                
+                preloadInstancePoolsForEJBs(hqJar, classLoader);
             } catch (Exception e) {
-                throw new RuntimeException("failed to register EJB classloader", e);
+                throw new RuntimeException("failed to preload cached local " +
+                        "homes for hq.jar", e);
+            }
+        }
+
+        URL hqeeJar = classLoader.getResource("hqee.jar");
+
+        if (hqeeJar != null) {
+            try {
+                _log.info("Preloading instance pools for Util classes in "+hqeeJar);
+                
+                preloadInstancePoolsForEJBs(hqeeJar, classLoader);
+            } catch (Exception e) {
+                throw new RuntimeException("failed to preload cached local " +
+                        "homes for hqee.jar", e);
+            }
+        }
+
+        registerEJBDeployerClassLoader(classLoader);        
+    }
+    
+    /**
+     * Register the EJB deployer classloader, making it accessible to the 
+     * in-container unit tests for looking up local references to EJBs.
+     * 
+     * @param deployerClassLoader The EJB deployer classloader.
+     */
+    private void registerEJBDeployerClassLoader(ClassLoader deployerClassLoader) {            
+        // Have to use reflection - else we will get a ClassCastException
+        ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
+
+        _log.info("Registering EJB deployer classloader for unit tests");
+
+        try {                
+            Method method = sysClassLoader.getClass()
+                            .getMethod("registerEJBClassLoader", 
+                                    new Class[]{ClassLoader.class});
+
+            method.invoke(sysClassLoader, new Object[]{deployerClassLoader});                
+        } catch (Exception e) {
+            throw new RuntimeException("failed to register EJB classloader", e);
+        }
+    }
+    
+    /**
+     * Find all EJBImpl classes in the jar file and invoke the getOne() static 
+     * factory method on them, preloading the instance pool for that EJB. This 
+     * is necessary for the in-container unit tests when looking up local 
+     * references to EJBs.
+     * 
+     * @param jarFile The jar file.
+     * @param deployerClassLoader The EJB deployer classloader.
+     * @throws Exception
+     */
+    private void preloadInstancePoolsForEJBs(URL jarFile, ClassLoader deployerClassLoader) 
+        throws Exception {
+        
+        ZipFile file = new ZipFile(new File(new URI(jarFile.toString())));
+        Enumeration enumeration = file.entries();
+                        
+        while (enumeration.hasMoreElements()) {
+            ZipEntry entry = (ZipEntry)enumeration.nextElement();
+            String name = entry.getName();
+            
+            if (name.endsWith("EJBImpl.class")) {
+                String className = name.substring(0, name.length()-6)
+                                        .replace('/', '.');
+                
+                _log.debug("Found class: "+className);
+                
+                Class clazz = deployerClassLoader.loadClass(className);
+                
+                try {
+                    Method m = clazz.getMethod("getOne", new Class[0]);
+                    _log.info("Preloading instance pool for: "+className);
+                    m.invoke(clazz, new Object[0]);
+                } catch (NoSuchMethodException e) {
+                    // The getOne() method probably doesn't exist
+                    _log.warn("No getOne() static factory method found for: "+className);
+                } catch (Throwable t) {
+                    _log.error("Caught Throwable preloading instance pool for: "+className, t);
+                }
             }
         }        
     }
