@@ -43,8 +43,8 @@ import org.hyperic.hq.product.server.MBeanUtil;
 /**
  * This class manages the Hyperic Server lifecycle in a unit testing environment. 
  * It is assumed that the local jboss deployment has already been prepared 
- * using the Ant target <code>prepare-jboss</code>. In addition we are assuming 
- * that this is a clean instance of jboss that does not include an HQ EAR 
+ * using the Ant target <code>unittest-prepare-jboss</code>. In addition we are 
+ * assuming that this is a clean instance of jboss that does not include an HQ EAR 
  * deployment and there is no other instance of the Hyperic server currently 
  * running on the host.
  */
@@ -74,7 +74,7 @@ public class ServerLifecycle {
     private final String _configuration;
             
     private boolean _isStarted;
-   
+
     
     /**
      * Create an instance using the "default" configuration in the jboss home dir.
@@ -171,16 +171,21 @@ public class ServerLifecycle {
      * Deploy the package represented by the URL.
      * 
      * @param url The URL representing the package to deploy.
+     * @return The local interface registry.
      * @throws IllegalStateException if the server is not started.
      * @throws Exception if the package cannot be deployed.
      */
-    public void deploy(final URL url) throws Exception {
+    public LocalInterfaceRegistry deploy(final URL url) throws Exception {
         synchronized (_lifecycleLock) {
             if (!_isStarted) {
                 throw new IllegalStateException("the server is not started.");
             }
             
-            deployOrUnDeploy(true, url);                    
+            deployOrUnDeploy(true, url);
+            
+            return new LocalInterfaceRegistry(
+                    (IsolatingDefaultSystemClassLoader)
+                    ClassLoader.getSystemClassLoader());
         }
     }
         
