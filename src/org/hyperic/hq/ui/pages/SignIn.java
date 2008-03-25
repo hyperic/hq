@@ -42,9 +42,11 @@ import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.RedirectException;
 import org.apache.tapestry.annotations.Component;
 import org.apache.tapestry.annotations.InitialValue;
+import org.apache.tapestry.annotations.InjectObject;
 import org.apache.tapestry.annotations.Meta;
 import org.apache.tapestry.annotations.Persist;
 import org.apache.tapestry.callback.ICallback;
+import org.apache.tapestry.engine.IEngineService;
 import org.apache.tapestry.engine.ILink;
 import org.apache.tapestry.link.PageLink;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -61,6 +63,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
+import org.hyperic.hq.ui.service.SearchService;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.image.widget.ResourceTree;
@@ -110,7 +113,7 @@ public abstract class SignIn extends BasePage {
 	boolean needsRegistration = false;
 	AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
 	try {
-	    webUser = loginUser(getRequest(), ctx, getUserName(), getPassword());
+	    webUser = loginUser(ctx, getUserName(), getPassword());
 
 	    needsRegistration = webUser.getPreferences().getKeys().size() == 0;
 	    if (!needsRegistration) {
@@ -174,8 +177,7 @@ public abstract class SignIn extends BasePage {
 	}
     }
 
-    public static WebUser loginUser(HttpServletRequest request,
-	    ServletContext ctx, String username, String password)
+    public static WebUser loginUser(ServletContext ctx, String username, String password)
 	    throws RemoteException, SecurityException, LoginException,
 	    ApplicationException, ConfigPropertyException, FinderException {
 	AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
@@ -232,4 +234,5 @@ public abstract class SignIn extends BasePage {
 	}
 	return userOpsMap;
     }
+    
 }
