@@ -75,7 +75,7 @@ public class ReportProcessorEJBImpl
     private final MeasurementProcessorLocal _measurementProc =
         MeasurementProcessorEJBImpl.getOne();
     
-    private void addPoint(List points, Integer metricId, MetricValue[] vals)
+    private void addPoint(List points, Measurement m, MetricValue[] vals)
     {
         for (int i=0; i<vals.length; i++)
         {
@@ -83,24 +83,23 @@ public class ReportProcessorEJBImpl
                 //this is just to check if the metricvalue is valid
                 //will throw a NumberFormatException if there is a problem
                 BigDecimal bigDec = new BigDecimal(vals[i].getValue());
-                DataPoint pt = new DataPoint(metricId, vals[i]);
+                DataPoint pt = new DataPoint(m.getId(), vals[i]);
                 points.add(pt);
             } catch(NumberFormatException e) {
                 log.warn("Unable to insert: " + e.getMessage() +
-                         ", metric id=" + metricId);
+                         ", metric id=" + m);
             }
         }
     }
     
-    private void addData(List points, Measurement dm, int dsnId, 
+    private void addData(List points, Measurement m, int dsnId, 
                          MetricValue[] dpts)
     {
-        long interval = dm.getInterval();
+        long interval = m.getInterval();
 
         // Safeguard against an anomaly
         if (interval <= 0) {
-            log.warn("Measurement had bogus interval[" + interval + "]: " + 
-                     dm);
+            log.warn("Measurement had bogus interval[" + interval + "]: " + m);
             interval = 60 * 1000;
         }
 
@@ -119,7 +118,7 @@ public class ReportProcessorEJBImpl
                                                    adjust);
             passThroughs[i] = modified;
         }
-        addPoint(points, dm.getId(), passThroughs);
+        addPoint(points, m, passThroughs);
     }
 
     /**
@@ -139,7 +138,7 @@ public class ReportProcessorEJBImpl
         
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
-            Measurement dm = _dmMan.getMeasurement(dmId);
+            Measurement m = _dmMan.getMeasurement(dmId);
             
             // Can't do much if we can't look up the derived measurement
             // If the measurement is enabled, we just throw away their data
@@ -147,25 +146,19 @@ public class ReportProcessorEJBImpl
             // because we don't know the interval to normalize those old
             // points for.  This is still a problem for people who change their
             // collection period, but the instances should be low.
-            if (dm == null || !dm.isEnabled())
+            if (m == null || !m.isEnabled())
                 continue;
-            
-            // If this is an availability metric, then tell the cache about it
-            boolean availMetric = false;
-            MeasurementTemplate tmpl = dm.getTemplate();
-            if (tmpl.isAvailability()) {
-                availMetric = true;
-            }
 
+            boolean isAvail = m.getTemplate().isAvailability();
             ValueList[] valLists = dsnLists[i].getDsns();
             for (int j = 0; j < valLists.length; j++) {
                 int dsnId = valLists[j].getDsnId();
                 MetricValue[] vals = valLists[j].getValues();
 
-                if (availMetric) {
-                    addData(availPoints, dm, dsnId, vals);
+                if (isAvail) {
+                    addData(availPoints, m, dsnId, vals);
                 } else {
-                    addData(dataPoints, dm, dsnId, vals);
+                    addData(dataPoints, m, dsnId, vals);
                 }
             }
         }
