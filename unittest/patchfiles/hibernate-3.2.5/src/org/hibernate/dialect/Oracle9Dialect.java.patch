@@ -1,0 +1,15 @@
+Index: src/org/hibernate/dialect/Oracle9Dialect.java
+===================================================================
+--- src/org/hibernate/dialect/Oracle9Dialect.java	(revision 14408)
++++ src/org/hibernate/dialect/Oracle9Dialect.java	(working copy)
+@@ -345,6 +345,10 @@
+ 		return false;
+ 	}
+ 
++        public boolean supportsDeferrableConstraints() {
++                return true;
++        }
++
+ 	public boolean supportsExistsInSelect() {
+ 		return false;
+ 	}
