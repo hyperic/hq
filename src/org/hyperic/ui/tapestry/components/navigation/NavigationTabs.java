@@ -24,24 +24,16 @@
  */
 package org.hyperic.ui.tapestry.components.navigation;
 
-import org.apache.tapestry.BaseComponent;
-import org.apache.tapestry.IMarkupWriter;
-import org.apache.tapestry.IRequestCycle;
-import org.apache.tapestry.annotations.Persist;
+import org.hyperic.ui.tapestry.components.BaseComponent;
+
 
 public abstract class NavigationTabs extends BaseComponent {
 
-    /*
-     * Note: Refer to the IPageListing interface for the page name constants
-     */
-    @Persist
-    public abstract String getPageName();
-    public abstract void setPageName(String name);
-
-    public void renderComponent(IMarkupWriter writer, IRequestCycle cycle) {
-	if (!cycle.isRewinding()) {
-	    setPageName(cycle.getPage().getPageName());
-	}
-	super.renderComponent(writer, cycle);
+    public boolean isActive(String path) {
+        if (getPage().getPageName().indexOf(path) != -1) {
+            return true;
+        } else
+            return false;
     }
+
 }

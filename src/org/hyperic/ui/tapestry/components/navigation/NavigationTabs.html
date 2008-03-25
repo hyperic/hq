@@ -1,11 +1,11 @@
-<if jwcid="@If" condition="ognl:!pageName==@org.hyperic.ui.tapestry.page.PageListing@SIGN_IN">
+<if jwcid="@If" condition="ognl:isLoggedIn">
 <div id="navTabContainer">
     <ul>
-        <li id="Dashboard" class="active"><a href="Dashboard.do"><span>Dashboard</span></a></li>
-        <li id="Resources" class=""><a href="Resources.do"><span>Resources</span></a></li>
-        <li id="Analyze" class=""><a href="Analyze"><span>Analyze</span></a></li>
-        <li id="Settings" class=""><a href="Settings.html"><span>Settings</span></a></li>
-        <li id="Administration" class=""><a href="Admin.do"><span>Administration</span></a></li>                   
+        <li jwcid="@Any" class="ognl:isActive('dashbaord')?'active':''"><a href="Dashboard.do"><span>Dashboard</span></a></li>
+        <li jwcid="@Any" class="ognl:isActive('resource')?'active':''"><a jwcid="@PageLink" page="Hub"><span>Resources</span></a></li>
+        <li jwcid="@Any" class="ognl:isActive('reporting')||isActive('mastheadAttach')?'active':''"><a href="Analyze"><span>Analyze</span></a></li>
+        <li jwcid="@Any" class="ognl:isActive('settings')?'active':''"><a href="Settings.html"><span>Settings</span></a></li>
+        <li jwcid="@Any" class="ognl:isActive('admin')?'active':''"><a href="Admin.do"><span>Administration</span></a></li>                   
     </ul>
 </div>
 </if>
