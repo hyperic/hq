@@ -3,13 +3,11 @@ import org.hyperic.hq.appdef.shared.AIQueueManagerLocal
 import org.hyperic.util.pager.PageList
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl
-import org.hyperic.hq.authz.shared.AuthzSubjectValue
 import org.hyperic.hq.appdef.shared.AIPlatformValue
 import org.hyperic.hq.appdef.shared.AIQueueConstants
 import org.hyperic.hq.appdef.server.session.Platform
 import org.hyperic.hq.appdef.server.session.Server
+import org.hyperic.hq.authz.server.session.AuthzSubject
 
 class AutodiscoveryController extends BaseController {
 
@@ -21,12 +19,10 @@ class AutodiscoveryController extends BaseController {
 
         String fqdn = params.getOne('fqdn')
 
-        AuthzSubjectManagerLocal subMan = AuthzSubjectManagerEJBImpl.one;
-        AuthzSubjectValue overlord = subMan.overlord
-
         AIQueueManagerLocal aiMan = AIQueueManagerEJBImpl.one
-
-        PageList list = aiMan.getQueue(overlord, true, true,
+        
+        def subject = user
+        PageList list = aiMan.getQueue(subject, true, true,
                                        PageControl.PAGE_ALL)
 
         List matching = getMatchingPlatforms(list, fqdn)
@@ -44,7 +40,7 @@ class AutodiscoveryController extends BaseController {
 
         AIQueueManagerLocal aiMan = AIQueueManagerEJBImpl.one
 
-        def subject = user.authzSubjectValue
+        def subject = user
         PageList list = aiMan.getQueue(subject, true, true, PageControl.PAGE_ALL)
 
         List matching = getMatchingPlatforms(list, fqdn)
@@ -62,7 +58,7 @@ class AutodiscoveryController extends BaseController {
         render(inline : res.toString())
     }
 
-    private List processPlatform(AuthzSubjectValue overlord,
+    private List processPlatform(AuthzSubject overlord,
                                  AIQueueManagerLocal aiMan,
                                  AIPlatformValue plat) {
         List platformIds = [plat.id]
