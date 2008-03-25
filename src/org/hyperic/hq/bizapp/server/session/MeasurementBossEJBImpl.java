@@ -1034,10 +1034,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return a PageList of MetricValue objects
      * @ejb:interface-method
      */
-    public PageList findMeasurementData(int sessionId, Integer mid,
+    public PageList findMeasurementData(int sessionId, Measurement m,
                                         long begin, long end, PageControl pc) {
         try {
-            return getDataMan().getHistoricalData(mid, begin, end, pc);
+            return getDataMan().getHistoricalData(m, begin, end, pc);
         } catch (DataNotAvailableException e) {
             throw new SystemException(e);
         }

@@ -127,10 +127,10 @@ public class AvailabilityManagerEJBImpl
      * 
      * @ejb:interface-method
      */
-    public PageList getHistoricalAvailData(Integer mid, long begin, long end,
+    public PageList getHistoricalAvailData(Measurement m, long begin, long end,
                                            PageControl pc) {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
-        List availInfo = dao.getHistoricalAvails(mid.intValue(), begin,
+        List availInfo = dao.getHistoricalAvails(m, begin,
                                                  end, pc.isDescending());
         return getPageList(availInfo, begin, end, (end-begin)/DEFAULT_INTERVAL);
     }

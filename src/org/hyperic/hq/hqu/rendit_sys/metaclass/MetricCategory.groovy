@@ -97,7 +97,7 @@ class MetricCategory {
     }
     
     static List getData(Measurement m, long start, long end) {
-        dataMan.getHistoricalData(m.id, start, end, new PageControl()) 
+        dataMan.getHistoricalData(m, start, end, new PageControl())
     }
     
     /**

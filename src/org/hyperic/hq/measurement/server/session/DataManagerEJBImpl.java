@@ -68,6 +68,7 @@ import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
@@ -939,25 +940,25 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch the list of historical data points given
      * a start and stop time range
      *
-     * @param id the id of the Measurement
+     * @param m The Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
      * @return the list of data points
      * @ejb:interface-method
      */
-    public PageList getHistoricalData(Integer id, long begin, long end,
+    public PageList getHistoricalData(Measurement m, long begin, long end,
                                       PageControl pc)
         throws DataNotAvailableException {
-        _measSep.init();
-        if (_measSep.isAvailMeas(id)) {
+        if (m.getTemplate().getAlias().toUpperCase().
+            equals(MeasurementConstants.CAT_AVAILABILITY)) {
             return AvailabilityManagerEJBImpl.getOne().
-                getHistoricalAvailData(id, begin, end, pc);
+                getHistoricalAvailData(m, begin, end, pc);
         } else {
-            return getHistData(id, begin, end, pc);
+            return getHistData(m, begin, end, pc);
         }
     }
 
-    private PageList getHistData(Integer id, long begin, long end,
+    private PageList getHistData(Measurement m, long begin, long end,
                                  PageControl pc)
         throws DataNotAvailableException {
         // Check the begin and end times
@@ -974,12 +975,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ResultSet         rs   = null;
 
         // The table to query from
-        String table = getDataTable(begin, end, id.intValue());
+        String table = getDataTable(begin, end, m.getId().intValue());
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
             int total =
-                getMeasTableCount(conn, begin, end, id.intValue(), table);
+                getMeasTableCount(conn, begin, end, m.getId().intValue(), table);
             if (total == 0)
                 return new PageList();
 
@@ -1017,11 +1018,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 stmt = conn.prepareStatement(sqlBuf.toString());
                 stmt.setLong(i++, begin);
                 stmt.setLong(i++, end - 1);
-                stmt.setInt(i++, id.intValue());
+                stmt.setInt(i++, m.getId().intValue());
 
                 if ( _log.isDebugEnabled() ) {
                     _log.debug("getHistoricalData(): " + sqlBuf);
-                    _log.debug("arg1 = " + id);
+                    _log.debug("arg1 = " + m.getId());
                     _log.debug("arg2 = " + begin);
                     _log.debug("arg3 = " + end);
                 }
@@ -1052,7 +1053,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 return new PageList(history, total);
             } catch (SQLException e) {
                 throw new DataNotAvailableException(
-                    "Can't lookup historical data for " + id, e);
+                    "Can't lookup historical data for " + m, e);
             } finally {
                 DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
             }

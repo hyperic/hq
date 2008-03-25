@@ -167,13 +167,13 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of AvailabilityDataRLE objs
      */
-    List getHistoricalAvails(int mid, long start,
+    List getHistoricalAvails(Measurement m, long start,
                              long end, boolean descending) {
         String sql = new StringBuffer()
                     .append("SELECT rle")
                     .append(" FROM AvailabilityDataRLE rle")
 				    .append(" JOIN rle.availabilityDataId.measurement m")
-				 	.append(" WHERE m.id = :mid")
+				 	.append(" WHERE m.id = :m")
 				 	.append(" AND (rle.availabilityDataId.startime > :startime")
 				 	.append("   OR rle.endtime > :startime)")
 				 	.append(" AND (rle.availabilityDataId.startime < :endtime")
@@ -185,7 +185,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .createQuery(sql)
             .setLong("startime", start)
             .setLong("endtime", end)
-            .setInteger("mid", mid)
+            .setParameter("m", m)
             .list();
     }
 

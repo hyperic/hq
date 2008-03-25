@@ -165,7 +165,7 @@ public class MetricDataServlet extends HttpServlet {
             try {
                 m = _mboss.findMeasurement(sessionId, templ.getId(),
                                            rValue.getEntityId());
-                PageList list = _mboss.findMeasurementData(sessionId, m.getId(),
+                PageList list = _mboss.findMeasurementData(sessionId, m,
                                                            begin.longValue(),
                                                            end.longValue(),
                                                            PageControl.PAGE_ALL);
