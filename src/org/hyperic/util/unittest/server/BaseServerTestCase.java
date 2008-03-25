@@ -68,7 +68,9 @@ import org.jdom.input.SAXBuilder;
  * 
  * In addition, the <code>hq.unittest.hq.home</code> system property must be set 
  * to the local path where the HQ src resides (.ORG or EE versions depending 
- * on the type of unit test).
+ * on the type of unit test). The <code>hq.unittest.working.dir</code> system 
+ * property must be set to the directory where the database dump file containing 
+ * the initial server state resides.
  * 
  * Finally (and most importantly), the system classloader must be 
  * set to the {@link IsolatingDefaultSystemClassLoader}.
@@ -133,48 +135,24 @@ public abstract class BaseServerTestCase extends TestCase {
         super.tearDown();
     }
     
-    protected final Connection getConnection(boolean forRestore)
-            throws UnitTestDBException {
-        try {
-            String deployDir = 
-                getJBossHomeDir()+"/server/"+JBOSS_UNIT_TEST_CONFIGURATION+"/deploy/";
-            
-            File file = new File(deployDir, "hq-ds.xml");
-            Document doc =  new SAXBuilder().build(file);
-            Element element =
-                doc.getRootElement().getChild("local-tx-datasource");
-            String url = element.getChild("connection-url").getText();
-            String user = element.getChild("user-name").getText();
-            String passwd = element.getChild("password").getText();
-            String driverClass = element.getChild("driver-class").getText();
-            if (forRestore && driverClass.toLowerCase().contains("mysql")) {
-                String buf = "?";
-                if (driverClass.toLowerCase().contains("?")) {
-                    buf = "&";
-                }
-                driverClass = driverClass +
-                    buf + "sessionVariables=FOREIGN_KEY_CHECKS=0";
-            }
-            Driver driver = (Driver)Class.forName(driverClass).newInstance();
-            Properties props = new Properties();
-            props.setProperty("user", user);
-            props.setProperty("password", passwd);
-            return driver.connect(url, props);
-        } catch (JDOMException e) {
-            throw new UnitTestDBException(e);
-        } catch (IOException e) {
-            throw new UnitTestDBException(e);
-        } catch (InstantiationException e) {
-            throw new UnitTestDBException(e);
-        } catch (SQLException e) {
-            throw new UnitTestDBException(e);
-        } catch (IllegalAccessException e) {
-            throw new UnitTestDBException(e);
-        } catch (ClassNotFoundException e) {
-            throw new UnitTestDBException(e);
-        }
+    /**
+     * Retrieve a connection to the unit test server database. This connection 
+     * may be used to verify that a state change has occurred during the 
+     * unit test.
+     * 
+     * @return The database connection.
+     * @throws UnitTestDBException
+     */
+    protected final Connection getConnectionToHQDatabase() throws UnitTestDBException {
+        return getConnection(false);
     }
-
+    
+    /**
+     * Restore the unit test server database to the original state specified 
+     * in the dump file.
+     * 
+     * @throws UnitTestDBException
+     */
     protected final void restoreDatabase()
             throws UnitTestDBException {
         Connection conn = null;
@@ -209,28 +187,6 @@ public abstract class BaseServerTestCase extends TestCase {
         }
     }
 
-    private final void dumpDatabase(Connection conn)
-            throws UnitTestDBException {
-        try {
-            IDatabaseConnection idbConn = new DatabaseConnection(conn);
-            IDataSet fullDataSet;
-            fullDataSet = idbConn.createDataSet();
-            GZIPOutputStream gstream =
-                new GZIPOutputStream(
-                    new FileOutputStream(getHQWorkingDir()+"/"+DUMP_FILE));
-            FlatXmlDataSet.write(fullDataSet, gstream);
-            gstream.finish();
-        } catch (SQLException e) {
-            throw new UnitTestDBException(e);
-        } catch (FileNotFoundException e) {
-            throw new UnitTestDBException(e);
-        } catch (IOException e) {
-            throw new UnitTestDBException(e);
-        } catch (DataSetException e) {
-            throw new UnitTestDBException(e);
-        }
-    }
-
     /**
      * Used to insert new data, will either update existing data or insert fresh.
      * @param schema File to extract XML data from.
@@ -250,46 +206,7 @@ public abstract class BaseServerTestCase extends TestCase {
         throws UnitTestDBException {
         overlayDBData(filename, DatabaseOperation.DELETE);
     }
-
-    private void overlayDBData(String filename, DatabaseOperation operation)
-        throws UnitTestDBException {
-        Connection conn = null;
-        Statement stmt = null;
-        try {
-            conn = getConnection(true);
-            conn.setAutoCommit(false);
-            IDatabaseConnection iconn = new DatabaseConnection(conn);
-            // this is done for MySQL via another method
-            if (DBUtil.isPostgreSQL(conn)) {
-                stmt.execute("set constraints all deferred");
-            } else if (DBUtil.isOracle(conn)) {
-                stmt.execute("alter session set constraints = deferred");
-            }
-            InputStream stream;
-            File overlayFile = new File(getHQWorkingDir(), filename);
-            if (filename.endsWith(".gz")) {
-                stream = new GZIPInputStream(new FileInputStream(overlayFile));
-            } else {
-                stream = new BufferedInputStream(new FileInputStream(overlayFile));
-            }
-            IDataSet dataset = new FlatXmlDataSet(stream);
-            operation.execute(iconn, dataset);
-            conn.commit();
-        } catch (UnitTestDBException e) {
-            throw new UnitTestDBException(e);
-        } catch (SQLException e) {
-            throw new UnitTestDBException(e);
-        } catch (DatabaseUnitException e) {
-            throw new UnitTestDBException(e);
-        } catch (FileNotFoundException e) {
-            throw new UnitTestDBException(e);
-        } catch (IOException e) {
-            throw new UnitTestDBException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
-        }
-    }
-
+    
     /**
      * Start the jboss server with the "unittest" configuration.
      * 
@@ -313,7 +230,7 @@ public abstract class BaseServerTestCase extends TestCase {
      * 
      * @boolean prepareOrRestoreDB <code>true</code> to let HQ app deployment 
      *                               include preparing the dump file containing 
-     *                               the initial database or restoring the 
+     *                               the initial database state or restoring the 
      *                               database from the dump file if it exists 
      *                               already.
      * @return The local interface registry for looking up local interfaces for 
@@ -385,6 +302,109 @@ public abstract class BaseServerTestCase extends TestCase {
             deployment = null;
         }
     }
+
+    private Connection getConnection(boolean forRestore)
+        throws UnitTestDBException {
+        try {
+            String deployDir = 
+                getJBossHomeDir()+"/server/"+JBOSS_UNIT_TEST_CONFIGURATION+"/deploy/";
+
+            File file = new File(deployDir, "hq-ds.xml");
+            Document doc =  new SAXBuilder().build(file);
+            Element element =
+                doc.getRootElement().getChild("local-tx-datasource");
+            String url = element.getChild("connection-url").getText();
+            String user = element.getChild("user-name").getText();
+            String passwd = element.getChild("password").getText();
+            String driverClass = element.getChild("driver-class").getText();
+            if (forRestore && driverClass.toLowerCase().contains("mysql")) {
+                String buf = "?";
+                if (driverClass.toLowerCase().contains("?")) {
+                    buf = "&";
+                }
+                driverClass = driverClass +
+                buf + "sessionVariables=FOREIGN_KEY_CHECKS=0";
+            }
+            Driver driver = (Driver)Class.forName(driverClass).newInstance();
+            Properties props = new Properties();
+            props.setProperty("user", user);
+            props.setProperty("password", passwd);
+            return driver.connect(url, props);
+        } catch (JDOMException e) {
+            throw new UnitTestDBException(e);
+        } catch (IOException e) {
+            throw new UnitTestDBException(e);
+        } catch (InstantiationException e) {
+            throw new UnitTestDBException(e);
+        } catch (SQLException e) {
+            throw new UnitTestDBException(e);
+        } catch (IllegalAccessException e) {
+            throw new UnitTestDBException(e);
+        } catch (ClassNotFoundException e) {
+            throw new UnitTestDBException(e);
+        }
+    }
+
+    private final void dumpDatabase(Connection conn)
+            throws UnitTestDBException {
+        try {
+            IDatabaseConnection idbConn = new DatabaseConnection(conn);
+            IDataSet fullDataSet;
+            fullDataSet = idbConn.createDataSet();
+            GZIPOutputStream gstream =
+                new GZIPOutputStream(
+                    new FileOutputStream(getHQWorkingDir()+"/"+DUMP_FILE));
+            FlatXmlDataSet.write(fullDataSet, gstream);
+            gstream.finish();
+        } catch (SQLException e) {
+            throw new UnitTestDBException(e);
+        } catch (FileNotFoundException e) {
+            throw new UnitTestDBException(e);
+        } catch (IOException e) {
+            throw new UnitTestDBException(e);
+        } catch (DataSetException e) {
+            throw new UnitTestDBException(e);
+        }
+    }
+
+    private void overlayDBData(String filename, DatabaseOperation operation)
+        throws UnitTestDBException {
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = getConnection(true);
+            conn.setAutoCommit(false);
+            IDatabaseConnection iconn = new DatabaseConnection(conn);
+            // this is done for MySQL via another method
+            if (DBUtil.isPostgreSQL(conn)) {
+                stmt.execute("set constraints all deferred");
+            } else if (DBUtil.isOracle(conn)) {
+                stmt.execute("alter session set constraints = deferred");
+            }
+            InputStream stream;
+            File overlayFile = new File(getHQWorkingDir(), filename);
+            if (filename.endsWith(".gz")) {
+                stream = new GZIPInputStream(new FileInputStream(overlayFile));
+            } else {
+                stream = new BufferedInputStream(new FileInputStream(overlayFile));
+            }
+            IDataSet dataset = new FlatXmlDataSet(stream);
+            operation.execute(iconn, dataset);
+            conn.commit();
+        } catch (UnitTestDBException e) {
+            throw new UnitTestDBException(e);
+        } catch (SQLException e) {
+            throw new UnitTestDBException(e);
+        } catch (DatabaseUnitException e) {
+            throw new UnitTestDBException(e);
+        } catch (FileNotFoundException e) {
+            throw new UnitTestDBException(e);
+        } catch (IOException e) {
+            throw new UnitTestDBException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+        }
+    }    
         
     private String getJBossHomeDir() {
         String jbossHomeDir = System.getProperty(JBOSS_HOME_DIR);
