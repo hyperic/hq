@@ -20,6 +20,9 @@ public abstract class BasePage extends org.apache.tapestry.html.BasePage {
     @Component(type = "GenericLink", bindings = { "href='Dashobard.do'" })
     public abstract GenericLink getDashboardLink();
     
+    @Component(type = "GenericLink", bindings = { "href='Resource.do'" })
+    public abstract GenericLink getResourceLink();
+    
     @Component(type = "GenericLink", bindings = { "href='admin/user/UserAdmin.do?mode=register'" })
     public abstract GenericLink getRegistrationLink();
 
