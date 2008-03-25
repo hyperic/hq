@@ -1375,7 +1375,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * Get the last MetricValue for the given Measurement.
      * 
-     * @param id The Measurement
+     * @param m The Measurement
      * @return The MetricValue or null if one does not exist.
      * @ejb:interface-method
      */
