@@ -1,0 +1,19 @@
+Index: src/org/hibernate/mapping/ForeignKey.java
+===================================================================
+--- src/org/hibernate/mapping/ForeignKey.java	(revision 14408)
++++ src/org/hibernate/mapping/ForeignKey.java	(working copy)
+@@ -40,9 +40,11 @@
+ 		String result = dialect.getAddForeignKeyConstraintString(
+ 			constraintName, cols, referencedTable.getQualifiedName(dialect, defaultCatalog, defaultSchema), refcols, isReferenceToPrimaryKey()
+ 		);
+-		return cascadeDeleteEnabled && dialect.supportsCascadeDelete() ? 
+-			result + " on delete cascade" : 
+-			result;
++		return new StringBuffer()
++		    .append((cascadeDeleteEnabled && dialect.supportsCascadeDelete()) ? 
++		        result + " " + dialect.getDeleteCascadeString() : result)
++		    .append((dialect.supportsDeferrableConstraints() ? 
++		        " " + dialect.getDeferrableString() : "")).toString();
+ 	}
+ 
+ 	public Table getReferencedTable() {

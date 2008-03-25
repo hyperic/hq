@@ -1,0 +1,23 @@
+Index: src/org/hibernate/dialect/Dialect.java
+===================================================================
+--- src/org/hibernate/dialect/Dialect.java	(revision 14408)
++++ src/org/hibernate/dialect/Dialect.java	(working copy)
+@@ -1498,6 +1498,18 @@
+ 		return true;
+ 	}
+ 
++	public boolean supportsDeferrableConstraints() {
++		return false;
++	}
++
++	public String getDeferrableString() {
++		return "deferrable";
++	}
++	
++	public String getDeleteCascadeString() {
++		return "on delete cascade";
++	}
++	
+ 	public boolean supportsCascadeDelete() {
+ 		return true;
+ 	}
