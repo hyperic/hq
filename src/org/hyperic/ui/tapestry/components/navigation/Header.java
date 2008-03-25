@@ -24,8 +24,10 @@
  */
 package org.hyperic.ui.tapestry.components.navigation;
 
-import org.apache.tapestry.BaseComponent;
 import org.apache.tapestry.annotations.Parameter;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.ui.tapestry.components.BaseComponent;
 
 public abstract class Header extends BaseComponent{
     
@@ -33,5 +35,8 @@ public abstract class Header extends BaseComponent{
     public abstract boolean getStatusElement();
     public abstract void setStatusElement(boolean statusElement);
     
-
+    @Parameter(name = "isSignedIn", defaultValue = "false")
+    public abstract boolean getIsSignedIn();
+    public abstract void setIsSignedIn(boolean signedIn);
+    
 }
