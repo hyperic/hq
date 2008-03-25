@@ -4,7 +4,8 @@
 	
 <target name="init-tests">
 	<delete dir="${junitResults.dir}"/>
-	<mkdir dir="${junitResults.dir}"/>  
+	<mkdir dir="${junitResults.dir}"/>
+	<mkdir dir="${basedir}/unittest/data"/>  
 </target>
 		
 <target name="test" depends="init,init-taskdefs,init-tests">
@@ -38,9 +39,9 @@
           <include name="**/*_test.java"/>
 		 
 		  <!-- This unit test shows how to use the in-container unit test 
-			   framework. We shouldn't need to run it on each build. -->	
+			   framework. We shouldn't need to run it on each build. -->
 		  <exclude name="**/ExampleInContainerTest.java"/>	
-
+		  
 		  <!-- This unit test should be enabled only when testing the 
 			   unit test framework itself -->
 		  <!--
