@@ -81,10 +81,10 @@ public class SearchService implements IEngineService {
             return;
 
         if (pageSize == null)
-            page = new PageControl(1, DEFAULT_PAGE_SIZE);
+            page = new PageControl(0, DEFAULT_PAGE_SIZE);
 
         else if (pageNum == null)
-            page = new PageControl(1, Integer.parseInt(pageSize));
+            page = new PageControl(0, Integer.parseInt(pageSize));
 
         else
             page = new PageControl(Integer.parseInt(pageNum), Integer
