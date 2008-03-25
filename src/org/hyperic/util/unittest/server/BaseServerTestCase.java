@@ -321,6 +321,11 @@ public abstract class BaseServerTestCase extends TestCase {
         if (!dbdump.exists()) {
             try {
                 conn = getConnection(false);
+                // we need the ear to initially deploy so that we can
+                // capture the plugins which take a lot more time
+                // to initially deploy
+                server.deploy(deployment);
+                server.undeploy(deployment);
             	dumpDatabase(conn);
             } finally {
                 DBUtil.closeConnection(logCtx, conn);
@@ -328,7 +333,6 @@ public abstract class BaseServerTestCase extends TestCase {
         } else {
             restoreDatabase();
         }
-        
         server.deploy(deployment);
     }
     
