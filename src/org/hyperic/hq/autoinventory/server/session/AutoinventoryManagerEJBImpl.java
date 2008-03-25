@@ -881,7 +881,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     {
         AIServiceValue aiservice = sInfo.aiservice;
         Server server = _serverMan.getServerById(sInfo.serverId);
-        
+
+        _log.info("Checking for existing service: " + aiservice.getName());
+
         Service service = _serviceMan.getServiceByName(server, 
                                                        aiservice.getName());
         boolean update = false;
