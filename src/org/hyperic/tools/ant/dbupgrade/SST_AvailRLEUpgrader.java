@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -60,33 +61,47 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
     private static final long ONE_DAY = 24*ONE_HR;
     private static final long MAX_TIMESTAMP = Long.MAX_VALUE;
     private static final long BATCH_SIZE = 1000;
+    private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
+    private static final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
+    private static final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
 
     public SST_AvailRLEUpgrader () {}
     
-    private void initDataTables() {
+    private void initDataTables(Connection conn)
+        throws SQLException {
         // these must be ordered from the latest table to the oldest
         List ranges = MeasRangeObj.getInstance().getRanges();
         for (Iterator i=ranges.iterator(); i.hasNext(); ) {
             MeasRange range = (MeasRange)i.next();
-            dataTables.add(new TableObj(range.getTable(), ONE_HR));
+            dataTables.add(new TableObj(range.getTable(), ONE_HR,
+                               getMinTimestamp(range.getTable(), conn),
+                           	   getMaxTimestamp(range.getTable(), conn)));
         }
-        dataTables.add(
-            new TableObj(MeasurementConstants.TAB_DATA_1H, ONE_HR*10));
-        dataTables.add(
-            new TableObj(MeasurementConstants.TAB_DATA_6H, SIX_HRS*10));
-        dataTables.add(
-            new TableObj(MeasurementConstants.TAB_DATA_1D, ONE_DAY*10));
+        // need to sort in descending order
+        Collections.sort(dataTables);
+        dataTables.add(new TableObj(TAB_DATA_1H, ONE_HR*10,
+                        getMinTimestamp(TAB_DATA_1H, conn),
+                        getMaxTimestamp(TAB_DATA_1H, conn)));
+        dataTables.add(new TableObj(TAB_DATA_6H, SIX_HRS*10,
+                        getMinTimestamp(TAB_DATA_6H, conn),
+                        getMaxTimestamp(TAB_DATA_6H, conn)));
+        dataTables.add(new TableObj(TAB_DATA_1D, ONE_DAY*10,
+                        getMinTimestamp(TAB_DATA_1D, conn),
+                        getMaxTimestamp(TAB_DATA_1D, conn)));
     }
 
     public void execute() throws BuildException {
-        initDataTables();
         Map avails = new HashMap();
         try
         {
             Connection conn = getConnection();
+            initDataTables(conn);
             log(SCHEMA_MOD_IN_PROGRESS);
             for (Iterator i=dataTables.iterator(); i.hasNext(); ) {
                 TableObj table = (TableObj)i.next();
+                log("Migrating Table: "+table.getTable() +
+                    " min: "+table.getMinTimestamp() +
+                    " max: "+table.getMaxTimestamp());
                 setAvailData(avails, table, conn);
             }
             insertAvailData(avails, conn);
@@ -106,7 +121,6 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
             for (Iterator i=avails.entrySet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
                 int mid = ((Integer)entry.getKey()).intValue();
-                //log("mid -> " + mid);
                 List list = (List)entry.getValue();
                 int ii=0;
                 for (Iterator it=list.iterator(); it.hasNext(); ii++) {
@@ -117,9 +131,10 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
                         pstmt.clearBatch();
                     }
                     AvailData data = (AvailData)it.next();
-                    //log("\tstartime -> " + data.getStartTime() + 
-                    //" endtime -> " + data.getEndTime() +
-                    //" availVal -> " + data.getAvailVal());
+                    //log("\tmid," + mid +
+                    //    ":startime," + data.getStartTime() + 
+                    //    ":endtime," + data.getEndTime() +
+                    //	":availVal," + data.getAvailVal());
                     pstmt.clearParameters();
                     pstmt.setInt(1, mid);
                     pstmt.setLong(2, data.getStartTime());
@@ -182,8 +197,8 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
 
     private void setAvailData(Map avails, TableObj table, Connection conn)
         throws SQLException {
-        long min = getMinTimestamp(table.getTable(), conn);
-        long max = getMaxTimestamp(table.getTable(), conn);
+        long min = table.getMinTimestamp();
+        long max = table.getMaxTimestamp();
         String sql = "SELECT timestamp, value, measurement_id" +
                      " FROM " + table.getTable() + " d, " +
                      TAB_MEAS + " m, " +
@@ -192,14 +207,14 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
                      " AND d.measurement_id = m.id" +
                      " AND t.id = m.template_id AND upper(t.alias) = '" +
                      AVAILABILITY + "'" +
-                     " ORDER BY d.timestamp, d.measurement_id";
+                     " ORDER BY d.timestamp desc, d.measurement_id";
         PreparedStatement pstmt = conn.prepareStatement(sql);
         ResultSet rs = null;
         try {
             long interval = table.getInterval();
-            for (long i=min; i<=max; i+=interval) {
-                pstmt.setLong(1, i);
-                pstmt.setLong(2, (i+interval));
+            for (long i=max; i>min; i-=interval) {
+                pstmt.setLong(1, (i-interval));
+                pstmt.setLong(2, i);
                 rs = pstmt.executeQuery();
                 int timestamp_col = rs.findColumn("timestamp");
                 int value_col     = rs.findColumn("value");
@@ -243,10 +258,15 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
         }
     }
 
-    private class TableObj {
+    private class TableObj implements Comparable {
         private String _table;
         private long _interval;
-        public TableObj(String table, long interval) {
+        private long _minTime;
+        private long _maxTime;
+        public TableObj(String table, long interval, long minTime, long maxTime)
+        {
+            _minTime = minTime;
+            _maxTime = maxTime;
             _table = table;
             _interval = interval;
         }
@@ -256,12 +276,27 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
         public long getInterval() {
             return _interval;
         }
+        public long getMinTimestamp() {
+            return _minTime;
+        }
+        public long getMaxTimestamp() {
+            return _maxTime;
+        }
+        public int compareTo(Object rhs) throws ClassCastException {
+            return compareTo((TableObj)rhs);
+        }
+        public int compareTo(TableObj rhs) throws ClassCastException {
+            Long min = new Long(_minTime);
+            Long rmin = new Long(rhs._minTime);
+            // want to sort in descending order
+            return rmin.compareTo(min);
+        }
     }
 
     private class AvailData {
         long _startTime;
         long _endtime;
-        int _metric_id;
+        int _mid;
         double _availval;
         
         public AvailData(long starttime, long endtime, int metric_id,
@@ -269,7 +304,7 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
             super();
             _startTime = starttime;
             _endtime = endtime;
-            _metric_id = metric_id;
+            _mid = metric_id;
             _availval = availval;
         }
 
@@ -286,11 +321,15 @@ public class SST_AvailRLEUpgrader extends SchemaSpecTask {
         }
 
         public int getMetric() {
-            return _metric_id;
+            return _mid;
         }
 
         public double getAvailVal() {
             return _availval;
         }
+        public String toString() {
+            return "mid:"+_mid+";startime:"+_startTime+";endtime:"+_endtime+";availval:"+_availval;
+        }
+
     }
 }
