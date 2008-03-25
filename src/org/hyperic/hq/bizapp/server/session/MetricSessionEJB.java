@@ -283,8 +283,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         }
         else {
             // Availability does not need to be summed
-            if (tmpl.getAlias().equalsIgnoreCase(
-                    MeasurementConstants.CAT_AVAILABILITY)) {
+            if (tmpl.isAvailability()) {
                 summary.setMetric(MetricDisplayConstants.LAST_KEY,
                     new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
             }

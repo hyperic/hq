@@ -30,6 +30,7 @@ import java.io.Serializable;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.units.FormattedNumber;
 
@@ -192,6 +193,11 @@ public class MeasurementTemplate
     
     void setCategory(Category category) {
         _category = category;
+    }
+
+    public boolean isAvailability() {
+        return getAlias().toUpperCase().
+            equals(MeasurementConstants.CAT_AVAILABILITY);
     }
 
     /**

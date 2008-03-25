@@ -949,8 +949,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public PageList getHistoricalData(Measurement m, long begin, long end,
                                       PageControl pc)
         throws DataNotAvailableException {
-        if (m.getTemplate().getAlias().toUpperCase().
-            equals(MeasurementConstants.CAT_AVAILABILITY)) {
+        if (m.getTemplate().isAvailability()) {
             return AvailabilityManagerEJBImpl.getOne().
                 getHistoricalAvailData(m, begin, end, pc);
         } else {

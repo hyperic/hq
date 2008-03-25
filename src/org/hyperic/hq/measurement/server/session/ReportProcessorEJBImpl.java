@@ -153,10 +153,7 @@ public class ReportProcessorEJBImpl
             // If this is an availability metric, then tell the cache about it
             boolean availMetric = false;
             MeasurementTemplate tmpl = dm.getTemplate();
-            if (tmpl.getAlias().toUpperCase()
-                    .equals(MeasurementConstants.CAT_AVAILABILITY) &&
-                tmpl.getCategory().getName()
-                    .equals(MeasurementConstants.CAT_AVAILABILITY)) {
+            if (tmpl.isAvailability()) {
                 availMetric = true;
             }
 

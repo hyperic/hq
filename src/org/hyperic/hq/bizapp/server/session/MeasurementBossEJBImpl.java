@@ -1197,9 +1197,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         Integer[] mids;
         StopWatch watch = new StopWatch();
 
-        if (aid.isApplication() &&
-            tmpl.getCategory().getName().equals(
-                MeasurementConstants.CAT_AVAILABILITY)) {
+        if (aid.isApplication() && tmpl.isAvailability()) {
             // Special case for application availability
             _log.debug("BEGIN findMeasurementData()");
             
@@ -1211,7 +1209,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             Map midMap = getMetricManager()
                 .findDesignatedMeasurementIds(subject, serviceIds,
                                          MeasurementConstants.CAT_AVAILABILITY);
-            mids = (Integer[]) midMap.values().toArray(new Integer[0]);
+            mids = (Integer[]) midMap.values().toArray(new Integer[midMap.values().size()]);
         }
         else {
             MeasurementTemplate template =

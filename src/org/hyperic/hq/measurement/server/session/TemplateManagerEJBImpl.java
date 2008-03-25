@@ -595,8 +595,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public void setDesignated(MeasurementTemplate tmpl, boolean designated) {
-        String alias = tmpl.getAlias(); 
-        if (alias.equalsIgnoreCase(MeasurementConstants.CAT_AVAILABILITY)) 
+        if (tmpl.isAvailability())
             return;
             
         tmpl.setDesignate(designated);
@@ -619,9 +618,9 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             MeasurementTemplate template = (MeasurementTemplate)i.next();
 
             // Never turn off Availability as an indicator
-            if (template.getAlias().equalsIgnoreCase(
-                    MeasurementConstants.CAT_AVAILABILITY))
-                    continue;
+            if (template.isAvailability()) {
+                continue;
+            }
 
             boolean designated = designates
                     .contains(template.getId());

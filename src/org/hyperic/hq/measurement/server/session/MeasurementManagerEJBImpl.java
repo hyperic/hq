@@ -1108,9 +1108,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
             template = (MeasurementTemplate)templates.get(i);
 
-            if (template.getCategory().getName().
-                equals(MeasurementConstants.CAT_AVAILABILITY) &&
-                template.isDesignate()) {
+            if (template.isAvailability() && template.isDesignate()) {
                 availIdx = idx;
             }
 
