@@ -169,7 +169,6 @@ public class IisDetector
             String siteName = (String)vhosts.get(i);
 
             ServiceResource service = new ServiceResource();
-            services.add(service);
             service.setType(this, VHOST_NAME);
             service.setServiceName(siteName);
 
@@ -217,6 +216,7 @@ public class IisDetector
             setMeasurementConfig(service, metricProps);
             service.setCustomProperties(cprops);
             //service.setResponseTimeConfig(new ConfigResponse(rtProps));
+            services.add(service);
         }
 
         return services;
