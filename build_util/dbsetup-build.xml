@@ -178,6 +178,15 @@
          appendToSqlFile="true" />
   </target> 
 
+  <!-- DBSetup target for unittest framework -->
+  <target name="test-dbsetup">
+    <property name="unittest-lib" location="${hq.home}/unittest/lib" />
+    <echo message="using unittest.lib as -> ${unittest-lib}"/>
+    <antcall target="dbsetup">
+      <param name="unittest.lib" value="${unittest-lib}"/>
+    </antcall>
+  </target>
+
   <!-- Main DBSetup target -->
   <target name="dbsetup"
           depends="dbsetup-schema-only,dbsetup-data,dbsetup-upgrade"

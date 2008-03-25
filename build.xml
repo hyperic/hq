@@ -35,6 +35,10 @@
   <property name="db2monitor.dir" location="${hq.bin}/db2monitor_bin"/>
   <property name="launcher.dir" location="${hq.bin}/launcher_bin"/>
 
+  <!-- UnitTest libs, initially empty and reset if the build is built
+        for unitTests -->
+  <property name="unittest.lib" location="${hq.home}/unittest/emptydir"/>
+
   <!-- Thirdparty libs -->
   <property name="thirdparty.lib" location="thirdparty/lib"/>
   <property name="xdoclet.lib" location="${thirdparty.lib}/xdoclet"/>
@@ -88,8 +92,13 @@
     <fileset dir="${db2monitor.dir}" includes="lib/db2monitor.jar" />
   </path>
 
+  <path id="unittest">
+    <fileset dir="${unittest.lib}" includes="*.jar" />
+  </path>
+
   <path id="alljars">
     <path refid="pdknative" />
+    <path refid="unittest" />
     <fileset dir="${lather.lib}" includes="lather.jar" />
     <fileset dir="${thirdparty.lib}" includes="*.jar" excludes="strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar"/>
     <fileset dir="${thirdparty.lib}" includes="*.zip" />      
