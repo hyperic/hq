@@ -175,7 +175,10 @@ public class Metric {
     /** The full JMX object name - domain : objectName 
      */ 
     public String getObjectName() {
-        return decode(this.objectName);
+	// do not return the decoded version of the object name
+	// at this point, since sigar will decode it successively
+	// causing things to break
+        return this.objectName;
     }
 
     /** Set the JMX object name.
