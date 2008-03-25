@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script PUBLIC
+  "-//Apache Software Foundation//Tapestry Script Specification 3.0//EN"
+  "http://jakarta.apache.org/tapestry/dtd/Script_3_0.dtd">
+    
+<script>
+<input-symbol key="enableHotkeys" required="yes"/>
+<input-symbol key="keyCombination" required="yes"/>
+<input-symbol key="searchURL" required="yes"/>
+<input-symbol key="resourcePageURL" required="yes"/>
+<body>
+    <if expression="enableHotkeys">
+var searchWidget = hyperic.widget.search({search:'${searchURL}', resource:'${resourcePageURL}'}, 3, ${keyCombination})
+    </if>
+    <if-not expression="enableHotkeys">
+var searchWidget = hyperic.widget.search({search:'${searchURL}', resource:'${resourcePageURL}'}, 3, null)
+    </if-not>
+    
+dojo.connect(window, "onload", searchWidget, "create");    
+</body>
+</script>
