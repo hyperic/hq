@@ -1212,9 +1212,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             mids = (Integer[]) midMap.values().toArray(new Integer[midMap.values().size()]);
         }
         else {
-            MeasurementTemplate template =
-                getTemplateManager().getTemplate(tmpl.getId());
-            mids = getMetricIdsForResource(subject, aid, template);
+            mids = getMetricIdsForResource(subject, aid, tmpl);
             if (mids == null || mids.length == 0) {
                 throw new MeasurementNotFoundException(
                     "There is no measurement for " + aid + " with template " + 
