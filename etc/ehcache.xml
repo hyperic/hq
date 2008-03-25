@@ -184,11 +184,6 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="AvailabilityCache"
-         maxElementsInMemory="20000"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Cache used outside Hibernate which contains ent IDs which are in the
        zevent queue -->
