@@ -25,15 +25,16 @@
 
 package org.hyperic.util.unittest.server;
 
-import java.lang.reflect.Method;
-
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 
 /**
  * An example on how to start the container and execute a query against a 
  * managed object.
  */
 public class ExampleInContainerTest extends BaseServerTestCase {
+    
+    private LocalInterfaceRegistry _registry;
 
     /**
      * Creates an instance.
@@ -44,7 +45,7 @@ public class ExampleInContainerTest extends BaseServerTestCase {
     
     public void setUp() throws Exception {
         super.setUp();
-        deployHQ();
+        _registry = deployHQ(false);
     }
     
     public void tearDown() throws Exception {
@@ -59,22 +60,15 @@ public class ExampleInContainerTest extends BaseServerTestCase {
      * 
      * @throws Exception
      */
-    public void testQueryAlertDefinitionManager() throws Exception {
-        IsolatingDefaultSystemClassLoader cl = 
-            (IsolatingDefaultSystemClassLoader)ClassLoader.getSystemClassLoader();
-
-        ClassLoader ejbCL = cl.getEJBClassLoader();
-
-        Class ejb = ejbCL.loadClass(AlertDefinitionManagerEJBImpl.class.getName());
-
-        Method getOne = ejb.getMethod("getOne", new Class[0]);
-
-        Object local = getOne.invoke(ejb, new Object[0]);
-
-        Method m = local.getClass().getMethod("getIdFromTrigger", new Class[]{Integer.class});
-
-        Integer id = (Integer)m.invoke(local, new Object[]{new Integer(-1)});
-
+    public void testQueryAlertDefinitionManager() throws Exception {        
+        AlertDefinitionManagerLocal adMan = 
+            (AlertDefinitionManagerLocal)
+                 _registry.getLocalInterface(AlertDefinitionManagerEJBImpl.class, 
+                                             AlertDefinitionManagerLocal.class);
+        
+        
+        Integer id = adMan.getIdFromTrigger(new Integer(-1));
+        
         assertNull("shouldn't have found alert def id", id);        
     }
     
