@@ -1234,7 +1234,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         ConfigResponse config;
         String mtype;
     
-        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         try {
             if (id.isPlatform() || id.isServer() | id.isService()) {
                 AppdefEntityValue av = new AppdefEntityValue(id, subj);
@@ -1251,7 +1250,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             }
     
             config = 
-                cfgMan.getMergedConfigResponse(subject,
+                cfgMan.getMergedConfigResponse(subj.getAuthzSubjectValue(),
                                                ProductPlugin.TYPE_MEASUREMENT,
                                                id, true);
         } catch (ConfigFetchException e) {
@@ -1269,12 +1268,12 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             } catch (InvalidConfigException e) {
                 log.warn("Error turning on default metrics, configuration (" +
                           config + ") " + "couldn't be validated", e);
-                cfgMan.setValidationError(subject, id, e.getMessage());
+                cfgMan.setValidationError(subj, id, e.getMessage());
                 return;
             } catch (Exception e) {
                 log.warn("Error turning on default metrics, " +
                           "error in validation", e);
-                cfgMan.setValidationError(subject, id, e.getMessage());
+                cfgMan.setValidationError(subj, id, e.getMessage());
                 return;
             }
         }
@@ -1282,7 +1281,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         // Enable the metrics
         try {
             createDefaultMeasurements(subj, id, mtype, config);
-            cfgMan.clearValidationError(subject, id);
+            cfgMan.clearValidationError(subj, id);
     
             // Execute the callback so other people can do things when the
             // metrics have been created (like create type-based alerts)

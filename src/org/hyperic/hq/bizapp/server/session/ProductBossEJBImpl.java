@@ -416,8 +416,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         boolean doRollback = true;
         try {
             cMan = this.getConfigManager();
-            ids  = cMan.setConfigResponse(subject.getAuthzSubjectValue(), id,
-                                          response, type, true);
+            ids = cMan.setConfigResponse(subject, id, response, type, true);
             
             if (shouldValidate) {
                 doValidation(subject, type, ids);

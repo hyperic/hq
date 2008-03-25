@@ -2188,7 +2188,7 @@ public class AppdefBossEJBImpl
         ResourceGroup rg = resMan.findResourceGroupById(subject, gv.getId());
         for (Iterator it = aeids.iterator(); it.hasNext(); ) {
             AppdefEntityID aeid = (AppdefEntityID) it.next();
-            resMan.addResource(subject.getAuthzSubjectValue(), rg, aeid);
+            resMan.addResource(subject, rg, aeid);
         }
     }
 
@@ -3080,15 +3080,15 @@ public class AppdefBossEJBImpl
 
         try {
             doSetAll(subject, allConfigs, doValidation, false);
-            AuthzSubjectValue subj = subject.getAuthzSubjectValue();
             if (doValidation) {
-                getConfigManager().clearValidationError(subj, id);
+                getConfigManager().clearValidationError(subject, id);
             }
             
             doRollback = false;
             
             // Wait until we have validated the config, send the configs
-            AIConversionUtil.sendNewConfigEvent(subj, id, allConfigs);
+            AIConversionUtil.sendNewConfigEvent(subject.getAuthzSubjectValue(),
+                                                id, allConfigs);
             
             //run an auto-scan for platforms
             if (id.isPlatform()) {
@@ -3125,9 +3125,8 @@ public class AppdefBossEJBImpl
                               null);
             }
 
-            AuthzSubjectValue subj = subject.getAuthzSubjectValue();
             ids = getConfigManager().configureResource(
-                subj, entityId,
+                subject, entityId,
                 ConfigResponse.safeEncode(allConfigs.getProductConfig()),
                 ConfigResponse.safeEncode(allConfigs.getMetricConfig()),
                 ConfigResponse.safeEncode(allConfigs.getControlConfig()),
@@ -3179,6 +3178,7 @@ public class AppdefBossEJBImpl
                 }
                 
                 List events = new ArrayList(ids.length);
+                AuthzSubjectValue subj = subject.getAuthzSubjectValue();
                 for (int i = 0; i < ids.length; i++)
                     events.add(new ResourceUpdatedZevent(subj, ids[i]));
                 

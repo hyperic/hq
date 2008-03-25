@@ -94,7 +94,6 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
     public GroupValue createGroup(AuthzSubject subj, GroupValue group)
         throws GroupCreationException, GroupDuplicateNameException 
     {
-        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         try {
             // To avoid groups with duplicate names, we're now performing a
             // a case-insensitive name based find before creation.
@@ -127,14 +126,14 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             group.setDescription   ( rg.getDescription() );
             group.setLocation      ( rg.getLocation() );
             group.setGroupType     ( createInfo.getGroupType() );
-            group.setSubject       ( subject );
+            group.setSubject       ( subj.getAuthzSubjectValue() );
             group.setCTime         ( new Long(rg.getCtime()) );
             group.setMTime         ( new Long(rg.getMtime()) );
             group.setModifiedBy    ( rg.getModifiedBy() );
             group.setOwner         ( subj.getName() );
 
            // Here's where we add our own group resource to our group.
-            rgmLoc.addResource(subject, rg,
+            rgmLoc.addResource(subj, rg,
                                AppdefEntityID.newGroupID(rg.getId().intValue()));
         } catch (PermissionException pe) {
             // This should NOT occur. Anyone can create groups.

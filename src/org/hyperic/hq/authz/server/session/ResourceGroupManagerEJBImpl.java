@@ -256,7 +256,7 @@ public class ResourceGroupManagerEJBImpl
      * Add a resource to a group by resource id and resource type
      * @ejb:interface-method
      */
-    public ResourceGroup addResource(AuthzSubjectValue whoami,
+    public ResourceGroup addResource(AuthzSubject whoami,
                                      ResourceGroup group, AppdefEntityID aeid)
         throws PermissionException 
     {

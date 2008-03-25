@@ -450,13 +450,12 @@ public class RuntimeReportProcessor {
             aiserverExt = (AIServerExtValue) aiserver;
         }
 
-        AuthzSubjectValue subjectValue = subject.getAuthzSubjectValue();
         if (!isPlaceholder(aiserverExt)) {             
             // CONFIGURE SERVER
             try {
                 // Configure resource, telling the config manager to send
                 // an update event if this resource has been updated.
-                _configMgr.configureResource(subjectValue,
+                _configMgr.configureResource(subject,
                                              foundAppdefServer.getEntityId(),
                                              aiserver.getProductConfig(),
                                              aiserver.getMeasurementConfig(),

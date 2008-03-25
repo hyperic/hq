@@ -120,13 +120,11 @@ public class AIQRV_approve implements AIQResourceVisitor {
             }
             
             try {
-                configMgr.
-                    configureResource(subject.getAuthzSubjectValue(),
-                                      aid,
-                                      aiplatform.getProductConfig(),
-                                      aiplatform.getMeasurementConfig(),
-                                      aiplatform.getControlConfig(),
-                                      null, null, false, false);
+                configMgr.configureResource(subject, aid,
+                                            aiplatform.getProductConfig(),
+                                            aiplatform.getMeasurementConfig(),
+                                            aiplatform.getControlConfig(),
+                                            null, null, false, false);
             } catch (Exception e) {
                 _log.warn("Error configuring platform: " + e, e);
             }
@@ -155,7 +153,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             if (aiplatformValue.isPlatformDevice()) {
                 try {
                     configMgr.
-                        configureResource(subject.getAuthzSubjectValue(),
+                        configureResource(subject,
                                           existingPlatform.getEntityId(),
                                           aiplatform.getProductConfig(),
                                           aiplatform.getMeasurementConfig(),
@@ -299,16 +297,15 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                                      serverValue);
 
                 try {
-                    configMgr.
-                        configureResource(subject.getAuthzSubjectValue(),
-                                          server.getEntityId(),
-                                          aiserver.getProductConfig(),
-                                          aiserver.getMeasurementConfig(),
-                                          aiserver.getControlConfig(),
-                                          null, /* RT config */
-                                          null,
-                                          false,
-                                          false);
+                    configMgr.configureResource(subject,
+                                                server.getEntityId(),
+                                                aiserver.getProductConfig(),
+                                                aiserver.getMeasurementConfig(),
+                                                aiserver.getControlConfig(),
+                                                null, /* RT config */
+                                                null,
+                                                false,
+                                                false);
                 } catch (Exception e) {
                     _log.warn("Error configuring server: " + e, e);
                 }
@@ -374,13 +371,12 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
                 Server updated = smLocal.updateServer(subject, serverValue);
                 try {
-                    configMgr.
-                        configureResource(subject.getAuthzSubjectValue(),
-                                          serverValue.getEntityId(),
-                                          aiserver.getProductConfig(),
-                                          aiserver.getMeasurementConfig(),
-                                          aiserver.getControlConfig(),
-                                          null, null, true, false);
+                    configMgr.configureResource(subject,
+                                                serverValue.getEntityId(),
+                                                aiserver.getProductConfig(),
+                                                aiserver.getMeasurementConfig(),
+                                                aiserver.getControlConfig(),
+                                                null, null, true, false);
                 } catch (Exception configE) {
                     _log.warn("Error configuring server: " + configE, configE);
                 }

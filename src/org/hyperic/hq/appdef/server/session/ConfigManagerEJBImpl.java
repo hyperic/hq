@@ -363,8 +363,7 @@ public class ConfigManagerEJBImpl
      * that the current config is valid
      * @ejb:interface-method
      */
-    public void clearValidationError(AuthzSubjectValue subject,
-                                     AppdefEntityID id) {
+    public void clearValidationError(AuthzSubject subject, AppdefEntityID id) {
         setValidationError(subject, id, null);
     }
 
@@ -376,7 +375,7 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void setValidationError(AuthzSubjectValue subject,
+    public void setValidationError(AuthzSubject subject,
                                    AppdefEntityID id,
                                    String validationError) {
         ConfigResponseDAO dao =
@@ -463,7 +462,7 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AppdefEntityID[] setConfigResponse(AuthzSubjectValue subject,
+    public AppdefEntityID[] setConfigResponse(AuthzSubject subject,
                                               AppdefEntityID id,
                                               ConfigResponse response,
                                               String type,
@@ -505,7 +504,7 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AppdefEntityID[] configureResource(AuthzSubjectValue subject,
+    public AppdefEntityID[] configureResource(AuthzSubject subject,
                                               AppdefEntityID appdefID,
                                               byte[] productConfig,
                                               byte[] measurementConfig,
@@ -577,7 +576,8 @@ public class ConfigManagerEJBImpl
             // have been affected by this config update.
             if (sendConfigEvent) {
                 ResourceUpdatedZevent event =
-                    new ResourceUpdatedZevent(subject, appdefID);
+                    new ResourceUpdatedZevent(subject.getAuthzSubjectValue(),
+                                              appdefID);
                 ZeventManager.getInstance().enqueueEventAfterCommit(event);
             }
             
