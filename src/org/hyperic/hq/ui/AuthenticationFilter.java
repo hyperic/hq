@@ -60,150 +60,157 @@ import org.hyperic.util.encoding.Base64;
 public final class AuthenticationFilter extends BaseFilter {
 
     private static Log log = LogFactory.getLog(AuthenticationFilter.class
-	    .getName());
+            .getName());
 
     public void doFilter(ServletRequest req, ServletResponse res,
-	    FilterChain chain) throws IOException, ServletException {
+            FilterChain chain) throws IOException, ServletException {
 
-	HttpServletResponse response = (HttpServletResponse) res;
-	HttpServletRequest request = (HttpServletRequest) req;
-	HttpSession session = request.getSession();
-	ServletContext ctx = session.getServletContext();
-	WebUser webUser = SessionUtils.getWebUser(session);
-	String servletPath = request.getServletPath(), 
-	contextPath = request.getContextPath(),
-	queryString = request.getQueryString();
-	
-	if (webUser == null) {
-	    // See if there is authentication information
-	    String auth = request.getHeader("Authorization");
-	    if (auth != null) {
-		StringTokenizer token = new StringTokenizer(auth, " ");
-		if (token.countTokens() == 2) {
-		    String tok = token.nextToken();
-		    assert (tok.equals("Basic"));
-		    tok = token.nextToken();
-		    String userpass = new String(Base64.decode(tok));
+        HttpServletResponse response = (HttpServletResponse) res;
+        HttpServletRequest request = (HttpServletRequest) req;
+        HttpSession session = request.getSession();
+        ServletContext ctx = session.getServletContext();
+        WebUser webUser = SessionUtils.getWebUser(session);
+        String servletPath = request.getServletPath(), contextPath = request
+                .getContextPath(), queryString = request.getQueryString();
 
-		    token = new StringTokenizer(userpass, ":");
-		    assert (token.countTokens() == 2);
-		    String user = token.nextToken();
-		    String pass = token.nextToken();
-		    try {
-			webUser = SignIn.loginUser(request, ctx, user, pass);
-			session.setAttribute(Constants.WEBUSER_SES_ATTR,
-				webUser);
-		    } catch (Exception e) {
-			// Unsuccessful login
-			log.debug("User attempted to log in with " + userpass);
-		    }
-		}
-	    }
-	}
+        if (webUser == null) {
+            // See if there is authentication information
+            String auth = request.getHeader("Authorization");
+            if (auth != null) {
+                StringTokenizer token = new StringTokenizer(auth, " ");
+                if (token.countTokens() == 2) {
+                    String tok = token.nextToken();
+                    assert (tok.equals("Basic"));
+                    tok = token.nextToken();
+                    String userpass = new String(Base64.decode(tok));
 
-	if (webUser == null) {
-	    // See if there is a guest user
-	    webUser = loginGuest(request, ctx);
-	}
-	
-	if (webUser == null) {
-	    // if the user is requesting the login page continue
-	    if (PageListing.SIGN_IN_URL.equals(servletPath)
-		    || "/j_security_check.do".equals(servletPath))
-		chain.doFilter(request, response);
-	    else {
-		// not requesting the login page so add a callback and send them
-		// there
-		if (servletPath.indexOf("RecentAlerts") < 0
-			&& servletPath.indexOf("rss") < 0
-			&& servletPath.indexOf("IndicatorCharts") < 0) {
-		    StringBuffer forwardURL = new StringBuffer();
-		    forwardURL.append(servletPath).append("?").append(queryString == null ? "" : queryString);
-		    session.setAttribute(Constants.POST_AUTH_CALLBACK_URL, forwardURL.toString());
-		}
-		String redirectURL = contextPath + PageListing.SIGN_IN_URL;
-		response.sendRedirect(redirectURL);
-		return;
-	    }
-	}
-	String callbackURL = (String) session
-		.getAttribute(Constants.POST_AUTH_CALLBACK_URL);
-	if (webUser != null && !PageListing.SIGN_IN_URL.equals(servletPath)
-		&& callbackURL != null) {
-	    session.setAttribute(Constants.POST_AUTH_CALLBACK_URL, null);
-	    response.sendRedirect(callbackURL);
-	} else if (webUser != null
-		&& (PageListing.SIGN_IN_URL.equals(servletPath) || "/j_security_check.do"
-			.equals(servletPath))) {
-	    response.sendRedirect(contextPath + PageListing.DASHBOARD_URL);
-	    return;
-	} else {
-	    try {
-		chain.doFilter(request, response);
-	    } catch (Exception e) {
-		log.warn("Caught IO Exception from client "
-			+ request.getRemoteAddr() + ": " + e.getMessage());
-	    }
-	}
+                    token = new StringTokenizer(userpass, ":");
+                    assert (token.countTokens() == 2);
+                    String user = token.nextToken();
+                    String pass = token.nextToken();
+                    try {
+                        webUser = SignIn.loginUser(ctx, user, pass);
+                        session.setAttribute(Constants.WEBUSER_SES_ATTR,
+                                webUser);
+                    } catch (Exception e) {
+                        // Unsuccessful login
+                        log.debug("User attempted to log in with " + userpass);
+                    }
+                }
+            }
+        }
+
+        if (webUser == null) {
+            // See if there is a guest user
+            webUser = loginGuest(request, ctx);
+        }
+
+        if (webUser == null) {
+            // if the user is requesting the login page continue
+            if (PageListing.SIGN_IN_URL.equals(servletPath)
+                    || "/j_security_check.do".equals(servletPath))
+                chain.doFilter(request, response);
+            else {
+                // not requesting the login page so add a callback and send them
+                // there
+                if (servletPath.indexOf("RecentAlerts") < 0
+                        && servletPath.indexOf("rss") < 0
+                        && servletPath.indexOf("IndicatorCharts") < 0) {
+                    StringBuffer forwardURL = new StringBuffer();
+                    forwardURL.append(servletPath).append("?").append(
+                            queryString == null ? "" : queryString);
+                    setCallback(forwardURL.toString(), session);
+                }
+                String redirectURL = contextPath + PageListing.SIGN_IN_URL;
+                response.sendRedirect(redirectURL);
+                return;
+            }
+        }
+        String callbackURL = (String) session
+                .getAttribute(Constants.POST_AUTH_CALLBACK_URL);
+        if (webUser != null && !PageListing.SIGN_IN_URL.equals(servletPath)
+                && callbackURL != null) {
+            session.removeAttribute(Constants.POST_AUTH_CALLBACK_URL);
+            response.sendRedirect(callbackURL);
+        } else if (webUser != null
+                && (PageListing.SIGN_IN_URL.equals(servletPath) || "/j_security_check.do"
+                        .equals(servletPath))) {
+            response.sendRedirect(contextPath + PageListing.DASHBOARD_URL);
+            return;
+        } else {
+            try {
+                chain.doFilter(request, response);
+            } catch (Exception e) {
+                log.warn("Caught IO Exception from client "
+                        + request.getRemoteAddr() + ": " + e.getMessage());
+            }
+        }
     }
 
     public void init(FilterConfig filterConfig) {
-	super.init(filterConfig);
+        super.init(filterConfig);
     }
 
     private WebUser loginGuest(HttpServletRequest request, ServletContext ctx) {
-	AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
-	try {
-	    int sid = authBoss.loginGuest();
+        AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
+        try {
+            int sid = authBoss.loginGuest();
 
-	    ConfigResponse preferences = new ConfigResponse();
+            ConfigResponse preferences = new ConfigResponse();
 
-	    // look up the user's preferences
-	    ConfigResponse defaultPreferences = (ConfigResponse) ctx
-		    .getAttribute(Constants.DEF_USER_PREFS);
+            // look up the user's preferences
+            ConfigResponse defaultPreferences = (ConfigResponse) ctx
+                    .getAttribute(Constants.DEF_USER_PREFS);
 
-	    AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-	    AuthzSubjectValue subject = authzBoss.getCurrentSubject(sid)
-		    .getAuthzSubjectValue();
+            AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+            AuthzSubjectValue subject = authzBoss.getCurrentSubject(sid)
+                    .getAuthzSubjectValue();
 
-	    Integer sessionId = new Integer(sid);
-	    preferences = authzBoss.getUserPrefs(sessionId, subject.getId());
-	    preferences.merge(defaultPreferences, false);
+            Integer sessionId = new Integer(sid);
+            preferences = authzBoss.getUserPrefs(sessionId, subject.getId());
+            preferences.merge(defaultPreferences, false);
 
-	    WebUser webUser = new WebUser(subject, sessionId, preferences, true);
+            WebUser webUser = new WebUser(subject, sessionId, preferences, true);
 
-	    Map userOpsMap = SignIn.loadUserPermissions(sessionId, authzBoss);
-	    request.getSession().setAttribute(Constants.USER_OPERATIONS_ATTR,
-		    userOpsMap);
+            Map userOpsMap = SignIn.loadUserPermissions(sessionId, authzBoss);
+            request.getSession().setAttribute(Constants.USER_OPERATIONS_ATTR,
+                    userOpsMap);
 
-	    try {
-		DashboardManagerLocal dashManager = DashboardManagerEJBImpl
-			.getOne();
-		ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
-			.getAttribute(Constants.DEF_USER_DASH_PREFS);
-		AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
-			.findSubjectById(webUser.getSubject().getId());
-		UserDashboardConfig userDashboard = dashManager
-			.getUserDashboard(me, me);
-		if (userDashboard == null) {
-		    userDashboard = dashManager.createUserDashboard(me, me,
-			    webUser.getName());
-		    ConfigResponse userDashobardConfig = userDashboard
-			    .getConfig();
-		    userDashobardConfig.merge(defaultUserDashPrefs, false);
-		    dashManager.configureDashboard(me, userDashboard,
-			    userDashobardConfig);
-		}
-	    } catch (PermissionException e) {
-		e.printStackTrace();
-	    }
-	    request.getSession().setAttribute(Constants.WEBUSER_SES_ATTR,
-			webUser);
-	    return webUser;
-	} catch (Exception e) {
-	    // No guest account available
-	    return null;
-	}
+            try {
+                DashboardManagerLocal dashManager = DashboardManagerEJBImpl
+                        .getOne();
+                ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
+                        .getAttribute(Constants.DEF_USER_DASH_PREFS);
+                AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
+                        .findSubjectById(webUser.getSubject().getId());
+                UserDashboardConfig userDashboard = dashManager
+                        .getUserDashboard(me, me);
+                if (userDashboard == null) {
+                    userDashboard = dashManager.createUserDashboard(me, me,
+                            webUser.getName());
+                    ConfigResponse userDashobardConfig = userDashboard
+                            .getConfig();
+                    userDashobardConfig.merge(defaultUserDashPrefs, false);
+                    dashManager.configureDashboard(me, userDashboard,
+                            userDashobardConfig);
+                }
+            } catch (PermissionException e) {
+                e.printStackTrace();
+            }
+            request.getSession().setAttribute(Constants.WEBUSER_SES_ATTR,
+                    webUser);
+            return webUser;
+        } catch (Exception e) {
+            // No guest account available
+            return null;
+        }
+    }
+    
+    private void setCallback(String url, HttpSession session) {
+        String currVal = (String) session.getAttribute(Constants.POST_AUTH_CALLBACK_URL);
+        if (currVal == null) {
+            session.setAttribute(Constants.POST_AUTH_CALLBACK_URL, url);
+        }
     }
 
 }
