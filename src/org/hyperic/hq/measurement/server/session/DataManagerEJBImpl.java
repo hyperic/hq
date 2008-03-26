@@ -91,8 +91,7 @@ import org.hyperic.util.timer.StopWatch;
 public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final String logCtx = DataManagerEJBImpl.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
-    private final MeasurementSeparator _measSep = new MeasurementSeparator();
-    
+
     // The boolean system property that makes all events interesting. This 
     // property is provided as a testing hook so we can flood the event 
     // bus on demand.
@@ -2332,49 +2331,4 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public void ejbPassivate() {}
     public void ejbRemove() {}
     public void setSessionContext(SessionContext ctx) {}
-    
-    private class MeasurementSeparator {
-        private List _orderedAvailIds;
-        private Integer[] _mids;
-        private Integer[] _avIds;
-        MeasurementSeparator() {
-        }
-        void init() {
-            _orderedAvailIds = AvailabilityManagerEJBImpl.getOne()
-                .getAllAvailIds();
-        }
-        public Integer[] getAvIds() {
-            Integer[] rtn = new Integer[_avIds.length];
-            System.arraycopy(_avIds, 0, rtn, 0, _avIds.length);
-            return rtn;
-        }
-        public Integer[] getMids() {
-            Integer[] rtn = new Integer[_mids.length];
-            System.arraycopy(_mids, 0, rtn, 0, _mids.length);
-            return rtn;
-        }
-        public void set(Integer[] mids) {
-            List midList = new ArrayList(mids.length);
-            List aidList = new ArrayList(mids.length);
-            for (int i=0; i<mids.length; i++) {
-                if (mids[i] == null) {
-                    continue;
-                } else if (isAvailMeas(mids[i])) {
-                    aidList.add(mids[i]);
-                } else {
-                    midList.add(mids[i]);
-                }
-            }
-            _mids = (Integer[])midList.toArray(new Integer[midList.size()]);
-            _avIds = (Integer[])aidList.toArray(new Integer[aidList.size()]);
-        }
-        public boolean isAvailMeas(Integer id) {
-            int res =
-                Collections.binarySearch(_orderedAvailIds, id);
-            if (res >= 0) {
-                return true;
-            }
-            return false;
-        }
-    }
 }
