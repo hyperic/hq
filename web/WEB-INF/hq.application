@@ -7,7 +7,9 @@
 <application name="HQ">  
 	<description>Hyperic HQ</description>
     <meta key="org.apache.tapestry.messages-encoding" value="UTF-8"/> 
-	<meta key="org.apache.tapestry.accepted-locales" value="en"/> 
+	<meta key="org.apache.tapestry.accepted-locales" value="en"/>
+	 
+    <meta key="org.apache.tapestry.renderTags" value="false"/>
     
 	<meta key="org.apache.tapestry.page-class-packages" value="org.hyperic.ui.hq.pages"/>
 	<meta key="org.apache.tapestry.component-class-packages" value="org.hyperic.ui.tapestry.components"/>
