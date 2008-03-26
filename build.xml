@@ -800,6 +800,7 @@
         <include name="**/*.ico"/>
         <include name="**/*.jsp"/>
         <include name="**/*.properties"/>
+        <include name="**/*.application"/>
         <include name="**/*.page"/>
         <include name="**/*.html"/>
         <exclude name="**/dojo/*"/>
