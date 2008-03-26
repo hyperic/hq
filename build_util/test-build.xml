@@ -44,9 +44,8 @@
 			 
 		  <!-- This unit test should be enabled only when testing the 
 			   unit test framework itself -->
-		  <!--
-		  <include name="**/TestServerLifecycleManagement.java"/>
-		  -->	  			
+		  <exclude name="**/ServerLifecycleManagement_test.java"/>
+	  			
         </fileset>
       </batchtest>
       <sysproperty key="hq.example.plugins" value="${hq.home}/plugins/examples"/>
