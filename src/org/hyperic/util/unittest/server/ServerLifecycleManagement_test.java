@@ -31,9 +31,9 @@ package org.hyperic.util.unittest.server;
  * A test case tasked with testing the server lifecycle management operations 
  * provided in the super class.
  */
-public class TestServerLifecycleManagement extends BaseServerTestCase {
+public class ServerLifecycleManagement_test extends BaseServerTestCase {
 
-    public TestServerLifecycleManagement(String name) {
+    public ServerLifecycleManagement_test(String name) {
         super(name, false);
     }
                 
