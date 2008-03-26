@@ -1,5 +1,5 @@
 var hyperic = {};
-hyperic.widget = {}; hyperic.utils = {};
+hyperic.URLS = {}; hyperic.widget = {}; hyperic.utils = {};
 
 hyperic.form = {
     fieldFocus : function(/*DOMNode*/elem) {
@@ -102,84 +102,88 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
     this.resourceURL= urls.resource;
     this.searchURL  = urls.search;
     this.keyCode    = keyCode;
-    //TODO shorten these names
-    this.searchBox = dojo.byId('searchBox');
-    this.searchContainer = dojo.byId('headerSearchBox');
-    this.nodeSearchResults = dojo.byId('headerSearchResults');
-    this.nodeCancel = dojo.byId('searchClose');
-    this.resourceRes = dojo.byId("resourceResults");
-    this.resourceResCount =  dojo.byId("resourceResultsCount");
-    
+    /**
+     * Connect all the events up and grab the nodes that we are going to need
+     */
     this.create = function(){
+        this.searchBox          = dojo.byId('searchBox');
+        this.searchContainer    = dojo.byId('headerSearchBox');
+        this.nodeSearchResults  = dojo.byId('headerSearchResults');
+        this.nodeCancel         = dojo.byId('searchClose');
+        this.nodeSearchButton   = dojo.byId("headerSearch");
         //Set up the key listeners for the search feature
-        hyperic.utils.addKeyListener(window, this.keyCode, 'search');
-        hyperic.utils.addKeyListener(this.searchContainer, {keyCode: 13}, 'enter');
-        hyperic.utils.addKeyListener(dojo.byId('header'), {keyCode: 27}, 'escape');
-        // What should the hot-keys do?
-        dojo.subscribe('enter', null, this.search);
-        dojo.subscribe('search', null, this.toggleSearchBox);
-        dojo.subscribe('escape', null, this.toggleSearchBox);
-        //Connect the events for the box and cancel button
-        dojo.connect(this.searchBox, "onkeypress", this.search);
-        dojo.connect(this.nodeCancel, "onclick", this.toggeSearchBox);
+        new hyperic.utils.addKeyListener(window, this.keyCode, 'search');
+        new hyperic.utils.addKeyListener(this.searchContainer, {keyCode: 13}, 'enter');
+        new hyperic.utils.addKeyListener(dojo.byId('header'), {keyCode: 27}, 'escape');
     };
-    this.search = function(string){
-        if(this.searchBox.value.length > this.minStrLen){
-            this.nodeSearchResults.style.display = '';
+    this.search = function(e){
+        var string = e.target.value;
+        if(this.searchBox.value.length >= this.minStrLen){
             this.searchStarted();
             dojo.xhrGet( {
-                url: this.searchURL+string, 
+                url: this.searchURL+'?q='+string, 
                 handleAs: "json",
                 timeout: 5000, 
-                load: function(response, ioArgs) {
-                    this.searchEnded();
-                    this.loadResults(response);
-                    return response;
-                },
-                error: function(response, ioArgs) {
-                    return response;
-                }
+                load: loadSearchData,
+                error: this.error
             });
         }else{
+            this.searchEnded();
             this.nodeSearchResults.style.display = 'none';
         }
     };
+    this.error = function(){
+        this.searchEnded();
+        alert("foo");
+    };
     this.loadResults = function(response){
-        var resourceURL = this.resourceURL+"?eid=";
-        var template = "<li><a href='link' class='type'>text<\/a><\/li>";
-        var count = 0;
-        var res;
-        var relink = new RegExp("link", "g");
-        var retext = new RegExp("text", "g");
-        var retype = new RegExp("type", "g");
-        for(var i in response) {
-            var length = response[i].name.length;
-            if(length >= 37)
-                response[i].name = response[i].name.substring(0,4) + "..." + response[i].name.substring(length-28, length);
-            res += template.replace(relink, resourceURL+response[i].id).replace(retext, response[i].name).replace(retext, 'platform');
-            count++;
-        }
-        this.resourceRes.innerHTML = res;
-        this.resourceResCount.innerHTML = count;
+        this.searchEnded();
+        
     };
     this.toggleSearchBox = function() {
         if(this.opened) {
             this.nodeSearchResults.style.display = 'none';
             dojo.fx.wipeOut({node:this.searchContainer, duration: 400}).play();
             this.opened = false;
+            this.searchEnded();
+            this.searchBox.value = '';
         }
         else {
-            this.searchBox.focus();
             window.scrollTo(0,0);
             dojo.fx.wipeIn({node:this.searchContainer, duration: 400}).play();
             this.opened = true;
+            this.searchBox.focus();
         }
     };
     this.searchStarted = function(){
         this.searchBox.className = "searchActive";
     };
     this.searchEnded = function(){
-        this.searchBox.className = "searchCanceled";
+        this.searchBox.className = "";
     };
     return this;
+}
+
+function loadSearchData(response, ioArgs) {
+    if(response){
+        var resURL = resourceURL+"?eid=";
+        var template = "<li><a href='link' class='type'>text<\/a><\/li>";
+        var count = 0;
+        var res = "";
+        var relink = new RegExp("link", "g");
+        var retext = new RegExp("text", "g");
+        var retype = new RegExp("type", "g");
+        for(var i in response) {
+            var length = response[i].name.length;
+            if(length >= 37){
+                response[i].name = response[i].name.substring(0,4) + "..." + response[i].name.substring(length-28, length);
+            }
+            res += template.replace(relink, resURL+response[i].eId).replace(retext, response[i].name).replace(retype, response[i].resType);
+            count++;
+        }
+        dojo.byId("resourceResults").innerHTML = res;
+        dojo.byId("resourceResultsCount").innerHTML = count;
+        dojo.byId('headerSearchResults').style.display = '';
+        dojo.byId('searchBox').className = "";
+    }
 }
