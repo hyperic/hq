@@ -24,7 +24,7 @@ public abstract class BaseComponent extends org.apache.tapestry.BaseComponent {
         if (user == null)
             return "";
         else
-            return user.getName();
+            return user.getFirstName();
     }
 
     public boolean getIsLoggedIn() {

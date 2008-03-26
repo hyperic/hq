@@ -3,9 +3,9 @@
     <if jwcid="@If" condition="ognl:isLoggedIn" renderTag="false">
     <div jwcid="@NavigationTabs"/>
     </if>
-    <div id="headerLinks">
-    <if jwcid="@If" condition="ognl:isLoggedIn" renderTag="false"><span key="signedIn"></span></if>
-    <else jwcid="@Else" renderTag="false"><span jwcid="@Insert" value="ognl:getUserName()"></span></else>
+    <div jwcid="@Any" id="headerLinks" style="ognl:isLoggedIn?'':'right:0px'">
+    <if jwcid="@If" condition="ognl:!isLoggedIn" renderTag="false"><span key="notSignedIn"></span></if>
+    <else jwcid="@Else" renderTag="false"><span key="welcome"></span> <span jwcid="@Insert" value="ognl:getUserName()"></span><span><a href="/Logout.do"><span key="logout"></span></a></span></else>
     <span><a href="#"><span key="help"/></a></span>
     </div>
     <if jwcid="@If" condition="ognl:isLoggedIn" renderTag="false">

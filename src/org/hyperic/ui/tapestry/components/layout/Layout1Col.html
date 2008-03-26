@@ -1,14 +1,22 @@
-<shell jwcid="@Shell" title="ognl:pageTitle" stylesheets='ognl:{HQ40Theme}' 
-       delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.remainingHead)" >
+<shell jwcid="@Shell" title="ognl:pageTitle + ' - ' + staticTitle" stylesheets='ognl:{HQ40Theme}' 
+       delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.remainingHead)"
+       ajaxDelegate="ognl:ajaxDelegate">
 <block jwcid="remainingHead@Block">
 <link rel="icon" href="/images/4.0/icons/favicon.ico"/>
+<style type="text/css">
+        @import "/js/dojo-1.0.2/dijit/themes/dijit.css";
+        @import "/js/dojo-1.0.2/dijit/themes/soria/soria.css";
+    </style>
 <script language="JavaScript" type="text/javascript" src="/js/lib/lib.js"></script>
+<script type="text/javascript">
+    djConfig= {isDebug: true, parseOnLoad: true, defaultTestTheme: 'soria'}
+</script>
 </block>
-<body jwcid="@Body">
+<body jwcid="@Body" class="soria">
 
 <div id="wrapper">
         
-<span jwcid="@Header" statusElement="ognl:statusElement"/>
+<span jwcid="@Header" statusElement="ognl:statusElement" />
 
 <div id="wrapper">
 	<div id="content">

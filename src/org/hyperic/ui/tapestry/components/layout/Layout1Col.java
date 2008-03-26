@@ -24,10 +24,12 @@
  */
 package org.hyperic.ui.tapestry.components.layout;
 
-import org.apache.tapestry.BaseComponent;
 import org.apache.tapestry.IAsset;
+import org.apache.tapestry.IRender;
 import org.apache.tapestry.annotations.Asset;
+import org.apache.tapestry.annotations.InjectObject;
 import org.apache.tapestry.annotations.Parameter;
+import org.hyperic.ui.tapestry.components.BaseComponent;
 
 public abstract class Layout1Col extends BaseComponent{
 
@@ -47,7 +49,14 @@ public abstract class Layout1Col extends BaseComponent{
     public abstract boolean getStatusElement();
     public abstract void setStatusElement(boolean statusElement);
     
+    @InjectObject("service:tacos.dojo.DojoOneShellDelegate")
+    public abstract IRender getAjaxDelegate();
+    
     @Asset("context:css/HQ_40_OS.css")
     public abstract IAsset getHQ40Theme();
+    
+    public String getStaticTitle(){
+        return getMessages().getMessage("hqTitle");
+    }
 
 }
