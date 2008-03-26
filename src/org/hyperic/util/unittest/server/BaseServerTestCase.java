@@ -44,6 +44,8 @@ import java.util.zip.GZIPOutputStream;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
@@ -64,20 +66,27 @@ import org.jdom.input.SAXBuilder;
  * resides. That jboss instance must contain a "unittest" configuration created 
  * with the <code>unittest-prepare-jboss</code> Ant target. The datasource file 
  * (<code>hq-ds.xml</code>) in the "unittest" configuration must point to the 
- * *preexisting* unit testing server database.
+ * *preexisting* unit testing server database setup with the <code>test-dbsetup</code> 
+ * Ant target.
  * 
  * In addition, the <code>hq.unittest.hq.home</code> system property must be set 
  * to the local path where the HQ src resides (.ORG or EE versions depending 
  * on the type of unit test). The <code>hq.unittest.working.dir</code> system 
  * property must be set to the directory where the database dump file containing 
- * the initial server state resides.
+ * the initial unit test database state resides (by default: $HQ_HOME/unittest/data).
  * 
  * Finally (and most importantly), the system classloader must be 
  * set to the {@link IsolatingDefaultSystemClassLoader}.
  */
 public abstract class BaseServerTestCase extends TestCase {
     
+    private static final Log log = LogFactory.getLog(BaseServerTestCase.class);
+    
     private static final String logCtx = BaseServerTestCase.class.getName();
+    
+    /**
+     * The dump file containing the initial unit test database state.
+     */
     private static final String DUMP_FILE = "hqdb.dump.xml.gz";
     
     /**
@@ -107,23 +116,41 @@ public abstract class BaseServerTestCase extends TestCase {
     private static ServerLifecycle server;
             
     private static URL deployment;
+    
+    private final boolean restoreDatabaseOnFirstRun;
+    
+    private static boolean restoredOnFirstRun;
         
     /**
      * Creates an instance.
      *
      * @param name The test case name.
+     * @param restoreDatabase <code>true</code> to restore the database before 
+     *                        the first unit test in this test case; 
+     *                        <code>false</code> to not restore the database.
+     * @see #restoreDatabase()                       
      */
-    public BaseServerTestCase(String name) {
+    public BaseServerTestCase(String name, boolean restoreDatabase) {
         super(name);
+        restoreDatabaseOnFirstRun = restoreDatabase;
     }
     
     /**
-     * Delegates to the super class.
+     * Creates the initial unit test database dump file if it doesn't exist 
+     * already. Also restores the database once before the first unit test in 
+     * this test case if the constructor parameter is set to <code>restoreDatabase</code>.
      * 
-     * @see junit.framework.TestCase#setUp()
+     * Subclasses should never override this method, only extend it if necessary.
      */
     public void setUp() throws Exception {
         super.setUp();
+        // we must make sure that the initial database dump always occurs
+        dumpDatabase();
+        
+        if (restoreDatabaseOnFirstRun && !restoredOnFirstRun) {
+            restoreDatabase();
+            restoredOnFirstRun = true;
+        }
     }
     
     /**
@@ -136,7 +163,7 @@ public abstract class BaseServerTestCase extends TestCase {
     }
     
     /**
-     * Retrieve a connection to the unit test server database. This connection 
+     * Retrieve a connection to the unit test database. This connection 
      * may be used to verify that a state change has occurred during the 
      * unit test.
      * 
@@ -148,13 +175,16 @@ public abstract class BaseServerTestCase extends TestCase {
     }
     
     /**
-     * Restore the unit test server database to the original state specified 
-     * in the dump file.
+     * Restore the unit test database to the original state specified 
+     * by the <code>test-dbsetup</code> Ant target.
      * 
      * @throws UnitTestDBException
      */
     protected final void restoreDatabase()
             throws UnitTestDBException {
+        
+        log.info("Restoring unit test database from dump file.");
+        
         Connection conn = null;
         Statement stmt = null;
         try {
@@ -188,7 +218,9 @@ public abstract class BaseServerTestCase extends TestCase {
     }
 
     /**
-     * Used to insert new data, will either update existing data or insert fresh.
+     * Used to insert new data into the unit test database. Will either update 
+     * existing data or insert fresh.
+     * 
      * @param schema File to extract XML data from.
      * @throws UnitTestDBException 
      */
@@ -198,7 +230,8 @@ public abstract class BaseServerTestCase extends TestCase {
     }
     
     /**
-     * Used to delete data that was specified by the schema.
+     * Used to delete data specified by the schema from the unit test database.
+     * 
      * @param schema File to extract XML data from.
      * @throws UnitTestDBException 
      */
@@ -228,44 +261,19 @@ public abstract class BaseServerTestCase extends TestCase {
      * Deploy the HQ application into the jboss server, starting the jboss server 
      * first if necessary.
      * 
-     * @boolean prepareOrRestoreDB <code>true</code> to let HQ app deployment 
-     *                               include preparing the dump file containing 
-     *                               the initial database state or restoring the 
-     *                               database from the dump file if it exists 
-     *                               already.
      * @return The local interface registry for looking up local interfaces for 
      *          the deployed EJBs.
      * @throws Exception
      */
-    protected final LocalInterfaceRegistry deployHQ(boolean prepareOrRestoreDB) throws Exception {
+    protected final LocalInterfaceRegistry deployHQ() throws Exception {
         if (server == null || !server.isStarted()) {
             startServer();
         }
         
         deployment = getHQDeployment();
-        
-        if (prepareOrRestoreDB) {
-            File dbdump = new File(getHQWorkingDir(), DUMP_FILE);
-            Connection conn = null;
-            if (!dbdump.exists()) {
-                try {
-                    conn = getConnection(false);
-                    // we need the ear to initially deploy so that we can
-                    // capture the plugins which take a lot more time
-                    // to initially deploy
-                    server.deploy(deployment);
-                    server.undeploy(deployment);
-                    dumpDatabase(conn);
-                } finally {
-                    DBUtil.closeConnection(logCtx, conn);
-                }
-            } else {
-                restoreDatabase();
-            }            
-        }
-        
+                
         return server.deploy(deployment);
-    }    
+    }
     
     /**
      * Undeploy the HQ or HQEE application from the jboss server.
@@ -301,6 +309,35 @@ public abstract class BaseServerTestCase extends TestCase {
             server = null;
             deployment = null;
         }
+    }
+    
+    
+    /**
+     * Create the database dump file used to restore the database if that 
+     * dump file does not already exist.
+     */
+    private void dumpDatabase() throws Exception {
+        File dbdump = new File(getHQWorkingDir(), DUMP_FILE);
+        if (!dbdump.exists()) {
+            log.info("Creating database dump file at "+dbdump.getCanonicalPath()+
+                     " for the unit test framework.");
+            
+            Connection conn = null;
+            
+            try {
+                conn = getConnection(false);
+                // we need the ear to initially deploy so that we can
+                // capture the plugins which take a lot more time
+                // to initially deploy
+                deployHQ();
+                undeployHQ();
+                dumpDatabase(conn);
+            } finally {
+                DBUtil.closeConnection(logCtx, conn);
+            }
+            
+            log.info("Finished creating database dump file.");
+        }        
     }
 
     private Connection getConnection(boolean forRestore)
