@@ -16,4 +16,4 @@
 # ./autoinventoryApprove.sh -dfqdn="regex:.*hyperic.com" # Approve all platforms that match *.hyperic.com
 #
 
-curl http://hqadmin:hqadmin@localhost:7080/hqu/mass/autodiscovery/approve.hqu $@
+curl -u hqadmin http://localhost:7080/hqu/mass/autodiscovery/approve.hqu $@
