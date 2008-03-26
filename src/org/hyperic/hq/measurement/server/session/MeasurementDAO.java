@@ -105,24 +105,13 @@ public class MeasurementDAO extends HibernateDAO {
         save(m);
         return m;
     }
-
-    List findByIds(Integer ids[]) {
-        if (ids.length == 0)   // Nothing to do
-            return new ArrayList(0);
-        
-        String sql = "from Measurement where id IN (:ids)";
-
-        return getSession().createQuery(sql)
-            .setParameterList("ids", ids)
-            .list();
-    }
     
     /**
      * Look up a Measurement, allowing for the query to return a stale
      * copy (for efficiency reasons).
      * 
-     * @param tid
-     * @param iid
+     * @param tid The MeasurementTemplate id
+     * @param iid The instance id
      * @param allowStale <code>true</code> to allow stale copies of an alert 
      *                   definition in the query results; <code>false</code> to 
      *                   never allow stale copies, potentially always forcing a 
