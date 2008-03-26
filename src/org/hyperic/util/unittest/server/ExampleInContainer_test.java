@@ -32,14 +32,14 @@ import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
  * An example on how to start the container and execute a query against a 
  * managed object.
  */
-public class ExampleInContainerTest extends BaseServerTestCase {
+public class ExampleInContainer_test extends BaseServerTestCase {
     
     private LocalInterfaceRegistry _registry;
 
     /**
      * Creates an instance.
      */
-    public ExampleInContainerTest(String name) {
+    public ExampleInContainer_test(String name) {
         super(name);
     }
     
