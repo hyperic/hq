@@ -88,7 +88,8 @@ public class PermissionManagerImpl
         + "AND authz_r.INSTANCE_ID = %%RESID%%";
     
     private static final String VIEWABLE_SEARCH =
-        "WHERE EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND NOT PROTO_ID = 0 AND "+
+        "WHERE EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND " +
+              "RESOURCE_TYPE_ID IN (3, 301, 303, 305, 308)  AND "+
               "(SORT_NAME LIKE ? OR " +
                "PROTO_ID IN (SELECT ID FROM EAM_RESOURCE " +
                             "WHERE PROTO_ID = 0 AND SORT_NAME LIKE ?)) ";
