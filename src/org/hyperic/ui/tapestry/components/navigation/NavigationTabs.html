@@ -1,11 +1,11 @@
 <if jwcid="@If" condition="ognl:isLoggedIn">
 <div id="navTabContainer">
     <ul>
-        <li jwcid="@Any" class="ognl:isActive('dashbaord')?'active':''"><a href="Dashboard.do"><span>Dashboard</span></a></li>
-        <li jwcid="@Any" class="ognl:isActive('resource')?'active':''"><a jwcid="@PageLink" page="Hub"><span>Resources</span></a></li>
+        <li jwcid="@Any" class="ognl:isActive('dashbaord')?'active':''"><a href="/Dashboard.do"><span>Dashboard</span></a></li>
+        <li jwcid="@Any" class="ognl:isActive('resource')?'active':''"><a jwcid="@PageLink" page="resource/Hub"><span>Resources</span></a></li>
         <li jwcid="@Any" class="ognl:isActive('reporting')||isActive('mastheadAttach')?'active':''"><a href="Analyze"><span>Analyze</span></a></li>
-        <li jwcid="@Any" class="ognl:isActive('settings')?'active':''"><a href="Settings.html"><span>Settings</span></a></li>
-        <li jwcid="@Any" class="ognl:isActive('admin')?'active':''"><a href="Admin.do"><span>Administration</span></a></li>                   
+        <li jwcid="@Any" class="ognl:isActive('settings')?'active':''"><a href="/Settings.html"><span>Settings</span></a></li>
+        <li jwcid="@Any" class="ognl:isActive('admin')?'active':''"><a href="/Admin.do"><span>Administration</span></a></li>                   
     </ul>
 </div>
 </if>
