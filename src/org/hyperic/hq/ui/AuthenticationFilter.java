@@ -115,7 +115,8 @@ public final class AuthenticationFilter extends BaseFilter {
                 // there
                 if (servletPath.indexOf("RecentAlerts") < 0
                         && servletPath.indexOf("rss") < 0
-                        && servletPath.indexOf("IndicatorCharts") < 0) {
+                        && servletPath.indexOf("IndicatorCharts") < 0
+                        && servletPath.indexOf("dashboard/") < 0) {
                     StringBuffer forwardURL = new StringBuffer();
                     forwardURL.append(servletPath).append("?").append(
                             queryString == null ? "" : queryString);
