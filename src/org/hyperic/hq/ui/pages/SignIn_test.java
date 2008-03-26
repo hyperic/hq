@@ -9,7 +9,7 @@ import org.apache.tapestry.link.PageLink;
 import org.hyperic.ui.tapestry.page.PageListing;
 import org.junit.Test;
 
-public class SignInTest extends BaseComponentTestCase {
+public class SignIn_test extends BaseComponentTestCase {
 
     /**
      * Note: this test requires the container
