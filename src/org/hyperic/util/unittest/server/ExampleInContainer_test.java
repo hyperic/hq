@@ -40,12 +40,12 @@ public class ExampleInContainer_test extends BaseServerTestCase {
      * Creates an instance.
      */
     public ExampleInContainer_test(String name) {
-        super(name);
+        super(name, false);
     }
     
     public void setUp() throws Exception {
         super.setUp();
-        _registry = deployHQ(false);
+        _registry = deployHQ();
     }
     
     public void tearDown() throws Exception {

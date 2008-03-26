@@ -34,7 +34,7 @@ package org.hyperic.util.unittest.server;
 public class TestServerLifecycleManagement extends BaseServerTestCase {
 
     public TestServerLifecycleManagement(String name) {
-        super(name);
+        super(name, false);
     }
                 
     /**
@@ -53,7 +53,7 @@ public class TestServerLifecycleManagement extends BaseServerTestCase {
      */
     public void testStartServerDeployAndUndeployHQ() throws Exception {
         startServer();
-        deployHQ(false);
+        deployHQ();
         undeployHQ();
     }
         
@@ -65,7 +65,7 @@ public class TestServerLifecycleManagement extends BaseServerTestCase {
      * @throws Exception
      */
     public void testDeployAndUndeployHQ() throws Exception {
-        deployHQ(false);
+        deployHQ();
         undeployHQ();        
     }
     
@@ -79,7 +79,7 @@ public class TestServerLifecycleManagement extends BaseServerTestCase {
     public void XXXtestRestartServerAndDeploy() throws Exception {
         stopServer();
         Thread.sleep(10000);
-        deployHQ(false);
+        deployHQ();
         undeployHQ();
     }
 
