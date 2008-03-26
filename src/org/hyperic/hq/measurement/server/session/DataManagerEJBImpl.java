@@ -1519,19 +1519,40 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * Fetch the most recent data point for particular Measurements.
      *
-     * @param ids The id's of the Measurements
+     * @param measurements The List of Measurements to query.  In the list of
+     * Measurements null values are allowed as placeholders.
      * @param timestamp Only use data points with collection times greater
      * than the given timestamp.
      * @return A Map of measurement ids to MetricValues.
+     * TODO: We should change this method to now allow NULL values.  This is
+     * legacy and only used by the Metric viewer and Availabilty Summary
+     * portlets.
      * @ejb:interface-method
      */
-    public Map getLastDataPoints(Integer[] ids, long timestamp)
+    public Map getLastDataPoints(List measurements, long timestamp)
     {
-        _measSep.init();
-        _measSep.set(ids);
-        Integer[] sepMids = _measSep.getMids();
-        Integer[] avIds = _measSep.getAvIds();
+        List availIds = new ArrayList();
+        List measurementIds = new ArrayList();
+
+        for (Iterator i = measurements.iterator(); i.hasNext(); ) {
+            Measurement m = (Measurement)i.next();
+            if (m == null) {
+                //XXX: See above.
+                measurementIds.add(null);
+            } else if (m.getTemplate().isAvailability()) {
+                availIds.add(m.getId());
+            } else {
+                measurementIds.add(m.getId());
+            }
+        }
+
+        Integer[] sepMids =
+            (Integer[])measurementIds.toArray(new Integer[measurementIds.size()]);
+        Integer[] avIds =
+            (Integer[])availIds.toArray(new Integer[availIds.size()]);
+
         Map data = getLastDataPts(sepMids, timestamp);
+
         data.putAll(AvailabilityManagerEJBImpl.getOne().getLastAvail(avIds,
                                                                      timestamp));
         return data;

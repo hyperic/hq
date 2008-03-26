@@ -159,7 +159,7 @@ public class ViewAction extends BaseAction {
         AppdefResourceTypeValue typeVal =
             appdefBoss.findResourceTypeById(sessionId, typeId);
         CacheData[] data = new CacheData[arrayIds.length];
-        Integer[] mids = new Integer[arrayIds.length];
+        List measurements = new ArrayList(arrayIds.length);
         long interval = 0;
         ArrayList toRemove = new ArrayList();
         for (int i = 0; i < arrayIds.length; i++) {
@@ -169,18 +169,17 @@ public class ViewAction extends BaseAction {
             } catch (AppdefEntityNotFoundException e) {
                 toRemove.add(id.getAppdefKey());
             }
-            if (data[i] != null) {
-                mids[i] = data[i].getMetricId();
-
-                if (data[i].getInterval() > interval) {
-                    interval = data[i].getInterval();
+            if (data[i] != null && data[i].getMeasurement() != null) {
+                measurements.add(i, data[i].getMeasurement());
+                if (data[i].getMeasurement().getInterval() > interval) {
+                    interval = data[i].getMeasurement().getInterval();
                 }
             } else {
-                mids[i] = null;
+                measurements.add(i, null);
             }
         }
 
-        MetricValue[] vals = mBoss.getLastMetricValue(sessionId, mids,
+        MetricValue[] vals = mBoss.getLastMetricValue(sessionId, measurements,
                                                       interval);
         TreeSet sortedSet =
             new TreeSet(new MetricSummaryComparator(isDescending));
@@ -315,7 +314,7 @@ public class ViewAction extends BaseAction {
                 return null; // No metric scheduled.
             }
 
-            CacheData data = new CacheData(val, m.getId(), m.getInterval());
+            CacheData data = new CacheData(val, m);
             cache.put(new Element(key, data));
             return data;
         } catch (AppdefEntityNotFoundException ex) {
@@ -354,26 +353,20 @@ public class ViewAction extends BaseAction {
 
     public class CacheData {
         private AppdefResourceValue _resource;
-        private Integer _metricId;
-        private long _interval;
+        private Measurement _m;
 
         public CacheData(AppdefResourceValue resource,
-                         Integer metricId, long interval) {
+                         Measurement m) {
             _resource = resource;
-            _metricId = metricId;
-            _interval = interval;
+            _m = m;
         }
 
         public AppdefResourceValue getResource() {
             return _resource;
         }
 
-        public Integer getMetricId() {
-            return _metricId;
-        }
-
-        public long getInterval() {
-            return _interval;
+        public Measurement getMeasurement() {
+            return _m;
         }
     }
 }

@@ -2,7 +2,6 @@ package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.measurement.UnitsConvert
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl
-import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl
 import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.hq.product.MetricValue
 import org.hyperic.util.pager.PageControl
@@ -60,21 +59,18 @@ class MetricCategory {
      * @return a Map of the passed Measurements onto MetricValues
      */
     static Map getLastDataPoints(Collection c, long timeWindow) {
-        Integer[] mids = new Integer[c.size()];
         def idToMetric = [:]
         
         int i = 0;
         for (Iterator it = c.iterator(); it.hasNext(); i++) {
             def m = it.next();
-            mids[i] = m.id;
             idToMetric[m.id] = m
         }
         
-        def vals = dataMan.getLastDataPoints(mids, timeWindow)
+        def vals = dataMan.getLastDataPoints(c, timeWindow)
         def res  = [:]
-        mids.each { mid ->
-            def metric = idToMetric[mid]
-            res[metric] = vals[mid]
+        c.each { m ->
+            res[m] = vals[m.id]
         }
         res
     }

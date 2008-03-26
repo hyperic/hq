@@ -132,7 +132,7 @@ public class ViewAction extends BaseAction {
         int sessionId = user.getSessionId().intValue();
 
         CacheEntry[] ents = new CacheEntry[arrayIds.length];
-        Integer[] mids = new Integer[arrayIds.length];
+        List measurements = new ArrayList(arrayIds.length);
         Map res = new HashMap();
         long interval = 0;
         ArrayList toRemove = new ArrayList();
@@ -144,17 +144,17 @@ public class ViewAction extends BaseAction {
                 toRemove.add(id.getAppdefKey());
             }
 
-            if (ents[i] != null) {
-                mids[i] = ents[i].getMetricId();
-                if (ents[i].getInterval() > interval) {
-                    interval = ents[i].getInterval();
+            if (ents[i] != null && ents[i].getMeasurement() != null) {
+                measurements.add(i, ents[i].getMeasurement());
+                if (ents[i].getMeasurement().getInterval() > interval) {
+                    interval = ents[i].getMeasurement().getInterval();
                 }
             } else {
-                mids[i] = null;
+                measurements.add(i, null);
             }
         }
 
-        MetricValue[] vals = mBoss.getLastMetricValue(sessionId, mids,
+        MetricValue[] vals = mBoss.getLastMetricValue(sessionId, measurements,
                                                       interval);
 
         for (int i = 0; i < ents.length; i++) {
@@ -224,7 +224,7 @@ public class ViewAction extends BaseAction {
 
         if (toRemove.size() > 0) {
             _log.debug("Removing " + toRemove.size() + " missing resources.");
-            DashboardUtils.removeResources((String[])toRemove.toArray(new String[0]),
+            DashboardUtils.removeResources((String[]) toRemove.toArray(new String[toRemove.size()]),
                                            resKey, dashPrefs);
         }
 
@@ -323,17 +323,10 @@ public class ViewAction extends BaseAction {
     // Classes for caching dashboard data
     private class CacheEntry {
         private AppdefResourceTypeValue _type;
-        private Integer _metricId;
-        private long _interval;
+        private Measurement _m;
 
-        public CacheEntry(Measurement metric) {
-            if (metric == null) {
-                _metricId = null;
-                _interval = 0;
-            } else {
-                _metricId = metric.getId();
-                _interval = metric.getInterval();
-            }
+        public CacheEntry(Measurement m) {
+            _m = m;
         }
 
         public AppdefResourceTypeValue getType() {
@@ -344,12 +337,8 @@ public class ViewAction extends BaseAction {
             _type = type;
         }
 
-        public Integer getMetricId() {
-            return _metricId;
-        }
-
-        public long getInterval() {
-            return _interval;
+        public Measurement getMeasurement() {
+            return _m;
         }
     }
 }

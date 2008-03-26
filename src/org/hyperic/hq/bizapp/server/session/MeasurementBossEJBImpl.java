@@ -745,38 +745,41 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                PermissionException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
-        Integer mids[] = new Integer[tids.length];
+        List measurements = new ArrayList(tids.length);
         long interval = 0;
         for (int i = 0; i < tids.length; i++) {
             try {
-                Measurement dmv = getMetricManager()
+                Measurement m = getMetricManager()
                     .findMeasurement(subject, tids[i], aeid);
-                mids[i] = dmv.getId();
-                interval = Math.max(interval, dmv.getInterval());
+                measurements.add(m);
+                interval = Math.max(interval, m.getInterval());
             } catch (MeasurementNotFoundException e) {
-                mids[i] = new Integer(0);
+                measurements.add(null);
             }
         }
 
-        return getLastMetricValue(sessionId,  mids, interval);
+        return getLastMetricValue(sessionId,  measurements, interval);
     }
 
     /**
      * Get the last metric data for the array of measurement ids.
      *
-     * @param mids  The array of measurement ids to get metrics for
+     * @param measurements The List of Measurements to get metrics for
      * @param interval The allowable time in ms to go back looking for data.
      * @ejb:interface-method
      */
-    public MetricValue[] getLastMetricValue(int sessionId, Integer mids[],
+    public MetricValue[] getLastMetricValue(int sessionId,
+                                            List measurements,
                                             long interval)
     {
-        MetricValue[] ret = new MetricValue[mids.length];
+        MetricValue[] ret = new MetricValue[measurements.size()];
         long after =  System.currentTimeMillis() - (3 * interval);
-        Map data = getDataMan().getLastDataPoints(mids, after);
-        for (int i = 0; i < mids.length; i++) {
-            if (data.containsKey(mids[i])) {
-                ret[i] = (MetricValue) data.get(mids[i]);
+        Map data = getDataMan().getLastDataPoints(measurements, after);
+
+        for (int i = 0; i < measurements.size(); i++) {
+            Measurement m = (Measurement)measurements.get(i);
+            if (m != null && data.containsKey(m.getId())) {
+                ret[i] = (MetricValue)data.get(m.getId());
             }
         }
 
@@ -2462,26 +2465,21 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // metrics for each category
         HashSet done = new HashSet();
         for (Iterator it = measurements.iterator(); it.hasNext(); ) {
-            Measurement dmv = (Measurement) it.next();
-            MeasurementTemplate templ = dmv.getTemplate();
+            Measurement m = (Measurement) it.next();
+            MeasurementTemplate templ = m.getTemplate();
             String category = templ.getCategory().getName();
 
             if (done.contains(category))
                 continue;
-            
-            // an array (of length 1) of measurement id's
-            Integer[] mids = { dmv.getId() };
 
             Double theValue;
-            Map dataMap;
-            dataMap = getDataMan().
-                getLastDataPoints(mids, now - MeasurementConstants.HOUR);
-
-            if (dataMap.size() < 1)
+            try {
+                MetricValue mv = getDataMan().getLastHistoricalData(m);
+                theValue = mv.getObjectValue();
+            } catch (DataNotAvailableException e) {
                 continue;
-                
-            theValue = ((MetricValue)dataMap.get(dmv.getId())).getObjectValue();
-            
+            }
+
             if (category.equals(MeasurementConstants.CAT_THROUGHPUT)) {
                 summary.setThroughput(theValue);
                 summary.setThroughputUnits(templ.getUnits());
