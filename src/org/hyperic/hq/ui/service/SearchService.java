@@ -2,6 +2,7 @@ package org.hyperic.hq.ui.service;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -16,11 +17,14 @@ import org.apache.tapestry.engine.ILink;
 import org.apache.tapestry.services.LinkFactory;
 import org.apache.tapestry.services.ServiceConstants;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * The User Interface's search service
@@ -104,15 +108,27 @@ public class SearchService implements IEngineService {
         _response.getWriter().write(getJsonResutls(res));
     }
 
+    private String getJsonResutls(PageList res) {
+        Iterator i = res.iterator();
+        int key = 0;
+        JSONObject jObject = new JSONObject();
+        while (i.hasNext()) {
+            SearchResult r = (SearchResult) i.next();
+            try {
+                jObject.put(Integer.toString(key), r.toJson());
+            } catch (JSONException e) {
+                log.warn("Cannot create search result list"
+                      + e.getStackTrace());
+            }
+            key++;
+        }
+        return jObject.toString();
+    }
+
     public String getName() {
         return SERVICE_NAME;
     }
-
-    private String getJsonResutls(PageList res) {
-        //TODO convert to JSON
-        return res.toString();
-    }
-
+    
     public void setRequest(HttpServletRequest request) {
         _request = request;
     }

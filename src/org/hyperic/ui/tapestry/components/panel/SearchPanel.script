@@ -9,13 +9,29 @@
 <input-symbol key="searchURL" required="yes"/>
 <input-symbol key="resourcePageURL" required="yes"/>
 <body>
+<unique>
+dojo.require("dojox.fx._base");
+dojo.require("dojo.fx");
+dojo.require("dojo.parser");
+dojo.require("dijit.Tooltip");
+</unique>
+var resourceURL = '${resourcePageURL}';
     <if expression="enableHotkeys">
-var searchWidget = hyperic.widget.search({search:'${searchURL}', resource:'${resourcePageURL}'}, 3, ${keyCombination})
+var searchWidget = new hyperic.widget.search({search:'${searchURL}'}, 3, ${keyCombination});
     </if>
     <if-not expression="enableHotkeys">
-var searchWidget = hyperic.widget.search({search:'${searchURL}', resource:'${resourcePageURL}'}, 3, null)
+var searchWidget = new hyperic.widget.search({search:'${searchURL}'}, 3, null);
     </if-not>
-    
-dojo.connect(window, "onload", searchWidget, "create");    
+dojo.connect(window, "onload",function(){ 
+    searchWidget.create();
+    //Connect the events for the box, cancel and search buttons
+    dojo.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
+    dojo.connect(searchWidget.nodeCancel, "onclick", searchWidget, "toggleSearchBox");
+    dojo.connect(searchWidget.nodeSearchButton, "onclick", searchWidget,  "toggleSearchBox");
+    // What should the hot-keys do?
+    dojo.subscribe('enter', searchWidget, "search");
+    dojo.subscribe('search', searchWidget, "toggleSearchBox");
+    dojo.subscribe('escape', searchWidget, "toggleSearchBox");
+});
 </body>
 </script>

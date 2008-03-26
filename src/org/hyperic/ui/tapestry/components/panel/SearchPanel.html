@@ -1,11 +1,11 @@
 <div id="headerSearch"><span key="search"></span></div>
 <div id="headerSearchBox" style="display:none">
     <div style="float:left;margin:3px 0px 3px 0px;">
-        <input type="text" id="searchBox" value="search for..."></input>
+        <input type="text" id="searchBox" value=""></input>
     </div>
 </div>
-<div id="headerSearchResults" class="none">
-    <a jwcid="@PageLink" page="Hub" class="all left"><span key="allResults"></span></a>
+<div id="headerSearchResults" style="display:none">
+    <a jwcid="@PageLink" page="resource/Hub" class="all left"><span key="allResults"></span></a>
     <div id="searchClose" class="cancelButton right"></div>
     <div class="clear">&nbsp;</div>
     <div class="resultsGroup">
@@ -26,3 +26,4 @@
         </ul>
     </div>
 </div>
+<div dojoType="dijit.Tooltip" connectId="headerSearch"><span jwcid="@InsertText" raw="true" value="message:searchButtonTooltip"/></div> 

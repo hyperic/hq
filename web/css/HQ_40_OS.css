@@ -25,16 +25,17 @@ a:visited,a:hover,a {
 
 #headerBottom {
     height: 5px;
-    background: #FF5A00 none repeat scroll 0
+    background: #2D6EBE none repeat scroll 0
 }
 
 #headerLinks {
     position: absolute;
     top: 0;
-    right: 55px;
-    width: 200px;
+    right: 70px;
+    width: 220px;
     height: 20px;
     text-align: right;
+    color: #FFF;
     padding: 3px 8px 0 0
 }
 
@@ -44,27 +45,31 @@ a:visited,a:hover,a {
     color: #fff
 }
 
+#headerLinks .noLogin{
+    top: 0;
+    right: 0
+}
+
+
+#headerLinks a:visited,a:hover,a {
+    color: #57CBDB;
+    text-decoration: none
+}
+
 /* HEADER SEARCH */
 #headerSearch {
+    background: #F96115 url(/images/4.0/icons/search.png) no-repeat scroll 99% 50%;
     position: absolute;
     top: 0;
     right: 0;
-    width: 50px;
+    width: 56px;
     height: 17px;
     background-color: #F96115;
     color: #FFF;
-    padding: 3px 8px 3px 0px;
-    text-align: right;
+    padding: 3px 8px 3px 4px;
+    text-align: left;
     cursor: pointer;
     font-weight: bold
-}
-
-#headerSearch a:hover {
-    color: #57CBDB
-}
-
-#headerSearch a,a:visited {
-    color: #FFF
 }
 
 #headerSearchBox {
@@ -76,14 +81,13 @@ a:visited,a:hover,a {
     background-color: #F96115;
     color: #FFF;
     padding: 0px 5px 0px 7px;
-    text-align: right;
-    cursor: pointer
+    text-align: right
 }
 
 #headerSearchBox input[type=text] {
     color: gray;
     padding: 1px 30px 1px 0px;
-    width: 191px
+    width: 210px
 }
 
 #headerSearchResults {
@@ -103,7 +107,11 @@ a:visited,a:hover,a {
     background: #92C1FD;
     color: #FFF;
     height: 12px;
-    padding: 2px
+    padding: 1px 0px 3px 2px;
+}
+
+#headerSearchResults a {
+    color: #57CBDB
 }
 
 #headerSearchResults .all {
@@ -129,7 +137,6 @@ a:visited,a:hover,a {
 }
 
 #headerSearchResults li a {
-    background: #FFF url('/images/4.0/icons/platform.png') no-repeat 0% 50%;
     padding-left: 22px;
     color: #666;
     text-decoration: none
@@ -140,7 +147,7 @@ a:visited,a:hover,a {
 }
 
 .searchActive {
-    background: #FFF url('/images/4.0/icons/progress2.gif') no-repeat 99% 50%
+    background: #FFF url('/images/4.0/icons/progress.gif') no-repeat 99% 50%
 }
 
 .searchComplete {
@@ -301,7 +308,7 @@ a:visited,a:hover,a {
     color: gray;
     font-size: 10px;
     float: left;
-    padding-top: 2px
+    padding-top: 2px;
     clear:both
 }
 
@@ -407,7 +414,8 @@ a.buttonGreen:active span {
 }
 
 .clear {
-    clear: both
+    clear: both;
+    height: 0px
 }
 
 .none {

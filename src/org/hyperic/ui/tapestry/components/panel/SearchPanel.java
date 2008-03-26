@@ -58,7 +58,7 @@ public abstract class SearchPanel extends BaseComponent{
                 map.put("enableHotkeys", getEnableHotkeys());
                 map.put("keyCombination", getHotkey());
                 map.put("searchURL", getSearchServiceURL());
-                map.put("resourcePageURL", "Resource.do");
+                map.put("resourcePageURL", "/Resource.do");
                 PageRenderSupport pageRenderSupport = TapestryUtils
                 .getPageRenderSupport(cycle, this);
                 getScript().execute(this, cycle, pageRenderSupport, map);
