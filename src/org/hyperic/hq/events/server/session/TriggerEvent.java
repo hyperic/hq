@@ -39,6 +39,15 @@ public class TriggerEvent extends LongIdPersistedObject {
     private long       _ctime;
     private long       _expiration;
 
+    /**
+     * Creates an instance where the unique id is currently unknown but will 
+     * be assigned by the underlying persistence engine.
+     *
+     * @param eventObject The event.
+     * @param triggerId The trigger id.
+     * @param ctime The creation time in milliseconds.
+     * @param expiration The expiration time in milliseconds.
+     */
     protected TriggerEvent(AbstractEvent eventObject, 
                            Integer triggerId, 
                            long ctime, 
@@ -48,6 +57,24 @@ public class TriggerEvent extends LongIdPersistedObject {
         setTriggerId(triggerId);
         setCtime(ctime);
         setExpiration(expiration);
+    }
+    
+    /**
+     * Creates an instance where the unique id is already known.
+     *
+     * @param id The unique id.
+     * @param eventObject The event.
+     * @param triggerId The trigger id.
+     * @param ctime The creation time in milliseconds.
+     * @param expiration The expiration time in milliseconds.
+     */
+    protected TriggerEvent(Long id, 
+                           AbstractEvent eventObject, 
+                           Integer triggerId, 
+                           long ctime, 
+                           long expiration) {
+        this(eventObject, triggerId, ctime, expiration);
+        setId(id);
     }
     
     protected TriggerEvent() {
