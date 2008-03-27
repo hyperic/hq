@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY sun-jvm-service SYSTEM "/pdk/plugins/sun-jvm-service.xml">
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin>
+
+  <classpath>
+    <include name="pdk/lib/mx4j"/>
+    <!-- following are relative to installpath -->
+
+    <!-- for jmxmp protocol -->
+    <include name="lib/jmxremote_optional-*.jar"/>
+
+    <!-- stats object classes -->
+    <include name="lib/tc.jar"/>
+  </classpath>
+
+  <filter name="template"
+          value="${OBJECT_NAME}:${alias}"/>
+
+  <server name="Terracotta"
+          version="2.5"
+          description="Terracotta Server">
+
+    <!-- derive installpath from -Dtc.install-root=... -->
+    <property name="PROC_HOME_PROPERTY"
+              value="tc.install-root"/>
+
+    <property name="OBJECT_NAME"
+              value="org.terracotta.internal:type=Terracotta Server,name=Terracotta Server"/>
+
+    <!-- default jmx.url -->
+    <property name="jmx.url" value="service:jmx:jmxmp://127.0.0.1:9520"/>
+
+    <!-- from jmx-plugin.xml -->
+    <config include="jmx"/>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.ConfigFileTrackPlugin"/>
+
+    <plugin type="control"
+            class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
+    <!-- operations -->
+    <actions include="shutdown,stop,reset,enable,disable,startBeanShell,takeThreadDump"/>
+
+    <properties>
+      <property name="Version" description="Version"/>
+      <property name="BuildID" description="Build ID"/>
+      <property name="Copyright" description="Copyright"/>
+    </properties>
+
+    <metric name="Availability"
+            template="${OBJECT_NAME}:Enabled"
+            indicator="true"/>
+
+    <metric name="Start Time"
+            units="epoch-millis"
+            category="AVAILABILITY"
+            collectionType="static"
+            defaultOn="true"/>
+
+    &sun-jvm-service;
+  </server>
+</plugin>
