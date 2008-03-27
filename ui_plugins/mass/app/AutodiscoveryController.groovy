@@ -68,8 +68,19 @@ class AutodiscoveryController extends BaseController {
     private List processPlatform(AuthzSubjectValue overlord,
                                  AIQueueManagerLocal aiMan,
                                  AIPlatformValue plat) {
-        List platformIds = [plat.id]
-        List serverIds = plat.AIServerValues.id
+        // If a platform is a placeholder, don't attempt to approve it.
+        def platformIds
+        if (!(plat.queueStatus == 0)) {
+            platformIds = [plat.id]
+        } else {
+            platformIds = []
+        }
+
+        // Only approve servers that are not marked ignored
+        def nonIgnoredServers = plat.AIServerValues.findAll { !it.ignored }
+        List serverIds = nonIgnoredServers.id
+
+        // All IP changes get auto-approved
         List ipIds = plat.AIIpValues.id
 
         aiMan.processQueue(overlord, platformIds, serverIds, ipIds,
