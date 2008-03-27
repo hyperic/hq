@@ -26,109 +26,45 @@
 package org.hyperic.hq.events.ext;
 
 import java.io.IOException;
-import java.util.Date;
-
-import javax.ejb.FinderException;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.util.Messenger;
-import org.hyperic.hq.escalation.server.session.EscalatableCreator;
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertCreateException;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
-import org.hyperic.hq.events.server.session.ClassicEscalatableCreator;
-import org.hyperic.hq.events.server.session.TriggerTrackerEJBImpl;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
-import org.hyperic.hq.events.shared.TriggerTrackerLocal;
 
-/** Abstract class that defines a trigger, which can fire actions
+/** 
+ * Abstract class that defines a trigger, which can fire actions
  */
 public abstract class AbstractTrigger 
     implements TriggerInterface, RegisterableTriggerInterface {
     
-    private final Log log = LogFactory.getLog(AbstractTrigger.class);
+    protected final Log log = LogFactory.getLog(AbstractTrigger.class);
     
-    private final Log triggerFiredLog = 
-        LogFactory.getLog(AbstractTrigger.class.getName()+".Fired");
-    
-    private final Object alertDefEnabledStatusLock = new Object();
-    
-    private final AlertDefinitionEnabledStatus uncommitedAlertDefEnabledStatus = 
-                    new AlertDefinitionEnabledStatus(true);
-    
-    private static boolean systemReady = false;
-
-    private static MBeanServer mServer;
-    private static ObjectName readyManName;
-
+    private final Object lock = new Object();
+            
     private RegisteredTriggerValue triggerValue = new RegisteredTriggerValue();
 
+    private TriggerFireStrategy fireStrategy;
     
-    public AbstractTrigger() {
-        super();
-        
+    private TriggerFiredEvent lastFiringEvent;
+    
+    
+    public AbstractTrigger() {        
         // set the default value
         triggerValue.setId(new Integer(-1));
-    }
-    
-    private boolean isSystemReady() {
-        if (!systemReady) {
-            try {
-                if (mServer == null) {
-                    mServer = (MBeanServer) MBeanServerFactory
-                        .findMBeanServer(null).iterator().next();
-
-                    readyManName =
-                        new ObjectName("hyperic.jmx:service=NotReadyManager");
-                }
-
-                Boolean mbeanReady =
-                    (Boolean) mServer.getAttribute(readyManName, "Ready");
-                
-                systemReady = mbeanReady.booleanValue();
-            } catch (AttributeNotFoundException e) {
-                // This would be a programmatic error, assume system is up
-                systemReady = true;
-            } catch (ReflectionException e) {
-                // Unable to reflect and get the value, assume system is up
-                systemReady = true;
-            } catch (MalformedObjectNameException e) {
-                // This would be a programmatic error, assume system is up
-                systemReady = true;
-            } catch (InstanceNotFoundException e) {
-                // MBean not deployed yet
-            } catch (MBeanException e) {
-                // MBean not deployed yet
-            }
-        }
         
-        return systemReady;
+        setTriggerFireStrategy(new DefaultTriggerFireStrategy(this));
     }
-    
+        
     protected final void publishEvent(AbstractEvent event) {
         Messenger.enqueueMessage(event);
     }
@@ -139,156 +75,17 @@ public abstract class AbstractTrigger
      
     protected final void fireActions(TriggerFiredEvent event) 
         throws ActionExecuteException, AlertCreateException {
-            
-        // If the system is not ready, do nothing
-        if (!isSystemReady())
-            return;
-
-        AlertDefinitionManagerLocal aman =
-            AlertDefinitionManagerEJBImpl.getOne();
-
-        if (!aman.alertsAllowed()) {
-            log.debug("Alert not firing because they are not allowed");
-            return;
+        
+        TriggerFireStrategy fireStrategy;
+        
+        synchronized (lock) {
+            lastFiringEvent = event;
+            fireStrategy = getTriggerFireStrategy();
         }
-
-        // No matter what, send a message to let people know that this trigger
-        // has fired
-        publishEvent(event);
-
-        try {
-            Integer adId = aman.getIdFromTrigger(getId());
-            if (adId == null)
-                return;
-
-            AlertDefinition alertDef = null;
-
-            // HQ-902: Retrieving the alert def and checking if the actions 
-            // should fire must be guarded by a mutex.
-            synchronized (alertDefEnabledStatusLock) {
-                // Check cached alert def status
-                if (!uncommitedAlertDefEnabledStatus.isAlertDefinitionEnabled())
-                    return;
-
-                // Check persisted alert def status
-                if (!shouldTriggerAlert(aman, adId))
-                    return;
-
-                alertDef = aman.getByIdNoCheck(adId);
-
-                // See if the alert def is actually enabled and if it's our job
-                // to fire the actions
-                if (!shouldFireActions(aman, alertDef))
-                    return;
-            }
-
-            if (triggerFiredLog.isDebugEnabled()) {
-                triggerFiredLog.debug("Firing actions for trigger with id=" +
-                        getId() + "; alert def [" +
-                        alertDef.getName() + "] with id=" +
-                        alertDef.getId()+"; triggering event ["+
-                        event+"], event time="+new Date(event.getTimestamp()));    
-            }
-
-            EscalatableCreator creator = 
-                new ClassicEscalatableCreator(alertDef, event);
-
-            // Now start escalation
-            if (alertDef.getEscalation() != null) {
-                EscalationManagerEJBImpl.getOne().startEscalation(alertDef,
-                        creator); 
-            } else {
-                creator.createEscalatable();
-            }
-
-        } catch (FinderException e) {
-            throw new ActionExecuteException(
-                    "Alert Definition not found for trigger: " + getId());
-        } catch (PermissionException e) {
-            throw new ActionExecuteException(
-                    "Overlord does not have permission to disable definition");
-        }
+        
+        fireStrategy.fireActions(event);
     }
-        
-    private boolean shouldTriggerAlert(AlertDefinitionManagerLocal adman,
-                                       Integer id) {
-        Object[] flags = adman.getEnabledAndTriggerId(id);
-        
-        // Check stored enabled flag as well as don't fire if it's not up to us
-        // to act
-        return flags[0].equals(Boolean.TRUE) && flags[1].equals(getId());
-    }
-
-    private boolean shouldFireActions(AlertDefinitionManagerLocal aman, 
-                                      AlertDefinition alertDef) 
-        throws PermissionException {
-        
-        if (log.isDebugEnabled())
-            log.debug("Trigger id " + getId() +
-                      " causing alert definition id " + alertDef.getId() + 
-                      " to fire");
-
-        // See if we need to suppress this trigger        
-        if (alertDef.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
-            TriggerTrackerLocal tracker = TriggerTrackerEJBImpl.getOne();                
-
-            boolean fire = tracker.fire(getId(), getFrequency());
-            // The TriggerTracker decided if we are supposed to fire
-            if (!fire)
-                return false;
-        }
-
-        if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE ||
-                alertDef.isWillRecover()) {
-            // Disable the alert definition now that we've fired
-            boolean succeeded = false;
             
-            try {
-                succeeded = aman.updateAlertDefinitionInternalEnable(
-                          AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(),
-                          alertDef, 
-                          false);                
-            } finally {
-                if (succeeded) {
-                    setUncommitedAlertDefEnabledStatusToDisabled();                    
-                }
-            }
-        }
-        
-        return true;        
-
-    }
-
-    private void setUncommitedAlertDefEnabledStatusToDisabled() {
-        boolean addedTxnListener = false;
-        
-        try {
-            uncommitedAlertDefEnabledStatus.flipEnabledStatus();
-            
-            HQApp.getInstance().addTransactionListener(new TransactionListener()
-            {
-                public void afterCommit(boolean success) {
-                    uncommitedAlertDefEnabledStatus.resetEnabledStatus();
-                }
-
-                public void beforeCommit() {
-                }
-                
-            });
-            
-            addedTxnListener = true;
-        } finally {
-            // If for any reason we can't add the transaction listener, reset
-            // the cached alert definition enabled status immediately so the
-            // trigger will continue firing after recovering from this failure
-            // case.
-            if (!addedTxnListener) {
-                uncommitedAlertDefEnabledStatus.resetEnabledStatus();
-            }
-        }
-
-    }
-    
     /**
      * Deserialize an event, providing optional recovery from stream corruption. 
      * The stream may become corrupted during upgrade scenarios since we started 
@@ -365,5 +162,38 @@ public abstract class AbstractTrigger
     public void setTriggerValue(RegisteredTriggerValue tv) {
         triggerValue = tv;
     }
+    
+    /**
+     * @return The last firing event or <code>null</code> if this trigger has 
+     *          not fired actions yet.        
+     */
+    public TriggerFiredEvent getLastFiringEvent() {
+        synchronized (lock) {
+            return lastFiringEvent;            
+        }
+    }
+    
+    /**
+     * @return The trigger fire strategy.
+     */
+    public TriggerFireStrategy getTriggerFireStrategy() {
+        synchronized (lock) {
+            return fireStrategy;            
+        }
+    }
+    
+    /**
+     * Set the trigger fire strategy. Doing so will cause this strategy to be 
+     * invoked on firing actions instead of the 
+     * {@link DefaultTriggerFireStrategy default strategy}.
+     * 
+     * @param strategy The trigger fire strategy.
+     * @see #fireActions(TriggerFiredEvent)
+     */
+    public void setTriggerFireStrategy(TriggerFireStrategy strategy) {
+        synchronized (lock) {
+            fireStrategy = strategy;            
+        }
+    }    
     
 }
