@@ -8019,6 +8019,16 @@ has already been defined.
       </statement>
     </schema-directSQL>
   </schemaSpec>
+    
+  <!-- Postgres needs this index despite the primary key on this table being
+  on instance_id, template_id -->
+  <schemaSpec version="3.96.6">
+     <schema-directSQL>
+        <statement desc="Create missing index on template_id foreign key constraint">
+            CREATE INDEX MEAS_TEMPLATE_ID ON EAM_MEASUREMENT(template_id)
+        </statement>
+    </schema-directSQL>
+  </schemaSpec>
 
 </dbupgrade>
 </target>
