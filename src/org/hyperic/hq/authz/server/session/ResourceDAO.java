@@ -231,11 +231,11 @@ public class ResourceDAO
     }
     
     public Resource findByInstanceId(Integer typeId, Integer id) {            
-        String sql = "from Resource where instanceId = ? and" +
-                     " resourceType.id = ?";
+        String sql = "from Resource where resourceType.id = ? " +
+                     "and instanceId = ?";
         return (Resource)getSession().createQuery(sql)
-            .setInteger(0, id.intValue())
-            .setInteger(1, typeId.intValue())
+            .setInteger(0, typeId.intValue())
+            .setInteger(1, id.intValue())
             .setCacheable(true)
             .setCacheRegion("Resource.findByInstanceId")
             .uniqueResult();
