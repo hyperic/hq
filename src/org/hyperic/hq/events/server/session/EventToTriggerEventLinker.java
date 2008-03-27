@@ -37,12 +37,15 @@ import org.hyperic.hq.events.shared.EventObjectDeserializer;
  * Deserializes an <code>AbstractEvent</code> referenced by a <code>TriggerEvent</code>. 
  * As part of the deserialization, links the <code>AbstractEvent</code> to the 
  * <code>TriggerEvent</code> by setting the <code>AbstractEvent</code> Id equal 
- * to the <code>TriggerEvent</code> Id. 
+ * to the <code>TriggerEvent</code> Id.
+ * 
+ * This class is not thread safe.
  */
 class EventToTriggerEventLinker implements EventObjectDeserializer {
     
     private final ObjectInput _eventObjectInput;
-    private final TriggerEvent _event;
+    private final TriggerEvent _triggerEvent;
+    private AbstractEvent _event;
     
     /**
      * Creates an instance.
@@ -50,11 +53,11 @@ class EventToTriggerEventLinker implements EventObjectDeserializer {
      * @param triggerEvent The <code>TriggerEvent</code>.
      * @throws IOException if the <code>AbstractEvent</code> stream header cannot be read.
      */
-    EventToTriggerEventLinker(TriggerEvent triggerEvent) throws IOException {
+    public EventToTriggerEventLinker(TriggerEvent triggerEvent) throws IOException {
         ByteArrayInputStream istream = 
             new ByteArrayInputStream(triggerEvent.getEventObject());
         _eventObjectInput = new ObjectInputStream(istream);
-        _event = triggerEvent;
+        _triggerEvent = triggerEvent;
     }
     
     /**
@@ -62,9 +65,13 @@ class EventToTriggerEventLinker implements EventObjectDeserializer {
      */
     public AbstractEvent deserializeEventObject() 
         throws ClassNotFoundException, IOException {
-        AbstractEvent event = (AbstractEvent) _eventObjectInput.readObject();
-        event.setId(_event.getId());
-        return event;
+        
+        if (_event == null) {
+            _event = (AbstractEvent) _eventObjectInput.readObject();
+            _event.setId(_triggerEvent.getId());            
+        }
+        
+        return _event;
     }
 
 }
