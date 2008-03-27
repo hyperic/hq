@@ -480,6 +480,18 @@ public class MultiConditionTrigger
             } else { // TriggerNotFiredEvent 
                 // Well, we know we ain't firing
                 fulfilled.remove(tracked.getInstanceId());
+                
+                // For this trigger we should publish not fired events only 
+                // when we have tracked that one of the sub trigger does 
+                // not currently fulfill the conditions. Otherwise, the 
+                // DurationTrigger when applied as a damper to a recovery 
+                // alert definition will not work correctly (remember that 
+                // recovery alert definitions use the MultiConditionTrigger).
+                // Once the recovery condition is met for the recovery alert 
+                // definition we only want the listening DurationTrigger to 
+                // receive a TriggerNotFiredEvent when the conditions are not 
+                // met, not because the primary alert definition has not currently 
+                // fired.                
                 notFired();
             }
         }
