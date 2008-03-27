@@ -25,7 +25,7 @@
         <column name="INSTANCE_ID" not-null="true"/>
       </property>
       <many-to-one name="template" class="MeasurementTemplate">
-        <column name="TEMPLATE_ID" not-null="true"/>
+        <column name="TEMPLATE_ID" index="MEAS_TEMPLATE_ID" not-null="true"/>
       </many-to-one>
     </properties>
 
