@@ -112,6 +112,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Measurement.findDesignatedByResourceForCategory"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="Measurement.findAllAvailIds"
          maxElementsInMemory="1"
          eternal="true"

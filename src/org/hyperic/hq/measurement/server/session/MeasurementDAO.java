@@ -346,16 +346,21 @@ public class MeasurementDAO extends HibernateDAO {
 
     List findDesignatedByResourceForCategory(Resource resource, String cat)
     {
-        List res = findDesignatedByResource(resource);
-        
-        for (Iterator i=res.iterator(); i.hasNext(); ) {
-            Measurement dm = (Measurement)i.next();
-            
-            if (!dm.getTemplate().getCategory().getName().equals(cat))
-                i.remove();
-        }
-        
-        return res;
+        String sql =
+            "select m from Measurement m " +
+            "join m.template t " +
+            "join t.category c " +
+            "where m.resource = ? and " +
+            "t.designate = true and " +
+            "c.name = ? " +
+            "order by t.name";
+
+        return getSession().createQuery(sql)
+            .setParameter(0, resource)
+            .setParameter(1, cat)
+            .setCacheable(true)
+            .setCacheRegion("Measurement.findDesignatedByResourceForCategory")
+            .list();
     }
 
     List findDesignatedByResource(Resource resource) {
