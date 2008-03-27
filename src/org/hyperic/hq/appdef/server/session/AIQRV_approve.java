@@ -103,6 +103,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                            aiplatform.getAIPlatformValue());
                 aid = platform.getEntityId();
                 setCustomProperties(aiplatform, platform, cpropMgr);
+                _log.info("Created platform " + platform.getName() + " id="
+                          + platform.getId());
                 createdResources.add(platform);
             } catch (PermissionException e) {
                 throw e;
@@ -129,8 +131,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 _log.warn("Error configuring platform: " + e, e);
             }
 
-            _log.info("Created platform (" + aiplatformValue.getId() + "): "
-                      + aiplatformValue);
             break;
 
         case AIQueueConstants.Q_STATUS_CHANGED:
@@ -311,7 +311,10 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 }
 
                 setCustomProperties(aiserver, server, cpropMgr);
-                
+
+                _log.info("Created server " + server.getName() + " id=" +
+                          server.getId());
+
                 createdResources.add(server);
             } catch (PermissionException e) {
                 throw e;
@@ -319,8 +322,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 throw new SystemException("Error creating platform from " +
                                           "AI data: " + e.getMessage(), e);
             }
-            _log.info("Created server (" + serverValue.getId() + "): " +
-                      serverValue);
+
             break;
 
         case AIQueueConstants.Q_STATUS_CHANGED:
@@ -382,14 +384,16 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 }
 
                 setCustomProperties(aiserver, updated, cpropMgr);
+
+                _log.info("Updated server " + updated.getName() + " id=" +
+                          updated.getId());
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {
                 throw new SystemException("Error updating platform with " +
                                           "new AIServer data.", e);
             }
-            _log.info("Updated server (" + serverValue.getId() + "): " +
-                      serverValue);
+
             break;
 
         case AIQueueConstants.Q_STATUS_REMOVED:
@@ -424,7 +428,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                      _log.warn("Server has already been removed, cannot " +
                                "remove aiserver=" + id);
                  }
-                 _log.info("Removing Server...");
+                 _log.info("Removing server " + serverValue.getId());
                  smLocal.removeServer(subject, serverValue.getId());
             } catch (PermissionException e) {
                 throw e;
