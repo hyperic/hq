@@ -96,8 +96,8 @@
       </key-many-to-one>
     </composite-id>
 
-    <property name="cid" type="integer">
-      <column name="CID" index="EAM_RESGRP_RESMAP_CID_IDX"/>
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="false" default="0"/>
     </property>
   </class>
 
