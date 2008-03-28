@@ -46,10 +46,9 @@ public class TableExport
     private static String _url,
                           _user,
                           _passwd,
-                          _destDir = "./";
+                          _destFilename;
     private static Connection _conn;
     private static List _tables = new ArrayList();
-    private static String _FS = File.separator;
 
     public static void main(String[] args) throws Exception
     {
@@ -71,8 +70,8 @@ public class TableExport
             } else if (args[i].equals("--tables")) {
                 String tables = args[++i];
                 setTables(tables);
-            } else if (args[i].equals("--dest")) {
-                _destDir = args[++i];
+            } else if (args[i].equals("--file")) {
+                _destFilename = args[++i];
             }
         }
     }
@@ -87,21 +86,23 @@ public class TableExport
 
     private static void exportPartialDataSet() throws Exception {
         IDatabaseConnection connection = new DatabaseConnection(_conn);
+        QueryDataSet dataSet = new QueryDataSet(connection);
         for (Iterator i=_tables.iterator(); i.hasNext(); )
         {
             String table = (String) i.next();
-            QueryDataSet dataSet = new QueryDataSet(connection);
             dataSet.addTable(table);
-            String file = _destDir + _FS + table + ".xml.gz";
-            GZIPOutputStream gstream = new GZIPOutputStream(
-                new FileOutputStream(file));
-            long start = System.currentTimeMillis();
-            System.out.print("writing " + file + "...");
-            FlatXmlDataSet.write(dataSet, gstream);
-            gstream.finish();
-            System.out.println("done " + (System.currentTimeMillis() - start)
-                + " ms");
         }
+        if (!_destFilename.endsWith(".xml.gz")) {
+            _destFilename = _destFilename + ".xml.gz";
+        }
+        GZIPOutputStream gstream = new GZIPOutputStream(new FileOutputStream(
+            _destFilename));
+        long start = System.currentTimeMillis();
+        System.out.print("writing " + _destFilename + "...");
+        FlatXmlDataSet.write(dataSet, gstream);
+        gstream.finish();
+        System.out.println("done " + (System.currentTimeMillis() - start)
+            + " ms");
     }
 
     private static Connection getConnection() throws SQLException

@@ -32,7 +32,7 @@ tflag=
 
 usage()
 {
-    printf "Usage: %s -l <url> -u <user> -p <passwd> -t <tables comma separated> -d <dest dir>\n"  $this_script
+    printf "Usage: %s -l <url> -u <user> -p <passwd> -t <tables comma separated> -d <dest file>\n"  $this_script
     printf "default url = $url\nexample urls:\nmysql = jdbc:mysql://localhost:3306/hqdb\noracle = jdbc:oracle:thin:@localhost:1521:orcl\n"
 }
 
@@ -47,7 +47,7 @@ do
             user="$OPTARG";;
      t)     tflag=1
             tables="$OPTARG";;
-     d)     dest="--dest $OPTARG";;
+     d)     dest="$OPTARG";;
      ?)     usage;
             exit 2;;
      esac
@@ -65,16 +65,18 @@ else
     exit 2
 fi
 if [ ! -z "$tflag" ]; then
-   [ "$DEBUG" ] && printf "Option --tables specified\n"
+   [ "$DEBUG" ] && printf "Option --tables $tables specified\n"
 else
     usage;
     exit 2
 fi
 if [ ! -z "$pflag" ]; then
-   [ "$DEBUG" ] && printf "Option --passwd specified\n"
+   [ "$DEBUG" ] && printf "Option --passwd $passwd specified\n"
 else
     usage;
     exit 2
 fi
+[ -z "$dest" ] && dest="$$-$tables"
 
-${JAVA} ${ARGS} org.hyperic.util.unittest.util.TableExport --url $url --passwd $passwd --user $user --tables $tables $dest
+set -x
+${JAVA} ${ARGS} org.hyperic.util.unittest.util.TableExport --url $url --passwd $passwd --user $user --tables $tables --file $dest
