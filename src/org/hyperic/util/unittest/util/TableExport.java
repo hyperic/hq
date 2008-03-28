@@ -25,7 +25,6 @@
 
 package org.hyperic.util.unittest.util;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;

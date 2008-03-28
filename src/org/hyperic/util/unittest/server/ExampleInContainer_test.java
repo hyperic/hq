@@ -36,6 +36,42 @@ import org.hyperic.util.jdbc.DBUtil;
 /**
  * An example on how to start the container and execute a query against a 
  * managed object.
+ * 
+ * <pre>
+ * <h3>DBOverlay Example</h3>
+ * create table eam_unitests
+ * (
+ *   id int,
+ *   name varchar(32),
+ *   version int,
+ *   description varchar(255),
+ *   primary key(id)
+ * );
+ * 
+ * create table eam_unitest_runtime
+ * (
+ *   id int,
+ *   unitest_id int references eam_unitests(id) DEFERRABLE,
+ *   startime numeric(24,0),
+ *   endtime numeric(24,0),
+ *   datapoint numeric(9,5),
+ *   primary key(id)
+ * );
+ * 
+ * NOTE: notice the DEFERRABLE keyword on the constraint
+ *       (doesn't work for MySQL, which is fine)
+ * 
+ * file contents ->
+ * # NOTE:  order does *NOT* matter for constraints as long as it resolves
+ * # before the commit
+ * 
+ * $ zcat $HQ_HOME/unittest/data/unittests.xml.gz
+ * &lt;?xml version='1.0' encoding='UTF-8'?&gt;
+ * &lt;dataset&gt;
+ *   &lt;eam_unitest_runtime id="0" unitest_id="0" startime="1206553000000" endtime="1206559000000" datapoint="37.00001"/&gt;
+ *   &lt;eam_unitests id="0" name="test1" version="1" description="testing import of data" /&gt;
+ * &lt;/dataset&gt;
+ * </pre>
  */
 public class ExampleInContainer_test extends BaseServerTestCase {
     
@@ -80,7 +116,9 @@ public class ExampleInContainer_test extends BaseServerTestCase {
         Integer id = adMan.getIdFromTrigger(new Integer(-1));
         
         assertNull("shouldn't have found alert def id", id);
-        
+    }
+    
+    public void testDBOverlay() throws Exception {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;

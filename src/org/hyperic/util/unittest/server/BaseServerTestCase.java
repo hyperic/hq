@@ -79,39 +79,6 @@ import org.jdom.input.SAXBuilder;
  *
  * <p>Finally (and most importantly), the system classloader must be 
  * set to the {@link IsolatingDefaultSystemClassLoader}.</p>
- *
- * <pre>
- * <h3>DBOverlay Example</h3>
- * create table eam_unitests
- * (
- *   id int,
- *   name varchar(32),
- *   version int,
- *   description varchar(255),
- *   primary key(id)
- * );
- * 
- * create table eam_unitest_runtime
- * (
- *   id int,
- *   unitest_id int references eam_unitests(id) deferrable,
- *   startime numeric(24,0),
- *   endtime numeric(24,0),
- *   datapoint numeric(9,5),
- *   primary key(id)
- * );
- * 
- * file contents ->
- * # NOTE:  order does *NOT* matter for constraints as long as it resolves
- * # before the commit
- * 
- * $ zcat $HQ_HOME/unittest/data/unittests.xml.gz
- * &lt;?xml version='1.0' encoding='UTF-8'?&gt;
- * &lt;dataset&gt;
- *   &lt;eam_unitest_runtime id="0" unitest_id="0" startime="1206553000000" endtime="1206559000000" datapoint="37.00001"/&gt;
- *   &lt;eam_unitests id="0" name="test1" version="1" description="testing import of data" /&gt;
- * &lt;/dataset&gt;
- * </pre>
  */
 public abstract class BaseServerTestCase extends TestCase {
     
