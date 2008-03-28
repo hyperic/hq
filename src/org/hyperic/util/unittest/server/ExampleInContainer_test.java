@@ -45,17 +45,17 @@ public class ExampleInContainer_test extends BaseServerTestCase {
      * Creates an instance.
      */
     public ExampleInContainer_test(String name) {
-        super(name, false);
+        super(name, true);
     }
     
     public void setUp() throws Exception {
         super.setUp();
-        super.insertSchemaData("unittest.xml.gz");
+        super.insertSchemaData("example-unittest.xml.gz");
         _registry = deployHQ();
     }
     
     public void tearDown() throws Exception {
-        super.deleteSchemaData("unittest.xml.gz");
+        super.deleteSchemaData("example-unittest.xml.gz");
         super.tearDown();
         undeployHQ();
     }
@@ -79,8 +79,8 @@ public class ExampleInContainer_test extends BaseServerTestCase {
         
         Integer id = adMan.getIdFromTrigger(new Integer(-1));
         
-        assertNull("shouldn't have found alert def id", id);        
-    
+        assertNull("shouldn't have found alert def id", id);
+        
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
