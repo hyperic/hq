@@ -5,7 +5,12 @@ DEBUG=
 basedir=`dirname $0`
 this_script=`basename $0`
 
-JAVA_HOME="/usr/jdk/latest"
+if [ -z "$JAVA_HOME" ]
+then
+    echo "ERROR: JAVA_HOME not defined"
+    exit 1
+fi
+
 LIB="$basedir/../thirdparty/lib"
 DBUNIT_PKGS="${LIB}/dbunit-2.2.jar"
 PG_PKGS=${LIB}/oracle_jdbc/oracle12.jar 
