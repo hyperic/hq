@@ -25,14 +25,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.ResourceBundle;
 
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.util.HypericEnum;
 
 public class AuthzSubjectField extends HypericEnum {
