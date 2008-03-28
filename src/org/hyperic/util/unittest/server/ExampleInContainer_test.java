@@ -25,8 +25,13 @@
 
 package org.hyperic.util.unittest.server;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.util.jdbc.DBUtil;
 
 /**
  * An example on how to start the container and execute a query against a 
@@ -45,18 +50,23 @@ public class ExampleInContainer_test extends BaseServerTestCase {
     
     public void setUp() throws Exception {
         super.setUp();
+        super.insertSchemaData("unittest.xml.gz");
         _registry = deployHQ();
     }
     
     public void tearDown() throws Exception {
+        super.deleteSchemaData("unittest.xml.gz");
         super.tearDown();
         undeployHQ();
     }
     
     /**
      * This is an example unit test demonstrating how the in-container unit test 
-     * framework can be used to perform local invocations on EJBs. Note that this 
-     * example DOES NOT show how to use the database overlay framework.
+     * framework can be used to perform local invocations on EJBs.
+     * 
+     * This also is an example of the DB Overlay framework.  The initial dbsetup
+     * does not have any data in the made-up eam_unittest tables.  The overlay
+     * populates it during setup(), verifies then deletes the data in tearDown().
      * 
      * @throws Exception
      */
@@ -70,6 +80,27 @@ public class ExampleInContainer_test extends BaseServerTestCase {
         Integer id = adMan.getIdFromTrigger(new Integer(-1));
         
         assertNull("shouldn't have found alert def id", id);        
+    
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = this.getConnectionToHQDatabase();
+            stmt = conn.createStatement();
+            String sql = "select count(*) from eam_unitests";
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                assertTrue(rs.getInt(1) > 0);
+            }
+            rs.close();
+            sql = "select count(*) from eam_unitest_runtime";
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                assertTrue(rs.getInt(1) > 0);
+            }
+        } finally {
+            DBUtil.closeJDBCObjects(getClass().getName(), conn, stmt, rs);
+        }
     }
     
 }

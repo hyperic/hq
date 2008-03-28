@@ -38,6 +38,9 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -60,23 +63,57 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 /**
- * The test case that all server-side unit tests should extend. Before starting 
+ * <p>The test case that all server-side unit tests should extend. Before starting 
  * the server, the user must set the <code>hq.unittest.jboss.home</code> system  
  * property to the path where the jboss server that will be used for unit testing 
  * resides. That jboss instance must contain a "unittest" configuration created 
  * with the <code>unittest-prepare-jboss</code> Ant target. The datasource file 
  * (<code>hq-ds.xml</code>) in the "unittest" configuration must point to the 
- * *preexisting* unit testing server database setup with the <code>test-dbsetup</code> 
- * Ant target.
- * 
- * In addition, the <code>hq.unittest.hq.home</code> system property must be set 
+ * *preexisting* unit testing server database.</p>
+ *
+ * <p>In addition, the <code>hq.unittest.hq.home</code> system property must be set 
  * to the local path where the HQ src resides (.ORG or EE versions depending 
  * on the type of unit test). The <code>hq.unittest.working.dir</code> system 
  * property must be set to the directory where the database dump file containing 
+ * the initial server state resides.</p>
+ *
+ * <p>Finally (and most importantly), the system classloader must be 
+ * set to the {@link IsolatingDefaultSystemClassLoader}.</p>
+ *
  * the initial unit test database state resides (by default: $HQ_HOME/unittest/data).
+ *
+ * <pre>
+ * <h3>DBOverlay Example</h3>
+ * create table eam_unitests
+ * (
+ *   id int,
+ *   name varchar(32),
+ *   version int,
+ *   description varchar(255),
+ *   primary key(id)
+ * );
  * 
- * Finally (and most importantly), the system classloader must be 
- * set to the {@link IsolatingDefaultSystemClassLoader}.
+ * create table eam_unitest_runtime
+ * (
+ *   id int,
+ *   unitest_id int references eam_unitests(id) deferrable,
+ *   startime numeric(24,0),
+ *   endtime numeric(24,0),
+ *   datapoint numeric(9,5),
+ *   primary key(id)
+ * );
+ * 
+ * file contents ->
+ * # NOTE:  order does *NOT* matter for constraints as long as it resolves
+ * # before the commit
+ * 
+ * $ zcat $HQ_HOME/unittest/data/unittests.xml.gz
+ * &lt;?xml version='1.0' encoding='UTF-8'?&gt;
+ * &lt;dataset&gt;
+ *   &lt;eam_unitest_runtime id="0" unitest_id="0" startime="1206553000000" endtime="1206559000000" datapoint="37.00001"/&gt;
+ *   &lt;eam_unitests id="0" name="test1" version="1" description="testing import of data" /&gt;
+ * &lt;/dataset&gt;
+ * </pre>
  */
 public abstract class BaseServerTestCase extends TestCase {
     
@@ -221,18 +258,41 @@ public abstract class BaseServerTestCase extends TestCase {
      * Used to insert new data into the unit test database. Will either update 
      * existing data or insert fresh.
      * 
-     * @param schema File to extract XML data from.
+     * @param schema filename to extract XML data from.
      * @throws UnitTestDBException 
      */
     protected final void insertSchemaData(String filename)
         throws UnitTestDBException {
         overlayDBData(filename, DatabaseOperation.REFRESH);
     }
+
+    /**
+     * Used to insert new data into the unit test database. Will either update 
+     * existing data or insert fresh.
+     * 
+     * @param List<String> of schema filenames to extract XML data from.
+     * @throws UnitTestDBException 
+     */
+    protected final void insertSchemaData(List filenames)
+        throws UnitTestDBException {
+        overlayDBData(filenames, DatabaseOperation.REFRESH);
+    }
     
     /**
      * Used to delete data specified by the schema from the unit test database.
      * 
-     * @param schema File to extract XML data from.
+     * @param List<String> of schema filenames to extract XML data from.
+     * @throws UnitTestDBException 
+     */
+    protected final void deleteSchemaData(List filenames)
+        throws UnitTestDBException {
+        overlayDBData(filenames, DatabaseOperation.DELETE);
+    }
+    
+    /**
+     * Used to delete data specified by the schema from the unit test database.
+     * 
+     * @param schema filename to extract XML data from.
      * @throws UnitTestDBException 
      */
     protected final void deleteSchemaData(String filename)
@@ -406,10 +466,19 @@ public abstract class BaseServerTestCase extends TestCase {
 
     private void overlayDBData(String filename, DatabaseOperation operation)
         throws UnitTestDBException {
+        List filenames = new ArrayList();
+        filenames.add(filename);
+        overlayDBData(filenames, operation);
+    }
+    
+    private void overlayDBData(List filenames, DatabaseOperation operation)
+        throws UnitTestDBException {
         Connection conn = null;
         Statement stmt = null;
+        InputStream stream = null;
         try {
             conn = getConnection(true);
+            stmt = conn.createStatement();
             conn.setAutoCommit(false);
             IDatabaseConnection iconn = new DatabaseConnection(conn);
             // this is done for MySQL via another method
@@ -418,15 +487,20 @@ public abstract class BaseServerTestCase extends TestCase {
             } else if (DBUtil.isOracle(conn)) {
                 stmt.execute("alter session set constraints = deferred");
             }
-            InputStream stream;
-            File overlayFile = new File(getHQWorkingDir(), filename);
-            if (filename.endsWith(".gz")) {
-                stream = new GZIPInputStream(new FileInputStream(overlayFile));
-            } else {
-                stream = new BufferedInputStream(new FileInputStream(overlayFile));
+            for (Iterator i=filenames.iterator(); i.hasNext(); ) {
+                String filename = (String)i.next();
+                File overlayFile = new File(getHQWorkingDir(), filename);
+                if (filename.endsWith(".gz")) {
+                    stream = new GZIPInputStream(new FileInputStream(
+                        overlayFile));
+                } else {
+                    stream = new BufferedInputStream(new FileInputStream(
+                        overlayFile));
+                }
+                IDataSet dataset = new FlatXmlDataSet(stream);
+                operation.execute(iconn, dataset);
+                stream.close();
             }
-            IDataSet dataset = new FlatXmlDataSet(stream);
-            operation.execute(iconn, dataset);
             conn.commit();
         } catch (UnitTestDBException e) {
             throw new UnitTestDBException(e);
@@ -440,6 +514,11 @@ public abstract class BaseServerTestCase extends TestCase {
             throw new UnitTestDBException(e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+            try {
+                if (stream != null) stream.close();
+            } catch (IOException e) {
+                throw new UnitTestDBException(e);
+            }
         }
     }    
         
