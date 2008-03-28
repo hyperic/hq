@@ -314,13 +314,16 @@ public class ProductPluginDeployer
                                         .replace('/', '.');
                 
                 _log.debug("Found class: "+className);
-                
-                Class clazz = deployerClassLoader.loadClass(className);
-                
+                                
                 try {
+                    Class clazz = deployerClassLoader.loadClass(className);
                     Method m = clazz.getMethod("getOne", new Class[0]);
                     _log.info("Preloading instance pool for: "+className);
                     m.invoke(clazz, new Object[0]);
+                } catch (ClassNotFoundException e) {
+                    // This is probably a Mock EJBImpl
+                    _log.warn("Cannot preload instance pool for (probably a mock EJB Impl): "+
+                               className);
                 } catch (NoSuchMethodException e) {
                     // The getOne() method probably doesn't exist
                     _log.warn("No getOne() static factory method found for: "+className);
