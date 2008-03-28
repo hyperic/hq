@@ -50,6 +50,7 @@ public class ResourceGroup extends AuthzNamedBean
     private long _mtime;
     private String _modifiedBy;
     private Resource _resource;
+    private Resource _resourcePrototype;
     private Collection _resourceSet = new HashSet();
     private Collection _roles = new HashSet();
 
@@ -219,6 +220,14 @@ public class ResourceGroup extends AuthzNamedBean
 
     protected Collection getResourceSet() {
         return _resourceSet;
+    }
+
+    protected void setResourcePrototype(Resource r) {
+        _resourcePrototype = r;
+    }
+
+    public Resource getResourcePrototype() {
+        return _resourcePrototype;
     }
 
     protected void setResource(Resource r) {

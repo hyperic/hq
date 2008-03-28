@@ -67,6 +67,10 @@
       <column name="MODIFIED_BY" length="100"/>
     </property>
 
+    <many-to-one name="resourcePrototype">
+      <column name="RESOURCE_PROTOTYPE"/>
+    </many-to-one>
+
     <many-to-one name="resource">
       <column name="RESOURCE_ID" not-null="true"/>
     </many-to-one>

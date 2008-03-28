@@ -8534,6 +8534,27 @@ has already been defined.
                           nullable="NOT NULL"/>
 
   </schemaSpec>
+
+  <schemaSpec version="3.108">
+
+    <schema-addColumn table="EAM_RESOURCE_GROUP"
+                      column="RESOURCE_PROTOTYPE"
+                      columnType="INTEGER">
+      <initializer>
+      UPDATE EAM_RESOURCE_GROUP SET RESOURCE_PROTOTYPE = (
+          SELECT ID FROM EAM_RESOURCE WHERE INSTANCE_ID=GROUP_ENT_RES_TYPE AND
+          RESOURCE_TYPE_ID = CASE GROUP_ENT_TYPE
+            WHEN 1 THEN 601
+            WHEN 2 THEN 602
+            WHEN 3 THEN 603
+          END) WHERE GROUP_ENT_RES_TYPE != -1
+      </initializer>
+      <foreignKey constraintName="fk6dbccdbc190495f3"
+                  references="EAM_RESOURCE(ID)"/>
+    </schema-addColumn>
+
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 
