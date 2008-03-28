@@ -4547,7 +4547,7 @@ has already been defined.
       <schema-insert table="EAM_RESOURCE_TYPE"
                      insertCmd="(ID, VERSION_COL, NAME, CID, RESOURCE_ID, FSYSTEM) VALUES (401, 0, 'EscalationScheme', 401, 401, %%FALSE%%)"/>
       <schema-insert table="EAM_RES_GRP_RES_MAP"
-                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CTIME) VALUES (0, 401, 0)"/>
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 401, 6)"/>
       <schema-insert table="EAM_OPERATION"
                      insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (412, 0, 'createEscalation', 0, 412)"/>
       <schema-insert table="EAM_OPERATION"
@@ -6776,7 +6776,7 @@ has already been defined.
       <schema-insert table="EAM_RESOURCE_TYPE"
                      insertCmd="(ID, VERSION_COL, NAME, CID, RESOURCE_ID, FSYSTEM) VALUES (501, 0, 'HQSystem', 501, 501, %%FALSE%%)"/>
       <schema-insert table="EAM_RES_GRP_RES_MAP"
-                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CTIME) VALUES (0, 501, 0)"/>
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 501, 7)"/>
     </schemaSpec>
 
     <schemaSpec version="3.57">
@@ -6885,13 +6885,13 @@ has already been defined.
       <schema-insert table="EAM_RESOURCE"
                      insertCmd="(ID, CID, INSTANCE_ID, RESOURCE_TYPE_ID, SUBJECT_ID, PROTO_ID, FSYSTEM) VALUES (604, 604, 604, 0, 0, 0, %%TRUE%%)"/>
       <schema-insert table="EAM_RES_GRP_RES_MAP"
-                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CTIME) VALUES (0, 601, 0)"/>
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 601, 8)"/>
       <schema-insert table="EAM_RES_GRP_RES_MAP"
-                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CTIME) VALUES (0, 602, 0)"/>
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 602, 9)"/>
       <schema-insert table="EAM_RES_GRP_RES_MAP"
-                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CTIME) VALUES (0, 603, 0)"/>
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 603, 10)"/>
       <schema-insert table="EAM_RES_GRP_RES_MAP"
-                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CTIME) VALUES (0, 604, 0)"/>
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 604, 11)"/>
       
       <schema-directSQL>
         <statement>
