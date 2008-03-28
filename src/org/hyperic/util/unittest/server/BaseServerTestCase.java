@@ -75,12 +75,10 @@ import org.jdom.input.SAXBuilder;
  * to the local path where the HQ src resides (.ORG or EE versions depending 
  * on the type of unit test). The <code>hq.unittest.working.dir</code> system 
  * property must be set to the directory where the database dump file containing 
- * the initial server state resides.</p>
+ * the initial server state resides (by default in $HQ_HOME/unittest/data).</p>
  *
  * <p>Finally (and most importantly), the system classloader must be 
  * set to the {@link IsolatingDefaultSystemClassLoader}.</p>
- *
- * the initial unit test database state resides (by default: $HQ_HOME/unittest/data).
  *
  * <pre>
  * <h3>DBOverlay Example</h3>
