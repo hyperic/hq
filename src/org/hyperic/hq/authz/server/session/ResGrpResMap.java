@@ -36,7 +36,7 @@ public class ResGrpResMap  implements java.io.Serializable {
     // Fields    
 
      private ResGrpResMapId id;
-     private long _ctime;
+     private Integer cid;
 
      // Constructors
 
@@ -48,7 +48,11 @@ public class ResGrpResMap  implements java.io.Serializable {
 	/** minimal constructor */
     public ResGrpResMap(ResGrpResMapId id) {
         this.id = id;
-        _ctime = System.currentTimeMillis();
+    }
+    /** full constructor */
+    public ResGrpResMap(ResGrpResMapId id, Integer cid) {
+        this.id = id;
+        this.cid = cid;
     }
     
    
@@ -60,14 +64,15 @@ public class ResGrpResMap  implements java.io.Serializable {
     protected void setId(ResGrpResMapId id) {
         this.id = id;
     }
-
-    public long getCtime() {
-        return _ctime;
+    public Integer getCid() {
+        return this.cid;
+    }
+    
+    protected void setCid(Integer cid) {
+        this.cid = cid;
     }
 
-    protected void setCtime(Long val) {
-        _ctime = val != null ? val.longValue() : 0;
-    }
+
 
 
 }
