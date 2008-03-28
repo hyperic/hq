@@ -11,19 +11,6 @@ then
     exit 1
 fi
 
-LIB="$basedir/../thirdparty/lib"
-DBUNIT_PKGS="${LIB}/dbunit-2.2.jar"
-PG_PKGS=${LIB}/oracle_jdbc/oracle12.jar 
-ORA_PKGS=${LIB}/postgresql/postgresql-8.2-505.jdbc3.jar 
-MYSQL_PKGS=${LIB}/mysql_jdbc/mysql-connector-java-5.0.5-bin.jar 
-DB_PKGS="${PG_PKGS}:${ORA_PKGS}:${MYSQL_PKGS}"
-DRIVER="org.postgresql.Driver"
-#DRIVER="com.mysql.jdbc.Driver"
-#DRIVER="oracle.jdbc.OracleDriver"
-PKGS="${DB_PKGS}:${DBUNIT_PKGS}:$basedir/../build/hq.ear/hq.jar"
-ARGS="-Djdbc.drivers=${DRIVER} -cp ${PKGS}"
-JAVA="${JAVA_HOME}/bin/java"
-
 lflag=1
 url="jdbc:postgresql://localhost:5432/hqdb?protocolVersion=2"
 uflag=
@@ -78,5 +65,18 @@ else
 fi
 [ -z "$dest" ] && dest="$$-$tables"
 
-set -x
+[ `echo "$url" | grep -i postgresql` ] && DRIVER="org.postgresql.Driver"
+[ `echo "$url" | grep -i mysql` ]      && DRIVER="com.mysql.jdbc.Driver"
+[ `echo "$url" | grep -i oracle` ]     && DRIVER="oracle.jdbc.OracleDriver"
+
+LIB="$basedir/../thirdparty/lib"
+DBUNIT_PKGS="${LIB}/dbunit-2.2.jar"
+PG_PKGS=${LIB}/oracle_jdbc/oracle12.jar 
+ORA_PKGS=${LIB}/postgresql/postgresql-8.2-505.jdbc3.jar 
+MYSQL_PKGS=${LIB}/mysql_jdbc/mysql-connector-java-5.0.5-bin.jar 
+DB_PKGS="${PG_PKGS}:${ORA_PKGS}:${MYSQL_PKGS}"
+PKGS="${DB_PKGS}:${DBUNIT_PKGS}:$basedir/../build/hq.ear/hq.jar"
+ARGS="-Djdbc.drivers=${DRIVER} -cp ${PKGS}"
+JAVA="${JAVA_HOME}/bin/java"
+
 ${JAVA} ${ARGS} org.hyperic.util.unittest.util.TableExport --url $url --passwd $passwd --user $user --tables $tables --file $dest
