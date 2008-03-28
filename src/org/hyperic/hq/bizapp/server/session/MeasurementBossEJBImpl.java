@@ -1199,7 +1199,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             Map midMap = getMetricManager()
                 .findDesignatedMeasurements(subject, serviceIds,
                                             MeasurementConstants.CAT_AVAILABILITY);
-            measurements = new ArrayList(midMap.entrySet());
+            measurements = new ArrayList(midMap.values());
         }
         else {
             measurements = getMeasurementsForResource(subject, aid, tmpl);
