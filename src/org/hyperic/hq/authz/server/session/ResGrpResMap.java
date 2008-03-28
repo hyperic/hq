@@ -42,7 +42,6 @@ public class ResGrpResMap  implements java.io.Serializable {
 
     /** default constructor */
     public ResGrpResMap() {
-        _ctime = System.currentTimeMillis();
     }
 
 	/** minimal constructor */
