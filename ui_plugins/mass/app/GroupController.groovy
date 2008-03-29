@@ -179,7 +179,6 @@ class GroupController extends BaseController {
         groupVal.clusterId       = -1
         groupVal.groupEntType    = -1
         groupVal.groupEntResType = -1
-        groupVal.clusterId       = -1
     }
     
     private AppdefGroupValue createAppGroup(def groupDef) {
