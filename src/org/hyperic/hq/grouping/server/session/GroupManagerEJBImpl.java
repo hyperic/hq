@@ -103,18 +103,22 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
                                                        "exists.");
             }
 
+            ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
+
+            Resource resourcePrototype =
+                rgmLoc.getResourceGroupPrototype(group.getGroupEntType(),
+                                                 group.getGroupEntResType());
+
             /* Create the resource group. */
             ResourceGroupCreateInfo createInfo = 
                 new ResourceGroupCreateInfo(group.getName(), 
                                             group.getDescription(),
                                             group.getGroupType(), 
-                                            group.getGroupEntType(),
-                                            group.getGroupEntResType(),
+                                            resourcePrototype,
                                             group.getLocation(),
                                             group.getClusterId(), 
                                             false /* system = false */);
             
-            ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
             ResourceGroup rg =
                 rgmLoc.createResourceGroup(subj, createInfo,
                                            Collections.EMPTY_LIST,  // Roles

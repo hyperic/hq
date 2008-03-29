@@ -93,8 +93,7 @@ public class RoleDAO extends HibernateDAO {
             new ResourceGroupCreateInfo(groupName,
                                         "",    // Description
                                         0,     // Group type
-                                        0,     // Group entity type
-                                        0,     // Group entity resource type
+                                        null,  // The Resource prototype
                                         null,  // Location
                                         0,     // clusterId
                                         true); // system

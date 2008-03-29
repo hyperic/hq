@@ -43,14 +43,6 @@
       <column name="GROUPTYPE" not-null="false" default="11"/>
     </property>
 
-    <property name="groupEntType" type="integer">
-      <column name="GROUP_ENT_TYPE" not-null="false" default="-1"/>
-    </property>
-
-    <property name="groupEntResType" type="integer">
-      <column name="GROUP_ENT_RES_TYPE" not-null="false" default="-1"/>
-    </property>
-
     <property name="clusterId" type="integer">
       <column name="CLUSTER_ID" not-null="false" default="-1"/>
     </property>

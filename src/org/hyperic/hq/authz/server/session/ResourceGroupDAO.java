@@ -59,29 +59,6 @@ public class ResourceGroupDAO extends HibernateDAO
         Resource r = rDao.create(resType, proto, resGrp.getName(), creator,  
                                  resGrp.getId(), cInfo.getSystem());
 
-        // XXX: This garbage is temporary.
-        if (cInfo.getGroupEntResType() != -1) {
-            Integer type;
-            switch (cInfo.getGroupEntType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    type = AuthzConstants.authzPlatformProto;
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    type = AuthzConstants.authzServerProto;
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    type = AuthzConstants.authzServiceProto;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unhandled group type" +
-                                                       cInfo.getGroupEntType());
-            }
-
-            Resource resourceType =
-                rDao.findByInstanceId(type, new Integer(cInfo.getGroupEntResType()));
-            resGrp.setResourcePrototype(resourceType);
-        }
-
         resGrp.setResource(r);
         save(resGrp);
         

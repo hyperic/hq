@@ -8555,6 +8555,17 @@ has already been defined.
 
   </schemaSpec>
 
+  <schemaSpec version="3.109">
+    <schema-directSQL>
+        <statement desc="Drop group_ent_type from EAM_RESOURCE_GROUP">
+            ALTER TABLE EAM_RESOURCE_GROUP DROP COLUMN group_ent_type
+        </statement>        
+        <statement desc="Drop group_ent_res_type from EAM_RESOURCE_GROUP">
+            ALTER TABLE EAM_RESOURCE_GROUP DROP COLUMN group_ent_res_type
+        </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 

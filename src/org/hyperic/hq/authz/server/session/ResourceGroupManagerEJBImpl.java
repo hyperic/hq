@@ -39,6 +39,7 @@ import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -101,6 +102,38 @@ public class ResourceGroupManagerEJBImpl
         Collection pojos = getResourceGroupDAO().findContaining(resource);
         return (ResourceGroupValue[])
             fromPojos(pojos, ResourceGroupValue.class);
+    }
+
+    /**
+     * For compatible groups, get the Resource prototype for the given
+     * appdef entity type and id.
+     * @param atype The appdef type, one of AppdefEntityConstants.APPDEF_TYPE*
+     * @param aid The appdef instance id.
+     * @return The Resource prototype for this type and id or null if one
+     * does not exist.
+     * @ejb:interface-method
+     * @TODO As we migrate to a Resource based inventory this method should go.
+     */
+    public Resource getResourceGroupPrototype(int atype, int aid) {
+
+        ResourceDAO dao = getResourceDAO();
+
+        Integer type;
+        switch (atype) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                type = AuthzConstants.authzPlatformProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                type = AuthzConstants.authzServerProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                type = AuthzConstants.authzServiceProto;
+                break;
+            default:
+                return null;
+        }
+
+        return dao.findByInstanceId(type, new Integer(aid));
     }
 
     /**
@@ -736,11 +769,12 @@ public class ResourceGroupManagerEJBImpl
                  g.getId(), AuthzConstants.perm_modifyResourceGroup);
         
         g.setGroupType(new Integer(groupType));
-        g.setGroupEntType(new Integer(groupEntType));
-        g.setGroupEntResType(new Integer(groupEntResType));
+
+        Resource r = getResourceGroupPrototype(groupEntType,
+                                               groupEntResType);
+        g.setResourcePrototype(r);
     }
-    
-    
+
     /**
      * Get the maximum collection interval for a scheduled metric within a
      * compatible group of resources.

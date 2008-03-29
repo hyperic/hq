@@ -43,8 +43,6 @@ public class ResourceGroup extends AuthzNamedBean
     private String _location;
     private boolean _system = false;
     private Integer _groupType;
-    private Integer _groupEntType;
-    private Integer _groupEntResType;
     private Integer _clusterId;
     private long _ctime;
     private long _mtime;
@@ -61,22 +59,20 @@ public class ResourceGroup extends AuthzNamedBean
         private String  _description;
         private String  _location;
         private int     _groupType;
-        private int     _groupEntType;
-        private int     _groupEntResType;
+        private Resource _resourcePrototype;
         private int     _clusterId;
         private boolean _system;
         
         public ResourceGroupCreateInfo(String name, String description,
-                                       int groupType, int groupEntType,
-                                       int groupEntResType,
+                                       int groupType,
+                                       Resource resourcePrototype,
                                        String location,
                                        int clusterId, boolean system)  
                                        
         {
             _name            = name;
             _description     = description;
-            _groupEntResType = groupEntResType;
-            _groupEntType    = groupEntType;
+            _resourcePrototype = resourcePrototype;
             _groupType       = groupType;
             _location        = location;
             _clusterId       = clusterId;
@@ -87,18 +83,13 @@ public class ResourceGroup extends AuthzNamedBean
         public String  getDescription() { return _description; }
         public String  getLocation() { return _location; }
         public int getGroupType() { return _groupType; }
-        public int getGroupEntType() { return _groupEntType; }
-        public int getGroupEntResType() { return _groupEntResType; }
+        public Resource getResourcePrototype() { return _resourcePrototype; }
         public int getClusterId() { return _clusterId; }
         public boolean getSystem() { return _system; }
     }
     
     protected ResourceGroup() {
         super();
-    }
-
-    ResourceGroup(ResourceGroupValue val) {
-        setResourceGroupValue(val);
     }
 
     ResourceGroup(ResourceGroupCreateInfo cInfo, AuthzSubject creator) {
@@ -108,8 +99,7 @@ public class ResourceGroup extends AuthzNamedBean
         _location        = cInfo.getLocation();
         _system          = cInfo.getSystem();
         _groupType       = new Integer(cInfo.getGroupType());
-        _groupEntType    = new Integer(cInfo.getGroupEntType());
-        _groupEntResType = new Integer(cInfo.getGroupEntResType());
+        _resourcePrototype = cInfo.getResourcePrototype();
         _ctime = _mtime  = System.currentTimeMillis();
         _modifiedBy      = creator.getName();
     }
@@ -170,20 +160,36 @@ public class ResourceGroup extends AuthzNamedBean
         _groupType = val;
     }
 
+    /**
+     * @deprecated Use getResourcePrototype() instead.
+     * XXX: ADHOC groups lose the Group or Application types with the change
+     * to use a Resource prototype for compatible groups.
+     */
     public Integer getGroupEntType() {
-        return _groupEntType;
+        if (_resourcePrototype == null) {
+            return new Integer(-1);
+        }
+
+        Integer type = _resourcePrototype.getResourceType().getId();
+        if (type.equals(AuthzConstants.authzPlatformProto)) {
+            return new Integer(AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
+        } else if (type.equals(AuthzConstants.authzServerProto)) {
+            return new Integer(AppdefEntityConstants.APPDEF_TYPE_SERVER);
+        } else if (type.equals(AuthzConstants.authzServiceProto)) {
+            return new Integer(AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        } else {
+            return new Integer(-1); // Backwards compat.
+        }
     }
 
-    protected void setGroupEntType(Integer val) {
-        _groupEntType = val;
-    }
-
+    /**
+     * @deprecated Use getResourcePrototype() instead.
+     */
     public Integer getGroupEntResType() {
-        return _groupEntResType;
-    }
-
-    protected void setGroupEntResType(Integer val) {
-        _groupEntResType = val;
+        if (_resourcePrototype  == null) {
+            return new Integer(-1);
+        }
+        return _resourcePrototype.getInstanceId();
     }
 
     public Integer getClusterId() {
@@ -322,12 +328,15 @@ public class ResourceGroup extends AuthzNamedBean
         return _resourceGroupValue;
     }
 
+    /**
+     * @TODO: This method needs to be removed in favor of more discrete
+     * operations.  Not all the properties here can be changed once a group is
+     * created.
+     */
     protected void setResourceGroupValue(ResourceGroupValue val) {
         setClusterId(new Integer(val.getClusterId()));
         setCtime(val.getCTime());
         setDescription(val.getDescription());
-        setGroupEntResType(new Integer(val.getGroupEntResType()));
-        setGroupEntType(new Integer(val.getGroupEntType()));
         setGroupType(new Integer(val.getGroupType()));
         setId(val.getId());
         setLocation(val.getLocation());
