@@ -94,58 +94,46 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
     public GroupValue createGroup(AuthzSubject subj, GroupValue group)
         throws GroupCreationException, GroupDuplicateNameException 
     {
-        try {
-            // To avoid groups with duplicate names, we're now performing a
-            // a case-insensitive name based find before creation.
-            if (groupNameExists(subj, group)) {
-                throw new GroupDuplicateNameException ("A Group "+
-                                                       "with same name "+
-                                                       "exists.");
-            }
-
-            ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
-
-            Resource resourcePrototype =
-                rgmLoc.getResourceGroupPrototype(group.getGroupEntType(),
-                                                 group.getGroupEntResType());
-
-            /* Create the resource group. */
-            ResourceGroupCreateInfo createInfo = 
-                new ResourceGroupCreateInfo(group.getName(), 
-                                            group.getDescription(),
-                                            group.getGroupType(), 
-                                            resourcePrototype,
-                                            group.getLocation(),
-                                            group.getClusterId(), 
-                                            false /* system = false */);
-            
-            ResourceGroup rg =
-                rgmLoc.createResourceGroup(subj, createInfo,
-                                           Collections.EMPTY_LIST,  // Roles
-                                           Collections.EMPTY_LIST); // Resources
-
-            /* Create our return group vo */
-            group.setId            ( rg.getId() );
-            group.setName          ( rg.getName() );
-            group.setDescription   ( rg.getDescription() );
-            group.setLocation      ( rg.getLocation() );
-            group.setGroupType     ( createInfo.getGroupType() );
-            group.setSubject       ( subj.getAuthzSubjectValue() );
-            group.setCTime         ( new Long(rg.getCtime()) );
-            group.setMTime         ( new Long(rg.getMtime()) );
-            group.setModifiedBy    ( rg.getModifiedBy() );
-            group.setOwner         ( subj.getName() );
-
-           // Here's where we add our own group resource to our group.
-            rgmLoc.addResource(subj, rg,
-                               AppdefEntityID.newGroupID(rg.getId().intValue()));
-        } catch (PermissionException pe) {
-            // This should NOT occur. Anyone can create groups.
-            log.error("Caught PermissionException during "+
-                      "self-assignment of group resource to group.", pe);
-            throw new GroupCreationException ("Caught PermissionException "+
-                "during self-assignment of resource to group");
+        // To avoid groups with duplicate names, we're now performing a
+        // a case-insensitive name based find before creation.
+        if (groupNameExists(subj, group)) {
+            throw new GroupDuplicateNameException ("A Group "+
+                                                   "with same name "+
+                                                   "exists.");
         }
+
+        ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
+
+        Resource resourcePrototype =
+            rgmLoc.getResourceGroupPrototype(group.getGroupEntType(),
+                                             group.getGroupEntResType());
+
+        /* Create the resource group. */
+        ResourceGroupCreateInfo createInfo = 
+            new ResourceGroupCreateInfo(group.getName(), 
+                                        group.getDescription(),
+                                        group.getGroupType(), 
+                                        resourcePrototype,
+                                        group.getLocation(),
+                                        group.getClusterId(), 
+                                        false /* system = false */);
+        
+        ResourceGroup rg =
+            rgmLoc.createResourceGroup(subj, createInfo,
+                                       Collections.EMPTY_LIST,  // Roles
+                                       Collections.EMPTY_LIST); // Resources
+
+        /* Create our return group vo */
+        group.setId            ( rg.getId() );
+        group.setName          ( rg.getName() );
+        group.setDescription   ( rg.getDescription() );
+        group.setLocation      ( rg.getLocation() );
+        group.setGroupType     ( createInfo.getGroupType() );
+        group.setSubject       ( subj.getAuthzSubjectValue() );
+        group.setCTime         ( new Long(rg.getCtime()) );
+        group.setMTime         ( new Long(rg.getMtime()) );
+        group.setModifiedBy    ( rg.getModifiedBy() );
+        group.setOwner         ( subj.getName() );
         return group;
     }
 
