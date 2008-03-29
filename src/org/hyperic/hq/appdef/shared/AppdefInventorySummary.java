@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,24 +25,12 @@
 
 package org.hyperic.hq.appdef.shared;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.AppdefStatManagerUtil;
-import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
-
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
-import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
-import org.hyperic.hq.appdef.shared.ServerManagerUtil;
-import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
-import org.hyperic.hq.appdef.shared.AppdefStatManagerUtil;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.appdef.server.session.AppdefStatManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 
 
@@ -55,7 +43,7 @@ public class AppdefInventorySummary implements java.io.Serializable {
 
     public static int COUNT_UNKNOWN = 0;
 
-    private AuthzSubjectValue user = null;
+    private AuthzSubject _user     = null;
     private int appCount           = COUNT_UNKNOWN;
     private int platformCount      = COUNT_UNKNOWN;
     private int serverCount        = COUNT_UNKNOWN;
@@ -73,12 +61,12 @@ public class AppdefInventorySummary implements java.io.Serializable {
     private List serverTypes       = null;
     private List serviceTypes      = null;
     
-    public AppdefInventorySummary(AuthzSubjectValue user) {
+    public AppdefInventorySummary(AuthzSubject user) {
         this(user, true);
     }
 
-    public AppdefInventorySummary(AuthzSubjectValue user, boolean countTypes) {
-        this.user = user;
+    public AppdefInventorySummary(AuthzSubject user, boolean countTypes) {
+        _user = user;
         init(countTypes);
     }
 
@@ -204,57 +192,53 @@ public class AppdefInventorySummary implements java.io.Serializable {
     private void getPlatformSummary(boolean countTypes) {
         if (countTypes) {
             platformTypeMap = getAppdefStatManager()
-                .getPlatformCountsByTypeMap(user);
+                .getPlatformCountsByTypeMap(_user);
             if (platformTypeMap != null) {
                 platformCount = countMapTotals(platformTypeMap);
             }
         } else {
-            platformCount = getAppdefStatManager().getPlatformsCount(user);
+            platformCount = getAppdefStatManager().getPlatformsCount(_user);
         }
     }
 
     private void getServerSummary(boolean countTypes) {
         if (countTypes) {
             serverTypeMap = getAppdefStatManager()
-                .getServerCountsByTypeMap(this.user);
+                .getServerCountsByTypeMap(this._user);
             if (serverTypeMap != null) {
                 serverCount = countMapTotals(serverTypeMap);
             }
         } else {
-            serverCount = getAppdefStatManager().getServersCount(user);
+            serverCount = getAppdefStatManager().getServersCount(_user);
         }
     }
 
     private void getServiceSummary(boolean countTypes) {
         if (countTypes) {
             serviceTypeMap = getAppdefStatManager()
-                .getServiceCountsByTypeMap(this.user);
+                .getServiceCountsByTypeMap(this._user);
             if (serviceTypeMap != null) {
                 serviceCount = countMapTotals(serviceTypeMap);
             }
         } else {
-            serviceCount = getAppdefStatManager().getServicesCount(user);
+            serviceCount = getAppdefStatManager().getServicesCount(_user);
         }
     }
 
     private void getAppSummary(boolean countTypes) {
         if (countTypes) {
             appTypeMap = getAppdefStatManager()
-                .getApplicationCountsByTypeMap(this.user);
+                .getApplicationCountsByTypeMap(this._user);
             if (appTypeMap != null) {
                 appCount = countMapTotals(appTypeMap);
             }
         } else {
-            appCount = getAppdefStatManager().getApplicationsCount(user);
+            appCount = getAppdefStatManager().getApplicationsCount(_user);
         }
     }
 
     private AppdefStatManagerLocal getAppdefStatManager() {
-        try {
-            return AppdefStatManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+        return AppdefStatManagerEJBImpl.getOne();
     }
 
     /* With groups, we have multiple types and each type may or may not
@@ -263,7 +247,7 @@ public class AppdefInventorySummary implements java.io.Serializable {
        accessors to the group summary count information. This also has the
        added benefit of keeping our types ordered where maps lose this attr. */
     private void getGroupSummary() {
-        Map grpTypeMap = getAppdefStatManager().getGroupCountsMap(this.user);
+        Map grpTypeMap = getAppdefStatManager().getGroupCountsMap(this._user);
 
         groupCntAdhocApp = ((Integer)grpTypeMap.get(new Integer(
             AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP))).intValue();

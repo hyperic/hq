@@ -374,10 +374,6 @@ public abstract class AuthzSession {
         return ic;
     }
 
-    protected Connection getDBConn() throws SQLException {
-        return DAOFactory.getDAOFactory().getCurrentSession().connection();
-    }
-    
     public void setSessionContext(SessionContext ctx) {
         this.ctx = ctx;
     }

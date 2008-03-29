@@ -3020,7 +3020,7 @@ public class AppdefBossEJBImpl
                                                       boolean countTypes)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        AuthzSubjectValue who = manager.getSubject(sessionId);
+        AuthzSubject who = manager.getSubjectPojo(sessionId);
         return new AppdefInventorySummary(who, countTypes);
     }
 

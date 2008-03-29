@@ -96,7 +96,8 @@ public class PermissionManagerImpl
 
     private Connection getConnection() throws SQLException {
         try {
-            return DBUtil.getConnByContext(getInitialContext(), HQConstants.DATASOURCE);            
+            return DBUtil.getConnByContext(getInitialContext(),
+                                           HQConstants.DATASOURCE);            
         } catch (NamingException e) {
             throw new SQLException("Failed to retrieve datasource: "+e);
         }

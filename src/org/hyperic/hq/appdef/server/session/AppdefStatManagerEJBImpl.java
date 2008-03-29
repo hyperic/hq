@@ -57,7 +57,6 @@ import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefStatManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -95,7 +94,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public Map getPlatformCountsByTypeMap (AuthzSubjectValue subject)
+    public Map getPlatformCountsByTypeMap (AuthzSubject subject)
     {
         Map               platMap = new HashMap();
         PreparedStatement stmt = null;
@@ -144,7 +143,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public int getPlatformsCount (AuthzSubjectValue subject) {
+    public int getPlatformsCount (AuthzSubject subject) {
         PreparedStatement stmt = null;
         ResultSet         rs = null;
 
@@ -184,7 +183,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public Map getServerCountsByTypeMap (AuthzSubjectValue subject)
+    public Map getServerCountsByTypeMap (AuthzSubject subject)
     {
         Map               servMap = new HashMap();
         PreparedStatement stmt = null;
@@ -230,7 +229,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public int getServersCount (AuthzSubjectValue subject) {
+    public int getServersCount (AuthzSubject subject) {
         PreparedStatement stmt = null;
         ResultSet         rs = null;
         try {
@@ -265,7 +264,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public Map getServiceCountsByTypeMap (AuthzSubjectValue subject)
+    public Map getServiceCountsByTypeMap (AuthzSubject subject)
     {
         Map               svcMap = new HashMap();
         PreparedStatement stmt = null;
@@ -310,7 +309,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public int getServicesCount (AuthzSubjectValue subject) {
+    public int getServicesCount (AuthzSubject subject) {
         PreparedStatement stmt = null;
         ResultSet         rs = null;
         try {
@@ -345,7 +344,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public Map getApplicationCountsByTypeMap (AuthzSubjectValue subject)
+    public Map getApplicationCountsByTypeMap (AuthzSubject subject)
     {
         Map               appMap = new HashMap();
         PreparedStatement stmt = null;
@@ -390,7 +389,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public int getApplicationsCount(AuthzSubjectValue subject) {
+    public int getApplicationsCount(AuthzSubject subject) {
         PreparedStatement stmt = null;
         ResultSet         rs = null;
         
@@ -427,7 +426,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public Map getGroupCountsMap (AuthzSubjectValue subject)
+    public Map getGroupCountsMap (AuthzSubject subject)
     {
         Map               grpMap = new HashMap();
         PreparedStatement stmt = null;
@@ -1609,8 +1608,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             AppdefGroupValue groupVo = 
                 getAppdefGroupManagerLocal().findGroup(subject,groupId);
 
-            return getNavMapDataForGroup(subject.getAuthzSubjectValue(),
-                                         groupVo);
+            return getNavMapDataForGroup(subject, groupVo);
         } catch (SQLException e) {
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
@@ -1618,7 +1616,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     }
 
     private ResourceTreeNode[] getNavMapDataForGroup (
-        AuthzSubjectValue subject, AppdefGroupValue groupVo)
+        AuthzSubject subject, AppdefGroupValue groupVo)
         throws PermissionException, SQLException {
         ResourceTreeNode[] retVal;
         PreparedStatement    stmt;
