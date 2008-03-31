@@ -2934,9 +2934,7 @@ public class AppdefBossEJBImpl
                AgentRemoteException, AgentConnectionException,
                FileNotFoundException
     {
-        AuthzSubjectValue who;
-
-        who = manager.getSubject(sessionId);
+        AuthzSubject who = manager.getSubjectPojo(sessionId);
         return getAgentManager().agentSendFileData(who, id, files, modes);
     }
 

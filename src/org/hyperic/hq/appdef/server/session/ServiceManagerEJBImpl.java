@@ -1571,7 +1571,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * Create a service cluster from a set of service Ids
      * @ejb:interface-method
      */
-    public Integer createCluster(AuthzSubjectValue subj,
+    public Integer createCluster(AuthzSubject subj,
                                  ServiceClusterValue cluster,
                                  List serviceIdList)
         throws AppSvcClustDuplicateAssignException, 
@@ -1587,7 +1587,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      *                        updated cluster
      * @ejb:interface-method
      */
-    public void updateCluster(AuthzSubjectValue subj,
+    public void updateCluster(AuthzSubject subj,
                               ServiceClusterValue cluster,
                               List serviceIdList)
         throws AppSvcClustDuplicateAssignException, FinderException, 
@@ -1598,7 +1598,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * @ejb:interface-method
      */
-    public void removeCluster(AuthzSubjectValue subj, Integer clusterId)
+    public void removeCluster(AuthzSubject subj, Integer clusterId)
         throws RemoveException, FinderException, PermissionException,
                VetoException
     {

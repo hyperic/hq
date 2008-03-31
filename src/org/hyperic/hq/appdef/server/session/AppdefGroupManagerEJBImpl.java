@@ -66,7 +66,6 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
@@ -452,7 +451,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     // However, since their entities reside in disparate subsystems, there
     // are no physical constraints between them. This method realizes a
     // logical constraint.
-    private void manageServiceCluster(AuthzSubjectValue subject,
+    private void manageServiceCluster(AuthzSubject subject,
                                       AppdefGroupValue gv) 
         throws CreateException, FinderException, RemoveException,
                PermissionException, AppSvcClustDuplicateAssignException,
@@ -491,7 +490,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    private void createServiceCluster (AuthzSubjectValue subject,
+    private void createServiceCluster (AuthzSubject subject,
         AppdefGroupValue gv, ServiceClusterValue clusterVo, List svcList)
         throws FinderException, AppSvcClustDuplicateAssignException,
                PermissionException, AppSvcClustIncompatSvcException {
@@ -504,7 +503,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    private void updateServiceCluster (AuthzSubjectValue subject,
+    private void updateServiceCluster (AuthzSubject subject,
         AppdefGroupValue gv, ServiceClusterValue clusterVo, List svcList)
         throws FinderException, AppSvcClustDuplicateAssignException,
                PermissionException, AppSvcClustIncompatSvcException {
@@ -512,7 +511,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         getServiceManager().updateCluster(subject, clusterVo, svcList);
     }
 
-    private void removeServiceCluster (AuthzSubjectValue subject, int clusterId)
+    private void removeServiceCluster (AuthzSubject subject, int clusterId)
         throws RemoveException, FinderException, PermissionException,
                VetoException
     {
@@ -543,7 +542,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
 
             if (gv.getGroupType() == 
                     AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
-                manageServiceCluster(subject.getAuthzSubjectValue(), gv);
+                manageServiceCluster(subject, gv);
             }
             GroupManagerLocal manager = getGroupManager();
             manager.saveGroup(subject, gv);
@@ -834,19 +833,17 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         try {
             GroupManagerLocal manager = getGroupManager();
             AppdefGroupValue gv = findGroup(subject,groupId);
-            AuthzSubjectValue subjVal = subject.getAuthzSubjectValue();
 
             if (gv.getGroupType() == 
                 AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC && 
                 gv.getClusterId() != CLUSTER_UNDEFINED) {
-                removeServiceCluster (subjVal, gv.getClusterId());
+                removeServiceCluster (subject, gv.getClusterId());
             }
-            manager.deleteGroup(subjVal, groupId );
-
+            manager.deleteGroup(subject, groupId );
                     
             // Send resource delete event
             ResourceDeletedZevent zevent =
-                new ResourceDeletedZevent(subjVal,
+                new ResourceDeletedZevent(subject.getAuthzSubjectValue(),
                     new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
                                        groupId));
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);

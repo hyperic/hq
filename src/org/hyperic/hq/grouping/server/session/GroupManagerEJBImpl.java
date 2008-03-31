@@ -430,7 +430,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void deleteGroup (AuthzSubjectValue subject, Integer groupId)
+    public void deleteGroup (AuthzSubject subject, Integer groupId)
         throws GroupNotFoundException, PermissionException, VetoException 
     {
         ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();

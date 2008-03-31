@@ -58,7 +58,6 @@ import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -464,7 +463,7 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
-    public FileDataResult[] agentSendFileData(AuthzSubjectValue subject,
+    public FileDataResult[] agentSendFileData(AuthzSubject subject,
                                               AppdefEntityID id,
                                               String[][] files,
                                               int[] modes)

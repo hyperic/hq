@@ -239,7 +239,7 @@ public class ResourceGroupManagerEJBImpl
      * @param group The group to delete.
      * @ejb:interface-method
      */
-    public void removeResourceGroup(AuthzSubjectValue whoami,
+    public void removeResourceGroup(AuthzSubject whoami,
                                     ResourceGroupValue group)
         throws PermissionException, VetoException
     {
