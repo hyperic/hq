@@ -471,6 +471,13 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
      * @ejb:interface-method
      */
     public void preload(){
+        // We don't need to preload the 2nd level cache for unit tests.
+        // Besides, hq.ear hot deployment after an undeploy is not working 
+        // correctly within the unit test framework when the caches are preloaded.
+        if (Boolean.getBoolean("hq.unittest.run")) {
+            return;
+        }
+        
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream is = 
             loader.getResourceAsStream("META-INF/preload_caches.txt"); 
