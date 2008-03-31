@@ -567,8 +567,7 @@ public class ResourceGroupManagerEJBImpl
      * @ejb:interface-method
      */
     public Collection getCompatibleResourceGroups(AuthzSubject subject,
-                                                  Integer groupEntType,
-                                                  Integer groupEntResType)
+                                                  Resource resProto)
         throws FinderException, PermissionException
     {
         // first get the list of groups subject can view
@@ -579,8 +578,7 @@ public class ResourceGroupManagerEJBImpl
                                            AuthzConstants.groupResourceTypeName,
                                            PageControl.PAGE_ALL);
 
-        Collection groups = getResourceGroupDAO().findCompatible(groupEntType,
-                                                                 groupEntResType);
+        Collection groups = getResourceGroupDAO().findCompatible(resProto);
         for (Iterator i = groups.iterator(); i.hasNext(); ) {
             ResourceGroup g = (ResourceGroup)i.next();
             if (!groupIds.contains(g.getId())) {

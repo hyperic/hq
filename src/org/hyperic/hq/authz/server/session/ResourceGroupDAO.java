@@ -192,18 +192,16 @@ public class ResourceGroupDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findCompatible(Integer groupEntType,
-                                     Integer groupEntResType) {
+    public Collection findCompatible(Resource proto) {
         String sql =
             "from ResourceGroup g " +
-            "where g.groupEntType = ? and g.groupEntResType = ? and " +
+            "where g.resourcePrototype = ? and " +
             "(g.groupType = ? or g.groupType = ?)";
 
         return getSession().createQuery(sql)
-            .setInteger(0, groupEntType.intValue())
-            .setInteger(1, groupEntResType.intValue())
-            .setInteger(2, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS)
-            .setInteger(3, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC)
+            .setParameter(0, proto)
+            .setInteger(1, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS)
+            .setInteger(2, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC)
             .list();
     }
 
