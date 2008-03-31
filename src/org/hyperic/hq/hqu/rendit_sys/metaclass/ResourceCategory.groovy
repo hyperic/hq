@@ -219,8 +219,7 @@ class ResourceCategory {
             }
                                                             
             res.addAll(servers*.resource)
-            res.addAll(svcMan.getPlatformServices(user.valueObject, 
-                                                  r.instanceId)*.resource)
+            res.addAll(svcMan.getPlatformServices(user, r.instanceId)*.resource)
         } else if (isServer(r)) {
             def svr = toServer(r)
             def services = svr.services.grep { 

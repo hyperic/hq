@@ -313,7 +313,7 @@ class ResourceConfig {
     public static Agent findSuitableAgentFor(String s) {
         def overlord = authzMan.overlordPojo
         try {
-            return platMan.findPlatformByFqdn(overlord.valueObject, s)?.agent
+            return platMan.findPlatformByFqdn(overlord, s)?.agent
         } catch(PlatformNotFoundException e) {
             return null
         }
