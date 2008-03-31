@@ -48,16 +48,16 @@ public class HAService
      */
     public void startSingleton() {
         MBeanServer server = MBeanUtil.getMBeanServer();
-        try {
-            // Re-initialize the Registered Trigger cache in case this is
-            // a failover
-            RegisteredTriggers.reinitialize();
-            startDataPurgeService(server);
-            startAvailCheckService(server);
-            startAgentAIScanService(server);
-        } catch (Exception e) {
-            _log.error("Error starting services", e);
-        }
+        
+        // Re-initialize the Registered Trigger cache in case this is
+        // a failover
+        RegisteredTriggers.reinitialize();
+
+        _log.info("Starting HA Services");
+
+        startDataPurgeService(server);
+        startAvailCheckService(server);
+        startAgentAIScanService(server);
     }
 
     /**
@@ -67,30 +67,36 @@ public class HAService
         // XXX: shut down services
     }
 
-    private void startDataPurgeService(MBeanServer server)
-        throws Exception
-    {
-        invoke(server, "hyperic.jmx:type=Service,name=DataPurge",
-               "startPurgeService");
+    private void startDataPurgeService(MBeanServer server) {
+        try {
+            invoke(server, "hyperic.jmx:type=Service,name=DataPurge",
+                    "startPurgeService");
+        } catch (Exception e) {
+            _log.info("Unable to start service: " + e);
+        }
     }
 
-    private void startAvailCheckService(MBeanServer server)
-        throws Exception
-    {
-        invoke(server, "hyperic.jmx:service=Scheduler,name=AvailabilityCheck",
-               "startSchedule");
+    private void startAvailCheckService(MBeanServer server) {
+        try {
+            invoke(server, "hyperic.jmx:service=Scheduler,name=AvailabilityCheck",
+                    "startSchedule");
+
+        } catch (Exception e) {
+            _log.info("Unable to start service: " + e);
+        }
     }
 
-    private void startAgentAIScanService(MBeanServer server)
-        throws Exception
-    {
-        invoke(server, "hyperic.jmx:service=Scheduler,name=AgentAIScan",
-               "startSchedule");
+    private void startAgentAIScanService(MBeanServer server) {
+        try {
+            invoke(server, "hyperic.jmx:service=Scheduler,name=AgentAIScan",
+                    "startSchedule");
+        } catch (Exception e) {
+            _log.info("Unable to start service: " + e);
+        }
     }
 
     private void invoke(MBeanServer server, String mbean, String method)
-        throws Exception
-    {
+            throws Exception {
         ObjectName o = new ObjectName(mbean);
         _log.info("Invoking " + o.getCanonicalName() + "." + method);
         server.invoke(o, method, new Object[] {}, new String[] {});
