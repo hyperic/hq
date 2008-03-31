@@ -42,14 +42,27 @@ public class HAStartupListener
 
     public void hqStarted() {
         MBeanServer server = MBeanUtil.getMBeanServer();
+        
+        _log.info("Starting services");
+        
         try {
-            _log.info("Starting services");
             startConfigService(server);
+        } catch (Exception e) {
+            _log.info("Unable to start service: "+e);
+        }
+        
+        try {
             startScheduler(server);
+        } catch (Exception e) {
+            _log.info("Unable to start service: "+e);
+        }
+
+        try {
             startHAService(server);
         } catch (Exception e) {
-            _log.error("Unable to start services", e);
+            _log.info("Unable to start service: "+e);
         }
+
     }
 
     private void startHAService(MBeanServer server)

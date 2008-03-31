@@ -29,7 +29,7 @@ public class BossStartupListener
         try {
             createStatsMBean();
         } catch(Exception e) {
-            _log.warn("Unable to create stats mbean", e);
+            _log.info("Unable to create stats mbean: "+e);
         }
         
         synchronized (LOCK) {
