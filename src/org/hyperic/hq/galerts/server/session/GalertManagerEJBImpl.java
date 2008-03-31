@@ -57,7 +57,6 @@ import org.hyperic.hq.common.shared.CrispoManagerLocal;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.AlertSeverity;
@@ -95,23 +94,18 @@ public class GalertManagerEJBImpl
 {
     private final Log _log = LogFactory.getLog(GalertManagerEJBImpl.class);
 
-    private EscalationManagerLocal       _escMan;
     private ExecutionStrategyTypeInfoDAO _stratTypeDAO;
     private GalertDefDAO                 _defDAO;
     private GalertAuxLogDAO              _auxLogDAO;
     private GalertLogDAO                 _logDAO;
-    private CrispoManagerLocal           _crispoMan;
     private GalertActionLogDAO           _actionLogDAO;
     
     public GalertManagerEJBImpl() {
         DAOFactory f = DAOFactory.getDAOFactory();
-
-        _escMan       = EscalationManagerEJBImpl.getOne();      
         _stratTypeDAO = new ExecutionStrategyTypeInfoDAO(f); 
         _defDAO       = new GalertDefDAO(f);
         _logDAO       = new GalertLogDAO(f);
         _auxLogDAO    = new GalertAuxLogDAO(f);
-        _crispoMan    = CrispoManagerEJBImpl.getOne();
         _actionLogDAO = new GalertActionLogDAO(f);
     }
 
@@ -587,8 +581,10 @@ public class GalertManagerEJBImpl
             _defDAO.remove(t);
         }
         
+        CrispoManagerLocal crispoMan = CrispoManagerEJBImpl.getOne();
+        
         for (Iterator i=crispos.iterator(); i.hasNext(); ) {
-            _crispoMan.deleteCrispo((Crispo)i.next());
+            crispoMan.deleteCrispo((Crispo)i.next());
         }
         strat.clearTriggers();
         
@@ -597,7 +593,7 @@ public class GalertManagerEJBImpl
         for (Iterator i=triggerInfos.iterator(); i.hasNext(); ) {
             GtriggerTypeInfo typeInfo = (GtriggerTypeInfo)i.next();
             ConfigResponse config = (ConfigResponse)j.next();
-            Crispo crispo = _crispoMan.create(config);
+            Crispo crispo = crispoMan.create(config);
             GtriggerInfo t = strat.addTrigger(typeInfo, crispo, def.getGroup(), 
                                               partition); 
  
@@ -614,7 +610,7 @@ public class GalertManagerEJBImpl
                      ExecutionStrategyTypeInfo stratType, 
                      ConfigResponse stratConfig)
     {
-        Crispo stratCrispo = _crispoMan.create(stratConfig);
+        Crispo stratCrispo = CrispoManagerEJBImpl.getOne().create(stratConfig);
         ExecutionStrategyInfo res = def.addPartition(partition, stratType, 
                                                      stratCrispo); 
         
@@ -692,10 +688,12 @@ public class GalertManagerEJBImpl
         
         _defDAO.remove(def);
         
+        CrispoManagerLocal crispoMan = CrispoManagerEJBImpl.getOne();
+        
         for (Iterator i=nukeCrispos.iterator(); i.hasNext(); ) {
             Crispo c = (Crispo)i.next();
 
-            _crispoMan.deleteCrispo(c);
+            crispoMan.deleteCrispo(c);
         }
         GalertProcessor.getInstance().alertDefDeleted(defId);
     }
@@ -714,7 +712,8 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method
      */
     public void startEscalation(GalertDef def, ExecutionReason reason) {
-        _escMan.startEscalation(def, new GalertEscalatableCreator(def, reason));
+        EscalationManagerEJBImpl.getOne()
+            .startEscalation(def, new GalertEscalatableCreator(def, reason));
     }
 
     /**
