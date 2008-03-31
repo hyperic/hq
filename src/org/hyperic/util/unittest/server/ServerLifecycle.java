@@ -180,7 +180,7 @@ public class ServerLifecycle {
             if (!_isStarted) {
                 throw new IllegalStateException("the server is not started.");
             }
-            
+                        
             deployOrUnDeploy(true, url);
             
             return new LocalInterfaceRegistry(
@@ -317,6 +317,10 @@ public class ServerLifecycle {
                     loadSigar(url, cl);                    
                 }
                 
+                if (!deploy) {
+                    stopProductPluginDeployer();
+                }
+                
                 deployURL(deploy, url);
                 
                 if (deploy) {
@@ -401,6 +405,21 @@ public class ServerLifecycle {
         } catch (Exception e) {
             throw new RuntimeException("Could not deploy hq plugins", e); 
         }        
+    }
+    
+    /**
+     * We need to stop the ProductPluginDeployer so that the plugins are removed 
+     * from JBoss and ProductPluginDeployer.setReady() is set to <code>false</code>.
+     */
+    private void stopProductPluginDeployer() {
+        MBeanServer server = MBeanUtil.getMBeanServer();
+        
+        try {
+            server.invoke(new ObjectName("hyperic.jmx:type=Service,name=ProductPluginDeployer"), 
+                          "stop", new Object[0], new String[0]);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not stop ProductPluginDeployer", e); 
+        }                
     }
     
     /**
