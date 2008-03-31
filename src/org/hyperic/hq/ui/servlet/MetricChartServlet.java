@@ -45,7 +45,6 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -268,7 +267,7 @@ public class MetricChartServlet extends VerticalChartServlet {
 
     protected ChartDataBean getupMetricData(HttpServletRequest request)
         throws SessionNotFoundException, SessionTimeoutException,
-               DataNotAvailableException, MeasurementNotFoundException,
+               MeasurementNotFoundException,
                RemoteException, AppdefEntityNotFoundException,
                PermissionException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();

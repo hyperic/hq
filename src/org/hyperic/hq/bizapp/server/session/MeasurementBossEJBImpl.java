@@ -101,7 +101,6 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
-import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -1032,11 +1031,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      */
     public PageList findMeasurementData(int sessionId, Measurement m,
                                         long begin, long end, PageControl pc) {
-        try {
-            return getDataMan().getHistoricalData(m, begin, end, pc);
-        } catch (DataNotAvailableException e) {
-            throw new SystemException(e);
-        }
+        return getDataMan().getHistoricalData(m, begin, end, pc);
     }
 
     /**
@@ -1056,7 +1051,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                         long end, long interval,
                                         boolean returnNulls, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
-               DataNotAvailableException, AppdefEntityNotFoundException,
+               AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
 
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
@@ -1094,7 +1089,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                         long begin, long end, long interval,
                                         boolean returnNulls, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
-               DataNotAvailableException, AppdefEntityNotFoundException,
+               AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
@@ -1123,7 +1118,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                         long begin, long end, long interval,
                                         boolean returnNulls, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
-               DataNotAvailableException, AppdefEntityNotFoundException,
+               AppdefEntityNotFoundException,
                PermissionException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
@@ -1179,7 +1174,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                         long begin, long end, long interval,
                                         boolean returnNulls, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
-               DataNotAvailableException, AppdefEntityNotFoundException,
+               AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
             
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
@@ -1258,7 +1253,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                           boolean returnNulls,
                                           PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
-               DataNotAvailableException, AppdefEntityNotFoundException,
+               AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
@@ -1354,12 +1349,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 (AppdefResourceValue)resourceMap.get(instanceId.intValue());
             
             // Fetch the last data point
-            MetricValue mv = null;
-            try {
-                mv = getDataMan().getLastHistoricalData(mm);
-            } catch (DataNotAvailableException e) {
-                // mv still NULL
-            }
+            MetricValue mv = getDataMan().getLastHistoricalData(mm);
             
             MeasurementMetadataSummary summary =
                 new MeasurementMetadataSummary(mm, mv, resource);
@@ -1513,7 +1503,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         int sessionId, AppdefResourceValue[] resources, Integer tid)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, MeasurementNotFoundException,
-               PermissionException, DataNotAvailableException {
+               PermissionException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
         MeasurementTemplate tmpl = getTemplateManager().getTemplate(tid);
 
@@ -2472,13 +2462,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             if (done.contains(category))
                 continue;
 
-            Double theValue;
-            try {
-                MetricValue mv = getDataMan().getLastHistoricalData(m);
-                theValue = mv.getObjectValue();
-            } catch (DataNotAvailableException e) {
+            MetricValue mv = getDataMan().getLastHistoricalData(m);
+            if (mv == null) {
                 continue;
             }
+            Double theValue = mv.getObjectValue();
 
             if (category.equals(MeasurementConstants.CAT_THROUGHPUT)) {
                 summary.setThroughput(theValue);

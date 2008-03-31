@@ -44,7 +44,6 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -183,9 +182,6 @@ public abstract class CurrentHealthChartServlet extends VerticalChartServlet {
             if ( log.isDebugEnabled() )
                 log.debug( "One or more AppdefEntityIDs invalid: " +
                            StringUtil.arrayToString(eids) );
-        } catch (DataNotAvailableException e) {
-            if ( log.isDebugEnabled() )
-                log.debug("No metric data available.");
         } catch (PermissionException e) {
             log.warn("Permission denied to view metric.");
         } catch (SessionNotFoundException e) {
@@ -234,7 +230,7 @@ public abstract class CurrentHealthChartServlet extends VerticalChartServlet {
                          Integer tid, AppdefEntityID[] eids,
                          AppdefEntityTypeID ctype, long beginTime, long endTime)
         throws TemplateNotFoundException, SessionNotFoundException,
-               SessionTimeoutException, DataNotAvailableException,
+               SessionTimeoutException,
                AppdefEntityNotFoundException, MeasurementNotFoundException,
                PermissionException, RemoteException {
         Integer[] tids = new Integer[] { tid };

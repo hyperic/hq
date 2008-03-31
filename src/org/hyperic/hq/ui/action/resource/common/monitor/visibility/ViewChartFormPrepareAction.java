@@ -68,7 +68,6 @@ import org.hyperic.hq.measurement.BaselineCreationException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.shared.BaselineValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -242,8 +241,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                                                     MeasurementBoss mb)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException,
-               RemoteException, MeasurementNotFoundException,
-               DataNotAvailableException {
+               RemoteException, MeasurementNotFoundException {
         ServletContext ctx = getServlet().getServletContext();
         // get list of all child resources
         AppdefResourceValue[] resources = null;
@@ -348,7 +346,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                                   AppdefResourceValue[] resources,
                                   MeasurementBoss mb, ServletContext ctx)
         throws SessionNotFoundException, SessionTimeoutException,
-               DataNotAvailableException, MeasurementNotFoundException,
+               MeasurementNotFoundException,
                RemoteException, AppdefEntityNotFoundException,
                PermissionException {
         

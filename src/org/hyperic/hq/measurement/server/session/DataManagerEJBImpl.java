@@ -60,7 +60,6 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
-import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
@@ -948,7 +947,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public PageList getHistoricalData(Measurement m, long begin, long end,
                                       PageControl pc)
-        throws DataNotAvailableException {
+    {
         if (m.getTemplate().isAvailability()) {
             return AvailabilityManagerEJBImpl.getOne().
                 getHistoricalAvailData(m, begin, end, pc);
@@ -958,8 +957,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     private PageList getHistData(Measurement m, long begin, long end,
-                                 PageControl pc)
-        throws DataNotAvailableException {
+                                 PageControl pc) {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
@@ -1051,16 +1049,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 // Now return a PageList
                 return new PageList(history, total);
             } catch (SQLException e) {
-                throw new DataNotAvailableException(
-                    "Can't lookup historical data for " + m, e);
+                throw new SystemException("Can't lookup historical data for " +
+                                          m, e);
             } finally {
                 DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
             }
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
-            throw new DataNotAvailableException(
-                "Can't open connection", e);
+            throw new SystemException("Can't open connection", e);
         } finally {
             DBUtil.closeConnection(logCtx, conn);
         }
@@ -1068,7 +1065,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
     private int getMeasTableCount(Connection conn, long begin, long end,
                                   int measurementId, String measView)
-        throws DataNotAvailableException
     {
         Statement stmt = null;
         ResultSet rs   = null;
@@ -1085,8 +1081,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 return 0;
             }
         } catch (SQLException e) {
-            throw new DataNotAvailableException(
-                "Can't count historical data for " + measurementId, e);
+            throw new SystemException("Can't count historical data for " +
+                                      measurementId, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
         }
@@ -1129,8 +1125,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public PageList getHistoricalData(List measurements, long begin, long end,
                                       long interval, int type,
-                                      boolean returnNulls, PageControl pc)
-        throws DataNotAvailableException {
+                                      boolean returnNulls, PageControl pc) {
 
         List availIds = new ArrayList();
         List measurementIds = new ArrayList();
@@ -1160,7 +1155,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private PageList getHistData(Integer[] ids, long begin, long end,
                                  long interval, int type,
                                  boolean returnNulls, PageControl pc)
-        throws DataNotAvailableException {
+    {
         final int    MAX_IDS  = 30;
         
         if (ids == null || ids.length < 1) {
@@ -1344,7 +1339,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
-            throw new DataNotAvailableException(
+            throw new SystemException(
                 "Can't lookup historical data for " +
                 StringUtil.arrayToString(ids), e);
         } finally {
@@ -1395,7 +1390,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public MetricValue getLastHistoricalData(Measurement m)
-        throws DataNotAvailableException {
+    {
 
         if (m.getTemplate().isAvailability()) {
             return AvailabilityManagerEJBImpl.getOne().getLastAvail(m);
@@ -1404,9 +1399,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    private MetricValue getLastHistData(Measurement m)
-        throws DataNotAvailableException {
-
+    private MetricValue getLastHistData(Measurement m) {
         // Check the cache
         MetricDataCache cache = MetricDataCache.getInstance();
         MetricValue mval = cache.get(m.getId(), 0);
@@ -1450,7 +1443,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
             _log.error("Unable to look up historical data for " + m, e);
-            throw new DataNotAvailableException(e);
+            throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
@@ -1466,8 +1459,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public long[] getMissingDataTimestamps(Integer id, long interval,
-                                           long begin, long end)
-        throws DataNotAvailableException {
+                                           long begin, long end) {
         this.checkTimeArguments(begin, end);
         
         Connection conn = null;
@@ -1509,8 +1501,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
-            throw new DataNotAvailableException(
-                "Can't lookup historical data for " + id, e);
+            throw new SystemException("Can't lookup historical data for " +
+                                      id, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
@@ -1918,8 +1910,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public Map getAggregateDataByMetric(Integer[] tids, Integer[] iids,
                                         long begin, long end,
-                                        boolean useAggressiveRollup)
-        throws DataNotAvailableException {
+                                        boolean useAggressiveRollup) {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
@@ -2004,7 +1995,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             return resMap;
         } catch (SQLException e) {
             _log.debug("getAggregateDataByMetric()", e);
-            throw new DataNotAvailableException(e);
+            throw new SystemException(e);
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } finally {
@@ -2026,7 +2017,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public Map getAggregateDataByMetric(Integer[] mids, long begin,
                                         long end, boolean useAggressiveRollup)
-        throws DataNotAvailableException {
+    {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
@@ -2104,7 +2095,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             return resMap;
         } catch (SQLException e) {
             _log.debug("getAggregateDataByMetric()", e);
-            throw new DataNotAvailableException(e);
+            throw new SystemException(e);
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } finally {
@@ -2123,7 +2114,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public Integer[] getInstancesWithData(Integer[] tids, long begin, long end)
-        throws DataNotAvailableException {
+    {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
@@ -2171,7 +2162,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
             return (Integer[]) validList.toArray(new Integer[validList.size()]);
         } catch (SQLException e) {
-            throw new DataNotAvailableException(
+            throw new SystemException(
                 "Can't get time data for " + StringUtil.arrayToString(tids) +
                 " between " + begin + " " + end, e);
         } catch (NamingException e) {
@@ -2190,8 +2181,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return the list of measurement IDs
      * @ejb:interface-method
      */
-    public Integer[] getIdsWithoutData(long current, int cycles)
-        throws DataNotAvailableException {
+    public Integer[] getIdsWithoutData(long current, int cycles) {
         Connection        conn = null;
         PreparedStatement stmt = null;
         ResultSet         rs   = null;
@@ -2226,8 +2216,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
             return (Integer[]) validList.toArray(new Integer[validList.size()]);
         } catch (SQLException e) {
-            throw new DataNotAvailableException(
-                "Can't look up missing data", e);
+            throw new SystemException("Can't look up missing data", e);
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } finally {
