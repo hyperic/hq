@@ -1409,6 +1409,17 @@
   <target name="all" description="xdoclet, compile and pack for everything" 
           depends="init,xdoclet,hibernate-prep,build" >
   </target>
+	
+  <!-- When running the 'test-dbsetup' target, use the 'test-all' target in 
+       place of the 'all' target. This ensures that deferrable constraints 
+       are set correctly. -->
+  <target name="test-all">
+    <property name="unittest-lib" location="${hq.home}/unittest/lib" />
+    <echo message="using unittest.lib as -> ${unittest-lib}"/>    
+    <antcall target="all">
+      <param name="unittest.lib" value="${unittest-lib}"/>
+    </antcall>
+  </target>	
 
   <target name="build" depends="init,compile,pack" 
          description="Compile and pack - no code generation" />
