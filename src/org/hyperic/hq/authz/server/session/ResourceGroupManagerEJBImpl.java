@@ -57,6 +57,7 @@ import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
+import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -206,6 +207,45 @@ public class ResourceGroupManagerEJBImpl
         return group;
     }
 
+    /**
+     * Update some of the fundamentals of groups (name, description, location).
+     * If name, description or location are null, the associated properties
+     * of the passed group will not change.
+     * 
+     * @throws DuplicateObjectException if an attempt to rename the group would
+     *                                  result in a group with the same name.
+     * @ejb:interface-method
+     */
+    public void updateGroup(AuthzSubject whoami, ResourceGroup group,
+                            String name, String description, String location) 
+        throws PermissionException, DuplicateObjectException
+    {
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+        pm.check(whoami.getId(),
+                 AuthzConstants.authzGroup, group.getId(),
+                 AuthzConstants.perm_modifyResourceGroup);
+
+        // XXX:  Add Auditing
+        if (name != null && !name.equals(group.getName())) {
+            ResourceGroup existing = getResourceGroupDAO().findByName(name);
+            
+            if (existing != null) {
+                throw new DuplicateObjectException("Group by that name [" +
+                                                   name + "] already exists",
+                                                   existing);
+            }
+            group.setName(name);
+        }
+        
+        if (description != null && !description.equals(group.getDescription())){
+            group.setDescription(description);
+        }
+        
+        if (location != null && !location.equals(group.getLocation())) {
+            group.setLocation(location);
+        }
+    }
+    
     /**
      * Write the specified entity out to permanent storage.
      * @param whoami The current running user.

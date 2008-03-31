@@ -150,6 +150,7 @@ import org.hyperic.hq.bizapp.shared.resourceImport.Validator;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.server.session.EventLog;
@@ -2194,6 +2195,22 @@ public class AppdefBossEJBImpl
         }
     }
 
+    /**
+     * Update properties of a group.
+     * 
+     * @see ResourceGroupManagerEJBImpl.updateGroup
+     * @ejb:interface-method
+     */
+    public void updateGroup(int sessionId, ResourceGroup group,
+                            String name, String description, String location) 
+        throws SessionException, PermissionException, DuplicateObjectException
+    {
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        
+        getResourceGroupManager().updateGroup(subject, group, name, description, 
+                                              location); 
+    }
+    
     /**
      * Save a group back to persistent storage.
      * @ejb:interface-method

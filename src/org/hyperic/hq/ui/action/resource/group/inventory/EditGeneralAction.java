@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.ui.Constants;
@@ -92,10 +93,13 @@ public class EditGeneralAction extends BaseAction {
             Integer groupId = RequestUtils.getResourceId(request);
             
             rValue = boss.findGroup(sessionId.intValue(), groupId);
+
+            ResourceGroup group = boss.findGroupById(sessionId.intValue(), 
+                                                     groupId);
             
-            rForm.updateResourceValue(rValue);            
-            
-            boss.saveGroup(sessionId.intValue(), rValue);
+            boss.updateGroup(sessionId.intValue(), group,
+                             rForm.getName(), rForm.getDescription(),
+                             rForm.getLocation());
               
             // XXX: enable when we have a confirmed functioning API
             log.trace("saving group [" + rValue.getName()
