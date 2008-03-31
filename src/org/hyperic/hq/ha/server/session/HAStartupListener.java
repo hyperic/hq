@@ -42,53 +42,47 @@ public class HAStartupListener
 
     public void hqStarted() {
         MBeanServer server = MBeanUtil.getMBeanServer();
-        
+
         _log.info("Starting services");
-        
-        try {
-            startConfigService(server);
-        } catch (Exception e) {
-            _log.info("Unable to start service: "+e);
-        }
-        
-        try {
-            startScheduler(server);
-        } catch (Exception e) {
-            _log.info("Unable to start service: "+e);
-        }
 
-        try {
-            startHAService(server);
-        } catch (Exception e) {
-            _log.info("Unable to start service: "+e);
-        }
-
+        startConfigService(server);
+        startScheduler(server);
+        startHAService(server);
     }
 
     private void startHAService(MBeanServer server)
-        throws Exception
     {
-        ObjectName o =
-            new ObjectName("hyperic.jmx:type=Service,name=HAService");
-        server.registerMBean(new HAService(), o);
+        try {
+            ObjectName o =
+                new ObjectName("hyperic.jmx:type=Service,name=HAService");
+            server.registerMBean(new HAService(), o);
 
-        server.invoke(o, "startSingleton", new Object[] {}, new String[] {});
+            server.invoke(o, "startSingleton", new Object[] {}, new String[] {});
+        } catch (Exception e) {
+            _log.info("Unable to start service: "+e);
+        }
     }
 
     private void startConfigService(MBeanServer server)
-        throws Exception
     {
-        ObjectName o =
-            new ObjectName("hyperic.jmx:type=Service,name=ProductConfig");
-        server.registerMBean(new ProductConfigService(), o);
+        try {
+            ObjectName o =
+                new ObjectName("hyperic.jmx:type=Service,name=ProductConfig");
+            server.registerMBean(new ProductConfigService(), o);
 
-        server.invoke(o, "start", new Object[] {}, new String[] {});
+            server.invoke(o, "start", new Object[] {}, new String[] {});
+        } catch (Exception e) {
+            _log.info("Unable to start service: "+e);
+        }
     }
 
     private void startScheduler(MBeanServer server)
-        throws Exception
     {
-        ObjectName o = new ObjectName("hyperic.jmx:type=Service,name=Scheduler");
-        server.invoke(o, "startScheduler", new Object[] {}, new String[] {});
+        try {
+            ObjectName o = new ObjectName("hyperic.jmx:type=Service,name=Scheduler");
+            server.invoke(o, "startScheduler", new Object[] {}, new String[] {});
+        } catch (Exception e) {
+            _log.info("Unable to start service: "+e);
+        }
     }
 }
