@@ -99,12 +99,6 @@ public class ExampleInContainer_test extends BaseServerTestCase {
     /**
      * This is an example unit test demonstrating how the in-container unit test 
      * framework can be used to perform local invocations on EJBs.
-     * 
-     * This also is an example of the DB Overlay framework.  The initial dbsetup
-     * does not have any data in the made-up eam_unittest tables.  The overlay
-     * populates it during setup(), verifies then deletes the data in tearDown().
-     * 
-     * @throws Exception
      */
     public void testQueryAlertDefinitionManager() throws Exception {        
         AlertDefinitionManagerLocal adMan = 
@@ -118,6 +112,11 @@ public class ExampleInContainer_test extends BaseServerTestCase {
         assertNull("shouldn't have found alert def id", id);
     }
     
+    /**
+     * This is an example of the DB Overlay framework.  The initial dbsetup
+     * does not have any data in the made-up eam_unittest tables.  The overlay
+     * populates it during setup(), verifies then deletes the data in tearDown().
+     */
     public void testDBOverlay() throws Exception {
         Connection conn = null;
         Statement stmt = null;
@@ -139,6 +138,23 @@ public class ExampleInContainer_test extends BaseServerTestCase {
         } finally {
             DBUtil.closeJDBCObjects(getClass().getName(), conn, stmt, rs);
         }
+    }
+    
+    /**
+     * This test is merely here to test that multiple hq.ear deployments 
+     * work within the same server instance, especially when the same 
+     * EJB type is referenced between deployments.
+     */
+    public void testDeployAgain() throws Exception {
+        AlertDefinitionManagerLocal adMan = 
+            (AlertDefinitionManagerLocal)
+                 _registry.getLocalInterface(AlertDefinitionManagerEJBImpl.class, 
+                                             AlertDefinitionManagerLocal.class);
+        
+        
+        Integer id = adMan.getIdFromTrigger(new Integer(-1));
+        
+        assertNull("shouldn't have found alert def id", id);
     }
     
 }
