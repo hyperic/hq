@@ -528,14 +528,16 @@ public class ProductPluginDeployer
     }
 
     private void setReady(boolean ready) {
-        try {
-            getServer().setAttribute(_readyMgrName,
-                                     new Attribute(READY_ATTR,
-                                                   ready ? Boolean.TRUE :
-                                                   Boolean.FALSE));
-        } catch(Exception e) {
-            _log.error("Unable to declare application ready", e);
-        }
+        if (getServer() != null) {
+            try {            
+                getServer().setAttribute(_readyMgrName,
+                                         new Attribute(READY_ATTR,
+                                                       ready ? Boolean.TRUE :
+                                                       Boolean.FALSE));
+            } catch(Exception e) {
+                _log.error("Unable to declare application ready", e);
+            }            
+        }        
     }
     
     /**
@@ -738,6 +740,9 @@ public class ProductPluginDeployer
         addCustomPluginDir();
     }
 
+    /**
+     * @jmx:managed-operation
+     */
     public void stop() {
         super.stop();
         pluginNotify("deployer", DEPLOYER_SUSPENDED);
