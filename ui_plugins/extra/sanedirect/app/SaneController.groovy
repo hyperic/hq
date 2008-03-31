@@ -25,7 +25,7 @@ class SaneController
         log.info "Redirecting from ${params}"
         
         def args = [:]
-        if (args.resourceContext) {
+        if (ctx) {
             args.resourceContext = ctx
         }
 
