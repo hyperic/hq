@@ -1,8 +1,7 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal
-import org.hyperic.util.pager.PageList
 import org.hyperic.util.pager.PageControl
-import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl
+import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl as AIQMan
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl
 import org.hyperic.hq.authz.shared.AuthzSubjectValue
@@ -15,27 +14,44 @@ class AutodiscoveryController extends BaseController {
 
     AutodiscoveryController() {
         onlyAllowSuperUsers()
+        
+        setXMLMethods(['list'])
     }
 
-    def list(params) {
+    def list(xmlResult, params) {
 
         String fqdn = params.getOne('fqdn')
 
         AuthzSubjectManagerLocal subMan = AuthzSubjectManagerEJBImpl.one;
-        AuthzSubjectValue overlord = subMan.overlord
 
-        AIQueueManagerLocal aiMan = AIQueueManagerEJBImpl.one
-
-        PageList list = aiMan.getQueue(overlord, true, true,
+        def list = AIQMan.one.getQueue(subMan.overlord, true, true,
                                        PageControl.PAGE_ALL)
 
         List matching = getMatchingPlatforms(list, fqdn)
 
-        def res = new StringBuffer()
-        for (plat in matching) {
-            res.append(plat.fqdn).append("\n")
+        xmlResult.autodiscovery {
+            xmlResult.platforms {
+                matching.each { plat ->
+                    xmlResult.platform(name: plat.name,
+                                       fqdn: plat.fqdn,
+                                       type: plat.platformTypeName) {
+                        xmlResult.ips {
+                            plat.aIIpValues.each { ip ->
+                                xmlResult.ip(address: ip.address,
+                                             mac: ip.mACAddress)
+                            }
+                        }
+                        xmlResult.servers {
+                            plat.aIServerValues.each { server ->
+                                xmlResult.server(name: server.name,
+                                                 type: server.serverTypeName)
+                            }
+                        }
+                    }
+                }
+            }
         }
-        render(inline : res.toString())
+        xmlResult
     }
 
     def approve(params) {
@@ -45,10 +61,9 @@ class AutodiscoveryController extends BaseController {
         AuthzSubjectManagerLocal subMan = AuthzSubjectManagerEJBImpl.one;
         AuthzSubjectValue overlord = subMan.overlord
 
-        AIQueueManagerLocal aiMan = AIQueueManagerEJBImpl.one
+        AIQueueManagerLocal aiMan = AIQMan.one
 
-        PageList list = aiMan.getQueue(overlord, true, true,
-                                       PageControl.PAGE_ALL)
+        def list = aiMan.getQueue(overlord, true, true, PageControl.PAGE_ALL)
 
         List matching = getMatchingPlatforms(list, fqdn)
 
