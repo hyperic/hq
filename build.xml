@@ -1492,6 +1492,8 @@
   <target name="unittest-prepare-jboss" 
           depends="all,prepare-jboss"
           description="Prepare jboss for in-container unit testing">
+	  
+	  <delete dir="${jboss.home}/server/unittest"/>
 
 	  <echo message="Creating 'unittest' configuration - a copy of the prepared 'default' configuration"/>
 	  	
