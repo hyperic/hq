@@ -114,7 +114,7 @@ abstract class DataSet
         return strCmd.toString();
     }
 
-    protected String getUpdateCommand() throws SQLException
+    protected String getUpdateCommand(String strCol) throws SQLException
     {
         int iCols = this.getNumberColumns();
         
@@ -133,7 +133,8 @@ abstract class DataSet
             strCmd.append(" = ?");
         }
         
-        strCmd.append(" WHERE CID = ?");
+        strCmd.append(" WHERE ").append(strCol).append(" = ?");
+
         
         return strCmd.toString();
     }
@@ -148,18 +149,20 @@ abstract class DataSet
         
         int iCols = this.getNumberColumns();
         // This may seem kludgy, but beats the alternative
-        for(int i = 0;i < iCols;i++) {
+        for(int i = 0; i < iCols; i++) {
 
             Data   data     = this.getData(i);
             
             //////////////////////////////////////////////////////////
             // Update the row if it already exists
             
-            if(data.getColumnName().equalsIgnoreCase("CID"))
+            if(data.getColumnName().equalsIgnoreCase("CID") ||
+               data.getColumnName().equalsIgnoreCase("ID"))
             {
+                String strCol = data.getColumnName();
                 String strValue = data.getValue();
-                strSelect = "SELECT CID FROM " + this.getTableName() +
-							" WHERE CID = " + strValue;                
+                strSelect = "SELECT " + strCol + " FROM " + this.getTableName() +
+							" WHERE " + strCol +" = " + strValue;
                 
                 try {
                     stmtQuery = m_parent.getConn().createStatement();
@@ -170,7 +173,7 @@ abstract class DataSet
                     if(bExists) {           // If the row exists already, we update
                         bResult = false;    // Return false in the end
                         cid = strValue;
-                        String strCmd = this.getUpdateCommand();
+                        String strCmd = this.getUpdateCommand(strCol);
                         // before we overwrite stmt, close a previous statement
                         // if there was one
                         if (stmt != null) stmt.close();
@@ -208,7 +211,7 @@ abstract class DataSet
                 String strSID     = strValue.substring(iDataDelim + 1);
             
                 strSelect = "SELECT " + strCol + " FROM " + strTab +
-							" WHERE CID = " + strSID;
+							" WHERE " + strCol + " = "  + strSID;
                 try {
                     stmtQuery = m_parent.getConn().createStatement();
                     results   = stmtQuery.executeQuery(strSelect);

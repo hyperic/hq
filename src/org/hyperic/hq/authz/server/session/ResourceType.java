@@ -50,7 +50,6 @@ public class ResourceType extends AuthzNamedBean {
         TYPE_TO_PROP.put(AuthzConstants.authzRole, "resource.role");
     }
     
-    private Integer    _cid;
     private Resource   _resource;
     private boolean    _system = false;
     private Collection _operations = new ArrayList();
@@ -65,14 +64,6 @@ public class ResourceType extends AuthzNamedBean {
         super(name);
         _resource = resource;
         _system   = fsystem;
-    }
-
-    public Integer getCid() {
-        return _cid;
-    }
-
-    protected void setCid(Integer val) {
-        _cid = val;
     }
 
     public Resource getResource() {

@@ -24,10 +24,6 @@
       </many-to-one>
     </properties>
 
-    <property name="cid" type="integer">
-      <column name="CID" not-null="false"/>
-    </property>
-
   </class>
 
 </hibernate-mapping>

@@ -26,10 +26,6 @@
       </property>
     </properties>
 
-    <property name="cid" type="integer">
-      <column name="CID" not-null="false"/>
-    </property>
-
     <property name="sortName" type="string">
       <column name="SORT_NAME" not-null="false" length="100"/>
     </property>
@@ -94,10 +90,6 @@
         <column name="SUBJECT_ID" not-null="true"/>
       </key-many-to-one>
     </composite-id>
-
-    <property name="cid" type="integer">
-      <column name="CID"/>
-    </property>
   </class>
 
 </hibernate-mapping>

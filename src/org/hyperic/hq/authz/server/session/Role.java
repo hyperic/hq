@@ -37,7 +37,6 @@ import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.server.session.Calendar;
 
 public class Role extends AuthzNamedBean {
-    private Integer    _cid;
     private String     _description;
     private boolean    _system = false;
     private Resource   _resource;
@@ -56,14 +55,6 @@ public class Role extends AuthzNamedBean {
         setRoleValue(val);
     }
     
-    public Integer getCid() {
-        return _cid;
-    }
-    
-    void setCid(Integer val) {
-        _cid = val;
-    }
-
     public String getDescription() {
         return _description;
     }

@@ -8574,6 +8574,41 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.111">
+      <schema-directSQL>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_RESOURCE_GROUP DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_RESOURCE DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_RESOURCE_TYPE DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_OPERATION DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_SUBJECT DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_ROLE DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_RES_GRP_RES_MAP DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_ROLE_OPERATION_MAP DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_ROLE_RESOURCE_GROUP_MAP DROP COLUMN cid
+        </statement>
+        <statement desc="Drop unused cid column">
+            ALTER TABLE EAM_SUBJECT_ROLE_MAP DROP COLUMN cid
+        </statement>
+      </schema-directSQL>
+  </schemaSpec>
+    
 </dbupgrade>
 </target>
 

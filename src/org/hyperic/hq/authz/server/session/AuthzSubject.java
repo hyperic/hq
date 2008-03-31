@@ -34,7 +34,6 @@ import org.hyperic.hq.common.server.session.Crispo;
 
 public class AuthzSubject extends AuthzNamedBean {
     private String     _dsn;
-    private Integer    _cid;
     private String     _firstName;
     private String     _lastName;
     private String     _emailAddress;
@@ -77,14 +76,6 @@ public class AuthzSubject extends AuthzNamedBean {
 
     protected void setAuthDsn(String val) {
         _dsn = val;
-    }
-
-    public Integer getCid() {
-        return _cid;
-    }
-
-    protected void setCid(Integer val) {
-        _cid = val;
     }
 
     public String getFirstName() {

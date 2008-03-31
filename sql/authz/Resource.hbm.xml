@@ -25,10 +25,6 @@
       </property>
     </properties>
 
-    <property name="cid" type="integer">
-      <column name="CID" not-null="false"/>
-    </property>
-
     <many-to-one name="owner" class="AuthzSubject">
       <column name="SUBJECT_ID" not-null="false" index="EAM_RESOURCE_OWNER_ID_IDX"/>
     </many-to-one>

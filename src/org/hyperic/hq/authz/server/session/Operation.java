@@ -29,7 +29,6 @@ import org.hyperic.hq.authz.shared.OperationValue;
 
 public class Operation extends AuthzNamedBean {
     private ResourceType _resourceType;
-    private Integer      _cid;
 
     private OperationValue _operationValue = new OperationValue();
 
@@ -47,14 +46,6 @@ public class Operation extends AuthzNamedBean {
 
     protected void setResourceType(ResourceType resourceType) {
         _resourceType = resourceType;
-    }
-
-    public Integer getCid() {
-        return _cid;
-    }
-
-    protected void setCid(Integer val) {
-        _cid = val;
     }
 
     /**

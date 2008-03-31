@@ -19,10 +19,6 @@
       <column name="NAME" not-null="true" length="100" unique="true"/>
     </property>
 
-    <property name="cid" type="integer">
-      <column name="CID" index="EAM_RES_GROUP_CID_IDX" not-null="false"/>
-    </property>
-
     <property name="sortName" type="string">
       <column name="SORT_NAME" not-null="false" length="100"/>
     </property>
@@ -91,10 +87,6 @@
         <column name="RESOURCE_GROUP_ID" not-null="true"/>
       </key-many-to-one>
     </composite-id>
-
-    <property name="cid" type="integer">
-      <column name="CID" index="EAM_RESGRP_RESMAP_CID_IDX"/>
-    </property>
   </class>
 
 </hibernate-mapping>

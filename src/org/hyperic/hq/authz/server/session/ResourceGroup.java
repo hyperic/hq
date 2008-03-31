@@ -38,7 +38,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupValue;
 public class ResourceGroup extends AuthzNamedBean
     implements ContainerManagedTimestampTrackable
 {
-    private Integer _cid;
     private String _description;
     private String _location;
     private boolean _system = false;
@@ -118,14 +117,6 @@ public class ResourceGroup extends AuthzNamedBean
      */
     public boolean allowContainerManagedLastModifiedTime() {
         return true;
-    }
-
-    public Integer getCid() {
-        return _cid;
-    }
-
-    protected void setCid(Integer val) {
-        _cid = val;
     }
 
     public String getDescription() {

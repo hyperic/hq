@@ -40,7 +40,6 @@ public class Resource extends AuthzNamedBean {
     private ResourceType _resourceType;
     private Resource     _prototype;
     private Integer      _instanceId;
-    private Integer      _cid;
     private AuthzSubject _owner;
     private boolean      _system = false;
     private Collection   _resourceGroups = new ArrayList();
@@ -86,14 +85,6 @@ public class Resource extends AuthzNamedBean {
 
     protected void setInstanceId(Integer val) {
         _instanceId = val;
-    }
-
-    public Integer getCid() {
-        return _cid;
-    }
-
-    protected void setCid(Integer val) {
-        _cid = val;
     }
 
     public AuthzSubject getOwner() {

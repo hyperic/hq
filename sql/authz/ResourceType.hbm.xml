@@ -19,10 +19,6 @@
       <column name="NAME" not-null="true" length="100" unique="true"/>
     </property>
 
-    <property name="cid" type="integer">
-      <column name="CID" index="EAM_RESOURCE_TYPE_CID_IDX" not-null="false"/>
-    </property>
-
     <many-to-one name="resource" class="Resource">
       <column name="RESOURCE_ID" not-null="false" unique="true"/>
     </many-to-one>
