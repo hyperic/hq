@@ -150,6 +150,8 @@
     <fileset dir="${pdk.lib}"
              excludes="hq-product.jar"
              includes="**/*.jar" />
+    <!-- needed for coverage information -->
+    <fileset dir="${thirdparty.lib}" includes="emma.jar"/>
     <path location="${build.dir}/classes" />
   </path>
 
@@ -1520,7 +1522,12 @@
 	  
 	  <echo message="Creating hqu directory..."/>
 	  <mkdir dir="${jboss.home}/server/unittest/deploy/hq.ear/hq.war/hqu"/>
-	  	  
+	 
+          <echo message="Copying code coverage libraries.."/>
+          <copy todir="${jboss.home}/server/unittest/lib">
+              <fileset dir="${thirdparty.lib}" includes="emma.jar"/>
+          </copy>
+ 	  
 	  <echo message="Before running unit tests DON'T FORGET to set the connectionURL in the 'unittest' configuration hq-ds.xml to point at the unit test database."/>
   </target>
 	  
