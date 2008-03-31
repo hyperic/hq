@@ -175,10 +175,7 @@
   </target> 
 
   <!-- DBSetup target for unittest framework -->
-  <target name="test-dbsetup">
-    <!-- this file is used for hqdb data dump during test framework execution -->
-    <delete file="${hq.home}/unittest/data/hqdb.dump.xml.gz" />
-	  	  
+  <target name="test-dbsetup" depends="delete-dump">	  	  
     <property name="unittest-lib" location="${hq.home}/unittest/lib" />
     <echo message="using unittest.lib as -> ${unittest-lib}"/>
     <antcall target="dbsetup">
@@ -195,11 +192,7 @@
           depends="dbsetup-combine,dbsetup-replace,dbsetup-uninstall,dbsetup-schema"
           description="Create an empty schema in the database, without any data."/>
 
-  <target name="dbsetup-upgrade" depends="init-taskdefs">
-
-    <!-- this file is used for hqdb data dump during test framework execution -->
-    <delete file="${hq.home}/unittest/data/hqdb.dump.xml.gz" />
-
+  <target name="dbsetup-upgrade" depends="init-taskdefs,delete-dump">
     <ant antfile="${hq.home}/installer/data/db-upgrade.xml"
          target="upgrade"
          inheritAll="true"
@@ -211,5 +204,10 @@
       <property name="schema.target" value="${hq.schema.target.version}"/>
     </ant>
   </target>
+	
+  <target name="delete-dump">
+    <!-- this file is used for hqdb data dump during unit test framework execution -->
+    <delete file="${hq.home}/unittest/data/hqdb.dump.xml.gz" />	  
+  </target>	
 
 </project>
