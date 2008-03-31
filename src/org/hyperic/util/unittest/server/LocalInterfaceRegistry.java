@@ -81,7 +81,7 @@ public class LocalInterfaceRegistry {
         
         Object ejbProxy = getOne.invoke(ejb, new Object[0]);
         
-        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), 
+        return Proxy.newProxyInstance(localInterface.getClassLoader(), 
                                       new Class[]{localInterface}, 
                                       new LocalInterfaceHandler(ejbProxy));
     }
