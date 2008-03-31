@@ -281,6 +281,6 @@ class ResourceHelper extends BaseHelper {
      * Find a group by id.  Permission checking is performed.
      */
     ResourceGroup findGroup(int id) {
-         groupMan.findResourceGroupById(userValue, id)
+         groupMan.findResourceGroupById(user, id)
     }
 }
