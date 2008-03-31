@@ -8613,3 +8613,8 @@ has already been defined.
 </target>
 
 </project>
+
+<!-- !!NOTE: Make sure you add the DEFERRABLE keyword when adding constraints 
+	         in Postgres or Oracle. Without this the unit testing framework 
+	         may not work correctly -->
+
