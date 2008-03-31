@@ -4,10 +4,6 @@
 
   <!-- ==================== DBSetup ==================== -->
   <target name="dbsetup-init" depends="init-taskdefs" unless="dbsetup-init.isLoaded">
-
-    <!-- this file is used for hqdb data dump during test framework execution -->
-    <delete file="${hq.home}/unittest/data/hqdb.dump.xml.gz" />
-  
     <switch value="${hq.server.ds-mapping}">
       <case value="Oracle8">
         <echo>dbsetup-init: Oracle8</echo>
@@ -180,6 +176,9 @@
 
   <!-- DBSetup target for unittest framework -->
   <target name="test-dbsetup">
+    <!-- this file is used for hqdb data dump during test framework execution -->
+    <delete file="${hq.home}/unittest/data/hqdb.dump.xml.gz" />
+	  	  
     <property name="unittest-lib" location="${hq.home}/unittest/lib" />
     <echo message="using unittest.lib as -> ${unittest-lib}"/>
     <antcall target="dbsetup">
