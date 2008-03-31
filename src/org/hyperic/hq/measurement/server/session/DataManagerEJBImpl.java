@@ -604,7 +604,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     rowsToUpdate++;
                     values.append("(").append(val.getTimestamp()).append(", ")
                           .append(metricId.intValue()).append(", ")
-                          .append(getDecimalInRange(bigDec, metricId)+"),");
+                          .append(getDecimalInRange(bigDec, metricId))
+                          .append("),");
                 }
                 String sql = "insert into "+table+" (timestamp, measurement_id, "+
                              "value) values "+values.substring(0, values.length()-1);
@@ -1584,7 +1585,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         if (nodata.size() == 0) {
             return data;
         } else {
-            ids = (Integer[]) nodata.toArray(new Integer[0]);
+            ids = (Integer[]) nodata.toArray(new Integer[nodata.size()]);
         }
         
         Connection conn  = null;
@@ -1595,7 +1596,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
     
-            int length = Math.min(ids.length, MAX_ID_LEN);
+            int length;
             stmt = conn.createStatement();
             for (int ind = 0; ind < ids.length; )
             {
@@ -1623,70 +1624,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         List dataPoints = convertMetricId2MetricValueMapToDataPoints(data);
         updateMetricDataCache(dataPoints);
         return data;
-    }
-
-    /**
-     * Fetch the most recent non-zero data point for a particular Measurement.
-     *
-     * @param id the ID of the Measurement
-     * @param timeAfter the result timestamps are greater than this value
-     * @return a long time value
-     */
-    private long getLastNonZeroTimestamp(Integer id, long timeAfter)
-    {
-        Connection conn  = null;
-        Statement  stmt  = null;
-        ResultSet  rs    = null;
-        StopWatch  timer = new StopWatch();
-        
-        try {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-
-            stmt = conn.createStatement();
-            String[] mdTables =
-                MeasTabManagerUtil.getMetricTables(System.currentTimeMillis() -
-                                                   getPurgeRaw(), timeAfter);
-
-            // Create array of tables to go through
-            String[] tables = new String[mdTables.length + 3];
-            int i = 0;
-            for (; i < mdTables.length; i++) {
-                tables[i] = mdTables[i];
-            }
-            tables[i++] = TAB_DATA_1H;
-            tables[i++] = TAB_DATA_6H;
-            tables[i++] = TAB_DATA_1D;
-            
-            for (i = 0; i < tables.length; i++) {
-                rs = stmt.executeQuery("SELECT max(timestamp) FROM " +
-                                       tables[i] +
-                                       " WHERE timestamp < " + timeAfter +
-                                       " and measurement_id = " + id +
-                                       " and not value = 0");
-                
-                if (rs.next()) {
-                    long ret = rs.getLong(1);
-                    if (!rs.wasNull())
-                        return ret;
-                }
-                
-                DBUtil.closeResultSet(logCtx, rs);
-            }
-            
-            // If all values are zero, then just return largest value
-            return Long.MAX_VALUE;
-        } catch (SQLException e) {         
-            throw new SystemException("Cannot get last non-zero value", e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-            if (_log.isDebugEnabled()) {
-                _log.debug("getLastNonZeroTimestamp(): Statement query " +
-                		   "elapsed time: " + timer.getElapsed());
-            }
-        }
     }
 
     private void setDataPoints(Map data, int length, long timestamp,
@@ -2211,7 +2148,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     
             StringBuffer sqlBuf = new StringBuffer();
             sqlBuf.append("SELECT DISTINCT(instance_id)")
-                  .append(" FROM " + TAB_MEAS + " m, " + table + " d")
+                  .append(" FROM ").append(TAB_MEAS).append(" m, ")
+                  .append(table).append(" d")
                   .append(" WHERE timestamp BETWEEN ? AND ?")
                   .append(" AND measurement_id = m.id AND ")
                   .append(DBUtil.composeConjunctions("template_id", tids.length));
@@ -2231,7 +2169,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 validList.add(new Integer(rs.getInt(1)));
             }
 
-            return (Integer[]) validList.toArray(new Integer[0]);
+            return (Integer[]) validList.toArray(new Integer[validList.size()]);
         } catch (SQLException e) {
             throw new DataNotAvailableException(
                 "Can't get time data for " + StringUtil.arrayToString(tids) +
@@ -2286,7 +2224,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             for (i = 1; rs.next(); i++) {
                 validList.add(new Integer(rs.getInt(1)));
             }
-            return (Integer[]) validList.toArray(new Integer[0]);
+            return (Integer[]) validList.toArray(new Integer[validList.size()]);
         } catch (SQLException e) {
             throw new DataNotAvailableException(
                 "Can't look up missing data", e);
