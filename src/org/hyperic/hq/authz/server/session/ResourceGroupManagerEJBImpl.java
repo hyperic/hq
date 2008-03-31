@@ -38,6 +38,7 @@ import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
+import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -58,6 +59,7 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -234,13 +236,40 @@ public class ResourceGroupManagerEJBImpl
     }
 
     /**
+     * Remove all groups compatable with the specified resource prototype.
+     * 
+     * @throws VetoException if another subsystem cannot allow it (for 
+     *                       constraint reasons)
+     * @ejb:interface-method
+     */
+    public void removeGroupsCompatibleWith(Resource proto)
+        throws VetoException
+    {
+        AuthzSubject overlord = 
+            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        
+        for (Iterator i=getAllResourceGroups().iterator(); i.hasNext(); ) {
+            ResourceGroup group = (ResourceGroup)i.next();
+            
+            if (group.isCompatableWith(proto)) {
+                try {
+                    removeResourceGroup(overlord, group);
+                } catch(PermissionException exc) {
+                    log.warn("Perm denied while deleting group [" + 
+                             group.getName() + " id=" + group.getId() + "]", 
+                             exc);
+                }
+            }
+        }
+    }    
+    
+    /**
      * Delete the specified ResourceGroup.
      * @param whoami The current running user.
      * @param group The group to delete.
      * @ejb:interface-method
      */
-    public void removeResourceGroup(AuthzSubject whoami,
-                                    ResourceGroupValue group)
+    public void removeResourceGroup(AuthzSubject whoami, ResourceGroup group)
         throws PermissionException, VetoException
     {
         ResourceGroupDAO dao = getResourceGroupDAO();
@@ -253,6 +282,13 @@ public class ResourceGroupManagerEJBImpl
 
         GroupingStartupListener.getCallbackObj().preGroupDelete(resGrp);
         dao.remove(resGrp);
+
+        // Send resource delete event
+        ResourceDeletedZevent zevent =
+            new ResourceDeletedZevent(whoami.getAuthzSubjectValue(),
+                new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
+                                   group.getId()));
+        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
 
     /**
@@ -722,6 +758,22 @@ public class ResourceGroupManagerEJBImpl
         return (RoleValue[])fromLocals(groupLocal.getRoles(), RoleValue.class);
     }
 
+    /**
+     * Change owner of a group.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void changeGroupOwner(AuthzSubject subject, ResourceGroup group,
+                                 AuthzSubject newOwner)
+        throws PermissionException 
+    {
+        ResourceManagerEJBImpl.getOne().setResourceOwner(subject, 
+                                                         group.getResource(), 
+                                                         newOwner);
+        group.setModifiedBy(newOwner.getName());
+    }
+    
     /**
      * Get a ResourceGroup owner's AuthzSubjectValue
      * @param gid The group id

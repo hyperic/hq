@@ -69,11 +69,13 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
@@ -1378,7 +1380,10 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         HashMap serverTypes = new HashMap();
 
         ServiceTypeDAO stLHome = getServiceTypeDAO();
-        AppdefGroupManagerLocal grpMgr = AppdefGroupManagerEJBImpl.getOne();
+        ResourceGroupManagerLocal resGroupMan = 
+            ResourceGroupManagerEJBImpl.getOne();
+        ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+        
         try {
             Collection curServices = stLHome.findByPlugin(plugin);
             ServerTypeDAO stHome = getServerTypeDAO();
@@ -1396,35 +1401,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
                 // See if this exists
                 if (sinfo == null) {
-                    int groupEntType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-                    int groupEntResType = stlocal.getId().intValue();
+                    Integer typeId = AuthzConstants.authzServiceProto;
+                    Resource proto = 
+                        resMan.findResourcePojoByInstanceId(typeId,
+                                                            stlocal.getId());
                     
                     try {
-                        // Delete compatible groups of this type. 
-                        List groups = grpMgr
-                            .findAllGroups(overlord, PageControl.PAGE_ALL,
-                                           new AppdefPagerFilter[0]);
-                        for (Iterator grpIt = groups.iterator();
-                             grpIt.hasNext(); ) {
-                            try {
-                                AppdefGroupValue grp =
-                                    (AppdefGroupValue) grpIt.next();
-                                
-                                if (grp.isGroupCompat() &&
-                                    grp.getGroupEntType() == groupEntType &&
-                                    grp.getGroupEntResType() == groupEntResType)
-                                {
-                                    grpMgr.deleteGroup(overlord, grp.getId());
-                                }
-                            } catch (AppdefGroupNotFoundException e) {
-                                assert false :
-                                    "Delete based on a group should not " +
-                                    "result in AppdefGroupNotFoundException";
-                            } catch (VetoException e) {
-                                // Why can't we delete?
-                                log.error("Cannot delete group", e);
-                            }
-                        }
+                        // Delete compatible groups of this type.
+                        resGroupMan.removeGroupsCompatibleWith(proto);
                     
                         // Remove all services
                         for (Iterator svcIt = stlocal.getServices().iterator();

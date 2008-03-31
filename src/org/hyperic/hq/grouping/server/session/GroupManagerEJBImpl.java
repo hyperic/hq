@@ -423,51 +423,6 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
         return false;
     }
 
-    /**
-     * Removes a group specified by id.
-     * 
-     * @throws PermissionException when consumer is not owner or priv'd.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public void deleteGroup (AuthzSubject subject, Integer groupId)
-        throws GroupNotFoundException, PermissionException, VetoException 
-    {
-        ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
-
-        ResourceGroupValue rgVo = new ResourceGroupValue();
-        rgVo.setId(groupId);
-        rgmLoc.removeResourceGroup(subject,rgVo);
-    }
-
-    /**
-     * Change owner of a group.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public GroupValue changeGroupOwner(AuthzSubject subject,
-                                       GroupValue groupVo,
-                                       AuthzSubject newOwner)
-        throws GroupNotFoundException, PermissionException 
-    {
-        try {
-            ResourceValue authzRes =
-                getResourceByInstanceId(AuthzConstants.groupResourceTypeName,
-                                        groupVo.getId());
-            getResourceManager().setResourceOwner(subject, authzRes, newOwner);
-            getResourceGroupManager().setGroupModifiedBy(subject,
-                                                         groupVo.getId());
-            groupVo.setOwner(newOwner.getName());
-            groupVo.setModifiedBy(subject.getName());
-        } catch (FinderException e) {
-            log.error("Unable to find resource group to change owner.");
-            throw new GroupNotFoundException ("Unable to lookup ResourceGroup" +
-                                              " for ownership change");
-        }
-        return groupVo;
-    }
-
     /* Get the authz resource type value  */
     protected ResourceType getResourceType(String resType)
         throws FinderException 

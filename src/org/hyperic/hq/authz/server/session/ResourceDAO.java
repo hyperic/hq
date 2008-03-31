@@ -179,7 +179,7 @@ public class ResourceDAO
         return q.executeUpdate();
     }
 
-    public int deleteByInstances(AppdefEntityID[] ids) {
+    int deleteByInstances(AppdefEntityID[] ids) {
         ResourceStartupListener.getCallbackObj().preAppdefResourcesDelete(ids);
 
         new ResourceEdgeDAO(DAOFactory.getDAOFactory()).deleteEdges(ids);

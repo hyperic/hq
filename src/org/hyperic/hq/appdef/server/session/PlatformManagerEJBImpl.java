@@ -75,11 +75,14 @@ import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
@@ -1234,37 +1237,18 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public void deletePlatformType(PlatformType pt) 
         throws VetoException, RemoveException
     { 
-        AppdefGroupManagerLocal grpMgr = AppdefGroupManagerEJBImpl.getOne();
+        ResourceGroupManagerLocal resGroupMan = 
+            ResourceGroupManagerEJBImpl.getOne();
+        ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+        Resource proto = 
+          resMan.findResourcePojoByInstanceId(AuthzConstants.authzPlatformProto,
+                                              pt.getId());
         AuthzSubject overlord = getOverlord();
         
         try {
             _log.debug("Removing PlatformType: " + pt.getName());
 
-            // Find resource groups of this type and remove
-            int groupEntType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-            int groupEntResType = pt.getId().intValue();
-
-            List groups = grpMgr.findAllGroups(overlord, 
-                                               PageControl.PAGE_ALL,
-                                               new AppdefPagerFilter[0]);
-            for (Iterator i = groups.iterator(); i.hasNext(); ) {
-                try {
-                    AppdefGroupValue grp = (AppdefGroupValue) i.next();
-                    if (grp.isGroupCompat() &&
-                        grp.getGroupEntType() == groupEntType &&
-                        grp.getGroupEntResType() == groupEntResType)
-                    {
-                        grpMgr.deleteGroup(overlord, grp.getId());
-                    }
-                } catch (AppdefGroupNotFoundException e) {
-                    /*                            assert false :
-                    "Delete based on a group should not " +
-                    "result in AppdefGroupNotFoundException";*/
-                } catch (VetoException e) {
-                    // Why can't we delete?
-                    log.error("Cannot delete group", e);
-                }
-            }
+            resGroupMan.removeGroupsCompatibleWith(proto);
 
             // Remove all platforms
             for (Iterator i= pt.getPlatforms().iterator(); i.hasNext();) {
@@ -1280,7 +1264,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         } catch (PermissionException e) {
             assert false : "Overlord should not run into PermissionException";
         }
-        
+
+        // TODO:  Need to remove the Resource prototype associated with this
+        //        platform.
         getPlatformTypeDAO().remove(pt);
     }
     

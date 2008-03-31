@@ -1866,7 +1866,9 @@ public class AppdefBossEJBImpl
                     .changeApplicationOwner(caller, id, newOwner);
                 return findApplicationById(sessionId, id);
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                getAppdefGroupManager().changeGroupOwner(caller, id, newOwner);
+                ResourceGroup g = 
+                    getResourceGroupManager().findResourceGroupById(caller, id);
+                getResourceGroupManager().changeGroupOwner(caller, g, newOwner);
                 return findGroup(sessionId, eid.getId());
             default:
                 throw new InvalidAppdefTypeException("Unknown type: " +
@@ -2728,17 +2730,14 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public void deleteGroup(int sessionId, Integer groupId)
-        throws AppdefGroupNotFoundException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException,
-               VetoException
+        throws SessionException, PermissionException, VetoException,
+               FinderException
     {
-        try {
-            AuthzSubject subject = manager.getSubjectPojo(sessionId);
-            getAppdefGroupManager().deleteGroup(subject,groupId);
-        } catch (AppdefGroupNotFoundException e) {
-            log.debug("Unable to locate group for removal");
-            throw e;
-        }
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        ResourceGroup group = groupMan.findResourceGroupById(subject, groupId); 
+            
+        groupMan.removeResourceGroup(subject, group);
     }
 
     /**
@@ -2778,6 +2777,8 @@ public class AppdefBossEJBImpl
         throws FinderException, UpdateException,
                PermissionException, AppdefEntityNotFoundException
     {
+        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        
         try {
             // first look up the appdef resources by owner
             ResourceValue[] resources
@@ -2814,16 +2815,10 @@ public class AppdefBossEJBImpl
                                                 overlord);
                 }
                 if(resType.equals(AuthzConstants.groupResType)) {
-                    try {
-                        // change group owner
-                        getAppdefGroupManager()
-                            .changeGroupOwner(overlord, aRes.getInstanceId(),
-                                              overlord);
-                    } catch (AppdefGroupNotFoundException e) {
-                        // Group may not be an appdef group
-                        log.info("Group " + aRes.getInstanceId() +
-                                 " not appdef group, ownership unchanged");
-                    }
+                    ResourceGroup g = 
+                        groupMan.findResourceGroupById(overlord, 
+                                                       aRes.getInstanceId());
+                    groupMan.changeGroupOwner(overlord, g, overlord);
                 }
             }
         } catch (CreateException e) {

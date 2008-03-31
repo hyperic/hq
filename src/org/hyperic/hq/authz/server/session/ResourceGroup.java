@@ -223,6 +223,24 @@ public class ResourceGroup extends AuthzNamedBean
         _resourcePrototype = r;
     }
 
+    /**
+     * Checks if this group is compatable with the passed resource. 
+     *
+     * @param resource A resource prototype.  Note that this is NOT an
+     *                 instance of the prototype.
+     * 
+     * @return false if this is not a compatable group, or if the passed
+     *               resource is not an instace of this.getResourcePrototype()
+     */
+    public boolean isCompatableWith(Resource resource) {
+        return _resourcePrototype != null && 
+            _resourcePrototype.equals(resource);
+    }
+    
+    /**
+     * If the group is compatable, this method returns the prototype for all
+     * resources contained within.
+     */
     public Resource getResourcePrototype() {
         return _resourcePrototype;
     }

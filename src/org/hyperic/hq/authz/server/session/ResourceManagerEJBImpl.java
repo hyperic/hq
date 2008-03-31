@@ -426,19 +426,30 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public void setResourceOwner(AuthzSubject whoami, ResourceValue res,
                                  AuthzSubject newOwner)
-        throws PermissionException {
+        throws PermissionException 
+    {
         Resource resource = lookupResourcePojo(res);
+        setResourceOwner(whoami, resource, newOwner);
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void setResourceOwner(AuthzSubject whoami, Resource resource,
+                                 AuthzSubject newOwner)
+        throws PermissionException 
+    {
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
 
         if (pm.hasAdminPermission(whoami.getId()) ||
             getResourceDAO().isOwner(resource, whoami.getId())) {
             resource.setOwner(newOwner);
-        }
-        else {
+        } else {
             throw new PermissionException("Only an owner or admin may " +
                                           "reassign ownership.");
         }
     }
+    
 
     /**
      * Get all the resource types

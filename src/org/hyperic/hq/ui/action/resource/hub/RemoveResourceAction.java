@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.ejb.FinderException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -157,7 +158,7 @@ public class RemoveResourceAction extends BaseAction {
                             boss.deleteGroup(sessionId.intValue(), 
                                              resourceId.getId());
                             deleted++;
-                       } catch (AppdefEntityNotFoundException e) {
+                       } catch (FinderException e) {
                            log.trace("Removing resource  " + resourceId +
                                      " failed");
                        } catch (Exception e) {
