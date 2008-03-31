@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launchConfiguration type="org.eclipse.jdt.junit.launchconfig">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/hq_ee/hq/src/org/hyperic/util/unittest/server/ExampleInContainer_test.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
+<mapAttribute key="org.eclipse.debug.core.environmentVariables">
+<mapEntry key="JBOSS_HOME" value="${JBOSS_HOME}"/>
+<mapEntry key="HQ_HOME" value="${HQ_HOME}"/>
+<mapEntry key="HQEE_HOME" value="${HQEE_HOME}"/>
+</mapAttribute>
+<stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
+<booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
+<stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
+<stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit3"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.hyperic.util.unittest.server.ExampleInContainer_test"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="hq_ee"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx512m -Xms512m  -XX:MaxPermSize=192m -Djava.system.class.loader=org.hyperic.util.unittest.server.IsolatingDefaultSystemClassLoader -Dhq.unittest.run=true -Dhq.unittest.jboss.home=${JBOSS_HOME} -Dhq.unittest.hq.home=${HQ_HOME} -Dhq.unittest.working.dir=${HQ_HOME}/unittest/data"/>
+</launchConfiguration>
