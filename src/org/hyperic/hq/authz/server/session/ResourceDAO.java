@@ -388,9 +388,7 @@ public class ResourceDAO
                    "  op.name = 'viewServer' or " +
                    "  op.name = 'viewService' or " +
                    "  op.name = 'viewApplication' or " +
-                   "  op.name = 'viewApplication' or " +
-                   "  (op.name='viewResourceGroup' and " +
-                   "    not r.instanceId = :groupId) )" +
+                   "  op.name = 'viewResourceGroup' )" +
                    " order by r.sortName ";
         return getSession().createQuery(sql)
             .setBoolean("system", fSystem.booleanValue())
@@ -418,9 +416,7 @@ public class ResourceDAO
                    "  op.name = 'viewServer' or " +
                    "  op.name = 'viewService' or " +
                    "  op.name = 'viewApplication' or " +
-                   "  op.name = 'viewApplication' or " +
-                   "  (op.name='viewResourceGroup' and " +
-                   "    not r.instanceId = :groupId) )" +
+                   "  op.name='viewResourceGroup' )" +
                    " order by r.sortName ";
 
         return getSession().createQuery(sql)

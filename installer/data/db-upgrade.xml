@@ -8566,6 +8566,14 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.110">
+    <schema-directSQL>
+        <statement desc="Remove unnecessary group resource as its own member">
+          DELETE FROM EAM_RES_GRP_RES_MAP WHERE EXISTS (SELECT * FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 3 AND ID = RESOURCE_ID AND RESOURCE_GROUP_ID = INSTANCE_ID)
+        </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 
