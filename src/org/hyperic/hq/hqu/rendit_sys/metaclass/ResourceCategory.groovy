@@ -125,7 +125,7 @@ class ResourceCategory {
             return Collections.EMPTY_LIST
         }
         
-        groupMan.findResourceGroupById(user.authzSubjectValue,
+        groupMan.findResourceGroupById(user,
                                        r.instanceId).resources
     }
     
