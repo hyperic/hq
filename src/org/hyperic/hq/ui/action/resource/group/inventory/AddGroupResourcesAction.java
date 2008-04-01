@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.grouping.shared.GroupVisitorException;
 import org.hyperic.hq.ui.Constants;
@@ -124,11 +125,13 @@ public class AddGroupResourcesAction extends BaseAction {
                 return returnSuccess(request, mapping, forwardParams);
                             
             log.trace("getting group [" + aeid.getID() + "]");
-            AppdefGroupValue group = boss.findGroup(sessionId.intValue(),
-                                                    aeid.getId());
+            AppdefGroupValue agroup = boss.findGroup(sessionId.intValue(),
+                                                     aeid.getId());
+            ResourceGroup group = boss.findGroupById(sessionId.intValue(), 
+                                                     agroup.getId());
 
             List newIds =
-                BizappUtils.getNewResourcesForGroup(group, pendingResourceIds);
+                BizappUtils.getNewResourcesForGroup(agroup, pendingResourceIds);
 
             boss.addResourcesToGroup(sessionId.intValue(), group, newIds);
 

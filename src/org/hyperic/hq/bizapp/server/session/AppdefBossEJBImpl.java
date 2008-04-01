@@ -129,6 +129,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -1819,24 +1820,6 @@ public class AppdefBossEJBImpl
             throw e;
         }
     }
-    /**
-     * Process a batch of import data.  The batch consists of
-     * platforms/servers/services/applications which need to be updated
-     * or added.  A report is spit out the backend, which indicates
-     * which operations occurred.
-     *
-     * @ejb:interface-method
-     */
-    public String importBatchData(int sessionID, BatchImportData data)
-        throws SessionTimeoutException, SessionNotFoundException,
-               BatchImportException, PermissionException
-    {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
-
-        Validator.validate(data);
-        ImportHelper helper = new ImportHelper(subject, data);
-        return helper.process();
-    }
 
     /**
      * @return The updated Resource
@@ -1955,6 +1938,20 @@ public class AppdefBossEJBImpl
                                                    name, description, location);
     }
 
+    /**
+     * Remove resources from the group's contents.
+     * 
+     * @ejb:interface-method
+     */
+    public void removeResourcesFromGroup(int sessionId, ResourceGroup group,
+                                         Collection resources)
+        throws SessionException, PermissionException
+    {
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+
+        getResourceGroupManager().removeResources(subject, group, resources);
+    }
+    
     /**
      * @ejb:interface-method
      */
@@ -2182,16 +2179,21 @@ public class AppdefBossEJBImpl
      * Add entities to a resource group
      * @ejb:interface-method
      */
-    public void addResourcesToGroup(int sessionID, AppdefGroupValue gv,
+    public void addResourcesToGroup(int sessionID, ResourceGroup group,
                                     List aeids)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException, FinderException {
+        throws SessionException, PermissionException, FinderException 
+    {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        ResourceGroupManagerLocal resMan = ResourceGroupManagerEJBImpl.getOne();
-        ResourceGroup rg = resMan.findResourceGroupById(subject, gv.getId());
-        for (Iterator it = aeids.iterator(); it.hasNext(); ) {
-            AppdefEntityID aeid = (AppdefEntityID) it.next();
-            resMan.addResource(subject, rg, aeid);
+        ResourceGroupManagerLocal groupMan = 
+            ResourceGroupManagerEJBImpl.getOne();
+        ResourceManagerLocal resourceMan =
+            ResourceManagerEJBImpl.getOne();
+        
+        for (Iterator i = aeids.iterator(); i.hasNext(); ) {
+            AppdefEntityID aeid = (AppdefEntityID)i.next();
+            Resource resource = resourceMan.findResource(aeid);
+            
+            groupMan.addResource(subject, group, resource);
         }
     }
 
@@ -2209,26 +2211,6 @@ public class AppdefBossEJBImpl
         
         getResourceGroupManager().updateGroup(subject, group, name, description, 
                                               location); 
-    }
-    
-    /**
-     * Save a group back to persistent storage.
-     * @ejb:interface-method
-     */
-    public void saveGroup(int sessionId, AppdefGroupValue gv)
-        throws GroupNotCompatibleException, GroupModificationException,
-               GroupDuplicateNameException, 
-               AppSvcClustDuplicateAssignException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException, VetoException 
-    {
-        try {
-            AuthzSubject subject = manager.getSubjectPojo(sessionId);
-            getAppdefGroupManager().saveGroup(subject, gv);
-        } catch (GroupModificationException e) {
-            log.debug("Caught group modification exception on save.");
-            throw e;
-        }
     }
     
     // Return a PageList of authz resources.
@@ -2767,19 +2749,18 @@ public class AppdefBossEJBImpl
      */
     public void batchGroupAdd(int sessionId, AppdefEntityID entityId,
                               Integer[] groupIds)
-        throws GroupNotCompatibleException, AppdefGroupNotFoundException,
-               GroupModificationException, GroupDuplicateNameException,
-               AppSvcClustDuplicateAssignException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException,
-               VetoException 
+        throws SessionException, PermissionException, VetoException,
+               FinderException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
-
-        for (int i=0;i<groupIds.length;i++) {
-            AppdefGroupValue agv = groupMan.findGroup(subject,groupIds[i]);
-            agv.addAppdefEntity(entityId);
-            groupMan.saveGroup(subject,agv);
+        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        ResourceManagerLocal resourceMan = getResourceManager();
+        Resource resource = resourceMan.findResource(entityId);
+        
+        for (int i=0; i < groupIds.length; i++) {
+            ResourceGroup group = groupMan.findResourceGroupById(subject, 
+                                                                 groupIds[i]);
+            groupMan.addResource(subject, group, resource);
         }
     }
 
@@ -2851,19 +2832,19 @@ public class AppdefBossEJBImpl
      */
     public void batchGroupRemove(int sessionId, AppdefEntityID entityId,
                                  Integer[] groupIds)
-        throws GroupNotCompatibleException, AppdefGroupNotFoundException,
-               GroupModificationException, AppSvcClustDuplicateAssignException,
-               GroupDuplicateNameException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException,
-               VetoException 
+        throws PermissionException, SessionException,
+               VetoException, FinderException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
-
+        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        ResourceManagerLocal resourceMan = getResourceManager();
+        Resource resource = resourceMan.findResource(entityId);
+        
         for (int i=0;i<groupIds.length;i++) {
-            AppdefGroupValue agv = groupMan.findGroup(subject,groupIds[i]);
-            agv.removeAppdefEntity(entityId);
-            groupMan.saveGroup(subject,agv);
+            ResourceGroup group = groupMan.findResourceGroupById(subject, 
+                                                                 groupIds[i]);
+            groupMan.removeResources(subject, group, 
+                                     Collections.singleton(resource));
         }
     }
 

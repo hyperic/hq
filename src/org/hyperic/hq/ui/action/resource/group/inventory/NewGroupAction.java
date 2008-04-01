@@ -36,6 +36,7 @@ import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.ui.Constants;
@@ -135,8 +136,9 @@ public class NewGroupAction extends BaseAction {
                 // Now add the new entities to group
                 List newIds = BizappUtils.getNewResourcesForGroup(newGroup,
                                          Arrays.asList(newForm.getEntityIds()));
-                boss.addResourcesToGroup(sessionId.intValue(), newGroup,
-                                         newIds);
+                ResourceGroup group = boss.findGroupById(sessionId.intValue(), 
+                                                         rid);
+                boss.addResourcesToGroup(sessionId.intValue(), group, newIds);
             }
 
             return returnNew(request, mapping, forwardParams);

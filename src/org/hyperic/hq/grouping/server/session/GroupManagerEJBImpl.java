@@ -310,119 +310,6 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
         return  defaultPager.seek(coll,pc.getPagenum(),pc.getPagesize());
     }
 
-    /**
-     *  Saves the contents of a persistent group back the persistent
-     *  storage.  Any registered visitors are executed prior to
-     *  initiating save operation. Contents of group overwrite any
-     *  previous group data.
-     * 
-     * @param subj The authz subject
-     * @param groupVo The group value object
-     * @throws GroupModificationException when group save fails.
-     * @throws PermissionException when consumer is not owner or priv'd.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public void saveGroup(AuthzSubject subj, GroupValue groupVo)
-        throws GroupModificationException, GroupDuplicateNameException,
-               PermissionException, GroupVisitorException
-    {
-        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
-        try {
-            ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
-            
-            // First, lookup the group to preserve non-updatable fields
-            ResourceGroup rg = rgmLoc.findResourceGroupById(subj,
-                                                            groupVo.getId());
-            ResourceGroupValue rgVo = rg.getResourceGroupValue();
-
-            // If they've changed the group name then we need to ensure
-            // they haven't chosen one that already exists. Perform a 
-            // case-insensitive name based find before saving.
-            if (!groupVo.getName().toLowerCase().equals( 
-                    rgVo.getName().toLowerCase()) &&
-                groupNameExists(subj,groupVo)) {
-                throw new GroupDuplicateNameException ("A Group "+
-                                                       "with same name "+
-                                                       "exists.");
-            }
-
-            // Apply any last minute operations.
-            groupVo.visit();
-
-            rgVo.setName        (groupVo.getName());
-            rgVo.setDescription (groupVo.getDescription());
-            rgVo.setLocation    (groupVo.getLocation());
-            rgVo.setMTime       ( new Long(System.currentTimeMillis()) );
-            rgVo.setModifiedBy  (subj.getName());
-            rgVo.setClusterId   (groupVo.getClusterId());
-
-            rgmLoc.saveResourceGroup(subject, rgVo);
-
-            // Fetch existing entries
-            Collection resList = rg.getResources();
-
-            // Now apply deletions
-            Iterator iter = resList.iterator();
-            List resToDel = new ArrayList();
-            while (iter.hasNext()) {
-                Resource resVo = (Resource) iter.next();
-                GroupEntry ent =
-                    new GroupEntry(resVo.getInstanceId(),
-                                   resVo.getResourceType().getName());
-
-                if (!groupVo.existsEntry(ent)) {
-                    resToDel.add(resVo);
-                }
-            }
-            
-            // only call remove if there's stuff to delete
-            if(!resToDel.isEmpty()) {
-                Resource[] resToDelArr = (Resource[]) resToDel
-                        .toArray(new Resource[resToDel.size()]);
-                rgmLoc.removeResources(subject, rgVo, resToDelArr);
-            }
-            // now apply additions
-            iter = groupVo.getGroupEntries().iterator();
-            List resToAdd = new ArrayList();
-            while (iter.hasNext()) {
-                GroupEntry groupEntry = (GroupEntry)iter.next();
-                if (! resourceListContainsGroupEntry(resList,groupEntry) ) {
-                    ResourceValue trv = getResourceByInstanceId(
-                                            groupEntry.getType(),
-                                            groupEntry.getId());
-                    resToAdd.add(trv);
-                }
-            }
-            ResourceValue[] resToAddArr = (ResourceValue[])
-                resToAdd.toArray(new ResourceValue[]{});
-            rgmLoc.addResources(subject,rgVo,resToAddArr);
-        } catch (FinderException fe) {
-            log.error("GroupManager.saveGroup caught underlying finder exc: "+
-                      "this may happen in authz during permission checks if "+
-                      "person or resource isn't found: "+ fe.getMessage());
-            throw new GroupModificationException (fe);
-        } catch (PermissionException pe) {
-            throw pe;
-        }
-    }
-
-    private boolean resourceListContainsGroupEntry(Collection list,
-                                                   GroupEntry ge) {
-        try {
-            Iterator i=list.iterator();
-            while (i.hasNext()) {
-                Resource rv = (Resource) i.next();
-                if (rv.getInstanceId().intValue() == ge.getId().intValue() &&
-                    rv.getResourceType().getName().equals(ge.getType()))
-                    return true;
-            }
-        } catch (Exception e) {
-            log.debug("ResourceListContainsGroupEntry caught exception:", e);
-        }
-        return false;
-    }
-
     /* Get the authz resource type value  */
     protected ResourceType getResourceType(String resType)
         throws FinderException 
@@ -444,13 +331,6 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
         } catch (Exception e) {
             throw new SystemException(e);
         }
-    }
-
-    private ResourceValue getResourceByInstanceId(String type, Integer id)
-        throws FinderException 
-    {
-        return getResourceManager()
-            .findResourceByInstanceId(getResourceType(type),id);
     }
 
     // To avoid groups with duplicate names, we're now performing a

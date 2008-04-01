@@ -365,26 +365,17 @@ public class ResourceGroupManagerEJBImpl
      * Add a resource to a group by resource id and resource type
      * @ejb:interface-method
      */
-    public ResourceGroup addResource(AuthzSubject whoami,
-                                     ResourceGroup group, AppdefEntityID aeid)
+    public ResourceGroup addResource(AuthzSubject whoami, ResourceGroup group, 
+                                     Resource resource)
         throws PermissionException 
     {
-        ResourceGroupDAO dao = getResourceGroupDAO();
-        // reassociate group to session
-        ResourceGroup resGroup = dao.findById(group.getId());
-
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(),
-                 AuthzConstants.authzGroup,
-                 resGroup.getId(),
-                 AuthzConstants.perm_modifyResourceGroup);
+        pm.check(whoami.getId(), AuthzConstants.authzGroup,
+                 group.getId(), AuthzConstants.perm_modifyResourceGroup);
 
-        // now look up the resource by type and id
-        Resource resource = getResourceDAO()
-            .findByInstanceId(aeid.getAuthzTypeId(), aeid.getId());
-        resGroup.addResource(resource);
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(resGroup);
-        return resGroup;
+        group.addResource(resource);
+        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
+        return group;
     }
  
     /**
@@ -393,9 +384,9 @@ public class ResourceGroupManagerEJBImpl
      * @param group The group .
      * @ejb:interface-method
      */
-    public void removeResources(AuthzSubjectValue whoami,
-                                ResourceGroupValue group,
-                                Resource[] resources)
+    public void removeResources(AuthzSubject whoami,
+                                ResourceGroup group,
+                                Collection resources)
         throws PermissionException 
     {
         ResourceGroupDAO grpDao = getResourceGroupDAO();

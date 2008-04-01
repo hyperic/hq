@@ -29,7 +29,9 @@
  */
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -43,6 +45,9 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -66,41 +71,39 @@ public class RemoveAction extends BaseAction {
         forwardParams.put(Constants.ACCORDION_PARAM, "1");
         
         try {
+            String[] rsrcIds = nwForm.getResources();
             
-            String[] resources = nwForm.getResources();
-            
-            if (resources == null || resources.length == 0) {
+            if (rsrcIds == null || rsrcIds.length == 0) {
                 return returnSuccess(request, mapping,forwardParams);
             }
             
-            Integer groupId = RequestUtils.getResourceId(request);
-            Integer sessionId =  RequestUtils.getSessionId(request);
+            Integer groupId   = RequestUtils.getResourceId(request);
+            Integer sessionId = RequestUtils.getSessionId(request);
             
-            //get the spiderSubjectValue of the user to be deleated.
             ServletContext ctx = getServlet().getServletContext();            
             AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
             
-            log.trace("removing resource");                                                      
-            AppdefGroupValue group = boss.findGroup(sessionId.intValue(), 
-                            groupId);
-            
-            for (int i = 0; i < resources.length; i++) {
-                AppdefEntityID entity = new AppdefEntityID(resources[i]);
-                group.removeAppdefEntity(entity);                
+            ResourceGroup group = boss.findGroupById(sessionId.intValue(), 
+                                                     groupId);
+
+            ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+            List resources = new ArrayList(rsrcIds.length);
+            for (int i = 0; i < rsrcIds.length; i++) {
+                AppdefEntityID entity = new AppdefEntityID(rsrcIds[i]);
+                
+                resources.add(rMan.findResource(entity));
             }
 
-            boss.saveGroup(sessionId.intValue(), group);
+            boss.removeResourcesFromGroup(sessionId.intValue(), group,
+                                          resources);
             
             return returnSuccess(request, mapping,forwardParams);
-                
         } catch (ParameterNotFoundException e2) {
-            RequestUtils
-                .setError(request,
-                          Constants.ERR_RESOURCE_ID_FOUND);
+            RequestUtils.setError(request,
+                                  Constants.ERR_RESOURCE_ID_FOUND);
             return returnFailure(request, mapping, forwardParams);
         } catch (AppdefGroupNotFoundException e) {
-            RequestUtils
-                .setError(request,
+            RequestUtils.setError(request,
                           "resource.common.inventory.error.ResourceNotFound");
                      
             return returnFailure(request, mapping, forwardParams);

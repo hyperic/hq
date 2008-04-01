@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
@@ -111,10 +112,11 @@ public class ResourceGroupDAO extends HibernateDAO
         entity.getResourceSet().clear();
     }
 
-    public void removeResources(ResourceGroup entity, Resource[] resources) {
+    public void removeResources(ResourceGroup entity, Collection resources) {
         Collection resCol = entity.getResourceSet();
-        for (int i = 0; i < resources.length; i++) {
-            resCol.remove(resources[i]);
+        
+        for (Iterator i=resources.iterator(); i.hasNext(); ) {
+            resCol.remove(i.next());
         }
     }
 
