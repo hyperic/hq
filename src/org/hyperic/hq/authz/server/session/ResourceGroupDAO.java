@@ -243,7 +243,7 @@ public class ResourceGroupDAO extends HibernateDAO
         String sql =
             "select m from DerivedMeasurement m, " +
             "ResourceGroup g join g.resourceSet r " +
-            "where m.instanceId = r.instanceId and "+
+            "where not g.resource = r and m.instanceId = r.instanceId and "+
             "g = ? and m.template.id = ? and m.enabled = true";
 
         return getSession().createQuery(sql)
