@@ -130,8 +130,10 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
@@ -157,7 +159,6 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
-import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
@@ -1878,14 +1879,25 @@ public class AppdefBossEJBImpl
      * @return AppdefGroupValue object
      * @ejb:interface-method
      */
-    public AppdefGroupValue createGroup(int sessionId, String name,
-                                        String description, String location)
+    public ResourceGroup createGroup(int sessionId, String name,
+                                     String description, String location)
         throws GroupCreationException, GroupDuplicateNameException,
-               SessionTimeoutException, SessionNotFoundException 
+               SessionException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        return getAppdefGroupManager().createGroup(subject, name, description,
-                                                   location);
+        ResourceGroupCreateInfo cInfo = 
+            new ResourceGroupCreateInfo(name, description,
+                              AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS,
+                              null,      // prototype
+                              location,
+                              0,         // clusterId 
+                              false);    // system?
+
+        // No roles or resources
+        return getResourceGroupManager()
+            .createResourceGroup(subject, cInfo,
+                                 Collections.EMPTY_LIST,
+                                 Collections.EMPTY_LIST);
     }
 
     /**
@@ -1903,14 +1915,36 @@ public class AppdefBossEJBImpl
      * @return AppdefGroupValue object
      * @ejb:interface-method
      */
-    public AppdefGroupValue createGroup(int sessionId, int adType, String name,
-                                        String description, String location)
-        throws GroupCreationException, GroupDuplicateNameException,
-               SessionTimeoutException, SessionNotFoundException 
+    public ResourceGroup createGroup(int sessionId, int adType, String name,
+                                     String description, String location)
+        throws GroupCreationException, SessionException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        return getAppdefGroupManager().createGroup(subject, adType, name,
-                                                   description, location);
+        int groupType;
+        
+        if (adType == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP;
+        } else if (adType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
+            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
+        } else {
+            throw new IllegalArgumentException("Invalid group type. Strict " + 
+                                               "mixed group types can be " +
+                                               "group or application");
+        }        
+        
+        ResourceGroupCreateInfo cInfo = 
+            new ResourceGroupCreateInfo(name, description,
+                                        groupType,
+                                        null,      // prototype
+                                        location,
+                                        0,         // clusterId 
+                                        false);    // system?
+
+        // No roles or resources
+        return getResourceGroupManager()
+            .createResourceGroup(subject, cInfo,
+                                 Collections.EMPTY_LIST,
+                                 Collections.EMPTY_LIST);
     }
 
     /**
@@ -1927,15 +1961,43 @@ public class AppdefBossEJBImpl
      * @param location    - Location of group (optional)
      * @ejb:interface-method
      */
-    public AppdefGroupValue createGroup(int sessionId, int adType, 
-                                        int adResType, String name, 
-                                        String description, String location)
+    public ResourceGroup createGroup(int sessionId, int adType, 
+                                     int adResType, String name, 
+                                     String description, String location)
         throws GroupCreationException, GroupDuplicateNameException,
-               SessionTimeoutException, SessionNotFoundException 
+               SessionException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        return getAppdefGroupManager().createGroup(subject, adType, adResType,
-                                                   name, description, location);
+        int groupType;
+        
+        if (adType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC;
+        } else if (adType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM ||
+                   adType == AppdefEntityConstants.APPDEF_TYPE_SERVER) 
+        {
+            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
+        } else {
+            throw new IllegalArgumentException("Invalid group compatibility " +
+                                               "type specified");
+        }
+        
+        Resource prototype = 
+            getResourceGroupManager().getResourceGroupPrototype(adType, 
+                                                                adResType);
+        
+        ResourceGroupCreateInfo cInfo = 
+            new ResourceGroupCreateInfo(name, description,
+                                        groupType,
+                                        prototype,      
+                                        location,
+                                        0,         // clusterId 
+                                        false);    // system?
+
+        // No roles or resources
+        return getResourceGroupManager()
+            .createResourceGroup(subject, cInfo,
+                                 Collections.EMPTY_LIST,
+                                 Collections.EMPTY_LIST);
     }
 
     /**

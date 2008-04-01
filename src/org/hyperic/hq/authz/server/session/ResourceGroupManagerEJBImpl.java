@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -151,12 +152,10 @@ public class ResourceGroupManagerEJBImpl
                                              ResourceGroupCreateInfo cInfo,
                                              Collection roles,
                                              Collection resources)
+        throws GroupCreationException
     {
-        ResourceGroup res;
-
-        res = getResourceGroupDAO().create(whoami, cInfo);
-        res.setResourceSet(new HashSet(resources));
-        res.setRoles(new HashSet(roles));
+        ResourceGroup res = getResourceGroupDAO().create(whoami, cInfo,
+                                                         resources, roles);
 
         GroupingStartupListener.getCallbackObj().postGroupCreate(res);
         return res;
@@ -861,10 +860,10 @@ public class ResourceGroupManagerEJBImpl
      * compatible group of resources.
      *
      * @return The maximum collection time in milliseconds.
+     * TODO:  This does not belong here.  Evict, evict!  -- JMT 04/01/08 
      * @ejb:interface-method
      */
     public long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
-
         Long max =
             getResourceGroupDAO().getMaxCollectionInterval(g, templateId);
 
@@ -885,6 +884,8 @@ public class ResourceGroupManagerEJBImpl
      * @param templateId The measurement template to query.
      * @return templateId A list of Measurement objects with the given template
      * id in the group that are set to be collected.
+     * 
+     * TODO:  This does not belong here.  Evict, evict!  -- JMT 04/01/08 
      * @ejb:interface-method
      */
     public List getMetricsCollecting(ResourceGroup g, Integer templateId) {

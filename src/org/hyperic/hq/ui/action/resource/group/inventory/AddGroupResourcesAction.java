@@ -131,7 +131,7 @@ public class AddGroupResourcesAction extends BaseAction {
                                                      agroup.getId());
 
             List newIds =
-                BizappUtils.getNewResourcesForGroup(agroup, pendingResourceIds);
+                BizappUtils.getNewResourcesForGroup(group, pendingResourceIds);
 
             boss.addResourcesToGroup(sessionId.intValue(), group, newIds);
 

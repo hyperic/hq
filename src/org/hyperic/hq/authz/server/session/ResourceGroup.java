@@ -32,6 +32,7 @@ import java.util.TreeSet;
 
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 
@@ -54,33 +55,32 @@ public class ResourceGroup extends AuthzNamedBean
     private ResourceGroupValue _resourceGroupValue = new ResourceGroupValue();
 
     public static class ResourceGroupCreateInfo {
-        private String  _name;
-        private String  _description;
-        private String  _location;
-        private int     _groupType;
+        private String   _name;
+        private String   _description;
+        private String   _location;
+        private int      _groupType;
         private Resource _resourcePrototype;
-        private int     _clusterId;
-        private boolean _system;
+        private int      _clusterId;
+        private boolean  _system;
         
         public ResourceGroupCreateInfo(String name, String description,
                                        int groupType,
                                        Resource resourcePrototype,
                                        String location,
                                        int clusterId, boolean system)  
-                                       
         {
-            _name            = name;
-            _description     = description;
+            _name              = name;
+            _description       = description;
             _resourcePrototype = resourcePrototype;
-            _groupType       = groupType;
-            _location        = location;
-            _clusterId       = clusterId;
-            _system          = system;
+            _groupType         = groupType;
+            _location          = location;
+            _clusterId         = clusterId;
+            _system            = system;
         }
         
-        public String  getName() { return _name; }
-        public String  getDescription() { return _description; }
-        public String  getLocation() { return _location; }
+        public String getName() { return _name; }
+        public String getDescription() { return _description; }
+        public String getLocation() { return _location; }
         public int getGroupType() { return _groupType; }
         public Resource getResourcePrototype() { return _resourcePrototype; }
         public int getClusterId() { return _clusterId; }
@@ -93,14 +93,14 @@ public class ResourceGroup extends AuthzNamedBean
 
     ResourceGroup(ResourceGroupCreateInfo cInfo, AuthzSubject creator) {
         setName(cInfo.getName());
-        _clusterId       = new Integer(cInfo.getClusterId());
-        _description     = cInfo.getDescription();
-        _location        = cInfo.getLocation();
-        _system          = cInfo.getSystem();
-        _groupType       = new Integer(cInfo.getGroupType());
+        _clusterId         = new Integer(cInfo.getClusterId());
+        _description       = cInfo.getDescription();
+        _location          = cInfo.getLocation();
+        _system            = cInfo.getSystem();
+        _groupType         = new Integer(cInfo.getGroupType());
         _resourcePrototype = cInfo.getResourcePrototype();
-        _ctime = _mtime  = System.currentTimeMillis();
-        _modifiedBy      = creator.getName();
+        _ctime = _mtime    = System.currentTimeMillis();
+        _modifiedBy        = creator.getName();
     }
     
     /**
@@ -315,6 +315,41 @@ public class ResourceGroup extends AuthzNamedBean
 
     public void removeAllRoles() {
         _roles.clear();
+    }
+
+    
+    private static AppdefEntityID getEntityID(Resource r) {
+        int typeId = r.getResourceType().getId().intValue();
+        
+        if (typeId == AuthzConstants.authzPlatform.intValue()) {
+            return AppdefEntityID.newPlatformID(r.getInstanceId().intValue());
+        } else if (typeId == AuthzConstants.authzServer.intValue()) {
+            return AppdefEntityID.newServerID(r.getInstanceId().intValue());
+        } else if (typeId == AuthzConstants.authzService.intValue()) {
+            return AppdefEntityID.newServiceID(r.getInstanceId().intValue());
+        } else if (typeId == AuthzConstants.authzApplication.intValue()) {
+            return AppdefEntityID.newAppID(r.getInstanceId().intValue());
+        } else if (typeId == AuthzConstants.authzGroup.intValue()) {
+            return AppdefEntityID.newGroupID(r.getInstanceId().intValue());
+        } else {
+            throw new RuntimeException("Resource [id=" + r.getId() + "] " +
+                                       "is not an appdef object");
+        }
+    }
+    
+    /**
+     * Returns true if this group contains a resource of the specified ID
+     * @deprecated Should use call into the manager instead.
+     */
+    public boolean existsAppdefEntity(AppdefEntityID ent) {
+        for (Iterator i=getResources().iterator(); i.hasNext(); ) {
+            Resource r = (Resource)i.next();
+            AppdefEntityID rId = getEntityID(r);
+            
+            if (rId.equals(ent))
+                return true;
+        }
+        return false;
     }
 
     /**

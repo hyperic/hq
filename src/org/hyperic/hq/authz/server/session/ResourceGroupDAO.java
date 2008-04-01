@@ -26,12 +26,14 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -42,19 +44,62 @@ public class ResourceGroupDAO extends HibernateDAO
         super(ResourceGroup.class, f);
     }
 
-    public ResourceGroup create(AuthzSubject creator,
-                                ResourceGroupCreateInfo cInfo)
+    private void assertNameConstraints(String name) 
+        throws GroupCreationException
     {
+        if (name == null || name.length() == 0 || name.length() > 100)
+            throw new GroupCreationException("Group name must be between " +
+                                             "1 and 100 characters in length");
+    }
+
+    private void assertDescriptionConstraints(String desc) 
+        throws GroupCreationException
+    {
+        if (desc != null && desc.length() > 100)
+            throw new GroupCreationException("Group description must be " + 
+                                     "between 1 and 100 characters in length");
+    }
+
+    private void assertLocationConstraints(String loc) 
+        throws GroupCreationException
+    {
+        if (loc != null && loc.length() > 100)
+            throw new GroupCreationException("Group location must be " + 
+                                     "between 1 and 100 characters in length");
+    }
+    
+    ResourceGroup create(AuthzSubject creator, ResourceGroupCreateInfo cInfo,
+                         Collection resources, Collection roles)
+        throws GroupCreationException
+    {
+        assertNameConstraints(cInfo.getName());
+        assertDescriptionConstraints(cInfo.getDescription());
+        assertLocationConstraints(cInfo.getLocation());
+        
+        switch(cInfo.getGroupType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP:
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP:
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS:
+            if (cInfo.getResourcePrototype() != null) {
+                throw new GroupCreationException("Cannot specify a prototype "+
+                                                 "for mixed groups");
+            }
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS:
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC:
+            if (cInfo.getResourcePrototype() == null) {
+                throw new GroupCreationException("Compatable groups must " +
+                                                 "specify a prototype");
+            }
+            break;
+        }
+        
         ResourceGroup resGrp = new ResourceGroup(cInfo, creator);
 
         ResourceType resType = new ResourceTypeDAO(DAOFactory.getDAOFactory())
             .findById(AuthzConstants.authzGroup);
         
-        if (resType == null) {
-            throw new SystemException("ResourceType not found " +
-                                      AuthzConstants.groupResourceTypeName);
-        }
-
+        assert resType != null;
         ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
         Resource proto = rDao.findById(AuthzConstants.rootResourceId);
         Resource r = rDao.create(resType, proto, resGrp.getName(), creator,  
@@ -66,13 +111,16 @@ public class ResourceGroupDAO extends HibernateDAO
         /* The following oddity is needed because the above rDao.create()
          * flushes the session.  If we don't refresh the object, then 
          * changing the instanceId here doens't seem to do anything.  This
-         * is definitely a hacky workaround for a Hibernate issue. 
-         */
+         * is definitely a hacky workaround for a Hibernate issue. */
         r = rDao.findById(r.getId());
         getSession().refresh(r);
         r.setInstanceId(resGrp.getId());
         save(r);
         flushSession();
+        
+        resGrp.setResourceSet(new HashSet(resources));
+        resGrp.setRoles(new HashSet(roles));
+        
         return resGrp;
     }
 

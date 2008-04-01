@@ -79,7 +79,7 @@ public class NewGroupAction extends BaseAction {
         try {        
             ServletContext ctx = getServlet().getServletContext();
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefGroupValue newGroup;
+            ResourceGroup newGroup;
             AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
             if (newForm.getGroupType().intValue() ==
@@ -121,7 +121,7 @@ public class NewGroupAction extends BaseAction {
             HashMap forwardParams = new HashMap(2);
             
             rid = newGroup.getId();
-            entityType = new Integer(newGroup.getEntityId().getType());
+            entityType = new Integer(AppdefEntityConstants.APPDEF_TYPE_GROUP);
             forwardParams.put(Constants.RESOURCE_PARAM, rid);
             forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
             

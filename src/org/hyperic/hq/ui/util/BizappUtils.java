@@ -65,6 +65,7 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
@@ -693,13 +694,12 @@ public class BizappUtils {
     /**
      * get a list of new AppdefEntityID objects for a group
      */
-    public static List getNewResourcesForGroup(AppdefGroupValue group, List ids)
-        throws GroupVisitorException {
+    public static List getNewResourcesForGroup(ResourceGroup group, List ids) {
         List ret = new ArrayList();
-        Iterator iterator = ids.iterator();
-        while (iterator.hasNext()) {
-            String id = (String) iterator.next();
+        for (Iterator i=ids.iterator(); i.hasNext(); ) {
+            String id = (String) i.next();
             AppdefEntityID entity = new AppdefEntityID(id);
+            
             if (!group.existsAppdefEntity(entity)) {
                 ret.add(entity);
             }            

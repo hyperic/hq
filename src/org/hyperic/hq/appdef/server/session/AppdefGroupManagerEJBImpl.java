@@ -66,6 +66,7 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
@@ -73,7 +74,6 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupManagerLocal;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
@@ -127,157 +127,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     }
     
     public AppdefGroupManagerEJBImpl() {}
-
-    /**
-     * Create and return a new mixed group value object. This group can 
-     * contain mixed resources of any entity/resource type combination 
-     * including platform, server and service.
-     *
-     * @param subject     - A valid spider subject value
-     * @param name        - The name of the group.
-     * @param description - A description of the group contents. (optional)
-     * @param location    - Location of group (optional)
-     * @return AppdefGroupValue object
-     * @throws GroupCreationException
-     *
-     * @ejb:interface-method
-     */
-    public AppdefGroupValue createGroup(AuthzSubject subject, String name,
-                                        String description, String location )
-        throws GroupCreationException, GroupDuplicateNameException {
-
-        return createGroup(subject,
-                           AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS,
-                           APPDEF_TYPE_UNDEFINED,
-                           APPDEF_RES_TYPE_UNDEFINED,
-                           name, description, location);
-    }
-
-    /**
-     * Create and return a new strict mixed group value object. This 
-     * type of group can contain either applications or other
-     * groups. However, the choice between between the 
-     * two is mutually exclusive because all group members must be
-     * of the same entity type. Additionally, groups that contain
-     * groups are limited to containing either "application groups" or
-     * "platform,server&service groups".
-     *
-     * @param subject     - A valid spider subject value
-     * @param adType      - The appdef entity type (groups or applications)
-     * @param name        - The name of the group.
-     * @param description - A description of the group contents. (optional)
-     * @param location    - Location of group (optional)
-     * @return AppdefGroupValue object
-     * @throws GroupCreationException
-     *
-     * @ejb:interface-method
-     */
-    public AppdefGroupValue createGroup(AuthzSubject subject, int adType,
-                                        String name, String description,
-                                        String location)
-        throws GroupCreationException, GroupDuplicateNameException {
-        int groupType;
-
-        if (adType == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP;
-        } else if (adType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
-            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
-        } else {
-            throw new IllegalArgumentException(
-                "Invalid group type. Strict mixed group types can be " +
-                "group or application");
-        }
-
-        return createGroup(subject, groupType,
-                           adType, APPDEF_RES_TYPE_UNDEFINED,
-                           name, description, location);
-    }
-
-    /**
-     * Create and return a new compatible group type object. This group type
-     * can contain any type of platform, server or service. Compatible groups
-     * are strict which means that all members must be of the same type. 
-     * Compatible group members must also be compatible which means that all
-     * group members must have the same resource type. Compatible groups of
-     * services have an additional designation of being of type "Cluster". 
-     *
-     * @param subject     - A valid spider subject value
-     * @param adType      - The type of entity this group is compatible with.
-     * @param adResType   - The resource type this group is compatible with.
-     * @param name        - The name of the group.
-     * @param description - A description of the group contents. (optional)
-     * @param location    - Location of group (optional)
-     * @return AppdefGroupValue object
-     * @throws GroupCreationException
-     *
-     * @ejb:interface-method
-     */
-    public AppdefGroupValue createGroup(AuthzSubject subject, int adType,
-        int adResType, String name, String description, String location)
-        throws  GroupCreationException, GroupDuplicateNameException {
-        int groupType;
-
-        if (adType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC;
-        } else if (adType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM ||
-                   adType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
-        } else {
-            throw new IllegalArgumentException ("Invalid group compatibility " +
-                "type specified");
-        }
-
-        return createGroup (subject, groupType, adType, adResType,
-                            name, description, location );
-    }
-
-    // Creates groups of all types
-    // XXX- enforce service to cluster membership uniqueness types
-    // XXX- hit appdef service manager with list of services.
-    // XXX- add cluster_id
-    // XXX- authz checks
-    private AppdefGroupValue createGroup(AuthzSubject subject, int gType,
-                                         int adType, int adResType, String name,
-                                         String description, String location)
-        throws GroupCreationException, GroupDuplicateNameException 
-    {
-        // groups must have at minimum a name between 1 and 100 chars.
-        if (name == null || name.length() == 0 || name.length() > 100 )
-            throw new GroupCreationException ("Name must be between 1 and "+
-                                              "100 characters in length.");
-
-        // and desc (if provided) should be between 1 and 100 chars.
-        if (description != null && description.length() > 100)
-            throw new GroupCreationException ("Description must be between "+ 
-                                              "0 and 100 characters in "+
-                                              "length.");
-
-        // and location (if provided) should be between 1 and 100 chars.
-        if (location != null && location.length() > 100)
-            throw new GroupCreationException ("Location must be between "+
-                                              "0 and 100 characters in "+
-                                              "length.");
-
-        AppdefGroupValue gv = new AppdefGroupValue();
-        gv.setName            ( name        );
-        gv.setDescription     ( description );
-        gv.setLocation        ( location    );
-        gv.setGroupEntType    ( adType      );
-        gv.setGroupEntResType ( adResType   );
-        gv.setGroupType       ( gType       );
-
-        GroupManagerLocal manager = getGroupManager();
-
-        gv = (AppdefGroupValue) manager.createGroup(subject, gv);
-
-        // Setup the group to contain a valid type object. 
-        setGroupAppdefResourceType(subject,gv);
-
-        // Setup any group visitors
-        registerVisitors (gv);
-
-        return gv;
-    }
 
     /**
      * Lookup and return a group value object by its name.

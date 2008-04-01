@@ -45,6 +45,7 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
@@ -55,7 +56,6 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
@@ -79,63 +79,6 @@ import org.hyperic.util.pager.SortAttribute;
 public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
     private final Log log = LogFactory.getLog(GroupManagerEJBImpl.class);
     public final String authzResourceGroupName = "covalentAuthzResourceGroup";
-
-    /**
-     *  Create a persistent group according to options specified.
-     * 
-     * @param subj subject
-     * @param group value object ref to populate. Visitors can be pre-registered
-     * @return GroupValue object.
-     * @throws GroupCreationException during finding of resource types and
-     *         creation of dependent session EJBs.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public GroupValue createGroup(AuthzSubject subj, GroupValue group)
-        throws GroupCreationException, GroupDuplicateNameException 
-    {
-        // To avoid groups with duplicate names, we're now performing a
-        // a case-insensitive name based find before creation.
-        if (groupNameExists(subj, group)) {
-            throw new GroupDuplicateNameException ("A Group "+
-                                                   "with same name "+
-                                                   "exists.");
-        }
-
-        ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
-
-        Resource resourcePrototype =
-            rgmLoc.getResourceGroupPrototype(group.getGroupEntType(),
-                                             group.getGroupEntResType());
-
-        /* Create the resource group. */
-        ResourceGroupCreateInfo createInfo = 
-            new ResourceGroupCreateInfo(group.getName(), 
-                                        group.getDescription(),
-                                        group.getGroupType(), 
-                                        resourcePrototype,
-                                        group.getLocation(),
-                                        group.getClusterId(), 
-                                        false /* system = false */);
-        
-        ResourceGroup rg =
-            rgmLoc.createResourceGroup(subj, createInfo,
-                                       Collections.EMPTY_LIST,  // Roles
-                                       Collections.EMPTY_LIST); // Resources
-
-        /* Create our return group vo */
-        group.setId            ( rg.getId() );
-        group.setName          ( rg.getName() );
-        group.setDescription   ( rg.getDescription() );
-        group.setLocation      ( rg.getLocation() );
-        group.setGroupType     ( createInfo.getGroupType() );
-        group.setSubject       ( subj.getAuthzSubjectValue() );
-        group.setCTime         ( new Long(rg.getCtime()) );
-        group.setMTime         ( new Long(rg.getMtime()) );
-        group.setModifiedBy    ( rg.getModifiedBy() );
-        group.setOwner         ( subj.getName() );
-        return group;
-    }
 
     private String fetchGroupOwner(Integer gid) {
         String retVal = "";

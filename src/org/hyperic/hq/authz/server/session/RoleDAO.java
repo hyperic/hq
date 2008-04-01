@@ -26,14 +26,17 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class RoleDAO extends HibernateDAO {
@@ -97,8 +100,16 @@ public class RoleDAO extends HibernateDAO {
                                         null,  // Location
                                         0,     // clusterId
                                         true); // system
-        
-        ResourceGroup group = resourceGroupDAO.create(creator, cInfo);
+
+        ResourceGroup group;
+        try {
+            group = resourceGroupDAO.create(creator, cInfo,
+                                            Collections.EMPTY_LIST,
+                                            Collections.EMPTY_LIST);
+        } catch(GroupCreationException e) {
+            throw new SystemException("Should always be able to create a " +
+                                      "group for roles, but got exceptin", e);
+        }
         // add our resource
         group.addResource(myResource);
         groups.add(group);

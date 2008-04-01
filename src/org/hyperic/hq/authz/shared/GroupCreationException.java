@@ -23,24 +23,13 @@
  * USA.
  */
 
-package org.hyperic.hq.grouping.shared;
-
-/** This exception is thrown when the group cannot be created. Causes
-*   may range from incompatible element insertion to CMP failure. */
+package org.hyperic.hq.authz.shared;
 
 import org.hyperic.hq.common.ApplicationException;
 
 public class GroupCreationException extends ApplicationException {
-    public GroupCreationException () {
-        super();
-    }
-
     public GroupCreationException (String s) {
         super(s);
-    }
-
-    public GroupCreationException (Throwable t) {
-        super(t);
     }
 
     public GroupCreationException (String s, Throwable t) {
