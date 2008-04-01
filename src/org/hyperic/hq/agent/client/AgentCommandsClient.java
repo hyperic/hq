@@ -29,9 +29,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.hq.agent.AgentCommandsAPI;
+import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.AgentStreamPair;
@@ -46,8 +45,6 @@ import org.hyperic.hq.agent.commands.AgentRestart_args;
 import org.hyperic.hq.agent.commands.AgentRestart_result;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.util.math.MathUtil;
-
-import org.tanukisoftware.wrapper.WrapperManager;
 
 /**
  * The set of commands a client can call to a remote agent.  This object
