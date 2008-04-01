@@ -91,48 +91,44 @@ public class MetricSessionEJB extends BizappSessionEJB {
     protected Map getResourceMetrics(AuthzSubject subject, List resources,
                                      List tmpls, long begin, long end,
                                      Boolean showNoCollect)
-        throws AppdefCompatException {
-        List mtVals;
-        Integer[] mtids = new Integer[tmpls.size()];
-        int i = 0;
-        StopWatch timer = new StopWatch();
-                
+        throws AppdefCompatException
+    {
+        List templates;
+        Integer[] templateIds;
+
         // Create Map of all resources
-        HashMap resmap =
-            new HashMap(MeasurementConstants.VALID_CATEGORIES.length);
-        
-        // bail out early if there's nothing to do
-        if (tmpls.size() < 1 || resources.size() < 1)
+        HashMap resmap = new HashMap(MeasurementConstants.VALID_CATEGORIES.length);
+
+        if (tmpls.size() == 0 || resources.size() == 0)
             return resmap;
             
-        // If templates are just ID's, we have to look them up
         if (tmpls.get(0) instanceof MeasurementTemplate) {
-            mtVals = tmpls;
-            // Iterate through them
-            for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
-                MeasurementTemplate tmpl =
-                    (MeasurementTemplate) it.next();
-                mtids[i++] = tmpl.getId();
+            templates = tmpls;
+            templateIds = new Integer[templates.size()];
+            for (int i = 0; i < templates.size(); i++ ) {
+                MeasurementTemplate t = (MeasurementTemplate)templates.get(i);
+                templateIds[i] = t.getId();
             }
         }
         else {
-            mtids = (Integer[]) tmpls.toArray(mtids);
+            // If templates are just ID's, we have to look them up
+            templateIds = (Integer[])tmpls.toArray(new Integer[tmpls.size()]);
             try {
-                mtVals = getTemplateManager()
-                             .getTemplates(mtids, PageControl.PAGE_ALL);
+                templates = getTemplateManager().getTemplates(templateIds,
+                                                              PageControl.PAGE_ALL);
             } catch (TemplateNotFoundException e) {
+                templates = new ArrayList(0);
                 // Well, if we don't find it, *shrug*
-                mtVals = new ArrayList(0);
             }
         }
         
         // Create the EntityIds array and map of counts
         Integer[] eids = new Integer[resources.size()];
         AppdefEntityID[] aeids = new AppdefEntityID[resources.size()];
-        AppdefEntityID aeid = null;
+        AppdefEntityID aeid;
         Map totalCounts = new HashMap();
         Iterator it = resources.iterator();
-        for (i = 0; it.hasNext(); i++) {            
+        for (int i = 0; it.hasNext(); i++) {
             // We understand two types
             Object resource = it.next();
             if (resource instanceof AppdefResourceValue) {
@@ -158,29 +154,16 @@ public class MetricSessionEJB extends BizappSessionEJB {
             eids[i]  = aeid.getId();
             aeids[i] = aeid;
         }
-        
-        if (log.isTraceEnabled()) {
-            log.trace("getResourceMetrics -> resource and template maps " +
-                timer.getElapsed());
-        }
-    
-        timer.reset();
             
         // Now get the aggregate data, keyed by template ID's
-        Map datamap = getDataMan().getAggregateData(mtids, eids, begin, end);
-        
-        if (log.isTraceEnabled()) {
-            log.trace("getResourceMetrics -> getAggregateData took " +
-                      timer.getElapsed());
-        }
-    
+        Map datamap = getDataMan().getAggregateData(templates, eids, begin, end);
+
         // Get the intervals, keyed by template ID's as well
         Map intervals = showNoCollect == null ? new HashMap() :
-            getMetricManager().findMetricIntervals(subject, aeids, mtids);
+            getMetricManager().findMetricIntervals(subject, aeids, templateIds);
 
-        for (it = mtVals.iterator(); it.hasNext(); ) {
-            MeasurementTemplate tmpl =
-                (MeasurementTemplate) it.next();
+        for (it = templates.iterator(); it.hasNext(); ) {
+            MeasurementTemplate tmpl = (MeasurementTemplate) it.next();
     
             int total = eids.length;
             String type = tmpl.getMonitorableType().getName();
@@ -206,7 +189,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
             // Now create a MetricDisplaySummary and add it to the list
             MetricDisplaySummary summary =
                 getMetricDisplaySummary(tmpl, interval, begin, end,
-                                             data, total);
+                                        data, total);
 
             summaries.add(summary);
         }
@@ -575,7 +558,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         // Can't assume that all templates are only for given entity,
         // might be for associated resources, too.
         switch (rv.getID().getType()) {
-            // Hierarchical, not actuall missing "break" statements
+            // Hierarchical, not actually missing "break" statements
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 // Get the platforms

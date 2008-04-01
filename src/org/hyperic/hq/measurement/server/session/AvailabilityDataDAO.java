@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -221,6 +222,10 @@ public class AvailabilityDataDAO extends HibernateDAO {
      */
     List findAggregateAvailability(Integer[] tids, Integer[] iids,
                                    long start, long end) {
+        if (tids.length == 0) {
+            // Nothing to do
+            return new ArrayList(0);
+        }
         String sql = new StringBuffer()
                     .append("SELECT m.template.id, min(rle.availVal),")
                     .append(" avg(rle.availVal), max(rle.availVal),")

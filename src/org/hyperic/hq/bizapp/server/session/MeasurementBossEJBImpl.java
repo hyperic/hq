@@ -1681,21 +1681,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         String monitorableType = rv.getMonitorableType();        
     
         // Get the template ID's for that type
-        List tmpls =
-            findMeasurementTemplates(sessionId, monitorableType,
-                                          PageControl.PAGE_ALL);
+        List tmpls = findMeasurementTemplates(sessionId, monitorableType,
+                                              PageControl.PAGE_ALL);
     
         // Keep the templates in a map        
         IntHashMap tmplMap = new IntHashMap();
-        
-        // Create an Integer array of template ID's
-        Integer[] mtids = new Integer[tmpls.size()];
-        Iterator it = tmpls.iterator();
-        for (int i = 0; it.hasNext(); i++) {
-            MeasurementTemplate tmpl =
-                (MeasurementTemplate) it.next();
-            mtids[i] = tmpl.getId();
-            tmplMap.put(mtids[i].intValue(), tmpl);
+        for (Iterator i = tmpls.iterator(); i.hasNext(); ) {
+            MeasurementTemplate tmpl = (MeasurementTemplate) i.next();
+            tmplMap.put(tmpl.getId().intValue(), tmpl);
         }
     
         IntHashMap templateMetrics = new IntHashMap();
@@ -1707,18 +1700,18 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         for (int i = 0; i < entIds.length; i++) {            
             Integer[] eid = new Integer[] { entIds[i].getId() };
             // Now get the aggregate data, keyed by template ID's
-            Map datamap = getDataMan().getAggregateData(mtids, eid, begin, end);
+            Map datamap = getDataMan().getAggregateData(tmpls, eid, begin, end);
     
             // For each template, add a new summary
-            for (it = datamap.entrySet().iterator(); it.hasNext(); ) {
+            for (Iterator it = datamap.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry entry = (Map.Entry) it.next();
                     
                 Integer mtid = (Integer) entry.getKey();
-                // Get the MeasurementTemplateValue
+                // Get the MeasurementTemplate
                 MeasurementTemplate tmpl =
                     (MeasurementTemplate) tmplMap.get(mtid.intValue());
                         
-                // Use the MeasurementTemplateValue id to get the array List
+                // Use the MeasurementTemplate id to get the array List
                 List resSummaries =
                     (List) templateMetrics.get(mtid.intValue());
                 if (resSummaries == null) // this key hasn't been seen yet
@@ -1747,7 +1740,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
         }
         // now take all of the unique lists and unique 
-        // MeasurementTemplateValue's and merge them into the result
+        // MeasurementTemplate's and merge them into the result
         HashMap result = new HashMap();
         for (Iterator iter = uniqueTemplates.keySet().iterator(); 
              iter.hasNext();) 

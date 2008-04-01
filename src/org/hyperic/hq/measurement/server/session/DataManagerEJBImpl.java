@@ -1738,20 +1738,37 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch a map of aggregate data values keyed by metric templates given
      * a start and stop time range
      *
-     * @param tids The id's of the Measurement
+     * @param templates The List of MeasurementTemplates
+     * @param iids The array of instance ids to look up
      * @param begin the start of the time range
      * @param end the end of the time range
      * @return the map of data points
+     * 
      * @ejb:interface-method
      */
-    public Map getAggregateData(Integer[] tids, Integer[] iids,
+    public Map getAggregateData(List templates, Integer[] iids,
                                 long begin, long end)
     {
-        // XXX: This should only call the AvailablityManager with the
-        //      template ids for Availability.
+        ArrayList availTempls = new ArrayList();
+        ArrayList dataTempls = new ArrayList();
+
+        for (Iterator i = templates.iterator(); i.hasNext(); ) {
+            MeasurementTemplate t = (MeasurementTemplate)i.next();
+            if (t.isAvailability()) {
+                availTempls.add(t.getId());
+            } else {
+                dataTempls.add(t.getId());
+            }
+        }
+
+        Integer[] availIds =
+            (Integer[])availTempls.toArray(new Integer[availTempls.size()]);
+        Integer[] dataIds =
+            (Integer[])dataTempls.toArray(new Integer[dataTempls.size()]);
+
         Map rtn = AvailabilityManagerEJBImpl.getOne().
-            getAggregateData(tids, iids, begin, end);
-        rtn.putAll(getAggData(tids, iids, begin, end));
+            getAggregateData(availIds, iids, begin, end);
+        rtn.putAll(getAggData(dataIds, iids, begin, end));
         return rtn;
     }
 
