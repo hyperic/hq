@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
@@ -477,18 +478,36 @@ public class AgentManagerEJBImpl
 
         FileData[] data = new FileData[files.length];
         InputStream[] streams = new InputStream[files.length];
+        
+        try {
+            for (int i = 0; i < files.length; i++) {
+                File file = new File(files[i][0]);
+                FileData fileData = new FileData(files[i][1], file.length(), 
+                                                 modes[i]);
+                FileInputStream is = new FileInputStream(file);
 
-        for (int i = 0; i < files.length; i++) {
-            File file = new File(files[i][0]);
-            FileData fileData = new FileData(files[i][1], file.length(), 
-                                             modes[i]);
-            FileInputStream is = new FileInputStream(file);
+                data[i] = fileData;
+                streams[i] = is;
+            }                
 
-            data[i] = fileData;
-            streams[i] = is;
-        }                
-
-        return client.agentSendFileData(id, data, streams);
+            return client.agentSendFileData(id, data, streams);            
+        } finally {
+            safeCloseStreams(streams);
+        }
+    }
+    
+    private void safeCloseStreams(InputStream[] streams) {
+        for (int i = 0; i < streams.length; i++) {
+            InputStream is = streams[i];
+            
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // swallow
+                }
+            }
+        }
     }
 
     public static AgentManagerLocal getOne() {
