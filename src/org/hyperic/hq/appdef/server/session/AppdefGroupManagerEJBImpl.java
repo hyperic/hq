@@ -140,7 +140,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
      */
-    public PageList findAllGroups(AuthzSubject subject, PageControl pc)
+    public PageList findAllGroups(AuthzSubject subject, PageControl pc,
+                                  boolean foosball)
         throws PermissionException {
         return findAllGroups(subject, (ResourceValue) null, pc, null);
     }
@@ -223,47 +224,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
 
         return retVal;
     }
-
-    /**
-     * Produce list of all groups that contain the specified appdef entity.
-     * Apply filterSet to control group list membership.
-     *
-     * @param subject subject
-     * @param id for inclusive search.
-     * @return PageList containing AppdefGroupValues.
-     * @throw PermissionException when group access is not authorized.
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     * */
-    public Integer[] findClusterIds(AuthzSubject subject, AppdefEntityID id)
-        throws PermissionException, ApplicationException {
-        ResourceValue rv = null;
-        try {
-            rv = getResourceFromInstance( 
-                AppdefUtil.appdefTypeIdToAuthzTypeStr(id.getType()),
-                                                      id.getId());
-        }
-        catch (FinderException fe) {
-            // XXX - Temporary! Throw more appdef specific exception.
-            // need a clean way to convert from authz to appdef type
-            throw new ApplicationException("unable to find entity: " + id, fe);
-        }
-        
-        List grps = findAllGroups(subject, rv, PageControl.PAGE_ALL,
-                                  new AppdefPagerFilter[0]);
-
-        ArrayList clusterIds = new ArrayList(0);
-        for (Iterator it = grps.iterator(); it.hasNext(); ) {
-            AppdefGroupValue gv = (AppdefGroupValue) it.next();
-
-            if (gv.getGroupType() == 
-                AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC && 
-                gv.getClusterId() != CLUSTER_UNDEFINED) {
-                clusterIds.add(new Integer(gv.getClusterId()));
-            }
-        }
-        return (Integer[]) clusterIds.toArray(new Integer[clusterIds.size()]);
-    }
     
     // dbfetch the resource
     private ResourceValue getResourceFromInstance (String authzTypeStr, 
@@ -318,43 +278,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         return retVal;
     }
 
-    /* This had to be adopted from appdef boss's similar version. This will
-     * eventually be available from a new EJB that will represent all of the
-     * appdef entities agnostically.*/
-    private AppdefResourceValue findById(AuthzSubject subject,
-                                         AppdefEntityID entityId)
-        throws AppdefEntityNotFoundException, PermissionException {
-
-        ServerManagerLocal      serverManagerLocal      = null;
-        ApplicationManagerLocal appManagerLocal         = null;
-
-        switch (entityId.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM: 
-                return PlatformManagerEJBImpl.getOne().getPlatformValueById(
-                        subject, entityId.getId());
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                serverManagerLocal = ServerManagerEJBImpl.getOne();
-                return serverManagerLocal.getServerById(
-                        subject, entityId.getId());
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                return getServiceManager().getServiceById(
-                        subject, entityId.getId());
-            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                appManagerLocal = ApplicationManagerEJBImpl.getOne();
-                return appManagerLocal.getApplicationById(
-                        subject, entityId.getId());
-            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                ResourceGroupManagerLocal groupMan =
-                    ResourceGroupManagerEJBImpl.getOne();
-                ResourceGroup g = 
-                    groupMan.findResourceGroupById(subject, entityId.getId()); 
-                               
-                return groupMan.convertGroup(subject, g);
-            default:
-                throw new InvalidAppdefTypeException (entityId.getType()
-                        + " is not a valid appdef entity type");
-        }
-    }
 
 
     public static AppdefGroupManagerLocal getOne() {
