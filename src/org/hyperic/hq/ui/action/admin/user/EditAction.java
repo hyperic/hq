@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -35,8 +35,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -64,8 +62,9 @@ public class EditAction extends BaseAction {
         //get the spiderSubjectValue of the user to be edited.
         ServletContext ctx = getServlet().getServletContext();            
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-        AuthzSubjectValue user = ContextUtils.getAuthzBoss(ctx)
-            .findSubject(RequestUtils.getSessionId(request), userForm.getId() );
+        AuthzSubject user = ContextUtils.getAuthzBoss(ctx)
+            .findSubjectById(RequestUtils.getSessionId(request),
+                             userForm.getId() );
 
         ActionForward forward = checkSubmit(request, mapping, form,
                                             Constants.USER_PARAM, 
@@ -76,9 +75,7 @@ public class EditAction extends BaseAction {
             return forward;
         }                                                                     
 
-        AuthzSubject target = 
-            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(userForm.getId());
-        authzBoss.updateSubject(sessionId, target, 
+        authzBoss.updateSubject(sessionId, user, 
                                 new Boolean(userForm.getEnableLogin().equals("yes")), 
                                 null,
                                 userForm.getDepartment(), 

@@ -2617,9 +2617,7 @@ public class AppdefBossEJBImpl
                                       aeid.getAppdefKey()));
         }
         
-        resources.clear();
-        resources.addAll(searchResults);
-        return resources;        
+        return new PageList(searchResults, resources.getTotalSize());        
     }
 
     /**

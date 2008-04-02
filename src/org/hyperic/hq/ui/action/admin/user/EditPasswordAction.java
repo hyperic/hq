@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,35 +25,27 @@
 
 package org.hyperic.hq.ui.action.admin.user;
         
-import java.io.IOException;
 import java.util.Iterator;
 
 import javax.security.auth.login.LoginException;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AuthBoss;
-import org.hyperic.hq.ui.action.BaseAction;
-
-
-import org.hyperic.hq.authz.shared.OperationValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.OperationValue;
+import org.hyperic.hq.bizapp.shared.AuthBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * An <code>BaseAction</code> subclass that edit's a user's
@@ -91,8 +83,9 @@ public class EditPasswordAction extends BaseAction {
         AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        AuthzSubjectValue user 
-            = authzBoss.findSubject(RequestUtils.getSessionId(request), pForm.getId());                                                           
+        AuthzSubject user =
+            authzBoss.findSubjectById(RequestUtils.getSessionId(request),
+                                      pForm.getId());                                                           
 
         log.trace("Editing user's password.");                                                      
 

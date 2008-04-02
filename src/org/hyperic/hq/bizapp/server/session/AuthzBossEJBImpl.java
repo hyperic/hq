@@ -354,6 +354,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * the given subject id.
      *
      * @ejb:interface-method
+     * @deprecated use findSubjectById() to retrieve an AuthzSubject object
      */
     public AuthzSubjectValue findSubject(Integer sessionId, Integer subjectId)
         throws FinderException, SessionTimeoutException,
@@ -396,20 +397,19 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * Return the <code>AuthzSubject</code> object identified by
      * the given username. This method should only be used in cases
      * where displaying the user does not require an Authz check. An
-     * example of this is when the owner and last modifyer need to 
+     * example of this is when the owner and last modifier need to 
      * be displayed, and the user viewing the resource does not 
      * have permissions to view other users.
      * See bug #5452 for more information
      * @ejb:interface-method
      */
     public AuthzSubject findSubjectByNameNoAuthz(Integer sessionId,
-                                                      String subjectName)
+                                                 String subjectName)
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
         // check for timeout
         manager.getSubjectPojo(sessionId.intValue());
-        AuthzSubject overlord = getOverlord();
-        return getAuthzSubjectManager().findSubjectByName(overlord, subjectName);
+        return getAuthzSubjectManager().findSubjectByName(subjectName);
     }
 
     /**
