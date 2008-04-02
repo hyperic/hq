@@ -321,26 +321,6 @@ public class ResourceGroup extends AuthzNamedBean
         _roles.clear();
     }
 
-    
-    private static AppdefEntityID getEntityID(Resource r) {
-        int typeId = r.getResourceType().getId().intValue();
-        
-        if (typeId == AuthzConstants.authzPlatform.intValue()) {
-            return AppdefEntityID.newPlatformID(r.getInstanceId().intValue());
-        } else if (typeId == AuthzConstants.authzServer.intValue()) {
-            return AppdefEntityID.newServerID(r.getInstanceId().intValue());
-        } else if (typeId == AuthzConstants.authzService.intValue()) {
-            return AppdefEntityID.newServiceID(r.getInstanceId().intValue());
-        } else if (typeId == AuthzConstants.authzApplication.intValue()) {
-            return AppdefEntityID.newAppID(r.getInstanceId().intValue());
-        } else if (typeId == AuthzConstants.authzGroup.intValue()) {
-            return AppdefEntityID.newGroupID(r.getInstanceId().intValue());
-        } else {
-            throw new RuntimeException("Resource [id=" + r.getId() + "] " +
-                                       "is not an appdef object");
-        }
-    }
-    
     /**
      * Returns true if this group contains a resource of the specified ID
      * @deprecated Should use call into the manager instead.
@@ -348,7 +328,7 @@ public class ResourceGroup extends AuthzNamedBean
     public boolean existsAppdefEntity(AppdefEntityID ent) {
         for (Iterator i=getResources().iterator(); i.hasNext(); ) {
             Resource r = (Resource)i.next();
-            AppdefEntityID rId = getEntityID(r);
+            AppdefEntityID rId = new AppdefEntityID(r);
             
             if (rId.equals(ent))
                 return true;

@@ -63,6 +63,7 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -125,9 +126,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * Get ApplicationType by ID
      * @ejb:interface-method
      */
-    public ApplicationTypeValue findApplicationTypeById(Integer id)
-        throws FinderException 
-    {
+    public ApplicationTypeValue findApplicationTypeById(Integer id) {
         return findApplicationPojoTypeById(id).getApplicationTypeValue();
     }
 
@@ -497,21 +496,15 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 AppdefEntityID id = (AppdefEntityID)entityIds.get(i);
                 if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
                     asDAO.create(id.getId(), app.getId(), false);
-                }
-                else if (id.getType() == 
-                    AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-                    // look up the group so I can get the cluster id
-                    AppdefGroupValue agv = AppdefGroupManagerUtil.getLocalHome()
-                        .create().findGroup(subject, id);
-                    asDAO.create(
-                        new Integer(agv.getClusterId()),
-                        app.getId());
+                } else if (id.isGroup()) {
+                    ResourceGroup g = ResourceGroupManagerEJBImpl.getOne() 
+                                          .findResourceGroupById(subject, 
+                                                                 id.getId());
+                    asDAO.create(g.getClusterId(), app.getId());
                 }
             }
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
 

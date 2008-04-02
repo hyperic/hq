@@ -132,123 +132,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     public AppdefGroupManagerEJBImpl() {}
 
     /**
-     * Lookup and return a group value object.
-     * @param subject subject value.
-     * @param id entity id
-     * @return AppdefGroupValue object
-     * @ejb:interface-method
-     * @throws AppdefGroupNotFoundException when group cannot be located in db.
-     * @throws PermissionException if the caller is not authorized.
-     */
-    public AppdefGroupValue findGroup(AuthzSubject subject,
-                                      AppdefEntityID id)
-        throws AppdefGroupNotFoundException, PermissionException {
-        return findGroup(subject, id, true);
-    }
-
-    /**
-     * Lookup and return a group value object that may or may not be fully 
-     * populated.
-     * @param subject subject value.
-     * @param id entity id
-     * @return AppdefGroupValue object
-     * @ejb:interface-method
-     * @throws AppdefGroupNotFoundException when group cannot be located in db.
-     * @throws PermissionException if the caller is not authorized.
-     */
-    public AppdefGroupValue findGroup(AuthzSubject subject,
-                                      AppdefEntityID id, boolean full)
-        throws AppdefGroupNotFoundException, PermissionException {
-        return findGroup(subject, id, null, full);
-    }
-
-    /*
-     * Lookup and return a group value object by either its name or identifier.
-     */
-    private AppdefGroupValue findGroup(AuthzSubject subject,
-                                       AppdefEntityID id,
-                                       String groupName, boolean full)
-        throws AppdefGroupNotFoundException, PermissionException
-    {
-        AppdefGroupValue retVal;
-
-        try {
-            GroupManagerLocal manager = getGroupManager();
-
-            retVal = new AppdefGroupValue();
-
-            // One of name or id is required to find the group.
-            if (groupName != null) {
-                retVal.setName(groupName);
-            } else if (id != null) {
-                retVal.setId(id.getId());
-            } else {
-                // One of either id or name is required..
-                throw new AppdefGroupNotFoundException("Unable to find " +
-                                                       "group.  No name or " +
-                                                       "id specified.");
-            }
-
-            retVal = (AppdefGroupValue) manager.findGroup(subject, retVal, full);
-
-            // Check permission, making sure to generate an appdef id if only
-            // a group name was passed in.
-            if (id == null) {
-                id = AppdefEntityID.newGroupID(retVal.getId().intValue());
-            }
-
-            checkPermission(subject, id,
-                            AuthzConstants.groupOpViewResourceGroup);
-
-            // Setup the group to contain a valid type object.
-            setGroupAppdefResourceType(subject, retVal);
-   
-            // register any visitors
-            registerVisitors(retVal);
-        } catch (GroupNotFoundException e) {
-            log.debug("findGroup() Unable to find group:" + id); 
-            throw new AppdefGroupNotFoundException ("Unable to find group:",e);
-        } catch (IllegalArgumentException e) {
-            log.debug("findGroup() unable to find an appdef group:" + id);
-            throw new AppdefGroupNotFoundException("Group not an appdef group");
-        }
-
-        return retVal;
-    }
-
-     /**
-      * Fetch a group's members as a paged list of resource values. 
-      *
-      * Note: This method is expensive and unnecessary for most scenarios as
-      * each group member's appdef value is looked up. Please USE SPARINGLY.
-      * Use findGroup().getAppdefGroupEntries() for low cost alternative.
-      *
-      * @param subject - valid spider subject
-      * @param gid     - group id
-      * @param pc      - page control
-      * @throws AppdefGroupNotFoundException  - non-existent group
-      * @throws AppdefEntityNotFoundException - group member doesn't exist
-      * @throws PermissionException           - unable to view group
-      * @ejb:interface-method
-      */
-    public PageList getGroupMemberValues(AuthzSubject subject,
-                                         Integer gid, PageControl pc)
-        throws AppdefGroupNotFoundException, AppdefEntityNotFoundException,
-               PermissionException {
-        PageList retVal = null;
-        AppdefEntityID aeid = AppdefEntityID.newGroupID(gid.intValue());
-        AppdefGroupValue groupVo = findGroup(subject, aeid, null, true);
-        retVal = groupVo.getAppdefGroupEntries();
-
-        // Replace each AppdefEntityID with an AppdefResourceValue
-        for (int i = 0; i < retVal.size(); i++) {
-            AppdefEntityID id = (AppdefEntityID) retVal.get(i);
-            retVal.set(i, findById(subject, id));
-        }
-        return retVal;
-    }
-
-    /**
      * Produce a paged list of all groups where caller is authorized
      * to modify.
      * @param subject subject value.
@@ -316,59 +199,25 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     private PageList findAllGroups(AuthzSubject subject, 
                                    ResourceValue rv, PageControl pc,
                                    AppdefPagerFilter[] grpFilters)
-        throws PermissionException {
+        throws PermissionException 
+    {
         PageList retVal = null;
 
-        try {
-            GroupManagerLocal manager = getGroupManager();
+        ResourceGroupManagerLocal groupMan = 
+            ResourceGroupManagerEJBImpl.getOne();
 
-            // create a valid appdef group vo for cloning.
-            AppdefGroupValue gv = new AppdefGroupValue();
+        if (pc == null)
+            pc = new PageControl();
 
-            if (pc == null)
-                pc = new PageControl();
+        Collection allGroups = groupMan.getAllResourceGroups(subject, true);
+        log.debug("All groups size: " + allGroups.size());
 
-            PageList allGroups = manager.findAllGroups(subject, gv, rv,
-                                                       PageControl.PAGE_ALL);
-            
-            log.debug("All groups size: " + allGroups.size());
-
-            List toBePaged = new ArrayList();
-            for (Iterator i=allGroups.iterator();i.hasNext();) {
-                gv = (AppdefGroupValue)i.next();
-
-                // Setup the group to contain a valid type object.
-                setGroupAppdefResourceType(subject,gv);
-
-                // register any visitors
-                registerVisitors((AppdefGroupValue)gv);
-
-                toBePaged.add(gv);
-            }
-            retVal = getPageList ( toBePaged, pc, grpFilters );
-
-            if (log.isDebugEnabled()) {
-                log.debug("Filtered groups size: " + retVal.size() +
-                          " filter size: " +
-                          (grpFilters == null ? 0 : grpFilters.length));
-                if (grpFilters != null) {
-                    for (int i = 0; i < grpFilters.length; i++) {
-                        log.debug("Filter type: " +
-                                  grpFilters[i].getClass().getName());                
-                    }
-                }
-            }
+        List toBePaged = new ArrayList();
+        for (Iterator i=allGroups.iterator();i.hasNext();) {
+            ResourceGroup g = (ResourceGroup)i.next();
+            toBePaged.add(groupMan.convertGroup(subject, g));
         }
-        catch (GroupNotFoundException gnf) {
-            // Catch exception to return empty list.
-            log.debug("Caught harmless GroupNotFound exception whilest looking "+
-                "for groups [subject="+subject.toString()+"]- "+gnf.getMessage());
-        }
-        catch (CloneNotSupportedException e) {
-            log.error("The group value object does not support cloning.",e);
-            throw new SystemException ("Group value object doesn't support "+
-                                          "cloning.",e);
-        }
+        retVal = getPageList ( toBePaged, pc, grpFilters );
         if (retVal==null)
             retVal = new PageList();  // return empty list if no groups.
 
@@ -507,106 +356,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    // Register any visitors for a group value.
-    private void registerVisitors(AppdefGroupValue gv) {
-        // XXX - forthcoming, required reworking to 
-        // handle new group types and subtypes.
-    }
-
-    // All UIs will require a group to express a valid type (encapsulated by a
-    // concrete decendent of AppdefResourceTypeValue).  However, since a group
-    // is not an actual appdef entity, we set the group up as a surrogate
-    // for either a dummy type (GroupTypeValue) or a copy of one of its
-    // member's type objects.
-    private void setGroupAppdefResourceType(AuthzSubject subject,
-                                            AppdefGroupValue gv) {
-
-        try {
-            if (gv.isGroupCompat()) {
-                gv.setAppdefResourceTypeValue(
-                    getResourceTypeById(gv.getGroupEntType(),
-                                        gv.getGroupEntResType()));
-            }
-            else {
-                AppdefResourceTypeValue tvo = new GroupTypeValue();
-                tvo.setId ( new Integer(gv.getGroupType()) );
-                tvo.setName( AppdefEntityConstants.getAppdefGroupTypeName(
-                    gv.getGroupType()) );
-                gv.setAppdefResourceTypeValue( tvo );
-            }
-        }
-        catch (FinderException e) {
-            // this is not a fatal error
-            if (log.isDebugEnabled())
-                log.debug("Caught exception setting group resource type value.",
-                          e);
-        } catch (AppdefEntityNotFoundException e) {
-            // this is not a fatal error
-            if (log.isDebugEnabled())
-                log.debug("Caught exception setting group resource type value.",
-                          e);
-        }
-    }
-
-    private AppdefResourceTypeValue getResourceTypeById (int type, int id)
-        throws FinderException, AppdefEntityNotFoundException {
-        switch (type) {
-            case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM) :
-                return getPlatformTypeById(id);
-            case (AppdefEntityConstants.APPDEF_TYPE_SERVER) :
-                return getServerTypeById(id);
-            case (AppdefEntityConstants.APPDEF_TYPE_SERVICE) :
-                return getServiceTypeById(id);
-            case (AppdefEntityConstants.APPDEF_TYPE_APPLICATION) :
-                return getApplicationTypeById(id);
-            default:
-                throw new IllegalArgumentException ("Invalid resource type:"
-                                                    +type);
-        }
-    }
-
-    private PlatformTypeValue getPlatformTypeById (int id)
-        throws PlatformNotFoundException {
-        PlatformManagerLocal platLoc;
-        try {
-            platLoc = PlatformManagerUtil.getLocalHome().create();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-        return platLoc.findPlatformTypeValueById(new Integer(id));
-    }
-
-    private ServerTypeValue getServerTypeById (int id)
-        throws FinderException {
-        ServerManagerLocal servLoc;
-        try {
-            servLoc = ServerManagerUtil.getLocalHome().create();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-        return servLoc.findServerTypeById(new Integer(id));
-    }
-
-    private ServiceTypeValue getServiceTypeById(int id) throws FinderException {
-        return getServiceManager().findServiceTypeById(new Integer(id));
-    }
-
-    private ApplicationTypeValue getApplicationTypeById (int id)
-        throws FinderException {
-        ApplicationManagerLocal appLoc;
-        try {
-            appLoc = ApplicationManagerUtil.getLocalHome().create();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-        return appLoc.findApplicationTypeById(new Integer(id));
-    }
 
     public static AppdefGroupManagerLocal getOne() {
         try {

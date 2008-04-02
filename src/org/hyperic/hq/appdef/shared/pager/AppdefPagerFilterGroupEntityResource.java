@@ -33,6 +33,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 
 /** Pager Processor filter that filters object instances of
@@ -234,9 +236,9 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 return true;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                AppdefGroupValue group =
-                    AppdefGroupManagerEJBImpl.getOne().findGroup(_subject, id);
-                return _resourceType == group.getGroupEntResType();
+                ResourceGroup group = ResourceGroupManagerEJBImpl.getOne()
+                    .findResourceGroupById(_subject, id.getId()); 
+                return _resourceType == group.getGroupEntResType().intValue();
             default:
                 return false;
         }

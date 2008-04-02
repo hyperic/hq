@@ -259,14 +259,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             p = findPlatformById(id.getId());
             typeName = p.getPlatformType().getName();
         } else if(id.isGroup()) {
-            try {
-                AppdefGroupValue agv = AppdefGroupManagerEJBImpl.getOne()
-                    .findGroup(getOverlord(), id);
-                return agv.getGroupTypeLabel();
-            } catch (PermissionException e) {
-                // never happens... its the overlord.
-                throw new SystemException(e);
-            }
+            ResourceGroup g = ResourceGroupManagerEJBImpl.getOne()
+                .findResourceGroupById(id.getId()); 
+            return g.getResourcePrototype().getName();
         } else {
             throw new IllegalArgumentException("Unsupported entity type: "+
                                                id);

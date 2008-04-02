@@ -334,13 +334,10 @@ public class AppdefBossEJBImpl
      */
     public ApplicationTypeValue findApplicationTypeById(int sessionId,
                                                         Integer id)
-        throws ApplicationException {
-        try {
-            manager.getSubjectPojo(sessionId);
-            return getApplicationManager().findApplicationTypeById(id);
-        } catch (FinderException e) {
-            throw new ApplicationException(e);
-        }
+        throws ApplicationException 
+    {
+        manager.getSubjectPojo(sessionId);
+        return getApplicationManager().findApplicationTypeById(id);
     }
 
     /**

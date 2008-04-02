@@ -45,8 +45,11 @@ import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -182,9 +185,15 @@ public class AppdefEntityValue {
     }
 
     private AppdefGroupValue getGroup(boolean full)
-        throws PermissionException, AppdefGroupNotFoundException {
-        if (group == null)
-            group = getGroupManager().findGroup(_subjPojo, _id, full);
+        throws PermissionException, AppdefGroupNotFoundException 
+    {
+        if (group == null) {
+            ResourceGroupManagerLocal groupMan = 
+                ResourceGroupManagerEJBImpl.getOne();
+            ResourceGroup g = 
+                groupMan.findResourceGroupById(_subjPojo, _id.getId());
+            group = groupMan.convertGroup(_subjPojo, g);
+        }
         return group;
     }
     

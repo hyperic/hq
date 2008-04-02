@@ -188,13 +188,7 @@ public abstract class AppdefSessionUtil {
                                                    " not found");
             }
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
-            try {
-                return getApplicationMgrLocal().findApplicationTypeById(id);
-            } catch(FinderException exc){
-                throw new ApplicationNotFoundException("App type id=" +
-                                                       appdefTypeId + 
-                                                       "not found");
-            }
+            return getApplicationMgrLocal().findApplicationTypeById(id);
         } else {
             throw new IllegalArgumentException("Unrecognized appdef type:"+
                                                " " + appdefType);

@@ -38,10 +38,21 @@ import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
+import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
+import org.hyperic.hq.appdef.shared.GroupTypeValue;
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformTypeValue;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -559,7 +570,58 @@ public class ResourceGroupManagerEJBImpl
             retVal.addEntry(ge);
         }
 
+        retVal.setAppdefResourceTypeValue(getAppdefResourceTypeValue(subj, g));
         return retVal;
+    }
+    
+    private AppdefResourceTypeValue
+        getAppdefResourceTypeValue(AuthzSubject subject, ResourceGroup group) 
+    {
+        if (group.isMixed()) {
+            AppdefResourceTypeValue res = new GroupTypeValue();
+            int iGrpType = group.getGroupType().intValue();
+            res.setId(group.getGroupType());
+            res.setName(AppdefEntityConstants.getAppdefGroupTypeName(iGrpType));
+            return res;
+        } else {
+            return getResourceTypeById(group.getGroupEntType().intValue(),
+                                       group.getGroupEntResType().intValue());
+        }
+    }
+
+    private AppdefResourceTypeValue getResourceTypeById (int type, int id){
+        switch (type) {
+        case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM) :
+            return getPlatformTypeById(id);
+        case (AppdefEntityConstants.APPDEF_TYPE_SERVER) :
+            return getServerTypeById(id);
+        case (AppdefEntityConstants.APPDEF_TYPE_SERVICE) :
+            return getServiceTypeById(id);
+        case (AppdefEntityConstants.APPDEF_TYPE_APPLICATION) :
+            return getApplicationTypeById(id);
+        default:
+            throw new IllegalArgumentException("Invalid resource type:" +type);
+        }
+    }
+
+    private PlatformTypeValue getPlatformTypeById (int id) {
+        return PlatformManagerEJBImpl.getOne()
+                    .findPlatformTypeValueById(new Integer(id));
+    }
+
+    private ServerTypeValue getServerTypeById (int id) {
+        return ServerManagerEJBImpl.getOne()
+                   .findServerTypeById(new Integer(id));
+    }
+
+    private ServiceTypeValue getServiceTypeById(int id) {
+        return ServiceManagerEJBImpl.getOne()
+                   .findServiceTypeById(new Integer(id));
+    }
+
+    private ApplicationTypeValue getApplicationTypeById (int id) {
+        return ApplicationManagerEJBImpl.getOne()
+                   .findApplicationTypeById(new Integer(id));
     }
     
     /**
@@ -618,15 +680,21 @@ public class ResourceGroupManagerEJBImpl
      */
     public Collection getAllResourceGroups(AuthzSubject subject,
                                            boolean excludeRoot)
-        throws PermissionException, FinderException 
+        throws PermissionException
     {
         // first get the list of groups subject can view
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        List groupIds =
-            pm.findOperationScopeBySubject(subject, 
-                                           AuthzConstants.groupOpViewResourceGroup, 
-                                           AuthzConstants.groupResourceTypeName, 
-                                           PageControl.PAGE_ALL);
+        List groupIds;
+        
+        try {
+            groupIds = pm.findOperationScopeBySubject(subject, 
+                                        AuthzConstants.groupOpViewResourceGroup, 
+                                        AuthzConstants.groupResourceTypeName, 
+                                        PageControl.PAGE_ALL);
+        } catch(FinderException e) {
+            // Makes no sense
+            throw new SystemException(e);
+        }
         
         // now build a collection for all of them
         Collection groups = new ArrayList();
