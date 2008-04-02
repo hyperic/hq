@@ -1506,29 +1506,29 @@
           depends="all,prepare-jboss"
           description="Prepare jboss for in-container unit testing">
 	  
-	  <delete dir="${jboss.home}/server/unittest"/>
+      <delete dir="${jboss.home}/server/unittest"/>
 
-	  <echo message="Creating 'unittest' configuration - a copy of the prepared 'default' configuration"/>
+      <echo message="Creating 'unittest' configuration - a copy of the prepared 'default' configuration"/>
 	  	
       <copy todir="${jboss.home}/server/unittest">
         <fileset dir="${jboss.home}/server/default" excludes="**/hq.ear/**"/>
       </copy>
 	    
-	  <echo message="Copying hq-plugins to 'unittest' configuration..."/>
+      <echo message="Copying hq-plugins to 'unittest' configuration..."/>
 	  
-	  <copy todir="${jboss.home}/server/unittest/deploy/hq.ear/hq-plugins">
-		<fileset dir="${server.plugin.dir}"/>
-	  </copy>
+      <copy todir="${jboss.home}/server/unittest/deploy/hq.ear/hq-plugins">
+          <fileset dir="${server.plugin.dir}"/>
+      </copy>
 	  
-	  <echo message="Creating hqu directory..."/>
-	  <mkdir dir="${jboss.home}/server/unittest/deploy/hq.ear/hq.war/hqu"/>
+      <echo message="Creating hqu directory..."/>
+      <mkdir dir="${jboss.home}/server/unittest/deploy/hq.ear/hq.war/hqu"/>
 	 
-          <echo message="Copying code coverage libraries.."/>
+      <echo message="Copying code coverage libraries.."/>
           <copy todir="${jboss.home}/server/unittest/lib">
-              <fileset dir="${thirdparty.lib}" includes="emma.jar"/>
-          </copy>
+          <fileset dir="${thirdparty.lib}" includes="emma.jar"/>
+      </copy>
  	  
-	  <echo message="Before running unit tests DON'T FORGET to set the connectionURL in the 'unittest' configuration hq-ds.xml to point at the unit test database."/>
+      <echo message="Before running unit tests DON'T FORGET to set the connectionURL in the 'unittest' configuration hq-ds.xml to point at the unit test database."/>
   </target>
 	  
   <target name="pack-installer" description="Pack the installer" 
