@@ -26,9 +26,6 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.lang.reflect.Array;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,7 +39,6 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
