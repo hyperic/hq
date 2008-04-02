@@ -29,6 +29,7 @@ import java.util.Properties;
 
 import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.Service;
+import org.hyperic.sigar.win32.ServiceConfig;
 import org.hyperic.sigar.win32.Win32Exception;
 
 public class Win32MeasurementPlugin extends MeasurementPlugin {
@@ -67,7 +68,7 @@ public class Win32MeasurementPlugin extends MeasurementPlugin {
         boolean isAvail=false, isFormatted=false;
         
         if (type != null) {
-            isAvail = "Availability".equals(type);
+            isAvail = Metric.ATTR_AVAIL.equals(type);
             if (!isAvail) {
                 isFormatted = "Formatted".equals(type);
             }
@@ -75,7 +76,12 @@ public class Win32MeasurementPlugin extends MeasurementPlugin {
 
         if (object == null) {
             if ((object = props.getProperty("Service")) != null) {
-                return getServiceValue(object);
+                if (counter.equals("StartType")) {
+                    return new MetricValue(getServiceStartType(object));
+                }
+                else {
+                    getServiceValue(object);
+                }
             }
         }
         
@@ -158,7 +164,21 @@ public class Win32MeasurementPlugin extends MeasurementPlugin {
             }
         }
     }
-    
+
+    private static int getServiceStartType(String name) {
+        Service svc = null;
+        try {
+            svc = new Service(name);
+            return svc.getConfig().getStartType();
+        } catch (Win32Exception e) {
+            return ServiceConfig.START_DISABLED;
+        } finally {
+            if (svc != null) {
+                svc.close();
+            }
+        }
+    }
+
     static boolean isServiceRunning(String name) {
         return getServiceStatus(name) == Service.SERVICE_RUNNING;
     }
