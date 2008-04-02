@@ -415,8 +415,8 @@ public class AppdefBossEJBImpl
     public PageList findChildResources(int sessionID, AppdefEntityID parent,
                                        AppdefEntityTypeID childResourceType,
                                        PageControl pc)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException, AppdefEntityNotFoundException
+        throws SessionException, PermissionException, 
+               AppdefEntityNotFoundException 
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
         AppdefEntityValue adev = new AppdefEntityValue(parent, subject);
@@ -496,8 +496,8 @@ public class AppdefBossEJBImpl
     public PageList findServiceInventoryByApplication(int sessionID,
                                                       Integer appId,
                                                       PageControl pc)
-        throws AppdefEntityNotFoundException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException 
+        throws AppdefEntityNotFoundException, SessionException,
+               PermissionException
     {
         AppdefEntityID aeid = AppdefEntityID.newAppID(appId.intValue());
                                
@@ -513,7 +513,7 @@ public class AppdefBossEJBImpl
     public PageList findServicesByServer(int sessionID, Integer serverId,
                                          PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
+               SessionException
     {
         AppdefEntityID aeid = AppdefEntityID.newServerID(serverId.intValue());
                                
@@ -523,7 +523,7 @@ public class AppdefBossEJBImpl
     private PageList findServices(int sessionID, AppdefEntityID aeid,
                                   boolean allServiceInventory, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
+               SessionException
     {
         PageList res = null;
 
@@ -2018,33 +2018,24 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public ResourceGroup findGroupById(int sessionId, Integer groupId) 
-        throws AppdefGroupNotFoundException, PermissionException,
-               SessionException
+        throws PermissionException, SessionException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
-        try {
-            return getResourceGroupManager().findResourceGroupById(subject,
-                                                                   groupId);
-        } catch (FinderException e) {
-            throw new AppdefGroupNotFoundException(groupId);
-        }
+        return getResourceGroupManager().findResourceGroupById(subject,
+                                                               groupId);
     }
 
     /**
      * @ejb:interface-method
      */
     public AppdefGroupValue findGroup(int sessionId, Integer id)
-        throws AppdefGroupNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
+        throws PermissionException, SessionException
     {
-        try {
-            AuthzSubject subject = manager.getSubjectPojo(sessionId);
-            return getAppdefGroupManager().findGroup(subject, id);
-        } catch (AppdefGroupNotFoundException e) {
-            log.error("Caught 'group not found' exception.");
-            throw e;
-        }
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        ResourceGroup group = groupMan.findResourceGroupById(subject, id);
+        return groupMan.convertGroup(subject, group);
     }
 
     /**
@@ -2057,16 +2048,11 @@ public class AppdefBossEJBImpl
      */
     public PageList findGroups(int sessionId, Integer[] groupIds,
                                PageControl pc)
-        throws AppdefGroupNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException,
-               SystemException 
+        throws PermissionException, SessionException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
-        
         List toBePaged = new ArrayList(groupIds.length);
         for (int i=0; i < groupIds.length; i++) {
-            toBePaged.add(groupMan.findGroup(subject, groupIds[i]));
+            toBePaged.add(findGroup(sessionId, groupIds[i]));
         }
         return getPageList(toBePaged,pc);
     }
@@ -2366,7 +2352,8 @@ public class AppdefBossEJBImpl
                                         AppdefEntityID[] pendingEntities,
                                         PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException {
+               SessionException
+    {
         if ( groupType != APPDEF_GROUP_TYPE_UNDEFINED &&
              !AppdefEntityConstants.groupTypeIsValid(groupType) ) {
             throw new IllegalArgumentException ("Invalid group type: " +
@@ -2398,7 +2385,7 @@ public class AppdefBossEJBImpl
                                         AppdefEntityID[] pendingEntities,
                                         PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
+               SessionException
     {
         return findCompatInventory(sessionId, appdefTypeId, appdefResTypeId,
                                    APPDEF_GROUP_TYPE_UNDEFINED, groupEntity,
@@ -2431,7 +2418,7 @@ public class AppdefBossEJBImpl
                                         AppdefEntityID[] pendingEntities,
                                         String resourceName, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
+               SessionException
     {
         PageList ret = findCompatInventory(sessionId, appdefTypeId,
                                            appdefResTypeId,
@@ -2472,8 +2459,7 @@ public class AppdefBossEJBImpl
                                          String resourceName,
                                          List filterList, int groupType,
                                          PageControl pc)
-    throws PermissionException, SessionTimeoutException, 
-           SessionNotFoundException 
+        throws PermissionException, SessionException 
     {
         List toBePaged;
 
@@ -2519,9 +2505,6 @@ public class AppdefBossEJBImpl
                 groupMemberFilter = 
                     new AppdefPagerFilterGroupMemExclude(gValue, members);
                 filterList.add( groupMemberFilter );
-            } catch (AppdefGroupNotFoundException e) {
-                // non-fatal; log and continue
-                log.error("Unable to lookup group for inventory filtering",e);
             } catch (PermissionException e) {
                 // Should never happen, finder accounts for permissions;
                 log.error("Caught permission exc filtering on group",e);
@@ -2665,7 +2648,7 @@ public class AppdefBossEJBImpl
                                         AppdefEntityID groupEntity,
                                         String resourceName, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
+               SessionException
     {
         return findCompatInventory(sessionId, appdefTypeId, appdefResTypeId,
                                    APPDEF_GROUP_TYPE_UNDEFINED, groupEntity,
@@ -2692,7 +2675,7 @@ public class AppdefBossEJBImpl
                                    AppdefEntityID[] pendingEntities,
                                    String resourceName, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
+               SessionException
     {
         List toBePaged, filterList, authzResources;
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
@@ -2770,18 +2753,8 @@ public class AppdefBossEJBImpl
 
         try {
             pager = Pager.getPager( APPDEF_PAGER_PROCESSOR );
-        } catch (InstantiationException e) {
-            log.debug("InstantiationException caught instantiating "+
-                      APPDEF_PAGER_PROCESSOR);
-            throw new SystemException (e.getMessage());
-        } catch (IllegalAccessException e) {
-            log.debug("IllegalAccessException caught instantiating "+
-                      APPDEF_PAGER_PROCESSOR);
-            throw new SystemException (e.getMessage());
-        } catch (ClassNotFoundException e) {
-            log.debug("ClassNotFoundException caught instantiating "+
-                      APPDEF_PAGER_PROCESSOR);
-            throw new SystemException (e.getMessage());
+        } catch (Exception e) {
+            throw new SystemException("Unable to get a pager", e);
         }
         return pager.seekAll(coll,pc.getPagenum(), pc.getPagesize(),
                              filterArr);

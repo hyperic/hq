@@ -55,8 +55,11 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
 import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl.ConfigSchemaAndBaseResponse;
@@ -116,28 +119,28 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                ConfigFetchException, SessionNotFoundException, 
                SessionTimeoutException, EncodingException
     {
+        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
         AuthzSubject subject;
-        AppdefGroupValue group;
+        ResourceGroup group;
         ConfigResponse[] res;
-        List members;
+        Collection members;
         int idx;
 
         // validate the session
         subject = sessionManager.getSubjectPojo(sessionId);
-        group   = this.getAppdefGroupManager().findGroup(subject, 
-                                                         new Integer(groupId));
+        group   = groupMan.findResourceGroupById(subject, new Integer(groupId));  
 
         // use the overlord to pull the merge
-        // FIXME - this is a pretty ugly compromise.
-        subject = this.getOverlord();
-
-        members = group.getAppdefGroupEntries();
+        subject = getOverlord();
+        members = groupMan.getMembers(group);
         res     = new ConfigResponse[members.size()];
         idx     = 0;
+        AuthzSubjectValue subjectVal = subject.getAuthzSubjectValue();
         for(Iterator i=members.iterator(); i.hasNext(); ){
-            AppdefEntityID id = (AppdefEntityID)i.next();
+            Resource r = (Resource)i.next();
+            AppdefEntityID id = new AppdefEntityID(r); 
 
-            res[idx++] = getMergedConfigResponse(subject.getAuthzSubjectValue(),
+            res[idx++] = getMergedConfigResponse(subjectVal,
                                                  productType, id, required);
         }
         

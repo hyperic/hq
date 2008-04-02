@@ -45,6 +45,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -601,7 +602,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      */
     public Map findControllableResourceNames(int sessionID,
                                              AppdefEntityTypeID aetid)
-        throws SessionNotFoundException, SessionTimeoutException,
+        throws SessionNotFoundException, SessionException,
                PermissionException {
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
         

@@ -455,7 +455,7 @@ public class EventsBossEJBImpl
         throws AlertDefinitionCreateException,
                PermissionException, InvalidOptionException,
                InvalidOptionValueException, 
-               SessionNotFoundException, SessionTimeoutException 
+               SessionException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
 
@@ -475,8 +475,6 @@ public class EventsBossEJBImpl
             try {
                 group = getAppdefBoss().findGroup(sessionID,
                                              new Integer(adval.getAppdefId()));
-            } catch (AppdefGroupNotFoundException e) {
-                throw new AlertDefinitionCreateException(e);
             } catch (InvalidAppdefTypeException e) {
                 throw new AlertDefinitionCreateException(e);
             }

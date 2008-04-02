@@ -202,13 +202,8 @@ public class GalertBossEJBImpl
         
         // Find the ResourceGroup
         ResourceGroup g;
-        try {
-            g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj, 
-                                                                           gid);
-        } catch (FinderException e) {
-            throw new SystemException(e);
-        }
-        
+        g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj, 
+                                                                       gid);
         return _galertMan.findAlertDefs(g, pc);
     }
 
@@ -302,12 +297,8 @@ public class GalertBossEJBImpl
         AuthzSubject subj = _sessMan.getSubjectPojo(sessionId);
 
         ResourceGroup g;
-        try {
-            g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj,
-                                                                           gid);
-        } catch (FinderException e) {
-            throw new SystemException(e);
-        }
+        g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj,
+                                                                       gid);
         
         // Don't need to have any results
         PageControl pc = new PageControl();
@@ -335,12 +326,8 @@ public class GalertBossEJBImpl
         AuthzSubject subj = _sessMan.getSubjectPojo(sessionId);
 
         ResourceGroup g;
-        try {
-            g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj,
-                                                                           gid);
-        } catch (FinderException e) {
-            throw new SystemException(e);
-        }
+        g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj,
+                                                                       gid);
         
         PageList alertLogs =
             _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
