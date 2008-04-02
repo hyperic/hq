@@ -65,7 +65,8 @@ public class PermissionManagerImpl
     private String _falseToken = null;
 
     private static final String VIEWABLE_SELECT =
-        "SELECT instance_id, EAM_RESOURCE.sort_name, EAM_RESOURCE.id " +
+        "SELECT instance_id, EAM_RESOURCE.sort_name, EAM_RESOURCE.id, " +
+                            "EAM_RESOURCE.resource_type_id " +
         "FROM EAM_RESOURCE ";
 
     private static final String VIEWABLE_CLAUSE =
@@ -90,9 +91,9 @@ public class PermissionManagerImpl
     private static final String VIEWABLE_SEARCH =
         "WHERE EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND " +
               "RESOURCE_TYPE_ID IN (3, 301, 303, 305, 308)  AND "+
-              "(SORT_NAME LIKE ? OR " +
+              "(SORT_NAME LIKE UPPER(?) OR " +
                "PROTO_ID IN (SELECT ID FROM EAM_RESOURCE " +
-                            "WHERE PROTO_ID = 0 AND SORT_NAME LIKE ?)) ";
+                            "WHERE PROTO_ID = 0 AND SORT_NAME LIKE UPPER(?))) ";
 
     private Connection getConnection() throws SQLException {
         try {
@@ -267,7 +268,8 @@ public class PermissionManagerImpl
             String sql = VIEWABLE_SELECT + VIEWABLE_SEARCH;
             
             // TODO: change sort by
-            sql += "ORDER BY EAM_RESOURCE.sort_name ";
+            sql += "ORDER BY EAM_RESOURCE.resource_type_id, " +
+            		        "EAM_RESOURCE.sort_name ";
             
             if(!pc.isAscending()) {
                 sql = sql + "DESC";
@@ -278,7 +280,8 @@ public class PermissionManagerImpl
                 searchFor = "%";
             }
             else {
-                searchFor = '%' + searchFor.toUpperCase() + '%';
+                // Support wildcards
+                searchFor = '%' + searchFor.replace('*', '%') + '%';
             }
             
             stmt = conn.prepareStatement(sql);
