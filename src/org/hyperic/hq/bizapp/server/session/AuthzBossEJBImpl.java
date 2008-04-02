@@ -162,7 +162,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                                    PageControl pc)
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId.intValue());
+        AuthzSubject subject = manager.getSubjectPojo(sessionId.intValue());
         return getAuthzSubjectManager().getAllSubjects(subject, excludes, pc);
     }
 
@@ -177,7 +177,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                                     PageControl pc)
         throws PermissionException, SessionTimeoutException,
                SessionNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId.intValue());
+        AuthzSubject subject = manager.getSubjectPojo(sessionId.intValue());
         return getAuthzSubjectManager().getSubjectsById(subject, ids, pc);
     }
 
@@ -221,7 +221,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws FinderException, RemoveException, PermissionException,
                SessionTimeoutException, SessionNotFoundException {
         // check for timeout
-        AuthzSubjectValue whoami = manager.getSubject(sessionId.intValue());        
+        AuthzSubject whoami = manager.getSubjectPojo(sessionId.intValue());
         try {
             AuthzSubjectManagerLocal mgr = getAuthzSubjectManager();
             for (int i = 0; i < ids.length; i++) {
@@ -320,7 +320,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws PermissionException, CreateException, SessionException 
     {
         // check for timeout
-        AuthzSubjectValue whoami = manager.getSubject(sessionId.intValue());        
+        AuthzSubject whoami = manager.getSubjectPojo(sessionId.intValue());
 
         AuthzSubjectManagerLocal subjMan = getAuthzSubjectManager();
         AuthzSubject subject = subjMan.createSubject(whoami, name, active,
@@ -379,7 +379,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     }
 
     /**
-     * Return the <code>AuthzSubjectValue</code> object identified by
+     * Return the <code>AuthzSubject</code> object identified by
      * the given username.
      *
      * @ejb:interface-method
@@ -393,7 +393,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     }
 
     /**
-     * Return the <code>AuthzSubjectValue</code> object identified by
+     * Return the <code>AuthzSubject</code> object identified by
      * the given username. This method should only be used in cases
      * where displaying the user does not require an Authz check. An
      * example of this is when the owner and last modifyer need to 
@@ -433,7 +433,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      */
     public ConfigResponse getUserPrefs(Integer sessionId, Integer subjectId) {
         try {
-            AuthzSubjectValue who = manager.getSubject(sessionId.intValue());
+            AuthzSubject who = manager.getSubjectPojo(sessionId.intValue());
             return getAuthzSubjectManager().getUserPrefs(who, subjectId);
         } catch (Exception e) {
             throw new SystemException(e);
@@ -449,14 +449,9 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws ApplicationException, SessionTimeoutException,
                SessionNotFoundException 
     {
-        // log.debug("Invoking setUserPrefs" +
-        //         " in AuthzBossEJBImpl " +
-        //         " for " + subjectId + " at "+System.currentTimeMillis() +
-        //         " prefs = " + prefs);
-        AuthzSubjectValue who = manager.getSubject(sessionId.intValue());
+        AuthzSubject who = manager.getSubjectPojo(sessionId.intValue());
         getAuthzSubjectManager().setUserPrefs(who, subjectId, prefs);
-        prefs = getUserPrefs(sessionId, subjectId);
-        // log.debug("LOADED PREFS=" + prefs);
+        getUserPrefs(sessionId, subjectId);
     }
     
     /**

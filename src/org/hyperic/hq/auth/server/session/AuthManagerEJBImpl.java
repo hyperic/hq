@@ -27,7 +27,6 @@ package org.hyperic.hq.auth.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.ejb.CreateException;
@@ -46,7 +45,6 @@ import org.hyperic.hq.auth.shared.AuthManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
@@ -118,7 +116,7 @@ public class AuthManagerEJBImpl implements SessionBean {
         } catch (SubjectNotFoundException fe) {
             // User not found in the authz system.  Create it.
             try {
-                AuthzSubjectValue overlord = subjMan.findOverlord();
+                AuthzSubject overlord = subjMan.getOverlordPojo();
                 subject = subjMan.createSubject(overlord, user, true, appName,
                                                 "", "", "", "", "", "", false);
             } catch (CreateException e) {
@@ -180,8 +178,9 @@ public class AuthManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
+     * XXX: Shouldn't this check permissions?
      */
-    public void addUser(AuthzSubjectValue subject, 
+    public void addUser(AuthzSubject subject,
                         String username, String password)
     {
         PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
@@ -198,7 +197,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void changePassword(AuthzSubjectValue subject, 
+    public void changePassword(AuthzSubject subject,
                                String username, String password)
         throws PermissionException
     {
@@ -224,8 +223,9 @@ public class AuthManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
+     * XXX: Shouldn't this check permissions?
      */
-    public void deleteUser(AuthzSubjectValue subject, String username) {
+    public void deleteUser(AuthzSubject subject, String username) {
         PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
         Principal local = lhome.findByUsername(username);
 
@@ -245,7 +245,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public boolean isUser(AuthzSubjectValue subject, String username) {
+    public boolean isUser(AuthzSubject subject, String username) {
         PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
         return lhome.findByUsername(username) != null;
     }
@@ -258,7 +258,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public Collection getAllUsers(AuthzSubjectValue subject) {
+    public Collection getAllUsers(AuthzSubject subject) {
         PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
         
         Collection principals = lhome.findAllUsers();

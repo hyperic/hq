@@ -40,7 +40,6 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.util.ConfigPropertyException;
@@ -147,7 +146,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public void addUser(int sessionID, String username, String password)
         throws SessionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         getAuthManager().addUser(subject, username, password);
     }
 
@@ -162,7 +161,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public void changePassword(int sessionID, String username, String password) 
         throws FinderException, PermissionException, SessionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         getAuthManager().changePassword(subject, username, password);
     }
 
@@ -174,7 +173,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public boolean isUser(int sessionID, String username)
         throws SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getAuthManager().isUser(subject, username);
     }
 
@@ -186,7 +185,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public Collection getAllUsers(int sessionID)
         throws SessionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getAuthManager().getAllUsers(subject);
     }
 

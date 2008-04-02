@@ -82,11 +82,10 @@ public class AuthzSubjectManagerEJBImpl
     /** 
      * Create a subject.
      * @param whoami The current running user.
-     * @param subject The subject to be created.
      * @return Value-object for the new Subject.
      * @ejb:interface-method
      */
-    public AuthzSubject createSubject(AuthzSubjectValue whoami, String name,
+    public AuthzSubject createSubject(AuthzSubject whoami, String name,
                                       boolean active, String dsn, String dept,
                                       String email, String first, String last,
                                       String phone, String sms, boolean html)
@@ -104,12 +103,11 @@ public class AuthzSubjectManagerEJBImpl
                                       name);
         }
 
-        AuthzSubject whoamiPojo  = findSubjectById(whoami.getId()); 
-        AuthzSubject subjectPojo = dao.create(whoamiPojo, name, active, dsn,
+        AuthzSubject subjectPojo = dao.create(whoami, name, active, dsn,
                                               dept, email, first, last, phone, 
                                               sms, html);
 
-        UserAudit.createAudit(whoamiPojo, subjectPojo);
+        UserAudit.createAudit(whoami, subjectPojo);
         return subjectPojo;
     }
 
@@ -201,7 +199,7 @@ public class AuthzSubjectManagerEJBImpl
      * Check if a subject can modify users  
      * @ejb:interface-method
      */
-    public void checkModifyUsers(AuthzSubjectValue caller) 
+    public void checkModifyUsers(AuthzSubject caller)
         throws PermissionException 
     {
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -218,7 +216,7 @@ public class AuthzSubjectManagerEJBImpl
      * @param subject The ID of the subject to delete.
      * @ejb:interface-method
      */
-    public void removeSubject(AuthzSubjectValue whoami, Integer subject)
+    public void removeSubject(AuthzSubject whoami, Integer subject)
         throws RemoveException, PermissionException 
     {
         // no removing of the root user!
@@ -308,7 +306,7 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:interface-method
      * @param excludes the IDs of subjects to exclude from result
      */
-    public PageList getAllSubjects(AuthzSubjectValue whoami,
+    public PageList getAllSubjects(AuthzSubject whoami,
                                    Collection excludes, PageControl pc)
         throws FinderException, PermissionException {
         Collection subjects;
@@ -382,7 +380,7 @@ public class AuthzSubjectManagerEJBImpl
      * @param ids the subject ids
      * @ejb:interface-method
      */
-    public PageList getSubjectsById(AuthzSubjectValue subject,
+    public PageList getSubjectsById(AuthzSubject subject,
                                     Integer[] ids,
                                     PageControl pc)
         throws PermissionException {
@@ -440,7 +438,7 @@ public class AuthzSubjectManagerEJBImpl
      * Get the Preferences for a specified user
      * @ejb:interface-method
      */
-    public ConfigResponse getUserPrefs(AuthzSubjectValue who, Integer subjId)
+    public ConfigResponse getUserPrefs(AuthzSubject who, Integer subjId)
         throws PermissionException
     {
         // users can always see their own prefs.
@@ -463,7 +461,7 @@ public class AuthzSubjectManagerEJBImpl
      * Set the Preferences for a specified user
      * @ejb:interface-method
      */
-    public void setUserPrefs(AuthzSubjectValue who, Integer subjId,
+    public void setUserPrefs(AuthzSubject who, Integer subjId,
                              ConfigResponse prefs) 
         throws PermissionException 
     {
@@ -491,6 +489,7 @@ public class AuthzSubjectManagerEJBImpl
      * anonymous user and should be used for non-authz operations
      * that require a subject value as one of the params
      * @return the overlord
+     * @deprecated Use getOverlordPojo instead
      * @ejb:interface-method
      */
     public AuthzSubjectValue getOverlord() {
@@ -503,16 +502,6 @@ public class AuthzSubjectManagerEJBImpl
      */
     public AuthzSubject getOverlordPojo() {
         return getSubjectDAO().findById(AuthzConstants.overlordId);
-    }
-
-    /**
-     * Get the root spider subject value. THe root is the systems
-     * unrestricted user which can _log in.
-     * @ejb:interface-method
-     */
-    public AuthzSubjectValue getRoot() {
-        return getSubjectDAO().findById(AuthzConstants.rootSubjectId)
-                              .getAuthzSubjectValue();
     }
     
     public static AuthzSubjectManagerLocal getOne() {
