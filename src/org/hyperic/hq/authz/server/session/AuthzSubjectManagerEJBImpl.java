@@ -179,7 +179,7 @@ public class AuthzSubjectManagerEJBImpl
         }
 
         if (lastName != null && !lastName.equals(target.getLastName())) {
-            target.setFirstName(firstName);
+            target.setLastName(lastName);
             UserAudit.updateAudit(whoami, target, AuthzSubjectField.LASTNAME, 
                                   target.getLastName(), lastName);
         }
