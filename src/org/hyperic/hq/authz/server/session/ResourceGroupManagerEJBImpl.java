@@ -41,6 +41,7 @@ import javax.naming.NamingException;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -61,6 +62,7 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -169,11 +171,11 @@ public class ResourceGroupManagerEJBImpl
      */
     public ResourceGroup findResourceGroupById(AuthzSubject whoami,
                                                Integer id)
-        throws PermissionException, FinderException
+        throws PermissionException
     {
         ResourceGroup group = getResourceGroupDAO().get(id);
         if (group == null) {
-            throw new FinderException("Group id=" + id + " not found.");
+            return null;
         }
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -191,15 +193,15 @@ public class ResourceGroupManagerEJBImpl
      * on the requested group
      * @ejb:interface-method
      */
-    public ResourceGroup findResourceGroupByName(AuthzSubjectValue whoami,
+    public ResourceGroup findResourceGroupByName(AuthzSubject whoami,
                                                  String name)
-        throws PermissionException, FinderException 
+        throws PermissionException
     {
         ResourceGroup group = getResourceGroupDAO().findByName(name);
-        if (group == null) {
-            throw new FinderException("Group name=" + name + " not found.");
-        }
 
+        if (group == null)
+            return null;
+        
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(), AuthzConstants.authzGroup, group.getId(),
                  AuthzConstants.perm_viewResourceGroup);
@@ -496,6 +498,63 @@ public class ResourceGroupManagerEJBImpl
         return getAllResourceGroups(subject, pc, false);
     }
 
+    /**
+     * Get all the members of a group.
+     * 
+     * @return {@link Resource}s
+     * 
+     * TODO:  Currently a placeholder until ResourceGroup.getResources() is
+     *        made package-private.
+     * @ejb:interface-method
+     */
+    public Collection getMembers(ResourceGroup g) {
+        return g.getResources();
+    }
+
+    /**
+     * Get the # of members in a group
+     * @ejb:interface-method
+     */
+    public int getNumMembers(ResourceGroup g) {
+        return g.getResources().size();
+    }
+    
+    
+    /**
+     * Temporary method to convert a ResourceGroup into an AppdefGroupValue
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public AppdefGroupValue convertGroup(AuthzSubject subj, ResourceGroup g) {
+        AppdefGroupValue retVal = new AppdefGroupValue();
+
+        // Create our return group vo
+        retVal.setId(g.getId());
+        retVal.setName(g.getName());
+        retVal.setDescription(g.getDescription());
+        retVal.setLocation(g.getLocation());
+        retVal.setGroupType(g.getGroupType().intValue());
+        retVal.setGroupEntType(g.getGroupEntType().intValue());
+        retVal.setGroupEntResType(g.getGroupEntResType().intValue());
+        retVal.setTotalSize(g.getResources().size() );
+        retVal.setSubject(subj.getAuthzSubjectValue());
+        retVal.setClusterId(g.getClusterId().intValue());
+        retVal.setMTime(new Long(g.getMtime()));
+        retVal.setCTime(new Long(g.getCtime()));
+        retVal.setModifiedBy(g.getModifiedBy());
+        retVal.setOwner(subj.getName());
+                
+        // Add the group members
+        for (Iterator i = g.getResources().iterator(); i.hasNext();) {
+            Resource r= (Resource) i.next();
+            GroupEntry ge = new GroupEntry(r.getInstanceId(),
+                                           r.getResourceType().getName());
+            retVal.addEntry(ge);
+        }
+
+        return retVal;
+    }
+    
     /**
      * Get all the resource groups that contain a particular resource. Exclude
      * the root resource group. 

@@ -111,55 +111,52 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
         throws PermissionException, GroupNotFoundException 
     {
         AuthzSubjectValue subject = subj.getAuthzSubjectValue();
-        try {
-            ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
+        ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
 
-            ResourceGroup group;
-            if (retVal.getName () != null) {
-                group = rgmLoc.findResourceGroupByName(subject,
+        ResourceGroup group;
+        if (retVal.getName () != null) {
+            /*
+                group = rgmLoc.findResourceGroupByName(subj,
                                                        retVal.getName());
-            } else { 
-                group = rgmLoc.findResourceGroupById(subj,retVal.getId());
-            }
+                                                           */
+            // This used to find by name.  We are tempo rarily disabling
+            // it while we remove this function.
+            return null;    
+        } else { 
+            group = rgmLoc.findResourceGroupById(subj,retVal.getId());
+        }
 
-            if (group == null) {
-                throw new GroupNotFoundException();
-            }
+        if (group == null) {
+            throw new GroupNotFoundException();
+        }
 
-            // Create our return group vo
-            retVal.setId(group.getId());
-            retVal.setName(group.getName());
-            retVal.setDescription(group.getDescription());
-            retVal.setLocation(group.getLocation());
-            retVal.setGroupType(group.getGroupType().intValue());
-            retVal.setGroupEntType(group.getGroupEntType().intValue());
-            retVal.setGroupEntResType(group.getGroupEntResType().intValue());
-            retVal.setTotalSize( group.getResources().size() );
+        // Create our return group vo
+        retVal.setId(group.getId());
+        retVal.setName(group.getName());
+        retVal.setDescription(group.getDescription());
+        retVal.setLocation(group.getLocation());
+        retVal.setGroupType(group.getGroupType().intValue());
+        retVal.setGroupEntType(group.getGroupEntType().intValue());
+        retVal.setGroupEntResType(group.getGroupEntResType().intValue());
+        retVal.setTotalSize( group.getResources().size() );
 
-            if (full) {
-                retVal.setSubject(subject);
-                retVal.setClusterId(group.getClusterId().intValue());
-                retVal.setMTime(new Long(group.getMtime()));
-                retVal.setCTime(new Long(group.getCtime()));
-                retVal.setModifiedBy(group.getModifiedBy());
-                retVal.setOwner(fetchGroupOwner(group.getId()));
+        if (full) {
+            retVal.setSubject(subject);
+            retVal.setClusterId(group.getClusterId().intValue());
+            retVal.setMTime(new Long(group.getMtime()));
+            retVal.setCTime(new Long(group.getCtime()));
+            retVal.setModifiedBy(group.getModifiedBy());
+            retVal.setOwner(fetchGroupOwner(group.getId()));
                 
-                // Add the group members
-                for (Iterator i = group.getResources().iterator(); i.hasNext();)
-                {
-                    Resource resVo = (Resource) i.next();
-                    GroupEntry ge =
-                        new GroupEntry(resVo.getInstanceId(),
-                                       resVo.getResourceType().getName());
-                    retVal.addEntry(ge);
-                }
+            // Add the group members
+            for (Iterator i = group.getResources().iterator(); i.hasNext();)
+            {
+                Resource resVo = (Resource) i.next();
+                GroupEntry ge =
+                    new GroupEntry(resVo.getInstanceId(),
+                                   resVo.getResourceType().getName());
+                retVal.addEntry(ge);
             }
-        } catch (FinderException fe) {
-            log.debug("GroupManager caught underlying finder exc "+
-                      "attempting to findResourceGroupById(): "+
-                      fe.getMessage());
-            throw new GroupNotFoundException("The specified group "+
-                                             "does not exist.", fe);
         }
         return retVal;
     }

@@ -35,6 +35,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -99,21 +100,13 @@ public class NavMapSupportedTag extends VarSetterBaseTag {
                                 // compatible-group or cluster, supported
                                 navMapSupported = true;
                             }
-                        } catch (SessionNotFoundException e) {
-                            // ERROR, not supported
-                            log.error("Session not found.  Assuming NavMap not supported.", e);
-                            navMapSupported = false;
-                        } catch (SessionTimeoutException e) {
+                        } catch (SessionException e) {
                             // ERROR, not supported
                             log.error("Session timeout.  Assuming NavMap not supported.", e);
                             navMapSupported = false;
                         } catch (PermissionException e) {
                             // ERROR, not supported
                             log.error("No rights to this group.  Assuming NavMap not supported.", e);
-                            navMapSupported = false;
-                        } catch (AppdefGroupNotFoundException e) {
-                            // ERROR, not supported
-                            log.error("Group not found.  Assuming NavMap not supported.", e);
                             navMapSupported = false;
                         } catch (ServletException e) {
                             // ERROR, not supported

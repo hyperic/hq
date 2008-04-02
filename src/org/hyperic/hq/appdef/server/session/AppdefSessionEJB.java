@@ -57,6 +57,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -274,8 +275,12 @@ public abstract class AppdefSessionEJB
      */
     protected AppdefGroupValue findGroupById(AuthzSubject subject,
                                              Integer groupId)
-        throws AppdefGroupNotFoundException, PermissionException {
-        return getAppdefGroupManagerLocal().findGroup(subject,groupId);
+        throws PermissionException 
+    {
+        ResourceGroupManagerLocal groupMan = 
+            ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroup group = groupMan.findResourceGroupById(subject, groupId);
+        return groupMan.convertGroup(subject, group);
     }
 
     /**

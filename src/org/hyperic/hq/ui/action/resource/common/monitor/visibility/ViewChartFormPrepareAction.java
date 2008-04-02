@@ -52,6 +52,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -239,7 +240,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                                                     ViewChartForm chartForm,
                                                     AppdefResourceValue resource,
                                                     MeasurementBoss mb)
-        throws SessionTimeoutException, SessionNotFoundException,
+        throws SessionTimeoutException, SessionException,
                AppdefEntityNotFoundException, PermissionException,
                RemoteException, MeasurementNotFoundException {
         ServletContext ctx = getServlet().getServletContext();

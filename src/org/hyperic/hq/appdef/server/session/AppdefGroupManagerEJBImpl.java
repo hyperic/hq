@@ -65,9 +65,12 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceValue;
@@ -127,55 +130,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     }
     
     public AppdefGroupManagerEJBImpl() {}
-
-    /**
-     * Lookup and return a group value object by its name.
-     * @param subject subject value.
-     * @param groupName - the unique group name.
-     * @throws AppdefGroupNotFoundException when group cannot be located in db.
-     * @throws PermissionException if the caller is not authorized.
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public AppdefGroupValue findGroupByName(AuthzSubject subject,
-                                            String groupName)
-        throws AppdefGroupNotFoundException, PermissionException 
-    {
-        return findGroup(subject, null, groupName, true);
-    }
-
-    /**
-     * Lookup and return a group value object by its name.
-     * @param groupName - the unique group name.
-     * @param pc - page control
-     * @return AppdefGroupValue object
-     * @throws AppdefGroupNotFoundException when group cannot be located in db.
-     * @throws PermissionException if the caller is not authorized.
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public AppdefGroupValue findGroupByName(AuthzSubject subject,
-                                            String groupName, PageControl pc)
-        throws AppdefGroupNotFoundException, PermissionException 
-    {
-        return findGroup(subject, null, groupName, true);
-    }
-
-    /**
-     * Lookup and return a group value object by its identifier.
-     * 
-     * @param subject subject value.
-     * @param id representing the group identifier
-     * @return AppdefGroupValue object
-     * @throw AppdefGroupNotFoundException when group cannot be found.
-     * @throw PermissionException when group access is not authorized.
-     * @ejb:interface-method
-     */
-    public AppdefGroupValue findGroup(AuthzSubject subject, Integer id)
-        throws AppdefGroupNotFoundException, PermissionException {
-        AppdefEntityID aeid = AppdefEntityID.newGroupID(id.intValue());
-        return findGroup(subject, aeid);
-    }
 
     /**
      * Lookup and return a group value object.
@@ -292,79 +246,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
             retVal.set(i, findById(subject, id));
         }
         return retVal;
-    }
-
-    // This is, in effect, a service cluster CRUD method that manages the
-    // lifecycle of service clusters and their association with groups.
-    // Groups of type COMPAT_SVC and Service Clusters are interdependent.
-    // However, since their entities reside in disparate subsystems, there
-    // are no physical constraints between them. This method realizes a
-    // logical constraint.
-    private void manageServiceCluster(AuthzSubject subject,
-                                      AppdefGroupValue gv) 
-        throws CreateException, FinderException, RemoveException,
-               PermissionException, AppSvcClustDuplicateAssignException,
-               AppSvcClustIncompatSvcException, VetoException 
-    {
-
-        // Group/cluster pre-existed, user flushed group of all
-        // members, Delete the cluster.
-        if (gv.getClusterId() != CLUSTER_UNDEFINED && gv.getSize() == 0) {
-            removeServiceCluster(subject, gv.getClusterId());
-            gv.setClusterId( CLUSTER_UNDEFINED );
-        } 
-        // Create/Update (only if they've added something to the group)
-        else if (gv.getSize()>0) {
-            ServiceClusterValue clusterVo = new ServiceClusterValue();
-            clusterVo.setName(gv.getName());
-            clusterVo.setDescription(gv.getDescription());
-            clusterVo.setGroupId(gv.getId());
-            clusterVo.setServiceType(
-                (ServiceTypeValue) gv.getAppdefResourceTypeValue());
-
-            List svcList = new ArrayList();
-            List grpMembers = gv.getAppdefGroupEntries();
-            for (Iterator i=grpMembers.iterator(); i.hasNext();) {
-                AppdefEntityID member = (AppdefEntityID)i.next();
-                svcList.add(member.getId());
-            }
-            // Group/cluster doesn't exist, create it.
-            if (gv.getClusterId() == CLUSTER_UNDEFINED)  {
-                createServiceCluster(subject, gv, clusterVo, svcList);
-            }
-            // Group/cluster pre-existed, group has members, update
-            else {
-                updateServiceCluster(subject, gv, clusterVo, svcList);
-            }
-        }
-    }
-
-    private void createServiceCluster (AuthzSubject subject,
-        AppdefGroupValue gv, ServiceClusterValue clusterVo, List svcList)
-        throws FinderException, AppSvcClustDuplicateAssignException,
-               PermissionException, AppSvcClustIncompatSvcException {
-        try {
-            Integer pk =
-                getServiceManager().createCluster(subject, clusterVo, svcList);
-            gv.setClusterId(pk.intValue());
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
-    }
-
-    private void updateServiceCluster (AuthzSubject subject,
-        AppdefGroupValue gv, ServiceClusterValue clusterVo, List svcList)
-        throws FinderException, AppSvcClustDuplicateAssignException,
-               PermissionException, AppSvcClustIncompatSvcException {
-        clusterVo.setId(new Integer(gv.getClusterId()));
-        getServiceManager().updateCluster(subject, clusterVo, svcList);
-    }
-
-    private void removeServiceCluster (AuthzSubject subject, int clusterId)
-        throws RemoveException, FinderException, PermissionException,
-               VetoException
-    {
-        getServiceManager().removeCluster(subject, new Integer(clusterId));
     }
 
     /**
@@ -614,13 +495,12 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                 return appManagerLocal.getApplicationById(
                         subject, entityId.getId());
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                try {
-                    return findGroup(subject, entityId.getId());
-                }
-                catch (AppdefGroupNotFoundException e) {
-                    log.debug("getById() failed to find specified group.");
-                    throw e;
-                }
+                ResourceGroupManagerLocal groupMan =
+                    ResourceGroupManagerEJBImpl.getOne();
+                ResourceGroup g = 
+                    groupMan.findResourceGroupById(subject, entityId.getId()); 
+                               
+                return groupMan.convertGroup(subject, g);
             default:
                 throw new InvalidAppdefTypeException (entityId.getType()
                         + " is not a valid appdef entity type");

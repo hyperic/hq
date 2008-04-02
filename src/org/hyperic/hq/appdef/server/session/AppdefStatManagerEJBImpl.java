@@ -56,10 +56,13 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefStatManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.SystemException;
@@ -1603,12 +1606,15 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      */
     public ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject,
                                                     Integer groupId)
-        throws AppdefEntityNotFoundException, PermissionException {
+        throws PermissionException 
+    {
+        ResourceGroupManagerLocal groupMan = 
+            ResourceGroupManagerEJBImpl.getOne();
+        
+        ResourceGroup group = groupMan.findResourceGroupById(subject, groupId);
+        AppdefGroupValue groupVal = groupMan.convertGroup(subject, group);
         try {
-            AppdefGroupValue groupVo = 
-                getAppdefGroupManagerLocal().findGroup(subject,groupId);
-
-            return getNavMapDataForGroup(subject, groupVo);
+            return getNavMapDataForGroup(subject, groupVal);
         } catch (SQLException e) {
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);

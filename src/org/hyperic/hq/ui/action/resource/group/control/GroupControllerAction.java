@@ -236,7 +236,6 @@ public class GroupControllerAction extends ResourceControlController {
                 RequestUtils.setError(request, 
                     "resource.common.control.error.NoResourcesInGroup");
             }
-        } catch (AppdefGroupNotFoundException agnfe) {
         } catch (PermissionException pe) {
         } catch (ServletException se) {
         }

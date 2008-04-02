@@ -60,6 +60,7 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
+import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent.MeasurementScheduleZeventSource;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
@@ -742,20 +743,16 @@ public class MeasurementGtrigger
         _resourceGroup = rg;
         
         _interestedEvents.clear();
+        ResourceGroupManagerLocal gMan = ResourceGroupManagerEJBImpl.getOne(); 
+        AuthzSubjectManagerLocal sMan = AuthzSubjectManagerEJBImpl.getOne(); 
+        TemplateManagerLocal tMan = TemplateManagerEJBImpl.getOne(); 
+            
         try {
-            // Not sure this is the best way to do this.  It essentially ties us
-            // to only having appdef groups come in here.
-            AppdefGroupManagerLocal gMan = 
-                AppdefGroupManagerUtil.getLocalHome().create();
-            AuthzSubjectManagerLocal sMan = 
-                AuthzSubjectManagerUtil.getLocalHome().create();
-            TemplateManagerLocal tMan = 
-                TemplateManagerUtil.getLocalHome().create();
+            ResourceGroup g = gMan.findResourceGroupById(sMan.getOverlordPojo(),
+                                                         rg.getId());
+                                             
             
-            AppdefGroupValue g = gMan.findGroup(sMan.getOverlordPojo(),
-                                                rg.getId());
-            
-            _groupSize = g.getTotalSize();
+            _groupSize = gMan.getNumMembers(g);
             
             _log.debug("Resource group set: id="+rg.getId()+", size="+_groupSize);
             

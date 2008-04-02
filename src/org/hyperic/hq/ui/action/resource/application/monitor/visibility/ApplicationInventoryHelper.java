@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -77,7 +78,7 @@ public class ApplicationInventoryHelper extends InventoryHelper {
                                       AppdefResourceValue resource)
         throws PermissionException, AppdefEntityNotFoundException,
                RemoteException, SessionNotFoundException,
-               SessionTimeoutException, ServletException {
+               SessionException, ServletException {
         AppdefEntityID entityId = resource.getEntityId();
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
@@ -129,7 +130,7 @@ public class ApplicationInventoryHelper extends InventoryHelper {
                               ServletContext ctx,
                               AppdefResourceValue resource)
         throws PermissionException, AppdefEntityNotFoundException,
-        RemoteException, SessionNotFoundException, SessionTimeoutException,
+        RemoteException, SessionException, 
         ServletException {
         ApplicationValue application = (ApplicationValue) resource;
         int sessionId = RequestUtils.getSessionId(request).intValue();
