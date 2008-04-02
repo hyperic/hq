@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2007], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -201,7 +201,7 @@
     </td>
   <c:choose>
   <c:when test="${mode eq MODE_REGISTER}"> 
-    <td class="BlockContent colspan="2">&nbsp;</td>
+    <td class="BlockContent" colspan="2">&nbsp;</td>
   </c:when>
   <c:otherwise>
     <td class="BlockLabel"><fmt:message key="admin.user.generalProperties.EnableLogin"/></td>
