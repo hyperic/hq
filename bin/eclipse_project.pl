@@ -48,7 +48,7 @@ sub add_lib {
 my(@jar_dirs);
 
 for my $path (@dirs) {
-    for my $src (qw(src build/src installer/src tools/txsnatch/src)) {
+    for my $src (qw(src build/src installer/src tools/txsnatch/src ui_plugins)) {
 	my $src_dir = "$path/$src";
 	push @src, $src_dir if -d $src_dir;
     }
