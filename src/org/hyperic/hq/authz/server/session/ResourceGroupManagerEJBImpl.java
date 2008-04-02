@@ -164,9 +164,8 @@ public class ResourceGroupManagerEJBImpl
     }
     
     /**
-     * Find the group that has the given ID.
+     * Find the group that has the given ID.  Performs authz checking
      * @param whoami user requesting to find the group
-     * @param id The ID of the role you're looking for.
      * @ejb:interface-method
      */
     public ResourceGroup findResourceGroupById(AuthzSubject whoami,
@@ -184,6 +183,14 @@ public class ResourceGroupManagerEJBImpl
         return group;
     }
 
+    /**
+     * Find the group that has the given ID.  Does not do any authz checking
+     * @ejb:interface-method
+     */
+    public ResourceGroup findResourceGroupById(Integer id) {
+        return getResourceGroupDAO().findById(id);
+    }
+    
     /**
      * Find the role that has the given name.
      * @param whoami user requesting to find the group

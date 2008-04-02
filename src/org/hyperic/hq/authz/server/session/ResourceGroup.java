@@ -151,6 +151,10 @@ public class ResourceGroup extends AuthzNamedBean
         _groupType = val;
     }
 
+    public boolean isMixed() {
+        return getResourcePrototype() == null;
+    }
+    
     /**
      * @deprecated Use getResourcePrototype() instead.
      * XXX: ADHOC groups lose the Group or Application types with the change
