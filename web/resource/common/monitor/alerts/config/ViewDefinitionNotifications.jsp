@@ -67,7 +67,7 @@
   <tiles:put name="viewUsersUrl" beanName="viewUsersUrl"/>
   <tiles:put name="viewOthersUrl" beanName="viewOthersUrl"/>
   <tiles:put name="viewEscalationUrl" beanName="viewEscalationUrl"/>
-  <tiles:put name="viewEscalationUrl" beanName="viewOpenNMSUrl"/>
+  <tiles:put name="viewOpenNMSUrl" beanName="viewOpenNMSUrl"/>
 </tiles:insert>
 
 <script language="JavaScript" src="<html:rewrite page='/js/listWidget.js'/>" type="text/javascript"></script>
