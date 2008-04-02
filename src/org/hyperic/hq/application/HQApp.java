@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -77,6 +78,9 @@ public class HQApp {
     private long               _numTxErrors;
 
     private long               _methWarnTime;
+
+    private Map _methInvokeStats      = new HashMap();
+    private AtomicBoolean _collectMethStats = new AtomicBoolean();
     
     private StartupFinishedCallback _startupFinished;
     
@@ -265,10 +269,10 @@ public class HQApp {
         }
     }
 
-    private static void warnMethodTooLong(long total, long warnTime,
-                                          Invocation v, Object methodRes,
-                                          boolean failed, String methName,
-                                          String className)
+    private void warnMethodTooLong(long total, long warnTime,
+                                   Invocation v, Object methodRes,
+                                   boolean failed, String methName,
+                                   String className)
     {
         Map txPayload = v.getTransientPayload();
         
@@ -314,7 +318,59 @@ public class HQApp {
         _log.warn(warn);
     }
     
-    private static class TxSynch implements Synchronization, Serializable {
+
+    private String makeMethodStatKey(Class c, Method meth) {
+        StringBuffer key = new StringBuffer();
+        key.append(c.getName())
+           .append("#")
+           .append(meth.getName());
+        Class[] params = meth.getParameterTypes();
+        for (int i=0; i<params.length; i++) {
+            key.append(params[i].getName());
+        }
+        return key.toString();
+    }
+
+    public void setCollectMethodStats(boolean enable) {
+        _collectMethStats.set(enable);
+    }
+    
+    public boolean isCollectingMethodStats() {
+        return _collectMethStats.get();
+    }
+    
+    private void updateMethodStats(Class c, Method meth, long total,
+                                   boolean txFailed) 
+    { 
+        if (!_collectMethStats.get()) {
+            return;
+        }
+        
+        String key = makeMethodStatKey(c, meth);
+        
+        MethodStats stats;
+        synchronized (STAT_LOCK) {
+            stats = (MethodStats)_methInvokeStats.get(key);
+            if (stats == null) {
+                stats = new MethodStats(c, meth);
+                _methInvokeStats.put(key, stats);
+            }
+        }
+        if (stats != null)
+            stats.update(total, txFailed);
+    }
+    
+    public List getMethodStats() {
+        synchronized (STAT_LOCK) {
+            return new ArrayList(_methInvokeStats.values());
+        }
+    }
+    
+    private TxSynch createTxSynch(javax.transaction.Transaction tx) {
+        return new TxSynch(tx);
+    }
+
+    private class TxSynch implements Synchronization, Serializable {
         private javax.transaction.Transaction _me;
         
         private TxSynch(javax.transaction.Transaction me) {
@@ -330,14 +386,14 @@ public class HQApp {
             }
         
             if (status != Status.STATUS_COMMITTED) {
-                HQApp.getInstance().incrementTxCount(true);
+                incrementTxCount(true);
                 if (_log.isTraceEnabled()) {
                     _log.trace("Transaction [" + _me + "] failed!");
                 }
                 // Failed Tx -- kill the session.
                 SessionManager.cleanupSession(false);
             } else {
-                HQApp.getInstance().incrementTxCount(false);
+                incrementTxCount(false);
             }
         }
 
@@ -346,6 +402,16 @@ public class HQApp {
     }
     
     private static class Snatcher implements TxSnatch.Snatcher  {
+        private final Object SNATCH_LOCK = new Object();
+        private HQApp _app;
+        
+        private HQApp getAppInstance() {
+            synchronized (SNATCH_LOCK) {
+                if (_app == null)
+                    _app = HQApp.getInstance();
+                return _app;
+            }
+        }
         private void attemptRegisterSynch(javax.transaction.Transaction tx,
                                           Session s) 
         {
@@ -360,7 +426,8 @@ public class HQApp {
             }
             if (newSynch) {
                 try {
-                    tx.registerSynchronization(new TxSynch(tx));
+                    HQApp app = getAppInstance();
+                    tx.registerSynchronization(app.createTxSynch(tx));
                 } catch(Exception e) {
                     synchronized (_txSynchs) {
                         _txSynchs.remove(tx);
@@ -422,14 +489,16 @@ public class HQApp {
                         res = next.invoke(v);
                     failed = false;
                 } finally {
+                    HQApp app = getAppInstance();
                     long total = System.currentTimeMillis() - startTime;
-                    long warnTime = HQApp.getInstance().getMethodWarnTime();
+                    long warnTime = app.getMethodWarnTime();
                     
+                    app.updateMethodStats(c, meth, total, failed);
                     if (warnTime != -1 && total > warnTime) {
                         try {
-                            HQApp.warnMethodTooLong(total, warnTime, v, res,
-                                                    failed, methName,
-                                                    className);
+                            app.warnMethodTooLong(total, warnTime, v, res,
+                                                  failed, methName,
+                                                  className);
                         } catch(Throwable t) {
                             _log.warn("Error while warning.  Ugly", t);
                         }
