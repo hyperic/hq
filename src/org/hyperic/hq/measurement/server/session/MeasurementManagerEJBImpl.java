@@ -419,21 +419,30 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     /** 
      * Look up a Measurement for an instance and an alias and an alias.
      *
-     * @return a Measurement value
+     * @return The Measurement for the AppdefEntityId of the given alias.
+     * @deprecated Use getMeasurement(AuthzSubject, Resource, String) instread.
      * @ejb:interface-method
      */
     public Measurement getMeasurement(AuthzSubject subject,
                                       AppdefEntityID id,
                                       String alias)
         throws MeasurementNotFoundException {
+        return getMeasurement(subject, getResource(id), alias);
+    }
 
-        Measurement m =
-            getMeasurementDAO().findByAliasAndID(alias, getResource(id));
+    /**
+     * Look up a Measurement for a Resource and Measurement alias
+     * @return a The Measurement for the Resource of the given alias.
+     * @ejb:interface-method
+     */
+    public Measurement getMeasurement(AuthzSubject s, Resource r, String alias)
+        throws MeasurementNotFoundException
+    {
+        Measurement m = getMeasurementDAO().findByAliasAndID(alias, r);
         if (m == null) {
-            throw new MeasurementNotFoundException(alias + " for " + id + 
-                                                   " not found.");
+            throw new MeasurementNotFoundException(alias + " for " + r.getName() +
+                                                   " not found");
         }
-
         return m;
     }
 
@@ -660,13 +669,22 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Get an Availabilty Measurement by AppdefEntityId
+     * @deprecated Use getAvailabilityMeasurement(Resource) instead.
      *
      * @ejb:interface-method
      */
     public Measurement getAvailabilityMeasurement(AuthzSubject subject,
                                                   AppdefEntityID id)
     {
-        return getMeasurementDAO().findAvailMeasurement(getResource(id));
+        return getAvailabilityMeasurement(getResource(id));
+    }
+
+    /**
+     * Get an Availability Measurement by Resource
+     * @ejb:interface-method
+     */
+    public Measurement getAvailabilityMeasurement(Resource r) {
+        return getMeasurementDAO().findAvailMeasurement(r);
     }
 
     /**
