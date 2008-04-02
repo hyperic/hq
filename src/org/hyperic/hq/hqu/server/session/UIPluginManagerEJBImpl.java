@@ -44,9 +44,12 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
@@ -271,18 +274,6 @@ public class UIPluginManagerEJBImpl
                                                user);
     }
 
-    private Integer appdefTypeToAuthzType(int appdefType) {
-        switch(appdefType) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return AuthzConstants.authzPlatformProto;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            return AuthzConstants.authzServerProto;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return AuthzConstants.authzServiceProto;
-        }
-        return null;
-    }
-    
     /**
      * @ejb:interface-method
      */
@@ -317,24 +308,15 @@ public class UIPluginManagerEJBImpl
         if (ent.isGroup()) {
             AuthzSubject overlord =
                 AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(); 
-            AppdefGroupValue grp;
+            ResourceGroup group;
             
-            try {
-                grp = AppdefGroupManagerEJBImpl.getOne().findGroup(overlord, 
-                                                                   ent);
-            } catch(Exception e) {
-                throw new SystemException("Unable to lookup attachments", e);
-            }
-
-            if (grp.isGroupAdhoc()) {
+            group = ResourceGroupManagerEJBImpl.getOne() 
+                        .findResourceGroupById(ent.getId());
+            
+            if (group.isMixed()) {
                 r = rman.findRootResource();
             } else {
-                Integer authzType = appdefTypeToAuthzType(grp.getGroupEntType());
-                if (authzType == null)
-                    return Collections.EMPTY_LIST;
-                
-                Integer entityType = new Integer(grp.getGroupEntResType());
-                r = rman.findResourcePojoByInstanceId(authzType, entityType);
+                r = group.getResourcePrototype();
             }
         } else {
             r = rman.findResource(ent);
