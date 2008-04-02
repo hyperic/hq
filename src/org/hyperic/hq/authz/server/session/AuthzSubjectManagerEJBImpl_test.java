@@ -23,12 +23,14 @@ public class AuthzSubjectManagerEJBImpl_test extends BaseServerTestCase {
         undeployHQ();
     }
 
+    public void testNothing() throws Exception {
+    }
+    
     public void xxx_testUserUpdate() throws Exception {
         AuthzSubjectManagerLocal asMan =
              (AuthzSubjectManagerLocal)
                   _registry.getLocalInterface(AuthzSubjectManagerEJBImpl.class,
                                               AuthzSubjectManagerLocal.class);
-        
         AuthzSubject overlord = asMan.getOverlordPojo();
         
         String dept = "DEPT1";
@@ -73,6 +75,6 @@ public class AuthzSubjectManagerEJBImpl_test extends BaseServerTestCase {
         assertFalse(subj.getSMSAddress().equals(sms));
         assertFalse(subj.getDepartment().equals(dept));
         assertFalse(subj.getPhoneNumber().equals(phone));
-        assertFalse(subj.getHtmlEmail());        
+        assertFalse(subj.getHtmlEmail());
     }
 }
