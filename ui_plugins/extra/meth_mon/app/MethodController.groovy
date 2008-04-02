@@ -97,6 +97,10 @@ class MethodController
 	private getMethodData(pageInfo) {
 	    def app   = HQApp.instance
 	    def res = app.getMethodStats()
+	    
+	    if (!res)
+	        return []
+	    
 	    def d = pageInfo.sort.description
 	    res = res.sort {a, b ->
 	        return a."${d}" <=> b."${d}"
