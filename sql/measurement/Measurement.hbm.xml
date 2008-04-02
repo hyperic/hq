@@ -6,7 +6,7 @@
     <cache usage="read-write"/>
 
     <id name="id" type="integer">
-      <column name="ID" not-null="true" index="MEAS_ID_CLASS"/>
+      <column name="ID" not-null="true"/>
       <generator class="org.hyperic.hibernate.id.ComboGenerator">
         <param name="sequence">EAM_MEASUREMENT_ID_SEQ</param>
       </generator>
