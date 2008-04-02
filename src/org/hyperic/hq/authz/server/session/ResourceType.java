@@ -35,6 +35,7 @@ import java.util.ResourceBundle;
 
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 public class ResourceType extends AuthzNamedBean {
     private static final Map TYPE_TO_PROP = new HashMap();
@@ -91,12 +92,29 @@ public class ResourceType extends AuthzNamedBean {
     }
     
     Operation createOperation(String name) {
-        Operation res = new Operation(this, name);
-        return res;
+        return new Operation(this, name);
     }
 
     public Collection getOperations() {
         return Collections.unmodifiableCollection(_operations);
+    }
+
+    /**
+     * Convert an authz ResourceType to appdef type.  Currently only platform
+     * server and service types are supported.
+     * @return One of AppdefEntityConstants.APPDEF_TYPE*
+     */
+    public int getAppdefType() {
+        if (getId().equals(AuthzConstants.authzPlatform)) {
+            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+        } else if (getId().equals(AuthzConstants.authzServer)) {
+            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
+        } else if (getId().equals(AuthzConstants.authzService)) {
+            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+        } else {
+            throw new IllegalArgumentException("ResourceType " + getId() +
+                                               " not supported");
+        }
     }
 
     /**
