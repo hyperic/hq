@@ -1028,11 +1028,16 @@
   <metrics name="Windows Service">
     <metric name="Availability"
             alias="Availability"
-            template="ServiceAvail:Platform=Win32:%service_name%"
+            template="win32:Service=%service_name%:${alias}"
             category="AVAILABILITY"
             indicator="true"
             units="percentage"
             collectionType="dynamic"/>
+
+    <metric name="Start Type"
+            template="win32:Service=%service_name%:${alias}"
+            category="AVAILABILITY"
+            collectionType="static"/>
 
     <metric name="Memory Size"
             alias="MemSize"
