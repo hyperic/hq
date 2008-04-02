@@ -174,7 +174,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     .append("SELECT rle")
                     .append(" FROM AvailabilityDataRLE rle")
 				    .append(" JOIN rle.availabilityDataId.measurement m")
-				 	.append(" WHERE m.id = :m")
+				 	.append(" WHERE m = :m")
 				 	.append(" AND (rle.availabilityDataId.startime > :startime")
 				 	.append("   OR rle.endtime > :startime)")
 				 	.append(" AND (rle.availabilityDataId.startime < :endtime")
