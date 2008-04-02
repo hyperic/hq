@@ -27,6 +27,11 @@ class MethodController
         status(params)
     }
 
+    def clear(params) {
+        app.clearMethodStats()
+        render(inline: "Method stats cleared\n")
+    }
+    
     def index(params) {
     	render(locals:[methodSchema: getMethodSchema() ])
     }

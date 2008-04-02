@@ -339,6 +339,12 @@ public class HQApp {
         return _collectMethStats.get();
     }
     
+    public void clearMethodStats() {
+        synchronized (STAT_LOCK) {
+            _methInvokeStats.clear();
+        }
+    }
+    
     private void updateMethodStats(Class c, Method meth, long total,
                                    boolean txFailed) 
     { 
