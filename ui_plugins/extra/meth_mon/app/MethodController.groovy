@@ -5,13 +5,45 @@ import org.hyperic.hq.application.HQApp
 class MethodController 
 	extends BaseController
 {
+    private app
     protected void init() {
+        this.app = HQApp.instance
         onlyAllowSuperUsers()
         setJSONMethods(['methodData'])
+        setXMLMethods(['methodDataXML'])
+    }
+
+    def status(params) {
+        render(inline: "Collecting method stats: ${app.isCollectingMethodStats()}\n")
     }
     
+    def enable(params) {
+        app.setCollectMethodStats(true)
+        status(params)
+    }
+        
+    def disable(params) {
+        app.setCollectMethodStats(false)
+        status(params)
+    }
+
     def index(params) {
     	render(locals:[methodSchema: getMethodSchema() ])
+    }
+    
+    def methodDataXML(xmlOut, params) {
+        xmlOut.stats() {
+            app.getMethodStats().each { stat -> 
+                xmlOut.stat("class"    : stat.className,
+                            "method"   : stat.methodName,
+                            "max"      : stat.max,
+                            "min"      : stat.min,
+                            "total"    : stat.total,
+                            "failures" : stat.failures,
+                            "average"  : stat.average)
+            }
+        }
+        xmlOut
     }
     
     private getMethodSchema() {
@@ -58,7 +90,6 @@ class MethodController
     }
     
 	private getMethodData(pageInfo) {
-	    log.info "Getting method data"
 	    def app   = HQApp.instance
 	    def res = app.getMethodStats()
 	    def d = pageInfo.sort.description
