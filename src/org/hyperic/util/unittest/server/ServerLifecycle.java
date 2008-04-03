@@ -434,53 +434,6 @@ public class ServerLifecycle {
         
         server.setAttribute(new ObjectName("jboss.system:type=ServerConfig"), 
                 new Attribute("ExitOnShutdown", Boolean.FALSE));    
-    }
-    
-    /**
-     * A thread group that a client may use for registering an action to perform 
-     * if an uncaught exception is handled. The uncaught exception may also be 
-     * retrieved.
-     */
-    private static class ExceptionHandlingThreadGroup extends ThreadGroup {
-        
-        private final Object _lock = new Object();
-        private Runnable _runnable;
-        private Throwable _uncaughtException;
-        
-        
-        public ExceptionHandlingThreadGroup(String name) {
-            super(name);
-        }
-        
-        /**
-         * @return The uncaught exception or <code>null</code>.
-         */
-        public Throwable getUncaughtException() {
-            synchronized (_lock) {
-                return _uncaughtException;
-            }
-        }
-        
-        /**
-         * Set an action to execute in the uncaught exception handler.
-         * 
-         * @param runnable The runnable representing the action to execute.
-         */
-        public void setUncaughtExceptionAction(Runnable runnable) {
-            synchronized (_lock) {
-                _runnable = runnable;
-            }
-        }
-        
-        public void uncaughtException(Thread t, Throwable e) {
-            synchronized (_lock) {
-                _uncaughtException = e;
-                
-                if (_runnable != null) {
-                    _runnable.run();
-                }
-            }
-        }        
     }    
 
 }
