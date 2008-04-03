@@ -1523,8 +1523,17 @@
       <echo message="Creating hqu directory..."/>
       <mkdir dir="${jboss.home}/server/unittest/deploy/hq.ear/hq.war/hqu"/>
 	 
+      <echo message="Copying unit test libraries.."/>
+      <copy todir="${jboss.home}/server/unittest/lib">
+          <fileset dir="${thirdparty.lib}">
+			  <include name="mockejb.jar"/>
+			  <include name="dbunit*.jar"/>
+			  <include name="junit*.jar"/>
+		  </fileset>	  
+      </copy>	  
+	  
       <echo message="Copying code coverage libraries.."/>
-          <copy todir="${jboss.home}/server/unittest/lib">
+      <copy todir="${jboss.home}/server/unittest/lib">
           <fileset dir="${thirdparty.lib}" includes="emma.jar"/>
       </copy>
  	  
