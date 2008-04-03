@@ -11,16 +11,15 @@ class Plugin extends HQUPlugin {
     private boolean attachmentIsShown(Attachment a, Resource r, AuthzSubject u){
         // returns true iff the resource is a 4.0 agent or later
         def isRestartableAgent = { res ->
-                if (res.prototype.name.equals(HQ_AGENT_SERVER_NAME)) {
+                if (res.prototype.name == HQ_AGENT_SERVER_NAME) {
                     def agent = agentMan.one.getAgent(res.entityID)
                     // only support restarts in 4.0 agents and later
                     return (agent.version >= "4.0.0")
                 }
                 else return false;
         } 
-        log.info("Got resource ${r}")
        if (r.isGroup()) {
-            return r.getGroupMembers(u).find {isRestartableAgent  } != null
+           return r.getGroupMembers(u).find {isRestartableAgent(it)} != null
         }
        else return isRestartableAgent(r)
     }
@@ -32,7 +31,7 @@ class Plugin extends HQUPlugin {
                 resourceType:	['HQ Agent'],
                 controller:   AgentController,
                 action:       'index',
-                
+                toRoot:       true,
                 showAttachmentIf: {a, r, u -> attachmentIsShown(a, r, u)})        
     }
 }
