@@ -13,8 +13,6 @@ my $Interval = "00:05:00";
 my $Username = "sa";
 my $Passwd = "";
 my $Server = uc(hostname());
-my $ISql = "isql";
-my $Sqshrc = "isql";
 
 sub main
 {
@@ -172,8 +170,7 @@ sub printOutput
 
 sub getSysmonOutput
 {
-    my $pass = ($Sqshrc =~ /^\s*$/) ? "-P $Passwd" : "-r $Sqshrc";
-    my $cmd = "$ISql -Usa $pass -S $Server <<-EOF1\n".
+    my $cmd = "isql -Usa -P $Passwd -S $Server <<-EOF1\n".
               "use master\n".
               "go\n".
               "sp_sysmon '$Interval'\n".
@@ -207,10 +204,6 @@ sub getArgs
              "u=s" => \$Username,
              "passwd" => \$Passwd,
              "p=s" => \$Passwd,
-             "sqshrc=s" => \$Sqshrc,
-             "r=s" => \$Sqshrc,
-             "isql" => \$ISql,
-             "q=s" => \$ISql,
              "server" => \$Server,
              "s=s" => \$Server,
              "help" => \$bool_help,
@@ -233,11 +226,5 @@ sub printUsage
   my $thisprog = basename($0);
   print "$thisprog [--help]\n";
   print "$thisprog:\n"; 
-  print "           -q, --isql, default $ISql\n";
-  print "           -r, --sqshrc\n";
-  print "           -i, --interval\n";
-  print "           -u, --username\n";
-  print "           -p, --passwd\n";
-  print "           -s, --server\n";
   print "           -h, --help\n\n";
 }

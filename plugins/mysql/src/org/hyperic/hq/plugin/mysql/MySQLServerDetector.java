@@ -308,9 +308,7 @@ public class MySQLServerDetector extends ServerDetector implements
                     pass);
 
                 server.setProductConfig(productConfig);
-//                setProductConfig(server, productConfig);
                 server.setMeasurementConfig();
-//                server.setControlConfig();
 
                 this.log.debug("found database: " + productConfig);
 

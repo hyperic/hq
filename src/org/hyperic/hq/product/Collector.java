@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -398,15 +397,6 @@ public abstract class Collector implements Runnable {
             }
             get(collector.plugin).results.put(collector.props, result);
         }
-    }
-
-    public List getValues(List metrics, CollectorResult result) {
-        List rtn = new ArrayList(metrics.size());
-        for (Iterator i=metrics.iterator(); i.hasNext(); ) {
-            Metric metric = (Metric)i.next();
-            rtn.add(result.getMetricValue(metric.getAttributeName()));
-        }
-        return rtn;
     }
 
     public MetricValue getValue(Metric metric, CollectorResult result) {
