@@ -297,30 +297,28 @@ public class ResourceDAO
         // before we do anything else.
         // Note: this should be refactored to use named queries so
         // that we can perform "fetch" optimization outside of the code
-        String sql = "select distinct r from Resource r " +
-                     " join r.resourceGroups rg " +
-                     " join rg.roles role " +
-                     " join role.subjects subj " +
-                     " join role.operations op " +
-                     " join r.resourceType rt " +
-                     "where " +
-                     "  r.system = :system and " +
-                     "  (subj.id = :subjId or r.owner.id = :subjId) and " +
-                     "  (" +
-                     "   rt.name = 'covalentEAMService' or " +
-                     "   (rt.name = 'covalentAuthzResourceGroup' and " +
-                     "   0 < (select count(*) from Resource r2 " +
-                     "        join r2.resourceGroups rg2 " +
-                     "        where r.id = r2.id and rg2.groupType = 15 and" +
-                     "              rg2.clusterId != -1) )) and " +
-                     "  (" +
-                     "   op.name = 'viewService' or " +
-                     "   op.name = 'viewResourceGroup') " +
-                     "order by r.sortName ";
+        String sql =
+            "select distinct(r) from Resource r join r.resourceType rt " +
+            "where r.system = :system and " +
+                  "(rt.name = :resGrpType or rt.name = :resSvcType) and " +
+                  "(r.owner.id = :subjId or " +
+                  ":subjId in (select subj.id from ResourceGroup rg " +
+                                             "join rg.roles role " +
+                                             "join role.subjects subj " +
+                                             "join role.operations op " +
+                              "where subj.id = :subjId and" +
+                               "((op.name = :viewResGrp and rg.resource = r) " +
+                             "or (op.name = :viewSvc and " +
+                                 "rg in (select rg2 from r.resourceGroups rg2)"+
+                                 "))) ) order by r.sortName";
         List resources =
             getSession().createQuery(sql)
                         .setBoolean("system", fSystem.booleanValue())
                         .setInteger("subjId", user.intValue())
+                        .setString("resGrpType", AuthzConstants.groupResType)
+                        .setString("resSvcType", AuthzConstants.serviceResType)
+                        .setString("viewResGrp", AuthzConstants.groupOpViewResourceGroup)
+                        .setString("viewSvc", AuthzConstants.serviceOpViewService)
                         .list();
 
         // Hibernate's distinct does not work well with joins - do filter here
@@ -339,28 +337,17 @@ public class ResourceDAO
 
     public Collection findSvcRes_orderName(Boolean fSystem)
     {
-        String sql="select distinct r from Resource r " +
-                   " join r.resourceGroups rg " +
-                   " join rg.roles role " +
-                   " join role.operations op " +
-                   " join r.resourceType rt " +
-                   "where " +
-                   "  r.system = ? and " +
-                   "  (" +
-                   "   rt.name = 'covalentEAMService' or " +
-                   "   (rt.name = 'covalentAuthzResourceGroup' and " +
-                   "   0 < (select count(*) from Resource r2 " +
-                   "        join r2.resourceGroups rg2 " +
-                   "        where r.id = r2.id and rg2.groupType = 15 and" +
-                   "              rg2.clusterId != -1))) and " +
-                   "  (" +
-                   "   op.name = 'viewService' or " +
-                   "   op.name = 'viewResourceGroup') " +
+        String sql =
+            "select r from Resource r join r.resourceType rt " +
+            "where r.system = :system and " +
+                  "(rt.name = :resGrpType or rt.name = :resSvcType) " +
                    "order by r.sortName ";
         
         List resources =
             getSession().createQuery(sql)
                         .setBoolean(0, fSystem.booleanValue())
+                        .setString("resGrpType", AuthzConstants.groupResType)
+                        .setString("resSvcType", AuthzConstants.serviceResType)
                         .list();
         
         return resources;
