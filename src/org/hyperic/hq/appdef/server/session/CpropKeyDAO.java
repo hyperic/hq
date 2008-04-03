@@ -28,7 +28,6 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class CpropKeyDAO extends HibernateDAO
@@ -37,23 +36,20 @@ public class CpropKeyDAO extends HibernateDAO
         super(CpropKey.class, f);
     }
 
-    protected CpropKey findById(Integer id)
-    {
+    public CpropKey findById(Integer id) {
         return (CpropKey)super.findById(id);
     }
 
-    public void save(CpropKey entity)
-    {
+    void save(CpropKey entity) {
         super.save(entity);
     }
 
-    public void remove(CpropKey entity)
-    {
+    void remove(CpropKey entity) {
         super.remove(entity);
     }
 
-    public CpropKey create(int appdefType, int appdefTypeId, String key,
-                           String description)
+    CpropKey create(int appdefType, int appdefTypeId, String key,
+                    String description)
     {
         CpropKey cpropkey = new CpropKey();
         cpropkey.setAppdefType(appdefType);
@@ -64,7 +60,7 @@ public class CpropKeyDAO extends HibernateDAO
         return cpropkey;
     }
 
-    public List findByAppdefType(int appdefType, int appdefId)
+    List findByAppdefType(int appdefType, int appdefId)
     {
         String sql = "from CpropKey k where k.appdefType=? and " +
                      "k.appdefTypeId = ?";
@@ -74,7 +70,7 @@ public class CpropKeyDAO extends HibernateDAO
             .list();
     }
 
-    public CpropKey findByKey(int appdefType, int appdefTypeId, String key)
+    CpropKey findByKey(int appdefType, int appdefTypeId, String key)
     {
         String sql = "from CpropKey k where k.appdefType=? and " +
                      "k.appdefTypeId=? and k.key=?";

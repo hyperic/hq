@@ -43,7 +43,7 @@ public class Cprop extends PersistedObject
         return _key;
     }
 
-    public void setKey(CpropKey keyId) {
+    protected void setKey(CpropKey keyId) {
         _key = keyId;
     }
 
@@ -51,7 +51,7 @@ public class Cprop extends PersistedObject
         return _appdefId;
     }
 
-    public void setAppdefId(Integer appdefId) {
+    protected void setAppdefId(Integer appdefId) {
         _appdefId = appdefId;
     }
 
@@ -59,7 +59,7 @@ public class Cprop extends PersistedObject
         return _valueIdx;
     }
 
-    public void setValueIdx(Integer valueIdx) {
+    protected void setValueIdx(Integer valueIdx) {
         _valueIdx = valueIdx;
     }
 
@@ -67,7 +67,7 @@ public class Cprop extends PersistedObject
         return _propValue;
     }
 
-    public void setPropValue(String propValue) {
+    protected void setPropValue(String propValue) {
         _propValue = propValue;
     }
 
