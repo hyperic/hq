@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE plugin [
-  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+  <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
 ]>
 
 <!--
@@ -12,7 +12,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -32,40 +32,56 @@
 <plugin>
   <!-- extracted to: pdk/work/scripts/sendmail/hq-sendmail-stat -->
   <script name="hq-sendmail-stat">
+  <![CDATA[
 #!/bin/sh
 
-# linux
-[ -d "/var/spool/mqueue" ] &amp;&amp;
-    msgdir="/var/spool/mqueue" &amp;&amp;
+# linux / aix
+[ -d "/var/spool/mqueue" ] &&
+    msgdir="/var/spool/mqueue" &&
     premsgdir="/var/spool/clientmqueue"
 
 # solaris
-[ -d "/usr/spool/mqueue" ] &amp;&amp;
-    msgdir="/usr/spool/mqueue" &amp;&amp;
+[ -d "/usr/spool/mqueue" ] &&
+    msgdir="/usr/spool/mqueue" &&
     premsgdir="/usr/spool/clientmqueue"
 
-[ -z "$msgdir" -o ! -r "$msgdir" ] &amp;&amp;
+# If the mqueue dir doesn't exist, exit 1
+[ -z "$msgdir" -o ! -r "$msgdir" ] &&
     exit 1
 
-cd $msgdir > /dev/null 2>&amp;1
-[ $? != 0 ] &amp;&amp;
+# May not have permission to cd to the mqueue, make sure
+# stdout/err don't get echo'd
+cd $msgdir > /dev/null 2>&1
+[ "$?" != "0" ] &&
     exit 1
-messfiles=`find * -print 2>/dev/null | wc -w`
 
-cd $premsgdir > /dev/null 2>&amp;1
-[ $? != 0 ] &amp;&amp;
-    exit 1
-premessfiles=`find * -print 2>/dev/null | wc -w`
+# count msgs in sendmail mqueue dir.  DO NOT use find since it
+# may fail when there are lots of files 
+messfiles=`ls 2>/dev/null | wc -w`
+
+premessfiles=0
+
+if [ ! -z "$premsgdir" ] && [ -d "$premsgdir" ] && [ -r "$premsgdir" ]
+then
+    [ `cd $premsgdir > /dev/null 2>&1` ] && [ "$?" = "0" ] &&
+        premessfiles=`ls 2>/dev/null | wc -w`
+fi
 
 echo MessagesInQueue=$messfiles
 echo MessagesAwaitingPreprocessing=$premessfiles
+
+exit 0
+  ]]>
   </script>
 
-  <server name="SendMail">
+  <server name="Sendmail">
+
+    <property name="INVENTORY_ID" value="sendmail"/>
+
     <config>
       <option name="process.query"
               description="Process Query"
-              default="State.Name.eq=sendmail,CredName.User.eq=root"/>
+              default="State.Name.eq=sendmail,State.Name.Pne=$1,CredName.User.eq=root"/>
       <option name="exec"
               description="Type &quot;sudo&quot; To Avoid Having Agent As Root"
               default=""/>
@@ -77,6 +93,11 @@ echo MessagesAwaitingPreprocessing=$premessfiles
 
     <property name="PROC_QUERY"
               value="State.Name.eq=sendmail"/>
+
+    <scan type="file">
+      <include name="/usr/sbin/sendmail"/>
+      <include name="/usr/lib/sendmail"/>
+    </scan>
 
     <plugin type="autoinventory"
             class="org.hyperic.hq.product.DaemonDetector"/>
@@ -92,7 +113,7 @@ echo MessagesAwaitingPreprocessing=$premessfiles
             units="percentage"
             collectionType="dynamic"/>
 
-    <service name="SendMail Message Submission Process">
+    <service name="Message Submission Process">
       <config>
         <option name="user"
                 default="smmsp"
@@ -104,22 +125,22 @@ echo MessagesAwaitingPreprocessing=$premessfiles
       </config>
 
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              template="sigar:Type=MultiProcCpu,Arg=%process.query%:Processes"
               indicator="true"/>
-      &process-metrics;
+      &multi-process-metrics;
     </service>
 
-    <service name="SendMail Root Daemon Process">
+    <service name="Root Daemon Process">
       <plugin type="autoinventory"/>
       <config>
         <option name="process.query"
-                default="State.Name.eq=sendmail,CredName.User.eq=root"
+                default="State.Name.eq=sendmail,State.Name.Pne=$1,CredName.User.eq=root"
                 description="PTQL for SendMail Root Daemon Process"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              template="sigar:Type=MultiProcCpu,Arg=%process.query%:Processes"
               indicator="true"/>
-      &process-metrics;
+      &multi-process-metrics;
     </service>
 
     <!-- sendmail-stat metrics -->
@@ -135,12 +156,15 @@ echo MessagesAwaitingPreprocessing=$premessfiles
     <!-- protocol services+metrics -->
     <service name="SMTP">
       <config>
+        <option name="port"
+                description="SMTP Post"
+                default="25"/>
         <option name="hostname"
                 description="SMTP Hostname"
                 default="localhost"/>
       </config>
       <filter name="template"
-              value="SMTP:hostname=%hostname%:${alias}"/>
+              value="SMTP:hostname=%hostname%,port=%port%:${alias}"/>
       <metric name="Availability"
               indicator="true"/>
       <metric name="Inbound Connections"
