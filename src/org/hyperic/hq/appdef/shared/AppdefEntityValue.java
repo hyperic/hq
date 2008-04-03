@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
@@ -95,10 +94,6 @@ public class AppdefEntityValue {
         return _subjPojo;
     }
     
-    private AppdefGroupManagerLocal getGroupManager() {
-        return AppdefGroupManagerEJBImpl.getOne();
-    }
-
     private PlatformManagerLocal getPlatformManager() {
         if (platformManagerLocal == null) {
             platformManagerLocal = PlatformManagerEJBImpl.getOne();

@@ -39,10 +39,8 @@ import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
-import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -55,7 +53,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.product.TypeInfo;
 
-import javax.ejb.FinderException;
 
 public abstract class AppdefSessionUtil {
     private AIQueueManagerLocal         aiqManagerLocal;
@@ -79,10 +76,6 @@ public abstract class AppdefSessionUtil {
 
     protected ApplicationManagerLocal getApplicationMgrLocal() {
         return ApplicationManagerEJBImpl.getOne();
-    }
-
-    protected AppdefGroupManagerLocal getAppdefGroupManagerLocal() {
-        return AppdefGroupManagerEJBImpl.getOne();
     }
 
     protected PlatformManagerLocal getPlatformMgrLocal() {

@@ -29,7 +29,6 @@ import java.rmi.RemoteException;
 import javax.ejb.SessionContext;
 
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
@@ -43,7 +42,6 @@ import org.hyperic.hq.appdef.server.session.AppdefStatManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.auth.shared.AuthManagerLocal;
@@ -203,10 +201,6 @@ public abstract class BizappSessionEJB {
 
     public PlatformManagerLocal getPlatformManager() {
         return PlatformManagerEJBImpl.getOne();
-    }
-
-    public AppdefGroupManagerLocal getAppdefGroupManager() {
-        return AppdefGroupManagerEJBImpl.getOne();
     }
 
     public ProductManagerLocal getProductManager() {

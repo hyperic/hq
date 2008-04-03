@@ -26,6 +26,8 @@
 package org.hyperic.hq.ui.action.resource.common.inventory;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +35,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -119,10 +124,12 @@ public class AddResourceGroupsFormPrepareAction extends Action {
             SessionUtils.getList(request.getSession(),
                                  Constants.PENDING_RESGRPS_SES_ATTR);
 
+        Resource r = ResourceManagerEJBImpl.getOne()
+                         .findResource(resource.getEntityId()); 
         PageList availableGroups = 
             boss.findAllGroupsMemberExclusive(
                 sessionId.intValue(), pca, entityId, pendingGroupIds, 
-                resource.getAppdefResourceTypeValue());
+                r.getPrototype());
 
         if (log.isTraceEnabled())
             log.trace("findAllGroups(...) returned these " +
@@ -144,6 +151,8 @@ public class AddResourceGroupsFormPrepareAction extends Action {
             request.setAttribute(Constants.NUM_PENDING_RESGRPS_ATTR,
                                  new Integer(0));
         }
+        
+        
         request.setAttribute(Constants.AVAIL_RESGRPS_ATTR, availableGroups);            
         request.setAttribute(Constants.NUM_AVAIL_RESGRPS_ATTR,
                              new Integer(availableGroups.getTotalSize()));
