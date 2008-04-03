@@ -485,19 +485,6 @@ public class AuthzSubjectManagerEJBImpl
     }
     
     /**
-     * Get the overlord spider subject value. THe overlord is the systems
-     * anonymous user and should be used for non-authz operations
-     * that require a subject value as one of the params
-     * @return the overlord
-     * @deprecated Use getOverlordPojo instead
-     * @ejb:interface-method
-     */
-    public AuthzSubjectValue getOverlord() {
-        return getSubjectDAO().findById(AuthzConstants.overlordId)
-                              .getAuthzSubjectValue();
-    }
-
-    /**
      * @ejb:interface-method
      */
     public AuthzSubject getOverlordPojo() {

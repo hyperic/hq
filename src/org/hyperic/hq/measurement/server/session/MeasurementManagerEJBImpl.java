@@ -628,7 +628,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @return a list of {@link Measurement}
      * @ejb:interface-method
      */
-    public List findEnabledMeasurements(AuthzSubjectValue subject,
+    public List findEnabledMeasurements(AuthzSubject subject,
                                         AppdefEntityID id, String cat) {
         List mcol;
             

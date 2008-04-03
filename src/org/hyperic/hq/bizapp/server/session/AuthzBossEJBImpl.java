@@ -311,23 +311,19 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      *
      * @ejb:interface-method
      */
-    public AuthzSubjectValue createSubject(Integer sessionId, String name,
-                                           boolean active, String dsn,
-                                           String dept, String email, 
-                                           String first, String last,
-                                           String phone, String sms,
-                                           boolean useHtml) 
+    public AuthzSubject createSubject(Integer sessionId, String name,
+                                      boolean active, String dsn, String dept,
+                                      String email, String first, String last,
+                                      String phone, String sms,
+                                      boolean useHtml) 
         throws PermissionException, CreateException, SessionException 
     {
         // check for timeout
         AuthzSubject whoami = manager.getSubjectPojo(sessionId.intValue());
 
         AuthzSubjectManagerLocal subjMan = getAuthzSubjectManager();
-        AuthzSubject subject = subjMan.createSubject(whoami, name, active,
-                                                     dsn, dept, email, first,
-                                                     last, phone, sms, useHtml);
-        return subject.getAuthzSubjectValue();
-        
+        return subjMan.createSubject(whoami, name, active, dsn, dept, email,
+                                     first, last, phone, sms, useHtml);
     }
 
     /**
@@ -423,7 +419,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws SessionNotFoundException, ApplicationException,
                ConfigPropertyException {
         int sessionId = getAuthManager().getUnauthSessionId(username);
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         return getUserPrefs(new Integer(sessionId), subject.getId());
     }
     

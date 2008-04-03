@@ -25,12 +25,12 @@
 
 package org.hyperic.hq.bizapp.server.action.email;
 
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Date;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -52,8 +52,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
@@ -79,8 +79,8 @@ public class EmailFilter {
     public EmailFilter() {}
 
     public String getAppdefEntityName(AppdefEntityID appEnt) {
-        AuthzSubjectValue overlord =
-            AuthzSubjectManagerEJBImpl.getOne().getOverlord();
+        AuthzSubject overlord =
+            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         try {
             AppdefEntityValue entVal =
                 new AppdefEntityValue(appEnt, overlord);
@@ -97,8 +97,8 @@ public class EmailFilter {
     
     private void replaceAppdefEntityHolders(AppdefEntityID appEnt,
                                             String[] strs) {
-        AuthzSubjectValue overlord =
-            AuthzSubjectManagerEJBImpl.getOne().getOverlord();
+        AuthzSubject overlord =
+            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
 
         try {
             AppdefEntityValue entVal =

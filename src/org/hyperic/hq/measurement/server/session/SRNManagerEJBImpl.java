@@ -25,11 +25,21 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.ejb.CreateException;
+import javax.ejb.SessionBean;
+import javax.ejb.SessionContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
@@ -41,15 +51,6 @@ import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerUtil;
-
-import javax.ejb.SessionBean;
-import javax.ejb.CreateException;
-import javax.ejb.SessionContext;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * The tracker manager handles sending agents add and remove operations
@@ -334,11 +335,11 @@ public class SRNManagerEJBImpl extends SessionEJB
         return srn;
     }
     
-    private AuthzSubjectValue getOverlord() {
-        return AuthzSubjectManagerEJBImpl.getOne().getOverlord();
+    private AuthzSubject getOverlord() {
+        return AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
     }
 
-    private MeasurementManagerLocal getDMan() {
+    private MeasurementManagerLocal getMgr() {
         return MeasurementManagerEJBImpl.getOne();
     }
 
@@ -368,7 +369,7 @@ public class SRNManagerEJBImpl extends SessionEJB
                MonitorAgentException, PermissionException,
                MeasurementUnscheduleException
     {
-        List dms = getDMan().findEnabledMeasurements(getOverlord(), eid, null);
+        List dms = getMgr().findEnabledMeasurements(getOverlord(), eid, null);
 
         if (_log.isDebugEnabled())
             _log.debug("Reschedule " + dms.size() + " metrics for " + eid);

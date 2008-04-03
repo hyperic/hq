@@ -60,8 +60,8 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -452,7 +452,6 @@ public class ControlManagerEJBImpl implements SessionBean {
         throws PluginException
     {
         ConfigManagerLocal cLocal;
-        AuthzSubjectValue overlord;
         AppdefEntityID id;
 
         try {
@@ -460,8 +459,9 @@ public class ControlManagerEJBImpl implements SessionBean {
             cLocal = ConfigManagerUtil.getLocalHome().create();
 
             // We use the overlord to grab config schemas
-            overlord = AuthzSubjectManagerUtil.getLocalHome()
-                .create().getOverlord();
+            AuthzSubjectValue overlord =
+                AuthzSubjectManagerEJBImpl.getOne()
+                .getOverlordPojo().getAuthzSubjectValue();
             
             ConfigResponse config = cLocal.
                 getMergedConfigResponse(overlord,

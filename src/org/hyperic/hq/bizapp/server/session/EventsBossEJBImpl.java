@@ -651,13 +651,14 @@ public class EventsBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public void inheritResourceTypeAlertDefinition(AuthzSubjectValue subject,
+    public void inheritResourceTypeAlertDefinition(AuthzSubject subj,
                                                    AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException,
                InvalidOptionException, InvalidOptionValueException,
                AlertDefinitionCreateException 
     {
-        AppdefEntityValue rv = new AppdefEntityValue(id, subject);
+        AppdefEntityValue rv = new AppdefEntityValue(id, subj);
+        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         AppdefResourceTypeValue type = rv.getResourceTypeValue();
         
         // Find the alert definitions for the type
@@ -1756,8 +1757,8 @@ public class EventsBossEJBImpl
                     try {
                         _log.info("Inheriting type-based alert defs for " +ent);
                         EventsBossLocal eb = EventsBossEJBImpl.getOne();
-                        AuthzSubjectValue overlord = 
-                            AuthzSubjectManagerEJBImpl.getOne().getOverlord();
+                        AuthzSubject overlord = AuthzSubjectManagerEJBImpl
+                            .getOne().getOverlordPojo();
                         eb.inheritResourceTypeAlertDefinition(overlord, ent);
                     } catch(Exception e) {
                         throw new SystemException(e);

@@ -987,7 +987,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
             return findGroupMeasurements(sessionId, id, cat, pc);
 
