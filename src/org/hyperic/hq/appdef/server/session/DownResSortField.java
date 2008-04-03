@@ -36,7 +36,7 @@ public abstract class DownResSortField
 
     private static final String BUNDLE = "org.hyperic.hq.appdef.Resources";
     
-    private abstract class OrderedComparator implements Comparator {
+    private static abstract class OrderedComparator implements Comparator {
         boolean _asc;
         
         OrderedComparator(boolean asc) {
