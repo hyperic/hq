@@ -29,8 +29,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -98,18 +96,22 @@ public class ExampleInContainer_test extends BaseServerTestCase {
     
     /**
      * This is an example unit test demonstrating how the in-container unit test 
-     * framework can be used to perform local invocations on EJBs.
+     * framework can test an operation on a session bean deployed in the hq.ear 
+     * (AlertDefinitionManager in this case). To test the session bean you must 
+     * create a unit test EJB (ExampleInContainer_testEJBImpl in this case), 
+     * deploy it within the hq.ear, and invoke operations on the target 
+     * component from with the unit test EJB.
      */
-    public void testQueryAlertDefinitionManager() throws Exception {        
-        AlertDefinitionManagerLocal adMan = 
-            (AlertDefinitionManagerLocal)
-                 _registry.getLocalInterface(AlertDefinitionManagerEJBImpl.class, 
-                                             AlertDefinitionManagerLocal.class);
+    public void testQueryAlertDefinitionManager() throws Exception {
+        // Note that the database operations residing in the superclass can be 
+        // called directly from this test case.
         
+        ExampleInContainer_testLocal example = 
+            (ExampleInContainer_testLocal)
+                 _registry.getLocalInterface(ExampleInContainer_testEJBImpl.class, 
+                                             ExampleInContainer_testLocal.class);
         
-        Integer id = adMan.getIdFromTrigger(new Integer(-1));
-        
-        assertNull("shouldn't have found alert def id", id);
+        example.testQueryAlertDefinitionManager();
     }
     
     /**
@@ -146,15 +148,12 @@ public class ExampleInContainer_test extends BaseServerTestCase {
      * EJB type is referenced between deployments.
      */
     public void testDeployAgain() throws Exception {
-        AlertDefinitionManagerLocal adMan = 
-            (AlertDefinitionManagerLocal)
-                 _registry.getLocalInterface(AlertDefinitionManagerEJBImpl.class, 
-                                             AlertDefinitionManagerLocal.class);
+        ExampleInContainer_testLocal example = 
+            (ExampleInContainer_testLocal)
+                 _registry.getLocalInterface(ExampleInContainer_testEJBImpl.class, 
+                                             ExampleInContainer_testLocal.class);
         
-        
-        Integer id = adMan.getIdFromTrigger(new Integer(-1));
-        
-        assertNull("shouldn't have found alert def id", id);
+        example.testQueryAlertDefinitionManager();
     }
     
 }
