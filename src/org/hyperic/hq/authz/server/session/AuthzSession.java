@@ -125,21 +125,6 @@ public abstract class AuthzSession {
         return subjectMgrHome;
     }
 
-    /** 
-     * @return The value-object of the overlord
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public AuthzSubjectValue findOverlord() {
-        try {
-            return findSubjectByAuth(AuthzConstants.overlordName,
-                                     AuthzConstants.overlordDsn)
-                                     .getAuthzSubjectValue();
-        } catch(SubjectNotFoundException e) {
-            throw new SystemException("Unable to find overlord", e);
-        }
-    }
-
     protected ResourceType getRootResourceType() {
        return DAOFactory.getDAOFactory().getResourceTypeDAO()
             .findByName(AuthzConstants.typeResourceTypeName); 

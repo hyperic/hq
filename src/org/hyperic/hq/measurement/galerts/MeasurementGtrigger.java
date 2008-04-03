@@ -40,15 +40,11 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.galerts.ResourceAuxLog;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
@@ -66,7 +62,6 @@ import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZe
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
-import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.HeartBeatZevent;
 import org.hyperic.hq.zevents.Zevent;
@@ -668,8 +663,8 @@ public class MeasurementGtrigger
         // Assemble the aux info
         List auxLogs = new ArrayList();
         MeasurementManagerLocal dmMan = getDMMan();
-        AuthzSubjectValue overlord = 
-            AuthzSubjectManagerEJBImpl.getOne().findOverlord();
+        AuthzSubject overlord = 
+            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         for (Iterator i=srcId2MetricValue.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry ent = (Map.Entry)i.next();
             MeasurementZeventSource src = (MeasurementZeventSource)ent.getKey();

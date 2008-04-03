@@ -1006,30 +1006,15 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
     /**
      * Get the roles for a subject
-     */
-    private Collection getRoles(AuthzSubjectValue subjectValue)
-        throws PermissionException
-    {
-        AuthzSubject subjectLocal = lookupSubject(subjectValue);
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-
-        pm.check(findOverlord().getId(), getRootResourceType(),
-                 AuthzConstants.rootResourceId,
-                 AuthzConstants.subjectOpViewSubject);
-        return subjectLocal.getRoles();
-    }
-
-    /**
-     * Get the roles for a subject
      * @param whoami 
      * @param subject
      * @param pc Paging and sorting information.
      * @return Set of Roles
      * @ejb:interface-method
      */
-    public List getRoles(AuthzSubjectValue subjectValue, PageControl pc)
+    public List getRoles(AuthzSubject subjectValue, PageControl pc)
         throws PermissionException {
-        Collection roles = getRoles(subjectValue);
+        Collection roles = subjectValue.getRoles();
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         return rolePager.seek(roles, pc.getPagenum(), pc.getPagesize()); 
     }
@@ -1043,9 +1028,9 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @throws NamingException if database connection cannot be established
      * @ejb:interface-method
      */
-    public List getOwnedRoles(AuthzSubjectValue subjectValue, PageControl pc) 
+    public List getOwnedRoles(AuthzSubject subject, PageControl pc) 
         throws PermissionException {
-        Collection roles = getRoles(subjectValue);
+        Collection roles = subject.getRoles();
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         return ownedRolePager.seek(roles, pc.getPagenum(), pc.getPagesize()); 
     }

@@ -41,7 +41,6 @@ import org.hyperic.hq.auth.server.session.UserAudit;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;

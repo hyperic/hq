@@ -75,8 +75,8 @@ public abstract class GalertDefPartition
             EscalationManagerLocal eman = EscalationManagerEJBImpl.getOne();
             GalertManagerLocal gman = GalertManagerEJBImpl.getOne();
             AuthzSubjectManagerLocal aman = AuthzSubjectManagerEJBImpl.getOne();
-            AuthzSubjectValue overlordValue = aman.findOverlord(); 
-            AuthzSubject overlord = aman.findSubjectById(overlordValue.getId());
+            AuthzSubject overlord = aman.getOverlordPojo();
+            
             GalertDef def = gman.findById(id);
             String fixedMessage = ResourceBundle.getBundle(BUNDLE)
                                                 .getString(GALERT_FIXED_PROP);
