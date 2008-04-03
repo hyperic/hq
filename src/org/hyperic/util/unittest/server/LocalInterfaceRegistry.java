@@ -26,6 +26,7 @@
 package org.hyperic.util.unittest.server;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
@@ -33,6 +34,9 @@ import java.lang.reflect.Proxy;
  * A registry for looking up EJB local interfaces. This registry is necessary 
  * (as opposed to JNDI local lookups) since JNDI local lookups don't work unless 
  * the current classloader is the EJB deployer classloader.
+ * 
+ * NOTE: At this time, only unit test method invocations on the local interfaces 
+ * are supported.
  */
 public class LocalInterfaceRegistry {
 
@@ -62,7 +66,8 @@ public class LocalInterfaceRegistry {
      *                      factory method specified for retrieving the EJB 
      *                      local interface.
      * @param localInterface The interface that the EJB local implements.
-     * @return The proxy that can be cast to the local interface.
+     * @return The proxy that can be cast to the local interface. At this time,  
+     *         the proxy ONLY supports unit test method invocations.
      * @throws Exception
      */
     public Object getLocalInterface(Class ejbImplClazz, Class localInterface) 
@@ -79,7 +84,7 @@ public class LocalInterfaceRegistry {
             		            "getOne() factory method: "+ejbImplClazz, e);
         }
         
-        Object ejbProxy = getOne.invoke(ejb, new Object[0]);
+        Object ejbProxy = getOne.invoke(null, new Object[0]);
         
         return Proxy.newProxyInstance(localInterface.getClassLoader(), 
                                       new Class[]{localInterface}, 
@@ -105,9 +110,83 @@ public class LocalInterfaceRegistry {
             Method ejbMethod = _ejbProxy.getClass().getMethod(method.getName(), 
                                                     method.getParameterTypes());
             
-            return ejbMethod.invoke(_ejbProxy, args);
+            if (isUnitTestMethod(method)) {
+                invokeUnitTest(ejbMethod, 
+                               _ejbProxy, 
+                               method.getDeclaringClass().getName(), 
+                               method.getName());
+                return null;
+            } else {
+                // Only unit test method invocations are supported at this time
+                throw new IllegalArgumentException("Method invocation not supported: "+
+                        method.getDeclaringClass().getName()+"#"+method.getName());
+                // return ejbMethod.invoke(_ejbProxy, args);                
+            }
         }
         
+        private boolean isUnitTestMethod(Method method) {
+            return method.getName().startsWith("test") && 
+                   method.getReturnType().equals(Void.TYPE) && 
+                   method.getParameterTypes().length==0;
+        }
+        
+        /**
+         * Unit tests must be isolated from the default system classloader to 
+         * prevent loading unmanaged objects (pojos, not, EJBs) from the wrong 
+         * classloader.
+         */
+        private void invokeUnitTest(final Method unitTestMethod, 
+                                    final Object proxy, 
+                                    String className,
+                                    String methodName) 
+            throws Throwable {
+            
+            ExceptionHandlingThreadGroup group = 
+                new ExceptionHandlingThreadGroup("unit-test-group");
+            
+            String threadName = className+"#"+methodName;
+            
+            Thread thread = new Thread(group, threadName) {
+                public void run() {
+                    IsolatingDefaultSystemClassLoader cl = 
+                        (IsolatingDefaultSystemClassLoader)
+                            ClassLoader.getSystemClassLoader();
+                    
+                    cl.setIsolateDefaultSystemClassloader();
+                    
+                    try {
+                        unitTestMethod.invoke(proxy, new Object[0]);
+                    } catch (InvocationTargetException e) {
+                        throw new WrapperRuntimeException(e.getCause());
+                    } catch (Exception e) {
+                        throw new WrapperRuntimeException(e);
+                    }
+                }
+            };
+            
+            thread.start();
+            thread.join();
+            
+            Throwable uncaughtException = group.getUncaughtException();
+            
+            if (uncaughtException != null) {
+                if (uncaughtException instanceof WrapperRuntimeException) {
+                    throw ((WrapperRuntimeException)uncaughtException).getCause();
+                } else {
+                    throw uncaughtException;                    
+                }
+            }
+       }
+        
     }
- 
+    
+    private static class WrapperRuntimeException extends RuntimeException {
+        
+        private static final long serialVersionUID = 1L;
+
+        public WrapperRuntimeException(Throwable cause) {
+            super(cause);
+        }
+    }
+    
 }
