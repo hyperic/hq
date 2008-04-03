@@ -42,7 +42,10 @@
                destdir="${build.dir}/src" 
                verbose="true">
       <packageSubstitution packages="server.session" substituteWith="shared"/>
-      <fileset dir="src" includes="**/session/*EJBImpl.java"/>
+      <fileset dir="src">
+		  <include name="**/session/*EJBImpl.java"/>
+		  <include name="**/ExampleInContainer_testEJBImpl.java"/>
+	  </fileset>
       <valueobject/>
       <remoteinterface pattern="{0}"/>
       <localinterface pattern="{0}Local"/>
