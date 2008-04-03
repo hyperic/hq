@@ -23,7 +23,7 @@
  * USA. 
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
 import java.util.List;
 
@@ -31,8 +31,9 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.Cprop;
-import org.hyperic.hq.appdef.CpropKey;
+import org.hyperic.hq.appdef.server.session.Cprop;
+import org.hyperic.hq.appdef.server.session.CpropKey;
+import org.hyperic.hq.dao.HibernateDAO;
 
 public class CpropDAO extends HibernateDAO
 {

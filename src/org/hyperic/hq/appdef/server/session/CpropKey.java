@@ -23,15 +23,12 @@
  * USA. 
  */
 
-package org.hyperic.hq.appdef;
+package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 
 import org.hyperic.hibernate.PersistedObject;
 
-/**
- *
- */
 public class CpropKey extends PersistedObject
 {
     private int _appdefType;
@@ -40,80 +37,64 @@ public class CpropKey extends PersistedObject
     private String _description;
     private Collection _cprops;
 
-    public Collection getCprops()
-    {
+    public Collection getCprops() {
         return _cprops;
     }
 
-    public void setCprops(Collection cprops)
-    {
+    public void setCprops(Collection cprops) {
         _cprops = cprops;
     }
 
-    /**
-     * default constructor
-     */
-    public CpropKey()
-    {
+    public CpropKey() {
         super();
     }
 
-    public int getAppdefType()
-    {
+    public int getAppdefType() {
         return _appdefType;
     }
 
-    public void setAppdefType(int appdefType)
-    {
+    public void setAppdefType(int appdefType) {
         _appdefType = appdefType;
     }
 
-    public int getAppdefTypeId()
-    {
+    public int getAppdefTypeId() {
         return _appdefTypeId;
     }
 
-    public void setAppdefTypeId(int appdefTypeId)
-    {
+    public void setAppdefTypeId(int appdefTypeId) {
         _appdefTypeId = appdefTypeId;
     }
 
-    public String getKey()
-    {
+    public String getKey() {
         return _key;
     }
 
-    public void setKey(String propKey)
-    {
+    public void setKey(String propKey) {
         _key = propKey;
     }
 
-    public String getDescription()
-    {
+    public String getDescription() {
         return _description;
     }
 
-    public void setDescription(String description)
-    {
+    public void setDescription(String description) {
         _description = description;
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (!(obj instanceof CpropKey) || !super.equals(obj)) {
             return false;
         }
-        CpropKey o = (CpropKey)obj;
-        return (_key==o.getKey() || (_key!=null && o.getKey()!=null &&
-                                    _key.equals(o.getKey())))
-               &&
-               _appdefType==o.getAppdefType()
-               &&
-               _appdefTypeId==o.getAppdefTypeId();
+        CpropKey o = (CpropKey) obj;
+        return (_key == o.getKey() || (_key != null && o.getKey() != null &&
+            _key.equals(o.getKey())))
+            &&
+            _appdefType == o.getAppdefType()
+            &&
+            _appdefTypeId == o.getAppdefTypeId();
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = 17;
 
         result = 37*result + (_key!=null ? _key.hashCode() : 0);
@@ -122,5 +103,4 @@ public class CpropKey extends PersistedObject
 
         return result;
     }
-
 }

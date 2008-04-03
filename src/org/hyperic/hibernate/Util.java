@@ -375,7 +375,7 @@ public class Util {
      * Generate a new ID for a class of the given type.
      * 
      * @param className the persisted class name, as per the .hbm descriptor:
-     *                  e.g. org.hyperic.hq.appdef.CpropKey
+     *                  e.g. org.hyperic.hq.appdef.server.session.CpropKey
      * @param o         The object which will be getting the new ID
      * 
      * @return an Integer id for the new object.  If your class uses Long IDs

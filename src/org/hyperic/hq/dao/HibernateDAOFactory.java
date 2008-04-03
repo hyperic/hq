@@ -31,6 +31,8 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.ServerTypeDAO;
 import org.hyperic.hq.appdef.server.session.ServiceTypeDAO;
+import org.hyperic.hq.appdef.server.session.CpropDAO;
+import org.hyperic.hq.appdef.server.session.CpropKeyDAO;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;

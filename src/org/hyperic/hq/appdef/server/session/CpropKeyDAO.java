@@ -23,13 +23,13 @@
  * USA. 
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.CpropKey;
+import org.hyperic.hq.appdef.server.session.CpropKey;
+import org.hyperic.hq.dao.HibernateDAO;
 
 public class CpropKeyDAO extends HibernateDAO
 {
@@ -86,5 +86,4 @@ public class CpropKeyDAO extends HibernateDAO
             .setCacheRegion("CpropKey.findByKey")
             .uniqueResult();
     }
-
 }
