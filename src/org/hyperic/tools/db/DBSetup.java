@@ -50,8 +50,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.hyperic.util.StrongCollection;
 import org.hyperic.util.jdbc.JDBC;
-import org.hyperic.util.jdbc.log.LoggerConnection;
-import org.hyperic.util.jdbc.log.LoggerListener;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -63,8 +61,6 @@ import org.xml.sax.SAXParseException;
 
 /**
  * To Do:
- * - factor out main() into a separate DBSetupCLI class or something and use
- * jakarta commons-cli
  * - implement abstract factory for tables,columns,views,etc - the "if dbtype"
  * stuff is yucky
  * - The verbose/quiet System.out'ing stuff should go away in favor of
@@ -78,45 +74,15 @@ import org.xml.sax.SAXParseException;
  * - fix up terminology ("create" should be "rdbms-export", "setup" should be
  * "rdbms-import" or something else) to more descriptive
  */
-public class DBSetup implements LoggerListener
-{
+public class DBSetup {
     private static final String COPYRIGHT = "DBSetup, Copyright (C) 2005, Hyperic, Inc. All Rights Reserved.";
 
-    private static final String HELP =
-  "DBSetup setupfile database [username] [password] [-create] [-clear] [-lint]\n"
-+ "                           [-quiet] [-uninstall] [-upgrade] [-validate]\n"
-+ "                           [-verbose] [-driver <driver-class>]\n"
-+ "                           [-noninteractive]\n"
-+ "                           [-sqllog <sql-file-name>]\n"
-+ "                           [-typemap <typemap-file>]\n"
-+ "  setupfile  XML definition of the database schema.\n"
-+ "  database   The JDBC connection string for the target database.\n"
-+ "  -create    Creates an XML definition file from an existing database.\n"
-+ "  -clear     Removes data from an existing database.\n"
-+ "  -driver    The JDBC driver class name for the database to connect to.\n"
-+ "             (e.g., oracle.jdbc.OracleDriver).\n"
-+ "  -sqllog    All commands sent to the database will be logged to the file.\n"
-+ "  -noexec    Do not execute any sql.  Commands will still be logged.\n"
-+ "  -lint      Checks that the source file is valid and can be constructed in the\n"
-+ "             target database.\n"
-+ "  -quiet     Doesn't display any messages\n"
-+ "  -data      Executes only dml statements\n"
-+ "  -uninstall Uninstalls the previously installed schema.\n"
-+ "  -upgrade   Makes an existing database schema match the setup definition.\n"
-+ "  -validate  Validates the schema.\n"
-+ "  -verbose   Displays the SQL Commands that are sent to the database.\n"
-+ "  -typemap   Use a separate file for type mappings.\n"
-+ "  -noninteractive Don't ask any questions."
-;
-
-    private StrongCollection m_collTypeMaps;
     private boolean          m_bQuiet;   // Defaults to false
     private boolean          m_bNoninteractive;   // Defaults to false
     private boolean          m_bVerbose; // Defaults to false
     private String           m_logFileName = null;
     private boolean          m_logAppend = false;
     private FileWriter       m_log = null;
-    private boolean          m_noexec = false;
     public static boolean    m_bDMLonly = false;
     private String           m_typeMapFile = null;
     private InputStream      m_typeMapStream = null;
@@ -129,257 +95,6 @@ public class DBSetup implements LoggerListener
     private int     m_lFailedViews;
 
     private Connection m_conn = null;
-
-    public static void main(String[] args)
-    {
-        /////////////////////////////////////////////////////////////
-        // Look for the command line options
-
-        int     iArgLen           = args.length;
-        boolean bCreate           = false;
-        String  strError          = null;
-        String  strDriver         = null;
-        String  strTypeMap        = null;
-        String  strLogFile        = null;
-        boolean bHelp             = false;
-        boolean bLint             = false;
-        boolean bMultiOptionError = false;
-        boolean bNoExec           = false;
-        boolean bAppend           = false;
-        boolean bQuiet            = false;
-        boolean bNoninteractive   = false;
-        boolean bResult           = false;
-        boolean bUninstall        = false;
-        boolean bUpgrade          = false;
-        boolean bValidate         = false;
-        boolean bVerbose          = false;
-        boolean bClear            = false;
-        String  theTable          = null;
-        
-        for(int i = 0;i < args.length;i++)
-        {
-            if(args[i].equals("-?") == true || args[i].equalsIgnoreCase("-help") == true)
-            {
-                bHelp = true;
-                break;
-            }
-            else if(args[i].equalsIgnoreCase("-create") == true)
-            {
-                bCreate = true;
-                iArgLen --;
-            }
-            else if(args[i].equalsIgnoreCase("-clear") == true)
-            {
-                bClear = true;
-                iArgLen --;
-            }
-            else if(args[i].equalsIgnoreCase("-data") == true)
-            {
-                m_bDMLonly = true;
-                iArgLen --;
-            }
-            else if(args[i].equalsIgnoreCase("-noexec") == true)
-            {
-                bNoExec = true;
-                iArgLen --;
-            }
-            else if(args[i].equalsIgnoreCase("-driver") == true)
-            {
-                if ( ++i >= args.length ) {
-                    bHelp = true;
-                    break;
-                }
-                strDriver = args[i];
-                iArgLen -= 2;
-            }
-            else if(args[i].equalsIgnoreCase("-typemap") == true)
-            {
-                if ( ++i >= args.length ) {
-                    bHelp = true;
-                    break;
-                }
-                strTypeMap = args[i];
-                iArgLen -= 2;
-            }
-            else if(args[i].equalsIgnoreCase("-sqllog") == true)
-            {
-                if ( ++i >= args.length ) {
-                    bHelp = true;
-                    break;
-                }
-                strLogFile = args[i];
-                iArgLen -= 2;
-            }
-            else if(args[i].equalsIgnoreCase("-lint") == true)
-            {
-                if(bUninstall == true || bValidate == true)
-                {
-                    bMultiOptionError = true;
-                    break;
-                }
-
-                bLint = true;
-                iArgLen --;
-            }
-            else if(args[i].equalsIgnoreCase("-quiet") == true)
-            {
-                if(bVerbose == true)
-                {
-                    bMultiOptionError = true;
-                    break;
-                }
-
-                bQuiet = true;
-                iArgLen --;
-            }
-            else if(args[i].equalsIgnoreCase("-noninteractive") == true)
-            {
-                bNoninteractive = true;
-                iArgLen --;
-            }
-            else if(args[i].equalsIgnoreCase("-uninstall") == true)
-            {
-                if(bLint == true || bValidate == true)
-                {
-                    bMultiOptionError = true;
-                    break;
-                }
-
-                bUninstall = true;
-                iArgLen --;
-            }
-            else if(args[i].equalsIgnoreCase("-upgrade") == true)
-            {
-                bUpgrade = true;
-                iArgLen --;
-            }
-            else if(args[i].equalsIgnoreCase("-validate") == true)
-            {
-                if(bLint == true || bUninstall == true)
-                {
-                    bMultiOptionError = true;
-                    break;
-                }
-
-                bValidate = true;
-                iArgLen --;
-            }
-            else if(args[i].equalsIgnoreCase("-verbose") == true)
-            {
-                if(bQuiet == true)
-                {
-                    bMultiOptionError = true;
-                    break;
-                }
-
-                bVerbose = true;
-                iArgLen --;
-            }
-            else if(args[i].charAt(0) == '-')
-            {
-                System.out.println("Error: Unknown option \'" + args[i] + '\'');
-                bHelp = true;
-                break;
-            }
-        }
-
-        /////////////////////////////////////////////////////////////
-        // Display the program copyright notice
-
-        if(bQuiet == false)
-            System.out.println('\n' + DBSetup.COPYRIGHT + '\n');
-
-        if(strError != null)
-            System.out.println("Error : " + strError + '\n');
-
-        if(bMultiOptionError == true)
-        {
-            System.out.println("Error: The -lint, -uninstall, -validate cannot be used together.\n");
-            bHelp = true;
-        }
-
-        if(bLint == true)
-        {
-            System.out.println("Error: The -lint option is not yet supported.\n");
-            bHelp = true;
-        }
-
-        if(bUpgrade == true)
-        {
-            System.out.println("Error: The -upgrade option is not yet supported.\n");
-            bHelp = true;
-        }
-
-        if(iArgLen < 2)
-            bHelp = true;   // We need at least 2 arguments
-
-        if(bHelp == false)
-        {
-            String  strUsername = null;
-            String  strPassword = null;
-
-            if(iArgLen >= 3)
-                strUsername = args[2];
-
-            if(iArgLen >= 4)
-                strPassword = args[3];
-
-            DBSetup setup = new DBSetup(bQuiet, bVerbose, bNoninteractive,
-                                        strLogFile, bAppend, bNoExec);
-            if ( strTypeMap != null ) {
-                setup.setTypeMapFile(strTypeMap);
-            }
-            try
-            {
-                // jeez, just be explicit about what the args are supposed
-                // to be...
-                String theFilename = args[0];
-                String theJdbcUrl = args[1];
-                if(bCreate == true)
-                    setup.create(theFilename, theJdbcUrl, strUsername, strPassword);
-                else if(bClear == true)
-                    bResult = setup.clear(theFilename, theJdbcUrl, strUsername, strPassword);
-                else if(bUninstall == true)
-                    bResult = setup.uninstall(theFilename, theJdbcUrl, strUsername, strPassword);
-                else if(bValidate == true)
-                    bResult = setup.validate(theFilename, theJdbcUrl, strUsername, strPassword);
-                else
-                    bResult = setup.setup(theFilename, theJdbcUrl, strUsername, strPassword);
-            }
-            catch(IOException e)
-            {
-                if(bQuiet == false)
-                    System.out.println("Error: " + e);
-
-                if(bVerbose == true)
-                    e.printStackTrace();
-
-                bResult = false;
-            }
-            catch(SQLException e)
-            {
-                if(setup.isQuiet() == false)
-                    JDBC.printSQLException(e);
-
-                if(setup.isVerbose() == true)
-                    e.printStackTrace();
-            }
-            catch(Exception e)
-            {
-                if(setup.isQuiet() == false)
-                    System.out.println("Error: " + e);
-
-                if(setup.isVerbose() == true)
-                    e.printStackTrace();
-            }
-        }
-
-        if(bHelp == true)
-            System.out.println(DBSetup.HELP);
-
-        System.exit((bResult == true) ? 0 : -1);
-    }
-
 
     /**
      * Constructs a DBSetup class with quiet mode turned on.
@@ -423,7 +138,6 @@ public class DBSetup implements LoggerListener
         m_bNoninteractive = nonInteractive;
         m_logFileName = logFileName;
         m_logAppend = append;
-        m_noexec = noexec;
     }
 
     public void create(String file, String database, String username, String password)
@@ -440,13 +154,6 @@ public class DBSetup implements LoggerListener
 
             Document doc      = this.newDocument();
             Element  elemRoot = doc.createElement("Covalent.DBSetup");
-
-            String  strName;
-            int     iIndex = file.lastIndexOf('.');
-            if(iIndex > 0)
-                strName = file.substring(0, iIndex);
-            else
-                strName = file;
 
             elemRoot.setAttribute("name", file);
             elemRoot.setAttribute("notice", DBSetup.COPYRIGHT);
@@ -753,8 +460,6 @@ public class DBSetup implements LoggerListener
 
     public void writeDocument(Document doc, String file) throws IOException, SAXException
     {
-        Document docResult = null;
-
         try
         {
 
@@ -809,8 +514,6 @@ public class DBSetup implements LoggerListener
                               String table, boolean doDelete)
         throws ClassNotFoundException, IOException, SQLException
     {
-        String      strCmd;
-
         try
         {
             Document doc = null;
@@ -1035,9 +738,6 @@ public class DBSetup implements LoggerListener
 
             try {
                 if(m_conn != null) m_conn.close();
-                if(database.startsWith("jdbc:cloudscape")) {
-                    java.sql.DriverManager.getConnection(database+";shutdown=true");
-                }
             } catch(SQLException e) {}
         }
 
@@ -1055,7 +755,6 @@ public class DBSetup implements LoggerListener
                          String password, String table)
         throws ClassNotFoundException, IOException, SQLException
     {
-        String      strCmd;
         boolean     bProceed = false;
         Statement   stmt     = null;
 
@@ -1168,7 +867,6 @@ public class DBSetup implements LoggerListener
     protected boolean doUninstall(Object source, String database, String username, String password)
         throws ClassNotFoundException, IOException, SQLException
     {
-        String      strCmd;
         boolean     bProceed = false;
         Statement   stmt     = null;
 
@@ -1541,11 +1239,6 @@ public class DBSetup implements LoggerListener
         m_typeMapStream = is;
     }
 
-    public static final String LOGGER_DRIVER
-        = "org.hyperic.util.jdbc.log.LoggerDriver";
-    public static final String LOGGER_DATABASE
-        = "jdbc:covalent-log:";
-
     private Connection connect (String database,
                                 String user, String password)
         throws ClassNotFoundException, SQLException {
@@ -1558,25 +1251,12 @@ public class DBSetup implements LoggerListener
         if ( driver == null ) {
             driver = JDBC.getDriverString(database);
         }
-        if ( m_logFileName != null ) {
-            database = LOGGER_DATABASE + driver + ":" + database;
-            driver = LOGGER_DRIVER;
-        }
+
         JDBC.loadDriver(driver); 
         Connection conn = DriverManager.getConnection(database, user, password);
         // mysql complains if autocomit is true and you try to commit...
         // ddl operations are not transactional anyhow.
         conn.setAutoCommit(false);
-        if ( conn instanceof LoggerConnection ) {
-            ((LoggerConnection) conn).addListener(this);
-            if ( m_noexec ) {
-                ((LoggerConnection) conn).setExecutionMask(LoggerConnection.M_NONE);
-            }
-            if ( m_logFileName != null ) {
-                // We should only log updates
-                ((LoggerConnection) conn).setLogMask(LoggerConnection.M_UPDATES);
-            }
-        }
 
         return conn;
 

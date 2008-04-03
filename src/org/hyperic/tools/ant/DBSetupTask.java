@@ -28,7 +28,6 @@ package org.hyperic.tools.ant;
 import java.io.File;
 
 import org.apache.tools.ant.Task;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.Environment;
 import java.util.ArrayList;
@@ -150,7 +149,7 @@ public class DBSetupTask extends Task {
                                       appendToSqlFile,
                                       noexec);
 
-            dbs.m_bDMLonly = data; // XXX HACK, there is no other way to set this
+            DBSetup.m_bDMLonly = data; // XXX HACK, there is no other way to set this
 
             if ( typeMap != null ) dbs.setTypeMapFile(typeMap.getAbsolutePath());
 
