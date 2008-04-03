@@ -24,9 +24,9 @@ class AgentController
         def members
         
         // returns true iff the resource is a 4.0 agent or later
-        def isRestartableAgent = { res ->
-                if (res.prototype.name == HQ_AGENT_SERVER_NAME) {
-                    def agent = agentMan.one.getAgent(res.entityID)
+        def isRestartableAgent = {
+                if (it.prototype.name == HQ_AGENT_SERVER_NAME) {
+                    def agent = agentMan.one.getAgent(it.entityID)
                     // only support restarts in 4.0 agents and later
                     return (agent.version >= "4.0.0")
                 }
@@ -91,7 +91,6 @@ class AgentController
                 rsltDescription = "Failed to send ${cmd} command to agent at ${agent.address}:${agent.port}. Reason: ${e.message}"
                 log.error("Failed to send ${cmd} command to agent at ${agent.address}:${agent.port}", e)
             }
-            log.info(aeid)
            	def val = [rid: aeid.toString(), result: rsltDescription] as JSONObject
            	res.put(val)
         }
