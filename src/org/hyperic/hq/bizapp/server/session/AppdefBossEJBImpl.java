@@ -127,6 +127,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -2061,7 +2062,8 @@ public class AppdefBossEJBImpl
         throws PermissionException, SessionTimeoutException,
                SessionNotFoundException, ApplicationException 
     {
-        return findAllGroupsMemberInclusive(sessionId, pc, entity, null, null);
+        return findAllGroupsMemberInclusive(sessionId, pc, entity, 
+                                            new Integer[0]);
     }
 
     /**
@@ -2074,29 +2076,29 @@ public class AppdefBossEJBImpl
      * */
     private PageList findAllGroupsMemberInclusive(int sessionId, PageControl pc,
                                                   AppdefEntityID entity,
-                                                  Integer[] removeIds,
-                                                  AppdefResourceTypeValue resType)
+                                                  Integer[] excludeIds)
         throws PermissionException, SessionTimeoutException,
                SessionNotFoundException, ApplicationException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-
-        List filterList  = new ArrayList();
-
-        if (removeIds != null) {
-            // convert to set and define exlusion filter on group set.
-            Set grpExcludeSet = new HashSet();
-            for (int i = 0; i < removeIds.length; i++) {
-                int groupId = removeIds[i].intValue();
-
-                grpExcludeSet.add(AppdefEntityID.newGroupID(groupId));
-            }
-            filterList.add(new AppdefGroupPagerFilterExclude(grpExcludeSet));
+        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        
+        List excludeGroups = new ArrayList(excludeIds.length);
+        for (int i=0; i<excludeIds.length; i++) {
+            excludeGroups.add(groupMan.findResourceGroupById(excludeIds[i]));
         }
-
-        return getAppdefGroupManager()
-            .findAllGroups(subject, entity, pc, (AppdefPagerFilter[])
-                           filterList.toArray(new AppdefPagerFilter[0]));
+        
+        Resource r = getResourceManager().findResource(entity);
+        PageInfo pInfo = PageInfo.create(pc, ResourceGroupSortField.NAME);
+        PageList res = groupMan.findGroupsContaining(subject, r,
+                                                     excludeGroups, pInfo);
+        List appVals = new ArrayList(res.size());
+        for (Iterator i=res.iterator(); i.hasNext(); ) {
+            ResourceGroup g = (ResourceGroup)i.next();
+            appVals.add(groupMan.convertGroup(subject, g));
+        }
+        
+        return new PageList(appVals, res.getTotalSize());
     }
 
     /**
@@ -2143,36 +2145,32 @@ public class AppdefBossEJBImpl
         findAllGroupsMemberExclusive(int sessionId, PageControl pc,
                                      AppdefEntityID entity, 
                                      Integer[] removeIds,
-                                     AppdefResourceTypeValue resType)
+                                     Resource resourceType)
         throws PermissionException, SessionTimeoutException,
                SessionNotFoundException 
     {
-        List filterList  = new ArrayList();
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        List excludeGroups = new ArrayList(removeIds.length);
         
-        if (entity != null) {
-            // Define exclusion filter to filter member set.
-            filterList.add(new AppdefGroupPagerFilterMemExclude(entity));
+        for (int i=0; i<removeIds.length; i++) {
+            excludeGroups.add(groupMan.findResourceGroupById(removeIds[i]));
+        }
+        Resource r = getResourceManager().findResource(entity);
+        PageInfo pInfo = PageInfo.create(pc, ResourceGroupSortField.NAME);
+        PageList res = groupMan.findGroupsNotContaining(subject, r,
+                                                        resourceType, 
+                                                        excludeGroups,
+                                                        pInfo);
+        
+        // Now convert those ResourceGroups into AppdefResourceGroupValues
+        List appVals = new ArrayList(res.size());
+        for (Iterator i=res.iterator(); i.hasNext(); ) {
+            ResourceGroup g = (ResourceGroup)i.next();
+            appVals.add(groupMan.convertGroup(subject, g));
         }
         
-        if (resType != null) {
-            // Add a filter to weed out groups incompatible with this entity
-            filterList.add(new AppdefGroupPagerFilterGrpEntRes(
-                    resType.getAppdefType(), resType.getId().intValue(),
-                    true));
-        }
-        
-        if (removeIds != null) {
-            // convert to set and define exlusion filter on group set.
-            Set grpExcludeSet = new HashSet();
-            for (int i=0; i<removeIds.length; i++) {
-                int groupId = removeIds[i].intValue();
-                grpExcludeSet.add(AppdefEntityID.newGroupID(groupId));
-            }
-            filterList.add(new AppdefGroupPagerFilterExclude(grpExcludeSet));
-        }
-        
-        return findAllGroups(sessionId, pc, (AppdefPagerFilter[])
-                             filterList.toArray (new AppdefPagerFilter[0]));
+        return new PageList(appVals, res.getTotalSize());
     }
 
     /**
@@ -2199,20 +2197,6 @@ public class AppdefBossEJBImpl
         return resGrps;
     }
 
-    private PageList findAllGroups(int sessionId, PageControl pc,
-                                   AppdefPagerFilter[] grpFilters)
-        throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException 
-    {
-        PageList retVal;
-
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        retVal = getAppdefGroupManager().findAllGroups(subject, pc, grpFilters);
-        if (retVal == null)
-            retVal = new PageList();  // return empty list if no groups.
-        return retVal;
-    }
-    
     /**
      * Add entities to a resource group
      * @ejb:interface-method

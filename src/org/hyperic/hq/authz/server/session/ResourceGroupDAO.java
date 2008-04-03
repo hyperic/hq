@@ -25,18 +25,22 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.util.pager.PageList;
 
 public class ResourceGroupDAO extends HibernateDAO
 {
@@ -302,6 +306,62 @@ public class ResourceGroupDAO extends HibernateDAO
             .list();
     }
     
+    PageList findGroupsClusionary(Resource member, Resource prototype,
+                                  Collection excludeGroups, PageInfo pInfo,
+                                  boolean inclusive) 
+    {
+        ResourceGroupSortField sort = (ResourceGroupSortField)pInfo.getSort();
+        String hql = "from ResourceGroup g " + 
+                     "where " +  
+                     "g.system = false and ";
+        
+        if (prototype != null)
+            hql += " g.resourcePrototype = :proto and ";
+        
+        List excludes = new ArrayList(excludeGroups.size());
+        for (Iterator i=excludeGroups.iterator(); i.hasNext(); ) {
+            ResourceGroup g = (ResourceGroup)i.next();
+            
+            excludes.add(g.getId());
+        }
+        if (!excludes.isEmpty())
+            hql += " g.id not in (:excludes) and ";
+        
+        String inclusionStr = "";
+        if (!inclusive) 
+            inclusionStr = " not ";
+        hql += "g.id " + inclusionStr + " in ( " + 
+               "   select m.id.resourceGroup.id from ResGrpResMap m " + 
+               "   where m.id.resource = :resource " + 
+               ") ";
+        
+        String countHql  = "select count(g.id) " + hql;
+        String actualHql = "select g " + hql + " order by " + 
+            sort.getSortString("g");
+      
+        Query q = getSession().createQuery(countHql)
+            .setParameter("resource", member);
+        
+        if (!excludes.isEmpty())
+            q.setParameterList("excludes", excludes);
+        
+        if (prototype != null)
+            q.setParameter("proto", prototype);
+            
+        int total = ((Number)(q.uniqueResult())).intValue();
+        q = getSession().createQuery(actualHql)
+            .setParameter("resource", member);
+        
+        if (prototype != null)
+            q.setParameter("proto", prototype);
+
+        if (!excludes.isEmpty())
+            q.setParameterList("excludes", excludes);
+        
+        List vals = pInfo.pageResults(q).list();
+        return new PageList(vals, total);
+    }
+    
     public Collection findByGroupType_orderName(boolean isAscending,
                                                 int groupType) {
         String sql = "from ResourceGroup groupType = :type" +
@@ -311,5 +371,4 @@ public class ResourceGroupDAO extends HibernateDAO
             .setInteger("type", groupType)
             .list();
     }
-
 }

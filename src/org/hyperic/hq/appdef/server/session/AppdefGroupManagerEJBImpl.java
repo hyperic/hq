@@ -124,21 +124,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     public AppdefGroupManagerEJBImpl() {}
 
     /**
-     * Produce a paged list of all groups where caller is authorized
-     * to modify.
-     * @param subject subject value.
-     * @param pc control
-     * @return List containing AppdefGroupValue.
-     * @throw PermissionException when group access is not authorized.
-     * @ejb:interface-method
-     */
-    public PageList findAllGroups(AuthzSubject subject, PageControl pc,
-                                  boolean foosball)
-        throws PermissionException {
-        return findAllGroups(subject, (ResourceValue) null, pc, null);
-    }
-
-    /**
      * Produce list of all groups where caller is authorized
      * to modify. Apply filterSet to control group list membership.
      * @param subject subject
@@ -147,12 +132,12 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @return PageList containing AppdefGroupValues.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
-     */
     public PageList findAllGroups(AuthzSubject subject, PageControl pc,
                                   AppdefPagerFilter[] grpFilters)
         throws PermissionException {
         return findAllGroups(subject, (ResourceValue) null, pc, grpFilters);
     }
+     */
 
     /**
      * Produce list of all groups that contain the specified appdef entity.
@@ -165,7 +150,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @return PageList containing AppdefGroupValues.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
-     * */
     public PageList findAllGroups(AuthzSubject subject, AppdefEntityID id,
                                   PageControl pc,
                                   AppdefPagerFilter[] grpFilters)
@@ -188,6 +172,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         }
         return findAllGroups(subject,rv,pc,grpFilters);
     }
+     * */
 
     private PageList findAllGroups(AuthzSubject subject, 
                                    ResourceValue rv, PageControl pc,

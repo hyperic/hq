@@ -38,6 +38,7 @@ import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
@@ -674,6 +675,56 @@ public class ResourceGroupManagerEJBImpl
                                      pc.getPagesize());
     }   
 
+    /**
+     * Get a list of {@link ResourceGroup}s which are compatable with
+     * the specified prototype.
+     * 
+     * Do not return any groups contained within 'excludeGroups' (a list of
+     * {@link ResourceGroup}s
+     * 
+     * @param prototype  If specified, the resulting groups must be compatable
+     *                   with the prototype.  
+     * 
+     * @param pInfo Pageinfo with a sort field of type 
+     *              {@link ResourceGroupSortField}
+     * 
+     * @ejb:interface-method
+     * */
+    public PageList findGroupsNotContaining(AuthzSubject subject, 
+                                            Resource member, Resource prototype,
+                                            Collection excludeGroups, 
+                                            PageInfo pInfo) 
+    {
+        return getResourceGroupDAO().findGroupsClusionary(member, prototype, 
+                                                          excludeGroups, 
+                                                          pInfo, false);
+    }
+
+    /**
+     * Get a list of {@link ResourceGroup}s which are compatable with
+     * the specified prototype.
+     * 
+     * Do not return any groups contained within 'excludeGroups' (a list of
+     * {@link ResourceGroup}s
+     * 
+     * @param prototype  If specified, the resulting groups must be compatable
+     *                   with the prototype.  
+     * 
+     * @param pInfo Pageinfo with a sort field of type 
+     *              {@link ResourceGroupSortField}
+     * 
+     * @ejb:interface-method
+     * */
+    public PageList findGroupsContaining(AuthzSubject subject, 
+                                         Resource member,
+                                         Collection excludeGroups, 
+                                         PageInfo pInfo) 
+    {
+        return getResourceGroupDAO().findGroupsClusionary(member, null, 
+                                                          excludeGroups, 
+                                                          pInfo, true);
+    }
+    
     /**
      * Get all the resource groups excluding the root resource group.
      * @ejb:interface-method

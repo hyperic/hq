@@ -26,6 +26,7 @@
 package org.hyperic.hibernate;
 
 import org.hibernate.Query;
+import org.hyperic.util.pager.PageControl;
 
 /**
  * A paging class that knows a little about Hibernate.
@@ -113,5 +114,10 @@ public class PageInfo {
      */
     public static PageInfo getAll(SortField sort, boolean ascending) {
         return new PageInfo(sort, ascending);
+    }
+    
+    public static PageInfo create(PageControl pc, SortField sort) {
+        return new PageInfo(pc.getPagenum(), pc.getPagesize(),
+                            sort, pc.isAscending());
     }
 }
