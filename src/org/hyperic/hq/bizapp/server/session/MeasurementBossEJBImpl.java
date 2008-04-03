@@ -313,7 +313,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             for (Iterator it = appSvcs.iterator(); it.hasNext(); ) {
                 AppService appSvc = (AppService) it.next();
                 // Let's try it
-                if (appSvc.isIsCluster()) {
+                if (appSvc.isIsGroup()) {
                     if (appSvc.getServiceCluster() == null)
                         continue;
                         
@@ -629,7 +629,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             for (Iterator it = appSvcs.iterator(); it.hasNext(); ) {
                 AppService appSvc = (AppService) it.next();
                 // Let's try it
-                if (appSvc.isIsCluster()) {
+                if (appSvc.isIsGroup()) {
                     if (appSvc.getServiceCluster() == null)
                         continue;
                         
@@ -1540,7 +1540,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 if (appSvc.isEntryPoint()) {
                     AppdefEntityID id;
                     
-                    if (appSvc.isIsCluster()) {
+                    if (appSvc.isIsGroup()) {
                         id = new AppdefEntityID(
                             AppdefEntityConstants.APPDEF_TYPE_GROUP, 
                             appSvc.getServiceCluster().getGroup().getId());

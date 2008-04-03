@@ -38,6 +38,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.HasAuthzOperations;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class Service extends AppdefResource
@@ -62,7 +63,7 @@ public class Service extends AppdefResource
     private Service _parentService;
     private Server _server;
     private ServiceType _serviceType;
-    private ServiceCluster _serviceCluster;
+    private ResourceGroup _resourceGroup;
     private ConfigResponseDB _configResponse;
     private Collection _appServices;
 
@@ -154,12 +155,12 @@ public class Service extends AppdefResource
         _serviceType = serviceType;
     }
 
-    public ServiceCluster getServiceCluster() {
-        return _serviceCluster;
+    public ResourceGroup getResourceGroup() {
+        return _resourceGroup;
     }
 
-    public void setServiceCluster(ServiceCluster serviceCluster) {
-        _serviceCluster = serviceCluster;
+    public void setResourceGroup(ResourceGroup resourceGroup) {
+        _resourceGroup = resourceGroup;
     }
 
     public ConfigResponseDB getConfigResponse() {
@@ -247,12 +248,12 @@ public class Service extends AppdefResource
         }
         else
             _serviceValue.setServer( null );
-        if ( getServiceCluster() != null ) {
-            _serviceValue.setServiceCluster(
-                getServiceCluster().getServiceClusterValue());
+        if ( getResourceGroup() != null ) {
+            _serviceValue.setResourceGroup(
+                getResourceGroup().getResourceGroupValue());
         }
         else
-            _serviceValue.setServiceCluster( null );
+            _serviceValue.setResourceGroup( null );
         if ( getServiceType() != null ) {
             _serviceValue.setServiceType(getServiceType().getServiceTypeValue());
         }

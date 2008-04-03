@@ -301,4 +301,15 @@ public class ResourceGroupDAO extends HibernateDAO
             .setCacheRegion("ResourceGroup.getMetricsCollecting")
             .list();
     }
+    
+    public Collection findByGroupType_orderName(boolean isAscending,
+                                                int groupType) {
+        String sql = "from ResourceGroup groupType = :type" +
+                     " ORDER BY name " + ((isAscending) ? "asc" : "desc");
+        return getSession()
+            .createQuery(sql)
+            .setInteger("type", groupType)
+            .list();
+    }
+
 }

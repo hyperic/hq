@@ -31,7 +31,6 @@ import java.util.Collection;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup;

@@ -1,7 +1,6 @@
 org.hyperic.hq.authz.server.session.Resource
 org.hyperic.hq.authz.server.session.ResourceType
 org.hyperic.hq.authz.server.session.ResourceGroup
-org.hyperic.hq.appdef.ServiceCluster
 org.hyperic.hq.appdef.AgentType
 org.hyperic.hq.appdef.Agent
 org.hyperic.hq.appdef.server.session.PlatformType

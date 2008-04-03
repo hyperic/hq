@@ -76,10 +76,6 @@
       <column name="SERVICE_TYPE_ID" not-null="true"/>
     </many-to-one>
 
-    <many-to-one name="serviceCluster" class="org.hyperic.hq.appdef.ServiceCluster">
-      <column name="SVC_CLUSTER_ID" not-null="false"/>
-    </many-to-one>
-
     <many-to-one name="configResponse" unique="true" class="org.hyperic.hq.appdef.ConfigResponseDB">
       <column name="CONFIG_RESPONSE_ID" not-null="false"/>
     </many-to-one>

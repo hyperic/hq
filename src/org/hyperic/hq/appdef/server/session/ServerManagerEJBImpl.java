@@ -991,7 +991,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     
             AppService appService = (AppService) it.next();
 
-            if ( appService.isIsCluster() ) {
+            if ( appService.isIsGroup() ) {
                 Collection services =
                     appService.getServiceCluster().getServices();
                 Iterator serviceIterator = services.iterator();

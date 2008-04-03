@@ -293,16 +293,6 @@ public class ServiceDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public Collection findByCluster(Integer clusterId)
-    {
-        String sql="select s from Service s " +
-                   " join fetch s.serviceCluster c " +
-                   "where c.id=?";
-        return getSession().createQuery(sql)
-            .setInteger(0, clusterId.intValue())
-            .list();
-    }
-
     public Collection findAllClusterUnassigned_orderName(boolean asc)
     {
         String sql="from Service where serviceCluster is null " +

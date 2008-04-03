@@ -477,7 +477,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             for(Iterator i = app.getAppServices().iterator();i.hasNext();) {
                 AppService appSvc = (AppService)i.next();
                 AppdefEntityID anId = null;
-                if(appSvc.isIsCluster()) {
+                if(appSvc.isIsGroup()) {
                     ResourceGroup group = appSvc.getServiceCluster().getGroup();
                     anId = AppdefEntityID.newGroupID(group.getId().intValue());
                 } else {
@@ -601,7 +601,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         Service service =
             (Service) getResource(AppdefEntityID.newServiceID(id.intValue()));
         
-        boolean cluster = service.getServiceCluster() != null;
+        boolean cluster = service.getResourceGroup() != null;
         
         Collection apps;
         pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
@@ -611,9 +611,10 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 break;
             case SortAttribute.RESOURCE_NAME:
             default :
+                // ZZZ need to fix this up
                 if (cluster)
                     apps = dao.findByServiceIdOrClusterId_orderName(
-                            id, service.getServiceCluster().getId());
+                            id, service.getResourceGroup().getId());
                 else
                     apps = dao.findByServiceId_orderName(id);
 
@@ -783,7 +784,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             ResourceBundle b = 
                 ResourceBundle.getBundle("org.hyperic.hq.appdef.Resources");
 
-            Collection apps = getApplicationDAO().findUsingCluster(c);
+            Collection apps = getApplicationDAO().findUsingGroup(c.getGroup());
             
             if (apps.size() != 0) {
                 throw new VetoException(b.getString("cluster.inUse"));

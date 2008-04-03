@@ -34,7 +34,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
-import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyNode;
@@ -43,8 +42,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.AppServiceDAO;
 import org.hyperic.hq.dao.AppSvcDependencyDAO;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hq.dao.ServiceClusterDAO;
-import org.hyperic.hq.dao.ServiceDAO;
 
 public class ApplicationDAO extends HibernateDAO
 {
@@ -230,15 +227,15 @@ public class ApplicationDAO extends HibernateDAO
     }
 
     public Collection findByServiceIdOrClusterId_orderName(Integer serviceId,
-                                                           Integer clusterId)
+                                                           Integer groupId)
     {
         String sql="select a from Application a " +
                    " join fetch a.appServices s " +
-                   "where s.service.id=? or s.serviceCluster.id=?" +
+                   "where s.service.id=? or s.resourceGroup.id=?" +
                    "order by a.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, serviceId.intValue())
-            .setInteger(1, clusterId.intValue())
+            .setInteger(1, groupId.intValue())
             .list();
     }
 
@@ -301,22 +298,11 @@ public class ApplicationDAO extends HibernateDAO
             .setInteger(0, pid.intValue())
             .list();
     }
-    
-    public Collection findUsingCluster(ServiceCluster c) {
-        String sql = "select a from Application a " + 
-                     "join fetch a.appServices s " + 
-                     "where s.serviceCluster = :cluster";
-                     
-        return getSession().createQuery(sql)
-            .setParameter("cluster", c)
-            .list();
-    }
 
     public Collection findUsingGroup(ResourceGroup g) {
         String sql = "select a from Application a " + 
                      "join a.appServices s " +
-                     "join s.serviceCluster c " +
-                     "where c.group = :group";
+                     "where s.resourceGroup = :group";
                      
         return getSession().createQuery(sql)
             .setParameter("group", g)

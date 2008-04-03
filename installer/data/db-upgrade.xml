@@ -8608,7 +8608,44 @@ has already been defined.
         </statement>
       </schema-directSQL>
   </schemaSpec>
-    
+
+  <schemaSpec version="3.112">
+      <schema-directSQL>
+        <statement desc="Adding group_id to EAM_APP_SERVICE">
+            alter table EAM_APP_SERVICE add group_id int null
+        </statement>
+        <statement desc="Redirecting EAM_APP_SERVICE from EAM_SVC_CLUSTER to EAM_RESOURCE_GROUP">
+            update EAM_APP_SERVICE set group_id =
+                (select g.id FROM EAM_SVC_CLUSTER c, EAM_RESOURCE_GROUP g
+                where EAM_APP_SERVICE.cluster_id is not null
+                and c.group_id = g.id and EAM_APP_SERVICE.cluster_id = c.id)
+        </statement>
+        <statement desc="Adding constraint from EAM_APP_SERVICE.group_id to EAM_RESOURCE_GROUP.id">
+            alter table EAM_APP_SERVICE
+                add constraint "fkd1cf8e49cce79ab8"
+                foreign key (group_id) references EAM_RESOURCE_GROUP(id) on delete cascade
+        </statement>
+        <statement desc="Dropping EAM_APP_SERVICE constraint to EAM_SVC_CLUSTER">
+            alter table EAM_APP_SERVICE drop constraint fkd1cf8e49ffb4c31c
+        </statement>
+        <statement desc="Dropping EAM_APP_SERVICE.cluster_id">
+            alter table EAM_APP_SERVICE drop COLUMN cluster_id
+        </statement>
+        <statement desc="Renaming EAM_APP_SERVICE iscluster to isgroup">
+            alter table EAM_APP_SERVICE RENAME COLUMN iscluster to isgroup
+        </statement>
+        <statement desc="Dropping EAM_SERVICE.svc_cluster_id constraint to EAM_SVC_CLUSTER.id">
+            alter table EAM_SERVICE drop CONSTRAINT fkee7e4387a14c9e5b
+        </statement>
+        <statement desc="Dropping EAM_SERVICE.svc_cluster_id">
+            alter table EAM_SERVICE drop COLUMN svc_cluster_id cascade
+        </statement>
+        <statement desc="Dropping EAM_SVC_CLUSTER">
+            drop table EAM_SVC_CLUSTER
+        </statement>
+      </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 

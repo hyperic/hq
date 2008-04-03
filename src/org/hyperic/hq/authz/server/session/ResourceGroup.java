@@ -87,7 +87,7 @@ public class ResourceGroup extends AuthzNamedBean
         public boolean getSystem() { return _system; }
     }
     
-    protected ResourceGroup() {
+    public ResourceGroup() {
         super();
     }
 

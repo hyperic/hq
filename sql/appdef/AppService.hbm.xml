@@ -18,16 +18,18 @@
       <many-to-one name="service" class="org.hyperic.hq.appdef.server.session.Service">
         <column name="SERVICE_ID" not-null="false"/>
       </many-to-one>
-      <many-to-one name="serviceCluster" class="ServiceCluster">
-        <column name="CLUSTER_ID" not-null="false"/>
+
+      <many-to-one name="resourceGroup" class="org.hyperic.hq.authz.server.session.ResourceGroup">
+        <column name="GROUP_ID" not-null="false"/>
       </many-to-one>
+
       <many-to-one name="application" class="org.hyperic.hq.appdef.server.session.Application">
         <column name="APPLICATION_ID" not-null="false"/>
       </many-to-one>
     </properties>
 
-    <property name="isCluster" type="boolean">
-      <column name="ISCLUSTER" not-null="true"/>
+    <property name="isGroup" type="boolean">
+      <column name="ISGROUP" not-null="true"/>
     </property>
 
     <property name="creationTime" type="long">

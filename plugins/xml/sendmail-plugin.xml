@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE plugin [
-  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+  <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
 ]>
 
 <!--
@@ -32,40 +32,42 @@
 <plugin>
   <!-- extracted to: pdk/work/scripts/sendmail/hq-sendmail-stat -->
   <script name="hq-sendmail-stat">
+  <![CDATA[
 #!/bin/sh
 
 # linux
-[ -d "/var/spool/mqueue" ] &amp;&amp;
-    msgdir="/var/spool/mqueue" &amp;&amp;
+[ -d "/var/spool/mqueue" ] &&
+    msgdir="/var/spool/mqueue" &&
     premsgdir="/var/spool/clientmqueue"
 
 # solaris
-[ -d "/usr/spool/mqueue" ] &amp;&amp;
-    msgdir="/usr/spool/mqueue" &amp;&amp;
+[ -d "/usr/spool/mqueue" ] &&
+    msgdir="/usr/spool/mqueue" &&
     premsgdir="/usr/spool/clientmqueue"
 
-[ -z "$msgdir" -o ! -r "$msgdir" ] &amp;&amp;
+[ -z "$msgdir" -o ! -r "$msgdir" ] &&
     exit 1
 
 cd $msgdir > /dev/null 2>&amp;1
-[ $? != 0 ] &amp;&amp;
+[ $? != 0 ] &&
     exit 1
 messfiles=`find * -print 2>/dev/null | wc -w`
 
 cd $premsgdir > /dev/null 2>&amp;1
-[ $? != 0 ] &amp;&amp;
+[ $? != 0 ] &&
     exit 1
 premessfiles=`find * -print 2>/dev/null | wc -w`
 
 echo MessagesInQueue=$messfiles
 echo MessagesAwaitingPreprocessing=$premessfiles
+  ]]>
   </script>
 
   <server name="SendMail">
     <config>
       <option name="process.query"
               description="Process Query"
-              default="State.Name.eq=sendmail,CredName.User.eq=root"/>
+              default="State.Name.eq=sendmail,State.Name.Pne=$1,CredName.User.eq=root"/>
       <option name="exec"
               description="Type &quot;sudo&quot; To Avoid Having Agent As Root"
               default=""/>
@@ -77,6 +79,10 @@ echo MessagesAwaitingPreprocessing=$premessfiles
 
     <property name="PROC_QUERY"
               value="State.Name.eq=sendmail"/>
+
+    <scan type="file">
+      <include name="/usr/sbin/sendmail"/>
+    </scan>
 
     <plugin type="autoinventory"
             class="org.hyperic.hq.product.DaemonDetector"/>
@@ -106,20 +112,20 @@ echo MessagesAwaitingPreprocessing=$premessfiles
       <metric name="Availability"
               template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
-      &process-metrics;
+      &multi-process-metrics;
     </service>
 
     <service name="SendMail Root Daemon Process">
       <plugin type="autoinventory"/>
       <config>
         <option name="process.query"
-                default="State.Name.eq=sendmail,CredName.User.eq=root"
+                default="State.Name.eq=sendmail,State.Name.Pne=$1,CredName.User.eq=root"
                 description="PTQL for SendMail Root Daemon Process"/>
       </config>
       <metric name="Availability"
               template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
-      &process-metrics;
+      &multi-process-metrics;
     </service>
 
     <!-- sendmail-stat metrics -->

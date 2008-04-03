@@ -28,8 +28,11 @@ package org.hyperic.hq.appdef;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
+import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 
 import java.util.Collection;
 
@@ -39,9 +42,9 @@ import java.util.Collection;
 public class AppService extends AppdefBean
 {
     private Service service;
-    private ServiceCluster serviceCluster;
+    private ResourceGroup resourceGroup;
     private Application application;
-    private boolean isCluster;
+    private boolean isGroup;
     private String modifiedBy;
     private boolean isEntryPoint = true;
     private ServiceType serviceType;
@@ -70,14 +73,22 @@ public class AppService extends AppdefBean
         this.service = service;
     }
 
+    // ZZZ -> remove in future
     public ServiceCluster getServiceCluster()
     {
-        return this.serviceCluster;
+        ServiceManagerLocal sMan = ServiceManagerEJBImpl.getOne();
+        return (resourceGroup == null) ?
+            null : sMan.getServiceCluster(resourceGroup);
     }
 
-    public void setServiceCluster(ServiceCluster cluster)
+    public ResourceGroup getResourceGroup()
     {
-        this.serviceCluster = cluster;
+        return this.resourceGroup;
+    }
+
+    public void setResourceGroup(ResourceGroup group)
+    {
+        this.resourceGroup = group;
     }
 
     public Application getApplication()
@@ -90,14 +101,14 @@ public class AppService extends AppdefBean
         this.application = application;
     }
 
-    public boolean isIsCluster()
+    public boolean isIsGroup()
     {
-        return this.isCluster;
+        return this.isGroup;
     }
 
-    public void setIsCluster(boolean isCluster)
+    public void setIsGroup(boolean isGroup)
     {
-        this.isCluster = isCluster;
+        this.isGroup = isGroup;
     }
 
     public String getModifiedBy()
@@ -150,9 +161,9 @@ public class AppService extends AppdefBean
                 (service!=null && o.getService()!=null &&
                  service.equals(o.getService())))
                &&
-               (serviceCluster == o.getServiceCluster() ||
-                (serviceCluster!=null && o.getServiceCluster()!=null &&
-                 serviceCluster.equals(o.getServiceCluster())))
+               (resourceGroup == o.getResourceGroup() ||
+                (resourceGroup!=null && o.getResourceGroup()!=null &&
+                 resourceGroup.equals(o.getResourceGroup())))
                &&
                (application == o.getApplication() ||
                 (application!=null && o.getApplication()!=null &&
@@ -165,7 +176,7 @@ public class AppService extends AppdefBean
 
         result = 37*result + (service!=null ? service.hashCode() : 0);
         result = 37*result + (application!=null ? application.hashCode() : 0);
-        result = 37*result + (serviceCluster!=null?serviceCluster.hashCode():0);
+        result = 37*result + (resourceGroup!=null?resourceGroup.hashCode():0);
 
         return result;
     }
@@ -176,7 +187,7 @@ public class AppService extends AppdefBean
      */
     public AppServiceValue getAppServiceValue()
     {
-        appServiceValue.setIsCluster(isIsCluster());
+        appServiceValue.setIsCluster(isIsGroup());
         appServiceValue.setIsEntryPoint(isEntryPoint());
         appServiceValue.setId(getId());
         appServiceValue.setMTime(getMTime());
@@ -200,7 +211,7 @@ public class AppService extends AppdefBean
     }
 
     public void setAppServiceValue(AppServiceValue value) {
-        setIsCluster( value.getIsCluster() );
+        setIsGroup( value.getIsCluster() );
         setEntryPoint( value.getIsEntryPoint() );
 
         if (value.getService() != null) {
@@ -211,9 +222,9 @@ public class AppService extends AppdefBean
 
         if (value.getServiceCluster() != null) {
             Integer i = value.getServiceCluster().getId();
-            ServiceCluster sc = 
-                DAOFactory.getDAOFactory().getServiceClusterDAO().findById(i);
-            setServiceCluster(sc);
+            ResourceGroup gr = 
+                DAOFactory.getDAOFactory().getResourceGroupDAO().findById(i);
+            setResourceGroup(gr);
         }
 
         if (value.getServiceType() != null) {

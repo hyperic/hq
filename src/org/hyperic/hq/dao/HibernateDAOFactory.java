@@ -144,10 +144,6 @@ public class HibernateDAOFactory extends DAOFactory {
         return new ServerDAO(this);
     }
 
-    public ServiceClusterDAO getServiceClusterDAO() {
-        return new ServiceClusterDAO(this);
-    }
-
     public ServerTypeDAO getServerTypeDAO() {
         return new ServerTypeDAO(this);
     }

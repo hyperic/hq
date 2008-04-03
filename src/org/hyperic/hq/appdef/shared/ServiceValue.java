@@ -29,6 +29,8 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import org.hyperic.hq.authz.shared.ResourceGroupValue;
+
 /**
  * Value object for Service.
  *
@@ -66,8 +68,8 @@ public class ServiceValue extends AppdefResourceValue
     private boolean cTimeHasBeenSet = false;
     private ServerLightValue Server;
     private boolean ServerHasBeenSet = false;
-    private ServiceClusterValue ServiceCluster;
-    private boolean ServiceClusterHasBeenSet = false;
+    private ResourceGroupValue ResourceGroup;
+    private boolean ResourceGroupHasBeenSet = false;
     private ServiceTypeValue ServiceType;
     private boolean ServiceTypeHasBeenSet = false;
 
@@ -142,8 +144,8 @@ public class ServiceValue extends AppdefResourceValue
         this.Server = otherValue.Server;
         ServerHasBeenSet = true;
         // TODO Clone is better no ?
-        this.ServiceCluster = otherValue.ServiceCluster;
-        ServiceClusterHasBeenSet = true;
+        this.ResourceGroup = otherValue.ResourceGroup;
+        ResourceGroupHasBeenSet = true;
         // TODO Clone is better no ?
         this.ServiceType = otherValue.ServiceType;
         ServiceTypeHasBeenSet = true;
@@ -370,15 +372,15 @@ public class ServiceValue extends AppdefResourceValue
         ServerHasBeenSet = true;
     }
     
-    public ServiceClusterValue getServiceCluster()
+    public ResourceGroupValue getResourceGroup()
     {
-        return this.ServiceCluster;
+        return this.ResourceGroup;
     }
     
-    public void setServiceCluster( ServiceClusterValue ServiceCluster )
+    public void setResourceGroup( ResourceGroupValue ResourceGroup )
     {
-        this.ServiceCluster = ServiceCluster;
-        ServiceClusterHasBeenSet = true;
+        this.ResourceGroup = ResourceGroup;
+        ResourceGroupHasBeenSet = true;
     }
     
     public ServiceTypeValue getServiceType()
@@ -546,13 +548,13 @@ public class ServiceValue extends AppdefResourceValue
             {
                 lEquals = lEquals && this.Server.equals( that.Server );
             }
-            if( this.ServiceCluster == null )
+            if( this.ResourceGroup == null )
             {
-                lEquals = lEquals && ( that.ServiceCluster == null );
+                lEquals = lEquals && ( that.ResourceGroup == null );
             }
             else
             {
-                lEquals = lEquals && this.ServiceCluster.equals( that.ServiceCluster );
+                lEquals = lEquals && this.ResourceGroup.equals( that.ResourceGroup );
             }
             if( this.ServiceType == null )
             {
@@ -602,7 +604,7 @@ public class ServiceValue extends AppdefResourceValue
         result = 37*result + ((this.cTime != null) ? this.cTime.hashCode() : 0);
 
         result = 37*result + ((this.Server != null) ? this.Server.hashCode() : 0);
-        result = 37*result + ((this.ServiceCluster != null) ? this.ServiceCluster.hashCode() : 0);
+        result = 37*result + ((this.ResourceGroup != null) ? this.ResourceGroup.hashCode() : 0);
         result = 37*result + ((this.ServiceType != null) ? this.ServiceType.hashCode() : 0);
         return result;
     }

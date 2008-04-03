@@ -59,7 +59,6 @@ import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.PluginDAO;
 import org.hyperic.hq.dao.PrincipalDAO;
 import org.hyperic.hq.dao.ServerDAO;
-import org.hyperic.hq.dao.ServiceClusterDAO;
 import org.hyperic.hq.dao.ServiceDAO;
 import org.hyperic.hq.dao.VirtualDAO;
 import org.hyperic.hq.events.server.session.ActionDAO;
@@ -95,7 +94,6 @@ public abstract class DAOFactory {
     public abstract PlatformTypeDAO getPlatformTypeDAO();
     public abstract ServerDAO getServerDAO();
     public abstract ServerTypeDAO getServerTypeDAO();
-    public abstract ServiceClusterDAO getServiceClusterDAO();
     public abstract ServiceDAO getServiceDAO();
     public abstract ServiceTypeDAO getServiceTypeDAO();
     public abstract VirtualDAO getVirtualDAO();

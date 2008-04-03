@@ -4,7 +4,7 @@ CLONE_JAVA_FLAGS=""
 ${JAVA_HOME}/bin/java \
 -client \
 -Dagent.propFile=agent.properties \
--Dorg.hyperic.hq.bizapp.agent.CommandsAPIInfo.camUpPort=7080 \
+-Dorg.hyperic.hq.bizapp.agent.CommandsAPIInfo.camUpPort=111 \
 -Djava.security.auth.login.config=jaas.config \
 -Djava.net.preferIPv4Stack=true \
 -XX:MaxPermSize=256m \

@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.appdef.shared;
 
+import org.hyperic.hq.authz.shared.ResourceGroupValue;
+
 /**
  * This is a display helper bean for the screens
  * 
@@ -81,7 +83,7 @@ public class AppServiceNodeBean extends ServiceValue implements java.io.Serializ
         if (service instanceof ServiceValue) {
             this.setParentId(((ServiceValue)service).getParentId());
             this.setServer(((ServiceValue)service).getServer());
-            this.setServiceCluster(((ServiceValue)service).getServiceCluster());
+            this.setResourceGroup(((ServiceValue)service).getResourceGroup());
         } else if (service instanceof AppdefGroupValue) {
             AppdefGroupValue group = (AppdefGroupValue)service;        
             switch (group.getGroupType()) {
@@ -93,7 +95,7 @@ public class AppServiceNodeBean extends ServiceValue implements java.io.Serializ
             }        
             this.setCluster(Boolean.TRUE); // sets the parent id
             this.setServer(new ServerLightValue());
-            this.setServiceCluster(new ServiceClusterValue());
+            this.setResourceGroup(new ResourceGroupValue());
         } else {
             // you really really really suck
             throw new IllegalStateException("dependency nodes must be services " +

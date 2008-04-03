@@ -13,6 +13,10 @@ import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -22,7 +26,7 @@ import org.hyperic.hq.appdef.server.session.Service;
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -41,7 +45,9 @@ import org.hyperic.hq.appdef.server.session.Service;
 
 public class AppServiceDAO extends HibernateDAO
 {
-    private static final Log log = LogFactory.getLog(ServiceClusterDAO.class);
+    private static final Log log = LogFactory.getLog(AppServiceDAO.class);
+    private static final String serviceResType = AuthzConstants.serviceResType;
+    private static final String groupResType = AuthzConstants.groupResType;
 
     public AppServiceDAO(DAOFactory f) {
         super(AppService.class, f);
@@ -140,15 +146,17 @@ public class AppServiceDAO extends HibernateDAO
     public AppService create(Integer cpk, Integer apk)
     {
         // reassociate service cluster
-        ServiceCluster sc = DAOFactory.getDAOFactory().getServiceClusterDAO()
+        ResourceGroup gr = DAOFactory.getDAOFactory().getResourceGroupDAO()
             .findById(cpk);
         // reassociate application
         Application ap = DAOFactory.getDAOFactory().getApplicationDAO()
             .findById(apk);
 
+        ServiceManagerLocal sMan = ServiceManagerEJBImpl.getOne();
+        ServiceCluster sc = sMan.getServiceCluster(gr);
         AppService a = new AppService();
-        a.setIsCluster(true);
-        a.setServiceCluster(sc);
+        a.setIsGroup(true);
+        a.setResourceGroup(gr);
         a.setServiceType(sc.getServiceType());
         a.setApplication(ap);
         save(a);
@@ -161,16 +169,18 @@ public class AppServiceDAO extends HibernateDAO
         String sql=
             "select distinct a from " +
             "AppService a, Resource r, ResourceType t " +
-            "where a.application.id=? and (" +
-            "r.resourceType.id=t.id AND t.name='covalentAuthzResourceGroup' "+
-            "AND a.serviceCluster.id IN (" +
-            "SELECT id FROM ServiceCluster c where c.group.id = r.instanceId)"+
+            "where a.application.id=:appid and (" +
+            "r.resourceType.id=t.id AND t.name=:groupType "+
+            "AND a.resourceGroup.id IN (" +
+            "SELECT id FROM ResourceGroup g where g.id = r.instanceId)"+
             " OR " +
             "(r.instanceId=a.service.id and " +
-            "r.resourceType.id=t.id AND t.name='covalentEAMService'))) " +
+            "r.resourceType.id=t.id AND t.name=:serviceType))) " +
             "order by r.name";
         return getSession().createQuery(sql)
-            .setInteger(0, id.intValue())
+            .setInteger("appid", id.intValue())
+            .setString("groupType", groupResType)
+            .setString("serviceType", serviceResType)
             .list();
     }
 
@@ -244,7 +254,7 @@ public class AppServiceDAO extends HibernateDAO
     {
         String sql=
             "select distinct a from AppService a " +
-            "where a.application.id=? and a.serviceCluster.id=?";
+            "where a.application.id=? and a.resourceGroup.id=?";
         return (AppService)getSession().createQuery(sql)
             .setInteger(0, appId.intValue())
             .setInteger(1, svcClusterId.intValue())

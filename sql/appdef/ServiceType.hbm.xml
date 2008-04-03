@@ -67,13 +67,6 @@
       <key on-delete="cascade" column="SERVICE_TYPE_ID"/>
       <one-to-many class="Service"/>
     </bag>
-
-    <bag inverse="true" cascade="all" name="serviceClusters" table="EAM_SVC_CLUSTER"
-         optimistic-lock="false">
-      <key on-delete="cascade" column="SERVICE_TYPE_ID"/>
-      <one-to-many class="org.hyperic.hq.appdef.ServiceCluster"/>
-    </bag>
-
   </class>
 
 </hibernate-mapping>

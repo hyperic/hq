@@ -889,7 +889,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         while (it != null && it.hasNext()) {
             AppService appService = (AppService) it.next();
 
-            if (appService.isIsCluster()) {
+            if (appService.isIsGroup()) {
                 Collection services =
                     appService.getServiceCluster().getServices();
 

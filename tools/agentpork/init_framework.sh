@@ -1,5 +1,10 @@
 #!/bin/sh
 
+set -x
+
+rm -rf clones
+rm pdk lib
+
 mkdir clones
 cd clones
 ln -s ../../../build/agent master

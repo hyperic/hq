@@ -35,7 +35,6 @@ import org.hyperic.hq.dao.ServerDAO;
 import org.hyperic.hq.dao.AgentTypeDAO;
 import org.hyperic.hq.dao.AgentDAO;
 import org.hyperic.hq.dao.ApplicationTypeDAO;
-import org.hyperic.hq.dao.ServiceClusterDAO;
 import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -52,6 +51,7 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.product.TypeInfo;
 
@@ -115,16 +115,16 @@ public abstract class AppdefSessionUtil {
         return DAOFactory.getDAOFactory().getAgentDAO();
     }
 
+    protected ResourceGroupDAO getResourceGroupDAO() {
+        return DAOFactory.getDAOFactory().getResourceGroupDAO();
+    }
+
     protected AgentTypeDAO getAgentTypeDAO() {
         return DAOFactory.getDAOFactory().getAgentTypeDAO();
     }
 
     protected ConfigResponseDAO getConfigResponseDAO() {
         return DAOFactory.getDAOFactory().getConfigResponseDAO();
-    }
-
-    protected ServiceClusterDAO getServiceClusterDAO() {
-        return DAOFactory.getDAOFactory().getServiceClusterDAO();
     }
 
     protected PlatformDAO getPlatformDAO() {

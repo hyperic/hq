@@ -227,6 +227,11 @@ public abstract class PermissionManager extends AuthzSession {
 
     public abstract String getResourceTypeSQL(String table);
 
+    public abstract String getResourceTypeSQL(String table,
+                                               int subjectId,
+                                               String resType,
+                                               String op);
+
     public abstract int prepareResourceTypeSQL(PreparedStatement ps,
                                                int ps_idx,
                                                int subjectId,

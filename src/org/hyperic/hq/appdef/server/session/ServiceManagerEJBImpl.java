@@ -29,9 +29,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -69,13 +71,16 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
@@ -91,7 +96,6 @@ import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hq.dao.ServiceDAO;
 import org.hyperic.hq.dao.AppServiceDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
-import org.hyperic.hq.dao.ServiceClusterDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -121,6 +125,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
     private Pager valuePager = null;
     private final Integer APPDEF_RES_TYPE_UNDEFINED = new Integer(-1);
+    private final int APPDEF_TYPE_GROUP_COMPAT_SVC =
+        AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC;
 
     
     /**
@@ -550,51 +556,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             }
         }
         return toBePaged;
-    }
-
-    /**
-     * Get all cluster unassigned services - services that haven't been assigned 
-     * to a service cluster.
-     * @ejb:interface-method
-     * @return A List of ServiceValue objects representing all of the
-     * unassigned services that the given subject is allowed to view.
-     */
-    public PageList getAllClusterUnassignedServices(AuthzSubject subject, 
-        PageControl pc) throws FinderException, PermissionException {
-        // get list of pks user can view
-        List authzPks = getViewableServices(subject);
-        Collection services = null;
-        Collection toBePaged = new ArrayList();
-        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
-
-        switch( pc.getSortattribute() ) {
-            case SortAttribute.RESOURCE_NAME:
-                if(pc != null) {
-                    services = getServiceDAO()
-                        .findAllClusterUnassigned_orderName(pc.isAscending());
-                }
-                break;
-            case SortAttribute.SERVICE_NAME:
-                if(pc != null) {
-                    services = getServiceDAO()
-                        .findAllClusterUnassigned_orderName(pc.isAscending());
-                }
-                break;
-            default:
-                services =
-                    getServiceDAO().findAllClusterUnassigned_orderName(true);
-                break;
-        }
-        for(Iterator i = services.iterator(); i.hasNext();) {
-            Service aService = (Service)i.next();
-            // remove service if its not viewable
-            if(authzPks.contains(aService.getId())) {
-                toBePaged.add(aService);
-            }
-        }
-        // valuePager converts local/remote interfaces to value objects
-        // as it pages through them.
-        return valuePager.seek(toBePaged, pc);
     }
 
     /**
@@ -1075,7 +1036,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         List services = new ArrayList();
         while ( i.hasNext() ) {
             appService = (AppService) i.next();
-            if ( appService.isIsCluster() ) {
+            if ( appService.isIsGroup() ) {
                 services.add(appService.getServiceCluster());
             } else {
                 services.add(appService.getService());
@@ -1127,7 +1088,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         while (it != null && it.hasNext()) {
             AppService appService = (AppService) it.next();
 
-            if (appService.isIsCluster()) {
+            if (appService.isIsGroup()) {
                 svcCollection.addAll(
                     appService.getServiceCluster().getServices());
             } else {
@@ -1274,7 +1235,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         List services = new ArrayList();
         while (i.hasNext()) {
             appService = (AppService) i.next();
-            if (appService.isIsCluster()) {
+            if (appService.isIsGroup()) {
                 services.add(appService.getServiceCluster());
             } else {
                 services.add(appService.getService());
@@ -1552,124 +1513,91 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Create a service cluster from a set of service Ids
+     * Map a ResourceGroup to ServiceCluster, just temporary,
+     * should be able to remove when done with the
+     * ServiceCluster to ResourceGroup Migration
      * @ejb:interface-method
      */
-    public Integer createCluster(AuthzSubject subj,
-                                 ServiceClusterValue cluster,
-                                 List serviceIdList)
-        throws AppSvcClustDuplicateAssignException, 
-               AppSvcClustIncompatSvcException, CreateException {
-        // TODO check authz createCluster operation 
-        ServiceCluster clusterEJB =
-            getServiceClusterDAO().create(cluster, serviceIdList);
-        return clusterEJB.getId();
-    }
-    
-    /**
-     * @param serviceIdList - the list of service id's which comprise the 
-     *                        updated cluster
-     * @ejb:interface-method
-     */
-    public void updateCluster(AuthzSubject subj,
-                              ServiceClusterValue cluster,
-                              List serviceIdList)
-        throws AppSvcClustDuplicateAssignException, FinderException, 
-               AppSvcClustIncompatSvcException, PermissionException {
-        getServiceClusterDAO().updateCluster(cluster, serviceIdList);
-    }
-    
-    /**
-     * @ejb:interface-method
-     */
-    public void removeCluster(AuthzSubject subj, Integer clusterId)
-        throws RemoveException, FinderException, PermissionException,
-               VetoException
-    {
-        ServiceCluster c = getServiceClusterDAO().findById(clusterId); 
-        AppdefStartupListener.getClusterDeleteCallback().preDelete(c);
-        // XXX - Authz chex needed?
-        //checkRemovePermission(subj, clusterLoc.getEntityId());
-        getServiceClusterDAO().remove(c);
-    }
-    
-    /**
-     * @ejb:interface-method
-     */
-    public ServiceClusterValue getClusterById(AuthzSubjectValue subj,
-                                              Integer cid)
-        throws FinderException, PermissionException {
-        // TODO authz        
-        return getServiceClusterDAO().findById(cid).getServiceClusterValue();
-    }
-    
-    /**
-     * Retrieve all services belonging to a cluster
-     * @ejb:interface-method
-     */
-    public PageList getServicesByCluster(AuthzSubjectValue subj,
-                                         Integer clusterId)
-        throws FinderException, PermissionException {
-        // TODO AUTHZ
-        Collection clustSvcs = getServiceDAO().findByCluster(clusterId);
-        PageList page = new PageList();
-        for (Iterator i = clustSvcs.iterator(); i.hasNext();) {
-            Service aSvc = (Service) i.next();
-            page.add(aSvc.getServiceValue());
+    public ServiceCluster getServiceCluster(ResourceGroup group) {
+        if (group == null) {
+            return null;
         }
-        return page;
-    }
+        ServiceCluster sc = new ServiceCluster();
+        sc.setName(group.getName());
+        sc.setDescription(group.getDescription());
+        sc.setGroup(group);
+        
+        Collection resources = group.getResources();
 
-    /**
-     * Get all service clusters.
-     * @ejb:interface-method
-     * @return A List of ServiceClusterValue objects representing all of the
-     * services that the given subject is allowed to view.
-     */
-    public PageList getAllServiceClusters(AuthzSubject subject, PageControl pc)
-        throws FinderException, PermissionException {
-        ServiceClusterDAO clusterLocalHome = getServiceClusterDAO();
-
-        Collection clusters = null;
-        Collection toBePaged = new ArrayList();
-
-        // get list of group value objects user can view
-        List viewableGroups = null;
-        try {
-            viewableGroups = getViewableGroups(subject);
-        } catch (AppdefGroupNotFoundException e) {
-            viewableGroups = new ArrayList(0);
-        }
-
-        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
-
-        switch (pc.getSortattribute()) {
-        case SortAttribute.RESOURCE_NAME:
-            clusters = clusterLocalHome.findAll_orderName(pc.isAscending());
-            break;
-        case SortAttribute.SERVICE_NAME:
-            clusters = clusterLocalHome.findAll_orderName(pc.isAscending());
-            break;
-        default:
-            clusters = clusterLocalHome.findAll();
-            break;
-        }
-        // only page cluster if id is assigned to viewable (service) group
-        for (Iterator i = clusters.iterator(); i.hasNext();) {
-            ServiceCluster aCluster = (ServiceCluster) i.next();
-            // only page cluster if it is viewable.
-            for (int x = 0; x < viewableGroups.size(); x++) {
-                ResourceGroup thisGroup = (ResourceGroup) viewableGroups.get(x);
-                if (thisGroup.getClusterId().equals(aCluster.getId())) {
-                    toBePaged.add(aCluster);
-                }
+        Set services = new HashSet(resources.size());
+        ServiceDAO dao = DAOFactory.getDAOFactory().getServiceDAO();
+        ServiceType st = null;
+        String svcResType = AuthzConstants.serviceResType;
+        for (Iterator i=resources.iterator(); i.hasNext();) {
+            Resource resource = (Resource)i.next();
+            // this should not be the case
+            if (!resource.getResourceType().getName().equals(svcResType)) {
+                continue;
             }
+            Service service = dao.findById((Integer)resource.getId());
+            if (st == null) {
+                st = service.getServiceType();
+            }
+            services.add(service);
+            service.setResourceGroup(sc.getGroup());
         }
-        // valuePager converts local/remote interfaces to value objects
-        // as it pages through them.
-        return valuePager.seek(toBePaged, pc);
+        sc.setServices(services);
+        
+        if (st == null && group.getGroupType() != null) {
+            st = DAOFactory.getDAOFactory().getServiceTypeDAO()
+                    .findById(group.getGroupType());
+        }
+        
+        if (st != null) {
+            sc.setServiceType(st);
+        }
+        return sc;
     }
+        
+    private ServiceCluster getServiceCluster(AuthzSubject subj,
+                                             ServiceClusterValue cluster,
+                                             List serviceIdList)
+        throws PermissionException, FinderException
+    {
+        ServiceCluster sc = new ServiceCluster();
+        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
+        rgMan.getResourceGroupsById(subj,
+            (Integer[])serviceIdList.toArray(new Integer[0]),
+            PageControl.PAGE_NONE);
+        ResourceGroup rg = getResourceGroupDAO().findById(cluster.getGroupId());
+        sc.setName(cluster.getName());
+        sc.setDescription(cluster.getDescription());
+        sc.setGroup(rg);
 
+        Set services = new HashSet(serviceIdList.size());
+        ServiceDAO dao = DAOFactory.getDAOFactory().getServiceDAO();
+        ServiceType st = null;
+        for (int i = 0; i < serviceIdList.size(); i++) {
+            Service service = dao.findById((Integer) serviceIdList.get(i));
+            if (st == null) {
+                st = service.getServiceType();
+            }
+            services.add(service);
+            service.setResourceGroup(sc.getGroup());
+        }
+        sc.setServices(services);
+        
+        if (st == null && cluster.getServiceType() != null) {
+            st = DAOFactory.getDAOFactory().getServiceTypeDAO()
+                    .findById(cluster.getServiceType().getId());
+        }
+        
+        if (st != null) {
+            sc.setServiceType(st);
+        }
+        return sc;
+    }
+    
     /**
      * Returns a list of 2 element arrays.  The first element is the name of
      * the service type, the second element is the # of services of that
