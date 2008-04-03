@@ -83,6 +83,7 @@ import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.PlatformServiceDetector;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
 import org.hyperic.hq.ui.beans.AgentBean;
@@ -807,12 +808,13 @@ public class BizappUtils {
                                                 ConfigResponse config) {
         String value = option.getDefault();
         String name = option.getName();
+        String type = config.getValue(ProductPlugin.PROP_PLATFORM_TYPE);
         if (name.equals(SNMPClient.PROP_IP) ||
             name.equals(PlatformServiceDetector.PROP_IPADDRESS))
         {
             //dont want to override those that default to the loopback
             //address, such as apache and iplanet servers
-            if (!"127.0.0.1".equals(value)) { 
+            if (type != null && !PlatformDetector.isSupportedPlatform(type)) {
                 value = config.getValue(ProductPlugin.PROP_PLATFORM_IP);
             }
         }
