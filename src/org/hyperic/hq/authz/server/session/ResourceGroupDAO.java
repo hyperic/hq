@@ -37,6 +37,8 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.GroupCreationException;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -306,9 +308,9 @@ public class ResourceGroupDAO extends HibernateDAO
             .list();
     }
     
-    PageList findGroupsClusionary(Resource member, Resource prototype,
-                                  Collection excludeGroups, PageInfo pInfo,
-                                  boolean inclusive) 
+    PageList findGroupsClusionary(AuthzSubject subject, Resource member,
+                                  Resource prototype, Collection excludeGroups,
+                                  PageInfo pInfo, boolean inclusive)
     {
         ResourceGroupSortField sort = (ResourceGroupSortField)pInfo.getSort();
         String hql = "from ResourceGroup g " + 
@@ -330,10 +332,14 @@ public class ResourceGroupDAO extends HibernateDAO
         String inclusionStr = "";
         if (!inclusive) 
             inclusionStr = " not ";
+        
+        PermissionManager pm = PermissionManagerFactory.getInstance();
         hql += "g.id " + inclusionStr + " in ( " + 
                "   select m.id.resourceGroup.id from ResGrpResMap m " + 
                "   where m.id.resource = :resource " + 
-               ") ";
+               ") " + pm.getOperableGroupsHQL("g",
+               inclusive ? AuthzConstants.groupOpViewResourceGroup : 
+                           AuthzConstants.groupOpModifyResourceGroup);
         
         String countHql  = "select count(g.id) " + hql;
         String actualHql = "select g " + hql + " order by " + 
@@ -347,6 +353,8 @@ public class ResourceGroupDAO extends HibernateDAO
         
         if (prototype != null)
             q.setParameter("proto", prototype);
+        
+        q.setInteger("subjId", subject.getId().intValue());
             
         int total = ((Number)(q.uniqueResult())).intValue();
         q = getSession().createQuery(actualHql)
@@ -358,6 +366,8 @@ public class ResourceGroupDAO extends HibernateDAO
         if (!excludes.isEmpty())
             q.setParameterList("excludes", excludes);
         
+        q.setInteger("subjId", subject.getId().intValue());
+
         List vals = pInfo.pageResults(q).list();
         return new PageList(vals, total);
     }

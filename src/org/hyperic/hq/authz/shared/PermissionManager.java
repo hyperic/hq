@@ -232,6 +232,8 @@ public abstract class PermissionManager extends AuthzSession {
                                                String resType,
                                                String op);
 
+    public abstract String getOperableGroupsHQL(String alias, String oper);
+    
     public abstract int prepareResourceTypeSQL(PreparedStatement ps,
                                                int ps_idx,
                                                int subjectId,

@@ -484,4 +484,6 @@ public class PermissionManagerImpl
             }  
         };
     }
+
+    public String getOperableGroupsHQL(String alias, String oper) { return ""; }
 }
