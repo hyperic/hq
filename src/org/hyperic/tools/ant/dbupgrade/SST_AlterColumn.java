@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -126,15 +126,21 @@ public class SST_AlterColumn extends SchemaSpecTask {
     }
 
     private void alter_mysql (Connection c) throws BuildException {
-        alterTable(c, false);
+        alterMySQLTable(c, false);
     }
 
     private void alter_oracle (Connection c) throws BuildException {
         alterTable(c, true);
     }
 
-    private void alterTable (Connection c, boolean withParen) throws BuildException {
+    private void alterTable (Connection c, boolean withParen)
+        throws BuildException
+    {
         String columnTypeName = null;
+        if (_columnType == null) {
+            throw new BuildException("ColumnType must have an associated" +
+                " value for this operation");
+        }
         String alterSql =
             "ALTER TABLE " + _table + " MODIFY " +
             ( (withParen) ? "(" : "" ) + _column;
@@ -161,8 +167,89 @@ public class SST_AlterColumn extends SchemaSpecTask {
         sql.add(alterSql);
         doAlter(c, sql);
     }
-    
-    private String getPgsqlColumnType(Connection conn) throws BuildException {
+
+    private void alterMySQLTable (Connection c, boolean withParen)
+        throws BuildException
+    {
+        String columnTypeName = null;
+        if (_columnType == null) {
+            throw new BuildException("ColumnType must have an associated" +
+                " value for this operation");
+        }
+        String alterSql =
+            "ALTER TABLE " + _table + " MODIFY " +
+            ( (withParen) ? "(" : "" ) + _column;
+
+        if (_columnType != null) {
+            columnTypeName =  getDBSpecificTypeName(_columnType);
+            if (!columnTypeName.contains("(")) {
+                columnTypeName = getMySQLColumnType(c);
+            }
+            alterSql += " " + columnTypeName;
+        }
+
+        if (_defval != null) {
+            alterSql += " DEFAULT '" + _defval + "'";
+        }
+
+        if ( _precision != null ) {
+            alterSql += " (" + _precision + ")";
+        }
+
+        if (_nullable != null) {
+            alterSql += " " + _nullable;
+        }
+        alterSql += (withParen) ? ")" : "";
+
+        List sql = new ArrayList();
+        sql.add(alterSql);
+        doAlter(c, sql);
+    }
+
+    private String getMySQLColumnType(Connection conn) throws BuildException {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("select database()");
+            String db = null;
+            if (rs.next()) {
+                db = rs.getString(1);
+            }
+            String sql = "select data_type, column_type, character_maximum_length," +
+                         " column_type, numeric_precision, numeric_scale" +
+                         " FROM information_schema.columns" +
+                         " WHERE lower(table_name) = '" + _table.toLowerCase() + "'" +
+                         " AND lower(column_name) = '" + _column.toLowerCase() + "'" +
+                         " AND lower(table_schema) = '" + db.toLowerCase() + "'";
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                String type = rs.getString("data_type");
+                if (type.equalsIgnoreCase("int")) {
+                    return "INTEGER";
+                } else if (type.equalsIgnoreCase("decimal")) {
+                    int scale = rs.getInt("numeric_scale");
+                    int precision = rs.getInt("numeric_precision");
+                    return "NUMERIC("+precision+ ((scale>0) ? ","+scale : "") +")";
+                } else if (type.equalsIgnoreCase("varchar")) {
+                    String len = rs.getString("character_maximum_length");
+                    return "VARCHAR(" + len + ")";
+                } else if (type.equalsIgnoreCase("char")) {
+                    String len = rs.getString("character_maximum_length");
+                    return "CHAR(" + len + ")";
+                }
+                return rs.getString("column_type");
+            }
+            throw new SQLException();
+        } catch (SQLException e) {
+            throw new BuildException("Error retrieving pg columntype from " +
+                "table, " + _table + " column, " + _column);
+        } finally {
+            DBUtil.closeJDBCObjects(getClass().getName(), null, stmt, rs);
+        }
+    }
+
+    private String getPgSQLColumnType(Connection conn) throws BuildException {
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -204,7 +291,7 @@ public class SST_AlterColumn extends SchemaSpecTask {
 
         if (_columnType != null) {
             columnTypeName =  getDBSpecificTypeName(_columnType);
-            String currColType = getPgsqlColumnType(c);
+            String currColType = getPgSQLColumnType(c);
             if (!currColType.replaceAll("\\s+", "").equalsIgnoreCase(columnTypeName))
             {
                 if ( _precision != null ) { 
