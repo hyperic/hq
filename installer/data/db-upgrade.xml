@@ -8622,7 +8622,7 @@ has already been defined.
         </statement>
         <statement desc="Adding constraint from EAM_APP_SERVICE.group_id to EAM_RESOURCE_GROUP.id">
             alter table EAM_APP_SERVICE
-                add constraint "fkd1cf8e49cce79ab8"
+                add constraint fkd1cf8e49cce79ab8
                 foreign key (group_id) references EAM_RESOURCE_GROUP(id) on delete cascade
         </statement>
         <statement desc="Dropping EAM_APP_SERVICE constraint to EAM_SVC_CLUSTER">
