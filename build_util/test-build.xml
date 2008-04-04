@@ -1,12 +1,20 @@
 <?xml version="1.0"?>
 
 <project name="test-build" basedir="..">
-	
+		
 <target name="init-tests">
 	<delete dir="${junitResults.dir}"/>
 	<mkdir dir="${junitResults.dir}"/>
 	<mkdir dir="${hq.home}/unittest/data"/>  
 </target>
+	
+<target name="single-test">
+	<fail message="Must specify a test case system property: -Dtestcase=org.hyperic.My_test" unless="testcase"/>
+    <echo message="Running Single Test: ${testcase}"/>
+    <antcall target="test">
+		<param name="single.test" value="true" />
+    </antcall>
+</target>	
 		
 <target name="test" depends="init,init-taskdefs,init-tests">
 	<echo message="Using the following system properties..."/>
@@ -32,17 +40,19 @@
         <path location="${build.dir}/src" />
       </classpath>
       <formatter type="xml"/>
-      <batchtest todir="${junitResults.dir}">
-        <fileset dir="src">
-          <include name="**/*Test.java"/>
-          <exclude name="**/*CactusTest.java"/>
-          <include name="**/*_test.java"/>
-		 
-		  <!-- This unit test should be enabled only when testing the 
-			   unit test framework itself -->
-		  <exclude name="**/ServerLifecycleManagement_test.java"/>
-	  			
-        </fileset>
+		
+	  <test name="${testcase}" todir="${junitResults.dir}" if="single.test" />
+		
+      <batchtest todir="${junitResults.dir}" unless="single.test">
+		  <fileset dir="src">
+			  <include name="**/*Test.java"/>
+			  <exclude name="**/*CactusTest.java"/>
+			  <include name="**/*_test.java"/>
+	 
+			  <!-- This unit test should be enabled only when testing the 
+				   unit test framework itself -->
+			  <exclude name="**/ServerLifecycleManagement_test.java"/>
+		  </fileset>
       </batchtest>
       <sysproperty key="hq.example.plugins" value="${hq.home}/plugins/examples"/>
       <sysproperty key="pdk.dir" value="${pdk.dir}"/>
