@@ -298,39 +298,30 @@ public class ResourceDAO
         // Note: this should be refactored to use named queries so
         // that we can perform "fetch" optimization outside of the code
         String sql =
-            "select distinct(r) from Resource r join r.resourceType rt " +
-            "where r.system = :system and " +
-                  "(rt.name = :resGrpType or rt.name = :resSvcType) and " +
-                  "(r.owner.id = :subjId or " +
-                  ":subjId in (select subj.id from ResourceGroup rg " +
-                                             "join rg.roles role " +
-                                             "join role.subjects subj " +
-                                             "join role.operations op " +
-                              "where subj.id = :subjId and" +
-                               "((op.name = :viewResGrp and rg.resource = r) " +
-                             "or (op.name = :viewSvc and " +
-                                 "rg in (select rg2 from r.resourceGroups rg2)"+
-                                 "))) ) order by r.sortName";
+            "select r from Resource r join r.resourceType rt " +
+            "where r.system = :system and exists " +
+                "(select rg from ResourceGroup rg join rg.roles role " +
+                                                 "join role.subjects subj " +
+                                                 "join role.operations op " +
+                 "where (rg.resource = r and rg.groupType = 15 and " +
+                        "(r.owner.id = :subjId or " +
+                         "(subj.id = :subjId and op.name = :viewResGrp))) or " +
+                       "rg in (select rg2 from r.resourceGroups rg2 " +
+                              "where rt.name = :resSvcType and " +
+                                    "(r.owner.id = :subjId or " +
+                                     "(subj.id = :subjId and " +
+                                      "op.name = :viewSvc))))) " +
+            "order by r.sortName";
         List resources =
             getSession().createQuery(sql)
                         .setBoolean("system", fSystem.booleanValue())
                         .setInteger("subjId", user.intValue())
-                        .setString("resGrpType", AuthzConstants.groupResType)
                         .setString("resSvcType", AuthzConstants.serviceResType)
-                        .setString("viewResGrp", AuthzConstants.groupOpViewResourceGroup)
-                        .setString("viewSvc", AuthzConstants.serviceOpViewService)
+                        .setString("viewResGrp",
+                                   AuthzConstants.groupOpViewResourceGroup)
+                        .setString("viewSvc",
+                                   AuthzConstants.serviceOpViewService)
                         .list();
-
-        // Hibernate's distinct does not work well with joins - do filter here
-        Integer lastId = null; // Track the last one we looked at
-        for (Iterator it = resources.iterator(); it.hasNext();) {
-            Resource res = (Resource) it.next();
-            if (res.getId().equals(lastId)) {
-                it.remove();
-            } else {
-                lastId = res.getId();
-            }
-        }
 
         return resources;
     }
@@ -340,13 +331,15 @@ public class ResourceDAO
         String sql =
             "select r from Resource r join r.resourceType rt " +
             "where r.system = :system and " +
-                  "(rt.name = :resGrpType or rt.name = :resSvcType) " +
+                  "(rt.name = :resGrpType or " +
+                   "exists (select rg from ResourceGroup rg " +
+                                     "join rg.resource r2 " +
+                           "where r = r2 and rg.groupType = 15)) " +
                    "order by r.sortName ";
         
         List resources =
             getSession().createQuery(sql)
-                        .setBoolean(0, fSystem.booleanValue())
-                        .setString("resGrpType", AuthzConstants.groupResType)
+                        .setBoolean("system", fSystem.booleanValue())
                         .setString("resSvcType", AuthzConstants.serviceResType)
                         .list();
         
