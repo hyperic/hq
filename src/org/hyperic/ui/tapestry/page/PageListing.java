@@ -35,6 +35,8 @@ public class PageListing {
      */
     public static final String SIGN_IN = "SignIn";
     public static final String REGISTRATION = "admin/Register";
+    public static final String RESOURCE_HUB = "resource/Hub";
+    public static final String PLUGIN = "Plugin";
     
     /*
      * Struts representations of tapestry pages
@@ -46,5 +48,11 @@ public class PageListing {
      * Struts pages 
      */
     public static final String DASHBOARD_URL = "/Dashboard.do";
-
+    public static final String REPORTING = "/reporting/ReportCenter.do";
+    
+    /*
+     * HQU plugin context url
+     */
+    public static final String HQU_CONTEXT_URL = "/hqu/";
+    //TODO add a getter for the web.xml to pull this dynamically
 }
