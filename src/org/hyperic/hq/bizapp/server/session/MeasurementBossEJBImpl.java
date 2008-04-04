@@ -314,12 +314,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 AppService appSvc = (AppService) it.next();
                 // Let's try it
                 if (appSvc.isIsGroup()) {
-                    if (appSvc.getServiceCluster() == null)
+                    if (appSvc.getResourceGroup() == null)
                         continue;
                         
-                    aeid = new AppdefEntityID(
-                        AppdefEntityConstants.APPDEF_TYPE_GROUP, 
-                        appSvc.getServiceCluster().getGroup().getId());
+                    aeid = AppdefEntityID.newGroupID(
+                        appSvc.getResourceGroup().getId().intValue());
                 }
                 else {
                     // Make sure this is a valid service
@@ -630,12 +629,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 AppService appSvc = (AppService) it.next();
                 // Let's try it
                 if (appSvc.isIsGroup()) {
-                    if (appSvc.getServiceCluster() == null)
+                    if (appSvc.getResourceGroup() == null)
                         continue;
                         
-                    id = new AppdefEntityID(
-                        AppdefEntityConstants.APPDEF_TYPE_GROUP, 
-                        appSvc.getServiceCluster().getGroup().getId());
+                    id = AppdefEntityID.newGroupID(
+                        appSvc.getResourceGroup().getId().intValue());
                 }
                 else {
                     // Make sure this is a valid service
@@ -1541,9 +1539,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     AppdefEntityID id;
                     
                     if (appSvc.isIsGroup()) {
-                        id = new AppdefEntityID(
-                            AppdefEntityConstants.APPDEF_TYPE_GROUP, 
-                            appSvc.getServiceCluster().getGroup().getId());
+                        id = AppdefEntityID.newGroupID(
+                            appSvc.getResourceGroup().getId().intValue());
                     }
                     else {
                         id = appSvc.getService().getEntityId();

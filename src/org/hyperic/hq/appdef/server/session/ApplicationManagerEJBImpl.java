@@ -36,7 +36,6 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
-import javax.naming.NamingException;
 
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
@@ -62,7 +61,6 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -477,7 +475,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 AppService appSvc = (AppService)i.next();
                 AppdefEntityID anId = null;
                 if(appSvc.isIsGroup()) {
-                    ResourceGroup group = appSvc.getServiceCluster().getGroup();
+                    ResourceGroup group = appSvc.getResourceGroup();
                     anId = AppdefEntityID.newGroupID(group.getId().intValue());
                 } else {
                     anId = AppdefEntityID.newServiceID(appSvc.getService()
@@ -491,15 +489,12 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             }
             // iterate over the list, and create the individual entries
             AppServiceDAO asDAO = getAppServiceDAO();
-            for(int i=0; i < entityIds.size(); i++) {
-                AppdefEntityID id = (AppdefEntityID)entityIds.get(i);
-                if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-                    asDAO.create(id.getId(), app.getId(), false);
+            for (int i = 0; i < entityIds.size(); i++) {
+                AppdefEntityID id = (AppdefEntityID) entityIds.get(i);
+                if (id.isService()) {
+                    asDAO.create(id.getId(), app, false);
                 } else if (id.isGroup()) {
-                    ResourceGroup g = ResourceGroupManagerEJBImpl.getOne() 
-                                          .findResourceGroupById(subject, 
-                                                                 id.getId());
-                    asDAO.create(g.getClusterId(), app.getId());
+                    asDAO.create(id.getId(), app);
                 }
             }
         } catch (ObjectNotFoundException e) {

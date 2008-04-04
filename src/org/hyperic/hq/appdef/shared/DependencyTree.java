@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -33,6 +33,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+
+import org.hyperic.hq.appdef.AppService;
 
 
 /**
@@ -80,7 +82,7 @@ public class DependencyTree implements Serializable {
      * AppServiceValue <code>appSvc</code>. If the <code>appSvc</code> does
      * not exist, it will be created as a toplevel node.
      */
-    public void addNode(AppServiceValue appSvc, AppServiceValue depSvc) {
+    public void addNode(AppService appSvc, AppService depSvc) {
         // find the item in the list which matches the source appservice
         DependencyNode aNode = null;
         try {
@@ -97,7 +99,7 @@ public class DependencyTree implements Serializable {
     /**
      * Add a node with no dependents
      */
-    public void addNode(AppServiceValue appSvc) {
+    public void addNode(AppService appSvc) {
         try {
             // find it first
             findAppService(appSvc);
@@ -111,7 +113,7 @@ public class DependencyTree implements Serializable {
     /**
      * Returns a top level DependencyNode
      */
-    public DependencyNode findAppService(AppServiceValue aService)
+    public DependencyNode findAppService(AppService aService)
         throws NoSuchElementException {
         // iterate over the nodes in the list, match by app service, 
         // since a single app service should exist only once at the top level
@@ -136,36 +138,26 @@ public class DependencyTree implements Serializable {
         throw new NoSuchElementException(aResource + " was not found in tree");
     }
 
-    public List getDependencies(AppServiceValue aService) throws
-        NoSuchElementException {
-        DependencyNode aNode = findAppService(aService);
-        return aNode.getChildren();
-    }
-    
     /**
      * Check if the app service represents an entry point within this
      * tree. An entry point is defined as an AppService which is not a 
      * dependee in any point in the tree
      * @return int
      */
-    public boolean isEntryPoint(AppServiceValue aService)
+    public boolean isEntryPoint(AppService appService)
         throws NoSuchElementException {
         boolean isEntry = true;
-        for(int i = 0; i < getTopLevelCount(); i++) {
+        for(int i = 0; i < _nodes.size(); i++) {
             DependencyNode aNode = (DependencyNode)getNodes().get(i);
             // if any of the children include the appservice in question,
             // we know its not an entry point
-            if(aNode.getChildren().contains(aService)) {
+            if(aNode.getChildren().contains(appService)) {
                 isEntry = false;        
             }
         }
         return isEntry;
     }
 
-    public int getTopLevelCount() {
-        return _nodes.size();
-    }
-    
     public String toString() {
         StringBuffer sb = new StringBuffer(DependencyTree.class.getName());
         sb.append("[");

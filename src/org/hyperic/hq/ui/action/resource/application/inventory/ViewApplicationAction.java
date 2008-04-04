@@ -172,7 +172,6 @@ public class ViewApplicationAction extends TilesAction {
     }
 
     private List getAppServiceNodes(DependencyTree tree, List services) {
-        Map serviceMap = DependencyTree.mapServices(services);
         List returnList = new ArrayList();
         /* We need to iterate over the service list (not the tree).
            This is so as not to offend our API method which spent numerous
@@ -188,7 +187,6 @@ public class ViewApplicationAction extends TilesAction {
             AppdefResourceValue resVo = (AppdefResourceValue)iter.next();
             DependencyNode appSvcDepNode = tree.findAppService(resVo);
             returnList.add(new AppServiceNodeBean(resVo,appSvcDepNode));
-
         } 
         return returnList;
     }

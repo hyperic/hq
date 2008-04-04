@@ -894,7 +894,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
             String typeName = aiservice.getServiceTypeName();
             ServiceType serviceType = 
-                _serviceMan.findPojoServiceTypeByName(typeName);
+                _serviceMan.findServiceTypeByName(typeName);
             service = _serviceMan.createService(sInfo.subject, server, 
                                                 serviceType, 
                                                 aiservice.getName(),

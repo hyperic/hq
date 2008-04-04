@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,19 +25,22 @@
 
 package org.hyperic.hq.appdef.shared;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.io.Serializable;
+
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.server.session.Service;
 
 public class DependencyNode implements Serializable, Comparable {
 
     private List _childNodes;
     private List _removedNodes;
-    private AppServiceValue _appService;
+    private AppService _appService;
 
-    public DependencyNode(AppServiceValue appService, List deps) {
+    public DependencyNode(AppService appService, List deps) {
         _appService = appService;
         _childNodes = deps;
         _removedNodes = new ArrayList();
@@ -65,67 +68,63 @@ public class DependencyNode implements Serializable, Comparable {
             return _childNodes.size();
     }
 
-    public AppServiceValue getAppService() {
+    public AppService getAppService() {
         return _appService;
     }
 
     public boolean isCluster() {
-        return getAppService().getIsCluster();
+        return getAppService().isIsGroup();
     }
 
     public Integer getServicePK() {
         return getAppService().getService().getId();
     }
 
-    public Integer getServiceClusterPK() {
-        return getAppService().getServiceCluster().getId();
-    }
-
     public Integer getId() {
         if (isCluster()) {
-            return getAppService().getServiceCluster().getGroupId();
+            return getAppService().getResourceGroup().getId();
         } else {
             return getAppService().getService().getId();
         }
     }
 
-    public ServiceLightValue getService() {
+    public Service getService() {
         return getAppService().getService();
     }
 
     public AppdefEntityID getEntityId() {
         if(isCluster())
-            return AppdefEntityID.newGroupID(getAppService().getServiceCluster()
-                                                     .getGroupId().intValue());
+            return AppdefEntityID.newGroupID(
+                    getAppService().getResourceGroup().getId().intValue());
         else
             return getAppService().getService().getEntityId();
     }
 
     public String getName() {
         if (isCluster())
-            return getAppService().getServiceCluster().getName();
+            return getAppService().getResourceGroup().getName();
         else
             return getAppService().getService().getName();
     }
 
     public String getDescription() {
         if(isCluster())
-            return getAppService().getServiceCluster().getDescription();
+            return getAppService().getResourceGroup().getDescription();
         else
             return getAppService().getService().getDescription();
     }
 
     public boolean isEntryPoint() {
-        return getAppService().getIsEntryPoint();
+        return getAppService().isEntryPoint();
     }
 
-    public void addChild(AppServiceValue aDep) {
+    public void addChild(AppService depSvc) {
         if (_childNodes == null) {
             _childNodes = new ArrayList();
         }
         // Fix for 5958. Dont add the child dep twice
-        if(!_childNodes.contains(aDep)) {
-            _childNodes.add(aDep);
+        if(!_childNodes.contains(depSvc)) {
+            _childNodes.add(depSvc);
         }
     }
 
@@ -150,8 +149,10 @@ public class DependencyNode implements Serializable, Comparable {
             sb.append(" serviceName=").append(_appService.getService().getName());
         }
         else  {
-            sb.append(" serviceClusterId=").append(_appService.getServiceCluster().getGroupId());
-            sb.append(" serviceClusterName=").append(_appService.getServiceCluster().getName());
+            sb.append(" serviceClusterId=")
+              .append(_appService.getResourceGroup().getId())
+              .append(" serviceClusterName=")
+              .append(_appService.getResourceGroup().getName());
         }
 
         if (hasChildren()) {

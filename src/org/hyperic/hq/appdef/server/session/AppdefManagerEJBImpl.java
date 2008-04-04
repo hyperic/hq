@@ -39,6 +39,7 @@ import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -46,6 +47,7 @@ import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;

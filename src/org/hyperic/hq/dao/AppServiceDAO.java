@@ -11,11 +11,12 @@ import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
 /*
@@ -82,16 +83,27 @@ public class AppServiceDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public AppService create(Integer spk, Integer apk, boolean entryPoint) {
-        // reassociate service
-        Service s = new ServiceDAO(DAOFactory.getDAOFactory()).findById(spk);
-        return create(s, apk, entryPoint);
+    public AppService create(Integer cpk, Application ap)
+    {
+        // reassociate service cluster
+        ResourceGroup gr = new ResourceGroupDAO(DAOFactory.getDAOFactory())
+            .findById(cpk);
+    
+        ServiceManagerLocal sMan = ServiceManagerEJBImpl.getOne();
+        ServiceType type =
+            sMan.findServiceType(gr.getResourcePrototype().getInstanceId());
+        AppService a = new AppService();
+        a.setIsGroup(true);
+        a.setResourceGroup(gr);
+        a.setServiceType(type);
+        a.setApplication(ap);
+        save(a);
+        return a;
     }
 
-    public AppService create(Service s, Integer apk, boolean entryPoint) {
-        // reassociate application
-        Application ap = new ApplicationDAO(DAOFactory.getDAOFactory())
-            .findById(apk);
+    public AppService create(Integer spk, Application ap, boolean entryPoint) {
+        // reassociate service
+        Service s = new ServiceDAO(DAOFactory.getDAOFactory()).findById(spk);
 
         AppService a = new AppService();
         a.setEntryPoint(entryPoint);
@@ -129,7 +141,7 @@ public class AppServiceDAO extends HibernateDAO
                                     boolean entryPoint)
     {
         // first create the AppService
-        return create(aService, a.getId(), entryPoint);
+        return create(aService, a, entryPoint);
     }
 
     /**
@@ -140,27 +152,7 @@ public class AppServiceDAO extends HibernateDAO
                                         Integer aClusterPK)
     {
         // first create the AppService
-        return create(aClusterPK, a.getId());
-    }
-
-    public AppService create(Integer cpk, Integer apk)
-    {
-        // reassociate service cluster
-        ResourceGroup gr = DAOFactory.getDAOFactory().getResourceGroupDAO()
-            .findById(cpk);
-        // reassociate application
-        Application ap = DAOFactory.getDAOFactory().getApplicationDAO()
-            .findById(apk);
-
-        ServiceManagerLocal sMan = ServiceManagerEJBImpl.getOne();
-        ServiceCluster sc = sMan.getServiceCluster(gr);
-        AppService a = new AppService();
-        a.setIsGroup(true);
-        a.setResourceGroup(gr);
-        a.setServiceType(sc.getServiceType());
-        a.setApplication(ap);
-        save(a);
-        return a;
+        return create(aClusterPK, a);
     }
 
     public List findByApplication_orderName(Integer id)

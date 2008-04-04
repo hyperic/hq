@@ -29,11 +29,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -43,19 +41,13 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
-import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -63,23 +55,18 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
-import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
@@ -97,6 +84,7 @@ import org.hyperic.hq.dao.AppServiceDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
@@ -124,9 +112,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
     private Pager valuePager = null;
     private final Integer APPDEF_RES_TYPE_UNDEFINED = new Integer(-1);
-    private final int APPDEF_TYPE_GROUP_COMPAT_SVC =
-        AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC;
-
     
     /**
      * @ejb:interface-method
@@ -155,8 +140,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         }
 
         ResourceCreatedZevent zevent =
-            new ResourceCreatedZevent(subject.getAuthzSubjectValue(),
-                                      service.getEntityId());
+            new ResourceCreatedZevent(subject, service.getEntityId());
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         return service;
     }
@@ -397,22 +381,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * Find service type by name
      * @ejb:interface-method
      */
-    public ServiceTypeValue findServiceTypeByName(String name) 
-        throws FinderException {
-
-        ServiceType st = getServiceTypeDAO().findByName(name);
-        if (st == null) {
-            throw new FinderException("service type not found: "+ name);
-        }
-        
-        return st.getServiceTypeValue();
-    }
-
-    /**
-     * Find service type by name
-     * @ejb:interface-method
-     */
-    public ServiceType findPojoServiceTypeByName(String name) { 
+    public ServiceType findServiceTypeByName(String name) { 
         return getServiceTypeDAO().findByName(name);
     }
 
@@ -613,16 +582,20 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             for (Iterator it = svcCol.iterator(); it.hasNext(); ) {
                 Object o = it.next();                
                 Integer thisSvcTypeId;
+                
                 if (o instanceof Service) {
                     thisSvcTypeId = ((Service)o).getServiceType().getId();
                 } else {
-                    ServiceCluster cluster = (ServiceCluster)o;
-                    thisSvcTypeId = cluster.getServiceType().getId();
+                    ResourceGroup cluster = (ResourceGroup) o;
+                    thisSvcTypeId =
+                        cluster.getResourcePrototype().getInstanceId();
                 }                
                 // first, if they specified a server type, then filter on it
                 if (!(thisSvcTypeId.equals(svcTypeId)))
                     continue;
-                services.add(o);
+                
+                services.add(o instanceof Service ? o :
+                             getServiceCluster((ResourceGroup) o));
             }
         } else {
             services.addAll(svcCol);
@@ -662,13 +635,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     retVal.add(o);
                 }
             }
-            else if (o instanceof ServiceCluster) {
-                ServiceCluster aCluster = (ServiceCluster)o;
+            else if (o instanceof ResourceGroup) {
+                ResourceGroup aCluster = (ResourceGroup)o;
                 AppdefEntityID clusterId = AppdefEntityID
-                    .newGroupID(aCluster.getGroup().getId().intValue());
+                    .newGroupID(aCluster.getId().intValue());
                 if (viewableEntityIds != null &&
                     viewableEntityIds.contains(clusterId)) {
-                    retVal.add(o);
+                    retVal.add(getServiceCluster(aCluster));
                 }
             }
         }
@@ -1036,7 +1009,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         while ( i.hasNext() ) {
             appService = (AppService) i.next();
             if ( appService.isIsGroup() ) {
-                services.add(appService.getServiceCluster());
+                services.add(appService.getResourceGroup());
             } else {
                 services.add(appService.getService());
             }
@@ -1088,8 +1061,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             AppService appService = (AppService) it.next();
 
             if (appService.isIsGroup()) {
-                svcCollection.addAll(
-                    appService.getServiceCluster().getServices());
+                svcCollection.addAll(getServiceCluster(
+                    appService.getResourceGroup()).getServices());
             } else {
                 svcCollection.add(appService.getService());
             } 
@@ -1153,10 +1126,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 } else {
                     // this only happens when entId is for an application and
                     // a cluster is bound to it
-                    ServiceCluster cluster = (ServiceCluster) o;
+                    ResourceGroup cluster = (ResourceGroup) o;
                     AppdefEntityID groupId = 
-                        AppdefEntityID.newGroupID(
-                            cluster.getGroup().getId().intValue());
+                        AppdefEntityID.newGroupID(cluster.getId().intValue());
                     // any authz resource filtering on the group members happens
                     // inside the group subsystem
                     try {
@@ -1235,7 +1207,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         while (i.hasNext()) {
             appService = (AppService) i.next();
             if (appService.isIsGroup()) {
-                services.add(appService.getServiceCluster());
+                services.add(appService.getResourceGroup());
             } else {
                 services.add(appService.getService());
             }
@@ -1511,92 +1483,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         deleteCustomProperties(aeid);
     }
 
-    /**
-     * Map a ResourceGroup to ServiceCluster, just temporary,
-     * should be able to remove when done with the
-     * ServiceCluster to ResourceGroup Migration
-     * @ejb:interface-method
-     */
-    public ServiceCluster getServiceCluster(ResourceGroup group) {
-        if (group == null) {
-            return null;
-        }
-        ServiceCluster sc = new ServiceCluster();
-        sc.setName(group.getName());
-        sc.setDescription(group.getDescription());
-        sc.setGroup(group);
-        
-        Collection resources = group.getResources();
-
-        Set services = new HashSet(resources.size());
-        ServiceDAO dao = DAOFactory.getDAOFactory().getServiceDAO();
-        ServiceType st = null;
-        String svcResType = AuthzConstants.serviceResType;
-        for (Iterator i=resources.iterator(); i.hasNext();) {
-            Resource resource = (Resource)i.next();
-            // this should not be the case
-            if (!resource.getResourceType().getName().equals(svcResType)) {
-                continue;
-            }
-            Service service = dao.findById((Integer)resource.getId());
-            if (st == null) {
-                st = service.getServiceType();
-            }
-            services.add(service);
-            service.setResourceGroup(sc.getGroup());
-        }
-        sc.setServices(services);
-        
-        if (st == null && group.getGroupType() != null) {
-            st = DAOFactory.getDAOFactory().getServiceTypeDAO()
-                    .findById(group.getGroupType());
-        }
-        
-        if (st != null) {
-            sc.setServiceType(st);
-        }
-        return sc;
-    }
-        
-    private ServiceCluster getServiceCluster(AuthzSubject subj,
-                                             ServiceClusterValue cluster,
-                                             List serviceIdList)
-        throws PermissionException, FinderException
-    {
-        ServiceCluster sc = new ServiceCluster();
-        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
-        rgMan.getResourceGroupsById(subj,
-            (Integer[])serviceIdList.toArray(new Integer[0]),
-            PageControl.PAGE_NONE);
-        ResourceGroup rg = getResourceGroupDAO().findById(cluster.getGroupId());
-        sc.setName(cluster.getName());
-        sc.setDescription(cluster.getDescription());
-        sc.setGroup(rg);
-
-        Set services = new HashSet(serviceIdList.size());
-        ServiceDAO dao = DAOFactory.getDAOFactory().getServiceDAO();
-        ServiceType st = null;
-        for (int i = 0; i < serviceIdList.size(); i++) {
-            Service service = dao.findById((Integer) serviceIdList.get(i));
-            if (st == null) {
-                st = service.getServiceType();
-            }
-            services.add(service);
-            service.setResourceGroup(sc.getGroup());
-        }
-        sc.setServices(services);
-        
-        if (st == null && cluster.getServiceType() != null) {
-            st = DAOFactory.getDAOFactory().getServiceTypeDAO()
-                    .findById(cluster.getServiceType().getId());
-        }
-        
-        if (st != null) {
-            sc.setServiceType(st);
-        }
-        return sc;
-    }
-    
     /**
      * Returns a list of 2 element arrays.  The first element is the name of
      * the service type, the second element is the # of services of that

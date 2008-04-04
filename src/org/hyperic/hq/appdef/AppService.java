@@ -73,14 +73,6 @@ public class AppService extends AppdefBean
         this.service = service;
     }
 
-    // ZZZ -> remove in future
-    public ServiceCluster getServiceCluster()
-    {
-        ServiceManagerLocal sMan = ServiceManagerEJBImpl.getOne();
-        return (resourceGroup == null) ?
-            null : sMan.getServiceCluster(resourceGroup);
-    }
-
     public ResourceGroup getResourceGroup()
     {
         return this.resourceGroup;
@@ -197,11 +189,6 @@ public class AppService extends AppdefBean
                 getService().getServiceLightValue() );
         else
             appServiceValue.setService( null );
-        if ( getServiceCluster() != null )
-            appServiceValue.setServiceCluster(
-                getServiceCluster().getServiceClusterValue() );
-        else
-            appServiceValue.setServiceCluster( null );
         if ( getServiceType() != null )
             appServiceValue.setServiceType(
                 getServiceType().getServiceTypeValue() );

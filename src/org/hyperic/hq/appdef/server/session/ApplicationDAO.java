@@ -93,17 +93,17 @@ public class ApplicationDAO extends HibernateDAO
         // add them to the top level of the tree
         for(Iterator i = appServices.iterator(); i.hasNext();) {
             AppService appSvc = (AppService)i.next();
-            aTree.addNode(appSvc.getAppServiceValue());
+            aTree.addNode(appSvc);
         }
         for(Iterator i = allDeps.iterator(); i.hasNext();) {
             AppSvcDependency aDep = (AppSvcDependency) i.next();
             // get the appservice it refers to
-            AppService appServiceEJB = aDep.getAppService();
-            AppServiceValue appService = appServiceEJB.getAppServiceValue();
-            AppService depServiceEJB = aDep.getDependentService();
-            AppServiceValue depService = depServiceEJB.getAppServiceValue();
-            log.debug("AppService: " + appService + "\n depends on: " +
-                depService);
+            AppService appService = aDep.getAppService();
+            AppService depService = aDep.getDependentService();
+            
+            if (log.isDebugEnabled())
+                log.debug("AppService: " + appService + "\n depends on: " +
+                          depService);
             // add the node to the tree. The tree will take care
             // of appending the dependency if its there already
             aTree.addNode(appService, depService);
@@ -136,10 +136,9 @@ public class ApplicationDAO extends HibernateDAO
             }
             // now iterate over the new and existing deps
 
-            AppServiceValue nodeAsv = aNode.getAppService();
+            AppService nodeAsv = aNode.getAppService();
             for (int j = 0; j < aNode.getChildren().size(); j++) {
-                AppServiceValue depAsv =
-                    (AppServiceValue) aNode.getChildren().get(j);
+                AppService depAsv = (AppService) aNode.getChildren().get(j);
                 
                 // new dependency
                 asdao.addDependentService(nodeAsv.getId(), depAsv.getId());
