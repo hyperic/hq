@@ -1,8 +1,0 @@
-<groups deleteMissing="false">
-  <group name='Nagios Groups' type='groups'>
-    <resourceType name='Group'>
-      <resource name='regex:.*Nagios.*'/>
-    </resourceType>
-  </group>
-</groups>
-

@@ -1,9 +1,0 @@
-<groups deleteMissing="false">
-  <group name='OSX Platforms' type='compat' resourceType='MacOSX' 
-         description="All OSX Platforms">
-    <resourceType name='regex:.*'>
-      <resource name='regex:.*'/>
-    </resourceType>
-  </group>
-</groups>
-
