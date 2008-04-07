@@ -1,0 +1,5 @@
+2008-04-07   Jon Travis <jtravis@hyperic.com>
+
+        * SaneController.groovy:  Added getInfo() which returns an XML document 
+                                  with ID, name, and other information about the
+                                  located resource
