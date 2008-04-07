@@ -72,8 +72,10 @@ public class AppdefEntityValue {
     private AuthzSubject            _subjPojo;
 
     public AppdefEntityValue(AppdefEntityID id, AuthzSubjectValue subject) {
-        _id      = id;
-        _subject = subject;
+        _id       = id;
+        _subject  = subject;
+        _subjPojo = AuthzSubjectManagerEJBImpl.getOne()
+                        .findSubjectById(subject.getId()); 
     }
     
     public AppdefEntityValue(AppdefEntityID id, AuthzSubject subject) {
