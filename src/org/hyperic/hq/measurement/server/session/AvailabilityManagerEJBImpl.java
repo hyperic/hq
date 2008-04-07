@@ -46,6 +46,7 @@ import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
@@ -102,6 +103,40 @@ public class AvailabilityManagerEJBImpl
     public List getPlatformResources() {
         return getMeasurementDAO().findAvailMeasurementsByInstances(
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null);
+    }
+
+    /**
+     * @return Down time in ms for the Resource availability
+     * 
+     * @ejb:interface-method
+     */
+    public long getDowntime(Resource resource, long begin, long end)
+        throws MeasurementNotFoundException
+    {
+        List list = new ArrayList();
+        list.add(resource.getId());
+        list = getMeasurementDAO().findAvailMeasurements(list);
+        if (list.size() == 0) {
+            String msg = "Availability measurement for resource, id = " +
+                resource.getId() + ", cannot be found";
+            throw new MeasurementNotFoundException(msg);
+        }
+        Measurement meas = (Measurement)list.get(0);
+        AvailabilityDataDAO dao = getAvailabilityDataDAO();
+        List availInfo = dao.getHistoricalAvails(meas, begin, end, false);
+        long rtn = 0l;
+        for (Iterator i=availInfo.iterator(); i.hasNext(); ) {
+            AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
+            if (avail.getAvailVal() != AVAIL_DOWN) {
+                continue;
+            }
+            long endtime = avail.getEndtime();
+            if (endtime == MAX_AVAIL_TIMESTAMP) {
+                endtime = System.currentTimeMillis();
+            }
+            rtn += (endtime-avail.getStartime());
+        }
+        return rtn;
     }
 
     /**
