@@ -692,11 +692,10 @@ public class ResourceGroupManagerEJBImpl
      * */
     public PageList findGroupsNotContaining(AuthzSubject subject, 
                                             Resource member, Resource prototype,
-                                            Collection excludeGroups, 
-                                            PageInfo pInfo) 
+                                            Collection excGrps, PageInfo pInfo) 
     {
-        return getResourceGroupDAO().findGroupsClusionary(member, prototype, 
-                                                          excludeGroups, 
+        return getResourceGroupDAO().findGroupsClusionary(subject, member,
+                                                          prototype, excGrps,
                                                           pInfo, false);
     }
 
@@ -720,8 +719,8 @@ public class ResourceGroupManagerEJBImpl
                                          Collection excludeGroups, 
                                          PageInfo pInfo) 
     {
-        return getResourceGroupDAO().findGroupsClusionary(member, null, 
-                                                          excludeGroups, 
+        return getResourceGroupDAO().findGroupsClusionary(subject, member,
+                                                          null, excludeGroups,
                                                           pInfo, true);
     }
     
