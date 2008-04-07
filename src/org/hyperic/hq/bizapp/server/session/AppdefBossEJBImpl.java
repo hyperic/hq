@@ -1703,7 +1703,7 @@ public class AppdefBossEJBImpl
 
             try {
                 AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
-                aiManager.toggleRuntimeScan(getOverlordVal(),
+                aiManager.toggleRuntimeScan(getOverlord(),
                                             serverRes.getEntityId(),
                                             false);
             } catch (Exception e) {

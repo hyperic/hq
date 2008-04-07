@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,21 +28,18 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.ejb.CreateException;
 import javax.ejb.RemoveException;
-import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.AIPlatformDAO;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * A utility class to synchronize existing AI queue data with new AI data.
@@ -58,14 +55,14 @@ public class AIQSynchronizer {
      * from the queue (this would happen if the platform in the queue matched
      * appdef exactly, such that the data should not be queued).
      */
-    public AIPlatformValue sync(AuthzSubjectValue subject,
+    public AIPlatformValue sync(AuthzSubject subject,
                                 AIQueueManagerLocal aiqMgr,
                                 AIPlatformDAO aiPlatformLH,
                                 AIPlatformValue aiPlatform,
                                 boolean updateServers,
                                 boolean isApproval,
                                 boolean isReport)
-        throws CreateException, RemoveException, NamingException
+        throws RemoveException
     {
         // Is there an entry in the queue for this platform?
         AIPlatform existingQplatform;

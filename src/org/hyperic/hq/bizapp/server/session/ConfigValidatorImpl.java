@@ -137,8 +137,7 @@ public class ConfigValidatorImpl
 
         for (int i=0; i<ids.length; i++) {
             try {
-                cLocal.checkControlEnabled(subject.getAuthzSubjectValue(),
-                                           ids[i]);
+                cLocal.checkControlEnabled(subject, ids[i]);
             } catch (PluginException e) {
                 // Not configured for control
                 continue;

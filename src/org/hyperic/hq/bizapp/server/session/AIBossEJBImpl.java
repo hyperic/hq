@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -31,10 +31,12 @@ import java.util.Map;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
@@ -49,12 +51,10 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
@@ -71,9 +71,6 @@ import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /** 
  * @ejb:bean name="AIBoss"
@@ -109,7 +106,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         try {
             return getAIScheduleManager().findScheduledJobs(subject, id, pc);
         } catch (FinderException e) {
@@ -124,10 +121,11 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);;
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);;
 
         try {
-            return getAIScheduleManager().findScheduleByID(subject, id);
+            return getAIScheduleManager().findScheduleByID(subject, id)
+                .getAIScheduleValue();
         } catch (Exception e) {
             throw new SystemException(e);
         }
@@ -143,7 +141,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
        throws SessionNotFoundException, SessionTimeoutException,
               PermissionException
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         try {
             return getAIScheduleManager().findJobHistory(subject, id, pc);
         } catch (Exception e) {
@@ -161,12 +159,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, AutoinventoryException
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
-        try {
-            getAIScheduleManager().deleteAIJob(subject, ids);
-        } catch ( NamingException ne ) {
-            throw new SystemException(ne);
-        }
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        getAIScheduleManager().deleteAIJob(subject, ids);
     }
 
     /**
@@ -183,7 +177,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AutoinventoryException {
 
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         try {
             return getAutoInventoryManager()
                 .getServerSignatures(subject, serverTypes);
@@ -279,7 +273,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                PermissionException, AutoinventoryException, 
                AgentConnectionException, AgentNotFoundException {
 
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         AppdefEntityID aid = AppdefEntityID.newPlatformID(platformID);
         getAutoInventoryManager().stopScan(subject, aid);
     }
@@ -296,7 +290,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                AgentConnectionException, AgentRemoteException,
                AutoinventoryException {
 
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         AppdefEntityID aid = AppdefEntityID.newPlatformID(platformID);
 
         ScanStateCore core =
@@ -315,7 +309,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                AgentConnectionException, AgentRemoteException,
                AutoinventoryException {
 
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         ScanStateCore core;
 
         core = getAutoInventoryManager().getScanStatusByAgentToken(subject, 
@@ -381,7 +375,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public AIPlatformValue findAIPlatformById(int sessionID, int aiplatformID)
         throws SessionNotFoundException, SessionTimeoutException {
         
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         AIPlatformValue aiplatform;
 
         try {
@@ -401,7 +395,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public AIPlatformValue findAIPlatformByFqdn(int sessionID, String fqdn)
         throws SessionNotFoundException, SessionTimeoutException {
 
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         AIPlatformValue aiplatform;
 
         try {
@@ -420,7 +414,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public AIServerValue findAIServerById(int sessionID, int serverID)
         throws SessionNotFoundException, SessionTimeoutException {
         
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         AIServerValue aiserver;
 
         try {
@@ -438,7 +432,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public AIServerValue findAIServerByName( int sessionID, String name ) 
         throws SessionNotFoundException, SessionTimeoutException {
 
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
 
         try {
             return getAIManager().findAIServerByName(subject, name);
@@ -454,7 +448,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public AIIpValue findAIIpById( int sessionID, int ipID ) 
         throws SessionNotFoundException, SessionTimeoutException {
         
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
 
         try {
             return getAIManager().findAIIpById(subject, ipID);
@@ -470,7 +464,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public AIIpValue findAIIpByAddress(int sessionID, String address)
         throws SessionNotFoundException, SessionTimeoutException {
 
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         try {
             return getAIManager().findAIIpByAddress(subject, address);
         } catch(FinderException exc){
@@ -542,7 +536,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                AppdefGroupNotFoundException, GroupNotCompatibleException,
                UpdateException, ConfigFetchException, EncodingException 
     {
-        AuthzSubjectValue subjectVal = subject.getAuthzSubjectValue();
         if (!id.isServer()) {
             log.warn("toggleRuntimeScan called for non-server type=" + id);
             return;
@@ -550,7 +543,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
         AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
         try {
-            aiManager.toggleRuntimeScan(subjectVal, id, doEnable);
+            aiManager.toggleRuntimeScan(subject, id, doEnable);
         } catch (Exception e) {
             log.error("Unable to disable runtime auto-discovery:" +
                       e.getMessage(), e);
@@ -566,7 +559,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, PlatformNotFoundException
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
 
         try {
             AIPlatformValue aiplatform =

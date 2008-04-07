@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -32,28 +32,23 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.autoinventory.AIHistory;
+import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerUtil;
-import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.scheduler.server.session.BaseJob;
-import org.hyperic.hq.dao.AIHistoryDAO;
-import org.hyperic.dao.DAOFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 
 public abstract class AIJob extends BaseJob {
 
@@ -80,7 +75,7 @@ public abstract class AIJob extends BaseJob {
                                   AppdefEntityID gid,
                                   Integer groupId,
                                   Integer batchId,
-                                  AuthzSubjectValue subject,
+                                  AuthzSubject subject,
                                   Date dateScheduled,
                                   Boolean scheduled,
                                   ScanConfigurationCore scanConfig,

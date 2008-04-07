@@ -40,6 +40,8 @@ import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.zevents.ZeventListener;
@@ -90,11 +92,14 @@ public class AIStartupListener
                     continue;
                 }
 
+                // Need to look up the AuthzSubject POJO
+                AuthzSubject subj = AuthzSubjectManagerEJBImpl.getOne()
+                    .findSubjectById(subject.getId());
                 if (isUpdate) {
                    Server s = serverMgr.getServerById(id.getId());
                     _log.info("Toggling Runtime-AI for " + id);
                     try {
-                        aiManager.toggleRuntimeScan(subject, id,
+                        aiManager.toggleRuntimeScan(subj, id,
                                                     s.isRuntimeAutodiscovery());
                     } catch (Exception e) {
                         _log.warn("Error toggling runtime-ai for server [" +
@@ -104,7 +109,7 @@ public class AIStartupListener
                 } else {
                     _log.info("Enabling Runtime-AI for " + id);
                     try {
-                        aiManager.toggleRuntimeScan(subject, id, true);
+                        aiManager.toggleRuntimeScan(subj, id, true);
                     } catch (Exception e) {
                         _log.warn("Error enabling runtime-ai for server [" +
                                   id + "]", e);

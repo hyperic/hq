@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -31,21 +31,18 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -72,13 +69,10 @@ public class AIScanGroupJob extends AIJob {
         
         Boolean scheduled = new Boolean(dataMap.getString(PROP_SCHEDULED));
         
-        long startTime = System.currentTimeMillis();
-
         // AIHistoryLocal historyLocal = null; 
         Integer jobId = null;
         // String status = ControlConstants.STATUS_COMPLETED;
         String errMsg = null;
-
 
         try {
             int[] order = getOrder(dataMap.getString(PROP_ORDER));
@@ -122,7 +116,7 @@ public class AIScanGroupJob extends AIJob {
                                     id,
                                     id.getId(),
                                     new Integer(42), // historyLocal.getId(),
-                                    subject.getAuthzSubjectValue(),
+                                    subject,
                                     dateScheduled, 
                                     scheduled,
                                     scanConfig,

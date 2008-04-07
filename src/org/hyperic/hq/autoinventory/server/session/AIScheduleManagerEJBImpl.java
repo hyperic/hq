@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -33,24 +33,20 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.autoinventory.AISchedule;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
 import org.hyperic.hq.common.SystemException;
@@ -108,7 +104,7 @@ public class AIScheduleManagerEJBImpl
     protected String getSchedulePrefix     () { return SCHEDULE_PREFIX; }
 
     protected void setupJobData(JobDetail jobDetail, 
-                                AuthzSubjectValue subject,
+                                AuthzSubject subject,
                                 AppdefEntityID id, 
                                 ScanConfigurationCore scanConfig,
                                 String scanName,
@@ -152,13 +148,13 @@ public class AIScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void doScheduledScan(AuthzSubjectValue subject,
+    public void doScheduledScan(AuthzSubject subject,
                                 AppdefEntityID id, 
                                 ScanConfigurationCore scanConfig,
                                 String scanName,
                                 String scanDesc,
                                 ScheduleValue schedule)
-        throws AutoinventoryException, NamingException, CreateException,
+        throws AutoinventoryException, CreateException,
                DuplicateAIScanNameException, ScheduleWillNeverFireException
     {
         // Scheduled jobs are persisted in the autoinventory subsystem
@@ -167,12 +163,8 @@ public class AIScheduleManagerEJBImpl
         // find the os for the platform
         Platform pValue = null;
         try {
-            PlatformManagerLocalHome platformManagerLocalHome =
-                PlatformManagerUtil.getLocalHome();
-
-            PlatformManagerLocal platformManagerLocal = null;
-            platformManagerLocal = platformManagerLocalHome.create();
-            pValue = platformManagerLocal.findPlatformById(id.getId());
+            pValue =
+                PlatformManagerEJBImpl.getOne().findPlatformById(id.getId());
         } catch (PlatformNotFoundException e) {
             throw new AutoinventoryException(e);
         }
@@ -289,7 +281,7 @@ public class AIScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PageList findScheduledJobs(AuthzSubjectValue subject, 
+    public PageList findScheduledJobs(AuthzSubject subject, 
                                       AppdefEntityID id, PageControl pc)
         throws FinderException {
         AIScheduleDAO sl = DAOFactory.getDAOFactory().getAIScheduleDAO();
@@ -326,12 +318,12 @@ public class AIScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIScheduleValue findScheduleByID(AuthzSubjectValue subject, 
+    public AISchedule findScheduleByID(AuthzSubject subject, 
                                             Integer id)
-        throws NamingException, FinderException, CreateException
+        throws FinderException, CreateException
     {
-        AIScheduleDAO sl = DAOFactory.getDAOFactory().getAIScheduleDAO();
-        return sl.findById(id).getAIScheduleValue();
+        AIScheduleDAO sl = new AIScheduleDAO(DAOFactory.getDAOFactory());
+        return sl.findById(id);
     }
 
     /**
@@ -340,9 +332,9 @@ public class AIScheduleManagerEJBImpl
      * @ejb:transaction type="REQUIRED"
      *
      */
-    public PageList findJobHistory(AuthzSubjectValue subject, 
+    public PageList findJobHistory(AuthzSubject subject, 
                                    AppdefEntityID id, PageControl pc)
-        throws NamingException, FinderException
+        throws FinderException
     {
         AIHistoryDAO histLH = DAOFactory.getDAOFactory().getAIHistoryDAO();
         Collection hist;
@@ -393,9 +385,8 @@ public class AIScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void deleteAIJob(AuthzSubjectValue subject,
-                            Integer ids[])
-        throws NamingException, AutoinventoryException
+    public void deleteAIJob(AuthzSubject subject, Integer ids[])
+        throws AutoinventoryException
     {
         AIScheduleDAO asdao = DAOFactory.getDAOFactory().getAIScheduleDAO();
         AISchedule aiScheduleLocal;

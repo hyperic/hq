@@ -124,11 +124,11 @@ public class ControlActionGroupJob extends ControlJob {
 
             ArrayList jobIds = new ArrayList();
             
+            AuthzSubjectValue subj = subject.getAuthzSubjectValue();
             for (Iterator i = groupMembers.iterator(); i.hasNext();) {
                 AppdefEntityID entity = (AppdefEntityID) i.next();
 
-                AuthzSubjectValue subj = subject.getAuthzSubjectValue();
-                int timeout = getTimeout(subj, entity);
+                int timeout = getTimeout(subject, entity);
                 if (timeout > longestTimeout)
                     longestTimeout = timeout;
 
@@ -295,7 +295,7 @@ public class ControlActionGroupJob extends ControlJob {
     /**
      * Utility to return the configured timeout of a resource in milliseconds
      */
-    private int getTimeout(AuthzSubjectValue subject, AppdefEntityID id)
+    private int getTimeout(AuthzSubject subject, AppdefEntityID id)
     {
         ControlManagerLocal cMan = ControlManagerEJBImpl.getOne();
 

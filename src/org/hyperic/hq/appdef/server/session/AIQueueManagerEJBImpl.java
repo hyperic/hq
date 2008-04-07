@@ -31,23 +31,24 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.dao.AIPlatformDAO;
-import org.hyperic.hq.dao.AIServerDAO;
-import org.hyperic.hq.dao.AIIpDAO;
+import org.hibernate.ObjectNotFoundException;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
+import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
@@ -57,28 +58,26 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
-import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
-import org.hyperic.hq.autoinventory.AIIp;
-import org.hyperic.hq.autoinventory.server.session.AIUtil;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
+import org.hyperic.hq.autoinventory.server.session.AIUtil;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.dao.AIIpDAO;
+import org.hyperic.hq.dao.AIPlatformDAO;
+import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.hyperic.dao.DAOFactory;
-import org.hibernate.ObjectNotFoundException;
 
 /**
  * This class is responsible for managing the various autoinventory
@@ -121,7 +120,7 @@ public class AIQueueManagerEJBImpl
                                  boolean updateServers,
                                  boolean isApproval,
                                  boolean isReport)
-        throws NamingException, CreateException, RemoveException
+        throws RemoveException
     {
         AIPlatformDAO aiplatformLH = getAIPlatformDAO();
         PlatformManagerLocal pmLocal = getPlatformMgrLocal();
@@ -150,14 +149,11 @@ public class AIQueueManagerEJBImpl
         }
 
         // Synchronize current AI data into existing queue.
-        revisedAIplatform =
-            queueSynchronizer.sync(subject.getAuthzSubjectValue(),
-                                   aiqLocal,
-                                   aiplatformLH, 
-                                   revisedAIplatform,
-                                   updateServers,
-                                   isApproval,
-                                   isReport);
+        revisedAIplatform = queueSynchronizer.sync(subject, aiqLocal,
+                                                   aiplatformLH,
+                                                   revisedAIplatform,
+                                                   updateServers, isApproval,
+                                                   isReport);
 
         if (revisedAIplatform == null) {
             return null;
@@ -187,8 +183,7 @@ public class AIQueueManagerEJBImpl
      */
     public AIPlatformValue syncQueue(AIPlatformValue aiplatform, 
                                      boolean isApproval) 
-        throws NamingException, CreateException,  RemoveException,
-               FinderException 
+        throws RemoveException, FinderException 
     {
         // Act as admin for now
         AuthzSubject subject = 
@@ -338,10 +333,9 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIPlatformValue findAIPlatformById(AuthzSubjectValue subject,
+    public AIPlatformValue findAIPlatformById(AuthzSubject subject,
                                               int aiplatformID)
-        throws NamingException, CreateException, 
-               FinderException, RemoveException {
+        throws FinderException, RemoveException {
 
         AIPlatform aiplatform;
         AIPlatformValue aiplatformValue;
@@ -359,10 +353,9 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIPlatformValue findAIPlatformByFqdn(AuthzSubjectValue subject,
+    public AIPlatformValue findAIPlatformByFqdn(AuthzSubject subject,
                                                 String fqdn)
-        throws NamingException, CreateException, FinderException,
-               RemoveException
+        throws FinderException, RemoveException
     {
         Collection aiplatforms;
         AIPlatform aiplatform = null;
@@ -392,7 +385,7 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIServerValue findAIServerById(AuthzSubjectValue subject,
+    public AIServerValue findAIServerById(AuthzSubject subject,
                                           int serverID)
         throws FinderException {
 
@@ -410,7 +403,7 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIServerValue findAIServerByName(AuthzSubjectValue subject,
+    public AIServerValue findAIServerByName(AuthzSubject subject,
                                             String name )
         throws FinderException {
 
@@ -429,7 +422,7 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIIpValue findAIIpById(AuthzSubjectValue subject,
+    public AIIpValue findAIIpById(AuthzSubject subject,
                                   int ipID )
         throws FinderException {
 
@@ -443,7 +436,7 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIIpValue findAIIpByAddress(AuthzSubjectValue subject,
+    public AIIpValue findAIIpByAddress(AuthzSubject subject,
                                        String address)
         throws FinderException {
 
@@ -481,8 +474,7 @@ public class AIQueueManagerEJBImpl
                              List serverList,
                              List ipList,
                              int action)
-        throws CreateException, FinderException, NamingException,
-               PermissionException, ValidationException,
+        throws FinderException, PermissionException, ValidationException,
                RemoveException, AIQApprovalException 
     {
         AuthzSubject s = 
@@ -508,8 +500,7 @@ public class AIQueueManagerEJBImpl
                                List serverList,
                                List ipList,
                                int action)
-        throws CreateException, FinderException, NamingException,
-               PermissionException, ValidationException,
+        throws FinderException, PermissionException, ValidationException,
                RemoveException, AIQApprovalException
     { 
         boolean isApproveAction
@@ -672,8 +663,7 @@ public class AIQueueManagerEJBImpl
      */
     public PlatformValue getPlatformByAI(AuthzSubject subject,
                                          int aiPlatformID)
-        throws FinderException, NamingException, CreateException,
-               PermissionException,PlatformNotFoundException
+        throws FinderException, PermissionException, PlatformNotFoundException
     {
         AIPlatform aiplatform;
 
@@ -686,7 +676,7 @@ public class AIQueueManagerEJBImpl
      * Find a platform given an AI platform 
      * @ejb:interface-method
      */
-    public AIPlatformValue getAIPlatformByPlatformID(AuthzSubjectValue subject,
+    public AIPlatformValue getAIPlatformByPlatformID(AuthzSubject subject,
                                                      int platformID)
         throws FinderException, PermissionException
     {
@@ -743,8 +733,7 @@ public class AIQueueManagerEJBImpl
      */
     public PlatformValue getPlatformByAI(AuthzSubject subject, 
                                          AIPlatform aipLocal)
-        throws FinderException, CreateException, NamingException,
-               PermissionException, PlatformNotFoundException
+        throws FinderException, PermissionException, PlatformNotFoundException
     {
         Collection ips;
         PlatformValue pValue;

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -93,7 +93,6 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
@@ -165,10 +164,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public Map getServerSignatures(AuthzSubjectValue subject,
+    public Map getServerSignatures(AuthzSubject subject,
                                    List serverTypes)
-        throws NamingException, FinderException, 
-               CreateException, AutoinventoryException
+        throws FinderException, AutoinventoryException
     {
         // Plug server type names into a map for quick retrieval
         HashMap stNames = null;
@@ -212,7 +210,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @return true if the given resource supports runtime auto-discovery.
      * @ejb:interface-method
      */
-    public boolean isRuntimeDiscoverySupported(AuthzSubjectValue subject,
+    public boolean isRuntimeDiscoverySupported(AuthzSubject subject,
                                                AppdefEntityID id) {
         boolean retVal;
         AutoinventoryPluginManager aiPluginManager ;
@@ -284,7 +282,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void turnOffRuntimeDiscovery(AuthzSubjectValue subject,
+    public void turnOffRuntimeDiscovery(AuthzSubject subject,
                                         AppdefEntityID id,
                                         String agentToken)
         throws PermissionException
@@ -306,7 +304,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * Toggle Runtime-AI config for the given server.
      * @ejb:interface-method
      */
-    public void toggleRuntimeScan(AuthzSubjectValue subject,
+    public void toggleRuntimeScan(AuthzSubject subject,
                                   AppdefEntityID id, boolean enable)
         throws PermissionException, AutoinventoryException
     {
@@ -326,7 +324,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             server.setRuntimeAutodiscovery(enable);
 
             ConfigResponse metricConfig =
-                cman.getMergedConfigResponse(subject,
+                cman.getMergedConfigResponse(subject.getAuthzSubjectValue(),
                                              ProductPlugin.TYPE_MEASUREMENT,
                                              id, true);
 
@@ -345,7 +343,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @param res The appdef entity ID of the server.
      * @param response The configuration info.
      */
-    private void pushRuntimeDiscoveryConfig(AuthzSubjectValue subject,
+    private void pushRuntimeDiscoveryConfig(AuthzSubject subject,
                                             AppdefResource res,
                                             ConfigResponse response)
         throws PermissionException
@@ -418,11 +416,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             // For now, this works.
             authzChecker.checkAIScanPermission(subject, aid);
 
-            AuthzSubjectValue subj = subject.getAuthzSubjectValue();
-            
             ConfigResponse config =
                 getConfigManagerLocalHome().create().
-                    getMergedConfigResponse(subj, 
+                    getMergedConfigResponse(subject.getAuthzSubjectValue(), 
                                             ProductPlugin.TYPE_MEASUREMENT, 
                                             aid, false);
 
@@ -433,7 +429,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             scanConfig.setConfigResponse(config);
 
             // All scans go through the scheduler.
-            aiScheduleManager.doScheduledScan(subj,
+            aiScheduleManager.doScheduledScan(subject,
                                               aid,
                                               scanConfig,
                                               scanName,
@@ -512,8 +508,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void stopScan(AuthzSubjectValue subject,
-                         AppdefEntityID aid)
+    public void stopScan(AuthzSubject subject, AppdefEntityID aid)
         throws AutoinventoryException {
 
         _log.info("AutoinventoryManager.stopScan called");
@@ -532,8 +527,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ScanStateCore getScanStatus(AuthzSubjectValue subject,
-                                       AppdefEntityID aid)
+    public ScanStateCore getScanStatus(AuthzSubject subject, AppdefEntityID aid)
         throws AgentNotFoundException, 
                AgentConnectionException, AgentRemoteException,
                AutoinventoryException {
@@ -622,7 +616,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ScanStateCore getScanStatusByAgentToken(AuthzSubjectValue subject,
+    public ScanStateCore getScanStatusByAgentToken(AuthzSubject subject,
                                                    String agentToken)
         throws AgentNotFoundException,  AgentConnectionException,
                AgentRemoteException, AutoinventoryException

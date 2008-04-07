@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -70,9 +70,8 @@ public class AIScanJob extends AIJob {
         
             String scanName = dataMap.getString(PROP_SCANNAME);
             String scanDesc = dataMap.getString(PROP_SCANDESC);
-            doAgentScan(id, null, null, null, subject.getAuthzSubjectValue(), 
-                        dateScheduled, scheduled, 
-                        scanConfig, scanName, scanDesc);
+            doAgentScan(id, null, null, null, subject, dateScheduled,
+                        scheduled, scanConfig, scanName, scanDesc);
         } catch(IOException e) {
             log.error(e.getMessage(), e);
         } catch(AutoinventoryException e) {

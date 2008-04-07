@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -147,7 +147,7 @@ public class ControlScheduleManagerEJBImpl
     }
     
     protected void setupJobData(JobDetail jobDetail, 
-                                AuthzSubjectValue subject,
+                                AuthzSubject subject,
                                 AppdefEntityID id, String action,
                                 String args,
                                 String scheduleString,
@@ -757,9 +757,8 @@ public class ControlScheduleManagerEJBImpl
      *
      * @ejb:interface-method
      */
-    public void doSingleAction(AppdefEntityID id,
-                               AuthzSubjectValue subject, String action,
-                               String args, int order[])
+    public void doSingleAction(AppdefEntityID id, AuthzSubject subject,
+                               String action, String args, int order[])
         throws PluginException
     {
         // Even one time actions go through the scheduler, but there
@@ -800,7 +799,7 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public void doScheduledAction(AppdefEntityID id, 
-                                  AuthzSubjectValue subject, String action,
+                                  AuthzSubject subject, String action,
                                   ScheduleValue schedule,
                                   int[] order)
         throws PluginException, SchedulerException

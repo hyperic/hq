@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,24 +27,23 @@ package org.hyperic.hq.scheduler.server.session;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.ejb.CreateException;
 import javax.ejb.SessionContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.hq.scheduler.shared.SchedulerUtil;
-
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.Pager;
-import org.hyperic.util.StringUtil;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 
 /**
  * Implements common functionality shared by various schedule managers,
@@ -77,7 +76,7 @@ public abstract class BaseScheduleManagerEJB {
         return id.getID() + SCHED_SEPARATOR + id.getType();
     }
 
-    protected String getJobName(AuthzSubjectValue subject,
+    protected String getJobName(AuthzSubject subject,
                                 AppdefEntityID id, String instanceIdentifier)
     {
         return jobPrefix + SCHED_SEPARATOR + getPrefix(id)  + 
@@ -85,7 +84,7 @@ public abstract class BaseScheduleManagerEJB {
             System.currentTimeMillis();
     }
 
-    protected String getTriggerName(AuthzSubjectValue subject,
+    protected String getTriggerName(AuthzSubject subject,
                                     AppdefEntityID id, String instanceIdentifier)
     {
         return schedulePrefix + SCHED_SEPARATOR + getPrefix(id) + 
@@ -94,7 +93,7 @@ public abstract class BaseScheduleManagerEJB {
     }
 
     protected void setupJobData(JobDetail jobDetail, 
-                                AuthzSubjectValue subject,
+                                AuthzSubject subject,
                                 AppdefEntityID id,
                                 String scheduleString,
                                 Boolean scheduled,

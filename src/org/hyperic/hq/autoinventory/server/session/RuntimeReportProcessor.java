@@ -570,8 +570,7 @@ public class RuntimeReportProcessor {
         AppdefEntityID aid = AppdefEntityID.newServerID(serverId.intValue());
         _log.info("Disabling RuntimeDiscovery for server: " + serverId);
         try {
-            _aiMgr.turnOffRuntimeDiscovery(subject.getAuthzSubjectValue(), aid,
-                                           _agentToken);
+            _aiMgr.turnOffRuntimeDiscovery(subject, aid, _agentToken);
             return true;
         } catch (Exception e) {
             _log.error("Error turning off runtime scans for " +
