@@ -1,16 +1,18 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 
+import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
 
 class SaneController 
 	extends BaseController
 {
     private resourceMan = ResourceManagerEJBImpl.one
-    
-    def SaneController() {
+
+    protected void init() {
+        setXMLMethods(['getInfo'])
     }
     
-    def redirect(params) {
+    private Resource findResource(params) {
         def plat   = params.getOne('platform')
         def platId = params.getOne('platformId')
         def svr    = params.getOne('server')
@@ -18,18 +20,9 @@ class SaneController
         def svc    = params.getOne('service')
         def svcId  = params.getOne('serviceId')
         def rsrcId = params.getOne('resourceId')
-        def ctx    = params.getOne('context')
-        def chart  = params.getOne('chart')
-        def link   = params.getOne('link')
         
-        log.info "Redirecting from ${params}"
-        
-        def args = [:]
-        if (ctx) {
-            args.resourceContext = ctx
-        }
-
         def findArgs = [:]
+        
         if (platId != null) {
             findArgs['platform'] = Integer.parseInt(platId)
         } else if (plat != null) {
@@ -55,17 +48,51 @@ class SaneController
             rsrc = resourceHelper.find(findArgs)
         }
         
-        if (rsrc == null) {
-            log.warn "Resource specified by [${findArgs}] not found"
-            return "Resource specified by [${findArgs}] not found"
+        rsrc
+    }
+    
+    def getInfo(xmlOut, params) {
+        Resource r = findResource(params)
+        
+        if (!r) {
+            xmlOut.error("Resource not found")
+            return xmlOut
         }
-        args['resource'] = rsrc
+        
+        xmlOut.resources {
+            xmlOut.resource(name: r.name, id: r.id, 
+                            prototypeId: r.prototype.id, 
+                            prototypeName: r.prototype.name)
+        }
+        xmlOut
+    }
+    
+    def redirect(params) {
+        def ctx    = params.getOne('context')
+        def chart  = params.getOne('chart')
+        def link   = params.getOne('link')
+        
+        log.info "Redirecting from ${params}"
+        
+        def args = [:]
+        if (ctx) {
+            args.resourceContext = ctx
+        }
 
+        args['resource'] = findResource(params) 
+        
+        if (args['resource']== null) {
+            log.warn "Resource specified by [$params] not found"
+            render(inline:"Resource specified by [$params] not found")
+            return
+        }
+        
         if (chart) {
             def metric = rsrc.enabledMetrics.find { it.template.name == chart }
             if (!metric) {
                 log.warn "No metric [${chart}] found for resource"
-                return "No metric [${chart}] found for resource"
+                render(inline:"No metric [${chart}] found for resource")
+                return
             }
             args['resource'] = metric
             def end   = params.getOne('end', "${System.currentTimeMillis()}").toLong()
