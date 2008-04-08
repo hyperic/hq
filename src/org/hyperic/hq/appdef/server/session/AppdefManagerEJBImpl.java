@@ -48,10 +48,7 @@ import org.hyperic.hq.appdef.shared.AppdefManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.jdbc.DBUtil;
@@ -95,7 +92,7 @@ public class AppdefManagerEJBImpl
           "(SELECT * FROM EAM_SUBJECT_ROLE_MAP sr " +
            "WHERE sr.role_id = g.role_id AND subject_id = ?))";
 
-    private List findOperableResourceColumn(AuthzSubjectValue subj,
+    private List findOperableResourceColumn(AuthzSubject subj,
                                             String resourceTable,
                                             String resourceColumn,
                                             String resType,
@@ -150,7 +147,7 @@ public class AppdefManagerEJBImpl
      * @throws PermissionException
      * @ejb:interface-method
      */
-    public Map getControllablePlatformTypes(AuthzSubjectValue subject)
+    public Map getControllablePlatformTypes(AuthzSubject subject)
         throws PermissionException {
         List typeIds =
             findOperableResourceColumn(subject,
@@ -182,7 +179,7 @@ public class AppdefManagerEJBImpl
      * @throws PermissionException
      * @ejb:interface-method
      */
-    public Map getControllablePlatformNames(AuthzSubjectValue subject, int tid)
+    public Map getControllablePlatformNames(AuthzSubject subject, int tid)
         throws PermissionException {
         List ids =
             findOperableResourceColumn(subject,
@@ -213,7 +210,7 @@ public class AppdefManagerEJBImpl
      * @throws PermissionException
      * @ejb:interface-method
      */
-    public Map getControllableServerTypes(AuthzSubjectValue subject)
+    public Map getControllableServerTypes(AuthzSubject subject)
         throws PermissionException {
         List typeIds =
             findOperableResourceColumn(subject,
@@ -246,7 +243,7 @@ public class AppdefManagerEJBImpl
      * @throws PermissionException
      * @ejb:interface-method
      */
-    public Map getControllableServerNames(AuthzSubjectValue subject, int tid)
+    public Map getControllableServerNames(AuthzSubject subject, int tid)
         throws PermissionException {
         List ids =
             findOperableResourceColumn(subject, "EAM_SERVER", "id",
@@ -276,7 +273,7 @@ public class AppdefManagerEJBImpl
      * @throws PermissionException
      * @ejb:interface-method
      */
-    public Map getControllableServiceTypes(AuthzSubjectValue subject)
+    public Map getControllableServiceTypes(AuthzSubject subject)
         throws PermissionException {
         List typeIds =
             findOperableResourceColumn(subject,
@@ -308,9 +305,8 @@ public class AppdefManagerEJBImpl
      * @throws PermissionException
      * @ejb:interface-method
      */
-    public Map getControllableServiceNames(AuthzSubjectValue subject, int tid)
+    public Map getControllableServiceNames(AuthzSubject subject, int tid)
         throws PermissionException {
-        PermissionManager pm = PermissionManagerFactory.getInstance();
         List ids = 
             findOperableResourceColumn(subject, "EAM_SERVICE", "id",
                                        AuthzConstants.serviceResType,

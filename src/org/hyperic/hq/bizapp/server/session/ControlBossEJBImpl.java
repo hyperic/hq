@@ -82,7 +82,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     private SessionManager sessionManager = SessionManager.getInstance();
 
     AppdefManagerLocal appdefMgr = null;
-    public AppdefManagerLocal getAppdefManager() {
+    private AppdefManagerLocal getAppdefManager() {
         if(appdefMgr == null){
             appdefMgr = AppdefManagerEJBImpl.getOne();
         }
@@ -249,7 +249,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws SessionNotFoundException,  SessionTimeoutException,
                PermissionException
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
 
         Map platTypes =
             getAppdefManager().getControllablePlatformTypes(subject);
@@ -523,7 +523,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public Map findControllablePlatformTypes(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         return getAppdefManager().getControllablePlatformTypes(subject);
     }
     
@@ -537,7 +537,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public Map findControllableServerTypes(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         return getAppdefManager().getControllableServerTypes(subject);
     }
     /**
@@ -550,7 +550,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public Map findControllableServiceTypes(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         return getAppdefManager().getControllableServiceTypes(subject);
     }
     /**
@@ -564,7 +564,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                                              AppdefEntityTypeID aetid)
         throws SessionNotFoundException, SessionException,
                PermissionException {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         
         Map ret;
         int groupType;
