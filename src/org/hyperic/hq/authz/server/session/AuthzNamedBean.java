@@ -94,9 +94,11 @@ public abstract class AuthzNamedBean extends PersistedObject
                     !(arg1 instanceof AuthzNamedBean))
                 return 0;
 
-            
-            return ((AuthzNamedBean) arg0).getName().compareTo(
+            int compVal = ((AuthzNamedBean) arg0).getName().compareTo(
                    ((AuthzNamedBean) arg1).getName());
+            
+            // Same name doesn't mean same object
+            return compVal == 0 ? 1 : compVal;
         }
     }
 }
