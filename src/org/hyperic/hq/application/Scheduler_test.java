@@ -49,11 +49,11 @@ public class Scheduler_test extends TestCase {
         
         try {
             new Scheduler(0);
-            fail("Expected IllegalStateException.");
-        } catch (IllegalStateException e) {
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException e) {
             // expected outcome
         } catch (Exception e) {
-            fail("Expected IllegalStateException instead of:"+e);
+            fail("Expected IllegalArgumentException instead of:"+e);
         }
     }
     
