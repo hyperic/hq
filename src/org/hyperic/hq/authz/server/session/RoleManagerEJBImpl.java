@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -1215,14 +1215,13 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         // be used by others
         if (isRootRoleMember(whoami) && pc.getPagenum() == 0 && 
             !index.contains(AuthzConstants.rootRoleId)) {
-            Role role = getRoleDAO().findAvailableRoleForSubject(
-                AuthzConstants.rootRoleId,
-                subjectId);
+            Role role = getRoleDAO()
+                    .findAvailableRoleForSubject(AuthzConstants.rootRoleId,
+                                                 subjectId);
             if (role == null) {
-                return new PageList();
+                return plist;
             }
-            OwnedRoleValue rootRoleValue =
-                role.getOwnedRoleValue();
+            OwnedRoleValue rootRoleValue = role.getOwnedRoleValue();
             PageList newList = new PageList();
             newList.add(rootRoleValue);
             newList.addAll(plist);
