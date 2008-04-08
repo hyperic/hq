@@ -693,23 +693,6 @@ public class BizappUtils {
     }
 
     /**
-     * get a list of new AppdefEntityID objects for a group
-     */
-    public static List getNewResourcesForGroup(ResourceGroup group, List ids) {
-        List ret = new ArrayList();
-        for (Iterator i=ids.iterator(); i.hasNext(); ) {
-            String id = (String) i.next();
-            AppdefEntityID entity = new AppdefEntityID(id);
-            
-            if (!group.existsAppdefEntity(entity)) {
-                ret.add(entity);
-            }            
-        }
-        return ret;
-    }
-
-
-    /**
      * Return a <code>List</code> of <code>AuthzSubjectValue</code>
      * objects from a list that do <strong>not</strong> appear in
      * a list of matches.

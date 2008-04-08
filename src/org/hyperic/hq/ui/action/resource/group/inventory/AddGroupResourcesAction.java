@@ -25,7 +25,9 @@
 
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -129,9 +131,16 @@ public class AddGroupResourcesAction extends BaseAction {
                                                      aeid.getId());
             ResourceGroup group = boss.findGroupById(sessionId.intValue(), 
                                                      agroup.getId());
-
-            List newIds =
-                BizappUtils.getNewResourcesForGroup(group, pendingResourceIds);
+            
+            List newIds = new ArrayList();
+            for (Iterator i=pendingResourceIds.iterator(); i.hasNext(); ) {
+                String id = (String) i.next();
+                AppdefEntityID entity = new AppdefEntityID(id);
+                
+                if (!group.existsAppdefEntity(entity)) {
+                    newIds.add(entity);
+                }            
+            }
 
             boss.addResourcesToGroup(sessionId.intValue(), group, newIds);
 
