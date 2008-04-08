@@ -1908,7 +1908,8 @@ public class AppdefBossEJBImpl
      */
     public ResourceGroup createGroup(int sessionId, int adType, String name,
                                      String description, String location)
-        throws GroupCreationException, SessionException
+        throws GroupCreationException, SessionException,
+               GroupDuplicateNameException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
         int groupType;

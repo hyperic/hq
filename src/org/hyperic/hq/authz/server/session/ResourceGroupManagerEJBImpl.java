@@ -73,6 +73,7 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
@@ -165,8 +166,17 @@ public class ResourceGroupManagerEJBImpl
                                              ResourceGroupCreateInfo cInfo,
                                              Collection roles,
                                              Collection resources)
-        throws GroupCreationException
+        throws GroupCreationException, GroupDuplicateNameException
     {
+        ResourceGroup existing = 
+            getResourceGroupDAO().findByName(cInfo.getName());
+        
+        if (existing != null) {
+            throw new GroupDuplicateNameException("Group by the name [" + 
+                                                  cInfo.getName() + 
+                                                  "] already exists"); 
+        }
+        
         ResourceGroup res = getResourceGroupDAO().create(whoami, cInfo,
                                                          resources, roles);
 
