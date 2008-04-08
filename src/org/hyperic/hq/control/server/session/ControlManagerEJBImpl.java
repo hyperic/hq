@@ -29,9 +29,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
+import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,6 +72,7 @@ import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.shared.ControlConstants;
+import org.hyperic.hq.control.shared.ControlManagerUtil;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.control.shared.ControlManagerLocal;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
@@ -661,7 +664,13 @@ public class ControlManagerEJBImpl implements SessionBean {
     }
 
     public static ControlManagerLocal getOne() {
-        return ControlManagerEJBImpl.getOne();
+        try {
+            return ControlManagerUtil.getLocalHome().create();
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (CreateException e) {
+            throw new SystemException(e);
+        }
     }
 
     private ConfigManagerLocal getConfigManager() {
