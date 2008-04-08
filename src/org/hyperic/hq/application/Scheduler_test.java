@@ -40,11 +40,11 @@ public class Scheduler_test extends TestCase {
     public void testIllegalPoolSize() {
         try {
             new Scheduler(-1);
-            fail("Expected IllegalStateException.");
-        } catch (IllegalStateException e) {
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException e) {
             // expected outcome
         } catch (Exception e) {
-            fail("Expected IllegalStateException instead of:"+e);
+            fail("Expected IllegalArgumentException instead of:"+e);
         }
         
         try {

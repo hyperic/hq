@@ -52,11 +52,11 @@ public class Scheduler implements ShutdownCallback {
      * Creates a scheduler.
      *
      * @param poolSize The thread pool size.
-     * @throws IllegalStateException if the pool size is less than or equal to zero.
+     * @throws IllegalArgumentException if the pool size is less than or equal to zero.
      */
     public Scheduler(int poolSize) {
         if (poolSize <= 0) {
-            throw new IllegalStateException("illegal pool size: "+poolSize);
+            throw new IllegalArgumentException("illegal pool size: "+poolSize);
         }
         
         LoggingThreadGroup threadGroup = new LoggingThreadGroup("SchedulerGroup");
