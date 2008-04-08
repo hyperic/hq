@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -454,6 +454,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.g}">
     <c:param name="g" value="${param.g}"/>
   </c:if>
+  <c:if test="${not empty param.fg}">
+    <c:param name="fg" value="${param.fg}"/>
+  </c:if>
   <c:param name="ff" value="${ResourceHubForm.ff}"/>
   <c:param name="view" value="${ResourceHubForm.view}"/>
 </c:url>
@@ -472,7 +475,10 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <c:param name="ft" value="${param.ft}"/>
   </c:if>
   <c:if test="${not empty param.g}">
-    <c:param name="g" value="${param.g}"/>
+    <c:param name="fg" value="${param.g}"/>
+  </c:if>
+  <c:if test="${not empty param.fg}">
+    <c:param name="g" value="${param.fg}"/>
   </c:if>
   <c:param name="ff" value="${ResourceHubForm.ff}"/>
   <c:param name="view" value="${ResourceHubForm.view}"/>
