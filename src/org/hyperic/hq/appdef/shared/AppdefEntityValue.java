@@ -186,6 +186,10 @@ public class AppdefEntityValue {
                 ResourceGroupManagerEJBImpl.getOne();
             ResourceGroup g = 
                 groupMan.findResourceGroupById(_subjPojo, _id.getId());
+            if (g == null) {
+                throw new AppdefGroupNotFoundException("Unable to find " + 
+                                                       "group [" + _id + "]");
+            }
             group = groupMan.convertGroup(_subjPojo, g);
         }
         return group;
