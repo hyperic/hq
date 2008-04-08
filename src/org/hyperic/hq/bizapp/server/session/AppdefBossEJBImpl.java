@@ -1859,6 +1859,19 @@ public class AppdefBossEJBImpl
             throw new SystemException(e);
         }
     }
+    
+    private List getResources(String[] resources) {
+        if (resources == null)
+            return Collections.EMPTY_LIST;
+        
+        List ret = new ArrayList(resources.length);
+        ResourceManagerLocal resMan = getResourceManager();
+        for (int i = 0; i < resources.length; i++) {
+            AppdefEntityID aeid = new AppdefEntityID(resources[i]);
+            ret.add(resMan.findResource(aeid));
+        }
+        return ret;
+    }
 
     /**
      * Create and return a new mixed group value object. This group can
@@ -1871,7 +1884,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public ResourceGroup createGroup(int sessionId, String name,
-                                     String description, String location)
+                                     String description, String location,
+                                     String[] resources)
         throws GroupCreationException, GroupDuplicateNameException,
                SessionException
     {
@@ -1888,7 +1902,7 @@ public class AppdefBossEJBImpl
         return getResourceGroupManager()
             .createResourceGroup(subject, cInfo,
                                  Collections.EMPTY_LIST,
-                                 Collections.EMPTY_LIST);
+                                 getResources(resources));
     }
 
     /**
@@ -1907,7 +1921,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public ResourceGroup createGroup(int sessionId, int adType, String name,
-                                     String description, String location)
+                                     String description, String location,
+                                     String[] resources)
         throws GroupCreationException, SessionException,
                GroupDuplicateNameException
     {
@@ -1936,7 +1951,7 @@ public class AppdefBossEJBImpl
         return getResourceGroupManager()
             .createResourceGroup(subject, cInfo,
                                  Collections.EMPTY_LIST,
-                                 Collections.EMPTY_LIST);
+                                 getResources(resources));
     }
 
     /**
@@ -1955,7 +1970,8 @@ public class AppdefBossEJBImpl
      */
     public ResourceGroup createGroup(int sessionId, int adType, 
                                      int adResType, String name, 
-                                     String description, String location)
+                                     String description, String location,
+                                     String[] resources)
         throws GroupCreationException, GroupDuplicateNameException,
                SessionException
     {
@@ -1989,7 +2005,7 @@ public class AppdefBossEJBImpl
         return getResourceGroupManager()
             .createResourceGroup(subject, cInfo,
                                  Collections.EMPTY_LIST,
-                                 Collections.EMPTY_LIST);
+                                 getResources(resources));
     }
 
     /**

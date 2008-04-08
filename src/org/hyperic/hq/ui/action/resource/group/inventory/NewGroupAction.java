@@ -25,31 +25,26 @@
 
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 public class NewGroupAction extends BaseAction {
 
@@ -86,10 +81,12 @@ public class NewGroupAction extends BaseAction {
                     Constants.APPDEF_TYPE_GROUP_COMPAT)
             {
                 newGroup = boss.createGroup(sessionId.intValue(), 
-                            newForm.getEntityTypeId().intValue(), 
-                            newForm.getResourceTypeId().intValue(),
-                            newForm.getName(), newForm.getDescription(),
-                            newForm.getLocation() );
+                                        newForm.getEntityTypeId().intValue(), 
+                                        newForm.getResourceTypeId().intValue(),
+                                        newForm.getName(),
+                                        newForm.getDescription(),
+                                        newForm.getLocation(),
+                                        newForm.getEntityIds());
             } else {
                 // Constants.APPDEF_TYPE_GROUP_ADHOC
                 if (newForm.getEntityTypeId().intValue() ==
@@ -99,16 +96,19 @@ public class NewGroupAction extends BaseAction {
                 {
                     newGroup = 
                       boss.createGroup(sessionId.intValue(),
-                                newForm.getEntityTypeId().intValue(), 
-                                newForm.getName(), 
-                                newForm.getDescription(),
-                                newForm.getLocation());
+                                       newForm.getEntityTypeId().intValue(), 
+                                       newForm.getName(), 
+                                       newForm.getDescription(),
+                                       newForm.getLocation(),
+                                       newForm.getEntityIds());
                 } else {
                     // otherwise, create a mixed group
                     newGroup = 
                       boss.createGroup(sessionId.intValue(), 
-                                newForm.getName(), newForm.getDescription(), 
-                                newForm.getLocation());
+                                       newForm.getName(),
+                                       newForm.getDescription(), 
+                                       newForm.getLocation(),
+                                       newForm.getEntityIds());
                 }
             }
     
@@ -131,16 +131,6 @@ public class NewGroupAction extends BaseAction {
                                          "resource.group.inventory.confirm.CreateGroup",
                                           newForm.getName());
     
-            // Check for resources
-            if (newForm.getEntityIds() != null) {
-                // Now add the new entities to group
-                List newIds = BizappUtils.getNewResourcesForGroup(newGroup,
-                                         Arrays.asList(newForm.getEntityIds()));
-                ResourceGroup group = boss.findGroupById(sessionId.intValue(), 
-                                                         rid);
-                boss.addResourcesToGroup(sessionId.intValue(), group, newIds);
-            }
-
             return returnNew(request, mapping, forwardParams);
         }
         catch (GroupDuplicateNameException ex) {
