@@ -6985,7 +6985,9 @@ has already been defined.
             where eam_resource.resource_type_id = 308
         </statement>
       </schema-directSQL>                        
-      <schema-alterColumn table="EAM_RESOURCE" column="PROTO_ID" 
+      <schema-alterColumn table="EAM_RESOURCE"
+                          column="PROTO_ID" 
+                          columnType="INTEGER" 
                           nullable="NOT NULL"/>
     </schemaSpec>
     
@@ -8376,13 +8378,11 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.102">
-      <schema-alterColumn columnType="BOOLEAN"
-                          table="EAM_MEASUREMENT"
+      <schema-alterColumn table="EAM_MEASUREMENT"
                           column="ENABLED"
                           nullable="NOT NULL"/>
 
-      <schema-alterColumn columnType="INTEGER"
-                          table="EAM_MEASUREMENT"
+      <schema-alterColumn table="EAM_MEASUREMENT"
                           column="COLL_INTERVAL"
                           nullable="NOT NULL"/>
   </schemaSpec>
@@ -8416,7 +8416,6 @@ has already been defined.
     </schema-directSQL>
     <schema-alterColumn table="EAM_EVENT_LOG"
                         column="RESOURCE_ID"
-                        columnType="INTEGER"
                         nullable="NOT NULL"/>
   </schemaSpec>
   
@@ -8516,20 +8515,16 @@ has already been defined.
   <!-- Clean up Measurement schema null constraints -->
   <schemaSpec version="3.107">
 
-      <schema-alterColumn columnType="VARCHAR2"
-                          table="EAM_MEASUREMENT"
+      <schema-alterColumn table="EAM_MEASUREMENT"
                           column="DSN"
                           nullable="NOT NULL"/>
-      <schema-alterColumn columnType="VARCHAR2"
-                          table="EAM_MEASUREMENT_TEMPL"
+      <schema-alterColumn table="EAM_MEASUREMENT_TEMPL"
                           column="UNITS"
                           nullable="NOT NULL"/>
-      <schema-alterColumn columnType="VARCHAR2"
-                          table="EAM_MEASUREMENT_TEMPL"
+      <schema-alterColumn table="EAM_MEASUREMENT_TEMPL"
                           column="PLUGIN"
                           nullable="NOT NULL"/>
-      <schema-alterColumn columnType="INTEGER"
-                          table="EAM_MEASUREMENT_TEMPL"
+      <schema-alterColumn table="EAM_MEASUREMENT_TEMPL"
                           column="MONITORABLE_TYPE_ID"
                           nullable="NOT NULL"/>
 
@@ -8625,20 +8620,59 @@ has already been defined.
                 add constraint fkd1cf8e49cce79ab8
                 foreign key (group_id) references EAM_RESOURCE_GROUP(id) on delete cascade
         </statement>
-        <statement desc="Dropping EAM_APP_SERVICE constraint to EAM_SVC_CLUSTER">
-            alter table EAM_APP_SERVICE drop constraint fkd1cf8e49ffb4c31c
+        <statement desc="Dropping EAM_APP_SERVICE constraint to EAM_SVC_CLUSTER"
+                   targetDB="mysql">
+            alter table EAM_APP_SERVICE drop foreign key FKD1CF8E49FFB4C31C
+        </statement>
+        <statement desc="Dropping EAM_APP_SERVICE constraint to EAM_SVC_CLUSTER"
+                   targetDB="postgresql">
+            alter table EAM_APP_SERVICE drop constraint FKD1CF8E49FFB4C31C
+        </statement>
+        <statement desc="Dropping EAM_APP_SERVICE constraint to EAM_SVC_CLUSTER"
+                   targetDB="oracle">
+            alter table EAM_APP_SERVICE drop constraint FKD1CF8E49FFB4C31C
+        </statement>
+        <statement desc="Dropping EAM_APP_SERVICE.cluster_id"
+                   targetDB="mysql">
+            alter table EAM_APP_SERVICE drop COLUMN cluster_id cascade
+        </statement>
+        <statement desc="Dropping EAM_APP_SERVICE.cluster_id"
+                   targetDB="postgresql">
+            alter table EAM_APP_SERVICE drop COLUMN cluster_id cascade
+        </statement>
+        <statement desc="Dropping EAM_APP_SERVICE.cluster_id"
+                   targetDB="oracle">
+            alter table EAM_APP_SERVICE drop COLUMN cluster_id cascade constraints
         </statement>
         <statement desc="Dropping EAM_APP_SERVICE.cluster_id">
-            alter table EAM_APP_SERVICE drop COLUMN cluster_id
+            create index eam_app_service_service_id_key on EAM_APP_SERVICE(service_id, group_id, application_id)
         </statement>
-        <statement desc="Renaming EAM_APP_SERVICE iscluster to isgroup">
+        <statement desc="Renaming EAM_APP_SERVICE iscluster to isgroup"
+                   targetDB="oracle">
             alter table EAM_APP_SERVICE RENAME COLUMN iscluster to isgroup
         </statement>
-        <statement desc="Dropping EAM_SERVICE.svc_cluster_id constraint to EAM_SVC_CLUSTER.id">
-            alter table EAM_SERVICE drop CONSTRAINT fkee7e4387a14c9e5b
+        <statement desc="Renaming EAM_APP_SERVICE iscluster to isgroup"
+                   targetDB="postgresql">
+            alter table EAM_APP_SERVICE RENAME COLUMN iscluster to isgroup
+        </statement>
+        <statement desc="Renaming EAM_APP_SERVICE iscluster to isgroup"
+                   targetDB="mysql">
+            alter table EAM_APP_SERVICE CHANGE COLUMN iscluster isgroup BIT
+        </statement>
+        <statement desc="Dropping EAM_SERVICE.svc_cluster_id constraint to EAM_SVC_CLUSTER.id"
+                   targetDB="postgresql">
+            alter table EAM_SERVICE drop CONSTRAINT FKEE7E4387A14C9E5B
+        </statement>
+        <statement desc="Dropping EAM_SERVICE.svc_cluster_id constraint to EAM_SVC_CLUSTER.id"
+                   targetDB="oracle">
+            alter table EAM_SERVICE drop CONSTRAINT FKEE7E4387A14C9E5B
+        </statement>
+        <statement desc="Dropping EAM_SERVICE.svc_cluster_id constraint to EAM_SVC_CLUSTER.id"
+                   targetDB="mysql">
+            alter table EAM_SERVICE drop FOREIGN KEY FKEE7E4387A14C9E5B
         </statement>
         <statement desc="Dropping EAM_SERVICE.svc_cluster_id">
-            alter table EAM_SERVICE drop COLUMN svc_cluster_id cascade
+            alter table EAM_SERVICE drop COLUMN svc_cluster_id
         </statement>
         <statement desc="Dropping EAM_SVC_CLUSTER">
             drop table EAM_SVC_CLUSTER

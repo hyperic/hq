@@ -130,17 +130,13 @@ public class SST_AlterColumn extends SchemaSpecTask {
     }
 
     private void alter_oracle (Connection c) throws BuildException {
-        alterTable(c, true);
+        alterOracleTable(c, true);
     }
 
-    private void alterTable (Connection c, boolean withParen)
+    private void alterOracleTable (Connection c, boolean withParen)
         throws BuildException
     {
         String columnTypeName = null;
-        if (_columnType == null) {
-            throw new BuildException("ColumnType must have an associated" +
-                " value for this operation");
-        }
         String alterSql =
             "ALTER TABLE " + _table + " MODIFY " +
             ( (withParen) ? "(" : "" ) + _column;
@@ -172,21 +168,19 @@ public class SST_AlterColumn extends SchemaSpecTask {
         throws BuildException
     {
         String columnTypeName = null;
-        if (_columnType == null) {
-            throw new BuildException("ColumnType must have an associated" +
-                " value for this operation");
-        }
         String alterSql =
             "ALTER TABLE " + _table + " MODIFY " +
             ( (withParen) ? "(" : "" ) + _column;
 
-        if (_columnType != null) {
+        if (_columnType == null) {
+            columnTypeName = getMySQLColumnType(c);
+        } else {
             columnTypeName =  getDBSpecificTypeName(_columnType);
-            if (!columnTypeName.contains("(")) {
-                columnTypeName = getMySQLColumnType(c);
+            if (_precision != null) {
+                columnTypeName = columnTypeName + "(" + _precision + ")";
             }
-            alterSql += " " + columnTypeName;
         }
+        alterSql += " " + columnTypeName;
 
         if (_defval != null) {
             alterSql += " DEFAULT '" + _defval + "'";
