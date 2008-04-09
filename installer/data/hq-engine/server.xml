@@ -29,7 +29,7 @@
            keystoreFile="${jboss.server.home.dir}/conf/hyperic.keystore"
            keystorePass="hyperic" sslProtocol = "TLS" />
 
-      <Engine name="jboss.web" defaultHost="localhost">
+      <Engine name="jboss.web" defaultHost="localhost" jvmRoute="node1">
 
          <!-- The JAAS based authentication and authorization realm implementation
          that is compatible with the jboss 3.2.x realm implementation.
