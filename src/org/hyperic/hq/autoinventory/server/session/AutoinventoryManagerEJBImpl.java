@@ -86,6 +86,8 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
@@ -94,7 +96,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
@@ -111,7 +113,6 @@ import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocalHome;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
@@ -1033,7 +1034,52 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         HQApp.getInstance().registerCallbackListener(AgentCreateCallback.class,
                                                      listener);
     }
-    
+
+    /**
+     * Handle ResourceZEvents for enabling runtime autodiscovery.
+     *
+     * @param events A list of ResourceZevents
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void handleResourceEvents(List events)
+    {
+        for (Iterator i = events.iterator(); i.hasNext(); ) {
+            ResourceZevent zevent = (ResourceZevent) i.next();
+            AuthzSubjectValue subject = zevent.getAuthzSubjectValue();
+            AppdefEntityID id = zevent.getAppdefEntityID();
+            ServerManagerLocal serverMgr = ServerManagerEJBImpl.getOne();
+            boolean isUpdate = zevent instanceof ResourceUpdatedZevent;
+
+            // Only servers have runtime AI.
+            if (!id.isServer()) {
+                continue;
+            }
+
+            // Need to look up the AuthzSubject POJO
+            AuthzSubject subj = AuthzSubjectManagerEJBImpl.getOne()
+                .findSubjectById(subject.getId());
+            if (isUpdate) {
+                Server s = serverMgr.getServerById(id.getId());
+                _log.info("Toggling Runtime-AI for " + id);
+                try {
+                    toggleRuntimeScan(subj, id, s.isRuntimeAutodiscovery());
+                } catch (Exception e) {
+                    _log.warn("Error toggling runtime-ai for server [" +
+                              id + "]", e);
+                }
+            } else {
+                _log.info("Enabling Runtime-AI for " + id);
+                try {
+                    toggleRuntimeScan(subj, id, true);
+                } catch (Exception e) {
+                    _log.warn("Error enabling runtime-ai for server [" +
+                              id + "]", e);
+                }
+            }
+        }
+    }
+
     public void setSessionContext(SessionContext ctx) {} 
 
     public static AutoinventoryManagerLocal getOne() {

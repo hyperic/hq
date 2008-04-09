@@ -26,23 +26,12 @@
 package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -50,8 +39,6 @@ import org.hyperic.hq.zevents.ZeventManager;
 public class AIStartupListener
     implements StartupListener
 {
-    private Log _log = LogFactory.getLog(AIStartupListener.class);
-
     public void hqStarted() {
 
         /**
@@ -77,46 +64,7 @@ public class AIStartupListener
     private class RuntimeAIEnabler implements ZeventListener {
 
         public void processEvents(List events) {
-            for (Iterator i = events.iterator(); i.hasNext();) {
-                ResourceZevent zevent = (ResourceZevent) i.next();
-                AuthzSubjectValue subject = zevent.getAuthzSubjectValue();
-                AppdefEntityID id = zevent.getAppdefEntityID();
-                AutoinventoryManagerLocal aiManager =
-                        AutoinventoryManagerEJBImpl.getOne();
-                ServerManagerLocal serverMgr =
-                    ServerManagerEJBImpl.getOne();
-                boolean isUpdate = zevent instanceof ResourceUpdatedZevent;
-
-                // Only servers have runtime AI.
-                if (!id.isServer()) {
-                    continue;
-                }
-
-                // Need to look up the AuthzSubject POJO
-                AuthzSubject subj = AuthzSubjectManagerEJBImpl.getOne()
-                    .findSubjectById(subject.getId());
-                if (isUpdate) {
-                   Server s = serverMgr.getServerById(id.getId());
-                    _log.info("Toggling Runtime-AI for " + id);
-                    try {
-                        aiManager.toggleRuntimeScan(subj, id,
-                                                    s.isRuntimeAutodiscovery());
-                    } catch (Exception e) {
-                        _log.warn("Error toggling runtime-ai for server [" +
-                                  id + "]", e);
-                        continue;
-                    }
-                } else {
-                    _log.info("Enabling Runtime-AI for " + id);
-                    try {
-                        aiManager.toggleRuntimeScan(subj, id, true);
-                    } catch (Exception e) {
-                        _log.warn("Error enabling runtime-ai for server [" +
-                                  id + "]", e);
-                        continue;
-                    }
-                }
-            }
+            AutoinventoryManagerEJBImpl.getOne().handleResourceEvents(events);
         }
         
         public String toString() {
