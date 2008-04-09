@@ -32,8 +32,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
@@ -42,13 +47,6 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
 
 /**
  * An Action that retrieves a resource and a list of subjects from the
@@ -99,8 +97,9 @@ public class ChangeResourceOwnerFormPrepareAction
         changeForm.setRid(resource.getId());
         changeForm.setType(new Integer(resource.getEntityId().getType()));
 
-        AuthzSubjectValue resourceOwner = (AuthzSubjectValue)
+        Object resourceOwner =
             request.getAttribute(Constants.RESOURCE_OWNER_ATTR);
+        
         if (resourceOwner == null) {
             RequestUtils.setError(request,
                                   "resource.common.inventory.error.ResourceOwnerNotFound");

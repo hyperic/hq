@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -65,7 +66,7 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
@@ -76,14 +77,13 @@ import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ObjectNotFoundException;
-import org.hyperic.hq.grouping.shared.GroupVisitorException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformServiceDetector;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
 import org.hyperic.hq.ui.beans.AgentBean;
@@ -706,11 +706,15 @@ public class BizappUtils {
         }
 
         // build an index of role subjects
-        HashMap index = new HashMap();
+        HashSet index = new HashSet();
         Iterator mi = matches.iterator();
         while (mi.hasNext()) {
-            AuthzSubjectValue m = (AuthzSubjectValue) mi.next();
-            index.put(m.getId(), m);
+            Object m = mi.next();
+            
+            if (m instanceof AuthzSubjectValue)
+                index.add(((AuthzSubjectValue) m).getId());
+            else if (m instanceof AuthzSubject)
+                index.add(((AuthzSubject) m).getId());
         }
 
         // find available subjects (those not in the index)
@@ -718,7 +722,7 @@ public class BizappUtils {
         Iterator ai = all.iterator();
         while (ai.hasNext()) {
             AuthzSubjectValue obj = (AuthzSubjectValue) ai.next();
-            if (index.get(obj.getId()) == null) {
+            if (!index.contains(obj.getId())) {
                 objects.add(obj);
             }
         }
