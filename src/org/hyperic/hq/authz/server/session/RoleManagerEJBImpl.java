@@ -1284,6 +1284,18 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
   
         // AUTHZ Check - filter the viewable roles
         roles = (ArrayList) filterViewableRoles(whoami, roles);
+
+        if (isRootRoleMember(whoami) && pc.getPagenum() == 0 && 
+            !index.contains(AuthzConstants.rootRoleId)) {
+            foundRoles = roleLH.findAvailableForGroup(true, groupId);
+            for (Iterator it = foundRoles.iterator(); it.hasNext(); ) {
+                Role role = (Role) it.next();
+                if (role.getId().equals(AuthzConstants.rootRoleId)) {
+                    roles.add(role);
+                }
+            }
+        }
+
         if (pc.isDescending()) {
             Collections.reverse(roles);
         }
@@ -1291,27 +1303,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         log.debug("Found " + roles.size() + " available roles for group " +
             groupId + " after permission checking");
   
-        PageList plist = new PageList();
-        plist = rolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
+
+        PageList plist = rolePager.seek(roles, pc.getPagenum(),
+                                        pc.getPagesize());
         plist.setTotalSize(roles.size());
-        // 6729 - if caller is a member of the root role, show it
-        // 5345 - allow access to the root role by the root user so it can
-        // be used by others
-        if (isRootRoleMember(whoami) && pc.getPagenum() == 0 && 
-            !index.contains(AuthzConstants.rootRoleId)) {
-            Role rootRole =
-                getRoleDAO().findAvailableRoleForSubject(
-                    AuthzConstants.rootRoleId, groupId);
-            if (rootRole == null) {
-                return new PageList();
-            }
-            OwnedRoleValue rootRoleValue = rootRole.getOwnedRoleValue();
-            PageList newList = new PageList();
-            newList.add(rootRoleValue);
-            newList.addAll(plist);
-            newList.setTotalSize(plist.getTotalSize() + 1);
-            return newList;
-        }
+
         return plist;
     }
     
