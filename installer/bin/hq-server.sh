@@ -16,12 +16,9 @@ infoOut () {
 # value permanently, set server.java.opts in conf/hq-server.conf
 #
 loadJavaOpts () {
-  TMPPROPFILE="${SERVER_HOME}/logs/.hq-server.conf.tmp"
-  cat ${SERVER_HOME}/conf/hq-server.conf | grep server\.java\.opts | grep -v "^#" | sed 's/\./_/g' > ${TMPPROPFILE}
-  . ${TMPPROPFILE} 2> /dev/null
-  rm -f ${TMPPROPFILE}
-  if [ "x${server_java_opts}" = "x" ] ; then
-    echo "-XX:MaxPermSize=192m -Xmx512m -Xms512m"
+  server_java_opts=`grep '^[ \t]*server\.java\.opts' ${SERVER_HOME}/conf/hq-server.conf | sed 's/[ \t]*server\.java\.opts=//'`
+  if [ -z "${server_java_opts}" ]; then
+  echo "-XX:MaxPermSize=192m -Xmx512m -Xms512m"
   fi
   echo "${server_java_opts}"
 }
