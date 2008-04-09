@@ -450,6 +450,8 @@ public class MeasurementDAO extends HibernateDAO {
     /**
      * param List of resourceIds return List of Availability Measurements which
      * are children of the resourceIds
+     *
+     * XXX: This is broken.
      */
     List findAvailMeasurements(List resourceIds) {
         String sql = new StringBuffer()

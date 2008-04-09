@@ -113,15 +113,12 @@ public class AvailabilityManagerEJBImpl
     public long getDowntime(Resource resource, long begin, long end)
         throws MeasurementNotFoundException
     {
-        List list = new ArrayList();
-        list.add(resource.getId());
-        list = getMeasurementDAO().findAvailMeasurements(list);
-        if (list.size() == 0) {
-            String msg = "Availability measurement for resource, id = " +
-                resource.getId() + ", cannot be found";
-            throw new MeasurementNotFoundException(msg);
+        Measurement meas = getMeasurementDAO().findAvailMeasurement(resource);
+        if (meas == null) {
+            throw new MeasurementNotFoundException("Availability measurement " +
+                                                   "not found for resource " +
+                                                   resource.getId());
         }
-        Measurement meas = (Measurement)list.get(0);
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List availInfo = dao.getHistoricalAvails(meas, begin, end, false);
         long rtn = 0l;
