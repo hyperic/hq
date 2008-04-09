@@ -216,7 +216,11 @@ function showViewEscResponse() {
               </c:forEach>
           }
           
-          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/>: " + roleNames + "<br>";
+	      if (configSms == "true") {
+	          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/> <fmt:message key="alert.config.action.notify.via.sms"/> " + roleNames + "<br>";
+	      } else {
+	          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/> <fmt:message key="alert.config.action.notify.via.email"/> " + roleNames + "<br>";
+	      }
       }
   
       escTr2.appendChild(td3);
