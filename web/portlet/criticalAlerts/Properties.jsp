@@ -34,7 +34,11 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
-<c:url var="selfAction" value="/dashboard/Admin.do?mode=criticalAlerts"/>
+<c:url var="selfAction" value="/dashboard/Admin.do?mode=criticalAlerts">
+  <c:if test="${not empty param.token}">
+    <c:param name="token" value="${param.token}"/>
+  </c:if>
+</c:url>
 
 
 <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
