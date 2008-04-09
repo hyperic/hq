@@ -85,12 +85,10 @@ public class RemoveServiceDependenciesAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         Integer sessionId = RequestUtils.getSessionId(request);
-        // note: these are _Service_ ids not _AppService_ ids
-        List appSvcIdList = Arrays.asList(resources);
+
         try {
             DependencyTree tree = boss.getAppDependencyTree(sessionId.intValue(),resourceId);
             log.debug("got tree " + tree);
-            List nodes = tree.getNodes();
             // walk through the nodes to find the ones that are
             // to be removed as dependees
 
