@@ -1,19 +1,22 @@
 <?xml version="1.0"?>
 <module id="org.hyperic.ui.hq" version="1.0.0">
 
+<sub-module descriptor="hyperic.ajax.xml" />
 <sub-module descriptor="hyperic.services.xml" />
-
 <!-- Application State Object(s) -->
-<!--
 <contribution configuration-id="tapestry.state.ApplicationObjects">
-  <state-object name="hqPageSession" scope="session">
-      <create-instance class="org.hyperic.ui.hq.session.HQPageSession" />
-  </state-object>
+    <state-object name="BaseSessionBean" scope="session">
+        <create-instance class="org.hyperic.hq.ui.session.BaseSessionBeanImpl"/>
+    </state-object>
 </contribution>
 
+<!--
 <contribution configuration-id="tapestry.form.validator.Validators">
   <validator name="firstAvailableDate" configurable="false"
     class="org.hyperic.ui.tapestry.validators.FirstAvailableDateValidator" />
+</contribution>
+<contribution configuration-id="hivemind.FactoryDefaults">
+    <default symbol="org.apache.tapestry.home-page" value="SignIn" />
 </contribution>
 -->
 
