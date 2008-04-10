@@ -821,6 +821,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         // Create a list of IDs
         Integer[] iids = new Integer[aeids.length];
         for (int i = 0; i < aeids.length; i++) {
+            checkModifyPermission(subject.getId(), aeids[i]);
             iids[i] = aeids[i].getId();
         }
         

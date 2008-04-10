@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,199 +27,157 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
 
-import javax.ejb.CreateException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
-import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
-import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
-import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.hq.product.shared.ProductManagerLocal;
-import org.hyperic.hq.product.shared.ProductManagerUtil;
 
 /** 
  *This is the base class to Measurement Session EJB's
  */
 public abstract class SessionEJB {
-    private static final Log log = LogFactory.getLog(SessionEJB.class);
-    private static final Log timingLog =
-        LogFactory.getLog(MeasurementConstants.MEA_TIMING_LOG);
-
     protected static final String DATASOURCE_NAME = HQConstants.DATASOURCE;
 
     // Error strings
     private final String ERR_START = "Begin and end times must be positive";
     private final String ERR_END   = "Start time must be earlier than end time";
 
-    protected static MeasurementPluginManager mpm = null;
+    protected static MeasurementPluginManager _mpm = null;
 
-    private DataManagerLocal dataMan;
-    private AgentManagerLocal agentMan;
-    private ProductManagerLocal prodMan;
-    private AuthzSubjectManagerLocal ssmLocal;
-    private TemplateManagerLocal templateMan;
-    private SRNManagerLocal srnManager;
+    private DataManagerLocal _dataMan;
+    private AgentManagerLocal _agentMan;
+    private ProductManagerLocal _prodMan;
+    private AuthzSubjectManagerLocal _ssmLocal;
+    private TemplateManagerLocal _templateMan;
+    private SRNManagerLocal s_rnManager;
 
-    private InitialContext ic;
+    private InitialContext _ic;
 
     protected BaselineDAO getBaselineDAO() {
         return new BaselineDAO(DAOFactory.getDAOFactory());
     }
 
     protected CategoryDAO getCategoryDAO() {
-        return DAOFactory.getDAOFactory().getCategoryDAO();
+        return new CategoryDAO(DAOFactory.getDAOFactory());
     }
 
     protected AvailabilityDataDAO getAvailabilityDataDAO() {
-        return DAOFactory.getDAOFactory().getAvailabilityDataDAO();
+        return new AvailabilityDataDAO(DAOFactory.getDAOFactory());
     }
 
     protected MeasurementDAO getMeasurementDAO() {
-        return DAOFactory.getDAOFactory().getMeasurementDAO();
+        return new MeasurementDAO(DAOFactory.getDAOFactory());
     }
 
     protected MeasurementTemplateDAO getMeasurementTemplateDAO() {
-        return DAOFactory.getDAOFactory().getMeasurementTemplateDAO();
+        return new MeasurementTemplateDAO(DAOFactory.getDAOFactory());
     }
 
     protected MetricProblemDAO getMetricProblemDAO() {
-        return DAOFactory.getDAOFactory().getMetricProblemDAO();
+        return new MetricProblemDAO(DAOFactory.getDAOFactory());
     }
     
     protected MonitorableTypeDAO getMonitorableTypeDAO() {
-        return DAOFactory.getDAOFactory().getMonitorableTypeDAO();
+        return new MonitorableTypeDAO(DAOFactory.getDAOFactory());
     }
 
     protected ScheduleRevNumDAO getScheduleRevNumDAO() {
-        return DAOFactory.getDAOFactory().getScheduleRevNumDAO();
+        return new ScheduleRevNumDAO(DAOFactory.getDAOFactory());
     }
 
     // Exposed accessor methods
     protected TemplateManagerLocal getTemplateMan(){
-        if (templateMan == null) {
-            try {
-                this.templateMan = TemplateManagerUtil.getLocalHome().create();
-            } catch(Exception exc){
-                throw new SystemException(exc);
-            }
+        if (_templateMan == null) {
+            _templateMan = TemplateManagerEJBImpl.getOne();
         }
-        return this.templateMan;
+        return _templateMan;
     }
 
     protected AuthzSubjectManagerLocal getAuthzSubjectManager() {
-        if (ssmLocal == null) {
-            try {
-                this.ssmLocal =
-                    AuthzSubjectManagerUtil.getLocalHome().create();
-            } catch (Exception exc) {
-                throw new SystemException(exc);
-            }
+        if (_ssmLocal == null) {
+            _ssmLocal = AuthzSubjectManagerEJBImpl.getOne();
         }
-        return this.ssmLocal;
+        return _ssmLocal;
     }
 
     protected DataManagerLocal getDataMan() {
-        if (dataMan == null) {
-            try {
-                dataMan = DataManagerUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
+        if (_dataMan == null) {
+            _dataMan = DataManagerEJBImpl.getOne();
         }
-        return dataMan;
+        return _dataMan;
     }
 
     protected AgentManagerLocal getAgentMan() {
-        if (agentMan == null) {
-            try {
-                this.agentMan = AgentManagerUtil.getLocalHome().create();
-            } catch (Exception exc) {
-                throw new SystemException(exc);
-            }
+        if (_agentMan == null) {
+            _agentMan = AgentManagerEJBImpl.getOne();
         }
-        return this.agentMan;
+        return _agentMan;
     }
 
     protected ProductManagerLocal getProductMan() {
-        if (prodMan == null) {
-            try {
-                this.prodMan = ProductManagerUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
+        if (_prodMan == null) {
+            _prodMan = ProductManagerEJBImpl.getOne();
         }
-        return this.prodMan;
+        return _prodMan;
     }
 
     protected MeasurementPluginManager getMPM() {
-        if (mpm == null) {
+        if (_mpm == null) {
             ProductManagerLocal ppm = this.getProductMan();
 
             try {
-                mpm = (MeasurementPluginManager)
+                _mpm = (MeasurementPluginManager)
                     ppm.getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
             } catch (PluginException e) {
                 throw new SystemException("PluginException: " + e.getMessage(),
                                           e);
             }
         }
-        return mpm;
+        return _mpm;
     }
 
     protected SRNManagerLocal getSRNManager() {
-        if (srnManager == null) {
-            try {
-                srnManager = SRNManagerUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
+        if (s_rnManager == null) {
+            s_rnManager = SRNManagerEJBImpl.getOne();
         }
-        return srnManager;
+        return s_rnManager;
     }
 
     protected InitialContext getInitialContext() {
-        if (ic == null) {
+        if (_ic == null) {
             try {
-                ic = new InitialContext();
+                _ic = new InitialContext();
             } catch (NamingException e) {
                 throw new SystemException(e);
             }
         }
-        return ic;
+        return _ic;
     }
 
     protected AgentValue getAgentConnection(AppdefEntityID id)
@@ -256,28 +214,24 @@ public abstract class SessionEJB {
      */
     protected void checkModifyPermission(Integer subjectId, AppdefEntityID id)
         throws PermissionException {
-        String resType = null;
         String opName = null;
 
-        int type = id.getType();
-        switch (type) {
+        switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                resType = AuthzConstants.platformResType;
-                opName = AuthzConstants.platformOpModifyPlatform;
+                opName = AuthzConstants.platformOpMonitorPlatform;
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                resType = AuthzConstants.serverResType;
-                opName = AuthzConstants.serverOpModifyServer;
+                opName = AuthzConstants.serverOpMonitorServer;
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                resType = AuthzConstants.serviceResType;
-                opName = AuthzConstants.serviceOpModifyService;
+                opName = AuthzConstants.serviceOpMonitorService;
                 break;
             default:
-                throw new InvalidAppdefTypeException("Unknown type: " + type);
+                throw new InvalidAppdefTypeException("Unknown type: " +
+                                                     id.getType());
         }
         
-        checkPermission(subjectId, id, resType, opName);
+        checkPermission(subjectId, id, id.getAuthzTypeName(), opName);
     }
 
     /**
