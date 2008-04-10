@@ -2,6 +2,7 @@ package org.hyperic.ui.tapestry.components;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.tapestry.annotations.InjectObject;
 import org.hyperic.hq.ui.Constants;
@@ -11,6 +12,9 @@ public abstract class BaseComponent extends org.apache.tapestry.BaseComponent {
 
     @InjectObject("service:tapestry.globals.HttpServletRequest")
     public abstract HttpServletRequest getRequest();
+    
+    @InjectObject("service:tapestry.globals.HttpServletResponse")
+    public abstract HttpServletResponse getResponse();
 
     @InjectObject("service:tapestry.globals.ServletContext")
     public abstract ServletContext getServletContext();
