@@ -52,8 +52,8 @@ widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstan
 </tiles:insert>
 
 <c:choose>
-<c:when test="${appSvcCurrent.isCluster == true}">
-<c:set var="appSvcCurrentName" value="${appSvcCurrent.serviceCluster.name}" />
+<c:when test="${appSvcCurrent.isGroup == true}">
+<c:set var="appSvcCurrentName" value="${appSvcCurrent.resourceGroup.name}" />
 </c:when>
 <c:otherwise>
 <c:set var="appSvcCurrentName" value="${appSvcCurrent.service.name}" />
@@ -82,7 +82,7 @@ widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstan
   <tr class="ListRow">
   <td class="ListCellCheckbox"><html:img page="/images/spacer.gif" width="10" height="10" border="0"/></td>
   <td class="ListCell" colspan="4">
-  <i><fmt:message key="resource.application.inventory.services.NoDependees"><c:choose><c:when test="${appSvcCurrent.isCluster == true}"><fmt:param value="${appSvcCurrent.serviceCluster.name}" /></c:when><c:otherwise><fmt:param value="${appSvcCurrent.service.name}"/></c:otherwise></c:choose></fmt:message></i></td>
+  <i><fmt:message key="resource.application.inventory.services.NoDependees"><c:choose><c:when test="${appSvcCurrent.isGroup == true}"><fmt:param value="${appSvcCurrent.resourceGroup.name}" /></c:when><c:otherwise><fmt:param value="${appSvcCurrent.service.name}"/></c:otherwise></c:choose></fmt:message></i></td>
   </tr>
 </table>
 </div>
@@ -150,7 +150,7 @@ widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstan
   </tr>
   <tr class="ListRow">
   <td class="ListCellCheckbox"><html:img page="/images/spacer.gif" width="10" height="10" border="0"/></td>
-  <td class="ListCell" colspan="4"><i><fmt:message key="resource.application.inventory.services.NoDependers"><c:choose><c:when test="${appSvcCurrent.isCluster == true}"><fmt:param value="${appSvcCurrent.serviceCluster.name}" /></c:when><c:otherwise><fmt:param value="${appSvcCurrent.service.name}"/></c:otherwise></c:choose></fmt:message></i></td>
+  <td class="ListCell" colspan="4"><i><fmt:message key="resource.application.inventory.services.NoDependers"><c:choose><c:when test="${appSvcCurrent.isGroup == true}"><fmt:param value="${appSvcCurrent.resourceGroup.name}" /></c:when><c:otherwise><fmt:param value="${appSvcCurrent.service.name}"/></c:otherwise></c:choose></fmt:message></i></td>
   </tr>
 </table>
 </div>
