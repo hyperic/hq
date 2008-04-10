@@ -459,7 +459,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                     "SELECT COUNT(*) FROM EAM_RESOURCE_GROUP GRP " +
                     "WHERE GRP.GROUPTYPE = " + groupTypes[x] + " " +
                     " AND GRP.ID IN (" +
-                        pm.getResourceTypeSQL("EAM_RESOURCE_GROUP", subjectId, groupResType, groupOpViewResourceGroup)
+                        pm.getResourceTypeSQL("EAM_RESOURCE_GROUP",
+                                              subjectId, groupResType,
+                                              groupOpViewResourceGroup)
                         + ")";
                 
                 try {
