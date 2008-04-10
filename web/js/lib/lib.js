@@ -187,3 +187,38 @@ function loadSearchData(response, ioArgs) {
         dojo.byId('searchBox').className = "";
     }
 }
+
+hyperic.widget.menu = {
+    onclick: function (node){   
+        var widget = dijit.byId(node.id+'_1');
+        if(!widget.isShowingNow){
+            var x,y;
+            x=node.offsetLeft;
+            y=node.clientHeight+node.offsetTop-3;
+            var self=widget;
+            var savedFocus = dijit.getFocus(widget);
+            function closeAndRestoreFocus(){
+                // user has clicked on a menu or popup
+                dijit.focus(savedFocus);
+                dijit.popup.close(widget);
+            }
+            dijit.popup.open({
+                popup: widget,
+                x: x,
+                y: y,
+                onExecute: closeAndRestoreFocus,
+                onCancel: closeAndRestoreFocus,
+                orient: 'L'
+            });
+            widget.focus();
+            widget._onBlur = function(){
+                // Usually the parent closes the child widget but if this is a context
+                // menu then there is no parent
+                dijit.popup.close(widget);
+                // don't try to restore focus; user has clicked another part of the screen
+                // and set focus there
+            }
+        }
+    }
+}
+
