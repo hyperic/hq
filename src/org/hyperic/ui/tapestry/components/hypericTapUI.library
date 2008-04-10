@@ -39,6 +39,8 @@
     <component-type type="Button" specification-path="form/Button.jwc"/>
     <component-type type="FieldSet" specification-path="form/FieldSet.jwc"/>
     
+    <component-type type="Attachment" specification-path="hqu/Attachment.jwc"/>
+    
     <component-type type="Layout1Col" specification-path="layout/Layout1Col.jwc"/>
     
     <component-type type="Header" specification-path="navigation/Header.jwc"/>
