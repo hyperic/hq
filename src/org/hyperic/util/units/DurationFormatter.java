@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -56,12 +56,10 @@ public class DurationFormatter
     public FormattedNumber format(UnitNumber val, Locale locale,
                                   FormatSpecifics specifics)
     {
-        BigDecimal baseTime;
         int granularity;
 
-        baseTime    = val.getBaseValue();
-        granularity = getGranularity(baseTime);
-        return format(baseTime, granularity, MILLISEC_DIGITS, locale);
+        granularity = getGranularity(val);
+        return format(val.getBaseValue(), granularity, MILLISEC_DIGITS, locale);
     }
 
     public FormattedNumber[] formatSame(double[] val, int unitType, int scale,
@@ -81,7 +79,7 @@ public class DurationFormatter
         }
 
         tmpNum      = new UnitNumber(val[maxIdx], unitType, scale);
-        granularity = getGranularity(tmpNum.getBaseValue());
+        granularity = getGranularity(tmpNum);
         
         // Determine the number scale (right of the decimal point) that is
         // needed to ensure that every formatted number is unique and a
@@ -195,21 +193,42 @@ public class DurationFormatter
         return r;
     }
 
-    private int getGranularity(BigDecimal nanoSecs){
-        TimeBreakDown tbd = breakDownTime(nanoSecs);
+    private int getGranularity(UnitNumber val){
+        BigDecimal nanoSecs = val.getBaseValue();
         
-        if(tbd.nYears > 0)
-            return GRANULAR_YEARS;
-        else if(tbd.nDays > 0)
-            return GRANULAR_DAYS;
-        else if(tbd.nHours > 0)
-            return GRANULAR_HOURS;
-        else if(tbd.nMins > 0)
-            return GRANULAR_MINS;
-        else if (tbd.nSecs > 0)
-            return GRANULAR_SECS;
-        else
-            return GRANULAR_MILLIS;
+        if (nanoSecs.longValue() > 0) {
+            TimeBreakDown tbd = breakDownTime(nanoSecs);
+
+            if(tbd.nYears > 0)
+                return GRANULAR_YEARS;
+            else if(tbd.nDays > 0)
+                return GRANULAR_DAYS;
+            else if(tbd.nHours > 0)
+                return GRANULAR_HOURS;
+            else if(tbd.nMins > 0)
+                return GRANULAR_MINS;
+            else if (tbd.nSecs > 0)
+                return GRANULAR_SECS;
+            else
+                return GRANULAR_MILLIS;
+        }
+        else {  // Use original scale as granularity for 0
+            switch (val.getScale()) {
+            case UnitsConstants.SCALE_YEAR:
+                return GRANULAR_YEARS;
+            case UnitsConstants.SCALE_DAY:
+                return GRANULAR_DAYS;
+            case UnitsConstants.SCALE_HOUR:
+                return GRANULAR_HOURS;
+            case UnitsConstants.SCALE_MIN:
+                return GRANULAR_MINS;
+            case UnitsConstants.SCALE_SEC:
+                return GRANULAR_SECS;
+            default:
+                return GRANULAR_MILLIS;
+            }
+        }
+
     }
 
     public BigDecimal getBaseValue(double value, int scale){
