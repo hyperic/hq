@@ -47,9 +47,9 @@ document.toggleSubmit = function(e){
 }
 
 dojo.addOnLoad(function(){
-    dojo.event.connect(document, 'onkeypress', document, 'toggleSubmit');
-    dojo.event.connect(document.forms[0], 'onkeypress', document, 'toggleSubmit');
-    dojo.event.connect(document.forms[1], 'onkeypress', document, 'toggleSubmit');
+    dojo.connect(document, 'onkeypress', document, 'toggleSubmit');
+    dojo.connect(document.forms[0], 'onkeypress', document, 'toggleSubmit');
+    dojo.connect(document.forms[1], 'onkeypress', document, 'toggleSubmit');
 });
 
 var selUserEsc;
