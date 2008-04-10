@@ -4,5 +4,5 @@
   "-//Apache Software Foundation//Tapestry Specification 4.1//EN" 
   "http://jakarta.apache.org/tapestry/dtd/Tapestry_4_1.dtd">
     
-<page-specification class="org.hyperic.hq.ui.pages.SignIn">
-</page-specificaiton>
+<page-specification class="org.hyperic.hq.ui.pages.Plugin">
+</page-specification>
