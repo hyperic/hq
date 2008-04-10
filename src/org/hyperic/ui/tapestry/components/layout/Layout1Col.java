@@ -30,7 +30,12 @@ import org.apache.tapestry.annotations.Asset;
 import org.apache.tapestry.annotations.InjectObject;
 import org.apache.tapestry.annotations.Parameter;
 import org.hyperic.ui.tapestry.components.BaseComponent;
+import org.hyperic.ui.tapestry.components.navigation.NavigationMenu;
 
+/**
+ * The single column liquid layout
+ *
+ */
 public abstract class Layout1Col extends BaseComponent{
 
     @Parameter(name = "pageTitle")
@@ -48,15 +53,29 @@ public abstract class Layout1Col extends BaseComponent{
     @Parameter(name = "statusElement", defaultValue = "false")
     public abstract boolean getStatusElement();
     public abstract void setStatusElement(boolean statusElement);
+
+    @Parameter(name = "helpLink")
+    public abstract String getHelpLink();
+    public abstract void setHelpLink(String link);
     
-    @InjectObject("service:tacos.dojo.DojoOneShellDelegate")
+    @Parameter(name = "navigationMenu")
+    public abstract void setNavigationMenu(NavigationMenu menu);
+    public abstract NavigationMenu getNavigationMenu();
+
+    @InjectObject("service:hq.ajax.DojoOnePointOneShellDelegate")
     public abstract IRender getAjaxDelegate();
     
     @Asset("context:css/HQ_40_OS.css")
     public abstract IAsset getHQ40Theme();
     
+    /**
+     * Need to build a page title &lt;title&gt; tag in the form of {pagename} -
+     * {application name}
+     * 
+     * @return the application name
+     */
     public String getStaticTitle(){
-        return getMessages().getMessage("hqTitle");
+        return getMessages().getMessage("applicationTitle");
     }
 
 }
