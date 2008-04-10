@@ -24,8 +24,12 @@
  */
 package org.hyperic.hq.ui.util;
 
+import javax.servlet.ServletContext;
+
 import org.apache.tapestry.engine.IEngineService;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.ConfigBoss;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.ui.RequestKeyConstants;
 import org.hyperic.ui.tapestry.page.PageListing;
@@ -43,12 +47,33 @@ public class URLUtils {
     
     public static String getAttachmentURL(AttachmentDescriptor attachmentDesc, IEngineService svc) {
         String url = getLocation(PageListing.PLUGIN, svc) + "?"
-                + RequestKeyConstants.PLUGIN_ID_PARAM
+                + RequestKeyConstants.PLUGIN_ID_PARAM + "="
                 + attachmentDesc.getAttachment().getId().toString();
-        return getLocation(url, svc);
+        return url;
     }
     
     public static String getLocation(String pageDescriptor, IEngineService svc){
         return svc.getLink(false, pageDescriptor).getAbsoluteURL();
+    }
+    
+    /**
+     * Get the url for the HQU plugin
+     * 
+     * @return a <code>java.lang.String</code> url in the form of
+     *         http(s)://fqdn[:port]/hqu/pluginName/pluginPath?typeId=pluginViewId
+     */
+    public static String buildPluginAbsoluteURL(String pluginName, String pluginPath, String pluginId, String baseURL) {
+        String url = new StringBuilder().append(baseURL).append(
+                PageListing.HQU_CONTEXT_URL).append(pluginName).append("/")
+                .append(pluginPath).append("?").append(RequestKeyConstants.HQU_PLUGIN_ID_PARAM)
+                .append("=").append(pluginId).toString();
+        return url;
+    }
+    
+    public static String getHQBaseURL(ServletContext ctx)
+            throws org.hyperic.util.ConfigPropertyException,
+            java.rmi.RemoteException {
+        ConfigBoss cboss = ContextUtils.getConfigBoss(ctx);
+        return (String) cboss.getConfig().getProperty(HQConstants.BaseURL);
     }
 }
