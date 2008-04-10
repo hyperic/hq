@@ -71,7 +71,7 @@ import org.hyperic.ui.tapestry.page.PageListing;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 
-@Meta({"org.apache.tapestry.default-binding-prefix=ognl"})
+@Meta( { "org.apache.tapestry.default-binding-prefix=ognl" })
 public abstract class SignIn extends BasePage {
 
     static Log log = LogFactory.getLog(SignIn.class);
@@ -89,10 +89,6 @@ public abstract class SignIn extends BasePage {
     public abstract String getMessage();
     public abstract void setMessage(String msg);
 
-    @Persist()
-    public abstract ICallback getCallback();
-    public abstract void setCallback(ICallback value);
-
     /*
      * TODO rip this out when struts is no more
      */
@@ -101,138 +97,138 @@ public abstract class SignIn extends BasePage {
 
     /**
      * Listener for the SignIn button
+     * 
      * @param cycle
      * @return the signin page if error and the dashboard if login successful
      */
     public ILink signinButtonListener(IRequestCycle cycle) {
-	HttpServletRequest request = getRequest();
-	ServletContext ctx = getServletContext();
-	HttpSession session = request.getSession(true);
-	WebUser webUser;
-	Map userOpsMap = new HashMap();
-	boolean needsRegistration = false;
-	AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-	try {
-	    webUser = loginUser(ctx, getUserName(), getPassword());
+        ServletContext ctx = getServletContext();
+        HttpSession session = getRequest().getSession(true);
+        WebUser webUser;
+        Map userOpsMap = new HashMap();
+        boolean needsRegistration = false;
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+        try {
+            webUser = loginUser(ctx, getUserName(), getPassword());
 
-	    needsRegistration = webUser.getPreferences().getKeys().size() == 0;
-	    if (!needsRegistration) {
-		userOpsMap = loadUserPermissions(webUser.getSessionId(),
-			authzBoss);
-	    }
-	} catch (Exception e) {
-	    String msg = e.getMessage().toLowerCase();
-	    if (msg.indexOf("username") >= 0 || msg.indexOf("password") >= 0)
-		//setMessage("FUBAR");
-		setMessage(this.getMessages().getMessage("credentialError"));
-	    else if (msg.indexOf("disabled") >= 0)
-		setMessage(this.getMessages().getMessage("userDisabled"));
-	    else
-		setMessage(this.getMessages().getMessage("serverError"));
-	    log.debug(getSigninLink().getLink(cycle));
-	    return getSigninLink().getLink(cycle);
-	}
+            needsRegistration = webUser.getPreferences().getKeys().size() == 0;
+            if (!needsRegistration) {
+                userOpsMap = loadUserPermissions(webUser.getSessionId(),
+                        authzBoss);
+            }
+        } catch (Exception e) {
+            String msg = e.getMessage().toLowerCase();
+            if (msg.indexOf("username") >= 0 || msg.indexOf("password") >= 0)
+                // setMessage("FUBAR");
+                setMessage(this.getMessages().getMessage("credentialError"));
+            else if (msg.indexOf("disabled") >= 0)
+                setMessage(this.getMessages().getMessage("userDisabled"));
+            else
+                setMessage(this.getMessages().getMessage("serverError"));
+            return getSigninLink().getLink(cycle);
+        }
 
-	if (needsRegistration) {
-	    // will be cleaned out during registration
-	    session.setAttribute(Constants.PASSWORD_SES_ATTR, getPassword());
-	}
+        if (needsRegistration) {
+            // will be cleaned out during registration
+            session.setAttribute(Constants.PASSWORD_SES_ATTR, getPassword());
+        }
 
-	session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
-	session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
+        getBaseSessionBean().setWebUser(webUser);
+        session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
 
-	loadDashboard(ctx, webUser);
+        loadDashboard(ctx, webUser);
 
-	try {
-	    new ResourceTree(1); // See if graphics engine is present
-	    session.setAttribute(Constants.XLIB_INSTALLED, Boolean.TRUE);
-	} catch (Throwable t) {
-	    session.setAttribute(Constants.XLIB_INSTALLED, Boolean.FALSE);
-	}
-	//log.debug(getDashboardLink().getLink(cycle).getAbsoluteURL());
-	//String link = getDashboardLink().getLink(cycle).getURL();
-	throw new RedirectException(PageListing.DASHBOARD_URL);
+        try {
+            new ResourceTree(1); // See if graphics engine is present
+            session.setAttribute(Constants.XLIB_INSTALLED, Boolean.TRUE);
+        } catch (Throwable t) {
+            session.setAttribute(Constants.XLIB_INSTALLED, Boolean.FALSE);
+        }
+        // log.debug(getDashboardLink().getLink(cycle).getAbsoluteURL());
+        // String link = getDashboardLink().getLink(cycle).getURL();
+        throw new RedirectException(PageListing.DASHBOARD_URL);
     }
 
     private void loadDashboard(ServletContext ctx, WebUser webUser) {
-	try {
-	    DashboardManagerLocal dashManager = DashboardManagerEJBImpl
-		    .getOne();
-	    ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
-		    .getAttribute(Constants.DEF_USER_DASH_PREFS);
-	    AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
-		    .findSubjectById(webUser.getSubject().getId());
-	    UserDashboardConfig userDashboard = dashManager.getUserDashboard(
-		    me, me);
-	    if (userDashboard == null) {
-		userDashboard = dashManager.createUserDashboard(me, me, webUser
-			.getName());
-		ConfigResponse userDashobardConfig = userDashboard.getConfig();
-		userDashobardConfig.merge(defaultUserDashPrefs, false);
-		dashManager.configureDashboard(me, userDashboard,
-			userDashobardConfig);
-	    }
-	} catch (PermissionException e) {
-	    e.printStackTrace();
-	}
+        try {
+            DashboardManagerLocal dashManager = DashboardManagerEJBImpl
+                    .getOne();
+            ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
+                    .getAttribute(Constants.DEF_USER_DASH_PREFS);
+            AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
+                    .findSubjectById(webUser.getSubject().getId());
+            UserDashboardConfig userDashboard = dashManager.getUserDashboard(
+                    me, me);
+            if (userDashboard == null) {
+                userDashboard = dashManager.createUserDashboard(me, me, webUser
+                        .getName());
+                ConfigResponse userDashobardConfig = userDashboard.getConfig();
+                userDashobardConfig.merge(defaultUserDashPrefs, false);
+                dashManager.configureDashboard(me, userDashboard,
+                        userDashobardConfig);
+            }
+        } catch (PermissionException e) {
+            e.printStackTrace();
+        }
     }
 
-    public static WebUser loginUser(ServletContext ctx, String username, String password)
-	    throws RemoteException, SecurityException, LoginException,
-	    ApplicationException, ConfigPropertyException, FinderException {
-	AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-	AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
-	boolean needsRegistration = false;
-	// authenticate the credentials
-	int sid = authBoss.login(username, password);
-	Integer sessionId = new Integer(sid);
-	if (log.isTraceEnabled()) {
-	    log.trace("Logged in as [" + username + "] with session id ["
-		    + sessionId + "]");
-	}
-	// look up the subject record
-	AuthzSubject subjPojo = authzBoss.getCurrentSubject(sid);
-	AuthzSubjectValue subject = null;
+    public static WebUser loginUser(ServletContext ctx, String username,
+            String password) throws RemoteException, SecurityException,
+            LoginException, ApplicationException, ConfigPropertyException,
+            FinderException {
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+        AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
+        boolean needsRegistration = false;
+        // authenticate the credentials
+        int sid = authBoss.login(username, password);
+        Integer sessionId = new Integer(sid);
+        if (log.isTraceEnabled()) {
+            log.trace("Logged in as [" + username + "] with session id ["
+                    + sessionId + "]");
+        }
+        // look up the subject record
+        AuthzSubject subjPojo = authzBoss.getCurrentSubject(sid);
+        AuthzSubjectValue subject = null;
 
-	if (subjPojo == null) {
-	    subject = new AuthzSubjectValue();
-	    subject.setName(username);
+        if (subjPojo == null) {
+            subject = new AuthzSubjectValue();
+            subject.setName(username);
 
-	    needsRegistration = true;
-	} else {
-	    subject = subjPojo.getAuthzSubjectValue();
-	    needsRegistration = subjPojo.getEmailAddress() == null
-		    || subjPojo.getEmailAddress().length() == 0;
-	}
+            needsRegistration = true;
+        } else {
+            subject = subjPojo.getAuthzSubjectValue();
+            needsRegistration = subjPojo.getEmailAddress() == null
+                    || subjPojo.getEmailAddress().length() == 0;
+        }
 
-	// figure out if the user has a principal
-	boolean hasPrincipal = authBoss.isUser(sessionId.intValue(), subject
-		.getName());
+        // figure out if the user has a principal
+        boolean hasPrincipal = authBoss.isUser(sessionId.intValue(), subject
+                .getName());
 
-	ConfigResponse preferences = new ConfigResponse();
-	if (!needsRegistration) {
-	    // look up the user's preferences
-	    ConfigResponse defaultPreferences = (ConfigResponse) ctx
-		    .getAttribute(Constants.DEF_USER_PREFS);
+        ConfigResponse preferences = new ConfigResponse();
+        if (!needsRegistration) {
+            // look up the user's preferences
+            ConfigResponse defaultPreferences = (ConfigResponse) ctx
+                    .getAttribute(Constants.DEF_USER_PREFS);
 
-	    preferences = authzBoss.getUserPrefs(sessionId, subject.getId());
-	    preferences.merge(defaultPreferences, false);
-	}
+            preferences = authzBoss.getUserPrefs(sessionId, subject.getId());
+            preferences.merge(defaultPreferences, false);
+        }
 
-	return new WebUser(subject, sessionId, preferences, hasPrincipal);
+        return new WebUser(subject, sessionId, preferences, hasPrincipal);
     }
 
     public static Map loadUserPermissions(Integer sessionId, AuthzBoss authzBoss)
-	    throws FinderException, PermissionException,
-	    SessionTimeoutException, SessionNotFoundException, RemoteException {
-	// look up the user's permissions
-	HashMap userOpsMap = new HashMap();
-	List userOps = authzBoss.getAllOperations(sessionId);
-	for (Iterator it = userOps.iterator(); it.hasNext();) {
-	    OperationValue op = (OperationValue) it.next();
-	    userOpsMap.put(op.getName(), Boolean.TRUE);
-	}
-	return userOpsMap;
+            throws FinderException, PermissionException,
+            SessionTimeoutException, SessionNotFoundException, RemoteException {
+        // look up the user's permissions
+        HashMap userOpsMap = new HashMap();
+        List userOps = authzBoss.getAllOperations(sessionId);
+        for (Iterator it = userOps.iterator(); it.hasNext();) {
+            OperationValue op = (OperationValue) it.next();
+            userOpsMap.put(op.getName(), Boolean.TRUE);
+        }
+        return userOpsMap;
     }
-    
+
 }
