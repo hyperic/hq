@@ -504,7 +504,6 @@
          <include name="oro-2.0.8.jar" />
          <include name="portlet-api-1.0.jar" />
          <include name="tacos-core-4.1.2-20080213.jar" />
-         <include name="tacos-dojo-0.1.102-20071228.jar" />
          <include name="tapdoc-0.7.0-20070512.jar" />
          <include name="tapdoc-0.7.0-20071218-sources" />
          <include name="tapestry-annotations-4.1.5.jar" />
