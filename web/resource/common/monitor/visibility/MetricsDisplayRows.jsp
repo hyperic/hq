@@ -196,12 +196,12 @@
                               ,"ctype=<c:out value="${ctype}"/>"
                             </c:if>
                             );--%>
-    dojo.io.bind({
-    url:'<html:rewrite page="/resource/common/monitor/visibility/CurrentMetricValues.do"/>',
-    content: 'eid=' + <c:out value="${eid}"/><c:if test="${not empty childResourceType}">  + 'ctype=' + <c:out value="${ctype}"/></c:if>',
-    load: function(type, data, evt){lastUpdate = now;setMetricsRefresh();},
-    method:'POST'
-});
+    dojo.xhrPOST( {
+        url: '<html:rewrite page="/resource/common/monitor/visibility/CurrentMetricValues.do"/>', 
+        handleAs: "text",
+        timeout: 5000,
+        load: function(data, ioArgs){lastUpdate = now;setMetricsRefresh();}
+    });
       //lastUpdate = now;
     }
     //setMetricsRefresh();
