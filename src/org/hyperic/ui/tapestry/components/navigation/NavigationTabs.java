@@ -24,16 +24,73 @@
  */
 package org.hyperic.ui.tapestry.components.navigation;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.tapestry.IMarkupWriter;
+import org.apache.tapestry.IRequestCycle;
+import org.apache.tapestry.IScript;
+import org.apache.tapestry.PageRenderSupport;
+import org.apache.tapestry.TapestryUtils;
+import org.apache.tapestry.annotations.InjectObject;
+import org.apache.tapestry.annotations.InjectScript;
+import org.apache.tapestry.annotations.Parameter;
+import org.apache.tapestry.engine.IEngineService;
+import org.hyperic.hq.ui.PageListing;
+import org.hyperic.hq.ui.util.URLUtils;
 import org.hyperic.ui.tapestry.components.BaseComponent;
 
-
+/**
+ * The colorful tabs at the top of the page. An aggregate of the Header
+ * component.
+ * 
+ */
 public abstract class NavigationTabs extends BaseComponent {
 
-    public boolean isActive(String path) {
-        if (getPage().getPageName().indexOf(path) != -1) {
+    @InjectObject("service:tapestry.services.Page")
+    public abstract IEngineService getPageService();
+
+    @Parameter(name = "navigationMenu")
+    public abstract void setNavigationMenu(NavigationMenu menu);
+    public abstract NavigationMenu getNavigationMenu();
+
+    /**
+     * Is a page link the active page?
+     * 
+     * @param path
+     *            the page path to check
+     * @return true if the page link passed eq the current page
+     */
+    public boolean isActive(String pageLink) {
+        if (getPage().getPageName().indexOf(pageLink) != -1) {
             return true;
         } else
             return false;
     }
-
+    
+    @InjectScript("NavigationTabs.script")
+    public abstract IScript getScript();
+    
+    protected void renderComponent(IMarkupWriter writer, IRequestCycle cycle) {
+        // render as if an Any component
+        NavigationMenu m = this.getNavigationMenu();
+        if(cycle.getPage().getPageName() != PageListing.SIGN_IN)
+            super.renderComponent(writer, cycle);
+        // then add the script
+        if (!cycle.isRewinding()) {
+            PageRenderSupport pageRenderSupport = TapestryUtils
+                    .getPageRenderSupport(cycle, this);
+            Map symbols = new HashMap();
+            getScript().execute(this, cycle, pageRenderSupport, symbols);
+        }
+    }
+   
+    public String getLocation(String page) {
+        return URLUtils.getLocation(page, getPageService());
+    }
+    /*       
+    public String getAttachemntURL(AttachmentDescriptor desc) {
+        return URLUtils.getAttachmentURL(desc, getPageService());
+    }
+*/ 
 }

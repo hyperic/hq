@@ -5,4 +5,5 @@
   "http://jakarta.apache.org/tapestry/dtd/Tapestry_4_1.dtd">
 
 <component-specification  allow-body="no" allow-informal-parameters="no" class="org.hyperic.ui.tapestry.components.navigation.NavigationTabs">
+    <property name="item"/>
 </component-specification>

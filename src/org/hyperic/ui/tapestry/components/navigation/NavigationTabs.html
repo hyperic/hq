@@ -1,11 +1,40 @@
 <if jwcid="@If" condition="ognl:isLoggedIn">
 <div id="navTabContainer">
     <ul>
-        <li jwcid="@Any" class="ognl:isActive('dashbaord')?'active':''"><a href="/Dashboard.do"><span>Dashboard</span></a></li>
-        <li jwcid="@Any" class="ognl:isActive('resource')?'active':''"><a jwcid="@PageLink" page="resource/Hub"><span>Resources</span></a></li>
-        <li jwcid="@Any" class="ognl:isActive('reporting')||isActive('mastheadAttach')?'active':''"><a href="Analyze"><span>Analyze</span></a></li>
-        <li jwcid="@Any" class="ognl:isActive('settings')?'active':''"><a href="/Settings.html"><span>Settings</span></a></li>
-        <li jwcid="@Any" class="ognl:isActive('admin')?'active':''"><a href="/Admin.do"><span>Administration</span></a></li>                   
+        <li jwcid="@Any" class="ognl:isActive('dashbaord')?'active':''"><a href="/Dashboard.do"><span><span key="dashboard">Dashboard</span></span></a></li>
+        <li jwcid="@Any" class="ognl:isActive('resource')?'active':''"><a id="browse" onclick="hyperic.widget.menu.onclick(this)"><span><span key="resource">Resources</span></span></a></li>
+        <li jwcid="@Any" class="ognl:isActive('reporting')||isActive('Plugin')?'active':''"><a id="analyze" onclick="hyperic.widget.menu.onclick(this)"><span><span key="analyze">Analyze</span></span></a></li>
+        <li jwcid="@Any" class="ognl:isActive('settings')?'active':''"><a href="/Settings.html"><span><span key="settings">Settings</span></span></a></li>
+        <li jwcid="@Any" class="ognl:isActive('admin')?'active':''"><a href="/Admin.do"><span><span key="admin">Administration</span></span></a></li>                   
     </ul>
+</div>
+<div dojoType="dijit.Menu" id="browse_1" popupDelay="500" style="display: none;">
+    <div jwcid="@Any" dojoType="dijit.MenuItem" iconClass="resourceIcon" onClick="ognl:'document.location='+'\''+getLocation(@org.hyperic.ui.tapestry.page.PageListing@RESOURCE_HUB)+'\''"><span key="inventory"/></div>
+    <foreach jwcid="@For" source="ognl:navigationMenu.resourceMenuItems" value="ognl:item">
+        <div jwcid="@Any" dojoType="dijit.MenuItem" iconClass="ognl:item.iconClass" onClick="ognl:'document.location='+'\''+item.url+'\''"><span jwcid="@Insert" value="ognl:item.name" renderTag="false"/></div>
+    </foreach>
+    <div dojoType="dijit.PopupMenuItem" iconClass="favoriteIcon" id="submenu2">
+        <span><span key="favorite"/></span>
+        <div dojoType="dijit.Menu">
+            <div jwcid="@Any" dojoType="dijit.MenuItem" onClick=""><span key="none"/></div>
+        </div>
+    </div>
+    <div dojoType="dijit.PopupMenuItem" iconClass="recentIcon" id="submenu3">
+        <span><span key="recent"/></span>
+        <div dojoType="dijit.Menu">
+            <foreach jwcid="@For" source="ognl:navigationMenu.recentResourceItems" value="ognl:item">
+                <div jwcid="@Any" dojoType="dijit.MenuItem" iconClass="ognl:item.iconClass" onClick="ognl:'document.location='+'\''+item.url+'\''"><span jwcid="@Insert" value="ognl:item.name" renderTag="false"/></div>
+            </foreach>
+            <div jwcid="@If" condition="ognl:navigationMenu.recentResourceItems.isEmpty()">
+                <div jwcid="@Any" dojoType="dijit.MenuItem" onClick=""><span key="none"/></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div dojoType="dijit.Menu" id="analyze_1" popupDelay="500" style="display: none;">
+    <div jwcid="@Any" dojoType="dijit.MenuItem" iconClass="reportIcon" onClick="ognl:'document.location='+'\''+getLocation(@org.hyperic.ui.tapestry.page.PageListing@REPORTING)+'\''"><span key="reporting"/></div>
+    <foreach jwcid="@For" source="ognl:navigationMenu.analyzeMenuItems" value="ognl:item">
+        <div jwcid="@Any" dojoType="dijit.MenuItem" iconClass="ognl:item.iconClass" onClick="ognl:'document.location='+'\''+item.url+'\''"><span jwcid="@Insert" value="ognl:item.name" renderTag="false"/></div>
+    </foreach>
 </div>
 </if>
