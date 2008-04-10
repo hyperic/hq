@@ -82,7 +82,7 @@ public abstract class Plugin extends MenuPage implements PageBeginRenderListener
             setTitle(attachDesc.getHTML());
             String path = view.getPath();
             String name = view.getPlugin().getName();
-            setPluginURL(URLUtils.buildPluginAbsoluteURL(name, path, pluginId, baseUrl));
+            setPluginURL(URLUtils.buildPluginAbsoluteURL(name, path, pluginId, baseUrl, getRequest().getSession().getId()));
         } else {
             log.error("Cannot find attachment descriptor for attachment "
                     + pluginId);
