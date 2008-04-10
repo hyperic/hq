@@ -28,7 +28,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<script src="<html:rewrite page="/js/dojo/dojo.js"/>" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/dojo/1.1/dojo/dojo.js"/>" type="text/javascript"></script>
 
 <script language="JavaScript" type="text/javascript">
   var help = "<hq:help/>";
