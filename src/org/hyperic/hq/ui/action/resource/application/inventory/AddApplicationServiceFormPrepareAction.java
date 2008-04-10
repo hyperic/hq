@@ -136,7 +136,7 @@ public class AddApplicationServiceFormPrepareAction extends TilesAction {
         //                        new Integer(entityId.getID()),
         //                        pendingServiceIds, 
         //                        pca);
-        availableServices = boss.findCompatServiceInventory(
+        availableServices = boss.findAvailableServicesForApplication(
             sessionId.intValue(), resource.getId(), pendingServiceIds,
             nameFilter, pca);
 

@@ -2660,9 +2660,9 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public PageList
-        findCompatServiceInventory(int sessionId, Integer appId,
-                                   AppdefEntityID[] pendingEntities,
-                                   String resourceName, PageControl pc)
+        findAvailableServicesForApplication(int sessionId, Integer appId,
+                                            AppdefEntityID[] pendingEntities,
+                                            String resourceName, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
                SessionException
     {
