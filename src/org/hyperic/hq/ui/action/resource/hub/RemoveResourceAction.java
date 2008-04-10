@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.VetoException;
@@ -161,6 +162,8 @@ public class RemoveResourceAction extends BaseAction {
                        } catch (FinderException e) {
                            log.trace("Removing resource  " + resourceId +
                                      " failed");
+                       } catch (PermissionException e) {
+                           throw e;
                        } catch (Exception e) {
                            // Still referenced by an application.  Application
                            // throws VetoException when in same web application.
