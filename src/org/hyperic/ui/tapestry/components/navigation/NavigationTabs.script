@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script PUBLIC
+  "-//Apache Software Foundation//Tapestry Script Specification 3.0//EN" 
+  "http://tapestry.apache.org/dtd/Script_3_0.dtd">
+
+<script>
+    <body>
+        <unique>
+            dojo.require("dijit.Menu");
+        </unique>
+    </body>
+</script>
