@@ -39,4 +39,8 @@ public abstract class Header extends BaseComponent{
     public abstract boolean getIsSignedIn();
     public abstract void setIsSignedIn(boolean signedIn);
     
+    @Parameter(name = "navigationMenu")
+    public abstract void setNavigationMenu(NavigationMenu menu);
+    public abstract NavigationMenu getNavigationMenu();
+
 }

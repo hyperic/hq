@@ -1,12 +1,13 @@
 <div id="header">
     <div id="headerLogo" title="Home" onclick="/Dashboard.do">&nbsp;</div>
     <if jwcid="@If" condition="ognl:isLoggedIn" renderTag="false">
-    <div jwcid="@NavigationTabs"/>
+    <div jwcid="@NavigationTabs" navigationMenu="ognl:navigationMenu"/>
     </if>
     <div jwcid="@Any" id="headerLinks" style="ognl:isLoggedIn?'':'right:0px'">
     <if jwcid="@If" condition="ognl:!isLoggedIn" renderTag="false"><span key="notSignedIn"></span></if>
     <else jwcid="@Else" renderTag="false"><span key="welcome"></span> <span jwcid="@Insert" value="ognl:getUserName()"></span><span><a href="/Logout.do"><span key="logout"></span></a></span></else>
-    <span><a href="#"><span key="help"/></a></span>
+    <span><a href="javascript:void(0)" onclick="tutorialWin=window.open('http://www.hyperic.com/demo/screencasts.html','tutorials','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');tutorialWin.focus();return false;"><span key="screencast"/></a></span>
+    <span><a href="javascript:void(0)" onclick="helpWin=window.open('','help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;"><span key="help"/></a></span>
     </div>
     <if jwcid="@If" condition="ognl:isLoggedIn" renderTag="false">
     <span jwcid="@SearchPanel"/>
