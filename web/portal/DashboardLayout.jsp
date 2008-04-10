@@ -29,12 +29,11 @@
   USA.
  --%>
 
-<script language="JavaScript" src="<html:rewrite page="/js/dash.js"/>" type="text/javascript"></script>
-<script language="JavaScript" src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
-<script language="JavaScript" src="<html:rewrite page="/js/dojo/dojo.js"/>" type="text/javascript"></script>
-<script language="JavaScript" src="<html:rewrite page='/js/requests.js'/>" type="text/javascript" id="requests"></script>
-<script src="<html:rewrite page="/js/dashboard.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
+<script src='<html:rewrite page="/js/dash.js"/>' type="text/javascript"></script>
+<script src='<html:rewrite page="/js/scriptaculous.js"/>' type="text/javascript"></script>
+<script src="<html:rewrite page='/js/requests.js'/>" type="text/javascript" id="requests"></script>
+<script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
+<script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
 
 <script language="JavaScript" type="text/javascript">
   if (top != self)
@@ -162,10 +161,10 @@
         dojo.byId("dashSelect").value = '<c:out value="${DashboardForm.selectedDashboardId}"/>';
     }
     onloads.push(refreshPortlets);
-    dojo.require("dojo.widget.Dialog");
-	dojo.event.connect(window, "onload", function(){
+    dojo.require("dijit.Dialog");
+	dojo.connect(window, "onload", function(){
 	<c:if test="${DashboardForm.dashboardSelectable}">
-	    var dialogWidget = dojo.widget.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
+	    var dialogWidget = dijit.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
 	    if(<c:out value="${DashboardForm.popDialog}"/>){
 	       dialogWidget.show();
 	    }
