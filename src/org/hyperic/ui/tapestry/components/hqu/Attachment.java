@@ -24,6 +24,7 @@
  */
 package org.hyperic.ui.tapestry.components.hqu;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -65,7 +66,7 @@ public abstract class Attachment extends BaseComponent {
         String url = getPluginURL();
         String pluginRender = renderPlugin(url);
         writer.printRaw(pluginRender);
-        super.renderComponent(writer, cycle);
+        //super.renderComponent(writer, cycle);
     }
 
     private String renderPlugin(String pluginURL) {
@@ -85,8 +86,9 @@ public abstract class Attachment extends BaseComponent {
                 String contentType = getRequest().getContentType();
                 if (contentType != null)
                     charSet = contentType;
-                else if (charSet == null)
+                /*else if (charSet == null)
                     charSet = uc.getContentType();
+                */
                 else if (charSet == null)
                     charSet = "UTF-8";
             }
@@ -103,8 +105,17 @@ public abstract class Attachment extends BaseComponent {
                     log.error("Bad return code from URLConnection: " + status
                             + " requesting: " + pluginURL);
             }
+            BufferedReader br = new BufferedReader(r);
+            StringBuffer sb = new StringBuffer();
+            int c;
 
-            return r.toString();
+            // under JIT, testing seems to show this simple loop is as fast
+            // as any of the alternatives
+            while ((c = br.read()) != -1)
+                sb.append((char)c);
+
+            return sb.toString();
+            
         } catch (IOException ex) {
             log.error(ex.getMessage());
             return "";
@@ -112,5 +123,7 @@ public abstract class Attachment extends BaseComponent {
             log.error(ex.getMessage());
             return "";
         }
+        
+        
     }
 }
