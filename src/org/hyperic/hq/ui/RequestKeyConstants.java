@@ -11,5 +11,5 @@ public class RequestKeyConstants extends Constants {
     /* 
      * Used for the HQU plugin body rendering by the hqu/Attach component 
      */
-    public static final String HQU_PLUGIN_ID_PARAM = "attachId";
+    public static final String HQU_PLUGIN_ID_PARAM = "typeId";
 }
