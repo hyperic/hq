@@ -108,7 +108,7 @@ function bodyClicked(e) {
     hide($('recent'));
   }
 }
-
-document.body.onclick = bodyClicked;
+dojo.connect(dojo.body(), "onclick", window, bodyClicked);
+//document.body.onclick = bodyClicked;
 
 /*-- END diagram.js --*/
