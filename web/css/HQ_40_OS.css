@@ -31,12 +31,12 @@ a:visited,a:hover,a {
 #headerLinks {
     position: absolute;
     top: 0;
-    right: 70px;
-    width: 220px;
+    right: 55px;
+    width: 292px;
     height: 20px;
     text-align: right;
-    color: #FFF;
-    padding: 3px 8px 0 0
+    padding: 3px 8px 0 0;
+    color: #FFF
 }
 
 #headerLinks span {
@@ -45,31 +45,27 @@ a:visited,a:hover,a {
     color: #fff
 }
 
-#headerLinks .noLogin{
-    top: 0;
-    right: 0
-}
-
-
-#headerLinks a:visited,a:hover,a {
-    color: #57CBDB;
-    text-decoration: none
-}
-
 /* HEADER SEARCH */
 #headerSearch {
-    background: #F96115 url(/images/4.0/icons/search.png) no-repeat scroll 99% 50%;
     position: absolute;
     top: 0;
     right: 0;
-    width: 56px;
+    width: 50px;
     height: 17px;
     background-color: #F96115;
     color: #FFF;
-    padding: 3px 8px 3px 4px;
-    text-align: left;
+    padding: 3px 8px 3px 0px;
+    text-align: right;
     cursor: pointer;
     font-weight: bold
+}
+
+#headerSearch a:hover {
+    color: #57CBDB
+}
+
+#headerSearch a,a:visited {
+    color: #FFF
 }
 
 #headerSearchBox {
@@ -81,13 +77,14 @@ a:visited,a:hover,a {
     background-color: #F96115;
     color: #FFF;
     padding: 0px 5px 0px 7px;
-    text-align: right
+    text-align: right;
+    cursor: pointer
 }
 
 #headerSearchBox input[type=text] {
     color: gray;
     padding: 1px 30px 1px 0px;
-    width: 210px
+    width: 191px
 }
 
 #headerSearchResults {
@@ -107,11 +104,7 @@ a:visited,a:hover,a {
     background: #92C1FD;
     color: #FFF;
     height: 12px;
-    padding: 1px 0px 3px 2px;
-}
-
-#headerSearchResults a {
-    color: #57CBDB
+    padding: 2px
 }
 
 #headerSearchResults .all {
@@ -137,6 +130,7 @@ a:visited,a:hover,a {
 }
 
 #headerSearchResults li a {
+    background: #FFF url('/images/4.0/icons/platform.png') no-repeat 0% 50%;
     padding-left: 22px;
     color: #666;
     text-decoration: none
@@ -147,7 +141,7 @@ a:visited,a:hover,a {
 }
 
 .searchActive {
-    background: #FFF url('/images/4.0/icons/progress.gif') no-repeat 99% 50%
+    background: #FFF url('/images/4.0/icons/progress2.gif') no-repeat 99% 50%
 }
 
 .searchComplete {
@@ -174,7 +168,7 @@ a:visited,a:hover,a {
     background: #FFF url('/images/4.0/icons/group.png') no-repeat 0% 50%;
 }
 
-/* HEADER SEARCH */
+/* Navigation Tabs */
 #navTabContainer {
     float: left;
     margin: 35px 0 0 20px
@@ -193,16 +187,17 @@ a:visited,a:hover,a {
 }
 
 #navTabContainer a {
-    background: url("/images/4.0/tabs/tab_cap.gif") no-repeat right top;
+    background: url('/images/4.0/tabs/tab_cap.gif') no-repeat right top;
     border-bottom: 0 solid #fff;
     float: left;
     margin: 0 1px 0 0;
     padding: 0;
-    text-decoration: none
+    text-decoration: none;
+    cursor: pointer
 }
 
 #navTabContainer a span {
-    background: url("/images/4.0/tabs/tab_main.gif") no-repeat left top;
+    background: url('/images/4.0/tabs/tab_main.gif') no-repeat left top;
     color: #FFF;
     display: block;
     float: left;
@@ -214,13 +209,13 @@ a:visited,a:hover,a {
 }
 
 #navTabContainer .active a {
-    background: url("/images/4.0/tabs/tab_cap_active.gif") no-repeat right top;
+    background: url('/images/4.0/tabs/tab_cap_active.gif') no-repeat right top;
     border-width: 0;
     margin-top: -3px
 }
 
 #navTabContainer .active a span {
-    background: url("/images/4.0/tabs/tab_main_active.gif") no-repeat left top;
+    background: url('/images/4.0/tabs/tab_main_active.gif') no-repeat left top;
     color: #fff;
     padding-bottom: 7px;
     padding-top: 10px
@@ -292,14 +287,14 @@ a:visited,a:hover,a {
     cursor: pointer;
     margin: 2px 0px 0px 4px;
     padding: 5px 10px 0 3px;
-    background: url(/images/4.0/icons/help.png) no-repeat
+    background: url(images/4.0/icons/help.png) no-repeat
 }
 
 .fieldRow input {
     float: left
 }
 
-.fieldRow input[readonly="readonly"] {
+.fieldRow input[readonly='readonly'] {
     background: #EFEFEF
 }
 
@@ -308,7 +303,7 @@ a:visited,a:hover,a {
     color: gray;
     font-size: 10px;
     float: left;
-    padding-top: 2px;
+    padding-top: 2px
     clear:both
 }
 
@@ -414,10 +409,204 @@ a.buttonGreen:active span {
 }
 
 .clear {
-    clear: both;
-    height: 0px
+    clear: both
 }
 
 .none {
     display:none
+}
+
+#menu{
+
+}
+
+#menu div{
+    display: block;
+    position: absolute;
+    background-color: #FFF;
+    padding: 2px 3px;
+    border: 1px solid #777;
+    width: 145px
+}
+
+#menu ul{
+    margin:0px;
+    padding:0px
+}
+
+#menu li{
+    list-style:none;
+    padding: 2px 4px;
+    margin:2px 0px;
+    font-weight:bold;
+    cursor:pointer
+}
+
+#menu li:hover{
+    border: 1px solid #4CD3F6;
+    padding:1px 3px;
+    color: #FF8400; /*222222*/
+}
+
+#menu li a,a:active{
+    color: #4CD3F6
+}
+
+#subMenu{
+
+}
+
+.arrow{
+    background: url('/images/4.0/icons/arrow_right.png') no-repeat 100% 50%;
+}
+
+.position1{
+    top: 65px;
+    left: 499px;
+}
+.position2{
+    top: 95px;
+    left: 644px;
+}
+
+body .dijitMenu {
+    border:1px solid #006DBD;
+    margin: 0px;
+    padding: 0px;
+    background-color:white;
+}
+
+body .dijitMenuTable {
+    margin:0px 0px;
+    border-collapse:collapse;
+    border-width:1px;
+    background-color:white;
+    padding:2px;
+}
+
+body .dijitMenuTable TR{
+    margin:2px;
+}
+body .dijitMenuItem{
+    white-space: nowrap;
+    padding:2px 4px;
+    font: menu;
+    margin: 0;
+    color: #555; /*7FA9E3*/
+}
+body .dijitMenuItem TD {
+    padding:3px;
+    outline:0; 
+}
+
+body .dijitMenuItemHover {
+    cursor:pointer;
+    cursor:hand;
+    background-color:#34C9F3;/*D9E3F0;*/
+    color:#000;/*7FA9E3;*/
+}
+
+body .dijitMenuItemIcon {
+    position: relative;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+body .dijitMenuItemDisabled * {
+    /* for a disabled menu item, just set it to mostly transparent */
+    /*opacity:0.3;*/
+    cursor:default;
+}
+body .dj_ie .dijit_a11y .dijitMenuItemDisabled td,
+body .dj_ie .dijitMenuItemDisabled *,
+body .dj_ie .dijitMenuItemDisabled td {
+    color:gray !important;
+    filter: alpha(opacity=35);
+}
+
+body .dijitMenuItemLabel {
+    position: relative;
+    vertical-align: middle;
+}
+
+body .dijit_a11y .dijitMenuItemHover .dijitMenuItemLabel {
+    border-width: 1px;
+    border-style: solid;
+}
+body .dijit_a11y .dijitMenuItemHover {
+    border: 1px #fff dotted !important;
+}
+
+body .dijit_a11y .dijitMenuExpandInner { 
+    display:block !important;
+} 
+
+/* separator can be two pixels -- set border of either one to 0px to have only one */
+body .dijitMenuSeparatorTop {
+    height: 50%;
+    margin: 0px;
+    margin-top:3px;
+    font-size: 1px;
+}
+
+body .dijitMenuSeparatorBottom {
+    height: 50%;
+    margin: 0px;
+    margin-bottom:3px;
+    font-size: 1px;
+}
+body .dijitMenuSeparator{
+    background-color: #FFF;
+    font-family: menu;
+    margin: 0pt;
+}
+
+body .dijitMenuExpandEnabled{
+    background: transparent url('/images/4.0/icons/arrow_right.png') scroll 0%;
+    width:16px;
+    height:16px;
+    overflow:hidden; 
+    margin:0; padding:0; 
+    background-repeat: none;
+}
+body .dijitArrowNode{
+    display:none;
+}
+body .dijitReset{
+    line-height:normal;
+}
+body .dijitPopup{
+    position:absolute;
+}
+
+.myIcon{
+    background: transparent url('/images/4.0/icons/arrow_right.png') scroll 0%;
+    width:16px;
+    height:16px;
+    overflow:hidden; 
+    margin:0; padding:0; 
+}
+.resourceIcon,.nagiosIcon,.recentIcon,.favoriteIcon,.alertIcon,.reportIcon{
+    width:16px;
+    height:16px;
+    overflow:hidden; 
+    margin:0; padding:0; 
+}
+.resourceIcon{
+    background: transparent url('/images/4.0/icons/resource.png') no-repeat scroll 0%;
+}
+.nagiosIcon{
+    background: transparent url('/images/4.0/icons/nagios.gif') no-repeat scroll 0%;
+}
+.recentIcon{
+    background: transparent url('/images/4.0/icons/recent1.png') no-repeat scroll 0%;
+}
+.favoriteIcon{
+    background: transparent url('/images/4.0/icons/favorite.png') no-repeat scroll 0%;
+}
+.alertIcon{
+    background: transparent url('/images/4.0/icons/alert.png') no-repeat scroll 0%;
+}
+.reportIcon{
+    background: transparent url('/images/4.0/icons/report.png') no-repeat scroll 0%;
 }
