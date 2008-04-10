@@ -67,16 +67,16 @@ public class ApplicationDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public void addAppService(Application a, AppServiceValue added) {
+    public void addAppService(Application a, Integer added) {
         AppServiceDAO adao = DAOFactory.getDAOFactory().getAppServiceDAO();
-        AppService as = adao.findById(added.getId());
+        AppService as = adao.findById(added);
         as.setApplication(a);
         a.getAppServices().add(as);
     }
 
-    public void removeAppService(Application a, AppServiceValue removed) {
+    public void removeAppService(Application a, Integer removed) {
         AppServiceDAO adao = DAOFactory.getDAOFactory().getAppServiceDAO();
-        AppService as = adao.findById(removed.getId());
+        AppService as = adao.findById(removed);
         a.getAppServices().remove(as);
     }
 
@@ -170,7 +170,7 @@ public class ApplicationDAO extends HibernateDAO
             while (iAppServiceValue.hasNext())
             {
                 AppServiceValue o = (AppServiceValue)iAppServiceValue.next();
-                addAppService(a, o);
+                addAppService(a, o.getId());
             }
         }
         if (appV.getRemovedAppServiceValues() != null) {
@@ -179,7 +179,7 @@ public class ApplicationDAO extends HibernateDAO
             while (iAppServiceValue.hasNext())
             {
                 AppServiceValue o = (AppServiceValue)iAppServiceValue.next();
-                removeAppService(a, o);
+                removeAppService(a, o.getId());
             }
         }
         // Checks for null aggregate
