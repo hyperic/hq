@@ -33,6 +33,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.jdbc.DBUtil;
@@ -65,16 +66,6 @@ public class BaselineDAO extends HibernateDAO {
         m.setBaseline(b);
         save(b);
         return b;
-    }
-
-    public Baseline findByMeasurementId(Integer mid) {
-        String sql = "from Baseline b where b.measurement.id = ?";
-
-        return (Baseline)getSession().createQuery(sql)
-            .setInteger(0, mid.intValue())
-            .setCacheable(true)
-            .setCacheRegion("Baseline.findByMeasurementId")
-            .uniqueResult();
     }
 
     public List findByInstance(int appdefType, int appdefId) {
