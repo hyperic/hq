@@ -86,7 +86,7 @@
       <% } %>
       <% if (resource.supportsMonitoring) { %>
       <tr>
-           <td valign="top" nowrap>Previous Indicator Metrics:</td>
+           <td valign="top" nowrap>Last Indicator Metrics Collected:</td>
            <td>
            <% for (i in resource.designatedMetrics.getLastDataPoints(MeasurementConstants.ACCEPTABLE_LIVE_MILLIS)) { %>
                <% if (i.value != null) { %>
