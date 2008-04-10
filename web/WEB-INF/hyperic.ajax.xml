@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<module id="hq.ajax" version="1.0.0" package="org.hyperic.hq.ui.contributions.ajax">
+    
+    <contribution configuration-id="tapestry.asset.UnprotectedAssets">
+        <unprotected-resource contains="^/tap-dojo/" />
+        <unprotected-resource contains="^/dojo/" />
+    </contribution>
+
+    <implementation service-id="tapestry.js.JavascriptManager">
+        <invoke-factory>
+            <construct class="org.apache.tapestry.javascript.JavascriptManagerImpl">
+                <set-service property="assetSource" service-id="tapestry.asset.AssetSource"/>                
+                <set property="files" value="context:/js/dojo/1.1/dojo/dojo.js"/>
+                <set property="formFiles" value=""/>
+                <set property="widgetFiles" value=""/>
+                <set property="folder" value=""/>
+                <set property="tapestryFile" value="context:/js/tap-dojo/tap-dojo1.1.js"/>
+                <set property="tapestryFolder" value="context:/js/tap-dojo/"/>
+            </construct>
+        </invoke-factory>
+    </implementation>  
+    
+    <service-point id="DojoDelegateFactory" interface="org.apache.hivemind.ServiceImplementationFactory"
+        parameters-occurs="none">
+        Constructs DojoOnePointOhShellDelegate.
+        <invoke-factory>
+            <construct class="DojoDelegateFactory" />
+        </invoke-factory>
+    </service-point>
+
+    <service-point id="DojoOnePointOneShellDelegate" interface="org.apache.tapestry.IRender">
+        <invoke-factory service-id="DojoDelegateFactory"/>
+    </service-point>    
+
+</module>
