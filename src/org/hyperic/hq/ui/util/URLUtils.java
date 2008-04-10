@@ -58,14 +58,16 @@ public class URLUtils {
     
     /**
      * Get the url for the HQU plugin
+     * @param sessionId TODO
      * 
      * @return a <code>java.lang.String</code> url in the form of
      *         http(s)://fqdn[:port]/hqu/pluginName/pluginPath?typeId=pluginViewId
      */
-    public static String buildPluginAbsoluteURL(String pluginName, String pluginPath, String pluginId, String baseURL) {
+    public static String buildPluginAbsoluteURL(String pluginName, String pluginPath, String pluginId, String baseURL, String sessionId) {
         String url = new StringBuilder().append(baseURL).append(
                 PageListing.HQU_CONTEXT_URL).append(pluginName).append("/")
-                .append(pluginPath).append("?").append(RequestKeyConstants.HQU_PLUGIN_ID_PARAM)
+                .append(pluginPath).append(";jsessionid=").append(sessionId)
+                .append("?").append(RequestKeyConstants.HQU_PLUGIN_ID_PARAM)
                 .append("=").append(pluginId).toString();
         return url;
     }
