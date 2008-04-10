@@ -33,17 +33,12 @@
 <tiles:importAttribute name="resources"/>
 
 <c:choose>
-<c:when test="${not empty resources}">
+  <c:when test="${not empty resources}">
   <c:forEach var="resource" items="${resources}">
-    <div dojoType="MenuItem2" caption="<c:out value="${resource.name}"/>" onClick="location.href='<html:rewrite page="/Resource.do?eid=${resource.entityId}"/>'"></div>
-
-
-
-      <!--<html:link page="/Resource.do?eid=${resource.entityId}"><c:out value="${resource.name}"/></html:link> -->
+    <div dojoType="dijit.MenuItem" onClick="location.href='<html:rewrite page="/Resource.do?eid=${resource.entityId}"/>'"><c:out value="${resource.name}"/></div>
   </c:forEach>
-
   </c:when>
   <c:otherwise>
-      <div dojoType="MenuItem2" caption="<fmt:message key="common.label.None"/>"></div>
+      <div dojoType="dijit.MenuItem"><fmt:message key="common.label.None"/></div>
   </c:otherwise>
 </c:choose>

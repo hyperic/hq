@@ -10,7 +10,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004, 2005, 2006, 2007, 2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -26,17 +26,22 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-
+<link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <link rel=stylesheet href="<html:rewrite page="/css/mig.css"/>" type="text/css">
+<link rel=stylesheet href="<html:rewrite page="/css/HQ_40_OS.css"/>" type="text/css">
+<!--[if lte IE 7]>
+<link rel=stylesheet href="<html:rewrite page='/css/iecss.css'/>" type="text/css">
+<![endif]-->
 <script type="text/javascript">
-  var imagePath = "<html:rewrite page="/images/"/>";
+    var djConfig = {parseOnLoad: true, isDebug : true, locale : "<%=request.getLocale().toString().substring(0,4)%>"};
+    var imagePath = "<html:rewrite page="/images/"/>";
 </script>
-<link rel="shortcut icon" href="<html:rewrite page="/images/hypericon.ico"/>"/>
-<script src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
-<script language="JavaScript" src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-
-<style type="text/css">
-	.PageTitleBar, .PageTitleBar td {background-image: url(<html:rewrite page="/images/bg_PageTitle2.gif"/>); background-repeat: repeat-x; background-color: #ff7214;}
-</style>
+<!-- FOR DEBUG ONLY -->
+<script src="<html:rewrite page='/js/dojo/1.1/dojo/dojo.js.uncompressed.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/js/rico.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/js/diagram.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/js/functions.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/js/lib/lib.js'/>" type="text/javascript"></script>

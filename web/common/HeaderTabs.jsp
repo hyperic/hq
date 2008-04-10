@@ -30,27 +30,12 @@
   <c:choose>
   <c:when test="${location eq 'resources'}">
 	  <c:forEach var="attachment" items="${mastheadResourceAttachments}">
-          <div dojoType="MenuItem2" caption='<c:out value="${attachment.HTML}"/>' onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>'"></div>
+          <div dojoType="dijit.MenuItem" onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>'"><c:out value="${attachment.HTML}"/></div>
       </c:forEach>
   </c:when>
   <c:when test="${location eq 'tracking'}">
     <c:forEach var="attachment" items="${mastheadTrackerAttachments}">
-          <div dojoType="MenuItem2" caption='<c:out value="${attachment.HTML}"/>' onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>'"></div>
+          <div dojoType="dijit.MenuItem" onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>'"><c:out value="${attachment.HTML}"/></div>
       </c:forEach>
   </c:when>
   </c:choose>
-
-<!-- TODO: Add in the inactive capability for EE only features
-<td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-  <a href="." onclick="toggleMenu('reportcenter');return false;" style="color: #DDD"><fmt:message key="reporting.reporting.ReportCenterTitle"/></a>
-  <div style="clear: both;"></div>
-  <div id="reportcenter" style="background-color:#60a5ea;border:1px solid #ffffff;position:absolute;right:0px;width:100%;z-index: 300;margin-top:4px;display:none;">
-    <div class="italicInfo" style="padding: 6px; text-align: center;" onclick="toggleMenu('reportcenter')">
-      <fmt:message key="feature.available.in.EE">
-        <fmt:param><fmt:message key="reporting.reporting.ReportCenterTitle"/></fmt:param>
-        <fmt:param value="http://support.hyperic.com/confluence/display/DOC/ui-Report.Center"/>
-      </fmt:message>
-    </div>
-  </div>
-</td>
--->
