@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -300,27 +300,27 @@ public class ResourceDAO
         String sql =
             "select r from Resource r join r.resourceType rt " +
             "where r.system = :system and exists " +
-                "(select rg from ResourceGroup rg join rg.roles role " +
-                                                 "join role.subjects subj " +
-                                                 "join role.operations op " +
-                 "where (rg.resource = r and rg.groupType = 15 and " +
-                        "(r.owner.id = :subjId or " +
-                         "(subj.id = :subjId and op.name = :viewResGrp))) or " +
-                       "rg in (select rg2 from r.resourceGroups rg2 " +
-                              "where rt.name = :resSvcType and " +
-                                    "(r.owner.id = :subjId or " +
-                                     "(subj.id = :subjId and " +
-                                      "op.name = :viewSvc))))) " +
+                 "(select rg from ResourceGroup rg join rg.resourceSet rs " +
+                 "where ((rg.resource = r and rg.groupType = 15) or " +
+                        "(rt.name = :resSvcType and r = rs)) " +
+                 " and (r.owner.id = :subjId or exists " +
+                      "(select role from rg.roles role " +
+                                   "join role.subjects subj " +
+                                   "join role.operations op " +
+                       "where subj.id = :subjId and " +
+                             "op.name = case rt.name " +
+                                       "when (:resSvcType) then '" +
+                                       AuthzConstants.serviceOpViewService +
+                                       "' " +
+                                       "else '" +
+                                       AuthzConstants.groupOpViewResourceGroup +
+                                       "' end))) " +
             "order by r.sortName";
         List resources =
             getSession().createQuery(sql)
                         .setBoolean("system", fSystem.booleanValue())
                         .setInteger("subjId", user.intValue())
                         .setString("resSvcType", AuthzConstants.serviceResType)
-                        .setString("viewResGrp",
-                                   AuthzConstants.groupOpViewResourceGroup)
-                        .setString("viewSvc",
-                                   AuthzConstants.serviceOpViewService)
                         .list();
 
         return resources;
@@ -331,7 +331,7 @@ public class ResourceDAO
         String sql =
             "select r from Resource r join r.resourceType rt " +
             "where r.system = :system and " +
-                  "(rt.name = :resGrpType or " +
+                  "(rt.name = :resSvcType or " +
                    "exists (select rg from ResourceGroup rg " +
                                      "join rg.resource r2 " +
                            "where r = r2 and rg.groupType = 15)) " +
