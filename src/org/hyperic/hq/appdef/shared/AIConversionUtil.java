@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,17 +27,12 @@ package org.hyperic.hq.appdef.shared;
 
 import javax.ejb.FinderException;
 
-import org.apache.commons.logging.Log;
+import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.EncodingException;
 
 /**
  * A utility for converting value objects from AI to appdef.
