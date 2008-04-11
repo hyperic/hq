@@ -34,9 +34,9 @@ import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.dao.HibernateDAOFactory;
@@ -320,7 +320,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
         }
     }
     
-    List findDefinitions(AuthzSubjectValue subj, AlertSeverity minSeverity, 
+    List findDefinitions(AuthzSubject subj, AlertSeverity minSeverity, 
                          Boolean enabled, boolean excludeTypeBased, 
                          PageInfo pInfo)
     {

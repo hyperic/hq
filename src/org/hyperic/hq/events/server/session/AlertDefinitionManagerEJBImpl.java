@@ -875,7 +875,7 @@ public class AlertDefinitionManagerEJBImpl
      * 
      * @ejb:interface-method
      */
-    public List findAlertDefinitions(AuthzSubjectValue subj, 
+    public List findAlertDefinitions(AuthzSubject subj, 
                                      AlertSeverity minSeverity, Boolean enabled,
                                      boolean excludeTypeBased, PageInfo pInfo)
     {
