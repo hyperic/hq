@@ -120,10 +120,10 @@
     <td class="BlockTitle" align="right">
       <c:choose>
         <c:when test="${not empty adminToken}">
-          <html:link page="${adminUrl}" paramId="token" paramName="adminToken"><html:img page="/images/dash-icon_edit.gif" width="16" height="16" border="0"/></html:link></t
+          <html:link page="${adminUrl}" paramId="token" paramName="adminToken"><html:img page="/images/4.0/icons/properties.png" width="16" height="16" border="0"/></html:link></t
         </c:when>
         <c:otherwise>
-          <html:link page="${adminUrl}"><html:img page="/images/dash-icon_edit.gif" width="16" height="16" border="0"/></html:link>
+          <html:link page="${adminUrl}"><html:img page="/images/4.0/icons/properties.png" width="16" height="16" border="0"/></html:link>
         </c:otherwise>
       </c:choose>
     </td>
@@ -133,7 +133,7 @@
          <c:choose>
          <c:when test='${enableDelete eq "true"}'>
             <a href="javascript:removePortlet(<c:out value="'${portletName}', '${title}'" escapeXml="false"/>)">
-            <html:img page="/images/dash-icon_delete.gif" width="16" height="16" border="0"/>
+            <html:img page="/images/4.0/icons/cross.png" width="16" height="16" border="0"/>
             </a>
          </c:when>
          <c:otherwise>
@@ -147,7 +147,7 @@
     </c:if>
     <c:if test="${not empty cancelAdvanced}">
     <td class="BlockTitle" align="right">
-      <a href="javascript:cancelAdvanced()"><html:img page="/images/dash-icon_delete.gif" border="0"/></a>
+      <a href="javascript:cancelAdvanced()"><html:img page="/images/4.0/icons/cross.png" border="0"/></a>
     </td>
     </c:if>
   </tr>
