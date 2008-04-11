@@ -84,7 +84,7 @@
       </td>
      </logic:messagesNotPresent>
       <td width="75%" class="BlockContent">
-       <html:image property="ok" page="/images/dash-button_go-arrow.gif" border="0"/>
+       <html:image property="ok" page="/images/4.0/icons/accept.png" border="0"/>
       </td>
   </tr>
   <tr>
