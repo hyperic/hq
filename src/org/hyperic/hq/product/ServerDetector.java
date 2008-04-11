@@ -78,6 +78,7 @@ public abstract class ServerDetector
     private static final String VERSION_FILE = "VERSION_FILE";
     private static final String INSTALLPATH_MATCH = "INSTALLPATH_MATCH";
     private static final String INSTALLPATH_NOMATCH = "INSTALLPATH_NOMATCH";
+    private static final String INSTALLPATH = "INSTALLPATH";
     private static final String INVENTORY_ID = "INVENTORY_ID";
 
     private static final String[] NO_ARGS = new String[0];
@@ -483,6 +484,11 @@ public abstract class ServerDetector
         server.setType(type);
         server.setName(getPlatformName() + " " + type);
         server.setInstallPath(getCanonicalPath(installpath));
+        //allow hardcoded property to override discovered installpath
+        installpath = getTypeProperty(INSTALLPATH);
+        if (installpath != null) {
+            server.setInstallPath(installpath);
+        }
         String aiid = getTypeProperty(INVENTORY_ID);
         if (aiid == null) {
             aiid = server.getInstallPath();
