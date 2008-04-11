@@ -42,7 +42,7 @@
             var updateUrl = 'Dashboard.do?';
             var url = updateUrl + pars;
             new Ajax.Request(url, {method: 'post'});
-            $('hb').innerHTML = '<html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/>'
+            dojo.byId('hb').innerHTML = '<html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/>'
         }
         menuLayers.hide();
     }
@@ -50,6 +50,7 @@
     var searchWidget = new hyperic.widget.search({search:'/search.shtml'}, 3, {keyCode: 83, ctrl: true});
     dojo.require("dojo.fx");
     dojo.connect(window, "onload",function(){ 
+        activateHeaderTab();
         searchWidget.create();
         //Connect the events for the box, cancel and search buttons
         dojo.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
@@ -68,13 +69,37 @@
     <div id="navTabContainer">
         <c:set var="pageURL" value="${requestURL}"/>
         <ul>
-            <li class="active"><a href="/Dashboard.do"><span><fmt:message key="header.dashboard"/></span></a></li>
-            <li class=""><a><span id="resource" onclick="hyperic.widget.menu.onclick(this)"><fmt:message key="header.resources"/></span></a></li>
-            <li class=""><a><span id="analyze" onclick="hyperic.widget.menu.onclick(this)"><fmt:message key="header.analyze"/></span></a></li>
-            <li class=""><a href="/Settings.html"><span><fmt:message key="header.settings"/></span></a></li>
-            <li class=""><a href="/Admin.do"><span><fmt:message key="header.admin"/></span></a></li>
+            <li id="dashTab" class=""><a href="/Dashboard.do"><span><fmt:message key="header.dashboard"/></span></a></li>
+            <li id="resTab" class=""><a><span id="resource" onclick="hyperic.widget.menu.onclick(this)"><fmt:message key="header.resources"/></span></a></li>
+            <li id="analyzeTab" class=""><a><span id="analyze" onclick="hyperic.widget.menu.onclick(this)"><fmt:message key="header.analyze"/></span></a></li>
+            <li id="setTab" class=""><a href="/Settings.html"><span><fmt:message key="header.settings"/></span></a></li>
+            <li id="adminTab" class=""><a href="/Admin.do"><span><fmt:message key="header.admin"/></span></a></li>
         </ul>
     </div>
+	<div dojoType="dijit.Menu" id="resource_1" popupDelay="500" style="display: none;">
+	    <div dojoType="dijit.MenuItem" iconClass="resourceIcon" onClick="document.location='/ResourceHub.do'"><fmt:message key="header.browse"/></div>
+	    <tiles:insert definition=".header.optional.tabs">
+	        <tiles:put name="location" value="resources"/>
+	    </tiles:insert>
+	    <div dojoType="dijit.PopupMenuItem" iconClass="favoriteIcon" id="submenu2">
+	        <span><fmt:message key="header.favorite"/></span>
+	        <div dojoType="dijit.Menu">
+	            <div dojoType="dijit.MenuItem" onClick="">Placeholder</div>
+	        </div>
+	    </div>
+	    <div dojoType="dijit.PopupMenuItem" iconClass="recentIcon" id="submenu3">
+	        <span><fmt:message key="header.recent"/></span>
+	        <div dojoType="dijit.Menu">
+	            <tiles:insert definition=".toolbar.recentResources"/>
+	        </div>
+	    </div>
+	</div>
+	<div dojoType="dijit.Menu" id="analyze_1" popupDelay="500" contextMenuForWindow="false" style="display: none;">
+	    <div dojoType="dijit.MenuItem" iconClass="reportIcon" onClick="/reporting/ReportCenter.do"><fmt:message key="reporting.reporting.ReportCenterTitle"/></div>
+	    <tiles:insert definition=".header.optional.tabs">
+	        <tiles:put name="location" value="tracking"/>
+	    </tiles:insert>
+	</div>
     <div id="headerLinks">
         <fmt:message key="header.Welcome"/>
          <c:choose>
@@ -122,31 +147,6 @@
      
 </div>
 <div id="headerBottom">&nbsp;</div>
-<div dojoType="dijit.Menu" id="resource_1" popupDelay="500" style="display: none;">
-    <div dojoType="dijit.MenuItem" iconClass="resourceIcon" onClick="document.location='/Resource.do'"><fmt:message key="header.browse"/></div>
-    <tiles:insert definition=".header.optional.tabs">
-        <tiles:put name="location" value="resources"/>
-    </tiles:insert>
-    <div dojoType="dijit.PopupMenuItem" iconClass="favoriteIcon" id="submenu2">
-        <span><fmt:message key="header.favorite"/></span>
-        <div dojoType="dijit.Menu">
-            <div dojoType="dijit.MenuItem" onClick="">Placeholder</div>
-        </div>
-    </div>
-    <div dojoType="dijit.PopupMenuItem" iconClass="recentIcon" id="submenu3">
-        <span><fmt:message key="header.recent"/></span>
-        <div dojoType="dijit.Menu">
-            <tiles:insert definition=".toolbar.recentResources"/>
-        </div>
-    </div>
-</div>
-<div dojoType="dijit.Menu" id="analyze_1" popupDelay="500" contextMenuForWindow="false" style="display: none;">
-    <div dojoType="dijit.MenuItem" iconClass="reportIcon" onClick="alert('Hello world');"><fmt:message key="reporting.reporting.ReportCenterTitle"/></div>
-    <tiles:insert definition=".header.optional.tabs">
-        <tiles:put name="location" value="tracking"/>
-    </tiles:insert>
-</div>
-
 
 <c:if test="${not empty HQUpdateReport}">
 <div id="update" class="menu" style="z-index:15000000;border:1px solid black;padding-top:15px;padding-bottom:15px;font-weight:bold;font-size:12px;">
