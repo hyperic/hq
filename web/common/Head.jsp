@@ -40,7 +40,6 @@
 <!-- FOR DEBUG ONLY -->
 <script src="<html:rewrite page='/js/dojo/1.1/dojo/dojo.js.uncompressed.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/rico.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/diagram.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/functions.js'/>" type="text/javascript"></script>
