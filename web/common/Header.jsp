@@ -95,7 +95,7 @@
 	    </div>
 	</div>
 	<div dojoType="dijit.Menu" id="analyze_1" popupDelay="500" contextMenuForWindow="false" style="display: none;">
-	    <div dojoType="dijit.MenuItem" iconClass="reportIcon" onClick="/reporting/ReportCenter.do"><fmt:message key="reporting.reporting.ReportCenterTitle"/></div>
+	    <div dojoType="dijit.MenuItem" iconClass="reportIcon" onClick="/document.location='reporting/ReportCenter.do'"><fmt:message key="reporting.reporting.ReportCenterTitle"/></div>
 	    <tiles:insert definition=".header.optional.tabs">
 	        <tiles:put name="location" value="tracking"/>
 	    </tiles:insert>
