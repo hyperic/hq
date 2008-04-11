@@ -90,8 +90,13 @@ public class AgentRemoteValue implements GenericValueMap {
      * @param key Key to assign the value to
      * @param val Value to assign to the key
      */
-
     public void setValue(String key, String val){
+        if (key == null) {
+            throw new IllegalArgumentException("Null key found for value=" + val);
+        } else if (val == null) {
+            throw new IllegalArgumentException("Null value found for key=" + key);
+        }
+
         this.vals.put(key, val);
     }
 
