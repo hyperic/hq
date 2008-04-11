@@ -67,11 +67,11 @@
 </c:if>
 <c:if test="${useCurrentButton}">
     <td width="100%" align="right"><fmt:message key="resource.common.monitor.visibility.GetCurrentValuesLabel"/></td>
-    <td><html:image property="current" page="/images/dash-button_go-arrow.gif" border="0"/></td>
+    <td><html:image property="current" page="/images/4.0/icons/accept.png" border="0"/></td>
 </c:if>
 <c:if test="${useReloadButton}">
     <td width="100%" align="right"><fmt:message key="resource.common.monitor.visibility.GetCurrentValuesLabel"/></td>
-    <td><a href="javascript:location.reload();"><html:img page="/images/dash-button_go-arrow.gif" border="0"/></a></td>
+    <td><a href="javascript:location.reload();"><html:img page="/images/4.0/icons/accept.png" border="0"/></a></td>
 </c:if>
     <td width="100%"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
 <c:if test="${usePager}">
