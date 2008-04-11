@@ -13,12 +13,14 @@ public class DataManager_test extends BaseServerTestCase {
     }
 
     public void setUp() throws Exception {
-        super.setUp();
+        // Disable DB dump and restore, it does not work on Oracle.
+        //super.setUp();
         _registry = deployHQ();
     }
 
     public void tearDown() throws Exception {
-        super.tearDown();
+        // Disable DB dump and restore, it does not work on Oracle.
+        //super.tearDown();
         undeployHQ();
     }
 
