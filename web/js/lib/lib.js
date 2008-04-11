@@ -222,3 +222,18 @@ hyperic.widget.menu = {
     }
 }
 
+/**
+ * @deprecated used only for the struts header
+ */
+function activateHeaderTab(){
+    var l = document.location;
+    l = l+""; // force string cast
+    if(l.indexOf("Dash")!=-1)
+        dojo.byId("dashTab").className = "active";
+    if(l.indexOf("Resou")!=-1)
+        dojo.byId("resTab").className = "active";
+    if(l.indexOf("rep")!=-1 || l.indexOf("Rep")!=-1 || l.indexOf("masth")!=-1)
+        dojo.byId("analyzeTab").className = "active";
+    if(l.indexOf("admin")!=-1 || l.indexOf("Adm")!=-1)
+        dojo.byId("adminTab").className = "active";
+}
