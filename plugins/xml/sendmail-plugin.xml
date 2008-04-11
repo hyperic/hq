@@ -77,6 +77,8 @@ exit 0
   <server name="Sendmail">
 
     <property name="INVENTORY_ID" value="sendmail"/>
+    <!-- hardwire this cosmetic to universal location -->
+    <property name="INSTALLPATH" value="/usr/sbin/sendmail"/>
 
     <config>
       <option name="process.query"
@@ -93,11 +95,6 @@ exit 0
 
     <property name="PROC_QUERY"
               value="State.Name.eq=sendmail"/>
-
-    <scan type="file">
-      <include name="/usr/sbin/sendmail"/>
-      <include name="/usr/lib/sendmail"/>
-    </scan>
 
     <plugin type="autoinventory"
             class="org.hyperic.hq.product.DaemonDetector"/>
