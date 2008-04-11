@@ -246,7 +246,7 @@ a.listheaderlink:hover {
 }
 
 .listrow,.tableroweven,.lineitem {
-    background-color: #F2F4F7
+    background-color: #F8F9FE;
 }
 
 .listrowselected,.tablerowaction,.tablerowodd {
@@ -1616,11 +1616,11 @@ ul.boxy li {
 }
 
 #narrowlist_false .blocktitle {
-    background-color: #38538b
+    background: transparent url('/images/4.0/backgrounds/panel_gray.jpg') repeat-x scroll 0% 50%;
 }
 
 #narrowlist_true .blockcontent {
-    background-color: #eaedf2
+    background-color: #F8F9FE
 }
 
 #displayselaction {
@@ -1875,7 +1875,7 @@ a.black:link,a.black:visited {
 }
 
 #narrowlist_true .blocktitle,#displayselaction .blocktitle {
-    background-color: #868787;
+    background: transparent url(/images/4.0/backgrounds/panel_gray.jpg) repeat-x scroll 0%;
     color: #fff;
     font-weight: 700
 }
