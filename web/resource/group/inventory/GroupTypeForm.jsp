@@ -56,7 +56,7 @@
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP_COMPAT_SVC" var="CONST_COMPAT_SVC" />
 
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
 var compatibleArr = new Array();
 var compatibleCount = 0;
 // need to set the total size of the compatbility types
@@ -205,7 +205,7 @@ function changeDropDown (masterSelName, selName, selectVal){
 <logic:messagesNotPresent property="typeAndResourceTypeId">
       <td width="80%" class="BlockContent">      
           <html:select property="typeAndResourceTypeId"/>
-          <script language="JavaScript" type="text/javascript">
+          <script  type="text/javascript">
             document.getElementsByName("typeAndResourceTypeId")[0].style.display = "none";
           </script>
       </td>
@@ -213,12 +213,12 @@ function changeDropDown (masterSelName, selName, selectVal){
 <logic:messagesPresent property="typeAndResourceTypeId">
       <td width="80%" class="ErrorField">      
           <html:select property="typeAndResourceTypeId"/>
-          <script language="JavaScript" type="text/javascript">
+          <script  type="text/javascript">
             document.getElementsByName("typeAndResourceTypeId")[0].style.display = "none";
           </script>
       </td>          
 </logic:messagesPresent>
-      <script language="JavaScript" type="text/javascript">
+      <script  type="text/javascript">
         changeDropDown('groupType', 'typeAndResourceTypeId','<c:out value="${GroupForm.typeAndResourceTypeId}"/>');
       </script>
 	</tr>

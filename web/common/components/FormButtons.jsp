@@ -35,7 +35,7 @@
 <tiles:importAttribute name="noReset" ignore="true"/>
 <tiles:importAttribute name="noCancel" ignore="true"/>
 
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
   var isButtonClicked = false;
   
   function checkSubmit() {

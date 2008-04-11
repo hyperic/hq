@@ -37,7 +37,7 @@
 <tiles:importAttribute name="okAssignBtn" ignore="true"/>
 <tiles:importAttribute name="okAssignOnly" ignore="true"/>
 
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
   var isButtonClicked = false;
 
   function checkSubmit() {

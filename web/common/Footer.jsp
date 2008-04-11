@@ -95,7 +95,7 @@
 </table>
 </div>
 
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
   setFoot();
 </script>
 

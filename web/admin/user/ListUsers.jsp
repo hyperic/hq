@@ -31,7 +31,7 @@
   USA.
  --%>
 
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="listUser"/>
 <script type="text/javascript">
 var pageData = new Array();

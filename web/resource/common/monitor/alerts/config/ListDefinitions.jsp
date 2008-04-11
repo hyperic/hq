@@ -58,9 +58,9 @@
 
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
 
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="listAlertDefinitions"/>
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
 function setActiveInactive() {
     document.RemoveConfigForm.setActiveInactive.value='y';
     document.RemoveConfigForm.submit();

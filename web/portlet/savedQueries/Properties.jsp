@@ -35,13 +35,13 @@
 <c:set var="widgetInstanceName" value="savedQueriesList"/>
 <c:url var="selfAction" value="/dashboard/Admin.do?mode=savedQueries"/>
 
-<script language="JavaScript" src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
-<script language="JavaScript" src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
 <script type="text/javascript">
   var help = "<hq:help/>";
 </script>
 
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="listRoles"/>
 <script type="text/javascript">
 var pageData = new Array();

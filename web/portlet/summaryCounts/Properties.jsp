@@ -35,7 +35,7 @@
 <c:set var="widgetInstanceName" value="savedQueriesList"/>
 <c:url var="selfAction" value="/dashboard/Admin.do?mode=savedQueries"/>
 
-<script language="JavaScript" src="<html:rewrite page="/js/"/>dashboard_SummaryCounts.js" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/"/>dashboard_SummaryCounts.js" type="text/javascript"></script>
 <script type="text/javascript">
   var help = '<hq:help/>';
 </script>
