@@ -45,6 +45,11 @@ a:visited,a:hover,a {
     color: #fff
 }
 
+#headerLinks a {
+   color: #57CBDB;
+    text-decoration: none
+}
+
 /* HEADER SEARCH */
 #headerSearch {
     position: absolute;
