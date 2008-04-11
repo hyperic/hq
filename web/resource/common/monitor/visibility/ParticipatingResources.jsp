@@ -181,7 +181,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <td width="100%" align="right"><fmt:message
       key="resource.common.monitor.visibility.GetCurrentValuesLabel"/></td>
     <td><html:image property="redraw"
-      page="/images/dash-button_go-arrow.gif" border="0"/></td>
+      page="/images/4.0/icons/accept.png" border="0"/></td>
 --%>
   </tr>
 </table>
