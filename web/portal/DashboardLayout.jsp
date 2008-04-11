@@ -35,28 +35,26 @@
 <script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
 
-<script language="JavaScript" type="text/javascript">
-  if (top != self)
+<script type="text/javascript">
+if (top != self){
     top.location.href = self.document.location;
+}
+autoLogout = false;
 
-  autoLogout = false;
-
-  // Register the removePortlet method
-  ajaxEngine.registerRequest( 'removePortlet',
-                              '<html:rewrite page="/dashboard/RemovePortlet.do"/>' );
-
-  ajaxEngine.registerRequest( 'movePortlet',
-                              '<html:rewrite page="/dashboard/ReorderPortlets.do"/>' );
-
-  function removePortlet(name, label) {
-    ajaxEngine.sendRequest( 'removePortlet', 'portletName=' + name );
-    new Effect.BlindUp($(name));
-
+function removePortlet(name, label) {
+    dojo.xhrGet({
+        url: '<html:rewrite page="/dashboard/RemovePortlet.do"/>',
+        load: function(){postRemovet(name,label)},
+        error: function(){document.location="/Login.do"}
+    });
+}
+  
+function postRemovet(name, label){
+    new Effect.BlindUp(dojo.byId(name));
     var wide = isWide(name);
     if (!wide && !isNarrow(name)) {
         return;
     }
-
     var portletOptions;
     for (i = 0; i < document.forms.length; i++) {
       if (document.forms[i].wide) {
@@ -66,7 +64,6 @@
         }
       }
     }
-
     if (portletOptions) {
         // Make sure that we are not re-inserting
         for (var i = 0; i < portletOptions.length; i++) {
@@ -77,100 +74,98 @@
         portletOptions[portletOptions.length] = new Option(label, name);
 
         // Make sure div is visible
-        $('addContentsPortlet' + wide).style.visibility='visible';
+        dojo.byId('addContentsPortlet' + wide).style.visibility='visible';
     }
-  }
+}
 
-</script>
-<script language="JavaScript" type="text/javascript">
-    function refreshPortlets() {
+function refreshPortlets() {
 
-        var problemPortlet = $('problemResourcesTable');
-        var favoritePortlet = $('favoriteTable');
+    var problemPortlet = dojo.byId('problemResourcesTable');
+    var favoritePortlet = dojo.byId('favoriteTable');
 
-        var nodes = document.getElementsByTagName('table');
-        var getRecentForm = document.getElementsByTagName('form')
+    var nodes = document.getElementsByTagName('table');
+    var getRecentForm = document.getElementsByTagName('form')
 
-        for (i = 0; i < nodes.length; i++) {
-            if (/metricTable/.test(nodes[i].id)) {
-                //alert('in metric table')
-                var metricTblId = nodes[i].id;
-                var getId = metricTblId.split('_');
-                var metricIdPart = getId[1];
+    for (i = 0; i < nodes.length; i++) {
+        if (/metricTable/.test(nodes[i].id)) {
+            //alert('in metric table')
+            var metricTblId = nodes[i].id;
+            var getId = metricTblId.split('_');
+            var metricIdPart = getId[1];
 
-                if (metricIdPart) {
-                    var metricIdToken = '_' + metricIdPart;
+            if (metricIdPart) {
+                var metricIdToken = '_' + metricIdPart;
 
-                    setInterval("requestMetricsResponse" + metricIdToken + "()", 30000);
-                } else {
-                    setInterval("requestMetricsResponse()", 30000);
-                }
+                setInterval("requestMetricsResponse" + metricIdToken + "()", 30000);
+            } else {
+                setInterval("requestMetricsResponse()", 30000);
             }
         }
+    }
 
 
-        for (i = 0; i < nodes.length; i++) {
-            if (/availTable/.test(nodes[i].id)) {
-                // alert('in avail table')
-                var availTblId = nodes[i].id;
-                var getId = availTblId.split('_');
-                var availIdPart = getId[1];
+    for (i = 0; i < nodes.length; i++) {
+        if (/availTable/.test(nodes[i].id)) {
+            // alert('in avail table')
+            var availTblId = nodes[i].id;
+            var getId = availTblId.split('_');
+            var availIdPart = getId[1];
 
-                if (availIdPart) {
-                    var availIdToken = '_' + availIdPart;
+            if (availIdPart) {
+                var availIdToken = '_' + availIdPart;
 
-                    setInterval("requestAvailSummary" + availIdToken + "()", 30000);
-                } else {
-                    setInterval("requestAvailSummary()", 30000);
-                }
+                setInterval("requestAvailSummary" + availIdToken + "()", 30000);
+            } else {
+                setInterval("requestAvailSummary()", 30000);
             }
         }
+    }
 
-        for (i = 0; i < getRecentForm.length; i++) {
+    for (i = 0; i < getRecentForm.length; i++) {
 
-            if (/RemoveAlerts/.test(getRecentForm[i].action)) {
-                for (i = 0; i < nodes.length; i++) {
-                    if (/recentAlertsTable/.test(nodes[i].id)) {
-                         //alert('in recent alerts table')
-                        var alertTblId = nodes[i].id;
-                        var getId = alertTblId.split('_');
-                        var alertIdPart = getId[1];
+        if (/RemoveAlerts/.test(getRecentForm[i].action)) {
+            for (i = 0; i < nodes.length; i++) {
+                if (/recentAlertsTable/.test(nodes[i].id)) {
+                     //alert('in recent alerts table')
+                    var alertTblId = nodes[i].id;
+                    var getId = alertTblId.split('_');
+                    var alertIdPart = getId[1];
 
-                        var alertIdToken = '';
-                        if (alertIdPart) {
-                            var alertIdToken = '_' + alertIdPart;
-                        }
-
-                        setInterval("requestRecentAlerts" + alertIdToken + "()", 30000);
+                    var alertIdToken = '';
+                    if (alertIdPart) {
+                        var alertIdToken = '_' + alertIdPart;
                     }
+
+                    setInterval("requestRecentAlerts" + alertIdToken + "()", 30000);
                 }
             }
         }
-
-
-        if (problemPortlet) {
-            setInterval("requestProblemResponse()", 30000);
-        }
-
-        if (favoritePortlet) {
-            setInterval("requestFavoriteResources()", 30000);
-        }
     }
 
-    function fixSelect(){
-        dojo.byId("dashSelect").value = '<c:out value="${DashboardForm.selectedDashboardId}"/>';
+
+    if (problemPortlet) {
+        setInterval("requestProblemResponse()", 30000);
     }
-    onloads.push(refreshPortlets);
-    dojo.require("dijit.Dialog");
-	dojo.connect(window, "onload", function(){
-	<c:if test="${DashboardForm.dashboardSelectable}">
-	    var dialogWidget = dijit.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
-	    if(<c:out value="${DashboardForm.popDialog}"/>){
-	       dialogWidget.show();
-	    }
-	    fixSelect();
-	 </c:if>
-	});
+
+    if (favoritePortlet) {
+        setInterval("requestFavoriteResources()", 30000);
+    }
+}
+
+function fixSelect(){
+    dojo.byId("dashSelect").value = '<c:out value="${DashboardForm.selectedDashboardId}"/>';
+}
+onloads.push(refreshPortlets);
+dojo.require("dijit.Dialog");
+dojo.connect(window, "onload", function(){
+<c:if test="${DashboardForm.dashboardSelectable}">
+   var dialogWidget = new dijit.Dialog({title: "<fmt:message key="dash.home.DashboardSelectionDialog"/>" },dojo.byId("dashboardSelectDialog"));
+    if(<c:out value="${DashboardForm.popDialog}"/>){
+       dialogWidget.startup();
+    }
+    fixSelect();
+ </c:if>
+});
 
 </script>
 <html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
@@ -234,7 +229,6 @@
         </div>
         <div id="dashboardSelectDialog" class="hidden">
 		    <div class="dojoDialog">
-		        <div class="dojoDialogHeader"><fmt:message key="dash.home.DashboardSelectionDialog"/></div>
 		        <div class="dojoDialogBody">
 		            <c:if test="${requestScope.isDashRemoved}">
 		              <div class="dojoDialogMessage"><fmt:message key="dash.home.DefalutDashboardRemoved"/></div>
@@ -260,7 +254,7 @@
 	  </html:form>
     </c:when>
     <c:otherwise>
-    	<div style="border-top:1px solid gray;margin-bottom: 4px;"></div>
+    	<div style="margin: 16px 0px;"></div>
     </c:otherwise>
     </c:choose>
     </td>
@@ -280,88 +274,86 @@
 
 <!-- Content Block -->
 <c:forEach var="columnsList" items="${portal.portlets}" >  
-  
-  <c:choose>    
-    <c:when test="${portal.columns eq 1}">    
-      <c:set var="narrow" value="false" />
-      <c:set var="hr" value="95%" />
-      <c:set var="width" value="width='100%'" />
-    </c:when>
-  
-    <c:when test="${narrow eq 'true'}">      
-      <c:set var="hr" value="180" />
-      <c:set var="width">
-        <%= narrowWidth %>
-      </c:set>
-    </c:when>
-    
-    <c:otherwise>
-      <c:set var="narrow" value="false" />
-      <c:set var="hr" value="75%" />
-      <c:set var="width" value="width='75%'" />
-    </c:otherwise>
-  </c:choose>
-
-  <td valign="top" name="specialTd" <c:out value="${width}" escapeXml="false"/>>      
-    <%= divStart %>
-
-<ul id="<c:out value="narrowList_${narrow}"/>" class="boxy">
-  <c:forEach var="portlet" items="${columnsList}">
-  <c:set var="isFirstPortlet" value="${portlet.isFirst}" scope="request"/>
-  <c:set var="isLastPortlet"  value="${portlet.isLast}"  scope="request"/>
-  <li id="<c:out value="${portlet.fullUrl}"/>">
-    <div class="DashboardPadding">
-    <tiles:insert beanProperty="url" beanName="portlet" flush="true">
-      <tiles:put name="portlet" beanName="portlet"/>
-    </tiles:insert>
-    </div>
-  </li>
-  </c:forEach>
-</ul>
-<c:if test="${sessionScope.modifyDashboard}">
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
-  <tr><td valign="top" class="DashboardPadding">
-  <c:choose>
-  <c:when test="${narrow eq 'true'}">      
-    <tiles:insert name=".dashContent.addContent.narrow" flush="true"/>
-  </c:when>
-  <c:otherwise>
-    <tiles:insert name=".dashContent.addContent.wide" flush="true"/>
-  </c:otherwise>
-  </c:choose>
-  </td></tr>
-</table>
-
-      <script type="text/javascript">
-      <!--
-        Sortable.create("<c:out value="narrowList_${narrow}"/>",
-          {dropOnEmpty: true,
-           format: /^(.*)$/,
-           containment: ["<c:out value="narrowList_${narrow}"/>"],
-           onUpdate: function() {
-                //new Ajax.Request('<html:rewrite page="/dashboard/ReOrderPortlet.do"/>',{method: 'post', onSuccess: Sortable.serialize('<c:out value="narrowList_${narrow}"/>')}); },
-                ajaxEngine.sendRequest( 'movePortlet', Sortable.serialize('<c:out value="narrowList_${narrow}"/>') ); },
-           constraint: 'vertical'});
-      -->
-      </script>
-</c:if>      
-      <c:choose >
-        <c:when test="${narrow eq 'true'}">              
-          <c:set var="narrow" value="false" />
-        </c:when>
-        <c:otherwise>              
-          <c:set var="narrow" value="true" />
-        </c:otherwise>
-      </c:choose>
-
-    <small name="footer"><br></small><html:img page="/images/spacer.gif" width="${hr}" height="1" border="0"/>
-    <%= divEnd %>
-    <script language="JavaScript" type="text/javascript">
-      if (!isIE) {
-        resizeToCorrectWidth();
-      }
-    </script>
-  </td> 
+	  <c:choose>    
+	    <c:when test="${portal.columns eq 1}">    
+	      <c:set var="narrow" value="false" />
+	      <c:set var="hr" value="95%" />
+	      <c:set var="width" value="width='100%'" />
+	    </c:when>
+	  
+	    <c:when test="${narrow eq 'true'}">      
+	      <c:set var="hr" value="180" />
+	      <c:set var="width">
+	        <%= narrowWidth %>
+	      </c:set>
+	    </c:when>
+	    
+	    <c:otherwise>
+	      <c:set var="narrow" value="false" />
+	      <c:set var="hr" value="75%" />
+	      <c:set var="width" value="width='75%'" />
+	    </c:otherwise>
+	  </c:choose>
+	
+	  <td valign="top" name="specialTd" <c:out value="${width}" escapeXml="false"/>>      
+	    <%= divStart %>
+	
+	<ul id="<c:out value="narrowList_${narrow}"/>" class="boxy">
+	  <c:forEach var="portlet" items="${columnsList}">
+	  <c:set var="isFirstPortlet" value="${portlet.isFirst}" scope="request"/>
+	  <c:set var="isLastPortlet"  value="${portlet.isLast}"  scope="request"/>
+	  <li id="<c:out value="${portlet.fullUrl}"/>">
+	    <div class="DashboardPadding">
+	    <tiles:insert beanProperty="url" beanName="portlet" flush="true">
+	      <tiles:put name="portlet" beanName="portlet"/>
+	    </tiles:insert>
+	    </div>
+	  </li>
+	  </c:forEach>
+	</ul>
+	<c:if test="${sessionScope.modifyDashboard}">
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	  <tr><td valign="top" class="DashboardPadding">
+	  <c:choose>
+	  <c:when test="${narrow eq 'true'}">      
+	    <tiles:insert name=".dashContent.addContent.narrow" flush="true"/>
+	  </c:when>
+	  <c:otherwise>
+	    <tiles:insert name=".dashContent.addContent.wide" flush="true"/>
+	  </c:otherwise>
+	  </c:choose>
+	  </td></tr>
+	</table>
+	      <script type="text/javascript">
+	        Sortable.create("<c:out value="narrowList_${narrow}"/>",
+	          {dropOnEmpty: true,
+	           format: /^(.*)$/,
+	           containment: ["<c:out value="narrowList_${narrow}"/>"],
+	           onUpdate: function() {
+	                dojo.xhrPost({
+	                    url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
+	                    load: function(){ }
+	                });},
+	           constraint: 'vertical'});
+	      </script>
+	</c:if>      
+	      <c:choose >
+	        <c:when test="${narrow eq 'true'}">              
+	          <c:set var="narrow" value="false" />
+	        </c:when>
+	        <c:otherwise>              
+	          <c:set var="narrow" value="true" />
+	        </c:otherwise>
+	      </c:choose>
+	
+	    <small name="footer"><br></small><html:img page="/images/spacer.gif" width="${hr}" height="1" border="0"/>
+	    <%= divEnd %>
+	    <script  type="text/javascript">
+	      if (!dojo.isIE) {
+	        resizeToCorrectWidth();
+	      }
+	    </script>
+	  </td> 
   
 </c:forEach>
 
@@ -371,7 +363,7 @@
     <td class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td class="rowSpanLeft"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
     <td colspan="2">
-        <div style="border-top:1px solid gray;width:100%;"></div>
+        <div style=""></div>
     </td>
     <td class="rowSpanRight"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
 </tr>
