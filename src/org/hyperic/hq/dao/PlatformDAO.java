@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Agent;
@@ -238,9 +239,9 @@ public class PlatformDAO extends HibernateDAO {
 
     public List findByServers(Integer[] ids)
     {
-        return createCriteria()
-            .createAlias("servers", "s")
-            .add( Expression.in("s.id", ids))
+        return createQuery("select distinct p from Platform p " +
+        		"join p.servers s where s.id in (:ids) order by p.sortName")
+            .setParameterList("ids", ids)
             .list();
     }
 
