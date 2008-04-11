@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -425,10 +425,8 @@ public class SybaseMeasurementPlugin
             if (rs.next())
                 return rs.getFloat("Num_active");
         }
-        finally
-        {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
+        finally {
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
         throw new SQLException();
     }
@@ -445,10 +443,8 @@ public class SybaseMeasurementPlugin
             if (rs.next())
                 return rs.getFloat("Num_free");
         }
-        finally
-        {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
+        finally {
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
         throw new SQLException();
     }
@@ -462,13 +458,20 @@ public class SybaseMeasurementPlugin
         {
             stmt = conn.createStatement();
             rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
-            if (rs.next())
-                return rs.getFloat("Num_Reuse");
+            try {
+                int col = rs.findColumn("Num_Reuse");
+                if (rs.next()) {
+                    return rs.getFloat(col);
+                }
+            } catch (SQLException e) {
+            }
+            int col = rs.findColumn("Reuse");
+            if (rs.next()) {
+                return rs.getFloat(col);
+            }
         }
-        finally
-        {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
+        finally {
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
         throw new SQLException();
     }
@@ -485,10 +488,8 @@ public class SybaseMeasurementPlugin
             if (rs.next())
                 return rs.getFloat("Max_Used");
         }
-        finally
-        {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
+        finally {
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
         throw new SQLException();
     }
@@ -505,10 +506,8 @@ public class SybaseMeasurementPlugin
             if (rs.next())
                 return rs.getFloat("Pct_act");
         }
-        finally
-        {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
+        finally {
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
         throw new SQLException();
     }
