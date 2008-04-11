@@ -39,6 +39,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
@@ -162,11 +164,15 @@ public class RecentAlertsTag extends TagSupport {
             request.setAttribute(var, recentAlerts);
             request.setAttribute(sizeVar, new Integer(recentAlerts.length) );
 
-            return SKIP_BODY;
+        } catch (SessionNotFoundException e) {
+            log.warn("User is not logged in");
+        } catch (SessionTimeoutException e) {
+            log.warn("User session has expired");
         } catch (Exception e) {
             log.warn("Error while generating recent alerts tag", e);
             throw new JspTagException( e.getMessage() );
         }
+        return SKIP_BODY;
     }
 
     public int doEndTag() throws JspException {
