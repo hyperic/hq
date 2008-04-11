@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,7 +38,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
@@ -82,7 +81,7 @@ public class ReportProcessorEJBImpl
             try {
                 //this is just to check if the metricvalue is valid
                 //will throw a NumberFormatException if there is a problem
-                BigDecimal bigDec = new BigDecimal(vals[i].getValue());
+                new BigDecimal(vals[i].getValue());
                 DataPoint pt = new DataPoint(m.getId(), vals[i]);
                 points.add(pt);
             } catch(NumberFormatException e) {
