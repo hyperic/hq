@@ -30,7 +30,7 @@
  --%>
 <script src="<html:rewrite page="/js/dojo/1.1/dojo/dojo.js"/>" type="text/javascript"></script>
 
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
   var help = "<hq:help/>";
 </script>
 

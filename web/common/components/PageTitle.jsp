@@ -55,7 +55,7 @@
     </c:otherwise>
   </c:choose>
 </c:if>
- <script language="JavaScript" type="text/javascript">
+ <script  type="text/javascript">
   var help = "<hq:help/>";
 </script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -163,7 +163,7 @@
         <tr>
           <td nowrap class="SearchBold"><fmt:message key="resource.hub.search.label.Search"/></td>
           <td class="SearchRegular"><html:text property="keywords" onfocus="ClearText(this)" value="${initSearchVal}" size="30" maxlength="40"/></td>
-          <td class="SearchRegular" width="100%"><html:image page="/images/dash-button_go-arrow.gif" border="0" property="ok"/></td>
+          <td class="SearchRegular" width="100%"><html:image page="/images/4.0/icons/accept.png" border="0" property="ok"/></td>
         </tr>
       </table>
       <!--  /  -->

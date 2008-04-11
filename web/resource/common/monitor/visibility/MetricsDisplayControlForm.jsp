@@ -107,7 +107,7 @@
               <hq:optionMessageList property="highlightThresholdMenu" baseKey="resource.common.monitor.visibility.metricsToolbar" filter="true"/>
             </html:select>
           </td>
-          <td><html:image property="highlight" page="/images/dash-button_go-arrow.gif" border="0"/></td>
+          <td><html:image property="highlight" page="/images/4.0/icons/accept.png" border="0"/></td>
 <c:choose>
   <c:when test="${highlighted}">
           <td width="100%"><html:link href="javascript:document.${formName}.submit()" onclick="clickLink('${formName}', 'clear')"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.ClearHighlightingBtn"/></html:link></td>
@@ -157,9 +157,9 @@
               <html:option value="4" key="resource.common.monitor.visibility.metricsToolbar.Days"/>
             </html:select>
           </td>
-          <td><html:image property="range" page="/images/dash-button_go-arrow.gif" border="0"/></td>
+          <td><html:image property="range" page="/images/4.0/icons/accept.png" border="0"/></td>
           <td width="100%" style="padding-left: 5px;">
-            <html:link href="javascript:moveIt($('advancedDisplay'), '-100px',null);showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
+            <html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), '-100px',null);showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
           </td>
         </tr>
       </table>
@@ -184,9 +184,9 @@
     </tiles:insert>
   </div>
 <!--  /  -->
-<script language="javascript">
+<script type="text/javascript">
   function hideAdvanced() {
-    var advancedDiv = $('advancedDisplay');
+    var advancedDiv = dojo.byId('advancedDisplay');
     advancedDiv.style.display='none';
     new Effect.MoveBy(advancedDiv.parentNode, 0, 0 );
   }

@@ -95,11 +95,11 @@
           window.location.reload()
         }
         else {
-          $('ctrlAction').innerHTML = statusNode.getAttribute("ctrlAction");
-          $('ctrlDesc').innerHTML = statusNode.getAttribute("ctrlDesc");
-          $('ctrlStart').innerHTML = statusNode.getAttribute("ctrlStart");
-          $('ctrlSched').innerHTML = statusNode.getAttribute("ctrlSched");
-          $('ctrlDuration').innerHTML = statusNode.getAttribute("ctrlDuration");
+          dojo.byId('ctrlAction').innerHTML = statusNode.getAttribute("ctrlAction");
+          dojo.byId('ctrlDesc').innerHTML = statusNode.getAttribute("ctrlDesc");
+          dojo.byId('ctrlStart').innerHTML = statusNode.getAttribute("ctrlStart");
+          dojo.byId('ctrlSched').innerHTML = statusNode.getAttribute("ctrlSched");
+          dojo.byId('ctrlDuration').innerHTML = statusNode.getAttribute("ctrlDuration");
         }
       }
     }

@@ -30,7 +30,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<script language="JavaScript" src='<html:rewrite page="/js/scriptaculous.js"/>'
+<script  src='<html:rewrite page="/js/scriptaculous.js"/>'
         type="text/javascript"></script>
 <script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
@@ -56,7 +56,7 @@ var selUserEsc;
 var selActionTypeEsc;
 
 function requestViewEscalation() {
-    var alertDefId = $('alertDefId').value;
+    var alertDefId = dojo.byId('alertDefId').value;
     var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
     url += escape('<c:out value="${param.escId}"/>');
     url += '.do';
@@ -67,15 +67,15 @@ function requestViewEscalation() {
 function showViewEscResponse(originalRequest) {
     var tmp = eval('(' + originalRequest.responseText + ')');
     if(tmp.error){
-        var escmsg = $('errMsg');
+        var escmsg = dojo.byId('errMsg');
 		escmsg.innerHTML = tmp.error;
-		var example = $('escError');
+		var example = dojo.byId('escError');
 		example.style.display= '';
     } else{
-         $('escMsg').innerHTML = '';
-         $('example').style.display= 'none';
-         $('errMsg').innerHTML = '';
-         $('escError').style.display= 'none';
+         dojo.byId('escMsg').innerHTML = '';
+         dojo.byId('example').style.display= 'none';
+         dojo.byId('errMsg').innerHTML = '';
+         dojo.byId('escError').style.display= 'none';
       
 	    var creationTime = tmp.escalation.creationTime;
 	    var notifyAll = tmp.escalation.notifyAll;
@@ -89,52 +89,52 @@ function showViewEscResponse(originalRequest) {
 	    var maxWaitTime = (tmp.escalation.maxWaitTime / 60000) +
 	                      " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
 	
-	    $('viewEscalation').style.display = "";
+	    dojo.byId('viewEscalation').style.display = "";
 	
-	    $('escId').value = id;
-	    $('id').value = id;
+	    dojo.byId('escId').value = id;
+	    dojo.byId('id').value = id;
 	
-	    $('name').innerHTML = '<b>' + escName + '</b>';
-	    $('escName').value = escName;
+	    dojo.byId('name').innerHTML = '<b>' + escName + '</b>';
+	    dojo.byId('escName').value = escName;
 	
-	    $('description').innerHTML = description + "&nbsp;";
+	    dojo.byId('description').innerHTML = description + "&nbsp;";
 	    if (description) {
-	        $('escDesc').value = description;
+	        dojo.byId('escDesc').value = description;
 	    }
 	
 	    if (allowPause) {
-	        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
-	        $('allowPauseTrue').checked = "true";
+	        dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
+	        dojo.byId('allowPauseTrue').checked = "true";
 	    }
 	    else {
-	        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
-	        $('allowPauseFalse').checked = "true";
+	        dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
+	        dojo.byId('allowPauseFalse').checked = "true";
 	    }
 	
 	    if (notifyAll) {
-	        $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.all" />';
-	        $('notifyAllTrue').checked = "true";
+	        dojo.byId('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.all" />';
+	        dojo.byId('notifyAllTrue').checked = "true";
 	
 	    }
 	    else {
-	        $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
-	        $('notifyAllFalse').checked = "true";
+	        dojo.byId('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
+	        dojo.byId('notifyAllFalse').checked = "true";
 	
 	    }
 	
-	    var escViewUL = $('viewEscalationUL');
+	    var escViewUL = dojo.byId('viewEscalationUL');
 	
 	    for (var i = escViewUL.childNodes.length - 1; i > -1; i--) {
 	        escViewUL.removeChild(escViewUL.childNodes[i]);
 	    }
 	
 	    if (actions.length == 0) {
-	        $('step2create').style.display = '';
-	        $('noActions').style.display = "";
+	        dojo.byId('step2create').style.display = '';
+	        dojo.byId('noActions').style.display = "";
 	    }
 	    else {
-	        $('step2create').style.display = 'none';
-	        $('viewSection').style.display = "";
+	        dojo.byId('step2create').style.display = 'none';
+	        dojo.byId('viewSection').style.display = "";
 	    }
 	
 	    for (i = 0; i < actions.length; i++) {
@@ -184,19 +184,19 @@ function showViewEscResponse(originalRequest) {
 	
 	        var emailInfo = actionConfig.names;
 	
-	        $('creationTime').value = creationTime;
-	        $('notifyAll').value = notifyAll;
-	        $('_version_').value = _version_;
-	        $('modifiedTime').value = modifiedTime;
-	        $('allowPause').value = allowPause;
-	        $('id').value = id;
+	        dojo.byId('creationTime').value = creationTime;
+	        dojo.byId('notifyAll').value = notifyAll;
+	        dojo.byId('_version_').value = _version_;
+	        dojo.byId('modifiedTime').value = modifiedTime;
+	        dojo.byId('allowPause').value = allowPause;
+	        dojo.byId('id').value = id;
 	
 	        escViewUL.appendChild(viewLi)
 	
 	        viewLi.setAttribute((document.all ? 'className' : 'class'), "BlockContent");
 	        viewLi.setAttribute('id', 'row_' + liID);
-	        $('row_' + liID).style.margin = "0px";
-	        $('row_' + liID).style.padding = "0px";
+	        dojo.byId('row_' + liID).style.margin = "0px";
+	        dojo.byId('row_' + liID).style.padding = "0px";
 	
 	        viewLi.appendChild(escTable);
 	        escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
@@ -336,7 +336,7 @@ function showViewEscResponse(originalRequest) {
 	        usersEditDiv.setAttribute('id', 'usersEditDiv_' + liID);
 	        usersEditDiv.setAttribute('width', '40%');
 	        usersEditDiv.innerHTML = " ";
-	        $('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
+	        dojo.byId('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
 	
 	    }
 	
@@ -351,23 +351,23 @@ function showViewEscResponse(originalRequest) {
 }
 
 function editEscalation() {
-    $('escPropertiesTable').style.display = 'none';
-    $('editPropertiesTable').style.display = '';
+    dojo.byId('escPropertiesTable').style.display = 'none';
+    dojo.byId('editPropertiesTable').style.display = '';
 }
 
 function cancelEditEscalation() {
-    $('escPropertiesTable').style.display = '';
-    $('editPropertiesTable').style.display = 'none';
+    dojo.byId('escPropertiesTable').style.display = '';
+    dojo.byId('editPropertiesTable').style.display = 'none';
 }
 
 function saveEscalation() {
-    var escName = $('escName').value;
+    var escName = dojo.byId('escName').value;
     if (escName == "") {
         alert('<fmt:message key="alert.config.error.escalation.name.required"/>');
         return false;
     }
 
-    var escDesc = $('escDesc').value;
+    var escDesc = dojo.byId('escDesc').value;
     if (escName.match(/['"]/) || escDesc.match(/['"]/)) {
         alert('<fmt:message key="error.input.badquotes"/>');
         return false;
@@ -376,36 +376,36 @@ function saveEscalation() {
     var pars = Form.serialize('EscalationForm');
     var url = '<html:rewrite action="/escalation/updateEscalation"/>';
     new Ajax.Request(url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError});
-    $('escPropertiesTable').style.display = '';
-    $('editPropertiesTable').style.display = 'none';
+    dojo.byId('escPropertiesTable').style.display = '';
+    dojo.byId('editPropertiesTable').style.display = 'none';
 
 }
 
 function updateEscView(originalRequest) {
-    $('example').setAttribute((document.all ? 'className' : 'class'), "ConfirmationBlock");
-    $('example').style.display = '';
-    $('okCheck').innerHTML = '<html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt="" />';
-    $('escMsg').innerHTML = "The action has been added to the escalation. The escalation is complete. You can add additional actions as needed.";
+    dojo.byId('example').setAttribute((document.all ? 'className' : 'class'), "ConfirmationBlock");
+    dojo.byId('example').style.display = '';
+    dojo.byId('okCheck').innerHTML = '<html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt="" />';
+    dojo.byId('escMsg').innerHTML = "The action has been added to the escalation. The escalation is complete. You can add additional actions as needed.";
     cancelAddEscalation();
     setTimeout("requestViewEscalation()", 1200);
     //requestViewEscalation();
 }
 
 function hideAddEscButtons() {
-    $('addEscButtons').style.display = "none";
-    $('addRowButton').style.display = "";
+    dojo.byId('addEscButtons').style.display = "none";
+    dojo.byId('addRowButton').style.display = "";
 }
 
 function showAddEscButton() {
-    $('addRowButton').style.display = "";
+    dojo.byId('addRowButton').style.display = "";
 }
 
 function addRow() {
-    $('addEscalationUL').style.display = "";
-    $('addEscButtons').style.display = "";
-    $('noActions').style.display = "none";
-    $('addRowButton').style.display = "none";
-    var ni = $('addEscalationUL');
+    dojo.byId('addEscalationUL').style.display = "";
+    dojo.byId('addEscButtons').style.display = "";
+    dojo.byId('noActions').style.display = "none";
+    dojo.byId('addRowButton').style.display = "none";
+    var ni = dojo.byId('addEscalationUL');
     var numi = document.getElementById('theValue');
     var num = (document.getElementById('theValue').value - 1) + 2;
 
@@ -528,31 +528,31 @@ function addRow() {
     td4.appendChild(emailDiv);
     emailDiv.setAttribute('class', 'emailDiv');
     emailDiv.setAttribute('id', 'emailinputDiv');
-    $('emailinputDiv').style.display = 'none';
-    $('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onMouseOut=checkEmail();copyOthersEmail(this);></textarea>";
+    dojo.byId('emailinputDiv').style.display = 'none';
+    dojo.byId('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onMouseOut=checkEmail();copyOthersEmail(this);></textarea>";
 
     td4.appendChild(sysDiv);
     sysDiv.setAttribute('class', 'escInput');
     sysDiv.setAttribute('id', 'sysloginput');
-    $('sysloginput').style.display = 'none';
-    $('sysloginput').style.textAlign = 'left';
+    dojo.byId('sysloginput').style.display = 'none';
+    dojo.byId('sysloginput').style.textAlign = 'left';
     //sysDiv.setAttribute('width', '40%');
     sysDiv.innerHTML = "meta:<br> <input type=text name=meta id=metainput" + " size=30 onMouseOut=copyMeta(this);checkMeta();><br>" + "product:<br> <input type=text name=product id=productinput" + " size=30 onMouseOut=copyProduct(this);checkProduct();><br>" + "version:<br> <input type=text name=version id=versioninput" + " size=30 onMouseOut=copyVersion(this);checkVersion();><br>";
 
     td4.appendChild(snmpDiv);
     snmpDiv.setAttribute('class', 'escInput');
     snmpDiv.setAttribute('id', 'snmpinput');
-    $('snmpinput').style.display = 'none';
-    $('snmpinput').style.textAlign = 'left';
+    dojo.byId('snmpinput').style.display = 'none';
+    dojo.byId('snmpinput').style.textAlign = 'left';
     //sysDiv.setAttribute('width', '40%');
     snmpDiv.innerHTML = '<fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: <fmt:message key="inform.config.escalation.scheme.IPAddress"/><br> <input type=text name=snmpIP id=snmpIPinput' + " size=30 onMouseOut=copysnmpIP(this);checkIP(this);><br>" + '<fmt:message key="admin.settings.SNMPTrapOID"/> <fmt:message key="inform.config.escalation.scheme.OID"/><br> <input type=text name=snmpOID id=snmpOIDinput' + " size=30 onMouseOut=copysnmpOID(this);checkOID(this);><br>";
 
     td4.appendChild(usersDiv);
     usersDiv.setAttribute('id', 'usersDiv' + liID);
-    $('usersDiv' + liID).style.display = 'none';
+    dojo.byId('usersDiv' + liID).style.display = 'none';
 
-    if ($('usersList')) {
-        usersDiv.innerHTML = $('usersList').innerHTML;
+    if (dojo.byId('usersList')) {
+        usersDiv.innerHTML = dojo.byId('usersList').innerHTML;
         var usersInputList = usersDiv.getElementsByTagName('input');
         for (i = 0; i < usersInputList.length; i++) {
             var inputNamesArr = usersInputList[i];
@@ -562,10 +562,10 @@ function addRow() {
 
     td4.appendChild(rolesDiv);
     rolesDiv.setAttribute('id', 'rolesDiv' + liID);
-    $('rolesDiv' + liID).style.display = 'none';
+    dojo.byId('rolesDiv' + liID).style.display = 'none';
 
-    if ($('rolesList')) {
-        rolesDiv.innerHTML = $('rolesList').innerHTML;
+    if (dojo.byId('rolesList')) {
+        rolesDiv.innerHTML = dojo.byId('rolesList').innerHTML;
         var rolesInputList = rolesDiv.getElementsByTagName('input');
         for (i = 0; i < rolesInputList.length; i++) {
             var inputRolesArr = rolesInputList[i];
@@ -576,65 +576,65 @@ function addRow() {
 }
 
 function copyOthersEmail(el) {
-    var othersDisplay = $('userListDisplay');
+    var othersDisplay = dojo.byId('userListDisplay');
     othersDisplay.style.display = "";
     othersDisplay.innerHTML = 'Notify email addresses: ' + el.value;
 }
 
 function copyMeta(el) {
-    var metaDisplay = $('metaText');
+    var metaDisplay = dojo.byId('metaText');
     metaDisplay.style.display = "";
     metaDisplay.innerHTML = 'meta: ' + el.value;
 }
 
 function copyProduct(el) {
-    var productDisplay = $('productText');
+    var productDisplay = dojo.byId('productText');
     productDisplay.style.display = "";
     productDisplay.innerHTML = 'product: ' + el.value;
 }
 
 function copyVersion(el) {
-    var versionDisplay = $('versionText');
+    var versionDisplay = dojo.byId('versionText');
     versionDisplay.style.display = "";
     versionDisplay.innerHTML = 'version: ' + el.value;
 }
 
 function copysnmpOID(el) {
-    var OIDDisplay = $('OIDText');
+    var OIDDisplay = dojo.byId('OIDText');
     OIDDisplay.style.display = "";
     OIDDisplay.innerHTML = '<fmt:message key="admin.settings.SNMPTrapOID"/> ' + el.value;
 }
 
 function copysnmpIP(el) {
-    var IPDisplay = $('IPText');
+    var IPDisplay = dojo.byId('IPText');
     IPDisplay.style.display = "";
     IPDisplay.innerHTML = '<fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + el.value;
 }
 
 function clearDisplay() {
-    $('userListDisplay').innerHTML = "";
-    $('metaText').innerHTML = "";
-    $('productText').innerHTML = "";
-    $('versionText').innerHTML = "";
-    $('time').innerHTML = "";
-    $('IPText').innerHTML = "";
-    $('OIDText').innerHTML = "";
+    dojo.byId('userListDisplay').innerHTML = "";
+    dojo.byId('metaText').innerHTML = "";
+    dojo.byId('productText').innerHTML = "";
+    dojo.byId('versionText').innerHTML = "";
+    dojo.byId('time').innerHTML = "";
+    dojo.byId('IPText').innerHTML = "";
+    dojo.byId('OIDText').innerHTML = "";
 }
 
 function clearOthers() {
-    $('emailinput').value = "";
-    $('emailinputDiv').style.display = "none";
+    dojo.byId('emailinput').value = "";
+    dojo.byId('emailinputDiv').style.display = "none";
 }
 
 function onchange_handler(el) {
 
-    var writeAction = $('actionName');
+    var writeAction = dojo.byId('actionName');
     var index = el.options[el.selectedIndex].value
 
     clearDisplay();
-    $('escMsg').innerHTML = '';
-    $('example').style.display = 'none';
-    $('userListDisplay').style.display = "";
+    dojo.byId('escMsg').innerHTML = '';
+    dojo.byId('example').style.display = 'none';
+    dojo.byId('userListDisplay').style.display = "";
 
     if (index == "NoOp") {
         writeAction.innerHTML = '<fmt:message key="inform.config.escalation.scheme.NoOP"/>';
@@ -666,17 +666,17 @@ function onchange_handler(el) {
 
 function onchange_who(el) {
     clearOthers();
-    $('escMsg').innerHTML = '';
-    $('example').style.display = 'none';
-    $('addEscButtons').style.display = "";
+    dojo.byId('escMsg').innerHTML = '';
+    dojo.byId('example').style.display = 'none';
+    dojo.byId('addEscButtons').style.display = "";
 
 
     var index = el.options[el.selectedIndex].value
     var idStr = el.id;
     var getId = idStr.split('_');
-    var rolesDivIn = $('rolesDiv' + getId[1]);
-    var usersDivIn = $('usersDiv' + getId[1]);
-    var emailDivIn = $('emailinputDiv');
+    var rolesDivIn = dojo.byId('rolesDiv' + getId[1]);
+    var usersDivIn = dojo.byId('usersDiv' + getId[1]);
+    var emailDivIn = dojo.byId('emailinputDiv');
 
     if (index == "Roles") {
         emailDivIn.style.display = 'none';
@@ -687,7 +687,7 @@ function onchange_who(el) {
         //configureUsers(nodeId);
     } else if (index == "Others") {
         emailDivIn.style.display = '';
-        $('emailinput').focus();
+        dojo.byId('emailinput').focus();
         //configureOthers(nodeId);
     }
     selUserEsc = index;
@@ -696,47 +696,47 @@ function onchange_who(el) {
 function showWhoSelect(el) {
     var idStr = el.id;
     var getId = idStr.split('_');
-    var whoSelector = $('who_' + getId[1]);
+    var whoSelector = dojo.byId('who_' + getId[1]);
     whoSelector.style.display = '';
 }
 
 function hideWhoSelect(el) {
     var idStr = el.id;
     var getId = idStr.split('_');
-    var whoSelector = $('who_' + getId[1]);
+    var whoSelector = dojo.byId('who_' + getId[1]);
     whoSelector.style.display = 'none';
 }
 
 function showSyslogInput(el) {
 
-    var syslogDivIn = $('sysloginput');
+    var syslogDivIn = dojo.byId('sysloginput');
     syslogDivIn.style.display = '';
-    $('metainput').focus();
+    dojo.byId('metainput').focus();
 }
 
 function hideSyslogInput(el) {
 
-    var syslogDivIn = $('sysloginput');
+    var syslogDivIn = dojo.byId('sysloginput');
     syslogDivIn.style.display = 'none';
 }
 
 function showSnmpInput(el) {
 
-    var snmpDivIn = $('snmpinput');
+    var snmpDivIn = dojo.byId('snmpinput');
     snmpDivIn.style.display = '';
-    $('snmpinput').focus();
+    dojo.byId('snmpinput').focus();
 }
 
 function hideSnmpInput(el) {
 
-    var snmpDivIn = $('snmpinput');
+    var snmpDivIn = dojo.byId('snmpinput');
     snmpDivIn.style.display = 'none';
 }
 
 
 function onchange_time(el) {
 
-    var writeTime = $('time');
+    var writeTime = dojo.byId('time');
     writeTime.style.display = "";
     var index = el.options[el.selectedIndex].value;
     writeTime.innerHTML = 'Then wait: ' + formatWaitTime(el, null, '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>',  '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
@@ -771,18 +771,18 @@ function addOption(sel, val, txt, selected) {
 }
 
 function showResponse(originalRequest) {
-    $('escMsg').innerHTML = "Escalation Saved";
+    dojo.byId('escMsg').innerHTML = "Escalation Saved";
 
 }
 
 function showResponseRemoved() {
-    $('example').style.display = '';
-    $('escMsg').innerHTML = "Action removed from this escalation";
+    dojo.byId('example').style.display = '';
+    dojo.byId('escMsg').innerHTML = "Action removed from this escalation";
 
-    if ($('viewEscalationUL').firstChild) {
-        $('noActions').style.display = "none";
+    if (dojo.byId('viewEscalationUL').firstChild) {
+        dojo.byId('noActions').style.display = "none";
     } else {
-        $('noActions').style.display = "";
+        dojo.byId('noActions').style.display = "";
     }
 }
 
@@ -791,14 +791,14 @@ function removeAction(id) {
         var urlEnd = '.do"/>';
     var url = urlBegin + id + urlEnd;
 
-    var id = $('id').value;
+    var id = dojo.byId('id').value;
     var pars = "EscId=" + id;
 
     new Ajax.Request(url, {method: 'post', parameters: pars, onComplete: showResponseRemoved, onFailure :reportError});
 }
 
 function configure(id) {
-    var sel = $('who' + id);
+    var sel = dojo.byId('who' + id);
     var selval = sel.options[sel.selectedIndex].value;
 
     if (selval == 'Users') {
@@ -818,7 +818,7 @@ function configure(id) {
 function configureOthers(el) {
     var idStr = el;
     var getId = idStr.split('_');
-    var othersDivIn = $('othersDiv_' + getId[1]);
+    var othersDivIn = dojo.byId('othersDiv_' + getId[1]);
 
     Dialog.confirm(othersDivIn.innerHTML,
     {windowParameters: {className:'dialog', width:305, height:200,
@@ -834,8 +834,8 @@ function configureOthers(el) {
 function configureUsers(el) {
     var idStr = el;
     var getId = idStr.split('_');
-    var usersDivIn = $('usersDiv' + getId[1]);
-    var writeListUsers = $('userListDisplay');
+    var usersDivIn = dojo.byId('usersDiv' + getId[1]);
+    var writeListUsers = dojo.byId('userListDisplay');
 
     Dialog.confirm('<div id="usersConfigWindow">' + usersDivIn.innerHTML +
                    '</div>',
@@ -846,7 +846,7 @@ function configureUsers(el) {
             var usersInputList =
                     usersDivIn.getElementsByTagName('input');
             var updatedInputList =
-                    $('usersConfigWindow').getElementsByTagName('input');
+                    dojo.byId('usersConfigWindow').getElementsByTagName('input');
 
             writeListUsers.appendChild(document.createTextNode('Notify: '));
 
@@ -876,8 +876,8 @@ function configureUsers(el) {
 function configureRoles(el) {
     var idStr = el;
     var getId = idStr.split('_');
-    var rolesDivIn = $('rolesDiv' + getId[1]);
-    var writeListUsers = $('userListDisplay');
+    var rolesDivIn = dojo.byId('rolesDiv' + getId[1]);
+    var writeListUsers = dojo.byId('userListDisplay');
 
     Dialog.confirm('<div id="rolesConfigWindow">' + rolesDivIn.innerHTML +
                    '</div>',
@@ -888,7 +888,7 @@ function configureRoles(el) {
             var rolesInputList =
                     rolesDivIn.getElementsByTagName('input');
             var updatedInputList =
-                    $('rolesConfigWindow').getElementsByTagName('input');
+                    dojo.byId('rolesConfigWindow').getElementsByTagName('input');
 
             writeListUsers.appendChild(document.createTextNode('Notify: '));
 
@@ -926,22 +926,22 @@ function reportError(originalRequest) {
 
 
 function hideExample() {
-    $('example').style.display = 'none';
+    dojo.byId('example').style.display = 'none';
 }
 
 function cancelAddEscalation() {
-    $('addEscalationUL').innerHTML = "";
-    $('addEscButtons').style.display = "none";
-    $('addRowButton').style.display = "";
+    dojo.byId('addEscalationUL').innerHTML = "";
+    dojo.byId('addEscButtons').style.display = "none";
+    dojo.byId('addRowButton').style.display = "";
 }
 
 function checkMeta() {
 
-    var metaText = $('metainput').value;
+    var metaText = dojo.byId('metainput').value;
     if (metaText == '') {
         showErrorDisplay();
-        $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noMetaInput"/>';
-        $('metainput').focus();
+        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noMetaInput"/>';
+        dojo.byId('metainput').focus();
         return false;
 
     } else {
@@ -952,11 +952,11 @@ function checkMeta() {
 
 function checkProduct() {
 
-    var productText = $('productinput').value;
+    var productText = dojo.byId('productinput').value;
     if (productText == '') {
         showErrorDisplay();
-        $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noProductInput"/>';
-        $('productinput').focus();
+        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noProductInput"/>';
+        dojo.byId('productinput').focus();
         return false;
     } else {
         hideErrorDisplay();
@@ -966,11 +966,11 @@ function checkProduct() {
 
 function checkVersion() {
 
-    var versionText = $('versioninput').value;
+    var versionText = dojo.byId('versioninput').value;
     if (versionText == '') {
         showErrorDisplay();
-        $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noVersionInput"/>';
-        $('versioninput').focus();
+        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noVersionInput"/>';
+        dojo.byId('versioninput').focus();
         return false;
 
     } else {
@@ -981,11 +981,11 @@ function checkVersion() {
 
 function checkIP() {
 
-    var IPText = $('snmpIPinput').value;
+    var IPText = dojo.byId('snmpIPinput').value;
     if (IPText == '') {
         showErrorDisplay();
-        $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPIPFormat"/>';
-        $('snmpIPinput').focus();
+        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPIPFormat"/>';
+        dojo.byId('snmpIPinput').focus();
         return false;
 
     } else {
@@ -996,12 +996,12 @@ function checkIP() {
 
 
 function checkOID() {
-    var OIDText = $('snmpOIDinput').value;
+    var OIDText = dojo.byId('snmpOIDinput').value;
 
     if (OIDText == '') {
         showErrorDisplay();
-        $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPTrapOIDFormat"/>';
-        $('snmpOIDinput').focus();
+        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPTrapOIDFormat"/>';
+        dojo.byId('snmpOIDinput').focus();
         return false;
 
     } else {
@@ -1013,8 +1013,8 @@ function checkOID() {
 
 function checkEmail() {
 
-    var emailTextArea = $('emailinput');
-    var userListCheck = $('userListDisplay');
+    var emailTextArea = dojo.byId('emailinput');
+    var userListCheck = dojo.byId('userListDisplay');
     var emailAdds = emailTextArea.value;
     var illegalChars = /[\(\)\<\>\;\:\\\/\"\[\]]/;
 
@@ -1027,10 +1027,10 @@ function checkEmail() {
             for (i = 0; i < separatedEmails.length; i++) {
          
            if(!((separatedEmails[i].indexOf(".") > 2) && (separatedEmails[i].indexOf("@") > 0))) {
-            $('example').style.display= '';
-            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
-            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressFormat"/>';
+            dojo.byId('example').style.display= '';
+            dojo.byId('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            dojo.byId('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+            dojo.byId('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressFormat"/>';
             return false;
                 }
             }
@@ -1038,11 +1038,11 @@ function checkEmail() {
 
         if (selUserEsc == 'Others' && emailAdds == '') {
             showErrorDisplay();
-            $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
+            dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
             return false;
         } else if (emailAdds.match(illegalChars)) {
             showErrorDisplay();
-            $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
+            dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
             return false;
         } else {
             hideErrorDisplay();
@@ -1055,7 +1055,7 @@ function checkSMS() {
 
     if ((selActionTypeEsc == 'SMS') && selUserEsc == undefined) {
         showErrorDisplay();
-        $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
+        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
         return false;
     } else {
         hideErrorDisplay();
@@ -1068,7 +1068,7 @@ function textCounter(field, countfield, maxlimit) {
     {
         field.value = field.value.substring(0, maxlimit);
         showErrorDisplay();
-        $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.250Char"/>';
+        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.250Char"/>';
         return false;
     } else {
         hideErrorDisplay();
@@ -1077,21 +1077,21 @@ function textCounter(field, countfield, maxlimit) {
 }
 
 function showErrorDisplay() {
-    $('example').style.display = '';
-    $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-    $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+    dojo.byId('example').style.display = '';
+    dojo.byId('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+    dojo.byId('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
 }
 
 function hideErrorDisplay() {
-    $('escMsg').innerHTML = '';
-    $('example').style.display = 'none';
-    $('addEscButtons').style.display = "";
+    dojo.byId('escMsg').innerHTML = '';
+    dojo.byId('example').style.display = 'none';
+    dojo.byId('addEscButtons').style.display = "";
 }
 
 function ActionTypeNull() {
     if (selActionTypeEsc == undefined || selActionTypeEsc == 'Select') {
         showErrorDisplay();
-        $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectEscMethod"/>';
+        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectEscMethod"/>';
         return false;
     } else {
         return true;
@@ -1099,10 +1099,10 @@ function ActionTypeNull() {
 }
 
 function selUserEscNull() {
-    var  userList = $('userListDisplay').innerHTML;
+    var  userList = dojo.byId('userListDisplay').innerHTML;
     if ((selUserEsc == undefined || selUserEsc == 'Select' || userList=='') && (selActionTypeEsc != "Syslog" && selActionTypeEsc != "SNMP" && selActionTypeEsc != "NoOp")) {
         showErrorDisplay();
-        $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
+        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
         return false;
     } else {
         return true;
@@ -1152,14 +1152,14 @@ function saveAddEscalation() {
     }
 
 
-    var emailTextArea = $('emailinput');
+    var emailTextArea = dojo.byId('emailinput');
     var emailAdds = emailTextArea.value;
 
     emailTextArea.value = emailAdds.split(/[\s]/);
     emailTextArea.value = emailAdds.split(/,/);
 
 
-    var id = $('id').value;
+    var id = dojo.byId('id').value;
     var serialAddAction = Form.serialize('addEscalation');
     var pars = "EscId=" + id + "&" + serialAddAction;
     var url = '<html:rewrite action="/escalation/saveAction"/>';

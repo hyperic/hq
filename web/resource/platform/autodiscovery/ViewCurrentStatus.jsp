@@ -35,7 +35,7 @@
 <c:url var="selfUrl" value="${selfAction}"/>
 
 <c:if test="${scanstate.startTime > 0 && !scanstate.isDone }"> <!-- there's a scan -->
- <script language="Javascript">
+ <script type="text/javascript">
    function changeUrl(newUrl) {
     window.location.href = newUrl;
    }

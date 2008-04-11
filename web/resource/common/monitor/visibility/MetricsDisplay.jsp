@@ -42,7 +42,7 @@
 <tiles:importAttribute name="useCheckboxes" ignore="true"/>
 <tiles:importAttribute name="favorites" ignore="true"/>
 
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <c:set var="mdsWidget" value="metricsDisplaySummary"/>
 <script type="text/javascript">
 initializeWidgetProperties('<c:out value="${mdsWidget}"/>');
@@ -115,16 +115,16 @@ sometimes we don't want any left side buttons or checkboxes at all
         </td>
 <c:if test="${useCurrent && not MetricsDisplayForm.readOnly}">
         <td align="right" nowrap>
-        <script language="JavaScript">
+        <script type="text/javascript">
         <!--
           var liveUpdate = true;
           var refreshInterval = 120;
 
           function resetAll() {
-            $('refresh60').innerHTML = '<a href="javascript:refresh60()"><fmt:message key="resource.common.monitor.visibility.MetricRefresh.60"/></a>';
-            $('refresh120').innerHTML = '<a href="javascript:refresh120()"><fmt:message key="resource.common.monitor.visibility.MetricRefresh.120"/></a>';
-            $('refresh300').innerHTML = '<a href="javascript:refresh300()"><fmt:message key="resource.common.monitor.visibility.MetricRefresh.300"/></a>';
-            $('refreshOff').innerHTML  = '<a href="javascript:refreshOff()"><fmt:message key="OFF"/>';
+            dojo.byId('refresh60').innerHTML = '<a href="javascript:refresh60()"><fmt:message key="resource.common.monitor.visibility.MetricRefresh.60"/></a>';
+            dojo.byId('refresh120').innerHTML = '<a href="javascript:refresh120()"><fmt:message key="resource.common.monitor.visibility.MetricRefresh.120"/></a>';
+            dojo.byId('refresh300').innerHTML = '<a href="javascript:refresh300()"><fmt:message key="resource.common.monitor.visibility.MetricRefresh.300"/></a>';
+            dojo.byId('refreshOff').innerHTML  = '<a href="javascript:refreshOff()"><fmt:message key="OFF"/>';
           }
 
           function refresh60() {
@@ -132,7 +132,7 @@ sometimes we don't want any left side buttons or checkboxes at all
 
             liveUpdate = true;
             refreshInterval = 60;
-            $('refresh60').innerHTML = '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.60"/>';
+            dojo.byId('refresh60').innerHTML = '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.60"/>';
           }
 
           function refresh120() {
@@ -140,7 +140,7 @@ sometimes we don't want any left side buttons or checkboxes at all
 
             liveUpdate = true;
             refreshInterval = 120;
-            $('refresh120').innerHTML = '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.120"/>';
+            dojo.byId('refresh120').innerHTML = '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.120"/>';
           }
 
           function refresh300() {
@@ -148,14 +148,14 @@ sometimes we don't want any left side buttons or checkboxes at all
 
             liveUpdate = true;
             refreshInterval = 300;
-            $('refresh300').innerHTML = '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.300"/>';
+            dojo.byId('refresh300').innerHTML = '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.300"/>';
           }
 
           function refreshOff() {
             resetAll();
 
             liveUpdate = null;
-            $('refreshOff').innerHTML = "<fmt:message key="OFF"/>";
+            dojo.byId('refreshOff').innerHTML = "<fmt:message key="OFF"/>";
           }
 
           function initLiveMetrics() {

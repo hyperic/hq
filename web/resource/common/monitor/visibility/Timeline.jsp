@@ -66,7 +66,7 @@
       <div id="eventDetailTable"
            style="position: relative; height: 230px; display: none;">
       <div class="eventDetails">
-<script>
+<script type="text/javascript">
   var statusArr =
     new Array ("ALL", "ERR", "WRN", "INF", "DBG", "ALR", "CTL");
 
@@ -107,7 +107,7 @@
           </td>
           <td valign="top" style="text-align: right; border-bottom: solid; border-width: 1px; border-color: #000000;">
             <html:img page="/images/dash-icon_delete.gif"
-                      onclick="new Effect.Fade($('eventDetailTable'))"/>
+                      onclick="new Effect.Fade(dojo.byId('eventDetailTable'))"/>
           </td>
         </tr>
         <tr>

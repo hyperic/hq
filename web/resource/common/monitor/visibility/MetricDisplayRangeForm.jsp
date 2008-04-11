@@ -60,7 +60,7 @@
 
 <script src="<html:rewrite page="/js/"/>schedule.js" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>monitorSchedule.js" type="text/javascript"></script>
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
  var jsPath = "<html:rewrite page="/js/"/>";
  var cssPath = "<html:rewrite page="/css/"/>";
  
@@ -261,39 +261,39 @@
   </tr>
 </table>
 
-<script language="javascript">
+<script type="text/javascript">
   function showAdvanced() {
-    if ($('advancedAnchor') != null) {
-      $('advancedDisplay').style.display = "";
+    if (dojo.byId('advancedAnchor') != null) {
+      dojo.byId('advancedDisplay').style.display = "";
       /*new Rico.Effect.Position('advancedDisplay',
                                null, // move across y axis
-                               $('advancedAnchor').offsetTop - $('advancedDisplay').offsetHeight,
+                               dojo.byId('advancedAnchor').offsetTop - dojo.byId('advancedDisplay').offsetHeight,
                                0,
                                1, // 1 steps
                                {}
                              );*/
-         new Effect.Grow($('advancedAnchor'))
+         new Effect.Grow(dojo.byId('advancedAnchor'))
     }
 
     new Effect.Appear('advancedDisplay', {to: 0.85});
-    if ($('simpleRn')) {
-        $('simpleRn').style.visibility = "hidden";
-        $('simpleRn').disabled = true;
+    if (dojo.byId('simpleRn')) {
+        dojo.byId('simpleRn').style.visibility = "hidden";
+        dojo.byId('simpleRn').disabled = true;
     }
-    if ($('simpleRu')) {
-        $('simpleRu').style.visibility = "hidden";
-        $('simpleRu').disabled = true;
+    if (dojo.byId('simpleRu')) {
+        dojo.byId('simpleRu').style.visibility = "hidden";
+        dojo.byId('simpleRu').disabled = true;
     }
   }
 
   function cancelAdvanced() {
-    if ($('simpleRn')) {
-        $('simpleRn').disabled = false;
-        $('simpleRn').style.visibility = "visible";
+    if (dojo.byId('simpleRn')) {
+        dojo.byId('simpleRn').disabled = false;
+        dojo.byId('simpleRn').style.visibility = "visible";
     }
-    if ($('simpleRu')) {
-        $('simpleRu').disabled = false;
-        $('simpleRu').style.visibility = "visible";
+    if (dojo.byId('simpleRu')) {
+        dojo.byId('simpleRu').disabled = false;
+        dojo.byId('simpleRu').style.visibility = "visible";
     }
     new Effect.Puff('advancedDisplay');
   }

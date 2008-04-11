@@ -38,7 +38,7 @@
   <c:set var="chooseScheme" value="true"/>
 </c:if>
 
-<script language="JavaScript" src='<html:rewrite page="/js/scriptaculous.js"/>'
+<script  src='<html:rewrite page="/js/scriptaculous.js"/>'
   type="text/javascript"></script>
 <script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
@@ -56,12 +56,12 @@ function showViewEscResponse() {
     var maxPauseTime = (tmp.escalation.maxWaitTime / 60000) +
        " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
 
-    $('viewEscalation').style.display = "";
+    dojo.byId('viewEscalation').style.display = "";
     if (document.EscalationSchemeForm != null) {
       document.EscalationSchemeForm.escId.value = id;
     }
   
-    var escViewUL = $('viewEscalationUL');
+    var escViewUL = dojo.byId('viewEscalationUL');
 
     if (actions.length > 0) {
       for (var i=escViewUL.childNodes.length; i > 0; i--) {
@@ -116,8 +116,8 @@ function showViewEscResponse() {
   
       viewLi.setAttribute((document.all ? 'className' : 'class'), "BlockContent");
       viewLi.setAttribute('id','row_'+ liID);
-      $('row_'+ liID).style.margin = "0px";
-      $('row_'+ liID).style.padding = "0px";
+      dojo.byId('row_'+ liID).style.margin = "0px";
+      dojo.byId('row_'+ liID).style.padding = "0px";
        
       viewLi.appendChild(escTable);
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
@@ -247,17 +247,17 @@ function showViewEscResponse() {
     }
 
       if (allowPause) {
-        $('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause" /> ' + maxPauseTime;
+        dojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause" /> ' + maxPauseTime;
       }
       else {
-        $('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.continue" />';
+        dojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.continue" />';
       }
 
       if (notifyAll) {
-        $('changed').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationNotify.all" />';
+        dojo.byId('changed').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationNotify.all" />';
       }
       else {
-        $('changed').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationNotify.previous" />';
+        dojo.byId('changed').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationNotify.previous" />';
       }
    }    
 
@@ -280,12 +280,12 @@ function showViewEscResponse() {
     function initEsc () {
         // Set up the escalation dropdown
         var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
-        var escalationSel = $('escIdSel');
+        var escalationSel = dojo.byId('escIdSel');
         var schemes = escJson.escalations;
 
         if (schemes.length == 0) {
             escalationSel.style.display = "none";
-            $('noescalations').style.display = "";;
+            dojo.byId('noescalations').style.display = "";;
         }
 
         for (var i = 0; i < schemes.length; i++) {
@@ -307,7 +307,7 @@ function showViewEscResponse() {
    onloads.push( initEsc );
 
     function hideExample() {
-            $('example').style.display= 'none';
+            dojo.byId('example').style.display= 'none';
     }
 
    </c:if>

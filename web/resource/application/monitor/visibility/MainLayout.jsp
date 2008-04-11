@@ -31,7 +31,7 @@
  --%>
 
 
-<script language="JavaScript" src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
 <script type="text/javascript">
 var pageData = new Array();
 </script>

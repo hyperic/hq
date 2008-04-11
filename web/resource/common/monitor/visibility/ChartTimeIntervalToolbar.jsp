@@ -71,7 +71,7 @@
   </tr>
   <tr>
     <td colspan="3" class="BlockContent" align="right">
-    <html:link href="javascript:moveIt($('advancedDisplay'), null,'75px');showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link>
+    <html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), null,'75px');showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link>
     </td>
     </tr>
     <tr>
@@ -86,9 +86,9 @@
   </tr>
 </table>
 
-<script language="javascript">
+<script type="text/javascript">
   function hideAdvanced() {
-    var advancedDiv = $('advancedDisplay');
+    var advancedDiv = dojo.byId('advancedDisplay');
     advancedDiv.style.display='none';
     new Effect.MoveBy(advancedDiv.parentNode, 0, 0 );
   }

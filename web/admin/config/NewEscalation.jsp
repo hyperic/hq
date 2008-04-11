@@ -30,7 +30,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<script language="JavaScript" src='<html:rewrite page="/js/scriptaculous.js"/>'
+<script  src='<html:rewrite page="/js/scriptaculous.js"/>'
   type="text/javascript"></script>
 <script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
@@ -68,16 +68,16 @@ function showViewEscResponse(originalRequest) {
        " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
 
     <c:if test="${not empty EscalationForm.escId}">
-          $('viewEscalation').style.display = "";
-          $('createEscTable').style.display = "none";
+          dojo.byId('viewEscalation').style.display = "";
+          dojo.byId('createEscTable').style.display = "none";
     </c:if>
     <c:if test="${empty EscalationForm.escId}">
-          $('viewEscalation').style.display = "none";
-          $('createEscTable').style.display = "";
+          dojo.byId('viewEscalation').style.display = "none";
+          dojo.byId('createEscTable').style.display = "";
 
     </c:if>
   
-    var escViewUL = $('viewEscalationUL');
+    var escViewUL = dojo.byId('viewEscalationUL');
 
     for(var i=escViewUL.childNodes.length-1; i>1; i--) {
 	 escViewUL.removeChild(escViewUL.childNodes[i]);
@@ -125,19 +125,19 @@ function showViewEscResponse(originalRequest) {
       var productInfo = " ";
       var versionInfo = " ";
   
-      $('creationTime').value = creationTime;
-      $('notifyAll').value = notifyAll;
-      $('_version_').value = _version_;
-      $('modifiedTime').value = modifiedTime;
-      $('allowPause').value = allowPause;
-      $('id').value = id;
+      dojo.byId('creationTime').value = creationTime;
+      dojo.byId('notifyAll').value = notifyAll;
+      dojo.byId('_version_').value = _version_;
+      dojo.byId('modifiedTime').value = modifiedTime;
+      dojo.byId('allowPause').value = allowPause;
+      dojo.byId('id').value = id;
   
       escViewUL.appendChild(viewLi)
   
       //viewLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
       viewLi.setAttribute('id','row_'+ liID);
-      $('row_'+ liID).style.margin = "0px";
-      $('row_'+ liID).style.padding = "0px";
+      dojo.byId('row_'+ liID).style.margin = "0px";
+      dojo.byId('row_'+ liID).style.padding = "0px";
       
       viewLi.appendChild(escTable);
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
@@ -220,13 +220,13 @@ function showViewEscResponse(originalRequest) {
       usersEditDiv.setAttribute('id', 'usersEditDiv_'+ liID);
       usersEditDiv.setAttribute('width', '40%');
       usersEditDiv.innerHTML = " ";
-      $('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
+      dojo.byId('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
    }    
 }
 onloads.push(requestViewEscalation);
 
 function requestViewEscalation() {
-    var alertDefId = $('alertDefId').value;
+    var alertDefId = dojo.byId('alertDefId').value;
     var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
     url += escape('<c:out value="${param.escId}"/>');
     url += '.do';
@@ -240,10 +240,10 @@ function editEscalation (row) {
     var liID = getId[1];
     var usersEditDiv = ('usersEditDiv_'+ getId[1]);
     //alert(idStr);
-    var editMaxWait = $('editWait_' + getId[1]);
-    $('wait_' + getId[1]).style.display = "none";
-    $('pauseTimeText').style.display="none";
-    $('pauseTimeEdit').style.display = "";
+    var editMaxWait = dojo.byId('editWait_' + getId[1]);
+    dojo.byId('wait_' + getId[1]).style.display = "none";
+    dojo.byId('pauseTimeText').style.display="none";
+    dojo.byId('pauseTimeEdit').style.display = "";
 
     editMaxWait.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
     editMaxWait.appendChild(select1);
@@ -257,8 +257,8 @@ function editEscalation (row) {
     addOption(select1, '2700000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message>');
     addOption(select1, '3600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>');
 
-    if($('usersList')) {
-      usersEditDiv.innerHTML = $('usersList').innerHTML;
+    if(dojo.byId('usersList')) {
+      usersEditDiv.innerHTML = dojo.byId('usersList').innerHTML;
       var usersInputList = usersEditDiv.getElementsByTagName('input');
       for(i=0;i < usersInputList.length; i++) {
           var inputNamesArr = usersInputList[i];
@@ -270,7 +270,7 @@ function editEscalation (row) {
 }
 
 	function addRow() {
-	    var ni = $('rowOrder');
+	    var ni = dojo.byId('rowOrder');
 	    var numi = document.getElementById('theValue');
 	    var num = (document.getElementById('theValue').value -1)+ 2;
 	
@@ -387,7 +387,7 @@ function editEscalation (row) {
 	td4.appendChild(emailDiv);
 	emailDiv.setAttribute('class', 'emailDiv');
 	emailDiv.setAttribute('id', 'emailinput' + liID);
-	$('emailinput'+ liID).style.display = 'none';
+	dojo.byId('emailinput'+ liID).style.display = 'none';
 	emailDiv.setAttribute('class', 'escInput');
 	emailDiv.setAttribute('width', '40%');
 	emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";
@@ -395,16 +395,16 @@ function editEscalation (row) {
 	td4.appendChild(sysDiv);
 	sysDiv.setAttribute('class', 'escInput'+ liID);
 	sysDiv.setAttribute('id', 'sysloginput'+ liID);
-	$('sysloginput'+ liID).style.display = 'none';
+	dojo.byId('sysloginput'+ liID).style.display = 'none';
 	sysDiv.setAttribute('width', '40%');
 	sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";
 	  
 	        td4.appendChild(usersDiv);
 	        usersDiv.setAttribute('id', 'usersDiv' + liID);
-	        $('usersDiv'+ liID).style.display = 'none';
+	        dojo.byId('usersDiv'+ liID).style.display = 'none';
 	
-	        if($('usersList')) {
-	          usersDiv.innerHTML = $('usersList').innerHTML;
+	        if(dojo.byId('usersList')) {
+	          usersDiv.innerHTML = dojo.byId('usersList').innerHTML;
 	          var usersInputList = usersDiv.getElementsByTagName('input');
 	          for(i=0;i < usersInputList.length; i++) {
 	          var inputNamesArr = usersInputList[i];
@@ -414,10 +414,10 @@ function editEscalation (row) {
 	
 	    td4.appendChild(rolesDiv);
 	    rolesDiv.setAttribute('id', 'rolesDiv' + liID);
-	    $('rolesDiv'+ liID).style.display = 'none';
+	    dojo.byId('rolesDiv'+ liID).style.display = 'none';
 	
-	    if($('rolesList')) {
-	      rolesDiv.innerHTML = $('rolesList').innerHTML;
+	    if(dojo.byId('rolesList')) {
+	      rolesDiv.innerHTML = dojo.byId('rolesList').innerHTML;
 	      var rolesInputList = rolesDiv.getElementsByTagName('input');
 	       for(i=0;i < rolesInputList.length; i++) {
 	              var inputRolesArr = rolesInputList[i];
@@ -471,9 +471,9 @@ function editEscalation (row) {
 	    var index= el.options[el.selectedIndex].value
 	    var idStr = el.id;
 	    var getId = idStr.split('_');
-	    var rolesDivIn = $('rolesDiv' + getId[1]);
-	    var usersDivIn = $('usersDiv' + getId[1]);
-	    var emailDivIn = $('emailinput' + getId[1]);
+	    var rolesDivIn = dojo.byId('rolesDiv' + getId[1]);
+	    var usersDivIn = dojo.byId('usersDiv' + getId[1]);
+	    var emailDivIn = dojo.byId('emailinput' + getId[1]);
 	
 	    if (index == "Roles") {
 	       emailDivIn.style.display = 'none';
@@ -491,42 +491,42 @@ function editEscalation (row) {
     function showWhoSelect(el) {
         var idStr = el.id;
         var getId = idStr.split('_');
-        var whoSelector = $('who_' + getId[1]);
+        var whoSelector = dojo.byId('who_' + getId[1]);
         whoSelector.style.display='';
     }
 
     function hideWhoSelect(el) {
         var idStr = el.id;
         var getId = idStr.split('_');
-        var whoSelector = $('who_' + getId[1]);
+        var whoSelector = dojo.byId('who_' + getId[1]);
         whoSelector.style.display='none';
     }
 
     function showSyslogInput(el) {
         var idStr = el.id;
         var getId = idStr.split('_');
-        var syslogDivIn = $('sysloginput' + getId[1]);
+        var syslogDivIn = dojo.byId('sysloginput' + getId[1]);
         syslogDivIn.style.display='';
     }
 
     function hideSyslogInput(el) {
         var idStr = el.id;
         var getId = idStr.split('_');
-        var syslogDivIn = $('sysloginput' + getId[1]);
+        var syslogDivIn = dojo.byId('sysloginput' + getId[1]);
         syslogDivIn.style.display='none';
     }
 
     function showSnmpInput(el) {
         var idStr = el.id;
         var getId = idStr.split('_');
-        var snmpDivIn = $('snmpinput' + getId[1]);
+        var snmpDivIn = dojo.byId('snmpinput' + getId[1]);
         snmpDivIn.style.display='';
     }
 
     function hideSnmpInput(el) {
         var idStr = el.id;
         var getId = idStr.split('_');
-        var snmpDivIn = $('snmpinput' + getId[1]);
+        var snmpDivIn = dojo.byId('snmpinput' + getId[1]);
         snmpDivIn.style.display='none';
     }
 
@@ -566,9 +566,9 @@ function editEscalation (row) {
     function showResponse(originalRequest) {
 	  var escJson = eval( '(' + originalRequest.responseText + ')' );
 	  if(escJson.error){
-	      var escmsg = $('escMsg');
+	      var escmsg = dojo.byId('escMsg');
 	      escmsg.innerHTML = escJson.error;
-	      var example = $('example');
+	      var example = dojo.byId('example');
 	      example.style.display= '';
 	  }else{
 	      document.EscalationSchemeForm.escId.value = escJson.escalation.id;
@@ -577,13 +577,13 @@ function editEscalation (row) {
     }
 
     function saveNewEscalation() {
-        var escName = $('escName').value;
+        var escName = dojo.byId('escName').value;
         if (escName == "") {
             alert('<fmt:message key="alert.config.error.escalation.name.required"/>');
             return false;
         }
 
-        var escDesc = $('escDesc').value;
+        var escDesc = dojo.byId('escDesc').value;
         if (escName.match(/['"]/) || escDesc.match(/['"]/)) {
             alert('<fmt:message key="error.input.badquotes"/>');
             return false;
@@ -596,7 +596,7 @@ function editEscalation (row) {
       function initEsc () {
         // Set up the escalation dropdown
         var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
-        var escalationSel = $('escIdSel');
+        var escalationSel = dojo.byId('escIdSel');
         var schemes = escJson.escalations;
 
           for (var i = 0; i < schemes.length; i++) {
@@ -627,23 +627,23 @@ function editEscalation (row) {
         var aetId;
         var escFormSerial = Form.serialize('viewEscalation');
         var url = '<html:rewrite action="/escalation/updateEscalation"/>';
-        if ($('gad')) {
-           gadId = $('gad').value;
+        if (dojo.byId('gad')) {
+           gadId = dojo.byId('gad').value;
         } else {
             gadId = '';
         }
-        if ($('ad')){
-            adId = $('ad').value;
+        if (dojo.byId('ad')){
+            adId = dojo.byId('ad').value;
         } else {
             adId = '';
         }
-        if ($('eid')){
-            eID = $('eid').value;
+        if (dojo.byId('eid')){
+            eID = dojo.byId('eid').value;
         } else {
            eId = '';
         }
-        if ($('aetid')) {
-            aetId = $('aetid').value;
+        if (dojo.byId('aetid')) {
+            aetId = dojo.byId('aetid').value;
         } else {
             aetId = '';
         }
@@ -660,23 +660,23 @@ function editEscalation (row) {
         var aetId;
         var escFormSerial = Form.serialize('EscalationForm');
         var url = '<html:rewrite action="/escalation/saveEscalation"/>';
-        if ($('gad')) {
-           gadId = $('gad').value;
+        if (dojo.byId('gad')) {
+           gadId = dojo.byId('gad').value;
         } else {
             gadId = '';
         }
-        if ($('ad')){
-            adId = $('ad').value;
+        if (dojo.byId('ad')){
+            adId = dojo.byId('ad').value;
         } else {
             adId = '';
         }
-        if ($('eid')){
-            eID = $('eid').value;
+        if (dojo.byId('eid')){
+            eID = dojo.byId('eid').value;
         } else {
            eId = '';
         }
-        if ($('aetid')) {
-            aetId = $('aetid').value;
+        if (dojo.byId('aetid')) {
+            aetId = dojo.byId('aetid').value;
         } else {
             aetId = '';
         }
@@ -686,7 +686,7 @@ function editEscalation (row) {
     }
 
     function configure(id) {
-      var sel = $('who' + id);
+      var sel = dojo.byId('who' + id);
       var selval = sel.options[sel.selectedIndex].value;
 
       if (selval == 'Users') {
@@ -706,7 +706,7 @@ function editEscalation (row) {
     function configureOthers(el) {
             var idStr = el;
             var getId = idStr.split('_');
-            var othersDivIn = $('othersDiv_' + getId[1]);
+            var othersDivIn = dojo.byId('othersDiv_' + getId[1]);
 
       Dialog.confirm(othersDivIn.innerHTML,
                   {windowParameters: {className:'dialog', width:305, height:200,
@@ -722,7 +722,7 @@ function editEscalation (row) {
     function configureUsers(el) {
       var idStr = el;
       var getId = idStr.split('_');
-      var usersDivIn = $('usersDiv' + getId[1]);
+      var usersDivIn = dojo.byId('usersDiv' + getId[1]);
 
       Dialog.confirm('<div id="usersConfigWindow">' + usersDivIn.innerHTML +
                      '</div>',
@@ -733,7 +733,7 @@ function editEscalation (row) {
                     var usersInputList =
                       usersDivIn.getElementsByTagName('input');
                     var updatedInputList =
-                      $('usersConfigWindow').getElementsByTagName('input');
+                      dojo.byId('usersConfigWindow').getElementsByTagName('input');
 
                     for(i = 0; i < usersInputList.length; i++) {
                         if (updatedInputList[i].checked) {
@@ -748,7 +748,7 @@ function editEscalation (row) {
     function configureRoles(el) {
       var idStr = el;
       var getId = idStr.split('_');
-      var rolesDivIn = $('rolesDiv' + getId[1]);
+      var rolesDivIn = dojo.byId('rolesDiv' + getId[1]);
 
       Dialog.confirm('<div id="rolesConfigWindow">' + rolesDivIn.innerHTML +
                      '</div>',
@@ -759,7 +759,7 @@ function editEscalation (row) {
                     var rolesInputList =
                       rolesDivIn.getElementsByTagName('input');
                     var updatedInputList =
-                      $('rolesConfigWindow').getElementsByTagName('input');
+                      dojo.byId('rolesConfigWindow').getElementsByTagName('input');
 
                     for(i = 0; i < rolesInputList.length; i++) {
                         if (updatedInputList[i].checked) {
@@ -782,7 +782,7 @@ function editEscalation (row) {
     }
 
     function getGroupOrder() {
-        var sectionID = $('rowOrder');
+        var sectionID = dojo.byId('rowOrder');
         var order = Sortable.serialize(sectionID);
 		var alerttext = Sortable.serialize('rowOrder') + '\n';
 
@@ -791,7 +791,7 @@ function editEscalation (row) {
 	}
 
     function hideExample() {
-            $('example').style.display= 'none';
+            dojo.byId('example').style.display= 'none';
     }
 
 
@@ -799,13 +799,13 @@ function editEscalation (row) {
        if ( field.value.length > maxlimit )
        {
          field.value = field.value.substring( 0, maxlimit );
-         $('example').style.display= '';
-         //$('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.250Char"/>';
+         dojo.byId('example').style.display= '';
+         //dojo.byId('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+         dojo.byId('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.250Char"/>';
         return false;
        } else {
-         $('escMsg').innerHTML ='';
-         $('example').style.display= 'none';
+         dojo.byId('escMsg').innerHTML ='';
+         dojo.byId('example').style.display= 'none';
          return true;
         }
      }

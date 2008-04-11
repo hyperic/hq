@@ -102,6 +102,6 @@
 </table>
 </div>
 <!--  /  -->
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
   document.getElementById("configFile").style.display = "none";
 </script>

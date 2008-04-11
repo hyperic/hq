@@ -87,7 +87,7 @@
     </td>
     <td rowspan="2" valign="top">
 
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
     function saveToDashboard() {
         ViewChartForm.saveChart.value='true'; 
         var saveChartUrl = ViewChartForm.action + "?";
@@ -164,7 +164,7 @@
       page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
 </table>
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
   <!--
     document.forms["ViewChartForm"].elements["showValuesCB"].focus();
   // -->

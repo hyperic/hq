@@ -56,7 +56,7 @@
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
 
-<script language="JavaScript">
+<script type="text/javascript">
   var baseUrl = "<html:rewrite page="/resource/common/monitor/visibility/IndicatorCharts.do"/>";
 
   // Register the remove metric chart method
@@ -85,7 +85,7 @@
           'ctype=' + '<c:out value="${ctype}"/>',
         </c:if>
         'view=' + '<c:out value="${IndicatorViewsForm.view}"/>');
-    var root = $('root');
+    var root = dojo.byId('root');
     var elem = $(metric);
     moveElementUp(elem, root);
   }
@@ -100,7 +100,7 @@
           'ctype=' + '<c:out value="${ctype}"/>',
         </c:if>
         'view=' + '<c:out value="${IndicatorViewsForm.view}"/>');
-    var root = $('root');
+    var root = dojo.byId('root');
     var elem = $(metric);
     moveElementDown(elem, root);
   }
@@ -110,7 +110,7 @@
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 </head>
 
-<body style="background-color: #DBE3F5;" <c:if test="${not empty chartDataKeys}">onload="$('slowScreenSplash').style.display = 'none';"</c:if>>
+<body style="background-color: #DBE3F5;" <c:if test="${not empty chartDataKeys}">onload="dojo.byId('slowScreenSplash').style.display = 'none';"</c:if>>
 <!-- <c:out value="${IndicatorViewsForm.addMetric}"/> -->
 <c:forEach var="id" items="${IndicatorViewsForm.metric}">
 <!-- <c:out value="metric: ${id}"/> -->

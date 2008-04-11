@@ -31,7 +31,7 @@
  --%>
 
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
- <script language="JavaScript" type="text/javascript">
+ <script  type="text/javascript">
      function onMouseRow(el) {
              el.style.background="#a6c2e7";
          }

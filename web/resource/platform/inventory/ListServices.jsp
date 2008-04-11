@@ -93,7 +93,7 @@
 
 <c:url var="fsAction" value="${selfAction}"/>
 
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <script type="text/javascript">
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 <c:out value="wp"/> = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');

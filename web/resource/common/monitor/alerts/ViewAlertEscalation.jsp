@@ -36,7 +36,7 @@
   <tiles:put name="tabKey" value="monitoring.events.MiniTabs.Escalation"/>
 </tiles:insert>
 
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
   var isButtonClicked = false;
   
   function checkSubmit() {
@@ -105,7 +105,7 @@
 <tiles:insert page="/common/components/ActionButton.jsp">
   <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
   <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
-  <tiles:put name="buttonClick">$('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>')</tiles:put>
+  <tiles:put name="buttonClick">dojo.byId('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>')</tiles:put>
   <c:choose>
     <c:when test="${alert.acknowledgeable}">
       <tiles:put name="disabled" value="false"/>

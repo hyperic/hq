@@ -137,9 +137,9 @@
       }
 
       // Update the time
-      if ($('UpdatedTime') != null) {
+      if (dojo.byId('UpdatedTime') != null) {
         var now = new Date();
-        $('UpdatedTime').innerHTML = 
+        dojo.byId('UpdatedTime').innerHTML = 
           '<fmt:message key="resource.common.monitor.visibility.LastUpdated"/> ' + now.toLocaleString();
       }
     },

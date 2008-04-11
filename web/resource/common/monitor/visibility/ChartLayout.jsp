@@ -66,8 +66,8 @@
                  symbol="MODE_MON_CHART_SMMR"
                  var="MODE_MON_CHART_SMMR"/>
 
-<script language="JavaScript" src="<html:rewrite page="/js/chart.js"/>" type="text/javascript"></script>
-<script language="javascript">
+<script  src="<html:rewrite page="/js/chart.js"/>" type="text/javascript"></script>
+<script type="text/javascript">
     function RefreshChartForm() {
         var forms = document.getElementsByTagName('form');
 

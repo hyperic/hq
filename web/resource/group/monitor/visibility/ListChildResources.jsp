@@ -44,7 +44,7 @@
   <c:set var="mode" value="currentHealth"/>
 </c:if>
 
-<script language="javascript">
+<script type="text/javascript">
   <c:set var="widgetInstanceName" value="childResources"/>
   <c:set var="listMembersName" value="groupMembers"/>
 

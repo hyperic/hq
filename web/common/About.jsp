@@ -28,7 +28,7 @@
   USA.
  --%>
 
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
   var help = "<hq:help/>";
 </script>
 

@@ -34,7 +34,7 @@
 <tiles:importAttribute name="wide"/>
 <tiles:importAttribute name="portlets"/>
 
-<script>
+<script type="text/javascript">
 <c:choose>
 <c:when test="${wide}">
   function isWide(portlet) {
@@ -81,7 +81,7 @@
         </select>
       </td>
       <td>&nbsp;</td>
-      <td width="100%"><html:image page="/images/dash_movecontent_add.gif" border="0" titleKey="FormButtons.ClickToOk" property="ok" onmouseover="imageSwap(this, imagePath + 'dash_movecontent_add-on', '');" onmouseout="imageSwap(this, imagePath +  'dash_movecontent_add', '');" onmousedown="imageSwap(this, imagePath +  'dash_movecontent_add-off', '')" /></td>
+      <td width="100%"><html:image page="/images/4.0/icons/add.png" border="0" titleKey="FormButtons.ClickToOk" property="ok"/></td>
     </tr>
   </table>
 </html:form>

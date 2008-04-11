@@ -37,7 +37,7 @@
 <tiles:importAttribute name="pendingServices"/>
 <tiles:importAttribute name="pendingServicesCount"/>
 
-<script language="JavaScript" src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="addServices"/>
 
 <script type="text/javascript">
@@ -247,7 +247,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:if>
 </c:url>
 
-<script language="JavaScript"> <!--
+<script type="text/javascript"> <!--
     function applyNameFilter() {
         goToLocationSelfAndElement(
                 'nameFilter',
@@ -294,7 +294,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
              <div style="float:left;display:inline;"><input type="text" name="nameFilter" maxlength="55" size="10"
                    onKeyPress="if (event.keyCode == 13) return applyNameFilter()"
                                value="<c:out value="${param.nameFilter}"/>"/></div>
-            <div style="display:inline;width:17px;padding-left:5px;padding-top:3px;"><html:img page="/images/dash-button_go-arrow.gif"
+            <div style="display:inline;width:17px;padding-left:5px;padding-top:3px;"><html:img page="/images/4.0/icons/accept.png"
                       border="0" onclick="applyNameFilter()"/></div>
           </td>
         </tr>

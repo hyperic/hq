@@ -33,7 +33,7 @@
 <link rel=stylesheet href="<html:rewrite page="/css/"/>win.css" type="text/css">
 <%-- end vit: delete this block --%>
 
-<script language="JavaScript" src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="editService"/>
 
 <script type="text/javascript">

@@ -37,7 +37,7 @@
  <c:set var="TheControlForm" value="${requestScope[\"org.apache.struts.taglib.html.BEAN\"]}"/>
 </c:if>
 <script src="<html:rewrite page="/js/"/>schedule.js" type="text/javascript"></script>
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
  var imagePath = "<html:rewrite page="/images/"/>";
  var jsPath = "<html:rewrite page="/js/"/>";
  var cssPath = "<html:rewrite page="/css/"/>";
@@ -157,7 +157,7 @@
 						</html:select>
 						/
 						<html:select property="startYear" styleId="startYear" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1); changeDropDown('startMonth', 'startDay', 'startYear');">
-							<script language="JavaScript" type="text/javascript">
+							<script  type="text/javascript">
 								for (i=0; i<SEL_NUMYEARS; i++) {
 									document.writeln("<option value=\"" + yearArr[i] + "\">" + yearArr[i] + "</option>");
 								}
@@ -394,7 +394,7 @@
 									</html:select>
 									/
 									<html:select property="endYear" styleId="endYear" onchange="toggleRadio('endTime', 1); changeDropDown('endMonth', 'endDay', 'endYear');">
-									<script language="JavaScript" type="text/javascript">
+									<script  type="text/javascript">
 										for (i=0; i<SEL_NUMYEARS; i++) {
 											document.writeln("<option value=\"" + yearArr[i] + "\">" + yearArr[i] + "</option>");
 										}
@@ -422,7 +422,7 @@
 </table>
 <!--  /  -->
 
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
 <c:choose>
  <c:when test="${param.mode eq 'edit'}">
  init(<c:out escapeXml="false" value="\"${TheControlForm.startMonth}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.startDay}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.startYear}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.endMonth}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.endDay}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.endYear}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.recurInterval}\""/>);

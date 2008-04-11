@@ -70,9 +70,9 @@
   <tiles:put name="viewOpenNMSUrl" beanName="viewOpenNMSUrl"/>
 </tiles:insert>
 
-<script language="JavaScript" src="<html:rewrite page='/js/listWidget.js'/>" type="text/javascript"></script>
+<script  src="<html:rewrite page='/js/listWidget.js'/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="list"/>
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
 var pageData = new Array();
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');

@@ -55,10 +55,10 @@
 
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
 
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script language="JavaScript" src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="listAlerts"/>
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
   var jsPath = "<html:rewrite page="/js/"/>";
   var cssPath = "<html:rewrite page="/css/"/>";
   var isMonitorSchedule = true;
@@ -247,7 +247,7 @@
     </c:choose>
 </c:if>
 
-<script>
+<script type="text/javascript">
   function nextDay() {
     var tomorrow = new Date(<c:out value="${date}"/> + 86400000);
     var url = '<c:out value="${calAction}" escapeXml="false"/>' +

@@ -12,7 +12,7 @@
 
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 
-<script>
+<script type="text/javascript">
   var eventsTime = 0;
 
   function initEventDetails() {
@@ -23,12 +23,12 @@
   onloads.push( initEventDetails );
 
   function showEventsCallback() {
-    var detail = $('eventsSummary');
+    var detail = dojo.byId('eventsSummary');
     if (detail.innerHTML == "") {
       setTimeout("showEventsCallback()", 500);
     }
     else {
-      var div = $('eventDetailTable');
+      var div = dojo.byId('eventDetailTable');
       detail.innerHTML=unescape(detail.innerHTML);
       if (div.style.display == 'none')
         new Effect.Appear(div);
@@ -37,7 +37,7 @@
 
   function showEventsDetails(time, status) {
     eventsTime = time;
-    var detail = $('eventsSummary');
+    var detail = dojo.byId('eventsSummary');
     detail.innerHTML = "";
 
     if (status != null)
@@ -53,7 +53,7 @@
   }
 
   function hideEventDetail() {
-    new Effect.Fade($('eventsSummary'));
+    new Effect.Fade(dojo.byId('eventsSummary'));
   }
 </script>
 

@@ -49,7 +49,7 @@
 </c:if>
 
 <c:set var="widgetInstanceName" value="configMetricsList"/>
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <script type="text/javascript">
 var pageData = new Array();
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');

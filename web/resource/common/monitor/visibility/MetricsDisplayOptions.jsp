@@ -78,7 +78,7 @@
     </td>
     <td class="ListCell" align="left">
       <html:hidden property="showAll" name="MetricsDisplayForm"/>
-      <html:image property="filterSubmit" page="/images/dash-button_go-arrow.gif" border="0"/>
+      <html:image property="filterSubmit" page="/images/4.0/icons/accept.png" border="0"/>
     </td>
   </tr>
 </table>

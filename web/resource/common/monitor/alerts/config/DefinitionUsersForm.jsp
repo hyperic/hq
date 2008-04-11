@@ -43,7 +43,7 @@
 </c:when>
 <c:otherwise>
 
-<script language="JavaScript" src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="addUsers"/>
 
 <script type="text/javascript">

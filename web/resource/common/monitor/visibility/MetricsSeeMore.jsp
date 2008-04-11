@@ -63,14 +63,14 @@
     </td>
     <td>
     <html:hidden property="showAll"/>
-    <script language="javascript">
+    <script type="text/javascript">
     function reverseListing() {
       document.forms.MetricsDisplayForm.showAll.value =
         '<c:out value="${!MetricsDisplayForm.showAll}"/>';
       document.forms.MetricsDisplayForm.submit();
     }
     </script>
-    <html:link href="javascript:reverseListing();"><html:img page="/images/dash-button_go-arrow.gif" border="0"/>
+    <html:link href="javascript:reverseListing();"><html:img page="/images/4.0/icons/accept.png" border="0"/>
     </html:link>
     </td>
   </tr>

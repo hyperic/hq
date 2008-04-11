@@ -57,7 +57,7 @@
 <c:set var="addToListUrl" 
         value="/resource/group/Inventory.do?mode=addResources&rid=${Resource.id}&type=${Resource.entityId.type}"/>
 
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <script type="text/javascript">
 var pageData = new Array();
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');

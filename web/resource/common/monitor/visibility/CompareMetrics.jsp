@@ -42,7 +42,7 @@ var pageData = new Array();
 </script>
 
 <script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="compareMetrics"/>
 <script type="text/javascript">
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');

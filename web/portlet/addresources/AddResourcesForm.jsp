@@ -32,7 +32,7 @@
  --%>
 
 
-<script language="JavaScript" src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript">
+<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript">
 </script>
 
 <tiles:importAttribute name="noFilter" ignore="true"/>
@@ -400,7 +400,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
               <html:text property="nameFilter" maxlength="55" size="10"
                      onkeypress="if (event.keyCode == 13) return goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');" /></div>
 
-              <div style="display:inline;width:17px;padding-left:5px;"><html:img page="/images/dash-button_go-arrow.gif"
+              <div style="display:inline;width:17px;padding-left:5px;"><html:img page="/images/4.0/icons/accept.png"
                      border="0" onclick="goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');"/></div>
       <html:hidden property="ff"/>
       <html:hidden property="ft"/>
@@ -453,7 +453,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
               <html:text property="nameFilter" maxlength="55" size="10"
                      onkeypress="if (event.keyCode == 13) return goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');" /></div>
 
-              <div style="display:inline;width:17px;padding-left:5px;"><html:img page="/images/dash-button_go-arrow.gif"
+              <div style="display:inline;width:17px;padding-left:5px;"><html:img page="/images/4.0/icons/accept.png"
                      border="0" onclick="goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');"/></div>
           </td>
           <td><html:img page="/images/spacer.gif" width="5" height="30" border="0"/></td>

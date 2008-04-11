@@ -53,8 +53,8 @@
 <c:set var="widgetInstanceName" value="controlAction"/>
 <c:set var="fullReturnUrl" value="${returnUrl}&rid=${Resource.id}&type=${Resource.entityId.type}"/>
 
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script language="JavaScript" type="text/javascript">
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  type="text/javascript">
   var pageData = new Array();
   initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
   widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');

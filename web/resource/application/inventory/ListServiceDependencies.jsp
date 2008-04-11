@@ -39,7 +39,7 @@
 <script type="text/javascript">
 var pageData = new Array();
 </script>
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <script type="text/javascript">
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');

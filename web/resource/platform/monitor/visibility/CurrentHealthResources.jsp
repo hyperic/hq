@@ -33,7 +33,7 @@
 <tiles:importAttribute name="showOptions" ignore="true"/>
 
 <c:if test="${showProblems}">
-  <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+  <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 </c:if>
 
 <tiles:insert page="/resource/common/monitor/visibility/ResourcesTab.jsp"/>

@@ -46,7 +46,7 @@
   <tiles:put name="tabListName" beanName="tabListName"/>
 </tiles:insert>
 
-<script language="JavaScript">
+<script type="text/javascript">
 var baseUrl = "<html:rewrite page="/resource/common/monitor/visibility/IndicatorCharts.do"/>";
 baseUrl += "?eid=<c:out value="${eid}"/>";
 <c:if test="${not empty ctype}">
@@ -64,7 +64,7 @@ function addMetric(metric) {
 function reviewAction(option) {
     var form = document.IndicatorViewsForm;
     if (option.value == 'go') {
-        $('viewname').style.display = "";
+        dojo.byId('viewname').style.display = "";
         form.view.value = option.text;
         form.submit();
     }
@@ -73,13 +73,13 @@ function reviewAction(option) {
         form.submit();
     }
     else if (option.value == 'create') {
-        $('viewname').style.display = "";
+        dojo.byId('viewname').style.display = "";
         return;
     }
     else if (option.value == 'update') {
         form.view.value = "<c:out value="${view}"/>";
     }
-    $('viewname').style.display = "none";
+    dojo.byId('viewname').style.display = "none";
 }
 
 </script>
@@ -130,7 +130,7 @@ function reviewAction(option) {
           <td align="right">
             <!-- Use hidden input because IE doesn't pass value of of image -->
             <input type="hidden" name="update" value="<c:out value="${view}"/>">
-            <input type="image" name="submit" src="<html:rewrite page="/images/dash-button_go-arrow.gif"/>" border="0" alt="Apply Chart View"/>
+            <input type="image" name="submit" src="<html:rewrite page="/images/4.0/icons/accept.png"/>" border="0" alt="Apply Chart View"/>
           </td>
         </tr>
       </table>

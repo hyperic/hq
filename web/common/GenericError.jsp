@@ -30,7 +30,7 @@
   USA.
  --%>
 
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
   var help = "<hq:help/>";
 </script>
 
@@ -39,7 +39,7 @@
 <head>
 <title><fmt:message key="error.Error.Title"/></title>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
-<script language="JavaScript" src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
 </head>
 <body>
 <br>

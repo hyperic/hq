@@ -28,7 +28,7 @@
  --%>
 
 
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
   var isButtonClicked = false;
   
   function checkSubmit() {

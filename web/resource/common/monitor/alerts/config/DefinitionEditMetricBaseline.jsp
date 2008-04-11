@@ -35,14 +35,14 @@
 
 <tiles:importAttribute name="BaselineValue" ignore="true"/>
 <script src="<html:rewrite page="/js/"/>schedule.js" type="text/javascript"></script>
-<script language="JavaScript" type="text/javascript">
+<script  type="text/javascript">
 var imagePath="<html:rewrite page="/images/"/>";
 var jsPath="<html:rewrite page="/js/"/>";
 var cssPath="<html:rewrite page="/css/"/>";
 
 var isMonitorSchedule = false;
 </script>
-<script language="javascript">
+<script type="text/javascript">
 function recalc() {
 document.EditMetricBaselineForm.recalc.value='y';
 document.EditMetricBaselineForm.submit();
@@ -133,7 +133,7 @@ document.EditMetricBaselineForm.submit();
 		<option value="31">31</option>
 		</html:select>&nbsp;/&nbsp;
 		<html:select property="startYear" styleId="startYear" styleClass="logo">
-		    <script language="JavaScript" type="text/javascript">
+		    <script  type="text/javascript">
 		        for (i=0; i<SEL_NUMYEARS; i++) {
                 var startYear =  document.getElementById('startYear');
                 startYear.options[i] = new Option(yearArr[i], yearArr[i]);
@@ -207,7 +207,7 @@ document.EditMetricBaselineForm.submit();
 		<option value="31">31</option>
 		</html:select>&nbsp;/&nbsp;
 		<html:select property="endYear" styleId="endYear"> 
-		    <script language="JavaScript" type="text/javascript">
+		    <script  type="text/javascript">
 		        for (i=0; i<SEL_NUMYEARS; i++) {
                 var endYear =  document.getElementById('endYear');
                 endYear.options[i] = new Option(yearArr[i], yearArr[i]);

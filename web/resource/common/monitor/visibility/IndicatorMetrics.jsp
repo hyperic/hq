@@ -149,10 +149,10 @@
   <c:if test="${count > 7}">
     <div id="metricsDiv" class="scrollable">
 
-    <script language="Javascript">
+    <script type="text/javascript">
       function setMetricsHeight() {
-        var metricsDiv = $('metricsDiv');
-        var bottom = overlay.findPosY($('timetop'));
+        var metricsDiv = dojo.byId('metricsDiv');
+        var bottom = overlay.findPosY(dojo.byId('timetop'));
         var top = overlay.findPosY(metricsDiv);
 
         metricsDiv.style.height = (bottom - top) + 'px';

@@ -32,8 +32,8 @@
  --%>
 
 
-<script language="JavaScript" src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-<script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="listResources"/>
 <script type="text/javascript">
 var pageData = new Array();
@@ -343,7 +343,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 
 <c:choose>
   <c:when test="${ResourceHubForm.view == LIST}">
-    <script language="Javascript">
+    <script type="text/javascript">
       function refreshAvail() {
         var now = new Date()
     <c:forEach var="resource" items="${AllResources}">
