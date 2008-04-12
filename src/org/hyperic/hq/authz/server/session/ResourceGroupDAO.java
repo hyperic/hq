@@ -317,8 +317,21 @@ public class ResourceGroupDAO extends HibernateDAO
                      "where " +  
                      "g.system = false and ";
         
-        if (prototype != null)
-            hql += " g.resourcePrototype = :proto and ";
+        if (prototype != null) {
+            hql += " (g.resourcePrototype = :proto ";
+            
+            // Mixed groups, too
+            
+            Integer protoType = prototype.getResourceType().getId();
+            if (protoType.equals(AuthzConstants.authzPlatformProto) ||
+                protoType.equals(AuthzConstants.authzServerProto)   ||
+                protoType.equals(AuthzConstants.authzService)) {
+                hql += " or g.groupType = " +
+                       AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
+            }
+                
+            hql += ") and ";
+        }
         
         List excludes = new ArrayList(excludeGroups.size());
         for (Iterator i=excludeGroups.iterator(); i.hasNext(); ) {
@@ -337,9 +350,14 @@ public class ResourceGroupDAO extends HibernateDAO
         hql += "g.id " + inclusionStr + " in ( " + 
                "   select m.id.resourceGroup.id from ResGrpResMap m " + 
                "   where m.id.resource = :resource " + 
-               ") " + pm.getOperableGroupsHQL("g",
+               ") ";
+        
+        String pmql = pm.getOperableGroupsHQL("g",
                inclusive ? AuthzConstants.groupOpViewResourceGroup : 
                            AuthzConstants.groupOpModifyResourceGroup);
+        
+        if (pmql.length() > 0)
+            hql += pmql;
         
         String countHql  = "select count(g.id) " + hql;
         String actualHql = "select g " + hql + " order by " + 
@@ -354,7 +372,8 @@ public class ResourceGroupDAO extends HibernateDAO
         if (prototype != null)
             q.setParameter("proto", prototype);
         
-        q.setInteger("subjId", subject.getId().intValue());
+        if (pmql.length() > 0)
+            q.setInteger("subjId", subject.getId().intValue());
             
         int total = ((Number)(q.uniqueResult())).intValue();
         q = getSession().createQuery(actualHql)
@@ -366,7 +385,8 @@ public class ResourceGroupDAO extends HibernateDAO
         if (!excludes.isEmpty())
             q.setParameterList("excludes", excludes);
         
-        q.setInteger("subjId", subject.getId().intValue());
+        if (pmql.length() > 0)
+            q.setInteger("subjId", subject.getId().intValue());
 
         List vals = pInfo.pageResults(q).list();
         return new PageList(vals, total);
