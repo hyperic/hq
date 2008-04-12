@@ -56,9 +56,9 @@ class ResourceCategory {
      */
     static String urlFor(Resource r, String context) {
         if (context == 'alert') {
-            return "/alerts/Config.do?mode=list&eid=${r.entityID}"
+            return "/alerts/Config.do?mode=list&eid=${r.entityId}"
         } 
-        return "/Resource.do?eid=${r.entityID}"
+        return "/Resource.do?eid=${r.entityId}"
     }
 
     /**
@@ -80,7 +80,7 @@ class ResourceCategory {
 	    }
     }
     
-    static AppdefEntityID getEntityID(Resource r) {
+    static AppdefEntityID getEntityId(Resource r) {
         def typeId = r.resourceType.id
         
         if (typeId == AuthzConstants.authzPlatform) {
@@ -104,16 +104,16 @@ class ResourceCategory {
     }
     
     static boolean getSupportsMonitoring(Resource r) {
-        def ent = getEntityID(r)
+        def ent = r.etityId
         ent.isPlatform() || ent.isServer() || ent.isService()
     }
 
     static Collection getDesignatedMetrics(Resource r) {
-		dman.findDesignatedMeasurements(r.entityID)
+		dman.findDesignatedMeasurements(r.entityId)
     }
 
     static Collection getEnabledMetrics(Resource r) {
-        dman.findEnabledMeasurements(null, r.entityID, null)
+        dman.findEnabledMeasurements(null, r.entityId, null)
     }
 
     static boolean isGroup(Resource r) {
@@ -134,13 +134,13 @@ class ResourceCategory {
      * commands available to the specified resource for the specified user
      */
     static Collection getLiveDataCommands(Resource r, AuthzSubject user) {
-        LiveDataManagerEJBImpl.one.getCommands(user, r.entityID) as List
+        LiveDataManagerEJBImpl.one.getCommands(user, r.entityId) as List
     }
 
     static LiveDataResult getLiveData(Resource r, AuthzSubject user, 
                                       String cmd, ConfigResponse cfg)  
     {
-        def lcmd = new LiveDataCommand(r.entityID, cmd, cfg)
+        def lcmd = new LiveDataCommand(r.entityId, cmd, cfg)
         LiveDataManagerEJBImpl.one.getData(user, lcmd)
     }
     
@@ -149,7 +149,7 @@ class ResourceCategory {
     {
         def cmds = []
         for (r in resources) {
-            cmds << new LiveDataCommand(r.entityID, cmd, cfg)
+            cmds << new LiveDataCommand(r.entityId, cmd, cfg)
         }
         LiveDataManagerEJBImpl.one.getData(user, cmds as LiveDataCommand[]) as List
     }

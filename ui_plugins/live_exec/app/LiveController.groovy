@@ -21,7 +21,7 @@ class LiveController
         def members
         
         if (r.isGroup()) {
-            members = r.getGroupMembers(user).findAll {it.entityID.isPlatform()}
+            members = r.getGroupMembers(user).findAll {it.entityId.isPlatform()}
         } else {
             members = [r]
         }
@@ -37,7 +37,7 @@ class LiveController
             if (m.isGroup())  // We don't process sub-groups
                 continue
                 
-            if (m.entityID.isPlatform()) {
+            if (m.entityId.isPlatform()) {
                 try {
                     cmds.addAll(m.getLiveDataCommands(user))
                 } catch (Exception e) {
@@ -50,7 +50,7 @@ class LiveController
     
     def index(params) {
         def cmds       = commands
-        def viewedId   = viewedResource.entityID
+        def viewedId   = viewedResource.entityId
         def liveMan    = ldmi.one
         def cmdFmt     = [:]
         def formatters = [:]
@@ -69,7 +69,7 @@ class LiveController
         
         def isGroup = viewedResource.isGroup()
         def members = viewedMembers
-    	render(locals:[ commands:cmds, eid:"${viewedResource.entityID}",
+    	render(locals:[ commands:cmds, eid:"${viewedResource.entityId}",
     	                cmdFmt:cmdFmt, formatters:formatters,
     	                isGroup:isGroup, groupMembers:members])
     }
@@ -90,7 +90,7 @@ class LiveController
         JSONArray res = new JSONArray()
 
         def formatter = ldmi.one.findFormatter(fmtId)
-        def fmtCmd    = new LiveDataCommand(viewedResource.entityID, cmd,
+        def fmtCmd    = new LiveDataCommand(viewedResource.entityId, cmd,
                                             new ConfigResponse())
 
         for (l in lres) {

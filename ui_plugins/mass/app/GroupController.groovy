@@ -297,7 +297,7 @@ class GroupController extends BaseController {
         }
         
         for (r in shouldContain) {
-            groupVal.addAppdefEntity(r.entityID)
+            groupVal.addAppdefEntity(r.entityId)
         }
         
         if (groupDef.'@description')

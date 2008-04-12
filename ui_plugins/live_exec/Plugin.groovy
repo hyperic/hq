@@ -8,7 +8,7 @@ class Plugin extends HQUPlugin {
         // We are currently only functional for groups that contain at least
         // 1 platform
         if (r.isGroup()) {
-            return r.getGroupMembers(u).find { m -> m.entityID.isPlatform() } != null
+            return r.getGroupMembers(u).find { m -> m.entityId.isPlatform() } != null
         }
         true
     }

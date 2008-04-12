@@ -129,7 +129,7 @@ class ResourceConfig {
     
     void populate() {
         clear()
-        def entityID = resource.entityID
+        def entityID = resource.entityId
 
         // Fill out config responses
         ProductPlugin.CONFIGURABLE_TYPES.each { type ->
@@ -218,7 +218,7 @@ class ResourceConfig {
         populate()
 
         def subjectVal = subject.valueObject
-        def entityID   = resource.entityID
+        def entityID   = resource.entityId
 
         // CProp changes
         def proto    = resource.prototype
