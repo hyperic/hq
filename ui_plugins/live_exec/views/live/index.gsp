@@ -8,7 +8,7 @@ var ajaxCount = 0;
 var lastSelected = undefined;
 
 <% for (m in groupMembers) { %>
-  resInfo['${m.entityID}'] = {name: "<%= linkTo(h(m.name), [resource:m]) %>" };
+  resInfo['${m.entityId}'] = {name: "<%= linkTo(h(m.name), [resource:m]) %>" };
 <% } %>
 
 <% for (c in commands) { %>
@@ -180,8 +180,8 @@ dojo.addOnLoad(function(){
         <ul>
         <% for (m in groupMembers) { %>
         <li>
-        <div id="clicker_${m.entityID}" style="float:left;display:inline;height:16px;width:18px;" class="restingExec" onclick="showResult('${m.entityID}')" title="Click to view query information on this resource">&nbsp;&nbsp;&nbsp;&nbsp;</div>
-        <div class="groupMemberName"><span id="mem_${m.entityID}">${h m.name}</span></div>
+        <div id="clicker_${m.entityId}" style="float:left;display:inline;height:16px;width:18px;" class="restingExec" onclick="showResult('${m.entityId}')" title="Click to view query information on this resource">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+        <div class="groupMemberName"><span id="mem_${m.entityId}">${h m.name}</span></div>
 
             <br class="clearBoth">
         </li>

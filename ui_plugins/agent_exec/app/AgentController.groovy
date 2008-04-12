@@ -26,7 +26,7 @@ class AgentController
         // returns true iff the resource is a 4.0 agent or later
         def isRestartableAgent = {
                 if (it.prototype.name == HQ_AGENT_SERVER_NAME) {
-                    def agent = agentMan.one.getAgent(it.entityID)
+                    def agent = agentMan.one.getAgent(it.entityId)
                     // only support restarts in 4.0 agents and later
                     return (agent.version >= "4.0.0")
                 }
@@ -59,7 +59,7 @@ class AgentController
         
         def isGroup = viewedResource.isGroup()
         def members = viewedMembers
-    	render(locals:[ commands:cmds, eid:viewedResource.entityID,
+    	render(locals:[ commands:cmds, eid:viewedResource.entityId,
     	                cmdFmt:cmdFmt, formatters:formatters,
     	                isGroup:isGroup, groupMembers:members])
     }
@@ -70,7 +70,7 @@ class AgentController
         def cmd   = params.getOne('cmd')     
         // iterate through all the group members, restarting 4.0 agents
         for (resource in viewedMembers) {
-            def final aeid   = resource.entityID
+            def final aeid   = resource.entityId
             def final agent = agentMan.one.getAgent(aeid)
             def final conn = new SecureAgentConnection(agent.address, agent.port, agent.authToken )
             def final verAPI = new AgentCommandsAPI()

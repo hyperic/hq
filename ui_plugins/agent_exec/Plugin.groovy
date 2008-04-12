@@ -12,7 +12,7 @@ class Plugin extends HQUPlugin {
         // returns true iff the resource is a 4.0 agent or later
         def isRestartableAgent = {
                 if (it.prototype.name == HQ_AGENT_SERVER_NAME) {
-                    def agent = agentMan.one.getAgent(it.entityID)
+                    def agent = agentMan.one.getAgent(it.entityId)
                     // only support restarts in 4.0 agents and later
                     return (agent.version >= "4.0.0")
                 }
