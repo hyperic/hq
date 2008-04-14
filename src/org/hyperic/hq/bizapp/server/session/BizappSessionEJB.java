@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -26,8 +26,17 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import java.rmi.RemoteException;
+
 import javax.ejb.SessionContext;
 
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AppdefStatManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
@@ -36,26 +45,17 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
-import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.AppdefStatManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
-import org.hyperic.hq.auth.shared.AuthManagerLocal;
 import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl;
+import org.hyperic.hq.auth.shared.AuthManagerLocal;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerEJBImpl;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AIBossUtil;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
@@ -73,26 +73,26 @@ import org.hyperic.hq.bizapp.shared.ProductBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
-import org.hyperic.hq.control.shared.ControlManagerLocal;
-import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.control.server.session.ControlManagerEJBImpl;
 import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl;
+import org.hyperic.hq.control.shared.ControlManagerLocal;
+import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
+import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.ReportProcessorEJBImpl;
+import org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.TrackerManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
+import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
-import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
-import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.ReportProcessorEJBImpl;
-import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.TrackerManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl;
-import org.hyperic.hq.product.shared.ProductManagerLocal;
+import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
+import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
+import org.hyperic.hq.product.shared.ProductManagerLocal;
 
 public abstract class BizappSessionEJB {
 
@@ -258,10 +258,6 @@ public abstract class BizappSessionEJB {
      */
     protected AuthzSubject getOverlord() {
         return getAuthzSubjectManager().getOverlordPojo();
-    }
-
-    protected AuthzSubjectValue getOverlordVal() {
-        return getOverlord().getAuthzSubjectValue();
     }
 
     public void setSessionContext(SessionContext aCtx) throws RemoteException {
