@@ -207,13 +207,31 @@ public class AvailabilityManagerEJBImpl
                 long endtime =
                     ((AvailabilityDataRLE)queue.getFirst()).getEndtime();
                 while (next > endtime) {
-                    AvailabilityDataRLE tmp = (AvailabilityDataRLE)it.next();
-                    queue.addFirst(tmp);
-                    endtime = tmp.getEndtime();
+                    // it should not be the case that there are no more
+                    // avails in the array, but we need to handle it
+                    if (it.hasNext()) {
+                        AvailabilityDataRLE tmp = (AvailabilityDataRLE)it.next();
+                        queue.addFirst(tmp);
+                        endtime = tmp.getEndtime();
+                    } else {
+                        int measId = rle.getMeasurement().getId().intValue();
+                        String msg = "Measurement, " + measId +
+                            ", for interval " + begin + " - " + end + 
+                            " did not return a value for range " +
+                            curr + " - " + (curr + interval);
+                        _log.warn(msg);
+                    }
                 }
                 endtime = availEndtime;
                 while (curr > endtime) {
                     queue.removeLast();
+                    // this should not happen unless the above !it.hasNext()
+                    // else condition is true
+                    if (queue.size() == 0) {
+                        rle = new AvailabilityDataRLE(rle.getMeasurement(),
+                            rle.getEndtime(), next, AVAIL_UNKNOWN);
+                        queue.addLast(rle);
+                    }
                     rle = (AvailabilityDataRLE)queue.getLast();
                     availStartime = rle.getStartime();
                     availEndtime = rle.getEndtime();
@@ -456,6 +474,9 @@ public class AvailabilityManagerEJBImpl
      */
     public void addData(List availPoints)
     {
+        if (availPoints == null || availPoints.size() == 0) {
+            return;
+        }
         List updateList = new ArrayList(availPoints.size());
         List outOfOrderAvail = new ArrayList(availPoints.size());
         AvailabilityCache avail = AvailabilityCache.getInstance();
@@ -551,7 +572,7 @@ public class AvailabilityManagerEJBImpl
             }
         } else if (after == null) {
             // this shouldn't happen here
-            updateState(state);
+            updateState(state, null);
         } else {
             insertAvail(before, after, state);
         }
@@ -617,16 +638,29 @@ public class AvailabilityManagerEJBImpl
         dao.updateStartime(avail, start);
     }
 
-    private boolean updateState(DataPoint state)
+    private AvailabilityDataRLE getLastAvail(DataPoint state, Map availMap) {
+        AvailabilityDataDAO dao = getAvailabilityDataDAO();
+        AvailabilityDataRLE avail = null;
+        if (availMap != null ) {
+            // remove the avail just in case it is updated
+            // don't want stale data
+            avail = (AvailabilityDataRLE)availMap.remove(state.getMetricId());
+        }
+        if (avail == null) {
+            List mids = new ArrayList();
+            mids.add(state.getMetricId());
+            List avails = dao.findLastAvail(mids);
+	        if (avails.size() > 0) {
+	            avail = (AvailabilityDataRLE)avails.get(0);
+	        }
+        }
+        return avail;
+    }
+
+    private boolean updateState(DataPoint state, Map availMap)
         throws BadAvailStateException {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
-        List mids = new ArrayList();
-        mids.add(state.getMetricId());
-        List avails = dao.findLastAvail(mids);
-        AvailabilityDataRLE avail = null;
-        if (avails.size() > 0) {
-            avail = (AvailabilityDataRLE)avails.get(0);
-        }
+        AvailabilityDataRLE avail = getLastAvail(state, availMap);
 	    if (avail == null) {
 	        Measurement meas = getMeasurement(state.getMetricId().intValue());
 	        dao.create(meas,
@@ -650,22 +684,44 @@ public class AvailabilityManagerEJBImpl
 	        state.getValue());
 	    return true;
     }
+    
+    private Map getLastAvails(List states) {
+        AvailabilityDataDAO dao = getAvailabilityDataDAO();
+        List mids = new ArrayList(states.size());
+        for (Iterator i=states.iterator(); i.hasNext(); ) {
+            DataPoint state = (DataPoint)i.next();
+            mids.add(state.getMetricId());
+        }
+        List avails = dao.findLastAvail(mids);
+        Map rtn = new HashMap(avails.size());
+        for (Iterator i=avails.iterator(); i.hasNext(); ) {
+            AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
+            rtn.put(avail.getMeasurement().getId(), avail);
+        }
+        return rtn;
+    }
 
     private void updateStates(List states) {
-        AvailabilityCache avail = AvailabilityCache.getInstance();
+        AvailabilityCache cache = AvailabilityCache.getInstance();
+        if (states.size() == 0) {
+            return;
+        }
+        // as a performance optimization, fetch all the last avails
+        // at once, rather than one at a time in updateState()
+        Map avMap = getLastAvails(states);
         for (Iterator i=states.iterator(); i.hasNext(); ) {
             DataPoint state = (DataPoint)i.next();
             try {
                 // need to check again since there could be multiple
                 // states with the same id in the list
-                DataPoint currState = avail.get(state.getMetricId());
+                DataPoint currState = cache.get(state.getMetricId());
                 if (currState != null &&
                     currState.getValue() == state.getValue()) {
                     continue;
                 }
-                boolean update = updateState(state);
+                boolean update = updateState(state, avMap);
                 _log.debug("state " + state + " was updated, status " + update);
-                avail.put(state.getMetricId(), state);
+                cache.put(state.getMetricId(), state);
             } catch (BadAvailStateException e) {
                 _log.warn(e.getMessage());
             }
@@ -673,6 +729,9 @@ public class AvailabilityManagerEJBImpl
     }
 
     private void updateOutOfOrderState(List outOfOrderAvail) {
+        if (outOfOrderAvail.size() == 0) {
+            return;
+        }
         for (Iterator i=outOfOrderAvail.iterator(); i.hasNext(); ) {
             try {
             	DataPoint state = (DataPoint)i.next();
@@ -687,6 +746,9 @@ public class AvailabilityManagerEJBImpl
     private void updateCache(List availPoints, List updateList,
                              List outOfOrderAvail)
     {
+        if (availPoints.size() == 0) {
+            return;
+        }
         AvailabilityCache avail = AvailabilityCache.getInstance();
         for (Iterator i=availPoints.iterator(); i.hasNext(); ) {
             DataPoint pt = (DataPoint)i.next();
