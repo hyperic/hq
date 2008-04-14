@@ -104,7 +104,7 @@ class ResourceCategory {
     }
     
     static boolean getSupportsMonitoring(Resource r) {
-        def ent = r.etityId
+        def ent = r.entityId
         ent.isPlatform() || ent.isServer() || ent.isService()
     }
 
