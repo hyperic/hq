@@ -729,8 +729,7 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public void removeScheduledJobs(AuthzSubjectValue subject,
-                                    AppdefEntityID id)
+    public void removeScheduledJobs(AuthzSubject subject, AppdefEntityID id)
         throws ScheduledJobRemoveException
     {
         ControlScheduleDAO cScheduleLocalHome = getControlScheduleDAO();

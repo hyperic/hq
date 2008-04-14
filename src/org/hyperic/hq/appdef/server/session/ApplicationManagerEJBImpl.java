@@ -476,7 +476,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 AppdefEntityID anId = null;
                 if(appSvc.isIsGroup()) {
                     ResourceGroup group = appSvc.getResourceGroup();
-                    anId = AppdefEntityID.newGroupID(group.getId().intValue());
+                    anId = AppdefEntityID.newGroupID(group.getId());
                 } else {
                     anId = AppdefEntityID.newServiceID(appSvc.getService()
                                                            .getId().intValue());

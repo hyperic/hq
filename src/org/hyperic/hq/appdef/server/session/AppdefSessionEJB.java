@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -244,8 +244,7 @@ public abstract class AppdefSessionEJB
         rm.removeResources(s, new AppdefEntityID[] { aeid });
         
         // Send resource delete event
-        ResourceDeletedZevent zevent =
-            new ResourceDeletedZevent(subject.getAuthzSubjectValue(), aeid);
+        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, aeid);
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
 
@@ -593,7 +592,7 @@ public abstract class AppdefSessionEJB
                                                PageControl.PAGE_ALL);
             for (int i=0; i<groupids.size(); i++) {
                 Integer id = (Integer)groupids.get(i);
-                entityIds.add(AppdefEntityID.newGroupID(id.intValue()));
+                entityIds.add(AppdefEntityID.newGroupID(id));
             }
         } catch (Exception e) {
             throw new SystemException(e);
@@ -985,7 +984,7 @@ public abstract class AppdefSessionEJB
                                            PageControl.PAGE_ALL);
         for (int i=0;i<viewableGroups.size();i++) {
             Integer gid = (Integer) viewableGroups.get(i);
-            viewableGroups.set(i, AppdefEntityID.newGroupID(gid.intValue()));
+            viewableGroups.set(i, AppdefEntityID.newGroupID(gid));
         }
         idList.addAll(viewableGroups);
         return idList;

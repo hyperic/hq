@@ -188,8 +188,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
             // Send resource create event
             ResourceCreatedZevent zevent =
-                new ResourceCreatedZevent(subject.getAuthzSubjectValue(),
-                                          server.getEntityId());
+                new ResourceCreatedZevent(subject, server.getEntityId());
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
 
             return server;

@@ -135,12 +135,11 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         members = groupMan.getMembers(group);
         res     = new ConfigResponse[members.size()];
         idx     = 0;
-        AuthzSubjectValue subjectVal = subject.getAuthzSubjectValue();
         for(Iterator i=members.iterator(); i.hasNext(); ){
             Resource r = (Resource)i.next();
             AppdefEntityID id = new AppdefEntityID(r); 
 
-            res[idx++] = getMergedConfigResponse(subjectVal,
+            res[idx++] = getMergedConfigResponse(subject,
                                                  productType, id, required);
         }
         
@@ -181,14 +180,14 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         sessionManager.getSubject(sessionId);
         // use the overlord to pull the merge
         // FIXME - this is a pretty ugly compromise.
-        return getMergedConfigResponse(getOverlordVal(), productType, id, 
+        return getMergedConfigResponse(getOverlord(), productType, id, 
                                        required);
     }
 
     /**
      * @ejb:interface-method view-type="local"
      */
-    public ConfigResponse getMergedConfigResponse(AuthzSubjectValue subject,
+    public ConfigResponse getMergedConfigResponse(AuthzSubject subject,
                                                   String productType,
                                                   AppdefEntityID id,
                                                   boolean required)
@@ -257,7 +256,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         return this.getConfigSchema(subject, id, type, true);
     }
 
@@ -291,7 +290,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
      * @ejb:interface-method view-type="local"
      */
     public ConfigSchemaAndBaseResponse
-        getConfigSchemaAndBaseResponse(AuthzSubjectValue subject, 
+        getConfigSchemaAndBaseResponse(AuthzSubject subject, 
                                        AppdefEntityID id, 
                                        String type,
                                        boolean validateFlow)
@@ -302,7 +301,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         ConfigManagerLocal  cman = getConfigManager();
         ConfigResponse      baseResponse = null;
 
-        AuthzSubjectValue overlord = getOverlordVal();
+        AuthzSubject overlord = getOverlord();
         if(validateFlow == true){
             try {
                 baseResponse =
@@ -328,7 +327,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     /**
      * @ejb:interface-method
      */
-    public ConfigSchema getConfigSchema(AuthzSubjectValue subject, 
+    public ConfigSchema getConfigSchema(AuthzSubject subject, 
                                         AppdefEntityID id, String type,
                                         boolean validateFlow)
         throws ConfigFetchException, EncodingException,

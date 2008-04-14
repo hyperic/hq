@@ -3193,9 +3193,8 @@ public class AppdefBossEJBImpl
                 }
                 
                 List events = new ArrayList(ids.length);
-                AuthzSubjectValue subj = subject.getAuthzSubjectValue();
                 for (int i = 0; i < ids.length; i++)
-                    events.add(new ResourceUpdatedZevent(subj, ids[i]));
+                    events.add(new ResourceUpdatedZevent(subject, ids[i]));
                 
                 ZeventManager.getInstance().enqueueEventsAfterCommit(events);
 

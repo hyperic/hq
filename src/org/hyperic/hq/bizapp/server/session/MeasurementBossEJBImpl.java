@@ -75,7 +75,6 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
@@ -318,7 +317,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                         continue;
                         
                     aeid = AppdefEntityID.newGroupID(
-                        appSvc.getResourceGroup().getId().intValue());
+                        appSvc.getResourceGroup().getId());
                 }
                 else {
                     // Make sure this is a valid service
@@ -461,7 +460,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         else {
             ConfigResponse mergedCR = getConfigManager()
-                .getMergedConfigResponse(subject.getAuthzSubjectValue(), 
+                .getMergedConfigResponse(subject, 
                                          ProductPlugin.TYPE_MEASUREMENT, 
                                          id, true);
             
@@ -632,8 +631,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     if (appSvc.getResourceGroup() == null)
                         continue;
                         
-                    id = AppdefEntityID.newGroupID(
-                        appSvc.getResourceGroup().getId().intValue());
+                    id = AppdefEntityID.newGroupID(appSvc.getResourceGroup()
+                                                   .getId());
                 }
                 else {
                     // Make sure this is a valid service
@@ -1540,7 +1539,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     
                     if (appSvc.isIsGroup()) {
                         id = AppdefEntityID.newGroupID(
-                            appSvc.getResourceGroup().getId().intValue());
+                            appSvc.getResourceGroup().getId());
                     }
                     else {
                         id = appSvc.getService().getEntityId();
@@ -2963,7 +2962,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         TrackerManagerLocal trackManager = getTrackerManager();
         ConfigResponse response;
     

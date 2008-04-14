@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -128,7 +128,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
 
             try {
                 ConfigResponse mConfig = cManager.
-                    getMergedConfigResponse(subject.getAuthzSubjectValue(),
+                    getMergedConfigResponse(subject,
                                             ProductPlugin.TYPE_MEASUREMENT,
                                             id, true);
                 mConfig.merge(config, false);

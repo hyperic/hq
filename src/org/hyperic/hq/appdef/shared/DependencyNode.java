@@ -95,7 +95,7 @@ public class DependencyNode implements Serializable, Comparable {
     public AppdefEntityID getEntityId() {
         if(isCluster())
             return AppdefEntityID.newGroupID(
-                    getAppService().getResourceGroup().getId().intValue());
+                    getAppService().getResourceGroup().getId());
         else
             return getAppService().getService().getEntityId();
     }

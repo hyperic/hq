@@ -422,8 +422,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             
             // Send resource create event
             ResourceCreatedZevent zevent =
-                new ResourceCreatedZevent(subject.getAuthzSubjectValue(),
-                                          platform.getEntityId());
+                new ResourceCreatedZevent(subject, platform.getEntityId());
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
 
             return platform;
@@ -489,8 +488,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
         // Send resource create event
         ResourceCreatedZevent zevent =
-            new ResourceCreatedZevent(subject.getAuthzSubjectValue(),
-                                      platform.getEntityId());
+            new ResourceCreatedZevent(subject, platform.getEntityId());
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         
         return platform;

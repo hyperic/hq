@@ -300,7 +300,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public void removeScheduledJobs(int sessionId, AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException,
                ScheduledJobRemoveException {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         getControlScheduleManager().removeScheduledJobs(subject, id);
     }
 

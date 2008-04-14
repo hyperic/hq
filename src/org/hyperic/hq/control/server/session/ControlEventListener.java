@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -25,16 +25,18 @@
 
 package org.hyperic.hq.control.server.session;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.zevents.ZeventListener;
-
-import java.util.List;
-import java.util.Iterator;
 
 public class ControlEventListener
     implements ZeventListener {
@@ -43,10 +45,11 @@ public class ControlEventListener
 
     public void processEvents(List events) {
         ControlScheduleManagerLocal cM = ControlScheduleManagerEJBImpl.getOne();
+        AuthzSubjectManagerLocal azMan = AuthzSubjectManagerEJBImpl.getOne();
 
         for (Iterator i = events.iterator(); i.hasNext();) {
             ResourceZevent z = (ResourceZevent) i.next();
-            AuthzSubjectValue subject = z.getAuthzSubjectValue();
+            AuthzSubject subject = azMan.findSubjectById(z.getAuthzSubjectId());
             AppdefEntityID id = z.getAppdefEntityID();
 
             _log.info("Removing scheduled jobs for " + id);

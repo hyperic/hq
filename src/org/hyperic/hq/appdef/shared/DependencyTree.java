@@ -258,7 +258,7 @@ public class DependencyTree implements Serializable {
             AppdefEntityID contained ;
             if(appSvc.getIsCluster())
                 contained = AppdefEntityID.newGroupID(appSvc.getServiceCluster()
-                                                      .getGroupId().intValue());
+                                                      .getGroupId());
             else
                 contained = appSvc.getService().getEntityId();
 

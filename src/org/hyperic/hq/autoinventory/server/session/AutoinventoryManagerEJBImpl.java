@@ -93,6 +93,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -325,7 +326,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             server.setRuntimeAutodiscovery(enable);
 
             ConfigResponse metricConfig =
-                cman.getMergedConfigResponse(subject.getAuthzSubjectValue(),
+                cman.getMergedConfigResponse(subject,
                                              ProductPlugin.TYPE_MEASUREMENT,
                                              id, true);
 
@@ -419,7 +420,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
             ConfigResponse config =
                 getConfigManagerLocalHome().create().
-                    getMergedConfigResponse(subject.getAuthzSubjectValue(), 
+                    getMergedConfigResponse(subject, 
                                             ProductPlugin.TYPE_MEASUREMENT, 
                                             aid, false);
 
@@ -1044,11 +1045,12 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      */
     public void handleResourceEvents(List events)
     {
+        ServerManagerLocal serverMgr = ServerManagerEJBImpl.getOne();
+        AuthzSubjectManagerLocal azMan = AuthzSubjectManagerEJBImpl.getOne();
+
         for (Iterator i = events.iterator(); i.hasNext(); ) {
             ResourceZevent zevent = (ResourceZevent) i.next();
-            AuthzSubjectValue subject = zevent.getAuthzSubjectValue();
             AppdefEntityID id = zevent.getAppdefEntityID();
-            ServerManagerLocal serverMgr = ServerManagerEJBImpl.getOne();
             boolean isUpdate = zevent instanceof ResourceUpdatedZevent;
 
             // Only servers have runtime AI.
@@ -1057,8 +1059,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             }
 
             // Need to look up the AuthzSubject POJO
-            AuthzSubject subj = AuthzSubjectManagerEJBImpl.getOne()
-                .findSubjectById(subject.getId());
+            AuthzSubject subj = 
+                azMan.findSubjectById(zevent.getAuthzSubjectId());
             if (isUpdate) {
                 Server s = serverMgr.getServerById(id.getId());
                 _log.info("Toggling Runtime-AI for " + id);

@@ -508,8 +508,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @return a The number of metrics enabled for the given entity
      * @ejb:interface-method
      */
-    public int getEnabledMetricsCount(AuthzSubjectValue subject,
-                                      AppdefEntityID id) {
+    public int getEnabledMetricsCount(AuthzSubject subject, AppdefEntityID id) {
         List mcol = 
             getMeasurementDAO().findEnabledByResource(getResource(id));
         return mcol.size();
@@ -1068,7 +1067,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         
         for (Iterator i=events.iterator(); i.hasNext(); ) {
             ResourceZevent z = (ResourceZevent)i.next();
-            AuthzSubjectValue subject = z.getAuthzSubjectValue();
+            AuthzSubject subject = aman.findSubjectById(z.getAuthzSubjectId());
             AppdefEntityID id = z.getAppdefEntityID();
             boolean isCreate, isRefresh;
     
@@ -1087,8 +1086,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 // metrics
                 if (getEnabledMetricsCount(subject, id) == 0) {
                     log.info("Enabling default metrics for [" + id + "]");
-                    AuthzSubject subj = aman.findSubjectById(subject.getId());
-                    enableDefaultMetrics(subj, id, true);
+                    enableDefaultMetrics(subject, id, true);
                 }
     
                 if (isCreate) {
@@ -1269,7 +1267,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             }
     
             config = 
-                cfgMan.getMergedConfigResponse(subj.getAuthzSubjectValue(),
+                cfgMan.getMergedConfigResponse(subj,
                                                ProductPlugin.TYPE_MEASUREMENT,
                                                id, true);
         } catch (ConfigFetchException e) {

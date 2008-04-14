@@ -152,7 +152,7 @@ public class ControlManagerEJBImpl implements SessionBean {
             pluginType = getPlatformManager().getPlatformPluginName(id);
             ConfigManagerLocal cMan = ConfigManagerEJBImpl.getOne();
             mergedResponse = 
-                cMan.getMergedConfigResponse(subject.getAuthzSubjectValue(), 
+                cMan.getMergedConfigResponse(subject, 
                                              ProductPlugin.TYPE_CONTROL,
                                              id, true);
             ControlCommandsClient client =
@@ -447,7 +447,7 @@ public class ControlManagerEJBImpl implements SessionBean {
                 .getOverlordPojo();
             
             ConfigResponse config = cLocal.
-                getMergedConfigResponse(overlord.getAuthzSubjectValue(),
+                getMergedConfigResponse(overlord,
                                         ProductPlugin.TYPE_CONTROL,
                                         id, merge);
 

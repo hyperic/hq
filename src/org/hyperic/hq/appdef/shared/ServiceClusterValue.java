@@ -458,6 +458,6 @@ public class ServiceClusterValue extends AppdefResourceValue
         // the AppdefEntityID must be of the underlying group so we do 
         // something a little different
         return AppdefEntityID.newGroupID(
-                                         ((ServiceClusterValue)this).getGroupId().intValue());
+                                         ((ServiceClusterValue)this).getGroupId());
     }
 }

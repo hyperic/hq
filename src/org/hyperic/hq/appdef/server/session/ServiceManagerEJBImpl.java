@@ -187,8 +187,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
             // Send resource create event
             ResourceCreatedZevent zevent =
-                new ResourceCreatedZevent(subject.getAuthzSubjectValue(),
-                                          service.getEntityId());
+                new ResourceCreatedZevent(subject, service.getEntityId());
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
 
             return service.getId();
@@ -638,7 +637,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             else if (o instanceof ResourceGroup) {
                 ResourceGroup aCluster = (ResourceGroup)o;
                 AppdefEntityID clusterId = AppdefEntityID
-                    .newGroupID(aCluster.getId().intValue());
+                    .newGroupID(aCluster.getId());
                 if (viewableEntityIds != null &&
                     viewableEntityIds.contains(clusterId)) {
                     retVal.add(getServiceCluster(aCluster));
@@ -1128,7 +1127,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     // a cluster is bound to it
                     ResourceGroup cluster = (ResourceGroup) o;
                     AppdefEntityID groupId = 
-                        AppdefEntityID.newGroupID(cluster.getId().intValue());
+                        AppdefEntityID.newGroupID(cluster.getId());
                     // any authz resource filtering on the group members happens
                     // inside the group subsystem
                     try {

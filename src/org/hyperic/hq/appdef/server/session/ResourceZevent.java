@@ -29,15 +29,13 @@ import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventSourceId;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
 /**
  * Abstract class for appdef resource events.
  */
 public abstract class ResourceZevent extends Zevent {
 
-    public ResourceZevent(AuthzSubjectValue subject,
-                          AppdefEntityID id) {
+    public ResourceZevent(Integer subject, AppdefEntityID id) {
         super(new ResourceZeventSource(id),
               new ResourceZeventPayload(subject, id));
     }
@@ -47,9 +45,9 @@ public abstract class ResourceZevent extends Zevent {
             getAppdefEntityID();
     }
 
-    public AuthzSubjectValue getAuthzSubjectValue() {
+    public Integer getAuthzSubjectId() {
         return ((ResourceZeventPayload)getPayload()).
-            getAuthzSubjectValue();
+            getAuthzSubjectId();
     }
 
     private static class ResourceZeventSource
@@ -76,15 +74,14 @@ public abstract class ResourceZevent extends Zevent {
         implements ZeventPayload
     {
         private AppdefEntityID _id;
-        private AuthzSubjectValue _subject;
+        private Integer _subject;
 
-        public ResourceZeventPayload(AuthzSubjectValue subject,
-                                     AppdefEntityID id) {
+        public ResourceZeventPayload(Integer subject, AppdefEntityID id) {
             _subject = subject;
             _id = id;
         }
 
-        public AuthzSubjectValue getAuthzSubjectValue() {
+        public Integer getAuthzSubjectId() {
             return _subject;
         }
 

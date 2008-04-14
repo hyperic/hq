@@ -41,7 +41,6 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
@@ -208,7 +207,7 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ConfigResponse getMergedConfigResponse(AuthzSubjectValue subject,
+    public ConfigResponse getMergedConfigResponse(AuthzSubject subject,
                                                   String productType,
                                                   AppdefEntityID id,
                                                   boolean required)
@@ -578,8 +577,7 @@ public class ConfigManagerEJBImpl
             // have been affected by this config update.
             if (sendConfigEvent) {
                 ResourceUpdatedZevent event =
-                    new ResourceUpdatedZevent(subject.getAuthzSubjectValue(),
-                                              appdefID);
+                    new ResourceUpdatedZevent(subject, appdefID);
                 ZeventManager.getInstance().enqueueEventAfterCommit(event);
             }
             

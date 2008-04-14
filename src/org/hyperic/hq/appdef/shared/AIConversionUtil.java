@@ -111,13 +111,6 @@ public class AIConversionUtil {
         return server;
     }
 
-    public static void sendCreateEvent(AuthzSubjectValue subject,
-                                       AppdefEntityID aid) {
-        ResourceCreatedZevent zevent =
-                    new ResourceCreatedZevent(subject, aid);
-        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
-    }
-
     public static void sendNewConfigEvent(AuthzSubjectValue subject,
                                           AppdefEntityID aid,
                                           AllConfigResponses config) {

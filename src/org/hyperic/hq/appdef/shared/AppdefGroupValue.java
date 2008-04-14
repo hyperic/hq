@@ -104,7 +104,7 @@ public class AppdefGroupValue
     public void      setId( Integer id ) { this.id = id;  }
 
     public AppdefEntityID getEntityId() {
-        return AppdefEntityID.newGroupID(getId().intValue());
+        return AppdefEntityID.newGroupID(getId());
     }
     
     /** The group type (adhoc, compatible) */

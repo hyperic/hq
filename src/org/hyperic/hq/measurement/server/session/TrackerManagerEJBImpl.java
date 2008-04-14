@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -36,8 +36,8 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerUtil;
@@ -86,10 +86,8 @@ public class TrackerManagerEJBImpl
     /** 
      * Enable log or config tracking for the given resource
      */
-    private void trackPluginAdd(AuthzSubjectValue subject,
-                                AppdefEntityID id,
-                                String pluginType,
-                                ConfigResponse response)
+    private void trackPluginAdd(AuthzSubject subject, AppdefEntityID id,
+                                String pluginType, ConfigResponse response)
         throws PermissionException, PluginException
     {
         try {
@@ -114,8 +112,7 @@ public class TrackerManagerEJBImpl
     /**
      * Disable log or config tracking for the given resource
      */
-    private void trackPluginRemove(AuthzSubjectValue subject,
-                                   AppdefEntityID id,
+    private void trackPluginRemove(AuthzSubject subject, AppdefEntityID id,
                                    String pluginType)
         throws PermissionException, PluginException
     {
@@ -136,7 +133,7 @@ public class TrackerManagerEJBImpl
      *
      * @ejb:interface-method
      */
-    public void enableTrackers(AuthzSubjectValue subject, AppdefEntityID id,
+    public void enableTrackers(AuthzSubject subject, AppdefEntityID id,
                                ConfigResponse config)
         throws PermissionException, PluginException
     {
@@ -154,7 +151,7 @@ public class TrackerManagerEJBImpl
      *
      * @ejb:interface-method
      */
-    public void disableTrackers(AuthzSubjectValue subject, AppdefEntityID id,
+    public void disableTrackers(AuthzSubject subject, AppdefEntityID id,
                                 ConfigResponse config)
         throws PermissionException, PluginException
     {
@@ -172,7 +169,7 @@ public class TrackerManagerEJBImpl
      *
      * @ejb:interface-method
      */
-    public void toggleTrackers(AuthzSubjectValue subject, AppdefEntityID id,
+    public void toggleTrackers(AuthzSubject subject, AppdefEntityID id,
                                ConfigResponse config)
         throws PermissionException, PluginException
     {

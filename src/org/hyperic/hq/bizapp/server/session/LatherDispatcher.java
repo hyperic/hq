@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -374,7 +374,7 @@ public class LatherDispatcher
             try {
                 List zevents = new ArrayList();
                 ResourceRefreshZevent zevent;
-                AuthzSubjectValue overlord = getOverlordVal();
+                AuthzSubject overlord = getOverlord();
                 for (Iterator it = ids.iterator(); it.hasNext();) {
                     Integer id = (Integer) it.next();
                     Platform platform = getPlatformManager()
@@ -625,7 +625,7 @@ public class LatherDispatcher
 
         try {
             response = getConfigManager().
-                getMergedConfigResponse(getOverlordVal(),
+                getMergedConfigResponse(getOverlord(),
                                         ProductPlugin.TYPE_MEASUREMENT,
                                         id, true);
 

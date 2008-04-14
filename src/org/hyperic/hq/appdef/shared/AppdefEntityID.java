@@ -283,7 +283,7 @@ public class AppdefEntityID
                                   id);
     }
 
-    public static AppdefEntityID newGroupID(int id) {
+    public static AppdefEntityID newGroupID(Integer id) {
         return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, id);
     }
 }

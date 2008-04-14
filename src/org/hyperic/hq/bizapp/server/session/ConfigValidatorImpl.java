@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -31,16 +31,15 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.control.shared.ControlManagerLocal;
+import org.hyperic.hq.control.shared.ControlManagerUtil;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.control.shared.ControlManagerLocal;
-import org.hyperic.hq.control.shared.ControlManagerUtil;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -82,11 +81,10 @@ public class ConfigValidatorImpl
         cman      = getConfigManager();
         responses = new ConfigResponse[ids.length];
 
-        AuthzSubjectValue subj = subject.getAuthzSubjectValue();
         for(int i=0; i<ids.length; i++){
             try {
                 responses[i] =
-                    cman.getMergedConfigResponse(subj,
+                    cman.getMergedConfigResponse(subject,
                                                  ProductPlugin.TYPE_MEASUREMENT,
                                                  ids[i], true);
                 
@@ -113,7 +111,7 @@ public class ConfigValidatorImpl
             // Metric configuration has been validated, check if we need
             // to enable or disable log and config tracking.
             try {
-                trackerMan.toggleTrackers(subj, ids[i], responses[i]);
+                trackerMan.toggleTrackers(subject, ids[i], responses[i]);
             } catch (PluginException e) {
                 throw new InvalidConfigException("Unable to modify config " +
                                                  "track config: " +

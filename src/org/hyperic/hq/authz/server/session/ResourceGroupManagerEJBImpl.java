@@ -354,9 +354,8 @@ public class ResourceGroupManagerEJBImpl
 
         // Send resource delete event
         ResourceDeletedZevent zevent =
-            new ResourceDeletedZevent(whoami.getAuthzSubjectValue(),
-                new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                                   group.getId()));
+            new ResourceDeletedZevent(whoami,
+                                      AppdefEntityID.newGroupID(group.getId()));
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
 
