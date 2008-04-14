@@ -106,7 +106,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                            ResourceTypeValue typeV,
                                            OperationValue[] operations) 
     {
-        AuthzSubject whoamiPojo = this.lookupSubjectPojo(whoami);
+        AuthzSubject whoamiPojo = lookupSubject(whoami.getId());
         DAOFactory factory = DAOFactory.getDAOFactory();
         ResourceType type =
             factory.getResourceTypeDAO().create(whoamiPojo, typeV);
@@ -383,7 +383,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      */
     public void saveResource(ResourceValue res) {
-        lookupResourcePojo(res);
+        lookupResource(res);
 
         // XXX:  Fill this in -- what info can be changed, exactly?
         //resource.setResourceValue(res);
@@ -428,7 +428,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                  AuthzSubject newOwner)
         throws PermissionException 
     {
-        Resource resource = lookupResourcePojo(res);
+        Resource resource = lookupResource(res);
         setResourceOwner(whoami, resource, newOwner);
     }
     
@@ -645,7 +645,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                                       String resTypeName ) {
         AuthzSubject subj = getSubjectDAO().findById(subjVal.getId());
         ResourceType resType = getResourceTypeDAO().findByName(resTypeName);
-        return (ResourceValue[])this.fromPojos(
+        return (ResourceValue[]) fromPojos(
             getResourceDAO().findByOwnerAndType(subj,resType),
             org.hyperic.hq.authz.shared.ResourceValue.class);
     }

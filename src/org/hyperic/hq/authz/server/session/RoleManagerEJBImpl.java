@@ -992,7 +992,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     public RoleValue[] getRoles(AuthzSubjectValue whoami,
                                 AuthzSubjectValue subjectValue)
         throws FinderException, PermissionException {
-        AuthzSubject subjectLocal = lookupSubject(subjectValue);
+        AuthzSubject subjectLocal = lookupSubject(subjectValue.getId());
  
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(), getRootResourceType(),
@@ -1530,7 +1530,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
             return new PageList();
         }
         
-        AuthzSubject subj = lookupSubject(whoami);
+        AuthzSubject subj = lookupSubject(whoami.getId());
         // check if this user is a member of this role
         boolean roleHasUser = roleLocal.getSubjects().contains(subj);
         // check whether the user can see subjects other than himself

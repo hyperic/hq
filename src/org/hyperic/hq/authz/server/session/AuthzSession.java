@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -42,23 +42,16 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocalHome;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
-import org.hyperic.hq.authz.shared.ResourceManagerLocalHome;
-import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.pager.PageControl;
 
 /**
@@ -68,12 +61,7 @@ public abstract class AuthzSession {
     public static final Log log
         = LogFactory.getLog(AuthzSession.class.getName());
 
-    protected static final String DATASOURCE = HQConstants.DATASOURCE;
-    protected static InitialContext ic = null;
-
-    protected ResourceGroupManagerLocalHome groupMgrHome;
-    protected AuthzSubjectManagerLocalHome subjectMgrHome;
-    protected ResourceManagerLocalHome resourceMgrHome;
+    private static InitialContext _ic = null;
 
     protected SessionContext ctx;
 
@@ -94,35 +82,11 @@ public abstract class AuthzSession {
     }
 
     protected RoleDAO getRoleDAO() {
-        return DAOFactory.getDAOFactory().getRoleDAO();
+        return new RoleDAO(DAOFactory.getDAOFactory());
     }
 
     protected OperationDAO getOperationDAO() {
-        return DAOFactory.getDAOFactory().getOperationDAO();
-    }
-
-    protected ResourceGroupManagerLocalHome getGroupMgrHome() throws
-        NamingException {
-        if (groupMgrHome == null) {
-            groupMgrHome = ResourceGroupManagerUtil.getLocalHome();
-        }
-        return groupMgrHome;
-    }
-
-    protected ResourceManagerLocalHome getResourceMgrHome() throws
-        NamingException {
-        if (resourceMgrHome == null) {
-            resourceMgrHome = ResourceManagerUtil.getLocalHome();
-        }
-        return resourceMgrHome;
-    }
-
-    protected AuthzSubjectManagerLocalHome getSubjectMgrHome() throws
-        NamingException {
-        if (subjectMgrHome == null) {
-            subjectMgrHome = AuthzSubjectManagerUtil.getLocalHome();
-        }
-        return subjectMgrHome;
+        return new OperationDAO(DAOFactory.getDAOFactory());
     }
 
     protected ResourceType getRootResourceType() {
@@ -228,21 +192,12 @@ public abstract class AuthzSession {
         boolean isRole = false;
         boolean isAuthzSubject = false;
 
-        if (c.equals(OperationValue.class)) {
-            values = new OperationValue[locals.size()];
-            isOperation = true;
-        } else if (c.equals(ResourceValue.class)) {
-            values = new ResourceValue[locals.size()];
-            isResource = true;
-        } else if (c.equals(ResourceGroupValue.class)) {
-            values = new ResourceGroupValue[locals.size()];
-            isResourceGroup = true;
-        } else if (c.equals(RoleValue.class)) {
-            values = new RoleValue[locals.size()];
-            isRole = true;
-        } else if (c.equals(AuthzSubjectValue.class)) {
-            values = new AuthzSubjectValue[locals.size()];
-            isAuthzSubject = true;
+        values = new Object[locals.size()];
+        if (isOperation = c.equals(OperationValue.class)) {
+        } else if (isResource = c.equals(ResourceValue.class)) {
+        } else if (isResourceGroup = c.equals(ResourceGroupValue.class)) {
+        } else if (isRole = c.equals(RoleValue.class)) {
+        } else if (isAuthzSubject = c.equals(AuthzSubjectValue.class)) {
         } else {
             throw new SystemException("Unknown type");
         }
@@ -271,20 +226,8 @@ public abstract class AuthzSession {
         return values;
     }
 
-    protected AuthzSubject lookupSubject(AuthzSubjectValue subject) {
-        return getSubjectDAO().findById(subject.getId());
-    }
-
     protected AuthzSubject lookupSubject(Integer id) {
         return getSubjectDAO().findById(id);
-    }
-
-    protected AuthzSubject lookupSubjectPojo(AuthzSubjectValue subject) {
-        return lookupSubjectPojo(subject.getId());
-    }
-
-    protected AuthzSubject lookupSubjectPojo(Integer id) {
-        return new AuthzSubjectDAO(DAOFactory.getDAOFactory()).findById(id);
     }
 
     protected ResourceType lookupType(ResourceTypeValue type) {
@@ -302,9 +245,8 @@ public abstract class AuthzSession {
     protected Resource lookupResource(ResourceValue resource) {
         if (resource.getId() == null) {
             String typeName = resource.getResourceTypeValue().getName();
-            ResourceType typeLocal = getResourceTypeDAO().findByName(typeName);
-            return getResourceDAO().findByInstanceId(typeLocal,
-                                                     resource.getInstanceId());
+            return lookupResourcePojoByInstance(typeName,
+                                                resource.getInstanceId());
         } 
         return getResourceDAO().findById(resource.getId());
     }
@@ -313,16 +255,6 @@ public abstract class AuthzSession {
                                                     Integer instId) {
         ResourceType type = getResourceTypeDAO().findByName(resTypeName);
         return getResourceDAO().findByInstanceId(type, instId);
-    }
-
-    protected Resource lookupResourcePojo(ResourceValue resource) {
-        if (resource.getId() == null) {
-            ResourceType type = getResourceTypeDAO()
-                .findByName(resource.getResourceTypeValue().getName());
-            return getResourceDAO().findByInstanceId(type,
-                                                     resource.getInstanceId());
-        }
-        return getResourceDAO().findById(resource.getId());
     }
 
     /**
@@ -351,8 +283,9 @@ public abstract class AuthzSession {
     }
 
     protected InitialContext getInitialContext() throws NamingException {
-        if (ic == null) ic = new InitialContext();
-        return ic;
+        if (_ic == null)
+            _ic = new InitialContext();
+        return _ic;
     }
 
     public void setSessionContext(SessionContext ctx) {
