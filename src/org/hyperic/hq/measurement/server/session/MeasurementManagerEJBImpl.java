@@ -466,13 +466,13 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     {
         List mcol = 
             getMeasurementDAO().findEnabledByResource(getResource(id));
-        Integer[] mids = new Integer[mcol.size()];
+        String[] dsns = new String[mcol.size()];
         Integer availMeasurement = null; // For insert of AVAIL down
         Iterator it = mcol.iterator();
 
         for (int i = 0; it.hasNext(); i++) {
             Measurement dm = (Measurement)it.next();
-            mids[i] = dm.getId();
+            dsns[i] = dm.getDsn();
             
             MeasurementTemplate template = dm.getTemplate();
 
@@ -481,10 +481,10 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             }
         }
 
-        log.info("Getting live measurements for " + mids.length +
+        log.info("Getting live measurements for " + dsns.length +
                  " measurements");
         try {
-            getLiveMeasurementValues(subject, mids);
+            getLiveMeasurementValues(id, dsns);
         } catch (LiveMeasurementException e) {            
             log.info("Resource " + id + " reports it is unavailable, setting " +
                      "measurement ID " + availMeasurement + " to DOWN: "+ e);
@@ -1207,27 +1207,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         } catch(MonitorAgentException e){
             throw new LiveMeasurementException(e.getMessage(), e);
         }
-    }
-
-    /**
-     * Get the live measurement value
-     *
-     * @param mids Measurements to get the value of.
-     * @ejb:interface-method
-     */
-    public MetricValue[] getLiveMeasurementValues(AuthzSubject subject,
-                                                  Integer[] mids)
-        throws LiveMeasurementException, PermissionException
-    {
-        AppdefEntityID entity = null;
-        String[] dsns = new String[mids.length];
-
-        for (int i = 0; i < mids.length; i++) {
-            Measurement dm = getMeasurement(mids[i]);
-            dsns[i] = dm.getDsn();
-        }
-
-        return getLiveMeasurementValues(entity, dsns);
     }
 
     /**
