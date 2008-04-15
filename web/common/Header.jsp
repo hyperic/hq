@@ -63,7 +63,6 @@
     });
     
 </script>
-<body>
 <div id="header">
     <div id="headerLogo" title="Home" onclick="/Dashboard.do">&nbsp;</div>
     <div id="navTabContainer">
@@ -119,7 +118,7 @@
     <div id="headerSearch"><fmt:message key="header.Search"/></div>
         <div id="headerSearchBox" style="display:none">
             <div style="float:left;margin:3px 0px 3px 0px;">
-            <input type="text" id="searchBox" value=""></input>
+            <input type="text" id="searchBox" value=""/>
         </div>
     </div>
     <div id="headerSearchResults" style="display:none">
@@ -129,6 +128,7 @@
         <div class="resultsGroup">
             <div class="category"><fmt:message key="header.Resources"/> (<span id="resourceResultsCount"></span>)</div>
             <ul id="resourceResults">
+                <li></li>
             </ul>
         </div>
         <div class="resultsGroup">
