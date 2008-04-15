@@ -237,29 +237,22 @@ public class ProductPluginDeployer
     private void doInContainerUnitTestFrameworkSetup() {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-        URL hqJar = classLoader.getResource("hq.jar");
+        String[] jars = {
+            "hq.jar", "hq-test.jar", "hqee.jar", "hqee-test.jar"
+        };
 
-        if (hqJar != null) {
-            try {
-                _log.info("Preloading instance pools for Util classes in "+hqJar);
-                
-                preloadInstancePoolsForEJBs(hqJar, classLoader);
-            } catch (Exception e) {
-                throw new RuntimeException("failed to preload cached local " +
-                        "homes for hq.jar", e);
-            }
-        }
+        for (int i = 0; i < jars.length; i++) {
+            URL jar = classLoader.getResource(jars[i]);
 
-        URL hqeeJar = classLoader.getResource("hqee.jar");
-
-        if (hqeeJar != null) {
-            try {
-                _log.info("Preloading instance pools for Util classes in "+hqeeJar);
-                
-                preloadInstancePoolsForEJBs(hqeeJar, classLoader);
-            } catch (Exception e) {
-                throw new RuntimeException("failed to preload cached local " +
-                        "homes for hqee.jar", e);
+            if (jar != null) {
+                try {
+                    _log.info("Preloading instance pools for Util classes in " +
+                              jar);
+                    preloadInstancePoolsForEJBs(jar, classLoader);
+                } catch (Exception e) {
+                    throw new RuntimeException("failed to preload cached local " +
+                                               "homes for " + jars[i], e);
+                }
             }
         }
 

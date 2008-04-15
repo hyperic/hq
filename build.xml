@@ -268,6 +268,8 @@
           <path location="${build.dir}/src" />
           <!-- Shared and utility sources -->
           <path location="src" />
+          <!-- Test sources -->
+          <path location="unittest/src"/>
           <!-- Plugin sources -->
           <dirset dir="plugins">
             <include name="*/src"/>
@@ -275,7 +277,6 @@
         </src>
         <exclude name="org/hyperic/hq/ui/**/*.java" />
         <exclude name="org/hyperic/ui/tapestry/**/*.java" />
-        <!--exclude name="**/*_test.java" /-->
         <src>
           <path location="src/org/hyperic/hq/ui/server" />
         </src>
@@ -412,6 +413,8 @@
       <exclude name="org/hyperic/tools/ant/**" />
       <exclude name="org/hyperic/tools/db/**" />
       <exclude name="org/hyperic/hq/plugin/**"/>
+      <!-- Exclude unit tests -->
+      <exclude name="org/hyperic/**/*_test*"/>
     </jar>
 
     <!-- We only want server and shared classes for the UI -->
@@ -545,11 +548,11 @@
 
   <target name="pack-ear" depends="pack-ear-files,write-ear-manifest"/>
 
-  <target name="write-ear-manifest" unless="generate-manifest.notrequired">
+  <target name="write-ear-manifest" depends="init-taskdefs" unless="generate-manifest.notrequired">
     <!-- generate EAR MANIFEST file -->
     <pathconvert targetos="unix" pathSep="," property="Class-Path">
       <path>
-        <fileset dir="${ear.dir}" includes="hq.jar,hqee.jar" />
+        <fileset dir="${ear.dir}" includes="hq.jar,hq-test.jar,hqee.jar,hqee-test.jar" />
         <fileset dir="${ear.dir}/lib" includes="sigar.jar" />
         <fileset dir="${ear.dir}/lib" includes="*.jar" />
       </path>
@@ -1410,16 +1413,34 @@
   <target name="all" description="xdoclet, compile and pack for everything" 
           depends="init,xdoclet,hibernate-prep,build" >
   </target>
-	
-  <!-- When running the 'test-dbsetup' target, use the 'test-all' target in 
-       place of the 'all' target. This ensures that deferrable constraints 
-       are set correctly. -->
+
+  <!-- When running the 'test' target 'test-all' must be run to deploy the 
+       tests into the EAR and ensure deferrable constraints are set correctly -->
   <target name="test-all">
     <property name="unittest-lib" location="${hq.home}/unittest/lib" />
     <echo message="using unittest.lib as -> ${unittest-lib}"/>    
     <antcall target="all">
       <param name="unittest.lib" value="${unittest-lib}"/>
     </antcall>
+
+    <!-- Package the test jars and deploy into the EAR -->
+    <jar file="${ear.dir}/hq-test.jar" basedir="${build.dir}/classes" > 
+      <include name="org/hyperic/**/*_test*"/>
+    </jar>
+ 
+    <mkdir dir="${ear.dir}/hq-session-test.jar/META-INF" />
+    <copy todir="${ear.dir}/hq-session-test.jar/META-INF" >
+      <fileset dir="${build.dir}/dd/session-test" includes="*" />
+    </copy>
+
+    <!-- Rewrite the manifest to include the test jars -->
+    <antcall target="write-ear-manifest"/>
+
+    <!-- Copy in application.xml that includes the test EJBs -->
+    <copy file="etc/application-test.xml"
+          toFile="${ear.dir}/META-INF/application.xml"
+          overwrite="true"/>
+
   </target>	
 
   <target name="build" depends="init,compile,pack" 
@@ -1502,7 +1523,7 @@
 	   (see the "URLs" attribute for the URLDeploymentScanner in 
 	    product-plugin-service.xml) -->		
   <target name="unittest-prepare-jboss" 
-          depends="all,prepare-jboss"
+          depends="test-all,prepare-jboss"
           description="Prepare jboss for in-container unit testing">
 	  
       <delete dir="${jboss.home}/server/unittest"/>

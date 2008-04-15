@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+
+ <application>
+  <display-name>Hyperic HQ</display-name>
+
+  <!-- Hyperic UI -->
+  <module>
+    <web>
+      <web-uri>hq.war</web-uri>
+      <context-root>/</context-root>
+    </web>
+  </module>
+
+  <!-- HQ monitoring instrumentation -->
+  <module>
+    <web>
+      <web-uri>hyperic-hq.war</web-uri>
+      <context-root>/hyperic-hq</context-root>
+    </web>
+  </module>
+
+  <module>
+    <ejb>hq-session.jar</ejb>
+  </module>
+
+  <module>
+    <ejb>hq-message.jar</ejb>
+  </module>
+
+  <module>
+    <ejb>hq-agent-session.jar</ejb>
+  </module>
+
+  <module>
+    <ejb>hq-session-test.jar</ejb>
+  </module>
+
+ </application>

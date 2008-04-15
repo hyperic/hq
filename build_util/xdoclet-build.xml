@@ -37,14 +37,13 @@
     <mkdir dir="${build.dir}/dd/mdb" />
     <mkdir dir="${build.dir}/src" />
 
-    <echo>starting xdoclet generation ... </echo>
+    <echo>Starting xdoclet generation ... </echo>
     <ejbdoclet ejbspec="2.0"
                destdir="${build.dir}/src" 
                verbose="true">
       <packageSubstitution packages="server.session" substituteWith="shared"/>
       <fileset dir="src">
 		  <include name="**/session/*EJBImpl.java"/>
-		  <include name="**/ExampleInContainer_testEJBImpl.java"/>
 	  </fileset>
       <valueobject/>
       <remoteinterface pattern="{0}"/>
@@ -62,6 +61,32 @@
              datasource="${hq.server.datasource}"
              typemapping="${hq.server.ds-mapping}" 
              destdir="${build.dir}/dd/session" />
+    </ejbdoclet>
+
+    <ejbdoclet ejbspec="2.0"
+               destdir="${build.dir}/src"
+               verbose="true">
+      <packageSubstitution packages="server.session" substituteWith="shared"/>
+      <fileset dir="unittest/src">
+		  <include name="**/session/*EJBImpl.java"/>
+                  <include name="**/ExampleInContainer_testEJBImpl.java"/>
+	  </fileset>
+      <valueobject/>
+      <remoteinterface pattern="{0}"/>
+      <localinterface pattern="{0}Local"/>
+      <localhomeinterface pattern="{0}LocalHome"/>
+      <homeinterface pattern="{0}Home"/>
+      <entitypk/>
+      <entitycmp/>
+      <entitybmp/>
+      <utilobject kind="physical" cacheHomes="true"/>
+      <deploymentdescriptor xmlencoding="UTF-8"
+                            destdir="${build.dir}/dd/session-test" />
+      <jboss version="3.0"
+             xmlencoding="UTF-8"
+             datasource="${hq.server.datasource}"
+             typemapping="${hq.server.ds-mapping}"
+             destdir="${build.dir}/dd/session-test" />
     </ejbdoclet>
 
     <ejbdoclet ejbspec="2.0"

@@ -44,9 +44,7 @@
 	  <test name="${testcase}" todir="${junitResults.dir}" if="single.test" />
 		
       <batchtest todir="${junitResults.dir}" unless="single.test">
-		  <fileset dir="src">
-			  <include name="**/*Test.java"/>
-			  <exclude name="**/*CactusTest.java"/>
+		  <fileset dir="unittest/src">
 			  <include name="**/*_test.java"/>
 	 
 			  <!-- This unit test should be enabled only when testing the 
