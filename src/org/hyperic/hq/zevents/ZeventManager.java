@@ -535,6 +535,7 @@ public class ZeventManager {
         }
 
         ThreadWatchdog dog = HQApp.getInstance().getWatchdog();
+        long timeout = getListenerTimeout();
         for (Iterator i=listenerBatches.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry ent = (Map.Entry)i.next();
             ZeventListener listener = (ZeventListener)ent.getKey();
@@ -543,8 +544,7 @@ public class ZeventManager {
             synchronized (_listenerLock) {
                 InterruptToken t = null;
                 try {
-                    t = dog.interruptMeIn(getListenerTimeout(), 
-                                          TimeUnit.SECONDS,
+                    t = dog.interruptMeIn(timeout, TimeUnit.SECONDS,
                                           "Processing listener events");
                     listener.processEvents(Collections.unmodifiableList(batch));
                 } catch(RuntimeException e) {
