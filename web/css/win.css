@@ -13,6 +13,9 @@ body,p,td,th,option,input,textarea,select {
     font-size: 11px
 }
 
+select{
+    border: 1px solid gray
+}
 a:hover {
     color: #039;
     font-weight: 700;
