@@ -1156,7 +1156,6 @@ div.timepopup {
     position: absolute;
     text-align: center;
     top: -20px;
-    visibility: hidden;
     width: 70px;
     z-index: 210
 }

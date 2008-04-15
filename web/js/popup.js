@@ -69,9 +69,7 @@ var overlay = {
     },
 
     showTimePopup: function (index, e) {
-        if (this.curPopup != null) {
-            this.curPopup.style.visibility='hidden';
-        }
+        this.hideTimePopup();
         var anchor = $('timePopup_' + index);
         var left = this.findPosX(anchor) - 35;
         var top = this.findPosY(anchor) + 10;
@@ -84,8 +82,6 @@ var overlay = {
         else
             this.curPopup.style.top = top + 'px';
 
-        new Rico.Effect.FadeTo(this.curPopup, 0, 1, 1, null);
-        this.curPopup.style.visibility ='visible';
         this.fadeInTimePopup();
 
         if (e) {
@@ -94,9 +90,7 @@ var overlay = {
     },
 
     showTimePopupTopMetricChart: function (index, e) {
-        if (this.curPopup != null) {
-            this.curPopup.style.visibility='hidden';
-        }
+        this.hideTimePopup();
         var anchor = $('timePopup_' + index);
         var left = this.findPosX(anchor) - 35;
         var top = this.findPosY(anchor) + 10;
@@ -109,8 +103,6 @@ var overlay = {
         else
             this.curPopup.style.top = top + 'px';
 
-        new Rico.Effect.FadeTo(this.curPopup, 0, 1, 1, null);
-        this.curPopup.style.visibility ='visible';
         this.fadeInTimePopup();
 
         if (e) {
@@ -121,19 +113,19 @@ var overlay = {
     fadeInTimePopup: function (top) {
         if (top != null)
             this.curPopup.style.top = top + 'px';
-        new Rico.Effect.FadeTo(this.curPopup, 1, 1000, 10, null);
+        new Effect.Appear(this.curPopup);
     },
 
     moveTimePopup: function (top) {
         if (this.curPopup.style.top != (top + 'px')) {
-            new Rico.Effect.FadeTo(this.curPopup, 0, 1000, 10, null);
+            new Effect.Fade(this.curPopup);
             setTimeout("overlay.fadeInTimePopup(" + top + ")", 1000);
         }
     },
 
     hideTimePopup: function () {
         if (this.curPopup != null) {
-            this.curPopup.style.visibility='hidden';
+            Element.hide(this.curPopup);
         }
     },
 
