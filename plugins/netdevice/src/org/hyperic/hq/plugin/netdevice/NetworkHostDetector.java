@@ -48,7 +48,7 @@ public class NetworkHostDetector extends NetworkDeviceDetector {
 
         for (int i=0; i<storageDesc.size(); i++) {
             ConfigResponse config = new ConfigResponse();
-            String name = storageDesc.get(i).toString();
+            String name = storageDesc.get(i).toString().trim();
 
             ServiceResource service = createServiceResource(STORAGE_NAME);
 
@@ -57,7 +57,7 @@ public class NetworkHostDetector extends NetworkDeviceDetector {
             //required to auto-enable metric
             service.setMeasurementConfig();
             
-            service.setServiceName(name.trim() + " " + STORAGE_NAME);
+            service.setServiceName(name + " " + STORAGE_NAME);
 
             services.add(service);
         }

@@ -202,7 +202,7 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
         for (int i=0; i<interfaces.size(); i++) {
             ConfigResponse config = new ConfigResponse();
             ConfigResponse cprops = new ConfigResponse();
-            String name = interfaces.get(i).toString();
+            String name = interfaces.get(i).toString().trim();
             String mac = null;
 
             ServiceResource service = createServiceResource(SVC_NAME);
@@ -248,7 +248,7 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
 
             //might be more than 1 interface w/ the same name
             //so append the mac address to make it unique
-            name = name.trim() + " " + SVC_NAME;
+            name = name + " " + SVC_NAME;
             if ((mac != null) && !mac.equals("0:0:0:0:0:0")) {
                 name += " (" + mac + ")";
             }
