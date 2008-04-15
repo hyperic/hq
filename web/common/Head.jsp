@@ -27,14 +27,14 @@
   USA.
  --%>
 <link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
-<link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
-<link rel=stylesheet href="<html:rewrite page="/css/mig.css"/>" type="text/css">
-<link rel=stylesheet href="<html:rewrite page="/css/HQ_40_OS.css"/>" type="text/css">
+<link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
+<link rel="stylesheet" href="<html:rewrite page="/css/mig.css"/>" type="text/css"/>
+<link rel="stylesheet" href="<html:rewrite page="/css/HQ_40_OS.css"/>" type="text/css"/>
 <!--[if lte IE 7]>
 <link rel=stylesheet href="<html:rewrite page='/css/iecss.css'/>" type="text/css">
 <![endif]-->
 <script type="text/javascript">
-    var djConfig = {parseOnLoad: true, isDebug : true, locale : "<%=request.getLocale().toString().substring(0,4)%>"};
+    var djConfig = {parseOnLoad: true, isDebug : true, locale : "<%=request.getLocale().toString().substring(0,2)%>"};
     var imagePath = "<html:rewrite page="/images/"/>";
 </script>
 <!-- FOR DEBUG ONLY -->
