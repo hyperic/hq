@@ -1522,7 +1522,7 @@
 	   plugins to an hq.ear directory residing under ${jboss.home}.
 	   (see the "URLs" attribute for the URLDeploymentScanner in 
 	    product-plugin-service.xml) -->		
-  <target name="unittest-prepare-jboss" 
+  <target name="test-prepare-jboss" 
           depends="test-all,prepare-jboss"
           description="Prepare jboss for in-container unit testing">
 	  
