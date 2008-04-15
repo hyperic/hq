@@ -2,13 +2,11 @@ import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl as AIQMan
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl
-import org.hyperic.hq.authz.shared.AuthzSubjectValue
 import org.hyperic.hq.appdef.shared.AIPlatformValue
 import org.hyperic.hq.appdef.shared.AIQueueConstants
 import org.hyperic.hq.appdef.server.session.Platform
 import org.hyperic.hq.appdef.server.session.Server
+import org.hyperic.hq.authz.server.session.AuthzSubject
 
 class AutodiscoveryController extends BaseController {
 
@@ -22,9 +20,7 @@ class AutodiscoveryController extends BaseController {
 
         String fqdn = params.getOne('fqdn')
 
-        AuthzSubjectManagerLocal subMan = AuthzSubjectManagerEJBImpl.one;
-
-        def list = AIQMan.one.getQueue(subMan.overlord, true, true,
+        def list = AIQMan.one.getQueue(user.valueObject, true, true, 
                                        PageControl.PAGE_ALL)
 
         List matching = getMatchingPlatforms(list, fqdn)
@@ -58,18 +54,16 @@ class AutodiscoveryController extends BaseController {
 
         String fqdn = params.getOne('fqdn')
 
-        AuthzSubjectManagerLocal subMan = AuthzSubjectManagerEJBImpl.one;
-        AuthzSubjectValue overlord = subMan.overlord
-
         AIQueueManagerLocal aiMan = AIQMan.one
 
-        def list = aiMan.getQueue(overlord, true, true, PageControl.PAGE_ALL)
+        def list = aiMan.getQueue(user.valueObject, true, true, 
+                                  PageControl.PAGE_ALL)
 
         List matching = getMatchingPlatforms(list, fqdn)
 
         def res = new StringBuffer()
         for (plat in matching) {
-            List imported = processPlatform(overlord, aiMan, plat)
+            List imported = processPlatform(user, aiMan, plat)
             def numPlats = imported.findAll { it instanceof Platform }.size();
             def numServers = imported.findAll { it instanceof Server }.size();
             res.append("Processed platform '")
@@ -80,7 +74,7 @@ class AutodiscoveryController extends BaseController {
         render(inline : res.toString())
     }
 
-    private List processPlatform(AuthzSubjectValue overlord,
+    private List processPlatform(AuthzSubject overlord,
                                  AIQueueManagerLocal aiMan,
                                  AIPlatformValue plat) {
         // If a platform is a placeholder, don't attempt to approve it.
@@ -95,7 +89,7 @@ class AutodiscoveryController extends BaseController {
         // All IP changes get auto-approved
         List ipIds = plat.AIIpValues.id
 
-        aiMan.processQueue(overlord, platformIds, serverIds, ipIds,
+        aiMan.processQueue(overlord.valueObject, platformIds, serverIds, ipIds,
                            AIQueueConstants.Q_DECISION_APPROVE)
     }
 
