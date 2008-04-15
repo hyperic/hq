@@ -347,63 +347,98 @@ public class EventsBossEJBImpl
             alertdef.addTrigger(tval);
         }
     }
-
-    private void cloneParentConditions(AuthzSubjectValue subject,
-                                       AppdefEntityID id,
-                                       AlertDefinitionValue adval,
-                                       AlertConditionValue[] conds) {
+    
+    /**
+     * Clone the parent conditions into the alert definition.
+     * 
+     * @param subject The subject.
+     * @param id The entity to which the alert definition is assigned.
+     * @param adval The alert definition where the cloned conditions are set.
+     * @param conds The parent conditions to clone.
+     * @param failSilently <code>true</code> fail silently if cloning fails 
+     *                     because no measurement is found corresponding 
+     *                     to the measurement template specified in a parent 
+     *                     condition; <code>false</code> to throw a 
+     *                     {@link MeasurementNotFoundException} when this occurs.
+     * @return <code>true</code> if cloning succeeded; 
+     *         <code>false</code> if cloning failed.
+     */
+    private boolean cloneParentConditions(AuthzSubjectValue subject,
+                                          AppdefEntityID id,
+                                          AlertDefinitionValue adval,
+                                          AlertConditionValue[] conds, 
+                                          boolean failSilently) 
+        throws MeasurementNotFoundException {
+        
         // scrub and copy the parent's conditions
         adval.removeAllConditions();
         
         for (int i = 0; i < conds.length; i++) {
             AlertConditionValue clone = new AlertConditionValue(conds[i]);
     
-            try {
-                switch (clone.getType()) {
-                case EventConstants.TYPE_THRESHOLD:
-                case EventConstants.TYPE_BASELINE:
-                case EventConstants.TYPE_CHANGE:
-                    Integer tid = new Integer(clone.getMeasurementId());
-                    
-                    // Don't need to synch the DerivedMeasurement with the db 
-                    // since changes to the DerivedMeasurement aren't cascaded 
-                    // on saving the AlertCondition.
-                    DerivedMeasurement dmv =
+            switch (clone.getType()) {
+            case EventConstants.TYPE_THRESHOLD:
+            case EventConstants.TYPE_BASELINE:
+            case EventConstants.TYPE_CHANGE:
+                Integer tid = new Integer(clone.getMeasurementId());
+                
+                // Don't need to synch the DerivedMeasurement with the db 
+                // since changes to the DerivedMeasurement aren't cascaded 
+                // on saving the AlertCondition.
+                try {
+                    DerivedMeasurement dmv = 
                         getMetricManager().findMeasurement(subject, tid,
-                                                           id.getId(), true);
-                    clone.setMeasurementId(dmv.getId().intValue());
-                    break;
-                case EventConstants.TYPE_ALERT:
+                            id.getId(), true);
+                    clone.setMeasurementId(dmv.getId().intValue());     
+                } catch (MeasurementNotFoundException e) {
+                    _log.error("No measurement found for entity "+id+
+                               " associated with template id="+tid+
+                               ". Alert definition name ["+adval.getName()+"]");
+                    _log.debug("Root cause", e);
                     
-                    // Don't need to synch the child alert definition Id lookup.
-                    Integer recoverId = 
-                        getADM().findChildAlertDefinitionId(id, 
-                                          new Integer(clone.getMeasurementId()),
-                                          true);
-                                        
-                    if (recoverId == null) {                        
-                        // recoverId should never be null, but if it is and assertions 
-                        // are disabled, just move on.
-                        assert false : "recover Id should not be null.";
-                        
-                        _log.error("A recovery alert has no associated recover " +
-                                   "from alert. Setting alert condition " +
-                                   "measurement Id to 0.");
+                    if (failSilently) {
+                        _log.info("Alert condition creation failed. " +
+                                "The alert definition for entity "+id+
+                                " with name ["+adval.getName()+
+                                "] should not be created.");
+                        // Just set to 0, it'll never fire
                         clone.setMeasurementId(0);
+                        return false;
                     } else {
-                        clone.setMeasurementId(recoverId.intValue());                        
-                    }
-                    
-                    break;
+                        throw e;
+                    }                    
                 }
-            } catch (MeasurementNotFoundException e) {
-                // Just set to 0, it'll never fire
-                clone.setMeasurementId(0);
+                
+                break;
+            case EventConstants.TYPE_ALERT:
+                
+                // Don't need to synch the child alert definition Id lookup.
+                Integer recoverId = 
+                    getADM().findChildAlertDefinitionId(id, 
+                                      new Integer(clone.getMeasurementId()),
+                                      true);
+                                    
+                if (recoverId == null) {                        
+                    // recoverId should never be null, but if it is and assertions 
+                    // are disabled, just move on.
+                    assert false : "recover Id should not be null.";
+                    
+                    _log.error("A recovery alert has no associated recover " +
+                               "from alert. Setting alert condition " +
+                               "measurement Id to 0.");
+                    clone.setMeasurementId(0);
+                } else {
+                    clone.setMeasurementId(recoverId.intValue());                        
+                }
+                
+                break;
             }
-    
+
             // Now add it to the alert definition
             adval.addCondition(clone);
         }
+        
+        return true;
     }
 
     private void cloneParentActions(AppdefEntityID id,
@@ -505,8 +540,13 @@ public class EventsBossEJBImpl
                 // scrub and copy the parent's conditions
                 if (parent != null) {
                     adval.setParentId(parent.getId());                    
-                    cloneParentConditions(subject, id, adval,
-                                          parent.getConditions());
+                    try {
+                        cloneParentConditions(subject, id, adval,
+                                              parent.getConditions(), 
+                                              false);
+                    } catch (MeasurementNotFoundException e) {
+                        throw new AlertConditionCreateException(e);
+                    }
                 }
             
                 // Create the triggers
@@ -602,7 +642,17 @@ public class EventsBossEJBImpl
             // Scrub the triggers just in case
             adval.removeAllTriggers();
 
-            cloneParentConditions(subject, id, adval, parent.getConditions());
+            try {
+                boolean succeeded = 
+                    cloneParentConditions(subject, id, adval, parent.getConditions(), true);
+                
+                if (!succeeded) {
+                    continue;
+                }
+            } catch (MeasurementNotFoundException e) {
+                throw new AlertDefinitionCreateException(
+                        "Expected parent condition cloning to fail silently", e);
+            }
                         
             // Create the triggers
             createTriggers(subject, adval);
@@ -692,8 +742,18 @@ public class EventsBossEJBImpl
             // Reset the value object with this entity ID
             adval.setAppdefId(id.getID());
             
-            cloneParentConditions(subject, id, adval, adval.getConditions());
-        
+            try {
+                boolean succeeded = 
+                    cloneParentConditions(subject, id, adval, adval.getConditions(), true);
+                
+                if (!succeeded) {
+                    continue;
+                }
+            } catch (MeasurementNotFoundException e) {
+                throw new AlertDefinitionCreateException(
+                        "Expected parent condition cloning to fail silently", e);
+            }
+                    
             // Create the triggers
             createTriggers(subject, adval);
             triggers.addAll(Arrays.asList(adval.getTriggers()));
@@ -819,8 +879,13 @@ public class EventsBossEJBImpl
                                                        child.getAppdefId());
 
                 // Now add parent's conditions, actions, and new triggers
-                cloneParentConditions(subject, id, child,
-                                      adval.getConditions());
+                try {
+                    cloneParentConditions(subject, id, child,
+                                          adval.getConditions(), 
+                                          false);
+                } catch (MeasurementNotFoundException e) {
+                    throw new AlertConditionCreateException(e);
+                }
 
                 cloneParentActions(id, child, adval.getActions());
                 
