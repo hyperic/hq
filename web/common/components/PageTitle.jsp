@@ -163,7 +163,7 @@
         <tr>
           <td nowrap class="SearchBold"><fmt:message key="resource.hub.search.label.Search"/></td>
           <td class="SearchRegular"><html:text property="keywords" onfocus="ClearText(this)" value="${initSearchVal}" size="30" maxlength="40"/></td>
-          <td class="SearchRegular" width="100%"><html:image page="/images/4.0/icons/accept.png" border="0" property="ok"/></td>
+          <td class="SearchRegular" width="100%"><html:image page="/images/4.0/icons/accept.png" property="ok"/></td>
         </tr>
       </table>
       <!--  /  -->

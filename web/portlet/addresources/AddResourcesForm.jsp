@@ -401,7 +401,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
                      onkeypress="if (event.keyCode == 13) return goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');" /></div>
 
               <div style="display:inline;width:17px;padding-left:5px;"><html:img page="/images/4.0/icons/accept.png"
-                     border="0" onclick="goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');"/></div>
+                     onclick="goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');"/></div>
       <html:hidden property="ff"/>
       <html:hidden property="ft"/>
           </td>
@@ -454,7 +454,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
                      onkeypress="if (event.keyCode == 13) return goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');" /></div>
 
               <div style="display:inline;width:17px;padding-left:5px;"><html:img page="/images/4.0/icons/accept.png"
-                     border="0" onclick="goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');"/></div>
+                     onclick="goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');"/></div>
           </td>
           <td><html:img page="/images/spacer.gif" width="5" height="30" border="0"/></td>
         </tr>
