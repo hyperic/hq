@@ -24,7 +24,7 @@
  --%>
 <%@ page pageEncoding="UTF-8"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" %>
-<%@page errorPage="/common/Error.jsp"  %>
+<%@ page errorPage="/common/Error.jsp"  %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
@@ -32,10 +32,6 @@
 
 <html:html locale="true">
 <head>
-  <meta http-equiv="EXPIRES" content="-1"/>
-  <meta http-equiv="PRAGMA" content="NO-CACHE"/>
-  <meta http-equiv="MAX-AGE" content="0"/>
-  <meta http-equiv="CACHE-CONTROL" content="NO-CACHE"/>
   <tiles:insert attribute="head" />
   <title>
    <fmt:message key="${portal.name}">
@@ -99,7 +95,9 @@
      <tiles:insert attribute="header" />
     </c:otherwise>
   </c:choose>  
+  <div id="migContainer">
   <tiles:insert attribute='body' />
   <tiles:insert attribute="footer" />
+  </div>
 </body>
 </html:html>
