@@ -109,7 +109,7 @@ public class RegisteredDispatcherEJBImpl
                 log.debug("dispatchEvent dispatched to trigger (" +
                         trigger.getClass() + " that's not " +
                         "configured to handle this type of event: " +
-                        event.getClass());
+                        event.getClass(), e);
             }
         }            
         
