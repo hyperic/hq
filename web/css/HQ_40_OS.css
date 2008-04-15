@@ -78,10 +78,11 @@ a:visited,a:hover,a {
     top: 22px;
     right: 0px;
     height: 29px;
-    width: 248px;
+    width: 253px;
     background-color: #F96115;
     color: #FFF;
-    padding: 0px 5px 0px 7px;
+    padding: 0px 1px 0px 7
+    px;
     text-align: right;
     cursor: pointer
 }
@@ -89,12 +90,12 @@ a:visited,a:hover,a {
 #headerSearchBox input[type=text] {
     color: gray;
     padding: 1px 30px 1px 0px;
-    width: 191px
+    width: 245px
 }
 
 #headerSearchResults {
     position: absolute;
-    top: 48px;
+    top: 46px;
     right: 0px;
     height: auto;
     border: solid 1px #F96115;
@@ -135,7 +136,6 @@ a:visited,a:hover,a {
 }
 
 #headerSearchResults li a {
-    background: #FFF url('/images/4.0/icons/platform.png') no-repeat 0% 50%;
     padding-left: 22px;
     color: #666;
     text-decoration: none
@@ -614,4 +614,10 @@ body .dijitPopup{
 }
 .reportIcon{
     background: transparent url('/images/4.0/icons/report.png') no-repeat scroll 0%;
+}
+
+
+/* MIG */
+#migContainer a:visited, a:hover, a{
+    color: #003399
 }
