@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.PropertyNotFoundException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.common.DiagnosticThread;
 
 public class EventsStartupListener 
     implements StartupListener
@@ -60,6 +61,8 @@ public class EventsStartupListener
 
         loadConfigProps("triggers");
         loadConfigProps("actions");
+        
+        DiagnosticThread.addDiagnosticObject(EventTrackerDiagnostic.getInstance());
     }
         
     private void loadConfigProps(String prop) {

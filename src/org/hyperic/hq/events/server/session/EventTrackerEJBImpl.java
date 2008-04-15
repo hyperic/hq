@@ -64,7 +64,10 @@ import org.hyperic.hq.events.shared.EventTrackerUtil;
  */
 public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
 
-    private final Log log = LogFactory.getLog(EventTrackerEJBImpl.class);    
+    private final Log log = LogFactory.getLog(EventTrackerEJBImpl.class);
+    
+    private final EventTrackerDiagnostic _diagnostic = 
+            EventTrackerDiagnostic.getInstance();
 
     /** 
      * Add a reference from a trigger to an event. The event object id will be 
@@ -79,9 +82,11 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      */
     public Long addReference(Integer tid, AbstractEvent eventObject, long expiration) 
         throws SQLException {
-        
+
         if (log.isDebugEnabled())
-            log.debug("Add referenced event for trigger id: " + tid);
+            log.debug("Add referenced event for trigger id: " + tid);      
+        
+        _diagnostic.startAddReference();
         
         long expire = 0;
         
@@ -126,9 +131,11 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         } finally {
             session.close();
         }
-                
+                        
         Long teid = triggerEvent.getId();
         eventObject.setId(teid);
+        
+        _diagnostic.endAddReference();
         
         return teid;
     }
@@ -151,8 +158,10 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         if (log.isDebugEnabled())
             log.debug("Updating the event object for trigger event id: " + teid);            
 
-        TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
+        _diagnostic.startUpdateReference();
         
+        TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
+                
         Session session = triggerEventDAO.getNewSession();
         
         // NOTE: Explicit txn management is not strictly necessary, since the 
@@ -183,8 +192,10 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         } finally {
             session.close();
         }
-        
+                
         eventObject.setId(teid);
+        
+        _diagnostic.endUpdateReference();
     }
 
 
@@ -197,9 +208,11 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
     public void deleteReference(Integer tid) throws SQLException {
         if (log.isDebugEnabled())
             log.debug("Delete referenced events for trigger id: " + tid);
+       
+        _diagnostic.startDeleteReference();
         
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
-        
+                
         Session session = triggerEventDAO.getNewSession();
         
         // NOTE: Explicit txn management is not strictly necessary, since the 
@@ -234,8 +247,9 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
             
         } finally {
             session.close();
-        }        
+        }
         
+        _diagnostic.endDeleteReference();
     }
 
 
@@ -260,8 +274,10 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
             log.debug("Get referenced events for trigger id: " + tid);                
         }
         
-        TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
+        _diagnostic.startGetReferencedEventStreams();
         
+        TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
+
         Session session = triggerEventDAO.getNewSession();
         
         LinkedList eventObjectDeserializers = new LinkedList();
@@ -285,6 +301,8 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         } finally {
             session.close();
         }
+        
+        _diagnostic.endGetReferencedEventStreams();
         
         if (debug) {
             log.debug("Retrieved " + eventObjectDeserializers.size() + 
