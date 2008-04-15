@@ -26,7 +26,7 @@ package org.hyperic.hq.ui.util;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.ui.pages.CSSConstants;
+import org.hyperic.hq.ui.CSSConstants;
 
 /**
  * Util Class for css related operations
