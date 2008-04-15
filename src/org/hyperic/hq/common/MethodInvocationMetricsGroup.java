@@ -37,7 +37,10 @@ import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
  * internal queue such that the metric values in the group will be updated 
  * only after the internal queue is flushed. Flushing occurs automatically 
  * when the queue capacity is reached but it may be invoked explicitly by any 
- * client wishing to obtain the most recent snapshot of metrics.
+ * client wishing to obtain the most recent snapshot of metrics. Clients may 
+ * also choose to update the metric values in the group synchronously when a 
+ * new method invocation time value is added. In this case, the internal queue 
+ * and flush operations are not used.
  * 
  * Each metric in the group (num invocations/max,min,avg invocation time) is 
  * guaranteed to be consistent with the current flushed state of the group. 
@@ -129,6 +132,17 @@ public class MethodInvocationMetricsGroup {
         if (!_queue.offer(latestInvocationTime)) {
             flush(latestInvocationTime, true);
         }
+    }
+    
+    /**
+     * Add an invocation time and update the metrics in the group immediately.
+     * 
+     * @param invocationTime The invocation time.
+     */
+    public void addInvocationTimeSynch(long invocationTime) {
+        synchronized (_lock) {
+            updateMetrics(invocationTime);            
+        }        
     }
         
     /**

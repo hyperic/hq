@@ -122,6 +122,21 @@ public class MethodInvocationMetricsGroup_test extends TestCase {
         assertEquals(1.5, metricsGroup.getAverageInvocationTime(), 0.0);               
     }
     
+    public void testAddInvocationsSynchronously() {
+        MethodInvocationMetricsGroup metricsGroup = 
+            new MethodInvocationMetricsGroup(null);
+        
+        metricsGroup.addInvocationTimeSynch(0);
+        metricsGroup.addInvocationTimeSynch(1);
+        metricsGroup.addInvocationTimeSynch(2);        
+        metricsGroup.addInvocationTimeSynch(3);
+                
+        assertEquals(4, metricsGroup.getNumberInvocations());
+        assertEquals(3, metricsGroup.getMaxInvocationTime());
+        assertEquals(0, metricsGroup.getMinInvocationTime());
+        assertEquals(1.5, metricsGroup.getAverageInvocationTime(), 0.0);          
+    }
+    
     public void testAddInvocationsFlushExplicitly() {
         MethodInvocationMetricsGroup metricsGroup = 
             new MethodInvocationMetricsGroup(null);
@@ -206,6 +221,98 @@ public class MethodInvocationMetricsGroup_test extends TestCase {
         metricsGroup.reset();
         
         assertNoMetrics(metricsGroup);
+    }
+    
+    /**
+     * Test the performance of adding method invocation times synchronously, 
+     * evaluating the group metrics immediately.
+     */
+    public void testSynchInsertionPerformance() throws Exception {
+        MethodInvocationMetricsGroup metricsGroup = 
+            new MethodInvocationMetricsGroup(null);
+        
+        int numThreads = 10;
+        int numInserts = 100000;
+        
+        InsertionThread[] threads = new InsertionThread[numThreads];
+        
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new InsertionThread(metricsGroup, numInserts, false);
+        }
+        
+        long start = System.currentTimeMillis();
+        
+        for (int i = 0; i < threads.length; i++) {
+            threads[i].start();
+        }
+        
+        for (int i = 0; i < threads.length; i++) {
+            threads[i].join();
+        }
+        
+        System.out.println("total insert time (sync): "+(System.currentTimeMillis()-start));
+    }
+    
+    /**
+     * Test the performance of adding method invocation times asynchronously, 
+     * evaluating the group metrics only on flush.
+     */
+    public void testAsyncInsertionPerformance() throws Exception {
+        MethodInvocationMetricsGroup metricsGroup = 
+            new MethodInvocationMetricsGroup(null);
+        
+        int numThreads = 10;
+        int numInserts = 100000;
+        
+        InsertionThread[] threads = new InsertionThread[numThreads];
+        
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new InsertionThread(metricsGroup, numInserts, true);
+        }
+        
+        long start = System.currentTimeMillis();
+        
+        for (int i = 0; i < threads.length; i++) {
+            threads[i].start();
+        }
+        
+        for (int i = 0; i < threads.length; i++) {
+            threads[i].join();
+        }
+        
+        System.out.println("total insert time (async): "+(System.currentTimeMillis()-start));        
+    }
+    
+    private static class InsertionThread extends Thread {
+        
+        private final MethodInvocationMetricsGroup _metricsGroup;
+        private final int _numInserts;
+        private final boolean _async;
+        
+        public InsertionThread(MethodInvocationMetricsGroup metricsGroup, 
+                               int numInserts, 
+                               boolean async) {
+            super("Insertion Thread");
+            setDaemon(true);
+            _metricsGroup = metricsGroup;
+            _numInserts = numInserts;
+            _async = async;
+        }
+        
+        public void run() {            
+            for (int i = 0; i < _numInserts; i++) {
+                
+                if (_async) {
+                    _metricsGroup.addInvocationTime(i);                    
+                } else {
+                    _metricsGroup.addInvocationTimeSynch(i);
+                }
+            }
+            
+            if (_async) {
+                _metricsGroup.flush();
+            }
+        }
     }
     
     
