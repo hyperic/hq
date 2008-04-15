@@ -61,24 +61,24 @@ class EventTrackerDiagnostic implements DiagnosticObject {
      * Private constructor for a singleton.
      */
     private EventTrackerDiagnostic() {
-        _addMetrics = new MethodInvocationMetricsGroup("Add Events:");
-        _updateMetrics = new MethodInvocationMetricsGroup("Update Events:");
-        _deleteMetrics = new MethodInvocationMetricsGroup("Delete Events:");
-        _getMetrics = new MethodInvocationMetricsGroup("Get Events:");
+        _addMetrics = new MethodInvocationMetricsGroup("    Add Events:");
+        _updateMetrics = new MethodInvocationMetricsGroup("    Update Events:");
+        _deleteMetrics = new MethodInvocationMetricsGroup("    Delete Events:");
+        _getMetrics = new MethodInvocationMetricsGroup("    Get Events:");
     }
 
     /**
      * @see org.hyperic.hq.common.DiagnosticObject#getName()
      */
     public String getName() {
-        return "Event Tracker Queries";
+        return "Event Tracker Stats";
     }
 
     /**
      * @see org.hyperic.hq.common.DiagnosticObject#getShortName()
      */
     public String getShortName() {
-        return "EventTrackerQueries";
+        return "EventTrackerStats";
     }
 
     /**
@@ -89,6 +89,7 @@ class EventTrackerDiagnostic implements DiagnosticObject {
             {_addMetrics, _getMetrics, _updateMetrics, _deleteMetrics};
 
         StringBuffer res = new StringBuffer();
+        res.append("Event Tracker Queries:\n");
         
         PrintfFormat timingFmt = 
             new PrintfFormat("%-20s max=%-10d min=%-7d avg=%-10.2f num=%-20d\n");
@@ -128,7 +129,7 @@ class EventTrackerDiagnostic implements DiagnosticObject {
         
         if (startTime != null) {
             long invocationTime = endTime-startTime.longValue();
-            _addMetrics.addInvocationTime(invocationTime);
+            _addMetrics.addInvocationTimeSynch(invocationTime);
         }
     }
     
@@ -150,7 +151,7 @@ class EventTrackerDiagnostic implements DiagnosticObject {
         
         if (startTime != null) {
             long invocationTime = endTime-startTime.longValue();
-            _updateMetrics.addInvocationTime(invocationTime);
+            _updateMetrics.addInvocationTimeSynch(invocationTime);
         }
     }
     
@@ -172,7 +173,7 @@ class EventTrackerDiagnostic implements DiagnosticObject {
         
         if (startTime != null) {
             long invocationTime = endTime-startTime.longValue();
-            _deleteMetrics.addInvocationTime(invocationTime);
+            _deleteMetrics.addInvocationTimeSynch(invocationTime);
         }        
     }
     
@@ -194,7 +195,7 @@ class EventTrackerDiagnostic implements DiagnosticObject {
         
         if (startTime != null) {
             long invocationTime = endTime-startTime.longValue();
-            _getMetrics.addInvocationTime(invocationTime);
+            _getMetrics.addInvocationTimeSynch(invocationTime);
         }          
     }
 
