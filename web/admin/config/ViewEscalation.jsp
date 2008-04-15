@@ -1573,7 +1573,7 @@ function saveAddEscalation() {
                     </ul>
                 </td>
             </tr>
-            <c:if test="${useroperations['modifyEscalation']}">
+	        <c:if test="${useroperations['createEscalation'] || useroperations['modifyEscalation']}">
                 <tr class="ToolbarContent">
                     <td id="addRowButton">
                         <table cellspacing="4" cellpadding="0">
