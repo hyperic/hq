@@ -44,8 +44,7 @@ autoLogout = false;
 function removePortlet(name, label) {
     dojo.xhrGet({
         url: '<html:rewrite page="/dashboard/RemovePortlet.do"/>',
-        load: function(){postRemovet(name,label)},
-        error: function(){document.location="/Login.do"}
+        load: function(){postRemovet(name,label)}
     });
 }
   
@@ -183,7 +182,7 @@ dojo.connect(window, "onload", function(){
     narrowWidth = "width='25%'";
   }
   else {
-    divStart = "<div name=\"containerDiv\" style=\"margin:0px; width: 25%\">";
+    divStart = "<div style=\"margin:0px;\">";
     divEnd = "</div>";
     narrowWidth = "width='100%'";
   }
