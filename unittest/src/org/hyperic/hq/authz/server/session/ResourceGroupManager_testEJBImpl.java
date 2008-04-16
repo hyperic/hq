@@ -39,6 +39,7 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager_testLocal;
 import org.hyperic.hq.authz.shared.ResourceGroupManager_testUtil;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 
@@ -135,7 +136,7 @@ public class ResourceGroupManager_testEJBImpl implements SessionBean {
             rgMan.updateGroup(overlord, rg, "Test Group 1",
                               "New Description", "New Location");
             Assert.fail("Group update with existing name didn't fail");
-        } catch (GroupDuplicateNameException e) {
+        } catch (DuplicateObjectException e) {
             // Ok
         }
 
@@ -154,5 +155,4 @@ public class ResourceGroupManager_testEJBImpl implements SessionBean {
     public void ejbPassivate() throws EJBException, RemoteException {}
     public void ejbRemove() throws EJBException, RemoteException {}
     public void setSessionContext(SessionContext arg0) {}
-
 }
