@@ -314,10 +314,7 @@ public class AvailabilityManagerEJBImpl
         Map rtn = new HashMap();
 
         if (avails.size() == 0) {
-            for (Iterator i=tidList.iterator(); i.hasNext(); ) {
-                Integer tid = (Integer)i.next();
-                rtn.put(tid, getDefaultData(interval));
-            }
+            // Nothing to do, return empty list.
             return rtn;
         }
         int i = 0;
