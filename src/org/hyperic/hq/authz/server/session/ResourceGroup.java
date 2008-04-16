@@ -325,15 +325,23 @@ public class ResourceGroup extends AuthzNamedBean
         _roles = val;
     }
 
-    // TODO document access
+    // hibernate getter method
+    // ResourceGroupManager should call getCritterList instead
     protected List getCriteriaList() {
         return _criteria;
     }
 
+    // hibernate setter method
+    // ResourceGroupManager should call setCritterList instead 
     protected void setCriteriaList(List val) {
         _criteria = val;
     }
     
+    /**
+     * Getter method used to retrieve the criteria list for a ResourceGroup.
+     * @return CritterList The criteria list associated with this ResourceGroup instance.
+     * @throws GroupException
+     */
     public CritterList getCritterList() throws GroupException {
         List critters = new ArrayList();
         // iterate through all the persisted criteria, and convert to critters
@@ -346,6 +354,9 @@ public class ResourceGroup extends AuthzNamedBean
         return new CritterList(critters, _orCriteria);
     }
 
+     // used by the ResourceManager to set the criteria list for a resource group
+    // note that the ResourceManager should invoke this method rather than
+    // the setCriteriaList  setter used by hibernate
     protected void setCritterList(CritterList criteria) throws GroupException {
         List dumps = new ArrayList();
         // iterate through all the critters in the critter list

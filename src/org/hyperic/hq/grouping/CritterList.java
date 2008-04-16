@@ -50,10 +50,20 @@ public class CritterList {
         return Collections.unmodifiableList(_critters);
     }
     
+    /**
+     * 
+     * @return true iff the list of criteria represents a logical OR of its 
+     * constituent criteria
+     */
     public boolean isAny() {
         return _isAny;
     }
     
+    /**
+     * 
+     * @return true iff the list of criteria represents a logical AND of its 
+     * constituent criteria
+     */
     public boolean isAll() {
         return !_isAny;
     }
