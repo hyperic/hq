@@ -27,9 +27,20 @@ class CageController
     }
 
     private CritterType findCritterType(String name) {
-        _registry.getCritterTypes().find { t ->
+        _registry.critterTypes.find { t ->
             t.class.name == name
         }
+    }
+    
+    def list(params) {
+        def res = new StringBuilder()
+        
+        for (c in _registry.critterTypes) {
+            res << "${c.class.name}:\n"
+            res << "    Name:        ${c.name}\n"
+            res << "    Description: ${c.description}\n\n"
+        }
+        render inline:res.toString()
     }
     
     def explain(params) {
