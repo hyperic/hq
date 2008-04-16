@@ -119,7 +119,7 @@ public class AlertDefinitionManagerEJBImpl
      * Remove alert definitions. It is assumed that the subject has permission 
      * to remove this alert definition and any of its' child alert definitions.
      */
-    private boolean deleteAlertDefinition(AuthzSubjectValue subj,
+    private boolean deleteAlertDefinition(AuthzSubject subj,
                                           AlertDefinition alertdef,
                                           boolean force)
         throws RemoveException, PermissionException {
@@ -186,7 +186,7 @@ public class AlertDefinitionManagerEJBImpl
      * Create a new alert definition
      * @ejb:interface-method
      */
-    public AlertDefinitionValue createAlertDefinition(AuthzSubjectValue subj,
+    public AlertDefinitionValue createAlertDefinition(AuthzSubject subj,
                                                       AlertDefinitionValue a)
         throws AlertDefinitionCreateException, ActionCreateException,
                FinderException, PermissionException 
@@ -278,7 +278,7 @@ public class AlertDefinitionManagerEJBImpl
      *
      * @ejb:interface-method
      */
-    public void updateAlertDefinitionBasic(AuthzSubjectValue subj, Integer id,
+    public void updateAlertDefinitionBasic(AuthzSubject subj, Integer id,
                                            String name, String desc,
                                            int priority, boolean activate)
         throws PermissionException
@@ -393,7 +393,7 @@ public class AlertDefinitionManagerEJBImpl
      * 
      * @ejb:interface-method
      */
-    public void updateAlertDefinitionsActiveStatus(AuthzSubjectValue subj,
+    public void updateAlertDefinitionsActiveStatus(AuthzSubject subj,
                                                    Integer[] ids, 
                                                    boolean activate)
         throws FinderException, PermissionException 
@@ -410,7 +410,8 @@ public class AlertDefinitionManagerEJBImpl
         }
 
         for (Iterator i = alertdefs.iterator(); i.hasNext(); ) {
-            updateAlertDefinitionActiveStatus(subj, (AlertDefinition) i.next(), activate);
+            updateAlertDefinitionActiveStatus(subj, (AlertDefinition) i.next(),
+                                              activate);
         }
     }
 
@@ -419,7 +420,7 @@ public class AlertDefinitionManagerEJBImpl
      * 
      * @ejb:interface-method
      */
-    public void updateAlertDefinitionActiveStatus(AuthzSubjectValue subj,
+    public void updateAlertDefinitionActiveStatus(AuthzSubject subj,
                                                   AlertDefinition def, 
                                                   boolean activate)
         throws PermissionException {
@@ -508,12 +509,11 @@ public class AlertDefinitionManagerEJBImpl
     }
     
     /** 
-     * Set the escalation on the alertdefinition
+     * Set the escalation on the alert definition
      * 
      * @ejb:interface-method
      */
-    public void setEscalation(AuthzSubjectValue subj, Integer defId,
-                              Integer escId)
+    public void setEscalation(AuthzSubject subj, Integer defId, Integer escId)
         throws PermissionException 
     {
         AlertDefinition def = getAlertDefDAO().findById(defId);
@@ -539,7 +539,7 @@ public class AlertDefinitionManagerEJBImpl
      * Remove alert definitions
      * @ejb:interface-method
      */
-    public void deleteAlertDefinitions(AuthzSubjectValue subj, Integer[] ids)
+    public void deleteAlertDefinitions(AuthzSubject subj, Integer[] ids)
         throws RemoveException, PermissionException
     {
         for (int i = 0; i < ids.length; i++) {
@@ -562,8 +562,7 @@ public class AlertDefinitionManagerEJBImpl
      * @throws PermissionException 
      * @ejb:interface-method
      */
-    public void deleteAlertDefinitions(AuthzSubjectValue subj,
-                                       AppdefEntityID aeid)
+    public void deleteAlertDefinitions(AuthzSubject subj, AppdefEntityID aeid)
         throws RemoveException, PermissionException 
     {
         canManageAlerts(subj.getId(), aeid);
@@ -653,7 +652,7 @@ public class AlertDefinitionManagerEJBImpl
      * alerts
      * @ejb:interface-method
      */
-    public AlertDefinitionValue getById(AuthzSubjectValue subj, Integer id) 
+    public AlertDefinitionValue getById(AuthzSubject subj, Integer id) 
         throws FinderException, PermissionException
     {
         return getByIdAndCheck(subj, id).getAlertDefinitionValue();
@@ -664,7 +663,7 @@ public class AlertDefinitionManagerEJBImpl
      * alerts
      * @ejb:interface-method
      */
-    public AlertDefinition getByIdAndCheck(AuthzSubjectValue subj, Integer id)
+    public AlertDefinition getByIdAndCheck(AuthzSubject subj, Integer id)
         throws FinderException, PermissionException
     {
         AlertDefinition ad = badFindById(id);
@@ -930,10 +929,8 @@ public class AlertDefinitionManagerEJBImpl
      * Get list of alert conditions for a resource or resource type
      * @ejb:interface-method
      */
-    public PageList findAlertDefinitions(AuthzSubjectValue subj,
-                                         AppdefEntityID id,
-                                         Integer parentId,
-                                         PageControl pc)
+    public PageList findAlertDefinitions(AuthzSubject subj, AppdefEntityID id,
+                                         Integer parentId, PageControl pc)
         throws PermissionException 
     {
         AlertDefinitionDAO aDao = getAlertDefDAO();

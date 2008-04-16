@@ -64,7 +64,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
@@ -551,7 +550,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @return The Measurement
      * @ejb:interface-method
      */
-    public Measurement findMeasurement(AuthzSubjectValue subject,
+    public Measurement findMeasurement(AuthzSubject subject,
                                        Integer tid,
                                        Integer iid,
                                        boolean allowStale)

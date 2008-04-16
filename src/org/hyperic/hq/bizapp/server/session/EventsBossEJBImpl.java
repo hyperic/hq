@@ -52,7 +52,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
@@ -229,7 +228,7 @@ public class EventsBossEJBImpl
     /*
      * How the Boss figures out which triggers to create based on conditions
      */
-    private void createTriggers(AuthzSubjectValue subject,
+    private void createTriggers(AuthzSubject subject,
                                 AlertDefinitionValue alertdef)
         throws TriggerCreateException, InvalidOptionException,
                InvalidOptionValueException {
@@ -362,13 +361,12 @@ public class EventsBossEJBImpl
      * @return <code>true</code> if cloning succeeded; 
      *         <code>false</code> if cloning failed.
      */
-    private boolean cloneParentConditions(AuthzSubjectValue subject,
+    private boolean cloneParentConditions(AuthzSubject subject,
                                           AppdefEntityID id,
                                           AlertDefinitionValue adval,
                                           AlertConditionValue[] conds, 
                                           boolean failSilently) 
         throws MeasurementNotFoundException {
-        
         // scrub and copy the parent's conditions
         adval.removeAllConditions();
         
@@ -493,7 +491,7 @@ public class EventsBossEJBImpl
                InvalidOptionValueException, 
                SessionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length == 0) {
@@ -583,8 +581,7 @@ public class EventsBossEJBImpl
                InvalidOptionValueException, 
                SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        AuthzSubjectValue subjVal = subject.getAuthzSubjectValue();
-
+        
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length == 0) {
             throw new AlertDefinitionCreateException(
@@ -600,7 +597,7 @@ public class EventsBossEJBImpl
         
         try {
             // Now create the alert definition
-            parent = getADM().createAlertDefinition(subjVal, adval);
+            parent = getADM().createAlertDefinition(subject, adval);
         } catch (FinderException e) {
             throw new AlertDefinitionCreateException(e.getMessage());
         }
@@ -643,7 +640,8 @@ public class EventsBossEJBImpl
             
             try {
                 boolean succeeded = 
-                    cloneParentConditions(subjVal, id, adval, parent.getConditions(), true);
+                    cloneParentConditions(subject, id, adval,
+                                          parent.getConditions(), true);
                 
                 if (!succeeded) {
                     continue;
@@ -654,7 +652,7 @@ public class EventsBossEJBImpl
             }
                         
             // Create the triggers
-            createTriggers(subjVal, adval);
+            createTriggers(subject, adval);
             triggers.addAll(Arrays.asList(adval.getTriggers()));
 
             // Make sure the actions have the proper parentId
@@ -665,7 +663,7 @@ public class EventsBossEJBImpl
 
             try {
                 // Now create the alert definition
-                adm.createAlertDefinition(subjVal, adval);
+                adm.createAlertDefinition(subject, adval);
             } catch (FinderException e) {
                 throw new AlertDefinitionCreateException(e.getMessage());
             }
@@ -702,14 +700,13 @@ public class EventsBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public void inheritResourceTypeAlertDefinition(AuthzSubject subj,
+    public void inheritResourceTypeAlertDefinition(AuthzSubject subject,
                                                    AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException,
                InvalidOptionException, InvalidOptionValueException,
                AlertDefinitionCreateException 
     {
-        AppdefEntityValue rv = new AppdefEntityValue(id, subj);
-        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
+        AppdefEntityValue rv = new AppdefEntityValue(id, subject);
         AppdefResourceTypeValue type = rv.getResourceTypeValue();
         
         // Find the alert definitions for the type
@@ -782,7 +779,7 @@ public class EventsBossEJBImpl
                ActionCreateException, RemoveException, FinderException,
                PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
         ActionValue action = new ActionValue();
 
@@ -827,7 +824,7 @@ public class EventsBossEJBImpl
                                          boolean activate)
         throws SessionNotFoundException, SessionTimeoutException, 
                FinderException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         getADM().updateAlertDefinitionsActiveStatus(subject, ids, activate);
     }
 
@@ -841,7 +838,7 @@ public class EventsBossEJBImpl
                                            int priority, boolean activate)
         throws SessionNotFoundException, SessionTimeoutException,
                FinderException, RemoveException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         getADM().updateAlertDefinitionBasic(subject, alertDefId, name, desc,
                                             priority, activate);
     }
@@ -854,7 +851,7 @@ public class EventsBossEJBImpl
                InvalidOptionValueException, AlertConditionCreateException,
                ActionCreateException, FinderException, RemoveException,
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length < 1) {
@@ -958,7 +955,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException, 
                RemoveException, PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         getADM().deleteAlertDefinitions(subject, ids);
     }
 
@@ -1020,7 +1017,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException, FinderException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         
         // Delete alerts for definition and its children
         int count = 0;
@@ -1048,7 +1045,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException, 
                FinderException, PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getADM().getById(subject, id);
     }
 
@@ -1108,7 +1105,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getADM().findAlertDefinitions(subject, id, parentId, pc);
     }
     
@@ -1121,7 +1118,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getADM().findAlertDefinitions(subject, id,
                                              EventConstants.TYPE_ALERT_DEF_ID,
                                              pc);
@@ -1207,7 +1204,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         List allAlerts = findAlertDefinitionsByAgent(sessionID, platId);
         AlertDefinitionManagerLocal adm = getADM();
         for (Iterator it = allAlerts.iterator(); it.hasNext();) {
@@ -1444,7 +1441,8 @@ public class EventsBossEJBImpl
                RemoveException, AlertDefinitionCreateException,
                FinderException, PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        
         // check security
         RegisteredTriggerValue trigger = new RegisteredTriggerValue();
         trigger.setClassname(className);
@@ -1783,7 +1781,7 @@ public class EventsBossEJBImpl
     public String getLastFix(int sessionID, Integer defId)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, FinderException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         
         // Look for the last fixed alert
         AlertDefinition def = getADM().getByIdAndCheck(subject, defId);

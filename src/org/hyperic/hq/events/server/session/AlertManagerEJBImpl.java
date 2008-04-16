@@ -178,7 +178,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @throws PermissionException 
      * @ejb:interface-method
      */
-    public int deleteAlerts(AuthzSubjectValue subj, AlertDefinition ad)
+    public int deleteAlerts(AuthzSubject subj, AlertDefinition ad)
         throws RemoveException, PermissionException {
         canManageAlerts(subj, ad);
         return getAlertDAO().deleteByAlertDefinition(ad);
