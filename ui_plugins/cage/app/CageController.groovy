@@ -1,8 +1,10 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.grouping.CritterRegistry
-import org.hyperic.hq.grouping.prop.StringCritterProp
 import org.hyperic.hq.grouping.CritterTranslator
 import org.hyperic.hq.grouping.CritterList
+import org.hyperic.hq.grouping.CritterType
+import org.hyperic.hq.grouping.prop.CritterPropDescription
+import org.hyperic.hq.grouping.prop.StringCritterProp
 import org.hyperic.dao.DAOFactory
 
 class CageController 
@@ -23,15 +25,43 @@ class CageController
         }
         res
     }
+
+    private CritterType findCritterType(String name) {
+        _registry.getCritterTypes().find { t ->
+            t.class.name == name
+        }
+    }
+    
+    def explain(params) {
+        def typeName = params.getOne('class')
+        def type = findCritterType(typeName)
+
+        if (!type) {
+            render inline: "Critter type [${typeName}] not found\n"
+            return
+        }
+        
+        def res = new StringBuilder()
+        res << "Critter class: ${typeName}\n"
+        res << "Name:          ${type.name}\n"
+        res << "Description:   ${type.description}\n"
+        
+        type.propDescriptions.eachWithIndex { desc, i ->
+            res << "Arg[${i}]:\n"
+            res << "    name:    ${desc.name}\n"
+            res << "    type:    ${desc.type.description}\n"
+            res << "    purpose: ${desc.purpose}\n"
+        }
+        
+        render inline: res.toString()
+    }
     
     def peek(xmlOut, params) {
         def xmlIn = new XmlParser().parseText(getUpload('args'))
 
         def critters = []
         for (critterDef in xmlIn.critter) {
-            def critterType = _registry.getCritterTypes().find { t -> 
-                t.class.name == critterDef.'@class'
-            }
+            def critterType = findCritterType(critterDef.'@class')
             
             if (critterType == null) {
                 xmlOut.error("Unable to find critter class [${critterDef.'@class'}]")
