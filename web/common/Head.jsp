@@ -34,7 +34,7 @@
 <link rel=stylesheet href="<html:rewrite page='/css/iecss.css'/>" type="text/css">
 <![endif]-->
 <script type="text/javascript">
-    var djConfig = {parseOnLoad: true, isDebug : true, locale : "<%=request.getLocale().toString().substring(0,2)%>"};
+    var djConfig = {parseOnLoad: true, isDebug : false, locale : "<%=request.getLocale().toString().substring(0,2)%>"};
     var imagePath = "<html:rewrite page="/images/"/>";
 </script>
 <!-- FOR DEBUG ONLY -->
