@@ -29,6 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -57,6 +58,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigAudit;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.hqu.server.session.UIPlugin;
+import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 import org.hyperic.util.thread.LoggingThreadGroup;
 
 
@@ -140,9 +143,22 @@ public class UpdateBossEJBImpl
         
         req.putAll(SysStats.getCpuMemStats());
         req.putAll(SysStats.getDBStats());
-        
+        req.putAll(getHQUPlugins());
         BossStartupListener.getUpdateReportAppender().addProps(req);
         return req;
+    }
+    
+    private Properties getHQUPlugins() {
+        Collection plugins = UIPluginManagerEJBImpl.getOne().findAll();
+        Properties res = new Properties();
+        
+        for (Iterator i=plugins.iterator(); i.hasNext(); ) {
+            UIPlugin p = (UIPlugin)i.next();
+            
+            res.setProperty("hqu.plugin." + p.getName(),
+                            p.getPluginVersion());
+        }
+        return res;
     }
     
     private void addResourceProperties(Properties p, List resCounts,
