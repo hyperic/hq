@@ -1,0 +1,1 @@
+${alertDef.name}:${action.shortReason}
