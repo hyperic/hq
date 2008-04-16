@@ -74,7 +74,8 @@ exit 0
   ]]>
   </script>
 
-  <server name="Sendmail">
+  <server name="Sendmail"
+          version="8.x">
 
     <property name="INVENTORY_ID" value="sendmail"/>
     <!-- hardwire this cosmetic to universal location -->
@@ -114,11 +115,11 @@ exit 0
       <config>
         <option name="user"
                 default="smmsp"
-                description="SendMail Message Submission Process User"/>
+                description="Sendmail Message Submission Process User"/>
 
         <option name="process.query"
                 default="State.Name.eq=sendmail,CredName.User.eq=%user%"
-                description="PTQL for SendMail Message Submission Process"/>
+                description="PTQL for Sendmail Message Submission Process"/>
       </config>
 
       <metric name="Availability"
@@ -132,7 +133,7 @@ exit 0
       <config>
         <option name="process.query"
                 default="State.Name.eq=sendmail,State.Name.Pne=$1,CredName.User.eq=root"
-                description="PTQL for SendMail Root Daemon Process"/>
+                description="PTQL for Sendmail Root Daemon Process"/>
       </config>
       <metric name="Availability"
               template="sigar:Type=MultiProcCpu,Arg=%process.query%:Processes"
@@ -171,15 +172,15 @@ exit 0
     </service>
   </server>
   <!-- ==================== Plugin Help =========================== -->
-  <help name="SendMail">
+  <help name="Sendmail">
   <![CDATA[
   <p>
-  <h3>Configure HQ for monitoring SendMail</h3>
+  <h3>Configure HQ for monitoring Sendmail</h3>
   </p>
   <p>
   This plugin needs sudo access as root in order to access the appropriate
   <br>
-  SendMail dirs.
+  Sendmail dirs.
   <br>
   To configure sudo (in /etc/sudoers):
   <br>
@@ -189,4 +190,5 @@ exit 0
   </p>
   ]]>
   </help>
+  <help name="Sendmail 8.x" include="Sendmail"/>
 </plugin>
