@@ -680,7 +680,11 @@
         <path refid="alljars" />
         <path refid="testjars" />
       </classpath>
-      <src path="src"/>
+      <src>
+        <path location="src" />
+        <!-- Test sources --> 
+        <path location="unittest/src"/>
+      </src>
       <include name="**/hq/ui/**" />
       <include name="**/ui/tapestry/**" />
     </hq-javac>
