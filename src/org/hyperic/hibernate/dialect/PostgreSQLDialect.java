@@ -138,4 +138,21 @@ public class PostgreSQLDialect
     public boolean usesSequenceGenerator() {
         return true;
     }
+    
+    public String getRegExSQL(String column, String regex, boolean ignoreCase,
+                              boolean invertMatch) {
+        String op = " ~ ";
+        if (ignoreCase && invertMatch) {
+            op = " !~* ";
+        } else if (ignoreCase) {
+            op = " ~* ";
+        } else if (invertMatch) {
+            op = " !~ ";
+        }
+        return new StringBuffer()
+            .append(column)
+            .append(op)
+            .append("'").append(regex).append("'")
+            .toString();
+    }
 }

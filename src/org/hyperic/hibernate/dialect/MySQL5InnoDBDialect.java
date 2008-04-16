@@ -388,4 +388,18 @@ public class MySQL5InnoDBDialect
     public boolean usesSequenceGenerator() {
         return false;
     }
+
+    /*
+     * MySQL, unfortunately, does not support case sensitivity for
+     * ut8 character sets.  This is also an issue with their "like" SQL clauses.
+     */
+    public String getRegExSQL(String column, String regex, boolean ignoreCase,
+                              boolean invertMatch) {
+        return new StringBuffer()
+            .append(column)
+            .append((invertMatch) ? " NOT " : " ")
+            .append("REGEXP '")
+            .append(regex).append("'")
+            .toString();
+    }
 }

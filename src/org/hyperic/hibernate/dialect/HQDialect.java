@@ -46,6 +46,18 @@ public interface HQDialect
      * Returns true if the database supports a multi insert stmt.
      */
     public boolean supportsMultiInsertStmt();
+    
+    /*
+     * Returns a db specific SQL syntax for a POSIX style Regular Expression.
+     * NOTE: MySQL, unfortunately, does not support case sensitivity for
+     * ut8 character sets.  This is also an issue with their "like" SQL clauses.
+     * @param column - the column to match against
+     * @param regex - the POSIX style regex
+     * @param ignoreCase - similar to grep -i
+     * @param invertMatch - similar to grep -v
+     */
+    public String getRegExSQL(String column, String regex, boolean ignoreCase,
+                              boolean invertMatch);
 
     /*
      * Returns true if the database supports an insert stmt which

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004-2007], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -143,5 +143,15 @@ public class Oracle9Dialect
     public boolean usesSequenceGenerator() {
         return true;
     }
-    
+
+    public String getRegExSQL(String column, String regex, boolean ignoreCase,
+                              boolean invertMatch) {
+        return new StringBuffer()
+            .append((invertMatch) ? "NOT " : "")
+            .append("REGEXP_LIKE(")
+            .append(column)
+            .append(", '").append(regex).append("'")
+            .append((ignoreCase) ? ", 'i')" : ")")
+            .toString();
+    }
 }
