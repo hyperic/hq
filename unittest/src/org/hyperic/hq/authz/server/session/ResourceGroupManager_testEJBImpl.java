@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.rmi.RemoteException;
+import java.util.Collections;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -36,7 +37,10 @@ import junit.framework.Assert;
 
 import org.hyperic.hq.authz.shared.ResourceGroupManager_testLocal;
 import org.hyperic.hq.authz.shared.ResourceGroupManager_testUtil;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 
 /**
  * The session bean implementing the in-container unit tests for the 
@@ -52,7 +56,9 @@ import org.hyperic.hq.common.SystemException;
  * @ejb:transaction type="NOTSUPPORTED"
  */
 public class ResourceGroupManager_testEJBImpl implements SessionBean {
-    
+
+    final int ADHOC = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
+
     public static ResourceGroupManager_testLocal getOne() {
         try {
             return ResourceGroupManager_testUtil.getLocalHome().create();
@@ -62,14 +68,86 @@ public class ResourceGroupManager_testEJBImpl implements SessionBean {
     }
     
     /**
-     * A place holder showing how to use the framework.
+     * Test creating two groups of the same name.
      * 
      * @ejb:interface-method
      */
-    public void testNothing() throws Exception {
-        // Implement your in-container unit test here!
-        Assert.assertTrue(true);
-    }    
+    public void testDuplicateNameCreate() throws Exception {
+        AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroup.ResourceGroupCreateInfo info =
+            new ResourceGroup.ResourceGroupCreateInfo("Test Group",
+                                                      "Test Group Description",
+                                                      ADHOC,
+                                                      null,
+                                                      "Test Group Location",
+                                                      0, false);
+
+        rgMan.createResourceGroup(overlord, info,
+                                  Collections.EMPTY_LIST,
+                                  Collections.EMPTY_LIST);
+
+        try {
+            rgMan.createResourceGroup(overlord, info,
+                                      Collections.EMPTY_LIST,
+                                      Collections.EMPTY_LIST);
+            Assert.fail("Duplicate group creation didn't fail with duplicate " +
+                        "name exception");
+        } catch (GroupDuplicateNameException e) {
+            // Ok
+        }
+    }
+
+   /**
+     * Test renaming a group to a name which already exists.
+     *
+     * @ejb:interface-method
+     */
+    public void testUpdate() throws Exception {
+        AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroup.ResourceGroupCreateInfo info1 =
+            new ResourceGroup.ResourceGroupCreateInfo("Test Group 1",
+                                                      "Test Group Description",
+                                                      ADHOC,
+                                                      null,
+                                                      "Test Group Location",
+                                                      0, false);
+
+        ResourceGroup.ResourceGroupCreateInfo info2 =
+            new ResourceGroup.ResourceGroupCreateInfo("Test Group 2",
+                                                      "Test Group Description",
+                                                      ADHOC,
+                                                      null,
+                                                      "Test Group Location",
+                                                      0, false);
+
+        rgMan.createResourceGroup(overlord, info1,
+                                  Collections.EMPTY_LIST,
+                                  Collections.EMPTY_LIST);
+
+        ResourceGroup rg = rgMan.createResourceGroup(overlord, info2,
+                                                     Collections.EMPTY_LIST,
+                                                     Collections.EMPTY_LIST);
+
+        // Update Test Group 2
+        try {
+            rgMan.updateGroup(overlord, rg, "Test Group 1",
+                              "New Description", "New Location");
+            Assert.fail("Group update with existing name didn't fail");
+        } catch (GroupDuplicateNameException e) {
+            // Ok
+        }
+
+        String name = "Test Group 3";
+        String description = "Test Group 3 Description";
+        String location = "Test Group 3 Location";
+        rgMan.updateGroup(overlord, rg, name, description, location);
+
+        Assert.assertEquals(rg.getName(), name);
+        Assert.assertEquals(rg.getDescription(), description);
+        Assert.assertEquals(rg.getLocation(), location);
+    }
 
     public void ejbCreate() throws CreateException {}
     public void ejbActivate() throws EJBException, RemoteException {}
