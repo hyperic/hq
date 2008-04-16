@@ -73,6 +73,8 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.grouping.CritterList;
+import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -453,6 +455,25 @@ public class ResourceGroupManagerEJBImpl
         GroupingStartupListener.getCallbackObj().groupMembersChanged(resGroup);
     }
 
+    /**
+     * Set the resources for this group.
+     * @param whoami The current running user.
+     * @param group This group.
+     * @param critters List of critters to associate with this resource group.
+     * @throws PermissionException whoami does not own the resource.
+     * @ejb:interface-method
+     */
+    public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters) 
+        throws PermissionException, GroupException 
+   {
+        PermissionManager pm = PermissionManagerFactory.getInstance(); 
+        pm.check(whoami.getId(),
+                 AuthzConstants.authzGroup, group.getId(),
+                 AuthzConstants.perm_modifyResourceGroup);
+        
+        group.setCritterList(critters);
+    }
+    
     /**
      * Set the resources for this group.
      * To get the operations call getOperationValues() on the value-object.

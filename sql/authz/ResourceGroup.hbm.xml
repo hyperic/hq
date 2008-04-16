@@ -34,6 +34,10 @@
     <property name="system" type="boolean">
       <column name="FSYSTEM" not-null="false"/>
     </property>
+    
+     <property name="orCriteria" type="boolean">
+      <column name="HAS_OR_CRITERIA" not-null="true" default="true"/>
+    </property>   
 
     <property name="groupType" type="integer">
       <column name="GROUPTYPE" not-null="false" default="11"/>
@@ -74,6 +78,13 @@
       <key column="RESOURCE_GROUP_ID"/>
       <many-to-many class="Role" column="ROLE_ID"/>
     </set>
+    
+    <list name="criteriaList" table="EAM_CRITERIA" inverse="true">
+      <cache usage="read-write"/>
+      <key column="RESOURCE_GROUP_ID"/>
+      <list-index column="LIST_INDEX"/>
+      <one-to-many class="PersistedCritter"/>
+    </list>
   </class>
 
   <class name="ResGrpResMap" table="EAM_RES_GRP_RES_MAP">

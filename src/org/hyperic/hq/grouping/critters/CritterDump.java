@@ -23,44 +23,34 @@
  * USA.
  */
 
-package org.hyperic.hq.grouping;
+package org.hyperic.hq.grouping.critters;
 
-import java.util.List;
+import java.math.BigDecimal;
 
-import org.hibernate.Query;
 import org.hyperic.hq.authz.server.session.Resource;
 
-/**
- * A {@link Critter} is a 'criteria', which is able to aid in composing
- * complex SQL.
- */
-public interface Critter {
-    /**
-     * Get a list of {@link CritterProps}s which are the current
-     * values set for this critter.
-     */
-    List getProps();
+// TODO document, setters/getters, getValue (double)
+ // move to grouping package
+public interface CritterDump {
     
-    /**
-     * Get a SQL segment, suitable for placement within a where clause.
-     * 
-     * @param resourceAlias  The SQL alias for the {@link Resource}
-     */
-    String getSql(String resourceAlias);
+    public String getStringProp();
+
+    public void setStringProp(String stringProp);
     
-    /**
-     * Get additional SQL specifying joins requierd by the critter
-     */
-    String getSqlJoins(String resourceAlias);
+    public Long getDateProp();
+
+    public void setDateProp(Long dateProp);
     
-    /**
-     * Bind any SQL parameters which were previously returned as part
-     * of getSql()
-     */
-    void bindSqlParams(Query q);
+    public Resource getResourceProp();
+
+    public void setResourceProp(Resource resourceProp);
     
-    /**
-     * Returns the {@link CritterType} associated with this Critter
-     */
-    CritterType getCritterType();
+    public BigDecimal getNumericProp();
+    
+    public void setNumericProp(BigDecimal numericProp);
+
+    public Integer getEnumProp();
+    
+    public void setEnumProp(Integer enumProp);
+
 }

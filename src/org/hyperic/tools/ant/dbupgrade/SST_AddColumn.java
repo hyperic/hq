@@ -41,11 +41,22 @@ public class SST_AddColumn extends SchemaSpecTask {
     private String      _precision;
     private Initializer _initializer;
     private ForeignKey  _foreignKey;
+    private String _default;
+    private String _nullable;
 
+    
     public SST_AddColumn () {}
 
+    public void setDefault (String v) {
+        _default = v;
+    }
+    
     public void setTable (String t) {
         _table = t;
+    }
+
+    public void setNullable (String n) {
+        _nullable = n;
     }
     
     public void setColumn (String c) {
@@ -88,9 +99,20 @@ public class SST_AddColumn extends SchemaSpecTask {
         String alterSql = "ALTER TABLE " + _table + " ADD " + _column + " " + 
                           columnTypeName;
         
-        if ( _precision != null ) alterSql += "(" + _precision + ")";
-
+        alterSql += ( _precision != null ) ? "(" + _precision + ")" : "";
+        alterSql += ( _nullable != null ) ? " " + _nullable : "";
+        
         try {
+            if (_default != null) {
+                String buf = null;
+                 if (_columnType.equalsIgnoreCase("boolean") && (!_default.equalsIgnoreCase("null"))) {
+                     buf = " default " + DBUtil.getBooleanValue(Boolean.valueOf(_default).booleanValue(), c);
+                 } else {
+                     buf = " default " + _default;
+                 }
+                 alterSql += buf;
+             }
+            
             // Check to see if the column exists.  If it's already there,
             // then don't re-add it.
             boolean foundColumn = DBUtil.checkColumnExists(_ctx, c, 

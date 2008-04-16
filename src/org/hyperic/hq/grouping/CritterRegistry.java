@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.grouping;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,7 @@ public class CritterRegistry {
     private static final CritterRegistry INSTANCE = new CritterRegistry();
 
     private final Log _log = LogFactory.getLog(CritterRegistry.class);
+    // maps CritterType class names to CritterType instances
     private final Map _registry = new HashMap();
     
     private CritterRegistry() {
@@ -55,8 +57,9 @@ public class CritterRegistry {
         _log.info("Registrying Critter: " + type.getName());
         _log.debug("               from: " + type.getClass().getName());
         
+     // map CritterType class names to CritterType instances
         synchronized (_registry) {
-            _registry.put(type, type);
+            _registry.put(type.getClass().getName(), type);
         }
     }
     
@@ -68,9 +71,18 @@ public class CritterRegistry {
         }
     }
     
-    public Set getCritterTypes() {
+    public Collection getCritterTypes() {
         synchronized (_registry) {
-            return Collections.unmodifiableSet(_registry.keySet());
+            return Collections.unmodifiableCollection(_registry.values());
+        }
+    }
+    
+    /**
+     * Returns the registered CritterType instance with the given class name
+     */
+    public CritterType getCritterTypeForClass(String className) {
+        synchronized (_registry) {
+            return (CritterType)_registry.get(className);
         }
     }
 }

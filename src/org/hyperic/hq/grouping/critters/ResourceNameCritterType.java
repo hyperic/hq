@@ -55,6 +55,20 @@ public class ResourceNameCritterType
         validate(critterProps);
         
         StringCritterProp c = (StringCritterProp) critterProps.get(0);
-        return new ResourceNameCritter(c.getString());
+        return new ResourceNameCritter(c.getString(), this);
+    }
+    
+    public Critter compose(CritterDump dump) throws GroupException {
+        return newInstance(dump.getStringProp());
+    }
+
+    public void decompose(Critter critter, CritterDump dump)
+            throws GroupException {
+        // verify that critter is of the right type
+        if (!(critter instanceof ResourceNameCritter))
+            throw new GroupException("Critter is not of valid type ResourceNameCritter");
+        
+        ResourceNameCritter resourceCritter = (ResourceNameCritter)critter;
+        dump.setStringProp(resourceCritter.getNameRegex());
     }
 }

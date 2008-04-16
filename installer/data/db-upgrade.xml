@@ -8680,9 +8680,91 @@ has already been defined.
       </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.113">
+    <schema-addColumn table="EAM_RESOURCE_GROUP"
+                      column="HAS_OR_CRITERIA"
+                      columnType="BOOLEAN"
+    				  default="true"
+    				  nullable="NOT NULL"/>
+    <schema-directSQL>
+      <statement targetDB="postgresql"
+                 desc="Creating new EAM_CRITERIA table">
+        create table EAM_CRITERIA (
+        criteria_id integer NOT NULL,
+	    version_col bigint DEFAULT 0 NOT NULL,
+	    string_prop varchar(1024),
+	    date_prop bigint,
+      	resource_id_prop integer,
+	    value_prop decimal(24,5),
+	    operation integer,
+	    list_index integer NOT NULL,
+	    resource_group_id integer NOT NULL,
+	    klazz varchar(256) NOT NULL,
+      	primary key (criteria_id)
+        )
+      </statement>
+      <statement targetDB="postgresql">
+            CREATE SEQUENCE EAM_CRITERIA_ID_SEQ
+                START WITH 10001
+                INCREMENT BY 1
+                NO MAXVALUE
+                NO MINVALUE
+                CACHE 1    	
+      </statement>
+
+    	<statement targetDB="oracle"
+                 desc="Creating new EAM_CRITERIA table">
+        create table EAM_CRITERIA (
+        criteria_id integer NOT NULL,
+      	version_col NUMBER(19, 0) NOT NULL,
+	    string_prop VARCHAR2(1024),
+	    date_prop NUMBER(19, 0),
+      	resource_id_prop integer,
+      	value_prop number(24,5),
+	    operation integer,
+	    list_index integer NOT NULL,
+	    resource_group_id integer NOT NULL,
+     	klazz VARCHAR2(256) NOT NULL,
+      	primary key (criteria_id)
+        )
+      </statement>
+        <statement targetDB="oracle">
+                CREATE SEQUENCE EAM_CRITERIA_ID_SEQ
+                    START WITH 10001
+                    INCREMENT BY 1
+                    NO MAXVALUE
+                    NOCYCLE
+                    CACHE 10    	
+       </statement>    	    	
+      
+    	<statement targetDB="mysql"
+                 desc="Creating new EAM_CRITERIA table">
+        create table EAM_CRITERIA (
+        criteria_id int NOT NULL,
+      	version_col bigint not null,
+	    string_prop varchar(1024),
+	    date_prop bigint,
+	    resource_id_prop int,
+      	value_prop numeric(24,5),
+	    operation int,
+	    list_index int NOT NULL,
+	    resource_group_id int NOT NULL,
+	    klazz varchar(256) NOT NULL,
+      	primary key (criteria_id)
+        )
+      </statement>
+      <statement desc="Add foreign key constraint for resource_id">
+          alter table EAM_CRITERIA add constraint "fk36efcad46a3b098"  foreign key (RESOURCE_ID_PROP)
+            references EAM_RESOURCE (ID)
+      </statement>
+      <statement desc="Add foreign key constraint for resource_group_id">
+          alter table EAM_CRITERIA add constraint "fk36efcad6da1b7c9" foreign key (RESOURCE_GROUP_ID)
+            references EAM_RESOURCE_GROUP (ID)
+      </statement>    	
+    </schema-directSQL>  	
+  </schemaSpec>
 </dbupgrade>
 </target>
-
 </project>
 
 <!-- !!NOTE: Make sure you add the DEFERRABLE keyword when adding constraints 

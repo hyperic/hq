@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.authz.server.session">
+
+  <class name="PersistedCritter" table="EAM_CRITERIA">
+    <cache usage="read-write"/>
+
+    <id name="id">
+      <column name="CRITERIA_ID" not-null="true"/>
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
+        <param name="sequence">EAM_CRITERIA_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+     <property name="listIndex">
+      <column name="LIST_INDEX" not-null="true"/>
+    </property>
+    
+     <many-to-one name="resourceGroup" class="ResourceGroup">
+      <column name="RESOURCE_GROUP_ID" not-null="true"/>
+    </many-to-one>    
+    
+     <property name="klazz">
+      <column name="KLAZZ" not-null="true" length="256"/>
+    </property>  
+
+    <property name="stringProp">
+      <column name="STRING_PROP" not-null="false" length="1024"/>
+    </property>
+    
+	<property name="dateProp">
+      <column name="DATE_PROP" not-null="false"/>
+    </property>
+
+    <many-to-one name="resourceProp" class="Resource">
+      <column name="RESOURCE_ID_PROP"/>
+    </many-to-one>
+    
+     <property name="numericProp">
+      <column name="NUMERIC_PROP" precision="24" scale="5"/>
+    </property>
+    
+     <property name="enumProp">
+      <column name="ENUM_PROP" not-null="false"/>
+    </property>       
+
+  </class>
+
+</hibernate-mapping>

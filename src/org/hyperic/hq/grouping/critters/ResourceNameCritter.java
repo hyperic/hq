@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
+import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.prop.StringCritterProp;
 
 class ResourceNameCritter
@@ -38,13 +39,15 @@ class ResourceNameCritter
 {
     private final String _nameRegex;
     private final List   _props;
+    private final CritterType _type;
     
-    ResourceNameCritter(String nameRegex) {
+    ResourceNameCritter(String nameRegex, CritterType type) {
         _nameRegex = nameRegex;
 
         List c = new ArrayList(1);
         c.add(new StringCritterProp(_nameRegex));
         _props = Collections.unmodifiableList(c);
+        _type = type;
     }
     
     public List getProps() {
@@ -61,5 +64,13 @@ class ResourceNameCritter
     
     public void bindSqlParams(Query q) {
         q.setParameter("resourceName", _nameRegex);
+    }
+
+    public CritterType getCritterType() {
+        return _type;
+    }
+    
+    public String getNameRegex() {
+        return _nameRegex;
     }
 }

@@ -55,6 +55,21 @@ public class ProtoNameCritterType
         validate(critterProps);
         
         StringCritterProp c = (StringCritterProp)critterProps.get(0);
-        return new ProtoNameCritter(c.getString());
+        return new ProtoNameCritter(c.getString(), this);
     }
+
+    public Critter compose(CritterDump dump) throws GroupException {
+        return newInstance(dump.getStringProp());
+    }
+
+    public void decompose(Critter critter, CritterDump dump)
+            throws GroupException {
+        // verify that critter is of the right type
+        if (!(critter instanceof ProtoNameCritter))
+            throw new GroupException("Critter is not of valid type ProtoNameCritter");
+        
+        ProtoNameCritter protoCritter = (ProtoNameCritter)critter;
+        dump.setStringProp(protoCritter.getNameRegex());
+    }
+    
 }
