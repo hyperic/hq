@@ -54,12 +54,10 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.server.session.Category;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -70,13 +68,10 @@ import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.product.MeasurementInfo;
-import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.TypeInfo;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.Pager;
 
 /** The TemplateManagerEJB class is a stateless session bean that can be
  *  used to interact with Template EJB's
@@ -327,33 +322,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         return ids;
     }
 
-    /**
-     * Remove a measurement template
-     *
-     * @ejb:interface-method
-     */
-    public void removeTemplate(AuthzSubjectValue subject, Integer tid) {
-        MeasurementTemplate t = getMeasurementTemplateDAO().findById(tid);
-        getMeasurementDAO().remove(t);
-        getMeasurementTemplateDAO().remove(t);
-    }
-
-    /**
-     * Get the Product Monitoring Configuration
-     *
-     * @return A String of HTML help.
-     * @ejb:interface-method
-     */
-    public String getMonitoringHelp(AuthzSubjectValue subject,
-                                    AppdefEntityValue entityVal,
-                                    Map props)
-        throws PluginNotFoundException, PermissionException,
-               AppdefEntityNotFoundException
-    {
-        return this.getProductMan().getMonitoringHelp(subject, entityVal,
-                                                      props);
-    }
-    
     /**
      * Update the default interval for a list of meas. templates
      * 
