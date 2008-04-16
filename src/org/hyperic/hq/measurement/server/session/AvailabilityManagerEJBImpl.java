@@ -307,14 +307,13 @@ public class AvailabilityManagerEJBImpl
     public Map getAggregateData(Integer[] tids, Integer[] iids,
                                 long begin, long end)
     {
-        List tidList = new ArrayList(Arrays.asList(tids));
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List avails = dao.findAggregateAvailability(tids, iids, begin, end);
         long interval = (end - begin)/DEFAULT_INTERVAL;
         Map rtn = new HashMap();
 
         if (avails.size() == 0) {
-            // Nothing to do, return empty list.
+            // Nothing to do, return an empty Map.
             return rtn;
         }
         int i = 0;
@@ -351,16 +350,6 @@ public class AvailabilityManagerEJBImpl
             data[IND_LAST_TIME] = lastVal.getValue();
         }
         return rtn;
-    }
-
-    private double[] getDefaultData(double interval) {
-        double[] data = new double[5];
-        data[IND_MIN] = AVAIL_UNKNOWN;
-        data[IND_AVG] = AVAIL_UNKNOWN;
-        data[IND_MAX] = AVAIL_UNKNOWN;
-        data[IND_CFG_COUNT] = interval;
-        data[IND_LAST_TIME] = AVAIL_UNKNOWN;
-        return data;
     }
 
     /**
