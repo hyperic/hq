@@ -96,7 +96,6 @@
     <emma>
       <instr instrpath="${build.dir}/classes" mode="overwrite">
         <!-- exclude tests -->
-        <filter excludes="*Test*" />
         <filter excludes="*_test*" />
       </instr>
     </emma>
