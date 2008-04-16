@@ -456,11 +456,12 @@ public class ResourceGroupManagerEJBImpl
     }
 
     /**
-     * Set the resources for this group.
+     * Sets the criteria list for this group.
      * @param whoami The current running user.
      * @param group This group.
      * @param critters List of critters to associate with this resource group.
      * @throws PermissionException whoami does not own the resource.
+     * @throws GroupException critters is not a valid list of criteria.
      * @ejb:interface-method
      */
     public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters) 
