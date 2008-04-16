@@ -1,30 +1,28 @@
 <script type="text/javascript">
 function sendCode() {
-  dojo.io.bind({
+  dojo.xhrPost({
     url: '<%= urlFor(action:"execute") %>',
-    method: "post",
-    mimetype: "text/json-comment-filtered",
+    handleAs: "json-comment-filtered",
     content: {code: dojo.byId("code").value},
-    load: function(type, data, evt) {
-      dojo.byId('result').innerHTML = data.result;
+    load: function(responseObject, ioArgs) {
+      dojo.byId('result').innerHTML = responseObject.result;
     },
-    error: function(err, msg) {
-      alert('error! ' + err);
+    error: function(response, ioArgs) {
+      alert('error! ' + response);
     }
   });
 }
 
 function chooseTemplate(t) {
-  dojo.io.bind({
+  dojo.xhrGet({
     url: '<%= urlFor(action:"getTemplate") %>',
-    method: "get",
-    mimetype: "text/json-comment-filtered",
+    handleAs: "json-comment-filtered",
     content: {template: t},
-    load: function(type, data, evt) {
-      dojo.byId('code').value = data.result;
+    load: function(responseObject, ioArgs) {
+      dojo.byId('code').value = responseObject.result;
     },
-    error: function(err, msg) {
-      alert('error! ' + err);
+    error: function(response, ioArgs) {
+      alert('error! ' + response);
     }
   });
 }
