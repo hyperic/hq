@@ -11,7 +11,7 @@
       </generator>
     </id>
 
-    <version name="_version_">
+    <version name="_version_" type="long">
       <column name="VERSION_COL" default="0"/>
     </version>
 
