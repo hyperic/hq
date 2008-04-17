@@ -29,52 +29,39 @@ import org.hyperic.hq.appdef.shared.AgentTypeValue;
 
 import java.util.Collection;
 
-/**
- *
- */
 public class AgentType extends AppdefBean
 {
-    private String name;
-    private String sortName;
-    private Collection agents;
+    private String _name;
+    private String _sortName;
+    private Collection _agents;
 
-    /**
-     * default constructor
-     */
-    public AgentType()
-    {
+    public AgentType() {
         super();
     }
 
-    public String getName()
-    {
-        return this.name;
+    public String getName() {
+        return _name;
     }
 
-    public void setName(String name)
-    {
-        this.name = name;
+    public void setName(String name) {
+        _name = name;
         setSortName(name);
     }
 
-    public String getSortName()
-    {
-        return this.sortName;
+    public String getSortName() {
+        return _sortName;
     }
 
-    public void setSortName(String sortName)
-    {
-        this.sortName = sortName != null ? sortName.toUpperCase() : null;
+    public void setSortName(String sortName) {
+        _sortName = sortName != null ? sortName.toUpperCase() : null;
     }
 
-    public Collection getAgents()
-    {
-        return this.agents;
+    public Collection getAgents() {
+        return _agents;
     }
 
-    public void setAgents(Collection agents)
-    {
-        this.agents = agents;
+    public void setAgents(Collection agents) {
+        _agents = agents;
     }
 
     private AgentTypeValue agentTypeValue = new AgentTypeValue();
@@ -92,21 +79,19 @@ public class AgentType extends AppdefBean
         return agentTypeValue;
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (!(obj instanceof AgentType) || !super.equals(obj)) {
             return false;
         }
         AgentType o = (AgentType)obj;
-        return (name == o.getName() || (name!=null && o.getName()!=null &&
-                                        name.equals(o.getName())));
+        return (_name == o.getName() || (_name != null && o.getName() != null &&
+                                         _name.equals(o.getName())));
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = super.hashCode();
 
-        result = 37*result + (name!=null ? name.hashCode() : 0);
+        result = 37*result + (_name != null ? _name.hashCode() : 0);
 
         return result;
     }
