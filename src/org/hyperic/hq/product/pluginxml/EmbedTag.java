@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.hyperic.hq.product.ClientPluginDeployer;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.xmlparser.XmlTagException;
 import org.hyperic.util.xmlparser.XmlTextHandler;
 
@@ -82,7 +83,10 @@ public class EmbedTag
 
     void write() throws XmlTagException {
         String name = getAttribute(ATTR_NAME);
-
+        if (ProductPlugin.isGroovyScript(name)) {
+            this.data.setProperty(name, this.text); //XXX
+            return;
+        }
         String pdk = this.data.getPdkDir();
 
         if (pdk == null) {

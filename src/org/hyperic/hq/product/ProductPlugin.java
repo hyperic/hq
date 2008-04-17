@@ -25,7 +25,11 @@
 
 package org.hyperic.hq.product;
 
+import groovy.lang.GroovyClassLoader;
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 
 import org.hyperic.hq.product.pluginxml.PluginData;
@@ -116,6 +120,49 @@ public abstract class ProductPlugin extends GenericPlugin {
         return (String[])cp.toArray(new String[0]);
     }
 
+    public static boolean isGroovyScript(String name) {
+        return name.endsWith(".groovy");
+    }
+
+    private static Class loadGroovyClass(GenericPlugin plugin,
+                                         String name, TypeInfo info) {
+
+        ClassLoader loader = plugin.getClass().getClassLoader();
+        GroovyClassLoader cl = new GroovyClassLoader(loader);
+
+        File file = new File(name); //XXX pdk/work/
+        if (file.exists()) {
+            try {
+                return cl.parseClass(file);
+            } catch (Exception e) {
+                plugin.getLog().error("Failed to load: " + name, e);
+                return null;
+            }
+        }
+        else {
+            InputStream is;
+            is = loader.getResourceAsStream(name); //embedded in plugin.jar
+            if (is == null) {
+                //in memory server-side
+                String code = plugin.data.getProperty(name);
+                if (code == null) {
+                    plugin.getLog().error("No code found for: " + name);
+                    return null;                
+                }
+                is = new ByteArrayInputStream(code.getBytes());
+            }
+
+            try {
+                return cl.parseClass(is);
+            } catch (Exception e) {
+                plugin.getLog().error("Failed to parse: " + name, e);
+                return null;
+            } finally {
+                try { is.close(); } catch (Exception e) {}
+            }
+        }
+    }
+
     private static Class loadClass(ClassLoader loader, String name)
         throws ClassNotFoundException {
 
@@ -135,23 +182,20 @@ public abstract class ProductPlugin extends GenericPlugin {
             throw nfe;
         }        
     }
-    
-    static GenericPlugin getPlugin(GenericPlugin plugin,
-                                   String name,
-                                   String type, TypeInfo info) {
 
-        Class pluginClass;
+    private static Class loadJavaClass(GenericPlugin plugin,
+                                       String name, TypeInfo info) {
         ClassLoader loader = plugin.getClass().getClassLoader();
 
         try {
-            pluginClass = loadClass(loader, name);
+            return loadClass(loader, name);
         } catch (ClassNotFoundException e) {
             //we get here if the server's implementation is a class loaded
             //from hq-product.jar rather than the plugin's ClassLoader
             try {
                 plugin.getLog().debug("Trying data ClassLoader to load: " +
                                       name + " for plugin " + info.getName());
-                pluginClass = loadClass(plugin.data.getClassLoader(), name);
+                return loadClass(plugin.data.getClassLoader(), name);
             } catch (ClassNotFoundException e2) {
                 String msg =
                     "Unable to load " + name +
@@ -167,6 +211,25 @@ public abstract class ProductPlugin extends GenericPlugin {
                 return null;
             }
         }
+    }
+
+    static GenericPlugin getPlugin(GenericPlugin plugin,
+                                   String name,
+                                   String type, TypeInfo info) {
+
+        Class pluginClass;
+
+        if (isGroovyScript(name)) {
+            pluginClass = loadGroovyClass(plugin, name, info);
+        }
+        else {
+            pluginClass = loadJavaClass(plugin, name, info);
+        }
+
+        if (pluginClass == null) {
+            return null;
+        }
+
         try {
             return (GenericPlugin)pluginClass.newInstance();
         } catch (Exception e) {
