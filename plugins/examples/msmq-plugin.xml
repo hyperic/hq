@@ -24,6 +24,30 @@
  -->
 
 <plugin>
+  <script name="msmq_detector.groovy">
+  <![CDATA[
+import java.util.List
+import org.hyperic.hq.product.DaemonDetector
+import org.hyperic.util.config.ConfigResponse
+import org.hyperic.sigar.win32.Pdh
+
+class msmq_detector extends DaemonDetector {
+    protected List discoverServices(ConfigResponse sconfig) {
+
+	Pdh.getInstances("MSMQ Queue").collect { String queue ->
+           def service = createServiceResource("Queue")
+           service.serviceName = queue
+
+           service.productConfig = [name:queue]
+           service.setMeasurementConfig()
+
+           service
+	}
+    }
+}
+
+  ]]>
+  </script>
 
   <server name="MSMQ"
           platforms="Win32">
@@ -32,7 +56,7 @@
             class="org.hyperic.hq.product.MeasurementPlugin"/>
 
     <plugin type="autoinventory"
-            class="org.hyperic.hq.product.DaemonDetector"/>
+            class="msmq_detector.groovy"/>
 
     <filter name="service_name" value="MSMQ"/>
 
