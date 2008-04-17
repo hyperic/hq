@@ -33,6 +33,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.grouping.critters.DescendantProtoCritterType;
 import org.hyperic.hq.grouping.critters.ProtoNameCritterType;
 import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
 
@@ -47,6 +48,7 @@ public class CritterRegistry {
         // Seed ourselves with a few types
         register(new ResourceNameCritterType());
         register(new ProtoNameCritterType());
+        register(new DescendantProtoCritterType());
     }
     
     public static final CritterRegistry getRegistry() {
