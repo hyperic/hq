@@ -80,7 +80,7 @@ public class Win32MeasurementPlugin extends MeasurementPlugin {
                     return new MetricValue(getServiceStartType(object));
                 }
                 else {
-                    getServiceValue(object);
+                    return getServiceValue(object);
                 }
             }
         }
