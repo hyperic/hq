@@ -467,6 +467,12 @@ ${errMsg}
     <echo>^^^INFO: Copying existing HQ server cache information</echo>
     <ehcacheUpgrade existing="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/ehcache.xml"
                     new="${server.installdir}/server-${version}/hq-engine/server/default/deploy/hq.ear/ehcache.xml"/>
+      
+    <echo>^^^INFO: Copying existing HQU plugins</echo>
+    <copy todir="${server.installdir}/server-${version}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu">
+      <fileset dir="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu"/>
+    </copy>
+      
     <echo>^^^COMPLETION:
       Server successfully upgraded to: ${server.product.dir}
     </echo>
