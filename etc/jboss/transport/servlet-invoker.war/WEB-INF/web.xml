@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC
+   "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+   "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<!-- The the JBossRemoting server invoker servlet web.xml descriptor
+$Id: web.xml 1239 2006-07-17 03:44:00Z telrod $
+-->
+<web-app>
+    <servlet>
+        <servlet-name>ServerInvokerServlet</servlet-name>
+        <description>The ServerInvokerServlet receives requests via HTTP
+           protocol from within a web container and passes it onto the
+           ServletServerInvoker for processing.
+        </description>
+        <servlet-class>org.jboss.remoting.transport.servlet.web.ServerInvokerServlet</servlet-class>
+        <init-param>
+            <!--
+            <param-name>invokerName</param-name>
+            <param-value>jboss.remoting:service=invoker,transport=servlet</param-value>
+            <description>The servlet server invoker</description>
+            -->
+            <param-name>locatorUrl</param-name>
+            <!-- Note that the locatorUrl is just a registry key for the ServletServerInvoker.
+                 The protocol, host, port are arbitrary. -->
+            <param-value>servlet://localhost:8000/unidirectional</param-value>
+            <description>The servlet server invoker locator url</description>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServerInvokerServlet</servlet-name>
+        <url-pattern>/ServerInvokerServlet/*</url-pattern>
+    </servlet-mapping>
+</web-app>
+

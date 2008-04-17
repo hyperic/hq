@@ -349,6 +349,10 @@
     <mkdir dir="${ear.dir}/sigar_bin/lib" />
     <mkdir dir="${server.plugin.dir}" />
 
+    <mkdir dir="${ear.dir}/servlet-invoker.war/WEB-INF"/>
+    <copy todir="${ear.dir}/servlet-invoker.war/WEB-INF"
+          file="etc/jboss/transport/servlet-invoker.war/WEB-INF/web.xml"/>
+ 
     <mkdir dir="${ear.dir}/hq-session.jar/META-INF" />
     <mkdir dir="${ear.dir}/hq-agent-session.jar/META-INF" />
     <mkdir dir="${ear.dir}/hq-message.jar/META-INF" />

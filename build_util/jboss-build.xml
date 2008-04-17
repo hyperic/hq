@@ -204,6 +204,12 @@
     <copy file="${hq.home}/installer/data/hq-engine/server.xml"
           tofile="${tomcat.home}/server.xml" overwrite="true"/>
 
+    <!-- Copy our version of JBoss Remoting -->
+    <echo>Copying JBoss Remoting jars.</echo>
+    <copy file="${thirdparty.lib}/jboss-remoting.jar"
+          toFile="${jboss.home}/server/default/deploy/lib/jboss-remoting.jar"
+          overwrite="true"/>
+
     <replace file="${tomcat.home}/server.xml">
       <replacefilter token="@@@server.webapp.port@@@"
                      value="${server.webapp.port}"/>
@@ -214,6 +220,7 @@
     <available property="available.keystore"
                file="${jboss.home}/server/default/conf/hyperic.keystore"/>
     <antcall target="prepare-ssl"/>
+
   </target>
 
   <target name="post-prepare-jboss"
