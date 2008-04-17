@@ -62,7 +62,7 @@ public class SQLQueryMeasurementPlugin
         if (getName().equals(DOMAIN)) {
             this.isProxy = true;
             this.config =
-                ":" + getProperty(PROP_TEMPLATE_CONFIG);
+                ":" + getPluginProperty(PROP_TEMPLATE_CONFIG);
         }
         else if (!getManager().isRegistered(DOMAIN)) {
             getLog().info("Registered proxy for domain: " + DOMAIN);

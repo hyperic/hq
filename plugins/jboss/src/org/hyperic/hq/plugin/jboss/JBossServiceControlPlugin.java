@@ -53,7 +53,7 @@ public class JBossServiceControlPlugin extends ControlPlugin {
         return
             getObjectName() + ":" +
             getAttribute() + ":" + 
-            getProperty(JBossMeasurementPlugin.PROP_TEMPLATE_CONFIG);
+            getPluginProperty(JBossMeasurementPlugin.PROP_TEMPLATE_CONFIG);
     }
     
     protected Metric getConfiguredMetric() {

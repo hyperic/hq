@@ -109,7 +109,7 @@ public class MQSeriesProductPlugin
     public String[] getClassPath(ProductPluginManager manager) {
         if (isWin32()) {
             String prop = "mqseries.regkey";
-            MQ_KEY = getProperty(prop);
+            MQ_KEY = getPluginProperty(prop);
             if (MQ_KEY == null) {
                 throw new IllegalArgumentException(prop +
                                                    " property undefined");

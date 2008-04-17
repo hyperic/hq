@@ -92,7 +92,7 @@ public class OracleMeasurementPlugin
     }
 
     protected String getDefaultURL() {
-        return getProperty("DEFAULT_URL");
+        return getPluginProperty("DEFAULT_URL");
     }
 
     public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config)

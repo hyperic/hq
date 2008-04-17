@@ -77,7 +77,7 @@ public class MySQLMeasurementPlugin
 
     protected String getDefaultURL() {
         // defined in hq-plugin.xml
-        return getProperty("DEFAULT_URL");
+        return getPluginProperty("DEFAULT_URL");
     }
 
     protected void initQueries()

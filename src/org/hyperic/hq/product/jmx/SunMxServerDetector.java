@@ -84,7 +84,7 @@ public class SunMxServerDetector extends MxServerDetector {
                     else {
                         //jmx-plugin.xml may map the classname to product name
                         String productName =
-                            getProperty("MAIN-CLASS." + name);
+                            getPluginProperty("MAIN-CLASS." + name);
                         if (productName != null) {
                             name = productName;
                         }

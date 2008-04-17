@@ -29,6 +29,6 @@ public class JBossJCAControlPlugin extends JBossServiceControlPlugin {
 
     protected String getObjectName() {
         //defined in hq-plugin.xml
-        return getProperty("JCAConnectionPool");
+        return getPluginProperty("JCAConnectionPool");
     }
 }

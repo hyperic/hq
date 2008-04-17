@@ -82,7 +82,7 @@ public class SNMPMeasurementPlugin
      * @return The MIB names that should be loaded for this plugin.
      */
     protected String[] getMIBs() {
-        String prop = getProperty("MIBS");
+        String prop = getPluginProperty("MIBS");
         if (prop == null) {
             return new String[0];
         }
@@ -262,7 +262,7 @@ public class SNMPMeasurementPlugin
             return MetricValue.NONE;
         }
 
-        String varOID = getProperty(varName);
+        String varOID = getPluginProperty(varName);
         if (varOID != null) {
             if (isDebug) {
                 log.debug(getName() + " defined " +

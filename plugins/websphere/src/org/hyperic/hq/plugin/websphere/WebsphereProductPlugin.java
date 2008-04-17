@@ -312,7 +312,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public String[] getClassPath(ProductPluginManager manager) {
         if (isWin32()) {
             String prop = "websphere.regkey";
-            REG_KEY = getProperty(prop);
+            REG_KEY = getPluginProperty(prop);
             if (REG_KEY == null) {
                 throw new IllegalArgumentException(prop +
                                                    " property undefined");

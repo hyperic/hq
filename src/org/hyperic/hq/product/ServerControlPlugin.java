@@ -346,7 +346,7 @@ public abstract class ServerControlPlugin extends ControlPlugin {
      * @return Seconds to wait on a background process
      */
     protected int getBackgroundWaitTime() {
-        String time = getProperty("CONTROL_WAIT_TIME");
+        String time = getPluginProperty("CONTROL_WAIT_TIME");
         if (time != null) {
             return Integer.parseInt(time);
         }

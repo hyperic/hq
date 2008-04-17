@@ -231,7 +231,7 @@ public abstract class GenericPlugin {
     /**
      * Get a value defined by a &lt;property&gt; tag in the plugin's hq-plugin.xml 
      */
-    public String getProperty(String name) {
+    public String getPluginProperty(String name) {
         if (this.data == null) {
             return null;
         }
@@ -284,7 +284,7 @@ public abstract class GenericPlugin {
      * </code> 
      */
     public String getTypeProperty(String type, String name) {
-        return getProperty(type + "." + name);
+        return getPluginProperty(type + "." + name);
     }
 
     /**
@@ -301,7 +301,7 @@ public abstract class GenericPlugin {
             ServiceTypeInfo service = (ServiceTypeInfo)type;
             return getTypeProperty(service.getServerName(), name);
         }
-        return getProperty(name);
+        return getPluginProperty(name);
     }
 
     /**

@@ -126,7 +126,7 @@ public class PluginMain {
         pd.init();
         ProductPlugin productPlugin = pd.ppm.getProductPlugin(plugin);
         
-        String packageName = productPlugin.getProperty("package");
+        String packageName = productPlugin.getPluginProperty("package");
         if (packageName == null) {
             packageName = DEFAULT_PACKAGE + "." + plugin;
         }

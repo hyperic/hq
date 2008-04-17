@@ -261,7 +261,7 @@ public class JBossDetector
 
     private static void findBrandedExe(GenericPlugin plugin, List servers) {
         String query =
-            "State.Name.eq=" + plugin.getProperty("brand.exe");
+            "State.Name.eq=" + plugin.getPluginProperty("brand.exe");
 
         long[] pids = getPids(query);
 
@@ -276,7 +276,7 @@ public class JBossDetector
             File root =
                 new File(exe).getParentFile().getParentFile();
 
-            String engine = plugin.getProperty("brand.dir");
+            String engine = plugin.getPluginProperty("brand.dir");
             if (engine != null) {
                 root = new File(root, engine);
             }
@@ -548,9 +548,9 @@ public class JBossDetector
         server.setControlConfig(controlConfig);
 
         if (JBossProductPlugin.isBrandedServer(configDir, 
-                                               getProperty("brand.ear"))) {
+                                               getPluginProperty("brand.ear"))) {
             // Branded JBoss
-            String brandName = getProperty("brand.name");
+            String brandName = getPluginProperty("brand.name");
             server.setName(getPlatformName() + " " + brandName);
             server.setIdentifier(brandName);
         }

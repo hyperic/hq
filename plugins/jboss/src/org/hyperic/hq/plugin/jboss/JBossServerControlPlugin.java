@@ -103,7 +103,7 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
         if (this.serverMetric == null) {
             String metric =
                 SERVER + ":Version:" +
-                getProperty(JBossMeasurementPlugin.PROP_TEMPLATE_CONFIG);
+                getPluginProperty(JBossMeasurementPlugin.PROP_TEMPLATE_CONFIG);
 
             this.serverMetric = configureMetric(metric);
         }
@@ -200,11 +200,11 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
     // Check for branded server.
     private boolean isBrandedServer() {
         if (JBossProductPlugin.isBrandedServer(new File(getInstallPrefix()),
-                                               getProperty("brand.ear")))
+                                               getPluginProperty("brand.ear")))
         {
             setResult(RESULT_FAILURE);
             setMessage("Control not supported for " +
-                       getProperty("brand.name"));
+                       getPluginProperty("brand.name"));
             return true;
         }
         return false;
