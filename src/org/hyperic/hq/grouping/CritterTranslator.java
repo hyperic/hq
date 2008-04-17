@@ -27,7 +27,6 @@ package org.hyperic.hq.grouping;
 
 import java.util.Iterator;
 
-import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -44,19 +43,19 @@ public class CritterTranslator {
     public SQLQuery translate(Session s, CritterList cList) {
         StringBuilder sql = new StringBuilder();
         
-        sql.append("select {RES.*} from EAM_RESOURCE RES ");
+        sql.append("select {res.*} from EAM_RESOURCE res ");
         
         for (Iterator i=cList.getCritters().iterator(); i.hasNext(); ) {
             Critter c = (Critter)i.next();
             
-            sql.append(c.getSqlJoins("RES"));
+            sql.append(c.getSqlJoins("res"));
         }
         
-        sql.append(" WHERE ");
+        sql.append(" where ");
         for (Iterator i=cList.getCritters().iterator(); i.hasNext(); ) {
             Critter c = (Critter)i.next();
             
-            sql.append(c.getSql("RES"));
+            sql.append(c.getSql("res"));
             if (i.hasNext()) {
                 if (cList.isAll()) {
                     sql.append(" and ");
@@ -67,7 +66,7 @@ public class CritterTranslator {
         }
 
         SQLQuery res = s.createSQLQuery(sql.toString());
-        res.addEntity("RES", Resource.class);
+        res.addEntity("res", Resource.class);
         for (Iterator i = cList.getCritters().iterator(); i.hasNext(); ) {
             Critter c = (Critter)i.next();
 

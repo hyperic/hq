@@ -31,8 +31,7 @@ import org.hibernate.Query;
 import org.hyperic.hq.authz.server.session.Resource;
 
 /**
- * A {@link Critter} is a 'criteria', which is able to aid in composing
- * complex SQL.
+ * A {@link Critter} is a criteria, able to aid in composing complex SQL.
  */
 public interface Critter {
     /**
