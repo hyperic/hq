@@ -319,10 +319,11 @@ public class ResourceHubPortalAction extends BaseAction {
                 geid = new AppdefEntityID(hubForm.getFg());
             }
             
-            resources = appdefBoss.findCompatInventory(sessionId, 
+            resources = appdefBoss.findCompatInventory(sessionId,
                                                        entityType, 
                                                        resourceType,
                                                        geid,
+                                                       null,
                                                        resourceName,
                                                        pc);
         }
