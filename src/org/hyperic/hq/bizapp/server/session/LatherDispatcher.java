@@ -71,7 +71,6 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanStateCore;
@@ -300,7 +299,7 @@ public class LatherDispatcher
 
         try {
             checkUserCanManageAgent(ctx, args.getUser(), args.getPword(), 
-                                         "register");
+                                    "register");
         } catch(PermissionException exc){
             return new RegisterAgent_result("Permission denied");
         }
@@ -316,18 +315,10 @@ public class LatherDispatcher
 
         agentToken = SecurityUtil.generateRandomToken();
 
-        agentVal = new AgentValue();
-        agentVal.setAddress(agentIP);
-        agentVal.setPort(port);
-        agentVal.setVersion(version);
-        agentVal.setAuthToken(args.getAuthToken());
-        agentVal.setAgentToken(agentToken);
-
         // Check the to see if it already exists
         Collection ids = null;
         try {
-            AgentValue origAgent =
-                getAgentManager().getAgent(agentIP, port);
+            AgentValue origAgent = getAgentManager().getAgent(agentIP, port);
             
             try {
                 ids = getPlatformManager().
@@ -337,9 +328,9 @@ public class LatherDispatcher
                 // No platforms found, no a big deal
             }
 
-            log.info("Updating agent information for " + agentIP + ":" +
-                          port);
-            getAgentManager().updateAgent(agentIP, port, agentVal);
+            log.info("Updating agent information for " + agentIP + ":" + port);
+            getAgentManager().updateAgent(agentIP, port, args.getAuthToken(),
+                                          agentToken, version);
         } catch(AgentNotFoundException exc){
             log.info("Registering agent at " + agentIP + ":" + port);
             try {
@@ -444,10 +435,10 @@ public class LatherDispatcher
             {
                 return new UpdateAgent_result(errRes);
             }
-        
-            agentVal.setAddress(args.getAgentIP());
-            agentVal.setPort(args.getAgentPort());
-            getAgentManager().updateAgent(args.getAgentToken(), agentVal);
+
+            getAgentManager().updateAgent(args.getAgentToken(),
+                                          args.getAgentIP(),
+                                          args.getAgentPort());
         } catch(AgentNotFoundException exc){
             return new UpdateAgent_result("Agent not found for update");
         }
@@ -471,7 +462,7 @@ public class LatherDispatcher
             getAuthManager().getSessionId(arg.getUser(), arg.getPword());
         } catch(Exception exc){
             log.warn("An invalid user(" + arg.getUser() + 
-                          ") connected from " + ctx.getCallerIP());
+                     ") connected from " + ctx.getCallerIP());
             return new UserIsValid_result(false);
         }
         return new UserIsValid_result(true);

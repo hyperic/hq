@@ -256,67 +256,48 @@ public class AgentManagerEJBImpl
         return agent;
     }
 
-    private void validateAgentUpdate(String ip, int port, AgentValue agentVal){
-        if(agentVal.getAddress().equals(ip) == false ||
-           agentVal.getPort() != port)
-        {
-            throw new IllegalArgumentException("Passed agent value does not " +
-                                               "match the ip/port");
-        }
-    }
-
     /**
-     * Update an existing agent.
+     * Update an existing Agent given an IP and port.
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
-     * @return A value object representing the updated agent
+     * @return An Agent object representing the updated agent
      */
-    public AgentValue updateAgent(String ip, int port, AgentValue newData)
+    public Agent updateAgent(String ip, int port, String authToken,
+                             String agentToken, String version)
         throws AgentNotFoundException
     {
         Agent agent;
 
-        this.validateAgentUpdate(ip, port, newData);
         agent = this.getAgentInternal(ip, port);
-        agent.setAuthToken(newData.getAuthToken());
-        agent.setAgentToken(newData.getAgentToken());
-        agent.setVersion(newData.getVersion());
+        agent.setAuthToken(authToken);
+        agent.setAgentToken(agentToken);
+        agent.setVersion(version);
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
-        return agent.getAgentValue();
+        return agent;
     }
 
     /**
-     * Update an existing agent.  The AgentToken is given, and the
-     * rest of the data contained in the value object will be used
-     * to update the agent.
+     * Update an existing agent's IP and port based on an agent token.
      *
-     * @param agentToken Token that the agent uses to connect to CAM
-     * @param val        AgentValue to update with
+     * @param agentToken Token that the agent uses to connect to HQ
+     * @param ip         The new IP address
+     * @param port       The new port
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
-     * @return A value object representing the updated agent
+     * @return An Agent object representing the updated agent
      */
-    public AgentValue updateAgent(String agentToken, AgentValue val)
+    public Agent updateAgent(String agentToken, String ip, int port)
         throws AgentNotFoundException
     {
         Agent agent;
-
-        if(agentToken.equals(val.getAgentToken()) == false){
-            throw new IllegalArgumentException("AgentToken argument does not "+
-                                               "match the AgentToken " +
-                                               "contained in the update val");
-        }
 
         agent = this.getAgentInternal(agentToken);
-        agent.setAddress(val.getAddress());
-        agent.setPort(val.getPort());
-        agent.setVersion(val.getVersion());
-        agent.setAuthToken(val.getAuthToken());
-        agent.setAgentToken(val.getAgentToken());
+        agent.setAddress(ip);
+        agent.setPort(port);
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
-        return agent.getAgentValue();
+        return agent;
     }
 
     /**
