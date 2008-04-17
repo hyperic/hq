@@ -32,16 +32,20 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.Critter;
+import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.prop.ResourceCritterProp;
 
 class DescendantProtoCritter
     implements Critter
 {
-    private final Resource _root;
-    private final Resource _proto;
-    private final List     _props; 
+    private final Resource                   _root;
+    private final Resource                   _proto;
+    private final List                       _props; 
+    private final DescendantProtoCritterType _type;
     
-    DescendantProtoCritter(Resource root, Resource proto) {
+    DescendantProtoCritter(Resource root, Resource proto,
+                           DescendantProtoCritterType type) 
+    {
         _root  = root;
         _proto = proto;
 
@@ -49,6 +53,7 @@ class DescendantProtoCritter
         c.add(new ResourceCritterProp(root));
         c.add(new ResourceCritterProp(proto));
         _props = Collections.unmodifiableList(c);
+        _type = type;
     }
     
     public List getProps() {
@@ -69,5 +74,9 @@ class DescendantProtoCritter
     public void bindSqlParams(Query q) {
         q.setParameter("protoId", _proto.getId());
         q.setParameter("rootId", _root.getId());
+    }
+
+    public CritterType getCritterType() {
+        return _type;
     }
 }

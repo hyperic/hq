@@ -68,10 +68,12 @@ public class ResourceNameCritterType
     }
 
     public void decompose(Critter critter, CritterDump dump)
-            throws GroupException {
+        throws GroupException 
+    {
         // verify that critter is of the right type
         if (!(critter instanceof ResourceNameCritter))
-            throw new GroupException("Critter is not of valid type ResourceNameCritter");
+            throw new GroupException("Critter is not of valid type " + 
+                                     "ResourceNameCritter");
         
         ResourceNameCritter resourceCritter = (ResourceNameCritter)critter;
         dump.setStringProp(resourceCritter.getNameRegex());

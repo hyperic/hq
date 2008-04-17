@@ -78,6 +78,16 @@ public class DescendantProtoCritterType
         ResourceCritterProp root = (ResourceCritterProp) critterProps.get(0);
         ProtoCritterProp proto = (ProtoCritterProp) critterProps.get(1);
         return new DescendantProtoCritter(root.getResource(), 
-                                          proto.getProtoType());
+                                          proto.getProtoType(), this);
+    }
+
+    public Critter compose(CritterDump dump) throws GroupException {
+        throw new GroupException("compose from dump not supported");
+    }
+
+    public void decompose(Critter critter, CritterDump dump)
+        throws GroupException 
+    {
+        throw new GroupException("decompose not supported");
     }
 }
