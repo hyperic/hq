@@ -61,15 +61,16 @@ public class ResourceHubForm extends BaseValidatorForm {
 
     //-------------------------------------instance variables
 
-    private Integer _ff;
-    private String _ft;      // Resource type to filter by
-    private List _functions;
-    private Integer _g;      // Group type
+    private Integer  _ff;
+    private String   _ft;      // Resource type to filter by
+    private List     _functions;
+    private Integer  _g;       // Group type
     private String[] _resources;
-    private List _types;
-    private String _keywords;
-    private String _view;
-    private String _fg;      // The group to filter by
+    private List     _types;
+    private String   _keywords;
+    private String   _view;
+    private String   _fg;      // The group to filter by
+    private boolean  _any;     // Meet any criteria (vs. all)
 
     private ImageButtonBean _group = null;
     
@@ -178,6 +179,14 @@ public class ResourceHubForm extends BaseValidatorForm {
         _fg = fg;
     }
 
+    public boolean isAny() {
+        return _any;
+    }
+
+    public void setAll(boolean all) {
+        _any = all;
+    }
+
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         setDefaults();
@@ -193,6 +202,7 @@ public class ResourceHubForm extends BaseValidatorForm {
         _view = null;
         _group = new ImageButtonBean();
         _fg = null;
+        _any = false;
     }
 
     public String toString() {
@@ -215,7 +225,9 @@ public class ResourceHubForm extends BaseValidatorForm {
          .append(" group=")
          .append(_group)
          .append(" fg=")
-         .append(_fg);
+         .append(_fg)
+         .append(" any=")
+         .append(_any);
 
         return s.toString();
     }
