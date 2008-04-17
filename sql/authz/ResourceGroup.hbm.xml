@@ -35,8 +35,8 @@
       <column name="FSYSTEM" not-null="false"/>
     </property>
     
-     <property name="orCriteria" type="boolean">
-      <column name="HAS_OR_CRITERIA" not-null="true" default="true"/>
+     <property name="orCriteria" type="integer">
+      <column name="HAS_OR_CRITERIA" not-null="true" default="1"/>
     </property>   
 
     <property name="groupType" type="integer">

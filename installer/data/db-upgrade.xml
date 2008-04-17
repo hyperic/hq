@@ -8683,8 +8683,8 @@ has already been defined.
   <schemaSpec version="3.113">
     <schema-addColumn table="EAM_RESOURCE_GROUP"
                       column="HAS_OR_CRITERIA"
-                      columnType="BOOLEAN"
-    				  default="true"
+                      columnType="INTEGER"
+    				  default="1"
     				  nullable="NOT NULL"/>
     <schema-directSQL>
       <statement targetDB="postgresql"
