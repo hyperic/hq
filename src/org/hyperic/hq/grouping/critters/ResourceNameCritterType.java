@@ -33,6 +33,11 @@ import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
 import org.hyperic.hq.grouping.prop.StringCritterProp;
 
+/**
+ * This type of criteria is able to match resources by their name
+ *
+ * "Show me all resources named '.*web-infra.*'"
+ */
 public class ResourceNameCritterType
     extends BaseCritterType
 {

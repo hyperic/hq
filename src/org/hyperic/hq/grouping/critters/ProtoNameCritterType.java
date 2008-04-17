@@ -33,6 +33,12 @@ import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
 import org.hyperic.hq.grouping.prop.StringCritterProp;
 
+/**
+ * This type of criteria is able to match resources if their prototype matches
+ * the passed name.
+ *
+ * "Show me all resources of type 'Nagios.*'"
+ */
 public class ProtoNameCritterType
     extends BaseCritterType
 {
