@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.product;
 
+import java.util.Map;
+
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.util.config.ConfigResponse;
@@ -114,5 +116,21 @@ public class PlatformResource extends AIPlatformValue {
         } catch (EncodingException e) {
             throw new IllegalArgumentException("Error encoding config");
         }
+    }
+
+    public void setProductConfig(Map config) {
+        setProductConfig(new ConfigResponse(config));
+    }
+
+    public void setMeasurementConfig(Map config) {
+        setMeasurementConfig(new ConfigResponse(config));
+    }
+
+    public void setControlConfig(Map config) {
+        setControlConfig(new ConfigResponse(config));
+    }
+
+    public void setCustomProperties(Map props) {
+        setCustomProperties(new ConfigResponse(props));
     }
 }

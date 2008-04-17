@@ -27,6 +27,7 @@ package org.hyperic.hq.product;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -228,7 +229,23 @@ public class ServerResource {
             throw encodeException();
         }
     }
-    
+
+    public void setProductConfig(Map config) {
+        setProductConfig(new ConfigResponse(config));
+    }
+
+    public void setMeasurementConfig(Map config) {
+        setMeasurementConfig(new ConfigResponse(config));
+    }
+
+    public void setControlConfig(Map config) {
+        setControlConfig(new ConfigResponse(config));
+    }
+
+    public void setCustomProperties(Map props) {
+        setCustomProperties(new ConfigResponse(props));
+    }
+
     public String toString() {
         return this.resource.toString();
     }
