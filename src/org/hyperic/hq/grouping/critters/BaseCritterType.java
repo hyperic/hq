@@ -123,28 +123,34 @@ public abstract class BaseCritterType
     }
 
     /**
-     * Validate a list of {@link CritterProp}s agains the previously
+     * Validate a list of {@link CritterPropDescription}s agains the previously
      * defined descriptions.
+     * 
+     * Calls to addDescription() pre-populate the critter type with the
+     * props that are valid.  This method ensures that a list of 
+     * {@link CritterPropDescription}s match the valid types.
+     * 
+     * @param propDescs a list of {@link CritterPropDescription}s 
      */
-    protected void validate(List critterProps) 
+    protected void validate(List propDescs) 
         throws GroupException
     {
-        if (critterProps.size() != getPropDescriptions().size()) {
+        if (propDescs.size() != getPropDescriptions().size()) {
             throw new GroupException("Critter requires " + 
                                      getPropDescriptions().size() + " props");
         }
          
-        for (int i=0; i<critterProps.size(); i++) {
+        for (int i=0; i<propDescs.size(); i++) {
             CritterPropDescription desc = (CritterPropDescription)
                 _propDescs.get(i);
-            CritterProp prop = (CritterProp)critterProps.get(i);
+            CritterProp prop = (CritterProp)propDescs.get(i);
             
             if (!desc.getType().equals(prop.getType())) {
                 throw new GroupException("Property[" + i + "] must be of " +
                                          "type " + 
                                          desc.getType().getDescription() +
                                          " (was " + 
-                                         prop.getType().getDescription());
+                                         prop.getType().getDescription() + ")");
             }
         }
     }
