@@ -24,6 +24,7 @@ a:visited,a:hover,a {
 }
 
 #headerBottom {
+    margin-bottom: 10px;
     height: 5px;
     background: #2D6EBE none repeat scroll 0
 }
@@ -78,7 +79,7 @@ a:visited,a:hover,a {
     top: 22px;
     right: 0px;
     height: 29px;
-    width: 253px;
+    width: 260px;
     background-color: #F96115;
     color: #FFF;
     padding: 0px 1px 0px 7
@@ -90,7 +91,7 @@ a:visited,a:hover,a {
 #headerSearchBox input[type=text] {
     color: gray;
     padding: 1px 30px 1px 0px;
-    width: 245px
+    width: 218px
 }
 
 #headerSearchResults {
@@ -111,6 +112,9 @@ a:visited,a:hover,a {
     color: #FFF;
     height: 12px;
     padding: 2px
+}
+#headerSearchResults a, a:visited, a:hover {
+    color:#57CBDB
 }
 
 #headerSearchResults .all {
@@ -618,6 +622,16 @@ body .dijitPopup{
 
 
 /* MIG */
+#migContainer{  
+    margin-top:14px;
+}
 #migContainer a:visited, a:hover, a{
     color: #003399
+}
+
+.FooterTitle{
+    color: #fff;
+    font-family: arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700
 }
