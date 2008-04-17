@@ -12,7 +12,7 @@
     <put name="titleBgStyle" value="PageTitleGroupBg"/>
     <put name="titleImg" value="spacer.gif"/>
     <put name="linkUrl" value="/resource/hub/ResourceHubLinks.jsp"/>
-    <put name="showSearch" value="true"/>
+    <put name="showSearch" value="false"/>
   </definition>
   
   <definition name=".header.tab.resource.hub"

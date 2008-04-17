@@ -108,7 +108,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 
 <tiles:insert definition=".page.title.resource.hub">
   <tiles:put name="titleName"><c:out value="${navHierarchy}"/></tiles:put>
-  <tiles:put name="showSearch" value="true"/>
 </tiles:insert>
 
 <c:if test="${not empty ResourceSummary}">
@@ -266,30 +265,38 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:param name="view" value="${ResourceHubForm.view}"/>
 </c:url>
 
+<c:choose>
+  <c:when test="${not empty ResourceHubForm.keywords}">
+    <c:set var="initSearchVal" value="${ResourceHubForm.keywords}"/>
+  </c:when>
+  <c:otherwise>
+    <fmt:message var="initSearchVal" key="resource.hub.search.KeywordSearchText"/>
+  </c:otherwise>
+</c:choose>
+
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #ABB1C7;">
   <tr>
+    <!--  SEARCH TOOLBAR CONTENTS -->
+    <td nowrap class="FilterLabelText"><fmt:message key="resource.hub.search.label.Search"/>
+      <html:text property="keywords" size="15" maxlength="40" onfocus="ClearText(this)" value="${initSearchVal}"/></td>
     <c:choose>
     <c:when test="${empty allTypesKey}">
-    <td class="FilterLabelText" nowrap align="right" width="100%">
+    <td class="FilterLabelText" nowrap align="right">
       <html:hidden property="ft" value=""/>&nbsp;
     </td>
     </c:when>
     <c:otherwise>
     <td class="FilterLabelText" nowrap align="right" width="1%">
-      <fmt:message key="Filter.ViewLabel"/></td>
-    <td class="FilterLabelText">
-      <html:select property="ft" styleClass="FilterFormText" size="1" onchange="goToSelectLocation(this, 'ft', '${ftAction}');">
+      <fmt:message key="Filter.ViewLabel"/>
+      <html:select property="ft" styleClass="FilterFormText" size="1">
         <html:option value="" key="${allTypesKey}"/>
         <html:optionsCollection property="types"/>
       </html:select>
     </td>
-
       <c:if test="${not empty AvailableResGrps}">
     <td class="FilterLabelText" nowrap align="right">
       <fmt:message key="resource.hub.filter.GroupLabel"/>
-    </td>
-    <td class="FilterLabelText" width="100%">
-        <html:select property="fg" styleClass="FilterFormText" onchange="goToSelectLocation(this, 'fg', '${fgAction}');">
+        <html:select property="fg" styleClass="FilterFormText">
           <html:option value="" key="resource.hub.filter.AllGroupOption"/>
           <html:optionsCollection name="AvailableResGrps"/>
         </html:select>
@@ -297,6 +304,11 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       </c:if>
     </c:otherwise>
     </c:choose>
+    <c:if test="${not empty allTypesKey || not empty AvailableResGrps}">
+    <td class="FilterLabelText" style="padding-right: 0"><html:checkbox property="any"/></td>
+    <td class="FilterLabelText" style="padding-left: 0"><fmt:message key="any"/></td>
+    </c:if>
+    <td class="FilterLabelText" width="100%"><html:image page="/images/4.0/icons/accept.png" property="ok"/></td>
 
 	<c:choose>
 	  <c:when test="${ResourceHubForm.view == CHART}">
