@@ -28,6 +28,11 @@ import java.util.ResourceBundle;
 
 import org.hyperic.util.HypericEnum;
 
+/**
+ * This enumeration defines all of the datatypes that are possible to use
+ * via {@link Critter}s.  Any UI must be able to interact with (render, set,
+ * etc.) all values defined. 
+ */
 public final class CritterPropType 
     extends HypericEnum
 {
@@ -38,6 +43,12 @@ public final class CritterPropType
         new CritterPropType(0, "string", "critter.propType.string");
     public static CritterPropType DATE = 
         new CritterPropType(1, "date", "critter.propType.date");
+    public static CritterPropType ENUM = 
+        new CritterPropType(2, "enum", "critter.propType.enum");
+    public static CritterPropType RESOURCE = 
+        new CritterPropType(3, "resource", "critter.propType.resource");
+    public static CritterPropType PROTO = 
+        new CritterPropType(4, "proto", "critter.propType.proto");
     
     
     protected CritterPropType(int code, String desc, String localeProp) {
@@ -45,7 +56,6 @@ public final class CritterPropType
     }
     
     public static CritterPropType findByCode(int code) {
-        return (CritterPropType)findByCode(CritterPropType.class, 
-                                           code); 
+        return (CritterPropType)findByCode(CritterPropType.class, code);  
     }
 }
