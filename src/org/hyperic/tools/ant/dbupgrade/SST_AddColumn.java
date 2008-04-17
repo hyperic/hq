@@ -100,7 +100,6 @@ public class SST_AddColumn extends SchemaSpecTask {
                           columnTypeName;
         
         alterSql += ( _precision != null ) ? "(" + _precision + ")" : "";
-        alterSql += ( _nullable != null ) ? " " + _nullable : "";
         
         try {
             if (_default != null) {
@@ -112,6 +111,8 @@ public class SST_AddColumn extends SchemaSpecTask {
                  }
                  alterSql += buf;
              }
+            // set the database null constraing after setting the default
+            alterSql += ( _nullable != null ) ? " " + _nullable : "";
             
             // Check to see if the column exists.  If it's already there,
             // then don't re-add it.
