@@ -42,6 +42,7 @@ import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.jmx.MxServerDetector;
 import org.hyperic.hq.product.jmx.MxUtil;
 
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -209,7 +210,7 @@ extends MxServerDetector {
                 }
                 // use this argument to detect an OC4J Instance running under Oracle Application Server
                 if (arg.startsWith("-Doracle.oc4j.instancename=")) {
-                    instanceName = arg.replace("-Doracle.oc4j.instancename=", "");
+                    instanceName = StringUtil.replace(arg, "-Doracle.oc4j.instancename=", "");
                     log.debug("Auto-detected OC4J instance " + instanceName);
                 }
             }
