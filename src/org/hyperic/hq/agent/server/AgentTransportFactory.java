@@ -61,6 +61,9 @@ public class AgentTransportFactory {
     
     /**
      * @return An agent transport that has not been started yet.
+     * 
+     * @throws ClassNotFoundException if this is a .ORG instance and attempting 
+     *                                to use the unidirectional transport.
      */
     public AgentTransport createAgentTransport() throws Exception {                    
         Properties bootProperties = _bootConfig.getBootProperties();

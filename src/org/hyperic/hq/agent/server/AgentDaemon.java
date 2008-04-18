@@ -721,7 +721,12 @@ public class AgentDaemon
                                               getStorageProvider(), 
                                               unidirectional);
                 
-                agentTransport = factory.createAgentTransport();
+                try {
+                    agentTransport = factory.createAgentTransport();                    
+                } catch (ClassNotFoundException e) {
+                    throw new AgentStartException(
+                            "Unidirectional transport is not available in .ORG");
+                }
                 
                 // FIXME register services here
                 //agentTransport.registerService(serviceInterface, serviceImpl);
