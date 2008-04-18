@@ -461,7 +461,7 @@ public class MeasurementPlugin extends GenericPlugin {
                     ProductPlugin.getPluginClass(this.getClass().getClassLoader(),
                                                  this.data,
                                                  name,
-                                                 getTypeInfo());
+                                                 getTypeInfo().getName());
                 if (this.collector == null) {
                     String msg =    
                         "Class '" + name +
