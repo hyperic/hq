@@ -254,12 +254,13 @@ public class ResourceHubPortalAction extends BaseAction {
         PageList resources = null;
         StopWatch watch = new StopWatch();
         watch.markTimeBegin("findCompatInventory");
+        Integer gid = null;
+        int groupSubtype = -1;
+        
         if (isGroupSelected) {
             // as far as the backend is concerned, the resource type
             // is the actual group type we want. our groupType just
             // tells us compat or adhoc.
-
-            int groupSubtype = -1;
             if (isCompatGroupSelected(groupType)) {
                 // entity type tells us which type of compat group was
                 // chosen
@@ -280,16 +281,6 @@ public class ResourceHubPortalAction extends BaseAction {
             else {
                 throw new ServletException("Invalid group type: " + groupType);
             }
-
-            resources =
-                appdefBoss.findCompatInventory(sessionId,
-                                               groupSubtype,
-                                               AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                                               entityType,
-                                               resourceType,
-                                               resourceName,
-                                               null,
-                                               pc);
         }
         else {
             // Look up groups
@@ -314,19 +305,15 @@ public class ResourceHubPortalAction extends BaseAction {
             }
             
             // Lastly, check for group to filter by
-            AppdefEntityID geid = null;
             if (hubForm.getFg() != null && hubForm.getFg().length() > 0) {
-                geid = new AppdefEntityID(hubForm.getFg());
+                AppdefEntityID geid = new AppdefEntityID(hubForm.getFg());
+                gid = geid.getId();
             }
             
-            resources = appdefBoss.findCompatInventory(sessionId,
-                                                       entityType, 
-                                                       resourceType,
-                                                       geid,
-                                                       null,
-                                                       resourceName,
-                                                       pc);
         }
+        
+        resources = appdefBoss.search(sessionId, entityType, resourceName,
+                                      aetid, gid, groupSubtype, pc);
 
         watch.markTimeEnd("findCompatInventory");
 

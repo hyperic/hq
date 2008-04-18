@@ -2590,6 +2590,40 @@ public class AppdefBossEJBImpl
     }
 
     /**
+     * Perform a search for resources from the resource hub
+     * @ejb:interface-method
+     */
+    public PageList search(int sessionId, int appdefTypeId, String searchFor,
+                           AppdefEntityTypeID appdefResType, Integer groupId,
+                           int groupSubType, PageControl pc)
+        throws PermissionException, SessionException {
+        int grpEntId = APPDEF_GROUP_TYPE_UNDEFINED;
+        if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (appdefResType != null)
+                grpEntId = appdefResType.getType();
+            else
+                grpEntId = AppdefEntityConstants.APPDEF_TYPE_GROUP;
+        }
+        AppdefEntityID grpId = groupId == null ?
+                null : AppdefEntityID.newGroupID(groupId);
+        
+        return findCompatInventory(sessionId,
+                                   appdefTypeId,
+                                   appdefResType != null ?
+                                           appdefResType.getID() :
+                                           APPDEF_RES_TYPE_UNDEFINED, 
+                                   grpEntId, 
+                                   grpId,
+                                   appdefTypeId !=
+                                       AppdefEntityConstants.APPDEF_TYPE_GROUP, 
+                                   null,
+                                   searchFor,
+                                   null,
+                                   groupSubType,
+                                   pc);
+    }
+    
+    /**
      * Perform a search for resources
      * @ejb:interface-method
      */
