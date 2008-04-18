@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.platform.inventory;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -33,12 +32,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
@@ -102,7 +100,7 @@ public class ViewPlatformAction extends TilesAction {
         Integer platformId = platform.getId();
         AppdefEntityID entityId = platform.getEntityId();
         Integer appdefType = new Integer(entityId.getType());
-        AgentValue agent = platform.getAgent();
+        Agent agent = platform.getAgent();
         
         log.debug("Agent is = " + agent);
 

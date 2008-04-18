@@ -27,7 +27,7 @@ package org.hyperic.hq.bizapp.agent.client;
 
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.client.AgentConnection;
-import org.hyperic.hq.appdef.shared.AgentValue;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.agent.CommonSSL;
 import org.hyperic.util.JDK;
 import org.hyperic.util.security.BogusTrustManager;
@@ -60,10 +60,10 @@ public class SecureAgentConnection
     private int    agentPort;
     private String authToken;
 
-    public SecureAgentConnection(AgentValue acv){
-        super(acv.getAddress(), acv.getPort());
+    public SecureAgentConnection(Agent acv){
+        super(acv.getAddress(), acv.getPort().intValue());
         this.agentAddress = acv.getAddress();
-        this.agentPort    = acv.getPort();
+        this.agentPort    = acv.getPort().intValue();
         this.authToken    = acv.getAuthToken();
     }
 

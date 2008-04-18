@@ -26,6 +26,7 @@
 package org.hyperic.hq.appdef.shared;
 
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 
 public abstract class AgentConnectionUtil {
@@ -33,7 +34,7 @@ public abstract class AgentConnectionUtil {
     public static SecureAgentConnection getClient(AppdefEntityID aid)
         throws AgentNotFoundException
     {
-        AgentValue agent;
+        Agent agent;
 
         agent = AgentManagerEJBImpl.getOne().getAgent(aid);
         return new SecureAgentConnection(agent);
@@ -42,7 +43,7 @@ public abstract class AgentConnectionUtil {
     public static SecureAgentConnection getClient(String agentToken)
         throws AgentNotFoundException
     {
-        AgentValue agent;
+        Agent agent;
 
         agent = AgentManagerEJBImpl.getOne().getAgent(agentToken);
         return new SecureAgentConnection(agent);

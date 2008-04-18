@@ -67,7 +67,7 @@ public class PlatformValue extends AppdefResourceValue
     private java.util.Collection IpValues = new java.util.HashSet();
     private org.hyperic.hq.appdef.shared.PlatformTypeValue PlatformType;
     private boolean PlatformTypeHasBeenSet = false;
-    private org.hyperic.hq.appdef.shared.AgentValue Agent;
+    private org.hyperic.hq.appdef.Agent Agent;
     private boolean AgentHasBeenSet = false;
 
 
@@ -422,11 +422,11 @@ public class PlatformValue extends AppdefResourceValue
         this.PlatformType = PlatformType;
         PlatformTypeHasBeenSet = true;
     }
-    public org.hyperic.hq.appdef.shared.AgentValue getAgent()
+    public org.hyperic.hq.appdef.Agent getAgent()
     {
-        return this.Agent;
+        return Agent;
     }
-    public void setAgent( org.hyperic.hq.appdef.shared.AgentValue Agent )
+    public void setAgent( org.hyperic.hq.appdef.Agent Agent )
     {
         this.Agent = Agent;
         AgentHasBeenSet = true;

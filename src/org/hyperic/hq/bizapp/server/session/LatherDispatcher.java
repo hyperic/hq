@@ -58,7 +58,6 @@ import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -293,7 +292,6 @@ public class LatherDispatcher
                                                   RegisterAgent_args args)
         throws LatherRemoteException
     {
-        AgentValue agentVal;
         String agentToken, errRes, agentIP, version;
         int port;
 
@@ -318,7 +316,7 @@ public class LatherDispatcher
         // Check the to see if it already exists
         Collection ids = null;
         try {
-            AgentValue origAgent = getAgentManager().getAgent(agentIP, port);
+            Agent origAgent = getAgentManager().getAgent(agentIP, port);
             
             try {
                 ids = getPlatformManager().
@@ -415,7 +413,7 @@ public class LatherDispatcher
                                               UpdateAgent_args args)
         throws LatherRemoteException
     {
-        AgentValue agentVal;
+        Agent agent;
         String errRes;
 
         try {
@@ -427,11 +425,11 @@ public class LatherDispatcher
 
         validateAgent(ctx, args.getAgentToken(), false);
         try {
-            agentVal = getAgentManager().getAgent(args.getAgentToken());
+            agent = getAgentManager().getAgent(args.getAgentToken());
         
             if((errRes = testAgentConn(args.getAgentIP(), 
-                                            args.getAgentPort(), 
-                                            agentVal.getAuthToken())) != null)
+                                       args.getAgentPort(),
+                                       agent.getAuthToken())) != null)
             {
                 return new UpdateAgent_result(errRes);
             }

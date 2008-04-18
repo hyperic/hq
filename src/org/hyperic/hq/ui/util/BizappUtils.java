@@ -54,7 +54,6 @@ import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
@@ -64,6 +63,7 @@ import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -1155,14 +1155,12 @@ public class BizappUtils {
                SessionTimeoutException,
                SessionNotFoundException {
 
-        PageList agents =
-            appdefBoss.findAllAgents(sessionId,
-                                     PageControl.PAGE_ALL);
+        List agents = appdefBoss.findAllAgents(sessionId);
         List uiAgents = new ArrayList();
         for (Iterator itr = agents.iterator();itr.hasNext();) {
-            AgentValue agent = (AgentValue)itr.next();
+            Agent agent = (Agent)itr.next();
             uiAgents.add(new AgentBean(agent.getAddress(), 
-                         new Integer(agent.getPort())));
+                         agent.getPort()));
 
         }
 
@@ -1172,10 +1170,10 @@ public class BizappUtils {
         request.setAttribute("usedIpPort", usedIpPort);
     }
 
-    public static AgentValue getAgentConnection(int sessionId,
-                                                AppdefBoss appdefBoss,
-                                                HttpServletRequest request,
-                                                PlatformForm form)
+    public static Agent getAgentConnection(int sessionId,
+                                           AppdefBoss appdefBoss,
+                                           HttpServletRequest request,
+                                           PlatformForm form)
         throws RemoteException,
                SessionTimeoutException,
                SessionNotFoundException,
@@ -1192,10 +1190,7 @@ public class BizappUtils {
                 port = Integer.parseInt(st.nextToken());
             }
 
-            AgentValue agentValue =
-                appdefBoss.findAgentByIpAndPort(sessionId, ip, port);
-
-            return agentValue;
+            return appdefBoss.findAgentByIpAndPort(sessionId, ip, port);
         }
         else {
             return null;

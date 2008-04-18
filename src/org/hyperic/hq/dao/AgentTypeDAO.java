@@ -27,7 +27,6 @@ package org.hyperic.hq.dao;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AgentType;
-import org.hyperic.hq.appdef.shared.AgentTypeValue;
 
 public class AgentTypeDAO extends HibernateDAO
 {
@@ -48,14 +47,6 @@ public class AgentTypeDAO extends HibernateDAO
     public void remove(AgentType entity)
     {
         super.remove(entity);
-    }
-
-    public AgentType create(AgentTypeValue atv)
-    {
-        AgentType a = new AgentType();
-        a.setName(atv.getName());
-        save(a);
-        return a;
     }
 
     public AgentType findByName(String name)

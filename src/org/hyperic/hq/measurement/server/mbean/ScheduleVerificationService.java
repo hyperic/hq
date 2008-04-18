@@ -38,8 +38,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
@@ -123,22 +123,22 @@ public class ScheduleVerificationService
 
         for (Iterator iter = toResched.iterator(); iter.hasNext();) {
             AppdefEntityID entId = (AppdefEntityID) iter.next();
-            AgentValue agentVal = null;
+            Agent agent = null;
             // Get the agent connection
             try {
-                agentVal = agentMan.getAgent(entId);
+                agent = agentMan.getAgent(entId);
 
                 // If this is an entity on a platform whose agent is down,
                 // continue without rescheduling
-                if (downAgents.contains(agentVal))
+                if (downAgents.contains(agent))
                     continue;
                 
-                if (!upAgents.contains(agentVal)) {
-                    if (getMeasurementProcessor().ping(agentVal)) {
-                        upAgents.add(agentVal);
+                if (!upAgents.contains(agent)) {
+                    if (getMeasurementProcessor().ping(agent)) {
+                        upAgents.add(agent);
                     }
                     else {
-                        downAgents.add(agentVal);
+                        downAgents.add(agent);
                         continue;
                     }
                 }
@@ -155,8 +155,8 @@ public class ScheduleVerificationService
                            "No permission to look up " + entId);
             } catch (MonitorAgentException e) {
                 _log.debug("Measurement Schedule Verification: " +
-                           "Could not connect to agent " + agentVal);
-                downAgents.add(agentVal);
+                           "Could not connect to agent " + agent);
+                downAgents.add(agent);
             } catch (MeasurementScheduleException e) {
                 _log.debug("Scheduling error during rescheduling of " + entId);
             } catch (MeasurementUnscheduleException e) {

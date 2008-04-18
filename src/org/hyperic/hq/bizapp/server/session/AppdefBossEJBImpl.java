@@ -70,7 +70,6 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -119,6 +118,7 @@ import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterAssignSvc;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupEntityResource;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupMemExclude;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -894,7 +894,7 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public AgentValue findResourceAgent(AppdefEntityID entityId)
+    public Agent findResourceAgent(AppdefEntityID entityId)
         throws AppdefEntityNotFoundException,
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, AgentNotFoundException 
@@ -2900,28 +2900,11 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public PageList findAllAgents(int sessionId, PageControl pc)
+    public List findAllAgents(int sessionId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubjectValue who;
-
-        who = manager.getSubject(sessionId);
-        return getAgentManager().getAgents(pc);
-    }
-
-    /**
-     * Get all the unused agents in the system plus the one agent which
-     * is used by the platform whose id = input.
-     * @ejb:interface-method
-     */
-    public PageList findUnusedAgents(int sessionId, PageControl pc,
-                                     Integer platformId )
-        throws SessionNotFoundException, SessionTimeoutException
-    {
-        AuthzSubjectValue who;
-
-        who = manager.getSubject(sessionId);
-        return getAgentManager().getUnusedAgents(pc, platformId);
+        AuthzSubjectValue who = manager.getSubject(sessionId);
+        return getAgentManager().getAgents();
     }
 
     /**
@@ -2929,7 +2912,7 @@ public class AppdefBossEJBImpl
      * which the agent is listening
      * @ejb:interface-method
      */
-    public AgentValue findAgentByIpAndPort(int sessionId, String ip, int port)
+    public Agent findAgentByIpAndPort(int sessionId, String ip, int port)
         throws SessionNotFoundException, SessionTimeoutException,
                AgentNotFoundException
     {

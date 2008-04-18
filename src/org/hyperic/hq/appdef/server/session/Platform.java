@@ -263,7 +263,7 @@ public class Platform extends PlatformBase
         else
             _platformValue.setPlatformType( null );
         if (getAgent() != null) {
-            _platformValue.setAgent(getAgent().getAgentValue());
+            _platformValue.setAgent(getAgent());
         }
         else
             _platformValue.setAgent(null);

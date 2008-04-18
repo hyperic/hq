@@ -31,12 +31,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
@@ -100,7 +100,7 @@ public class NewPlatformAction extends BaseAction {
             log.trace("creating platform [" + platform.getName() + "]" +
                       " with attributes " + newForm);
 
-            AgentValue agent =
+            Agent agent =
                 BizappUtils.getAgentConnection(sessionId.intValue(),
                                                boss, request,
                                                newForm);

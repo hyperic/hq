@@ -32,8 +32,8 @@ import java.util.List;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
@@ -70,11 +70,11 @@ public class MeasurementProcessorEJBImpl
      * Ping the agent to make sure it's up
      * @ejb:interface-method
      */
-    public boolean ping(AgentValue aconn)
+    public boolean ping(Agent a)
         throws PermissionException {
 
         AgentMonitor monitor = new AgentMonitor();
-        return monitor.ping(aconn);
+        return monitor.ping(a);
     }
 
     /**
@@ -112,7 +112,7 @@ public class MeasurementProcessorEJBImpl
         ZeventManager.getInstance().enqueueEventsAfterCommit(events);
     }
 
-    private void unschedule(AgentValue aconn, AppdefEntityID[] entIds)
+    private void unschedule(Agent a, AppdefEntityID[] entIds)
         throws MeasurementUnscheduleException, MonitorAgentException {
         SRNManagerLocal srnManager = getSRNManager();
         for (int i = 0; i < entIds.length; i++) {
@@ -125,7 +125,7 @@ public class MeasurementProcessorEJBImpl
         }
 
         AgentMonitor monitor = new AgentMonitor();
-        monitor.unschedule(aconn, entIds);
+        monitor.unschedule(a, entIds);
     }
     
     /** Unschedule metrics of multiple appdef entities
@@ -139,8 +139,8 @@ public class MeasurementProcessorEJBImpl
         throws MeasurementUnscheduleException {
         try {
             // Get the agent from agent token
-            AgentValue aconn = getAgentConnection(agentToken);
-            unschedule(aconn, entIds);
+            Agent a = getAgent(agentToken);
+            unschedule(a, entIds);
         } catch (MonitorAgentException e) {
             log.warn("Error unscheduling metrics: " + e.getMessage());
         }
@@ -156,8 +156,8 @@ public class MeasurementProcessorEJBImpl
         throws MeasurementUnscheduleException {
         try {
             // Get the agent IP and Port from server ID
-            AgentValue aconn = getAgentConnection(agentEnt);
-            unschedule(aconn, entIds);
+            Agent a = getAgent(agentEnt);
+            unschedule(a, entIds);
         } catch (MonitorAgentException e) {
             log.warn("Error unscheduling metrics: " + e.getMessage());
         }
@@ -177,7 +177,7 @@ public class MeasurementProcessorEJBImpl
                                       List measurements, int srnVersion)
         throws PermissionException, MonitorAgentException {
 
-        AgentValue aconn = getAgentConnection(entId);
+        Agent a = getAgent(entId);
         SRN srn = new SRN(entId, srnVersion);
 
         AgentMonitor monitor = new AgentMonitor();
@@ -186,7 +186,7 @@ public class MeasurementProcessorEJBImpl
             measurements.toArray(new Measurement[measurements.size()]);
 
         // Then schedule
-        monitor.schedule(aconn, srn, meas);
+        monitor.schedule(a, srn, meas);
     }
 
     public static MeasurementProcessorLocal getOne() {

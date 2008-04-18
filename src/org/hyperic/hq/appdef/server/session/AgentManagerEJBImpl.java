@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
@@ -48,7 +49,6 @@ import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -169,21 +169,8 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public PageList getAgents(PageControl pc){
-        Pager pager;
-
-        Collection agents = getAgentDAO().findAll();
-        if (agents.size() == 0) {
-            // No entities found throws us this exception
-            return new PageList();
-        }
-
-        try {
-            pager = Pager.getPager(PagerProcessor_agent.class.getName());
-        } catch(Exception exc){
-            throw new SystemException(exc);
-        }
-        return pager.seek(agents, pc);
+    public List getAgents(){
+        return new ArrayList(getAgentDAO().findAll());
     }
 
     /**
@@ -204,30 +191,6 @@ public class AgentManagerEJBImpl
         return getAgentDAO().countUsed();
     }
     
-    /**
-     * Get a list of all the unused agents in the system plus the one agent 
-     * used by the platform whose id = input.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public PageList getUnusedAgents(PageControl pc, Integer platformId){
-        Pager pager;
-
-        Collection agents = this.getAgentDAO().findUnusedAgents(platformId);
-        if (agents.size() == 0) {
-            // No entities found throws us this exception
-            return new PageList();
-        }
-
-        try {
-            pager = Pager.getPager(PagerProcessor_agent.class.getName());
-        } catch(Exception exc){
-            throw new SystemException(exc);
-        }
-        return pager.seek(agents, pc);
-    }
-
-
     /**
      * Create a new Agent object.  The type of the agent
      * that is created is the default 'cam-agent'
@@ -365,23 +328,23 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AgentValue getAgent(String ip, int port)
+    public Agent getAgent(String ip, int port)
         throws AgentNotFoundException
     {
-        return this.getAgentInternal(ip, port).getAgentValue();
+        return this.getAgentInternal(ip, port);
     }
 
     /**
      * Find an agent by agent token.
      * @param agentToken the agent token to look for
-     * @return An AgentValue representing the agent that has the given token.
+     * @return An Agent representing the agent that has the given token.
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
-    public AgentValue getAgent(String agentToken) 
+    public Agent getAgent(String agentToken)
         throws AgentNotFoundException 
     {
-        return this.getAgentInternal(agentToken).getAgentValue();
+        return this.getAgentInternal(agentToken);
     }
 
     /**
@@ -409,7 +372,7 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AgentValue getAgent(AppdefEntityID aID)
+    public Agent getAgent(AppdefEntityID aID)
         throws AgentNotFoundException
     {
         try {
@@ -432,7 +395,7 @@ public class AgentManagerEJBImpl
                                               "entity which can return " +
                                               "multiple agents");
             }
-            return platform.getAgent().getAgentValue();
+            return platform.getAgent();
 
         } catch (ObjectNotFoundException exc) {
             throw new AgentNotFoundException("No agent found for " + aID);

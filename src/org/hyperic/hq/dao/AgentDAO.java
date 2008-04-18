@@ -86,15 +86,6 @@ public class AgentDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public Collection findUnusedAgents(Integer platformId) {
-        String sql = "from Agent where id not in (" +
-                     "select agent.id from Platform where " +
-                     "id != ?and agent.id is not null)";
-        return getSession().createQuery(sql)
-            .setInteger(0, platformId.intValue())
-            .list();
-    }
-
     public List findAgents(PageInfo pInfo) {
         AgentSortField sort = (AgentSortField)pInfo.getSort();
         String sql = "select distinct a from Platform p " + 

@@ -28,8 +28,8 @@ package org.hyperic.hq.measurement.agent.client;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -66,7 +66,7 @@ public class AgentMonitor
      * @param agent the agent connection info
      * @return true if the agent is up, false otherwise
      */
-    public boolean ping(AgentValue agent) {
+    public boolean ping(Agent agent) {
         SecureAgentConnection conn;
 
         conn = new SecureAgentConnection(agent);
@@ -97,7 +97,7 @@ public class AgentMonitor
      * @param srn      The entity associated with the schedule
      * @param schedule Information about the schedule of metrics to collect
      */
-    public void schedule(AgentValue agent, SRN srn, 
+    public void schedule(Agent agent, SRN srn,
                          Measurement[] schedule)
         throws MonitorAgentException
     {
@@ -143,7 +143,7 @@ public class AgentMonitor
      *
      * @param ids Array of entities to unschedule
      */
-    public void unschedule(AgentValue agent, AppdefEntityID[] ids)
+    public void unschedule(Agent agent, AppdefEntityID[] ids)
         throws MonitorAgentException 
     {
         SecureAgentConnection conn;
@@ -188,7 +188,7 @@ public class AgentMonitor
      * @param agent the agent to talk to
      * @param dsns the DSNs that identifies the values to fetch
      */
-    public MetricValue[] getLiveValues(AgentValue agent, String[] dsns)
+    public MetricValue[] getLiveValues(Agent agent, String[] dsns)
         throws MonitorAgentException, LiveMeasurementException 
     {
         SecureAgentConnection conn;

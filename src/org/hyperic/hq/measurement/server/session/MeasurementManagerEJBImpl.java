@@ -50,7 +50,6 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
@@ -1200,9 +1199,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     {
         try {
             AgentMonitor monitor = new AgentMonitor();
-            AgentValue aconn = getAgentConnection(entity);
+            Agent a = getAgent(entity);
 
-            return monitor.getLiveValues(aconn, dsns);
+            return monitor.getLiveValues(a, dsns);
         } catch(MonitorAgentException e){
             throw new LiveMeasurementException(e.getMessage(), e);
         }

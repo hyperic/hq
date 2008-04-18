@@ -25,11 +25,8 @@
 
 package org.hyperic.hq.ui.action.resource.platform.inventory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -40,11 +37,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
@@ -119,7 +115,7 @@ public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
 
             editForm.updatePlatformValue(platform);
 
-            AgentValue agent =
+            Agent agent =
                 BizappUtils.getAgentConnection(sessionId.intValue(), boss,
                                                request, editForm);
             if (agent != null) {

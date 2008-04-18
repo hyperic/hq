@@ -34,10 +34,10 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
@@ -180,7 +180,7 @@ public abstract class SessionEJB {
         return _ic;
     }
 
-    protected AgentValue getAgentConnection(AppdefEntityID id)
+    protected Agent getAgent(AppdefEntityID id)
         throws MonitorAgentException {
         // Ask the AgentManager for the AgentConnection
         try {
@@ -190,7 +190,7 @@ public abstract class SessionEJB {
         }
     }
 
-    protected AgentValue getAgentConnection(String agentToken)
+    protected Agent getAgent(String agentToken)
         throws MonitorAgentException {
         // Ask the AgentManager for the AgentConnection
         try {

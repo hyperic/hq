@@ -39,7 +39,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -49,6 +48,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -363,7 +363,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                     // First figure out if the agent of this appdef entity
                     // already has a list
                     try {
-                        AgentValue agent = agentMan.getAgent(ids[i]);
+                        Agent agent = agentMan.getAgent(ids[i]);
                         
                         List toGetLiveList;
                         if (null == (toGetLiveList = (List)toGetLive.get(agent))) {

@@ -28,8 +28,6 @@ package org.hyperic.hq.appdef;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hyperic.hq.appdef.shared.AgentValue;
-
 public class Agent extends AppdefBean {
     private String _address;
     private Integer _port;
@@ -138,30 +136,12 @@ public class Agent extends AppdefBean {
         return result;
     }
 
-    private AgentValue agentValue = new AgentValue();
-    /**
-     * legacy EJB code to get DTO (Value) object
-     * @deprecated use (this) Agent object instead
-     * @return
-     */
-    public AgentValue getAgentValue()
-    {
-        agentValue.setAddress(
-            (getAddress() == null) ? "" : getAddress());
-        agentValue.setPort(getPort().intValue());
-        agentValue.setAuthToken(
-            (getAuthToken() == null) ? "" : getAuthToken());
-        agentValue.setAgentToken(
-            (getAgentToken() == null) ? "" : getAgentToken());
-        agentValue.setVersion(
-            (getVersion() == null) ? "" : getVersion());
-        agentValue.setId(getId());
-        agentValue.setMTime(getMTime());
-        agentValue.setCTime(getCTime());
-        if ( getAgentType() != null )
-            agentValue.setAgentType( getAgentType().getAgentTypeValue() );
-        else
-            agentValue.setAgentType( null );
-        return agentValue;
-    }
+   public String toString() {
+	  StringBuffer str = new StringBuffer("{");
+
+	  str.append("address=").append(getAddress()).append(" ")
+          .append("port=").append(getPort()).append(" ")
+          .append("authToken=").append(getAuthToken()).append(" ");
+	  return(str.toString());
+   }
 }
