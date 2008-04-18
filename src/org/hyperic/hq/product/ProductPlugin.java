@@ -32,6 +32,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -88,6 +90,9 @@ public abstract class ProductPlugin extends GenericPlugin {
 
     protected ProductPluginManager manager;
 
+    private static final Log _log =
+        LogFactory.getLog(ProductPlugin.class.getName());
+
     public String getInstallPath() {
         //e.g. geronimo.installpath=/usr/local/geronimo-1.0
         String prop = getName() + "." + PROP_INSTALLPATH;
@@ -135,7 +140,7 @@ public abstract class ProductPlugin extends GenericPlugin {
             try {
                 return cl.parseClass(file);
             } catch (Exception e) {
-                plugin.getLog().error("Failed to load: " + name, e);
+                _log.error(info.getName() + " - Failed to load: " + name, e);
                 return null;
             }
         }
@@ -146,7 +151,7 @@ public abstract class ProductPlugin extends GenericPlugin {
                 //in memory server-side
                 String code = plugin.data.getProperty(name);
                 if (code == null) {
-                    plugin.getLog().error("No code found for: " + name);
+                    _log.error(info.getName() + " - No code found for: " + name);
                     return null;                
                 }
                 is = new ByteArrayInputStream(code.getBytes());
@@ -155,7 +160,7 @@ public abstract class ProductPlugin extends GenericPlugin {
             try {
                 return cl.parseClass(is);
             } catch (Exception e) {
-                plugin.getLog().error("Failed to parse: " + name, e);
+                _log.error(info.getName() + " - Failed to parse: " + name, e);
                 return null;
             } finally {
                 try { is.close(); } catch (Exception e) {}
@@ -193,20 +198,20 @@ public abstract class ProductPlugin extends GenericPlugin {
             //we get here if the server's implementation is a class loaded
             //from hq-product.jar rather than the plugin's ClassLoader
             try {
-                plugin.getLog().debug("Trying data ClassLoader to load: " +
-                                      name + " for plugin " + info.getName());
+                _log.debug("Trying data ClassLoader to load: " +
+                           name + " for plugin " + info.getName());
                 return loadClass(plugin.data.getClassLoader(), name);
             } catch (ClassNotFoundException e2) {
                 String msg =
                     "Unable to load " + name +
                     " for plugin " + info.getName();
                 if (PluginData.getServiceExtension(info.getName()) == null) {
-                    plugin.getLog().error(msg);
+                    _log.error(info.getName() + " - " + msg);
                 }
                 else {
                     //plugin class is likely in another plugin
                     //see PluginManager.getPlugin where we try later.
-                    plugin.getLog().debug(msg + ": " + e);
+                    _log.debug(info.getName() + " - " + msg + ": " + e);
                 }
                 return null;
             }
@@ -239,8 +244,9 @@ public abstract class ProductPlugin extends GenericPlugin {
         try {
             return (GenericPlugin)pluginClass.newInstance();
         } catch (Exception e) {
-            plugin.getLog().error("Error creating " + pluginClass.getName() +
-                                  ": " + e, e);
+           _log.error(info.getName() +
+                      " - Error creating " + pluginClass.getName() +
+                      ": " + e, e);
         }
 
         return null;        
