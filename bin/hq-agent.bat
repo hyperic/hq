@@ -38,7 +38,8 @@ set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-product.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\ant.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\jakarta-oro-2.0.7.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\jxla.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-httpclient-2.0.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-httpclient-3.1.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-codec-1.3.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\groovy-all-1.5.jar
 
 set CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient

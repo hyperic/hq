@@ -37,7 +37,10 @@ import javax.net.ssl.X509TrustManager;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import org.apache.commons.httpclient.ConnectTimeoutException;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.httpclient.protocol.SSLProtocolSocketFactory;
 
 // For use with Commons-HTTPClient
@@ -64,10 +67,10 @@ public class UntrustedSSLProtocolSocketFactory
 
         if (!isRegistered()) {
             if (untrustSSL == null) {
+                ProtocolSocketFactory factory =
+                    (ProtocolSocketFactory)new UntrustedSSLProtocolSocketFactory();
                 untrustSSL =
-                    new Protocol("https",
-                                 new UntrustedSSLProtocolSocketFactory(),
-                                 443);
+                    new Protocol("https", factory, 443);
             }
             Protocol.registerProtocol("https", untrustSSL);
         }
@@ -120,5 +123,16 @@ public class UntrustedSSLProtocolSocketFactory
         throws IOException, UnknownHostException
     {
         return this.factory.createSocket(socket, host, port, autoClose);
+    }
+
+    public Socket createSocket(String host, int port,
+                               InetAddress clientHost,
+                               int clientPort,
+                               HttpConnectionParams params)
+        throws IOException, UnknownHostException, ConnectTimeoutException
+    {
+        //as of 3.0 super.createSocket jumps through some hoops to support
+        //timeout in jre 1.3 and in the process by-passes our factory
+        return createSocket(host, port, clientHost, clientPort);
     }
 }
