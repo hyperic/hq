@@ -27,7 +27,7 @@ package org.hyperic.hq.transport;
 
 import junit.framework.TestCase;
 
-import org.hyperic.hq.appdef.shared.AgentValue;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.transport.util.AsynchronousInvoker;
 
 /**
@@ -55,7 +55,7 @@ public class AgentProxyFactory_test extends TestCase {
      */
     public void testCreateAsyncServiceNonVoidReturnType() throws Exception {        
         try {
-            AgentValue agent = new AgentValue();
+            Agent agent = new Agent();
             _agentProxyFactory.createAsyncService(agent, BadAsyncService.class, false, true);
             fail("Expected IllegalArgumentException");
         } catch (IllegalArgumentException e) {
