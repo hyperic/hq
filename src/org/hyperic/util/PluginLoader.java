@@ -166,14 +166,6 @@ public class PluginLoader extends URLClassLoader {
         Thread.currentThread().setContextClassLoader(loader);
     }
 
-    public String getPluginClassName() {
-        return this.pluginClassName;
-    }
-    
-    public void setPluginClassName(String name) {
-        this.pluginClassName = name;
-    }
-    
     public Class loadPlugin()
         throws ClassNotFoundException, PluginLoaderException {
         if (pluginClassName == null) {
