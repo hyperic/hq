@@ -263,10 +263,6 @@ public class PluginDumper {
             if (pluginProperties != null) {
                 load(pluginProperties);
             }
-
-            if (this.type != null) {
-                this.type = TypeInfo.formatName(this.type);
-            }
         }
     }
 
@@ -828,10 +824,8 @@ public class PluginDumper {
                 }
             }
 
-            //e.g. -Dtype=iplanet-4.1
-            if ((metricPlugin != null) &&
-                !metricPlugin.equals(type.getFormattedName()))
-            {
+            //e.g. -Dtype=HTTP
+            if (!type.getName().equals(metricPlugin)) {
                 continue;
             }
 
@@ -875,9 +869,7 @@ public class PluginDumper {
                 continue;  //aint gonna happen
             }
 
-            String resourceName = type.getFormattedName();
-
-            boolean wantedPlugin = resourceName.equals(runPlugin);
+            boolean wantedPlugin = typeName.equals(runPlugin);
 
             if ((runPlugin != null) && !wantedPlugin) {
                 //if type not specified, will just try create
@@ -889,6 +881,9 @@ public class PluginDumper {
             System.out.println(typeName + " control plugin");
 
             System.out.println("   actions=" + actions);
+
+            String resourceName =
+                type.getType() + ":" + typeName.hashCode() + ":" + typeName;
 
             try {
                 this.cpm.createControlPlugin(resourceName,
@@ -1046,7 +1041,7 @@ public class PluginDumper {
             String typeName = type.getName();
             boolean hasLogTrack=false, hasConfigTrack=false;
             boolean wantedPlugin =
-                type.getFormattedName().equals(runPlugin);
+                type.getName().equals(runPlugin);
 
             if ((runPlugin != null) && !wantedPlugin) {
                 continue; //filter for -t arg
@@ -1142,7 +1137,7 @@ public class PluginDumper {
 
             String name = types[i].getName();
             if (this.config.type != null) {
-                if (types[i].getFormattedName().equals(this.config.type)) {
+                if (types[i].getName().equals(this.config.type)) {
                     discoverer.add(name);        
                 }
             }
