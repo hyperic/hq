@@ -291,6 +291,7 @@ public class AddGroupResourcesFormPrepareAction extends Action {
                                                     -1,
                                                     group.getEntityId(),
                                                     pendingResItems,
+                                                    null,
                                                     pcAvail);
         }
         
@@ -323,6 +324,7 @@ public class AddGroupResourcesFormPrepareAction extends Action {
                                     appdefType,
                                     group.getEntityId(),
                                     pendingResItems,
+                                    null,
                                     pcAvail);
             
             /**
