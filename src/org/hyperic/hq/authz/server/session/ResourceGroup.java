@@ -49,7 +49,7 @@ public class ResourceGroup extends AuthzNamedBean
     private String _description;
     private String _location;
     private boolean _system = false;
-    private int  _orCriteriaFlag = 1;
+    private boolean  _orCriteria = true;
     private Integer _groupType;
     private Integer _clusterId;
     private long _ctime;
@@ -204,12 +204,12 @@ public class ResourceGroup extends AuthzNamedBean
         _clusterId = val;
     }
     
-    public int getOrCriteria() {
-        return _orCriteriaFlag;
+    public boolean getOrCriteria() {
+        return _orCriteria;
     }
 
-    protected void setOrCriteria(int val) {
-        _orCriteriaFlag = val;
+    protected void setOrCriteria(boolean val) {
+        _orCriteria = val;
     }
     
     public long getCtime() {
@@ -351,7 +351,7 @@ public class ResourceGroup extends AuthzNamedBean
             CritterType type = CritterRegistry.getRegistry().getCritterTypeForClass(dump.getKlazz());
             critters.add(type.compose(dump));
         }
-        return new CritterList(critters, _orCriteriaFlag > 0);
+        return new CritterList(critters, _orCriteria);
     }
 
      // used by the ResourceManager to set the criteria list for a resource group
@@ -370,7 +370,7 @@ public class ResourceGroup extends AuthzNamedBean
             critType.decompose(critter, dump);
             dumps.add(dump);
         }
-        this.setOrCriteria(criteria.isAny() ? 1 : 0);
+        this.setOrCriteria(_orCriteria);
         setCriteriaList(dumps);
     }
     

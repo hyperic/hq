@@ -8683,14 +8683,29 @@ has already been defined.
   <schemaSpec version="3.113">
     <schema-addColumn table="EAM_RESOURCE_GROUP"
                       column="HAS_OR_CRITERIA"
-                      columnType="INTEGER"
-    				  default="1"
-    				  nullable="NOT NULL"/>
+                      columnType="BOOLEAN"/>
     <schema-directSQL>
+	    <statement desc="Set has_or_criteria to true by default"
+	               targetDB="postgresql">
+	      UPDATE EAM_RESOURCE_GROUP SET HAS_OR_CRITERIA=TRUE
+	    </statement>
+	    <statement desc="Set has_or_criteria to true by default"
+	               targetDB="oracle">
+	      UPDATE EAM_RESOURCE_GROUP SET HAS_OR_CRITERIA=1
+	    </statement>
+	    <statement desc="Set has_or_criteria to true by default"
+	               targetDB="mysql">
+	      UPDATE EAM_RESOURCE_GROUP SET HAS_OR_CRITERIA=1
+	    </statement>		  
+    </schema-directSQL> 
+    <schema-alterColumn table="EAM_RESOURCE_GROUP"
+                        column="HAS_OR_CRITERIA"
+                        nullable="NOT NULL"/>  	
+    <schema-directSQL> 
       <statement targetDB="postgresql"
                  desc="Creating new EAM_CRITERIA table">
         create table EAM_CRITERIA (
-        criteria_id integer NOT NULL,
+        id integer NOT NULL,
 	    version_col bigint DEFAULT 0 NOT NULL,
 	    string_prop varchar(1024),
 	    date_prop bigint,
@@ -8700,7 +8715,7 @@ has already been defined.
 	    list_index integer NOT NULL,
 	    resource_group_id integer NOT NULL,
 	    klazz varchar(256) NOT NULL,
-      	primary key (criteria_id)
+      	primary key (id)
         )
       </statement>
       <statement targetDB="postgresql">
@@ -8715,7 +8730,7 @@ has already been defined.
     	<statement targetDB="oracle"
                  desc="Creating new EAM_CRITERIA table">
         create table EAM_CRITERIA (
-        criteria_id integer NOT NULL,
+        id integer NOT NULL,
       	version_col NUMBER(19, 0) NOT NULL,
 	    string_prop VARCHAR2(1024),
 	    date_prop NUMBER(19, 0),
@@ -8725,7 +8740,7 @@ has already been defined.
 	    list_index integer NOT NULL,
 	    resource_group_id integer NOT NULL,
      	klazz VARCHAR2(256) NOT NULL,
-      	primary key (criteria_id)
+      	primary key (id)
         )
       </statement>
         <statement targetDB="oracle">
@@ -8740,7 +8755,7 @@ has already been defined.
     	<statement targetDB="mysql"
                  desc="Creating new EAM_CRITERIA table">
         create table EAM_CRITERIA (
-        criteria_id int NOT NULL,
+        id int NOT NULL,
       	version_col bigint not null,
 	    string_prop varchar(1024),
 	    date_prop bigint,
@@ -8750,7 +8765,7 @@ has already been defined.
 	    list_index int NOT NULL,
 	    resource_group_id int NOT NULL,
 	    klazz varchar(256) NOT NULL,
-      	primary key (criteria_id)
+      	primary key (id)
         )
       </statement>
       <statement desc="Add foreign key constraint for resource_id">

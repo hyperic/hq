@@ -87,7 +87,7 @@
 
     <table name="EAM_RESOURCE_GROUP">
         <data ID="0" NAME="covalentAuthzResourceGroup" 
-              RESOURCE_ID="%EAM_RESOURCE.ID:5" FSYSTEM="TRUE" />
+              RESOURCE_ID="%EAM_RESOURCE.ID:5" FSYSTEM="TRUE" HAS_OR_CRITERIA="TRUE" />
     </table>
 
     <table name="EAM_RESOURCE">
@@ -378,7 +378,7 @@
 
     <table name="EAM_RESOURCE_GROUP">
         <data ID="1" NAME="ROOT_RESOURCE_GROUP" FSYSTEM="TRUE"
-              RESOURCE_ID="%EAM_RESOURCE.ID:7"/>
+              RESOURCE_ID="%EAM_RESOURCE.ID:7" HAS_OR_CRITERIA="TRUE"/>
     </table>
 
     <table name="EAM_RESOURCE">
