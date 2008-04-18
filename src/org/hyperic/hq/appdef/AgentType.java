@@ -30,7 +30,6 @@ import java.util.Collection;
 public class AgentType extends AppdefBean
 {
     private String _name;
-    private String _sortName;
     private Collection _agents;
 
     public AgentType() {
@@ -43,15 +42,6 @@ public class AgentType extends AppdefBean
 
     public void setName(String name) {
         _name = name;
-        setSortName(name);
-    }
-
-    public String getSortName() {
-        return _sortName;
-    }
-
-    public void setSortName(String sortName) {
-        _sortName = sortName != null ? sortName.toUpperCase() : null;
     }
 
     public Collection getAgents() {

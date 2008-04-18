@@ -8763,6 +8763,19 @@ has already been defined.
       </statement>    	
     </schema-directSQL>  	
   </schemaSpec>
+
+  <!-- Add new agent type, remove unused sort_name field. -->
+  <schemaSpec version="3.114">
+    <schema-directSQL>
+      <statement desc="Add new hyperic-hq-remoting agent type">
+          UPDATE EAM_AGENT_TYPE SET name='hyperic-hq-remoting' WHERE name='Other'
+      </statement>
+      <statement desc="Remove unused sort_field column">
+          ALTER TABLE EAM_AGENT_TYPE DROP COLUMN sort_name
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

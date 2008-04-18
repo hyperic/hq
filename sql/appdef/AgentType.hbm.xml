@@ -20,10 +20,6 @@
       <column name="NAME" length="80"/>
     </property>
 
-    <property name="sortName" type="string">
-      <column name="SORT_NAME" length="80"/>
-    </property>
-
     <property name="creationTime" type="long">
       <column name="CTIME"/>
     </property>

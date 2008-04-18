@@ -83,8 +83,10 @@ public class AgentManagerEJBImpl
     extends    AppdefSessionUtil
     implements SessionBean
 {
+    // XXX: These should go elsewhere.
     private final String CAM_AGENT_TYPE = "covalent-eam";
-
+    private final String HQ_AGENT_REMOTING_TYPE = "hyperic-hq-remoting";
+    
     private Log log = LogFactory.getLog(AgentManagerEJBImpl.class.getName());
 
     /**
@@ -205,7 +207,7 @@ public class AgentManagerEJBImpl
     {
         AgentType type = getAgentTypeDAO().findByName(CAM_AGENT_TYPE);
         if (type == null){
-            throw new SystemException("Unable to find CAM agent type '" +
+            throw new SystemException("Unable to find agent type '" +
                                       CAM_AGENT_TYPE + "'");
         }
         Agent agent = getAgentDAO().create(type, address, port, authToken,

@@ -3,7 +3,7 @@
 <!-- Agent types -->
     <table name="EAM_AGENT_TYPE">
         <data ID="1" NAME="covalent-eam"/>
-        <data ID="2" NAME="Other"/>
+        <data ID="2" NAME="hyperic-hq-remoting"/>
     </table>
 <!-- Application Types -->
     <table name="EAM_APPLICATION_TYPE">
