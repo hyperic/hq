@@ -129,10 +129,10 @@ public abstract class ProductPlugin extends GenericPlugin {
         return name.endsWith(".groovy");
     }
 
-    private static Class loadGroovyClass(GenericPlugin plugin,
+    private static Class loadGroovyClass(ClassLoader loader,
+                                         PluginData data,
                                          String name, TypeInfo info) {
 
-        ClassLoader loader = plugin.getClass().getClassLoader();
         GroovyClassLoader cl = new GroovyClassLoader(loader);
 
         File file = new File(name); //XXX pdk/work/
@@ -149,7 +149,7 @@ public abstract class ProductPlugin extends GenericPlugin {
             is = loader.getResourceAsStream(name); //embedded in plugin.jar
             if (is == null) {
                 //in memory server-side
-                String code = plugin.data.getProperty(name);
+                String code = data.getProperty(name);
                 if (code == null) {
                     _log.error(info.getName() + " - No code found for: " + name);
                     return null;                
@@ -188,9 +188,9 @@ public abstract class ProductPlugin extends GenericPlugin {
         }        
     }
 
-    private static Class loadJavaClass(GenericPlugin plugin,
+    private static Class loadJavaClass(ClassLoader loader,
+                                       PluginData data,
                                        String name, TypeInfo info) {
-        ClassLoader loader = plugin.getClass().getClassLoader();
 
         try {
             return loadClass(loader, name);
@@ -200,7 +200,7 @@ public abstract class ProductPlugin extends GenericPlugin {
             try {
                 _log.debug("Trying data ClassLoader to load: " +
                            name + " for plugin " + info.getName());
-                return loadClass(plugin.data.getClassLoader(), name);
+                return loadClass(data.getClassLoader(), name);
             } catch (ClassNotFoundException e2) {
                 String msg =
                     "Unable to load " + name +
@@ -218,16 +218,16 @@ public abstract class ProductPlugin extends GenericPlugin {
         }
     }
 
-    static Class getPluginClass(GenericPlugin plugin,
+    static Class getPluginClass(ClassLoader loader,
+                                PluginData data,
                                 String name,
-                                String type,
                                 TypeInfo info) {
 
         if (isGroovyScript(name)) {
-            return loadGroovyClass(plugin, name, info);
+            return loadGroovyClass(loader, data, name, info);
         }
         else {
-            return loadJavaClass(plugin, name, info);
+            return loadJavaClass(loader, data, name, info);
         }
     }
 
@@ -235,7 +235,9 @@ public abstract class ProductPlugin extends GenericPlugin {
                                    String name,
                                    String type, TypeInfo info) {
 
-        Class pluginClass = getPluginClass(plugin, name, type, info);
+        Class pluginClass =
+            getPluginClass(plugin.getClass().getClassLoader(),
+                           plugin.data, name, info);
 
         if (pluginClass == null) {
             return null;

@@ -458,8 +458,9 @@ public class MeasurementPlugin extends GenericPlugin {
                 }
 
                 this.collector =
-                    ProductPlugin.getPluginClass(this, name,
-                                                 TYPE_COLLECTOR,
+                    ProductPlugin.getPluginClass(this.getClass().getClassLoader(),
+                                                 this.data,
+                                                 name,
                                                  getTypeInfo());
                 if (this.collector == null) {
                     String msg =    
