@@ -138,6 +138,15 @@ public class ResourceGroupDAO extends HibernateDAO
         return (ResourceGroup) super.get(id);
     }
 
+    // used by the ResourceGroupManager to persist a list of 
+    // PersistedCritters to the database
+    public void saveCritters(List criteria) {
+        for (Iterator it = criteria.iterator(); it.hasNext(); ) {
+            PersistedCritter critter = (PersistedCritter)it.next();
+            save(critter);
+        }
+    }
+    
     public void save(ResourceGroup entity) {
         super.save(entity);
     }
