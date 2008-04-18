@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.transport;
 
-import org.hyperic.hq.appdef.shared.AgentValue;
+import org.hyperic.hq.appdef.Agent;
 
 /**
  * The interface for classes that create proxies to agent services.
@@ -42,7 +42,7 @@ public interface AgentProxyFactory {
      * @return A proxy to the agent service.
      * @throws Exception if an exception occurs acquiring the proxy.
      */
-    Object createSyncService(AgentValue agent, Class serviceInterface,
+    Object createSyncService(Agent agent, Class serviceInterface,
             boolean unidirectional) throws Exception;
 
     /**
@@ -61,7 +61,7 @@ public interface AgentProxyFactory {
      *                                  not have a <code>void</code> return type.
      * @throws Exception if an exception occurs acquiring the proxy.
      */
-    Object createAsyncService(AgentValue agent, Class serviceInterface,
+    Object createAsyncService(Agent agent, Class serviceInterface,
             boolean guaranteed, boolean unidirectional) throws Exception;
 
     /**

@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.transport;
 
-import org.hyperic.hq.appdef.shared.AgentValue;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.transport.util.AsynchronousInvoker;
 import org.hyperic.hq.transport.util.TransportUtils;
 import org.jboss.remoting.transporter.TransporterClient;
@@ -65,9 +65,9 @@ public class AgentProxyFactoryImpl implements AgentProxyFactory {
     }
     
     /**
-     * @see org.hyperic.hq.transport.AgentProxyFactory#createSyncService(org.hyperic.hq.appdef.shared.AgentValue, java.lang.Class, boolean)
+     * @see org.hyperic.hq.transport.AgentProxyFactory#createSyncService(Agent, java.lang.Class, boolean)
      */
-    public Object createSyncService(AgentValue agent, 
+    public Object createSyncService(Agent agent, 
                                     Class serviceInterface, 
                                     boolean unidirectional) throws Exception {
         
@@ -81,9 +81,9 @@ public class AgentProxyFactoryImpl implements AgentProxyFactory {
     }
     
     /**
-     * @see org.hyperic.hq.transport.AgentProxyFactory#createAsyncService(org.hyperic.hq.appdef.shared.AgentValue, java.lang.Class, boolean, boolean)
+     * @see org.hyperic.hq.transport.AgentProxyFactory#createAsyncService(Agent, java.lang.Class, boolean, boolean)
      */
-    public Object createAsyncService(AgentValue agent,
+    public Object createAsyncService(Agent agent,
                                      Class serviceInterface,
                                      boolean guaranteed,
                                      boolean unidirectional) throws Exception {
