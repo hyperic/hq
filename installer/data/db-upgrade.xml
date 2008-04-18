@@ -8754,11 +8754,11 @@ has already been defined.
         )
       </statement>
       <statement desc="Add foreign key constraint for resource_id">
-          alter table EAM_CRITERIA add constraint "fk36efcad46a3b098"  foreign key (RESOURCE_ID_PROP)
+          alter table EAM_CRITERIA add constraint fk36efcad46a3b098  foreign key (RESOURCE_ID_PROP)
             references EAM_RESOURCE (ID)
       </statement>
       <statement desc="Add foreign key constraint for resource_group_id">
-          alter table EAM_CRITERIA add constraint "fk36efcad6da1b7c9" foreign key (RESOURCE_GROUP_ID)
+          alter table EAM_CRITERIA add constraint fk36efcad6da1b7c9 foreign key (RESOURCE_GROUP_ID)
             references EAM_RESOURCE_GROUP (ID)
       </statement>    	
     </schema-directSQL>  	
