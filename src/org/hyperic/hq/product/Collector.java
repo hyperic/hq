@@ -208,7 +208,7 @@ public abstract class Collector implements Runnable {
         }
     }
     
-    protected String getProperty(String key, String defVal) {
+    protected String getCollectorProperty(String key, String defVal) {
         return this.props.getProperty(key, defVal);
     }
 
@@ -226,7 +226,7 @@ public abstract class Collector implements Runnable {
         return val;
     }
 
-    protected String getProperty(String key) {
+    protected String getCollectorProperty(String key) {
         return (String)getCompatValue(this.props, key);
     }
     

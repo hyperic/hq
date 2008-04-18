@@ -99,15 +99,15 @@ public class ExecutableProcess extends Collector {
     }
     
     protected String getExecProperty() {
-        return getProperty(PROP_EXEC);
+        return getCollectorProperty(PROP_EXEC);
     }
     
     protected String getFileProperty() {
-        return getProperty(PROP_FILE);
+        return getCollectorProperty(PROP_FILE);
     }
     
     protected String getArgsProperty() {
-        return getProperty(PROP_ARGS);
+        return getCollectorProperty(PROP_ARGS);
     }
     
     protected void init() {
