@@ -1200,6 +1200,7 @@
 
     <copy todir="${agent.dir}/lib" >
       <fileset dir="${lather.lib}" includes="lather.jar" />
+	  <fileset dir="${thirdparty.lib}" includes="jboss-remoting.jar,jboss-common.jar"/>	
     </copy>
   	
     <copy todir="${agent.dir}/sbin" >
@@ -1255,7 +1256,11 @@
       <include name="org/hyperic/hq/bizapp/client/*.class"/>
       <include name="org/hyperic/hq/bizapp/shared/*.class"/>
       <include name="org/hyperic/hq/common/*Exception.class"/>
-      <exclude name="org/hyperic/hq/agent/client/**"/>
+	  <include name="org/hyperic/hq/transport/AgentTransport.class"/>	
+      <include name="org/hyperic/hq/transport/PollerClient.class"/>
+      <include name="org/hyperic/hq/transport/util/*.class"/>   
+	  <exclude name="org/hyperic/hq/transport/**/*_test*"/>  	      
+	  <exclude name="org/hyperic/hq/agent/client/**"/>
     </jar>
 
     <!-- Control agent server handler -->
