@@ -812,7 +812,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     {
         List serviceMerges = mergePlatformsAndServers(agentToken, crrr);
         
-        Agent a = AgentManagerEJBImpl.getOne().getAgentPojo(agentToken);
+        Agent a = AgentManagerEJBImpl.getOne().getAgent(agentToken);
         AgentReportStatusDAO statDAO = 
             new AgentReportStatusDAO(DAOFactory.getDAOFactory());
         AgentReportStatus status = statDAO.getOrCreate(a);
@@ -998,7 +998,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         Agent a;
         
         try {
-            a = AgentManagerEJBImpl.getOne().getAgentPojo(agentToken);
+            a = AgentManagerEJBImpl.getOne().getAgent(agentToken);
         } catch(AgentNotFoundException e) {
             _log.error("Agent [" + agentToken + "] not found");
             return;

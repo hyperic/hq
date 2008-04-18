@@ -351,17 +351,7 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public Agent getAgentPojo(String agentToken) 
-        throws AgentNotFoundException 
-    {
-        return getAgentInternal(agentToken);
-    }
-
-    /**
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public Agent findAgentPojo(Integer id) {
+    public Agent findAgent(Integer id) {
         return getAgentDAO().findById(id);
     }
 

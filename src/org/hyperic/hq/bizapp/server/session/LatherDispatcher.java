@@ -710,7 +710,7 @@ public class LatherDispatcher
             String agentToken = ((SecureAgentLatherValue)arg).getAgentToken(); 
             validateAgent(ctx, agentToken);
             try {
-                Agent a = agentMan.getAgentPojo(agentToken);
+                Agent a = agentMan.getAgent(agentToken);
                 agentId = a.getId();
             } catch(Exception e) {
             }

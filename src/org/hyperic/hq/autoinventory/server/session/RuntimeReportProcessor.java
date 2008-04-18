@@ -115,7 +115,7 @@ public class RuntimeReportProcessor {
         _overlord   = _subjectMgr.getOverlordPojo();
         _agentToken = agentToken;
         
-        Agent agent = AgentManagerEJBImpl.getOne().getAgentPojo(_agentToken);
+        Agent agent = AgentManagerEJBImpl.getOne().getAgent(_agentToken);
         Audit audit = AIAudit.newRuntimeImportAudit(agent); 
         boolean pushed = false;
         

@@ -627,7 +627,7 @@ public class MeasurementDAO extends HibernateDAO {
             Integer id = (Integer)ent.getKey();
             Long count = (Long)ent.getValue();
             
-            res.put(agentMan.findAgentPojo(id), count);
+            res.put(agentMan.findAgent(id), count);
         }
         return res;
     }
