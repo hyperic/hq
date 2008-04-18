@@ -130,7 +130,9 @@ public abstract class Collector implements Runnable {
 
     CollectorResult result = new CollectorResult();
 
-    protected abstract void init() throws PluginException;
+    protected void init() throws PluginException {
+        setSource(getPlugin().getName());
+    }
 
     public abstract void collect();
 
