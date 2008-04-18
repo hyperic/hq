@@ -2351,40 +2351,12 @@ public class AppdefBossEJBImpl
                                                 groupType);
         }
 
-        return findCompatInventory(sessionId, appdefTypeId, appdefResTypeId, 
-                                   groupEntTypeId, null, false,
-                                   pendingEntities, resourceName, null, groupType, pc);
+        return findCompatInventory(sessionId, appdefTypeId, appdefResTypeId,
+                                   groupEntTypeId, null, false, pendingEntities,
+                                   resourceName, null, groupType, pc);
     }
 
     /**
-     * Produce list of compatible, viewable inventory items.
-     *
-     * NOTE: This method returns an empty page list when no compatible
-     *       inventory is found.
-     *
-     * @param appdefTypeId    - the id correponding to the type of entity.
-     *                          example: platform, server, service
-     *                          NOTE: A valid entity type id is now MANDATORY!
-     * @param appdefResTypeId - the id corresponding to the type of resource
-     *                          example: linux, jboss, vhost
-     * @return page list of value objects that extend AppdefResourceValue
-     * @ejb:interface-method
-     */
-    public PageList findCompatInventory(int sessionId, int appdefTypeId,
-                                        int appdefResTypeId,
-                                        AppdefEntityID groupEntity,
-                                        AppdefEntityID[] pendingEntities,
-                                        PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException,
-               SessionException
-    {
-        return findCompatInventory(sessionId, appdefTypeId, appdefResTypeId,
-                                   APPDEF_GROUP_TYPE_UNDEFINED, groupEntity,
-                                   false, pendingEntities, null,
-                                   null, APPDEF_GROUP_TYPE_UNDEFINED, pc);
-    }
-
-   /**
      * Produce list of compatible, viewable inventory items.
      * The returned list of value objects will be filtered
      * on AppdefGroupValue -- if the group contains the entity,
@@ -2595,7 +2567,7 @@ public class AppdefBossEJBImpl
      */
     public PageList search(int sessionId, int appdefTypeId, String searchFor,
                            AppdefEntityTypeID appdefResType, Integer groupId,
-                           int groupSubType, PageControl pc)
+                           int groupSubType, boolean matchAny, PageControl pc)
         throws PermissionException, SessionException {
         int grpEntId = APPDEF_GROUP_TYPE_UNDEFINED;
         if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
