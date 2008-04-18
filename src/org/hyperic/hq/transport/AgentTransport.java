@@ -99,7 +99,7 @@ public class AgentTransport {
     
     /**
      * Create the poller client. A ClassNotFoundException is thrown if this is 
-     * a .ORG instance. The undirectional transport that requires the poller 
+     * a .ORG instance. The unidirectional transport that requires the poller 
      * client is only supported in EE.
      */
     private PollerClient createPollerClient(InetSocketAddress serverTransportAddr, 
