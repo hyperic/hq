@@ -88,9 +88,11 @@ public class AgentClient {
     // The following QPROP_* defines are properties which can be
     // placed in the agent properties file to perform automatic setup
     private static final String QPROP_PRE = "agent.setup.";
-    private static final String QPROP_IPADDR     = QPROP_PRE + "camIP";
-    private static final String QPROP_PORT       = QPROP_PRE + "camPort";
-    private static final String QPROP_SSLPORT    = QPROP_PRE + "camSSLPort";
+    public  static final String QPROP_IPADDR     = QPROP_PRE + "camIP";
+    public  static final String QPROP_PORT       = QPROP_PRE + "camPort";
+    public  static final String QPROP_SSLPORT    = QPROP_PRE + "camSSLPort";
+    public  static final String QPROP_UNI        = QPROP_PRE + "unidirectional";
+    public  static final String QPROP_UNI_POLLING_FREQUENCY = QPROP_PRE + "uniPollingFrequency";    
     private static final String QPROP_SECURE     = QPROP_PRE + "camSecure";
     private static final String QPROP_LOGIN      = QPROP_PRE + "camLogin";
     private static final String QPROP_PWORD      = QPROP_PRE + "camPword";
