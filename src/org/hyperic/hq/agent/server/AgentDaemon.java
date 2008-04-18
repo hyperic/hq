@@ -48,11 +48,13 @@ import org.hyperic.hq.agent.AgentMonitorValue;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
+import org.hyperic.hq.bizapp.agent.client.AgentClient;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginExistsException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.transport.AgentTransport;
 import org.hyperic.util.security.SecurityUtil;
 
 /**
@@ -116,7 +118,11 @@ public class AgentDaemon
     private static File[] getLibJars() {
         File[] jars = new File("lib").listFiles(new FileFilter() {
                 public boolean accept(File file) {
-                    return file.getName().endsWith(".jar");
+                    String name = file.getName();
+                    
+                    // The jboss-remoting jar has a Main-Class but we don't 
+                    // want to load this class as an AgentServerHandler
+                    return name.endsWith(".jar") && !name.contains("jboss-remoting");
                 }
             });
 
@@ -415,7 +421,7 @@ public class AgentDaemon
                     loadedHandler = 
                         this.handlerLoader.loadServerHandler(jarPath);
                     this.serverHandlers.add(loadedHandler);
-                    this.dispatcher.addServerHandler(loadedHandler);
+                    this.dispatcher.addServerHandler(loadedHandler);                        
                 }
             } catch (Exception e) {
                 throw new AgentConfigException("Failed to load " +
@@ -695,8 +701,33 @@ public class AgentDaemon
         this.registerMonitor("agent", this);
         this.registerMonitor("agent.commandListener", this.listener);
         redirectStreams(bootProps);
+                
+        AgentTransport agentTransport = null;
 
         try {
+            String unidirectionalString = 
+                getBootConfig().getBootProperties()
+                               .getProperty(AgentClient.QPROP_UNI, 
+                                            Boolean.FALSE.toString());
+            
+            boolean unidirectional = 
+                Boolean.valueOf(unidirectionalString).booleanValue();
+            
+            if (unidirectional) {
+                logger.info("Setting up unidirectional transport");
+                
+                AgentTransportFactory factory = 
+                    new AgentTransportFactory(getBootConfig(), 
+                                              getStorageProvider(), 
+                                              unidirectional);
+                
+                agentTransport = factory.createAgentTransport();
+                
+                // FIXME register services here
+                //agentTransport.registerService(serviceInterface, serviceImpl);
+                agentTransport.start();
+            }
+
             this.startPluginManagers();
             this.startHandlers();
             this.listener.setup();
@@ -721,6 +752,13 @@ public class AgentDaemon
             // The next line will never execute 
             throw new AgentStartException("Critical shutdown");
         } finally {
+            if (agentTransport != null) {
+                try {
+                    agentTransport.stop();
+                } catch (InterruptedException e) {
+                }
+            }
+            
             this.running = false;
             try {this.cleanup();} catch(AgentRunningException exc){}
         
