@@ -841,15 +841,9 @@ public class ProductPluginManager extends PluginManager {
 
             data = PluginData.getInstance(this, dataLoader, jarName);
             
-            String implName = loader.getPluginClassName(); 
-            if (implName == null) {
-                implName =
-                    data.getPlugin(ProductPlugin.TYPE_PRODUCT,
-                                   ProductPlugin.TYPE_PRODUCT);
-                if (implName != null) {
-                    loader.setPluginClassName(implName);
-                }
-            }
+            String implName =
+                data.getPlugin(ProductPlugin.TYPE_PRODUCT,
+                               ProductPlugin.TYPE_PRODUCT);
 
             if (implName == null) {
                 pluginClass =
@@ -858,7 +852,9 @@ public class ProductPluginManager extends PluginManager {
                                       this.pluginStubLength);
             }
             else {
-                pluginClass = loader.loadPlugin();
+                pluginClass =
+                    ProductPlugin.getPluginClass(PluginLoader.getClassLoader(),
+                                                 data, implName, jarName);
             }
 
             plugin = (ProductPlugin)pluginClass.newInstance();
