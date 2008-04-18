@@ -29,28 +29,70 @@ import java.math.BigDecimal;
 
 import org.hyperic.hq.authz.server.session.Resource;
 
-// TODO document, setters/getters, getValue (double)
- // move to grouping package
+/**
+ * This interface is used to isolate critters from the persistence layer.
+ * 
+ */
 public interface CritterDump {
-    
+
+    /**
+     * 
+     * @return the string property for this critter
+     */
     public String getStringProp();
 
+    /**
+     * Sets the string property for this critter
+     * @param stringProp
+     */
     public void setStringProp(String stringProp);
-    
+
+    /**
+     * 
+     * @return the date property for this critter
+     */
     public Long getDateProp();
 
+    /**
+     * Sets the date property for this critter
+     * @param dateProp
+     */
     public void setDateProp(Long dateProp);
-    
+
+    /**
+     * 
+     * @return the Resource property for this critter
+     */
     public Resource getResourceProp();
 
+    /**
+     * Sets the Resource property for this critter
+     * @param resourceProp
+     */
     public void setResourceProp(Resource resourceProp);
-    
+
+    /**
+     * 
+     * @return the numeric property for this critter
+     */
     public BigDecimal getNumericProp();
-    
+
+    /**
+     * Sets the numeric property for this critter
+     * @param numericProp
+     */
     public void setNumericProp(BigDecimal numericProp);
 
+    /**
+     * 
+     * @return the enum property for this critter
+     */
     public Integer getEnumProp();
-    
+
+    /**
+     * Sets the enum property for this critter
+     * @param enumProp
+     */
     public void setEnumProp(Integer enumProp);
 
 }

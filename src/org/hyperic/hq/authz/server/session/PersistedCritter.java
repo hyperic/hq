@@ -55,6 +55,30 @@ public class PersistedCritter extends PersistedObject implements CritterDump {
            _klazz = critterType.getClass().getName();
     }
 
+    public int getListIndex() {
+        return _listIndex;
+    }
+
+    protected void setListIndex(int index) {
+        _listIndex = index;
+    }
+
+    public ResourceGroup getResourceGroup() {
+        return _group;
+    }
+
+    protected void setResourceGroup(ResourceGroup group) {
+        _group = group;
+    }
+
+    public String getKlazz() {
+        return _klazz;
+    }
+
+    protected void setKlazz(String klazz) {
+        _klazz = klazz;
+    }
+    
     public Long getDateProp() {
         return _dateProp;
     }
@@ -92,30 +116,6 @@ public class PersistedCritter extends PersistedObject implements CritterDump {
 
     public void setStringProp(String stringProp) {
         _stringProp = stringProp;
-    }
-
-    public int getListIndex() {
-        return _listIndex;
-    }
-
-    protected void setListIndex(int index) {
-        _listIndex = index;
-    }
-
-    public ResourceGroup getResourceGroup() {
-        return _group;
-    }
-
-    protected void setResourceGroup(ResourceGroup group) {
-        _group = group;
-    }
-
-    public String getKlazz() {
-        return _klazz;
-    }
-
-    protected void setKlazz(String klazz) {
-        _klazz = klazz;
     }
     
     /**
