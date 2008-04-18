@@ -51,6 +51,7 @@ import org.hyperic.hq.product.CollectorExecutor;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.ControlPluginManager;
+import org.hyperic.hq.product.LiveDataPluginManager;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.MeasurementPlugin;
@@ -91,6 +92,7 @@ public class PluginDumper {
     protected ProductPluginManager ppm;
     protected MeasurementPluginManager mpm;
     protected ControlPluginManager cpm;
+    protected LiveDataPluginManager ldpm;
     protected LogTrackPluginManager ltpm;
     protected ConfigTrackPluginManager ctpm;
     AutoinventoryPluginManager apm;
@@ -118,6 +120,7 @@ public class PluginDumper {
 
     static final String METHOD_METRIC   = "metric";
     static final String METHOD_CONTROL  = "control";
+    static final String METHOD_LIVEDATA = "livedata";
     static final String METHOD_DISCOVER = "discover";
     static final String METHOD_GENERATE = "generate";
     static final String METHOD_TRACK    = "track";
@@ -348,6 +351,8 @@ public class PluginDumper {
 
         this.cpm = this.ppm.getControlPluginManager();
 
+        this.ldpm = this.ppm.getLiveDataPluginManager();
+
         this.apm = this.ppm.getAutoinventoryPluginManager();
 
         this.ctpm = this.ppm.getConfigTrackPluginManager();
@@ -431,6 +436,17 @@ public class PluginDumper {
                 help("No plugin specified");
                 return;
             }
+        }
+        else if (method.equals(METHOD_LIVEDATA)) {
+            if (this.config.type == null) {
+                help("-t required");
+                return;
+            }
+            if (this.config.action == null) {
+                help("-a required");
+                return;
+            }
+            testLiveData();
         }
         else if (method.equals(METHOD_TRACK)) {
             if (this.config.plugin != null) {
@@ -939,6 +955,20 @@ public class PluginDumper {
                 continue;
             }
         }
+    }
+
+    public void testLiveData()
+        throws PluginException {
+
+        ConfigResponse config =
+            new ConfigResponse(this.config.props);
+
+        String data =
+            this.ldpm.getData(this.config.type,
+                              this.config.action,
+                              config);
+        
+        System.out.println(data);
     }
 
     private void flushEvents(LinkedList events, String name)
