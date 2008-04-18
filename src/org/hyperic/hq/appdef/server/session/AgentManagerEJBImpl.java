@@ -210,7 +210,7 @@ public class AgentManagerEJBImpl
             throw new SystemException("Unable to find agent type '" +
                                       CAM_AGENT_TYPE + "'");
         }
-        Agent agent = getAgentDAO().create(type, address, port, authToken,
+        Agent agent = getAgentDAO().create(type, address, port, false, authToken,
                                            agentToken, version);
         
         try {

@@ -34,18 +34,21 @@ public class Agent extends AppdefBean {
     private String _authToken;
     private String _agentToken;
     private String _version;
+    private boolean _unidirectional;
     private AgentType _agentType;
     private Collection _platforms;
 
     public Agent() {
     }
 
-    public Agent(AgentType type, String address, Integer port, String authToken,
+    public Agent(AgentType type, String address, Integer port,
+                 boolean unidirectional, String authToken,
                  String agentToken, String version)
     {
         _agentType  = type;
         _address    = address;
         _port       = port;
+        _unidirectional = unidirectional;
         _authToken  = authToken;
         _agentToken = agentToken;
         _version    = version;
@@ -94,6 +97,14 @@ public class Agent extends AppdefBean {
 
     public void setVersion(String version) {
         _version = version;
+    }
+
+    public boolean isUnidirectional() {
+        return _unidirectional;
+    }
+
+    public void setUnidirectional(boolean unidirectional) {
+        _unidirectional = unidirectional;
     }
 
     public AgentType getAgentType() {

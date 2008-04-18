@@ -54,10 +54,11 @@ public class AgentDAO extends HibernateDAO
     }
 
     public Agent create(AgentType type, String address, Integer port, 
-                        String authToken, String agentToken, String version)
+                        boolean unidirectional, String authToken,
+                        String agentToken, String version)
     {
-        Agent ag = new Agent(type, address, port, authToken, agentToken, 
-                             version); 
+        Agent ag = new Agent(type, address, port, unidirectional, authToken,
+                             agentToken, version); 
         save(ag);
         return ag;
     }
