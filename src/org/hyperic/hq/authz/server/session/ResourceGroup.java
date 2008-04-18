@@ -370,7 +370,7 @@ public class ResourceGroup extends AuthzNamedBean
             critType.decompose(critter, dump);
             dumps.add(dump);
         }
-        this.setOrCriteria(_orCriteria);
+        this.setOrCriteria(criteria.isAny());
         setCriteriaList(dumps);
     }
     
