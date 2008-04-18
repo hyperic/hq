@@ -60,7 +60,7 @@ public class DHCPCollector extends NetServicesCollector {
     protected void init() throws PluginException {
         super.init();
 
-        String address = getProperty("hwaddr");
+        String address = getProperties().getProperty("hwaddr");
         if (address == null) {
             address = getDefaultHwaddr();
         }

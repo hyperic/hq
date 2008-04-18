@@ -54,7 +54,7 @@ public class RPCCollector extends NetServicesCollector {
         }
         super.init();
 
-        String program = getProperty("program");
+        String program = getProperties().getProperty("program");
         Long pnum = (Long)PROGRAMS.get(program);
         if (pnum != null) {
             this.program = pnum.longValue();
@@ -63,7 +63,7 @@ public class RPCCollector extends NetServicesCollector {
             this.program = RPC.getProgram(program);
         }
 
-        String version = getProperty("version");
+        String version = getProperties().getProperty("version");
         try {
             this.version = Long.parseLong(version);
         } catch (NumberFormatException e) {
