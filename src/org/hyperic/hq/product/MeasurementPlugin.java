@@ -457,11 +457,11 @@ public class MeasurementPlugin extends GenericPlugin {
                     throw new MetricInvalidException(msg);                    
                 }
 
-                try {
-                    this.collector =
-                        Class.forName(name, true,
-                                      this.data.getClassLoader());
-                } catch (ClassNotFoundException e) {
+                this.collector =
+                    ProductPlugin.getPluginClass(this, name,
+                                                 TYPE_COLLECTOR,
+                                                 getTypeInfo());
+                if (this.collector == null) {
                     String msg =    
                         "Class '" + name +
                         "' NotFound using ClassLoader=" +

@@ -213,18 +213,24 @@ public abstract class ProductPlugin extends GenericPlugin {
         }
     }
 
+    static Class getPluginClass(GenericPlugin plugin,
+                                String name,
+                                String type,
+                                TypeInfo info) {
+
+        if (isGroovyScript(name)) {
+            return loadGroovyClass(plugin, name, info);
+        }
+        else {
+            return loadJavaClass(plugin, name, info);
+        }
+    }
+
     static GenericPlugin getPlugin(GenericPlugin plugin,
                                    String name,
                                    String type, TypeInfo info) {
 
-        Class pluginClass;
-
-        if (isGroovyScript(name)) {
-            pluginClass = loadGroovyClass(plugin, name, info);
-        }
-        else {
-            pluginClass = loadJavaClass(plugin, name, info);
-        }
+        Class pluginClass = getPluginClass(plugin, name, type, info);
 
         if (pluginClass == null) {
             return null;
