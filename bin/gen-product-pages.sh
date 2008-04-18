@@ -30,7 +30,7 @@ ${LIBDIR}/ant.jar:\
 ${LIBDIR}/commons-beanutils.jar:\
 ${LIBDIR}/commons-logging.jar:\
 ${LIBDIR}/commons-collections.jar:\
-${LIBDIR}/commons-httpclient-2.0.jar:\
+${LIBDIR}/commons-httpclient-3.1.jar:\
 ${LIBDIR}/log4j.jar:\
 ${LIBDIR}/snmpmgr.jar:\
 ${LIBDIR}/jakarta-oro-2.0.7.jar:\
