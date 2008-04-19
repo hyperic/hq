@@ -70,12 +70,6 @@ public class PluginLoader extends URLClassLoader {
         return new URL(toFileURL(file));
     }
 
-    public static String getPluginMainClass(String jar)
-        throws Exception {
-
-        return getPluginMainClass(toJarURL(jar));
-    }
-
     /*
      * if classname is a jar, try to configure the plugin using jar
      * attributes
@@ -128,10 +122,6 @@ public class PluginLoader extends URLClassLoader {
 
     public static ClassLoader getClassLoader() {
         return Thread.currentThread().getContextClassLoader();
-    }
-
-    public static void resetClassLoader() {
-        setClassLoader(defaultClassLoader);
     }
 
     public static void resetClassLoader(Object obj) {
@@ -277,19 +267,9 @@ public class PluginLoader extends URLClassLoader {
         }
     }
 
-    public PluginLoader(URL[] urls)
-    {
-        super(urls);
-    }
-
-    public PluginLoader(URL[] urls, ClassLoader parent)
+    private PluginLoader(URL[] urls, ClassLoader parent, String name)
     {
         super(urls, parent);
-    }
-
-    public PluginLoader(URL[] urls, ClassLoader parent, String name)
-    {
-        this(urls, parent);
         pluginClassName = name;
         previousClassLoader = getClassLoader();
     }
