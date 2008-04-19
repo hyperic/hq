@@ -204,7 +204,7 @@ public class ResourceGroup extends AuthzNamedBean
         _clusterId = val;
     }
     
-    public boolean getOrCriteria() {
+    public boolean isOrCriteria() {
         return _orCriteria;
     }
 
