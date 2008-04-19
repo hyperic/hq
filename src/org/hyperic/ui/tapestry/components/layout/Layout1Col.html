@@ -1,4 +1,4 @@
-<shell jwcid="@Shell" title="ognl:pageTitle + ' - ' + staticTitle" stylesheets='ognl:{HQ40Theme}' 
+<shell jwcid="@Shell" title="ognl:pageTitle + ' - ' + staticTitle" stylesheets='ognl:styleSheetList' 
        delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.remainingHead)"
        ajaxDelegate="ognl:ajaxDelegate">
 <block jwcid="remainingHead@Block">
@@ -9,7 +9,7 @@
     </style>
 <script language="JavaScript" type="text/javascript" src="/js/lib/lib.js"></script>
 <script type="text/javascript">
-    djConfig= {isDebug: true, parseOnLoad: true, defaultTestTheme: 'soria'}
+    djConfig= {isDebug: false, parseOnLoad: true, defaultTestTheme: 'soria'}
 </script>
 </block>
 <body jwcid="@Body" class="soria">

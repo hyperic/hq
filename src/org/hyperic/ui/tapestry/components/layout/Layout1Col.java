@@ -23,7 +23,8 @@
  * USA.
  */
 package org.hyperic.ui.tapestry.components.layout;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.tapestry.IAsset;
 import org.apache.tapestry.IRender;
 import org.apache.tapestry.annotations.Asset;
@@ -37,7 +38,10 @@ import org.hyperic.ui.tapestry.components.navigation.NavigationMenu;
  *
  */
 public abstract class Layout1Col extends BaseComponent{
-
+    @Parameter(name ="styleSheets")
+    public abstract List<IAsset> getStyleSheets();
+    public abstract void setStyleSheets(List<IAsset> sheets);
+    
     @Parameter(name = "pageTitle")
     public abstract String getPageTitle();
     public abstract void setPageTitle(String title);
@@ -61,7 +65,7 @@ public abstract class Layout1Col extends BaseComponent{
     @Parameter(name = "navigationMenu")
     public abstract void setNavigationMenu(NavigationMenu menu);
     public abstract NavigationMenu getNavigationMenu();
-
+    
     @InjectObject("service:hq.ajax.DojoOnePointOneShellDelegate")
     public abstract IRender getAjaxDelegate();
     
@@ -78,4 +82,12 @@ public abstract class Layout1Col extends BaseComponent{
         return getMessages().getMessage("applicationTitle");
     }
 
+    public List<IAsset> getStyleSheetList(){
+        List<IAsset> list = new ArrayList<IAsset>();
+        list.add(getHQ40Theme());
+        List<IAsset> optional = getStyleSheets();
+        if(optional != null)
+            list.addAll(optional);
+        return list;
+    }
 }
