@@ -895,8 +895,18 @@ public class ProductPluginManager extends PluginManager {
             }
 
             //only setup classpath on the agentside.
-            //server-side within JBoss, ClassLoader is a UCL not PluginLoader.
-            if (pluginClass.getClassLoader() instanceof PluginLoader) {
+            //server-side within JBoss, ClassLoader might be UCL not PluginLoader.
+            //agent-side might be GroovyClassLoader so check parent(s)
+            boolean isPluginLoader = false;
+            ClassLoader parent = pluginClass.getClassLoader();
+            while (parent != null) {
+                if ((isPluginLoader = parent instanceof PluginLoader)) {
+                    break;
+                }
+                parent = parent.getParent();
+            }
+
+            if (isPluginLoader) {
                 if ((embeddedJars != null) &&
                     (embeddedJars.size() != 0))
                 {
