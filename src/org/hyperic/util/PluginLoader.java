@@ -40,8 +40,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class PluginLoader extends URLClassLoader {
 
+    private static Log _log =
+        LogFactory.getLog(PluginLoader.class.getName());
     //XXX WAS 6.1 seems to have an issue with %20
     private static final boolean ESCAPE_SPACES =
         !"false".equals(System.getProperty("PluginLoader.ESCAPE_SPACES"));
@@ -49,6 +54,7 @@ public class PluginLoader extends URLClassLoader {
     private ClassLoader previousClassLoader = null;
 
     private String pluginClassName = null;
+    private String pluginName;
 
     private static String toFileURL(String file) {
         if (ESCAPE_SPACES) {
@@ -95,7 +101,7 @@ public class PluginLoader extends URLClassLoader {
         String pluginClassName = null;
         URL[] classpath;
 
-        if ((pluginName != null) && pluginName.endsWith(".jar")) {
+        if (pluginName.endsWith(".jar")) {
             ArrayList urls = new ArrayList();
             try {
                 URL jarUrl = toJarURL(pluginName);
@@ -116,7 +122,9 @@ public class PluginLoader extends URLClassLoader {
             classpath = new URL[0];
         }
 
-        return new PluginLoader(classpath, parent, pluginClassName);
+        PluginLoader loader = new PluginLoader(classpath, parent, pluginClassName);
+        loader.pluginName = new File(pluginName).getName();
+        return loader;
     }
 
     public static ClassLoader getClassLoader() {
@@ -190,14 +198,36 @@ public class PluginLoader extends URLClassLoader {
         }
     }
 
+    private void logAddPath(File path, boolean isExpand) {
+        if (_log.isDebugEnabled()) {
+            if (isExpand) {
+                String url = path.toString();
+                if (addedURLs.get(url) == Boolean.TRUE) {
+                    return; //only print once
+                }
+                _log.debug(this.pluginName + " expanding " + path + "...");
+                addedURLs.put(url, Boolean.TRUE);
+            }
+            else {
+                if (path.canRead()) {
+                    _log.debug(this.pluginName + " += " + path);
+                }
+                else {
+                    _log.debug(this.pluginName + " -= " + path +
+                               ": Permission denied");
+                }
+            }
+        }
+    }
+
     public static String[] expand(File file) {
         String name = file.getName();
         int ix = name.indexOf("*"); //good enough for version matching
         if (ix == -1) {
             return null;
         }
-        file = file.getParentFile();
-        if (!file.isDirectory()) {
+        File dir = file.getParentFile();
+        if (!dir.isDirectory()) {
             return null;
         }
 
@@ -205,12 +235,13 @@ public class PluginLoader extends URLClassLoader {
         String start = name.substring(0, ix);
         String end = name.substring(ix+1);
 
-        return file.list(new ClassPathFilter(start, end));
+        return dir.list(new ClassPathFilter(start, end));
     }
 
     public void addURL(File file)
         throws PluginLoaderException {
 
+        boolean isExpand = false;
         String[] jars = null;
 
         if (!file.exists()) {
@@ -218,11 +249,14 @@ public class PluginLoader extends URLClassLoader {
             if (jars == null) {
                 return;
             }
+            isExpand = true;
+            logAddPath(file, true);
             file = file.getParentFile();
         }
 
-        if (file.isDirectory()) {
-            if (jars == null) {
+        if (isExpand || file.isDirectory()) {
+            if (!isExpand) {
+                logAddPath(file, true);
                 jars = file.list();
             }
 
@@ -237,6 +271,9 @@ public class PluginLoader extends URLClassLoader {
             return;
         }
 
+        if (!file.exists()) {
+            return;
+        }
         String url = file.toString();
         if (addedURLs.get(url) == Boolean.TRUE) {
             return;
@@ -244,6 +281,7 @@ public class PluginLoader extends URLClassLoader {
         addedURLs.put(url, Boolean.TRUE);
 
         try {
+            logAddPath(file, false);
             addURL(toURL(url));
         } catch (Exception e) {
             throw new PluginLoaderException(e.getMessage());
