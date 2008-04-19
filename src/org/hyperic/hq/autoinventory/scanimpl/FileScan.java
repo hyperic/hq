@@ -242,7 +242,7 @@ public class FileScan
                         detectedServers = ((FileServerDetector)serverDetector).
                             getServerResources(platformConfig, matchPath);
                     } finally {
-                        PluginLoader.resetClassLoader();
+                        PluginLoader.resetClassLoader(serverDetector);
                     }
 
                     if ( detectedServers != null && 
