@@ -120,11 +120,12 @@ class ResourceHelper extends BaseHelper {
         if (args.service != null) {
             def service
             if (args.service in String) {
-                if (!server) {
-                    throw new IllegalArgumentException('Requisite server ' +
-                                                       'not found')
+                if (server) {
+                    service = ServiceMan.one.getServiceByName(server, args.service)
                 }
-                service = ServiceMan.one.getServiceByName(server, args.service)
+                else if (plat) {
+                    service = ServiceMan.one.getServiceByName(plat, args.service)
+                }
             } else {
                 service = ServiceMan.one.getServiceById(args.service as int)
             }

@@ -190,6 +190,16 @@ public class ServiceDAO extends HibernateDAO
             .uniqueResult();
     }
 
+    public Service findByName(Platform platform, String serviceName) {
+        String sql = "select v from Service v join v.server s " +
+            "where s.platform = :platform and v.sortName = :name";
+        
+        return (Service)getSession().createQuery(sql)
+            .setParameter("platform", platform)
+            .setParameter("name", serviceName.toUpperCase())
+            .uniqueResult();
+    }
+
     public Collection findByPlatform_orderName(Integer id, boolean asc)
     {
         String sql="select sv from Service sv " +
