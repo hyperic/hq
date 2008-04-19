@@ -103,11 +103,13 @@ public class EmailAction extends EmailActionConfig
     }
 
     private String createSubject(AlertDefinitionInterface alertdef,
-                                 AlertInterface alert, Resource resource) {
+                                 AlertInterface alert, Resource resource,
+                                 String status) {
         Map params = new HashMap();
         params.put("resource", resource);
         params.put("alertDef", alertdef);
         params.put("alert", alert);
+        params.put("status", status);
 
         return renderTemplate("subject.gsp", params);
     }
@@ -167,7 +169,8 @@ public class EmailAction extends EmailActionConfig
                                          "text_email.gsp", user);
             }
 
-            filter.sendAlert(appEnt, to, createSubject(alertDef, alert, resource),
+            filter.sendAlert(appEnt, to,
+                             createSubject(alertDef, alert, resource, ""),
                              body, htmlBody, alertDef.getPriority(),
                              alertDef.isNotifyFiltered());
 
@@ -300,8 +303,8 @@ public class EmailAction extends EmailActionConfig
                                                   appEnt.getId());
 
         filter.sendAlert(getResource(defInfo), to, 
-                         createSubject(defInfo, alert.getAlertInfo(), resource)
-                         + " " + change.getDescription(), 
+                         createSubject(defInfo, alert.getAlertInfo(), resource,
+                                       change.getDescription()), 
                          messages, messages, defInfo.getPriority(), false);
     }
 }
