@@ -1,6 +1,14 @@
 var hyperic = {};
-hyperic.URLS = {}; hyperic.widget = {}; hyperic.utils = {};
+hyperic.URLS = {}; hyperic.widget = {}; hyperic.utils = {}; hyperic.html = {};
 
+hyperic.html = {
+    show : function(/*String*/ node){
+        dojo.style(node, 'display', '');
+    },
+    hide : function(/*String*/ node){
+        dojo.style(node, 'display', 'none');
+    }
+}
 hyperic.form = {
     fieldFocus : function(/*DOMNode*/elem) {
         if (!elem.getAttribute('readonly')) {
@@ -221,9 +229,112 @@ hyperic.widget.menu = {
         }
     }
 }
+/**
+ * Hyperic Dojo Grid
+ *
+ * Some nomenclature
+ *  Columns - Vertical groups of cells of the same type, continuity is not required
+ *  Rows - horizontal contiguous groups of cells of the same type
+ *  Cells - a single entity in the grid
+ *  Views - a collection of cells (row groups) that form a logical row
+ *  Layouts - a collection of views, side by side (sets of columns)
+ *
+ * Columns have the following schema options
+ *  name: The title of the column - ex "foo"
+ *  width: the style width of the column - ex "150px"
+ *  field:
+ * 
+ * Example
+ *  build a model, view and layout then
+ *  var myGrid = new hyperic.widget.grid(node, "myGridNode", model, layout);
+ *  var myDojoGrid = myGrid.dojoGrid; //the dojo grid
+ * 
+ * @param containerNode
+ * @param tableId
+ * @param model
+ * @param layout
+ * 
+ */
+hyperic.widget.Grid = function(/*DOMNode*/ containerNode, /*String*/ tableId, /*Object*/ model, /*Object*/ layout) {
+    this.dojoGrid = null;
+    this.data = null;
+    this.store = null;
+    this.model = null;
+    //Private Constructor
+    function Grid(/*DOMNode*/ containerNode, /*String*/ tableId, /*Object*/ model, /*Object*/ layout){
+        this.dojoGrid = new dojox.Grid({
+            "id": tableId,
+            "model": model,
+            "structure": layout
+        });
+        //add the grid to the parent node
+        if(contianerNode.innerHTML){
+            containerNode.appendChild(this.grid.domNode);
+        }else{
+            dojo.byId("${containerId}").appendChild(this.grid.domNode);
+        }
+    }
+    Grid();
+    return this;
+};
 
 /**
- * @deprecated used only for the struts header
+ * A datastore for a Grid
+ * Don't really care which kind of datastore since they are being depricated quickly
+ * just return the one that pages and writes or not
+ * 
+ * Example
+ * var datastore = new hyperic.widget.Grid.Datastore(true, true, 'http://foo.org/tableData.html');
+ * 
+ * @param readOnlyGrid is this grid going to be editable
+ * @param paging does this grid page data remotely
+ * @param dataServiceUrl where can it get the data from
+ * 
+ */
+hyperic.widget.Grid.Datastore = function(/*boolean*/ readOnlyGrid, /*boolean*/ paging, /*String*/ dataServiceUrl){
+    var store;
+    //create the datastore
+    if(readOnlyGrid && !paging){
+        store = new dojo.data.ItemFileReadStore(dataServiceUrl);
+    }else if(!paging){
+        store = new dojo.data.ItemFileWriteStore(dataServiceUrl);
+    }else{
+        store = new dojox.data.QueryReadStore(dataServiceUrl);
+        //need to create the xhr to handle the optional writes to the server
+    }
+    return store;
+};
+
+/**
+ * The Grid Model
+ *  
+ * Example
+ * var model = new hyperic.widget.Grid.Model(500, myDatastoreObj, false);
+ * 
+ * @param tableHeight - the integer height of the table used to specify #rows for virtual scrolling
+ * @param datastore - a dojo datastore or json object of the data
+ * @param isClientDataSource is this data local or remote
+ */
+hyperic.widget.Grid.Model = function(tableHeight, datastore, isClientDataSource){
+    //create the model
+    function calcSize(){
+        return 30;
+    }
+    var model;
+    if(isClientDataSource){
+        model = new dojox.grid.data.Table(null, datastore, {
+            
+        });
+    }else{
+        model = new dojox.grid.data.Dynamic(null, datastore, {
+            
+        });
+    }
+    return model;
+};
+
+/**
+ * @eprecated used only for the struts header
  */
 function activateHeaderTab(){
     var l = document.location;
