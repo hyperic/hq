@@ -1,11 +1,11 @@
 <script type="text/javascript">
 function selectAlertType(t) {
   if (t == "1") {
-    dojo.html.show('alertsTable');
-    dojo.html.hide('groupAlertsTable');
+    hyperic.html.show('alertsTable');
+    hyperic.html.hide('groupAlertsTable');
   } else if (t == "2") {
-    dojo.html.hide('alertsTable');
-    dojo.html.show('groupAlertsTable');
+    hyperic.html.hide('alertsTable');
+    hyperic.html.show('groupAlertsTable');
   }
 }
 
@@ -22,20 +22,20 @@ function refreshDefTables() {
 
 function selectDefType(t) {
   if (t == '1') {
-    dojo.html.show('defsTable')
-    dojo.html.show('excludeTypeBasedInput')
-    <% if (superUser) { %> dojo.html.hide('typeDefsTable') <% } %>
-    dojo.html.hide('galertDefsTable')
+    hyperic.html.show('defsTable')
+    hyperic.html.show('excludeTypeBasedInput')
+    <% if (superUser) { %> hyperic.html.hide('typeDefsTable') <% } %>
+    hyperic.html.hide('galertDefsTable')
   } else if (t == '2') {
-    dojo.html.hide('defsTable')
-    dojo.html.hide('excludeTypeBasedInput')
-    <% if (superUser) { %> dojo.html.show('typeDefsTable') <% } %>
-    dojo.html.hide('galertDefsTable')
+    hyperic.html.hide('defsTable')
+    hyperic.html.hide('excludeTypeBasedInput')
+    <% if (superUser) { %> hyperic.html.show('typeDefsTable') <% } %>
+    hyperic.html.hide('galertDefsTable')
   } else if (t == '3') {
-    dojo.html.hide('defsTable')
-    dojo.html.hide('excludeTypeBasedInput')
-    <% if (superUser) { %> dojo.html.hide('typeDefsTable') <% } %>
-    dojo.html.show('galertDefsTable')
+    hyperic.html.hide('defsTable')
+    hyperic.html.hide('excludeTypeBasedInput')
+    <% if (superUser) { %> hyperic.html.hide('typeDefsTable') <% } %>
+    hyperic.html.show('galertDefsTable')
   }
 }
  
@@ -55,9 +55,9 @@ function setSelectedOption() {
 onloads.push(setSelectedOption);
 </script>
 
-<div dojoType="TabContainer" id="mainTabContainer" 
+<div dojoType="dijit.layout.TabContainer" id="mainTabContainer" 
      style="width: 100%; height:500px;">
-  <div dojoType="ContentPane" label="Alerts">
+  <div dojoType="dijit.layout.ContentPane" title="Alerts">
     <div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">
       <div style="float:left;width:18%;margin-right:10px;">
         <div class="filters">
@@ -110,7 +110,7 @@ onloads.push(setSelectedOption);
 <div style="clear:both;height:1px;"></div>
   </div>
   
-  <div dojoType="ContentPane" label="Definitions">
+  <div dojoType="dijit.layout.ContentPane" title="Definitions">
    <div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">
       <div style="float:left;display:inline;width:18%;margin-right:10px;">
         <div class="filters">
@@ -164,9 +164,12 @@ onloads.push(setSelectedOption);
         </div>    
 
         <div id="galertDefsTable" style="display:none;">
-          <%= dojoTable(id:'GalertDefs', title:l.GroupDefsTable,
+          <%= dojoTable(id:'GalertDefs', 
+                        title:l.GroupDefsTable,
                         url:urlFor(action:'galertDefData'),
-                        schema:galertDefSchema, numRows:15) %>
+                        schema:galertDefSchema, 
+                        numRows:15,
+                        readOnly:true) %>
         </div>    
       </div>
     </div>

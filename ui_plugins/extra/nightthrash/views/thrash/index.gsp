@@ -1,45 +1,41 @@
 <script type="text/javascript">
 function compressData() {
-  dojo.io.bind({
+  dojo.xhrGet({
     url: '<%= urlFor(action:"compressData") %>',
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('compressResult').innerHTML = data.compressResult;
-    },
+    handleAs: "text/json-comment-filtered",
+    load: function(responseObj, ioArgs) {
+      dojo.byId('compressResult').innerHTML = responseObj.compressResult;
+    }
   });
 }
 
 function dbAnalyze() {
-  dojo.io.bind({
+  dojo.xhrGet({
     url: '<%= urlFor(action:"dbAnalyze") %>',
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('analyzeResult').innerHTML = data.analyzeResult;
-    },
+    handleAs: "text/json-comment-filtered",
+    load: function(responseObj, ioArgs) {
+      dojo.byId('analyzeResult').innerHTML = responseObj.analyzeResult;
+    }
   });
 }
 
 function dbMaint() {
-  dojo.io.bind({
+  dojo.xhrGet({
     url: '<%= urlFor(action:"dbMaint") %>',
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('maintResult').innerHTML = data.maintResult;
-    },
+    handleAs: "text/json-comment-filtered",
+    load: function(responseObj, ioArgs) {
+      dojo.byId('maintResult').innerHTML = responseObj.maintResult;
+    }
   });
 }
 
 function purgeEventLogs() {
-  dojo.io.bind({
+  dojo.xhrGet({
     url: '<%= urlFor(action:"purgeEventLogs") %>',
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('purgeResult').innerHTML = data.purgeResult;
-    },
+    handleAs: "text/json-comment-filtered",
+    load: function(responseObj, ioArgs) {
+      dojo.byId('purgeResult').innerHTML = responseObj.purgeResult;
+    }
   });
 }
 

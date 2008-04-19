@@ -1,20 +1,17 @@
-<%= dojoInclude(["dojo.event.*",
-                 "dojo.parser",
-                 "dojo.widget.InlineEditBox",
-                 "dojo.widget.TextBox" ]) %>
+<%= dojoInclude(["dijit.InlineEditBox",
+                 "dijit.form.TextBox" ]) %>
 <link rel=stylesheet href="/hqu/public/hqu.css" type="text/css">
 
 <script type="text/javascript">
 function saveValue(key, newVal, oldVal) {
-  dojo.io.bind({
+  dojo.xhrGet({
     url: '<%= urlFor(action:"setProp") %>',
-    method: "post",
-    mimetype: "text/json-comment-filtered",
+    handleAs: "text/json-comment-filtered",
     content: {key: key, newVal: newVal, oldVal: oldVal},
-    load: function(type, data, evt) {
+    load: function(responseObj, ioArgs) {
     },
-    error: function(err, msg) {
-      alert('error! ' + err);
+    error: function(responseObj, ioArgs) {
+      alert('error! ' + responseObj);
     }
   });
 }
@@ -35,7 +32,7 @@ function saveValue(key, newVal, oldVal) {
     <tr>
       <td>${h p.key}</td>
       <td>
-        <span id="editable_${p.id}" dojoType="InlineEditBox"
+        <span id="editable_${p.id}" dojoType="dijit.InlineEditBox"
             title="Click to edit" onSave="saveValue('${p.key}', arguments[0], arguments[1])">
             ${h p.value}
         </span>

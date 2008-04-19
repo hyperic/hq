@@ -1,17 +1,15 @@
 <%= dojoInclude(["dojo.event.*",
-                 "dojo.collections.Store",
-                 "dojo.widget.ContentPane",
-                 "dojo.widget.TabContainer",
-                 "dojo.widget.FilteringTable"]) %>
+                 "dijit.layout.ContentPane",
+                 "dijit.layout.TabContainer",
+                 "dojo.grid.Grid"]) %>
 <%= hquStylesheets() %>
 
 <script type="text/javascript">
 function getSystemStats() {
-  dojo.io.bind({
+  dojo.xhrPost({
     url: '<%= urlFor(action:"getSystemStats") %>',
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
+    handleAs: "text/json-comment-filtered",
+    load: function(data, ioArgs) {
       dojo.byId('userCPU').innerHTML = data.sysUserCpu;
       dojo.byId('userCPUBar').style.width = data.sysUserCpu;
       dojo.byId('sysCPU').innerHTML  = data.sysSysCpu;
@@ -275,12 +273,11 @@ function selectDiag(d) {
     return;
   }
     
-  dojo.io.bind({
+  dojo.xhrPost({
     url: '<%= urlFor(action:"getDiag") %>' + '?diag=' + d,
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('diagData').innerHTML = data.diagData;
+    handleAs: "text/json-comment-filtered",
+    load: function(responseObj, ioArgs) {
+      dojo.byId('diagData').innerHTML = responseObj.diagData;
     }
   });
 }
@@ -303,12 +300,11 @@ function selectQuery(q) {
     return;
   }
     
-  dojo.io.bind({
+  dojo.xhrPost({
     url: '<%= urlFor(action:"runQuery") %>' + '?query=' + q,
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('queryData').innerHTML = data.queryData;
+    handleAs: "text/json-comment-filtered",
+    load: function(responseObj, ioArgs) {
+      dojo.byId('queryData').innerHTML = responseObj.queryData;
     }
   });
 }

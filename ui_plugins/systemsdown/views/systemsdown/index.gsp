@@ -14,7 +14,7 @@
             currentCountFilter.style.fontWeight = 'bold';
         }else
             return;
-        dojo.io.cookie.setCookie('filtercount', obj.id);
+        dojo.cookie('filtercount', obj.id);
         currentCountFilter = obj;
         currentCountFilter.style.color = '#000000';
         currentCountFilter.style.cursor = 'default';
@@ -37,7 +37,7 @@
         this.getLocalizedMessageForReason = function(reason){
             return "${l.noDataAvailable}";
         }
-        dojo.event.topic.subscribe("XHRComplete", this, "toggleVisibility");
+        dojo.subscribe("XHRComplete", this, "toggleVisibility");
     }
     
     new plugin.MessagePanel();
