@@ -755,42 +755,20 @@ public class ProductPluginManager extends PluginManager {
     private void addClassPath(PluginLoader loader, String path)
         throws PluginException {
 
-        File jar = new File(path);
-
-        if (log.isDebugEnabled()) {
-            String exists;
-            if (jar.exists()) {
-                if (jar.canRead()) {
-                    exists = jar.isDirectory() ? "d" : "+";
-                }
-                else {
-                    exists = "~";
-                }
-            }
-            else {
-                exists = "-";
-            }
-            log.debug("   " + exists + " " + jar);
-        }
-
         try {
-            loader.addURL(jar);
+            loader.addURL(path);
         } catch (PluginLoaderException e) {
             throw new PluginException(e.getMessage());
         }
     }
 
-    private void addClassPath(ProductPlugin plugin, PluginLoader loader)
+    private void addClassPath(PluginLoader loader, String name, String[] classpath)
         throws PluginException {
-        //XXX expand variables in plugin.getClassPath
-        String[] classpath = plugin.getClassPath(this);
 
         if (classpath.length == 0) {
-            log.trace("No classpath configured for: " + plugin.getName());
             return;
         }
 
-        log.debug("adding to " + plugin.getName() + " classpath:");
         String pdkDir = getProperty(PROP_PDK_DIR);
 
         for (int i=0; i<classpath.length; i++) {
@@ -821,9 +799,10 @@ public class ProductPluginManager extends PluginManager {
                                     ClassLoader resourceLoader)
         throws PluginException, PluginExistsException {
 
-        ProductPlugin plugin = null; //will be from Main-Class
+        ProductPlugin plugin = null;
         Class pluginClass = null;
         PluginData data;
+        String defaultPluginName = getNameFromFile(jarName);
 
         try {
             PluginLoader loader =
@@ -840,7 +819,19 @@ public class ProductPluginManager extends PluginManager {
             }
 
             data = PluginData.getInstance(this, dataLoader, jarName);
-            
+
+            String[] classpath = ProductPlugin.getDataClassPath(data); 
+            addClassPath(loader, jarName, classpath);
+
+            if (this.isClient && jarName.endsWith(".jar")) {
+                String pdk = getProperty(PROP_PDK_DIR);
+
+                ClientPluginDeployer deployer =
+                    new ClientPluginDeployer(pdk, defaultPluginName);
+                List jars = deployer.unpackJar(jarName);
+                loader.addURLs(jars);
+            }
+
             String implName =
                 data.getPlugin(ProductPlugin.TYPE_PRODUCT,
                                ProductPlugin.TYPE_PRODUCT);
@@ -871,7 +862,7 @@ public class ProductPluginManager extends PluginManager {
                 pluginName = data.getName(); //hq-plugin.xml
             }
             if (pluginName == null) {
-                pluginName = getNameFromFile(jarName);
+                pluginName = defaultPluginName;
                 if (pluginName == null) {
                     throw new PluginException("Malformed name for: " + jarName);
                 }
@@ -884,37 +875,10 @@ public class ProductPluginManager extends PluginManager {
                 plugin.setName(pluginName);
             }
 
-            List embeddedJars = null;
-            if (this.isClient && jarName.endsWith(".jar")) {
-                String pdk =
-                    getProperty(PROP_PDK_DIR);
-
-                ClientPluginDeployer deployer =
-                    new ClientPluginDeployer(pdk, plugin.getName());
-                embeddedJars = deployer.unpackJar(jarName);
-            }
-
-            //only setup classpath on the agentside.
-            //server-side within JBoss, ClassLoader might be UCL not PluginLoader.
-            //agent-side might be GroovyClassLoader so check parent(s)
-            boolean isPluginLoader = false;
-            ClassLoader parent = pluginClass.getClassLoader();
-            while (parent != null) {
-                if ((isPluginLoader = parent instanceof PluginLoader)) {
-                    break;
-                }
-                parent = parent.getParent();
-            }
-
-            if (isPluginLoader) {
-                if ((embeddedJars != null) &&
-                    (embeddedJars.size() != 0))
-                {
-                    loader.addURLs(embeddedJars);
-                    log.debug("Adding embedded jars to classpath for: " +
-                              plugin.getName() + "=" + embeddedJars);
-                }
-                addClassPath(plugin, loader);
+            if (this.isClient && (implName != null)) {
+                //already added the classpath, but the impl may override/adjust
+                String[] pluginClasspath = plugin.getClassPath(this);
+                addClassPath(loader, plugin.getName(), pluginClasspath);
             }
 
             PluginInfo info = new PluginInfo(plugin, jarName);

@@ -114,15 +114,19 @@ public abstract class ProductPlugin extends GenericPlugin {
         return this.manager;
     }
 
-    public String[] getClassPath(ProductPluginManager manager) {
-        if (this.data == null) {
+    static String[] getDataClassPath(PluginData data) {
+        if (data == null) {
             return new String[0];
         }
-        List cp = this.data.getClassPath();
+        List cp = data.getClassPath();
         if (cp == null) {
             return new String[0];
         }
-        return (String[])cp.toArray(new String[0]);
+        return (String[])cp.toArray(new String[0]);        
+    }
+
+    public String[] getClassPath(ProductPluginManager manager) {
+        return getDataClassPath(this.data);
     }
 
     public static boolean isGroovyScript(String name) {
