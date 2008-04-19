@@ -371,7 +371,9 @@ public class ResourceGroup extends AuthzNamedBean
             dumps.add(dump);
         }
         this.setOrCriteria(criteria.isAny());
-        setCriteriaList(dumps);
+        // overwrite the contents of the criteria persisted by hibernate
+        getCriteriaList().clear();
+        getCriteriaList().addAll(dumps);
     }
     
     public void addRole(Role role) {

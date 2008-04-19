@@ -473,9 +473,6 @@ public class ResourceGroupManagerEJBImpl
                  AuthzConstants.perm_modifyResourceGroup);
         
         group.setCritterList(critters);
-        List criteria = group.getCriteriaList();
-        ResourceGroupDAO grpDao = getResourceGroupDAO();
-        grpDao.saveCritters(criteria);
     }
     
     /**

@@ -79,7 +79,7 @@
       <many-to-many class="Role" column="ROLE_ID"/>
     </set>
     
-    <list name="criteriaList" table="EAM_CRITERIA" inverse="true">
+    <list name="criteriaList" table="EAM_CRITERIA" inverse="true" cascade="all-delete-orphan">
       <cache usage="read-write"/>
       <key column="RESOURCE_GROUP_ID"/>
       <list-index column="LIST_INDEX"/>
