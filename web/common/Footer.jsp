@@ -34,11 +34,11 @@
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr> 
-    <td rowspan="99" class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
+    <td rowspan="99" class="FooterTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td colspan="2"><html:img page="/images/spacer.gif" width="1" height="60" alt="" border="0" styleId="footerSpacer"/></td>
   </tr>
   <tr> 
-    <td rowspan="99" class="PageTitle" valign="top"><html:img page="/images/footer_corner.gif" width="8" height="8" alt="" border="0"/></td>
+    <td rowspan="99" class="FooterTitle" valign="top"></td>
     <td width="100%"><html:img page="/images/spacer.gif" width="1" height="8" alt="" border="0"/></td>
   </tr>
   <tr class="PageTitle"> 
