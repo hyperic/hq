@@ -45,7 +45,6 @@ public class PluginLoader extends URLClassLoader {
     //XXX WAS 6.1 seems to have an issue with %20
     private static final boolean ESCAPE_SPACES =
         !"false".equals(System.getProperty("PluginLoader.ESCAPE_SPACES"));
-    private static final ClassLoader defaultClassLoader = getClassLoader();
     private Map addedURLs = new HashMap();
     private ClassLoader previousClassLoader = null;
 
