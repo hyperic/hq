@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class BaselineDAO extends HibernateDAO {
@@ -66,6 +67,30 @@ public class BaselineDAO extends HibernateDAO {
         m.setBaseline(b);
         save(b);
         return b;
+    }
+    
+    /*
+     * @return List of Measurement
+     */
+    public List findMeasurementsForBaselines(boolean enabled, long computeTime) {
+        String sql = new StringBuffer()
+            .append("SELECT {m.*}")
+        	.append(" FROM EAM_MEASUREMENT m")
+        	.append(" LEFT JOIN (")
+        	    .append("SELECT measurement_id, id from EAM_MEASUREMENT_BL")
+        	    .append(" WHERE compute_time > :computeTime")
+        	.append(" ) b on b.measurement_id = m.id")
+        	.append(" JOIN EAM_MEASUREMENT_TEMPL t on m.template_id = t.id")
+        	.append(" WHERE t.COLLECTION_TYPE=:collType")
+        	.append(" AND m.ENABLED=:enabled")
+        	.append(" AND m.COLL_INTERVAL is not null")
+        	.append(" AND b.ID is null").toString();
+        int collType = MeasurementConstants.COLL_TYPE_DYNAMIC;
+        return getSession().createSQLQuery(sql)
+            .addEntity("m", Measurement.class)
+            .setBoolean("enabled", enabled)
+            .setInteger("collType", collType)
+            .setLong("computeTime", computeTime).list();
     }
 
     public List findByInstance(int appdefType, int appdefId) {

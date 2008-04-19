@@ -304,14 +304,28 @@ public class AvailabilityManagerEJBImpl
     /**
      * @ejb:interface-method
      */
+    public Map getAggregateData(Integer[] mids, long begin, long end)
+    {
+        AvailabilityDataDAO dao = getAvailabilityDataDAO();
+        List avails = dao.findAggregateAvailability(mids, begin, end);
+        return getAggData(avails, begin, end, false);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
     public Map getAggregateData(Integer[] tids, Integer[] iids,
                                 long begin, long end)
     {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List avails = dao.findAggregateAvailability(tids, iids, begin, end);
+        return getAggData(avails, begin, end, true);
+    }
+
+    private Map getAggData(List avails, long begin, long end, boolean useTidKey)
+    {
         long interval = (end - begin)/DEFAULT_INTERVAL;
         Map rtn = new HashMap();
-
         if (avails.size() == 0) {
             // Nothing to do, return an empty Map.
             return rtn;
@@ -320,7 +334,12 @@ public class AvailabilityManagerEJBImpl
         Map lastMap = new HashMap();
         Object[] objs = (Object[])avails.get(i++);
         for (long curr = begin; curr < end; curr += interval) {
-            Integer tid = (Integer)objs[0];
+            Integer key = null;
+            if (useTidKey) {
+                key = (Integer)objs[0];
+            } else {
+                key = ((Measurement)objs[0]).getId();
+            }
             while (begin > ((Long)objs[5]).longValue()) {
                 objs = (Object[])avails.get(i++);
             }
@@ -333,13 +352,13 @@ public class AvailabilityManagerEJBImpl
             Double availVal = (Double)objs[6];
             MetricValue mval;
             long lendtime = endtime.longValue();
-            if (null == (mval = (MetricValue)lastMap.get(tid)) ||
+            if (null == (mval = (MetricValue)lastMap.get(key)) ||
                 mval.getTimestamp() > lendtime)
             {
                 mval = new MetricValue(availVal, lendtime);
-                lastMap.put(tid, mval);
+                lastMap.put(key, mval);
             }
-            rtn.put(tid, data);
+            rtn.put(key, data);
         }
 
         for (Iterator it=lastMap.entrySet().iterator(); it.hasNext(); ) {

@@ -216,6 +216,39 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     /**
+     * @return List of Object[].  [0] = Measurement Obj
+     *  [1] = min(availVal), [2] = avg(availVal), [3] max(availVal)
+     *  [4] = startime, [5] = endtime, [6] = availVal, [7] mid count
+     */
+    List findAggregateAvailability(Integer[] mids, long start, long end) {
+        if (mids.length == 0) {
+            // Nothing to do
+            return new ArrayList(0);
+        }
+        String sql = new StringBuffer()
+                    .append("SELECT m, min(rle.availVal),")
+                    .append(" avg(rle.availVal), max(rle.availVal),")
+                    .append(" rle.availabilityDataId.startime, rle.endtime,")
+                    .append(" rle.availVal, count(m.id)")
+                    .append(" FROM Measurement m")
+                    .append(" JOIN m.availabilityData rle")
+                    .append(" WHERE m in (:mids)")
+                    .append(" AND (rle.availabilityDataId.startime > :startime")
+                    .append("   OR rle.endtime > :startime)")
+                    .append(" AND (rle.availabilityDataId.startime < :endtime")
+                    .append("   OR rle.endtime < :endtime)")
+                    .append(" group by m,")
+                    .append(" rle.availabilityDataId.startime, rle.availVal,")
+                    .append(" rle.endtime").toString();
+        return getSession()
+            .createQuery(sql)
+            .setLong("startime", start)
+            .setLong("endtime", end)
+            .setParameterList("mids", mids, new IntegerType())
+            .list();
+    }
+
+    /**
      * @return List of Object[].  [0] = measurement template id,
      *  [1] = min(availVal), [2] = avg(availVal), [3] max(availVal)
      *  [4] = startime, [5] = endtime, [6] = availVal, [7] mid count

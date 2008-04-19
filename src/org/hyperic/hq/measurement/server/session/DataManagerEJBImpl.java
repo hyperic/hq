@@ -62,6 +62,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
+import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
@@ -949,8 +950,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                       PageControl pc)
     {
         if (m.getTemplate().isAvailability()) {
-            return AvailabilityManagerEJBImpl.getOne().
-                getHistoricalAvailData(m, begin, end, pc);
+            return getAvailMan().getHistoricalAvailData(m, begin, end, pc);
         } else {
             return getHistData(m, begin, end, pc);
         }
@@ -1144,7 +1144,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         Integer[] mids =
             (Integer[])measurementIds.toArray(new Integer[measurementIds.size()]);
 
-        PageList rtn = AvailabilityManagerEJBImpl.getOne().
+        PageList rtn = getAvailMan().
             getHistoricalAvailData(avIds, begin, end, interval, pc);
 
         rtn.addAll(getHistData(mids, begin, end, interval,
@@ -1393,7 +1393,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     {
 
         if (m.getTemplate().isAvailability()) {
-            return AvailabilityManagerEJBImpl.getOne().getLastAvail(m);
+            return getAvailMan().getLastAvail(m);
         } else {
             return getLastHistData(m);
         }
@@ -1545,7 +1545,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
         Map data = getLastDataPts(sepMids, timestamp);
 
-        data.putAll(AvailabilityManagerEJBImpl.getOne().getLastAvail(avIds,
+        data.putAll(getAvailMan().getLastAvail(avIds,
                                                                      timestamp));
         return data;
     }
@@ -1693,9 +1693,23 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public double[] getBaselineData(Integer id, long begin, long end) {
+    public double[] getBaselineData(Measurement meas, long begin, long end) {
+        if (meas.getTemplate().getAlias().equalsIgnoreCase("availability")) {
+            Integer[] mids = new Integer[1];
+            Integer id = meas.getId();
+            mids[0] = id;
+            return (double[])getAvailMan()
+                .getAggregateData(mids, begin, end)
+                .get(id);
+        } else {
+            return getBaselineMeasData(meas, begin, end);
+        }
+    }
+
+    private double[] getBaselineMeasData(Measurement meas, long begin, long end) {
         // Check the begin and end times
         super.checkTimeArguments(begin, end);
+        Integer id = meas.getId();
         
         Connection conn = null;
         Statement  stmt = null;
@@ -1766,8 +1780,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         Integer[] dataIds =
             (Integer[])dataTempls.toArray(new Integer[dataTempls.size()]);
 
-        Map rtn = AvailabilityManagerEJBImpl.getOne().
-            getAggregateData(availIds, iids, begin, end);
+        Map rtn = getAvailMan().getAggregateData(availIds, iids, begin, end);
         rtn.putAll(getAggData(dataIds, iids, begin, end));
         return rtn;
     }
@@ -1928,6 +1941,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public Map getAggregateDataByMetric(Integer[] tids, Integer[] iids,
                                         long begin, long end,
                                         boolean useAggressiveRollup) {
+        Map rtn =
+            getAggDataByMetric(tids, iids, begin, end, useAggressiveRollup);
+        rtn.putAll(getAvailMan().getAggregateData(tids, iids, begin, end));
+        return rtn;
+    }
+
+    private Map getAggDataByMetric(Integer[] tids, Integer[] iids,
+                                        long begin, long end,
+                                        boolean useAggressiveRollup) {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
@@ -2032,7 +2054,32 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return the map of data points
      * @ejb:interface-method
      */
-    public Map getAggregateDataByMetric(Integer[] mids, long begin,
+    public Map getAggregateDataByMetric(List measurements, long begin,
+                                        long end, boolean useAggressiveRollup)
+    {
+        List avids = new ArrayList();
+        List mids = new ArrayList();
+        for (Iterator i=measurements.iterator(); i.hasNext(); ) {
+            Measurement meas = (Measurement)i.next();
+            MeasurementTemplate t = meas.getTemplate();
+            if (t.getAlias().equalsIgnoreCase("availability")) {
+                avids.add(meas);
+            } else {
+                mids.add(meas);
+            }
+        }
+        Map rtn = getAggDataByMetric(
+            (Integer[])mids.toArray(new Integer[0]), begin, end, true);
+        rtn.putAll(getAvailMan().getAggregateData(
+            (Integer[])avids.toArray(new Integer[0]), begin, end));
+        return rtn;
+    }
+
+    private AvailabilityManagerLocal getAvailMan() {
+        return AvailabilityManagerEJBImpl.getOne();
+    }
+
+    private Map getAggDataByMetric(Integer[] mids, long begin,
                                         long end, boolean useAggressiveRollup)
     {
         // Check the begin and end times
