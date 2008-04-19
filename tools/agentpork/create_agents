@@ -1,0 +1,81 @@
+#!/usr/bin/perl -w
+
+use strict;
+use POSIX ":sys_wait_h";
+
+my $debug = 1;
+
+my $NUM_AGENTS = 5;
+my $BATCH_SIZE = 2;
+my $AGENT_PORK_DIR = "${HOME}/workspace/hq_trunk/tools/agentpork";
+my $LOG_DIR = "${HOME}/workspace/hq_trunk/tools/agentpork";
+
+my (@pids);
+
+sub main()
+{
+    my $i = 0;
+    my $clone = 0;
+    while ($clone < $NUM_AGENTS)
+    {
+        $clone = $i++*$BATCH_SIZE;
+        for (my $j=0; $j<$BATCH_SIZE; $j++)
+        {
+            my $pid;
+            if (0 == ($pid = fork())) {
+                createAgent($clone);
+                exit(0);
+            } else {
+                $clone++;
+                push (@pids, $pid);
+            }
+        }
+        waitForAgentCreate();
+    }
+}
+
+main();
+
+sub createAgent
+{
+    my ($clone) = @_;
+    my $cmd = "$AGENT_PORK_DIR/create_clone.sh $clone 2>&1";
+    execCmd($cmd);
+}
+
+sub execCmd
+{
+    my ($cmd) = @_;
+    print "$cmd\n" if $debug;
+    my $output = join "", `$cmd`;
+    `echo "$output" >> $LOG_DIR/create.log`;
+}
+
+sub waitForAgentCreate
+{
+    while (@pids > 0)
+    {
+        foreach my $pid (@pids)
+        {
+            if ( waitpid($pid, &WNOHANG()) > 0 )
+            {
+                print "wait for $pid\n" if $debug;
+                spliceArray($pid);
+            }
+        }
+        sleep(1);
+    }
+}
+
+
+sub spliceArray
+{
+    my ($PID) = @_;
+    my ($i);
+    for ($i=0; $i<@pids; $i++)
+    {
+        if ($pids[$i] == $PID) {
+            splice (@pids, $i, 1);
+        }
+    }
+}
