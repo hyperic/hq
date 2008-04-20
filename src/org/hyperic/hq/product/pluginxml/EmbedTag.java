@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.hyperic.hq.product.ClientPluginDeployer;
-import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.util.xmlparser.XmlTagException;
 import org.hyperic.util.xmlparser.XmlTextHandler;
@@ -84,13 +83,10 @@ public class EmbedTag
 
     void write() throws XmlTagException {
         String name = getAttribute(ATTR_NAME);
-        if (ProductPlugin.isGroovyScript(name)) {
-            this.data.setProperty(name, this.text); //XXX
-            return;
-        }
-        String pdk = ProductPluginManager.getPdkDir();
 
-        if (pdk == null) {
+        String pdkWork = ProductPluginManager.getPdkWorkDir();
+
+        if (pdkWork == null) {
             return;
         }
 
@@ -103,7 +99,7 @@ public class EmbedTag
         }
 
         ClientPluginDeployer deployer =
-            new ClientPluginDeployer(pdk, pluginName);
+            new ClientPluginDeployer(pdkWork, pluginName);
 
         String type = getType();
 
@@ -116,6 +112,10 @@ public class EmbedTag
         File file = deployer.getFile(type, name);
         if (file == null) {
             return;
+        }
+
+        if (this.data.getProperty(name) == null) {
+            this.data.setProperty(name, file.getPath());
         }
 
         if (deployer.upToDate(new File(this.data.file), file)) {
