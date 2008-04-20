@@ -3,7 +3,8 @@ import org.hyperic.hq.hqu.rendit.HQUPlugin
 import @CONTROLLER_NAME@Controller
 
 class Plugin extends HQUPlugin {
-    Plugin() {
+    void initialize(File pluginDir) {
+        super.initialize(pluginDir)
         /**
          * The following can be un-commented to have the plugin's view rendered in HQ.
          *
