@@ -136,7 +136,13 @@ public class PluginJar extends Jar {
         String pluginDir = getProperty("plugin.dir", "build/plugins");
         String packageName = getPackage();
         if (packageName == null) {
-            packageName = DEFAULT_PACKAGE + "." + getName();
+            String name = getName();
+            int ix;
+            if ((ix = name.indexOf('-')) != -1) {
+                //e.g. groovy-scripting -> groovy
+                name = name.substring(0, ix);
+            }
+            packageName = DEFAULT_PACKAGE + "." + name;
         }
         boolean validate =
             getProperty("pluginxml.validate", "true").equals("true");//XXX
