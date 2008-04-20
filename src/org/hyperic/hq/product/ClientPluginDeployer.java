@@ -105,17 +105,12 @@ public class ClientPluginDeployer {
     public static File getSubDirectory(String root,
                                        String name,
                                        String plugin) {
-        //e.g. check /.../pdk/$name exists
-        File pluginDir = new File(root, name);
-        if (!pluginDir.exists()) {
-            log.debug(pluginDir + " does not exist.");
-            return null;
-        }
 
-        String subdir =
-            WORK_DIR + File.separator +
-            name + File.separator +
-            plugin;
+        String subdir = "";
+        if (!new File(root).getName().equals(WORK_DIR)) {
+            subdir += WORK_DIR + File.separator; 
+        }
+        subdir += name + File.separator + plugin;
 
         File dir = new File(root, subdir);
 
