@@ -1145,6 +1145,7 @@
   <!-- Copy plugins -->
   <target name="copy-plugins" depends="init-taskdefs">
     <mkdir dir="${pdk.plugins}"/>
+    <mkdir dir="${pdk.plugins}/scripting"/>
 
     <echo message="Copying plugins from: ${plugin.dir}"/>
 
@@ -1152,7 +1153,15 @@
     <copy todir="${pdk.plugins}">
       <fileset dir="${plugin.dir}"
                excludes="${plugins.exclude}">
+        <exclude name="*-scripting-plugin.jar"/>
         <include name="*-plugin.jar"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${pdk.plugins}/scripting">
+      <fileset dir="${plugin.dir}"
+               excludes="${plugins.exclude}">
+        <include name="*-scripting-plugin.jar"/>
       </fileset>
     </copy>
 
@@ -1170,6 +1179,7 @@
       <fileset dir="${pdk.plugins}">
         <include name="*-plugin.jar"/>
         <include name="*.xml"/>
+        <include name="scripting/*-scripting-plugin.jar"/>
       </fileset>
     </copy>
 

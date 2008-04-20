@@ -80,6 +80,11 @@ public class ProductPluginManager extends PluginManager {
         "sqlquery",    //for sql: metrics
     };
 
+    //support plugins loaded before product plugins 
+    private final String[] PLUGIN_SUPPORT_DIRS = {
+        "scripting"
+    };
+
     private boolean registerTypes = false;
     private boolean isClient;
     private HashMap basePlugins = new HashMap();
@@ -443,6 +448,16 @@ public class ProductPluginManager extends PluginManager {
                 log.debug(mgr.getName() + " plugins enabled=" +
                           isPluginTypeEnabled(mgr.getName()));
             }
+        }
+
+        //XXX by-passing server hot-deploy
+        String plugins = getPdkPluginsDir();
+        for (int i=0; i<PLUGIN_SUPPORT_DIRS.length; i++) {
+            File dir = new File(plugins, PLUGIN_SUPPORT_DIRS[i]);
+            if (!dir.exists()) {
+                continue;
+            }
+            registerPlugins(dir.getPath());
         }
     }
 
