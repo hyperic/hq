@@ -1140,6 +1140,8 @@
     <hqplugin name="informix"/>
 
     <hqplugin name="vmware"/>
+
+    <hqplugin name="groovy-scripting"/>
   </target>
   
   <!-- Copy plugins -->
