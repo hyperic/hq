@@ -129,7 +129,7 @@ public abstract class ProductPlugin extends GenericPlugin {
         return getDataClassPath(this.data);
     }
 
-    public static boolean isGroovyScript(String name) {
+    private static boolean isGroovyScript(String name) {
         return name.endsWith(".groovy");
     }
 
@@ -140,8 +140,10 @@ public abstract class ProductPlugin extends GenericPlugin {
 
         GroovyClassLoader cl = new GroovyClassLoader(loader);
 
-        File file = new File(name); //XXX pdk/work/
+        String script = data.getProperties().getProperty(name, name);
+        File file = new File(script);
         if (file.exists()) {
+            _log.debug(name + "->" + file);
             try {
                 return cl.parseClass(file);
             } catch (Exception e) {
@@ -153,7 +155,7 @@ public abstract class ProductPlugin extends GenericPlugin {
             InputStream is;
             is = loader.getResourceAsStream(name); //embedded in plugin.jar
             if (is == null) {
-                //in memory server-side
+                //in memory
                 String code = data.getProperty(name);
                 if (code == null) {
                     _log.error(pluginName + " - No code found for: " + name);
