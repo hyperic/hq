@@ -25,12 +25,14 @@
 
 package org.hyperic.hq.product;
 
-import groovy.lang.GroovyClassLoader;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,6 +92,8 @@ public abstract class ProductPlugin extends GenericPlugin {
 
     protected ProductPluginManager manager;
 
+    private static Map scriptLanguagePlugins = new HashMap();
+
     private static final Log _log =
         LogFactory.getLog(ProductPlugin.class.getName());
 
@@ -97,6 +101,12 @@ public abstract class ProductPlugin extends GenericPlugin {
         //e.g. geronimo.installpath=/usr/local/geronimo-1.0
         String prop = getName() + "." + PROP_INSTALLPATH;
         return getManager().getProperty(prop);
+    }
+
+    protected void addScriptLanguage(ScriptLanguagePlugin plugin) {
+        scriptLanguagePlugins.put("." + plugin.getExtension(), plugin);
+        _log.debug(ScriptLanguagePlugin.class.getName() + " " +
+                   plugin.getExtension() + " registered");
     }
 
     public void init(PluginManager manager)
@@ -127,52 +137,6 @@ public abstract class ProductPlugin extends GenericPlugin {
 
     public String[] getClassPath(ProductPluginManager manager) {
         return getDataClassPath(this.data);
-    }
-
-    private static boolean isGroovyScript(String name) {
-        return name.endsWith(".groovy");
-    }
-
-    private static Class loadGroovyClass(ClassLoader loader,
-                                         PluginData data,
-                                         String name,
-                                         String pluginName) {
-
-        GroovyClassLoader cl = new GroovyClassLoader(loader);
-
-        String script = data.getProperties().getProperty(name, name);
-        File file = new File(script);
-        if (file.exists()) {
-            _log.debug(name + "->" + file);
-            try {
-                return cl.parseClass(file);
-            } catch (Exception e) {
-                _log.error(pluginName + " - Failed to load: " + name, e);
-                return null;
-            }
-        }
-        else {
-            InputStream is;
-            is = loader.getResourceAsStream(name); //embedded in plugin.jar
-            if (is == null) {
-                //in memory
-                String code = data.getProperty(name);
-                if (code == null) {
-                    _log.error(pluginName + " - No code found for: " + name);
-                    return null;                
-                }
-                is = new ByteArrayInputStream(code.getBytes());
-            }
-
-            try {
-                return cl.parseClass(is);
-            } catch (Exception e) {
-                _log.error(pluginName + " - Failed to parse: " + name, e);
-                return null;
-            } finally {
-                try { is.close(); } catch (Exception e) {}
-            }
-        }
     }
 
     private static Class loadClass(ClassLoader loader, String name)
@@ -226,17 +190,72 @@ public abstract class ProductPlugin extends GenericPlugin {
         }
     }
 
+    private static Class getScriptClass(ScriptLanguagePlugin plugin,
+                                        ClassLoader loader,
+                                        PluginData data,
+                                        String className)
+        throws PluginException {
+
+        Properties props = data.getProperties();
+        String script = props.getProperty(className, className);
+        File file = new File(script);
+        if (file.exists()) {
+            _log.debug(className + "->" + file);
+            try {
+                return plugin.loadClass(loader, props, file);
+            } catch (Exception e) {
+                throw new PluginException(e.toString(), e);
+            }
+        }
+        else {
+            InputStream is = null;
+            //embedded in plugin.jar
+            is = data.getClassLoader().getResourceAsStream(className);
+            if (is == null) {
+                //in memory
+                String code = props.getProperty(className);
+                if (code == null) {
+                    throw new PluginException("No code found for: " + className);
+                }
+                is = new ByteArrayInputStream(code.getBytes());
+            }
+            try {
+                return plugin.loadClass(loader, props, is);
+            } catch (Exception e) {
+                throw new PluginException(e.toString(), e);
+            } finally {
+                if (is != null) {
+                    try { is.close(); } catch (Exception e) {}
+                }
+            }
+        }    
+    }
+
     static Class getPluginClass(ClassLoader loader,
                                 PluginData data,
                                 String name,
                                 String pluginName) {
 
-        if (isGroovyScript(name)) {
-            return loadGroovyClass(loader, data, name, pluginName);
+        for (Iterator it = scriptLanguagePlugins.entrySet().iterator();
+             it.hasNext();)
+        {
+            Map.Entry ent = (Map.Entry)it.next();
+            String ext = (String)ent.getKey();
+            if (!name.endsWith(ext)) {
+                continue;
+            }
+
+            ScriptLanguagePlugin plugin =
+                (ScriptLanguagePlugin)ent.getValue();
+            try {
+                return getScriptClass(plugin, loader, data, name);
+            } catch (PluginException e) {
+                _log.error(pluginName + " - " + e.getMessage(), e);
+                return null;
+            }
         }
-        else {
-            return loadJavaClass(loader, data, name, pluginName);
-        }
+
+        return loadJavaClass(loader, data, name, pluginName);
     }
 
     static GenericPlugin getPlugin(GenericPlugin plugin,
