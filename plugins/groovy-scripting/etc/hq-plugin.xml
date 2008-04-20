@@ -26,4 +26,7 @@
 
 <plugin class="org.hyperic.hq.plugin.groovy.GroovyLanguagePlugin">
 
+  <classpath>
+    <include name="pdk/plugins/scripting/groovy-all-*.jar"/>
+  </classpath>
 </plugin>

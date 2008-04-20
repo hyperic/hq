@@ -29,12 +29,14 @@ import groovy.lang.GroovyClassLoader;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Properties;
 
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ScriptLanguagePlugin;
+import org.hyperic.util.PluginLoader;
 
 public class GroovyLanguagePlugin
     extends ProductPlugin
@@ -51,12 +53,31 @@ public class GroovyLanguagePlugin
         return "groovy";
     }
 
+    //adding groovy-all-*.jar to the GroovyClassLoader
+    //XXX dont like this but would like to keep groovy-all
+    //out of the agent classloader
+    private void adjustClassPath(GroovyClassLoader cl) {
+        ClassLoader parent = getClass().getClassLoader();
+
+        if (parent instanceof PluginLoader) {
+            PluginLoader loader = (PluginLoader)parent;
+            URL[] urls = loader.getURLs();
+
+            //urls[0] == groovy-scripting-plugin.jar
+            for (int i=1; i<urls.length; i++) {
+                getLog().debug("Adding to classpath: " + urls[i]);
+                cl.addURL(urls[i]);
+            }
+        }
+    }
+
     public Class loadClass(ClassLoader loader,
                            Properties properties,
                            InputStream is)
         throws PluginException {
 
         GroovyClassLoader cl = new GroovyClassLoader(loader);
+        adjustClassPath(cl);
 
         try {
             return cl.parseClass(is);
@@ -71,6 +92,7 @@ public class GroovyLanguagePlugin
         throws PluginException {
 
         GroovyClassLoader cl = new GroovyClassLoader(loader);
+        adjustClassPath(cl);
 
         try {
             return cl.parseClass(file);

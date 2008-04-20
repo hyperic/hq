@@ -1015,7 +1015,6 @@
         <include name="xmlrpc-client-3.1.jar"/>
         <include name="xmlrpc-common-3.1.jar"/>
         <include name="ws-commons-util-1.0.2.jar"/>
-        <include name="groovy-all-1.5.jar" />
       </fileset>
       <fileset dir="${tapestry_lib}">
         <!-- for CollectorThread -->
@@ -1164,6 +1163,9 @@
       <fileset dir="${plugin.dir}"
                excludes="${plugins.exclude}">
         <include name="*-scripting-plugin.jar"/>
+      </fileset>
+      <fileset dir="${thirdparty.lib}">
+        <include name="groovy-all-1.5.jar" />
       </fileset>
     </copy>
 
