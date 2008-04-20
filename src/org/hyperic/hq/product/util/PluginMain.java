@@ -49,9 +49,6 @@ import org.hyperic.util.PluginLoader;
 //cut-n-pasted-n-chopped from sigar.cmd.Runner class
 public class PluginMain {
 
-    private static final String PDK_DIR =
-        System.getProperty(ProductPluginManager.PROP_PDK_DIR, getPdkDir());
-    
     private static final String DEFAULT_PACKAGE =
         "org.hyperic.hq.plugin";
 
@@ -231,7 +228,10 @@ public class PluginMain {
     }
 
     public static void main(String[] args) throws Exception {
-        File tmpDir = new File(new File(PDK_DIR).getParentFile(), "tmp");
+        String pdkDir =
+            System.getProperty(ProductPluginManager.PROP_PDK_DIR, getPdkDir());
+
+        File tmpDir = new File(new File(pdkDir).getParentFile(), "tmp");
         //point the the agent tmp dir which gets cleaned out everytime
         //the agent is started.  a must for windows where the files will
         //not get deleted because they are still open.
@@ -239,7 +239,7 @@ public class PluginMain {
             System.setProperty("java.io.tmpdir", tmpDir.toString());
         }
 
-        String pdkLib = PDK_DIR + File.separator + "lib";
+        String pdkLib = pdkDir + File.separator + "lib";
         String logLevel = System.getProperty("log", "error");
 
         //bleh, make sure we get log level right.
@@ -249,16 +249,10 @@ public class PluginMain {
             }
         }
 
-        System.setProperty(ProductPluginManager.PROP_PDK_DIR, PDK_DIR);
-
-        System.setProperty("org.hyperic.sigar.path", pdkLib);
-
         addJarDir(pdkLib);
 
-        String compatLib = pdkLib + "/../../lib/jdk1.3-compat";
-        if (new File(compatLib).exists()) {
-            addJarDir(compatLib);
-        }
+        System.setProperty("org.hyperic.sigar.path", pdkLib);
+        ProductPluginManager.setPdkDir(pdkDir);
 
         configureLogging(logLevel);
 

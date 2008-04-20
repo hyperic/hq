@@ -132,8 +132,7 @@ public class SNMPMeasurementPlugin
             ixExpire = Integer.parseInt(expire) * 1000;
         }
 
-        final String pdkDir =
-            manager.getProperty(ProductPluginManager.PROP_PDK_DIR);
+        final String pdkDir = ProductPluginManager.getPdkDir();
 
         if (pdkDir == null) {
             return; //dont load MIBs in the server

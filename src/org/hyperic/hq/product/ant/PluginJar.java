@@ -114,7 +114,7 @@ public class PluginJar extends Jar {
         FileInputStream is = null;
 
         data.setFile(name);
-        data.setPdkDir(dir);
+        ProductPluginManager.setPdkDir(dir);
 
         try {
             System.out.println("Validating " + name);

@@ -293,8 +293,8 @@ public abstract class ProductPlugin extends GenericPlugin {
     }
 
     protected File getWorkDir(String type) {
-        String pdk =
-            this.manager.getProperty(ProductPluginManager.PROP_PDK_DIR);
+        String pdk = ProductPluginManager.getPdkDir();
+
         if (pdk == null) {
             return null;
         }

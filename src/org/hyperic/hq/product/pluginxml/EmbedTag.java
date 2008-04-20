@@ -30,6 +30,7 @@ import java.io.IOException;
 
 import org.hyperic.hq.product.ClientPluginDeployer;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.util.xmlparser.XmlTagException;
 import org.hyperic.util.xmlparser.XmlTextHandler;
 
@@ -87,7 +88,7 @@ public class EmbedTag
             this.data.setProperty(name, this.text); //XXX
             return;
         }
-        String pdk = this.data.getPdkDir();
+        String pdk = ProductPluginManager.getPdkDir();
 
         if (pdk == null) {
             return;

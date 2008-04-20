@@ -55,6 +55,14 @@ import org.apache.commons.logging.Log;
 public class ProductPluginManager extends PluginManager {
     public static final String PROP_PDK_DIR = "pdk.dir";
 
+    private static final String PLUGINS_DIR = "plugins";
+    
+    private static final String PROP_PDK_PLUGINS_DIR =
+        PROP_PDK_DIR + "." + PLUGINS_DIR;
+    
+    private static final String PROP_PDK_WORK_DIR =
+        PROP_PDK_DIR + "." + ClientPluginDeployer.WORK_DIR;
+
     //this is really verbose and not very helpful
     static final boolean DEBUG_LIFECYCLE = false;
 
@@ -79,7 +87,7 @@ public class ProductPluginManager extends PluginManager {
     private HashMap types = new HashMap();
     private HashMap includePlugins = null;
     private HashMap excludePlugins = null;
-    private Log log = null;
+    private Log log = LogFactory.getLog(this.getClass().getName());
     private byte[] pluginStub = null;
     private int pluginStubLength = 0;
     private Comparator pluginSorter;
@@ -276,8 +284,6 @@ public class ProductPluginManager extends PluginManager {
     }
 
     private void initPluginFilters() {
-        log = LogFactory.getLog(this.getClass().getName());
-
         this.basePlugins.put(SYSTEM_PLUGIN, //must-have
                              new Integer(TypeInfo.TYPE_PLATFORM));
         String[] defaultPlugins;
@@ -329,6 +335,62 @@ public class ProductPluginManager extends PluginManager {
         }
     }
 
+    private void setSystemProperties() {
+        final String pluginsDir = "/" + PLUGINS_DIR;
+        final String workDir = "/" + ClientPluginDeployer.WORK_DIR;
+
+        String pdk = getProperty(PROP_PDK_DIR);
+        if (pdk != null) {
+            setPdkDir(pdk);
+            setPdkWorkDir(pdk + workDir);
+            setPdkPluginsDir(pdk + pluginsDir);
+            log.info(PROP_PDK_DIR + "=" + getPdkDir());
+        }
+        else {
+            String serverHome =
+                System.getProperty("jboss.server.home.dir");
+            if (serverHome != null) {
+                setPdkPluginsDir(serverHome + "/deploy/hq.ear/hq-plugins");
+            }
+            String tmp = System.getProperty("jboss.server.temp.dir");
+            if (tmp == null) {
+                tmp = System.getProperty("java.io.tmpdir");
+            }
+            File work = new File(tmp + "/pdk" +workDir);
+            setPdkWorkDir(work.getPath());
+            if (!work.exists()) {
+                work.mkdirs();
+            }
+        }
+
+        log.info(PROP_PDK_PLUGINS_DIR + "=" + getPdkPluginsDir());
+        log.info(PROP_PDK_WORK_DIR + "=" + getPdkWorkDir());
+    }
+
+    public static String getPdkDir() {
+        return System.getProperty(PROP_PDK_DIR);
+    }
+
+    public static void setPdkDir(String dir) {
+        System.setProperty(PROP_PDK_DIR, dir);
+    }
+
+    public static String getPdkPluginsDir() {
+        return System.getProperty(PROP_PDK_PLUGINS_DIR);
+    }
+
+    public static void setPdkPluginsDir(String dir) {
+        System.setProperty(PROP_PDK_PLUGINS_DIR, dir);
+    }
+
+    public static String getPdkWorkDir() {
+        return System.getProperty(PROP_PDK_WORK_DIR);
+    }
+
+    public static void setPdkWorkDir(String dir) {
+        System.setProperty(PROP_PDK_WORK_DIR, dir);
+    }
+    
     public void init()
         throws PluginException {
 
@@ -338,10 +400,11 @@ public class ProductPluginManager extends PluginManager {
 
         Properties props = getProperties();
         props.putAll(ProductProperties.getProperties());
+        setSystemProperties();
 
         initPluginFilters();
 
-        String pdk = getProperty(PROP_PDK_DIR);
+        String pdk = getPdkDir();
         if (pdk != null) {
             this.isClient = new File(pdk, "lib").exists();
         }
@@ -769,7 +832,7 @@ public class ProductPluginManager extends PluginManager {
             return;
         }
 
-        String pdkDir = getProperty(PROP_PDK_DIR);
+        String pdkDir = getPdkDir();
 
         for (int i=0; i<classpath.length; i++) {
             String path = classpath[i];
@@ -824,7 +887,7 @@ public class ProductPluginManager extends PluginManager {
             addClassPath(loader, jarName, classpath);
 
             if (this.isClient && jarName.endsWith(".jar")) {
-                String pdk = getProperty(PROP_PDK_DIR);
+                String pdk = getPdkDir();
 
                 ClientPluginDeployer deployer =
                     new ClientPluginDeployer(pdk, defaultPluginName);

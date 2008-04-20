@@ -76,7 +76,6 @@ public class PluginData {
 
     String name = null;
     String file = null;
-    String pdkDir = null;
     ClassLoader loader;
     Map fileScanIncludes = new HashMap();
     Map rgyScanIncludes = new HashMap();
@@ -117,17 +116,6 @@ public class PluginData {
     
     public void setFile(String file) {
         this.file = file;
-    }
-
-    public String getPdkDir() {
-        if (this.pdkDir == null) {
-            return System.getProperty(ProductPluginManager.PROP_PDK_DIR);
-        }
-        return this.pdkDir;
-    }
-
-    public void setPdkDir(String pdkDir) {
-        this.pdkDir = pdkDir;
     }
 
     public ClassLoader getClassLoader() {
@@ -183,19 +171,15 @@ public class PluginData {
         private String resolvePluginFile(String name) {
             String dir;
 
-            //XXX ProductPluginManager ought to set 1 variable we can
-            //use regardless of being in agent, server or commandline
-            String pdkDir = this.data.getPdkDir();
+            String pdkDir = ProductPluginManager.getPdkDir();
             if (pdkDir != null) {
                 dir = pdkDir + "/plugins";
             }
             else {
-                String serverHome =
-                    System.getProperty("jboss.server.home.dir");
-                if (serverHome == null) {
+                dir = ProductPluginManager.getPdkPluginsDir();
+                if (dir == null) {
                     return resolveParentFile(name);
                 }
-                dir = serverHome + "/deploy/hq.ear/hq-plugins";
             }
 
             return dir + "/" + name.substring(PLUGINS_PREFIX.length());            
@@ -263,7 +247,6 @@ public class PluginData {
         }
 
         PluginParser parser = new PluginParser();
-        String pdk = manager.getProperty(ProductPluginManager.PROP_PDK_DIR);
         boolean isServer = manager.getRegisterTypes();
         if (!isServer) {
             parser.collectHelp(false);
@@ -274,7 +257,6 @@ public class PluginData {
         InputStream is = null;
         data = new PluginData();
         data.file = file;
-        data.setPdkDir(pdk);
 
         if (isJar) {
             try {
