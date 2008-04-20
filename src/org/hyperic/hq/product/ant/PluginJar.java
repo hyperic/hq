@@ -198,7 +198,18 @@ public class PluginJar extends Jar {
         super.execute();
 
         if (validate) {
-            String plugin = getDir() + "/etc/hq-plugin.xml";
+            final String desc = "/" + PluginData.PLUGIN_XML;
+            String plugin = getDir() + desc;
+            if (!new File(plugin).exists()) {
+                String name =
+                    ProductPluginManager.getNameFromFile(destFile.getPath());
+                String xml =
+                    getDir() + 
+                    StringUtil.replace(desc, "hq", name);
+                if (new File(xml).exists()) {
+                    plugin = xml;
+                }
+            }
             String pdk = getProperty(ProductPluginManager.PROP_PDK_DIR, "pdk");
             validatePluginXML(pdk, plugin);
         }
