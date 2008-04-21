@@ -40,7 +40,9 @@ import javax.naming.NamingException;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
@@ -397,6 +399,29 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                                  id.getId());
     }
 
+    /**
+     * @ejb:interface-method
+     */
+    public Resource findResourcePrototype(AppdefEntityTypeID id) {
+        Integer authzType;
+        
+        switch(id.getType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            authzType = AuthzConstants.authzPlatformProto;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            authzType = AuthzConstants.authzServerProto;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            authzType = AuthzConstants.authzServiceProto;
+            break;
+        default:
+            throw new IllegalArgumentException("Unsupported prototype type: " +
+                                               id.getType());
+        }
+        return getResourceDAO().findByInstanceId(authzType, id.getId());
+    }
+    
     /**
      * @ejb:interface-method
      */
