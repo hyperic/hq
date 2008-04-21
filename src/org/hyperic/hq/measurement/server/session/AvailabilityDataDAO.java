@@ -237,7 +237,13 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     .append("   OR rle.endtime > :startime)")
                     .append(" AND (rle.availabilityDataId.startime < :endtime")
                     .append("   OR rle.endtime < :endtime)")
-                    .append(" group by m,")
+                    // must group by all columns in query for postgres to work
+                    // there is an open bug on this for hibernate to
+                    // automatically expand group by's
+                    // http://opensource.atlassian.com/projects/hibernate/browse/HHH-2407
+                    .append(" group by m.id,m._version_,m.instanceId,")
+                    .append(" m.template,m.mtime,m.enabled,")
+                    .append(" m.interval,m.dsn,m.resource,")
                     .append(" rle.availabilityDataId.startime, rle.availVal,")
                     .append(" rle.endtime").toString();
         return getSession()
