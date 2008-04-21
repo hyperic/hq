@@ -25,25 +25,41 @@
 
 package org.hyperic.hq.autoinventory.agent.client;
 
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.autoinventory.AutoinventoryException;
-import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.autoinventory.ScanStateCore;
+import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.server.ConfigStorage;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 
-public interface AICommandsClient {
+/**
+ * Utility class for AI Commands.
+ */
+public class AICommandsUtils {
 
-    void startScan(ScanConfigurationCore scanConfig)
-            throws AgentRemoteException, AgentConnectionException,
-            AutoinventoryException;
+    private AICommandsUtils() {
+    }
+    
+    public static AgentRemoteValue createArgForRuntimeDiscoveryConfig(
+            int type, int id, String typeName, String name, ConfigResponse response) {
+        
+        AgentRemoteValue arv = new AgentRemoteValue();
+        arv.setValue(ConfigStorage.PROP_TYPE, String.valueOf(type));
+        arv.setValue(ConfigStorage.PROP_ID, String.valueOf(id));
+        if (typeName != null) {
+            arv.setValue(ConfigStorage.PROP_TYPE_NAME, typeName);
+        }
 
-    void stopScan() throws AgentRemoteException, AgentConnectionException;
-
-    ScanStateCore getScanStatus() throws AgentRemoteException,
-            AgentConnectionException, AutoinventoryException;
-
-    void pushRuntimeDiscoveryConfig(int type, int id, String typeName,
-            String name, ConfigResponse response) throws AgentRemoteException;
+        if ( response == null ) { 
+            arv.setValue("disable.rtad", "true");
+        } else {
+            if (name != null) {
+                response.setValue(ProductPlugin.PROP_RESOURCE_NAME, name);
+            }
+            ConfigStorage.copy(ConfigStorage.NO_PREFIX,
+                               response,
+                               ConfigStorage.CONFIG_PREFIX,
+                               arv);
+        }
+        return arv;
+    }
 
 }

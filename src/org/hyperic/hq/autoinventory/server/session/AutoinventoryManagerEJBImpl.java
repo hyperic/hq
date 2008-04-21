@@ -107,6 +107,7 @@ import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
+import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
@@ -262,14 +263,20 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         AICommandsClient client;
 
         try {
-            client = AIUtil.getClient(id);
+            client = AICommandsClientFactory.getInstance().getClient(id);
         } catch ( AgentNotFoundException e ) {
             throw new SystemException("Error looking up agent for resource " +
                                       "(" + id + "): " + e);
         }
 
-        client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(),
-                                          null, null, null);
+        try {
+            client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(),
+                                              null, null, null);            
+        } catch (AgentRemoteException e) {
+            throw new SystemException("Error turning off runtime-autodiscovery " +
+            		                  "for resource ("+id+"): "+e);
+        }
+
     }
 
     /**
@@ -292,14 +299,19 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         AICommandsClient client;
         
         try {
-            client = AIUtil.getClient(agentToken);
+            client = AICommandsClientFactory.getInstance().getClient(agentToken);
         } catch (AgentNotFoundException e) {
             throw new SystemException("Error looking up agent for resource " +
                                       "(" + id + "): " + e);
         }
-
-        client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(),
-                                          null, null, null);
+        
+        try {
+            client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(),
+                                              null, null, null);            
+        } catch (AgentRemoteException e) {
+            throw new SystemException("Error turning off runtime-autodiscovery " +
+                                      "for resource ("+id+"): "+e);
+        }
     }
 
     /**
@@ -366,7 +378,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
 
         try {
-            client = AIUtil.getClient(aeid);
+            client = AICommandsClientFactory.getInstance().getClient(aeid);
         } catch ( AgentNotFoundException e ) {
             throw new SystemException("Error looking up agent for server " +
                                       "(" + res + "): " + e);
@@ -377,8 +389,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             name = res.getName();
         }
         
-        client.pushRuntimeDiscoveryConfig(aeid.getType(), aeid.getID(),
-                                          typeName, name, response);
+        try {
+            client.pushRuntimeDiscoveryConfig(aeid.getType(), aeid.getID(),
+                                              typeName, name, response);            
+        } catch (AgentRemoteException e) {
+            throw new SystemException("Error pushing metric config response to " +
+            		                  "agent for server ("+res+"): "+e);
+        }
+
     }
 
     // XXX hack, see usage in startScan method below.
@@ -497,7 +515,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
 
         try {
-            AICommandsClient client = AIUtil.getClient(agentToken);
+            AICommandsClient client = 
+                AICommandsClientFactory.getInstance().getClient(agentToken);
+            
             client.startScan(scanConfig);
         } catch (AgentRemoteException e) {
             throw new AutoinventoryException(e);
@@ -515,7 +535,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
         _log.info("AutoinventoryManager.stopScan called");
         try { 
-            AICommandsClient client = AIUtil.getClient(aid);
+            AICommandsClient client = 
+                AICommandsClientFactory.getInstance().getClient(aid);
             client.stopScan();
         } catch (Exception e) {
             throw new AutoinventoryException("Error stopping scan " +
@@ -537,7 +558,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         _log.info("AutoinventoryManager.getScanStatus called");
         ScanStateCore core;
         try {
-            AICommandsClient client = AIUtil.getClient(aid);
+            AICommandsClient client = 
+                AICommandsClientFactory.getInstance().getClient(aid);
             core = client.getScanStatus();
         } 
         catch (AgentNotFoundException ae) {
@@ -626,7 +648,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         _log.info("AutoinventoryManager.getScanStatus called");
         ScanStateCore core;
         try {
-            AICommandsClient client = AIUtil.getClient(agentToken);
+            AICommandsClient client = 
+                AICommandsClientFactory.getInstance().getClient(agentToken);
             core = client.getScanStatus();
         } catch (AgentNotFoundException ae) {
             throw ae;
@@ -978,7 +1001,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             AICommandsClient client;
             
             try {
-                client = AIUtil.getClient(a.getAgentToken());
+                client = 
+                    AICommandsClientFactory.getInstance().getClient(a.getAgentToken());
             } catch(AgentNotFoundException e) {
                 _log.warn("Unable to find agent [" + a.getAgentToken() + "]");
                 continue;
@@ -986,7 +1010,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             
             int type = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
             ConfigResponse cfg = new ConfigResponse();
-            client.pushRuntimeDiscoveryConfig(type, 0, null, null, cfg);
+            
+            try {
+                client.pushRuntimeDiscoveryConfig(type, 0, null, null, cfg);                
+            } catch (AgentRemoteException e) {
+                _log.warn("Unable to notify agent needing runtime scan ["+
+                          a.getAgentToken()+"]");
+                continue;
+            }
         }
     }
     

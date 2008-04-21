@@ -29,11 +29,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,28 +47,18 @@ import org.hyperic.hq.autoinventory.ScanConfiguration;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.ScanListener;
 import org.hyperic.hq.autoinventory.ScanManager;
-import org.hyperic.hq.autoinventory.ScanMethod;
 import org.hyperic.hq.autoinventory.ScanState;
-import org.hyperic.hq.autoinventory.ServerSignature;
+import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.agent.AICommandsAPI;
-import org.hyperic.hq.autoinventory.scanimpl.NullScan;
-import org.hyperic.hq.autoinventory.scanimpl.WindowsRegistryScan;
+import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.client.AutoinventoryCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
-import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.RegistryServerDetector;
-import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.TypeInfo;
-import org.hyperic.sigar.OperatingSystem;
-import org.hyperic.util.ArrayUtil;
+import org.hyperic.hq.transport.AgentTransport;
 import org.hyperic.util.StringUtil;
-import org.hyperic.util.config.ConfigResponse;
 
 public class AutoinventoryCommandsServer 
     implements AgentServerHandler, AgentNotificationHandler, ScanListener 
@@ -87,15 +72,14 @@ public class AutoinventoryCommandsServer
     private AICommandsAPI               _verAPI;
     private AgentDaemon                 _agent;
     private AgentStorageProvider        _storage;        
-    private Log                         _log;            
-    private AutoinventoryPluginManager  _pluginManager;  
+    private Log                         _log;              
     private RuntimeAutodiscoverer       _rtAutodiscoverer;
+    private AICommandsService           _aiCommandsService;
 
     // The CertDN uniquely identifies this agent
     protected String _certDN;
 
     private ScanManager _scanManager;
-    private ScanState   _mostRecentState;
     private ScanState   _lastCompletedDefaultScanState;
 
     private AutoinventoryCallbackClient _client;
@@ -138,68 +122,47 @@ public class AutoinventoryCommandsServer
         _scanManager.interruptHangingScan();
 
         if(cmd.equals(_verAPI.command_startScan)){
-            
             ScanConfigurationCore scanConfig = null;
+            
             try {
-                scanConfig = ScanConfigurationCore.fromAgentRemoteValue(AICommandsAPI.PROP_SCANCONFIG, args);
-                if ( scanConfig == null ) {
-                    throw new AgentRemoteException("No scan configuration exists.");
-                }
-                startScan(new ScanConfiguration(scanConfig));
-
-            } catch ( AgentRemoteException are ) {
-                throw are;
-
+                scanConfig = ScanConfigurationCore.fromAgentRemoteValue(
+                                        AICommandsAPI.PROP_SCANCONFIG, args);  
             } catch ( Exception e ) {
                 _log.error("Error starting scan.", e);
                 throw new AgentRemoteException("Error starting scan: " + 
                                                e.toString());
             }
+            
+            _aiCommandsService.startScan(scanConfig, false);
             return null;
 
         } else if(cmd.equals(_verAPI.command_stopScan)){
-
-            try {
-                if ( !stopScan() ) {
-                    throw new AgentRemoteException("No scan is currently running.");
-                }
-            } catch ( Exception e ){
-                _log.error("Error stopping scan.", e);
-                throw new AgentRemoteException("Error stopping scan: " + 
-                                               e.toString());
-            }
+            _aiCommandsService.stopScan(false);
             return null;
 
         } else if(cmd.equals(_verAPI.command_getScanStatus)){
-
             AgentRemoteValue rval = new AgentRemoteValue();
-            ScanState state = null;
+            ScanStateCore state = _aiCommandsService.getScanStatus(false);
+            
             try {
-                state = getScanStatus();
-
-                // Fix bug 7004 -- set endtime so that duration appears 
-                // correctly on the serverside when viewing status
-                // Fix bug 7134 -- only set endtime if the scan is not yet done
-                if ( !state.getIsDone() ) state.initEndTime();
-
-                state.getCore().toAgentRemoteValue("scanState", rval);
-
+                state.toAgentRemoteValue("scanState", rval);
             } catch ( Exception e ) {
                 _log.error("Error getting scan state.", e);
                 throw new AgentRemoteException("Error getting scan status: " + 
                                                e.toString());
             }
+            
             return rval;
 
         } else if(cmd.equals(_verAPI.command_pushRuntimeDiscoveryConfig)){
-            _rtAutodiscoverer.updateConfig(args);
+            _aiCommandsService.pushRuntimeDiscoveryConfig(args, false);
             return null;
         } else {
             throw new AgentRemoteException("Unknown command: " + cmd);
         }
     }
 
-    public void startup (AgentDaemon agent) throws AgentStartException {
+    public void startup (AgentDaemon agent, AgentTransport agentTransport) throws AgentStartException {
         try {
             _agent   = agent;
             _storage = agent.getStorageProvider();
@@ -208,9 +171,11 @@ public class AutoinventoryCommandsServer
         } catch(AgentRunningException exc){
             throw new AgentAssertionException("Agent should be running here");
         }
+        
+        AutoinventoryPluginManager pluginManager;
 
         try {
-            _pluginManager = (AutoinventoryPluginManager)
+            pluginManager = (AutoinventoryPluginManager)
                 agent.getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
         } catch (Exception e) {
             throw new AgentStartException("Unable to get auto inventory " +
@@ -223,8 +188,9 @@ public class AutoinventoryCommandsServer
                                                       _agent, _client);
 
         // Fire up the scan manager
-        _scanManager = new ScanManager(this, _log, _pluginManager,  
+        _scanManager = new ScanManager(this, _log, pluginManager,  
                                       _rtAutodiscoverer);
+        
         _scanManager.startup();
 
         // Do we have a provider?
@@ -234,7 +200,21 @@ public class AutoinventoryCommandsServer
         } else {
             _rtAutodiscoverer.triggerDefaultScan();
         }
-
+        
+        _aiCommandsService = new AICommandsService(pluginManager, 
+                                                   _rtAutodiscoverer, 
+                                                   _scanManager);
+        
+        if (agentTransport != null) {
+            _log.info("Registering AI Commands Service with Agent Transport");
+            
+            try {
+                agentTransport.registerService(AICommandsClient.class, _aiCommandsService);
+            } catch (Exception e) {
+                throw new AgentStartException("Failed to register AI Commands Service.", e);
+            }
+        }
+        
         _log.info("Autoinventory Commands Server started up");
     }
 
@@ -257,78 +237,7 @@ public class AutoinventoryCommandsServer
         
         scanConfig.setIsDefaultScan(true);
 
-        startScan(scanConfig);
-    }
-
-    private ServerSignature[] getAutoScanners(String type) {
-        ArrayList sigs = new ArrayList();
-        Map plugins = _pluginManager.getPlatformPlugins(type);
-        //XXX hack.  we want the jboss plugin to run before tomcat
-        //so jboss can drop a hint about the embedded tomcat.
-        TreeSet detectors =
-            new TreeSet(new Comparator() {
-                public int compare(Object o1, Object o2) {
-                    String name1 = ((GenericPlugin)o1).getName();
-                    String name2 = ((GenericPlugin)o2).getName();
-                    return name1.compareTo(name2);
-                }
-            });
-
-        for (Iterator i = plugins.entrySet().iterator(); i.hasNext();) {
-            Map.Entry entry = (Map.Entry)i.next();
-            ServerDetector detector;
-
-            if (!(entry.getValue() instanceof ServerDetector)) {
-                continue;
-            }
-
-            detector = (ServerDetector)entry.getValue();
-
-            TypeInfo info = ((GenericPlugin)detector).getTypeInfo();
-
-            if (info.getType() != TypeInfo.TYPE_SERVER) {
-                continue;
-            }
-
-            if (!(detector instanceof AutoServerDetector)) {
-                continue;
-            }
-
-            detectors.add(detector);
-        }
-
-        for (Iterator i = detectors.iterator(); i.hasNext();) {
-            ServerDetector detector = (ServerDetector)i.next();
-            sigs.add(detector.getServerSignature());
-        }
-
-        return (ServerSignature[])sigs.toArray(new ServerSignature[0]);
-    }
-
-    private ServerSignature[] getWindowsRegistryScanners() {
-        ArrayList sigs = new ArrayList();
-        Map plugins = _pluginManager.getPlatformPlugins();
-
-        for (Iterator it = plugins.entrySet().iterator(); it.hasNext();) {
-            Map.Entry entry = (Map.Entry)it.next();
-            ServerDetector detector;
-
-            if (!(entry.getValue() instanceof RegistryServerDetector)) {
-                continue;
-            }
-
-            detector = (ServerDetector)entry.getValue();
-
-            TypeInfo info = ((GenericPlugin)detector).getTypeInfo();
-
-            if (info.getType() != TypeInfo.TYPE_SERVER) {
-                continue;
-            }
-
-            sigs.add(detector.getServerSignature());
-        }
-
-        return (ServerSignature[])sigs.toArray(new ServerSignature[0]);
+        _aiCommandsService.startScan(scanConfig);
     }
 
     public void shutdown () {
@@ -345,106 +254,6 @@ public class AutoinventoryCommandsServer
             new StorageProviderFetcher(_storage);
 
         return new AutoinventoryCallbackClient(fetcher);
-    }
-
-    private void addScanners(ScanConfiguration scanConfig,
-                             ScanMethod method, ServerSignature[] sigs) {
-
-        ServerSignature[] signatures = scanConfig.getServerSignatures();
-
-        signatures = (ServerSignature[])
-            ArrayUtil.combine(signatures, sigs);
-
-        scanConfig.setServerSignatures(signatures);
-        scanConfig.setScanMethodConfig(method, new ConfigResponse());
-    }
-
-    private void startScan ( ScanConfiguration scanConfig ) {
-        ConfigResponse platformConfig = scanConfig.getConfigResponse();
-        String platformType = null;
-        boolean isDefault = scanConfig.getIsDefaultScan();
-        String type = isDefault ? "auto" : "user";
-
-        ServerSignature[] autoSigs, rgySigs;
-
-        autoSigs = rgySigs = scanConfig.getServerSignatures();
-
-        //user scan, default to all if no servers specified.
-        boolean userDefault =
-            ((autoSigs == null) || (autoSigs.length == 0));
-
-        if (platformConfig != null) {
-            platformType =
-                platformConfig.getValue(ProductPlugin.PROP_PLATFORM_TYPE);
-        }
-        if (platformType == null) {
-            platformType = OperatingSystem.getInstance().getName();
-        }
-
-        boolean isWin32 = PlatformDetector.isWin32(platformType);
-
-        if (isDefault || userDefault) {
-            autoSigs = getAutoScanners(platformType);
-
-            if (isWin32) {
-                rgySigs = getWindowsRegistryScanners();
-            }
-        }
-
-        addScanners(scanConfig, new NullScan(), autoSigs);
-        if (isWin32 && (rgySigs != null)) {
-            addScanners(scanConfig, new WindowsRegistryScan(), rgySigs);
-        }
-
-        if (_log.isDebugEnabled()) {
-            ServerSignature[] sigs = scanConfig.getServerSignatures();
-            ArrayList types = new ArrayList();
-            for (int i=0; i<sigs.length; i++) {
-                types.add(sigs[i].getServerTypeName());
-            }
-            _log.debug(type + " scan for: " + types);
-        }
-
-        synchronized ( _scanManager ) {
-            _scanManager.queueScan(scanConfig);
-        }
-    }
-
-    /**
-     * @return true if a scan was actually running, false otherwise.
-     */
-    private boolean stopScan () {
-
-        // A best-effort attempt to grab the most recent scanState we can
-        try { getScanStatus(); } catch ( Exception e ) {}
-
-        synchronized ( _scanManager ) {
-            try {
-                return _scanManager.stopScan();
-                
-            } catch ( AutoinventoryException e ) {
-                // Error stopping scan - restart the entire scan manager
-                _log.error("Error stopping scan, restarting scan manager: " + e);
-                _scanManager.shutdown(1000);
-                _scanManager.startup();
-            }
-            return true;
-        }
-    }
-
-    private ScanState getScanStatus () throws AutoinventoryException {
-
-        ScanState scanState = _scanManager.getStatus();
-        if ( scanState == null ) {
-            if ( _mostRecentState == null ) {
-                throw new AutoinventoryException
-                    ("No autoinventory scan has been started.");
-            } else {
-                return _mostRecentState;
-            }
-        }
-        _mostRecentState = scanState;
-        return scanState; 
     }
 
     /**
@@ -476,7 +285,7 @@ public class AutoinventoryCommandsServer
         }
 
         // Anytime a scan completes, we update the most recent state
-        _mostRecentState = scanState;
+        _aiCommandsService.setMostRecentState(scanState);
 
         // Issue a warning if we could not even detect the platform
         if ( scanState.getPlatform() == null ) {

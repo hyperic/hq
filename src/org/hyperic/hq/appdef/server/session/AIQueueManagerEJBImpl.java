@@ -67,7 +67,7 @@ import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
-import org.hyperic.hq.autoinventory.server.session.AIUtil;
+import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.dao.AIIpDAO;
@@ -554,8 +554,9 @@ public class AIQueueManagerEJBImpl
                 // discovery and enable metrics.
                 if (isApproveAction) {
                     try {
-                        AICommandsClient client =
-                            AIUtil.getClient(aiplatform.getAgentToken());
+                        AICommandsClient client = 
+                            AICommandsClientFactory.getInstance()
+                                .getClient(aiplatform.getAgentToken());
                         client.getScanStatus();
                     } catch (Exception e) {
                         throw new AIQApprovalException("Cannot approve platform: " +
