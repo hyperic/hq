@@ -225,6 +225,15 @@ public class PluginDiscoverer implements ScanListener {
                                     type.getName());
                     log.debug("Set " + ProductPlugin.PROP_PLATFORM_TYPE + 
                               "=" + type.getName());
+                    //propagate platform config
+                    String[] props =
+                        plugin.getConfigSchema(type, config).getOptionNames();
+                    for (int j=0; j<props.length; j++) {
+                        String val = pd.getProperty(props[j]);
+                        if (val != null) {
+                            config.setValue(props[j], val);
+                        }
+                    }
                 }
             }
         }
