@@ -283,4 +283,11 @@ class ResourceHelper extends BaseHelper {
     ResourceGroup findGroup(int id) {
          groupMan.findResourceGroupById(user, id)
     }
+    
+    /**
+     * Find a group by name.  Permission checking is performed.
+     */
+    ResourceGroup findGroupByName(String name) {
+         groupMan.findResourceGroupByName(user, name)
+    }
 }
