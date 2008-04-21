@@ -223,18 +223,6 @@ public class PluginDumper {
             this.pluginDir =
                 this.pdkDir + File.separator + "plugins";
 
-            String dir = this.props.getProperty("plugin.dir");
-            if ((dir != null) && (dir.length() > 0)) {
-                if (dir.charAt(0) == File.pathSeparatorChar) {
-                    //append custom directories to the default
-                    this.pluginDir += dir;
-                }
-                else {
-                    //override the default
-                    this.pluginDir = dir;
-                }
-            }
-
             if ("all".equals(this.plugin)) {
                 this.plugin = null;
             }
@@ -517,7 +505,14 @@ public class PluginDumper {
         int nplugins =
             ppm.registerPlugins(this.config.pluginDir);
 
-        nplugins += ppm.registerCustomPlugins(".");
+        String dir = this.config.props.getProperty("plugin.dir");
+        if (dir == null) {
+            nplugins += ppm.registerCustomPlugins(".");
+        }
+        else {
+            //override ../hq-plugins useful for dev
+            nplugins += ppm.registerPlugins(dir);
+        }
         
         if (nplugins == 0) {
             System.out.println("no plugins loaded from directory: " +
