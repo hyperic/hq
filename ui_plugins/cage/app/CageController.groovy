@@ -7,6 +7,8 @@ import org.hyperic.hq.grouping.CritterList
 import org.hyperic.hq.grouping.CritterType
 import org.hyperic.hq.grouping.prop.CritterPropDescription
 import org.hyperic.hq.grouping.prop.StringCritterProp
+import org.hyperic.hq.grouping.prop.ProtoCritterProp
+import org.hyperic.hq.grouping.prop.ResourceCritterProp
 import org.hyperic.dao.DAOFactory
 import org.hyperic.hibernate.Util
 
@@ -115,6 +117,13 @@ class CageController
             for (propDef in critterDef.children()) {
                 if (propDef.name() == 'string') {
                     props << new StringCritterProp(propDef.text())
+                } else if (propDef.name() == 'resource') {
+                    def rsrcId   = propDef.text().toInteger()
+                    def resource = resourceHelper.findResource(rsrcId)
+                    props << new ResourceCritterProp(resource)
+                } else if (propDef.name() == 'proto') { 
+                    def proto  = resourceHelper.findResourcePrototype(propDef.text())
+                    props << new ProtoCritterProp(proto)
                 } else {
                     xmlOut.error("Unhandled prop type: ${propDef.'@type'}")
                 }
@@ -131,7 +140,8 @@ class CageController
         def clist     = new CritterList(critters, isAny == true)
         def trans     = new CritterTranslator()
         def sess      = DAOFactory.getDAOFactory().currentSession
-        def resources = trans.translate(sess, clist).list()
+        def ctx       = new CritterTranslationContext(sess, Util.getHQDialect())
+        def resources = trans.translate(ctx, clist).list()
         
         xmlOut.resources { 
             for (r in resources) {

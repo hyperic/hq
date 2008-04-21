@@ -1,0 +1,7 @@
+<critters>
+  <critter class="org.hyperic.hq.grouping.critters.DescendantProtoCritterType">
+    <resource>10534</resource>
+    <proto>CPU</proto>
+  </critter>
+</critters>
+
