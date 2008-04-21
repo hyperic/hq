@@ -83,4 +83,19 @@ public interface CritterType {
      */
     void decompose(Critter critter, CritterDump dump)
         throws GroupException;
+    
+    
+    /**
+     * Return true if the Critter is an internal one, used by the system.
+     * Critters with this set should not be persisted.
+     * 
+     * In addition, system-based criteria MUST be matched when processing
+     * the results.  (i.e. a CriterList may specify that 'any' may match,
+     * but if it contains a system critter, it MUST match)
+     *
+     * Example uses:
+     *   - Critters that specify a match for compatable groups
+     *   - Critters that filter out system-related resources (virtual servers)
+     */
+    boolean isSystem();
 }

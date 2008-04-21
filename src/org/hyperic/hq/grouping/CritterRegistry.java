@@ -33,6 +33,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.grouping.critters.DescendantProtoCritterType;
+import org.hyperic.hq.grouping.critters.NonSystemCritterType;
 import org.hyperic.hq.grouping.critters.ProtoNameCritterType;
 import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
 
@@ -48,6 +49,7 @@ public class CritterRegistry {
         register(new ResourceNameCritterType());
         register(new ProtoNameCritterType());
         register(new DescendantProtoCritterType());
+        register(new NonSystemCritterType());
     }
     
     public static final CritterRegistry getRegistry() {

@@ -80,4 +80,8 @@ public class ResourceNameCritterType
         ResourceNameCritter resourceCritter = (ResourceNameCritter)critter;
         dump.setStringProp(resourceCritter.getNameRegex());
     }
+
+    public boolean isSystem() {
+        return false;
+    }
 }

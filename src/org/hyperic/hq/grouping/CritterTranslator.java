@@ -25,8 +25,10 @@
 
 package org.hyperic.hq.grouping;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -61,9 +63,23 @@ public class CritterTranslator {
             sql.append(critterCtx.escapeSql(c.getSqlJoins(critterCtx, "res")));
         }
         
-        sql.append(" where ");
+        sql.append(" where (");
+
+        List systemCritters = new ArrayList();
+        List regularCritters = new ArrayList();
+        
         for (Iterator i=cList.getCritters().iterator(); i.hasNext(); ) {
             Critter c = (Critter)i.next();
+            
+            if (c.getCritterType().isSystem())
+                systemCritters.add(c);
+            else
+                regularCritters.add(c);
+        }
+        
+        for (Iterator i=regularCritters.iterator(); i.hasNext(); ) {
+            Critter c = (Critter)i.next();
+            
             CritterTranslationContext critterCtx = 
                 (CritterTranslationContext)txContexts.get(c);
             sql.append(critterCtx.escapeSql(c.getSql(critterCtx, "res"))); 
@@ -75,6 +91,23 @@ public class CritterTranslator {
                     sql.append(" or ");
                 }
             }
+        }
+        sql.append(") ");
+
+        if (!systemCritters.isEmpty()) {
+            sql.append(" and (");
+            for (Iterator i=systemCritters.iterator(); i.hasNext(); ) {
+                Critter c = (Critter)i.next();
+            
+                CritterTranslationContext critterCtx = 
+                    (CritterTranslationContext)txContexts.get(c);
+                sql.append(critterCtx.escapeSql(c.getSql(critterCtx, "res"))); 
+                
+                if (i.hasNext()) {
+                    sql.append(" and ");
+                }
+            }
+            sql.append(") ");
         }
 
         _log.info("Created SQL: [" + sql + "]");
