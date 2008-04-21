@@ -152,7 +152,7 @@ public class PostgreSQLDialect
         return new StringBuffer()
             .append(column)
             .append(op)
-            .append("'").append(regex).append("'")
+            .append(regex)
             .toString();
     }
 }

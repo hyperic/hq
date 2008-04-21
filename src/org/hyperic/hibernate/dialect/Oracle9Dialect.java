@@ -150,7 +150,7 @@ public class Oracle9Dialect
             .append((invertMatch) ? "NOT " : "")
             .append("REGEXP_LIKE(")
             .append(column)
-            .append(", '").append(regex).append("'")
+            .append(", ").append(regex)
             .append((ignoreCase) ? ", 'i')" : ")")
             .toString();
     }

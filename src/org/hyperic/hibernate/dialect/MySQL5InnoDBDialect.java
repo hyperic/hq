@@ -398,8 +398,8 @@ public class MySQL5InnoDBDialect
         return new StringBuffer()
             .append(column)
             .append((invertMatch) ? " NOT " : " ")
-            .append("REGEXP '")
-            .append(regex).append("'")
+            .append("REGEXP ")
+            .append(regex)
             .toString();
     }
 }
