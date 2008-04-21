@@ -48,7 +48,6 @@ import org.hyperic.hq.agent.AgentMonitorValue;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
-import org.hyperic.hq.bizapp.agent.client.AgentClient;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginExistsException;
@@ -606,7 +605,7 @@ public class AgentDaemon
         }
     }
 
-    private void startHandlers()
+    private void startHandlers(AgentTransport agentTransport)
         throws AgentStartException
     {
         int i;
@@ -619,7 +618,7 @@ public class AgentDaemon
             
             handler = (AgentServerHandler) this.serverHandlers.get(i);
             try {
-                handler.startup(this);
+                handler.startup(this, agentTransport);
             } catch(AgentStartException exc){
                 logger.error("Error starting plugin " + handler, exc);
                 throw exc;
@@ -705,36 +704,21 @@ public class AgentDaemon
         AgentTransport agentTransport = null;
 
         try {
-            String unidirectionalString = 
-                getBootConfig().getBootProperties()
-                               .getProperty(AgentClient.QPROP_UNI, 
-                                            Boolean.FALSE.toString());
+            AgentTransportFactory factory = 
+                new AgentTransportFactory(getBootConfig(), 
+                                          getStorageProvider());
             
-            boolean unidirectional = 
-                Boolean.valueOf(unidirectionalString).booleanValue();
-            
-            if (unidirectional) {
-                logger.info("Setting up unidirectional transport");
-                
-                AgentTransportFactory factory = 
-                    new AgentTransportFactory(getBootConfig(), 
-                                              getStorageProvider(), 
-                                              unidirectional);
-                
-                try {
-                    agentTransport = factory.createAgentTransport();                    
-                } catch (ClassNotFoundException e) {
-                    throw new AgentStartException(
-                            "Unidirectional transport is not available in .ORG");
-                }
-                
-                // FIXME register services here
-                //agentTransport.registerService(serviceInterface, serviceImpl);
-                agentTransport.start();
-            }
+            agentTransport = factory.createAgentTransport();                    
 
             this.startPluginManagers();
-            this.startHandlers();
+            this.startHandlers(agentTransport);
+            
+            // The server handlers have registered the new transport services. 
+            // Now we can start the agent transport.
+            if (agentTransport != null) {
+                agentTransport.start();
+            }
+            
             this.listener.setup();
             this.logger.info("Agent started successfully");
             this.sendNotification(NOTIFY_AGENT_UP, "we're up, baby!");

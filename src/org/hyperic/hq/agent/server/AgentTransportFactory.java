@@ -28,6 +28,8 @@ package org.hyperic.hq.agent.server;
 import java.net.InetSocketAddress;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
@@ -39,24 +41,21 @@ import org.hyperic.hq.transport.AgentTransport;
  */
 public class AgentTransportFactory {
     
+    private static final Log _log = LogFactory.getLog(AgentTransportFactory.class);
+    
     private final AgentConfig _bootConfig;
     private final AgentStorageProvider _storageProvider;
-    private final boolean _unidirectional;
     
     /**
      * Creates an instance.
      *
      * @param bootConfig The boot config.
      * @param storageProvider The storage provider.
-     * @param unidirectional <code>true</code> if the agent is unidirectional;
-     *                       <code>false</code> if the agent is bidirectional.
      */
     public AgentTransportFactory(AgentConfig bootConfig, 
-                                 AgentStorageProvider storageProvider, 
-                                 boolean unidirectional) {
+                                 AgentStorageProvider storageProvider) {
         _bootConfig = bootConfig;
         _storageProvider = storageProvider;
-        _unidirectional = unidirectional;
     }
     
     /**
@@ -67,6 +66,12 @@ public class AgentTransportFactory {
      */
     public AgentTransport createAgentTransport() throws Exception {                    
         Properties bootProperties = _bootConfig.getBootProperties();
+        
+        String unidirectionalString = 
+            bootProperties.getProperty(AgentClient.QPROP_UNI, 
+                                       Boolean.FALSE.toString());
+        boolean unidirectional = 
+            Boolean.valueOf(unidirectionalString).booleanValue();
         
         String host = bootProperties.getProperty(AgentClient.QPROP_IPADDR);
         
@@ -82,11 +87,17 @@ public class AgentTransportFactory {
         ProviderInfo providerInfo = 
             CommandsAPIInfo.getProvider(_storageProvider);
         
-        String agentToken = providerInfo.getAgentToken();
+        if (providerInfo == null) {
+            throw new Exception("Need to setup agent to initialize agent token");
+        }
         
+        String agentToken = providerInfo.getAgentToken();
+                
         AgentTransport agentTransport;
         
-        if (_unidirectional) {
+        if (unidirectional) {
+            _log.info("Setting up unidirectional transport");
+            
             InetSocketAddress pollerBindAddr = 
                 new InetSocketAddress(host, port);
             
@@ -95,11 +106,14 @@ public class AgentTransportFactory {
                                    "transport/ServerInvokerServlet", 
                                    true, 
                                    agentToken, 
-                                   true, 
+                                   unidirectional, 
                                    pollingFrequency, 
                                    2);
         } else {
-            throw new UnsupportedOperationException("bidirectional agent not supported yet");
+            _log.info("Setting up bidirectional transport");
+            // TODO need to implement bidirectional transport and return 
+            // an agent transport instead of null
+            return null;
         }
         
         return agentTransport;

@@ -47,6 +47,7 @@ import org.hyperic.hq.agent.commands.AgentPing_result;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.agent.commands.AgentRestart_args;
 import org.hyperic.hq.agent.commands.AgentRestart_result;
+import org.hyperic.hq.transport.AgentTransport;
 
 import org.hyperic.util.file.FileWriter;
 import org.hyperic.util.math.MathUtil;
@@ -123,7 +124,7 @@ public class AgentCommandsServer
         }
     }
 
-    public void startup(AgentDaemon agent){
+    public void startup(AgentDaemon agent, AgentTransport agentTransport){
         this.log.info("Agent commands started up");
         this.agent = agent;
     }
