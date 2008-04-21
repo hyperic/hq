@@ -28,8 +28,8 @@ package org.hyperic.hq.authz.server.session;
 import java.math.BigDecimal;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterType;
-import org.hyperic.hq.grouping.critters.CritterDump;
 
 public class PersistedCritter extends PersistedObject implements CritterDump {
 
