@@ -61,6 +61,7 @@ public class CritterTranslator {
                                               ctx.getDialect(), prefix);
             txContexts.put(c, critterCtx);
             sql.append(critterCtx.escapeSql(c.getSqlJoins(critterCtx, "res")));
+            sql.append(" ");
         }
         
         sql.append(" where (");
