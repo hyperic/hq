@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.util.StringUtil;
 
@@ -47,6 +48,12 @@ public class CritterTranslationContext {
     private final HQDialect _dialect;
     private final String    _prefix;
     
+    public CritterTranslationContext() {
+        _session = Util.getSessionFactory().getCurrentSession();
+        _dialect = Util.getHQDialect();
+        _prefix  = "x";
+    }
+
     public CritterTranslationContext(Session s, HQDialect d) {
         _session = s;
         _dialect = d;
