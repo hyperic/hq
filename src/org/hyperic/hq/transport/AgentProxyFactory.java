@@ -68,7 +68,8 @@ public interface AgentProxyFactory {
      * When a proxy to an agent service is no longer in use, it should be 
      * destroyed to reclaim resources.
      * 
-     * @param proxy The proxy to an agent service.
+     * @param proxy The proxy to an agent service. Null values should 
+     *              be handled gracefully.
      */
     void destroyService(Object proxy);
 
