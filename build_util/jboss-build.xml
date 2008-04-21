@@ -207,7 +207,7 @@
     <!-- Copy our version of JBoss Remoting -->
     <echo>Copying JBoss Remoting jars.</echo>
     <copy file="${thirdparty.lib}/jboss-remoting.jar"
-          toFile="${jboss.home}/server/default/deploy/lib/jboss-remoting.jar"
+          toFile="${jboss.home}/server/default/lib/jboss-remoting.jar"
           overwrite="true"/>
 
     <replace file="${tomcat.home}/server.xml">
