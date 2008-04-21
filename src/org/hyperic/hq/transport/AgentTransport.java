@@ -28,6 +28,7 @@ package org.hyperic.hq.transport;
 import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
 
+import org.hyperic.hq.agent.server.AgentStartException;
 import org.jboss.remoting.InvokerLocator;
 import org.jboss.remoting.transporter.TransporterServer;
 
@@ -110,8 +111,15 @@ public class AgentTransport {
                                             int asyncThreadPoolSize) 
         throws ClassNotFoundException, Exception {
         
-        Class clazz = Thread.currentThread().getContextClassLoader().loadClass(
-                                "com.hyperic.hq.transport.PollerClientImpl");
+        Class clazz;
+        
+        try {
+            clazz = Thread.currentThread().getContextClassLoader().loadClass(
+                                "com.hyperic.hq.transport.PollerClientImpl");            
+        } catch (ClassNotFoundException e) {
+            throw new ClassNotFoundException(
+                    "Unidirectional transport is not available in .ORG");
+        }        
         
         Constructor constructor = clazz.getConstructor(
                                 new Class[]{InetSocketAddress.class, 
