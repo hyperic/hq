@@ -313,7 +313,7 @@ public class PluginLoader extends URLClassLoader {
 
     public String toString() {
         URL[] urls = getURLs();
-        String s = this.getClass().getName() + "=[";
+        String s = super.toString() + "/" + this.pluginName + "=[";
 
         for (int i=0; i<urls.length; i++) {
             s += urls[i].getFile();
