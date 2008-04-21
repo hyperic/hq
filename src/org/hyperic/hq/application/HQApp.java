@@ -47,6 +47,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.hibernate.SessionManager;
+import org.hyperic.hq.transport.AgentProxyFactory;
+import org.hyperic.hq.transport.ServerTransport;
 import org.hyperic.txsnatch.TxSnatch;
 import org.hyperic.util.callback.CallbackDispatcher;
 import org.hyperic.util.thread.ThreadWatchdog;
@@ -72,6 +74,7 @@ public class HQApp {
     private File               _webAccessibleDir;
     private ThreadWatchdog     _watchdog;
     private final Scheduler    _scheduler;
+    private final ServerTransport _serverTransport;
     
     private final Object       STAT_LOCK = new Object();
     private long               _numTx;
@@ -101,7 +104,15 @@ public class HQApp {
         
         _scheduler = new Scheduler(4);
         this.registerCallbackListener(ShutdownCallback.class, _scheduler);
-        
+                
+        try {
+            _serverTransport = new ServerTransport(4);
+            _serverTransport.start();
+            this.registerCallbackListener(ShutdownCallback.class, _serverTransport);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to start server transport", e);
+        }
+                
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 _log.info("Running shutdown hooks");
@@ -142,6 +153,10 @@ public class HQApp {
         synchronized (_watchdog) {
             return _watchdog;
         }
+    }
+    
+    public AgentProxyFactory getAgentProxyFactory() {
+        return _serverTransport.getAgentProxyFactory();
     }
     
     public Scheduler getScheduler() {
