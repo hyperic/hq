@@ -36,6 +36,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -53,11 +55,18 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayConstants;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayValue;
 import org.hyperic.hq.bizapp.shared.uibeans.ProblemMetricSummary;
+import org.hyperic.hq.grouping.CritterList;
+import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterTranslator;
+import org.hyperic.hq.grouping.critters.DescendantProtoCritterType;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -291,28 +300,35 @@ public class MetricSessionEJB extends BizappSessionEJB {
     protected List getAGMemberIds(AuthzSubject subject,
                                   AppdefEntityID[] aids,
                                   AppdefEntityTypeID ctype)
-        throws AppdefEntityNotFoundException, PermissionException {
-        // Find the autogroup members
-        List entIds = new ArrayList();
+        throws AppdefEntityNotFoundException, PermissionException 
+    {
+        List res = new ArrayList();        
+        ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+        Resource proto = rman.findResourcePrototype(ctype); 
+
+        if (proto == null) {
+            log.warn("Unable to find prototype for ctype=[" + ctype + "]");
+            return res;
+        }
+        
+        DescendantProtoCritterType descType = new DescendantProtoCritterType();
+        CritterTranslator trans             = new CritterTranslator();
+        CritterTranslationContext ctx       = new CritterTranslationContext();
+        
         for (int i = 0; i < aids.length; i++) {
-            AppdefEntityID aid = aids[i];
-            AppdefEntityValue entVal = new AppdefEntityValue(aid, subject);
-    
-            switch (ctype.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    entIds.addAll(entVal.getAssociatedServerIds(ctype.getId()));
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    // Get service IDs
-                    entIds.addAll(entVal.getAssociatedServiceIds(ctype.getId()));
-                    break;
-                default:
-                    throw new IllegalArgumentException(
-                        "Unable to determine autogroup members for " +
-                        "appdef type: " + aid.getType());
+            Resource r = rman.findResource(aids[i]);
+            List critters = new ArrayList(1);
+            critters.add(descType.newInstance(r, proto));
+            CritterList cList = new CritterList(critters, false);
+            
+            List children = trans.translate(ctx, cList).list();
+            for (Iterator j=children.iterator(); j.hasNext(); ) {
+                Resource child = (Resource)j.next();
+                
+                res.add(new AppdefEntityID(child));
             }
         }
-        return entIds;
+        return res;
     }
     
     protected double[] getAvailability(AuthzSubject subject,
