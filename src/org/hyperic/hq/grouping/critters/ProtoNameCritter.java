@@ -55,7 +55,8 @@ class ProtoNameCritter
     }
     
     public String getSql(CritterTranslationContext ctx, String resourceAlias) {
-        return "@proto@.name like :@protoName@";
+        return ctx.getDialect().getRegExSQL("@proto@.name", ":@protoName@", 
+                                            false, false); 
     }
     
     public String getSqlJoins(CritterTranslationContext ctx, 
