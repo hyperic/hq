@@ -59,7 +59,8 @@ class CageController
         for (c in _registry.critterTypes) {
             res << "${c.class.name}:\n"
             res << "    Name:        ${c.name}\n"
-            res << "    Description: ${c.description}\n\n"
+            res << "    Description: ${c.description}\n"
+            res << "    System:      ${c.isSystem()}\n\n"
         }
         render inline:res.toString()
     }
