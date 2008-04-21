@@ -30,13 +30,14 @@ import java.net.InetSocketAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.ShutdownCallback;
 import org.hyperic.hq.transport.util.AsynchronousInvoker;
 
 
 /**
  * The transport for the HQ server.
  */
-public class ServerTransport {
+public class ServerTransport implements ShutdownCallback {
     
     private static final Log _log = LogFactory.getLog(ServerTransport.class);
     
@@ -193,6 +194,13 @@ public class ServerTransport {
         
         setReady(false);
         setStopped();
+    }
+    
+    /**
+     * Stop the server transport.
+     */
+    public void shutdown() {
+        stop();
     }
 
     /**
