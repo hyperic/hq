@@ -1,11 +1,11 @@
 <group name="Net Devices" isAny='false'>
   <critters>
     <critter class="org.hyperic.hq.grouping.critters.ResourceNameCritterType">
-      <string>%Trav%</string>
+      <string>Trav.*</string>
     </critter>
 
     <critter class="org.hyperic.hq.grouping.critters.ProtoNameCritterType">
-      <string>CPU</string>
+      <string>.*CPU.*</string>
     </critter>
 
     <critter class="org.hyperic.hq.grouping.critters.NonSystemCritterType"/>
