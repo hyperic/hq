@@ -42,6 +42,7 @@ import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.bizapp.client.ControlCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.control.agent.ControlCommandsAPI;
+import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.agent.commands.ControlPluginAdd_args;
 import org.hyperic.hq.control.agent.commands.ControlPluginAdd_result;
 import org.hyperic.hq.control.agent.commands.ControlPluginCommand_args;
@@ -49,10 +50,8 @@ import org.hyperic.hq.control.agent.commands.ControlPluginCommand_result;
 import org.hyperic.hq.control.agent.commands.ControlPluginRemove_args;
 import org.hyperic.hq.control.agent.commands.ControlPluginRemove_result;
 import org.hyperic.hq.product.ControlPluginManager;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginExistsException;
-import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.transport.AgentTransport;
 import org.hyperic.util.config.ConfigResponse;
 
 public class ControlCommandsServer 
@@ -64,13 +63,11 @@ public class ControlCommandsServer
     private ControlCommandsAPI    verAPI;         // Common API specifics
     private Log                   log;            // Our log
     private AgentConfig     bootConfig;     // Agent boot config
-    private ControlPluginManager  controlManager; // Our control manager
-    private ControlCallbackClient client;         // Client
     private AgentStorageProvider  storage;        // Our storage provider
+    private ControlCommandsService controlCommandsService;
     
     public ControlCommandsServer() {
         this.verAPI         = new ControlCommandsAPI();
-        this.controlManager = null;
         this.bootConfig     = null;
         this.log            = LogFactory.getLog(ControlCommandsServer.class);
     }
@@ -106,7 +103,7 @@ public class ControlCommandsServer
         }
     }
 
-    public void startup(AgentDaemon agent)
+    public void startup(AgentDaemon agent, AgentTransport agentTransport)
         throws AgentStartException 
     {
         this.bootConfig = agent.getBootConfig();
@@ -121,16 +118,31 @@ public class ControlCommandsServer
         }
 
         // setup control manager
+        ControlPluginManager controlManager;
+        ControlCallbackClient client;
+        
         try {
-            this.controlManager = 
+            controlManager = 
                 (ControlPluginManager)agent.
                     getPluginManager(ProductPlugin.TYPE_CONTROL);
 
-            this.client = setupClient();
+            client = setupClient();
         } catch (Exception e) {
             // Problem loading the plugin jars
             throw new AgentStartException("Unable to load control jars: " +
                                           e.getMessage());
+        }
+        
+        controlCommandsService = new ControlCommandsService(controlManager, client);
+        
+        if (agentTransport != null) {
+            log.info("Registering Control Commands Service with Agent Transport");
+            
+            try {
+                agentTransport.registerService(ControlCommandsClient.class, controlCommandsService);
+            } catch (Exception e) {
+                throw new AgentStartException("Failed to register Control Commands Service.", e);
+            }
         }
 
         this.log.info("Control Commands Server started up");
@@ -157,20 +169,7 @@ public class ControlCommandsServer
         String name = args.getName();
         String type = args.getType();
   
-        try {
-            this.controlManager.createControlPlugin(name, type, config);
-        } catch (PluginNotFoundException e) {
-            throw new AgentRemoteException(e.getMessage());
-        } catch (PluginExistsException e) {
-            // Must be a config update
-            try {
-                this.controlManager.updateControlPlugin(name, config);
-            } catch (Exception exc) {
-                throw new AgentRemoteException(exc.getMessage());
-            }
-        } catch (PluginException e) {
-            throw new AgentRemoteException(e.getMessage());
-        }
+        controlCommandsService.controlPluginAdd(name, type, config);
 
         ControlPluginAdd_result result = new ControlPluginAdd_result();
 
@@ -182,18 +181,17 @@ public class ControlCommandsServer
         throws AgentRemoteException
     {
         String pluginName = args.getPluginName();
+        String pluginType = args.getPluginType();
+        String id = args.getId();
         String pluginAction = args.getPluginAction();
-
-        ActionThread actionThread = 
-            new ActionThread(args.getPluginName(),
-                             args.getPluginType(),
-                             args.getId(),
-                             args.getPluginAction(),
-                             args.getArgs(),
-                             this.client, 
-                             this.controlManager);
-        actionThread.start();
-
+        String[] pluginArgs = args.getArgs();
+        
+        controlCommandsService.controlPluginCommand(pluginName, 
+                                                    pluginType, 
+                                                    id, 
+                                                    pluginAction, 
+                                                    pluginArgs); 
+        
         return new ControlPluginCommand_result();
     }
 
@@ -203,13 +201,8 @@ public class ControlCommandsServer
     {
         String pluginName = args.getPluginName();
 
-        try {
-            this.controlManager.removeControlPlugin(pluginName);
-        } catch (PluginNotFoundException e) {
-            // Ok if the plugin no longer exists.
-        } catch (PluginException e) {
-            throw new AgentRemoteException(e.getMessage());
-        }
+        controlCommandsService.controlPluginRemove(pluginName);
+        
         return new ControlPluginRemove_result();
     }
 }

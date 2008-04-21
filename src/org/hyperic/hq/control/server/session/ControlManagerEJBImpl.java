@@ -47,7 +47,6 @@ import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
-import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -70,6 +69,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
+import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
 import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlManagerUtil;
@@ -155,8 +155,9 @@ public class ControlManagerEJBImpl implements SessionBean {
                 cMan.getMergedConfigResponse(subject, 
                                              ProductPlugin.TYPE_CONTROL,
                                              id, true);
+            
             ControlCommandsClient client =
-                new ControlCommandsClient(AgentConnectionUtil.getClient(id));
+                ControlCommandsClientFactory.getInstance().getClient(id);
             client.controlPluginAdd(pluginName, pluginType, mergedResponse);
         } catch (EncodingException e) {
             throw new PluginException("Unable to decode config", e);
