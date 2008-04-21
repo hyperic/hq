@@ -63,7 +63,6 @@ import org.hyperic.hq.bizapp.agent.commands.GetServer_args;
 import org.hyperic.hq.bizapp.agent.commands.GetServer_result;
 import org.hyperic.hq.bizapp.agent.commands.SetServer_args;
 import org.hyperic.hq.bizapp.agent.commands.SetServer_result;
-import org.hyperic.hq.transport.AgentTransport;
 import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
@@ -401,7 +400,7 @@ public class CommandsServer
         }
     }
 
-    public void startup(AgentDaemon agent, AgentTransport agentTransport)
+    public void startup(AgentDaemon agent)
         throws AgentStartException 
     {
         String startupPort;

@@ -79,7 +79,6 @@ import org.hyperic.hq.product.PluginExistsException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.transport.AgentTransport;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.schedule.UnscheduledItemException;
 
@@ -477,7 +476,7 @@ public class MeasurementCommandsServer
         }
     }
 
-    public void startup(AgentDaemon agent, AgentTransport agentTransport)
+    public void startup(AgentDaemon agent)
         throws AgentStartException 
     {
         Iterator i;

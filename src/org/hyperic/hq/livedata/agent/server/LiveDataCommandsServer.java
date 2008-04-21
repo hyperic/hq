@@ -36,7 +36,6 @@ import org.hyperic.hq.livedata.agent.commands.LiveData_args;
 import org.hyperic.hq.livedata.agent.commands.LiveData_result;
 import org.hyperic.hq.product.LiveDataPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.transport.AgentTransport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -71,7 +70,7 @@ public class LiveDataCommandsServer implements AgentServerHandler {
         }
     }
 
-    public void startup(AgentDaemon agent, AgentTransport agentTransport) throws AgentStartException {
+    public void startup(AgentDaemon agent) throws AgentStartException {
 
         try {
             _manager = (LiveDataPluginManager)agent.

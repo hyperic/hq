@@ -103,7 +103,7 @@ public class ControlCommandsServer
         }
     }
 
-    public void startup(AgentDaemon agent, AgentTransport agentTransport)
+    public void startup(AgentDaemon agent)
         throws AgentStartException 
     {
         this.bootConfig = agent.getBootConfig();
@@ -134,6 +134,15 @@ public class ControlCommandsServer
         }
         
         controlCommandsService = new ControlCommandsService(controlManager, client);
+        
+        AgentTransport agentTransport;
+        
+        try {
+            agentTransport = agent.getAgentTransport();
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get agent transport: "+
+                                            e.getMessage());
+        }
         
         if (agentTransport != null) {
             log.info("Registering Control Commands Service with Agent Transport");

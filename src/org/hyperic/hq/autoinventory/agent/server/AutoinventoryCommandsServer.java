@@ -162,7 +162,7 @@ public class AutoinventoryCommandsServer
         }
     }
 
-    public void startup (AgentDaemon agent, AgentTransport agentTransport) throws AgentStartException {
+    public void startup (AgentDaemon agent) throws AgentStartException {
         try {
             _agent   = agent;
             _storage = agent.getStorageProvider();
@@ -204,6 +204,15 @@ public class AutoinventoryCommandsServer
         _aiCommandsService = new AICommandsService(pluginManager, 
                                                    _rtAutodiscoverer, 
                                                    _scanManager);
+        
+        AgentTransport agentTransport;
+        
+        try {
+            agentTransport = agent.getAgentTransport();
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get agent transport: "+
+                                            e.getMessage());
+        }
         
         if (agentTransport != null) {
             _log.info("Registering AI Commands Service with Agent Transport");

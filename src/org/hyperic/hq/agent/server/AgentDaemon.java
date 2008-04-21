@@ -83,9 +83,10 @@ public class AgentDaemon
     private CommandDispatcher    dispatcher;
     private AgentStorageProvider storageProvider;
     private CommandListener      listener;
+    private AgentTransport       agentTransport;
     private Vector               serverHandlers;
     private Vector               startedHandlers;
-    private AgentConfig    bootConfig;
+    private AgentConfig          bootConfig;
     private Hashtable            notifyHandlers;
     private Hashtable            monitorClients;
     private volatile boolean     running;         // Are we running?
@@ -204,6 +205,25 @@ public class AgentDaemon
     public AgentConfig getBootConfig()
     {
         return this.bootConfig;
+    }
+    
+    /**
+     * Retrieve the agent transport. May be <code>null</code> if the agent 
+     * transport type (bidirectional/unidirectional) is not supported.
+     * 
+     * @throws AgentRunningException indicating the Agent was not running 
+     *                               when the request was made.
+     */
+    public AgentTransport getAgentTransport() 
+        throws AgentRunningException 
+    {
+        
+        if(!this.isRunning()){
+            throw new AgentRunningException("Agent Transport cannot be retrieved if " +
+                                            "the Agent is not running");
+        }
+        
+        return this.agentTransport;
     }
 
     /**
@@ -605,7 +625,7 @@ public class AgentDaemon
         }
     }
 
-    private void startHandlers(AgentTransport agentTransport)
+    private void startHandlers()
         throws AgentStartException
     {
         int i;
@@ -618,7 +638,7 @@ public class AgentDaemon
             
             handler = (AgentServerHandler) this.serverHandlers.get(i);
             try {
-                handler.startup(this, agentTransport);
+                handler.startup(this);
             } catch(AgentStartException exc){
                 logger.error("Error starting plugin " + handler, exc);
                 throw exc;
@@ -701,22 +721,20 @@ public class AgentDaemon
         this.registerMonitor("agent.commandListener", this.listener);
         redirectStreams(bootProps);
                 
-        AgentTransport agentTransport = null;
-
         try {
             AgentTransportFactory factory = 
                 new AgentTransportFactory(getBootConfig(), 
                                           getStorageProvider());
             
-            agentTransport = factory.createAgentTransport();                    
+            this.agentTransport = factory.createAgentTransport();                    
 
             this.startPluginManagers();
-            this.startHandlers(agentTransport);
+            this.startHandlers();
             
             // The server handlers have registered the new transport services. 
             // Now we can start the agent transport.
-            if (agentTransport != null) {
-                agentTransport.start();
+            if (this.agentTransport != null) {
+                this.agentTransport.start();
             }
             
             this.listener.setup();
@@ -741,9 +759,9 @@ public class AgentDaemon
             // The next line will never execute 
             throw new AgentStartException("Critical shutdown");
         } finally {
-            if (agentTransport != null) {
+            if (this.agentTransport != null) {
                 try {
-                    agentTransport.stop();
+                    this.agentTransport.stop();
                 } catch (InterruptedException e) {
                 }
             }

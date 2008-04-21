@@ -28,7 +28,6 @@ package org.hyperic.hq.agent.server;
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
-import org.hyperic.hq.transport.AgentTransport;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -89,11 +88,9 @@ public interface AgentServerHandler {
      * helper threads, etc.)
      * 
      * @param agent The agent.
-     * @param agentTransport The agent transport or <code>null</code> if we are 
-     *                       not using the new transport mechanism.
      */
 
-    public void startup(AgentDaemon agent, AgentTransport agentTransport) 
+    public void startup(AgentDaemon agent) 
         throws AgentStartException;
 
     /**
