@@ -62,13 +62,8 @@ public class DescendantProtoCritterType
         return _proto;
     }
 
-    public DescendantProtoCritter newInstance(Resource root, Resource proto)
-        throws GroupException
-    {
-        List props = new ArrayList(2);
-        props.add(new ResourceCritterProp(root));
-        props.add(new ProtoCritterProp(proto));
-        return (DescendantProtoCritter)newInstance(props);
+    public DescendantProtoCritter newInstance(Resource root, Resource proto) {
+        return new DescendantProtoCritter(root, proto, this);
     }
     
     public Critter newInstance(List critterProps)
