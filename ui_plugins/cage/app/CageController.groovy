@@ -1,11 +1,17 @@
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.grouping.CritterRegistry
 import org.hyperic.hq.grouping.CritterTranslator
+import org.hyperic.hq.grouping.CritterTranslationContext
 import org.hyperic.hq.grouping.CritterList
 import org.hyperic.hq.grouping.CritterType
 import org.hyperic.hq.grouping.prop.CritterPropDescription
 import org.hyperic.hq.grouping.prop.StringCritterProp
 import org.hyperic.dao.DAOFactory
+import org.hyperic.hibernate.Util
+
+import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceGroup
 
 class CageController 
 	extends BaseController
@@ -14,7 +20,7 @@ class CageController
     
     protected void init() {
         onlyAllowSuperUsers()
-        setXMLMethods(['peek'])
+        setXMLMethods(['peek', 'sync'])
     }
     
     private String getUpload(argName) {
@@ -30,6 +36,21 @@ class CageController
         _registry.critterTypes.find { t ->
             t.class.name == name
         }
+    }
+    
+    def index(params) {
+        Resource r = getViewedResource()
+        ResourceGroup g = resourceHelper.findGroup(r.instanceId) 
+            
+        def sess      = DAOFactory.getDAOFactory().currentSession
+        def ctx       = new CritterTranslationContext(sess, Util.getHQDialect())
+        def trans     = new CritterTranslator()
+        def clist     = g.critterList
+        log.info "Critters: ${clist.critters.config}"
+        def proposedResources = trans.translate(ctx, clist).list()
+        
+        render(locals:[group:g, critterList:clist,
+                       proposedResources:proposedResources])
     }
     
     def list(params) {
@@ -67,11 +88,21 @@ class CageController
         render inline: res.toString()
     }
     
-    def peek(xmlOut, params) {
+    def sync(xmlOut, params) {
         def xmlIn = new XmlParser().parseText(getUpload('args'))
+        def group = resourceHelper.findGroupByName(xmlIn.'@name')
+        def isAny = xmlIn.'@isAny'?.toBoolean()
+        
+        def critters = parseCritters(xmlIn.critters)
 
-        def critters = []
-        for (critterDef in xmlIn.critter) {
+        log.info "Critters ${critters.config}"
+        GroupMan.one.setCriteria(user, group, new CritterList(critters, 
+                                                              isAny == true))
+        xmlOut.success()
+    }
+    
+    private List parseCritters(xmlIn) {
+        xmlIn.critter.collect { critterDef ->
             def critterType = findCritterType(critterDef.'@class')
             
             if (critterType == null) {
@@ -81,15 +112,19 @@ class CageController
             
             def props = []
             for (propDef in critterDef.children()) {
-                log.info "${propDef.name()}"
                 if (propDef.name() == 'string') {
                     props << new StringCritterProp(propDef.text())
                 } else {
                     xmlOut.error("Unhandled prop type: ${propDef.'@type'}")
                 }
             }
-            critters << critterType.newInstance(props)
+            critterType.newInstance(props)
         }
+    }
+    
+    def peek(xmlOut, params) {
+        def xmlIn    = new XmlParser().parseText(getUpload('args'))
+        def critters = parseCritters(xmlIn)
 
         def isAny     = xmlIn.'@isAny'?.toBoolean()
         def clist     = new CritterList(critters, isAny == true)
