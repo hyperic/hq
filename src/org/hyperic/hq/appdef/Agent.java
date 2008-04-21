@@ -106,6 +106,16 @@ public class Agent extends AppdefBean {
     public void setUnidirectional(boolean unidirectional) {
         _unidirectional = unidirectional;
     }
+    
+    public boolean isNewTransportAgent() {
+        AgentType type = getAgentType();
+        
+        if (type != null) {
+            return type.isNewTransportType();
+        }
+        
+        return false;
+    }
 
     public AgentType getAgentType() {
         return _agentType;

@@ -29,6 +29,10 @@ import java.util.Collection;
 
 public class AgentType extends AppdefBean
 {
+    private static final Integer TYPE_LEGACY_TRANSPORT = new Integer(1);
+    private static final Integer TYPE_NEW_TRANSPORT = new Integer(2);
+    
+    
     private String _name;
     private Collection _agents;
 
@@ -42,6 +46,16 @@ public class AgentType extends AppdefBean
 
     public void setName(String name) {
         _name = name;
+    }
+    
+    public boolean isNewTransportType() {
+        Integer id = getId();
+        
+        if (id != null) {
+            return id.equals(TYPE_NEW_TRANSPORT);
+        }
+        
+        return false;
     }
 
     public Collection getAgents() {
