@@ -290,4 +290,8 @@ class ResourceHelper extends BaseHelper {
     ResourceGroup findGroupByName(String name) {
          groupMan.findResourceGroupByName(user, name)
     }
+    
+    Resource findResource(int id) {
+        rman.findResourcePojoById(id)
+    }
 }
