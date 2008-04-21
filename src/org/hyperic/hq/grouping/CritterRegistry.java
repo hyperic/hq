@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,7 +58,7 @@ public class CritterRegistry {
         _log.info("Registrying Critter: " + type.getName());
         _log.debug("               from: " + type.getClass().getName());
         
-     // map CritterType class names to CritterType instances
+        // map CritterType class names to CritterType instances
         synchronized (_registry) {
             _registry.put(type.getClass().getName(), type);
         }
@@ -69,7 +68,7 @@ public class CritterRegistry {
         _log.info("Unregistrying Critter: " + type.getName());
         
         synchronized (_registry) {
-            _registry.remove(type);
+            _registry.remove(type.getClass().getName());
         }
     }
     

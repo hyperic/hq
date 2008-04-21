@@ -27,7 +27,6 @@ package org.hyperic.hq.grouping;
 
 import java.util.List;
 
-import org.hyperic.hq.grouping.critters.CritterDump;
 
 public interface CritterType {
     /**
@@ -66,8 +65,8 @@ public interface CritterType {
      * Returns a Critter instance of this critter type based on the
      * critter properties passed through in the CritterDump.
      * 
-     * @param dump The {@link CritterDump} containing
-     *                     the critter properties used to populate the new Critter instance.
+     * @param dump The {@link CritterDump} containing the critter properties 
+     *             used to populate the new Critter instance.
      */
     Critter compose(CritterDump dump)
         throws GroupException;

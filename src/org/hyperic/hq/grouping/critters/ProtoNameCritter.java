@@ -30,40 +30,43 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
+import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.prop.StringCritterProp;
 
 class ProtoNameCritter
     implements Critter
 {
-    private final String _nameRegex;
-    private final List _props;
-    private final CritterType _type;
+    private final String               _nameRegex;
+    private final List                 _props;
+    private final ProtoNameCritterType _type;
     
-    ProtoNameCritter(String nameRegex, CritterType type) {
+    ProtoNameCritter(String nameRegex, ProtoNameCritterType type) {
         _nameRegex = nameRegex;
         
         List c = new ArrayList(1);
         c.add(new StringCritterProp(_nameRegex));
         _props = Collections.unmodifiableList(c);
-        _type = type;
+        _type  = type;
     }
     
     public List getProps() {
         return _props;
     }
     
-    public String getSql(String resourceAlias) {
-        return "proto.name like :protoName";
+    public String getSql(CritterTranslationContext ctx, String resourceAlias) {
+        return "@proto@.name like :@protoName@";
     }
     
-    public String getSqlJoins(String resourceAlias) {
-        return "join EAM_RESOURCE proto on " + 
-            resourceAlias + ".proto_id = proto.id"; 
+    public String getSqlJoins(CritterTranslationContext ctx, 
+                              String resourceAlias) 
+    {
+        return "join EAM_RESOURCE @proto@ on " + 
+            resourceAlias + ".proto_id = @proto@.id"; 
     }
     
-    public void bindSqlParams(Query q) {
-        q.setParameter("protoName", _nameRegex);
+    public void bindSqlParams(CritterTranslationContext ctx, Query q) {
+        q.setParameter(ctx.escape("protoName"), _nameRegex);
     }
 
     public CritterType getCritterType() {
@@ -72,5 +75,10 @@ class ProtoNameCritter
     
     public String getNameRegex() {
         return _nameRegex;
+    }
+    
+    public String getConfig() {
+        Object[] args = {_nameRegex};
+        return _type.getInstanceConfig().format(args);
     }
 }

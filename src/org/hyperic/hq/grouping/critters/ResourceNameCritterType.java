@@ -25,10 +25,12 @@
 
 package org.hyperic.hq.grouping.critters;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hyperic.hq.grouping.Critter;
+import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
 import org.hyperic.hq.grouping.prop.StringCritterProp;

@@ -31,39 +31,42 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
+import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.prop.StringCritterProp;
 
 class ResourceNameCritter
     implements Critter
 {
-    private final String _nameRegex;
-    private final List   _props;
-    private final CritterType _type;
+    private final String                  _nameRegex;
+    private final List                    _props;
+    private final ResourceNameCritterType _type;
     
-    ResourceNameCritter(String nameRegex, CritterType type) {
+    ResourceNameCritter(String nameRegex, ResourceNameCritterType type) {
         _nameRegex = nameRegex;
 
         List c = new ArrayList(1);
         c.add(new StringCritterProp(_nameRegex));
         _props = Collections.unmodifiableList(c);
-        _type = type;
+        _type  = type;
     }
     
     public List getProps() {
         return _props;
     }
     
-    public String getSql(String resourceAlias) {
-        return resourceAlias + ".name like :resourceName";
+    public String getSql(CritterTranslationContext ctx, String resourceAlias) {
+        return resourceAlias + ".name like :@resourceName@";
     }
     
-    public String getSqlJoins(String resourceAlias) {
+    public String getSqlJoins(CritterTranslationContext ctx, 
+                              String resourceAlias) 
+    {
         return "";
     }
     
-    public void bindSqlParams(Query q) {
-        q.setParameter("resourceName", _nameRegex);
+    public void bindSqlParams(CritterTranslationContext ctx, Query q) {
+        q.setParameter(ctx.escape("resourceName"), _nameRegex);
     }
 
     public CritterType getCritterType() {
@@ -72,5 +75,10 @@ class ResourceNameCritter
     
     public String getNameRegex() {
         return _nameRegex;
+    }
+
+    public String getConfig() {
+        Object[] args = {_nameRegex};
+        return _type.getInstanceConfig().format(args);
     }
 }

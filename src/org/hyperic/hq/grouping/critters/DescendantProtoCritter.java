@@ -32,6 +32,7 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.Critter;
+import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.prop.ResourceCritterProp;
 
@@ -53,30 +54,37 @@ class DescendantProtoCritter
         c.add(new ResourceCritterProp(root));
         c.add(new ResourceCritterProp(proto));
         _props = Collections.unmodifiableList(c);
-        _type = type;
+        _type  = type;
     }
     
     public List getProps() {
         return _props;
     }
     
-    public String getSql(String resourceAlias) {
-        return "proto.id = :protoId and edge.from_id = :rootId";
+    public String getSql(CritterTranslationContext ctx, String resourceAlias) {
+        return "@proto@.id = :@protoId@ and @edge@.from_id = :@rootId@";  
     }
     
-    public String getSqlJoins(String resourceAlias) {
-        return "join EAM_RESOURCE proto on " + 
-                   resourceAlias + ".proto_id = proto.id " +
-               "join EAM_RESOURCE_EDGE edge on " + 
-                   resourceAlias + ".id = edge.to_id";
+    public String getSqlJoins(CritterTranslationContext ctx, 
+                              String resourceAlias) 
+    {
+        return "join EAM_RESOURCE @proto@ on " +   
+                    resourceAlias + ".proto_id = @proto@.id " +
+               "join EAM_RESOURCE_EDGE @edge@ on " + 
+                    resourceAlias + ".id = @edge@.to_id";
     }
     
-    public void bindSqlParams(Query q) {
-        q.setParameter("protoId", _proto.getId());
-        q.setParameter("rootId", _root.getId());
+    public void bindSqlParams(CritterTranslationContext ctx, Query q) {
+        q.setParameter(ctx.escape("protoId"), _proto.getId());
+        q.setParameter(ctx.escape("rootId"), _root.getId());
     }
 
     public CritterType getCritterType() {
         return _type;
+    }
+    
+    public String getConfig() {
+        Object[] args = {_root.getName(), _proto.getName()};
+        return _type.getInstanceConfig().format(args);
     }
 }

@@ -25,11 +25,13 @@
 
 package org.hyperic.hq.grouping.critters;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterProp;
@@ -121,6 +123,10 @@ public abstract class BaseCritterType
     public String getName() {
         return _name;
     }
+    
+    public ResourceBundle getBundle() {
+        return _bundle;
+    }
 
     /**
      * Validate a list of {@link CritterPropDescription}s agains the previously
@@ -153,5 +159,16 @@ public abstract class BaseCritterType
                                          prop.getType().getDescription() + ")");
             }
         }
+    }
+    
+    /**
+     * Returns a localized MessageFormat, useful for returning the 
+     * critter config.
+     * 
+     * @see Critter#getConfig()
+     */
+    public MessageFormat getInstanceConfig() {
+        return new MessageFormat(_bundle.getString(_propPrefix + 
+                                                   "critter.config"));
     }
 }

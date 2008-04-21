@@ -25,37 +25,49 @@
 
 package org.hyperic.hq.grouping;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.SQLQuery;
-import org.hibernate.Session;
 import org.hyperic.hq.authz.server.session.Resource;
-
 
 /**
  * The CritterTranslator is a simple class useful composing a Hibernate query
  * from a list of critters
  */
 public class CritterTranslator {
+    private final Log _log = LogFactory.getLog(CritterTranslator.class);
+    
     public CritterTranslator() {
     }
     
-    public SQLQuery translate(Session s, CritterList cList) {
+    public SQLQuery translate(CritterTranslationContext ctx, CritterList cList){
         StringBuilder sql = new StringBuilder();
+        Map txContexts = new HashMap(cList.getCritters().size());
         
         sql.append("select {res.*} from EAM_RESOURCE res ");
         
+        int prefixCnt = 0;
         for (Iterator i=cList.getCritters().iterator(); i.hasNext(); ) {
             Critter c = (Critter)i.next();
-            
-            sql.append(c.getSqlJoins("res"));
+            String prefix = "x" + (prefixCnt++);
+            CritterTranslationContext critterCtx = 
+                new CritterTranslationContext(ctx.getSession(), 
+                                              ctx.getDialect(), prefix);
+            txContexts.put(c, critterCtx);
+            sql.append(critterCtx.escapeSql(c.getSqlJoins(critterCtx, "res")));
         }
         
         sql.append(" where ");
         for (Iterator i=cList.getCritters().iterator(); i.hasNext(); ) {
             Critter c = (Critter)i.next();
+            CritterTranslationContext critterCtx = 
+                (CritterTranslationContext)txContexts.get(c);
+            sql.append(critterCtx.escapeSql(c.getSql(critterCtx, "res"))); 
             
-            sql.append(c.getSql("res"));
             if (i.hasNext()) {
                 if (cList.isAll()) {
                     sql.append(" and ");
@@ -65,12 +77,14 @@ public class CritterTranslator {
             }
         }
 
-        SQLQuery res = s.createSQLQuery(sql.toString());
+        _log.info("Created SQL: [" + sql + "]");
+        SQLQuery res = ctx.getSession().createSQLQuery(sql.toString());
+        _log.info("Translated into: [" + res.getQueryString() + "]");
         res.addEntity("res", Resource.class);
         for (Iterator i = cList.getCritters().iterator(); i.hasNext(); ) {
             Critter c = (Critter)i.next();
 
-            c.bindSqlParams(res);
+            c.bindSqlParams((CritterTranslationContext)txContexts.get(c), res);
         }
         
         return res;

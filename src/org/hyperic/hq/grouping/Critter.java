@@ -43,23 +43,51 @@ public interface Critter {
     /**
      * Get a SQL segment, suitable for placement within a where clause.
      * 
+     * The result of this method is run through 
+     * {@link CritterTranslationContext#escapeSql(String)}, which will
+     * turn all references delimited '@' into unique identifiers.
+     * 
      * @param resourceAlias  The SQL alias for the {@link Resource}
      */
-    String getSql(String resourceAlias);
+    String getSql(CritterTranslationContext ctx, String resourceAlias);
     
     /**
      * Get additional SQL specifying joins requierd by the critter
+     * 
+     * The result of this method is run through 
+     * {@link CritterTranslationContext#escapeSql(String)} which will
+     * turn all references delimited by '@' into unique identifiers.
      */
-    String getSqlJoins(String resourceAlias);
+    String getSqlJoins(CritterTranslationContext ctx, String resourceAlias);
     
     /**
      * Bind any SQL parameters which were previously returned as part
-     * of getSql()
+     * of getSql().
+     * 
+     * The implementor of this method will likely need to use
+     * {@link CritterTranslationContext#escape(String)} to bind to variables
+     * which match the references returned from getSql, etc.
      */
-    void bindSqlParams(Query q);
+    void bindSqlParams(CritterTranslationContext ctx, Query q);
     
     /**
      * Returns the {@link CritterType} associated with this Critter
      */
     CritterType getCritterType();
+    
+    /**
+     * Returns a localized description of how the Critter is configured.
+     * Should work in the following layout:
+     * 
+     * If all of the following criteria are met:
+     *     - Resource name matches 'web.*' 
+     *     - Resource type is Apache 2.0 
+     *     
+     * (or...)
+     * 
+     * If any of the following criteria are met:
+     *     - Resource is a child of 'my.platform' and of type 'Fileserver File'
+     *     - Resource has been modified in the last 2 days
+     */
+    String getConfig();
 }
