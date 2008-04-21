@@ -25,20 +25,21 @@
 
 package org.hyperic.hq.product;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.PluginLoader;
-import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.ConfigResponse;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.hyperic.util.config.ConfigSchema;
 
 /**
  * This class implements common functionality of the GenericPluginManager
@@ -50,8 +51,8 @@ public abstract class PluginManager {
     private final String OS;
     private final String OS_SUFFIX;
 
-    protected HashMap plugins = new HashMap();
-    private HashMap pluginInfo = new HashMap();
+    protected Map plugins = Collections.synchronizedMap(new HashMap());
+    private Map pluginInfo = Collections.synchronizedMap(new HashMap());
     private Properties props = null;
     protected Log log = null;
     private PluginManager parent = null;
@@ -80,20 +81,22 @@ public abstract class PluginManager {
     public void shutdown()
         throws PluginException {
 
-        Iterator it = this.plugins.entrySet().iterator();
+        synchronized (plugins) {
+            Iterator it = this.plugins.entrySet().iterator();
+            
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry)it.next();
+                GenericPlugin plugin = (GenericPlugin)entry.getValue();
 
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry)it.next();
-            GenericPlugin plugin = (GenericPlugin)entry.getValue();
-
-            try {
-                plugin.shutdown();
-            } catch (PluginException e) {
-                log.error(plugin.getName() + ".shutdown() failed", e);
-            }
+                try {
+                    plugin.shutdown();
+                } catch (PluginException e) {
+                    log.error(plugin.getName() + ".shutdown() failed", e);
+                }
+            }            
+            
+            this.plugins.clear(); 
         }
-
-        this.plugins.clear(); 
 
         if (ProductPluginManager.DEBUG_LIFECYCLE) {
             log.debug("shutdown");
@@ -450,17 +453,20 @@ public abstract class PluginManager {
         os = " " + os;
         HashMap found = new HashMap();
 
-        for (Iterator it = getPlugins().entrySet().iterator();
-             it.hasNext();)
-        {
-            Map.Entry entry = (Map.Entry)it.next();
-            String name = (String)entry.getKey();
+        Map plugins = getPlugins();
+        
+        synchronized (plugins) {
+            for (Iterator it = plugins.entrySet().iterator(); it.hasNext();)
+            {
+                Map.Entry entry = (Map.Entry)it.next();
+                String name = (String)entry.getKey();
 
-            if (name.endsWith(os)) {
-                found.put(name, entry.getValue());
-            }
+                if (name.endsWith(os)) {
+                    found.put(name, entry.getValue());
+                }
+            }            
         }
-
+        
         return found;
     }
 
@@ -475,17 +481,18 @@ public abstract class PluginManager {
     public List getPlugins(PluginInfo info) {
         ArrayList found = new ArrayList();
 
-        for (Iterator it = this.pluginInfo.entrySet().iterator();
-             it.hasNext();)
-        {
-            Map.Entry entry = (Map.Entry)it.next();
-            PluginInfo pi = (PluginInfo)entry.getValue();
+        synchronized (pluginInfo) {
+            for (Iterator it = this.pluginInfo.entrySet().iterator(); it.hasNext();)
+            {
+                Map.Entry entry = (Map.Entry)it.next();
+                PluginInfo pi = (PluginInfo)entry.getValue();
 
-            if (pi.matches(info)) {
-                found.add(pi.name);
-            }
+                if (pi.matches(info)) {
+                    found.add(pi.name);
+                }
+            }            
         }
-
+        
         return found;
     }
 
