@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.autoinventory;
 
+import java.io.Serializable;
+
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.encoding.Base64;
@@ -35,7 +37,7 @@ import org.hyperic.util.encoding.Base64;
  * to make it easy to move scan configurations across SOAP and other network
  * transports.
  */
-public class ScanConfigurationCore {
+public class ScanConfigurationCore implements Serializable {
 
     /**
      * The configurations for the scan methods to run.
