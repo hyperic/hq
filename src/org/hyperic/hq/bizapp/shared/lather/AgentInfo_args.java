@@ -36,9 +36,42 @@ public abstract class AgentInfo_args
     private static final String PROP_PWORD     = "pword";
     private static final String PROP_AGENTIP   = "agentIP";
     private static final String PROP_AGENTPORT = "agentPort";
+    private static final String PROP_UNIDIRECTIONAL = "isUnidirectional";
+    private static final String PROP_NEWTRANSPORTTYPE = "isNewTransportAgent";
 
     public AgentInfo_args(){
         super();
+    }
+    
+    public void setNewTransportAgent(boolean unidirectional) {
+        this.setStringValue(PROP_NEWTRANSPORTTYPE, Boolean.TRUE.toString());
+        this.setStringValue(PROP_UNIDIRECTIONAL, String.valueOf(unidirectional));
+    }
+    
+    public boolean isUnidirectional() {
+        boolean unidirectional = false;
+        
+        try {
+            unidirectional = 
+                Boolean.valueOf(getStringValue(PROP_UNIDIRECTIONAL)).booleanValue();
+        } catch (LatherKeyNotFoundException e) {
+            // this is an older agent that does not support the unidirectional transport
+        }
+        
+        return unidirectional;
+    }
+
+    public boolean isNewTransportAgent() {
+        boolean newTransportAgent = false;
+        
+        try {
+            newTransportAgent = 
+                Boolean.valueOf(getStringValue(PROP_NEWTRANSPORTTYPE)).booleanValue();
+        } catch (LatherKeyNotFoundException e) {
+            // this is an older agent that does not support the new transport
+        }
+        
+        return newTransportAgent;
     }
 
     public void setUser(String user){

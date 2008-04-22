@@ -47,6 +47,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
+import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -263,17 +265,21 @@ public class LatherDispatcher
         }
     }
 
-    private String testAgentConn(String agentIP, int agentPort, 
-                                 String authToken)
+    private String testAgentConn(String agentIP, 
+                                 int agentPort, 
+                                 String authToken, 
+                                 boolean isNewTransportAgent, 
+                                 boolean unidirectional)
     {
-        AgentCommandsClient agtCmds;
-        SecureAgentConnection agentConn;
-        
-        agentConn = new SecureAgentConnection(agentIP, agentPort, authToken);
-        agtCmds   = new AgentCommandsClient(agentConn);
-
+        AgentCommandsClient client = 
+                AgentCommandsClientFactory
+                       .getInstance().getClient(agentIP, 
+                                                agentPort, 
+                                                authToken, 
+                                                isNewTransportAgent, 
+                                                unidirectional);
         try {
-            agtCmds.ping();
+            client.ping();
         } catch(AgentConnectionException exc){
             return "Failed to connect to agent: " + exc.getMessage();
         } catch(AgentRemoteException exc){
@@ -292,9 +298,6 @@ public class LatherDispatcher
                                                   RegisterAgent_args args)
         throws LatherRemoteException
     {
-        String agentToken, errRes, agentIP, version;
-        int port;
-
         try {
             checkUserCanManageAgent(ctx, args.getUser(), args.getPword(), 
                                     "register");
@@ -302,16 +305,18 @@ public class LatherDispatcher
             return new RegisterAgent_result("Permission denied");
         }
 
-        agentIP = args.getAgentIP();
-        port    = args.getAgentPort();
-        version = args.getVersion();
-
-        errRes = testAgentConn(agentIP, port, args.getAuthToken());
+        String agentIP = args.getAgentIP();
+        int port    = args.getAgentPort();
+        String version = args.getVersion();
+        boolean isNewTransportAgent = args.isNewTransportAgent();
+        boolean unidirectional = args.isUnidirectional();
+        String errRes = testAgentConn(agentIP, port, args.getAuthToken(), 
+                                      isNewTransportAgent, unidirectional);
         if(errRes != null){
             return new RegisterAgent_result(errRes);
         }
-
-        agentToken = SecurityUtil.generateRandomToken();
+        
+        String agentToken = SecurityUtil.generateRandomToken();
 
         // Check the to see if it already exists
         Collection ids = null;
@@ -332,9 +337,21 @@ public class LatherDispatcher
         } catch(AgentNotFoundException exc){
             log.info("Registering agent at " + agentIP + ":" + port);
             try {
-                getAgentManager().createAgent(agentIP, new Integer(port), 
-                                              args.getAuthToken(),
-                                              agentToken, version);
+                if (isNewTransportAgent) {
+                    getAgentManager().createNewTransportAgent(agentIP, 
+                                                              new Integer(port), 
+                                                              args.getAuthToken(), 
+                                                              agentToken,
+                                                              version, 
+                                                              unidirectional);
+                } else {
+                    getAgentManager().createLegacyAgent(agentIP, 
+                                                        new Integer(port), 
+                                                        args.getAuthToken(),
+                                                        agentToken, 
+                                                        version);                    
+                }
+                
             } catch(AgentCreateException oexc){
                 log.error("Error creating agent", oexc);
                 return new RegisterAgent_result("Error creating agent: " + 
@@ -429,7 +446,9 @@ public class LatherDispatcher
         
             if((errRes = testAgentConn(args.getAgentIP(), 
                                        args.getAgentPort(),
-                                       agent.getAuthToken())) != null)
+                                       agent.getAuthToken(), 
+                                       agent.isNewTransportAgent(), 
+                                       agent.isUnidirectional())) != null)
             {
                 return new UpdateAgent_result(errRes);
             }

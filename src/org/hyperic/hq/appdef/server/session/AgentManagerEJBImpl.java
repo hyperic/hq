@@ -45,11 +45,11 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
-import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -194,15 +194,44 @@ public class AgentManagerEJBImpl
     }
     
     /**
-     * Create a new Agent object.  The type of the agent
-     * that is created is the default 'cam-agent'
+     * Create a new Agent object.  The type of the agent that is created is the 
+     * 'hyperic-hq-remoting' agent. This type of agent may be configured to use 
+     * either a bidirectional or unidirectional transport.
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public Agent createAgent(String address, Integer port, 
-                             String authToken, String agentToken, 
-                             String version)
+    public Agent createNewTransportAgent(String address, Integer port, 
+                                         String authToken, String agentToken, 
+                                         String version, boolean unidirectional)
+        throws AgentCreateException
+    {
+        AgentType type = getAgentTypeDAO().findByName(HQ_AGENT_REMOTING_TYPE);
+        if (type == null){
+            throw new SystemException("Unable to find agent type '" +
+                                        HQ_AGENT_REMOTING_TYPE + "'");
+        }
+        Agent agent = getAgentDAO().create(type, address, port, unidirectional, 
+                                           authToken, agentToken, version);
+        
+        try {
+            AppdefStartupListener.getAgentCreateCallback().agentCreated(agent);
+        } catch(VetoException e) {
+            throw new AgentCreateException("Agent creation vetoed", e);
+        }
+        return agent;
+    }
+    
+    /**
+     * Create a new Agent object.  The type of the agent that is created is
+     * the legacy 'covalent-eam' type.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public Agent createLegacyAgent(String address, Integer port, 
+                                   String authToken, String agentToken, 
+                                   String version)
         throws AgentCreateException
     {
         AgentType type = getAgentTypeDAO().findByName(CAM_AGENT_TYPE);
@@ -408,7 +437,7 @@ public class AgentManagerEJBImpl
                AgentRemoteException, PermissionException, FileNotFoundException
     {
         AgentCommandsClient client = 
-            new AgentCommandsClient(AgentConnectionUtil.getClient(id));
+            AgentCommandsClientFactory.getInstance().getClient(id);
 
         //XXX: Check for superuser role
 

@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement.agent.client;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
@@ -67,14 +68,11 @@ public class AgentMonitor
      * @return true if the agent is up, false otherwise
      */
     public boolean ping(Agent agent) {
-        SecureAgentConnection conn;
-
-        conn = new SecureAgentConnection(agent);
-
-        AgentCommandsClient client =
-                new AgentCommandsClient(conn);
         try {
-            client.ping();
+            AgentCommandsClient client = 
+                AgentCommandsClientFactory.
+                    getInstance().getClient(agent);
+            client.ping(); 
         } catch (AgentRemoteException e) {
             log.error("Agent exception: " + e.getMessage());
             if (log.isDebugEnabled()) {
