@@ -218,13 +218,13 @@ public abstract class SessionEJB {
 
         switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                opName = AuthzConstants.platformOpMonitorPlatform;
+                opName = AuthzConstants.platformOpModifyPlatform;
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                opName = AuthzConstants.serverOpMonitorServer;
+                opName = AuthzConstants.serverOpModifyServer;
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                opName = AuthzConstants.serviceOpMonitorService;
+                opName = AuthzConstants.serviceOpModifyService;
                 break;
             default:
                 throw new InvalidAppdefTypeException("Unknown type: " +
