@@ -156,13 +156,17 @@ public class Agent extends AppdefBean {
 
         return result;
     }
+    
+    public String connectionString() {
+        return getAddress()+":"+getPort();
+    }
 
-   public String toString() {
-	  StringBuffer str = new StringBuffer("{");
+    public String toString() {
+        StringBuffer str = new StringBuffer("{");
 
-	  str.append("address=").append(getAddress()).append(" ")
-          .append("port=").append(getPort()).append(" ")
-          .append("authToken=").append(getAuthToken()).append(" ");
-	  return(str.toString());
-   }
+        str.append("address=").append(getAddress()).append(" ")
+           .append("port=").append(getPort()).append(" ")
+           .append("authToken=").append(getAuthToken()).append(" ");
+        return(str.toString());
+    }
 }
