@@ -110,4 +110,19 @@ public class TransportUtils {
         }
     }
     
+    /**
+     * Attempt to load the poller client implementation from the context 
+     * class loader.
+     * 
+     * @return The class object.
+     * @throws ClassNotFoundException if the poller client implementation cannot 
+     *                                be found. This can happen if invoked from 
+     *                                a .ORG instance.
+     */
+    public static Class tryLoadUnidirectionalTransportPollerClient() 
+        throws ClassNotFoundException {
+        return Thread.currentThread().getContextClassLoader().loadClass(
+                "com.hyperic.hq.transport.PollerClientImpl");          
+    }
+    
 }
