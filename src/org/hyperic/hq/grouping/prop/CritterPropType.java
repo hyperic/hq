@@ -49,6 +49,8 @@ public final class CritterPropType
         new CritterPropType(3, "resource", "critter.propType.resource");
     public static CritterPropType PROTO = 
         new CritterPropType(4, "proto", "critter.propType.proto");
+    public static CritterPropType GROUP = 
+        new CritterPropType(5, "group", "critter.propType.group");
     
     
     protected CritterPropType(int code, String desc, String localeProp) {
