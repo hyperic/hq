@@ -45,6 +45,10 @@ public abstract class AbstractCommandsClient {
         _agent = agent;
         _factory = factory;
     }
+    
+    protected final Agent getAgent() {
+        return _agent;
+    }
 
     protected final void safeDestroyService(Object proxy) {
         try {
