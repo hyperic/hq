@@ -183,8 +183,8 @@ public class ResourceHubForm extends BaseValidatorForm {
         return _any;
     }
 
-    public void setAll(boolean all) {
-        _any = all;
+    public void setAny(boolean any) {
+        _any = any;
     }
 
     public void reset(ActionMapping mapping, HttpServletRequest request) {
