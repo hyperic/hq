@@ -43,11 +43,16 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.PropertyConfigurator;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
@@ -59,17 +64,13 @@ import org.hyperic.hq.bizapp.client.BizappCallbackClient;
 import org.hyperic.hq.bizapp.client.RegisterAgentResult;
 import org.hyperic.hq.bizapp.client.StaticProviderFetcher;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.transport.util.TransportUtils;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.JDK;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.exec.Background;
 import org.hyperic.util.security.SecurityUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.PropertyConfigurator;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -91,6 +92,7 @@ public class AgentClient {
     public  static final String QPROP_IPADDR     = QPROP_PRE + "camIP";
     public  static final String QPROP_PORT       = QPROP_PRE + "camPort";
     public  static final String QPROP_SSLPORT    = QPROP_PRE + "camSSLPort";
+    public  static final String QPROP_NEWTRANSPORT = QPROP_PRE + "newTransport";    
     public  static final String QPROP_UNI        = QPROP_PRE + "unidirectional";
     public  static final String QPROP_UNI_POLLING_FREQUENCY = QPROP_PRE + "uniPollingFrequency";    
     private static final String QPROP_SECURE     = QPROP_PRE + "camSecure";
@@ -130,7 +132,7 @@ public class AgentClient {
     private boolean             redirectedOutputs = false;
 
     private AgentClient(AgentConfig config, SecureAgentConnection conn){
-        this.agtCommands = new AgentCommandsClient(conn);
+        this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
         this.camCommands = new CommandsClient(conn);
         this.config      = config;
         this.log         = LogFactory.getLog(AgentClient.class);
@@ -514,10 +516,13 @@ public class AgentClient {
         InetAddress localHost;
         CreateToken_result tokenRes;
         ProviderInfo providerInfo;
-        String provider, host, user, pword, agentIP, 
+        String provider, host, user, pword,  
             agentToken, response;
+        String agentIP = "localhost";
         Properties bootP;
-        int agentPort;
+        int agentPort = -1;
+        boolean isNewTransportAgent = false;
+        boolean unidirectional = false;
 
         bootP = this.config.getBootProperties();
 
@@ -531,18 +536,48 @@ public class AgentClient {
         }
 
         SYSTEM_OUT.println("[ Running agent setup ]");
+        
+        // FIXME - For now we will only setup the new transport if the 
+        // unidirectional agent is available (since currently we don't 
+        // have a bidirectional agent). Once we have a bidirectional 
+        // agent, we should always ask if agent communications should 
+        // use the new transport.
 
-        // If not, ask the appropriate questions
+//        isNewTransportAgent = askYesNoQuestion("Should Agent communications to " + 
+//                PRODUCT + " use the new transport ", 
+//                false, QPROP_NEWTRANSPORT);   
+        
+        
+        boolean isUnidirectionalAgentSupported = false;
+        
+        try {
+            TransportUtils.tryLoadUnidirectionalTransportPollerClient();
+            isUnidirectionalAgentSupported = true;
+        } catch (Exception e) {
+        }
 
+        if (isUnidirectionalAgentSupported) {
+            unidirectional = askYesNoQuestion("Should Agent communications to " + 
+                                              PRODUCT + " be unidirectional ", 
+                                              false, QPROP_UNI);
+            
+            // FIXME For now enable the new transport only if we have 
+            // a unidirectional agent.
+            isNewTransportAgent = unidirectional;
+        }
+        
+        boolean secure;
+        
         while(true){
             int port;
             host = this.askQuestion("What is the " + PRODUCT +
                                     " server IP address",
                                     null, QPROP_IPADDR);
-            boolean secure = askYesNoQuestion("Should Agent communications " +
-                                              "to " + PRODUCT + " always " +
-                                              "be secure", 
-                                              false, QPROP_SECURE);
+                        
+            secure = askYesNoQuestion("Should Agent communications " +
+                                      "to " + PRODUCT + " always " +
+                                      "be secure", 
+                                      false, QPROP_SECURE);
             if (secure) {
                 // Always secure.  Ask for SSL port and verify
                 port = this.askIntQuestion("What is the " + PRODUCT +
@@ -570,6 +605,23 @@ public class AgentClient {
 
             break;
         }
+        
+        // unidirectional only uses secure communication. Ask for SSL port and verify
+        if (unidirectional && !secure) {
+            while(true){
+                int port;
+                    port = this.askIntQuestion("What is the " + PRODUCT +
+                                " server SSL port for unidirectional communications",
+                                               7443, QPROP_SSLPORT);
+                try {
+                    getConnection(provider, true);
+                } catch (AgentCallbackClientException e) {
+                    continue;
+                }
+
+                break;
+            }            
+        }
 
         while(true){
             user  = this.askQuestion("What is your " + PRODUCT +
@@ -595,33 +647,35 @@ public class AgentClient {
             }
         } 
 
-        // Get info about server connecting to the agent
-        while(true){
-            agentIP = this.askQuestion("What IP should " + PRODUCT +
-                                       " use to contact the agent",
-                                       getDefaultIpAddress(),
-                                       QPROP_AGENTIP);
-            
-            // Attempt to resolve, as a safeguard
-            try {
-                localHost = InetAddress.getByName(agentIP);
-                localHost.getHostAddress();
-                break;
-            } catch(UnknownHostException exc){
-                SYSTEM_ERR.println("- Unable to resolve host");
-            }
-        } 
+        if (!unidirectional) {
+            // Get info about server connecting to the agent
+            while(true){
+                agentIP = this.askQuestion("What IP should " + PRODUCT +
+                                           " use to contact the agent",
+                                           getDefaultIpAddress(),
+                                           QPROP_AGENTIP);
+                
+                // Attempt to resolve, as a safeguard
+                try {
+                    localHost = InetAddress.getByName(agentIP);
+                    localHost.getHostAddress();
+                    break;
+                } catch(UnknownHostException exc){
+                    SYSTEM_ERR.println("- Unable to resolve host");
+                }
+            } 
 
-        while(true){
-            agentPort = this.askIntQuestion("What port should " + PRODUCT +
-                                            " use to contact the agent",
-                                            this.config.getListenPort(),
-                                            QPROP_AGENTPORT);
-            if(agentPort < 1 || agentPort > 65535){
-                SYSTEM_ERR.println("- Invalid port");
-            } else {
-                break;
-            }
+            while(true){
+                agentPort = this.askIntQuestion("What port should " + PRODUCT +
+                                                " use to contact the agent",
+                                                this.config.getListenPort(),
+                                                QPROP_AGENTPORT);
+                if(agentPort < 1 || agentPort > 65535){
+                    SYSTEM_ERR.println("- Invalid port");
+                } else {
+                    break;
+                }
+            }            
         }
 
         /* Check to see if this agent already has a setup for a server.
@@ -678,7 +732,8 @@ public class AgentClient {
             result = bizapp.registerAgent(user, pword, tokenRes.getToken(), 
                                           agentIP, agentPort,
                                           ProductProperties.getVersion(),
-                                          getCpuCount());
+                                          getCpuCount(), isNewTransportAgent, 
+                                          unidirectional);
             response = result.response;
             if(!response.startsWith("token:")){
                 SYSTEM_ERR.println("- Unable to register agent: " + response);

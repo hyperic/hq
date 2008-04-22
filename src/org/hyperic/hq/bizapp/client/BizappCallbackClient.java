@@ -70,7 +70,9 @@ public class BizappCallbackClient
                                              String authToken,
                                              String agentIP, int agentPort,
                                              String version,
-                                             int cpuCount)
+                                             int cpuCount, 
+                                             boolean isNewTransportAgent, 
+                                             boolean unidirectional)
         throws AgentCallbackClientException
     {
         RegisterAgent_result res;
@@ -87,6 +89,10 @@ public class BizappCallbackClient
         args.setAgentPort(agentPort);
         args.setVersion(version);
         args.setCpuCount(cpuCount);
+        
+        if (isNewTransportAgent) {
+            args.setNewTransportAgent(unidirectional);            
+        }
 
         res = (RegisterAgent_result)this.invokeLatherCall(provider,
                                                 CommandInfo.CMD_REGISTER_AGENT,
