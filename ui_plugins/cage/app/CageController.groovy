@@ -7,6 +7,7 @@ import org.hyperic.hq.grouping.CritterList
 import org.hyperic.hq.grouping.CritterType
 import org.hyperic.hq.grouping.prop.CritterPropDescription
 import org.hyperic.hq.grouping.prop.StringCritterProp
+import org.hyperic.hq.grouping.prop.GroupCritterProp
 import org.hyperic.hq.grouping.prop.ProtoCritterProp
 import org.hyperic.hq.grouping.prop.ResourceCritterProp
 import org.hyperic.dao.DAOFactory
@@ -121,6 +122,9 @@ class CageController
                     def rsrcId   = propDef.text().toInteger()
                     def resource = resourceHelper.findResource(rsrcId)
                     props << new ResourceCritterProp(resource)
+                } else if (propDef.name() == 'group') {
+                    def group = resourceHelper.findGroupByName(propDef.text())
+                    props << new GroupCritterProp(group)
                 } else if (propDef.name() == 'proto') { 
                     def proto  = resourceHelper.findResourcePrototype(propDef.text())
                     props << new ProtoCritterProp(proto)
