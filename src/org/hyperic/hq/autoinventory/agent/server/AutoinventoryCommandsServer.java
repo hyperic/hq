@@ -191,6 +191,10 @@ public class AutoinventoryCommandsServer
         _scanManager = new ScanManager(this, _log, pluginManager,  
                                       _rtAutodiscoverer);
         
+        _aiCommandsService = new AICommandsService(pluginManager, 
+                                                   _rtAutodiscoverer, 
+                                                   _scanManager);
+        
         _scanManager.startup();
 
         // Do we have a provider?
@@ -200,11 +204,7 @@ public class AutoinventoryCommandsServer
         } else {
             _rtAutodiscoverer.triggerDefaultScan();
         }
-        
-        _aiCommandsService = new AICommandsService(pluginManager, 
-                                                   _rtAutodiscoverer, 
-                                                   _scanManager);
-        
+                
         AgentTransport agentTransport;
         
         try {
