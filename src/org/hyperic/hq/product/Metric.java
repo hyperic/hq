@@ -63,6 +63,8 @@ public class Metric {
     private static HashMap cache = new HashMap();
     private static final MetricProperties NO_PROPERTIES =
         new MetricProperties();
+    
+    private final Object lock = new Object();
 
     private String template   = null;
     private String domainName = null;
@@ -75,9 +77,12 @@ public class Metric {
     private MetricProperties props = null;
     private String id = null; //for tie-in to logging
     private String category = null;
-    private long interval = -1;
+    private long interval;
 
     private Metric() {
+        synchronized (lock) {
+            interval = -1;
+        }
     }
 
     //we only need to encode these three
@@ -320,11 +325,15 @@ public class Metric {
     }
 
     public long getInterval() {
-        return this.interval;
+        synchronized (lock) {
+            return this.interval;            
+        }
     }
 
     public void setInterval(long interval) {
-        this.interval = interval;
+        synchronized (lock) {
+            this.interval = interval;            
+        }
     }
 
     public boolean isAvail() {

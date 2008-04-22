@@ -74,6 +74,8 @@ public class ScheduleThread
     private static final long WARN_FETCH_TIME = 5 * 1000; // 5 seconds.
     private static final Log _log =
         LogFactory.getLog(ScheduleThread.class.getName());
+    
+    private final    Object     _lock = new Object();
 
     private          Map       _schedules;   // AppdefID -> Schedule
     private volatile boolean   _shouldDie;   // Should I shut down?
@@ -146,7 +148,10 @@ public class ScheduleThread
 
         ScheduledItem[] items = rs._schedule.getScheduledItems();
         _log.debug("Unscheduling " + items.length + " metrics for " + ent);
-        _stat_numMetricsScheduled -= items.length;
+        
+        synchronized (_lock) {
+            _stat_numMetricsScheduled -= items.length;            
+        }
 
         for (int i=0; i<items.length; i++) {
             ScheduledMeasurement meas =
@@ -167,7 +172,9 @@ public class ScheduleThread
         ResourceSchedule rs = getSchedule(meas);
         try {
             rs._schedule.scheduleItem(meas, meas.getInterval(), true, true);
-            _stat_numMetricsScheduled++;
+            synchronized (_lock) {
+                _stat_numMetricsScheduled++;                
+            }
         } catch (ScheduleException e) {
             _log.error("Unable to schedule metric '" +
                       logMetric(meas.getDSN()) + "', skipping. Cause is " +
@@ -491,7 +498,9 @@ public class ScheduleThread
     public double getNumMetricsScheduled() 
         throws AgentMonitorException 
     {
-        return _stat_numMetricsScheduled;
+        synchronized (_lock) {
+            return _stat_numMetricsScheduled;            
+        }
     }
 
     /**

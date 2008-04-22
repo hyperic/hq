@@ -45,6 +45,9 @@ import org.apache.commons.logging.LogFactory;
  */
 
 public class Schedule {
+    
+    private final Object _lock = new Object();
+    
     private long   scheduleID;   // Used for assigning unique event IDs
     private Vector schedule;     // The actual events being scheduled, sorted
                                  // by ascending nextTime in the item
@@ -63,7 +66,9 @@ public class Schedule {
      */
 
     private long consumeNextGlobalID(){
-        return this.scheduleID++;
+        synchronized (_lock) {
+            return this.scheduleID++;            
+        }
     }
 
     /**

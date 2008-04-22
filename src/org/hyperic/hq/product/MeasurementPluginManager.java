@@ -25,18 +25,18 @@
 
 package org.hyperic.hq.product;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigResponse;
-
 import org.hyperic.util.config.ConfigSchema;
 
 public class MeasurementPluginManager extends PluginManager {
 
-    private HashMap metricCache = new HashMap();
+    private Map metricCache = Collections.synchronizedMap(new HashMap());
     private boolean debugRateMetrics;
     private LogTrackPluginManager ltpm;
     
