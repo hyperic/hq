@@ -1305,6 +1305,8 @@
       <include name="org/hyperic/hq/bizapp/client/*.class"/>
       <include name="org/hyperic/hq/bizapp/shared/*.class"/>
       <exclude name="org/hyperic/hq/bizapp/agent/server/**"/>
+      <include name="org/hyperic/hq/transport/util/TransportUtils.class"/>
+      <include name="org/hyperic/hq/transport/PollerClient.class"/>		
     </jar>
 
     <!-- TODO: Copy and replace properties -->
