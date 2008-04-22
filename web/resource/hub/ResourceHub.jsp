@@ -305,7 +305,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     </c:otherwise>
     </c:choose>
     <c:if test="${not empty allTypesKey || not empty AvailableResGrps}">
-    <td class="FilterLabelText" style="padding-right: 0"><html:checkbox property="any"/></td>
+    <td class="FilterLabelText" style="padding-right: 0"><html:checkbox property="any" value="true"/></td>
     <td class="FilterLabelText" style="padding-left: 0"><fmt:message key="any"/></td>
     </c:if>
     <td class="FilterLabelText" width="100%"><html:image page="/images/4.0/icons/accept.png" property="ok"/></td>
