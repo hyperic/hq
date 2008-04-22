@@ -25,10 +25,12 @@
 
 package org.hyperic.hq.agent;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.Externalizable;
 import java.io.IOException;
-
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Set;
@@ -43,9 +45,9 @@ import org.hyperic.util.GenericValueMap;
  * way which abstracts the serialization or protocol implementation.
  */
 
-public class AgentRemoteValue implements GenericValueMap {
+public class AgentRemoteValue implements GenericValueMap, Externalizable {
     private Hashtable vals;
-
+    
     /**
      * Create a new AgentRemoteValue object with default innards.
      */
@@ -175,7 +177,7 @@ public class AgentRemoteValue implements GenericValueMap {
         }
     }
 
-    public void toStream(DataOutputStream os)
+    public void toStream(DataOutput os)
         throws IOException
     {
         for(Enumeration eKey = this.vals.keys(); eKey.hasMoreElements() ;){
@@ -193,7 +195,7 @@ public class AgentRemoteValue implements GenericValueMap {
         return this.vals.keySet();
     }
 
-    public static AgentRemoteValue fromStream(DataInputStream is) 
+    public static AgentRemoteValue fromStream(DataInput is) 
         throws IOException 
     {
         AgentRemoteValue res = new AgentRemoteValue();
@@ -212,5 +214,15 @@ public class AgentRemoteValue implements GenericValueMap {
 
     public String toString(){
         return this.vals.toString();
+    }
+
+    public void readExternal(ObjectInput in) throws IOException,
+            ClassNotFoundException {
+        AgentRemoteValue res = fromStream(in);        
+        this.vals = res.vals;
+    }
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        toStream(out);
     }
 }
