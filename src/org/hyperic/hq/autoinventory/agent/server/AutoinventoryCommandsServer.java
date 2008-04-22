@@ -195,16 +195,6 @@ public class AutoinventoryCommandsServer
                                                    _rtAutodiscoverer, 
                                                    _scanManager);
         
-        _scanManager.startup();
-
-        // Do we have a provider?
-        if ( CommandsAPIInfo.getProvider(_storage) == null ) {
-            agent.registerNotifyHandler(this, 
-                                        CommandsAPIInfo.NOTIFY_SERVER_SET);
-        } else {
-            _rtAutodiscoverer.triggerDefaultScan();
-        }
-                
         AgentTransport agentTransport;
         
         try {
@@ -222,8 +212,18 @@ public class AutoinventoryCommandsServer
             } catch (Exception e) {
                 throw new AgentStartException("Failed to register AI Commands Service.", e);
             }
+        }        
+                
+        _scanManager.startup();
+
+        // Do we have a provider?
+        if ( CommandsAPIInfo.getProvider(_storage) == null ) {
+            agent.registerNotifyHandler(this, 
+                                        CommandsAPIInfo.NOTIFY_SERVER_SET);
+        } else {
+            _rtAutodiscoverer.triggerDefaultScan();
         }
-        
+                        
         _log.info("Autoinventory Commands Server started up");
     }
 
