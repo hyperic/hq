@@ -1275,7 +1275,6 @@
       <include name="org/hyperic/hq/transport/PollerClient.class"/>
       <include name="org/hyperic/hq/transport/util/*.class"/>   
       <exclude name="org/hyperic/hq/transport/**/*_test*"/>  	      
-      <exclude name="org/hyperic/hq/agent/client/**"/>
     </jar>
 
     <!-- Control agent server handler -->
