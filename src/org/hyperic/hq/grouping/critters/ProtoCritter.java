@@ -90,6 +90,9 @@ public class ProtoCritter implements Critter {
         if (this == other) return true;
         if (!(other instanceof ProtoCritter)) return false;
         
+        // make assumptions explicit
+        assert _proto != null;
+        
         ProtoCritter critter = (ProtoCritter) other;
         if (!_proto.equals(critter._proto)) return false;
         return true;
