@@ -56,7 +56,7 @@ class ResourceNameCritter
     }
     
     public String getSql(CritterTranslationContext ctx, String resourceAlias) {
-        return ctx.getDialect().getRegExSQL(resourceAlias + ".name", 
+        return ctx.getHQDialect().getRegExSQL(resourceAlias + ".name", 
                                             ":@resourceName@", false, false);
     }
     

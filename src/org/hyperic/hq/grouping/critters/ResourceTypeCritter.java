@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
+
 package org.hyperic.hq.grouping.critters;
 
 import java.util.ArrayList;
@@ -34,52 +35,57 @@ import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.prop.StringCritterProp;
 
-class ProtoNameCritter
-    implements Critter
-{
-    private final String               _nameRegex;
-    private final List                 _props;
-    private final ProtoNameCritterType _type;
-    
-    ProtoNameCritter(String nameRegex, ProtoNameCritterType type) {
-        _nameRegex = nameRegex;
-        
-        List c = new ArrayList(1);
-        c.add(new StringCritterProp(_nameRegex));
+/**
+ * Fetches all Resources which match the ResourceTypeName, joins the
+ * EAM_RESOURCE_TYPE table, doesn't use proto
+ */
+public class ResourceTypeCritter extends Object implements Critter {
+    private String _resTypeName;
+    private List _props;
+    private ResourceTypeCritterType _type;
+
+    public ResourceTypeCritter(String resTypeName,
+                                    ResourceTypeCritterType type)
+    {
+        _resTypeName = resTypeName;
+        List c = new ArrayList();
+        c.add(new StringCritterProp(resTypeName));
         _props = Collections.unmodifiableList(c);
         _type  = type;
     }
-    
-    public List getProps() {
-        return _props;
-    }
-    
-    public String getSql(CritterTranslationContext ctx, String resourceAlias) {
-        return ctx.getHQDialect().getRegExSQL("@proto@.name", ":@protoName@", 
-                                            false, false); 
-    }
-    
-    public String getSqlJoins(CritterTranslationContext ctx, 
-                              String resourceAlias) 
-    {
-        return "join EAM_RESOURCE @proto@ on " + 
-            resourceAlias + ".proto_id = @proto@.id"; 
-    }
-    
+
     public void bindSqlParams(CritterTranslationContext ctx, Query q) {
-        q.setParameter(ctx.escape("protoName"), _nameRegex);
+        q.setParameter(ctx.escape("resTypeName"), _resTypeName);
+    }
+
+    public String getConfig() {
+        Object[] args = {_resTypeName};
+        return _type.getInstanceConfig().format(args);
     }
 
     public CritterType getCritterType() {
         return _type;
     }
-    
-    public String getNameRegex() {
-        return _nameRegex;
+
+    public List getProps() {
+        return _props;
     }
-    
-    public String getConfig() {
-        Object[] args = {_nameRegex};
-        return _type.getInstanceConfig().format(args);
+
+    public String getSql(CritterTranslationContext ctx, String resourceAlias) {
+        String  bool = ctx.getDialect().toBooleanValueString(false);
+        return new StringBuilder()
+            .append("(@type@.name = :@resTypeName@ and ")
+            .append(resourceAlias).append(".fsystem = ")
+            .append(bool).append(")").toString();
     }
+
+    public String getSqlJoins(CritterTranslationContext ctx,
+                              String resourceAlias)
+    {
+        return new StringBuilder()
+            .append("JOIN EAM_RESOURCE_TYPE @type@ on ")
+            .append(resourceAlias)
+            .append(".resource_type_id = @type@.id").toString();
+    }
+
 }

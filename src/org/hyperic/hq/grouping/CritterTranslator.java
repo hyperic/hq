@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -35,6 +35,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SQLQuery;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 
 /**
  * The CritterTranslator is a simple class useful composing a Hibernate query
@@ -45,12 +47,39 @@ public class CritterTranslator {
     
     public CritterTranslator() {
     }
+
+    public PageList translate(CritterTranslationContext ctx, CritterList cList,
+                              PageControl pc)
+    {
+        PageList rtn = new PageList();
+        rtn.ensureCapacity(pc.getPagesize());
+        rtn.addAll(
+            translate(ctx, cList, false)
+            .setFirstResult(pc.getPageEntityIndex()*pc.getPagenum())
+            .setMaxResults(pc.getPagesize())
+            .list());
+        rtn.setTotalSize(
+            ((Number)translate(ctx, cList, true)
+            .uniqueResult()).intValue());
+        return rtn;
+    }
+
+    public SQLQuery translate(CritterTranslationContext ctx, CritterList cList)
+    {
+        return translate(ctx,cList,false);
+    }
     
-    public SQLQuery translate(CritterTranslationContext ctx, CritterList cList){
+    public SQLQuery translate(CritterTranslationContext ctx, CritterList cList,
+                              boolean issueCount)
+    {
         StringBuilder sql = new StringBuilder();
         Map txContexts = new HashMap(cList.getCritters().size());
         
-        sql.append("select {res.*} from EAM_RESOURCE res ");
+        if (issueCount) {
+            sql.append("select count(1) from EAM_RESOURCE res ");
+        } else {
+            sql.append("select {res.*} from EAM_RESOURCE res ");
+        }
         
         int prefixCnt = 0;
         for (Iterator i=cList.getCritters().iterator(); i.hasNext(); ) {
@@ -58,13 +87,13 @@ public class CritterTranslator {
             String prefix = "x" + (prefixCnt++);
             CritterTranslationContext critterCtx = 
                 new CritterTranslationContext(ctx.getSession(), 
-                                              ctx.getDialect(), prefix);
+                                              ctx.getHQDialect(), prefix);
             txContexts.put(c, critterCtx);
             sql.append(critterCtx.escapeSql(c.getSqlJoins(critterCtx, "res")));
             sql.append(" ");
         }
-        
-        sql.append(" where (");
+
+        sql.append(" where ");
 
         List systemCritters = new ArrayList();
         List regularCritters = new ArrayList();
@@ -77,26 +106,33 @@ public class CritterTranslator {
             else
                 regularCritters.add(c);
         }
+
+        if (!regularCritters.isEmpty()) {
+            sql.append(" (");
         
-        for (Iterator i=regularCritters.iterator(); i.hasNext(); ) {
-            Critter c = (Critter)i.next();
+            for (Iterator i=regularCritters.iterator(); i.hasNext(); ) {
+                Critter c = (Critter)i.next();
             
-            CritterTranslationContext critterCtx = 
-                (CritterTranslationContext)txContexts.get(c);
-            sql.append(critterCtx.escapeSql(c.getSql(critterCtx, "res"))); 
+                CritterTranslationContext critterCtx = 
+                    (CritterTranslationContext)txContexts.get(c);
+                sql.append(critterCtx.escapeSql(c.getSql(critterCtx, "res"))); 
             
-            if (i.hasNext()) {
-                if (cList.isAll()) {
-                    sql.append(" and ");
-                } else {
-                    sql.append(" or ");
+                if (i.hasNext()) {
+                    if (cList.isAll()) {
+                        sql.append(" and ");
+                    } else {
+                        sql.append(" or ");
+                    }
                 }
             }
+            sql.append(") ");
         }
-        sql.append(") ");
 
         if (!systemCritters.isEmpty()) {
-            sql.append(" and (");
+            if (!regularCritters.isEmpty()) {
+                sql.append(" and ");
+            }
+            sql.append(" (");
             for (Iterator i=systemCritters.iterator(); i.hasNext(); ) {
                 Critter c = (Critter)i.next();
             
@@ -114,7 +150,9 @@ public class CritterTranslator {
         _log.info("Created SQL: [" + sql + "]");
         SQLQuery res = ctx.getSession().createSQLQuery(sql.toString());
         _log.info("Translated into: [" + res.getQueryString() + "]");
-        res.addEntity("res", Resource.class);
+        if (!issueCount) {
+            res.addEntity("res", Resource.class);
+        }
         for (Iterator i = cList.getCritters().iterator(); i.hasNext(); ) {
             Critter c = (Critter)i.next();
 

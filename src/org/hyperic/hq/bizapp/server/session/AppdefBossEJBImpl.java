@@ -155,6 +155,17 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
+import org.hyperic.hq.grouping.Critter;
+import org.hyperic.hq.grouping.CritterList;
+import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterTranslator;
+import org.hyperic.hq.grouping.GroupException;
+import org.hyperic.hq.grouping.critters.GroupMembershipCritterType;
+import org.hyperic.hq.grouping.critters.GroupTypeCritter;
+import org.hyperic.hq.grouping.critters.GroupTypeCritterType;
+import org.hyperic.hq.grouping.critters.ProtoCritterType;
+import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
+import org.hyperic.hq.grouping.critters.ResourceTypeCritterType;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
@@ -2570,31 +2581,153 @@ public class AppdefBossEJBImpl
                            int groupSubType, boolean matchAny, PageControl pc)
         throws PermissionException, SessionException {
         int grpEntId = APPDEF_GROUP_TYPE_UNDEFINED;
+
         if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-            if (appdefResType != null)
-                grpEntId = appdefResType.getType();
-            else
-                grpEntId = AppdefEntityConstants.APPDEF_TYPE_GROUP;
+            grpEntId = (appdefResType == null) ? 
+                AppdefEntityConstants.APPDEF_TYPE_GROUP :
+                appdefResType.getType();
         }
-        AppdefEntityID grpId = groupId == null ?
-                null : AppdefEntityID.newGroupID(groupId);
+        AppdefEntityID grpId = (groupId == null) ?
+            null : AppdefEntityID.newGroupID(groupId);
         
-        return findCompatInventory(sessionId,
-                                   appdefTypeId,
-                                   appdefResType != null ?
-                                           appdefResType.getID() :
-                                           APPDEF_RES_TYPE_UNDEFINED, 
-                                   grpEntId, 
-                                   grpId,
-                                   appdefTypeId !=
-                                       AppdefEntityConstants.APPDEF_TYPE_GROUP, 
-                                   null,
-                                   searchFor,
-                                   null,
-                                   groupSubType,
-                                   pc);
+        return findInventoryFromCBG(sessionId, appdefTypeId, appdefResType,
+                                    grpEntId, grpId, searchFor,
+                                    groupSubType, matchAny, pc);
     }
     
+    private PageList findInventoryFromCBG(int sessionId, int appdefTypeId,
+                                          AppdefEntityTypeID appdefResType,
+                                          int grpEntId, AppdefEntityID grpId,
+                                          String resourceName, int groupType,
+                                          boolean matchAny, PageControl pc)
+        throws PermissionException, SessionException
+    {
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        PageList res = new PageList();
+
+        CritterTranslator trans       = new CritterTranslator();
+        CritterTranslationContext ctx = new CritterTranslationContext();
+        CritterList cList = getCritterList(matchAny, appdefResType,resourceName,
+                                           grpId, grpEntId, groupType,
+                                           appdefTypeId);
+        PageList children = trans.translate(ctx, cList, pc);
+        res.ensureCapacity(children.size());
+        res.setTotalSize(children.getTotalSize());
+        for (Iterator j = children.iterator(); j.hasNext();) {
+            try {
+                Resource child = (Resource) j.next();
+                AppdefEntityID aeid = new AppdefEntityID(child);
+                AppdefEntityValue arv = new AppdefEntityValue(aeid, subject);
+                if (aeid.isGroup()) {
+                    res.add(arv.getAppdefGroupValue());
+                } else {
+                    AppdefResource resource = arv.getResourcePOJO();
+                    res.add(resource.getAppdefResourceValue());
+                }
+            } catch (AppdefEntityNotFoundException e) {
+                log.warn(e.getMessage(), e);
+            }
+        }
+        return res;
+    }
+    
+    private CritterList getCritterList(boolean matchAny,
+        AppdefEntityTypeID appdefResType, String resourceName,
+        AppdefEntityID grpId, int grpEntId, int groupType, int appdefTypeId)
+    {
+        Critter tmp;
+        List critters = new ArrayList();
+        if (null != (tmp = getProtoCritter(appdefResType))) {
+            critters.add(tmp);
+        }
+        if (null != (tmp = getResourceNameCritter(resourceName))) {
+            critters.add(tmp);
+        }
+        if (null != (tmp = getGrpMemCritter(grpId))) {
+            critters.add(tmp);
+        }
+        if (null != (tmp = getResourceTypeCritter(grpEntId))) {
+            critters.add(tmp);
+            if (groupType != APPDEF_GROUP_TYPE_UNDEFINED) {
+                critters.add(getGrpTypeCritter(groupType));
+            }
+        } else if (null != (tmp = getResourceTypeCritter(appdefTypeId))) {
+            critters.add(tmp);
+        }
+        return new CritterList(critters, matchAny);
+    }
+    
+    private Critter getGrpTypeCritter(int groupType) {
+        if (groupType == APPDEF_GROUP_TYPE_UNDEFINED) {
+            return null;
+        }
+        GroupTypeCritterType critter = new GroupTypeCritterType();
+        try {
+            return critter.newInstance(groupType);
+        } catch (GroupException e) {
+            log.warn(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private Critter getProtoCritter(AppdefEntityTypeID appdefResType) {
+        if (appdefResType != null) {
+            ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+            Resource proto = rman.findResourcePrototype(appdefResType); 
+            if (proto != null) {
+                ProtoCritterType protoType = new ProtoCritterType();
+                return protoType.newInstance(proto);
+            }
+        }
+        return null;
+    }
+
+    private Critter getGrpMemCritter(AppdefEntityID grpId) {
+        if (grpId != null) {
+            try {
+                ResourceGroupManagerLocal rgman =
+                    ResourceGroupManagerEJBImpl.getOne();
+                ResourceGroup group =
+                    rgman.findResourceGroupById(grpId.getId());
+                GroupMembershipCritterType groupMemType =
+                    new GroupMembershipCritterType();
+                return groupMemType.newInstance(group);
+            } catch (GroupException e) {
+                log.warn(e.getMessage(), e);
+            }
+        }
+        return null;
+    }
+
+    private Critter getResourceTypeCritter(int appdefTypeId) {
+        if (appdefTypeId == APPDEF_GROUP_TYPE_UNDEFINED ||
+            appdefTypeId == APPDEF_TYPE_UNDEFINED ||
+            appdefTypeId == APPDEF_RES_TYPE_UNDEFINED) {
+            return null;
+        }
+        String resTypeName = AppdefUtil.appdefTypeIdToAuthzTypeStr(appdefTypeId);
+        try {
+            ResourceTypeCritterType type = new ResourceTypeCritterType();
+            return type.newInstance(resTypeName);
+        } catch (GroupException e) {
+            log.warn(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private Critter getResourceNameCritter(String resourceName) {
+        if (resourceName != null) {
+            try {
+                ResourceNameCritterType resNameCritterType =
+                    new ResourceNameCritterType();
+                return resNameCritterType.newInstance(resourceName);
+            } catch (GroupException e) {
+                log.warn(e.getMessage(), e);
+            }
+        }
+        return null;
+    }
+
     /**
      * Perform a search for resources
      * @ejb:interface-method
