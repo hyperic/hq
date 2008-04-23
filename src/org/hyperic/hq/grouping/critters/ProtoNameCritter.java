@@ -87,6 +87,9 @@ class ProtoNameCritter
         if (this == other) return true;
         if (!(other instanceof ProtoNameCritter)) return false;
         
+        // make assumptions explicit
+        assert _nameRegex != null;
+        
         ProtoNameCritter critter = (ProtoNameCritter) other;
         if (!_nameRegex.equals(critter._nameRegex)) return false;
         return true;
