@@ -55,7 +55,7 @@ public class CritterTranslator {
         rtn.ensureCapacity(pc.getPagesize());
         rtn.addAll(
             translate(ctx, cList, false)
-            .setFirstResult(pc.getPageEntityIndex()*pc.getPagenum())
+            .setFirstResult(pc.getPageEntityIndex())
             .setMaxResults(pc.getPagesize())
             .list());
         rtn.setTotalSize(
