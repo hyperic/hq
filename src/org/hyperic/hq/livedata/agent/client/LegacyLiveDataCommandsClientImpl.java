@@ -33,21 +33,20 @@ import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.i18n.MessageBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.thoughtworks.xstream.XStream;
 
-public class LiveDataClient {
+/**
+ * The Live Data Commands client that uses the legacy transport.
+ */
+public class LegacyLiveDataCommandsClientImpl implements LiveDataCommandsClient {
 
     private LiveDataCommandsAPI _api;
     private AgentConnection _conn;
-    private static Log _log = LogFactory.getLog(LiveDataClient.class);
+    private static Log _log = LogFactory.getLog(LegacyLiveDataCommandsClientImpl.class);
 
-    private static final MessageBundle BUNDLE =
-        MessageBundle.getBundle("org.hyperic.hq.livedata.Resources");
-
-    public LiveDataClient(AgentConnection agentConnection) {
+    public LegacyLiveDataCommandsClientImpl(AgentConnection agentConnection) {
         _conn = agentConnection;
         _api = new LiveDataCommandsAPI();
     }
@@ -64,6 +63,9 @@ public class LiveDataClient {
         xstream.fromXML(xml);
     }
 
+    /**
+     * @see org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient#getData(org.hyperic.hq.appdef.shared.AppdefEntityID, java.lang.String, java.lang.String, org.hyperic.util.config.ConfigResponse)
+     */
     public LiveDataResult getData(AppdefEntityID id, String type,
                                   String command,
                                   ConfigResponse config)
@@ -83,7 +85,7 @@ public class LiveDataClient {
                 serializeData(xml);
                 return new LiveDataResult(id, xml);
             } catch (Throwable t) {
-                String err = BUNDLE.format("error.serialization");
+                String err = LiveDataCommandsClientFactory.BUNDLE.format("error.serialization");
                 _log.warn(err, t);
                 return new LiveDataResult(id, t, err);
             }

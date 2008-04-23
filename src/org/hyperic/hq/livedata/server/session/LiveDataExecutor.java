@@ -28,7 +28,8 @@ package org.hyperic.hq.livedata.server.session;
 import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
-import org.hyperic.hq.livedata.agent.client.LiveDataClient;
+
+import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,7 +54,7 @@ public class LiveDataExecutor extends ThreadPoolExecutor {
         _results = new ArrayList();
     }
 
-    public void getData(LiveDataClient client, List commands) {
+    public void getData(LiveDataCommandsClient client, List commands) {
         execute(new LiveDataGatherer(client, commands));
     }
 
@@ -70,10 +71,10 @@ public class LiveDataExecutor extends ThreadPoolExecutor {
         
     private class LiveDataGatherer implements Runnable {
 
-        private LiveDataClient _client;
+        private LiveDataCommandsClient _client;
         private List _commands;
 
-        LiveDataGatherer(LiveDataClient client, List commands) {
+        LiveDataGatherer(LiveDataCommandsClient client, List commands) {
             _client = client;
             _commands = commands;
         }

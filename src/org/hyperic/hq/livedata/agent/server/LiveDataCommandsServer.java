@@ -25,22 +25,23 @@
 
 package org.hyperic.hq.livedata.agent.server;
 
-import org.hyperic.hq.agent.server.AgentServerHandler;
-import org.hyperic.hq.agent.server.AgentDaemon;
-import org.hyperic.hq.agent.server.AgentStartException;
-import org.hyperic.hq.agent.AgentAPIInfo;
-import org.hyperic.hq.agent.AgentRemoteValue;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.livedata.agent.LiveDataCommandsAPI;
-import org.hyperic.hq.livedata.agent.commands.LiveData_args;
-import org.hyperic.hq.livedata.agent.commands.LiveData_result;
-import org.hyperic.hq.product.LiveDataPluginManager;
-import org.hyperic.hq.product.ProductPlugin;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentAPIInfo;
+import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.server.AgentDaemon;
+import org.hyperic.hq.agent.server.AgentServerHandler;
+import org.hyperic.hq.agent.server.AgentStartException;
+import org.hyperic.hq.livedata.agent.LiveDataCommandsAPI;
+import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
+import org.hyperic.hq.livedata.agent.commands.LiveData_args;
+import org.hyperic.hq.product.LiveDataPluginManager;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.transport.AgentTransport;
 
 public class LiveDataCommandsServer implements AgentServerHandler {
 
@@ -48,6 +49,9 @@ public class LiveDataCommandsServer implements AgentServerHandler {
     private LiveDataPluginManager _manager;
 
     private LiveDataCommandsAPI _commands = new LiveDataCommandsAPI();
+    
+    private LiveDataCommandsService _liveDataCommandsService;
+    
 
     public String[] getCommandSet() {
         return LiveDataCommandsAPI.commandSet;
@@ -64,7 +68,8 @@ public class LiveDataCommandsServer implements AgentServerHandler {
     {
         if (cmd.equals(LiveDataCommandsAPI.command_getData)) {
             LiveData_args res = new LiveData_args(args);
-            return cmdGetData(res);
+                        
+            return _liveDataCommandsService.getData(res);
         } else {
             throw new AgentRemoteException("Unexpected command: " + cmd);
         }
@@ -79,26 +84,33 @@ public class LiveDataCommandsServer implements AgentServerHandler {
             throw new AgentStartException("Unable to load live data manager",
                                           e);
         }
+        
+        _liveDataCommandsService = new LiveDataCommandsService(_manager);
+        
+        AgentTransport agentTransport;
+        
+        try {
+            agentTransport = agent.getAgentTransport();
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get agent transport: "+
+                                            e.getMessage());
+        }
+        
+        if (agentTransport != null) {
+            _log.info("Registering Live Data Commands Service with Agent Transport");
+            
+            try {
+                agentTransport.registerService(LiveDataCommandsClient.class, 
+                                               _liveDataCommandsService);
+            } catch (Exception e) {
+                throw new AgentStartException("Failed to register Live Data Commands Service.", e);
+            }
+        }        
+        
+        _log.info("Live Data Commands Server started up");
     }
 
     public void shutdown() {
     }
 
-    public LiveData_result cmdGetData(LiveData_args args)
-        throws AgentRemoteException
-    {
-        _log.info("Asked to invoke cmdGetData for " + args.getType());
-
-        try {
-            String s = _manager.getData(args.getType(),
-                                        args.getCommand(),
-                                        args.getConfig());
-            LiveData_result res = new LiveData_result();
-            res.setResult(s);
-            return res;
-        } catch (Exception e) {
-            throw new AgentRemoteException("Unable to invoke command: " +
-                                           e.getMessage(), e);
-        }
-    }
 }
