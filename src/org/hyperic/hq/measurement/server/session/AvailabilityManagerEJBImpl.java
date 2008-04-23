@@ -324,43 +324,43 @@ public class AvailabilityManagerEJBImpl
 
     private Map getAggData(List avails, long begin, long end, boolean useTidKey)
     {
-        long interval = (end - begin)/DEFAULT_INTERVAL;
         Map rtn = new HashMap();
         if (avails.size() == 0) {
             // Nothing to do, return an empty Map.
             return rtn;
         }
-        int i = 0;
         Map lastMap = new HashMap();
-        Object[] objs = (Object[])avails.get(i++);
-        for (long curr = begin; curr < end; curr += interval) {
+        for (Iterator it=avails.iterator(); it.hasNext(); ) {
+            Object[] objs = (Object[])it.next();
+            if (begin > ((Long)objs[5]).longValue()) {
+                continue;
+            }
+            double[] data;
             Integer key = null;
             if (useTidKey) {
                 key = (Integer)objs[0];
             } else {
                 key = ((Measurement)objs[0]).getId();
             }
-            while (begin > ((Long)objs[5]).longValue()) {
-                objs = (Object[])avails.get(i++);
+            if (null == (data = (double[])rtn.get(key))) {
+                data = new double[5];
             }
-            double[] data = new double[5];
-            data[IND_MIN] = ((Double)objs[1]).doubleValue();
-            data[IND_AVG] = ((Double)objs[2]).doubleValue();
-            data[IND_MAX] = ((Double)objs[3]).doubleValue();
-            data[IND_CFG_COUNT] =  ((Integer)objs[7]).doubleValue();
+            data[IND_MIN] += ((Double)objs[1]).doubleValue();
+            data[IND_AVG] += ((Double)objs[2]).doubleValue();
+            data[IND_MAX] += ((Double)objs[3]).doubleValue();
+            data[IND_CFG_COUNT] +=  ((Integer)objs[7]).doubleValue();
             Long endtime = (Long)objs[5];
             Double availVal = (Double)objs[6];
             MetricValue mval;
             long lendtime = endtime.longValue();
-            if (null == (mval = (MetricValue)lastMap.get(key)) ||
-                mval.getTimestamp() > lendtime)
-            {
-                mval = new MetricValue(availVal, lendtime);
-                lastMap.put(key, mval);
-            }
+            mval = new MetricValue(availVal, lendtime);
+            lastMap.put(key, mval);
             rtn.put(key, data);
         }
-
+        for (Iterator it=rtn.values().iterator(); it.hasNext(); ) {
+            double[] data = (double[])it.next();
+            data[IND_AVG] = data[IND_AVG]/data[IND_CFG_COUNT];
+        }
         for (Iterator it=lastMap.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry)it.next();
             Integer tid = (Integer)entry.getKey();
