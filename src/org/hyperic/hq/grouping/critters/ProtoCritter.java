@@ -85,4 +85,18 @@ public class ProtoCritter implements Critter {
         Object[] args = {_proto.getName()};
         return _type.getInstanceConfig().format(args);
     }
+    
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof ProtoCritter)) return false;
+        
+        ProtoCritter critter = (ProtoCritter) other;
+        if (!_proto.equals(critter._proto)) return false;
+        return true;
+    }
+
+    public int hashCode() {
+        int result = _proto != null ? _proto.hashCode() : 0;
+        return result;
+    }
 }

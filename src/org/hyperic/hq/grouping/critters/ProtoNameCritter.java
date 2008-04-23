@@ -82,4 +82,18 @@ class ProtoNameCritter
         Object[] args = {_nameRegex};
         return _type.getInstanceConfig().format(args);
     }
+    
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof ProtoNameCritter)) return false;
+        
+        ProtoNameCritter critter = (ProtoNameCritter) other;
+        if (!_nameRegex.equals(critter._nameRegex)) return false;
+        return true;
+    }
+
+    public int hashCode() {
+        int result = _nameRegex != null ? _nameRegex.hashCode() : 0;
+        return result;
+    }
 }

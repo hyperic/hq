@@ -87,4 +87,25 @@ class DescendantProtoCritter
         Object[] args = {_root.getName(), _proto.getName()};
         return _type.getInstanceConfig().format(args);
     }
+    
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof DescendantProtoCritter)) return false;
+        
+        // make assumptions explicit
+        assert _root != null;
+        assert _proto != null;
+        
+        DescendantProtoCritter critter = (DescendantProtoCritter) other;
+        if (!_root.equals(critter._root)) return false;
+        if (!_proto.equals(critter._proto)) return false;
+        
+        return true;
+    }
+
+    public int hashCode() {
+        int result = _root != null ? _root.hashCode() : 0;
+        result = 37 * result + (_proto != null ? _proto.hashCode() : 0);
+        return result;
+    }
 }

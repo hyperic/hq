@@ -67,4 +67,39 @@ public class CritterList {
     public boolean isAll() {
         return !_isAny;
     }
+    
+
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof CritterList)) return false;
+
+        final CritterList critterList = (CritterList) other;
+        if (critterList.isAny() != isAny()) return false;
+        
+        List listObj = critterList.getCritters();
+        List origListObj = getCritters();
+        
+        // the critter list should never be null
+        assert listObj != null;
+        assert origListObj != null;
+        
+        // verify that the list of critters contains
+        // logically equivalent critters in the same order
+        if (listObj.size() != origListObj.size())
+            return false;
+        else {
+            for (int i =0; i < listObj.size(); i++) {
+                if (!listObj.get(i).equals(origListObj.get(i)))
+                        return false;
+            }
+        }
+        return true;
+    }
+
+    public int hashCode() {
+        int result;
+        result = getCritters().hashCode();
+        result = 29 * result + (isAny() ? 0 : 1);
+        return result;
+    }
 }

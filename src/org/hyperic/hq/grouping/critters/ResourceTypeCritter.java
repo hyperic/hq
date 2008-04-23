@@ -87,5 +87,21 @@ public class ResourceTypeCritter extends Object implements Critter {
             .append(resourceAlias)
             .append(".resource_type_id = @type@.id").toString();
     }
+    
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof ResourceTypeCritter)) return false;
+        
+        // make assumptions explicit
+        assert _resTypeName != null;
+        
+        ResourceTypeCritter critter = (ResourceTypeCritter) other;
+        if (!_resTypeName.equals(critter._resTypeName)) return false;
+        return true;
+    }
 
+    public int hashCode() {
+        int result = _resTypeName != null ? _resTypeName.hashCode() : 0;
+        return result;
+    }
 }

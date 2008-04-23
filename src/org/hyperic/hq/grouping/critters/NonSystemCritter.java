@@ -69,4 +69,15 @@ class NonSystemCritter
     public String getConfig() {
         return _type.getInstanceConfig().format(new Object[0]);
     }
+    
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof NonSystemCritter)) return false;
+        return true;
+    }
+
+    public int hashCode() {
+        // all nonsystem critters are logically identical for now
+        return 0;
+    }
 }

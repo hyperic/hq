@@ -46,6 +46,7 @@ public class GroupTypeCritter implements Critter {
     private final GroupTypeCritterType _type;
 
     // TODO, scottmf need to add an IntegerCritterProp
+    // scottmf -> please update equals and hashCode accordingly
     public GroupTypeCritter(StringCritterProp groupType,
         GroupTypeCritterType type) {
         _groupType = new Integer(groupType.getString());
@@ -62,7 +63,7 @@ public class GroupTypeCritter implements Critter {
     public void bindSqlParams(CritterTranslationContext ctx, Query q) {
         q.setParameter(ctx.escape("groupType"), _groupType);
     }
-
+    
     public String getConfig() {
         Object[] args = { _groupType };
         return _type.getInstanceConfig().format(args);
@@ -84,4 +85,21 @@ public class GroupTypeCritter implements Critter {
                 "@map@.resource_group_id = @grp@.id ").toString();
     }
 
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof GroupTypeCritter)) return false;
+        
+        // make assumptions explicit
+        assert _groupType != null;
+        
+        GroupTypeCritter critter = (GroupTypeCritter) other;
+        if (!_groupType.equals(critter._groupType)) return false;
+        return true;
+    }
+
+    public int hashCode() {
+        int result = _groupType != null ? _groupType.hashCode() : 0;
+        return result;
+    }
+    
 }

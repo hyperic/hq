@@ -84,4 +84,21 @@ public class GroupMembershipCritter implements Critter {
             .append("join EAM_RESOURCE_GROUP @grp@ on ")
             .append("@map@.resource_group_id = @grp@.id ").toString();
     }
+    
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof GroupMembershipCritter)) return false;
+        
+        // make assumptions explicit
+        assert _group != null;
+        
+        GroupMembershipCritter critter = (GroupMembershipCritter) other;
+        if (!_group.equals(critter._group)) return false;
+        return true;
+    }
+
+    public int hashCode() {
+        int result = _group != null ? _group.hashCode() : 0;
+        return result;
+    }
 }
