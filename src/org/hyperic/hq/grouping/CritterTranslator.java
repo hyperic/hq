@@ -127,7 +127,7 @@ public class CritterTranslator {
             }
             sql.append(") ");
         }
-
+        
         if (!systemCritters.isEmpty()) {
             if (!regularCritters.isEmpty()) {
                 sql.append(" and ");
@@ -147,9 +147,18 @@ public class CritterTranslator {
             sql.append(") ");
         }
 
-        _log.info("Created SQL: [" + sql + "]");
+        if (!issueCount) {
+            sql.append(" order by res.name");
+        }
+
+        if (_log.isDebugEnabled())
+            _log.debug("Created SQL: [" + sql + "]");
+        
         SQLQuery res = ctx.getSession().createSQLQuery(sql.toString());
-        _log.info("Translated into: [" + res.getQueryString() + "]");
+        
+        if (_log.isDebugEnabled())
+            _log.debug("Translated into: [" + res.getQueryString() + "]");
+        
         if (!issueCount) {
             res.addEntity("res", Resource.class);
         }

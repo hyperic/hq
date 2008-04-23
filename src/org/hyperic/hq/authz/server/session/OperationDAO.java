@@ -47,10 +47,10 @@ public class OperationDAO extends HibernateDAO {
     }
 
     public Operation findByTypeAndName(ResourceType type, String name) {
-        String sql = "from Operation where resourceType.id=? and name=?";
+        String sql = "from Operation where resourceType=? and name=?";
 
         return (Operation)getSession().createQuery(sql)
-            .setInteger(0, type.getId().intValue())
+            .setParameter(0, type)
             .setString(1, name)
             .setCacheable(true)
             .setCacheRegion("Operation.findByTypeAndName")
