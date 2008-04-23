@@ -2604,6 +2604,8 @@ public class AppdefBossEJBImpl
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
         PageList res = new PageList();
+        resourceName = (resourceName != null && resourceName.equals("*")) ?
+                            ".*" : resourceName;
 
         CritterTranslator trans       = new CritterTranslator();
         CritterTranslationContext ctx = new CritterTranslationContext();
