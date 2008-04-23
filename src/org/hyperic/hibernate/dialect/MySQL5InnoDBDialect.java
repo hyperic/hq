@@ -389,17 +389,22 @@ public class MySQL5InnoDBDialect
         return false;
     }
 
-    /*
-     * MySQL, unfortunately, does not support case sensitivity for
-     * ut8 character sets.  This is also an issue with their "like" SQL clauses.
-     */
     public String getRegExSQL(String column, String regex, boolean ignoreCase,
                               boolean invertMatch) {
-        return new StringBuffer()
-            .append(column)
-            .append((invertMatch) ? " NOT " : " ")
-            .append("REGEXP ")
-            .append(regex)
-            .toString();
+        if (ignoreCase) {
+            return new StringBuilder()
+                .append("lower(").append(column).append(")")
+                .append((invertMatch) ? " NOT " : " ")
+                .append("REGEXP ")
+                .append("lower(").append(regex).append(")")
+                .toString();
+        } else {
+            return new StringBuilder()
+                .append(column)
+                .append((invertMatch) ? " NOT " : " ")
+                .append("REGEXP ")
+                .append(regex)
+                .toString();
+        }
     }
 }

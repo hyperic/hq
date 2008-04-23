@@ -49,8 +49,6 @@ public interface HQDialect
     
     /*
      * Returns a db specific SQL syntax for a POSIX style Regular Expression.
-     * NOTE: MySQL, unfortunately, does not support case sensitivity for
-     * ut8 character sets.  This is also an issue with their "like" SQL clauses.
      * @param column - the column to match against
      * @param regex - the POSIX style regex
      * @param ignoreCase - similar to grep -i
