@@ -31,7 +31,6 @@ import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
@@ -99,14 +98,11 @@ public class AgentMonitor
                          Measurement[] schedule)
         throws MonitorAgentException
     {
-        SecureAgentConnection conn;
-
-        conn = new SecureAgentConnection(agent);
-
         try {
             ScheduleMeasurements_args args = new ScheduleMeasurements_args();
-            MeasurementCommandsClient client =
-                new MeasurementCommandsClient(conn);
+            
+            MeasurementCommandsClient client = 
+                MeasurementCommandsClientFactory.getInstance().getClient(agent);
             
             args.setSRN(srn);
 
@@ -124,12 +120,14 @@ public class AgentMonitor
 
             client.scheduleMeasurements(args);
         } catch (AgentConnectionException e) {
-            final String emsg = ERR_REMOTE + conn + ": " + e.getMessage();
+            final String emsg = ERR_REMOTE + agent.connectionString() + 
+                                ": " + e.getMessage();
 
             this.log.warn(emsg);
             throw new MonitorAgentException(e.getMessage(), e);
         } catch (AgentRemoteException e) {
-            final String emsg = ERR_REMOTE + conn + ": " + e.getMessage();
+            final String emsg = ERR_REMOTE + agent.connectionString() + 
+                                ": " + e.getMessage();
 
             this.log.warn(emsg);
             throw new MonitorAgentException(emsg, e);
@@ -144,17 +142,13 @@ public class AgentMonitor
     public void unschedule(Agent agent, AppdefEntityID[] ids)
         throws MonitorAgentException 
     {
-        SecureAgentConnection conn;
-
         // If the agent's bad in the last 60 seconds, let's not worry about it
         if (badAgents.containsKey(agent.getAddress()))
             return;
-        
-        conn = new SecureAgentConnection(agent);
 
         try {
-            MeasurementCommandsClient client =
-                new MeasurementCommandsClient(conn);
+            MeasurementCommandsClient client = 
+                MeasurementCommandsClientFactory.getInstance().getClient(agent);
 
             UnscheduleMeasurements_args args = 
                 new UnscheduleMeasurements_args();
@@ -165,14 +159,16 @@ public class AgentMonitor
 
             client.unscheduleMeasurements(args);
         } catch (AgentConnectionException e) {
-            this.log.warn(ERR_REMOTE + conn + ": " + e.getMessage());
+            this.log.warn(ERR_REMOTE + agent.connectionString() + 
+                          ": " + e.getMessage());
             
             // Track bad agent
             badAgents.put(agent.getAddress(), agent, BAD_AGENT_EXPIRE);
             
             throw new MonitorAgentException(e.getMessage(), e);
         } catch (AgentRemoteException e) {
-            String emsg = ERR_REMOTE + conn + ": " + e.getMessage();
+            String emsg = ERR_REMOTE + agent.connectionString() +
+            		      ": " + e.getMessage();
             this.log.warn(emsg);
             
             // Track bad agent
@@ -188,13 +184,8 @@ public class AgentMonitor
      */
     public MetricValue[] getLiveValues(Agent agent, String[] dsns)
         throws MonitorAgentException, LiveMeasurementException 
-    {
-        SecureAgentConnection conn;
-
-        conn   = new SecureAgentConnection(agent);
-
+    {        
         try {
-            MeasurementCommandsClient client;
             GetMeasurements_result result;
             GetMeasurements_args args;
             MetricValue[] res;
@@ -203,8 +194,10 @@ public class AgentMonitor
             for(int i=0; i<dsns.length; i++){
                 args.addMeasurement(dsns[i]);
             }
+            
+            MeasurementCommandsClient client = 
+                MeasurementCommandsClientFactory.getInstance().getClient(agent);
 
-            client = new MeasurementCommandsClient(conn);
             result = client.getMeasurements(args);
             res    = new MetricValue[dsns.length];
 
@@ -216,12 +209,14 @@ public class AgentMonitor
             }
             return res;
         } catch (AgentConnectionException e) {
-            final String emsg = ERR_REMOTE + conn + ": " + e.getMessage();
+            final String emsg = ERR_REMOTE + agent.connectionString() + 
+                                ": " + e.getMessage();
                         
             this.log.warn(emsg);
             throw new MonitorAgentException(e.getMessage(), e);
         } catch (AgentRemoteException e) {
-            final String emsg = ERR_REMOTE + conn + ": " + e.getMessage();
+            final String emsg = ERR_REMOTE + agent.connectionString() + 
+                                ": " + e.getMessage();
             
             this.log.warn(emsg);
             throw new MonitorAgentException(emsg, e);

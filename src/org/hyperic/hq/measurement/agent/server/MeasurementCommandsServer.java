@@ -27,36 +27,34 @@ package org.hyperic.hq.measurement.agent.server;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
-import org.hyperic.hq.agent.PropertyPair;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentNotificationHandler;
 import org.hyperic.hq.agent.server.AgentRunningException;
 import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentStartException;
-import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
-import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.agent.MeasurementCommandsAPI;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
+import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.agent.commands.DeleteProperties_args;
 import org.hyperic.hq.measurement.agent.commands.DeleteProperties_result;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
-import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
-import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_metric;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_result;
@@ -67,23 +65,10 @@ import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_result;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_result;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
-import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
-import org.hyperic.hq.product.MetricInvalidException;
-import org.hyperic.hq.product.MetricNotFoundException;
-import org.hyperic.hq.product.MetricUnreachableException;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginExistsException;
-import org.hyperic.hq.product.PluginManager;
-import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.schedule.UnscheduledItemException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.transport.AgentTransport;
 
 public class MeasurementCommandsServer 
     implements AgentServerHandler, AgentNotificationHandler {
@@ -95,7 +80,7 @@ public class MeasurementCommandsServer
     private Thread                   senderThread;   // Thread of sender
     private SenderThread             senderObject;   // Our sender
     private AgentStorageProvider     storage;        // Agent storage
-    private HashMap                  validProps;     // Hash of valid props
+    private Map                      validProps;     // Map of valid props
     private AgentConfig        bootConfig;     // Agent boot config
     private MeasurementSchedule      schedStorage;   // Schedule storage
     private MeasurementPluginManager pluginManager;  // Plugin manager
@@ -106,6 +91,8 @@ public class MeasurementCommandsServer
     private LogTrackPluginManager    ltPluginManager;
     private Thread                   trackerThread;  // Config and Log tracker thread
     private TrackerThread            trackerObject;  // Config and Log tracker object
+    
+    private MeasurementCommandsService measurementCommandsService;
 
     public MeasurementCommandsServer(){
         this.verAPI         = new MeasurementCommandsAPI();
@@ -114,7 +101,7 @@ public class MeasurementCommandsServer
         this.senderThread   = null;
         this.senderObject   = null;
         this.storage        = null;
-        this.validProps     = new HashMap();
+        this.validProps     = Collections.synchronizedMap(new HashMap());
         this.bootConfig     = null;
         this.schedStorage   = null;
         this.pluginManager  = null;
@@ -131,25 +118,16 @@ public class MeasurementCommandsServer
         }
     }
 
-    private void spawnThreads()
+    private void spawnThreads(SenderThread senderObject, 
+                              ScheduleThread scheduleObject, 
+                              TrackerThread trackerObject)
         throws AgentStartException 
     {
-        this.senderObject   
-            = new SenderThread(this.bootConfig.getBootProperties(),
-                               this.storage, this.schedStorage);
-        this.scheduleObject = new ScheduleThread(this.senderObject, 
-                                                 this.pluginManager);
-        this.trackerObject =
-            new TrackerThread(this.ctPluginManager,
-                              this.ltPluginManager,
-                              this.storage,
-                              this.bootConfig.getBootProperties());
-
-        this.senderThread   = new Thread(this.senderObject, "SenderThread");
+        this.senderThread   = new Thread(senderObject, "SenderThread");
         senderThread.setDaemon(true);
-        this.scheduleThread = new Thread(this.scheduleObject,"ScheduleThread");
+        this.scheduleThread = new Thread(scheduleObject,"ScheduleThread");
         scheduleThread.setDaemon(true);
-        this.trackerThread = new Thread(this.trackerObject, "TrackerThread");
+        this.trackerThread = new Thread(trackerObject, "TrackerThread");
         this.trackerThread.setDaemon(true);
 
         this.senderThread.start();
@@ -165,312 +143,55 @@ public class MeasurementCommandsServer
         return MeasurementCommandsAPI.commandSet;
     }
 
-    /**
-     * Schedule measurements for collection.  
-     */
-    private ScheduleMeasurements_result 
-        scheduleMeasurements(ScheduleMeasurements_args args)
-    {
-        AppdefEntityID ent;
-        int nMeas = args.getNumMeasurements();
-        SRN srn;
-
-        srn = args.getSRN();
-        ent = srn.getEntity();
-
-        this.log.debug("Scheduling " + nMeas + " metrics for " + ent + 
-                       ": new SRN = " + srn.getRevisionNumber());
-        try {
-            unscheduleMeasurements(ent);
-            this.schedStorage.deleteMeasurements(ent);
-        } catch(UnscheduledItemException exc){
-            // OK to ignore
-        } catch(AgentStorageException exc){
-            this.log.error("Unable to remove metrics for entity " + ent + 
-                           " from storage: " + exc.getMessage());
-        }
-
-        for(int i=0; i<nMeas; i++){
-            ScheduleMeasurements_metric metric = args.getMeasurement(i);
-            ScheduledMeasurement sMetric;
-
-            sMetric = new ScheduledMeasurement(metric.getDSN(), 
-                                               metric.getInterval(),
-                                               metric.getDerivedID(),
-                                               metric.getDSNID(),
-                                               ent,
-                                               metric.getCategory());
-            try {
-                this.schedStorage.storeMeasurement(sMetric);
-            } catch(AgentStorageException exc){
-                this.log.debug("Failed to put measurement in storage: " + 
-                               exc.getMessage());
-            }
-            scheduleMeasurement(sMetric);
-        }
-
-        try {
-            this.schedStorage.updateSRN(srn);
-        } catch(AgentStorageException exc){
-            this.log.error("Unable to update SRN in storage: " + 
-                           exc.getMessage());
-        }
-        return new ScheduleMeasurements_result();
-    }
-
-    private UnscheduleMeasurements_result 
-      unscheduleMeasurements(UnscheduleMeasurements_args args)
-        throws AgentRemoteException 
-    {
-        UnscheduledItemException resExc = null;
-        AppdefEntityID failedEnt = null;
-        int i, nEnts = args.getNumEntities();
-
-        this.log.debug("Received unschedule request for " + nEnts + 
-                       " resources");
-        for (i = 0; i < nEnts; i++) {
-            AppdefEntityID ent = args.getEntity(i);
-
-            this.log.debug("Deleting metrics for " + ent);
-
-            try {
-                try {
-                    unscheduleMeasurements(ent);
-                    this.schedStorage.removeSRN(ent);
-                } catch(UnscheduledItemException exc){
-                    resExc    = exc;
-                    failedEnt = ent;
-                }
-
-                if(resExc == null){
-                        this.schedStorage.deleteMeasurements(ent);
-                }
-            } catch(AgentStorageException exc){
-                this.log.error("Failed to delete measurement from storage");
-            }
-        }
-        
-        if(resExc != null){
-            throw new AgentRemoteException("Failed to unschedule metrics " +
-                                           "for entity " + failedEnt + ": " +
-                                           resExc.getMessage());
-        }
-
-        return new UnscheduleMeasurements_result();
-    }
-
-    private GetMeasurements_result 
-        getMeasurements(GetMeasurements_args args)
-    {
-        GetMeasurements_result res = new GetMeasurements_result();
-        int i, nArgs = args.getNumMeasurements();
-        
-        for(i=0; i<nArgs; i++){
-            Exception tExc = null;
-            String arg = args.getMeasurement(i);
-            String excMsg = null;
-
-            this.log.debug("Getting real time measurement: " + arg);
-            try {
-                MetricValue val;
-
-                val = this.pluginManager.getValue(arg);
-                res.addMeasurement(val);
-                this.log.debug("Result was: " + val);
-            } catch(PluginNotFoundException exc){
-                excMsg = "Plugin not found: ";
-                tExc = exc;
-            } catch(PluginException exc){
-                excMsg = "Plugin error: ";
-                tExc = exc;
-            } catch(MetricInvalidException exc){
-                excMsg = "Invalid request: ";
-                tExc = exc;
-            } catch(MetricNotFoundException exc){
-                excMsg = "Error retrieving value: ";
-                tExc = exc;
-            } catch(MetricUnreachableException exc){
-                excMsg = "Error contacting resource: ";
-                tExc = exc;
-            }
-
-            if(excMsg != null){
-                if(tExc.getMessage() == null){
-                    excMsg = excMsg + tExc;
-                } else {
-                    excMsg = excMsg + tExc.getMessage();
-                }
-                    
-                if(this.log.isDebugEnabled()){
-                    this.log.debug("Error getting real time measurement '" + 
-                                   arg + "': " + excMsg, tExc);
-                } else {
-                    this.log.error("Error getting real time measurement: " +
-                                   excMsg);
-                }
-                res.addException(excMsg);
-            }
-        }
-        return res;
-    }
-
-    private SetProperties_result setProperties(SetProperties_args args)
-        throws AgentRemoteException 
-    {
-        int i, nProps = args.getNumProperties();
-        Vector tmpVec = new Vector();
-
-        // Validate all properties before doing any assigning
-        for(i=0; i<nProps; i++){
-            PropertyPair pp = args.getProperty(i);
-
-            if(this.validProps.get(pp.getName()) == null)
-                throw new AgentRemoteException("Unknown measurement " +
-                                               "property name, '" + 
-                                               pp.getName() +"'");
-            tmpVec.add(pp);
-        }
-
-        for(i=0; i<nProps; i++){
-            PropertyPair pp = (PropertyPair) tmpVec.get(i);
-            this.storage.setValue(pp.getName(), pp.getValue());
-        }
-        
-        return new SetProperties_result();
-    }
-
-    private DeleteProperties_result 
-      deleteProperties(DeleteProperties_args args)
-        throws AgentRemoteException 
-    {
-        int i, nProps = args.getNumProperties();
-
-        // Validate all properties before doing any deleting
-        for(i=0; i<nProps; i++){
-            if(this.validProps.get(args.getPropertyName(i)) == null)
-                throw new AgentRemoteException("Unknown measurement " +
-                                               "property name, '" + 
-                                               args.getPropertyName(i) +"'");
-        }
-
-        for(i=0; i<nProps; i++){
-            this.storage.setValue(args.getPropertyName(i), null);
-        }
-        return new DeleteProperties_result();
-    }
-
-    private TrackPluginAdd_result
-        trackPluginAdd(TrackPluginAdd_args args)
-        throws AgentRemoteException
-    {
-        ConfigResponse config = args.getConfigResponse();
-        String name = args.getName();
-        String resourceName = args.getResourceName();
-        String type = args.getType();
-        PluginManager manager;
-        GenericPlugin plugin;
-        boolean isUpdate;
-        
-        if (type.equals(ProductPlugin.TYPE_LOG_TRACK)) {
-            manager = this.ltPluginManager;
-        }
-        else if (type.equals(ProductPlugin.TYPE_CONFIG_TRACK)) {
-            manager = this.ctPluginManager;
-        }
-        else {
-            throw new AgentRemoteException("Unknown plugin type=" + type);
-        }
-        
-        try {
-            plugin = manager.getPlugin(name);
-            isUpdate = true;
-        } catch (PluginNotFoundException e) {
-            plugin = null;
-            isUpdate = false;
-        }
-
-        try {
-            this.log.info((isUpdate ? "Updating" : "Creating") +
-                          " " + manager.getName() +
-                          " plugin " + name +
-                          " [" + resourceName + "]");
-            if (isUpdate) {
-                manager.updatePlugin(plugin, config);
-            }
-            else {
-                manager.createPlugin(name, resourceName, config);
-            }
-        } catch (PluginNotFoundException e) {
-            // XXX: for now
-            this.log.error(e.getMessage());
-        } catch (PluginExistsException e) {
-            this.log.error(e.getMessage());
-        } catch (PluginException e) {
-            this.log.error(e.getMessage(), e);
-            throw new AgentRemoteException(e.getMessage());
-        }
-        return new TrackPluginAdd_result();
-    }
-
-    private TrackPluginRemove_result
-        trackPluginRemove(TrackPluginRemove_args args)
-        throws AgentRemoteException
-    {
-        String name = args.getName();
-        String type = args.getType();
-
-        try {
-            if (type.equals(ProductPlugin.TYPE_LOG_TRACK))
-                this.ltPluginManager.removePlugin(name);
-            else if (type.equals(ProductPlugin.TYPE_CONFIG_TRACK))
-                this.ctPluginManager.removePlugin(name);
-            else
-                throw new AgentRemoteException("Unknown plugin type");
-        } catch (PluginNotFoundException e) {
-            // Ok if the plugin no longer exists.
-        } catch (PluginException e) {
-            throw new AgentRemoteException(e.getMessage());
-        }
-        return new TrackPluginRemove_result();
-    }
-
     public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue args,
                                             InputStream in, OutputStream out)
         throws AgentRemoteException 
     {
-        if(cmd.equals(this.verAPI.command_scheduleMeasurements)){
+        if(cmd.equals(this.verAPI.command_scheduleMeasurements)){            
             ScheduleMeasurements_args sa = 
                 new ScheduleMeasurements_args(args);
 
-            return this.scheduleMeasurements(sa);
+            measurementCommandsService.scheduleMeasurements(sa);
+
+            return new ScheduleMeasurements_result();
         } else if(cmd.equals(this.verAPI.command_unscheduleMeasurements)){
             UnscheduleMeasurements_args sa = 
                 new UnscheduleMeasurements_args(args);
 
-            return this.unscheduleMeasurements(sa);
+            measurementCommandsService.unscheduleMeasurements(sa);
+            
+            return new UnscheduleMeasurements_result();
         } else if(cmd.equals(this.verAPI.command_getMeasurements)){
             GetMeasurements_args sa = 
                 new GetMeasurements_args(args);
 
-            return this.getMeasurements(sa);
+            return measurementCommandsService.getMeasurements(sa);
         } else if(cmd.equals(this.verAPI.command_setProperties)){
             SetProperties_args sa = 
                 new SetProperties_args(args);
 
-            return this.setProperties(sa);
+            measurementCommandsService.setProperties(sa);
+            
+            return new SetProperties_result();
         } else if(cmd.equals(this.verAPI.command_deleteProperties)){
             DeleteProperties_args sa = 
                 new DeleteProperties_args(args);
 
-            return this.deleteProperties(sa);
+            measurementCommandsService.deleteProperties(sa);
+            
+            return new DeleteProperties_result();
         } else if(cmd.equals(this.verAPI.command_trackAdd)) {
             TrackPluginAdd_args ta = new TrackPluginAdd_args(args);
+            
+            measurementCommandsService.addTrackPlugin(ta);
 
-            return this.trackPluginAdd(ta);
+            return new TrackPluginAdd_result();
         } else if(cmd.equals(this.verAPI.command_trackRemove)) {
             TrackPluginRemove_args ta = new TrackPluginRemove_args(args);
 
-            return this.trackPluginRemove(ta);
+            measurementCommandsService.removeTrackPlugin(ta);
+            
+            return new TrackPluginRemove_result();
         } else {
             throw new AgentRemoteException("Unknown command: " + cmd);
         }
@@ -505,13 +226,54 @@ public class MeasurementCommandsServer
                                           "plugin manager: " + 
                                           e.getMessage());
         }
+        
+        this.senderObject = new SenderThread(this.bootConfig.getBootProperties(),
+                                             this.storage, this.schedStorage);
+        
+        this.scheduleObject = new ScheduleThread(this.senderObject, 
+                                                 this.pluginManager);
+        
+        this.trackerObject =
+            new TrackerThread(this.ctPluginManager,
+                              this.ltPluginManager,
+                              this.storage,
+                              this.bootConfig.getBootProperties());
+        
+        this.measurementCommandsService = 
+                new MeasurementCommandsService(this.storage, 
+                                               this.validProps,
+                                               this.schedStorage, 
+                                               this.pluginManager, 
+                                               this.ltPluginManager,
+                                               this.ctPluginManager,
+                                               this.scheduleObject);
+        
+        AgentTransport agentTransport;
+        
+        try {
+            agentTransport = agent.getAgentTransport();
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get agent transport: "+
+                                            e.getMessage());
+        }
+        
+        if (agentTransport != null) {
+            log.info("Registering Measurement Commands Service with Agent Transport");
+            
+            try {
+                agentTransport.registerService(MeasurementCommandsClient.class, 
+                                               measurementCommandsService);
+            } catch (Exception e) {
+                throw new AgentStartException("Failed to register Measurement Commands Service.", e);
+            }
+        }
 
-        spawnThreads();
+        spawnThreads(this.senderObject, this.scheduleObject, this.trackerObject);
 
         i = this.schedStorage.getMeasurementList();
         while(i.hasNext()){
             ScheduledMeasurement meas = (ScheduledMeasurement)i.next();
-            scheduleMeasurement(meas);
+            this.measurementCommandsService.scheduleMeasurement(meas);
         }
 
         agent.registerMonitor("camMetric.schedule", this.scheduleObject);
@@ -527,16 +289,6 @@ public class MeasurementCommandsServer
         }
 
         this.log.info("Measurement Commands Server started up");
-    }
-
-    private void scheduleMeasurement(ScheduledMeasurement m) {
-        this.scheduleObject.scheduleMeasurement(m);
-    }
-
-    private void unscheduleMeasurements(AppdefEntityID id)
-        throws UnscheduledItemException
-    {
-        this.scheduleObject.unscheduleMeasurements(id);
     }
 
     public void handleNotification(String msgClass, String msg){
