@@ -85,9 +85,9 @@ public class AgentDaemon
     private CommandListener      listener;
     private AgentTransport       agentTransport;
     private Vector               serverHandlers;
-    private Vector               startedHandlers;
+    private Vector               startedHandlers = new Vector();
     private AgentConfig          bootConfig;
-    private Hashtable            notifyHandlers;
+    private Hashtable            notifyHandlers = new Hashtable();
     private Hashtable            monitorClients;
     private volatile boolean     running;         // Are we running?
 
@@ -628,12 +628,7 @@ public class AgentDaemon
     private void startHandlers()
         throws AgentStartException
     {
-        int i;
-
-        this.notifyHandlers  = new Hashtable();
-        this.startedHandlers = new Vector();
-
-        for(i=0; i<this.serverHandlers.size(); i++){
+        for(int i=0; i<this.serverHandlers.size(); i++){
             AgentServerHandler handler;
             
             handler = (AgentServerHandler) this.serverHandlers.get(i);
@@ -728,14 +723,14 @@ public class AgentDaemon
                                           getStorageProvider());
                         
             try {
-                this.agentTransport = factory.createAgentTransport();                                    
+                this.agentTransport = factory.createAgentTransport();
             } catch (Exception e) {
-                throw new AgentStartException("Cannot start agent transport: "+e.getMessage());
+                throw new AgentStartException("Cannot start agent transport: " + e.getMessage(), e);
             }
             
             this.startPluginManagers();
             this.startHandlers();
-            
+
             // The server handlers have registered the new transport services. 
             // Now we can start the agent transport.
             if (this.agentTransport != null) {
@@ -748,6 +743,7 @@ public class AgentDaemon
             this.listener.listenLoop();
             this.sendNotification(NOTIFY_AGENT_DOWN, "goin' down, baby!");
         } catch(AgentStartException exc){
+            this.logger.error(exc.getMessage(), exc);
             throw exc;
         } catch(Exception exc){
             this.logger.error("Error running agent", exc);

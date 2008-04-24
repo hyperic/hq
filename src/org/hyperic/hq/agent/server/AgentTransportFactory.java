@@ -95,31 +95,31 @@ public class AgentTransportFactory implements AgentNotificationHandler {
         if (providerInfo == null) {
             _log.info("Agent token is not currently set. " +
             		  "Registering handler to notify agent transport when token is set.");
-        }
-        
-        String agentToken = providerInfo.getAgentToken();
-                        
-        if (unidirectional) {
-            _log.info("Setting up unidirectional transport");
-            
-            InetSocketAddress pollerBindAddr = 
-                new InetSocketAddress(host, port);
-            
-            _agentTransport = 
-                new AgentTransport(pollerBindAddr, 
-                                   "transport/ServerInvokerServlet", 
-                                   true, 
-                                   agentToken, 
-                                   unidirectional, 
-                                   pollingFrequency, 
-                                   1);
         } else {
-            _log.info("Setting up bidirectional transport");
-            // TODO need to implement bidirectional transport and return 
-            // an agent transport instead of null
-            _agentTransport = null;
+
+            String agentToken = providerInfo.getAgentToken();
+
+            if (unidirectional) {
+                _log.info("Setting up unidirectional transport");
+
+                InetSocketAddress pollerBindAddr =
+                    new InetSocketAddress(host, port);
+
+                _agentTransport =
+                    new AgentTransport(pollerBindAddr,
+                                       "transport/ServerInvokerServlet",
+                                       true,
+                                       agentToken,
+                                       unidirectional,
+                                       pollingFrequency,
+                                       1);
+            } else {
+                _log.info("Setting up bidirectional transport");
+                // TODO need to implement bidirectional transport and return
+                // an agent transport instead of null
+                _agentTransport = null;
+            }
         }
-        
         // register handler to be notified when the agent token is set (or reset)
         _agent.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
         
