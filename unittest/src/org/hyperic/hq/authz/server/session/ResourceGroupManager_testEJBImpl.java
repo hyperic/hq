@@ -26,7 +26,9 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -41,6 +43,9 @@ import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.grouping.CritterList;
+import org.hyperic.hq.grouping.critters.ProtoNameCritterType;
+import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 
 /**
@@ -150,6 +155,50 @@ public class ResourceGroupManager_testEJBImpl implements SessionBean {
         Assert.assertEquals(rg.getLocation(), location);
     }
 
+    /**
+     * Test setting criteria list for a group. This test will set the criteria on the resource
+     * group more than once to ensure that the criteria list can be overwritten
+     * correctly and persisted appropriately to the database.
+     * 
+     * @ejb:interface-method
+     */
+    public void testResourceGroupSetCriteria() throws Exception {
+        AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne()
+                .getOverlordPojo();
+        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroup.ResourceGroupCreateInfo info = new ResourceGroup.ResourceGroupCreateInfo(
+                "Test Criteria Group " + System.currentTimeMillis(), "Test Criteria Group Description", ADHOC, null,
+                "Test Criteria Group Location", 0, false);
+        
+        ResourceGroup rg = rgMan.createResourceGroup(overlord, info,
+                Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        
+
+        List critterList = new ArrayList();
+        critterList.add(new ProtoNameCritterType().newInstance("protoName1"));
+        critterList.add(new ResourceNameCritterType().newInstance("resName1"));
+        CritterList critters = new CritterList(critterList, false);
+        
+        // set the ResourceGroup criteria and verify
+        // that the criteria were set correctly
+        rgMan.setCriteria(overlord, rg, critters);
+        // verify that the CritterList has the right properties
+        CritterList rsltCritters = rg.getCritterList();
+        Assert.assertEquals(critters, rsltCritters);
+        
+        critterList.clear();
+        critterList.add(new ResourceNameCritterType().newInstance("resName2"));
+        critterList.add(new ProtoNameCritterType().newInstance("protoName2"));
+        critters = new CritterList(critterList, false);
+
+        // set the ResourceGroup criteria and verify
+        // that the criteria were set correctly
+        rgMan.setCriteria(overlord, rg, critters);
+        // verify that the CritterList has the right properties
+        rsltCritters = rg.getCritterList();
+        Assert.assertEquals(critters, rsltCritters);   
+    }
+    
     public void ejbCreate() throws CreateException {}
     public void ejbActivate() throws EJBException, RemoteException {}
     public void ejbPassivate() throws EJBException, RemoteException {}

@@ -39,4 +39,13 @@ public class ResourceGroupManager_test extends BaseServerTestCase {
 
         rmMan.testUpdate();        
     }
+    
+    public void testResourceGroupSetCriteria() throws Exception {
+        ResourceGroupManager_testLocal rmMan =
+            (ResourceGroupManager_testLocal)
+                 _registry.getLocalInterface(ResourceGroupManager_testEJBImpl.class,
+                                             ResourceGroupManager_testLocal.class);
+
+       rmMan.testResourceGroupSetCriteria();
+   }
 }
