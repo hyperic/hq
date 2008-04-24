@@ -43,4 +43,11 @@ public interface PollerClient {
      */
     void stop() throws InterruptedException;
 
+    /**
+     * Update the agent token uniquely identifying the agent.
+     * 
+     * @param agentToken The agent token.
+     */
+    void updateAgentToken(String agentToken);
+
 }

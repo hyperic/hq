@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.transport.util;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.remoting.InvokerLocator;
@@ -61,6 +62,28 @@ public class HQInvokerLocator extends InvokerLocator {
                             String agentToken) {
         super(protocol, host, port, path, parameters);
         _agentToken = agentToken;
+    }
+    
+    /**
+     * Clone this instance of HQ invoker locator, setting the agent token 
+     * to a new value.
+     * 
+     * @param agentToken The new agent token value.
+     * @return The cloned instance.
+     */
+    public HQInvokerLocator cloneWithNewAgentToken(String agentToken) {
+        HQInvokerLocator locator = new HQInvokerLocator(this.getProtocol(), 
+                                                        this.getHost(), 
+                                                        this.getPort(), 
+                                                        this.getPath(), 
+                                                        new HashMap(this.getParameters()), 
+                                                        agentToken);
+        
+        locator._invoker = this._invoker;
+        locator._oneWay = this._oneWay;
+        locator._guaranteed = this._guaranteed;
+        
+        return locator;
     }
     
     /**

@@ -154,6 +154,20 @@ public class AgentTransport {
         
         _server.addHandler(serviceImpl, serviceInterface.getName());
     }
+    
+    /**
+     * Update the agent token uniquely identifying the agent.
+     * 
+     * @param agentToken The agent token.
+     * @throws NullPointerException if the agent token is <code>null</code>.
+     */
+    public void updateAgentToken(String agentToken) {
+        if (agentToken == null) {
+            throw new NullPointerException("agent token is null");
+        }
+        
+        _pollerClient.updateAgentToken(agentToken);
+    }
 
     /**
      * Start the transport.
