@@ -44,11 +44,16 @@ class CageController
     def index(params) {
         Resource r = getViewedResource()
         ResourceGroup g = resourceHelper.findGroup(r.instanceId) 
-            
+
         def sess      = DAOFactory.getDAOFactory().currentSession
-        def ctx       = new CritterTranslationContext(sess, Util.getHQDialect())
+        def ctx       = new CritterTranslationContext()
         def trans     = new CritterTranslator()
         def clist     = g.critterList
+        if (!clist.critters) {
+            render(locals:[group:g, critterList:null,
+                           proposedResources:null])
+            return
+        }
         log.info "Critters: ${clist.critters.config}"
         def proposedResources = trans.translate(ctx, clist).list()
         

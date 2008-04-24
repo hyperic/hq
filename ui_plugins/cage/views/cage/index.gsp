@@ -1,15 +1,19 @@
 <div id="critters">
-  <% if (critterList.isAny()) { %>
-    ${l.ifAny}
-  <% } else { %>
-    ${l.ifAll}
-  <% } %>
+  <% if (critterList) { %>
+    <% if (critterList.isAny()) { %>
+      ${l.ifAny}
+    <% } else { %>
+      ${l.ifAll}
+    <% } %>
 
-  <ul>
-  <% for (c in group.critterList.critters) { %>
-    <li><%= h c.config %></li>
+    <ul>
+    <% for (c in group.critterList.critters) { %>
+      <li><%= h c.config %></li>
+    <% } %>
+    </ul>
+  <% } else { %>
+    No Criteria specified
   <% } %>
-  </ul>
 </div>
 
 <div id="resources">
@@ -21,11 +25,13 @@
   </table>
 </div>
 
-<div id="matchResources">
-  <h3>Proposed group members</h3>
-  <table>
-    <% for (r in proposedResources) { %>
-      <tr><td><%= h r.name %></td></tr>
-    <% } %>
-  </table>
-</div>
+<% if (critterList) { %>
+  <div id="matchResources">
+    <h3>Proposed group members</h3>
+    <table>
+      <% for (r in proposedResources) { %>
+        <tr><td><%= h r.name %></td></tr>
+      <% } %>
+    </table>
+  </div>
+<% } %>
