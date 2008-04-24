@@ -2578,7 +2578,7 @@ public class AppdefBossEJBImpl
      */
     public PageList search(int sessionId, int appdefTypeId, String searchFor,
                            AppdefEntityTypeID appdefResType, Integer groupId,
-                           int groupSubType, boolean matchAny, PageControl pc)
+                           int[] groupSubType, boolean matchAny, PageControl pc)
         throws PermissionException, SessionException {
         int grpEntId = APPDEF_GROUP_TYPE_UNDEFINED;
 
@@ -2598,7 +2598,7 @@ public class AppdefBossEJBImpl
     private PageList findInventoryFromCBG(int sessionId, int appdefTypeId,
                                           AppdefEntityTypeID appdefResType,
                                           int grpEntId, AppdefEntityID grpId,
-                                          String resourceName, int groupType,
+                                          String resourceName, int[] groupType,
                                           boolean matchAny, PageControl pc)
         throws PermissionException, SessionException
     {
@@ -2635,7 +2635,7 @@ public class AppdefBossEJBImpl
     
     private CritterList getCritterList(boolean matchAny,
         AppdefEntityTypeID appdefResType, String resourceName,
-        AppdefEntityID grpId, int grpEntId, int groupType, int appdefTypeId)
+        AppdefEntityID grpId, int grpEntId, int[] groupType, int appdefTypeId)
     {
         Critter tmp;
         List critters = new ArrayList();
@@ -2650,8 +2650,10 @@ public class AppdefBossEJBImpl
         }
         if (null != (tmp = getResourceTypeCritter(grpEntId))) {
             critters.add(tmp);
-            if (groupType != APPDEF_GROUP_TYPE_UNDEFINED) {
-                critters.add(getGrpTypeCritter(groupType));
+            if (groupType != null) {
+                for (int i = 0; i < groupType.length; i++) {
+                    critters.add(getGrpTypeCritter(groupType[i]));
+                }
             }
         } else if (null != (tmp = getResourceTypeCritter(appdefTypeId))) {
             critters.add(tmp);

@@ -255,7 +255,7 @@ public class ResourceHubPortalAction extends BaseAction {
         StopWatch watch = new StopWatch();
         watch.markTimeBegin("findCompatInventory");
         Integer gid = null;
-        int groupSubtype = -1;
+        int[] groupSubtype = null;
         
         if (isGroupSelected) {
             // as far as the backend is concerned, the resource type
@@ -264,15 +264,24 @@ public class ResourceHubPortalAction extends BaseAction {
             if (isCompatGroupSelected(groupType)) {
                 // entity type tells us which type of compat group was
                 // chosen
-                groupSubtype =
-                    entityType == AppdefEntityConstants.APPDEF_TYPE_SERVICE ?
-                    AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC :
-                    AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
+                groupSubtype = new int[] {
+                        AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS,
+                        AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC
+                };
             }
             else if (isAdhocGroupSelected(groupType)) {
-                // resourceType straight up tells us what group
-                // subtype was chosen
-                groupSubtype = resourceType;
+                if (resourceType != DEFAULT_RESOURCE_TYPE) {
+                    // resourceType straight up tells us what groupsubtype was 
+                    // chosen
+                    groupSubtype = new int[] { resourceType };
+                }
+                else {
+                    groupSubtype = new int[] {
+                            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS,
+                            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP,
+                            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP
+                    };
+                }
 
                 // for findCompatInventory, resourceType always need
                 // to be this, for whatever reason
@@ -312,6 +321,7 @@ public class ResourceHubPortalAction extends BaseAction {
             
         }
         
+        // TODO: Pass groupSubType as int[]
         resources = appdefBoss.search(sessionId, entityType, resourceName,
                                       aetid, gid, groupSubtype, 
                                       hubForm.isAny(),
