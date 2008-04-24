@@ -26,7 +26,7 @@
 package org.hyperic.util;
 
 
-public class PluginLoaderException extends NestedException {
+public class PluginLoaderException extends NestedRuntimeException {
 
     public PluginLoaderException () {
         super();
