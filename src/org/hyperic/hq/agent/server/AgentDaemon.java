@@ -54,6 +54,7 @@ import org.hyperic.hq.product.PluginExistsException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.transport.AgentTransport;
+import org.hyperic.util.PluginLoader;
 import org.hyperic.util.security.SecurityUtil;
 
 /**
@@ -80,6 +81,7 @@ public class AgentDaemon
     private double               startTime;
     private Log                  logger;
     private ServerHandlerLoader  handlerLoader;
+    private PluginLoader         handlerClassLoader;
     private CommandDispatcher    dispatcher;
     private AgentStorageProvider storageProvider;
     private CommandListener      listener;
@@ -104,7 +106,10 @@ public class AgentDaemon
         // See cleanup()/configure() for fields which can
         // be re-configured
         this.logger        = LogFactory.getLog(AgentDaemon.class);
-        this.handlerLoader = new ServerHandlerLoader();
+        this.handlerClassLoader =
+            PluginLoader.create("ServerHandlerLoader",
+                                getClass().getClassLoader());
+        this.handlerLoader = new ServerHandlerLoader(this.handlerClassLoader);
         this.running       = false;
         this.startTime     = System.currentTimeMillis();
 
@@ -383,6 +388,12 @@ public class AgentDaemon
         if(this.isRunning()){
             throw new AgentRunningException("Agent cannot be configured while"+
                                             " running");
+        }
+
+        //add lib/handlers/lib/*.jar classpath for handlers only
+        File handlersLib = new File("lib/handlers/lib");
+        if (handlersLib.exists()) {
+            this.handlerClassLoader.addURL(handlersLib);
         }
 
         // Dispatcher
