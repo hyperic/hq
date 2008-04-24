@@ -723,13 +723,14 @@ public class AgentDaemon
                 
         try {
             AgentTransportFactory factory = 
-                new AgentTransportFactory(getBootConfig(), 
+                new AgentTransportFactory(this,
+                                          getBootConfig(), 
                                           getStorageProvider());
                         
             try {
                 this.agentTransport = factory.createAgentTransport();                                    
             } catch (Exception e) {
-                this.logger.error("Cannot start agent transport: "+e.getMessage());
+                throw new AgentStartException("Cannot start agent transport: "+e.getMessage());
             }
             
             this.startPluginManagers();

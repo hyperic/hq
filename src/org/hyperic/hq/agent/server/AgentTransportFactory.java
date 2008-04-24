@@ -39,21 +39,26 @@ import org.hyperic.hq.transport.AgentTransport;
 /**
  * A factory for creating agent transports.
  */
-public class AgentTransportFactory {
+public class AgentTransportFactory implements AgentNotificationHandler {
     
     private static final Log _log = LogFactory.getLog(AgentTransportFactory.class);
     
+    private final AgentDaemon _agent;
     private final AgentConfig _bootConfig;
     private final AgentStorageProvider _storageProvider;
+    private AgentTransport _agentTransport;
     
     /**
      * Creates an instance.
      *
+     * @param agent The agent.
      * @param bootConfig The boot config.
      * @param storageProvider The storage provider.
      */
-    public AgentTransportFactory(AgentConfig bootConfig, 
+    public AgentTransportFactory(AgentDaemon agent,
+                                 AgentConfig bootConfig, 
                                  AgentStorageProvider storageProvider) {
+        _agent = agent;
         _bootConfig = bootConfig;
         _storageProvider = storageProvider;
     }
@@ -88,20 +93,19 @@ public class AgentTransportFactory {
             CommandsAPIInfo.getProvider(_storageProvider);
         
         if (providerInfo == null) {
-            throw new Exception("Need to setup agent to initialize agent token");
+            _log.info("Agent token is not currently set. " +
+            		  "Registering handler to notify agent transport when token is set.");
         }
         
         String agentToken = providerInfo.getAgentToken();
-                
-        AgentTransport agentTransport;
-        
+                        
         if (unidirectional) {
             _log.info("Setting up unidirectional transport");
             
             InetSocketAddress pollerBindAddr = 
                 new InetSocketAddress(host, port);
             
-            agentTransport = 
+            _agentTransport = 
                 new AgentTransport(pollerBindAddr, 
                                    "transport/ServerInvokerServlet", 
                                    true, 
@@ -113,10 +117,36 @@ public class AgentTransportFactory {
             _log.info("Setting up bidirectional transport");
             // TODO need to implement bidirectional transport and return 
             // an agent transport instead of null
-            return null;
+            _agentTransport = null;
         }
         
-        return agentTransport;
+        // register handler to be notified when the agent token is set (or reset)
+        _agent.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
+        
+        return _agentTransport;
+    }
+
+    /**
+     * Notification handles agent token reset.
+     * 
+     * @see org.hyperic.hq.agent.server.AgentNotificationHandler#handleNotification(java.lang.String, java.lang.String)
+     */
+    public void handleNotification(String msgClass, String msg) {
+        ProviderInfo providerInfo = 
+            CommandsAPIInfo.getProvider(_storageProvider);
+        
+        if (providerInfo == null) {
+            _log.error("Agent transport expected agent token set but " +
+            		   "storage provider does not have token.");
+        } else {
+            String agentToken = providerInfo.getAgentToken();
+            
+            _log.info("Updating agent transport with new agent token: "+agentToken);
+            
+            if (_agentTransport != null) {
+                _agentTransport.updateAgentToken(agentToken);
+            }
+        }
     }
 
 }
