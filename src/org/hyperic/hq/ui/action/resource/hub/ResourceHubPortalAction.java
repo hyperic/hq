@@ -214,9 +214,12 @@ public class ResourceHubPortalAction extends BaseAction {
                 // all, but rather an integer
                 resourceType = (new Integer(ft)).intValue();
             }
-            String typeName = appdefBoss.findResourceTypeById(
-                sessionId, new AppdefEntityTypeID(ft)).getName();
-            navHierarchy += typeName;
+            
+            if (aetid != null) {
+                String typeName = appdefBoss.findResourceTypeById(
+                    sessionId, new AppdefEntityTypeID(ft)).getName();
+                navHierarchy += typeName;
+            }
         }
         else {
             hubForm.setFt(new Integer(resourceType).toString());
@@ -414,6 +417,7 @@ public class ResourceHubPortalAction extends BaseAction {
             else if (isAdhocGroupSelected(groupType)) {
                 // the entity is an adhoc group- we offer no adhoc group
                 // options
+                addMixedTypeOptions(hubForm, res);
             }
             else {
                 throw new ServletException("invalid group type: " + groupType);
@@ -468,6 +472,22 @@ public class ResourceHubPortalAction extends BaseAction {
             form.addType(new LabelValueBean(label, BLANK_VAL));
             addTypeOptions(form, types);
         }
+    }
+    
+    private void addMixedTypeOptions(ResourceHubForm form, MessageResources mr)
+    {
+        form.addType(
+            new LabelValueBean(
+                mr.getMessage("resource.group.inventory.New.props.GroupOfGroups"),
+                String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP)));
+        form.addType(
+            new LabelValueBean(
+                mr.getMessage("resource.group.inventory.New.props.GroupOfMixed"),
+                String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS)));
+        form.addType(
+            new LabelValueBean(
+                mr.getMessage("resource.group.inventory.New.props.GroupOfApplications"),
+                String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)));
     }
 
     private boolean isAdhocGroupSelected(int type) {
