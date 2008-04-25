@@ -354,7 +354,12 @@ public class AvailabilityManagerEJBImpl
             MetricValue mval;
             long lendtime = endtime.longValue();
             mval = new MetricValue(availVal, lendtime);
-            lastMap.put(key, mval);
+            MetricValue tmp = null;
+            if (null == (tmp = (MetricValue)lastMap.get(key))) {
+                lastMap.put(key, mval);
+            } else if (mval.getTimestamp() > tmp.getTimestamp()) {
+                lastMap.put(key, mval);
+            }
             rtn.put(key, data);
         }
         for (Iterator it=rtn.values().iterator(); it.hasNext(); ) {

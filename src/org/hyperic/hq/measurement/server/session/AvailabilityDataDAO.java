@@ -241,11 +241,12 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     // there is an open bug on this for hibernate to
                     // automatically expand group by's
                     // http://opensource.atlassian.com/projects/hibernate/browse/HHH-2407
-                    .append(" group by m.id,m._version_,m.instanceId,")
+                    .append(" GROUP BY m.id,m._version_,m.instanceId,")
                     .append(" m.template,m.mtime,m.enabled,")
                     .append(" m.interval,m.dsn,m.resource,")
                     .append(" rle.availabilityDataId.startime, rle.availVal,")
-                    .append(" rle.endtime").toString();
+                    .append(" rle.endtime")
+                    .append(" ORDER BY rle.endtime").toString();
         return getSession()
             .createQuery(sql)
             .setLong("startime", start)
@@ -278,9 +279,10 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     .append("   OR rle.endtime > :startime)")
                     .append(" AND (rle.availabilityDataId.startime < :endtime")
                     .append("   OR rle.endtime < :endtime)")
-                    .append(" group by m.template.id,")
+                    .append(" GROUP BY m.template.id,")
                     .append(" rle.availabilityDataId.startime, rle.availVal,")
-                    .append(" rle.endtime").toString();
+                    .append(" rle.endtime")
+                    .append(" ORDER BY rle.endtime").toString();
         return getSession()
             .createQuery(sql)
             .setLong("startime", start)
