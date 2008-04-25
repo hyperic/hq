@@ -39,6 +39,7 @@ import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
+import org.hyperic.hq.agent.server.AgentTransportLifecycle;
 import org.hyperic.hq.bizapp.client.ControlCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.control.agent.ControlCommandsAPI;
@@ -51,7 +52,6 @@ import org.hyperic.hq.control.agent.commands.ControlPluginRemove_args;
 import org.hyperic.hq.control.agent.commands.ControlPluginRemove_result;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.transport.AgentTransport;
 import org.hyperic.util.config.ConfigResponse;
 
 public class ControlCommandsServer 
@@ -135,23 +135,21 @@ public class ControlCommandsServer
         
         controlCommandsService = new ControlCommandsService(controlManager, client);
         
-        AgentTransport agentTransport;
+        AgentTransportLifecycle agentTransportLifecycle;
         
         try {
-            agentTransport = agent.getAgentTransport();
+            agentTransportLifecycle = agent.getAgentTransportLifecycle();
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport: "+
+            throw new AgentStartException("Unable to get agent transport lifecycle: "+
                                             e.getMessage());
         }
         
-        if (agentTransport != null) {
-            log.info("Registering Control Commands Service with Agent Transport");
-            
-            try {
-                agentTransport.registerService(ControlCommandsClient.class, controlCommandsService);
-            } catch (Exception e) {
-                throw new AgentStartException("Failed to register Control Commands Service.", e);
-            }
+        log.info("Registering Control Commands Service with Agent Transport");
+        
+        try {
+            agentTransportLifecycle.registerService(ControlCommandsClient.class, controlCommandsService);
+        } catch (Exception e) {
+            throw new AgentStartException("Failed to register Control Commands Service.", e);
         }
 
         this.log.info("Control Commands Server started up");

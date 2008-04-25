@@ -36,12 +36,12 @@ import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentStartException;
+import org.hyperic.hq.agent.server.AgentTransportLifecycle;
 import org.hyperic.hq.livedata.agent.LiveDataCommandsAPI;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
 import org.hyperic.hq.livedata.agent.commands.LiveData_args;
 import org.hyperic.hq.product.LiveDataPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.transport.AgentTransport;
 
 public class LiveDataCommandsServer implements AgentServerHandler {
 
@@ -87,25 +87,24 @@ public class LiveDataCommandsServer implements AgentServerHandler {
         
         _liveDataCommandsService = new LiveDataCommandsService(_manager);
         
-        AgentTransport agentTransport;
+        AgentTransportLifecycle agentTransportLifecycle;
         
         try {
-            agentTransport = agent.getAgentTransport();
+            agentTransportLifecycle = agent.getAgentTransportLifecycle();
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport: "+
+            throw new AgentStartException("Unable to get agent transport lifecycle: "+
                                             e.getMessage());
         }
         
-        if (agentTransport != null) {
-            _log.info("Registering Live Data Commands Service with Agent Transport");
-            
-            try {
-                agentTransport.registerService(LiveDataCommandsClient.class, 
-                                               _liveDataCommandsService);
-            } catch (Exception e) {
-                throw new AgentStartException("Failed to register Live Data Commands Service.", e);
-            }
-        }        
+        _log.info("Registering Live Data Commands Service with Agent Transport");
+        
+        try {
+            agentTransportLifecycle.registerService(LiveDataCommandsClient.class, 
+                                           _liveDataCommandsService);
+        } catch (Exception e) {
+            throw new AgentStartException("Failed to register Live Data Commands Service.", e);
+        }
+ 
         
         _log.info("Live Data Commands Server started up");
     }

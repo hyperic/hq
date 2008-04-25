@@ -42,6 +42,7 @@ import org.hyperic.hq.agent.server.AgentRunningException;
 import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
+import org.hyperic.hq.agent.server.AgentTransportLifecycle;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfiguration;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
@@ -57,7 +58,6 @@ import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.transport.AgentTransport;
 import org.hyperic.util.StringUtil;
 
 public class AutoinventoryCommandsServer 
@@ -195,24 +195,22 @@ public class AutoinventoryCommandsServer
                                                    _rtAutodiscoverer, 
                                                    _scanManager);
         
-        AgentTransport agentTransport;
+        AgentTransportLifecycle agentTransportLifecycle;
         
         try {
-            agentTransport = agent.getAgentTransport();
+            agentTransportLifecycle = agent.getAgentTransportLifecycle();
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport: "+
+            throw new AgentStartException("Unable to get agent transport lifecycle: "+
                                             e.getMessage());
         }
         
-        if (agentTransport != null) {
-            _log.info("Registering AI Commands Service with Agent Transport");
-            
-            try {
-                agentTransport.registerService(AICommandsClient.class, _aiCommandsService);
-            } catch (Exception e) {
-                throw new AgentStartException("Failed to register AI Commands Service.", e);
-            }
-        }        
+        _log.info("Registering AI Commands Service with Agent Transport");
+        
+        try {
+            agentTransportLifecycle.registerService(AICommandsClient.class, _aiCommandsService);
+        } catch (Exception e) {
+            throw new AgentStartException("Failed to register AI Commands Service.", e);
+        }    
                 
         _scanManager.startup();
 

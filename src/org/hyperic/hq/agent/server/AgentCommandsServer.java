@@ -25,13 +25,8 @@
 
 package org.hyperic.hq.agent.server;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,7 +35,6 @@ import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentCommandsAPI;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
-import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.commands.AgentDie_args;
 import org.hyperic.hq.agent.commands.AgentDie_result;
@@ -49,10 +43,6 @@ import org.hyperic.hq.agent.commands.AgentPing_result;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.agent.commands.AgentRestart_args;
 import org.hyperic.hq.agent.commands.AgentRestart_result;
-import org.hyperic.hq.transport.AgentTransport;
-import org.hyperic.util.file.FileWriter;
-import org.hyperic.util.math.MathUtil;
-import org.tanukisoftware.wrapper.WrapperManager;
 
 /**
  * The server-side of the commands the Agent supports.  This object 
@@ -117,25 +107,23 @@ public class AgentCommandsServer
     public void startup(AgentDaemon agent) throws AgentStartException {
         this.agent = agent;
         
-        AgentTransport agentTransport;
+        AgentTransportLifecycle agentTransportLifecycle;
         
         try {
-            agentTransport = agent.getAgentTransport();
+            agentTransportLifecycle = agent.getAgentTransportLifecycle();
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport: "+
+            throw new AgentStartException("Unable to get agent transport lifecycle: "+
                                             e.getMessage());
         }
         
         agentCommandsService = new AgentCommandsService(agent);
         
-        if (agentTransport != null) {
-            log.info("Registering Agent Commands Service with Agent Transport");
-            
-            try {
-                agentTransport.registerService(AgentCommandsClient.class, agentCommandsService);
-            } catch (Exception e) {
-                throw new AgentStartException("Failed to register Agent Commands Service.", e);
-            }
+        log.info("Registering Agent Commands Service with Agent Transport");
+        
+        try {
+            agentTransportLifecycle.registerService(AgentCommandsClient.class, agentCommandsService);
+        } catch (Exception e) {
+            throw new AgentStartException("Failed to register Agent Commands Service.", e);
         }
         
         this.log.info("Agent commands started up");

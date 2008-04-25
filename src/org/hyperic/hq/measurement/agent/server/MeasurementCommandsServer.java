@@ -45,6 +45,7 @@ import org.hyperic.hq.agent.server.AgentRunningException;
 import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
+import org.hyperic.hq.agent.server.AgentTransportLifecycle;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
@@ -68,7 +69,6 @@ import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.transport.AgentTransport;
 
 public class MeasurementCommandsServer 
     implements AgentServerHandler, AgentNotificationHandler {
@@ -248,24 +248,22 @@ public class MeasurementCommandsServer
                                                this.ctPluginManager,
                                                this.scheduleObject);
         
-        AgentTransport agentTransport;
+        AgentTransportLifecycle agentTransportLifecycle;
         
         try {
-            agentTransport = agent.getAgentTransport();
+            agentTransportLifecycle = agent.getAgentTransportLifecycle();
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport: "+
+            throw new AgentStartException("Unable to get agent transport lifecycle: "+
                                             e.getMessage());
         }
         
-        if (agentTransport != null) {
-            log.info("Registering Measurement Commands Service with Agent Transport");
-            
-            try {
-                agentTransport.registerService(MeasurementCommandsClient.class, 
-                                               measurementCommandsService);
-            } catch (Exception e) {
-                throw new AgentStartException("Failed to register Measurement Commands Service.", e);
-            }
+        log.info("Registering Measurement Commands Service with Agent Transport");
+        
+        try {
+            agentTransportLifecycle.registerService(MeasurementCommandsClient.class, 
+                                           measurementCommandsService);
+        } catch (Exception e) {
+            throw new AgentStartException("Failed to register Measurement Commands Service.", e);
         }
 
         spawnThreads(this.senderObject, this.scheduleObject, this.trackerObject);
