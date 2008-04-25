@@ -28,6 +28,7 @@ package org.hyperic.hq.agent.server;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
@@ -53,7 +54,6 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginExistsException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ProductPluginManager;
-import org.hyperic.hq.transport.AgentTransport;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.security.SecurityUtil;
 
@@ -85,7 +85,7 @@ public class AgentDaemon
     private CommandDispatcher    dispatcher;
     private AgentStorageProvider storageProvider;
     private CommandListener      listener;
-    private AgentTransport       agentTransport;
+    private AgentTransportLifecycle agentTransportLifecycle;
     private Vector               serverHandlers;
     private Vector               startedHandlers = new Vector();
     private AgentConfig          bootConfig;
@@ -109,7 +109,7 @@ public class AgentDaemon
         this.handlerClassLoader =
             PluginLoader.create("ServerHandlerLoader",
                                 getClass().getClassLoader());
-        this.handlerLoader = new ServerHandlerLoader(this.handlerClassLoader);
+        this.handlerLoader = new ServerHandlerLoader(this.handlerClassLoader);        
         this.running       = false;
         this.startTime     = System.currentTimeMillis();
 
@@ -121,13 +121,11 @@ public class AgentDaemon
     }
 
     private static File[] getLibJars() {
-        File[] jars = new File("lib").listFiles(new FileFilter() {
+        File[] jars = new File("lib/handlers").listFiles(new FileFilter() {
                 public boolean accept(File file) {
                     String name = file.getName();
                     
-                    // The jboss-remoting jar has a Main-Class but we don't 
-                    // want to load this class as an AgentServerHandler
-                    return name.endsWith(".jar") && !name.contains("jboss-remoting");
+                    return name.endsWith(".jar");
                 }
             });
 
@@ -213,22 +211,21 @@ public class AgentDaemon
     }
     
     /**
-     * Retrieve the agent transport. May be <code>null</code> if the agent 
-     * transport type (bidirectional/unidirectional) is not supported.
+     * Retrieve the agent transport lifecycle.
      * 
      * @throws AgentRunningException indicating the Agent was not running 
      *                               when the request was made.
      */
-    public AgentTransport getAgentTransport() 
+    public AgentTransportLifecycle getAgentTransportLifecycle() 
         throws AgentRunningException 
     {
         
         if(!this.isRunning()){
-            throw new AgentRunningException("Agent Transport cannot be retrieved if " +
+            throw new AgentRunningException("Agent Transport Lifecycle cannot be retrieved if " +
                                             "the Agent is not running");
         }
         
-        return this.agentTransport;
+        return this.agentTransportLifecycle;
     }
 
     /**
@@ -728,25 +725,41 @@ public class AgentDaemon
         redirectStreams(bootProps);
                 
         try {
-            AgentTransportFactory factory = 
-                new AgentTransportFactory(this,
-                                          getBootConfig(), 
-                                          getStorageProvider());
-                        
+            
+            // Load the agent transport in the server handler classloader.
+            // This is necessary because we don't want the jboss remoting 
+            // classes in the root agent classloader - this causes conflicts 
+            // with the jboss plugins.
+            String agentTransportLifecycleClass = 
+                "org.hyperic.hq.agent.server.AgentTransportLifecycleImpl";
+
             try {
-                this.agentTransport = factory.createAgentTransport();
-            } catch (Exception e) {
-                throw new AgentStartException("Cannot start agent transport: " + e.getMessage(), e);
+                Class clazz = this.handlerClassLoader.loadClass(agentTransportLifecycleClass);
+                Constructor constructor = clazz.getConstructor(
+                                    new Class[]{AgentDaemon.class, 
+                                                AgentConfig.class, 
+                                                AgentStorageProvider.class
+                                                });
+
+                this.agentTransportLifecycle = 
+                    (AgentTransportLifecycle)constructor.newInstance(
+                                    new Object[]{this, 
+                                                 getBootConfig(), 
+                                                 getStorageProvider()
+                                                 });
+            } catch (ClassNotFoundException e) {
+                throw new AgentStartException(
+                        "Cannot find agent transport lifecycle class: "+
+                        agentTransportLifecycleClass);
             }
             
             this.startPluginManagers();
             this.startHandlers();
 
-            // The server handlers have registered the new transport services. 
-            // Now we can start the agent transport.
-            if (this.agentTransport != null) {
-                this.agentTransport.start();
-            }
+            
+            // The started handlers should have already registered with the 
+            // agent transport lifecycle
+            this.agentTransportLifecycle.startAgentTransport();                
             
             this.listener.setup();
             this.logger.info("Agent started successfully");
@@ -771,11 +784,8 @@ public class AgentDaemon
             // The next line will never execute 
             throw new AgentStartException("Critical shutdown");
         } finally {
-            if (this.agentTransport != null) {
-                try {
-                    this.agentTransport.stop();
-                } catch (InterruptedException e) {
-                }
+            if (this.agentTransportLifecycle != null) {
+                this.agentTransportLifecycle.stopAgentTransport();
             }
             
             this.running = false;
