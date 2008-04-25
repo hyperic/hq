@@ -17,6 +17,8 @@ RUNDIR=`echo $FINDNAME | sed -e 's@/[^/]*$@@'`
 unset FINDNAME
 if test -d $RUNDIR; then
   cd $RUNDIR/..
+else
+  cd ..
 fi
 
 if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
