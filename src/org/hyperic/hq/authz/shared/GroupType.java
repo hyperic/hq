@@ -42,24 +42,34 @@ public class GroupType extends HypericEnum {
             rtn.add(GROUP_OF_GROUPS);
             rtn.add(APPLICATION_GROUP);
             rtn.add(PLATFORM_SERVER_SERVICE_GROUP);
+            return rtn;
         } else if (this.equals(COMPATIBLE_GROUP)) {
             rtn.add(PLATFORM_SERVER_GROUP);
             rtn.add(SERVICE_CLUSTER);
-        } else {
-            rtn.add(this);
+            return rtn;
         }
-        return rtn;
+        // blow up if this does not equal MIXED or COMPATIBLE GROUP
+        assert false;
+        return null;
     }
 
-    public static GroupType findBundledTypeByCode(int[] codes) {
+    /*
+     * @param codes array of AppdefEntityConstants representing either
+     * a mixed or compatible group.
+     */
+    public static GroupType findByCode(int[] codes) {
         Integer[] rtn = new Integer[codes.length];
         for (int i=0; i<codes.length; i++) {
             rtn[i] = new Integer(codes[i]);
         }
-        return findBundledTypeByCode(rtn);
+        return findByCode(rtn);
     }
 
-    public static GroupType findBundledTypeByCode(Integer[] codes) {
+    /*
+     * @param codes array of AppdefEntityConstants representing either
+     * a mixed or compatible group.
+     */
+    public static GroupType findByCode(Integer[] codes) {
         if (codes.length == 1) {
             return findByCode(codes[0].intValue());
         }

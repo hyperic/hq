@@ -2671,7 +2671,7 @@ public class AppdefBossEJBImpl
             return null;
         }
         try {
-            GroupType type = GroupType.findBundledTypeByCode(groupTypes);
+            GroupType type = GroupType.findByCode(groupTypes);
             return critter.newInstance(type);
         } catch (GroupException e) {
             log.warn(e.getMessage(), e);
