@@ -36,6 +36,9 @@ public class SetServer_args
 {
     private static final String PROP_CAMPROVIDER   = "provider";
     private static final String PROP_CAMAGENTTOKEN = "agentToken";
+    private static final String PROP_ISNEWTRANSPORT = "isNewTransport";
+    private static final String PROP_UNIDIRECTIONAL = "unidirectional";
+    private static final String PROP_UNIDIRECTIONAL_PORT = "unidirectionalPort";
 
     public SetServer_args(){
         super();
@@ -50,6 +53,12 @@ public class SetServer_args
     public void setProvider(ProviderInfo provider){
         this.setValue(PROP_CAMPROVIDER, provider.getProviderAddress());
         this.setValue(PROP_CAMAGENTTOKEN, provider.getAgentToken());
+        this.setValue(PROP_ISNEWTRANSPORT, String.valueOf(provider.isNewTransport()));
+        
+        if (provider.isNewTransport()) {
+            this.setValue(PROP_UNIDIRECTIONAL, String.valueOf(provider.isUnidirectional()));
+            this.setValue(PROP_UNIDIRECTIONAL_PORT, String.valueOf(provider.getUnidirectionalPort()));
+        }
     }
 
     public ProviderInfo getProvider(){
@@ -64,8 +73,23 @@ public class SetServer_args
     private static ProviderInfo getProvider(AgentRemoteValue rVal)
         throws AgentRemoteException
     {
-        return new ProviderInfo(getReqField(rVal, PROP_CAMPROVIDER),
-                                getReqField(rVal, PROP_CAMAGENTTOKEN));
+        ProviderInfo providerInfo = 
+            new ProviderInfo(getReqField(rVal, PROP_CAMPROVIDER),
+                             getReqField(rVal, PROP_CAMAGENTTOKEN));
+        
+        boolean isNewTransport = 
+            Boolean.valueOf(getReqField(rVal, PROP_ISNEWTRANSPORT)).booleanValue();
+        
+        if (isNewTransport) {
+            boolean unidirectional = 
+                Boolean.valueOf(getReqField(rVal, PROP_UNIDIRECTIONAL)).booleanValue();
+            int unidirectionalPort = 
+                Integer.valueOf(getReqField(rVal, PROP_UNIDIRECTIONAL_PORT)).intValue();
+            
+            providerInfo.setNewTransport(unidirectional, unidirectionalPort);
+        }
+        
+        return providerInfo;
     }
 
     private static String getReqField(AgentRemoteValue rVal, String field)
