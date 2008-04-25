@@ -25,9 +25,9 @@
 
 package org.hyperic.hq.grouping.critters;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
@@ -49,7 +49,7 @@ public class ResourceNameCritterType
     }
 
     public ResourceNameCritter newInstance(String name) 
-        throws GroupException
+        throws GroupException, PatternSyntaxException
     {
         List props = new ArrayList(1);
         props.add(new StringCritterProp(name));

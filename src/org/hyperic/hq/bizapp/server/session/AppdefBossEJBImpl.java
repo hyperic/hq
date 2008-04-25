@@ -27,6 +27,7 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,6 +40,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.PatternSyntaxException;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -166,6 +168,7 @@ import org.hyperic.hq.grouping.critters.GroupTypeCritterType;
 import org.hyperic.hq.grouping.critters.ProtoCritterType;
 import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
 import org.hyperic.hq.grouping.critters.ResourceTypeCritterType;
+import org.hyperic.hq.grouping.prop.EnumCritterProp;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
@@ -178,6 +181,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.util.HypericEnum;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -2579,7 +2583,8 @@ public class AppdefBossEJBImpl
     public PageList search(int sessionId, int appdefTypeId, String searchFor,
                            AppdefEntityTypeID appdefResType, Integer groupId,
                            int[] groupSubType, boolean matchAny, PageControl pc)
-        throws PermissionException, SessionException {
+        throws PermissionException, SessionException, PatternSyntaxException
+    {
         int grpEntId = APPDEF_GROUP_TYPE_UNDEFINED;
 
         if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
@@ -2600,12 +2605,10 @@ public class AppdefBossEJBImpl
                                           int grpEntId, AppdefEntityID grpId,
                                           String resourceName, int[] groupType,
                                           boolean matchAny, PageControl pc)
-        throws PermissionException, SessionException
+        throws PermissionException, SessionException, PatternSyntaxException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
         PageList res = new PageList();
-        resourceName = (resourceName != null && resourceName.equals("*")) ?
-                            ".*" : resourceName;
 
         CritterTranslator trans       = new CritterTranslator();
         CritterTranslationContext ctx = new CritterTranslationContext();
@@ -2635,7 +2638,8 @@ public class AppdefBossEJBImpl
     
     private CritterList getCritterList(boolean matchAny,
         AppdefEntityTypeID appdefResType, String resourceName,
-        AppdefEntityID grpId, int grpEntId, int[] groupType, int appdefTypeId)
+        AppdefEntityID grpId, int grpEntId, int[] groupTypes, int appdefTypeId)
+        throws PatternSyntaxException
     {
         Critter tmp;
         List critters = new ArrayList();
@@ -2650,10 +2654,8 @@ public class AppdefBossEJBImpl
         }
         if (null != (tmp = getResourceTypeCritter(grpEntId))) {
             critters.add(tmp);
-            if (groupType != null) {
-                for (int i = 0; i < groupType.length; i++) {
-                    critters.add(getGrpTypeCritter(groupType[i]));
-                }
+            if (groupTypes != null) {
+                critters.add(getGrpTypeCritter(groupTypes));
             }
         } else if (null != (tmp = getResourceTypeCritter(appdefTypeId))) {
             critters.add(tmp);
@@ -2661,13 +2663,26 @@ public class AppdefBossEJBImpl
         return new CritterList(critters, matchAny);
     }
     
-    private Critter getGrpTypeCritter(int groupType) {
-        if (groupType == APPDEF_GROUP_TYPE_UNDEFINED) {
+    private Critter getGrpTypeCritter(int[] groupTypes) {
+        GroupTypeCritterType critter = new GroupTypeCritterType();
+        List list = new ArrayList();
+        for (int i=0; i<groupTypes.length; i++) {
+            if (groupTypes[i] == APPDEF_GROUP_TYPE_UNDEFINED) {
+                continue;
+            }
+            try {
+                HypericEnum inum =
+                    GroupTypeCritter.getGroupTypeEnum(groupTypes[i]);
+                list.add(new EnumCritterProp(inum));
+            } catch (GroupException e) {
+                log.warn(e.getMessage(), e);
+            }
+        }
+        if (list.size() == 0) {
             return null;
         }
-        GroupTypeCritterType critter = new GroupTypeCritterType();
         try {
-            return critter.newInstance(groupType);
+            return critter.newInstance(list);
         } catch (GroupException e) {
             log.warn(e.getMessage(), e);
         }
@@ -2719,7 +2734,9 @@ public class AppdefBossEJBImpl
         return null;
     }
 
-    private Critter getResourceNameCritter(String resourceName) {
+    private Critter getResourceNameCritter(String resourceName)
+        throws PatternSyntaxException
+    {
         if (resourceName != null) {
             try {
                 ResourceNameCritterType resNameCritterType =

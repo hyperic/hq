@@ -26,6 +26,7 @@
 package org.hyperic.hq.grouping.critters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.hyperic.hq.grouping.Critter;
@@ -43,7 +44,7 @@ public class GroupTypeCritterType extends BaseCritterType {
     public GroupTypeCritterType() {
         super();
         initialize("org.hyperic.hq.grouping.Resources", "groupType"); 
-        addPropDescription("typeId", CritterPropType.STRING);
+        addPropDescription("typeId", CritterPropType.ENUM);
     }
 
     public Critter compose(CritterDump dump) throws GroupException {
@@ -59,15 +60,10 @@ public class GroupTypeCritterType extends BaseCritterType {
         return true;
     }
 
-    public Critter newInstance(int groupType) throws GroupException {
-        List list = new ArrayList();
-        list.add(new StringCritterProp((new Integer(groupType)).toString()));
-        return newInstance(list);
-    }
-
     public Critter newInstance(List critterProps) throws GroupException {
-        validate(critterProps);
-        StringCritterProp prop = (StringCritterProp)critterProps.get(0);
-        return new GroupTypeCritter(prop, this);
+        List list = new ArrayList();
+        list.add(critterProps.get(0));
+        validate(list);
+        return new GroupTypeCritter(critterProps, this);
     }
 }

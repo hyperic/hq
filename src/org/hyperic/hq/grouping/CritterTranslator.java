@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.util.pager.PageControl;
@@ -53,14 +54,14 @@ public class CritterTranslator {
     {
         PageList rtn = new PageList();
         rtn.ensureCapacity(pc.getPagesize());
-        rtn.addAll(
-            translate(ctx, cList, false)
-            .setFirstResult(pc.getPageEntityIndex())
-            .setMaxResults(pc.getPagesize())
-            .list());
+        Query query = translate(ctx, cList, false)
+                        .setFirstResult(pc.getPageEntityIndex());
+        if (PageControl.SIZE_UNLIMITED != pc.getPagesize()) {
+            query.setMaxResults(pc.getPagesize());
+        }
+        rtn.addAll(query.list());
         rtn.setTotalSize(
-            ((Number)translate(ctx, cList, true)
-            .uniqueResult()).intValue());
+            ((Number)translate(ctx, cList, true).uniqueResult()).intValue());
         return rtn;
     }
 

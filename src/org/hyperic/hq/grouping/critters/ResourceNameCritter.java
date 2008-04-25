@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,6 +28,8 @@ package org.hyperic.hq.grouping.critters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
@@ -42,7 +44,12 @@ class ResourceNameCritter
     private final List                    _props;
     private final ResourceNameCritterType _type;
     
-    ResourceNameCritter(String nameRegex, ResourceNameCritterType type) {
+    ResourceNameCritter(String nameRegex, ResourceNameCritterType type)
+        throws PatternSyntaxException
+    {
+        // will throw  a PatternSyntaxException if there is something
+        // wrong with nameRegex
+        Pattern.compile(nameRegex);
         _nameRegex = nameRegex;
 
         List c = new ArrayList(1);
