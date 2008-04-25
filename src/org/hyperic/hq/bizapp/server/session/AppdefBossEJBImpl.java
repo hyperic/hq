@@ -135,6 +135,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.GroupCreationException;
+import org.hyperic.hq.authz.shared.GroupType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
@@ -2665,24 +2666,13 @@ public class AppdefBossEJBImpl
     
     private Critter getGrpTypeCritter(int[] groupTypes) {
         GroupTypeCritterType critter = new GroupTypeCritterType();
-        List list = new ArrayList();
-        for (int i=0; i<groupTypes.length; i++) {
-            if (groupTypes[i] == APPDEF_GROUP_TYPE_UNDEFINED) {
-                continue;
-            }
-            try {
-                HypericEnum inum =
-                    GroupTypeCritter.getGroupTypeEnum(groupTypes[i]);
-                list.add(new EnumCritterProp(inum));
-            } catch (GroupException e) {
-                log.warn(e.getMessage(), e);
-            }
-        }
-        if (list.size() == 0) {
+        if (groupTypes.length == 0 ||
+            groupTypes[0] == APPDEF_GROUP_TYPE_UNDEFINED) {
             return null;
         }
         try {
-            return critter.newInstance(list);
+            GroupType type = GroupType.findBundledTypeByCode(groupTypes);
+            return critter.newInstance(type);
         } catch (GroupException e) {
             log.warn(e.getMessage(), e);
         }

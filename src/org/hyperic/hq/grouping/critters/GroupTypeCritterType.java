@@ -26,14 +26,14 @@
 package org.hyperic.hq.grouping.critters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import org.hyperic.hq.authz.shared.GroupType;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
-import org.hyperic.hq.grouping.prop.StringCritterProp;
+import org.hyperic.hq.grouping.prop.EnumCritterProp;
 
 /**
  * Metadata for GroupTypeCritter which fetches all Resources joined to
@@ -60,10 +60,17 @@ public class GroupTypeCritterType extends BaseCritterType {
         return true;
     }
 
-    public Critter newInstance(List critterProps) throws GroupException {
+    public Critter newInstance(List props) throws GroupException {
+        validate(props);
+        EnumCritterProp prop = (EnumCritterProp)props.get(0);
+        GroupType type = (GroupType)prop.getEnum();
+        return new GroupTypeCritter(type, this);
+    }
+
+    public Critter newInstance(GroupType type) throws GroupException {
         List list = new ArrayList();
-        list.add(critterProps.get(0));
-        validate(list);
-        return new GroupTypeCritter(critterProps, this);
+        EnumCritterProp groupTypeProp = new EnumCritterProp(type);
+        list.add(groupTypeProp);
+        return newInstance(list);
     }
 }

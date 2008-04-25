@@ -34,6 +34,7 @@ import java.util.ResourceBundle;
 import org.hibernate.Query;
 import org.hibernate.type.IntegerType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.authz.shared.GroupType;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterType;
@@ -43,8 +44,8 @@ import org.hyperic.hq.grouping.prop.StringCritterProp;
 import org.hyperic.util.HypericEnum;
 
 /**
- * Fetches all Resources which are joined from EAM_RES_GRP_RES_MAP and
- * EAM_RESOURCE_GROUP by grouptype
+ * Fetches all Groups (not members) from the EAM_RESOURCE table
+ * joined by instance_id from EAM_RESOURCE_GROUP
  */
 public class GroupTypeCritter implements Critter {
     
@@ -55,31 +56,18 @@ public class GroupTypeCritter implements Critter {
     /**
      * @param groupTypes List of Integers which represent grouptypes
      */
-    public GroupTypeCritter(List groupTypes, GroupTypeCritterType type)
-        throws GroupException
-    {
-        setIdList(groupTypes);
+    public GroupTypeCritter(GroupType groupType, GroupTypeCritterType type) {
+        setIdList(groupType.getAppdefEntityTypes());
         _type = type;
         List props = new ArrayList(1);
-        props.add(groupTypes.get(0));
+        props.add(new EnumCritterProp(groupType));
         _props = Collections.unmodifiableList(props);
     }
     
-    private void setIdList(List groupTypes) throws GroupException {
-        GroupType type = null;
-        try {
-            for (Iterator i=groupTypes.iterator(); i.hasNext(); ) {
-                EnumCritterProp prop = (EnumCritterProp)i.next();
-                type = GroupType.findByCode(prop.getEnum().getCode());
-                _groupTypes.add(new Integer(type.getCode()));
-            }
-        } catch (IllegalStateException e) {
-            //thrown if an enum GroupType is incorrect
-            String msg = "";
-            if (type != null) {
-                msg = "GroupType of " + type + "is invalid";
-            }
-            throw new GroupException(msg, e);
+    private void setIdList(List groupTypes) {
+        for (Iterator i=groupTypes.iterator(); i.hasNext(); ) {
+            Integer type = (Integer)i.next();
+            _groupTypes.add(type);
         }
     }
 
@@ -135,52 +123,4 @@ public class GroupTypeCritter implements Critter {
         }
         return rtn;
     }
-    
-    public static final HypericEnum getGroupTypeEnum(int groupType)
-        throws GroupException
-    {
-        try {
-            return GroupType.findByCode(groupType);
-        } catch (IllegalStateException e) {
-            //thrown if an enum GroupType is incorrect
-            throw new GroupException(
-                "GroupType of " + groupType + "is invalid", e);
-        }
-    }
-    
-    private static class GroupType extends HypericEnum {
-        private static final ResourceBundle BUNDLE =
-            ResourceBundle.getBundle("org.hyperic.hq.grouping.Resources");
-        
-        /* Group of applications */
-        public static GroupType APPDEF_TYPE_GROUP_ADHOC_APP =
-            new GroupType(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP,
-                "Integer", "critter.propType.groupType");
-        /* Group of group */
-        public static GroupType APPDEF_TYPE_GROUP_ADHOC_GRP =
-            new GroupType(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP,
-                "Integer", "critter.propType.groupType");
-        /* Group of platform, server, service */
-        public static GroupType APPDEF_TYPE_GROUP_ADHOC_PSS =
-            new GroupType(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS,
-                "Integer", "critter.propType.groupType");
-        /* Compatible group of Platform or Servers */
-        public static GroupType APPDEF_TYPE_GROUP_COMPAT_PS =
-            new GroupType(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS,
-                "Integer", "critter.propType.groupType");
-        /* Compatible group of Services (cluster) */
-        public static GroupType APPDEF_TYPE_GROUP_COMPAT_SVC =
-            new GroupType(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC,
-                "Integer", "critter.propType.groupType");
-        
-        
-        protected GroupType(int code, String desc, String localeProp) {
-            super(GroupType.class, code, desc, localeProp, BUNDLE);
-        }
-        
-        public static GroupType findByCode(int code) {
-            return (GroupType)findByCode(GroupType.class, code);  
-        }
-    }
-    
 }
