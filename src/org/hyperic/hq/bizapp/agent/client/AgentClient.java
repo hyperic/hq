@@ -64,7 +64,6 @@ import org.hyperic.hq.bizapp.client.BizappCallbackClient;
 import org.hyperic.hq.bizapp.client.RegisterAgentResult;
 import org.hyperic.hq.bizapp.client.StaticProviderFetcher;
 import org.hyperic.hq.common.shared.ProductProperties;
-import org.hyperic.hq.transport.util.TransportUtils;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.JDK;
@@ -248,6 +247,7 @@ public class AgentClient {
 
         throw new AgentRemoteException("Unable to kill agent within timeout");
     }
+    
 
     private void cmdRestart()
     throws AgentConnectionException, AgentRemoteException
@@ -523,6 +523,7 @@ public class AgentClient {
         int agentPort = -1;
         boolean isNewTransportAgent = false;
         boolean unidirectional = false;
+        int unidirectionalPort = -1;
 
         bootP = this.config.getBootProperties();
 
@@ -550,15 +551,15 @@ public class AgentClient {
         
         boolean isUnidirectionalAgentSupported = false;
         
-        try {
-            TransportUtils.tryLoadUnidirectionalTransportPollerClient();
-            isUnidirectionalAgentSupported = true;
-        } catch (Exception e) {
-        }
-
+        String version = ProductProperties.getVersion();
+        
+        log.debug("Agent version: "+version);
+        
+        isUnidirectionalAgentSupported = version.toLowerCase().contains("ee");
+        
         if (isUnidirectionalAgentSupported) {
             unidirectional = askYesNoQuestion("Should Agent communications to " + 
-                                              PRODUCT + " be unidirectional ", 
+                                              PRODUCT + " be unidirectional", 
                                               false, QPROP_UNI);
             
             // FIXME For now enable the new transport only if we have 
@@ -567,9 +568,9 @@ public class AgentClient {
         }
         
         boolean secure;
-        
+        int port;
+
         while(true){
-            int port;
             host = this.askQuestion("What is the " + PRODUCT +
                                     " server IP address",
                                     null, QPROP_IPADDR);
@@ -605,24 +606,27 @@ public class AgentClient {
 
             break;
         }
-        
-        // unidirectional only uses secure communication. Ask for SSL port and verify
-        if (unidirectional && !secure) {
-            while(true){
-                int port;
-                    port = this.askIntQuestion("What is the " + PRODUCT +
-                                " server SSL port for unidirectional communications",
-                                               7443, QPROP_SSLPORT);
-                try {
-                    getConnection(provider, true);
-                } catch (AgentCallbackClientException e) {
-                    continue;
-                }
+                
+        if (unidirectional) {
+            if (secure) {
+                unidirectionalPort = port;                
+            } else {
+                // unidirectional only uses secure communication. Ask for SSL port and verify
+                while(true){
+                    unidirectionalPort = this.askIntQuestion("What is the " + PRODUCT +
+                                       " server SSL port for unidirectional communications",
+                                                   7443, QPROP_SSLPORT);
+                    try {
+                        getConnection(provider, true);
+                    } catch (AgentCallbackClientException e) {
+                        continue;
+                    }
 
-                break;
-            }            
+                    break;
+                }                            
+            }
         }
-
+        
         while(true){
             user  = this.askQuestion("What is your " + PRODUCT +
                                      " login", "hqadmin",
@@ -723,7 +727,7 @@ public class AgentClient {
         }
         tokenRes = this.camCommands.createToken(new CreateToken_args());
         
-        SYSTEM_OUT.println("- Received temporary auth token from agent");
+        SYSTEM_OUT.println("- Received tempaorary auth token from agent");
 
         // Ask server to verify agent
         SYSTEM_OUT.println("- Registering agent with " + PRODUCT);
@@ -753,9 +757,17 @@ public class AgentClient {
                            " gave us the following agent token");
         SYSTEM_OUT.println("    " + agentToken);
         SYSTEM_OUT.println("- Informing agent of new " + PRODUCT + " server");
-        this.camCommands.setProviderInfo(new ProviderInfo(provider, agentToken));
+        
+        ProviderInfo registeredProviderInfo = new ProviderInfo(provider, agentToken);
+        
+        if (isNewTransportAgent) {
+            registeredProviderInfo.setNewTransport(unidirectional, unidirectionalPort);
+        }
+        
+        this.camCommands.setProviderInfo(registeredProviderInfo);
         SYSTEM_OUT.println("- Validating");
         providerInfo = this.camCommands.getProviderInfo();
+        
         if(providerInfo == null || 
            providerInfo.getProviderAddress().equals(provider) == false ||
            providerInfo.getAgentToken().equals(agentToken) == false)
@@ -773,6 +785,18 @@ public class AgentClient {
 
         } else {
             SYSTEM_OUT.println("- Successfully setup agent");
+            
+            if (providerInfo.isNewTransport()) {
+                String unidirectionalPortString = "";
+                if (providerInfo.isUnidirectional()) {
+                    unidirectionalPortString = ", port="+
+                                               providerInfo.getUnidirectionalPort();
+                }
+                
+                SYSTEM_OUT.println("- Agent using new transport, unidirectional="+
+                                    providerInfo.isUnidirectional()+
+                                    unidirectionalPortString);
+            }
         }
 
         redirectOutputs(); //win32
