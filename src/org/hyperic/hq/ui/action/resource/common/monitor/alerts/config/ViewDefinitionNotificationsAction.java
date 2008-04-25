@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,13 +28,17 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 import java.rmi.RemoteException;
 import java.util.List;
 
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -51,13 +55,6 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.actions.TilesAction;
 
 
 /**
@@ -83,17 +80,18 @@ public abstract class ViewDefinitionNotificationsAction
 
         PageControl pc = RequestUtils.getPageControl(request);
 
-        ActionValue[] actions = new ActionValue[0];
+        ActionValue[] actions;
         String a = request.getParameter("a");
         if (null != a) {
             log.debug("Viewing notifications for an alert ...");
             Integer aid = new Integer(a);
             List actionList = eb.getActionsForAlert(sessionID, aid);
-            actions = new ActionValue[actionList.size()];
-            actions = (ActionValue[])actionList.toArray(actions);
+            actions = (ActionValue[])
+                actionList.toArray(new ActionValue[actionList.size()]);
         } else {
             log.debug("Viewing notifications for an alert definition ...");
-            AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition(request, sessionID, eb);
+            AlertDefinitionValue adv =
+                AlertDefUtil.getAlertDefinition(request, sessionID, eb);
             actions = adv.getActions();
         }
 
@@ -142,9 +140,7 @@ public abstract class ViewDefinitionNotificationsAction
 
     protected abstract PageList getPageList(int sessionID, AuthzBoss ab,
                                             EmailActionConfig ea, PageControl pc)
-        throws NamingException,
-               FinderException,
-               CreateException,
+        throws FinderException,
                SessionTimeoutException,
                SessionNotFoundException,
                PermissionException,
