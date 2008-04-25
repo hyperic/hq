@@ -1203,6 +1203,7 @@
   <target name="pack-agent" description="Pack the agent">
     <mkdir dir="${agent.dir}" />
     <mkdir dir="${agent.dir}/lib" />
+    <mkdir dir="${agent.dir}/lib/handlers/lib" />	  
     <mkdir dir="${agent.dir}/log" />
     <mkdir dir="${agent.dir}/rcfiles" />
     <mkdir dir="${agent.dir}/tmp" />
@@ -1215,9 +1216,17 @@
 
     <copy todir="${agent.dir}/lib" >
       <fileset dir="${lather.lib}" includes="lather.jar" />
-      <fileset dir="${thirdparty.lib}" includes="jboss-remoting.jar,jboss-common.jar"/>	
     </copy>
   	
+    <copy todir="${agent.dir}/lib/handlers/lib" >
+		<fileset dir="${thirdparty.lib}">
+		  <include name="jboss-remoting.jar"/>
+		  <include name="jboss-common.jar"/>
+	      <include name="jboss-jmx.jar"/>
+		</fileset>
+		<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar"/>
+    </copy>
+	  
     <copy todir="${agent.dir}/sbin" >
       <fileset dir="${wrapper.bin}" includes="*" />
     </copy> 	
@@ -1225,9 +1234,9 @@
     <copy todir="${agent.dir}/lib/boot" >
       <fileset dir="${wrapper.lib}" includes="*" />
     </copy> 	
-
+	  
     <!-- Autoinventory jars -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/AgentAutoinventoryServer.jar">
+    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/handlers/AgentAutoinventoryServer.jar">
       <include name="org/hyperic/hq/autoinventory/**"/>
       <include name="org/hyperic/hq/authz/client/**"/>
       <include name="org/hyperic/hq/authz/shared/**"/>
@@ -1239,7 +1248,7 @@
     </jar>
 
     <!-- Bizapp jars -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/AgentBizappServer.jar">
+    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/handlers/AgentBizappServer.jar">
       <include name="org/hyperic/hq/bizapp/agent/server/**"/>
       <include name="org/hyperic/hq/bizapp/agent/commands/**"/>
       <include name="org/hyperic/hq/bizapp/agent/*"/>
@@ -1249,7 +1258,7 @@
     </jar>
 
     <!-- Measurement jars -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/AgentMeasurementServer.jar">
+    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/handlers/AgentMeasurementServer.jar">
         <include name="org/hyperic/hq/measurement/agent/**"/>
         <include name="org/hyperic/hq/measurement/ext/**"/>
         <include name="org/hyperic/hq/measurement/shared/**"/>
@@ -1263,7 +1272,16 @@
             <attribute name="Main-Class" value="org.hyperic.hq.measurement.agent.server.MeasurementCommandsServer"/>
         </manifest>
     </jar>
-
+	  
+	  <!-- New Handler for Transport -->
+    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/handlers/lib/AgentTransport.jar">
+	  <include name="org/hyperic/hq/agent/server/AgentTransportLifecycleImpl.class"/> 	
+      <include name="org/hyperic/hq/transport/AgentTransport*.class"/>
+      <include name="org/hyperic/hq/transport/PollerClient.class"/>
+      <include name="org/hyperic/hq/transport/util/*.class"/>   
+      <exclude name="org/hyperic/hq/transport/**/*_test*"/>  
+    </jar>	  
+	  
     <!-- Top level stuff -->
     <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/AgentServer.jar">
       <include name="org/hyperic/hq/agent/**"/>
@@ -1271,15 +1289,12 @@
       <include name="org/hyperic/hq/bizapp/client/*.class"/>
       <include name="org/hyperic/hq/bizapp/shared/*.class"/>
       <include name="org/hyperic/hq/common/*Exception.class"/>
-      <include name="org/hyperic/hq/transport/AgentTransport.class"/>	
-      <include name="org/hyperic/hq/transport/PollerClient.class"/>
-      <include name="org/hyperic/hq/transport/util/*.class"/>   
-      <exclude name="org/hyperic/hq/transport/**/*_test*"/>  	      
+      <exclude name="org/hyperic/hq/agent/server/AgentTransportLifecycleImpl.class"/>         
     </jar>
 
     <!-- Control agent server handler -->
     <jar basedir="${build.dir}/classes"
-         jarfile="${agent.dir}/lib/AgentControlServer.jar">
+         jarfile="${agent.dir}/lib/handlers/AgentControlServer.jar">
       <include name="org/hyperic/hq/control/**"/>
       <exclude name="org/hyperic/hq/control/**/*_test.java"/>
       <manifest>
@@ -1288,7 +1303,7 @@
     </jar>
 
     <jar basedir="${build.dir}/classes"
-         jarfile="${agent.dir}/lib/LiveDataServer.jar">
+         jarfile="${agent.dir}/lib/handlers/LiveDataServer.jar">
       <include name="org/hyperic/hq/livedata/**"/>
       <manifest>
         <attribute name="Main-Class" value="org.hyperic.hq.livedata.agent.server.LiveDataCommandsServer" />
@@ -1303,9 +1318,7 @@
       <include name="org/hyperic/hq/bizapp/agent/**"/>
       <include name="org/hyperic/hq/bizapp/client/*.class"/>
       <include name="org/hyperic/hq/bizapp/shared/*.class"/>
-      <exclude name="org/hyperic/hq/bizapp/agent/server/**"/>
-      <include name="org/hyperic/hq/transport/util/TransportUtils.class"/>
-      <include name="org/hyperic/hq/transport/PollerClient.class"/>		
+      <exclude name="org/hyperic/hq/bizapp/agent/server/**"/>	
     </jar>
 
     <!-- TODO: Copy and replace properties -->
