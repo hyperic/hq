@@ -2403,25 +2403,23 @@ public class AppdefBossEJBImpl
                                            appdefResTypeId,
                                            APPDEF_GROUP_TYPE_UNDEFINED,
                                            groupEntity, false,
-                                           pendingEntities, resourceName,
-                                           null, APPDEF_GROUP_TYPE_UNDEFINED, pc);
+                                           pendingEntities, resourceName, null,
+                                           APPDEF_GROUP_TYPE_UNDEFINED, pc);
 
         if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER ||
             appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVICE) 
         {
-            AuthzSubject subject = manager.getSubjectPojo(sessionId);
-            
             for (Iterator i = ret.iterator(); i.hasNext(); ) {
                 AppdefResourceValue res = (AppdefResourceValue) i.next();
 
                 if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-                    ServerValue server = getServerManager()
-                        .getServerById(subject, res.getId());
+                    Server server =
+                        getServerManager().findServerById(res.getId());
                     res.setHostName(server.getPlatform().getName());
 
                 } else {
-                    ServiceValue service =
-                        getServiceManager().getServiceById(subject, res.getId());
+                    Service service =
+                        getServiceManager().findServiceById(res.getId());
                     res.setHostName(service.getServer().getName());
                 }
             }
