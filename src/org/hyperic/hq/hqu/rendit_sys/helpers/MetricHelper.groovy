@@ -3,19 +3,14 @@ package org.hyperic.hq.hqu.rendit.helpers
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField
-
-import org.hyperic.hq.authz.shared.PermissionException
-import org.hyperic.hibernate.SortField
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
-import org.hyperic.hq.authz.server.session.ResourceSortField
-import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.HasAuthzOperations
+import org.hyperic.hq.measurement.server.session.Measurement
 
 class MetricHelper extends BaseHelper {
     private tmplMan = TemplateManagerEJBImpl.one
-    
+    private measMan = MeasurementManagerEJBImpl.one
     MetricHelper(AuthzSubject user) {
         super(user)
     }
@@ -75,5 +70,9 @@ class MetricHelper extends BaseHelper {
      
      MeasurementTemplate findTemplateById(int id) {
          tmplMan.getTemplate(id)
+     }
+
+     Measurement findMeasurementById(int id) {
+         measMan.getMeasurement(id)
      }
 }
