@@ -230,7 +230,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             rv.setName(newValue.getName());
         }
         dao.setApplicationValue(app, newValue);
-        return getApplicationById(subject, app.getId());
+        return findApplicationById(subject, app.getId()).getApplicationValue();
     }
 
     /**
@@ -333,7 +333,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @param depTree
      * @param subject
      */
-    public void setServiceDepsForApp(AuthzSubject subject, 
+    public void setServiceDepsForApp(AuthzSubject subject,
                                      DependencyTree depTree) 
         throws ApplicationNotFoundException, RemoveException, 
                PermissionException, CreateException {
@@ -353,27 +353,15 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * Find application by name
      * @param subject - who
      * @param name - name of app
-     * @ejb:interface-method
      */
-    public ApplicationValue findApplicationByName(AuthzSubject subject,
-                                                  String name)
+    private Application findApplicationByName(AuthzSubject subject, String name)
         throws ApplicationNotFoundException, PermissionException {
         Application app = getApplicationDAO().findByName(name);
         if (app == null) {
             throw new ApplicationNotFoundException(name);
         }
         checkViewPermission(subject, app.getEntityId());
-        return app.getApplicationValue();
-    }
-
-    /** 
-     * Get application by id.
-     * @ejb:interface-method
-     * @deprecated
-     */
-    public ApplicationValue getApplicationById(AuthzSubject subject, Integer id)
-        throws ApplicationNotFoundException, PermissionException {
-        return findApplicationById(subject, id).getApplicationValue();
+        return app;
     }
 
     /**
@@ -400,8 +388,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ApplicationValue objects representing all of the
      * applications that the given subject is allowed to view.
      */
-    public PageList getAllApplications ( AuthzSubject subject,
-                                         PageControl pc ) 
+    public PageList getAllApplications(AuthzSubject subject, PageControl pc)
         throws FinderException, PermissionException {
         Collection authzPks = getViewableApplications(subject);
         Collection apps = null;
@@ -437,8 +424,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public List getApplicationServices(AuthzSubject subject, Integer appId) 
-        throws ApplicationNotFoundException,
-               PermissionException {
+        throws ApplicationNotFoundException, PermissionException {
         // find the application
         Application app;
         try {
@@ -466,8 +452,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     public void setApplicationServices(AuthzSubject subject, Integer appId,
                                        List entityIds) 
         throws ApplicationNotFoundException, CreateException,
-               AppdefGroupNotFoundException, 
-               PermissionException {
+               AppdefGroupNotFoundException, PermissionException {
         try {
             Application app = getApplicationDAO().findById(appId);
             checkModifyPermission(subject, app.getEntityId());

@@ -43,7 +43,7 @@ import javax.ejb.SessionBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -68,7 +68,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
 
@@ -91,8 +90,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     private final Log    log     = LogFactory.getLog(logCtx);
     private int          DB_TYPE = -1;
     
-    private static final int APPDEF_TYPE_GROUP_COMPAT_SVC =
-        AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC;
     private static final String platformResType =
         AuthzConstants.platformResType;
     private static final String applicationResType =
@@ -1134,8 +1131,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     public ResourceTreeNode[] getNavMapDataForApplication(AuthzSubject subject,
                                                           Integer appId)
         throws ApplicationNotFoundException, PermissionException {
-        ApplicationValue appVo =
-            getApplicationMgrLocal().getApplicationById(subject,appId);
+        Application appVo =
+            getApplicationMgrLocal().findApplicationById(subject,appId);
 
         ResourceTreeNode[] retVal = null;
         Statement stmt = null;
@@ -1193,7 +1190,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 appVo.getName(),
                 getAppdefTypeLabel(AppdefEntityConstants
                     .APPDEF_TYPE_APPLICATION,
-                    appVo.getAppdefResourceTypeValue().getName()), 
+                    appVo.getAppdefResourceType().getName()), 
                 new AppdefEntityID(
                     AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
                     appVo.getId().intValue()),
@@ -1658,8 +1655,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     // The methods in this class should call getDBConn() to obtain a connection,
     // because it also initializes the private database-related variables
     private Connection getDBConn() throws SQLException {
-        Connection conn = new PlatformDAO(DAOFactory.getDAOFactory())
-            .getSession().connection();
+        Connection conn = Util.getConnection();
         
         if (DB_TYPE == -1) {
             DB_TYPE = DBUtil.getDBType(conn);
@@ -1669,7 +1665,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     }
     
     private void disconnect() {
-        new PlatformDAO(DAOFactory.getDAOFactory()).getSession().disconnect();
+        Util.endConnection();
     }
 
     private int getChildEntityType (int type) {
