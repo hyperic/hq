@@ -488,15 +488,14 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
 
         SessionFactoryImpl sessionFactory =
             (SessionFactoryImpl)Util.getSessionFactory();
-        Session session =
-            getMeasurementTemplateDAO().getSession();
+        Session session = getMeasurementTemplateDAO().getSession();
         try {
             IdentifierGenerator tmplIdGenerator =
                 sessionFactory
                 .getEntityPersister(MeasurementTemplate.class.getName())
                 .getIdentifierGenerator();
 
-            Connection conn = session.connection();
+            Connection conn = Util.getConnection();
 
             final String templatesql = "INSERT INTO EAM_MEASUREMENT_TEMPL " +
                 "(id, name, alias, units, collection_type, default_on, " +
@@ -529,8 +528,9 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     }
 
                     int col = 1;
-                    Integer rawid = (Integer)tmplIdGenerator.
-                        generate((SessionImpl)session, new MeasurementTemplate());
+                    Integer rawid = (Integer) tmplIdGenerator
+                            .generate((SessionImpl) session,
+                                      new MeasurementTemplate());
 
                     stmt = conn.prepareStatement(templatesql);
                     stmt.setInt(col++, rawid.intValue());
@@ -555,7 +555,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             this.log.error("Unable to add measurements for: " +
                            pluginName, e);
         } finally {
-            session.disconnect();
+            Util.endConnection();
         }
     }
  

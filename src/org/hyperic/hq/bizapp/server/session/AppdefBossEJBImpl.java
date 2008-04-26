@@ -27,7 +27,6 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -55,12 +54,13 @@ import org.hyperic.hibernate.SortField;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileDataResult;
-import org.hyperic.hq.appdef.server.session.Cprop;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.CPropResource;
 import org.hyperic.hq.appdef.server.session.CPropResourceSortField;
+import org.hyperic.hq.appdef.server.session.Cprop;
 import org.hyperic.hq.appdef.server.session.DownResSortField;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -112,15 +112,11 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterExclude;
-import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterGrpEntRes;
-import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterMemExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterAssignSvc;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupEntityResource;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupMemExclude;
-import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -164,12 +160,10 @@ import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.critters.GroupMembershipCritterType;
-import org.hyperic.hq.grouping.critters.GroupTypeCritter;
 import org.hyperic.hq.grouping.critters.GroupTypeCritterType;
 import org.hyperic.hq.grouping.critters.ProtoCritterType;
 import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
 import org.hyperic.hq.grouping.critters.ResourceTypeCritterType;
-import org.hyperic.hq.grouping.prop.EnumCritterProp;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
@@ -182,7 +176,6 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.util.HypericEnum;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -394,7 +387,8 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException {
 
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        return getApplicationManager().getApplicationById(subject, id);
+        return getApplicationManager().findApplicationById(subject, id)
+            .getApplicationValue();
     }
 
     /**
@@ -578,9 +572,8 @@ public class AppdefBossEJBImpl
      */
     public PlatformValue findPlatformByDependentID(int sessionID,
                                                    AppdefEntityID entityId)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException
+        throws AppdefEntityNotFoundException, SessionTimeoutException,
+               SessionNotFoundException, PermissionException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
         Integer id;
@@ -1068,11 +1061,12 @@ public class AppdefBossEJBImpl
                                                         AppdefEntityTypeID id)
         throws SessionTimeoutException, SessionNotFoundException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         try {
             switch(id.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    return getPlatformManager().findPlatformTypeValueById(id.getId());
+                    return getPlatformManager()
+                        .findPlatformTypeValueById(id.getId());
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                     return getServerManager().findServerTypeById(id.getId());
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
@@ -1093,7 +1087,7 @@ public class AppdefBossEJBImpl
         throws PlatformNotFoundException,
                SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         return getPlatformManager().findPlatformTypeValueById(id);
     }
 
@@ -1112,8 +1106,7 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public ServiceTypeValue findServiceTypeById(int sessionID, Integer id)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException 
+        throws SessionTimeoutException, SessionNotFoundException 
     {
         manager.getSubjectPojo(sessionID);
         return getServiceManager().findServiceTypeById(id);
@@ -1135,8 +1128,7 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public ServerTypeValue findServerTypeById(int sessionID,  Integer id)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException 
+        throws SessionTimeoutException, SessionNotFoundException 
     {
         manager.getSubjectPojo(sessionID);
         return getServerManager().findServerTypeById(id);
@@ -1177,10 +1169,9 @@ public class AppdefBossEJBImpl
     public ServerValue createServer(int sessionID, ServerValue serverVal,
                                     Integer platformPK, Integer serverTypePK,
                                     Map cProps)
-        throws CreateException, ValidationException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException, AppdefDuplicateNameException,
-               CPropKeyNotFoundException
+        throws CreateException, ValidationException, SessionTimeoutException,
+               SessionNotFoundException, PermissionException,
+               AppdefDuplicateNameException, CPropKeyNotFoundException
     {
         try {
             // Get the AuthzSubject for the user's session
@@ -1418,40 +1409,43 @@ public class AppdefBossEJBImpl
                AppdefDuplicateNameException, CPropKeyNotFoundException
     {
         try {
-            AuthzSubject subject = manager.getSubjectPojo(sessionId);
+            try {
+                AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
-            Server updated = getServerManager().updateServer(subject, aServer);
+                Server updated =
+                    getServerManager().updateServer(subject, aServer);
 
-            if(cProps != null ) {
-                AppdefEntityID entityId = aServer.getEntityId();
-                setCPropValues(subject, entityId, cProps);
+                if(cProps != null ) {
+                    AppdefEntityID entityId = aServer.getEntityId();
+                    setCPropValues(subject, entityId, cProps);
+                }
+                return updated.getServerValue();
+            } catch (Exception e) {
+                log.error("Error updating server: " + aServer.getId());
+                rollback();
+                throw e;
             }
-            return updated.getServerValue();
+        } catch (NamingException e) {
+            throw (NamingException) e;
+        } catch (CreateException e) {
+            // change to a update exception as this only occurs
+            // if there was a failure instantiating the session
+            // bean
+            throw new UpdateException("Error creating manager session "
+                                      + "bean: " + e.getMessage());
+        } catch (PermissionException e) {
+            throw (PermissionException) e;
+        } catch (FinderException e) {
+            throw (FinderException) e;
+        } catch (AppdefDuplicateNameException e) {
+            throw (AppdefDuplicateNameException) e;
+        } catch (CPropKeyNotFoundException e) {
+            throw (CPropKeyNotFoundException) e;
+        } catch (AppdefEntityNotFoundException e) {
+            throw new SystemException("Unable to find updated server");
         } catch (Exception e) {
-            log.error("Error updating server: " + aServer.getId());
-            rollback();
-            if(e instanceof NamingException) {
-                throw (NamingException)e;
-            } else if (e instanceof CreateException) {
-                // change to a update exception as this only occurs
-                // if there was a failure instantiating the session
-                // bean
-                throw new UpdateException("Error creating manager session " +
-                                          "bean: " + e.getMessage());
-            } else if (e instanceof PermissionException) {
-                throw (PermissionException)e;
-            } else if (e instanceof FinderException) {
-                throw (FinderException)e;
-            } else if (e instanceof AppdefDuplicateNameException) {
-                throw (AppdefDuplicateNameException)e;
-            } else if(e instanceof CPropKeyNotFoundException) {
-                throw (CPropKeyNotFoundException)e;
-            } else if(e instanceof AppdefEntityNotFoundException) {
-                throw new SystemException("Unable to find updated server");
-            } else {
-                throw new UpdateException("Unknown error updating server: " +
-                    aServer.getId(), e);
-            }
+            throw new UpdateException("Unknown error updating server: "
+                                      + aServer.getId(), e);
         }
     }
 
@@ -3007,7 +3001,7 @@ public class AppdefBossEJBImpl
     public int getAgentCount(int sessionId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubjectValue who = manager.getSubject(sessionId);
+        manager.getSubjectPojo(sessionId);
         return getAgentManager().getAgentCount();
     }
 
@@ -3017,7 +3011,7 @@ public class AppdefBossEJBImpl
     public List findAllAgents(int sessionId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubjectValue who = manager.getSubject(sessionId);
+        manager.getSubjectPojo(sessionId);
         return getAgentManager().getAgents();
     }
 
@@ -3030,9 +3024,7 @@ public class AppdefBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                AgentNotFoundException
     {
-        AuthzSubjectValue who;
-
-        who = manager.getSubject(sessionId);
+        manager.getSubjectPojo(sessionId);
         return getAgentManager().getAgent(ip, port);
     }
 
@@ -3087,7 +3079,7 @@ public class AppdefBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefEntityNotFoundException
     {
-        AuthzSubjectValue who = manager.getSubject(sessionId);
+        manager.getSubjectPojo(sessionId);
         return getCPropManager().getDescEntries(id);
     }
 
@@ -3101,9 +3093,7 @@ public class AppdefBossEJBImpl
     public List getCPropKeys(int sessionId, int appdefType, int appdefTypeId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubjectValue who;
-
-        who = manager.getSubject(sessionId);
+        manager.getSubjectPojo(sessionId);
         return getCPropManager().getKeys(appdefType, appdefTypeId);
     }
 
@@ -3621,7 +3611,6 @@ public class AppdefBossEJBImpl
 
         // Find all measurement IDs
         MeasurementManagerLocal dmMan = getMetricManager();
-        AvailabilityManagerLocal availMan = getAvailManager();
         
         Integer[] instIds = (Integer[])
             res.keySet().toArray(new Integer[services.size()]);

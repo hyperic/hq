@@ -39,6 +39,7 @@ import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -102,7 +103,7 @@ public class AppdefManagerEJBImpl
         PreparedStatement stmt = null;
         ResultSet rs = null;        
         try {
-            Connection conn = getPlatformDAO().getSession().connection();
+            Connection conn = Util.getConnection();
             
             StringBuffer sql = new StringBuffer("SELECT DISTINCT(s.")
                 .append(resourceColumn)
@@ -136,7 +137,7 @@ public class AppdefManagerEJBImpl
                                       e.getMessage());
         } finally {
             DBUtil.closeJDBCObjects(getSessionContext(), null, stmt, rs);
-            getPlatformDAO().getSession().disconnect();
+            Util.endConnection();
         }
     }
 
@@ -225,7 +226,7 @@ public class AppdefManagerEJBImpl
             Integer typeId = (Integer) it.next();
             try {
                 ServerType st = getServerTypeDAO().findById(typeId);
-                if (!st.getVirtual())
+                if (!st.isVirtual())
                     serverTypes.put(st.getName(), new AppdefEntityTypeID(
                         AppdefEntityConstants.APPDEF_TYPE_SERVER, typeId));
             } catch (ObjectNotFoundException e) {

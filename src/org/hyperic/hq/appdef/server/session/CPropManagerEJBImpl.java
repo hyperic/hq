@@ -81,8 +81,7 @@ public class CPropManagerEJBImpl
     private static final int    CHUNKSIZE      = 1000; // Max size for each row
     private static final String CPROP_TABLE    = "EAM_CPROP";
     private static final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
-    private static final String CPROP_SEQUENCE = "EAM_CPROP_ID_SEQ";
-
+    
     private Log log = 
         LogFactory.getLog(CPropManagerEJBImpl.class.getName());
 
@@ -233,7 +232,6 @@ public class CPropManagerEJBImpl
                PermissionException
     {
         PreparedStatement selStmt, delStmt, addStmt;
-        CpropKeyDAO cpHome;
         CpropKey propKey;
         Connection conn = null;
         ResultSet rs = null;
@@ -243,13 +241,11 @@ public class CPropManagerEJBImpl
         selStmt = null;
         delStmt = null;
         addStmt = null;
-        cpHome = getCPropKeyDAO();
-
         try {
             Integer pk = propKey.getId();
             final int keyId = pk.intValue();
 
-            conn = cpHome.getSession().connection();
+            conn = Util.getConnection();
                                     
             // Lock the rows we want to trash
             selStmt = conn.prepareStatement("SELECT PROPVALUE FROM " +
@@ -317,7 +313,7 @@ public class CPropManagerEJBImpl
             DBUtil.closeStatement(this, selStmt);
             DBUtil.closeStatement(this, delStmt);
             DBUtil.closeStatement(this, addStmt);
-            cpHome.getSession().disconnect();
+            Util.endConnection();
         }
     }
 
@@ -341,7 +337,6 @@ public class CPropManagerEJBImpl
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException,
                PermissionException
     {
-        CpropKeyDAO cpHome;
         CpropKey propKey;
         PreparedStatement stmt = null;
         Connection conn = null;
@@ -351,14 +346,13 @@ public class CPropManagerEJBImpl
         int typeId  = recType.getId().intValue();
         
         propKey = this.getKey(aID, typeId, key);
-        cpHome  = getCPropKeyDAO();
         try {
             Integer pk = propKey.getId();
             final int keyId = pk.intValue();
             StringBuffer buf = new StringBuffer();
             boolean didSomething;
 
-            conn = cpHome.getSession().connection();
+            conn = Util.getConnection();
             stmt = conn.prepareStatement("SELECT PROPVALUE FROM " + 
                                          CPROP_TABLE +
                                          " WHERE KEYID=? AND APPDEF_ID=? " +
@@ -384,7 +378,7 @@ public class CPropManagerEJBImpl
         } finally {
             DBUtil.closeResultSet(this, rs);
             DBUtil.closeStatement(this, stmt);
-            cpHome.getSession().disconnect();
+            Util.endConnection();
         }
     }
 
@@ -394,12 +388,11 @@ public class CPropManagerEJBImpl
         Properties res = new Properties();
         ResultSet rs = null;
 
-        CpropKeyDAO cpdao = getCPropKeyDAO();
         try {
             StringBuffer buf;
             String lastKey;
 
-            conn = cpdao.getSession().connection();
+            conn = Util.getConnection();
             stmt = conn.prepareStatement("SELECT A." + column +
                                          ", B.propvalue FROM " + 
                                          CPROPKEY_TABLE + " A, " +
@@ -440,7 +433,7 @@ public class CPropManagerEJBImpl
         } finally {
             DBUtil.closeResultSet(this, rs);
             DBUtil.closeStatement(this, stmt);
-            cpdao.getSession().disconnect();
+            Util.endConnection();
         }
 
         return res;
@@ -532,9 +525,8 @@ public class CPropManagerEJBImpl
         PreparedStatement stmt = null;
         Connection conn = null;
 
-        CpropKeyDAO cpdao = getCPropKeyDAO();
         try {
-            conn = cpdao.getSession().connection();
+            conn = Util.getConnection();
             stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE +
                                          " WHERE keyid IN " +
                                          "(SELECT id FROM " + CPROPKEY_TABLE +
@@ -550,7 +542,7 @@ public class CPropManagerEJBImpl
             throw new SystemException(exc);
         } finally {
             DBUtil.closeStatement(this, stmt);
-            cpdao.getSession().disconnect();
+            Util.endConnection();
         }
     }
     
