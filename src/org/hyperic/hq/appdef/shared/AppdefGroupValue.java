@@ -32,7 +32,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.grouping.shared.GroupValue;
 import org.hyperic.hq.grouping.shared.GroupVisitor;
@@ -71,7 +71,7 @@ public class AppdefGroupValue
     private int      clusterId;     // clusterId
     private String   name;          // group name
     private String   description;   // group description
-    private AuthzSubjectValue subject; // group owner
+    private AuthzSubject subject;   // group owner
     private String   owner;         // String value of owner
     private PageList groupEntries;  // list of group entries
     private List     visitors;      // registered visitors
@@ -152,8 +152,8 @@ public class AppdefGroupValue
     public void      setDescription (String desc) { this.description=desc; }
 
     /** The group owner */
-    public void      setSubject(AuthzSubjectValue s){ this.subject = s; }
-    public AuthzSubjectValue getSubject(){ return subject; }
+    public void      setSubject(AuthzSubject s){ this.subject = s; }
+    public AuthzSubject getSubject(){ return subject; }
 
     /** The group size PageList.size() */
     public int       getSize() { return this.groupEntries.size(); }

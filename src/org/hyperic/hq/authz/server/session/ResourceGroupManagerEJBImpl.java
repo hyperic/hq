@@ -586,7 +586,7 @@ public class ResourceGroupManagerEJBImpl
         retVal.setGroupEntType(g.getGroupEntType().intValue());
         retVal.setGroupEntResType(g.getGroupEntResType().intValue());
         retVal.setTotalSize(g.getResources().size() );
-        retVal.setSubject(subj.getAuthzSubjectValue());
+        retVal.setSubject(subj);
         retVal.setClusterId(g.getClusterId().intValue());
         retVal.setMTime(new Long(g.getMtime()));
         retVal.setCTime(new Long(g.getCtime()));

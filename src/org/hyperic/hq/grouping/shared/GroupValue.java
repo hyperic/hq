@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,12 +25,8 @@
 
 package org.hyperic.hq.grouping.shared;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.util.pager.PageList;
 
 /** Interface specification for group value objects. Provides access
@@ -77,8 +73,8 @@ public interface GroupValue {
     public void      setLocation(String location);
 
     /** The group owner */
-    public void      setSubject(AuthzSubjectValue s);
-    public AuthzSubjectValue getSubject();
+    public void      setSubject(AuthzSubject s);
+    public AuthzSubject getSubject();
 
     /** The group size */
     public int       getSize();
