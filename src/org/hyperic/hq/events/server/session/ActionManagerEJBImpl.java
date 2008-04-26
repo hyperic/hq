@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -41,6 +41,8 @@ import org.hyperic.hq.events.shared.ActionManagerUtil;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,25 +60,12 @@ import org.json.JSONObject;
 public class ActionManagerEJBImpl implements SessionBean {
     private ActionDAO          _actDAO;
     private AlertDAO           _alertDAO;
-    private AlertDefinitionDAO _defDAO;
     
     public ActionManagerEJBImpl() {
         DAOFactory f = DAOFactory.getDAOFactory();
         
         _actDAO   = new ActionDAO(f);
         _alertDAO = new AlertDAO(f);
-        _defDAO   = new AlertDefinitionDAO(f);
-    }
-
-    /**
-     * Get a collection of all actions
-     *
-     * @return a collection of {@link ActionValue}s
-     *
-     * @ejb:interface-method
-     */
-    public Collection getAllActions() {
-        return actionsToActionValues(_actDAO.findAll());
     }
 
     /**
@@ -97,7 +86,6 @@ public class ActionManagerEJBImpl implements SessionBean {
 
         for (Iterator i=actions.iterator(); i.hasNext();) {
             Action action = (Action)i.next();
-            
             res.add(action.getActionValue());
         }
 
@@ -109,9 +97,10 @@ public class ActionManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public Action createAction(AlertDefinition def, ActionValue val,
-                               Action parent) {
-        Action action = def.createAction(val, parent);
+    public Action createAction(AlertDefinition def, String className,
+                               ConfigResponse config, Action parent)
+        throws EncodingException {
+        Action action = def.createAction(className, config.encode(), parent);
         def.setMtime(System.currentTimeMillis());
         return action;
     }
@@ -121,7 +110,7 @@ public class ActionManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public ActionValue updateAction(ActionValue val) { 
+    public Action updateAction(ActionValue val) { 
         // First update the primary action
         Action action = _actDAO.findById(val.getId());
         
@@ -132,7 +121,7 @@ public class ActionManagerEJBImpl implements SessionBean {
         }
             
         action.setActionValue(val);
-        setParentAction(val, action);
+        setParentAction(action, val.getParentId());
         long mtime = System.currentTimeMillis();
         
         // HQ 942: We have seen orphaned actions on upgrade from 
@@ -152,7 +141,7 @@ public class ActionManagerEJBImpl implements SessionBean {
         for (Iterator i = children.iterator(); i.hasNext(); ) {
             Action act = (Action) i.next();
             act.setActionValue(val);
-            setParentAction(val, act);
+            setParentAction(act, val.getParentId());
             
             // HQ 942: We have seen orphaned actions on upgrade from 
             // 3.0.5 to 3.1.1 where the action has no associated alert def.
@@ -162,7 +151,7 @@ public class ActionManagerEJBImpl implements SessionBean {
             }
         }
         
-        return action.getActionValue();
+        return action;
     }
 
     /**
@@ -205,11 +194,11 @@ public class ActionManagerEJBImpl implements SessionBean {
         a.setDeleted(true);
     }
     
-    private void setParentAction(ActionValue val, Action action) {
-        if (val.getParentId() == null) {
+    private void setParentAction(Action action, Integer parent) {
+        if (parent == null) {
             action.setParent(null);
         } else {
-            action.setParent(_actDAO.findById(val.getParentId()));
+            action.setParent(_actDAO.findById(parent));
         }
     }
     

@@ -69,7 +69,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceChangeCallback;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
@@ -773,22 +772,13 @@ public class EventsBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public ActionValue createAction(int sessionID, Integer adid,
-                                    String className, ConfigResponse config)
+    public Action createAction(int sessionID, Integer adid, String className,
+                               ConfigResponse config)
         throws SessionNotFoundException, SessionTimeoutException,
                ActionCreateException, RemoveException, FinderException,
                PermissionException 
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-
-        ActionValue action = new ActionValue();
-
-        action.setClassname(className);
-        try {
-            action.setConfig( config.encode() );
-        } catch (EncodingException e) {
-            throw new SystemException("Couldn't encode.", e);
-        }
 
         ArrayList alertdefs = new ArrayList();
         
@@ -804,15 +794,19 @@ public class EventsBossEJBImpl
         for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
             ad = (AlertDefinition) it.next();
 
-            if (root == null) {
-                root = actMan.createAction(ad, action, null);
-            }
-            else {
-                actMan.createAction(ad, action, root);
+            try {
+                if (root == null) {
+                    root = actMan.createAction(ad, className, config, null);
+                }
+                else {
+                    actMan.createAction(ad, className, config, root);
+                }
+            } catch (EncodingException e) {
+                throw new SystemException("Couldn't encode.", e);
             }
         }
             
-        return action;
+        return root;
     }
 
     /**
@@ -989,7 +983,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getAM().deleteAlerts(subject, aeid);
     }
     
@@ -1077,7 +1071,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getADM().findAllAlertDefinitions(subject);
     }
 
@@ -1091,7 +1085,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getADM().findAlertDefinitions(subject, id, pc);
     }
     
@@ -1190,7 +1184,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getADM().findAlertDefinitionNames(subject, id, parentId);
     }
     
@@ -1255,7 +1249,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getAM().findAlerts(subject, id, pc);
     }
 
@@ -1269,7 +1263,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         return getAM().findAlerts(subject, id, begin, end, pc);
     }
 
@@ -1307,7 +1301,6 @@ public class EventsBossEJBImpl
                PermissionException 
     {
         AuthzSubject subject  = manager.getSubjectPojo(sessionID);
-        AuthzSubjectValue subjVal = subject.getAuthzSubjectValue();
         long cur = System.currentTimeMillis();
         
         List appentResources =
@@ -1315,7 +1308,7 @@ public class EventsBossEJBImpl
         
         // Assume if user can be alerted, then they can view resource,
         // otherwise, it'll be filtered out later anyways
-        List alerts = getAM().findEscalatables(subjVal, count, priority, 
+        List alerts = getAM().findEscalatables(subject, count, priority, 
                                                timeRange, cur, appentResources);
 
         // CheckAlertingScope now only used for galerts
@@ -1325,7 +1318,7 @@ public class EventsBossEJBImpl
         }
         
         GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
-        List galerts = gMan.findEscalatables(subjVal, count, priority, 
+        List galerts = gMan.findEscalatables(subject, count, priority, 
                                              timeRange, cur, appentResources);   
         alerts.addAll(galerts);
 
@@ -1529,8 +1522,7 @@ public class EventsBossEJBImpl
     /**
      * retrieve escalation by alert definition id.
      */
-    private Escalation findEscalationByAlertDefId(AuthzSubjectValue subject,
-                                                  Integer id, 
+    private Escalation findEscalationByAlertDefId(Integer id,
                                                   EscalationAlertType type)
         throws PermissionException
     {
@@ -1547,9 +1539,8 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, FinderException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        Escalation esc = findEscalationByAlertDefId(subject, id, alertType);
-
+        manager.getSubjectPojo(sessionID);
+        Escalation esc = findEscalationByAlertDefId(id, alertType);
         return esc == null ? null : esc.getId();
     }
 
@@ -1595,9 +1586,8 @@ public class EventsBossEJBImpl
         throws SessionException, PermissionException, JSONException, 
                FinderException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-
-        Escalation e = findEscalationByAlertDefId(subject, id, alertType);
+        manager.getSubjectPojo(sessionID);
+        Escalation e = findEscalationByAlertDefId(id, alertType);
         return e == null ? null 
                          : new JSONObject().put(e.getJsonName(), e.toJSON());
     }

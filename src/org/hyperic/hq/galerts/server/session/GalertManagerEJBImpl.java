@@ -397,9 +397,8 @@ public class GalertManagerEJBImpl
      * @return a list of {@link Escalatable}s
      * @ejb:interface-method
      */
-    public List findEscalatables(AuthzSubjectValue subj, int count, 
-                                 int priority, long timeRange, long endTime,
-                                 List includes)
+    public List findEscalatables(AuthzSubject subj, int count, int priority,
+                                 long timeRange, long endTime, List includes)
         throws PermissionException
     {
         List alerts = findAlerts(subj, count, priority, timeRange, endTime,
@@ -428,7 +427,7 @@ public class GalertManagerEJBImpl
      * @return a list of {@link GalertLog}s
      * @ejb:interface-method
      */
-    public List findAlerts(AuthzSubjectValue subj, int count, int priority,
+    public List findAlerts(AuthzSubject subj, int count, int priority,
                            long timeRange, long endTime, List includes) 
         throws PermissionException 
     {

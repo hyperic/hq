@@ -46,7 +46,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -167,7 +166,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @throws PermissionException 
      * @ejb:interface-method
      */
-    public int deleteAlerts(AuthzSubjectValue subj, AppdefEntityID id)
+    public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
         throws PermissionException {
         canManageAlerts(subj.getId(), id);
         return getAlertDAO().deleteByEntity(id);
@@ -281,7 +280,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public PageList findAlerts(AuthzSubjectValue subj, AppdefEntityID id,
+    public PageList findAlerts(AuthzSubject subj, AppdefEntityID id,
                                PageControl pc)
         throws PermissionException {
         canManageAlerts(subj.getId(), id);
@@ -305,7 +304,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public PageList findAlerts(AuthzSubjectValue subj, AppdefEntityID id,
+    public PageList findAlerts(AuthzSubject subj, AppdefEntityID id,
                                long begin, long end, PageControl pc)
         throws PermissionException 
     {
@@ -343,7 +342,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public List findAlerts(AuthzSubjectValue subj, int count, int priority,
+    public List findAlerts(AuthzSubject subj, int count, int priority,
                            long timeRange, long endTime, List includes) 
         throws PermissionException 
     {
@@ -388,11 +387,11 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     /**
      * Find escalatables for a resource in a given time range.
      *
-     * @see findAlerts(AuthzSubjectValue, int, int, long, long, List)
+     * @see findAlerts(AuthzSubject, int, int, long, long, List)
      *
      * @ejb:interface-method
      */
-    public List findEscalatables(AuthzSubjectValue subj, int count, 
+    public List findEscalatables(AuthzSubject subj, int count, 
                                  int priority, long timeRange, long endTime, 
                                  List includes)
         throws PermissionException

@@ -48,7 +48,6 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
@@ -237,7 +236,8 @@ public class AlertDefinitionManagerEJBImpl
             if (actions[i].getParentId() != null)
                 parent = aDAO.findById(actions[i].getParentId());
             
-            Action act = res.createAction(actions[i], parent);
+            Action act = res.createAction(actions[i].getClassname(),
+                                          actions[i].getConfig(), parent);
             actDAO.save(act);
         }
         
@@ -353,7 +353,8 @@ public class AlertDefinitionManagerEJBImpl
                 if (actions[i].getParentId() != null)
                     parent = getActionDAO().findById(actions[i].getParentId());
                 
-                actDao.save(aldef.createAction(actions[i], parent));
+                actDao.save(aldef.createAction(actions[i].getClassname(),
+                                               actions[i].getConfig(), parent));
             }
         }
 
@@ -757,24 +758,6 @@ public class AlertDefinitionManagerEJBImpl
         return condVals;
     }
     
-    /** Get an alert definition's actions
-     * @ejb:interface-method
-     */
-    public ActionValue[] getActionsById(Integer id)
-        throws FinderException 
-    {
-        AlertDefinition def = badFindById(id);
-        
-        Collection acts = def.getActions();
-        ActionValue[] actVals = new ActionValue[acts.size()];
-        Iterator it = acts.iterator();
-        for (int i = 0; it.hasNext(); i++) {
-            Action action = (Action) it.next();
-            actVals[i] = action.getActionValue();
-        }
-        return actVals;
-    }
-    
     /** Get list of alert conditions for a resource or resource type
      * @ejb:interface-method
      */
@@ -788,7 +771,7 @@ public class AlertDefinitionManagerEJBImpl
      * @return a PageList of {@link AlertDefinitionValue} objects
      * @ejb:interface-method
      */
-    public PageList findAllAlertDefinitions(AuthzSubjectValue subj) {
+    public PageList findAllAlertDefinitions(AuthzSubject subj) {
         List vals = new ArrayList();
         
         for (Iterator i = getAlertDefDAO().findAll().iterator(); i.hasNext();) {
@@ -890,8 +873,8 @@ public class AlertDefinitionManagerEJBImpl
      *              {@link AlertDefSortField}
      * @ejb:interface-method
      */
-    public List findTypeBasedDefinitions(AuthzSubjectValue subj, 
-                                         Boolean enabled, PageInfo pInfo) 
+    public List findTypeBasedDefinitions(AuthzSubject subj, Boolean enabled,
+                                         PageInfo pInfo) 
         throws PermissionException
     {
         if (!PermissionManagerFactory.getInstance()
@@ -904,7 +887,7 @@ public class AlertDefinitionManagerEJBImpl
     /** 
      * @ejb:interface-method
      */
-    public PageList findAlertDefinitions(AuthzSubjectValue subj,
+    public PageList findAlertDefinitions(AuthzSubject subj,
                                          AppdefEntityID id, PageControl pc)
         throws PermissionException
     {
@@ -981,7 +964,7 @@ public class AlertDefinitionManagerEJBImpl
      * Get list of alert definition names for a resource
      * @ejb:interface-method
      */
-    public SortedMap findAlertDefinitionNames(AuthzSubjectValue subj,
+    public SortedMap findAlertDefinitionNames(AuthzSubject subj,
                                               AppdefEntityID id,
                                               Integer parentId)
         throws PermissionException 

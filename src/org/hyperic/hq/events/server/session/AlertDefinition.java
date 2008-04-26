@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004-2007], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -39,7 +39,6 @@ import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertSeverity;
-import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
@@ -105,8 +104,8 @@ public class AlertDefinition
         return res;
     }
 
-    Action createAction(ActionValue actVal, Action parent) {
-        Action res = new Action(this, actVal, parent);
+    Action createAction(String className, byte[] config, Action parent) {
+        Action res = new Action(this, className, config, parent);
         _actions.add(res);
         return res;
     }

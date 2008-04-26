@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -139,9 +139,10 @@ public class Action
     protected Action() {
     }
 
-    Action(AlertDefinition def, ActionValue val, Action parent) {
-        _className  = val.getClassname();
-        _config     = ArrayUtil.clone(val.getConfig());
+    Action(AlertDefinition def, String className, byte[] config, Action parent)
+    {
+        _className  = className;
+        _config     = config;
         _parent     = parent;
         _alertDef   = def;
         _logEntries = Collections.EMPTY_LIST;
