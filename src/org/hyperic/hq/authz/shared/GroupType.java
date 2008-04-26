@@ -70,9 +70,6 @@ public class GroupType extends HypericEnum {
      * a mixed or compatible group.
      */
     public static GroupType findByCode(Integer[] codes) {
-        if (codes.length == 1) {
-            return findByCode(codes[0].intValue());
-        }
         List list = Arrays.asList(codes);
         if (list.contains(APPLICATION_GROUP) ||
             list.contains(GROUP_OF_GROUPS) ||
