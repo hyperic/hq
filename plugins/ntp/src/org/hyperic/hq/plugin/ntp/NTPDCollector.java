@@ -53,15 +53,19 @@ public class NTPDCollector extends Collector {
         return true;
     }
 
+    private String getNtpdc() {
+        return getProperties().getProperty(PROP_NTPDC, "");
+    }
+
     protected void init() throws PluginException {
-        String ntpdc = getProperty(PROP_NTPDC, "");
+        String ntpdc = getNtpdc();
         if (!new File(ntpdc).exists()) {
             throw new PluginException(PROP_NTPDC + "=" + ntpdc + " does not exist");
         }
     }
 
     public void collect() {
-        String ntpdc = getProperty(PROP_NTPDC);
+        String ntpdc = getNtpdc();
         int timeout = getTimeoutMillis();
         String argv[] = new String[ARGS.length + 3];
         argv[0] = ntpdc;

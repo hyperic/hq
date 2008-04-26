@@ -136,15 +136,15 @@ public abstract class WebsphereCollector extends Collector {
     }
 
     protected String getNodeName() {
-        return getProperty(WebsphereProductPlugin.PROP_SERVER_NODE);
+        return getProperties().getProperty(WebsphereProductPlugin.PROP_SERVER_NODE);
     }
 
     protected String getServerName() {
-        return getProperty(WebsphereProductPlugin.PROP_SERVER_NAME);
+        return getProperties().getProperty(WebsphereProductPlugin.PROP_SERVER_NAME);
     }
 
     protected String getModuleName() {
-        return getProperty("Module");
+        return getProperties().getProperty("Module");
     }
 
     protected AdminClient getMBeanServer() {
