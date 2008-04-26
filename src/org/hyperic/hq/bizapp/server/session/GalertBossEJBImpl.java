@@ -43,7 +43,6 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -170,7 +169,7 @@ public class GalertBossEJBImpl
                                     boolean enabled, ResourceGroup group) 
         throws SessionException
     {
-        AuthzSubjectValue subject = _sessMan.getSubject(sessionId);
+        AuthzSubject subject = _sessMan.getSubjectPojo(sessionId);
 
         return _galertMan.createAlertDef(subject, name, description,
                                          severity, enabled, group);

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -47,7 +47,6 @@ import org.hyperic.hq.authz.server.session.GroupChangeCallback;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
@@ -465,7 +464,7 @@ public class GalertManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public List findAlerts(AuthzSubjectValue subj, AlertSeverity severity,
+    public List findAlerts(AuthzSubject subj, AlertSeverity severity,
                            long timeRange, long endTime, PageInfo pInfo)
     {
         return _logDAO.findByCreateTimeAndPriority(subj.getId(), 
@@ -622,7 +621,7 @@ public class GalertManagerEJBImpl
     /**
      * @ejb:interface-method  
      */
-    public GalertDef createAlertDef(AuthzSubjectValue subject, String name,
+    public GalertDef createAlertDef(AuthzSubject subject, String name,
                                     String description, AlertSeverity severity,
                                     boolean enabled, ResourceGroup group)  
     {
