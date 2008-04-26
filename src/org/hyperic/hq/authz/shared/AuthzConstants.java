@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -187,9 +187,5 @@ public final class AuthzConstants {
     
     public static boolean isOverlord(Integer subject) {
         return subject.equals(AuthzConstants.overlordId);
-    }
-    
-    public static boolean isOverlord(AuthzSubjectValue subject) {
-        return isOverlord(subject.getId());
     }
 }
