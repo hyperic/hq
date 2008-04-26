@@ -98,23 +98,17 @@ public class ApplicationInventoryHelper extends InventoryHelper {
      * @param ctx the servlet context
      * @param id the id of the service type
      */
-    public AppdefResourceTypeValue
-    getChildResourceType(HttpServletRequest request,
-                         ServletContext ctx,
-                         AppdefEntityTypeID id)
+    public AppdefResourceTypeValue getChildResourceType(HttpServletRequest request,
+                                                        ServletContext ctx,
+                                                        AppdefEntityTypeID id)
         throws PermissionException, AppdefEntityNotFoundException,
         RemoteException, SessionNotFoundException, SessionTimeoutException,
         ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
-        try {
-            log.trace("finding service type [" + id + "]");
-            return boss.findServiceTypeById(sessionId, id.getId());
-        }
-        catch (FinderException e) {
-            throw new ServiceNotFoundException(id.getId());
-        }
+        log.trace("finding service type [" + id + "]");
+        return boss.findServiceTypeById(sessionId, id.getId());
     }
 
     /**

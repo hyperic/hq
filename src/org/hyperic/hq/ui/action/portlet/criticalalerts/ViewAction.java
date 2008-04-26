@@ -148,7 +148,7 @@ public class ViewAction extends BaseAction {
             def = alert.getDefinition().getDefinitionInfo();
             eid = new AppdefEntityID(def.getAppdefType(), def.getAppdefId());
 
-            aVal = new AppdefEntityValue(eid, subject.getAuthzSubjectValue());
+            aVal = new AppdefEntityValue(eid, subject);
             JSONObject jAlert = new JSONObject();
             jAlert.put("alertId", alert.getId());
             jAlert.put("appdefKey", eid.getAppdefKey());

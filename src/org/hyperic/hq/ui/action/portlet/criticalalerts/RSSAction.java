@@ -151,8 +151,7 @@ public class RSSAction extends BaseRSSAction {
             }
             
             AuthzSubject subject = aBoss.getCurrentSubject(user);
-            AppdefEntityValue resource = 
-                new AppdefEntityValue(aeid, subject.getAuthzSubjectValue()); 
+            AppdefEntityValue resource = new AppdefEntityValue(aeid, subject); 
 
             String link = feed.getBaseUrl() +
                 "/alerts/Alerts.do?mode=viewAlert&eid=" +

@@ -103,13 +103,8 @@ public class ServerInventoryHelper extends InventoryHelper {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
-        try {
-            log.trace("finding service type [" + id + "]");
-            return boss.findServiceTypeById(sessionId, id.getId());
-        }
-        catch (FinderException e) {
-            throw new ServiceNotFoundException(id.getId());
-        }
+        log.trace("finding service type [" + id + "]");
+        return boss.findServiceTypeById(sessionId, id.getId());
     }
 
     /**

@@ -103,20 +103,16 @@ public class PlatformInventoryHelper extends InventoryHelper {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
-        try {
-            switch (id.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    return boss.findPlatformTypeById(sessionId, id.getId());
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    return boss.findServerTypeById(sessionId, id.getId());
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    return boss.findServiceTypeById(sessionId, id.getId());
-                default:
-                    throw new IllegalArgumentException(
-                            "Unknown appdef entity type id: " + id);
-            }
-        } catch (FinderException e) {
-            throw new ServerNotFoundException(id.getId());
+        switch (id.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                return boss.findPlatformTypeById(sessionId, id.getId());
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                return boss.findServerTypeById(sessionId, id.getId());
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                return boss.findServiceTypeById(sessionId, id.getId());
+            default:
+                throw new IllegalArgumentException(
+                        "Unknown appdef entity type id: " + id);
         }
     }
 
