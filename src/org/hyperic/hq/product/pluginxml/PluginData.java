@@ -100,7 +100,7 @@ public class PluginData {
         this.name = name;
     }
 
-    String getPluginName() {
+    public String getPluginName() {
         if (this.name != null) {
             return this.name;
         }
