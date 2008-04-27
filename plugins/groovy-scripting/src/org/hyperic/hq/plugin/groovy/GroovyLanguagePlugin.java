@@ -28,7 +28,6 @@ package org.hyperic.hq.plugin.groovy;
 import groovy.lang.GroovyClassLoader;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
@@ -68,21 +67,6 @@ public class GroovyLanguagePlugin
                 getLog().debug("Adding to classpath: " + urls[i]);
                 cl.addURL(urls[i]);
             }
-        }
-    }
-
-    public Class loadClass(ClassLoader loader,
-                           Properties properties,
-                           InputStream is)
-        throws PluginException {
-
-        GroovyClassLoader cl = new GroovyClassLoader(loader);
-        adjustClassPath(cl);
-
-        try {
-            return cl.parseClass(is);
-        } catch (Exception e) {
-            throw new PluginException(e.getMessage(), e);
         }
     }
 

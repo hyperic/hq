@@ -26,16 +26,11 @@
 package org.hyperic.hq.product;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.Properties;
 
 public interface ScriptLanguagePlugin {
 
     public String getExtension();
-
-    public Class loadClass(ClassLoader loader,
-                           Properties properties,
-                           InputStream code) throws PluginException;
     
     public Class loadClass(ClassLoader loader,
                            Properties properties,
