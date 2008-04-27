@@ -901,13 +901,15 @@ public class ProductPluginManager extends PluginManager {
             String[] classpath = ProductPlugin.getDataClassPath(data); 
             addClassPath(loader, jarName, classpath);
 
-            if (this.isClient && jarName.endsWith(".jar")) {
-                String pdk = getPdkDir();
+            if (jarName.endsWith(".jar")) {
+                String pdk = getPdkWorkDir();
 
                 ClientPluginDeployer deployer =
                     new ClientPluginDeployer(pdk, defaultPluginName);
                 List jars = deployer.unpackJar(jarName);
-                loader.addURLs(jars);
+                if (this.isClient) {
+                    loader.addURLs(jars);
+                }
             }
 
             String implName =
