@@ -75,6 +75,7 @@ public class PluginParser {
     {
         this.replacer = new TokenReplacer();
         this.replacer.addFilters(PluginData.getGlobalProperties());
+        this.replacer.addFilters(System.getProperties());
 
         data.parser = this;
         data.scratch = new HashMap();
