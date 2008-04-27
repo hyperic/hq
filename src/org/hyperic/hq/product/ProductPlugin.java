@@ -25,9 +25,7 @@
 
 package org.hyperic.hq.product;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -201,34 +199,26 @@ public abstract class ProductPlugin extends GenericPlugin {
         File file = new File(script);
         if (file.exists()) {
             _log.debug(className + "->" + file);
-            try {
-                return plugin.loadClass(loader, props, file);
-            } catch (Exception e) {
-                throw new PluginException(e.toString(), e);
-            }
         }
         else {
-            InputStream is = null;
-            //embedded in plugin.jar
-            is = data.getClassLoader().getResourceAsStream(className);
-            if (is == null) {
-                //in memory
-                String code = props.getProperty(className);
-                if (code == null) {
-                    throw new PluginException("No code found for: " + className);
-                }
-                is = new ByteArrayInputStream(code.getBytes());
+            //unpacked from .jar XXX should not have to figure the path here
+            String pluginName = data.getPluginName();
+            String work =
+                ProductPluginManager.getPdkWorkDir() + "/" +
+                "scripts/" + pluginName + "/" +
+                file.getName();
+            _log.debug(className + " (" + pluginName + "-plugin.jar) -> " + work);
+            file = new File(work);
+            if (!file.exists()) {
+                _log.error("Unable to locate: " + className);
             }
-            try {
-                return plugin.loadClass(loader, props, is);
-            } catch (Exception e) {
-                throw new PluginException(e.toString(), e);
-            } finally {
-                if (is != null) {
-                    try { is.close(); } catch (Exception e) {}
-                }
-            }
-        }    
+        }
+
+        try {
+            return plugin.loadClass(loader, props, file);
+        } catch (Exception e) {
+            throw new PluginException(e.toString(), e);
+        }
     }
 
     static Class getPluginClass(ClassLoader loader,
