@@ -52,6 +52,6 @@ class IncludeTag
     
     public void endAttributes() {
         String include = getAttribute(ATTR_NAME);
-        this.container.includes.add(include);
+        this.container.includes.add(this.data.applyFilters(include));
     }
 }
