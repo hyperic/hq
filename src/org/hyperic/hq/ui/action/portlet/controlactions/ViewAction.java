@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -124,7 +124,7 @@ public class ViewAction extends TilesAction {
                 try{
                     AppdefEntityID entity =
                         new AppdefEntityID(control.getEntityType().intValue(),
-                                           control.getEntityId().intValue() );                    
+                                           control.getEntityId());                    
                     bean.setResource( appdefBoss.findById(sessionId,  entity) );
                     bean.setControl(control);                    
                     pendingList.add(bean);
