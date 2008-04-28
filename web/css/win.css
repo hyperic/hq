@@ -91,7 +91,7 @@ input.compactbuttoninactive {
 }
 
 .pagetitle,.pagetitlebar,.pagetitlebar td {
-    background-color: #CCC;
+    background-color: #FFF;
     color: #fff;
     font-family: arial, sans-serif;
     font-size: 12px;
@@ -1664,9 +1664,11 @@ ul.boxy li {
 }
 
 .pagetitlebar,.pagetitlebar td {
-    background-color: #ff7214;
-    background-image: url(/images/bg_PageTitle2.gif);
-    background-repeat: repeat-x
+    /*background-color: #ff7214;*/
+    /*background-image: url(/images/bg_PageTitle2.gif);*/
+    background-repeat:repeat-x;
+	color:#444444;
+	font-size:17px;
 }
 
 blk,.black,#usersconfigwindow .blockcontent,#rolesconfigwindow .blockcontent {
