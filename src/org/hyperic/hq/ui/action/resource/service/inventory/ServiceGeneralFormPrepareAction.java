@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -29,21 +29,15 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.WorkflowPrepareAction;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.action.WorkflowPrepareAction;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  *
@@ -63,9 +57,6 @@ public class ServiceGeneralFormPrepareAction
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log =
-            LogFactory.getLog(ServiceGeneralFormPrepareAction.class.getName());
-
         ServiceForm serviceForm = (ServiceForm) form;
 
         Integer sessionId = RequestUtils.getSessionId(request);
@@ -74,10 +65,6 @@ public class ServiceGeneralFormPrepareAction
         Integer resourceId = RequestUtils.getResourceId(request);
 
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-
-        AppdefEntityID entityId =
-            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                               resourceId.intValue());
 
         ServiceValue service =
             boss.findServiceById(sessionId.intValue(), resourceId);
