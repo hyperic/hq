@@ -86,7 +86,7 @@
 
     </script>
 </head>
-<body style="background-color: #FFFFFF;">
+<body style="background-color: #FFFFFF;" class="tundra">
   <c:choose>    
     <c:when test="${portal.dialog}">    
      <tiles:insert attribute="headerSmall"/>
