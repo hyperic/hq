@@ -70,7 +70,7 @@
     <td width="1%"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link></td>
   </tr>
   <tr> 
-    <td valign="top" align="left" rowspan="99"><html:img page="/images/title_TLcorner.gif" width="8" height="8" alt="" border="0"/></td>
+    <td valign="top" align="left" rowspan="99"></td>
     <td colspan="2"><html:img page="/images/spacer.gif" width="1" height="10" alt="" border="0"/></td>
   </tr>
   <tr valign="top"> 

@@ -99,7 +99,7 @@
   </tr>
   <tr>
     <td width="5" rowspan="99" class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
-    <td valign="top" align="left" rowspan="99"><html:img page="/images/title_TLcorner.gif" width="8" height="8" alt="" border="0"/></td>
+    <td valign="top" align="left" rowspan="99"></td>
     <td colspan="4"><html:img page="/images/spacer.gif" width="1" height="10" alt="" border="0"/></td>
   </tr>
 <c:if test="${not empty resource || not empty linkUrl || not empty showSearch}">
