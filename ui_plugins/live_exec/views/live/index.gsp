@@ -93,12 +93,12 @@ function runCommand() {
     
   dojo.xhrGet({
     url: url,
-    handleAs: "text/json-comment-filtered",
+    handleAs: "json-comment-filtered",
     load: function(responseObj, ioArgs) {
       if (--ajaxCount == 0) {
         dojo.byId("spinner").style.visibility = 'hidden';  
       }
-      processResult(data);
+      processResult(responseObj);
     },
     error: function(responseObj, ioArgs) {
       //alert('There has been an error:  ' + err);
