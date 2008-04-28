@@ -1,6 +1,12 @@
+var init_lib = false;
+var urlXtraVar = [];
 var hyperic = {};
-hyperic.URLS = {}; hyperic.widget = {}; hyperic.utils = {}; hyperic.html = {};
+hyperic.URLS = {}; hyperic.widget = {}; hyperic.utils = {}; hyperic.html = {}; hyperic.data = {}, hyperic.i18n = {};
 
+hyperic.init = function(){
+    if(!init_lib)
+        dojo.require("dojox.Grid");
+}
 hyperic.html = {
     show : function(/*String*/ node){
         dojo.style(node, 'display', '');
@@ -104,6 +110,92 @@ hyperic.utils.addKeyListener = function(/*Node*/node, /*Object*/ keyComb, /*Stri
     return this;
 }
 
+hyperic.utils.addUrlXtraCallback = function(plugin_id, fn) {
+    if(!urlXtraVar[plugin_id])
+        urlXtraVar[plugin_id] = [];
+    urlXtraVar[plugin_id].push(fn);
+}
+
+/**
+ * Make a query string for HQU plugins XHR calls
+ * Currently used for the dojo Grid
+ * 
+ * @param keywordArgs 
+ * @param pageNumVar
+ * @param sortOrderVar
+ * @param sortFieldVar
+ * @param urlXtraVar
+ * @param id
+ * 
+ */
+hyperic.utils.makeQueryString = function(kwArgs, pageNumVar, sortFieldVar, 
+        sortOrderVar, urlXtraVar, id){
+    var res = '?pageNum=' + pageNumVar;
+    if (kwArgs && kwArgs.numRows)
+        res += '&pageSize='+ kwArgs.numRows;
+    else
+        res += '&pageSize='+numRows;
+    if(kwArgs && kwArgs.typeId)
+        res += '&typeId='+ kwArgs.typeId;
+
+    if (sortFieldVar)
+        res += '&sortField=' + sortFieldVar;
+    if (sortOrderVar != null)
+        res += '&sortOrder=' + sortOrderVar;
+
+    var callbacks = urlXtraVar;
+    for (var i=0; i<callbacks.length; i++) {
+        var cb = callbacks[i];
+
+        var cbmap = cb(id);
+        for (var v in cbmap) {
+            if (v == 'extend') continue;
+            res += '&' + v + '=' + cbmap[v];
+        }
+    }
+    return res;
+};
+
+hyperic.utils.passwd = {
+    /**
+     * Password strength meter
+     * Params are keys in kwArgs
+     * 
+     * @param node [Node] - text node that contains the pw, has a .value property
+     * @param password [String] (optinal)
+     * @param updateNode [Node] - the node to update, has a .innerHTML property
+     * @param minimumChars (optional) defaults to 6
+     * 
+     * @return the localize string representing very weak - strong
+     */
+    assignStrength : function(kwArgs){
+        var desc = [];
+        desc[0] = hyperic.i18n.html.vweak; //"Very Weak";
+        desc[1] = hyperic.i18n.html.weak; //"Weak";
+        desc[2] = hyperic.i18n.html.medium; //"Medium";
+        desc[3] = hyperic.i18n.html.strong; //"Strong";
+
+        var score   = 0;
+
+        //if password bigger than 6 give 1 point
+        if (password.length > 6) score++;
+
+        //if password has both lower and uppercase characters give 1 point      
+        if ( ( password.match(/[a-z]/) ) && ( password.match(/[A-Z]/) ) ) score++;
+
+        //if password has at least one number give 1 point
+        if (password.match(/\d+/)) score++;
+
+        //if password has at least one special caracther give 1 point
+        if ( password.match(/.[!,@,#,$,%,^,&,*,?,_,~,-,(,)]/) ) score++;
+
+        //if password bigger than 12 give another 1 point
+        if (password.length > 12) score++;
+         document.getElementById("passwordDescription").innerHTML = desc[score];
+         document.getElementById("passwordStrength").className = "strength" + score;
+    }
+};
+
 hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Object*/ keyCode){
     this.opened     = false;
     this.minStrLen  = minStrLenth; 
@@ -170,7 +262,7 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
         this.searchBox.className = "";
     };
     return this;
-}
+};
 
 function loadSearchData(response, ioArgs) {
     if(response){
@@ -228,7 +320,8 @@ hyperic.widget.menu = {
             }
         }
     }
-}
+};
+
 /**
  * Hyperic Dojo Grid
  *
@@ -239,15 +332,35 @@ hyperic.widget.menu = {
  *  Views - a collection of cells (row groups) that form a logical row
  *  Layouts - a collection of views, side by side (sets of columns)
  *
- * Columns have the following schema options
+ * Columns have the following schema variables
  *  name: The title of the column - ex "foo"
  *  width: the style width of the column - ex "150px"
- *  field:
+ *  field: the index of the array of each row in the data array
+ *  height: the style height of the colum cell
+ *  formatter: a function that performs some display formatting and conversion - ex [0,1] -> [False,True]   
+ *      can return any string including HTML
  * 
  * Example
- *  build a model, view and layout then
+ *  build a hyperic.widget.Grid.Model, hyperic.widget.Grid.View and a layout descriptor then
  *  var myGrid = new hyperic.widget.grid(node, "myGridNode", model, layout);
  *  var myDojoGrid = myGrid.dojoGrid; //the dojo grid
+ * 
+ * Example Layout Descriptor
+ *  var subrow = [
+ *      { name: '' },
+ *      { name: '', formatter: formatPercentage }
+ *  ];
+ *
+ *  var view = {
+ *      rows: [
+ *          subrow // 1..n
+ *      ]
+ *  };
+ *
+ *  var structure = [
+ *      view // 1..n
+ *  ];
+ *
  * 
  * @param containerNode
  * @param tableId
@@ -255,27 +368,106 @@ hyperic.widget.menu = {
  * @param layout
  * 
  */
-hyperic.widget.Grid = function(/*DOMNode*/ containerNode, /*String*/ tableId, /*Object*/ model, /*Object*/ layout) {
+hyperic.widget.Grid = function(/*DOMNode*/ containerNode, /*String*/ tableId, /*Object*/ model,
+     /*Object*/ layout, /*Number*/ autoRefreshInterval) {
     this.dojoGrid = null;
-    this.data = null;
+    this.data   = null;
     this.store = null;
-    this.model = null;
-    //Private Constructor
-    function Grid(/*DOMNode*/ containerNode, /*String*/ tableId, /*Object*/ model, /*Object*/ layout){
-        this.dojoGrid = new dojox.Grid({
+    this.model  = model;
+    
+    this._autoRefresh = false;
+    this._autoRefreshInterval = autoRefreshInterval; //1 sec;
+    this._intervalVar = -1;
+    this._currentPage   = 0;
+    this._isSortable    = false;
+    this._sortIdx        = 0;
+    this._sortOrder     = 0;
+    
+    /**
+     * Turn off/on auto refresh on the grid.
+     * @param a new interval to refresh on
+     */
+    this.toggleAutoRefresh = function(interval){
+        if(interval && interval > 100){
+             this._autoRefreshInterval = interval;
+             clearInterval(this._intervalVar);
+             this._initInterval();
+        }else{
+            if(this._autoRefresh){
+                this._autoRefresh = false;
+                clearInterval(this._intervalVar);
+            }
+            else{
+                this._autoRefresh = true;
+                this._initInterval();
+            }
+        }
+    };
+    this.nextPage = function(){
+        if (this._currentPage != 0) {
+            this._currentPage++;
+            
+            this.refreshTable();
+        }
+        
+    };
+    this.previousPage = function(){
+        if (this._currentPage != 0) {
+            this._currentPage--;
+            this.refreshTable();
+        }
+    };
+    this.refreshGrid = function(){
+        this.dojoGrid.model.refresh();
+         
+    };
+    this.highlightRow = function(){
+    
+    };
+    this._setupHeader = function(){
+    
+    };
+    this._setSortField = function(){
+        if (!this._isSortable)
+                return;
+        var curSortIdx = this.dojoGrid.getSortAsc(this.dojoGrid.sortInfo);
+        this.sortOrder = this.dojoGrid.getSortIndex(this.dojoGrid.sortInfo);
+        if (curSortIdx == el.getAttribute('idx')) {
+            sortOrder = ~sortOrder & 1;
+        } else {
+            sortOrder = 0;
+        } 
+        this.dojoGrid.setSortIndex(curSortIdx, this.sortOrder);
+        this._sortIdx = curSortIdx;
+        this._currentPage = 0;
+        this.refreshGrid();
+    };
+    this._init = function(){
+        //Build grid
+        dojo.require("dojox.grid.Grid");
+        this.dojoGrid = new dojox.grid.Grid({
             "id": tableId,
             "model": model,
             "structure": layout
         });
         //add the grid to the parent node
-        if(contianerNode.innerHTML){
-            containerNode.appendChild(this.grid.domNode);
-        }else{
-            dojo.byId("${containerId}").appendChild(this.grid.domNode);
+        if(typeof(containerNode) == "string")
+            var node = dojo.byId(containerNode);
+            node.appendChild(this.dojoGrid.domNode);    
+        
+        //do connects
+            //connect header sort onclick
+        //auto refresh
+        this._initInterval();
+        
+    };
+    this._initInterval = function(){
+        if(this._autoRefresh){
+            var that = this;
+            this._intervalVar = setInterval( function(){that.refreshGrid();}, this._autoRefreshInterval);
         }
-    }
-    Grid();
-    return this;
+    };
+    this._init();
 };
 
 /**
@@ -291,15 +483,18 @@ hyperic.widget.Grid = function(/*DOMNode*/ containerNode, /*String*/ tableId, /*
  * @param dataServiceUrl where can it get the data from
  * 
  */
-hyperic.widget.Grid.Datastore = function(/*boolean*/ readOnlyGrid, /*boolean*/ paging, /*String*/ dataServiceUrl){
+hyperic.data.GridDatastore = function(/*boolean*/ readOnlyGrid, /*boolean*/ paging, /*String*/ dataServiceUrl){
     var store;
     //create the datastore
     if(readOnlyGrid && !paging){
-        store = new dojo.data.ItemFileReadStore(dataServiceUrl);
+        dojo.require("dojo.data.ItemFileReadStore");
+        store = new dojo.data.ItemFileReadStore({url:dataServiceUrl});
     }else if(!paging){
-        store = new dojo.data.ItemFileWriteStore(dataServiceUrl);
+        dojo.require("dojo.data.ItemFileWriteStore");
+        store = new dojo.data.ItemFileWriteStore({url:dataServiceUrl});
     }else{
-        store = new dojox.data.QueryReadStore(dataServiceUrl);
+        dojo.require("dojox.data.QueryReadStore");
+        store = new dojox.data.QueryReadStore({url:dataServiceUrl, requestMethod:"post", doClientPaging: false});
         //need to create the xhr to handle the optional writes to the server
     }
     return store;
@@ -311,27 +506,39 @@ hyperic.widget.Grid.Datastore = function(/*boolean*/ readOnlyGrid, /*boolean*/ p
  * Example
  * var model = new hyperic.widget.Grid.Model(500, myDatastoreObj, false);
  * 
+ * add a comparator to the model
+ *  ex -  model.fields.get(4).compare = function(a, b){ return (b > a ? 1 : (a == b ? 0 : -1)); }
+ * 
  * @param tableHeight - the integer height of the table used to specify #rows for virtual scrolling
  * @param datastore - a dojo datastore or json object of the data
  * @param isClientDataSource is this data local or remote
  */
-hyperic.widget.Grid.Model = function(tableHeight, datastore, isClientDataSource){
-    //create the model
-    function calcSize(){
-        return 30;
-    }
+hyperic.data.GridModel = function(tableHeight, datastore, rows, clientSort, query, data){
+    dojo.require("dojox.grid._data.model")
+    //create the model    
     var model;
-    if(isClientDataSource){
-        model = new dojox.grid.data.Table(null, datastore, {
-            
+    if(datastore) {
+        model = new dojox.grid.data.DojoData(null, datastore, {
+            rowsPerPage: rows,
+            clientSort: false,
+            doClientPaging:false,
+            /*clientSort: clientSort,*/
+            getRowCount: function(){
+                return 500;
+            },
         });
-    }else{
-        model = new dojox.grid.data.Dynamic(null, datastore, {
-            
-        });
+    } else {
+        model = new dojox.grid.data.Table(null, data);
     }
     return model;
 };
+
+hyperic.data.Comparators = {
+    string : function(){
+        
+    }
+    
+}
 
 /**
  * @eprecated used only for the struts header
