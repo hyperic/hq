@@ -1,4 +1,5 @@
 <script type="text/javascript">
+getDojo();
 function selectAlertType(t) {
   if (t == "1") {
     hyperic.html.show('alertsTable');

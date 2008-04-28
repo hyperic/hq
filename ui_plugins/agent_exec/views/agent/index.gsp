@@ -93,7 +93,7 @@ function runCommand() {
     
   dojo.xhrGet{
     url: url,
-    handleAs: "text/json-comment-filtered",
+    handleAs: "json-comment-filtered",
     load: function(responseObject, ioArgs) {
       if (--ajaxCount == 0) {
         dojo.byId("spinner").style.visibility = 'hidden';  

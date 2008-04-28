@@ -6,7 +6,7 @@
 function saveValue(key, newVal, oldVal) {
   dojo.xhrGet({
     url: '<%= urlFor(action:"setProp") %>',
-    handleAs: "text/json-comment-filtered",
+    handleAs: "json-comment-filtered",
     content: {key: key, newVal: newVal, oldVal: oldVal},
     load: function(responseObj, ioArgs) {
     },
