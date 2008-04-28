@@ -1,4 +1,5 @@
 <script type="text/javascript">
+    getDojo();
     <%= ajaxAccordionFilter( refresh:60, updateURL:urlFor(action:'summary')+"?q=all", id:"SystemsDownFilter", filterTargetId:"SystemsDown") %>
     plugin.accordion.update = function(kwArgs) {
         if(kwArgs.numRows)
