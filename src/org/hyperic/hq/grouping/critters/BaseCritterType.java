@@ -90,6 +90,8 @@ public abstract class BaseCritterType
      * 
      * @param propName The property name to use when looking up the localized
      *                 value.
+     * @param type     The critter prop type
+     * @param required If true, the property is required to create the critter
      *                 
      * propName is used in conjunction with the propPrefix (from initialize())
      * The properties loaded from the resource bundle will be of the following
@@ -100,7 +102,9 @@ public abstract class BaseCritterType
      * Each call to addPropDescription adds a new property, and thus will
      * require 2 more localized properties. 
      */
-    protected void addPropDescription(String propName, CritterPropType type) { 
+    protected void addPropDescription(String propName, CritterPropType type,
+                                      boolean required) 
+    { 
         String componentName = 
             _bundle.getString(_propPrefix + "critterProp." + propName + 
                               ".name");
@@ -109,7 +113,11 @@ public abstract class BaseCritterType
                               ".purpose");
         
         _propDescs.add(new CritterPropDescription(type, componentName, 
-                                                  componentPurpose));
+                                                  componentPurpose, required));
+    }
+    
+    protected void addPropDescription(String propName, CritterPropType type) {
+        addPropDescription(propName, type, true);
     }
 
     public List getPropDescriptions() {
@@ -129,14 +137,14 @@ public abstract class BaseCritterType
     }
 
     /**
-     * Validate a list of {@link CritterPropDescription}s agains the previously
-     * defined descriptions.
+     * Validate a list of {@link CritterPropDescription}s against the 
+     * previously defined descriptions.
      * 
-     * Calls to addDescription() pre-populate the critter type with the
+     * Calls to addPropDescription() pre-populate the critter type with the
      * props that are valid.  This method ensures that a list of 
      * {@link CritterPropDescription}s match the valid types.
      * 
-     * @param propDescs a list of {@link CritterPropDescription}s 
+     * @param propDescs a list of {@link CritterProp}s 
      */
     protected void validate(List propDescs) 
         throws GroupException

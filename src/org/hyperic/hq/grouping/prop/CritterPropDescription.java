@@ -33,7 +33,7 @@ package org.hyperic.hq.grouping.prop;
  * A list of {@link CritterPropDescription}s can easily be displayed in the UI
  * in the following format:
  * 
- * shortName:  purpose  (type.getValue())
+ * name:  purpose  (type.getValue())
  *  ...
  *  
  * For instance: 
@@ -42,18 +42,30 @@ package org.hyperic.hq.grouping.prop;
  *     Age:  only allow resources created before this time (date)
  */
 public class CritterPropDescription  {
-    private CritterPropType _type;
-    private String          _name;
-    private String          _purpose;
-    
-    public CritterPropDescription(CritterPropType type,
-                                  String name, String purpose)
+    private final CritterPropType _type;
+    private final String          _name;
+    private final String          _purpose;
+    private final boolean         _required;
+
+    public CritterPropDescription(CritterPropType type, String name, 
+                                  String purpose, boolean required)
     {
-        _name    = name;
-        _type    = type;
-        _purpose = purpose;
+        _name     = name;
+        _type     = type;
+        _purpose  = purpose;
+        _required = required;
     }
 
+    /**
+     * Create a new description for the {@link CritterProp}, defaulting
+     * to being a required property. 
+     */
+    public CritterPropDescription(CritterPropType type, String name, 
+                                  String purpose)
+    {
+        this(type, name, purpose, true);
+    }
+    
     /**
      * Returns a localized name for this prop.  Used by the UI
      * to generically argument types for critters.
@@ -74,5 +86,12 @@ public class CritterPropDescription  {
      */
     public String getPurpose() {
         return _purpose;
+    }
+
+    /**
+     * If true, the associated {@link CritterProp} is required.
+     */
+    public boolean isRequired() {
+        return _required;
     }
 }
