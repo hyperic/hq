@@ -1,3 +1,6 @@
+<script type="text/javascript">
+    getDojo();
+</script>
 <div class="nagContainer">
     <div class="nagTableContainer" id="nagCont">
         <div id="nagTable">
