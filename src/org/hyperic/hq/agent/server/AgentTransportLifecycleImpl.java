@@ -26,7 +26,6 @@
 package org.hyperic.hq.agent.server;
 
 import java.net.InetSocketAddress;
-import java.security.Security;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -149,7 +148,7 @@ public class AgentTransportLifecycleImpl implements AgentTransportLifecycle {
                           "know the server port for the unidirectional transport.");
                 return;
             }
-
+            
             _log.info("Setting up unidirectional transport");
                         
             InetSocketAddress pollerBindAddr = 
@@ -172,6 +171,7 @@ public class AgentTransportLifecycleImpl implements AgentTransportLifecycle {
         
         
         if (_agentTransport != null) {
+            
             // register the services and start the server            
             for (Iterator iter = _serviceInterface2ServiceImpl.entrySet().iterator(); 
                  iter.hasNext();) {
