@@ -98,6 +98,6 @@ class AgentController
         jsres.put('results', res)
         jsres.put('command', cmd)
         render(inline:"/* ${jsres} */", 
-    	       contentType:'text/json-comment-filtered')
+    	       contentType:'json-comment-filtered')
     }
 }

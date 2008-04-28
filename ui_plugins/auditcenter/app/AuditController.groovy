@@ -57,6 +57,6 @@ class AuditController
 
     def data(params) {
         def json = DojoUtil.processTableRequest(AUDIT_SCHEMA, params)
-		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
+		render(inline:"/* ${json} */", contentType:'json-comment-filtered')
     }
 }
