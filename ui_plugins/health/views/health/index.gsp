@@ -1,14 +1,19 @@
-<%= dojoInclude(["dojo.event.*",
+<%= dojoInclude([
                  "dijit.layout.ContentPane",
                  "dijit.layout.TabContainer",
-                 "dojo.grid.Grid"]) %>
+                 "dojox.grid.Grid",
+                 "dojo.data.ItemFileWriteStore",
+                 "dojo.data.ItemFileReadStore",
+                 "dojo.parser"
+               ]) %>
 <%= hquStylesheets() %>
 
 <script type="text/javascript">
+getDojo();
 function getSystemStats() {
   dojo.xhrPost({
     url: '<%= urlFor(action:"getSystemStats") %>',
-    handleAs: "text/json-comment-filtered",
+    handleAs: "json-comment-filtered",
     load: function(data, ioArgs) {
       dojo.byId('userCPU').innerHTML = data.sysUserCpu;
       dojo.byId('userCPUBar').style.width = data.sysUserCpu;
@@ -174,7 +179,7 @@ getSystemStats();
 
 <div class="metricGroupBlock">
   <div id="jvmInfo" class="metricGroup">
-  	<div class="metricCatLabel">${l.jvm}</div>
+    <div class="metricCatLabel">${l.jvm}</div>
     <table class="metricTable">
     <tr class="metricRow">
       <td>${l.jvmPercMem}:</td><td><span id="jvmPercMem"></span></td>
@@ -275,7 +280,7 @@ function selectDiag(d) {
     
   dojo.xhrPost({
     url: '<%= urlFor(action:"getDiag") %>' + '?diag=' + d,
-    handleAs: "text/json-comment-filtered",
+    handleAs: "json-comment-filtered",
     load: function(responseObj, ioArgs) {
       dojo.byId('diagData').innerHTML = responseObj.diagData;
     }
@@ -302,7 +307,7 @@ function selectQuery(q) {
     
   dojo.xhrPost({
     url: '<%= urlFor(action:"runQuery") %>' + '?query=' + q,
-    handleAs: "text/json-comment-filtered",
+    handleAs: "json-comment-filtered",
     load: function(responseObj, ioArgs) {
       dojo.byId('queryData').innerHTML = responseObj.queryData;
     }
