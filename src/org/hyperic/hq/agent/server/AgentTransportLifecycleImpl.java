@@ -43,7 +43,7 @@ import org.hyperic.hq.transport.AgentTransport;
 /**
  * The class that manages the agent transport lifecycle.
  */
-public class AgentTransportLifecycleImpl implements AgentTransportLifecycle {
+public final class AgentTransportLifecycleImpl implements AgentTransportLifecycle {
     
     private static final Log _log = LogFactory.getLog(AgentTransportLifecycleImpl.class);
     
@@ -62,16 +62,21 @@ public class AgentTransportLifecycleImpl implements AgentTransportLifecycle {
         _storageProvider = storageProvider;
         _serviceInterfaceName2ServiceInterface = new HashMap();
         _serviceInterface2ServiceImpl = new HashMap();
+        
+        // Normally we don't want 'this' to escape the constructor, but 
+        // we made this class final so we don't have to worry about a 
+        // not fully initialized instance of a subclass (of this class) 
+        // handled by another thread.
+        
+        // register handler to be notified when the transport layer 
+        // configuration is finally set
+        _agent.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
     }
             
     /**
      * @see org.hyperic.hq.agent.server.AgentTransportLifecycle#startAgentTransport()
      */
-    public void startAgentTransport() throws Exception {
-        // register handler to be notified when the transport layer 
-        // configuration is finally set
-        _agent.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
-        
+    public void startAgentTransport() throws Exception {        
         // Start the agent transport here - only if all configuration properties 
         // are available thru boot props - before starting, register all the services with the agent transport
         
