@@ -354,7 +354,6 @@ class ResourceCategory {
                           String name, AuthzSubject subject, Map cfg)
     {
         cfg = cfg + [:]  // Clone to avoid modifying someone else's cfg
-        def subjectVal = subject.valueObject
         
         if (proto.isServicePrototype()) {
             def serviceType = svcMan.findServiceType(proto.instanceId)
@@ -363,20 +362,20 @@ class ResourceCategory {
             if (serverType.isVirtual()) {
                 // Parent points at the 'resource' version of the Platform, so
                 // we use the instanceId here, not the Resource.id
-                def servers = svrMan.getServersByPlatformServiceType(subjectVal,
+                def servers = svrMan.getServersByPlatformServiceType(subject,
                                                                      parent.instanceId,
                                                                      proto.instanceId)
                 assert servers.size() == 1, "All virtual servers should be created for Platform ${parent.name}" 
                 
                 def server = svrMan.findServerById(servers[0].id) // value -> pojo
-                def res = svcMan.createService(subjectVal, server, 
+                def res = svcMan.createService(subject, server, 
                                                serviceType, name, "desc: ${name}",
                                                "loc: ${name}", null).resource
                 setConfig(res, cfg, subject)
                 return res
             } else {
                 Server server = toServer(parent)
-                def res = svcMan.createService(subjectVal, server,
+                def res = svcMan.createService(subject, server,
                                                serviceType, name, "desc: ${name}",
                                                "loc: ${name}", null).resource
                 setConfig(res, cfg, subject)
@@ -388,7 +387,7 @@ class ResourceCategory {
             sv.name        = name
             sv.description = "desc: ${name}"
             sv.installPath = 'dummy install path'
-            def res = svrMan.createServer(subjectVal, platform.id,
+            def res = svrMan.createServer(subject, platform.id,
                                           proto.instanceId, sv).resource
             setConfig(res, cfg, subject)
             return res

@@ -79,8 +79,8 @@ class ResourceConfig {
             fields: PLATFORM_FIELD_KEYS,
             targetForGet:  { r -> r.toPlatform() },
             targetForSet:  { r -> r.toPlatform().platformValue },
-            saveSetTarget: { subjectVal, platVal ->
-                platMan.updatePlatformImpl(subjectVal, platVal)
+            saveSetTarget: { subject, platVal ->
+                platMan.updatePlatformImpl(subject, platVal)
             },
             populateAllCfg: { allCfg, platform ->
             },
@@ -89,8 +89,8 @@ class ResourceConfig {
             fields: SERVER_FIELD_KEYS,
             targetForGet: { r -> r.toServer() },
             targetForSet: { r -> r.toServer().serverValue },
-            saveSetTarget: { subjectVal, serverVal ->
-               svrMan.updateServer(subjectVal, serverVal)
+            saveSetTarget: { subject, serverVal ->
+               svrMan.updateServer(subject, serverVal)
             },
             populateAllCfg: { allCfg, server ->
                 allCfg.enableRuntimeAIScan = server.getRuntimeAutodiscovery() 
@@ -100,8 +100,8 @@ class ResourceConfig {
             fields: SERVICE_FIELD_KEYS,
             targetForGet: { r -> r.toService()} ,
             targetForSet: { r -> r.toService().serviceValue },
-            saveSetTarget: { subjectVal, serviceVal ->
-                svcMan.updateService(subjectVal, serviceVal)
+            saveSetTarget: { subject, serviceVal ->
+                svcMan.updateService(subject, serviceVal)
             },
             populateAllCfg: { allCfg, service ->
             },
@@ -217,7 +217,6 @@ class ResourceConfig {
     void setProperties(Map props, AuthzSubject subject) {
         populate()
 
-        def subjectVal = subject.valueObject
         def entityID   = resource.entityId
 
         // CProp changes
@@ -250,7 +249,7 @@ class ResourceConfig {
             }
             
             println "Saving target ${targetForSet.name}: ${targetForSet}"
-            appdefHandler.saveSetTarget(subjectVal, targetForSet)
+            appdefHandler.saveSetTarget(subject, targetForSet)
         }
         
         // Config Response changes
