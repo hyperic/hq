@@ -16,6 +16,7 @@ import org.hyperic.hq.hqu.rendit.helpers.AlertHelper
 import org.hyperic.hq.hqu.rendit.helpers.AuditHelper
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.rendit.helpers.MetricHelper
+import org.hyperic.hq.hqu.rendit.helpers.UserHelper
 import org.hyperic.hq.hqu.rendit.render.RenderFrame
 
 import org.apache.commons.fileupload.servlet.ServletFileUpload
@@ -312,6 +313,10 @@ abstract class BaseController {
     
     protected MetricHelper getMetricHelper() {
         new MetricHelper(user)
+    }
+
+    protected UserHelper getUserHelper() {
+        new UserHelper(user)
     }
 
     /**
