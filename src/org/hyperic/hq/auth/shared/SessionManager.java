@@ -25,17 +25,15 @@
 
 package org.hyperic.hq.auth.shared;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.util.collection.IntHashMap;
 
 public class SessionManager {
     private static Random _random = new Random();
-    private static Map _cache = new HashMap();
+    private static IntHashMap _cache = new IntHashMap();
     private static SessionManager _manager = new SessionManager();
     private static final long DEFAULT_TIMEOUT = 90 * 1000 * 60;
 
@@ -64,15 +62,15 @@ public class SessionManager {
      */
     public synchronized int put(AuthzSubject subject, long timeout) {
 
-        Integer key = null;
+        int key;
 
         do {
-            key = new Integer(_random.nextInt());
+            key = _random.nextInt();
         } while (_cache.containsKey(key));
         
         _cache.put(key, new AuthSession(subject, timeout));
         
-        return key.intValue();
+        return key;
     }
 
     /**
@@ -87,26 +85,22 @@ public class SessionManager {
         int sessionId = -1;
 
         try {
-            Iterator i = _cache.keySet().iterator();
-            
-            //iterate existing sessions look for matching username
-            while (i.hasNext()) {
-                
-                Integer sessKey = (Integer) i.next();
-                
-                AuthSession session = (AuthSession)
-                    _cache.get(sessKey);
-                
+            int[] keys = _cache.getKeys();
+
+            // iterate existing sessions look for matching username
+            for (int i = 0; i < keys.length; i++) {
+                int sessKey = keys[i];
+
+                AuthSession session = (AuthSession) _cache.get(sessKey);
                 // If found...
                 if (session.getAuthzSubject().getName().equals(username)) {
-                    
+
                     // check expiration...
                     if (session.isExpired()) {
                         invalidate(sessionId);
                         throw new SessionTimeoutException();
-                    } 
-                    else 
-                        return sessKey.intValue();  // short circuit for efficiency.
+                    } else
+                        return sessKey; // short circuit for efficiency.
                 }
             } // end while
         } catch (NullPointerException e) {
@@ -149,9 +143,7 @@ public class SessionManager {
     public synchronized AuthzSubject getSubjectPojo(int sessionId) 
         throws SessionNotFoundException, SessionTimeoutException
     {
-        Integer id = new Integer(sessionId);
-
-        AuthSession session = (AuthSession)_cache.get(id);
+        AuthSession session = (AuthSession)_cache.get(sessionId);
         
         if (session == null) {
             throw new SessionNotFoundException();
@@ -182,6 +174,6 @@ public class SessionManager {
      */
     public synchronized void invalidate(int sessionId) {
         // XXX: check for other stale sessions?
-        _cache.remove(new Integer(sessionId));
+        _cache.remove(sessionId);
     }
 }
