@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -56,7 +56,6 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
@@ -222,10 +221,8 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                AppdefEntityNotFoundException, SessionNotFoundException,
                SessionTimeoutException
     {
-        AuthzSubjectValue subject =
-            sessionManager.getSubject(sessionId);
         AppdefEntityValue aval = new AppdefEntityValue(id, getOverlord());
-        return getProductManager().getMonitoringHelp(subject, aval, props);
+        return getProductManager().getMonitoringHelp(aval, props);
     }
 
     /**
