@@ -26,9 +26,9 @@
 package org.hyperic.hq.control.server.session;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,24 +38,20 @@ import java.util.Iterator;
 
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.AppdefManagerEJBImpl;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
@@ -95,13 +91,11 @@ import org.quartz.SimpleTrigger;
 public class ControlScheduleManagerEJBImpl 
     extends BaseScheduleManagerEJB implements SessionBean {
 
-    private Log log = 
-        LogFactory.getLog(ControlScheduleManagerEJBImpl.class.getName());
+    private Log log = LogFactory.getLog(ControlScheduleManagerEJBImpl.class);
 
     private final String JOB_PREFIX      = "action";
     private final String SCHEDULE_PREFIX = "interval";
     private final String GROUP           = "control";
-    private InitialContext ic            = null;
     
     private final String PAGER_BASE =
         "org.hyperic.hq.control.server.session.";
@@ -116,11 +110,11 @@ public class ControlScheduleManagerEJBImpl
     protected String getSchedulePrefix ()     { return SCHEDULE_PREFIX; }
 
     private ControlScheduleDAO getControlScheduleDAO() {
-        return DAOFactory.getDAOFactory().getControlScheduleDAO();
+        return new ControlScheduleDAO(DAOFactory.getDAOFactory());
     }
 
     private ControlHistoryDAO getControlHistoryDAO() {
-        return DAOFactory.getDAOFactory().getControlHistoryDAO();
+        return new ControlHistoryDAO(DAOFactory.getDAOFactory());
     }
 
     public static ControlScheduleManagerLocal getOne() {
@@ -174,26 +168,6 @@ public class ControlScheduleManagerEJBImpl
         dataMap.put(ControlJob.PROP_ARGS, args);
     }
 
-    protected InitialContext getInitialContext() {
-        if (this.ic == null) {
-            try {
-                this.ic = new InitialContext();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return this.ic;
-    }
-
-    private ControlHistoryDAO getHistoryDAO()
-    {
-        return getControlHistoryDAO();
-    }
-
-    // Public EJB methods (local)
-
-    // Dashboard routines
-    
     /**
      * Get a list of recent control actions in decending order
      *
@@ -209,10 +183,8 @@ public class ControlScheduleManagerEJBImpl
         Collection recent;
 
         try {
-            ControlHistoryDAO histLH = getControlHistoryDAO();
-            recent =
-                histLH.findByStartTime(System.currentTimeMillis() - window,
-                                       false);
+            recent = getControlHistoryDAO()
+                .findByStartTime(System.currentTimeMillis() - window, false);
 
             // Run through the list only returning entities the user
             // has the ability to see
@@ -225,8 +197,8 @@ public class ControlScheduleManagerEJBImpl
                 try {
                     checkViewPermission(subject, entity);
                     
-                    AppdefEntityValue aVal =
-                        new AppdefEntityValue(entity, subject);
+                    AppdefEntityValue aVal = new AppdefEntityValue(entity,
+                                                                   subject);
                     cLocal.setEntityName(aVal.getName());
 
                     if (++count > rows)
@@ -236,7 +208,7 @@ public class ControlScheduleManagerEJBImpl
                 }
             }
 
-            PageList list = this.historyPager.seek(recent, 0, rows);
+            PageList list = historyPager.seek(recent, 0, rows);
             list.setTotalSize(recent.size());
             return list;
         } catch (ObjectNotFoundException e) {
@@ -262,9 +234,7 @@ public class ControlScheduleManagerEJBImpl
         Collection pending;
 
         try {
-            ControlScheduleDAO scheduleLH = getControlScheduleDAO();
-
-            pending = scheduleLH.findByFireTime(false);
+            pending = getControlScheduleDAO().findByFireTime(false);
             // Run through the list only returning entities the user
             // has the ability to see
             int count = 0;
@@ -285,7 +255,7 @@ public class ControlScheduleManagerEJBImpl
             // This will remove stale data and update fire times which
             // may result in the list being out of order.  We should
             // probably sort a second time
-            PageList list = this.schedulePager.seek(pending, 0, rows);
+            PageList list = schedulePager.seek(pending, 0, rows);
             list.setTotalSize(pending.size());
             return list;
 
@@ -309,13 +279,12 @@ public class ControlScheduleManagerEJBImpl
         throws ApplicationException
     {
         Connection conn = null;
-        PreparedStatement stmt = null;
+        Statement stmt = null;
         ResultSet rs = null;
         PageList list = new PageList();
 
         try {
-            conn = DBUtil.getConnByContext(getInitialContext(),
-                                           HQConstants.DATASOURCE);
+            conn = Util.getConnection();
             
             String sqlStr = 
                 "SELECT entity_type, entity_id, action, COUNT(id) AS num " +
@@ -324,8 +293,8 @@ public class ControlScheduleManagerEJBImpl
                 " GROUP BY entity_type, entity_id, action " +
                 "ORDER by num DESC ";
 
-            stmt = conn.prepareStatement(sqlStr);
-            rs = stmt.executeQuery();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sqlStr);
 
             int i = 0;
             while (rs.next() && i++ < numToReturn) {
@@ -361,13 +330,11 @@ public class ControlScheduleManagerEJBImpl
                                               rs.getInt(4));
                 list.add(cv);
             }
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } catch (SQLException e) {
             throw new ApplicationException(e);
         } finally {
-            DBUtil.closeStatement(log, stmt);
-            DBUtil.closeConnection(log, conn);        
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
+            Util.endConnection();
         }
 
         return list;
@@ -379,7 +346,7 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PageList findScheduledJobs(AuthzSubjectValue subject, 
+    public PageList findScheduledJobs(AuthzSubject subject, 
                                       AppdefEntityID id, PageControl pc)
         throws ScheduledJobNotFoundException
     {
@@ -417,9 +384,8 @@ public class ControlScheduleManagerEJBImpl
         // This will remove stale data and update fire times which
         // may result in the list being out of order.  We should
         // probably sort a second time
-        PageList list = this.schedulePager.seek(schedule,
-                                                pc.getPagenum(),
-                                                pc.getPagesize());
+        PageList list = schedulePager.seek(schedule, pc.getPagenum(),
+                                           pc.getPagesize());
         list.setTotalSize(schedule.size());
 
         return list;
@@ -427,11 +393,11 @@ public class ControlScheduleManagerEJBImpl
 
     /**
      * Get a job history based on appdef id
-     *
+     * 
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public PageList findJobHistory(AuthzSubjectValue subject, 
+    public PageList findJobHistory(AuthzSubject subject, 
                                    AppdefEntityID id, PageControl pc)
         throws ApplicationException
     {
@@ -446,29 +412,24 @@ public class ControlScheduleManagerEJBImpl
         int sortAttr = pc.getSortattribute();
         switch(sortAttr) {
         case SortAttribute.CONTROL_ACTION:
-            hist = histLH.findByEntityAction(id.getType(),
-                                             id.getID(),
+            hist = histLH.findByEntityAction(id.getType(), id.getID(),
                                              pc.isAscending());
             break;
         case SortAttribute.CONTROL_STATUS:
-            hist = histLH.findByEntityStatus(id.getType(),
-                                             id.getID(),
+            hist = histLH.findByEntityStatus(id.getType(), id.getID(),
                                              pc.isAscending());
             break;
         case SortAttribute.CONTROL_STARTED:
         case SortAttribute.DEFAULT: // default the sorting to the start
-            hist = histLH.findByEntityStartTime(id.getType(),
-                                                id.getID(),
+            hist = histLH.findByEntityStartTime(id.getType(), id.getID(),
                                                 pc.isAscending());
             break;
         case SortAttribute.CONTROL_ELAPSED:
-            hist = histLH.findByEntityDuration(id.getType(),
-                                               id.getID(),
+            hist = histLH.findByEntityDuration(id.getType(), id.getID(),
                                                pc.isAscending());
             break;
         case SortAttribute.CONTROL_DATESCHEDULED:
-            hist = histLH.findByEntityDateScheduled(id.getType(),
-                                                    id.getID(),
+            hist = histLH.findByEntityDateScheduled(id.getType(), id.getID(),
                                                     pc.isAscending());
             break;
         case SortAttribute.CONTROL_ENTITYNAME:
@@ -479,9 +440,8 @@ public class ControlScheduleManagerEJBImpl
             throw new SystemException("Unknown sort attribute: " +
                                       sortAttr);
         }
-        PageList list = this.historyPager.seek(hist,
-                                               pc.getPagenum(),
-                                               pc.getPagesize());
+        PageList list = historyPager.seek(hist, pc.getPagenum(),
+                                          pc.getPagesize());
         list.setTotalSize(hist.size());
 
         return list;
@@ -526,8 +486,7 @@ public class ControlScheduleManagerEJBImpl
                                               pc.isAscending());
             break;
         case SortAttribute.CONTROL_DATESCHEDULED:
-            hist = histLH.findByGroupDateScheduled(id.getID(),
-                                                   batchId,
+            hist = histLH.findByGroupDateScheduled(id.getID(), batchId,
                                                    pc.isAscending());
             break;
         case SortAttribute.CONTROL_ENTITYNAME:
@@ -547,9 +506,8 @@ public class ControlScheduleManagerEJBImpl
             ch.setEntityName(aev.getName());
         }
         
-        PageList list = this.historyPager.seek(hist,
-                                               pc.getPagenum(),
-                                               pc.getPagesize());
+        PageList list = historyPager.seek(hist, pc.getPagenum(),
+                                          pc.getPagesize());
         list.setTotalSize(hist.size());
         
         // Sort the list if we are sorting by entity name
@@ -570,8 +528,7 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method 
      * @ejb:transaction type="REQUIRED"
      */
-    public void deleteJobHistory(AuthzSubjectValue subject,
-                                 Integer[] ids)
+    public void deleteJobHistory(AuthzSubject subject, Integer[] ids)
         throws ApplicationException
     {
         ControlHistoryDAO hdao = getControlHistoryDAO();
@@ -593,17 +550,12 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-     public ControlHistory getCurrentJob(AuthzSubjectValue subject, 
-                                              AppdefEntityID id)      
+     public ControlHistory getCurrentJob(AuthzSubject whoami, AppdefEntityID id)
          throws ApplicationException
     {
-        ControlHistoryDAO historyLocalHome;
-        Collection historyLocals;
-
-        historyLocalHome = getControlHistoryDAO();
-        historyLocals =
-            historyLocalHome.findByEntityStartTime(id.getType(),
-                                                   id.getID(), false);
+        Collection historyLocals =
+            getControlHistoryDAO().findByEntityStartTime(id.getType(),
+                                                         id.getID(), false);
         Iterator i = historyLocals.iterator();
         if (!i.hasNext())
             return null;
@@ -624,15 +576,13 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ControlHistory getJobByJobId(AuthzSubjectValue subject, Integer id)
+    public ControlHistory getJobByJobId(AuthzSubject subject, Integer id)
         throws ApplicationException
     {
-        ControlHistoryDAO hLocalHome;
         ControlHistory local;
 
         try {
-            hLocalHome = getControlHistoryDAO();
-            local = hLocalHome.findById(id);
+            local = getControlHistoryDAO().findById(id);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationException(e);
         }
@@ -647,19 +597,15 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ControlHistory getLastJob(AuthzSubjectValue subject,
-                                     AppdefEntityID id)
+    public ControlHistory getLastJob(AuthzSubject subject, AppdefEntityID id)
         throws ApplicationException
     {
-        ControlHistoryDAO hLocalHome;
-        Collection historyLocals;
-
-        hLocalHome = getControlHistoryDAO();
-        historyLocals = hLocalHome.findByEntityStartTime(id.getType(),
-                                                         id.getID(), false);
+        Collection historyLocals = getControlHistoryDAO()
+            .findByEntityStartTime(id.getType(), id.getID(), false);
+        
         Iterator i = historyLocals.iterator();
         while (i.hasNext()) {
-            ControlHistory cLocal = (ControlHistory)i.next();
+            ControlHistory cLocal = (ControlHistory) i.next();
             if (!cLocal.getStatus().equals(ControlConstants.STATUS_INPROGRESS))
                 return cLocal;
         }
@@ -673,20 +619,15 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ControlScheduleValue getControlJob(AuthzSubjectValue subject,
-                                              Integer id)
+    public ControlScheduleValue getControlJob(AuthzSubject subject, Integer id)
         throws PluginException
     {
-        ControlScheduleDAO cScheduleLocalHome;
         ControlSchedule cScheduleLocal;
 
-        cScheduleLocalHome = getControlScheduleDAO();
-
         try {
-            cScheduleLocal = cScheduleLocalHome.findById(id);
+            cScheduleLocal = getControlScheduleDAO().findById(id);
 
-            // validate the job in the scheduler?
-
+            // TODO: validate the job in the scheduler?
         } catch (Exception e) {
             log.error("Unable to get control job info: " +
                            e.getMessage());
@@ -702,20 +643,17 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void deleteControlJob(AuthzSubjectValue subject,
-                                 Integer ids[])
+    public void deleteControlJob(AuthzSubject subject, Integer ids[])
         throws PluginException
     {
-        ControlScheduleDAO cScheduleLocalHome;
+        ControlScheduleDAO dao = getControlScheduleDAO();
+
         ControlSchedule cScheduleLocal;
-
-        cScheduleLocalHome = getControlScheduleDAO();
-
         for (int i = 0; i < ids.length; i++) {
             try {
-                cScheduleLocal = cScheduleLocalHome.findById(ids[i]);
+                cScheduleLocal = dao.findById(ids[i]);
                 _scheduler.deleteJob(cScheduleLocal.getJobName(), GROUP);
-                cScheduleLocalHome.remove(cScheduleLocal);
+                dao.remove(cScheduleLocal);
             } catch (Exception e) {
                 log.error("Unable to remove job: " + e.getMessage());
                 throw new PluginException(e);
@@ -732,28 +670,25 @@ public class ControlScheduleManagerEJBImpl
     public void removeScheduledJobs(AuthzSubject subject, AppdefEntityID id)
         throws ScheduledJobRemoveException
     {
-        ControlScheduleDAO cScheduleLocalHome = getControlScheduleDAO();
+        ControlScheduleDAO dao = getControlScheduleDAO();
         
         // Any associated triggers will be automatically removed by Quartz.
-        Collection jobs = cScheduleLocalHome.findByEntity(id.getType(),
-                                                          id.getID());
+        Collection jobs = dao.findByEntity(id.getType(), id.getID());
         for (Iterator i = jobs.iterator(); i.hasNext();) {
-            ControlSchedule cScheduleLocal = (ControlSchedule)i.next();
+            ControlSchedule cSched = (ControlSchedule) i.next();
             try {
-                _scheduler.deleteJob(cScheduleLocal.getJobName(),
-                                         GROUP);
+                _scheduler.deleteJob(cSched.getJobName(), GROUP);
             } catch (SchedulerException e) {
-                log.error("Unable to remove job " +
-                               cScheduleLocal.getJobName() + ": " +
-                               e.getMessage());
+                log.error("Unable to remove job " + cSched.getJobName() + ": "
+                          + e.getMessage());
             }
-            cScheduleLocalHome.remove(cScheduleLocal);
+            dao.remove(cSched);
         }
     }
 
     /**
      * Execute a single action on an appdef entity
-     *
+     * 
      * @ejb:interface-method
      */
     public void doSingleAction(AppdefEntityID id, AuthzSubject subject,
@@ -766,8 +701,7 @@ public class ControlScheduleManagerEJBImpl
         String jobName = getJobName(subject, id, action);
         
         // Setup the quartz job class that will handle this control action.
-        Class jobClass = 
-            (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) ?
+        Class jobClass = id.isGroup() ?
             ControlActionGroupJob.class : ControlActionJob.class;
 
         JobDetail jobDetail = new JobDetail(jobName, GROUP, jobClass);
@@ -778,13 +712,11 @@ public class ControlScheduleManagerEJBImpl
 
         // All single actions use cron triggers
         SimpleTrigger trigger = 
-            new SimpleTrigger(getTriggerName(subject, id, action),
-                              GROUP);
+            new SimpleTrigger(getTriggerName(subject, id, action), GROUP);
         trigger.setVolatility(true);
 
         try {
-            log.debug("Scheduling job for immediate execution: " + 
-                           jobDetail);
+            log.debug("Scheduling job for immediate execution: " + jobDetail);
             _scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             log.error("Unable to schedule job: " + e.getMessage(), e);
@@ -797,23 +729,17 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void doScheduledAction(AppdefEntityID id, 
-                                  AuthzSubject subject, String action,
-                                  ScheduleValue schedule,
+    public void doScheduledAction(AppdefEntityID id, AuthzSubject subject,
+                                  String action, ScheduleValue schedule,
                                   int[] order)
         throws PluginException, SchedulerException
     {
         // Scheduled jobs are persisted in the control subsystem
-        ControlScheduleDAO cScheduleLocalHome;
-
-        cScheduleLocalHome = getControlScheduleDAO();
-
         String jobName = getJobName(subject, id, action);
         String triggerName = getTriggerName(subject, id, action);
 
         // Setup the quartz job class that will handle this control action.
-        Class jobClass = 
-            (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) ?
+        Class jobClass = id.isGroup() ?
             ControlActionGroupJob.class : ControlActionJob.class;
 
         JobDetail jobDetail = new JobDetail(jobName, GROUP, jobClass);
@@ -831,6 +757,7 @@ public class ControlScheduleManagerEJBImpl
         }
 
         // Single scheduled actions do not have cron strings
+        ControlScheduleDAO dao = getControlScheduleDAO();
         if (cronStr == null) {
             SimpleTrigger trigger = new SimpleTrigger(triggerName, 
                                                       GROUP, 
@@ -842,12 +769,8 @@ public class ControlScheduleManagerEJBImpl
             }
 
             try {
-                cScheduleLocalHome.create(id,
-                                          subject.getName(),
-                                          action, schedule,
-                                          nextFire.getTime(),
-                                          triggerName,
-                                          jobName,null);
+                dao.create(id, subject.getName(), action, schedule,
+                           nextFire.getTime(), triggerName, jobName, null);
             } catch (Exception e) {
                 log.error("Unable to schedule job: " + e.getMessage());
                 throw new PluginException(e);
@@ -859,7 +782,7 @@ public class ControlScheduleManagerEJBImpl
                                     schedule.getStart(), schedule.getEnd(),
                                     cronStr);
                 trigger.setMisfireInstruction(CronTrigger.
-                    MISFIRE_INSTRUCTION_DO_NOTHING);
+                                              MISFIRE_INSTRUCTION_DO_NOTHING);
 
                 _scheduler.scheduleJob(jobDetail, trigger);
 
@@ -874,14 +797,11 @@ public class ControlScheduleManagerEJBImpl
                 if (order != null)
                     stringOrder = StringUtil.arrayToString(order);
 
-                cScheduleLocalHome.create(id, subject.getName(), action,
-                                          schedule,
-                                          nextFire.getTime(),
-                                          triggerName,
-                                          jobName, stringOrder);
+                dao.create(id, subject.getName(), action, schedule,
+                           nextFire.getTime(), triggerName, jobName,
+                           stringOrder);
             } catch (ParseException e) {
-                log.error("Unable to setup cron trigger: " +
-                               e.getMessage());
+                log.error("Unable to setup cron trigger: " + e.getMessage());
                 throw new PluginException(e);
             } catch (SchedulerException e) {
                 throw new PluginException(e);
@@ -899,30 +819,28 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public ControlHistory createHistory(AppdefEntityID id,
-                                             Integer groupId,
-                                             Integer batchId,
-                                             String subjectName,
-                                             String action,
-                                             String args,
-                                             Boolean scheduled,
-                                             long startTime,
-                                             long stopTime,
-                                             long scheduleTime,
-                                             String status,
-                                             String description,
-                                             String errorMessage)
+                                        Integer groupId,
+                                        Integer batchId,
+                                        String subjectName,
+                                        String action,
+                                        String args,
+                                        Boolean scheduled,
+                                        long startTime,
+                                        long stopTime,
+                                        long scheduleTime,
+                                        String status,
+                                        String description,
+                                        String errorMessage)
     {
-        return
-            getHistoryDAO().create(id, groupId, batchId, subjectName,
-                                   action, args, scheduled,
-                                   startTime, stopTime, scheduleTime,
-                                   status, description,
-                                   errorMessage);    
+        return getControlHistoryDAO().create(id, groupId, batchId, subjectName,
+                                             action, args, scheduled, startTime,
+                                             stopTime, scheduleTime, status,
+                                             description, errorMessage);
     }
 
     /**
      * Update a control history entry
-     *
+     * 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
@@ -933,7 +851,7 @@ public class ControlScheduleManagerEJBImpl
         ControlHistory local;
 
         try {
-            local = getHistoryDAO().findById(jobId);
+            local = getControlHistoryDAO().findById(jobId);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationException(e);
         }
@@ -953,8 +871,7 @@ public class ControlScheduleManagerEJBImpl
         throws ApplicationException
     {
         try {
-            ControlHistoryDAO home = getHistoryDAO();
-            return home.findById(jobId);
+            return getControlHistoryDAO().findById(jobId);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationException(e);
         }
@@ -966,13 +883,10 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void removeHistory(Integer id)
-        throws ApplicationException
-    {
+    public void removeHistory(Integer id) throws ApplicationException {
         try {
-            ControlHistoryDAO home = getHistoryDAO();
-            ControlHistory local = home.findById(id);
-            home.remove(local);
+            ControlHistory local = getControlHistoryDAO().findById(id);
+            getControlHistoryDAO().remove(local);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationException(e);
         }

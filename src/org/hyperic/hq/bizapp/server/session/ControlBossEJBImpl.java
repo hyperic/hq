@@ -48,7 +48,6 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
 import org.hyperic.hq.common.ApplicationException;
@@ -289,7 +288,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         return getControlScheduleManager().findScheduledJobs(subject, id, pc);
     }
     
@@ -316,7 +315,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws PluginException, ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException               
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         return getControlScheduleManager().findJobHistory(subject, id, pc);
     }
 
@@ -351,7 +350,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException               
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         getControlScheduleManager().deleteJobHistory(subject, ids);
     }
    
@@ -367,7 +366,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
          throws ApplicationException, PermissionException,
                 SessionNotFoundException, SessionTimeoutException                
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         return getControlScheduleManager().getCurrentJob(subject, id);
     }
 
@@ -382,8 +381,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
-     
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         return getControlScheduleManager().getJobByJobId(subject, id);
     }
 
@@ -398,7 +396,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         return getControlScheduleManager().getLastJob(subject, id);
     }
 
@@ -415,8 +413,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws PluginException, ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException               
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
-     
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);     
         return getControlScheduleManager().getControlJob(subject, id);
     }
 
@@ -430,7 +427,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws PluginException, ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         getControlScheduleManager().deleteControlJob(subject, ids);
     }
 
