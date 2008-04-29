@@ -340,7 +340,7 @@ public class AppdefBossEJBImpl
                                                         Integer id)
         throws ApplicationException 
     {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getApplicationManager().findApplicationTypeById(id);
     }
 
@@ -1059,7 +1059,7 @@ public class AppdefBossEJBImpl
                                                         AppdefEntityTypeID id)
         throws SessionTimeoutException, SessionNotFoundException 
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         try {
             switch(id.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -1085,7 +1085,7 @@ public class AppdefBossEJBImpl
         throws PlatformNotFoundException,
                SessionTimeoutException, SessionNotFoundException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         return getPlatformManager().findPlatformTypeValueById(id);
     }
 
@@ -1096,7 +1096,7 @@ public class AppdefBossEJBImpl
         throws PlatformNotFoundException,
                SessionTimeoutException, SessionNotFoundException 
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         return getPlatformManager().findPlatformTypeByName(name);
     }
 
@@ -1106,7 +1106,7 @@ public class AppdefBossEJBImpl
     public ServiceTypeValue findServiceTypeById(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException 
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         return getServiceManager().findServiceTypeById(id);
     }
 
@@ -1128,7 +1128,7 @@ public class AppdefBossEJBImpl
     public ServerTypeValue findServerTypeById(int sessionID,  Integer id)
         throws SessionTimeoutException, SessionNotFoundException 
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         return getServerManager().findServerTypeById(id);
     }
 
@@ -2998,7 +2998,7 @@ public class AppdefBossEJBImpl
     public int getAgentCount(int sessionId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getAgentManager().getAgentCount();
     }
 
@@ -3008,7 +3008,7 @@ public class AppdefBossEJBImpl
     public List findAllAgents(int sessionId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getAgentManager().getAgents();
     }
 
@@ -3021,7 +3021,7 @@ public class AppdefBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                AgentNotFoundException
     {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getAgentManager().getAgent(ip, port);
     }
 
@@ -3076,7 +3076,7 @@ public class AppdefBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefEntityNotFoundException
     {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getCPropManager().getDescEntries(id);
     }
 
@@ -3090,7 +3090,7 @@ public class AppdefBossEJBImpl
     public List getCPropKeys(int sessionId, int appdefType, int appdefTypeId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getCPropManager().getKeys(appdefType, appdefTypeId);
     }
 
