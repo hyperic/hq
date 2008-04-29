@@ -33,7 +33,7 @@ import org.hyperic.hq.appdef.Agent;
 public interface AgentProxyFactory {
 
     /**
-     * Create a proxy to a synchronous agent service.
+     * Create a synchronous proxy to an agent service.
      * 
      * @param agent The agent.
      * @param serviceInterface The service interface.
@@ -46,19 +46,20 @@ public interface AgentProxyFactory {
             boolean unidirectional) throws Exception;
 
     /**
-     * Create a proxy to an asynchronous agent service where proxy method 
-     * invocations return immediately.
+     * Create an asynchronous proxy to an agent service where proxy method 
+     * invocations return immediately. The return type for an asynchronous 
+     * proxy method call is always <code>null</code> even if the service 
+     * interface specifies another return type. In addition, exceptions 
+     * thrown by the agent service are never propagated back to an 
+     * asynchronous proxy.
      * 
      * @param agent The agent.
-     * @param serviceInterface The service interface. All interface operations 
-     *                         should have a <code>void</code> return type.
+     * @param serviceInterface The service interface.
      * @param guaranteed <code>true</code> to guarantee message delivery;
      *                   <code>false</code> if guaranteed delivery is not required.                        
      * @param unidirectional <code>true</code> for a unidirectional transport; 
      *                       <code>false</code> for a bidirectional transport.
      * @return A proxy to the agent service.
-     * @throws IllegalArgumentException if any of the interface operations do 
-     *                                  not have a <code>void</code> return type.
      * @throws Exception if an exception occurs acquiring the proxy.
      */
     Object createAsyncService(Agent agent, Class serviceInterface,
