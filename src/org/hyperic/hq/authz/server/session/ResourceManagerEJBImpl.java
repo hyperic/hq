@@ -47,7 +47,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -104,7 +103,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return Value-object for the ResourceType.
      * @ejb:interface-method
      */
-    public ResourceType createResourceType(AuthzSubjectValue whoami,
+    public ResourceType createResourceType(AuthzSubject whoami,
                                            ResourceTypeValue typeV,
                                            OperationValue[] operations) 
     {
@@ -131,7 +130,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param type The type to delete.
      * @ejb:interface-method
      */
-    public void removeResourceType(AuthzSubjectValue whoami,
+    public void removeResourceType(AuthzSubject whoami,
                                    ResourceTypeValue type) {
         ResourceTypeDAO dao = DAOFactory.getDAOFactory().getResourceTypeDAO();
         ResourceType rt = dao.findById(type.getId());
@@ -147,7 +146,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @throws PermissionException whoami may not perform modifyResourceType on this role.
      * @ejb:interface-method
      */
-    public void saveResourceType(AuthzSubjectValue whoami,
+    public void saveResourceType(AuthzSubject whoami,
                                  ResourceTypeValue type)
         throws PermissionException {
         ResourceType resType = getResourceTypeDAO().findById(type.getId());
@@ -170,7 +169,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * operations.
      * @ejb:interface-method
      */
-    public void addOperations(AuthzSubjectValue whoami,
+    public void addOperations(AuthzSubject whoami,
                               ResourceTypeValue type,
                               OperationValue[] operations) {
         ResourceType resType = getResourceTypeDAO().findById(type.getId());
@@ -185,7 +184,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param operations The roles to disassociate. These operations will be deleted.
      * @ejb:interface-method
      */
-    public void removeOperations(AuthzSubjectValue whoami,
+    public void removeOperations(AuthzSubject whoami,
                                  ResourceTypeValue type,
                                  OperationValue[] operations) {
         Set opPojos = toPojos(operations);
@@ -204,7 +203,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param type The role.
      * @ejb:interface-method
      */
-    public void removeAllOperations(AuthzSubjectValue whoami,
+    public void removeAllOperations(AuthzSubject whoami,
                                     ResourceTypeValue type) {
         ResourceType resType = getResourceTypeDAO().findById(type.getId());
         resType.getOperations().clear();
@@ -660,15 +659,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     /**
      * Gets all the Resources of a particular type owned by the given Subject.
      * @param resTypeName type
-     * @param subjVal The owner.
+     * @param whoami The owner.
      * @return Array of resources owned by the given subject.
      * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      */
-    public ResourceValue[] findResourceByOwnerAndType(AuthzSubjectValue subjVal,
+    public ResourceValue[] findResourceByOwnerAndType(AuthzSubject whoami,
                                                       String resTypeName ) {
-        AuthzSubject subj = getSubjectDAO().findById(subjVal.getId());
+        AuthzSubject subj = getSubjectDAO().findById(whoami.getId());
         ResourceType resType = getResourceTypeDAO().findByName(resTypeName);
         return (ResourceValue[]) fromPojos(
             getResourceDAO().findByOwnerAndType(subj,resType),
