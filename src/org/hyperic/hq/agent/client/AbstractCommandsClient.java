@@ -37,7 +37,7 @@ import org.hyperic.hq.transport.AgentProxyFactory;
  */
 public abstract class AbstractCommandsClient {
 
-    protected final Log log = LogFactory.getLog(this.getClass());
+    protected final Log _log = LogFactory.getLog(this.getClass());
     private final Agent _agent;
     private final AgentProxyFactory _factory;
 
@@ -67,6 +67,7 @@ public abstract class AbstractCommandsClient {
                                                serviceInterface, 
                                                _agent.isUnidirectional());
         } catch (Exception e) {
+            _log.error("Error creating proxy to remote service.", e);
             throw new AgentConnectionException("Error creating proxy to remote service.", e);
         }        
     
@@ -85,6 +86,7 @@ public abstract class AbstractCommandsClient {
                                                 guaranteed, 
                                                 _agent.isUnidirectional());
         } catch (Exception e) {
+            _log.error("Error creating proxy to remote service.", e);
             throw new AgentConnectionException("Error creating proxy to remote service.", e);
         }
 
