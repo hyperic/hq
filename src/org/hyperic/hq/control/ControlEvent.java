@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004-2007], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -54,8 +54,7 @@ public class ControlEvent extends AbstractEvent
         super.setInstanceId(resourceId);
         super.setTimestamp(System.currentTimeMillis());
         this.subject  = subject;
-        this.resource = 
-            new AppdefEntityID(resourcetype, resourceId.intValue());
+        this.resource = new AppdefEntityID(resourcetype, resourceId);
         this.action        = action;
         this.scheduled     = scheduled;
         this.dateScheduled = dateScheduled;
