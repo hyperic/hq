@@ -52,7 +52,7 @@ public class AIScanJob extends AIJob {
 
         Integer idVal = new Integer(dataMap.getString(PROP_ID));
         Integer type = new Integer(dataMap.getString(PROP_TYPE));
-        AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal.intValue());
+        AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal);
         Integer subjectId = new Integer(dataMap.getString(PROP_SUBJECT));
         AuthzSubject subject = null;
         try {
