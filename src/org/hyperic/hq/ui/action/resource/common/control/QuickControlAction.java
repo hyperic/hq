@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -72,11 +72,11 @@ public class QuickControlAction extends BaseAction {
             int sessionId =  RequestUtils.getSessionIdInt(request);
             
             // create the new action to schedule
-            int id = qcForm.getResourceId().intValue();
-            int type = qcForm.getResourceType().intValue();
-            AppdefEntityID appdefId = new AppdefEntityID(type, id);
-            fwdParms.put(Constants.RESOURCE_PARAM, new Integer(id));
-            fwdParms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(type));
+            Integer id = qcForm.getResourceId();
+            Integer type = qcForm.getResourceType();
+            AppdefEntityID appdefId = new AppdefEntityID(type.intValue(), id);
+            fwdParms.put(Constants.RESOURCE_PARAM, id);
+            fwdParms.put(Constants.RESOURCE_TYPE_ID_PARAM, type);
             
             String action = qcForm.getResourceAction();
             String args = qcForm.getArguments();
