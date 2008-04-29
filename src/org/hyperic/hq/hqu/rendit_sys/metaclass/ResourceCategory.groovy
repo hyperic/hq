@@ -4,16 +4,12 @@ import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceType
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
-import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.server.session.Platform
 import org.hyperic.hq.appdef.shared.PlatformValue
-import org.hyperic.hq.appdef.server.session.PlatformType
 import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.server.session.Service
 import org.hyperic.hq.appdef.shared.ServerValue
@@ -21,6 +17,7 @@ import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as DMan
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as AlertMan
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
 import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.hq.livedata.shared.LiveDataResult
@@ -45,7 +42,7 @@ class ResourceCategory {
     private static dman     = DMan.one
     private static authzMan = AuthzMan.one
     private static groupMan = GroupMan.one
-    
+    private static defMan   = AlertMan.one
     /**
      * Creates a URL for the resource.  This should typically only be called
      * via HtmlUtil.linkTo (or from a controller).  
@@ -114,6 +111,10 @@ class ResourceCategory {
 
     static Collection getEnabledMetrics(Resource r) {
         dman.findEnabledMeasurements(null, r.entityId, null)
+    }
+
+    static List getAlertDefinitions(Resource r, AuthzSubject user) {
+        defMan.findAlertDefinitions(user, r.entityId)
     }
 
     static boolean isGroup(Resource r) {
