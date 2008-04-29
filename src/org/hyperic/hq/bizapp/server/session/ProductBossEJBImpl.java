@@ -60,6 +60,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
+import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl.ConfigSchemaAndBaseResponse;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
