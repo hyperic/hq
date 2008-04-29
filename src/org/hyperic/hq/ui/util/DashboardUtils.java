@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -78,15 +77,7 @@ public class DashboardUtils {
         Iterator i = list.iterator();
 
         while (i.hasNext()) {
-            ArrayList resourceIds =
-                (ArrayList) StringUtil.explode((String) i.next(), ":");
-
-            Iterator j = resourceIds.iterator();
-            int type = Integer.parseInt((String) j.next());
-            int id = Integer.parseInt((String) j.next());
-
-            AppdefEntityID entityID = new AppdefEntityID(type, id);
-            resources.add(entityID);
+            resources.add(new AppdefEntityID((String) i.next()));
         }
 
         return resources;
