@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -82,12 +82,9 @@ public class MeasurementEvent extends AbstractEvent
             MeasurementDAO dao =
                 new MeasurementDAO(DAOFactory.getDAOFactory());
             Measurement dm = dao.findById(getInstanceId());
-            int resourceId, resourceType;
-
-            resourceId   = dm.getInstanceId().intValue();
-            resourceType = dm.getTemplate().getMonitorableType()
-                .getAppdefType();
-            _resource    = new AppdefEntityID(resourceType, resourceId);
+            int resourceType = dm.getTemplate().getMonitorableType()
+                    .getAppdefType();
+            _resource    = new AppdefEntityID(resourceType, dm.getInstanceId());
             _units       = dm.getTemplate().getUnits();
         } catch (Exception e) {
             // don't set anything
