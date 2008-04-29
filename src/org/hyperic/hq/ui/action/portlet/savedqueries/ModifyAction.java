@@ -79,12 +79,10 @@ public class ModifyAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
     throws Exception {
-        Log log = LogFactory.getLog(ModifyAction.class.getName());
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
-        WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        WebUser user = RequestUtils.getWebUser(request);
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-        Integer sessionId = RequestUtils.getSessionId(request);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, boss);

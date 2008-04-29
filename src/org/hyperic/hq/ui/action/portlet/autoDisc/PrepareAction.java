@@ -41,6 +41,7 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 public class PrepareAction extends BaseAction {
@@ -63,8 +64,7 @@ public class PrepareAction extends BaseAction {
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
         ServletContext ctx = getServlet().getServletContext();
-        WebUser user =
-            (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        WebUser user = RequestUtils.getWebUser(session);
 		AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
 		DashboardConfig dashConfig = DashboardUtils.findDashboard(
 				(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),

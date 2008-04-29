@@ -33,12 +33,13 @@ import javax.servlet.http.HttpSession;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.ConfigurationProxy;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -73,7 +74,7 @@ public class ModifyAction extends BaseAction {
         }
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
-        WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        WebUser user = SessionUtils.getWebUser(session);
         String range = pForm.getRange().toString();            
         
         ConfigurationProxy.getInstance().setPreference(session, user, boss, 

@@ -36,6 +36,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 public class SetDashboardAction extends org.hyperic.hq.ui.action.BaseAction {
 
@@ -45,8 +46,7 @@ public class SetDashboardAction extends org.hyperic.hq.ui.action.BaseAction {
 	
 		HttpSession session = request.getSession(false);
 		DashboardForm dForm = (DashboardForm) form;
-		WebUser user = (WebUser) request.getSession().getAttribute(
-				Constants.WEBUSER_SES_ATTR);
+        WebUser user = RequestUtils.getWebUser(session);
 		AuthzBoss authzBoss = ContextUtils.getAuthzBoss(request.getSession()
 				.getServletContext());
 		if (!isPropertyEmpty(dForm.getSelectedDashboardId())) {

@@ -45,6 +45,7 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -76,7 +77,7 @@ public class PrepareAction extends BaseAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx); 
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         HttpSession session = request.getSession();
-        WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        WebUser user = RequestUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, boss);

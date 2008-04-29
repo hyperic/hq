@@ -41,6 +41,7 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 
@@ -56,8 +57,7 @@ public class ModifyAction extends BaseAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
-        WebUser user = (WebUser)
-            request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
+        WebUser user = RequestUtils.getWebUser(request);
 
         String forwardStr = Constants.SUCCESS_URL;
         DashboardConfig dashConfig = DashboardUtils.findDashboard(

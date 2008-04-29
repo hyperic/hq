@@ -67,9 +67,8 @@ public class PrepareAction extends TilesAction {
         MeasurementBoss measBoss = ContextUtils.getMeasurementBoss(ctx);
 
         HttpSession session = request.getSession();
-        int sessionId = RequestUtils.getSessionId(request).intValue();
-        WebUser user =
-            (WebUser)session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        WebUser user = RequestUtils.getWebUser(session);
+        int sessionId = user.getSessionId().intValue();
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),

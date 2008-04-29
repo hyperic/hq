@@ -45,13 +45,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -76,8 +76,7 @@ public class ViewAction extends BaseAction {
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
         EventsBoss eventBoss = ContextUtils.getEventsBoss(ctx);
         HttpSession session = request.getSession();
-        WebUser user = (WebUser) request.getSession().getAttribute(
-                Constants.WEBUSER_SES_ATTR);
+        WebUser user = RequestUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, authzBoss);

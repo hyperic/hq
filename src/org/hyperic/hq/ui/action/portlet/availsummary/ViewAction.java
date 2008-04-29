@@ -85,8 +85,7 @@ public class ViewAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
         HttpSession session = request.getSession();
-        WebUser user = (WebUser)
-        request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
+        WebUser user = RequestUtils.getWebUser(session);
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         AppdefBoss appBoss = ContextUtils.getAppdefBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(

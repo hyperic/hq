@@ -45,6 +45,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -56,12 +57,13 @@ import org.hyperic.util.config.ConfigResponse;
 public class ViewAction extends TilesAction {
     
    public ActionForward execute(ComponentContext context,
-			ActionMapping mapping, ActionForm form, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+                                 ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request,
+                                 HttpServletResponse response)
+        throws Exception {
 
         List portlets = (List) context.getAttribute("portlets");
-        WebUser user = (WebUser) request.getSession()
-                .getAttribute(Constants.WEBUSER_SES_ATTR);
+        WebUser user = RequestUtils.getWebUser(request);
 		ServletContext ctx = getServlet().getServletContext();
 
         ArrayList availablePortlets = new ArrayList();

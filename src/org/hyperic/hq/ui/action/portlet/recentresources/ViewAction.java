@@ -47,6 +47,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.timer.StopWatch;
 
@@ -72,8 +73,7 @@ public class ViewAction extends TilesAction {
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         HttpSession session = request.getSession();
-        WebUser user = (WebUser)
-            session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        WebUser user = SessionUtils.getWebUser(session);
         ConfigResponse userPrefs = user.getPreferences();
         String key = Constants.USERPREF_KEY_RECENT_RESOURCES;
         if(userPrefs.getValue(key, null) != null){

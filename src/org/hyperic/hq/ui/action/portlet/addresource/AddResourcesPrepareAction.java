@@ -135,11 +135,10 @@ public class AddResourcesPrepareAction extends Action {
         AddResourcesForm addForm = (AddResourcesForm)form;
             
         ServletContext ctx = getServlet().getServletContext();
-        HttpSession session = request.getSession();            
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-        Integer sessionId = RequestUtils.getSessionId(request);
-        WebUser user = (WebUser) session.getAttribute( 
-                                            Constants.WEBUSER_SES_ATTR );
+        HttpSession session = request.getSession();            
+        WebUser user = RequestUtils.getWebUser(session);
+        Integer sessionId = user.getSessionId();
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),

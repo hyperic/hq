@@ -44,7 +44,6 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -76,7 +75,7 @@ public class ViewAction extends TilesAction {
         HttpSession session = request.getSession();
         AIBoss boss = ContextUtils.getAIBoss(ctx);
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
         int sessionId = user.getSessionId().intValue();
         AIQueueForm queueForm = (AIQueueForm) form;
 

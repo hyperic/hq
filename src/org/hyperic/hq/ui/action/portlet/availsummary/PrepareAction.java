@@ -62,9 +62,8 @@ public class PrepareAction extends TilesAction {
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         HttpSession session = request.getSession();
-        Integer sessionId = RequestUtils.getSessionId(request);
-        WebUser user =
-            (WebUser)session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        WebUser user = RequestUtils.getWebUser(session);
+        Integer sessionId = user.getSessionId();
         PropertiesForm pForm = (PropertiesForm) form;
         PageList resources = new PageList();
 

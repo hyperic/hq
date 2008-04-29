@@ -48,6 +48,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -70,8 +71,7 @@ public class PrepareAction extends TilesAction {
         Log log = LogFactory.getLog(PrepareAction.class.getName());
         log.trace("getting saved charts associated with user ");
         ServletContext ctx = getServlet().getServletContext();
-        WebUser user = (WebUser)
-            request.getSession().getAttribute( Constants.WEBUSER_SES_ATTR );
+        WebUser user = RequestUtils.getWebUser(request);
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)request.getSession().getAttribute(

@@ -47,6 +47,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.timer.StopWatch;
@@ -73,8 +74,7 @@ public class ViewAction extends TilesAction {
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-        WebUser user = (WebUser)
-        session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        WebUser user = SessionUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, boss);

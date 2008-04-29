@@ -65,6 +65,7 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -90,8 +91,7 @@ public class ViewAction extends BaseAction {
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         HttpSession session = request.getSession();
-        WebUser user = (WebUser) request.getSession().getAttribute(
-                Constants.WEBUSER_SES_ATTR);
+        WebUser user = SessionUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, aBoss);

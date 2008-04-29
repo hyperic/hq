@@ -72,8 +72,7 @@ public class DisplayDashboardAction extends TilesAction {
 		ServletContext ctx = getServlet().getServletContext();
 		AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
 		DashboardForm dForm = (DashboardForm) form;
-		WebUser user =
-		    (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        WebUser user = RequestUtils.getWebUser(request);
 		DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
 		AuthzSubject me = boss.findSubjectById(user.getSessionId(), user
 				.getSubject().getId());
