@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -36,7 +36,6 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -45,6 +44,7 @@ import org.hyperic.hq.bizapp.shared.ConfigBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
+import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.util.ConfigPropertyException;
 
@@ -63,12 +63,16 @@ public class ConfigBossEJBImpl
 {
     private SessionManager sessionManager = SessionManager.getInstance();
 
+    private ServerConfigManagerLocal getCfgMan() {
+        return ServerConfigManagerEJBImpl.getOne();
+    }
+
     /**
      * Get the top-level configuration properties
      * @ejb:interface-method
      */
     public Properties getConfig() throws ConfigPropertyException {
-        return ServerConfigManagerEJBImpl.getOne().getConfig();
+        return getCfgMan().getConfig();
     }
 
     /**
@@ -77,7 +81,7 @@ public class ConfigBossEJBImpl
      */
     public Properties getConfig(String prefix) throws ConfigPropertyException
     {
-        return ServerConfigManagerEJBImpl.getOne().getConfig(prefix);
+        return getCfgMan().getConfig(prefix);
     }
 
     /**
@@ -89,7 +93,7 @@ public class ConfigBossEJBImpl
     {
         AuthzSubject subject = 
             SessionManager.getInstance().getSubjectPojo(sessId);
-        ServerConfigManagerEJBImpl.getOne().setConfig(subject, props);
+        getCfgMan().setConfig(subject, props);
     }
 
     /**
@@ -101,7 +105,7 @@ public class ConfigBossEJBImpl
     {
         AuthzSubject subject = 
             SessionManager.getInstance().getSubjectPojo(sessId);
-        ServerConfigManagerEJBImpl.getOne().setConfig(subject, prefix, props);
+        getCfgMan().setConfig(subject, prefix, props);
     }
 
     /**
