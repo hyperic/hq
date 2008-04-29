@@ -60,7 +60,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
-import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl.ConfigSchemaAndBaseResponse;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
@@ -175,7 +174,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException {
 
         // validate the session
-        sessionManager.getSubject(sessionId);
+        sessionManager.authenticate(sessionId);
         // use the overlord to pull the merge
         // FIXME - this is a pretty ugly compromise.
         return getMergedConfigResponse(getOverlord(), productType, id, 
@@ -208,7 +207,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws AppdefEntityNotFoundException, 
                SessionNotFoundException, SessionTimeoutException
     {
-        sessionManager.getSubject(sessionId);
+        sessionManager.authenticate(sessionId);
         return getConfigManager().getConfigResponse(id);
     }
 
@@ -237,7 +236,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws SessionTimeoutException, SessionNotFoundException,
                PluginException, PermissionException,
                AppdefEntityNotFoundException {
-       sessionManager.getSubjectPojo(sessionId);
+       sessionManager.authenticate(sessionId);
         return getConfigSchema(id, type, resp);
     }
 
