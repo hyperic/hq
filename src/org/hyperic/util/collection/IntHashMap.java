@@ -425,4 +425,16 @@ public class IntHashMap {
         count = 0;
     }
     
+    /**
+     * Get the keys of the map in an array of ints
+     */
+    public int[] getKeys() {
+        Entry tab[] = table;
+        int[] keys = new int[tab.length];
+        for (int index = tab.length; --index >= 0;) {
+            keys[index] = tab[index].key;
+        }
+        return keys;
+    }
+    
 }
