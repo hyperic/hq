@@ -924,7 +924,7 @@ public class EventsBossEJBImpl
     public List getActionsForAlert(int sessionId, Integer alertId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getActMan().getActionsForAlert(alertId.intValue());
     }
 
@@ -936,7 +936,7 @@ public class EventsBossEJBImpl
     public void updateAction(int sessionID, ActionValue aval)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         getActMan().updateAction(aval);
     }
 
@@ -962,7 +962,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException 
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         /* incorrect to use alert IDs as alert definition IDs
         try {
             // check security
@@ -996,7 +996,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException 
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         // XXX - check security
         return getAM().deleteAlerts(begin, end);
     }
@@ -1235,7 +1235,7 @@ public class EventsBossEJBImpl
     public PageList findAllAlerts(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         // XXX no security... FIXME
         return getAM().findAllAlerts();
     }
@@ -1384,7 +1384,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException, 
                EncodingException 
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         ActionInterface iface;
         try {
             Class c = Class.forName(actionClass);
@@ -1409,7 +1409,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException, 
                EncodingException 
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         RegisterableTriggerInterface iface;
         Class c;
 
@@ -1474,7 +1474,7 @@ public class EventsBossEJBImpl
     public Collection getAllRegisteredTriggers(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         return getRTM().getAllTriggers();
     }
 
@@ -1539,7 +1539,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, FinderException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         Escalation esc = findEscalationByAlertDefId(id, alertType);
         return esc == null ? null : esc.getId();
     }
@@ -1555,7 +1555,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         Escalation escalation = findEscalationById(sessionID, escId);
         // TODO: check permission
         getEscMan().setEscalation(alertType, id, escalation);
@@ -1571,7 +1571,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         // TODO: check permission
         getEscMan().setEscalation(alertType, id, null);
     }
@@ -1586,7 +1586,7 @@ public class EventsBossEJBImpl
         throws SessionException, PermissionException, JSONException, 
                FinderException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         Escalation e = findEscalationByAlertDefId(id, alertType);
         return e == null ? null 
                          : new JSONObject().put(e.getJsonName(), e.toJSON());
@@ -1618,7 +1618,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         getEscMan().addAction(e, cfg, waitTime);
     }
     
@@ -1629,7 +1629,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         Escalation e = getEscMan().findById(escId);
         
         if (e != null) {
@@ -1704,7 +1704,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, DuplicateObjectException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         Escalation res;
         
         // XXX -- We need to do perm-checking here
@@ -1784,7 +1784,7 @@ public class EventsBossEJBImpl
      */
     public boolean alertsAllowed(int sessionId)
         throws SessionNotFoundException, SessionTimeoutException {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getADM().alertsAllowed();
     }
 
@@ -1794,7 +1794,7 @@ public class EventsBossEJBImpl
      */
     public void setAlertsAllowed(int sessionId, boolean allowed)
         throws SessionNotFoundException, SessionTimeoutException {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         getADM().setAlertsAllowed(allowed);
     }
 
