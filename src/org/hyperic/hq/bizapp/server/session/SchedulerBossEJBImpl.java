@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,27 +25,20 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import java.util.Collection;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionContext;
 import javax.ejb.SessionBean;
-import javax.naming.NamingException;
-
-import org.quartz.utils.Key;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.SchedulerException;
+import javax.ejb.SessionContext;
 
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-
+import org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
-import org.hyperic.hq.scheduler.shared.SchedulerLocalHome;
-import org.hyperic.hq.scheduler.shared.SchedulerUtil;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerException;
+import org.quartz.utils.Key;
 
 
 /** 
@@ -76,14 +69,11 @@ public class SchedulerBossEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public String[] getJobGroupNames(int sessionID) throws
-        SessionNotFoundException,
-        SessionTimeoutException, 
-        NamingException,
-        CreateException,
-        SchedulerException
+    public String[] getJobGroupNames(int sessionID)
+        throws SessionNotFoundException, SessionTimeoutException,
+               SchedulerException
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         return getSched().getJobGroupNames();
     }
 
@@ -92,14 +82,11 @@ public class SchedulerBossEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public String[] getTriggerGroupNames(int sessionID) throws
-        SessionNotFoundException,
-        SessionTimeoutException, 
-        NamingException,
-        CreateException,
-        SchedulerException
+    public String[] getTriggerGroupNames(int sessionID)
+        throws SessionNotFoundException, SessionTimeoutException,
+               SchedulerException
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         return getSched().getTriggerGroupNames();
     }
 
@@ -110,14 +97,11 @@ public class SchedulerBossEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public String[] getJobNames(int sessionID, String jobGroup) throws
-        SessionNotFoundException,
-        SessionTimeoutException, 
-        NamingException,
-        CreateException,
-        SchedulerException
+    public String[] getJobNames(int sessionID, String jobGroup)
+        throws SessionNotFoundException, SessionTimeoutException,
+               SchedulerException
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         return getSched().getJobNames(jobGroup);
     }
 
@@ -128,14 +112,11 @@ public class SchedulerBossEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public String[] getTriggerNames(int sessionID, String triggerGroup) throws
-        SessionNotFoundException,
-        SessionTimeoutException, 
-        NamingException,
-        CreateException,
-        SchedulerException
+    public String[] getTriggerNames(int sessionID, String triggerGroup)
+        throws SessionNotFoundException, SessionTimeoutException,
+               SchedulerException
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         return getSched().getTriggerNames(triggerGroup);
     }
 
@@ -144,14 +125,11 @@ public class SchedulerBossEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public Key[] getCurrentlyExecutingJobs(int sessionID) throws
-        SessionNotFoundException,
-        SessionTimeoutException, 
-        NamingException,
-        CreateException,
-        SchedulerException
+    public Key[] getCurrentlyExecutingJobs(int sessionID)
+        throws SessionNotFoundException, SessionTimeoutException,
+               SchedulerException
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         List execJobs = getSched().getCurrentlyExecutingJobs();
         Key[] jobKeys = new Key[execJobs.size()];
         for (int i=0; i<jobKeys.length; ++i) {
@@ -173,14 +151,11 @@ public class SchedulerBossEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public boolean deleteJob(int sessionID, String jobName, String groupName) throws
-        SessionNotFoundException,
-        SessionTimeoutException, 
-        NamingException,
-        CreateException,
-        SchedulerException
+    public boolean deleteJob(int sessionID, String jobName, String groupName)
+        throws SessionNotFoundException, SessionTimeoutException,
+               SchedulerException
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         return getSched().deleteJob(jobName, groupName);
     }
 
@@ -193,14 +168,12 @@ public class SchedulerBossEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public boolean deleteSchedule(int sessionID, String scheduleName, String groupName) throws
-        SessionNotFoundException,
-        SessionTimeoutException, 
-        NamingException,
-        CreateException,
-        SchedulerException
+    public boolean deleteSchedule(int sessionID, String scheduleName,
+                                  String groupName)
+        throws SessionNotFoundException, SessionTimeoutException,
+               SchedulerException
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         return getSched().unscheduleJob(scheduleName, groupName);
     }
 
@@ -212,18 +185,17 @@ public class SchedulerBossEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public int deleteScheduleGroup(int sessionID, String groupName) throws
-        SessionNotFoundException,
-        SessionTimeoutException, 
-        NamingException,
-        CreateException,
-        SchedulerException
+    public int deleteScheduleGroup(int sessionID, String groupName)
+        throws SessionNotFoundException, SessionTimeoutException,
+               SchedulerException
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         String[] triggersInGroup = getSched().getTriggerNames(groupName);
         int numDeleted = 0;
         for (int i=0; i<triggersInGroup.length; ++i) {
-            if ( getSched().unscheduleJob(triggersInGroup[i], groupName) ) { ++numDeleted; }
+            if ( getSched().unscheduleJob(triggersInGroup[i], groupName) ) {
+                ++numDeleted;
+            }
         }
 
         return numDeleted;
@@ -237,14 +209,11 @@ public class SchedulerBossEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public int deleteJobGroup(int sessionID, String groupName) throws
-        SessionNotFoundException,
-        SessionTimeoutException, 
-        NamingException,
-        CreateException,
-        SchedulerException
+    public int deleteJobGroup(int sessionID, String groupName)
+        throws SessionNotFoundException, SessionTimeoutException,
+               SchedulerException
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         String[] jobsInGroup = getSched().getJobNames(groupName);
         int numDeleted = 0;
         for (int i=0; i<jobsInGroup.length; ++i) {
@@ -274,9 +243,8 @@ public class SchedulerBossEJBImpl implements SessionBean {
     //-------------------------------------------------------------------------
     //-- private helpers
     //-------------------------------------------------------------------------
-    private SchedulerLocal getSched() throws NamingException, CreateException {
-        SchedulerLocalHome schedHome = SchedulerUtil.getLocalHome();
-        return schedHome.create();
+    private SchedulerLocal getSched() {
+        return SchedulerEJBImpl.getOne();
     }
 }
 
