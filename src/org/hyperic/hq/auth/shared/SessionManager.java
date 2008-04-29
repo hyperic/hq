@@ -124,7 +124,7 @@ public class SessionManager {
     public synchronized Integer getId(int sessionId) 
         throws SessionNotFoundException, SessionTimeoutException
     {
-        return getSubject(sessionId).getId();
+        return getSubjectPojo(sessionId).getId();
     }
 
     /**
@@ -164,7 +164,7 @@ public class SessionManager {
     public void authenticate(int sessionId)
         throws SessionException
     {
-        getSubject(sessionId);
+        getSubjectPojo(sessionId);
     }
     
     /**
