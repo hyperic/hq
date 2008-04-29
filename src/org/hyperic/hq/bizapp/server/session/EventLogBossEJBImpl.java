@@ -82,7 +82,7 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
         throws SessionNotFoundException, SessionTimeoutException
     {
         // We ignore the subject for now
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getEvents(sessionId, eventType, new AppdefEntityID[] { id },
                          beginTime, endTime);
     }

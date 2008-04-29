@@ -404,7 +404,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
         // check for timeout
-        manager.getSubjectPojo(sessionId.intValue());
+        manager.authenticate(sessionId.intValue());
         return getAuthzSubjectManager().findSubjectByName(subjectName);
     }
 
@@ -468,7 +468,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     public String getEmailByName(Integer sessionId, String userName) 
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException {
-        manager.getSubjectPojo(sessionId.intValue());
+        manager.authenticate(sessionId.intValue());
         return getAuthzSubjectManager().getEmailByName(userName);
     }
 
@@ -479,7 +479,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     public String getEmailById(Integer sessionId, Integer userId) 
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException {
-        manager.getSubjectPojo(sessionId.intValue());
+        manager.authenticate(sessionId.intValue());
         return getAuthzSubjectManager().getEmailById(userId);
     }
     

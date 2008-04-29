@@ -73,7 +73,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         return getSched().getJobGroupNames();
     }
 
@@ -86,7 +86,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         return getSched().getTriggerGroupNames();
     }
 
@@ -101,7 +101,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         return getSched().getJobNames(jobGroup);
     }
 
@@ -116,7 +116,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         return getSched().getTriggerNames(triggerGroup);
     }
 
@@ -129,7 +129,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         List execJobs = getSched().getCurrentlyExecutingJobs();
         Key[] jobKeys = new Key[execJobs.size()];
         for (int i=0; i<jobKeys.length; ++i) {
@@ -155,7 +155,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         return getSched().deleteJob(jobName, groupName);
     }
 
@@ -173,7 +173,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         return getSched().unscheduleJob(scheduleName, groupName);
     }
 
@@ -189,7 +189,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         String[] triggersInGroup = getSched().getTriggerNames(groupName);
         int numDeleted = 0;
         for (int i=0; i<triggersInGroup.length; ++i) {
@@ -213,7 +213,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.getSubjectPojo(sessionID);
+        manager.authenticate(sessionID);
         String[] jobsInGroup = getSched().getJobNames(groupName);
         int numDeleted = 0;
         for (int i=0; i<jobsInGroup.length; ++i) {
