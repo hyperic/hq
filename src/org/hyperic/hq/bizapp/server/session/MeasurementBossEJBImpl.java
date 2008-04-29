@@ -197,7 +197,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                          String category,
                                          PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         String typeName = typeId.getAppdefResourceType().getName();
         return getTemplateManager().findTemplates(typeName, category,
                                                   new Integer[] {}, pc);
@@ -230,7 +230,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public List findMeasurementTemplates(int sessionId, String mtype,
                                          PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getTemplateManager().findTemplates(mtype, null, null, pc);
     }
 
@@ -252,7 +252,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                              PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
                TemplateNotFoundException {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getTemplateManager().getTemplates(ids, pc);
     }
 
@@ -262,7 +262,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public MeasurementTemplate getMeasurementTemplate(int sessionId, Integer id)
         throws SessionNotFoundException, SessionTimeoutException,
                TemplateNotFoundException {
-        manager.getSubjectPojo(sessionId);
+        manager.authenticate(sessionId);
         return getTemplateManager().getTemplate(id);
     }
 
