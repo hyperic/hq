@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -179,7 +179,7 @@ public class ResourceForm extends ScheduleForm {
 
     public String getEid() {
         if (type != null && rid != null)
-            return new AppdefEntityID(type.intValue(), rid).toString();
+            return new AppdefEntityID(type.intValue(), rid).getAppdefKey();
 
         return null;
     }
