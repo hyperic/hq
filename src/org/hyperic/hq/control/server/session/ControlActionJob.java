@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -51,7 +51,7 @@ public class ControlActionJob extends ControlJob {
 
         Integer idVal = new Integer(dataMap.getString(PROP_ID));
         Integer type = new Integer(dataMap.getString(PROP_TYPE));
-        AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal.intValue());
+        AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal);
         Integer subjectId = new Integer(dataMap.getString(PROP_SUBJECT));
         AuthzSubject subject = null;
         try {
@@ -69,9 +69,8 @@ public class ControlActionJob extends ControlJob {
         Date dateScheduled = trigger.getPreviousFireTime();
 
         try {
-            doAgentControlCommand(id, null, null, subject.getAuthzSubjectValue(),
-                                  dateScheduled, scheduled, description, action,
-                                  args);
+            doAgentControlCommand(id, null, null, subject, dateScheduled,
+                                  scheduled, description, action, args);
         } catch(PluginException e) {
             log.error(e.getMessage(), e);
         }

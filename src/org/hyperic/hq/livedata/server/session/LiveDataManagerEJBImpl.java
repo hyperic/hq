@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -150,7 +151,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
         AppdefEntityID id = cmd.getAppdefEntityID();
         AppdefEntityValue val = new AppdefEntityValue(id, subject); 
                                   
-        AppdefResourceTypeValue typeVal = val.getResourceTypeValue();
+        AppdefResourceType typeVal = val.getAppdefResourceType();
         return typeVal.getName();
     }
 
@@ -332,7 +333,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     {
         try {
             AppdefEntityValue val = new AppdefEntityValue(id, subject);
-            AppdefResourceTypeValue tVal = val.getResourceTypeValue();
+            AppdefResourceType tVal = val.getAppdefResourceType();
 
             return _manager.getCommands(tVal.getName());
         } catch (AppdefEntityNotFoundException e) {
@@ -386,7 +387,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     {
         try {
             AppdefEntityValue val = new AppdefEntityValue(id, subject);
-            AppdefResourceTypeValue tVal = val.getResourceTypeValue();
+            AppdefResourceType tVal = val.getAppdefResourceType();
 
             return _manager.getConfigSchema(tVal.getName(), command);
         } catch (AppdefEntityNotFoundException e) {

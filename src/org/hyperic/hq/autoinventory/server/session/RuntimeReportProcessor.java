@@ -567,7 +567,7 @@ public class RuntimeReportProcessor {
     private boolean turnOffRuntimeDiscovery(AuthzSubject subject,
                                             Integer serverId) 
     {
-        AppdefEntityID aid = AppdefEntityID.newServerID(serverId.intValue());
+        AppdefEntityID aid = AppdefEntityID.newServerID(serverId);
         _log.info("Disabling RuntimeDiscovery for server: " + serverId);
         try {
             _aiMgr.turnOffRuntimeDiscovery(subject, aid, _agentToken);

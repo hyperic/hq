@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
@@ -69,7 +69,7 @@ public abstract class ControlJob extends BaseJob {
     protected Integer doAgentControlCommand(AppdefEntityID id,
                                             AppdefEntityID gid,
                                             Integer batchId,
-                                            AuthzSubjectValue subject,
+                                            AuthzSubject subject,
                                             Date dateScheduled,
                                             Boolean scheduled,
                                             String description,

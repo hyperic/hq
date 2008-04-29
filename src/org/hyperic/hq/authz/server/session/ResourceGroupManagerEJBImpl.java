@@ -39,20 +39,22 @@ import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
-import org.hyperic.hq.appdef.shared.PlatformTypeValue;
-import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -605,6 +607,18 @@ public class ResourceGroupManagerEJBImpl
         return retVal;
     }
     
+    /**
+     * @ejb:interface-method
+     */
+    public AppdefResourceType
+        getAppdefResourceType(AuthzSubject subject, ResourceGroup group) {
+        if (group.isMixed())
+            throw new IllegalArgumentException("Group " + group.getId() +
+                                               " is a mixed group");
+        return getResourceTypeById(group.getGroupEntType().intValue(),
+                                       group.getGroupEntResType().intValue());
+    }
+    
     private AppdefResourceTypeValue
         getAppdefResourceTypeValue(AuthzSubject subject, ResourceGroup group) 
     {
@@ -615,12 +629,12 @@ public class ResourceGroupManagerEJBImpl
             res.setName(AppdefEntityConstants.getAppdefGroupTypeName(iGrpType));
             return res;
         } else {
-            return getResourceTypeById(group.getGroupEntType().intValue(),
-                                       group.getGroupEntResType().intValue());
+            return getAppdefResourceType(subject, group)
+                .getAppdefResourceTypeValue();
         }
     }
 
-    private AppdefResourceTypeValue getResourceTypeById (int type, int id){
+    private AppdefResourceType getResourceTypeById (int type, int id){
         switch (type) {
         case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM) :
             return getPlatformTypeById(id);
@@ -635,24 +649,22 @@ public class ResourceGroupManagerEJBImpl
         }
     }
 
-    private PlatformTypeValue getPlatformTypeById (int id) {
+    private PlatformType getPlatformTypeById (int id) {
         return PlatformManagerEJBImpl.getOne()
-                    .findPlatformTypeValueById(new Integer(id));
+                .findPlatformType(new Integer(id));
     }
 
-    private ServerTypeValue getServerTypeById (int id) {
-        return ServerManagerEJBImpl.getOne()
-                   .findServerTypeById(new Integer(id));
+    private ServerType getServerTypeById (int id) {
+        return ServerManagerEJBImpl.getOne().findServerType(new Integer(id));
     }
 
-    private ServiceTypeValue getServiceTypeById(int id) {
-        return ServiceManagerEJBImpl.getOne()
-                   .findServiceTypeById(new Integer(id));
+    private ServiceType getServiceTypeById(int id) {
+        return ServiceManagerEJBImpl.getOne().findServiceType(new Integer(id));
     }
 
-    private ApplicationTypeValue getApplicationTypeById (int id) {
+    private ApplicationType getApplicationTypeById (int id) {
         return ApplicationManagerEJBImpl.getOne()
-                   .findApplicationTypeById(new Integer(id));
+                   .findApplicationPojoTypeById(new Integer(id));
     }
     
     /**

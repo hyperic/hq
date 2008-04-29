@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -29,7 +29,6 @@ import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.measurement.server.session.SRN;
 
@@ -49,8 +48,7 @@ public class ScheduleMeasurements_args
         AppdefEntityID ent;
 
         this.setNumMeasurements(0);
-        ent = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                                 0);
+        ent = AppdefEntityID.newPlatformID(new Integer(0));
         this.setSRN(new SRN(ent, 0));
     }
 

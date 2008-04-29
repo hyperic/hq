@@ -501,7 +501,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             // It does exist.  Call the other startScan method so that 
             // authz checks will apply
             startScan(subject,
-                      AppdefEntityID.newPlatformID(pValue.getId().intValue()),
+                      AppdefEntityID.newPlatformID(pValue.getId()),
                       scanConfig, null, null, null);
             return;
 

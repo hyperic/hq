@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -39,7 +39,6 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.util.Messenger;
@@ -79,7 +78,7 @@ public class ControlActionGroupJob extends ControlJob {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         Integer idVal = new Integer(dataMap.getString(PROP_ID));
         Integer type = new Integer(dataMap.getString(PROP_TYPE));
-        AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal.intValue());
+        AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal);
         Integer subjectId = new Integer(dataMap.getString(PROP_SUBJECT));
         AuthzSubject subject = getSubject(subjectId);
         
@@ -124,7 +123,6 @@ public class ControlActionGroupJob extends ControlJob {
 
             ArrayList jobIds = new ArrayList();
             
-            AuthzSubjectValue subj = subject.getAuthzSubjectValue();
             for (Iterator i = groupMembers.iterator(); i.hasNext();) {
                 AppdefEntityID entity = (AppdefEntityID) i.next();
 
@@ -135,7 +133,7 @@ public class ControlActionGroupJob extends ControlJob {
                 jobId = doAgentControlCommand(entity,
                                               id,
                                               historyValue.getId(),
-                                              subj,
+                                              subject,
                                               dateScheduled,
                                               scheduled, 
                                               description,

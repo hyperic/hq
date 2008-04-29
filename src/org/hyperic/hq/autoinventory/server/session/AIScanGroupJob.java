@@ -63,7 +63,7 @@ public class AIScanGroupJob extends AIJob {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         Integer idVal = new Integer(dataMap.getString(PROP_ID));
         Integer type = new Integer(dataMap.getString(PROP_TYPE));
-        AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal.intValue());
+        AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal);
         Integer subjectId = new Integer(dataMap.getString(PROP_SUBJECT));
         AuthzSubject subject = getSubject(subjectId);
         
@@ -71,9 +71,7 @@ public class AIScanGroupJob extends AIJob {
         
         // AIHistoryLocal historyLocal = null; 
         Integer jobId = null;
-        // String status = ControlConstants.STATUS_COMPLETED;
-        String errMsg = null;
-
+        
         try {
             int[] order = getOrder(dataMap.getString(PROP_ORDER));
         
@@ -99,7 +97,6 @@ public class AIScanGroupJob extends AIJob {
                 subject, id, order, PageControl.PAGE_ALL);
 
             if (groupMembers.isEmpty()) {
-                errMsg = "Group contains no resources";
                 return;
             }
 
@@ -139,26 +136,11 @@ public class AIScanGroupJob extends AIJob {
             }               
 
         } catch (IOException e) {
-            errMsg = e.getMessage();
         } catch (AutoinventoryException e) {
-            errMsg = e.getMessage();
         } catch (GroupNotCompatibleException e) {
-            errMsg = e.getMessage();
-        } catch (PermissionException e) { 
-            // This will only happen if the permisions on a resource change
-            // after the job was scheudled.
-            errMsg = "Permission denied: " + e.getMessage();
+        } catch (PermissionException e) {
         } catch (AppdefEntityNotFoundException e) {
-            // Shouldnt happen
-            errMsg = "System error, resource not found: " + e.getMessage();
         } catch (SystemException e) {
-            // Shouldnt happen
-            errMsg = "System error";
-            /*
-        } catch (FinderException e) {
-            // Shouldnt happen
-            errMsg = "System error";
-            */
         } finally {
             /*
             if (historyLocal != null) {

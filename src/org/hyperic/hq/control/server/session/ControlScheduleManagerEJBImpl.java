@@ -272,7 +272,7 @@ public class ControlScheduleManagerEJBImpl
                 ControlSchedule sLocal = (ControlSchedule)i.next();
                 AppdefEntityID entity = 
                     new AppdefEntityID(sLocal.getEntityType().intValue(),
-                                       sLocal.getEntityId().intValue());
+                                       sLocal.getEntityId());
                 try {
                     checkViewPermission(subject, entity);
                     if (++count > rows)
