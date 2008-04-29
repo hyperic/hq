@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -299,8 +299,9 @@ public class EmailFilter {
         }
     }
     
-    void sendFiltered(int platId) {
+    void sendFiltered(Integer pid) {
         Hashtable cache;
+        int platId = pid.intValue();    // Convert to int for convenience
         
         synchronized (_alertBuffer) {
             if (!_alertBuffer.containsKey(platId))
@@ -315,7 +316,7 @@ public class EmailFilter {
             _alertBuffer.put(platId, null);
         }
         
-        AppdefEntityID platEntId = AppdefEntityID.newPlatformID(platId); 
+        AppdefEntityID platEntId = AppdefEntityID.newPlatformID(pid); 
         String platName = getAppdefEntityName(platEntId);
     
         // The cache is organized by addresses

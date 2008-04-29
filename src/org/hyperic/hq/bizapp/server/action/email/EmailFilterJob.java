@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -48,10 +48,9 @@ public class EmailFilterJob implements Job {
         JobExecutionException
     {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
-        int appId = new Integer(dataMap.getString(APP_ID)).intValue();
+        Integer appId = new Integer(dataMap.getString(APP_ID));
 
         EmailFilter ef = new EmailFilter();
-
         ef.sendFiltered(appId);
     }
 }

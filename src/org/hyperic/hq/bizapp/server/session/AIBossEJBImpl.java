@@ -212,9 +212,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                GroupNotCompatibleException {
 
         AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
-        AppdefEntityID aid
-            = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                                 groupID);
+        AppdefEntityID aid = AppdefEntityID.newGroupID(new Integer(groupID));
 
         getAutoInventoryManager().startScan(subject, aid, 
                                             scanConfig, scanName, scanDesc,
@@ -244,7 +242,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                AgentConnectionException, AgentNotFoundException,
                DuplicateAIScanNameException, ScheduleWillNeverFireException {
         AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
-        AppdefEntityID aid = AppdefEntityID.newPlatformID(platformID);
+        AppdefEntityID aid =
+            AppdefEntityID.newPlatformID(new Integer(platformID));
         getAutoInventoryManager().startScan(subject, aid, scanConfig, scanName,
                                             scanDesc, schedule);
     }
@@ -267,14 +266,14 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param platformID The platform ID of the platform to stop scanning on.
      * @ejb:interface-method
      */
-    public void stopScan(int sessionID,
-                         int platformID)
+    public void stopScan(int sessionID, int platformID)
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AutoinventoryException, 
                AgentConnectionException, AgentNotFoundException {
 
         AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
-        AppdefEntityID aid = AppdefEntityID.newPlatformID(platformID);
+        AppdefEntityID aid =
+            AppdefEntityID.newPlatformID(new Integer(platformID));
         getAutoInventoryManager().stopScan(subject, aid);
     }
 
@@ -283,15 +282,15 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param platformID The platform ID of the platform to get scan status for.
      * @ejb:interface-method
      */
-    public ScanStateCore getScanStatus(int sessionID,
-                                       int platformID)
+    public ScanStateCore getScanStatus(int sessionID, int platformID)
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AgentNotFoundException, 
                AgentConnectionException, AgentRemoteException,
                AutoinventoryException {
 
         AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
-        AppdefEntityID aid = AppdefEntityID.newPlatformID(platformID);
+        AppdefEntityID aid =
+            AppdefEntityID.newPlatformID(new Integer(platformID));
 
         ScanStateCore core =
             getAutoInventoryManager().getScanStatus(subject, aid);

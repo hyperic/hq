@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -40,10 +40,8 @@ import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.util.pager.PageControl;
@@ -68,20 +66,11 @@ public class AppdefEntityValue {
     private AppdefGroupValue        group       = null;
 
     private AppdefEntityID          _id;
-    private AuthzSubjectValue       _subject;
-    private AuthzSubject            _subjPojo;
+    private AuthzSubject            _subject;
 
-    public AppdefEntityValue(AppdefEntityID id, AuthzSubjectValue subject) {
-        _id       = id;
-        _subject  = subject;
-        _subjPojo = AuthzSubjectManagerEJBImpl.getOne()
-                        .findSubjectById(subject.getId()); 
-    }
-    
     public AppdefEntityValue(AppdefEntityID id, AuthzSubject subject) {
-        _id       = id;
-        _subjPojo = subject;
-        _subject  = _subjPojo.getAuthzSubjectValue();
+        _id      = id;
+        _subject = subject;
     }
     
     public AppdefEntityID getID() {
@@ -89,11 +78,7 @@ public class AppdefEntityValue {
     }
 
     public AuthzSubject getSubject() {
-        if (_subjPojo == null) {
-            _subjPojo = AuthzSubjectManagerEJBImpl.getOne()
-                .findSubjectById(_subject.getId());
-        }
-        return _subjPojo;
+        return _subject;
     }
     
     private PlatformManagerLocal getPlatformManager() {
@@ -128,7 +113,7 @@ public class AppdefEntityValue {
         throws AppdefEntityNotFoundException, PermissionException {
         if (platform == null) {
             if (permCheck) {
-                platform = getPlatformManager().getPlatformById(_subjPojo,
+                platform = getPlatformManager().getPlatformById(getSubject(),
                                                                 _id.getId());
             }
             else {
@@ -144,7 +129,7 @@ public class AppdefEntityValue {
                PermissionException {
         if(application == null){
             application =
-                getApplicationManager().findApplicationById(_subjPojo,
+                getApplicationManager().findApplicationById(getSubject(),
                                                             _id.getId());
         } 
         return application;
@@ -154,7 +139,7 @@ public class AppdefEntityValue {
         throws AppdefEntityNotFoundException, PermissionException {
         if (server == null) {
             if (permCheck) {
-                server = getServerManager().getServerPOJOById(_subjPojo,
+                server = getServerManager().getServerPOJOById(getSubject(),
                                                               _id.getId());
             }
             else {
@@ -173,24 +158,26 @@ public class AppdefEntityValue {
         return service;
     }
 
-    private AppdefResourceTypeValue getGroupType()
+    private ResourceGroup getGroup()
         throws PermissionException, AppdefGroupNotFoundException {
-        return getGroup(true).getAppdefResourceTypeValue();
+        ResourceGroupManagerLocal groupMan = 
+            ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroup g = 
+            groupMan.findResourceGroupById(getSubject(), _id.getId());
+        if (g == null) {
+            throw new AppdefGroupNotFoundException("Unable to find " + 
+                                                   "group [" + _id + "]");
+        }
+        return g;
     }
-
+    
     private AppdefGroupValue getGroup(boolean full)
         throws PermissionException, AppdefGroupNotFoundException 
     {
         if (group == null) {
             ResourceGroupManagerLocal groupMan = 
                 ResourceGroupManagerEJBImpl.getOne();
-            ResourceGroup g = 
-                groupMan.findResourceGroupById(_subjPojo, _id.getId());
-            if (g == null) {
-                throw new AppdefGroupNotFoundException("Unable to find " + 
-                                                       "group [" + _id + "]");
-            }
-            group = groupMan.convertGroup(_subjPojo, g);
+            group = groupMan.convertGroup(getSubject(), getGroup());
         }
         return group;
     }
@@ -209,7 +196,7 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             if (resType instanceof ServerTypeValue)
                 return getPlatformManager()
-                    .getPlatformsByServers(_subjPojo, eids);
+                    .getPlatformsByServers(getSubject(), eids);
             
             if (!(resType instanceof PlatformTypeValue))
                 throw new IllegalArgumentException(_id +
@@ -218,7 +205,7 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             if (resType instanceof ServiceTypeValue) {
                 return getServerManager()
-                    .getServersByServices(_subject, eids);
+                    .getServersByServices(getSubject(), eids);
             } 
 
             if (!(resType instanceof ServerTypeValue))
@@ -239,7 +226,7 @@ public class AppdefEntityValue {
         PageList res = new PageList();
         for (Iterator it = eids.iterator(); it.hasNext(); ) {
             AppdefEntityID eid = (AppdefEntityID) it.next();
-            AppdefEntityValue val = new AppdefEntityValue(eid, _subject);
+            AppdefEntityValue val = new AppdefEntityValue(eid, getSubject());
             res.add(val.getResourceValue());
         }
 
@@ -270,7 +257,7 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getResourcePOJO().getName();
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return getResourceValue().getName();
+            return getGroup().getName();
         default:
             throw new IllegalStateException("Unknown appdef entity type"); 
         }
@@ -285,7 +272,7 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getResourcePOJO().getDescription();
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return getResourceValue().getDescription();
+            return getGroup().getDescription();
         default:
             throw new IllegalStateException("Unknown appdef entity type"); 
         }
@@ -295,13 +282,16 @@ public class AppdefEntityValue {
         throws AppdefEntityNotFoundException, PermissionException
     {
         switch(_id.getType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+            ResourceGroup g = getGroup();
+            if (g.isMixed()) {
+                return getGroup(false).getAppdefResourceTypeValue().getName();
+            }
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getAppdefResourceType().getName();
-        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return getGroupType().getName();
         default:
             throw new IllegalStateException("Unknown appdef entity type");
         }
@@ -350,25 +340,6 @@ public class AppdefEntityValue {
     }
 
     /**
-     * Get the AppdefResourceTypeValue for a given AppdefEntityID.  
-     */
-    public AppdefResourceTypeValue getResourceTypeValue()
-        throws PermissionException, AppdefEntityNotFoundException 
-    {
-        switch(_id.getType()) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            return getAppdefResourceType().getAppdefResourceTypeValue();
-        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return getGroup(false).getAppdefResourceTypeValue();
-        default:
-            throw new IllegalStateException("Unknown appdef entity type");
-        }
-    }
-
-    /**
      * Get the AppdefResourceType POJO
      */
     public AppdefResourceType getAppdefResourceType()
@@ -381,7 +352,14 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getResourcePOJO().getAppdefResourceType();
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            throw new IllegalStateException("Can't return for group: " + _id);
+            // Make sure this is a compatible group
+            ResourceGroup g = getGroup();
+            if (g.isMixed())
+                throw new IllegalStateException("Can't return for mixed group: "
+                                                + _id);
+            ResourceGroupManagerLocal groupMan = 
+                ResourceGroupManagerEJBImpl.getOne();
+            return groupMan.getAppdefResourceType(getSubject(), g);
         default:
             throw new IllegalStateException("Unknown appdef entity type");
         }
@@ -404,16 +382,16 @@ public class AppdefEntityValue {
 
         PlatformManagerLocal pManager = getPlatformManager();
         if(_id.isApplication()){
-            return pManager.getPlatformsByApplication(_subjPojo, iId, pc);
+            return pManager.getPlatformsByApplication(getSubject(), iId, pc);
         }
 
         PageList res = new PageList();
         switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            res.add(pManager.getPlatformByService(_subjPojo, iId));
+            res.add(pManager.getPlatformByService(getSubject(), iId));
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            res.add(pManager.getPlatformByServer(_subjPojo, iId));
+            res.add(pManager.getPlatformByServer(getSubject(), iId));
             break;
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             res.add(getResourceValue());        // Add self
@@ -434,8 +412,8 @@ public class AppdefEntityValue {
     // illegal argument since this is a programmer error.
     private void validateGroupType (int groupTypeId) 
         throws PermissionException, AppdefEntityNotFoundException { 
-        AppdefGroupValue groupVo = (AppdefGroupValue) getResourceValue();
-        if (groupVo.getGroupType() != groupTypeId) {
+        ResourceGroup g = getGroup();
+        if (g.getGroupType().intValue() != groupTypeId) {
             throw new IllegalArgumentException("Invalid group type."+
                 "Expecting type:"+AppdefEntityConstants
                 .getAppdefGroupTypeName(groupTypeId));
@@ -457,15 +435,15 @@ public class AppdefEntityValue {
 
         switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            return sManager.getServersByApplication(_subjPojo, iId, pc);
+            return sManager.getServersByApplication(getSubject(), iId, pc);
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return sManager.getServersByPlatform(_subjPojo, iId, true, pc);
+            return sManager.getServersByPlatform(getSubject(), iId, true, pc);
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             return getGroupAppdefEntityValues(
                  AppdefEntityConstants.APPDEF_TYPE_SERVER, pc);
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
             res = new PageList();
-            res.add(sManager.getServerByService(_subjPojo, iId));
+            res.add(sManager.getServerByService(getSubject(), iId));
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             res = new PageList();
@@ -496,11 +474,11 @@ public class AppdefEntityValue {
         switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             res =
-                sManager.getServersByApplication(_subjPojo, iId, typeId, pc);
+                sManager.getServersByApplication(getSubject(), iId, typeId, pc);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             // default to exclude virtual servers
-            res = sManager.getServersByPlatform(_subjPojo, iId, typeId, true,
+            res = sManager.getServersByPlatform(getSubject(), iId, typeId, true,
                                                 pc);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
@@ -531,13 +509,13 @@ public class AppdefEntityValue {
     
         switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            ids = sManager.getServerIdsByApplication(_subjPojo, iId, typeId);
+            ids = sManager.getServerIdsByApplication(getSubject(), iId, typeId);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            ids = sManager.getServerIdsByPlatform(_subjPojo, iId, typeId);
+            ids = sManager.getServerIdsByPlatform(getSubject(), iId, typeId);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            ServerValue server = sManager.getServerByService(_subjPojo, iId);
+            ServerValue server = sManager.getServerByService(getSubject(), iId);
             ids = new Integer[] { server.getId() };
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
@@ -551,7 +529,7 @@ public class AppdefEntityValue {
         
         List entIds = new ArrayList();
         for (int i = 0; i < ids.length; i++) {
-            entIds.add(AppdefEntityID.newServerID(ids[i].intValue()));
+            entIds.add(AppdefEntityID.newServerID(ids[i]));
         }
         return entIds;
     }
@@ -571,7 +549,7 @@ public class AppdefEntityValue {
 
         switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
-            return sManager.getServiceInventoryByApplication(_subjPojo, iId,
+            return sManager.getServiceInventoryByApplication(getSubject(), iId,
                                                              pc);
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             validateGroupType(
@@ -579,11 +557,11 @@ public class AppdefEntityValue {
             return getGroupAppdefEntityValues(
                 AppdefEntityConstants.APPDEF_TYPE_SERVICE, pc);
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return sManager.getPlatformServices(_subjPojo, iId, pc);
+            return sManager.getPlatformServices(getSubject(), iId, pc);
         case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-            return sManager.getServicesByServer(_subjPojo, iId, pc);
+            return sManager.getServicesByServer(getSubject(), iId, pc);
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            res = sManager.getServicesByService(_subjPojo, iId, pc);
+            res = sManager.getServicesByService(getSubject(), iId, pc);
             res.add(getResourceValue());     // Also add self
             res.setTotalSize(res.size());
             return res;
@@ -610,17 +588,17 @@ public class AppdefEntityValue {
 
         switch (_id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
-                res = sManager.getServiceInventoryByApplication(_subjPojo,
+                res = sManager.getServiceInventoryByApplication(getSubject(),
                                                                 iId, typeId,pc);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
-                res = sManager.getServicesByService(_subjPojo, iId, typeId, pc);
+                res = sManager.getServicesByService(getSubject(), iId, typeId, pc);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                res = sManager.getServicesByServer(_subjPojo, iId, typeId, pc);
+                res = sManager.getServicesByServer(getSubject(), iId, typeId, pc);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM :
-                res = sManager.getPlatformServices(_subjPojo, iId, typeId, pc);
+                res = sManager.getPlatformServices(getSubject(), iId, typeId, pc);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP :
                 res = new PageList();
@@ -650,7 +628,7 @@ public class AppdefEntityValue {
 
         switch (_id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            vals = sManager.getServiceInventoryByApplication(_subjPojo, iId,
+            vals = sManager.getServiceInventoryByApplication(getSubject(), iId,
                                                              typeId, pc);
             res = new ArrayList(vals.size());
             for (Iterator it = vals.iterator(); it.hasNext();) {
@@ -660,13 +638,13 @@ public class AppdefEntityValue {
 
             return res;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            sids = sManager.getServiceIdsByServer(_subjPojo, iId, typeId);
+            sids = sManager.getServiceIdsByServer(getSubject(), iId, typeId);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            sids = sManager.getServiceIdsByService(_subjPojo, iId, typeId);
+            sids = sManager.getServiceIdsByService(getSubject(), iId, typeId);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            vals = sManager.getPlatformServices(_subjPojo, iId, typeId, pc);
+            vals = sManager.getPlatformServices(getSubject(), iId, typeId, pc);
             res = new ArrayList(vals.size());
                 for (Iterator it = vals.iterator(); it.hasNext(); ) {
                     AppdefResourceValue aval = (AppdefResourceValue) it.next();
@@ -681,7 +659,7 @@ public class AppdefEntityValue {
 
         res = new ArrayList(sids.length);
         for (int i = 0; i < sids.length; i++) {
-            res.add(AppdefEntityID.newServiceID(sids[i].intValue()));
+            res.add(AppdefEntityID.newServiceID(sids[i]));
         }
         return res;
     }
@@ -699,8 +677,7 @@ public class AppdefEntityValue {
             
             servEntIds = new AppdefEntityID[servicePKs.length];
             for (int i = 0; i < servicePKs.length; i++) {
-                servEntIds[i] =
-                    AppdefEntityID.newServiceID(servicePKs[i].intValue());
+                servEntIds[i] = AppdefEntityID.newServiceID(servicePKs[i]);
             }
         }
         else {
@@ -709,8 +686,7 @@ public class AppdefEntityValue {
             Iterator it = services.iterator();
             for (int i = 0; it.hasNext(); i++) {
                 ServiceValue servVal = (ServiceValue) it.next();
-                servEntIds[i] =
-                    AppdefEntityID.newServiceID(servVal.getId().intValue());
+                servEntIds[i] = AppdefEntityID.newServiceID(servVal.getId());
             }
         }
         

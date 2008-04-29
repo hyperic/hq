@@ -36,8 +36,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Session;
-import org.hyperic.hibernate.Util;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -50,7 +49,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
-import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -687,7 +685,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
 
     protected List getPlatformAG(AuthzSubject subject, AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, PermissionException {
-        if(ctype.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+        if(!ctype.isPlatform()) {
             throw new IllegalArgumentException(ctype.getType() + 
                     " is not a platform type");
         }
@@ -695,9 +693,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
             getPlatformManager().getPlatformIds(subject, ctype.getId());
         List entIds = new ArrayList(platIds.length);
         for(int i = 0; i < platIds.length; i++) {
-            entIds.add(
-                new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                                   platIds[i]));
+            entIds.add(AppdefEntityID.newPlatformID(platIds[i]));
         }
         return entIds;
     }

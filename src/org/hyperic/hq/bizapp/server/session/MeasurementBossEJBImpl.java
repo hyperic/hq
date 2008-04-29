@@ -2538,7 +2538,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         int entType = entId.getType();
 
         if (entType == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-            entType = rv.getResourceTypeValue().getAppdefType();
+            entType = rv.getAppdefResourceType().getAppdefType();
         }
         
         PageList hosts;

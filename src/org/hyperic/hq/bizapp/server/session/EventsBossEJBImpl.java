@@ -44,6 +44,7 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
@@ -53,7 +54,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
@@ -706,7 +706,7 @@ public class EventsBossEJBImpl
                AlertDefinitionCreateException 
     {
         AppdefEntityValue rv = new AppdefEntityValue(id, subject);
-        AppdefResourceTypeValue type = rv.getResourceTypeValue();
+        AppdefResourceType type = rv.getAppdefResourceType();
         
         // Find the alert definitions for the type
         AppdefEntityTypeID aetid =
