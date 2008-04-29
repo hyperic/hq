@@ -1279,7 +1279,8 @@
       <include name="org/hyperic/hq/transport/AgentTransport*.class"/>
       <include name="org/hyperic/hq/transport/PollerClient.class"/>
       <include name="org/hyperic/hq/transport/util/*.class"/>   
-      <exclude name="org/hyperic/hq/transport/**/*_test*"/>  
+      <exclude name="org/hyperic/hq/transport/**/*_test*"/> 
+	  <include name="org/hyperic/hq/measurement/agent/commands/*.class"/>	 
     </jar>	  
 	  
     <!-- Top level stuff -->
