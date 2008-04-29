@@ -76,10 +76,10 @@ public class AICommandsClientImpl
             proxy = (AICommandsClient)getAsynchronousProxy(AICommandsClient.class, false);
             proxy.pushRuntimeDiscoveryConfig(type, id, typeName, name, response); 
         } catch (AgentConnectionException ace) {
-            log.error("Error connecting to agent to push runtime discovery "
+            _log.error("Error connecting to agent to push runtime discovery "
                       + "config: " + ace.getMessage());
         } catch (AgentRemoteException are) {
-            log.error("Error sending runtime discover configuration to agent: "
+            _log.error("Error sending runtime discover configuration to agent: "
                       + are.getMessage());
         } finally {
             safeDestroyService(proxy);
