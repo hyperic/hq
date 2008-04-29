@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,11 +25,9 @@
 
 package org.hyperic.hq.ui.action.resource.application.inventory;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,16 +36,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.action.BaseValidatorForm;
 import org.hyperic.hq.ui.action.resource.application.ApplicationForm;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -78,7 +72,6 @@ public class EditApplicationPropertiesAction extends BaseAction {
         ActionForward forward = checkSubmit(request, mapping, form,
                                             forwardParams);
         if (forward != null) {
-            BaseValidatorForm spiderForm = (BaseValidatorForm) form;
             return forward;
         }
 
@@ -111,10 +104,8 @@ public class EditApplicationPropertiesAction extends BaseAction {
         appVal.setApplicationType(applicationType);
 
         log.trace("updating general properties of application [" +
-                  appVal.getName() + "]" + " with attributes " +
-                  appVal);
-        ApplicationValue updatedApplication =
-            boss.updateApplication(sessionId.intValue(), appVal);
+                  appVal.getName() + "]" + " with attributes " + appVal);
+        boss.updateApplication(sessionId.intValue(), appVal);
 
         RequestUtils
             .setConfirmation(request,
