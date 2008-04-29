@@ -25,9 +25,11 @@
 
 package org.hyperic.hq.autoinventory;
 
+import java.io.Serializable;
+
 import org.hyperic.hq.agent.AgentRemoteValue;
-import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.StringifiedException;
 
@@ -37,8 +39,8 @@ import org.hyperic.util.StringifiedException;
  * to make it easy to move scan states across SOAP and other network
  * transports.
  */
-public class ScanStateCore {
-
+public class ScanStateCore implements Serializable {
+    
     private AIPlatformValue _platform = null;
     private ScanMethodState[] _scanMethodStates;
 
