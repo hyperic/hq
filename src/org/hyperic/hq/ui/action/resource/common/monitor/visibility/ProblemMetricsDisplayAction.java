@@ -42,7 +42,6 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
@@ -70,8 +69,7 @@ public class ProblemMetricsDisplayAction extends TilesAction {
         throws Exception {
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
-        WebUser user = (WebUser) request.getSession().getAttribute(
-                Constants.WEBUSER_SES_ATTR);
+        WebUser user = RequestUtils.getWebUser(request);
         int sessionId = user.getSessionId().intValue();
 
         AppdefEntityID aeid = RequestUtils.getEntityId(request);

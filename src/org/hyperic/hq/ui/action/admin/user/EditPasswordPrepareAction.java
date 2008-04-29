@@ -45,6 +45,7 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 
@@ -62,8 +63,7 @@ public class EditPasswordPrepareAction extends TilesAction{
     throws Exception {
         
         
-        WebUser user = (WebUser) request.getSession().getAttribute( 
-                                                   Constants.WEBUSER_SES_ATTR );
+        WebUser user = RequestUtils.getWebUser(request);
         ServletContext ctx = getServlet().getServletContext();
         Integer sessionId = user.getSessionId();
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);

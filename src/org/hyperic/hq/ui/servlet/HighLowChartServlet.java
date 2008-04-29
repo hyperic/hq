@@ -34,6 +34,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -45,15 +47,11 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.image.chart.Chart;
 import org.hyperic.image.chart.DataPointCollection;
 import org.hyperic.image.chart.HighLowChart;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  *
@@ -97,10 +95,10 @@ public class HighLowChartServlet extends ChartServlet {
         Integer tid = RequestUtils.getIntParameter(request, "tid");
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         
-        int sessionId = RequestUtils.getSessionId(request).intValue();
         ServletContext ctx = this.getServletContext();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
+        int sessionId = user.getSessionId().intValue();
 
         // set metric range defaults
         Map pref = user.getMetricRangePreference(true);

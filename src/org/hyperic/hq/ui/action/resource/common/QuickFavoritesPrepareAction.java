@@ -40,7 +40,7 @@ import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
 
@@ -51,7 +51,7 @@ public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
                                   HttpServletResponse response)
         throws Exception {
 
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
 		Boolean isFavorite = Boolean.FALSE;
 		AppdefResourceValue arv = (AppdefResourceValue) context
 				.getAttribute("resource");

@@ -68,8 +68,8 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
                                   HttpServletResponse response)
         throws Exception {
         CompareMetricsForm cform = (CompareMetricsForm) form;
-        int sessionId = RequestUtils.getSessionId(request).intValue();
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request.getSession());
+        int sessionId = user.getSessionId().intValue();
         Map range = user.getMetricRangePreference();
 
         long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();

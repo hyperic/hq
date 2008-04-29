@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -32,8 +32,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
+import org.apache.struts.util.MessageResources;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
@@ -41,12 +47,6 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.util.MessageResources;
 
 public class NewGroupFormPrepareAction 
     extends WorkflowPrepareAction {
@@ -74,7 +74,7 @@ public class NewGroupFormPrepareAction
         if (eids != null) {
             newForm.setEntityIds(eids);
             
-            AppdefResourceTypeValue art = null;
+            AppdefResourceType art = null;
             Integer ff = (Integer)
                 session.getAttribute(Constants.RESOURCE_TYPE_ATTR);
 
@@ -96,7 +96,8 @@ public class NewGroupFormPrepareAction
             if (art != null) {
                 newForm.setGroupType(
                         new Integer(Constants.APPDEF_TYPE_GROUP_COMPAT));
-                newForm.setTypeAndResourceTypeId(art.getAppdefTypeKey());
+                AppdefEntityTypeID aetid = new AppdefEntityTypeID(art);
+                newForm.setTypeAndResourceTypeId(aetid.getAppdefKey());
                 newForm.setTypeName(art.getName());
                 return null;
             }

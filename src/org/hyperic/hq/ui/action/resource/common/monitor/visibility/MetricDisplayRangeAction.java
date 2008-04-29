@@ -34,17 +34,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * A <code>BaseAction</code> that handles metrics-specific form
@@ -76,7 +75,7 @@ public class MetricDisplayRangeAction extends BaseAction {
             return forward;
         }
 
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
         Integer sessionId = user.getSessionId();
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);

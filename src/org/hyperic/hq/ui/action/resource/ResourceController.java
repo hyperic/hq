@@ -176,7 +176,7 @@ public abstract class ResourceController extends BaseDispatchAction {
                     request.setAttribute("cprops", cprops);
                 
                 // Add this resource to the recently used preference
-                WebUser user = SessionUtils.getWebUser(request.getSession());
+                WebUser user = RequestUtils.getWebUser(request);
                 ConfigResponse userPrefs = user.getPreferences();
                 
                 if (DashboardUtils.addEntityToPreferences(

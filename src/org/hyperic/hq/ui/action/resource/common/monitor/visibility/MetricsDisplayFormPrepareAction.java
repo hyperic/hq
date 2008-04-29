@@ -30,6 +30,11 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
@@ -38,13 +43,6 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.config.InvalidOptionException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * An <code>Action</code> that retrieves data from the BizApp to
@@ -86,7 +84,7 @@ public abstract class MetricsDisplayFormPrepareAction
 
         if (begin == null || end == null) {
             // get the "metric range" user pref
-            WebUser user = SessionUtils.getWebUser(request.getSession());
+            WebUser user = RequestUtils.getWebUser(request);
             Map range = user.getMetricRangePreference();
             if (range != null) {    
                 begin = (Long) range.get(MonitorUtils.BEGIN);

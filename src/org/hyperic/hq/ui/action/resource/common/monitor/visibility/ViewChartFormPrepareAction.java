@@ -80,6 +80,7 @@ import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
+import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.TimeUtil;
@@ -165,8 +166,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         // This was probably a bad favorites chart
         String query = request.getQueryString();
         HttpSession session = request.getSession();
-        WebUser user =
-            (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        WebUser user = SessionUtils.getWebUser(session);
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),

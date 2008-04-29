@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -68,7 +68,6 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.InvalidOptionException;
 
@@ -93,7 +92,7 @@ public class IndicatorChartsAction extends DispatchAction
                                            HttpServletResponse response,
                                            String name)
         throws Exception {
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
         Map pref = user.getMetricRangePreference(true);
         request.setAttribute(MonitorUtils.BEGIN, pref.get(MonitorUtils.BEGIN));
         request.setAttribute(MonitorUtils.END, pref.get(MonitorUtils.END));
@@ -111,7 +110,7 @@ public class IndicatorChartsAction extends DispatchAction
         int sessionId = RequestUtils.getSessionId(request).intValue();
 
         // Get metric range defaults
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
         Map pref = user.getMetricRangePreference(true);
         long begin = ((Long) pref.get(MonitorUtils.BEGIN)).longValue();
         long end = ((Long) pref.get(MonitorUtils.END)).longValue();
@@ -175,7 +174,7 @@ public class IndicatorChartsAction extends DispatchAction
             ContextUtils.getMeasurementBoss(getServlet().getServletContext());
 
         String key = Constants.INDICATOR_VIEWS + generateUniqueKey(request);
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
 
         try {
             // First we try to find the metrics
@@ -528,7 +527,7 @@ public class IndicatorChartsAction extends DispatchAction
             HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         IndicatorViewsForm ivf = (IndicatorViewsForm) form;
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
 
         String key = Constants.INDICATOR_VIEWS + generateUniqueKey(request);
         
@@ -580,7 +579,7 @@ public class IndicatorChartsAction extends DispatchAction
             HttpServletResponse response)
         throws Exception {
         IndicatorViewsForm ivf = (IndicatorViewsForm) form;
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
         String key = Constants.INDICATOR_VIEWS + generateUniqueKey(request);
 
         // Now fetch the charts from the session
@@ -608,7 +607,7 @@ public class IndicatorChartsAction extends DispatchAction
                                 HttpServletResponse response)
         throws Exception {
         IndicatorViewsForm ivf = (IndicatorViewsForm) form;
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
 
         String key = Constants.INDICATOR_VIEWS + generateUniqueKey(request);
         

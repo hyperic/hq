@@ -53,7 +53,6 @@ import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -254,7 +253,7 @@ public class ViewChartAction extends MetricDisplayRangeAction {
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         HttpSession session = request.getSession();
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils
 				.findDashboard((Integer) session

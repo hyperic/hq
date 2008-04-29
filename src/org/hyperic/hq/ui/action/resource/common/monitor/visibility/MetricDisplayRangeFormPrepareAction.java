@@ -33,18 +33,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.WorkflowPrepareAction;
-import org.hyperic.hq.ui.util.MonitorUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.config.InvalidOptionException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.action.WorkflowPrepareAction;
+import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.InvalidOptionException;
 
 /**
  * An <code>Action</code> that retrieves data from the BizApp to
@@ -72,7 +71,7 @@ public class MetricDisplayRangeFormPrepareAction extends WorkflowPrepareAction {
         MetricDisplayRangeForm rangeForm = (MetricDisplayRangeForm) form;
 
         try {
-            WebUser user = SessionUtils.getWebUser(request.getSession());
+            WebUser user = RequestUtils.getWebUser(request);
             Map pref = user.getMetricRangePreference(false);
 
             if (rangeForm.isResetClicked() || rangeForm.getRn() == null) {

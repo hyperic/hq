@@ -114,8 +114,7 @@ public class ResourceHubPortalAction extends BaseAction {
 
         // Set the view in the form
         HttpSession session = request.getSession();
-        WebUser user =
-            (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        WebUser user = SessionUtils.getWebUser(session);
         
         PageControl pc = RequestUtils.getPageControl(request);
 
@@ -304,9 +303,8 @@ public class ResourceHubPortalAction extends BaseAction {
                 for (Iterator it = groups.iterator(); it.hasNext(); ) {
                     ResourceGroup group = (ResourceGroup) it.next();
 
-                    String appdefKey = new AppdefEntityID(
-                            AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                            group.getId()).getAppdefKey();
+                    String appdefKey =
+                        AppdefEntityID.newGroupID(group.getId()).getAppdefKey();
                     groupOptions.add(new LabelValueBean(group.getName(),
                                                         appdefKey));
                 }

@@ -71,8 +71,7 @@ public class EventDetailsAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        WebUser user = (WebUser) request.getSession().getAttribute(
-                Constants.WEBUSER_SES_ATTR);
+        WebUser user = RequestUtils.getWebUser(request);
         Map range = user.getMetricRangePreference();
         long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
         long end = ((Long) range.get(MonitorUtils.END)).longValue();

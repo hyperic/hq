@@ -31,10 +31,18 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
+import org.apache.struts.tiles.actions.TilesAction;
+import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -54,15 +62,6 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
-import org.apache.struts.util.MessageResources;
 
 /**
  * An <code>TilesAction</code> that retrieves metric data to
@@ -105,7 +104,7 @@ public class CurrentHealthAction extends TilesAction {
         // Get the resource availability
         int sessionId = RequestUtils.getSessionId(request).intValue();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
 
         try {
             MeasurementTemplate mt =

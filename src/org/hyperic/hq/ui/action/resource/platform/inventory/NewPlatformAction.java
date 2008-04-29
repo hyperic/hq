@@ -31,6 +31,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -105,7 +106,7 @@ public class NewPlatformAction extends BaseAction {
                                                boss, request,
                                                newForm);
 
-            PlatformValue newPlatform =
+            Platform newPlatform =
                 boss.createPlatform(sessionId.intValue(),
                                     platform, platformType.getId(),
                                     agent.getId());

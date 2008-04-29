@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -32,23 +32,17 @@ package org.hyperic.hq.ui.action.resource.group.monitor.config;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * An Action that edits a compatible group's availability thresholds.
@@ -68,8 +62,7 @@ public class EditAvailabilityAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
         Log log = LogFactory.getLog(EditAvailabilityAction.class.getName());    
-        HttpSession session = request.getSession();
-
+        
         GroupMonitoringConfigForm addForm = (GroupMonitoringConfigForm)form;
         Integer resourceId = addForm.getRid();
         Integer resourceType = addForm.getType();
@@ -78,8 +71,7 @@ public class EditAvailabilityAction extends BaseAction {
         
         int id = resourceId.intValue();
         int type = resourceType.intValue();      
-        AppdefEntityID appdefId = new AppdefEntityID(type, id);
-
+        
         parms.put(Constants.RESOURCE_PARAM, new Integer(id));
         parms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(type));
 
@@ -87,11 +79,7 @@ public class EditAvailabilityAction extends BaseAction {
         if (forward != null) {
             return forward;
         }
-
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
-        Integer sessionId = RequestUtils.getSessionId(request);
-
+        
         log.trace("Editing compatible group's availability thresholds.");
         // XXX    mBoss.createMeasurements(sessionId.intValue(), 
         //preapre the form here    appdefId, pendingMetricsIds);

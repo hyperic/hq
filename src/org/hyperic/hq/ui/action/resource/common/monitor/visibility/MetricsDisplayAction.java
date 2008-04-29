@@ -74,7 +74,7 @@ public class MetricsDisplayAction extends MetricsControlAction {
         AppdefEntityID entityId = displayForm.getEntityId();
         Map forwardParams = displayForm.getForwardParams();
 
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
         Integer sessionId = user.getSessionId();
         ServletContext ctx = getServlet().getServletContext();
 

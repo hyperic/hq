@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility;
 
 import java.rmi.RemoteException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -35,6 +34,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -55,14 +59,6 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * A <code>MetricsDisplayFormPrepareAction</code> that retrieves data
@@ -133,7 +129,7 @@ public class AutoGroupMetricsFormPrepareAction
                              selectedType);
 
         // get the "metric range" user pref
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
         Map range = user.getMetricRangePreference();
         begin = (Long) range.get(MonitorUtils.BEGIN);
         end = (Long) range.get(MonitorUtils.END);

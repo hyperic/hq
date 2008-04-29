@@ -39,11 +39,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.OperationValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -52,7 +50,6 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -89,7 +86,7 @@ public class RegisterAction extends BaseAction {
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);             
         AuthBoss authBoss = ContextUtils.getAuthBoss(ctx); 
 
-        WebUser webUser = SessionUtils.getWebUser(session);
+        WebUser webUser = RequestUtils.getWebUser(session);
 
         // password was saved off when the user logged in
         String password =

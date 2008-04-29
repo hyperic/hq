@@ -57,7 +57,6 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.pager.PageControl;
 
@@ -133,7 +132,7 @@ public class AutoGroupCurrentHealthAction extends CurrentHealthAction {
         // Get the resource availability
         MeasurementBoss boss =
             ContextUtils.getMeasurementBoss(getServlet().getServletContext());
-        WebUser user = SessionUtils.getWebUser(request.getSession());
+        WebUser user = RequestUtils.getWebUser(request);
 
         try {
             MeasurementTemplate mt =

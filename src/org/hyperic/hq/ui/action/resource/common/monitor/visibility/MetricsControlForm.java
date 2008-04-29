@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -236,21 +236,18 @@ public class MetricsControlForm extends MetricDisplayRangeForm {
     }
 
     public AppdefEntityID getEntityId() {
-        if (this.getEid().length > 1) {
-            // multiparent autogroup; the jsp should never allow us to
-            // perform an operation on a single parent, so we leave
-            // entityId null to provoke an NPE and piss off the guy
-            // writing the jsp
+        if (getEid().length > 1) {
+            // multiparent autogroup; the jsp should never allow us to perform
+            // an operation on a single parent, so we leave entityId null to 
+            // provoke an NPE and piss off the guy writing the jsp
             return null;
         }
-        else if (this.getEid().length == 1) {
-            return new AppdefEntityID(this.getEid()[0]);
+        else if (getEid().length == 1) {
+            return new AppdefEntityID(getEid()[0]);
         }
         else {
-            return new AppdefEntityID(this.getType().intValue(),
-                                      this.getRid().intValue());
+            return new AppdefEntityID(getType().intValue(), getRid());
         }
-
     }
 
     public Map getForwardParams() {

@@ -43,7 +43,6 @@ import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 public class QuickFavoritesAction extends BaseAction {
@@ -54,7 +53,7 @@ public class QuickFavoritesAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
 
-    	WebUser user = SessionUtils.getWebUser(request.getSession());
+    	WebUser user = RequestUtils.getWebUser(request);
         AuthzBoss boss =
             ContextUtils.getAuthzBoss(getServlet().getServletContext());
         DashboardConfig dashConfig =
