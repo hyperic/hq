@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -229,7 +229,7 @@ public class AvailabilityDecorator extends ColumnDecorator implements Tag {
             }
         }
         
-        return getOutput(new AppdefEntityID(typeId.intValue(), id.intValue()));
+        return getOutput(new AppdefEntityID(typeId.intValue(), id));
     }
 
     private String getOutputByResource() throws JspException {
@@ -272,8 +272,7 @@ public class AvailabilityDecorator extends ColumnDecorator implements Tag {
                                                     this.resourceTypeId,
                                                     Integer.class);
                         return this.getOutput(
-                            new AppdefEntityID(typeId.intValue(),
-                                               id.intValue()));
+                            new AppdefEntityID(typeId.intValue(), id));
                     } catch (NullAttributeException ne) {
                         log.debug("resourceId [" + this.resourceId +
                                   "] and resourceTypeId [" +
