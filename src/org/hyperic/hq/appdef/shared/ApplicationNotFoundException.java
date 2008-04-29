@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -48,19 +48,19 @@ public class ApplicationNotFoundException
     }
 
     public ApplicationNotFoundException(int id){
-        super(new AppdefEntityID(MY_TYPE, id));
+        this(new Integer(id));
     }
     
     public ApplicationNotFoundException(int id, Throwable t){
-        super(new AppdefEntityID(MY_TYPE, id), t);
+        this(new Integer(id), t);
     }
 
     public ApplicationNotFoundException(Integer id){
-        super(new AppdefEntityID(MY_TYPE, id.intValue()));
+        super(AppdefEntityID.newAppID(id));
     }
     
     public ApplicationNotFoundException(Integer id, Throwable t){
-        super(new AppdefEntityID(MY_TYPE, id.intValue()), t);
+        super(AppdefEntityID.newAppID(id), t);
     }
 
     public int getAppdefType(){

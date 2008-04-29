@@ -212,8 +212,8 @@ public class AI2AppdefDiff {
         doPlatformAttrDiff(appdefPlatform, revisedAIplatform);
 
         if (aiplatform.customPropertiesHasBeenSet()) {
-            int id = appdefPlatform.getId().intValue();
-            AppdefEntityID aid = AppdefEntityID.newPlatformID(id);
+            AppdefEntityID aid =
+                AppdefEntityID.newPlatformID(appdefPlatform.getId());
             int type =
                 appdefPlatform.getPlatformType().getId().intValue();
             updateCprops(cpropMgr, aid, type,
@@ -425,7 +425,7 @@ public class AI2AppdefDiff {
                 }
 
                 AppdefEntityID aID =
-                    AppdefEntityID.newServerID(appdefServer.getId().intValue());
+                    AppdefEntityID.newServerID(appdefServer.getId());
                 boolean configChanged = false;
                 
                 // Look at configs

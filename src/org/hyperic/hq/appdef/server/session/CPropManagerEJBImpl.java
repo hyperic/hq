@@ -342,7 +342,7 @@ public class CPropManagerEJBImpl
         Connection conn = null;
         ResultSet rs = null;
         AppdefEntityID aID = aVal.getID();
-        AppdefResourceTypeValue recType = aVal.getResourceTypeValue();
+        AppdefResourceType recType = aVal.getAppdefResourceType();
         int typeId  = recType.getId().intValue();
         
         propKey = this.getKey(aID, typeId, key);

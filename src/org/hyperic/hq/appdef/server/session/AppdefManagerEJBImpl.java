@@ -163,8 +163,8 @@ public class AppdefManagerEJBImpl
             Integer typeId = (Integer) it.next();
             try {
                 PlatformType pt = getPlatformTypeDAO().findById(typeId);
-                platformTypes.put(pt.getName(), new AppdefEntityTypeID(
-                    AppdefEntityConstants.APPDEF_TYPE_PLATFORM, typeId));
+                platformTypes.put(pt.getName(),
+                                  AppdefEntityTypeID.newPlatformID(typeId));
             } catch (ObjectNotFoundException e) {
                 continue;
             }
@@ -195,7 +195,7 @@ public class AppdefManagerEJBImpl
             try {
                 Platform plat = getPlatformDAO().findById(id);
                 platformNames.put(plat.getName(),
-                                  AppdefEntityID.newPlatformID(id.intValue()));
+                                  AppdefEntityID.newPlatformID(id));
             } catch (ObjectNotFoundException e) {
                 continue;
             }
@@ -257,8 +257,7 @@ public class AppdefManagerEJBImpl
             Integer id = (Integer) it.next();
             try {
                 Server svr = getServerDAO().findById(id);
-                serverNames.put(svr.getName(),
-                                AppdefEntityID.newServerID(id.intValue()));
+                serverNames.put(svr.getName(), AppdefEntityID.newServerID(id));
             } catch (ObjectNotFoundException e) {
                 continue;
             }
@@ -320,7 +319,7 @@ public class AppdefManagerEJBImpl
             try {
                 Service svc = getServiceDAO().findById(id);
                 serviceNames.put(svc.getName(),
-                                 AppdefEntityID.newServiceID(id.intValue()));
+                                 AppdefEntityID.newServiceID(id));
             } catch (ObjectNotFoundException e) {
                 continue;
             }

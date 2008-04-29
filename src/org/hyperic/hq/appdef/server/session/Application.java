@@ -78,9 +78,7 @@ public class Application extends AppdefResource
 
     public AppdefEntityID getEntityId()
     {
-        return new AppdefEntityID(
-            AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
-            getId().intValue());
+        return AppdefEntityID.newAppID(getId());
     }
 
     public String getEngContact()

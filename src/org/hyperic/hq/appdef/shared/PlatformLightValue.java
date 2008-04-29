@@ -651,6 +651,6 @@ public class PlatformLightValue extends AppdefResourceValue
     }
 
     public AppdefEntityID getEntityId() {
-        return AppdefEntityID.newPlatformID(getId().intValue());
+        return AppdefEntityID.newPlatformID(getId());
     }
 }

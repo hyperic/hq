@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -174,14 +174,6 @@ public class Platform extends PlatformBase
     }
 
     /**
-     * legacy EJB accessor method
-     * @deprecated use getConfigResponse()
-     */
-    public Integer getConfigResponseId() {
-        return _configResponse != null ? _configResponse.getId() : null;
-    }
-
-    /**
      * Compare this entity to a value object
      * (legacy code from entity bean)
      * @return true if this platform is the same as the one in the val obj
@@ -241,7 +233,7 @@ public class Platform extends PlatformBase
         _platformValue.setCommentText(getCommentText());
         _platformValue.setModifiedBy(getModifiedBy());
         _platformValue.setOwner(getOwner());
-        _platformValue.setConfigResponseId(getConfigResponseId());
+        _platformValue.setConfigResponseId(getConfigResponse().getId());
         _platformValue.setCertdn(getCertdn());
         _platformValue.setFqdn(getFqdn());
         _platformValue.setName(getName());
@@ -282,7 +274,7 @@ public class Platform extends PlatformBase
         _platformLightValue.setCommentText(getCommentText());
         _platformLightValue.setModifiedBy(getModifiedBy());
         _platformLightValue.setOwner(getOwner());
-        _platformLightValue.setConfigResponseId(getConfigResponseId());
+        _platformLightValue.setConfigResponseId(getConfigResponse().getId());
         _platformLightValue.setCertdn(getCertdn());
         _platformLightValue.setFqdn(getFqdn());
         _platformLightValue.setName(getName());

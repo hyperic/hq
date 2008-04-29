@@ -558,6 +558,6 @@ public class ServiceLightValue extends AppdefResourceValue
    }
 
    public AppdefEntityID getEntityId() {
-       return AppdefEntityID.newServiceID(getId().intValue());
+       return AppdefEntityID.newServiceID(getId());
    }
 }

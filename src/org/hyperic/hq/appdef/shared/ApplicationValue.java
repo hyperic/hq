@@ -589,6 +589,6 @@ public class ApplicationValue extends AppdefResourceValue
     }
 
     public AppdefEntityID getEntityId() {
-        return AppdefEntityID.newAppID(getId().intValue());
+        return AppdefEntityID.newAppID(getId());
     }
 }

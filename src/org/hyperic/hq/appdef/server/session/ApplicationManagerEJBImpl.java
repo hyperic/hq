@@ -463,8 +463,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                     ResourceGroup group = appSvc.getResourceGroup();
                     anId = AppdefEntityID.newGroupID(group.getId());
                 } else {
-                    anId = AppdefEntityID.newServiceID(appSvc.getService()
-                                                           .getId().intValue());
+                    anId = AppdefEntityID
+                        .newServiceID(appSvc.getService().getId());
                 }
                 if(!entityIds.contains(anId)) {
                     i.remove();
@@ -578,7 +578,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         // We need to look up the service so that we can see if we need to 
         // look up its cluster, too
         Service service =
-            (Service) getResource(AppdefEntityID.newServiceID(id.intValue()));
+            (Service) getResource(AppdefEntityID.newServiceID(id));
         
         boolean cluster = service.getResourceGroup() != null;
         

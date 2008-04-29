@@ -51,7 +51,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
@@ -630,24 +629,24 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                       platVo.getEntityId(),
                       ResourceTreeNode.RESOURCE);
 
-            int    thisServerId               = 0;
-            String thisServerName             = null;
-            int    thisServerTypeId           = 0;
-            String thisServerTypeName         = null;
-            int    thisServiceId              = 0;
-            String thisServiceName            = null;
-            int    thisServiceTypeId          = 0;
-            String thisServiceTypeName        = null;
+            int    thisSvrId           = 0;
+            String thisServerName      = null;
+            int    thisServerTypeId    = 0;
+            String thisServerTypeName  = null;
+            int    thisSvcId           = 0;
+            String thisServiceName     = null;
+            int    thisServiceTypeId   = 0;
+            String thisServiceTypeName = null;
 
             stmt = conn.createStatement();
             rs = stmt.executeQuery(buf.toString());
 
             while (rs.next()) {
-                thisServerId        = rs.getInt(1); 
+                thisSvrId           = rs.getInt(1); 
                 thisServerName      = rs.getString(2);
                 thisServerTypeId    = rs.getInt(3);
                 thisServerTypeName  = rs.getString(4);
-                thisServiceId       = rs.getInt(5);
+                thisSvcId           = rs.getInt(5);
                 thisServiceName     = rs.getString(6);
                 thisServiceTypeId   = rs.getInt(7);
                 thisServiceTypeName = rs.getString(8);
@@ -658,9 +657,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                             getAppdefTypeLabel(AppdefEntityConstants
                                 .APPDEF_TYPE_SERVER,
                                 thisServerTypeName),
-                            new AppdefEntityID(
-                                AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                                thisServerId),
+                            AppdefEntityID.newServerID(new Integer(thisSvrId)),
                                 platVo.getEntityId(),thisServerTypeId ));
                 }
 
@@ -671,12 +668,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                             getAppdefTypeLabel(AppdefEntityConstants
                                 .APPDEF_TYPE_SERVICE,
                                 thisServiceTypeName),
-                            new AppdefEntityID(
-                                AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                                thisServiceId),
-                            new AppdefEntityID(
-                                AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                                thisServerId),thisServiceTypeId));
+                            AppdefEntityID.newServiceID(new Integer(thisSvcId)),
+                            AppdefEntityID.newServerID(new Integer(thisSvrId)),
+                            thisServiceTypeId));
                 }
             }
             // XXX Leave out service data No current way to represent it
@@ -802,24 +796,22 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                               getAppdefTypeLabel(AppdefEntityConstants
                                   .APPDEF_TYPE_SERVER,
                                   serverVo.getAppdefResourceType().getName()),
-                              new AppdefEntityID(
-                                  AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                                  serverVo.getId().intValue()),
+                              AppdefEntityID.newServerID(serverVo.getId()),
                               ResourceTreeNode.RESOURCE);
 
-            int    thisPlatformId        = 0;
+            int    thisPlatId            = 0;
             String thisPlatformName      = null;
             int    thisPlatformTypeId    = 0;
             String thisPlatformTypeName  = null;
-            int    thisServiceId         = 0;
+            int    thisSvcId             = 0;
             String thisServiceName       = null;
             int    thisServiceTypeId     = 0;
             String thisServiceTypeName   = null;
 
             while (rs.next()) {
 
-                if (thisPlatformId == 0) {
-                    thisPlatformId        = rs.getInt(1); 
+                if (thisPlatId == 0) {
+                    thisPlatId            = rs.getInt(1); 
                     thisPlatformName      = rs.getString(2);
                     thisPlatformTypeId    = rs.getInt(3);
                     thisPlatformTypeName  = rs.getString(4);
@@ -829,27 +821,25 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                             getAppdefTypeLabel(AppdefEntityConstants
                                 .APPDEF_TYPE_PLATFORM,
                                 thisPlatformTypeName),
-                            new AppdefEntityID(
-                                AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                                thisPlatformId), (AppdefEntityID)null, 
+                            AppdefEntityID.newPlatformID(new Integer(thisPlatId)),
+                            (AppdefEntityID) null, 
                             thisPlatformTypeId );
                 }
 
-                thisServiceId       = rs.getInt(5);
+                thisSvcId       = rs.getInt(5);
                 thisServiceName     = rs.getString(6);
                 thisServiceTypeId   = rs.getInt(7);
                 thisServiceTypeName = rs.getString(8);
 
                 if (thisServiceName != null) {
-                    serviceMap.put(new Integer(thisServiceId),
+                    serviceMap.put(new Integer(thisSvcId),
                         new ResourceTreeNode (
                             thisServiceName,
                             getAppdefTypeLabel(AppdefEntityConstants
                                 .APPDEF_TYPE_SERVICE,
                                 thisServiceTypeName),
-                            new AppdefEntityID(
-                                AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                                thisServiceId), serverVo.getEntityId(),
+                            AppdefEntityID.newServiceID(new Integer(thisSvcId)),
+                            serverVo.getEntityId(),
                             thisServiceTypeId ));
                 }
             }
@@ -997,20 +987,19 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                   getAppdefTypeLabel(AppdefEntityConstants
                       .APPDEF_TYPE_SERVICE,
                       serviceVo.getAppdefResourceType().getName()), 
-                  new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                                     serviceVo.getId().intValue()),
+                  AppdefEntityID.newServiceID(serviceVo.getId()),
                   ResourceTreeNode.RESOURCE);
 
             while (rs.next()) {
 
                 int i = 1;
-                int    thisPlatformId       = rs.getInt(i++); 
+                int    thisPlatId           = rs.getInt(i++); 
                 String thisPlatformName     = rs.getString(i++);
                 String thisPlatformTypeName = rs.getString(i++);
-                int    thisServerId         = rs.getInt(i++); 
+                int    thisSvrId            = rs.getInt(i++); 
                 String thisServerName       = rs.getString(i++);
                 String thisServerTypeName   = rs.getString(i++);
-                int thisApplicationId       = rs.getInt(i++);
+                int thisAppId       = rs.getInt(i++);
                 String thisApplicationName  = rs.getString(i++);
                 String thisApplicationDesc  = rs.getString(i++);
                 String virtualServer        = rs.getString(i++);
@@ -1021,9 +1010,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                             getAppdefTypeLabel(AppdefEntityConstants
                                   .APPDEF_TYPE_PLATFORM,
                                   thisPlatformTypeName), 
-                            new AppdefEntityID(
-                                AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                                thisPlatformId),
+                            AppdefEntityID.newPlatformID(new Integer(thisPlatId)),
                             ResourceTreeNode.RESOURCE);
                 }
 
@@ -1034,22 +1021,18 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                             getAppdefTypeLabel(AppdefEntityConstants
                                   .APPDEF_TYPE_SERVER,
                                   thisServerTypeName), 
-                            new AppdefEntityID(
-                                AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                                thisServerId),
+                            AppdefEntityID.newServerID(new Integer(thisSvrId)),
                             ResourceTreeNode.RESOURCE);
                 }
 
                 if (thisApplicationName != null) {
-                    appMap.put( new Integer(thisApplicationId), 
+                    appMap.put( new Integer(thisAppId), 
                         new ResourceTreeNode (
                             thisApplicationName,
                             getAppdefTypeLabel(AppdefEntityConstants
                                 .APPDEF_TYPE_APPLICATION,
                                 thisApplicationDesc),
-                            new AppdefEntityID(
-                                AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
-                                thisApplicationId),
+                            AppdefEntityID.newAppID(new Integer(thisAppId)),
                             ResourceTreeNode.RESOURCE));
                 }
             }
@@ -1191,9 +1174,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 getAppdefTypeLabel(AppdefEntityConstants
                     .APPDEF_TYPE_APPLICATION,
                     appVo.getAppdefResourceType().getName()), 
-                new AppdefEntityID(
-                    AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
-                    appVo.getId().intValue()),
+                    AppdefEntityID.newAppID(appVo.getId()),
                 ResourceTreeNode.RESOURCE);
             
             int svc_id_col = rs.findColumn("service_id"),
@@ -1222,12 +1203,10 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                     svcMap.put(key, 
                         new ResourceTreeNode (
                             thisGroupName, 
-                            getAppdefTypeLabel(AppdefEntityConstants
-                                .APPDEF_TYPE_GROUP,
-                                serviceTypeName), 
-                            new AppdefEntityID(
+                            getAppdefTypeLabel(
                                 AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                                groupId),
+                                serviceTypeName), 
+                            AppdefEntityID.newGroupID(new Integer(groupId)),
                             ResourceTreeNode.CLUSTER));
                 } else if (serviceName != null) {
                     String key = AppdefEntityConstants.APPDEF_TYPE_SERVICE+
@@ -1235,12 +1214,10 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                     svcMap.put(key, 
                         new ResourceTreeNode (
                             serviceName,
-                            getAppdefTypeLabel(AppdefEntityConstants
-                                .APPDEF_TYPE_SERVICE,
-                                serviceTypeName),
-                            new AppdefEntityID(
+                            getAppdefTypeLabel(
                                 AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                                serviceId), 
+                                serviceTypeName),
+                            AppdefEntityID.newServiceID(new Integer(serviceId)), 
                             appVo.getEntityId(),
                             serviceTypeId));
                 }
@@ -1458,15 +1435,13 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 while (rs.next()) {
                     int     thisEntityId       = rs.getInt(1);
                     String  thisEntityName     = rs.getString(2);
-                    int     thisEntityTypeId   = rs.getInt(3);
                     String  thisEntityTypeName = rs.getString(4);
 
                     entitySet.add(
                         new ResourceTreeNode (
                             thisEntityName,
-                            getAppdefTypeLabel(cEntityType,
-                                thisEntityTypeName),
-                            new AppdefEntityID(cEntityType,thisEntityId),
+                            getAppdefTypeLabel(cEntityType, thisEntityTypeName),
+                            new AppdefEntityID(cEntityType, thisEntityId),
                             ResourceTreeNode.RESOURCE));
                 }
 
@@ -1627,10 +1602,10 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                     AppdefEntityID id = (AppdefEntityID)i.next();
                     entitySet.add (
                         new ResourceTreeNode (
-                            (String)entNameMap.get(id.getId()),
-                            getAppdefTypeLabel(id.getType(),
-                                groupVo.getAppdefResourceTypeValue().getName()),
-                            new AppdefEntityID(entityType,id.getID()),
+                            (String) entNameMap.get(id.getId()),
+                            getAppdefTypeLabel(id.getType(), groupVo
+                                    .getAppdefResourceTypeValue().getName()),
+                            new AppdefEntityID(entityType, id.getId()),
                             ResourceTreeNode.RESOURCE));
                 }
             }

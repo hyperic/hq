@@ -76,7 +76,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
@@ -187,8 +186,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @return List of PlatformTypeValues
      * @ejb:interface-method
      */
-    public PageList getAllPlatformTypes(AuthzSubjectValue subject,
-                                        PageControl pc) 
+    public PageList getAllPlatformTypes(AuthzSubject subject, PageControl pc) 
     {
         Collection platTypes = getPlatformTypeDAO().findAllOrderByName();
         // valuePager converts local/remote interfaces to value objects
@@ -301,7 +299,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             checkRemovePermission(subject, platform.getEntityId());
 
             // keep the configresponseId so we can remove it later
-            Integer cid = platform.getConfigResponseId();
+            Integer cid = platform.getConfigResponse().getId();
 
             ServerManagerLocal srvMgr = getServerMgrLocal();
             // Server manager will update the collection, so we need to copy

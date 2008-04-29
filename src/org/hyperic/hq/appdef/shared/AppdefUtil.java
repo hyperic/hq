@@ -98,29 +98,19 @@ public class AppdefUtil {
 
         if ( rv.getResourceTypeValue().getName().equals(
             AuthzConstants.platformResType))
-            return new AppdefEntityID(
-                        AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                        rv.getInstanceId().intValue());
+            return AppdefEntityID.newPlatformID(rv.getInstanceId());
         if ( rv.getResourceTypeValue().getName().equals(
              AuthzConstants.serverResType))
-            return new AppdefEntityID(
-                        AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                        rv.getInstanceId().intValue());
+            return AppdefEntityID.newServerID(rv.getInstanceId());
         if ( rv.getResourceTypeValue().getName().equals(
              AuthzConstants.serviceResType))
-            return new AppdefEntityID(
-                        AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                        rv.getInstanceId().intValue());
+            return AppdefEntityID.newServiceID(rv.getInstanceId());
         if ( rv.getResourceTypeValue().getName().equals(
              AuthzConstants.applicationResType))
-            return new AppdefEntityID(
-                        AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
-                        rv.getInstanceId().intValue());
+            return AppdefEntityID.newAppID(rv.getInstanceId());
         if ( rv.getResourceTypeValue().getName().equals(
             AuthzConstants.groupResourceTypeName))
-            return new AppdefEntityID(
-                        AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                        rv.getInstanceId().intValue());
+            return AppdefEntityID.newGroupID(rv.getInstanceId());
 
         throw new InvalidAppdefTypeException("No appdef entity type "+
             "provisioned for authz resource argument:"+rv.toString());

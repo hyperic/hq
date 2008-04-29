@@ -257,28 +257,27 @@ public class AppdefEntityID
     public boolean equals(Object other){
         AppdefEntityID othObj = (AppdefEntityID)other;
 
-        return (othObj._entityType == _entityType &&
-                othObj._entityID   == _entityID);
+        return othObj.getAppdefKey().equals(getAppdefKey());
     }
 
     public int hashCode(){
         return _entityType * _entityID;
     }
 
-    public static AppdefEntityID newPlatformID(int id) {
+    public static AppdefEntityID newPlatformID(Integer id) {
         return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, 
                                   id);
     }
 
-    public static AppdefEntityID newServerID(int id) {
+    public static AppdefEntityID newServerID(Integer id) {
         return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER, id);
     }
 
-    public static AppdefEntityID newServiceID(int id) {
+    public static AppdefEntityID newServiceID(Integer id) {
         return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,id);
     }
 
-    public static AppdefEntityID newAppID(int id) {
+    public static AppdefEntityID newAppID(Integer id) {
         return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_APPLICATION, 
                                   id);
     }

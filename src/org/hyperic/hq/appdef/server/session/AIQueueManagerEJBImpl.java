@@ -294,7 +294,7 @@ public class AIQueueManagerEJBImpl
 
                 } else if (pValue != null) {
                     ppk = pValue.getId();
-                    aid = AppdefEntityID.newPlatformID(ppk.intValue());
+                    aid = AppdefEntityID.newPlatformID(ppk);
 
                     try {
                         checkModifyPermission(subject, aid);

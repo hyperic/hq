@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -48,19 +48,19 @@ public class ServerNotFoundException
     }
 
     public ServerNotFoundException(int id){
-        super(new AppdefEntityID(MY_TYPE, id));
+        this(new Integer(id));
     }
     
     public ServerNotFoundException(int id, Throwable t){
-        super(new AppdefEntityID(MY_TYPE, id), t);
+        this(new Integer(id), t);
     }
 
     public ServerNotFoundException(Integer id){
-        super(new AppdefEntityID(MY_TYPE, id.intValue()));
+        super(AppdefEntityID.newServerID(id));
     }
     
     public ServerNotFoundException(Integer id, Throwable t){
-        super(new AppdefEntityID(MY_TYPE, id.intValue()), t);
+        super(AppdefEntityID.newServerID(id), t);
     }
 
     public int getAppdefType(){

@@ -140,7 +140,7 @@ public class AgentManagerEJBImpl
         int i = 0;
         for (Iterator it = plats.iterator(); it.hasNext(); i++) {
             Platform plat = (Platform) it.next();
-            platIds[i] = AppdefEntityID.newPlatformID(plat.getId().intValue());
+            platIds[i] = AppdefEntityID.newPlatformID(plat.getId());
         }
         
         generator = new ResourceTreeGenerator(subject);

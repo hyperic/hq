@@ -52,6 +52,10 @@ public class AppdefEntityTypeID extends AppdefEntityID implements Serializable {
     public AppdefEntityTypeID(int entityType, Integer entityID) {
         super(entityType, entityID);
     }
+    
+    public AppdefEntityTypeID(AppdefResourceType art) {
+        super(art.getAppdefType(), art.getId());
+    }
 
     public AppdefResourceType getAppdefResourceType() {
         try {

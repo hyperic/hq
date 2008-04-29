@@ -64,7 +64,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
@@ -388,7 +387,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @return PageList of ServiceTypeValues
      * @ejb:interface-method
      */
-    public PageList getAllServiceTypes(AuthzSubjectValue subject,
+    public PageList getAllServiceTypes(AuthzSubject subject,
                                        PageControl pc)
     {
         Collection serviceTypes = getServiceTypeDAO().findAll();
@@ -422,7 +421,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * @ejb:interface-method
      */
-    public PageList getServiceTypesByServerType(AuthzSubjectValue subject,
+    public PageList getServiceTypesByServerType(AuthzSubject subject,
                                                 int serverTypeId) {
         Collection serviceTypes =
             getServiceTypeDAO().findByServerType_orderName(serverTypeId, true);
@@ -435,7 +434,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * @ejb:interface-method
      */
-    public PageList findVirtualServiceTypesByPlatform(AuthzSubjectValue subject,
+    public PageList findVirtualServiceTypesByPlatform(AuthzSubject subject,
                                                       Integer platformId) {
         Collection serviceTypes = getServiceTypeDAO()
                 .findVirtualServiceTypesByPlatform(platformId.intValue());

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -167,8 +167,7 @@ public class ResourceTreeGenerator {
 
         try {
             AppdefEntityValue aeval = new AppdefEntityValue(
-                new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                                   id), subject);
+                AppdefEntityID.newPlatformID(id), subject);
             val = (PlatformValue) aeval.getResourceValue();
         } catch(PermissionException exc){
             throw new PermissionException("Failed to find platform " + id + 
@@ -185,8 +184,7 @@ public class ResourceTreeGenerator {
 
         try {
             AppdefEntityValue aeval = new AppdefEntityValue(
-                new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                                   id), subject);
+                AppdefEntityID.newServerID(id), subject);
             val = (ServerValue) aeval.getResourceValue();
         } catch(PermissionException exc){
             throw new PermissionException("Failed to find server " + id + 
@@ -203,8 +201,7 @@ public class ResourceTreeGenerator {
         
         try {
             AppdefEntityValue aeval = new AppdefEntityValue(
-                new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                                   id), subject);
+                AppdefEntityID.newServiceID(id), subject);
             val = (ServiceValue) aeval.getResourceValue();
         } catch(PermissionException exc){
             throw new PermissionException("Failed to find service " + id + 
@@ -220,8 +217,7 @@ public class ResourceTreeGenerator {
         ApplicationValue val;
         
         AppdefEntityValue aeval = new AppdefEntityValue(
-            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
-                               id), subject);
+            AppdefEntityID.newAppID(id), subject);
         val = (ApplicationValue) aeval.getResourceValue();
 
         traverseApp(val, direction, tree);
@@ -377,17 +373,14 @@ public class ResourceTreeGenerator {
             upServices.add(service.getId());
             try {
                 AppdefEntityID id =
-                    new AppdefEntityID(
-                        AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                        service.getId().intValue());
+                    AppdefEntityID.newServiceID(service.getId());
                 apps = 
                     appMan.getApplicationsByResource(subject, id,
                                                           PageControl.PAGE_ALL);
             } catch(ApplicationNotFoundException exc){
-                throw new SystemException("Internal inconsistancy: " +
-                                             "could not find apps for " +
-                                             "service '" + service.getId() + 
-                                             "'");
+                throw new SystemException("Internal inconsistancy: could not " +
+                                          "find apps for service '" +
+                                          service.getId() + "'");
             }
 
             for(Iterator i=apps.iterator(); i.hasNext(); ){

@@ -48,19 +48,19 @@ public class ServiceNotFoundException
     }
 
     public ServiceNotFoundException(int id){
-        super(new AppdefEntityID(MY_TYPE, id));
+        this(new Integer(id));
     }
     
     public ServiceNotFoundException(int id, Throwable t){
-        super(new AppdefEntityID(MY_TYPE, id), t);
+        this(new Integer(id), t);
     }
 
     public ServiceNotFoundException(Integer id){
-        super(new AppdefEntityID(MY_TYPE, id.intValue()));
+        super(AppdefEntityID.newServiceID(id));
     }
     
     public ServiceNotFoundException(Integer id, Throwable t){
-        super(new AppdefEntityID(MY_TYPE, id.intValue()), t);
+        super(AppdefEntityID.newServiceID(id), t);
     }
 
     public int getAppdefType(){

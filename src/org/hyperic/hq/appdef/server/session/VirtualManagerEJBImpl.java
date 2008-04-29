@@ -51,7 +51,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.Virtual;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
@@ -77,7 +76,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
         "org.hyperic.hq.appdef.server.session.VirtualManagerEJBImpl");
 
     private VirtualDAO getVirtualDAO() {
-        return DAOFactory.getDAOFactory().getVirtualDAO();
+        return new VirtualDAO(DAOFactory.getDAOFactory());
     }
 
     /**
@@ -85,7 +84,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
      * @return a list of virtual platform values
      * @ejb:interface-method
      */
-    public List findVirtualPlatformsByVM(AuthzSubjectValue subject, Integer vmId)
+    public List findVirtualPlatformsByVM(AuthzSubject subject, Integer vmId)
         throws PlatformNotFoundException, PermissionException {
         Collection platforms = getPlatformDAO().findVirtualByProcessId(vmId);
         List platVals = new ArrayList();
@@ -101,7 +100,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
      * @return a list of virtual server values
      * @ejb:interface-method
      */
-    public List findVirtualServersByVM(AuthzSubjectValue subject, Integer vmId)
+    public List findVirtualServersByVM(AuthzSubject subject, Integer vmId)
         throws ServerNotFoundException, PermissionException {
         Collection servers = getPlatformDAO().findVirtualByProcessId(vmId);
         List serverVals = new ArrayList();
@@ -118,7 +117,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
      * @return a list of virtual service values
      * @ejb:interface-method
      */
-    public List findVirtualServicesByVM(AuthzSubjectValue subject, Integer vmId)
+    public List findVirtualServicesByVM(AuthzSubject subject, Integer vmId)
         throws ServiceNotFoundException, PermissionException {
         Collection services = getPlatformDAO().findVirtualByProcessId(vmId);
         List svcVals = new ArrayList();
@@ -182,7 +181,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void associateEntities(AuthzSubjectValue subj,
+    public void associateEntities(AuthzSubject subj,
                                   Integer processId,
                                   AppdefEntityID[] aeids)
         throws FinderException {
@@ -213,7 +212,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void associateToPhysical(AuthzSubjectValue subj,
+    public void associateToPhysical(AuthzSubject subj,
                                     Integer physicalId,
                                     AppdefEntityID aeid)
         throws FinderException {

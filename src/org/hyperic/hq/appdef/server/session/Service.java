@@ -71,9 +71,7 @@ public class Service extends AppdefResource
     }
 
     public AppdefEntityID getEntityId() {
-        return new AppdefEntityID(
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-            getId().intValue());
+        return AppdefEntityID.newServiceID(getId());
     }
 
     public boolean isAutodiscoveryZombie() {

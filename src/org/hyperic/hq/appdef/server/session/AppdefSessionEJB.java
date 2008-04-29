@@ -64,7 +64,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -561,7 +560,7 @@ public abstract class AppdefSessionEJB
                                                PageControl.PAGE_ALL);
             for(int i = 0; i < platIds.size(); i++) {
                 Integer id = (Integer)platIds.get(i);
-                entityIds.add(AppdefEntityID.newPlatformID(id.intValue()));                                                             
+                entityIds.add(AppdefEntityID.newPlatformID(id));                                                             
             }
             // servers
             List serverIds = 
@@ -571,7 +570,7 @@ public abstract class AppdefSessionEJB
                                                PageControl.PAGE_ALL);
             for(int i = 0; i < serverIds.size(); i++) {
                 Integer id = (Integer)serverIds.get(i);
-                entityIds.add(AppdefEntityID.newServerID(id.intValue()));                                                                           
+                entityIds.add(AppdefEntityID.newServerID(id));                                                                           
             }
             // services
             List serviceIds =
@@ -581,7 +580,7 @@ public abstract class AppdefSessionEJB
                                                PageControl.PAGE_ALL);
             for(int i = 0; i < serviceIds.size(); i++) {
                 Integer id = (Integer)serviceIds.get(i);
-                entityIds.add(AppdefEntityID.newServiceID(id.intValue()));
+                entityIds.add(AppdefEntityID.newServiceID(id));
             }
             
             // Groups
@@ -974,7 +973,7 @@ public abstract class AppdefSessionEJB
         List idList = getViewableServices(whoami);
         for (int i=0;i<idList.size();i++) {
             Integer pk = (Integer) idList.get(i);
-            idList.set(i, AppdefEntityID.newServiceID(pk.intValue()));
+            idList.set(i, AppdefEntityID.newServiceID(pk));
         }
         PermissionManager pm = PermissionManagerFactory.getInstance();
         List viewableGroups = 
@@ -1045,8 +1044,7 @@ public abstract class AppdefSessionEJB
     /**
      * Filter a list of {@link Server}s by their viewability by the subject 
      */
-    protected List filterViewableServers(Collection servers, 
-                                         AuthzSubjectValue who) 
+    protected List filterViewableServers(Collection servers, AuthzSubject who) 
     {
         PermissionManager permMgr = PermissionManagerFactory.getInstance();
         List res = new ArrayList();

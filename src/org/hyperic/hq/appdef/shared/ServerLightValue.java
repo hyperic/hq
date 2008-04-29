@@ -617,7 +617,7 @@ public class ServerLightValue extends AppdefResourceValue
     }
 
     public AppdefEntityID getEntityId() {
-        return AppdefEntityID.newServerID(getId().intValue());
+        return AppdefEntityID.newServerID(getId());
     }
 
 }

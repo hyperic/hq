@@ -65,7 +65,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
@@ -344,8 +343,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return list of serverTypeValues
      * @ejb:interface-method
      */
-    public PageList getAllServerTypes(AuthzSubjectValue subject,
-                                      PageControl pc)
+    public PageList getAllServerTypes(AuthzSubject subject, PageControl pc)
         throws FinderException {
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -424,7 +422,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A list of ServerTypeValue objects for thie PlatformType.
      * @ejb:interface-method
      */
-    public PageList getServerTypesByPlatformType(AuthzSubjectValue subject,
+    public PageList getServerTypesByPlatformType(AuthzSubject subject,
                                                  Integer platformTypeId,
                                                  PageControl pc)
         throws PlatformNotFoundException
@@ -644,7 +642,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * returned list.
      * @ejb:interface-method
      */
-    public PageList getServersByServices(AuthzSubjectValue subject, List sIDs) 
+    public PageList getServersByServices(AuthzSubject subject, List sIDs) 
         throws PermissionException, ServerNotFoundException 
     {
         Set servers = new HashSet();
@@ -1349,7 +1347,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         Resource proto = ResourceManagerEJBImpl.getOne()
             .findResourcePojoByInstanceId(serverProto, st.getId());
         AppdefEntityID platId = 
-            AppdefEntityID.newPlatformID(platformId.intValue());
+            AppdefEntityID.newPlatformID(platformId);
         Resource parent = getResourceManager().findResource(platId);
 
         if (parent == null) {
