@@ -36,7 +36,7 @@ public class PagerProcessor_control_history implements PagerProcessor {
         if (o == null) return null;
         try {
             if (o instanceof ControlHistory) {
-                return ((ControlHistory)o).getControlHistoryValue();
+                return o;
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to " +

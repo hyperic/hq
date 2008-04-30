@@ -42,7 +42,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
-import org.hyperic.hq.control.shared.ControlHistoryValue;
+import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.portlet.BaseRSSAction;
 import org.hyperic.hq.ui.action.portlet.RSSFeed;
@@ -110,7 +110,7 @@ public class RSSAction extends BaseRSSAction {
         if (list != null) {
             int i = 0;
             for (Iterator it = list.iterator(); it.hasNext(); i++) {
-                ControlHistoryValue hist = (ControlHistoryValue) it.next();
+                ControlHistory hist = (ControlHistory) it.next();
                 AppdefEntityID aeid =
                     new AppdefEntityID(hist.getEntityType().intValue(),
                                        hist.getEntityId());

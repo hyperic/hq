@@ -27,7 +27,6 @@ package org.hyperic.hq.control.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.control.shared.ControlHistoryValue;
 import org.hyperic.hq.control.shared.ControlConstants;
 
 public class ControlHistory extends PersistedObject
@@ -233,40 +232,6 @@ public class ControlHistory extends PersistedObject
 
     public void setEntityName(String entityName) {
         this.entityName = entityName;
-    }
-
-    private ControlHistoryValue controlHistoryValue = new ControlHistoryValue();
-    /**
-     * legacy EJB DTO pattern
-     * @deprecated use (this) ControlHistory object instead
-     * @return
-     */
-    public ControlHistoryValue getControlHistoryValue()
-    {
-        controlHistoryValue.setId(getId());
-        controlHistoryValue.setGroupId(getGroupId());
-        controlHistoryValue.setBatchId(getBatchId());
-        controlHistoryValue.setEntityType(getEntityType());
-        controlHistoryValue.setEntityId(getEntityId());
-        controlHistoryValue.setEntityName(getEntityName());
-        controlHistoryValue.setSubject(
-            (getSubject() == null) ? "" : getSubject());
-        controlHistoryValue.setScheduled(getScheduled());
-        controlHistoryValue.setDateScheduled(getDateScheduled());
-        controlHistoryValue.setStartTime(getStartTime());
-        controlHistoryValue.setEndTime(getEndTime());
-        controlHistoryValue.setDuration(getDuration());
-        controlHistoryValue.setMessage(
-            (getMessage() == null) ? "" : getMessage());
-        controlHistoryValue.setDescription(
-            (getDescription() == null) ? "" : getDescription());
-        controlHistoryValue.setStatus(
-            (getStatus() == null) ? "" : getStatus());
-        controlHistoryValue.setAction(
-            (getAction() == null) ? "" : getAction());
-        controlHistoryValue.setArgs(
-            (getArgs() == null) ? "" : getArgs());
-        return controlHistoryValue;
     }
 
     public boolean equals(Object obj)
