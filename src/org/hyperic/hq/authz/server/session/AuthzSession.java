@@ -43,7 +43,6 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -121,18 +120,14 @@ public abstract class AuthzSession {
             return ret;
         }
         
-        OperationDAO operDao = null;
         AuthzSubjectDAO subjDao = 
             new AuthzSubjectDAO(DAOFactory.getDAOFactory());
         ResourceDAO resDao = null;
         RoleDAO roleDao = null;
         ResourceGroupDAO resGrpDao = null;
         for (int i = 0; i < vals.length; i++) {
-            if (vals[i] instanceof OperationValue) {
-                if (operDao == null) {
-                    operDao = getOperationDAO();
-                }
-                ret.add(operDao.findById(((OperationValue) vals[i]).getId()));
+            if (vals[i] instanceof Operation) {
+                ret.add(vals[i]);
             }
             else if (vals[i] instanceof AuthzSubjectValue) {
                 ret.add(subjDao.findById(((AuthzSubjectValue)vals[i]).getId()));
@@ -193,7 +188,7 @@ public abstract class AuthzSession {
         boolean isAuthzSubject = false;
 
         values = new Object[locals.size()];
-        if (isOperation = c.equals(OperationValue.class)) {
+        if (isOperation = c.equals(Operation.class)) {
         } else if (isResource = c.equals(ResourceValue.class)) {
         } else if (isResourceGroup = c.equals(ResourceGroupValue.class)) {
         } else if (isRole = c.equals(RoleValue.class)) {
@@ -204,8 +199,7 @@ public abstract class AuthzSession {
 
         while (it.hasNext()) {
             if (isOperation) {
-                values[counter] =
-                    ((Operation)it.next()).getOperationValue();
+                values[counter] = it.next();
             } else if (isResource) {
                 values[counter] =
                     ((Resource)it.next()).getResourceValue();

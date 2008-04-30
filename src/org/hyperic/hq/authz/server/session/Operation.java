@@ -25,12 +25,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.hyperic.hq.authz.shared.OperationValue;
-
 public class Operation extends AuthzNamedBean {
     private ResourceType _resourceType;
-
-    private OperationValue _operationValue = new OperationValue();
 
     protected Operation() {
     }
@@ -48,17 +44,8 @@ public class Operation extends AuthzNamedBean {
         _resourceType = resourceType;
     }
 
-    /**
-     * @deprecated use (this) Operation instead
-     */
-    public OperationValue getOperationValue() {
-        _operationValue.setId(getId());
-        _operationValue.setName(getName());
-        return _operationValue;
-    }
-
     public Object getValueObject() {
-        return getOperationValue();
+        return this;
     }
 
     public boolean equals(Object obj) {

@@ -130,7 +130,7 @@ public class ResourceType extends AuthzNamedBean {
         if (getOperations() != null) {
             for (Iterator it = getOperations().iterator(); it.hasNext(); ) {
                 Operation op = (Operation) it.next();
-                _resourceTypeValue.addOperationValue(op.getOperationValue());
+                _resourceTypeValue.addOperationValue(op);
             }
         }
         return _resourceTypeValue;

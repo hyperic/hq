@@ -25,32 +25,23 @@
 
 package org.hyperic.hq.ui.action.admin.user;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
-
+import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.BaseAction;
-
-import org.hyperic.hq.authz.shared.OperationValue;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class EditPasswordPrepareAction extends TilesAction{
     // --------------------------------------------------------- Public Methods
@@ -73,9 +64,9 @@ public class EditPasswordPrepareAction extends TilesAction{
 
         for(Iterator i = authzBoss.getAllOperations( sessionId ).iterator();
             i.hasNext();){
-            OperationValue operation = (OperationValue) i.next();            
-            if( AuthzConstants.subjectOpModifySubject.equals(operation.getName()) ){
-                admin = true;
+            Operation operation = (Operation) i.next();            
+            if( admin = AuthzConstants.subjectOpModifySubject
+                    .equals(operation.getName()) ){
                 break;
             }            
         }

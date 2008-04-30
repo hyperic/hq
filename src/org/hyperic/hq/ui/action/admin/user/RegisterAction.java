@@ -41,7 +41,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.OperationValue;
+import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -128,7 +128,7 @@ public class RegisterAction extends BaseAction {
         HashMap userOpsMap = new HashMap();
         List userOps = authzBoss.getAllOperations(sessionId);
         for (Iterator it=userOps.iterator(); it.hasNext();) {
-            OperationValue op = (OperationValue)it.next();
+            Operation op = (Operation)it.next();
             userOpsMap.put(op.getName(), Boolean.TRUE);
         }
 

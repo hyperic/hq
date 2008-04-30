@@ -53,8 +53,8 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -225,7 +225,7 @@ public abstract class SignIn extends BasePage {
         HashMap userOpsMap = new HashMap();
         List userOps = authzBoss.getAllOperations(sessionId);
         for (Iterator it = userOps.iterator(); it.hasNext();) {
-            OperationValue op = (OperationValue) it.next();
+            Operation op = (Operation) it.next();
             userOpsMap.put(op.getName(), Boolean.TRUE);
         }
         return userOpsMap;

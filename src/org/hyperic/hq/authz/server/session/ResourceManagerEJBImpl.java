@@ -44,10 +44,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -105,7 +105,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public ResourceType createResourceType(AuthzSubject whoami,
                                            ResourceTypeValue typeV,
-                                           OperationValue[] operations) 
+                                           Operation[] operations) 
     {
         AuthzSubject whoamiPojo = lookupSubject(whoami.getId());
         DAOFactory factory = DAOFactory.getDAOFactory();
@@ -171,7 +171,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public void addOperations(AuthzSubject whoami,
                               ResourceTypeValue type,
-                              OperationValue[] operations) {
+                              Operation[] operations) {
         ResourceType resType = getResourceTypeDAO().findById(type.getId());
         Collection rtOps = resType.getOperations();
         rtOps.addAll(toPojos(operations));
@@ -186,7 +186,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public void removeOperations(AuthzSubject whoami,
                                  ResourceTypeValue type,
-                                 OperationValue[] operations) {
+                                 Operation[] operations) {
         Set opPojos = toPojos(operations);
         ResourceType resType = getResourceTypeDAO().findById(type.getId());
         for (Iterator it = resType.getOperations().iterator(); it.hasNext(); ) {

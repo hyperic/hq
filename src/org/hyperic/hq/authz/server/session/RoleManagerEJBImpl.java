@@ -47,13 +47,13 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleCalendar;
 import org.hyperic.hq.authz.server.session.RoleCalendarType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzDuplicateNameException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -210,7 +210,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      */
     public Integer createOwnedRole(AuthzSubject whoami,
                                    RoleValue role,
-                                   OperationValue[] operations,
+                                   Operation[] operations,
                                    Integer[] subjectIds,
                                    Integer[] groupIds)
         throws FinderException, AuthzDuplicateNameException, PermissionException 
@@ -333,7 +333,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @ejb:interface-method
      */
     public void addOperations(AuthzSubject whoami, RoleValue role,
-                              OperationValue[] operations)
+                              Operation[] operations)
         throws PermissionException {
         Set opLocals = toPojos(operations);
         Role roleLocal = lookupRole(role);
@@ -353,7 +353,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @ejb:interface-method
      */
     public void removeOperations(AuthzSubject whoami, RoleValue role,
-                                 OperationValue[] operations)
+                                 Operation[] operations)
         throws PermissionException {
         Set opLocals = toPojos(operations);
         Role roleLocal = lookupRole(role);
@@ -379,7 +379,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
     /**
      * Set the operations for this role.
-     * To get the operations call getOperationValues() on the value-object.
+     * To get the operations call getOperations() on the value-object.
      * @param whoami The current running user.
      * @param role This role.
      * @param operations Operations to associate with this role.
@@ -389,7 +389,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @ejb:interface-method
      */
     public void setOperations(AuthzSubject whoami, RoleValue role,
-                              OperationValue[] operations)
+                              Operation[] operations)
         throws PermissionException {
         if (operations != null) {
             Role roleLocal = lookupRole(role);
@@ -727,12 +727,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
             if (theMap.containsKey(resType.getName())) {
                 // looks like this res type is accounted for
                 // add the operation to the list
-                ((List) theMap.get(resType.getName()))
-                    .add(anOp.getOperationValue());
+                ((List) theMap.get(resType.getName())).add(anOp);
             } else {
                 // key's not there, add it
                 List opList = new ArrayList();
-                opList.add(anOp.getOperationValue());
+                opList.add(anOp);
                 theMap.put(resType.getName(), opList);
             }
         }

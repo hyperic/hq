@@ -38,8 +38,8 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
@@ -93,9 +93,9 @@ public class EditPasswordAction extends BaseAction {
 
         for(Iterator i = authzBoss.getAllOperations( sessionId ).iterator();
             i.hasNext();){
-            OperationValue operation = (OperationValue) i.next();            
-            if( AuthzConstants.subjectOpModifySubject.equals(operation.getName()) ){
-                admin = true;
+            Operation operation = (Operation) i.next();
+            if (admin = AuthzConstants.subjectOpModifySubject
+                    .equals(operation.getName())) {
                 break;
             }            
         }

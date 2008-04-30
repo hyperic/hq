@@ -27,6 +27,8 @@ package org.hyperic.hq.authz.shared;
 
 import java.util.Set;
 
+import org.hyperic.hq.authz.server.session.Operation;
+
 /**
  * Value object for ResourceType.
  *
@@ -122,19 +124,19 @@ public class ResourceTypeValue
    public Set getRemovedOperationValues() { return removedOperationValues; }
    public Set getUpdatedOperationValues() { return updatedOperationValues; }
 
-   public org.hyperic.hq.authz.shared.OperationValue[] getOperationValues()
+   public Operation[] getOperationValues()
    {
-	  return (org.hyperic.hq.authz.shared.OperationValue[])this.OperationValues.toArray(new org.hyperic.hq.authz.shared.OperationValue[OperationValues.size()]);
+	  return (Operation[])this.OperationValues.toArray(new Operation[OperationValues.size()]);
    }
 
-   public void addOperationValue(org.hyperic.hq.authz.shared.OperationValue added)
+   public void addOperationValue(Operation added)
    {
 	  this.OperationValues.add(added);
 	  if ( ! this.addedOperationValues.contains(added))
 		 this.addedOperationValues.add(added);
    }
 
-   public void removeOperationValue(org.hyperic.hq.authz.shared.OperationValue removed)
+   public void removeOperationValue(Operation removed)
    {
 	  this.OperationValues.remove(removed);
 	  this.removedOperationValues.add(removed);
@@ -150,7 +152,7 @@ public class ResourceTypeValue
         this.OperationValues.clear();
    }
 
-   public void updateOperationValue(org.hyperic.hq.authz.shared.OperationValue updated)
+   public void updateOperationValue(Operation updated)
    {
 	  if ( ! this.updatedOperationValues.contains(updated))
 		 this.updatedOperationValues.add(updated);

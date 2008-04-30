@@ -179,7 +179,7 @@ public class Role extends AuthzNamedBean {
         if (getOperations() != null) {
             for (Iterator it = getOperations().iterator(); it.hasNext(); ) {
                 Operation op = (Operation) it.next();
-                _roleValue.addOperationValue(op.getOperationValue());
+                _roleValue.addOperationValue(op);
             }
         }
 
