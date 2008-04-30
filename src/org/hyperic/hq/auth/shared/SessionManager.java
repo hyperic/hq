@@ -28,7 +28,6 @@ package org.hyperic.hq.auth.shared;
 import java.util.Random;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.util.collection.IntHashMap;
 
 public class SessionManager {
@@ -125,19 +124,6 @@ public class SessionManager {
         throws SessionNotFoundException, SessionTimeoutException
     {
         return getSubjectPojo(sessionId).getId();
-    }
-
-    /**
-     * Returns the AuthzSubjectValue given a session id
-     * 
-     * @param sessionId The session id
-     * @return The AuthzSubjectValue associated with the session id
-     */
-    public synchronized AuthzSubjectValue getSubject(int sessionId) 
-        throws SessionNotFoundException, SessionTimeoutException
-    {
-        AuthzSubject subject = getSubjectPojo(sessionId);
-        return subject.getAuthzSubjectValue();
     }
 
     public synchronized AuthzSubject getSubjectPojo(int sessionId) 

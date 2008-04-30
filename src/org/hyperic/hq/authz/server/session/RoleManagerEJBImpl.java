@@ -41,7 +41,6 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -145,7 +144,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     /** 
      * Filter a collection of roleLocal objects to only include those viewable
      * by the specified user
-     * @throws NamingException if database connection cannot be established
      * @throws FinderException SQL error looking up roles scope
      */
     private Collection filterViewableRoles(AuthzSubject who, Collection roles) 
@@ -159,7 +157,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param roles - the list of role locals
      * @param excludeIds - role ids which should be excluded from the return list
      * 
-     * @throws NamingException if database connection cannot be established
      * @throws FinderException SQL error looking up roles scope
      */                                                         
     private Collection filterViewableRoles(AuthzSubject who,
@@ -206,40 +203,33 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * null to add subjects later.
      * @return OwnedRoleValue for the role.
      * @throws CreateException Unable to create the specified entity.
-     * @throws NamingException
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException whoami may not perform createResource on
      * the covalentAuthzRole ResourceType.
      * @ejb:interface-method
      */
-    public Integer createOwnedRole(AuthzSubjectValue whoami,
-                                  RoleValue role,
-                                  OperationValue[] operations,
-                                  Integer[] subjectIds,
-                                  Integer[] groupIds)
-        throws FinderException,
-               AuthzDuplicateNameException, PermissionException 
+    public Integer createOwnedRole(AuthzSubject whoami,
+                                   RoleValue role,
+                                   OperationValue[] operations,
+                                   Integer[] subjectIds,
+                                   Integer[] groupIds)
+        throws FinderException, AuthzDuplicateNameException, PermissionException 
     {
-        RoleDAO roleLome = getRoleDAO();
+        RoleDAO dao = getRoleDAO();
         validateRole(role);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(),
-                 getRootResourceType(),
-                 AuthzConstants.rootResourceId,
-                 AuthzConstants.roleOpCreateRole);
+        pm.check(whoami.getId(), getRootResourceType(),
+                 AuthzConstants.rootResourceId,AuthzConstants.roleOpCreateRole);
 
-        AuthzSubject whoamiLocal =
-            AuthzSubjectManagerEJBImpl.getOne().findByAuth(whoami.getName(),
-                                                           whoami.getAuthDsn());
-        Role roleLocal = roleLome.create(whoamiLocal, role);
+        Role roleLocal = dao.create(whoami, role);
 
         // Associated operations
         roleLocal.setOperations(toPojos(operations));
 
         if (subjectIds != null) {
             HashSet sLocals = new HashSet(subjectIds.length);
-            for (int si=0; si<subjectIds.length; si++) {
+            for (int si = 0; si < subjectIds.length; si++) {
                 sLocals.add(lookupSubject(subjectIds[si]));
             }
             // Associated subjects 
@@ -267,28 +257,26 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void removeRole(AuthzSubjectValue whoami, Integer rolePk)
+    public void removeRole(AuthzSubject whoami, Integer rolePk)
         throws RemoveException, PermissionException {
         // Don't delete the super user role
         if (rolePk.equals(AuthzConstants.rootRoleId)) {
             throw new RemoveException("Superuser role cannot be removed");
         }
 
-        Role role = getRoleDAO().findById(rolePk);
+        RoleDAO dao = getRoleDAO();
+        Role role = dao.findById(rolePk);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(), role.getResource().getResourceType(), 
                  role.getId(), AuthzConstants.roleOpRemoveRole);
 
         AuthzStartupListener.getRoleRemoveCallback().roleRemoved(role);
-        for (Iterator i=new ArrayList(role.getCalendars()).iterator();
-             i.hasNext(); ) 
-        {
+        for (Iterator i = role.getCalendars().iterator(); i.hasNext();) {
             RoleCalendar c = (RoleCalendar)i.next();
-            
             removeCalendar(c);
         }
-        getRoleDAO().remove(role);
+        dao.remove(role);
     }
 
     /**
@@ -299,7 +287,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * this role.
      * @ejb:interface-method
      */
-    public void saveRole(AuthzSubjectValue whoami, RoleValue role)
+    public void saveRole(AuthzSubject whoami, RoleValue role)
         throws AuthzDuplicateNameException, PermissionException {
         Role roleLocal = lookupRole(role);
         if(!roleLocal.getName().equals(role.getName())) {
@@ -322,7 +310,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * on this role.
      * @ejb:interface-method
      */
-    public void changeOwner(AuthzSubjectValue whoami, RoleValue role,
+    public void changeOwner(AuthzSubject whoami, RoleValue role,
                             AuthzSubject owner)
         throws PermissionException {
         Role roleLocal = lookupRole(role);
@@ -340,12 +328,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param role The role.
      * @param operations The operations to associate with the role.
      * @throws FinderException Unable to find a given or dependent entities.
-     * @throws NamingException
      * @throws PermissionException whoami may not perform addOperation on
      * this role.
      * @ejb:interface-method
      */
-    public void addOperations(AuthzSubjectValue whoami, RoleValue role,
+    public void addOperations(AuthzSubject whoami, RoleValue role,
                               OperationValue[] operations)
         throws PermissionException {
         Set opLocals = toPojos(operations);
@@ -361,12 +348,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param role The role.
      * @param operations The roles to disassociate.
      * @throws FinderException Unable to find a given or dependent entities.
-     * @throws NamingException
      * @throws PermissionException whoami may not perform removeOperation
      * on this role.
      * @ejb:interface-method
      */
-    public void removeOperations(AuthzSubjectValue whoami, RoleValue role,
+    public void removeOperations(AuthzSubject whoami, RoleValue role,
                                  OperationValue[] operations)
         throws PermissionException {
         Set opLocals = toPojos(operations);
@@ -380,12 +366,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param whoami The current running user.
      * @param role The role.
      * @throws FinderException Unable to find a given or dependent entities.
-     * @throws NamingException
      * @throws PermissionException whoami may not perform removeOperation 
      * on this role.
      * @ejb:interface-method
      */
-    public void removeAllOperations(AuthzSubjectValue whoami, RoleValue role)
+    public void removeAllOperations(AuthzSubject whoami, RoleValue role)
         throws PermissionException {
         Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
@@ -403,7 +388,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * setOperations on this role.
      * @ejb:interface-method
      */
-    public void setOperations(AuthzSubjectValue whoami, RoleValue role,
+    public void setOperations(AuthzSubject whoami, RoleValue role,
                               OperationValue[] operations)
         throws PermissionException {
         if (operations != null) {
@@ -425,12 +410,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param role This role.
      * @param groups The groups to associate with this role.
      * @throws FinderException Unable to find a given or dependent entities.
-     * @throws NamingException
      * @throws PermissionException whoami is not allowed to perform 
      * addResourceGroup on this role.
      * @ejb:interface-method
      */
-    public void addResourceGroups(AuthzSubjectValue whoami, RoleValue role,
+    public void addResourceGroups(AuthzSubject whoami, RoleValue role,
                                   ResourceGroupValue[] groups)
         throws PermissionException {
         Set sLocals = toPojos(groups);
@@ -452,12 +436,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param role This role.
      * @param ids The ids of the groups to associate with this role.
      * @throws FinderException Unable to find a given or dependent entities.
-     * @throws NamingException
      * @throws PermissionException whoami is not allowed to perform
      * addResourceGroup on this role.
      * @ejb:interface-method
      */
-    public void addResourceGroups(AuthzSubjectValue whoami, RoleValue role,
+    public void addResourceGroups(AuthzSubject whoami, RoleValue role,
                                   Integer[] ids)
         throws PermissionException {
         Role roleLocal = lookupRole(role);
@@ -477,7 +460,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @throws FinderException SQL error looking up roles scope
      * @ejb:interface-method
      */
-    public void addResourceGroupRoles(AuthzSubjectValue whoami, Integer gid,
+    public void addResourceGroupRoles(AuthzSubject whoami, Integer gid,
                                       Integer[] ids)
         throws PermissionException, FinderException {
         ResourceGroup group = lookupGroup(gid);
@@ -493,12 +476,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param role This role.
      * @param groups The groups to disassociate.
      * @throws FinderException Unable to find a given or dependent entities.
-     * @throws NamingException
      * @throws PermissionException whoami is not allowed to perform 
      * modifyRole on this role.
      * @ejb:interface-method
      */
-    public void removeResourceGroups(AuthzSubjectValue whoami, RoleValue role,
+    public void removeResourceGroups(AuthzSubject whoami, RoleValue role,
                                      ResourceGroupValue[] groups)
         throws PermissionException {
         Set sLocals = toPojos(groups);
@@ -521,12 +503,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param role This role.
      * @param ids The ids of the groups to disassociate.
      * @throws FinderException Unable to find a given or dependent entities.
-     * @throws NamingException
      * @throws PermissionException whoami is not allowed to perform 
      * modifyRole on this role.
      * @ejb:interface-method
      */
-    public void removeResourceGroups(AuthzSubjectValue whoami, RoleValue role,
+    public void removeResourceGroups(AuthzSubject whoami, RoleValue role,
                                      Integer[] ids)
         throws PermissionException {
         Role roleLocal = lookupRole(role);
@@ -547,12 +528,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param role This role.
      * @param ids The ids of the groups to disassociate.
      * @throws FinderException Unable to find a given or dependent entities.
-     * @throws NamingException
      * @throws PermissionException whoami is not allowed to perform 
      * modifyRole on this role.
      * @ejb:interface-method
      */
-    public void removeResourceGroupRoles(AuthzSubjectValue whoami,
+    public void removeResourceGroupRoles(AuthzSubject whoami,
                                          Integer gid, Integer[] ids)
         throws PermissionException {
         ResourceGroup group = lookupGroup(gid);
@@ -576,13 +556,12 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param whoami The current running user.
      * @param role This role.
      * @param groups The ResourceGroup to associate with this role.
-     * @throws NamingException
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform 
      * setResourceGroups on this role.
      * @ejb:interface-method
      */
-    public void setResourceGroups(AuthzSubjectValue whoami, RoleValue role,
+    public void setResourceGroups(AuthzSubject whoami, RoleValue role,
                                   ResourceGroupValue[] groups)
         throws PermissionException {
         Role roleLocal = lookupRole(role);
@@ -599,7 +578,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
       * List the ResourceGroups associate with this role.
       * @param whoami The current running user.
       * @param role This role.
-      * @throws NamingException
       * @throws FinderException Unable to find a given or dependent entities.
       * @throws PermissionException whoami is not allowed to 
       * @deprecated this method is not used by anything other than unit
@@ -607,7 +585,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
       * perform listResourceGroup on this role.
       * @ejb:interface-method
       */
-     public ResourceGroupValue[] getResourceGroups(AuthzSubjectValue whoami,
+     public ResourceGroupValue[] getResourceGroups(AuthzSubject whoami,
                                                    RoleValue role)
          throws PermissionException  {
          Role roleLocal = lookupRole(role);
@@ -642,7 +620,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @throws PermissionException if user is not allowed to modify role
      * @ejb:interface-method
      */
-    public RoleCalendar createCalendar(AuthzSubjectValue whoami, Role r,
+    public RoleCalendar createCalendar(AuthzSubject whoami, Role r,
                                        String calendarName, 
                                        RoleCalendarType type)
         throws PermissionException 
@@ -675,13 +653,13 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @throws FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      */
-    public OwnedRoleValue findOwnedRoleById(AuthzSubjectValue whoami,
+    public OwnedRoleValue findOwnedRoleById(AuthzSubject whoami,
                                             Integer id)
         throws PermissionException {
-        RoleDAO roleHome = getRoleDAO();
-        Role local = roleHome.findById(id);
+        RoleDAO dao = getRoleDAO();
+        Role local = dao.findById(id);
 
-        int numSubjects = roleHome.size(local.getSubjects());
+        int numSubjects = dao.size(local.getSubjects());
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(), local.getResource().getResourceType(),
@@ -732,7 +710,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * values which are supported on the resouce type.
      * @ejb:interface-method
      */ 
-    public Map getRoleOperationMap(AuthzSubjectValue subject, Integer roleId)
+    public Map getRoleOperationMap(AuthzSubject subject, Integer roleId)
         throws PermissionException {
         Map theMap = new HashMap();
         // find the role by id
@@ -769,7 +747,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         return getRoleDAO().findAll();
     }
     
-    private Collection getAllRoles(AuthzSubjectValue subject, int sort,
+    private Collection getAllRoles(AuthzSubject subject, int sort,
                                    boolean asc) {
         switch (sort) {
         default:
@@ -784,11 +762,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @return List a list of RoleValues
      * @ejb:interface-method
      */
-    public List getAllRoles(AuthzSubjectValue subject, PageControl pc) 
+    public List getAllRoles(AuthzSubject subject, PageControl pc) 
         throws FinderException {
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
-        int attr = pc.getSortattribute();
-        Collection roles = getAllRoles(subject, attr, pc.isAscending());
+        Collection roles = getAllRoles(subject, pc.getSortattribute(),
+                                       pc.isAscending());
 
         return rolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
     }
@@ -800,7 +778,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @return List a list of OwnedRoleValues
      * @ejb:interface-method
      */
-    public List getAllOwnedRoles(AuthzSubjectValue subject, PageControl pc) {
+    public List getAllOwnedRoles(AuthzSubject subject, PageControl pc) {
         Collection roles = getRoleDAO().findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         return ownedRolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
@@ -809,7 +787,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     /**
      * List all Roles in the system, except system roles.
      * @return List a list of OwnedRoleValues that are not system roles
-     * @throws NamingException if database connection cannot be established
      * @throws FinderException if sort attribute is unrecognized
      * @ejb:interface-method
      */
@@ -818,13 +795,13 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                                               PageControl pc)
         throws PermissionException, FinderException {
         Collection roles;
-        RoleDAO RoleLH = getRoleDAO();
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         int attr = pc.getSortattribute();
         switch (attr) {
 
         case SortAttribute.ROLE_NAME:
-            roles = RoleLH.findBySystem_orderName(false, !pc.isDescending());
+            roles = getRoleDAO().findBySystem_orderName(false,
+                                                        !pc.isDescending());
             break;
 
         default:
@@ -854,26 +831,25 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param subject
      * @param ids the role ids
      * @param pc Paging information for the request
-     * @throws NamingException
      * @throws FinderException
      * @throws PermissionException
      * @ejb:interface-method
      *
      */
-    public PageList getRolesById(AuthzSubjectValue whoami, Integer[] ids,
+    public PageList getRolesById(AuthzSubject whoami, Integer[] ids,
                                  PageControl pc)
         throws PermissionException, FinderException {
 
         List roles = getRolesByIds(whoami, ids, pc);
 
-        PageList plist =
-            rolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
+        PageList plist = rolePager.seek(roles, pc.getPagenum(),
+                                        pc.getPagesize());
         plist.setTotalSize(roles.size());
 
         return plist;
     }
 
-    private List getRolesByIds(AuthzSubjectValue whoami, Integer[] ids,
+    private List getRolesByIds(AuthzSubject whoami, Integer[] ids,
                                PageControl pc)
         throws PermissionException, FinderException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -914,7 +890,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * subject.
      * @ejb:interface-method
      */
-    public void addRoles(AuthzSubjectValue whoami, AuthzSubject subject,
+    public void addRoles(AuthzSubject whoami, AuthzSubject subject,
                          RoleValue[] roles)
         throws PermissionException  {
         Set roleLocals = toPojos(roles);
@@ -934,7 +910,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * this subject.
      * @ejb:interface-method
      */
-    public void removeRoles(AuthzSubjectValue whoami,
+    public void removeRoles(AuthzSubject whoami,
                             AuthzSubject subject, Integer[] roles)
         throws PermissionException, FinderException {
         Collection roleLocals = getRolesByIds(whoami, roles,
@@ -949,29 +925,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
             callback.roleRemovedFromSubject(role, subject);
             subject.removeRole(role);
         }
-    }
-
-    /**
-     * List the roles this subject belongs to.
-     * @param whoami The current running user.
-     * @param subject This subject.
-     * @return Array of roles in this role.
-     * @throws FinderException Unable to find a given or dependent entities.
-     * @throws PermissionException whoami is not allowed to perform
-     * listRoles on this subject.
-     * @ejb:interface-method
-     */
-    public RoleValue[] getRoles(AuthzSubject whoami,
-                                AuthzSubjectValue subjectValue)
-        throws FinderException, PermissionException { 
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(), getRootResourceType(),
-                 AuthzConstants.rootResourceId,
-                 AuthzConstants.subjectOpViewSubject);
-
-        return (RoleValue[])
-            fromLocals(whoami.getRoles(),
-                       org.hyperic.hq.authz.shared.RoleValue.class);
     }
 
     /**
@@ -995,7 +948,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param subject
      * @param pc Paging and sorting information.
      * @return Set of Roles
-     * @throws NamingException if database connection cannot be established
      * @ejb:interface-method
      */
     public List getOwnedRoles(AuthzSubject subject, PageControl pc) 
@@ -1012,12 +964,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @return List a list of OwnedRoleValues that are not system roles
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
-     * @throws NamingException on JNDI failure.
      * @throws CreateException indicating ejb creation / container failure.
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException caller is not allowed to perform listRoles
      * on this role.
-     * @throws NamingException if database connection cannot be established
      * @throws FinderException SQL error looking up roles scope
      */
     public PageList getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
@@ -1036,12 +986,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @return List a list of OwnedRoleValues that are not system roles
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
-     * @throws NamingException on JNDI failure.
      * @throws CreateException indicating ejb creation / container failure.
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException caller is not allowed to perform listRoles
      * on this role.
-     * @throws NamingException if database connection cannot be established
      * @throws FinderException SQL error looking up roles scope
      */
     public PageList getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
@@ -1132,7 +1080,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform
      * listRoles on this role.
-     * @throws NamingException if database connection cannot be established
      * @throws FinderException 
      * @ejb:interface-method
      */
@@ -1145,12 +1092,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         Collection foundRoles;
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         int attr = pc.getSortattribute();
-        RoleDAO roleLH = getRoleDAO();
         switch (attr) {
     
         case SortAttribute.ROLE_NAME:
             foundRoles =
-                roleLH.findBySystemAndAvailableForSubject_orderName(
+                getRoleDAO().findBySystemAndAvailableForSubject_orderName(
                     system, whoami.getId(), !pc.isDescending());
             break;
     
@@ -1209,7 +1155,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform
      * listRoles on this role.
-     * @throws NamingException if database connection cannot be established
      * @throws FinderException if the sort attribute was not recognized
      * @ejb:interface-method
      */
@@ -1221,10 +1166,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         Collection foundRoles;
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         int attr = pc.getSortattribute();
-        RoleDAO roleLH = getRoleDAO();
+        RoleDAO dao = getRoleDAO();
         switch (attr) {
         case SortAttribute.ROLE_NAME:
-            foundRoles = roleLH.findAvailableForGroup(false, groupId);
+            foundRoles = dao.findAvailableForGroup(false, groupId);
             break;
         default:
             throw new FinderException("Unrecognized sort attribute: " + attr);
@@ -1255,7 +1200,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
         if (isRootRoleMember(whoami) && pc.getPagenum() == 0 && 
             !index.contains(AuthzConstants.rootRoleId)) {
-            foundRoles = roleLH.findAvailableForGroup(true, groupId);
+            foundRoles = dao.findAvailableForGroup(true, groupId);
             for (Iterator it = foundRoles.iterator(); it.hasNext(); ) {
                 Role role = (Role) it.next();
                 if (role.getId().equals(AuthzConstants.rootRoleId)) {
@@ -1319,13 +1264,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     
     /**
      * Return the roles of a group
-     * @throws NamingException 
-     * @throws FinderException 
      * @throws PermissionException 
      * 
      * @ejb:interface-method
      */
-    public PageList getResourceGroupRoles(AuthzSubjectValue whoami,
+    public PageList getResourceGroupRoles(AuthzSubject whoami,
                                           Integer groupId, PageControl pc)
         throws PermissionException {
         ResourceGroup resGrp = getResourceGroupDAO().findById(groupId);
@@ -1368,7 +1311,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @throws PermissionException whoami is not allowed to perform
      *                listGroups on this role.
      * @throws FinderException 
-     * @throws NamingException 
      * @ejb:interface-method
      */
     public PageList getAvailableResourceGroups(AuthzSubject whoami,
@@ -1377,7 +1319,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                                                PageControl pc) 
         throws PermissionException, FinderException {
         RoleDAO rlDao = getRoleDAO();
-        Role roleLocal = rlDao.findById(roleId);
+        Role role = rlDao.findById(roleId);
         Collection noRoles;
         Collection otherRoles;
         pc = PageControl.initDefaults(pc, SortAttribute.RESGROUP_NAME);
@@ -1386,8 +1328,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         switch (attr) {
         case SortAttribute.RESGROUP_NAME:
             noRoles = rgDao.findWithNoRoles_orderName(pc.isAscending());
-            otherRoles = rgDao.findByNotRoleId_orderName(roleLocal.getId(),
-                                                       pc.isAscending());
+            otherRoles = rgDao.findByNotRoleId_orderName(role.getId(),
+                                                         pc.isAscending());
             break;
 
         default:
@@ -1443,39 +1385,38 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     
     /** Add subjects to this role.
      * @param whoami The current running user.
-     * @param role This role.
+     * @param roleVal This role.
      * @param subjects Subjects to add to role.
      * @throws PermissionException whoami is not allowed to perform
      * addSubject on this role.
      * @ejb:interface-method
      */
-    public void addSubjects(AuthzSubjectValue whoami, RoleValue role,
+    public void addSubjects(AuthzSubject whoami, RoleValue roleVal,
                             AuthzSubjectValue[] subjects) 
         throws PermissionException {
         Set sLocals = toPojos(subjects);
-        Role roleLocal = lookupRole(role);
+        Role role = lookupRole(roleVal);
 //        roleLocal.setWhoami(lookupSubject(whoami));
         for (Iterator it = sLocals.iterator(); it.hasNext(); ) {
             AuthzSubject subj = (AuthzSubject) it.next();
-            subj.addRole(roleLocal);
+            subj.addRole(role);
         }
     }
     
     /** Add subjects to this role.
      * @param whoami The current running user.
-     * @param role This role.
+     * @param roleVal This role.
      * @param ids Ids of ubjects to add to role.
-     * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform 
      * addSubject on this role.
      * @ejb:interface-method
      */
-    public void addSubjects(AuthzSubjectValue whoami, RoleValue role,
+    public void addSubjects(AuthzSubject whoami, RoleValue roleVal,
                             Integer[] ids)
         throws PermissionException {
-        Role roleLocal = lookupRole(role);
+        Role role = lookupRole(roleVal);
         for (int i = 0; i < ids.length; i++) {
-            lookupSubject(ids[i]).addRole(roleLocal);
+            lookupSubject(ids[i]).addRole(role);
         }
     }
     
@@ -1523,17 +1464,15 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         }
         Collection subjects;
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
-        int attr = pc.getSortattribute();
         AuthzSubjectDAO dao = new AuthzSubjectDAO(DAOFactory.getDAOFactory());
-        switch (attr) {
-
+        switch (pc.getSortattribute()) {
         case SortAttribute.SUBJECT_NAME:
             subjects = dao.findByRoleId_orderName(roleLocal.getId(),
                                                   pc.isAscending());
             break;
-
         default:
-            throw new FinderException("Unrecognized sort attribute: " + attr);
+            throw new FinderException("Unrecognized sort attribute: " +
+                                      pc.getSortattribute());
         }
 
         PageList plist = new PageList();
@@ -1555,7 +1494,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @ejb:interface-method
      *
      */
-    public PageList getAvailableSubjects(AuthzSubjectValue whoami,
+    public PageList getAvailableSubjects(AuthzSubject whoami,
                                          Integer roleId,
                                          Integer[] subjectIds,
                                          PageControl pc) 
@@ -1565,32 +1504,26 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         /** TODO PermissionCheck scope for viewSubject **/
         Collection otherRoles;
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
-        int attr = pc.getSortattribute();
         AuthzSubjectDAO dao = new AuthzSubjectDAO(DAOFactory.getDAOFactory());
-        switch (attr) {
+        switch (pc.getSortattribute()) {
         case SortAttribute.SUBJECT_NAME:
             otherRoles = dao.findByNotRoleId_orderName(roleLocal.getId(),
                                                        pc.isAscending());
             break;
-
         default:
-            throw new FinderException("Unrecognized sort attribute: " + attr);
+            throw new FinderException("Unrecognized sort attribute: " +
+                                      pc.getSortattribute());
         }
 
         // build an index of subjectIds
         int numToFind = subjectIds.length;
-        HashMap index = new HashMap();
-        for (int i = 0; i < numToFind; i++) {
-            Integer id = subjectIds[i];
-            index.put(id, id);
-        }
+        HashSet index = new HashSet(Arrays.asList(subjectIds));
 
         // grep out the specified subjects
         ArrayList subjects = new ArrayList(numToFind);
         for(Iterator i = otherRoles.iterator(); i.hasNext();) {
             AuthzSubject subj = (AuthzSubject)i.next();
-            Integer id = (Integer) index.get(subj.getId());
-            if (id == null) {
+            if (!index.contains(subj.getId())) {
                 subjects.add(subj);
             }
         }
@@ -1611,7 +1544,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @ejb:interface-method
      *
      */
-    public void removeSubjects(AuthzSubjectValue whoami, RoleValue role,
+    public void removeSubjects(AuthzSubject whoami, RoleValue role,
                                Integer[] ids)
         throws PermissionException {
         Role roleLocal = lookupRole(role);
@@ -1630,7 +1563,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @ejb:interface-method
      *
      */
-    public void setSubjects(AuthzSubjectValue whoami, RoleValue role,
+    public void setSubjects(AuthzSubject whoami, RoleValue role,
                             AuthzSubjectValue[] subjects)
         throws PermissionException {
         Role roleLocal = lookupRole(role);
