@@ -377,6 +377,18 @@ public class AgentManagerEJBImpl
     {
         return this.getAgentInternal(agentToken);
     }
+    
+    /**
+     * Determine if the agent token is already assigned to another agent.
+     * 
+     * @param agentToken The agent token.
+     * @return <code>true</code> if the agent token is unique; 
+     *         <code>false</code> if it is already assigned to an agent.
+     * @ejb:interface-method  
+     */
+    public boolean isAgentTokenUnique(String agentToken) {
+        return getAgentDAO().findByAgentToken(agentToken) == null;
+    }
 
     /**
      * @ejb:interface-method
