@@ -2,6 +2,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubjectMan
+import org.hyperic.hq.authz.shared.AuthzSubjectValue
 
 class UserHelper extends BaseHelper {
     private subjectMan = SubjectMan.one
