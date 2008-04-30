@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008, Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.shared.AlertActionLogValue;
+import org.hyperic.hq.events.server.session.AlertActionLog;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
@@ -163,9 +163,9 @@ public class ViewAlertAction extends TilesAction {
 
         // if alert is fixed, then there should be a fixed log
         if (av.isFixed()) {
-            AlertActionLogValue[] logs = av.getActionLogs();
+            AlertActionLog[] logs = av.getActionLogs();
             for (int i = logs.length - 1; i >= 0; i--) {
-                if (logs[i].getActionId() == null) {
+                if (logs[i].getAction() == null) {
                     request.setAttribute("fixedNote", logs[i].getDetail());
                     break;
                 }

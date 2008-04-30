@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -37,7 +37,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
-import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertValue;
 
@@ -215,7 +214,7 @@ public class Alert
         _alertVal.removeAllEscalationLogs();
         for (Iterator i=getActionLog().iterator(); i.hasNext(); ) {
             AlertActionLog l = (AlertActionLog)i.next();
-            AlertActionLogValue logVal = l.getAlertActionLogValue();
+            AlertActionLog logVal = l;
             _alertVal.addActionLog(logVal);
             
             // No action or alert definition means escalation log
@@ -254,13 +253,13 @@ public class Alert
         }
 
         for (Iterator i=val.getAddedActionLogs().iterator(); i.hasNext(); ) {
-            AlertActionLogValue lv = (AlertActionLogValue)i.next();
+            AlertActionLog lv = (AlertActionLog)i.next();
             
             addActionLog(alDao.findById(lv.getId()));
         }
         
         for (Iterator i=val.getRemovedActionLogs().iterator(); i.hasNext(); ) {
-            AlertActionLogValue lv = (AlertActionLogValue)i.next();
+            AlertActionLog lv = (AlertActionLog)i.next();
             
             removeActionLog(alDao.findById(lv.getId()));
         }

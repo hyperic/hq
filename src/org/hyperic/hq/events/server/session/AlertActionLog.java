@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -25,11 +25,9 @@
 
 package org.hyperic.hq.events.server.session;
 
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
-import org.hyperic.hq.events.shared.AlertActionLogValue;
 
 public class AlertActionLog  
     extends PersistedObject
@@ -39,8 +37,6 @@ public class AlertActionLog
     private Action              _action;
     private AuthzSubject        _subject;
     private long                _timeStamp;
-    
-    private AlertActionLogValue _valueObj;
     
     protected AlertActionLog() {
     }
@@ -114,28 +110,5 @@ public class AlertActionLog
     
     protected void setTimeStamp(long stamp) {
         _timeStamp = stamp;
-    }
-    
-    public AlertActionLogValue getAlertActionLogValue() {
-        if (_valueObj == null) {
-            _valueObj = new AlertActionLogValue();
-        }
-
-        _valueObj.setId(getId());
-        _valueObj.setDetail(getDetail() == null ? "" : getDetail());
-        if (getAction() != null) {
-            _valueObj.setActionId(getAction().getId());
-        }
-        _valueObj.setTimeStamp(_timeStamp);
-        return _valueObj;
-    }
-
-    protected void setAlertActionLogValue(AlertActionLogValue val) {
-        ActionDAO aDao = DAOFactory.getDAOFactory().getActionDAO();
-        Action action;
-
-        action = aDao.findById(val.getActionId());
-        setDetail(val.getDetail());
-        setAction(action);
     }
 }

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -28,11 +28,7 @@
  */
 package org.hyperic.hq.events.shared;
 
-import java.rmi.RemoteException;
-import javax.ejb.CreateException;
-import javax.ejb.EntityBean;
-import javax.ejb.EntityContext;
-import javax.ejb.RemoveException;
+import org.hyperic.hq.events.server.session.AlertActionLog;
 
 /**
  * Value object for Alert.
@@ -209,19 +205,19 @@ public class AlertValue
    public java.util.Collection getRemovedActionLogs() { return removedActionLogs; }
    public java.util.Collection getUpdatedActionLogs() { return updatedActionLogs; }
 
-   public org.hyperic.hq.events.shared.AlertActionLogValue[] getActionLogs()
+   public AlertActionLog[] getActionLogs()
    {
-      return (org.hyperic.hq.events.shared.AlertActionLogValue[])this.ActionLogs.toArray(new org.hyperic.hq.events.shared.AlertActionLogValue[ActionLogs.size()]);
+      return (AlertActionLog[])this.ActionLogs.toArray(new AlertActionLog[ActionLogs.size()]);
    }
 
-   public void addActionLog(org.hyperic.hq.events.shared.AlertActionLogValue added)
+   public void addActionLog(AlertActionLog added)
    {
       this.ActionLogs.add(added);
       if ( ! this.addedActionLogs.contains(added))
          this.addedActionLogs.add(added);
    }
 
-   public void removeActionLog(org.hyperic.hq.events.shared.AlertActionLogValue removed)
+   public void removeActionLog(AlertActionLog removed)
    {
       this.ActionLogs.remove(removed);
       this.removedActionLogs.add(removed);
@@ -237,7 +233,7 @@ public class AlertValue
         this.ActionLogs.clear();
    }
 
-   public void updateActionLog(org.hyperic.hq.events.shared.AlertActionLogValue updated)
+   public void updateActionLog(AlertActionLog updated)
    {
       if ( ! this.updatedActionLogs.contains(updated))
          this.updatedActionLogs.add(updated);
@@ -263,19 +259,19 @@ public class AlertValue
    public java.util.Collection getRemovedEscalationLogs() { return removedEscalationLogs; }
    public java.util.Collection getUpdatedEscalationLogs() { return updatedEscalationLogs; }
 
-   public org.hyperic.hq.events.shared.AlertActionLogValue[] getEscalationLogs()
+   public AlertActionLog[] getEscalationLogs()
    {
-      return (org.hyperic.hq.events.shared.AlertActionLogValue[])this.EscalationLogs.toArray(new org.hyperic.hq.events.shared.AlertActionLogValue[EscalationLogs.size()]);
+      return (AlertActionLog[])this.EscalationLogs.toArray(new AlertActionLog[EscalationLogs.size()]);
    }
 
-   public void addEscalationLog(org.hyperic.hq.events.shared.AlertActionLogValue added)
+   public void addEscalationLog(AlertActionLog added)
    {
       this.EscalationLogs.add(added);
       if ( ! this.addedEscalationLogs.contains(added))
          this.addedEscalationLogs.add(added);
    }
 
-   public void removeEscalationLog(org.hyperic.hq.events.shared.AlertActionLogValue removed)
+   public void removeEscalationLog(AlertActionLog removed)
    {
       this.EscalationLogs.remove(removed);
       this.removedEscalationLogs.add(removed);
@@ -291,7 +287,7 @@ public class AlertValue
         this.EscalationLogs.clear();
    }
 
-   public void updateEscalationLog(org.hyperic.hq.events.shared.AlertActionLogValue updated)
+   public void updateEscalationLog(AlertActionLog updated)
    {
       if ( ! this.updatedEscalationLogs.contains(updated))
          this.updatedEscalationLogs.add(updated);
