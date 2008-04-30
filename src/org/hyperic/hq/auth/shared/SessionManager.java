@@ -123,10 +123,10 @@ public class SessionManager {
     public synchronized Integer getId(int sessionId) 
         throws SessionNotFoundException, SessionTimeoutException
     {
-        return getSubjectPojo(sessionId).getId();
+        return getSubject(sessionId).getId();
     }
 
-    public synchronized AuthzSubject getSubjectPojo(int sessionId) 
+    public synchronized AuthzSubject getSubject(int sessionId) 
         throws SessionNotFoundException, SessionTimeoutException
     {
         AuthSession session = (AuthSession)_cache.get(sessionId);
@@ -150,7 +150,7 @@ public class SessionManager {
     public void authenticate(int sessionId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        getSubjectPojo(sessionId);
+        getSubject(sessionId);
     }
     
     /**

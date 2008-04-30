@@ -504,7 +504,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws SessionTimeoutException, SessionNotFoundException,
             InvalidAppdefTypeException, PermissionException,
             AppdefEntityNotFoundException, AppdefCompatException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = manager.getSubject(sessionId);
         
         // Assume all entities are of the same type
         AppdefEntityValue rv = new AppdefEntityValue(entIds[0], subject);
@@ -547,7 +547,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws SessionTimeoutException, SessionNotFoundException,
             PermissionException, AppdefEntityNotFoundException,
             AppdefCompatException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = manager.getSubject(sessionId);
         
         boolean bPlatforms = false, bServers = false, bServices = false;
         
@@ -705,7 +705,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, AppdefEntityNotFoundException,
                PermissionException, AppdefCompatException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = manager.getSubject(sessionId);
     
         // Get the member IDs
         List platforms = getPlatformAG(subject, platTypeId);
@@ -727,7 +727,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, PermissionException,
                AppdefEntityNotFoundException, AppdefCompatException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = manager.getSubject(sessionId);
         
         List group = new ArrayList();
         for (int i = 0; i < entIds.length; i++) {

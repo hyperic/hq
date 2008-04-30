@@ -282,7 +282,7 @@ public class UpdateBossEJBImpl
         throws SessionException
     {
         AuthzSubject subject = 
-            SessionManager.getInstance().getSubjectPojo(sess);
+            SessionManager.getInstance().getSubject(sess);
         UpdateStatus status = getOrCreateStatus();
 
         if (!status.getMode().equals(mode))

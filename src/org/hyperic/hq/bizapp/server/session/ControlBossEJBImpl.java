@@ -110,7 +110,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             doGroupAction(sessionId, id, action, args, null);
         } else {
-            AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+            AuthzSubject subject = sessionManager.getSubject(sessionId);
             getControlManager().doAction(subject, id, action, args);
         }
     }
@@ -134,7 +134,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             doGroupAction(sessionId, id, action, null, schedule);
         } else {
-            AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+            AuthzSubject subject = sessionManager.getSubject(sessionId);
             getControlManager().doAction(subject, id, action, schedule);
         }
     }
@@ -153,7 +153,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                PermissionException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, ApplicationException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         getControlManager().doGroupAction(subject, groupEnt, action, orderSpec,
                                           schedule);
     }
@@ -170,7 +170,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefEntityNotFoundException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         getControlManager().doGroupAction(subject, groupEnt, action, args,
                                           orderSpec);
     }
@@ -197,7 +197,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public List getActions(int sessionId, AppdefEntityTypeID aetid)
         throws PluginNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlManager().getActions(subject, aetid);
     }
 
@@ -209,7 +209,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws AppdefEntityNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
    {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         return getControlManager().isGroupControlEnabled(subject, id);
     }
@@ -221,7 +221,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public boolean isControlSupported (int sessionId, AppdefResourceValue res)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlManager().
             isControlSupported(subject,
                                res.getAppdefResourceTypeValue().getName());
@@ -234,7 +234,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public boolean isControlSupported (int sessionId, AppdefEntityTypeID tid)
         throws SessionNotFoundException, SessionTimeoutException               
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlManager().
             isControlSupported(subject, tid.getAppdefResourceType().getName());
     }
@@ -248,7 +248,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws SessionNotFoundException,  SessionTimeoutException,
                PermissionException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         Map platTypes =
             getAppdefManager().getControllablePlatformTypes(subject);
@@ -273,7 +273,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws AppdefEntityNotFoundException, SessionNotFoundException, 
                SessionTimeoutException, PermissionException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlManager().isControlEnabled(subject, id);
     }
 
@@ -288,7 +288,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlScheduleManager().findScheduledJobs(subject, id, pc);
     }
     
@@ -299,7 +299,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public void removeScheduledJobs(int sessionId, AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException,
                ScheduledJobRemoveException {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         getControlScheduleManager().removeScheduledJobs(subject, id);
     }
 
@@ -315,7 +315,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws PluginException, ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException               
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlScheduleManager().findJobHistory(subject, id, pc);
     }
 
@@ -333,7 +333,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         if (id.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP)
           throw new IllegalArgumentException ("Invalid group entity specified");
 
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlScheduleManager().findGroupJobHistory(subject,
                                                                batchJobId,
                                                                id, pc);
@@ -350,7 +350,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException               
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         getControlScheduleManager().deleteJobHistory(subject, ids);
     }
    
@@ -366,7 +366,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
          throws ApplicationException, PermissionException,
                 SessionNotFoundException, SessionTimeoutException                
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlScheduleManager().getCurrentJob(subject, id);
     }
 
@@ -381,7 +381,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlScheduleManager().getJobByJobId(subject, id);
     }
 
@@ -396,7 +396,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlScheduleManager().getLastJob(subject, id);
     }
 
@@ -413,7 +413,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws PluginException, ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException               
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);     
+        AuthzSubject subject = sessionManager.getSubject(sessionId);     
         return getControlScheduleManager().getControlJob(subject, id);
     }
 
@@ -427,7 +427,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws PluginException, ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         getControlScheduleManager().deleteControlJob(subject, ids);
     }
 
@@ -442,7 +442,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                                             long window)
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlScheduleManager()
             .getRecentControlActions(subject, rows, window);
     }
@@ -474,7 +474,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlScheduleManager().getPendingControlActions(subject,
                                                                     rows);
     }
@@ -488,7 +488,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws ApplicationException, PermissionException, ApplicationException,
                SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlScheduleManager().
             getOnDemandControlFrequency(subject, numToReturn);
     }
@@ -505,7 +505,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                                              AppdefEntityID[] entities)
         throws AppdefEntityNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlManager().batchCheckControlPermissions(subject,
                                                                 entities);
     }
@@ -520,7 +520,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public Map findControllablePlatformTypes(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
         return getAppdefManager().getControllablePlatformTypes(subject);
     }
     
@@ -534,7 +534,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public Map findControllableServerTypes(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
         return getAppdefManager().getControllableServerTypes(subject);
     }
     /**
@@ -547,7 +547,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public Map findControllableServiceTypes(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
         return getAppdefManager().getControllableServiceTypes(subject);
     }
     /**
@@ -561,7 +561,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                                              AppdefEntityTypeID aetid)
         throws SessionNotFoundException, SessionException,
                PermissionException {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
         
         Map ret;
         int groupType;

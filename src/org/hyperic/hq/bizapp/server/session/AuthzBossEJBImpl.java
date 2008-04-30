@@ -89,7 +89,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     public boolean hasAdminPermission(int sessionId)
         throws FinderException, 
                SessionTimeoutException, SessionNotFoundException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = manager.getSubject(sessionId);
         PermissionManager pm = PermissionManagerFactory.getInstance();
         return pm.hasAdminPermission(subject.getId());
     }
@@ -105,7 +105,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws CreateException, FinderException,
                PermissionException, SessionTimeoutException, 
                SessionNotFoundException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject subject = manager.getSubject(sessionId.intValue());
         return getResourceManager().getAllResourceTypes(subject, pc);
     }
 
@@ -133,7 +133,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     public List getAllOperations(Integer sessionId, PageControl pc)
         throws FinderException, PermissionException,
                SessionTimeoutException, SessionNotFoundException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject subject = manager.getSubject(sessionId.intValue());
         PermissionManager pm = PermissionManagerFactory.getInstance();
         return pm.getAllOperations(subject, pc);
     }
@@ -162,7 +162,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                                    PageControl pc)
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject subject = manager.getSubject(sessionId.intValue());
         return getAuthzSubjectManager().getAllSubjects(subject, excludes, pc);
     }
 
@@ -177,7 +177,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                                     PageControl pc)
         throws PermissionException, SessionTimeoutException,
                SessionNotFoundException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject subject = manager.getSubject(sessionId.intValue());
         return getAuthzSubjectManager().getSubjectsById(subject, ids, pc);
     }
 
@@ -191,7 +191,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     public List getAllResourceGroups(Integer sessionId, PageControl pc)
         throws FinderException, PermissionException,
                SessionTimeoutException, SessionNotFoundException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject subject = manager.getSubject(sessionId.intValue());
         return getResourceGroupManager().getAllResourceGroups(subject, pc);
     }
 
@@ -206,7 +206,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                                           PageControl pc)
         throws FinderException, PermissionException,
                SessionTimeoutException, SessionNotFoundException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject subject = manager.getSubject(sessionId.intValue());
         return getResourceGroupManager().getResourceGroupsById(subject, ids,
                                                                pc);
     }
@@ -221,7 +221,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws FinderException, RemoveException, PermissionException,
                SessionTimeoutException, SessionNotFoundException {
         // check for timeout
-        AuthzSubject whoami = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject whoami = manager.getSubject(sessionId.intValue());
         try {
             AuthzSubjectManagerLocal mgr = getAuthzSubjectManager();
             for (int i = 0; i < ids.length; i++) {
@@ -299,7 +299,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                               String phone, String sms, Boolean useHtml)
         throws PermissionException, SessionException 
     {
-        AuthzSubject whoami = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject whoami = manager.getSubject(sessionId.intValue());
         getAuthzSubjectManager().updateSubject(whoami, target, active, dsn,
                                                dept, email, first, last,
                                                phone, sms, useHtml);
@@ -319,7 +319,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws PermissionException, CreateException, SessionException 
     {
         // check for timeout
-        AuthzSubject whoami = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject whoami = manager.getSubject(sessionId.intValue());
 
         AuthzSubjectManagerLocal subjMan = getAuthzSubjectManager();
         return subjMan.createSubject(whoami, name, active, dsn, dept, email,
@@ -332,7 +332,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     public AuthzSubject getCurrentSubject(int sessionid) 
         throws SessionException
     {
-        return manager.getSubjectPojo(sessionid);
+        return manager.getSubject(sessionid);
     }
     
     /**
@@ -371,7 +371,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
         // check for timeout
-        AuthzSubject subj = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject subj = manager.getSubject(sessionId.intValue());
         return getAuthzSubjectManager().findSubjectById(subj, subjectId);
     }
 
@@ -385,7 +385,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
         // check for timeout
-        AuthzSubject subj = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject subj = manager.getSubject(sessionId.intValue());
         return getAuthzSubjectManager().findSubjectByName(subj, subjectName);
     }
 
@@ -419,7 +419,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws SessionNotFoundException, ApplicationException,
                ConfigPropertyException {
         int sessionId = getAuthManager().getUnauthSessionId(username);
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = manager.getSubject(sessionId);
         return getUserPrefs(new Integer(sessionId), subject.getId());
     }
     
@@ -429,7 +429,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      */
     public ConfigResponse getUserPrefs(Integer sessionId, Integer subjectId) {
         try {
-            AuthzSubject who = manager.getSubjectPojo(sessionId.intValue());
+            AuthzSubject who = manager.getSubject(sessionId.intValue());
             return getAuthzSubjectManager().getUserPrefs(who, subjectId);
         } catch (Exception e) {
             throw new SystemException(e);
@@ -445,7 +445,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws ApplicationException, SessionTimeoutException,
                SessionNotFoundException 
     {
-        AuthzSubject who = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject who = manager.getSubject(sessionId.intValue());
         getAuthzSubjectManager().setUserPrefs(who, subjectId, prefs);
         getUserPrefs(sessionId, subjectId);
     }
@@ -457,7 +457,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     public DashboardConfig getUserDashboard(Integer sessionId)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubject subj = manager.getSubjectPojo(sessionId.intValue());
+        AuthzSubject subj = manager.getSubject(sessionId.intValue());
         return DashboardManagerEJBImpl.getOne().getUserDashboard(subj, subj);
     }
 

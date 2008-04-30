@@ -83,7 +83,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
                AppdefEntityNotFoundException, LiveDataException,
                SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubject subject = _manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = _manager.getSubject(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
         return manager.getData(subject, command);
     }
@@ -99,7 +99,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
                AppdefEntityNotFoundException, LiveDataException,
                SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubject subject = _manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = _manager.getSubject(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
         return manager.getData(subject, commands);
     }
@@ -113,7 +113,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
         throws PluginException, PermissionException,
                SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubject subject = _manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = _manager.getSubject(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
         return manager.getCommands(subject, id);
     }
@@ -128,7 +128,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
         throws PluginException, PermissionException,
                SessionTimeoutException, SessionNotFoundException    
     {
-        AuthzSubject subject = _manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = _manager.getSubject(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
         return manager.getConfigSchema(subject, id, command);
     }

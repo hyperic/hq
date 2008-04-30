@@ -92,7 +92,7 @@ public class ConfigBossEJBImpl
         throws ApplicationException, ConfigPropertyException  
     {
         AuthzSubject subject = 
-            SessionManager.getInstance().getSubjectPojo(sessId);
+            SessionManager.getInstance().getSubject(sessId);
         getCfgMan().setConfig(subject, props);
     }
 
@@ -104,7 +104,7 @@ public class ConfigBossEJBImpl
         throws ApplicationException, ConfigPropertyException 
     {
         AuthzSubject subject = 
-            SessionManager.getInstance().getSubjectPojo(sessId);
+            SessionManager.getInstance().getSubject(sessId);
         getCfgMan().setConfig(subject, prefix, props);
     }
 
@@ -134,7 +134,7 @@ public class ConfigBossEJBImpl
     public long vacuum (int sessionId)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         PermissionManager pm = PermissionManagerFactory.getInstance();
         if (!pm.hasAdminPermission(subject.getId())) {
             throw new PermissionException("Only admins can vacuum the DB");

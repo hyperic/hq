@@ -169,7 +169,7 @@ public class GalertBossEJBImpl
                                     boolean enabled, ResourceGroup group) 
         throws SessionException
     {
-        AuthzSubject subject = _sessMan.getSubjectPojo(sessionId);
+        AuthzSubject subject = _sessMan.getSubject(sessionId);
 
         return _galertMan.createAlertDef(subject, name, description,
                                          severity, enabled, group);
@@ -197,7 +197,7 @@ public class GalertBossEJBImpl
     public PageList findDefinitions(int sessionId, Integer gid, PageControl pc)
         throws SessionException, PermissionException
     {
-        AuthzSubject subj = _sessMan.getSubjectPojo(sessionId);
+        AuthzSubject subj = _sessMan.getSubject(sessionId);
         
         // Find the ResourceGroup
         ResourceGroup g;
@@ -293,7 +293,7 @@ public class GalertBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubject subj = _sessMan.getSubjectPojo(sessionId);
+        AuthzSubject subj = _sessMan.getSubject(sessionId);
 
         ResourceGroup g;
         g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj,
@@ -322,7 +322,7 @@ public class GalertBossEJBImpl
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubject subj = _sessMan.getSubjectPojo(sessionId);
+        AuthzSubject subj = _sessMan.getSubject(sessionId);
 
         ResourceGroup g;
         g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj,

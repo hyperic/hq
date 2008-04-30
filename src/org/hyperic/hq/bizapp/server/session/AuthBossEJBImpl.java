@@ -72,7 +72,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     {
         try {
             int res = getAuthManager().getSessionId(username, password);
-            UserAudit.loginAudit(manager.getSubjectPojo(res));
+            UserAudit.loginAudit(manager.getSubject(res));
             return res;
         } catch (AccessLocalException e) {
             throw new LoginException(e.getMessage());
@@ -109,7 +109,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      */
     public void logout (int sessionID) {
         try {
-            UserAudit.logoutAudit(manager.getSubjectPojo(sessionID));
+            UserAudit.logoutAudit(manager.getSubject(sessionID));
         } catch(SessionException e) {
         }
         manager.invalidate(sessionID);
@@ -146,7 +146,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public void addUser(int sessionID, String username, String password)
         throws SessionException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         getAuthManager().addUser(subject, username, password);
     }
 
@@ -161,7 +161,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public void changePassword(int sessionID, String username, String password) 
         throws FinderException, PermissionException, SessionException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         getAuthManager().changePassword(subject, username, password);
     }
 
@@ -173,7 +173,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public boolean isUser(int sessionID, String username)
         throws SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         return getAuthManager().isUser(subject, username);
     }
 
@@ -185,7 +185,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public Collection getAllUsers(int sessionID)
         throws SessionException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         return getAuthManager().getAllUsers(subject);
     }
 

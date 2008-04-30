@@ -470,7 +470,7 @@ public class EventsBossEJBImpl
     public int[] getAlertCount(int sessionID, AppdefEntityID[] ids)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, FinderException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
 
         int[] counts = getAM().getAlertCount(ids);
         counts = GalertManagerEJBImpl.getOne().fillAlertCount(subject, ids,
@@ -490,7 +490,7 @@ public class EventsBossEJBImpl
                InvalidOptionValueException, 
                SessionException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length == 0) {
@@ -579,7 +579,7 @@ public class EventsBossEJBImpl
                PermissionException, InvalidOptionException,
                InvalidOptionValueException, 
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length == 0) {
@@ -778,7 +778,7 @@ public class EventsBossEJBImpl
                ActionCreateException, RemoveException, FinderException,
                PermissionException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
 
         ArrayList alertdefs = new ArrayList();
         
@@ -818,7 +818,7 @@ public class EventsBossEJBImpl
                                          boolean activate)
         throws SessionNotFoundException, SessionTimeoutException, 
                FinderException, PermissionException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         getADM().updateAlertDefinitionsActiveStatus(subject, ids, activate);
     }
 
@@ -832,7 +832,7 @@ public class EventsBossEJBImpl
                                            int priority, boolean activate)
         throws SessionNotFoundException, SessionTimeoutException,
                FinderException, RemoveException, PermissionException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         getADM().updateAlertDefinitionBasic(subject, alertDefId, name, desc,
                                             priority, activate);
     }
@@ -845,7 +845,7 @@ public class EventsBossEJBImpl
                InvalidOptionValueException, AlertConditionCreateException,
                ActionCreateException, FinderException, RemoveException,
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length < 1) {
@@ -949,7 +949,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException, 
                RemoveException, PermissionException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         getADM().deleteAlertDefinitions(subject, ids);
     }
 
@@ -983,7 +983,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         return getAM().deleteAlerts(subject, aeid);
     }
     
@@ -1011,7 +1011,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException, FinderException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         
         // Delete alerts for definition and its children
         int count = 0;
@@ -1039,7 +1039,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException, 
                FinderException, PermissionException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         return getADM().getById(subject, id);
     }
 
@@ -1071,7 +1071,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         return getADM().findAllAlertDefinitions(subject);
     }
 
@@ -1085,7 +1085,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         return getADM().findAlertDefinitions(subject, id, pc);
     }
     
@@ -1099,7 +1099,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         return getADM().findAlertDefinitions(subject, id, parentId, pc);
     }
     
@@ -1112,7 +1112,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         return getADM().findAlertDefinitions(subject, id,
                                              EventConstants.TYPE_ALERT_DEF_ID,
                                              pc);
@@ -1127,7 +1127,7 @@ public class EventsBossEJBImpl
     	throws SessionNotFoundException, SessionTimeoutException,
 			   AppdefEntityNotFoundException, PermissionException 
     {
-    	AuthzSubject subject = manager.getSubjectPojo(sessionID);
+    	AuthzSubject subject = manager.getSubject(sessionID);
     	// first get the tree 
         // bomb if this isnt a platform
         if(!id.isPlatform()) {
@@ -1184,7 +1184,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         return getADM().findAlertDefinitionNames(subject, id, parentId);
     }
     
@@ -1198,7 +1198,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         List allAlerts = findAlertDefinitionsByAgent(sessionID, platId);
         AlertDefinitionManagerLocal adm = getADM();
         for (Iterator it = allAlerts.iterator(); it.hasNext();) {
@@ -1249,7 +1249,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         return getAM().findAlerts(subject, id, pc);
     }
 
@@ -1263,7 +1263,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         return getAM().findAlerts(subject, id, begin, end, pc);
     }
 
@@ -1300,7 +1300,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
-        AuthzSubject subject  = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject  = manager.getSubject(sessionID);
         long cur = System.currentTimeMillis();
         
         List appentResources =
@@ -1434,7 +1434,7 @@ public class EventsBossEJBImpl
                RemoveException, AlertDefinitionCreateException,
                FinderException, PermissionException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         
         // check security
         RegisteredTriggerValue trigger = new RegisteredTriggerValue();
@@ -1485,7 +1485,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ApplicationException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         Escalation e = getEscMan().findByName(name);
         
         getEscMan().deleteEscalation(subject, e);
@@ -1509,7 +1509,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ApplicationException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         EscalationManagerLocal escMan = getEscMan();
 
         for (int i=0; i<ids.length; i++) {
@@ -1601,7 +1601,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         Escalation e = getEscMan().findById(subject, id);
 
         // XXX: Temporarily get around lazy loading problem        
@@ -1674,7 +1674,7 @@ public class EventsBossEJBImpl
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubject  subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject  subject = manager.getSubject(sessionID);
         Collection all = getEscMan().findAll(subject);
         JSONArray jarr = new JSONArray();
         for (Iterator i = all.iterator(); i.hasNext(); ) {
@@ -1730,7 +1730,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, DuplicateObjectException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
 
         getEscMan().updateEscalation(subject, escalation, name, desc, 
                                      pausable, maxWait, notifyAll);
@@ -1745,7 +1745,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
 
         getEscMan().acknowledgeAlert(subject, alertType, alertID, moreInfo,
                                      pauseWaitTime);
@@ -1759,7 +1759,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         
         getEscMan().fixAlert(subject, alertType, alertID, moreInfo);
     }
@@ -1771,7 +1771,7 @@ public class EventsBossEJBImpl
     public String getLastFix(int sessionID, Integer defId)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, FinderException {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        AuthzSubject subject = manager.getSubject(sessionID);
         
         // Look for the last fixed alert
         AlertDefinition def = getADM().getByIdAndCheck(subject, defId);

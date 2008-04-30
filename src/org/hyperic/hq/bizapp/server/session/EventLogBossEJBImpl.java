@@ -102,7 +102,7 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
                           long beginTime, long endTime)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = manager.getSubject(sessionId);
         List events = new ArrayList();
     
         for (int i=0; i <ids.length; i++) {
@@ -128,7 +128,7 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
                           String[] eventTypes, long beginTime, long endTime)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        AuthzSubject user = manager.getSubjectPojo(sessionId);
+        AuthzSubject user = manager.getSubject(sessionId);
         return getELM().findLogs(aeid, user, eventTypes, beginTime, endTime);
     }
 
@@ -146,7 +146,7 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
                           String status, long beginTime, long endTime)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = manager.getSubject(sessionId);
         return getELM().findLogs(aeid, subject, status, beginTime, endTime);
     }
 
@@ -165,7 +165,7 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
         throws SessionNotFoundException, SessionTimeoutException 
     {
         // We ignore the subject for now.
-        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        AuthzSubject subject = manager.getSubject(sessionId);
         return getELM().logsExistPerInterval(aeid, subject, beginTime, endTime,
                                              intervals);
     }

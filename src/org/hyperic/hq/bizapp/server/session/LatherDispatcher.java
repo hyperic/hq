@@ -220,7 +220,7 @@ public class LatherDispatcher
             int sessionId;
 
             sessionId = getAuthManager().getSessionId(user, pword);
-            subject   = sessionManager.getSubjectPojo(sessionId);
+            subject   = sessionManager.getSubject(sessionId);
             getServerManager().checkCreatePlatformPermission(subject);
         } catch(SecurityException exc){
             log.warn("Security exception when '" + user + 

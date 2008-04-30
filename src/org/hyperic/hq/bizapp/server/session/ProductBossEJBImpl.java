@@ -125,7 +125,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         int idx;
 
         // validate the session
-        subject = sessionManager.getSubjectPojo(sessionId);
+        subject = sessionManager.getSubject(sessionId);
         group   = groupMan.findResourceGroupById(subject, new Integer(groupId));  
 
         // use the overlord to pull the merge
@@ -251,7 +251,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getConfigSchema(subject, id, type, true);
     }
 
@@ -380,7 +380,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                EncodingException, PermissionException, ConfigFetchException,
                AppdefEntityNotFoundException, SessionNotFoundException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         this.setConfigResponse(subject, id, response, type);
     }
 
@@ -539,7 +539,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     public Collection findAttachments(int sessionId, AttachType type) 
         throws SessionException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         
         return UIPluginManagerEJBImpl.getOne().findAttachments(type, subject);
     }
@@ -552,7 +552,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                                       ViewResourceCategory cat) 
         throws SessionException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         
         return UIPluginManagerEJBImpl.getOne().findAttachments(ent, cat, 
                                                                subject);
@@ -564,7 +564,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     public AttachmentDescriptor findAttachment(int sessionId, Integer descId) 
         throws SessionException
     {
-        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         
         return UIPluginManagerEJBImpl.getOne()
                     .findAttachmentDescriptorById(descId, subject);
