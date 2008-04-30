@@ -316,12 +316,19 @@ public class LatherDispatcher
             return new RegisterAgent_result(errRes);
         }
         
+        // Generate a unique agent token
+        AgentManagerLocal agentMan = getAgentManager();
+        
         String agentToken = SecurityUtil.generateRandomToken();
-
-        // Check the to see if it already exists
+        
+        while (!agentMan.isAgentTokenUnique(agentToken)) {
+            agentToken = SecurityUtil.generateRandomToken();
+        }
+        
+        // Check the to see if the agent already exists
         Collection ids = null;
         try {
-            Agent origAgent = getAgentManager().getAgent(agentIP, port);
+            Agent origAgent = agentMan.getAgent(agentIP, port);
             
             try {
                 ids = getPlatformManager().
@@ -332,24 +339,24 @@ public class LatherDispatcher
             }
 
             log.info("Updating agent information for " + agentIP + ":" + port);
-            getAgentManager().updateAgent(agentIP, port, args.getAuthToken(),
+            agentMan.updateAgent(agentIP, port, args.getAuthToken(),
                                           agentToken, version);
         } catch(AgentNotFoundException exc){
             log.info("Registering agent at " + agentIP + ":" + port);
             try {
                 if (isNewTransportAgent) {
-                    getAgentManager().createNewTransportAgent(agentIP, 
-                                                              new Integer(port), 
-                                                              args.getAuthToken(), 
-                                                              agentToken,
-                                                              version, 
-                                                              unidirectional);
+                    agentMan.createNewTransportAgent(agentIP, 
+                                                      new Integer(port), 
+                                                      args.getAuthToken(), 
+                                                      agentToken,
+                                                      version, 
+                                                      unidirectional);
                 } else {
-                    getAgentManager().createLegacyAgent(agentIP, 
-                                                        new Integer(port), 
-                                                        args.getAuthToken(),
-                                                        agentToken, 
-                                                        version);                    
+                    agentMan.createLegacyAgent(agentIP, 
+                                                new Integer(port), 
+                                                args.getAuthToken(),
+                                                agentToken, 
+                                                version);                    
                 }
                 
             } catch(AgentCreateException oexc){
@@ -713,7 +720,7 @@ public class LatherDispatcher
                                 LatherValue arg)
         throws LatherRemoteException
     {
-        AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
+        AgentManagerLocal agentMan = getAgentManager();
         Integer agentId = null;
         
         log.debug("Request for " + method + "() from " + ctx.getCallerIP());
