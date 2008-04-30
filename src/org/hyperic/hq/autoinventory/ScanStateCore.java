@@ -41,6 +41,8 @@ import org.hyperic.util.StringifiedException;
  */
 public class ScanStateCore implements Serializable {
     
+    private static final long serialVersionUID = -10594694796182781L;
+    
     private AIPlatformValue _platform = null;
     private ScanMethodState[] _scanMethodStates;
 

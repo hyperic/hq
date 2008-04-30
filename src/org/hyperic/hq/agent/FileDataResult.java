@@ -27,6 +27,8 @@ package org.hyperic.hq.agent;
 
 public class FileDataResult implements java.io.Serializable {
 
+    private static final long serialVersionUID = -9153991732357001254L;
+
     private String fileName;
     private long sendBytes;
     private long sendTime;

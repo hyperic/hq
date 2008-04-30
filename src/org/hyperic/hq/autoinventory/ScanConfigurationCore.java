@@ -39,6 +39,8 @@ import org.hyperic.util.encoding.Base64;
  */
 public class ScanConfigurationCore implements Serializable {
 
+    private static final long serialVersionUID = -6390296285632945265L;
+
     /**
      * The configurations for the scan methods to run.
      */

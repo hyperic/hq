@@ -31,6 +31,9 @@ package org.hyperic.hq.agent;
  */
 
 public class AgentRemoteException extends AgentException {
+
+    private static final long serialVersionUID = 7897926634073036287L;
+
     public AgentRemoteException(String msg, Exception ex){
         super(msg, ex);
     }

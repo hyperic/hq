@@ -30,6 +30,8 @@ import org.hyperic.util.config.ConfigResponse;
 
 public class ScanMethodConfig implements Serializable {
 
+    private static final long serialVersionUID = 2201769505249624038L;
+
     private String _methodClass;
     private ConfigResponse _config;
 

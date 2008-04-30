@@ -34,6 +34,8 @@ import java.util.Map;
 
 public class ConfigSchema implements Serializable {
 
+    private static final long serialVersionUID = 8171794117881852319L;
+
     private ArrayList configOptions;
 
     public ConfigSchema(){

@@ -40,6 +40,8 @@ import org.hyperic.util.StringUtil;
  */
 public class ServerSignature implements Serializable {
 
+    private static final long serialVersionUID = 3718280788996349461L;
+
     private String _stName;
     private String[] _fileMatchPatterns;
     private String[] _fileExcludePatterns;

@@ -30,6 +30,8 @@ import org.hyperic.hq.agent.AgentException;
 public class AgentConnectionException 
     extends AgentException 
 {
+    private static final long serialVersionUID = -8557636733411808787L;
+
     public AgentConnectionException(String msg){
         super(msg);
     }
