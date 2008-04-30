@@ -8747,7 +8747,7 @@ has already been defined.
                 CREATE SEQUENCE EAM_CRITERIA_ID_SEQ
                     START WITH 10001
                     INCREMENT BY 1
-                    NO MAXVALUE
+                    NOMAXVALUE
                     NOCYCLE
                     CACHE 10    	
        </statement>    	    	
