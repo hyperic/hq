@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -24,6 +24,8 @@
  */
 
 package org.hyperic.hq.authz.shared;
+
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 
 /**
  * Value object for Resource.
@@ -45,7 +47,7 @@ public class ResourceValue
    private boolean idHasBeenSet = false;
    private org.hyperic.hq.authz.shared.ResourceTypeValue ResourceTypeValue;
    private boolean ResourceTypeValueHasBeenSet = false;
-   private org.hyperic.hq.authz.shared.AuthzSubjectValue AuthzSubjectValue;
+   private AuthzSubject AuthzSubjectValue;
    private boolean AuthzSubjectValueHasBeenSet = false;
 
    public ResourceValue() {
@@ -170,11 +172,11 @@ public class ResourceValue
 	  this.ResourceTypeValue = ResourceTypeValue;
 	  ResourceTypeValueHasBeenSet = true;
    }
-   public org.hyperic.hq.authz.shared.AuthzSubjectValue getAuthzSubjectValue()
+   public AuthzSubject getAuthzSubjectValue()
    {
 	  return this.AuthzSubjectValue;
    }
-   public void setAuthzSubjectValue( org.hyperic.hq.authz.shared.AuthzSubjectValue AuthzSubjectValue )
+   public void setAuthzSubjectValue( AuthzSubject AuthzSubjectValue )
    {
 	  this.AuthzSubjectValue = AuthzSubjectValue;
 	  AuthzSubjectValueHasBeenSet = true;

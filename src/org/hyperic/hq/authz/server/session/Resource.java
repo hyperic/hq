@@ -152,7 +152,7 @@ public class Resource extends AuthzNamedBean {
     public ResourceValue getResourceValue()
     {
         resourceValue.setId(getId());
-        resourceValue.setAuthzSubjectValue(getOwner().getAuthzSubjectValue());
+        resourceValue.setAuthzSubjectValue(getOwner());
         resourceValue.setInstanceId(getInstanceId());
         resourceValue.setName(getName());
         resourceValue.setSortName(getSortName());

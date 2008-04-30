@@ -58,7 +58,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -1028,7 +1027,7 @@ public class ResourceGroupManagerEJBImpl
      * @exception FinderException Unable to find a group by id
      * @ejb:interface-method
      */
-    public AuthzSubjectValue getResourceGroupOwner(Integer gid)
+    public AuthzSubject getResourceGroupOwner(Integer gid)
         throws FinderException 
     {
         ResourceManagerLocal rmLoc = ResourceManagerEJBImpl.getOne();
