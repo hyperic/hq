@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -36,7 +36,7 @@ public class PagerProcessor_ai_history implements PagerProcessor {
         if (o == null) return null;
         try {
             if (o instanceof AIHistory) {
-                return ((AIHistory)o).getAIHistoryValue();
+                return o;
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to " +

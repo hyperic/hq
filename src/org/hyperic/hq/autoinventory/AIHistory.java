@@ -26,7 +26,6 @@
 package org.hyperic.hq.autoinventory;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.autoinventory.shared.AIHistoryValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 /**
@@ -57,12 +56,6 @@ public class AIHistory extends PersistedObject
     public AIHistory()
     {
         super();
-    }
-
-    public AIHistory(AIHistoryValue av)
-    {
-        super();
-        setAIHistoryValue(av);
     }
 
     // Property accessors
@@ -246,72 +239,6 @@ public class AIHistory extends PersistedObject
     public void setEntityName()
     {
         // no op
-    }
-
-    private AIHistoryValue aIHistoryValue =  new AIHistoryValue();
-    /**
-     * legacy DTO pattern
-     * @deprecated use (this) AIHistory object
-     * @return
-     */
-    public AIHistoryValue getAIHistoryValue()
-    {
-        try {
-            aIHistoryValue.setId(getId());
-            aIHistoryValue.setGroupId(getGroupId());
-            aIHistoryValue.setBatchId(getBatchId());
-            aIHistoryValue.setEntityType(getEntityType());
-            aIHistoryValue.setEntityId(getEntityId());
-            aIHistoryValue.setEntityName(
-                (getEntityName() == null) ? "" : getEntityName());
-            aIHistoryValue.setSubject(
-                (getSubject() == null) ? "" : getSubject());
-            aIHistoryValue.setScheduled(getScheduled());
-            aIHistoryValue.setDateScheduled(getDateScheduled());
-            aIHistoryValue.setStartTime(getStartTime());
-            aIHistoryValue.setEndTime(getEndTime());
-            aIHistoryValue.setDuration(getDuration());
-            aIHistoryValue.setMessage(
-                (getMessage() == null) ? "" : getMessage());
-            aIHistoryValue.setDescription(
-                (getDescription() == null) ? "" : getDescription());
-            aIHistoryValue.setStatus(
-                (getStatus() == null) ? "" : getStatus());
-            aIHistoryValue.setScanName(
-                (getScanName() == null) ? "" : getScanName());
-            aIHistoryValue.setScanDesc(
-                (getScanDesc() == null) ? "" : getScanDesc());
-            aIHistoryValue.setConfig(getConfig());
-            aIHistoryValue.setConfigObj(getConfigObj());
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-        return aIHistoryValue;
-    }
-
-    public void setAIHistoryValue(AIHistoryValue valueHolder)
-    {
-        try {
-            setGroupId( valueHolder.getGroupId() );
-            setBatchId( valueHolder.getBatchId() );
-            setEntityType( valueHolder.getEntityType() );
-            setEntityId( valueHolder.getEntityId() );
-            setSubject( valueHolder.getSubject() );
-            setScheduled( valueHolder.getScheduled() );
-            setDateScheduled( valueHolder.getDateScheduled() );
-            setStartTime( valueHolder.getStartTime() );
-            setEndTime( valueHolder.getEndTime() );
-            setDuration( valueHolder.getDuration() );
-            setMessage( valueHolder.getMessage() );
-            setDescription( valueHolder.getDescription() );
-            setStatus( valueHolder.getStatus() );
-            setScanName( valueHolder.getScanName() );
-            setScanDesc( valueHolder.getScanDesc() );
-            setConfig( valueHolder.getConfig() );
-            setConfigObj( valueHolder.getConfigObj() );
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public ScanConfigurationCore getConfigObj() throws AutoinventoryException
