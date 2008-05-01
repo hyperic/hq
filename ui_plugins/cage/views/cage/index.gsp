@@ -1,17 +1,28 @@
 <div id="critters">
-  <% if (critterList) { %>
-    <% if (critterList.isAny()) { %>
+  <% if (critters) { %>
+    <% if (isAny) { %>
       ${l.ifAny}
     <% } else { %>
       ${l.ifAll}
     <% } %>
 
     <ul>
-    <% for (c in group.critterList.critters) { %>
+    <% for (c in critters) { %>
       <li><%= h c.config %></li>
     <% } %>
     </ul>
-  <% } else { %>
+  <% } %>
+  
+  <% if (systemCritters) { %>
+    The following criteria is always met:
+    <ul>
+    <% for (c in systemCritters) { %>
+      <li><%= h c.config %></li>
+    <% } %>
+    </ul>
+  <% } %>
+  
+  <% if (!critters && !systemCritters) { %>	
     No Criteria specified
   <% } %>
 </div>
@@ -25,7 +36,7 @@
   </table>
 </div>
 
-<% if (critterList) { %>
+<% if (proposedResources != null) { %>
   <div id="matchResources">
     <h3>Proposed group members</h3>
     <table>

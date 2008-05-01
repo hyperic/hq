@@ -1,0 +1,13 @@
+<critters isAny='false'>
+  <!--
+    This critter list finds all non-system resources which contain the
+    text 'Network' in their name
+  -->
+
+  <critter class="org.hyperic.hq.grouping.critters.ResourceNameCritterType">
+    <string id="name">.*Network.*</string>
+  </critter>
+
+  <critter class="org.hyperic.hq.grouping.critters.NonSystemCritterType"/>
+</critters>
+

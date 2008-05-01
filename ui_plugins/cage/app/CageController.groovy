@@ -6,12 +6,16 @@ import org.hyperic.hq.grouping.CritterTranslationContext
 import org.hyperic.hq.grouping.CritterList
 import org.hyperic.hq.grouping.CritterType
 import org.hyperic.hq.grouping.prop.CritterPropDescription
+import org.hyperic.hq.grouping.prop.EnumCritterPropDescription
 import org.hyperic.hq.grouping.prop.StringCritterProp
+import org.hyperic.hq.grouping.prop.EnumCritterProp
+import org.hyperic.hq.grouping.prop.CritterPropType
 import org.hyperic.hq.grouping.prop.GroupCritterProp
 import org.hyperic.hq.grouping.prop.ProtoCritterProp
 import org.hyperic.hq.grouping.prop.ResourceCritterProp
 import org.hyperic.dao.DAOFactory
 import org.hyperic.hibernate.Util
+import org.hyperic.util.HypericEnum
 
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
@@ -45,19 +49,27 @@ class CageController
         Resource r = getViewedResource()
         ResourceGroup g = resourceHelper.findGroup(r.instanceId) 
 
-        def sess      = DAOFactory.getDAOFactory().currentSession
-        def ctx       = new CritterTranslationContext()
-        def trans     = new CritterTranslator()
-        def clist     = g.critterList
+        def sess        = DAOFactory.getDAOFactory().currentSession
+        def ctx         = new CritterTranslationContext()
+        def trans       = new CritterTranslator()
+        def clist       = g.critterList
+        def isAny       = clist.isAny()
+        def systemCrits = clist.critters.findAll { it.critterType.isSystem() }
+        def critters    = clist.critters.findAll { !it.critterType.isSystem() }
+        
         if (!clist.critters) {
-            render(locals:[group:g, critterList:null,
+            render(locals:[group:g, isAny: isAny,
+                           critters: null,
+                           systemCritters: systemCrits,
                            proposedResources:null])
             return
         }
         log.info "Critters: ${clist.critters.config}"
         def proposedResources = trans.translate(ctx, clist).list()
         
-        render(locals:[group:g, critterList:clist,
+        render(locals:[group:g, isAny: isAny,
+                       critters: critters, 
+                       systemCritters: systemCrits,
                        proposedResources:proposedResources])
     }
     
@@ -75,7 +87,7 @@ class CageController
     
     def explain(params) {
         def typeName = params.getOne('class')
-        def type = findCritterType(typeName)
+        CritterType type = findCritterType(typeName)
 
         if (!type) {
             render inline: "Critter type [${typeName}] not found\n"
@@ -87,11 +99,18 @@ class CageController
         res << "Name:          ${type.name}\n"
         res << "Description:   ${type.description}\n"
         
-        type.propDescriptions.eachWithIndex { desc, i ->
-            res << "Arg[${i}]:\n"
-            res << "    name:    ${desc.name}\n"
-            res << "    type:    ${desc.type.description}\n"
-            res << "    purpose: ${desc.purpose}\n"
+        type.propDescriptions.eachWithIndex { CritterPropDescription desc, i -> 
+            res << "Arg[${desc.id}]:\n"
+            res << "    name:     ${desc.name}\n"
+            res << "    type:     ${desc.type.description}\n"
+            res << "    purpose:  ${desc.purpose}\n"
+            res << "    required: ${desc.required}\n"
+            if (desc.type == CritterPropType.ENUM) {
+                EnumCritterPropDescription eDesc = desc
+                res << "    possible values: " 
+                res << eDesc.possibleValues.description.join(', ') 
+                res << "\n"
+            }
         }
         
         render inline: res.toString()
@@ -101,56 +120,118 @@ class CageController
         def xmlIn = new XmlParser().parseText(getUpload('args'))
         def group = resourceHelper.findGroupByName(xmlIn.'@name')
         def isAny = xmlIn.'@isAny'?.toBoolean()
+        def critters
         
-        def critters = parseCritters(xmlIn.critters)
+        try {
+            critters = parseCritters(xmlIn.critters)
+        } catch(Exception e) {
+            xmlOut.error(e.getMessage())
+            log.error("Unable to parse critters", e)
+            return xmlOut
+        }
 
-        log.info "Critters ${critters.config}"
-        GroupMan.one.setCriteria(user, group, new CritterList(critters, 
-                                                              isAny == true))
-        xmlOut.success()
+        CritterList clist = new CritterList(critters, isAny == true)
+        GroupMan.one.setCriteria(user, group, clist)
+        
+        clist = group.critterList
+        log.info "Critters ${clist.critters.config}"
+        List resources = getResources(clist)
+
+        group.setResources(user, resources)
+        
+        xmlOut.group(name:group.name, isAny:clist.isAny()) {
+            xmlOut.resources {
+                for (r in group.resources) {
+                    xmlOut.resource(id:r.id, name:r.name)
+                }
+            }
+            
+            xmlOut.proposedResources {
+                for (r in resources) {
+                    xmlOut.resource(id:r.id, name:r.name)
+                }
+            }
+        }
+        xmlOut
     }
     
     private List parseCritters(xmlIn) {
         xmlIn.critter.collect { critterDef ->
-            def critterType = findCritterType(critterDef.'@class')
+            CritterType critterType = findCritterType(critterDef.'@class')
             
             if (critterType == null) {
-                xmlOut.error("Unable to find critter class [${critterDef.'@class'}]")
-                return xmlOut
+                throw new Exception("Unable to find critter class [${critterDef.'@class'}]")
             }
             
-            def props = []
+            def props = [:]
             for (propDef in critterDef.children()) {
-                if (propDef.name() == 'string') {
-                    props << new StringCritterProp(propDef.text())
-                } else if (propDef.name() == 'resource') {
+                String propId   = propDef.'@id'
+                String propType = propDef.name() 
+                if (propType == 'string') {
+                    props[propId] = new StringCritterProp(propId, propDef.text())
+                } else if (propType == 'resource') {
                     def rsrcId   = propDef.text().toInteger()
                     def resource = resourceHelper.findResource(rsrcId)
-                    props << new ResourceCritterProp(resource)
-                } else if (propDef.name() == 'group') {
+                    props[propId] = new ResourceCritterProp(propId, resource)
+                } else if (propType == 'group') {
                     def group = resourceHelper.findGroupByName(propDef.text())
-                    props << new GroupCritterProp(group)
-                } else if (propDef.name() == 'proto') { 
+                    props[propId] = new GroupCritterProp(propId, group)
+                } else if (propType == 'proto') { 
                     def proto  = resourceHelper.findResourcePrototype(propDef.text())
-                    props << new ProtoCritterProp(proto)
+                    props[propId] = new ProtoCritterProp(propId, proto)
+                } else if (propType == 'enum') {
+                    def desc = critterType.propDescriptions.find { it.id == propId }
+                    if (!desc) {
+                        throw new Exception("Unknown prop [${propId}] for " + 
+                                            "critter [${critterDef.class}]")
+                    }
+                    if (desc.type != CritterPropType.ENUM) {
+                        throw new Exception("Property [${propId}] of critter ["+ 
+                                            "[${critterDef.class}] should be " + 
+                                            "of type <enum>")
+                    }
+                    
+                    EnumCritterPropDescription eDesc = desc
+                    def propDesc = propDef.text()
+                    HypericEnum match = eDesc.possibleValues.find { it.description == propDesc }
+                    if (match == null) {
+                        throw new Exception("[${propDesc}] is not a valid " + 
+                                            "value for prop [${propId}] for " +
+                                            "critter [${critterDef.@class}]")
+                    }
+                    props[propId] = new EnumCritterProp(propId, match)
                 } else {
-                    xmlOut.error("Unhandled prop type: ${propDef.'@type'}")
+                    throw new Exception("Unknown prop type [${propDef.name()}] for " + 
+                                        "critter [${critterDef.@class}]")
                 }
             }
             critterType.newInstance(props)
         }
     }
     
-    def peek(xmlOut, params) {
-        def xmlIn    = new XmlParser().parseText(getUpload('args'))
-        def critters = parseCritters(xmlIn)
-
-        def isAny     = xmlIn.'@isAny'?.toBoolean()
-        def clist     = new CritterList(critters, isAny == true)
+    private List getResources(CritterList clist) {
         def trans     = new CritterTranslator()
         def sess      = DAOFactory.getDAOFactory().currentSession
         def ctx       = new CritterTranslationContext(sess, Util.getHQDialect())
-        def resources = trans.translate(ctx, clist).list()
+        
+        trans.translate(ctx, clist).list()
+    }
+    
+    def peek(xmlOut, params) {
+        def xmlIn    = new XmlParser().parseText(getUpload('args'))
+
+        def critters
+        try {
+            critters = parseCritters(xmlIn)
+        } catch(Exception e) {
+            log.error("Error parsing critters", e)
+            xmlOut.error(e.getMessage())
+            return xmlOut
+        }
+
+        def isAny     = xmlIn.'@isAny'?.toBoolean()
+        def clist     = new CritterList(critters, isAny == true)
+        def resources = getResources(clist)
         
         xmlOut.resources { 
             for (r in resources) {

@@ -1,0 +1,12 @@
+<critters>
+  <!--
+   This critter will find all descendents of the resource id=10540, who are of
+   type CPU
+  -->
+
+  <critter class="org.hyperic.hq.grouping.critters.DescendantProtoCritterType">
+    <resource id="root">10540</resource>
+    <proto id="protoType">CPU</proto>
+  </critter>
+</critters>
+

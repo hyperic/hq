@@ -1,0 +1,15 @@
+<group name="Net Devices" isAny='false'>
+  <!--
+    This sync will ensure that there is a 'Net Devices' group containing
+    all resources with the text 'Interface' in their type
+  -->
+
+
+  <critters>
+    <critter class="org.hyperic.hq.grouping.critters.ProtoNameCritterType">
+      <string id="name">.*Interface.*</string>
+    </critter>
+
+  </critters>
+</group>
+
