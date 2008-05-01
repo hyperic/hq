@@ -65,7 +65,7 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
     }
 
     public boolean isSystem() {
-        return false;
+        return true;
     }
 
     public Critter newInstance(Map props) throws GroupException {
