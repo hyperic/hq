@@ -32,7 +32,6 @@ import java.util.Set;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 
