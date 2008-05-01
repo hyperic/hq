@@ -28,11 +28,11 @@ public class StringCritterProp
     implements CritterProp
 {
     private final String _str;
-    private final String _name;
+    private final String _id;
     
-    public StringCritterProp(String name, String value) {
+    public StringCritterProp(String id, String value) {
         _str = value;
-        _name = name;
+        _id  = id;
     }
     
     public String getString() {
@@ -43,8 +43,8 @@ public class StringCritterProp
         return _str;
     }
     
-    public String getName() {
-        return _name;
+    public String getId() {
+        return _id;
     }
     
     public CritterPropType getType() {

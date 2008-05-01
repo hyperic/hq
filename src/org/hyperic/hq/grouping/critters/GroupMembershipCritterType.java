@@ -28,6 +28,7 @@ package org.hyperic.hq.grouping.critters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -40,8 +41,8 @@ import org.hyperic.hq.grouping.prop.CritterPropType;
 import org.hyperic.hq.grouping.prop.GroupCritterProp;
 
 /**
- * Metadata for GroupMembershipCritter which fetches all Resources
- * that belong to a group by GroupId
+ * Fetches all resources which are declared to be in a group.
+ * 
  */
 public class GroupMembershipCritterType extends BaseCritterType {
     
@@ -71,9 +72,9 @@ public class GroupMembershipCritterType extends BaseCritterType {
         return new GroupMembershipCritter(group, this);
     }
 
-    public Critter newInstance(List critterProps) throws GroupException {
+    public Critter newInstance(Map critterProps) throws GroupException {
         validate(critterProps);
-        GroupCritterProp group = (GroupCritterProp)critterProps.get(0);
+        GroupCritterProp group = (GroupCritterProp)critterProps.get(PROP_NAME);
         return new GroupMembershipCritter(group.getGroup(), this);
     }
     
@@ -91,7 +92,7 @@ public class GroupMembershipCritterType extends BaseCritterType {
            _group = group;
            _type = type;
            List c = new ArrayList(1);
-           c.add(new GroupCritterProp(type.getComponentName(PROP_NAME), group));
+           c.add(new GroupCritterProp(PROP_NAME, group));
            _props = Collections.unmodifiableList(c);
        }
        

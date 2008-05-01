@@ -28,6 +28,7 @@ package org.hyperic.hq.grouping.critters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
@@ -44,7 +45,7 @@ import org.hyperic.hq.grouping.prop.StringCritterProp;
  */
 public class ResourceTypeCritterType extends BaseCritterType {
     
-    private static final String PROP_NAME = "name";
+    private static final String PROP_NAME = "typeName";
 
     public ResourceTypeCritterType() {
         super();
@@ -52,26 +53,26 @@ public class ResourceTypeCritterType extends BaseCritterType {
         addPropDescription(PROP_NAME, CritterPropType.STRING);
     }
 
-    public Critter compose(CritterDump dump) throws GroupException {
-        throw new GroupException("compose is not supported");
+    public Critter compose(CritterDump dump) {
+        return new ResourceTypeCritter(dump.getStringProp(), this);
+        
     }
 
-    public void decompose(Critter critter, CritterDump dump)
-        throws GroupException {
-        throw new GroupException("decompose is not supported");
+    public void decompose(Critter c, CritterDump dump) { 
+        dump.setStringProp(((ResourceTypeCritter)c).getResourceTypeName());
     }
 
     public boolean isSystem() {
-        return true;
+        return false;
     }
 
     public Critter newInstance(String resTypeName) throws GroupException {
         return new ResourceTypeCritter(resTypeName, this);
     }
 
-    public Critter newInstance(List critterProps) throws GroupException {
+    public Critter newInstance(Map critterProps) throws GroupException {
         validate(critterProps);
-        StringCritterProp prop = (StringCritterProp)critterProps.get(0);
+        StringCritterProp prop = (StringCritterProp)critterProps.get(PROP_NAME);
         return new ResourceTypeCritter(prop.getString(), this);
     }
     
@@ -80,17 +81,16 @@ public class ResourceTypeCritterType extends BaseCritterType {
      * EAM_RESOURCE_TYPE table, doesn't use proto
      */
     public class ResourceTypeCritter extends Object implements Critter {
-        private String _resTypeName;
-        private List _props;
+        private String                  _resTypeName;
+        private List                    _props;
         private ResourceTypeCritterType _type;
 
         public ResourceTypeCritter(String resTypeName,
-                                        ResourceTypeCritterType type)
+                                   ResourceTypeCritterType type)
         {
             _resTypeName = resTypeName;
             List c = new ArrayList();
-            c.add(new StringCritterProp(
-                type.getComponentName(PROP_NAME), resTypeName));
+            c.add(new StringCritterProp(PROP_NAME, resTypeName));
             _props = Collections.unmodifiableList(c);
             _type  = type;
         }
@@ -99,6 +99,10 @@ public class ResourceTypeCritterType extends BaseCritterType {
             q.setParameter(ctx.escape("resTypeName"), _resTypeName);
         }
 
+        public String getResourceTypeName() {
+            return _resTypeName;
+        }
+        
         public String getConfig() {
             Object[] args = {_resTypeName};
             return _type.getInstanceConfig().format(args);

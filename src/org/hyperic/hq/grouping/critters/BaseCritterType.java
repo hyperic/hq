@@ -28,16 +28,21 @@ package org.hyperic.hq.grouping.critters;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
+import org.hyperic.hq.grouping.prop.BasicCritterPropDescription;
 import org.hyperic.hq.grouping.prop.CritterProp;
 import org.hyperic.hq.grouping.prop.CritterPropDescription;
 import org.hyperic.hq.grouping.prop.CritterPropType;
+import org.hyperic.hq.grouping.prop.EnumCritterPropDescription;
+import org.hyperic.util.HypericEnum;
 
 /**
  * BaseCritterType provides common routines for setting up type descriptions, 
@@ -52,18 +57,13 @@ public abstract class BaseCritterType
     private String _propPrefix;
     private String _name;
     private String _desc;
-    private List   _propDescs;
+    private Map    _propDescs;
     
     public BaseCritterType() {
     }
     
-    // XXX this is not really symmetrical since propName
-    // in addPropDescription takes a propName where
-    // the meaning is not the same.  Check the initialize() method
-    // specifically the params it passes in to this method
-    // I'd like to remove either this or getComponentName
-    protected String getResourceProperty(String propName) {
-        return _bundle.getString(_propPrefix + propName).trim();
+    protected String getResourceProperty(String propSuffix) {
+        return _bundle.getString(_propPrefix + propSuffix).trim();
     }
    
     /**
@@ -76,18 +76,19 @@ public abstract class BaseCritterType
      * The BaseCritterType will load properties for in the following form:
      *     propPrefix.critter.name=
      *     propPrefix.critter.desc=
-     *     propPrefix.critterProp.propName.name=
-     *     propPrefix.critterProp.propName.purpose=
+     *     propPrefix.critterProp.propId.name=
+     *     propPrefix.critterProp.propId.purpose=
      *     
-     * Where propName can be specified for all the different properties a
-     * resource supports. 
+     * Where propId can be specified for all the different properties a
+     * resource supports.  propId must match the value returned from
+     * CritterProp.getId()
      */
     protected void initialize(String bundleName, String propPrefix) {
         _bundle     = ResourceBundle.getBundle(bundleName);
         _propPrefix = propPrefix + ".";
         _name       = getResourceProperty("critter.name"); 
         _desc       = getResourceProperty("critter.desc");
-        _propDescs  = new ArrayList();
+        _propDescs  = new HashMap();
     }
     
     /**
@@ -108,33 +109,45 @@ public abstract class BaseCritterType
      * Each call to addPropDescription adds a new property, and thus will
      * require 2 more localized properties. 
      */
-    protected void addPropDescription(String propName, CritterPropType type,
+    protected void addPropDescription(String propId, CritterPropType type,
                                       boolean required) 
     { 
-        String componentName = getComponentName(propName);
-        String componentPurpose = getComponentPurpose(propName);
-        _propDescs.add(new CritterPropDescription(type, componentName, 
-                                                  componentPurpose, required));
+        String propName    = getPropName(propId);
+        String propPurpose = getPropPurpose(propId);
+        _propDescs.put(propId, 
+                       new BasicCritterPropDescription(type, propId, propName,
+                                                       propPurpose, required));
+    }
+    
+    protected void addEnumPropDescription(String propId, Class enumClass, 
+                                          boolean required)  
+    {
+        if (HypericEnum.class.isAssignableFrom(enumClass) == false) {
+            throw new IllegalArgumentException("enumClass must extend " + 
+                                               "HypericEnum");
+        }
+        String propName    = getPropName(propId);
+        String propPurpose = getPropPurpose(propId);
+        EnumCritterPropDescription d = 
+            new EnumCritterPropDescription(propId, propName,
+                                           propPurpose, enumClass, required);
+        _propDescs.put(propId, d); 
     }
 
-    protected String getComponentPurpose(String propName) {
-        return _bundle.getString(new StringBuilder()
-                .append(_propPrefix).append("critterProp.")
-                .append(propName).append(".purpose").toString().trim());
+    private String getPropPurpose(String propId) {
+        return getResourceProperty("critterProp." + propId + ".purpose");
     }
 
-    protected String getComponentName(String propName) {
-        return _bundle.getString(new StringBuilder()
-                .append(_propPrefix).append("critterProp.")
-                .append(propName).append(".name").toString().trim());
+    private String getPropName(String propId) {
+        return getResourceProperty("critterProp." + propId + ".name");
     }
 
-    protected void addPropDescription(String propName, CritterPropType type) {
-        addPropDescription(propName, type, true);
+    protected void addPropDescription(String propId, CritterPropType type) {
+        addPropDescription(propId, type, true);
     }
 
     public List getPropDescriptions() {
-        return Collections.unmodifiableList(_propDescs);
+        return Collections.unmodifiableList(new ArrayList(_propDescs.values()));
     }
 
     public String getDescription() {
@@ -157,48 +170,43 @@ public abstract class BaseCritterType
      * props that are valid.  This method ensures that a list of 
      * {@link CritterPropDescription}s match the valid types.
      * 
-     * @param propDescs a list of {@link CritterProp}s 
+     * @param props a map of propIds onto CritterProps
      */
-    protected void validate(List propDescs) 
+    protected void validate(Map props) 
         throws GroupException
     {
-        for (Iterator it=_propDescs.iterator(); it.hasNext(); ) {
-            CritterPropDescription desc = (CritterPropDescription)it.next();
-            if (!desc.isRequired()) {
+        for (Iterator i=_propDescs.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry ent = (Map.Entry)i.next();
+            String propId = (String)ent.getKey();
+            CritterPropDescription desc = 
+                (CritterPropDescription)ent.getValue(); 
+
+            if (!desc.isRequired())
                 continue;
-            } else if (!containsName(propDescs, desc.getName())) {
-                throw new GroupException("CritterPropDescription Name, " +
-                    desc.getName() + " does not exist in props being validated");
+            
+            CritterProp prop = (CritterProp)props.get(propId);
+            if (prop == null) {
+                throw new GroupException("Required property [" + propId + 
+                                         "] not specified");
+            } else if (prop.getType().equals(desc.getType()) == false) {
+                throw new GroupException("Property [" + propId + "] must " +
+                                         "be of type " + 
+                                         desc.getType().getDescription() + 
+                                         " (was " + 
+                                         prop.getType().getDescription() + ")");
             }
         }
-        for (Iterator it=propDescs.iterator(); it.hasNext(); ) {
-            CritterProp prop = (CritterProp)it.next();
-            if (!containsName(prop.getName())) {
-                throw new GroupException("CritterPropDescription Name, " +
-                    prop.getName() + " does not exist in this Object's " +
-                    "CritterPropDescriptions");
+        
+        for (Iterator i=props.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry ent = (Map.Entry)i.next();
+            String propId = (String)ent.getKey();
+            
+            if (!_propDescs.containsKey(propId)) {
+                throw new GroupException("Specified a property which is " +
+                                         "unknown by the critter [" + propId + 
+                                         "]"); 
             }
         }
-    }
-    
-    private boolean containsName(String name) {
-        for (Iterator it=_propDescs.iterator(); it.hasNext(); ) {
-            CritterPropDescription desc = (CritterPropDescription)it.next();
-            if (desc.getName().equals(name)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    private boolean containsName(List props, String name) {
-        for (Iterator it=props.iterator(); it.hasNext(); ) {
-            CritterProp prop = (CritterProp)it.next();
-            if (prop.getName().equals(name)) {
-                return true;
-            }
-        }
-        return false;
     }
     
     /**

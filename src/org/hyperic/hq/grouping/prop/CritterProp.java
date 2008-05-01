@@ -29,10 +29,29 @@ package org.hyperic.hq.grouping.prop;
  * The CritterProp is a data storage class, containing the values used
  * by critter when evaluating.  
  * 
- * You can think of this class as an argument when creating a
- * {@link Critter} via a {@link CritterType}.  
+ * A CritterProp contains an id and type and basically looks like an
+ * encapsulated method argument.
+ * 
+ * Critters are evaulated like: (pseudo code)
+ *    Critter1.evaluate(StringCritterProp resourceName, DateCritterProp since)
+ *    
+ * Where 'StringCritterProp' equates to something implementing this type
+ * and 'resourceName' equates to the name of the variable passed to evaluation.
  */
 public interface CritterProp {
+    /**
+     * Get some id that uniqely defines this prop in the context of a 
+     * critter prop list.
+     * 
+     * e.g.  resourceName, startDate, etc.
+     * 
+     * This id allows an XML document to setup new props. 
+     */
+    String getId();
+    
+    
+    /**
+     * The type that created this prop.
+     */
     CritterPropType getType();
-    String getName();
 }

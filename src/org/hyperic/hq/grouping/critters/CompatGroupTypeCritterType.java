@@ -27,8 +27,8 @@ package org.hyperic.hq.grouping.critters;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hibernate.type.IntegerType;
@@ -40,7 +40,7 @@ import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
-import org.hyperic.hq.grouping.prop.EnumCritterProp;
+import org.hyperic.hq.grouping.prop.ProtoCritterProp;
 import org.hyperic.hq.grouping.prop.ResourceCritterProp;
 
 public class CompatGroupTypeCritterType extends BaseCritterType {
@@ -50,28 +50,29 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
     public CompatGroupTypeCritterType() {
         super();
         initialize("org.hyperic.hq.grouping.Resources", "compatGroupType");
-        addPropDescription(PROTO_NAME_PROP, CritterPropType.ENUM, false);
+        addPropDescription(PROTO_NAME_PROP, CritterPropType.PROTO, false);
     }
 
     public Critter compose(CritterDump dump) throws GroupException {
-        throw new GroupException("compose is not supported");
+        return new CompatGroupTypeCritter(dump.getResourceProp(), this);
     }
 
     public void decompose(Critter critter, CritterDump dump)
-        throws GroupException {
-        throw new GroupException("decompose is not supported");
+        throws GroupException 
+    {
+        CompatGroupTypeCritter c = (CompatGroupTypeCritter)critter;
+        dump.setResourceProp(c.getPrototype());
     }
 
     public boolean isSystem() {
-        return true;
+        return false;
     }
 
-    public Critter newInstance(List props) throws GroupException {
+    public Critter newInstance(Map props) throws GroupException {
         validate(props);
-        Resource resource = null;
-        if (props.size() > 0) {
-            resource = ((ResourceCritterProp) props.get(1)).getResource();
-        }
+        Resource resource = 
+            ((ProtoCritterProp)props.get(PROTO_NAME_PROP)).getProtoType();
+            
         return new CompatGroupTypeCritter(resource, this);
     }
 
@@ -89,7 +90,6 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
      * instance_id from EAM_RESOURCE_GROUP
      */
     class CompatGroupTypeCritter implements Critter {
-
         private final List _groupTypes = new ArrayList();
         private final List _props;
         private final CompatGroupTypeCritterType _type;
@@ -104,24 +104,21 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
          *            List of Integers which represent grouptypes
          */
         public CompatGroupTypeCritter(Resource prototype,
-            CompatGroupTypeCritterType type) {
+                                      CompatGroupTypeCritterType type) 
+        {
             _groupTypes.add(this.COMPAT_GROUP_PLATFORM_SERVER);
             _groupTypes.add(this.COMPAT_SERVICE_CLUSTER);
             _type = type;
             List props = new ArrayList();
             if (prototype != null) {
-                props.add(new ResourceCritterProp(
-                    type.getComponentName(PROTO_NAME_PROP), prototype));
+                props.add(new ProtoCritterProp(PROTO_NAME_PROP, prototype));
                 _proto = prototype;
             }
             _props = Collections.unmodifiableList(props);
         }
-
-        private void setIdList(List groupTypes) {
-            for (Iterator i = groupTypes.iterator(); i.hasNext();) {
-                Integer type = (Integer) i.next();
-                _groupTypes.add(type);
-            }
+        
+        public Resource getPrototype() {
+            return _proto;
         }
 
         public List getProps() {
@@ -133,7 +130,7 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
                 q.setParameter(ctx.escape("proto"), _proto.getId());
             }
             q.setParameterList(ctx.escape("groupTypes"), _groupTypes,
-                new IntegerType());
+                               new IntegerType());
         }
 
         public String getConfig() {
@@ -172,22 +169,18 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
             if (!(other instanceof CompatGroupTypeCritter)) return false;
             
             // make assumptions explicit
-            assert _groupTypes != null;
+            assert _proto != null;
             
             CompatGroupTypeCritter critter = (CompatGroupTypeCritter) other;
-            if (!_groupTypes.equals(critter._groupTypes)) return false;
-            return true;
+            return  _proto == critter._proto ||
+                    (_proto != null && _proto.equals(critter._proto)) ;
         }
 
         public int hashCode() {
-            int rtn = 0;
-            if (_groupTypes == null) {
+            if (_proto == null) {
                 return 0;
             }
-            for (Iterator i = _groupTypes.iterator(); i.hasNext();) {
-                rtn += i.next().hashCode();
-            }
-            return rtn;
+            return _proto.hashCode();
         }
     }
 

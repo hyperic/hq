@@ -29,12 +29,12 @@ import java.util.Date;
 public class DateCritterProp
     implements CritterProp
 {
-    private final Date _date;
-    private final String _name;
+    private final Date   _date;
+    private final String _id;
     
-    public DateCritterProp(String name, Date value) {
+    public DateCritterProp(String id, Date value) {
         _date = value;
-        _name = name;
+        _id   = id;
     }
     
     public Date getDate() {
@@ -49,7 +49,7 @@ public class DateCritterProp
         return CritterPropType.DATE;
     }
 
-    public String getName() {
-        return _name;
+    public String getId() {
+        return _id;
     }
 }

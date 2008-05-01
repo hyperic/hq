@@ -28,6 +28,7 @@ package org.hyperic.hq.grouping.critters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
@@ -56,10 +57,10 @@ public class ProtoNameCritterType extends BaseCritterType {
         return new ProtoNameCritter(name, this);
     }
 
-    public Critter newInstance(List critterProps) throws GroupException {
+    public Critter newInstance(Map critterProps) throws GroupException {
         validate(critterProps);
 
-        StringCritterProp c = (StringCritterProp) critterProps.get(0);
+        StringCritterProp c = (StringCritterProp) critterProps.get(PROP_NAME);
         return new ProtoNameCritter(c.getString(), this);
     }
 
@@ -68,12 +69,8 @@ public class ProtoNameCritterType extends BaseCritterType {
     }
 
     public void decompose(Critter critter, CritterDump dump)
-        throws GroupException {
-        // verify that critter is of the right type
-        if (!(critter instanceof ProtoNameCritter))
-            throw new GroupException(
-                "Critter is not of valid type ProtoNameCritter");
-
+        throws GroupException 
+    {
         ProtoNameCritter protoCritter = (ProtoNameCritter) critter;
         dump.setStringProp(protoCritter.getNameRegex());
     }
@@ -91,8 +88,7 @@ public class ProtoNameCritterType extends BaseCritterType {
             _nameRegex = nameRegex;
 
             List c = new ArrayList(1);
-            c.add(new StringCritterProp(
-                type.getComponentName(PROP_NAME), _nameRegex));
+            c.add(new StringCritterProp(PROP_NAME, _nameRegex));
             _props = Collections.unmodifiableList(c);
             _type = type;
         }
@@ -132,16 +128,16 @@ public class ProtoNameCritterType extends BaseCritterType {
         }
 
         public boolean equals(Object other) {
-        if (this == other) return true;
-        if (!(other instanceof ProtoNameCritter)) return false;
+            if (this == other) return true;
+            if (!(other instanceof ProtoNameCritter)) return false;
         
-        // make assumptions explicit
-        assert _nameRegex != null;
+            // make assumptions explicit
+            assert _nameRegex != null;
         
-        ProtoNameCritter critter = (ProtoNameCritter) other;
-        if (!_nameRegex.equals(critter._nameRegex)) return false;
-        return true;
-    }
+            ProtoNameCritter critter = (ProtoNameCritter) other;
+            if (!_nameRegex.equals(critter._nameRegex)) return false;
+            return true;
+        }
 
         public int hashCode() {
             int result = _nameRegex != null ? _nameRegex.hashCode() : 0;

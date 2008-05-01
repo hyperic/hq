@@ -30,11 +30,11 @@ public class EnumCritterProp
     implements CritterProp
 {
     private final HypericEnum _enum;
-    private final String _name;
+    private final String _id;
     
     public EnumCritterProp(String name, HypericEnum e) {
         _enum = e;
-        _name = name;
+        _id = name;
     }
     
     public HypericEnum getEnum() {
@@ -49,7 +49,7 @@ public class EnumCritterProp
         return CritterPropType.ENUM;
     }
 
-    public String getName() {
-        return _name;
+    public String getId() {
+        return _id;
     }
 }

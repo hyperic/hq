@@ -29,45 +29,59 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hibernate.type.IntegerType;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
-import org.hyperic.hq.grouping.prop.CritterPropType;
 import org.hyperic.hq.grouping.prop.EnumCritterProp;
 
 public class MixedGroupTypeCritterType extends BaseCritterType {
     
-    private static final String ENUM_PROP_NAME = "mixedTypeId";
+    private static final String ENUM_PROP_NAME = "subType";
     
     public MixedGroupTypeCritterType() {
         super();
         initialize("org.hyperic.hq.grouping.Resources", "mixedGroupType"); 
-        addPropDescription(ENUM_PROP_NAME, CritterPropType.ENUM);
+        addEnumPropDescription(ENUM_PROP_NAME, MixedGroupType.class, true);
     }
 
     public Critter compose(CritterDump dump) throws GroupException {
-        throw new GroupException("compose is not supported");
+        MixedGroupType type; 
+        try {
+            type = MixedGroupType.findByCode(dump.getEnumProp().intValue());
+        } catch(Exception e) {
+            throw new GroupException("Error while finding enum value of " +
+                                     "MixedGroupType with code=" +
+                                     dump.getEnumProp(), e);
+        }
+
+        if (type == null) {
+            throw new GroupException("Unable to find enum value of " + 
+                                     "MixedGroupType with code=" + 
+                                     dump.getEnumProp().intValue());
+        }
+
+        return new MixedGroupTypeCritter(type, this);
     }
 
-    public void decompose(Critter critter, CritterDump dump)
-        throws GroupException {
-        throw new GroupException("decompose is not supported");
+    public void decompose(Critter critter, CritterDump dump) {
+        MixedGroupTypeCritter c = (MixedGroupTypeCritter)critter;
+        dump.setEnumProp(new Integer(c.getGroupType().getCode()));
     }
 
     public boolean isSystem() {
-        return true;
+        return false;
     }
 
-    public Critter newInstance(List props) throws GroupException {
+    public Critter newInstance(Map props) throws GroupException {
         validate(props);
-        EnumCritterProp prop = (EnumCritterProp)props.get(0);
+        EnumCritterProp prop = (EnumCritterProp)props.get(ENUM_PROP_NAME);
         MixedGroupType type = (MixedGroupType)prop.getEnum();
         return new MixedGroupTypeCritter(type, this);
     }
@@ -81,7 +95,7 @@ public class MixedGroupTypeCritterType extends BaseCritterType {
      * joined by instance_id from EAM_RESOURCE_GROUP
      */
     class MixedGroupTypeCritter implements Critter {
-        
+        private final MixedGroupType _groupType;
         private final List _groupTypes = new ArrayList();
         private final List _props; 
         private final MixedGroupTypeCritterType _type;
@@ -90,13 +104,18 @@ public class MixedGroupTypeCritterType extends BaseCritterType {
          * @param groupTypes List of Integers which represent grouptypes
          */
         public MixedGroupTypeCritter(MixedGroupType groupType,
-                                     MixedGroupTypeCritterType type) {
+                                     MixedGroupTypeCritterType type) 
+        {
+            _groupType = groupType;
             setIdList(groupType.getAppdefEntityTypes());
             _type = type;
             List props = new ArrayList();
-            props.add(new EnumCritterProp(
-                type.getComponentName(ENUM_PROP_NAME), groupType));
+            props.add(new EnumCritterProp(ENUM_PROP_NAME, groupType));
             _props = Collections.unmodifiableList(props);
+        }
+
+        public MixedGroupType getGroupType() {
+            return _groupType;
         }
         
         private void setIdList(List groupTypes) {
@@ -112,7 +131,7 @@ public class MixedGroupTypeCritterType extends BaseCritterType {
 
         public void bindSqlParams(CritterTranslationContext ctx, Query q) {
             q.setParameterList(ctx.escape("groupTypes"), _groupTypes,
-                new IntegerType());
+                               new IntegerType());
         }
         
         public String getConfig() {
@@ -144,19 +163,12 @@ public class MixedGroupTypeCritterType extends BaseCritterType {
             assert _groupTypes != null;
             
             MixedGroupTypeCritter critter = (MixedGroupTypeCritter) other;
-            if (!_groupTypes.equals(critter._groupTypes)) return false;
+            if (!_groupType.equals(critter._groupType)) return false;
             return true;
         }
 
         public int hashCode() {
-            int rtn = 0;
-            if (_groupTypes == null) {
-                return 0;
-            }
-            for (Iterator i=_groupTypes.iterator(); i.hasNext(); ) {
-                rtn += i.next().hashCode();
-            }
-            return rtn;
+            return _groupType.hashCode();
         }
     }
 }

@@ -27,6 +27,7 @@ package org.hyperic.hq.grouping.critters;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
@@ -45,25 +46,18 @@ public class NonSystemCritterType
         initialize("org.hyperic.hq.grouping.Resources", "nonSystem"); 
     }
 
-    public Critter newInstance(List critterProps)
+    public Critter newInstance(Map critterProps)
         throws GroupException
     {
         validate(critterProps);
         return new NonSystemCritter(this);
     }
     
-    public Critter compose(CritterDump dump) throws GroupException {
-        return newInstance(Collections.EMPTY_LIST);
+    public Critter compose(CritterDump dump) { 
+        return new NonSystemCritter(this);
     }
 
-    public void decompose(Critter critter, CritterDump dump)
-        throws GroupException 
-    {
-        // verify that critter is of the right type
-        if (!(critter instanceof NonSystemCritter)) {
-            throw new GroupException("Critter is not of valid type " + 
-                                     "NonSystemCritter");
-        }
+    public void decompose(Critter critter, CritterDump dump) {
     }
     
     public boolean isSystem() {

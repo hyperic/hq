@@ -30,11 +30,11 @@ public class ResourceCritterProp
     implements CritterProp
 {
     private final Resource _resource;
-    private final String _name;
+    private final String   _id;
     
-    public ResourceCritterProp(String name, Resource resource) {
+    public ResourceCritterProp(String id, Resource resource) {
         _resource = resource;
-        _name = name;
+        _id       = id;
     }
     
     public Resource getResource() {
@@ -49,7 +49,7 @@ public class ResourceCritterProp
         return CritterPropType.RESOURCE;
     }
 
-    public String getName() {
-        return _name;
+    public String getId() {
+        return _id;
     }
 }

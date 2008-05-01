@@ -40,58 +40,38 @@ package org.hyperic.hq.grouping.prop;
  *     
  *     Name: a regex to match against the resource name (string) 
  *     Age:  only allow resources created before this time (date)
+ *     
+ *     
+ * Subclasses of this should exist as types in {@link CritterPropType} 
  */
-public class CritterPropDescription  {
-    private final CritterPropType _type;
-    private final String          _name;
-    private final String          _purpose;
-    private final boolean         _required;
-
-    public CritterPropDescription(CritterPropType type, String name, 
-                                  String purpose, boolean required)
-    {
-        _name     = name;
-        _type     = type;
-        _purpose  = purpose;
-        _required = required;
-    }
-
+public interface CritterPropDescription  {
     /**
-     * Create a new description for the {@link CritterProp}, defaulting
-     * to being a required property. 
+     * Returns the ID for the {@link CritterProp} associated with this
+     * description.
+     * 
+     * The return value from this method should be equal to the value of
+     * CritterProp.getId()
      */
-    public CritterPropDescription(CritterPropType type, String name, 
-                                  String purpose)
-    {
-        this(type, name, purpose, true);
-    }
+    String getId();
     
     /**
      * Returns a localized name for this prop.  Used by the UI
      * to generically argument types for critters.
      */
-    public String getName() {
-        return _name;
-    }
-    
+    String getName();
+
     /**
      * Return the type (I am a DATE, I am a STRING, etc.)
      */
-    public CritterPropType getType() {
-        return _type;
-    }
+    CritterPropType getType();
 
     /**
      * Return a localized purpose.
      */
-    public String getPurpose() {
-        return _purpose;
-    }
+    public String getPurpose();
 
     /**
      * If true, the associated {@link CritterProp} is required.
      */
-    public boolean isRequired() {
-        return _required;
-    }
+    public boolean isRequired();
 }

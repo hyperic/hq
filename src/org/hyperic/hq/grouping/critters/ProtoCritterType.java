@@ -28,6 +28,7 @@ package org.hyperic.hq.grouping.critters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -61,11 +62,6 @@ public class ProtoCritterType extends BaseCritterType {
     public void decompose(Critter critter, CritterDump dump)
         throws GroupException
     {
-        // verify that critter is instanceof ProtoCritter
-        if (!(critter instanceof ProtoCritter)) {
-            String msg = "Critter is not of valid type ProtoCritter";
-            throw new GroupException(msg);
-        }
         ProtoCritter protoCritter = (ProtoCritter)critter;
         dump.setResourceProp(protoCritter.getProto());
     }
@@ -74,14 +70,14 @@ public class ProtoCritterType extends BaseCritterType {
         return false;
     }
     
-    public ProtoCritter newInstance(Resource name) 
-    {
+    public ProtoCritter newInstance(Resource name) { 
         return new ProtoCritter(name, this);
     }
 
-    public Critter newInstance(List critterProps) throws GroupException {
+    public Critter newInstance(Map critterProps) throws GroupException {
         validate(critterProps);
-        ProtoCritterProp protoProp = (ProtoCritterProp)critterProps.get(0);
+        ProtoCritterProp protoProp = (ProtoCritterProp)
+            critterProps.get(PROP_NAME);
         return new ProtoCritter(protoProp.getProtoType(), this);
     }
     
@@ -97,8 +93,7 @@ public class ProtoCritterType extends BaseCritterType {
         ProtoCritter(Resource proto, ProtoCritterType type) {
             _proto = proto;
             List c = new ArrayList();
-            c.add(new ResourceCritterProp(
-                type.getComponentName(PROP_NAME), proto));
+            c.add(new ResourceCritterProp(PROP_NAME, proto));
             _props = Collections.unmodifiableList(c);
             _type  = type;
         }

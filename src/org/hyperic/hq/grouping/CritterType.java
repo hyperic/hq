@@ -26,6 +26,7 @@
 package org.hyperic.hq.grouping;
 
 import java.util.List;
+import java.util.Map;
 
 
 public interface CritterType {
@@ -54,11 +55,12 @@ public interface CritterType {
     /**
      * Create a new instance of this critter type.  The passed props
      * must match what the type is asking for (via getPropDescriptions())
-     * 
-     * @param critterProps A list of {@link CritterProp}s, containing
-     *                     the values need to create the new instance.
+     *
+     * @param critterProps a map of prop IDs onto the actual props.
+     *                     The keys must match ids of props as returned by
+     *                     CritterProp.getId()
      */
-    Critter newInstance(List critterProps)
+    Critter newInstance(Map critterProps)
         throws GroupException;
     
     /**

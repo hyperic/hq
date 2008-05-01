@@ -28,6 +28,7 @@ package org.hyperic.hq.grouping.critters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -60,11 +61,11 @@ public class ResourceNameCritterType
         return new ResourceNameCritter(name, this);
     }
     
-    public Critter newInstance(List critterProps)
+    public Critter newInstance(Map critterProps)
         throws GroupException
     {
         validate(critterProps);
-        StringCritterProp c = (StringCritterProp) critterProps.get(0);
+        StringCritterProp c = (StringCritterProp) critterProps.get(PROP_NAME);
         return new ResourceNameCritter(c.getString(), this);
     }
     
@@ -101,8 +102,7 @@ public class ResourceNameCritterType
             _nameRegex = nameRegex;
 
             List c = new ArrayList(1);
-            c.add(new StringCritterProp(
-                type.getComponentName(PROP_NAME), _nameRegex));
+            c.add(new StringCritterProp(PROP_NAME, _nameRegex));
             _props = Collections.unmodifiableList(c);
             _type = type;
         }

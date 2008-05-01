@@ -28,6 +28,7 @@ package org.hyperic.hq.grouping.critters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -49,10 +50,11 @@ import org.hyperic.hq.grouping.prop.ResourceCritterProp;
 public class DescendantProtoCritterType
     extends BaseCritterType
 {
-    private Resource _root;
-    private Resource _proto;
     private static final String RESOURCE_PROP = "root";
     private static final String PROTO_PROP = "protoType";
+
+    private Resource _root;
+    private Resource _proto;
     
     public DescendantProtoCritterType() {
         initialize("org.hyperic.hq.grouping.Resources", "descendantProto"); 
@@ -72,13 +74,15 @@ public class DescendantProtoCritterType
         return new DescendantProtoCritter(root, proto, this);
     }
     
-    public Critter newInstance(List critterProps)
+    public Critter newInstance(Map critterProps)
         throws GroupException
     {
         validate(critterProps);
         
-        ResourceCritterProp root = (ResourceCritterProp) critterProps.get(0);
-        ProtoCritterProp proto = (ProtoCritterProp) critterProps.get(1);
+        ResourceCritterProp root = (ResourceCritterProp) 
+            critterProps.get(RESOURCE_PROP);
+        ProtoCritterProp proto = (ProtoCritterProp) 
+            critterProps.get(PROTO_PROP);
         return new DescendantProtoCritter(root.getResource(), 
                                           proto.getProtoType(), this);
     }
@@ -109,10 +113,8 @@ public class DescendantProtoCritterType
             _proto = proto;
 
             List c = new ArrayList(2);
-            c.add(new ResourceCritterProp(
-                type.getComponentName(RESOURCE_PROP), root));
-            c.add(new ResourceCritterProp(
-                type.getComponentName(PROTO_PROP), proto));
+            c.add(new ResourceCritterProp(RESOURCE_PROP, root));
+            c.add(new ResourceCritterProp(PROTO_PROP, proto));
             _props = Collections.unmodifiableList(c);
             _type = type;
         }
@@ -121,12 +123,15 @@ public class DescendantProtoCritterType
             return _props;
         }
 
-        public String getSql(CritterTranslationContext ctx, String resourceAlias) {
+        public String getSql(CritterTranslationContext ctx, 
+                             String resourceAlias) 
+        {
             return "@proto@.id = :@protoId@ and @edge@.from_id = :@rootId@";
         }
 
         public String getSqlJoins(CritterTranslationContext ctx,
-            String resourceAlias) {
+                                  String resourceAlias) 
+        {
             return "join EAM_RESOURCE @proto@ on " +
                 resourceAlias + ".proto_id = @proto@.id " +
                 "join EAM_RESOURCE_EDGE @edge@ on " +
