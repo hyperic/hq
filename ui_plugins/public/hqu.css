@@ -1,3 +1,6 @@
+body{
+    font-family:arial;
+}
 .BlockTitle {
     font-family: arial, sans-serif;
     font-size: 12px;
@@ -512,3 +515,45 @@ font-size:12px;
     *margin-left:1px
 }
 
+/*xTrap*/
+p a {
+    font-size:.8em
+}
+.chartContainer{
+    width: 100%;min-width:1000px;font-size:.9em
+}
+.chartTitle{
+    font-size:1em;
+    font-weight:bold;
+    margin-bottom:4px
+}
+.chartLegend{
+    font-size:0.8em;
+    clear:both;
+}
+.chartLegend span{
+    color:#3A3A3C
+}
+.link{
+    color:#0759FF;
+    cursor:pointer;
+}
+.fields{
+    font-size:.9em 
+}
+.fields span span{
+    color:#1160FF;
+    margin: 0 3px;
+    font-size:0.8em
+}
+.fields input[type=text]{
+    border: 1px solid gray;
+    width: 100px;
+    padding: 2px;
+    font-size:.8em;
+    color:#1160FF
+}
+.fieldHeader{
+    font-size:.9em;
+    font-weight:bold
+}
