@@ -115,10 +115,13 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    private Measurement updateMeasurementInterval(Measurement m,
-                                                  long interval) {
+    private Measurement updateMeasurement(Measurement m, ConfigResponse props,
+                                          long interval) {
         m.setEnabled(interval != 0);
         m.setInterval(interval);
+        
+        String dsn = translate(m.getTemplate().getTemplate(), props);
+        m.setDsn(dsn);
 
         enqueueZeventForMeasScheduleChange(m, interval);
 
@@ -256,7 +259,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                     // No measurement, create it
                     m = createMeasurement(resource, t, props, intervals[i]);
                 } else {
-                    updateMeasurementInterval(m, intervals[i]);
+                    updateMeasurement(m, props, intervals[i]);
                 }
                 dmList.add(m);
             }
