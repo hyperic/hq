@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
-import org.hyperic.hq.control.shared.ControlScheduleValue;
+import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.ui.Constants;
@@ -80,7 +80,7 @@ public class EditFormPrepareAction extends TilesAction {
             Integer trigger 
                 = RequestUtils.getIntParameter(request, Constants.CONTROL_BATCH_ID_PARAM);
 
-            ControlScheduleValue job = cBoss.getControlJob(sessionId, trigger);
+            ControlSchedule job = cBoss.getControlJob(sessionId, trigger);
             
             cForm.populateFromSchedule(job.getScheduleValue(), request.getLocale());
             cForm.setControlAction(job.getAction());

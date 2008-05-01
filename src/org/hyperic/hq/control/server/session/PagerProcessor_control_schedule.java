@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -54,9 +54,8 @@ public class PagerProcessor_control_schedule implements PagerProcessor {
                 ControlSchedule s = (ControlSchedule)o;
                 Trigger trigger;
                 try {
-                    trigger =
-                        scheduler.getTrigger(s.getTriggerName(),
-                                             ControlConstants.GROUP);
+                    trigger = scheduler.getTrigger(s.getTriggerName(),
+                                                   ControlConstants.GROUP);
                     if (trigger == null) {
                         // Job no longer exists
                         try {
@@ -82,7 +81,7 @@ public class PagerProcessor_control_schedule implements PagerProcessor {
                     return null;
                 }
 
-                return s.getControlScheduleValue();
+                return s;
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to " +

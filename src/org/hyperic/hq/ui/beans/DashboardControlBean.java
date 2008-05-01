@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@
 package org.hyperic.hq.ui.beans;
 
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.control.shared.ControlScheduleValue;
+import org.hyperic.hq.control.server.session.ControlSchedule;
 
 /**
  * Bean to hold alert values from AlertValue and AlertDefinitionValue
@@ -37,7 +37,7 @@ public final class DashboardControlBean implements java.io.Serializable{
     private AppdefResourceValue resource;
     
     /** Holds value of property control. */
-    private ControlScheduleValue control;
+    private ControlSchedule control;
     
     public DashboardControlBean() {
     //empty constructor
@@ -72,7 +72,7 @@ public final class DashboardControlBean implements java.io.Serializable{
     * @return Value of property control.
     *
     */
-   public ControlScheduleValue getControl() {
+   public ControlSchedule getControl() {
        return this.control;
    }
    
@@ -80,7 +80,7 @@ public final class DashboardControlBean implements java.io.Serializable{
     * @param control New value of property control.
     *
     */
-   public void setControl(ControlScheduleValue control) {
+   public void setControl(ControlSchedule control) {
        this.control = control;
    }
    

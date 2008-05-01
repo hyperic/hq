@@ -43,7 +43,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
-import org.hyperic.hq.control.shared.ControlScheduleValue;
+import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.beans.DashboardControlBean;
@@ -119,7 +119,7 @@ public class ViewAction extends TilesAction {
             pendingList.setTotalSize(pageList.getTotalSize());
 
             for(Iterator i = pageList.iterator(); i.hasNext();){
-                ControlScheduleValue control = (ControlScheduleValue) i.next();
+                ControlSchedule control = (ControlSchedule) i.next();
                 DashboardControlBean bean = new DashboardControlBean();     
                 try{
                     AppdefEntityID entity =

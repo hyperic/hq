@@ -53,11 +53,11 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.control.server.session.ControlHistory;
+import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
-import org.hyperic.hq.control.shared.ControlScheduleValue;
 import org.hyperic.hq.control.shared.ScheduledJobNotFoundException;
 import org.hyperic.hq.control.shared.ScheduledJobRemoveException;
 import org.hyperic.hq.product.PluginException;
@@ -619,7 +619,7 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ControlScheduleValue getControlJob(AuthzSubject subject, Integer id)
+    public ControlSchedule getControlJob(AuthzSubject subject, Integer id)
         throws PluginException
     {
         ControlSchedule cScheduleLocal;
@@ -634,7 +634,7 @@ public class ControlScheduleManagerEJBImpl
             throw new PluginException(e);
         }
 
-        return cScheduleLocal.getControlScheduleValue();
+        return cScheduleLocal;
     }
 
     /**

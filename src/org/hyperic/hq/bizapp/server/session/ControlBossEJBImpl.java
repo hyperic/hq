@@ -52,7 +52,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.control.server.session.ControlHistory;
-import org.hyperic.hq.control.shared.ControlScheduleValue;
+import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.control.shared.ScheduledJobNotFoundException;
 import org.hyperic.hq.control.shared.ScheduledJobRemoveException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
@@ -408,8 +408,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      *
      * @return The control job that was requested
      */
-    public ControlScheduleValue getControlJob(int sessionId, 
-                                              Integer id)
+    public ControlSchedule getControlJob(int sessionId, Integer id)
         throws PluginException, ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException               
     {

@@ -6,7 +6,7 @@
 * normal use of the program, and does *not* fall under the heading of
 * "derived work".
 *
-* Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+* Copyright (C) [2004-2008], Hyperic, Inc.
 * This file is part of HQ.
 *
 * HQ is free software; you can redistribute it and/or modify
@@ -32,7 +32,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.control.shared.ControlScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleValue;
 
 public class ControlSchedule extends PersistedObject
@@ -148,58 +147,6 @@ public class ControlSchedule extends PersistedObject
     protected void setAction(String action)
     {
         this.action = action;
-    }
-
-    private ControlScheduleValue controlScheduleValue =
-        new ControlScheduleValue();
-    /**
-     * legacy EJB DTO pattern
-     * @deprecated use (this) ControlHistory object instead
-     * @return
-     */
-    public ControlScheduleValue getControlScheduleValue()
-    {
-        try {
-            controlScheduleValue.setId(getId());
-            controlScheduleValue.setEntityType(getEntityType());
-            controlScheduleValue.setEntityId(getEntityId());
-            controlScheduleValue.setSubject(
-                (getSubject() == null) ? "" : getSubject());
-            controlScheduleValue.setScheduleValue(getScheduleValue());
-            controlScheduleValue.setScheduleValueBytes(getScheduleValueBytes());
-            controlScheduleValue.setTriggerName(
-                (getTriggerName() == null) ? "" : getTriggerName());
-            controlScheduleValue.setJobName(
-                (getJobName() == null) ? "" : getJobName());
-            controlScheduleValue.setNextFireTime(getNextFireTime());
-            controlScheduleValue.setJobOrderData(
-                (getJobOrderData() == null) ? "" : getJobOrderData());
-            controlScheduleValue.setAction(
-                (getAction() == null) ? "" : getAction());
-            return controlScheduleValue;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    protected void setControlScheduleValue(ControlScheduleValue valueHolder)
-    {
-        try {
-            setEntityType( valueHolder.getEntityType() );
-            setEntityId( valueHolder.getEntityId() );
-            setSubject( valueHolder.getSubject() );
-            setScheduleValue( valueHolder.getScheduleValue() );
-            setScheduleValueBytes( valueHolder.getScheduleValueBytes() );
-            setTriggerName( valueHolder.getTriggerName() );
-            setJobName( valueHolder.getJobName() );
-            setNextFireTime( valueHolder.getNextFireTime() );
-            setJobOrderData( valueHolder.getJobOrderData() );
-            setAction( valueHolder.getAction() );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     protected void setScheduleValue(ScheduleValue schedule) throws IOException
