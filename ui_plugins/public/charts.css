@@ -1,0 +1,50 @@
+/*TimePlot*/
+
+.timeplot-copyright{
+    display:none
+}
+
+.timeplot-legend{
+	clear:both;
+	font-size:.7em;
+	margin-bottom:16px;
+}
+.timeplot-legend span{
+	color:#323232;
+	margin-left:2px
+}
+
+.timeplot-container{
+    border:1px solid #33BBD5;
+    height:200px;
+    overflow:hidden;
+    padding:12px 14px;
+    position:relative;
+
+}
+
+.timeplot-timeflag{
+	background-color:#FFE57F;
+	border:1px solid #4F4F4F;
+	display:none;
+	font-weight:bold;
+	padding:2px 4px;
+	text-align:center;
+	z-index:1000;
+	color:#F8F8F8
+}
+
+.timeplot-valueflag{
+	background-color:#FFE57F;
+	border:1px solid #4F4F4F;
+	display:none;
+	font-weight:bold;
+	padding:2px 4px;
+	text-align:center;
+	z-index:1000;
+	color:#F8F8F8
+}
+
+.timeplot-div{
+    font-size:.7em
+}
