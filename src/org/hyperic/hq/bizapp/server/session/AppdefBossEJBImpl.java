@@ -130,7 +130,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.GroupCreationException;
-import org.hyperic.hq.authz.shared.GroupType;
+import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
@@ -158,8 +158,9 @@ import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.GroupException;
+import org.hyperic.hq.grouping.critters.CompatGroupTypeCritterType;
 import org.hyperic.hq.grouping.critters.GroupMembershipCritterType;
-import org.hyperic.hq.grouping.critters.GroupTypeCritterType;
+import org.hyperic.hq.grouping.critters.MixedGroupTypeCritterType;
 import org.hyperic.hq.grouping.critters.ProtoCritterType;
 import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
 import org.hyperic.hq.grouping.critters.ResourceTypeCritterType;
@@ -2585,6 +2586,9 @@ public class AppdefBossEJBImpl
         AppdefEntityID grpId = (groupId == null) ?
             null : AppdefEntityID.newGroupID(groupId);
         
+        if (groupSubType != null) {
+            appdefTypeId = AppdefEntityConstants.APPDEF_TYPE_GROUP;
+        }
         return findInventoryFromCBG(sessionId, appdefTypeId, appdefResType,
                                     grpEntId, grpId, searchFor,
                                     groupSubType, matchAny, pc);
@@ -2632,9 +2636,27 @@ public class AppdefBossEJBImpl
         throws PatternSyntaxException
     {
         Critter tmp;
+        Resource proto = null;
+        if (appdefResType != null) {
+           ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+           proto = rman.findResourcePrototype(appdefResType); 
+        }
+        boolean isGroup = (groupTypes == null) ? false : true;
         List critters = new ArrayList();
-        if (null != (tmp = getProtoCritter(appdefResType))) {
-            critters.add(tmp);
+        if (isGroup) {
+            critters.add(getGrpTypeCritter(groupTypes, proto));
+            if (null != (tmp = getResourceTypeCritter(grpEntId))) {
+                critters.add(tmp);
+            } else if (null != (tmp = getResourceTypeCritter(appdefTypeId))) {
+                critters.add(tmp);
+            }
+        } else {
+            if (null != (tmp = getProtoCritter(appdefResType, proto))) {
+                critters.add(tmp);
+            }
+            if (null != (tmp = getResourceTypeCritter(appdefTypeId))) {
+                critters.add(tmp);
+            }
         }
         if (null != (tmp = getResourceNameCritter(resourceName))) {
             critters.add(tmp);
@@ -2642,57 +2664,49 @@ public class AppdefBossEJBImpl
         if (null != (tmp = getGrpMemCritter(grpId))) {
             critters.add(tmp);
         }
-        if (null != (tmp = getResourceTypeCritter(grpEntId))) {
-            critters.add(tmp);
-            if (groupTypes != null) {
-                critters.add(getGrpTypeCritter(groupTypes));
-            }
-        } else if (null != (tmp = getResourceTypeCritter(appdefTypeId))) {
-            critters.add(tmp);
-        }
         return new CritterList(critters, matchAny);
     }
     
-    private Critter getGrpTypeCritter(int[] groupTypes) {
-        GroupTypeCritterType critter = new GroupTypeCritterType();
+    private Critter getGrpTypeCritter(int[] groupTypes, Resource proto) {
         if (groupTypes.length == 0 ||
             groupTypes[0] == APPDEF_GROUP_TYPE_UNDEFINED) {
             return null;
         }
         try {
-            GroupType type = GroupType.findByCode(groupTypes);
-            return critter.newInstance(type);
+            if (AppdefEntityConstants.isGroupCompat(groupTypes[0])) {
+                CompatGroupTypeCritterType critter =
+                    new CompatGroupTypeCritterType();
+                return critter.newInstance(proto);
+            } else {
+                MixedGroupType type = MixedGroupType.findByCode(groupTypes);
+                MixedGroupTypeCritterType critter =
+                    new MixedGroupTypeCritterType();
+                return critter.newInstance(type);
+            }
         } catch (GroupException e) {
             log.warn(e.getMessage(), e);
         }
         return null;
     }
 
-    private Critter getProtoCritter(AppdefEntityTypeID appdefResType) {
-        if (appdefResType != null) {
-            ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
-            Resource proto = rman.findResourcePrototype(appdefResType); 
-            if (proto != null) {
-                ProtoCritterType protoType = new ProtoCritterType();
-                return protoType.newInstance(proto);
-            }
+    private Critter getProtoCritter(AppdefEntityTypeID appdefResType,
+                                    Resource proto) {
+        if (appdefResType != null && proto != null) {
+            ProtoCritterType protoType = new ProtoCritterType();
+            return protoType.newInstance(proto);
         }
         return null;
     }
 
     private Critter getGrpMemCritter(AppdefEntityID grpId) {
         if (grpId != null) {
-            try {
-                ResourceGroupManagerLocal rgman =
-                    ResourceGroupManagerEJBImpl.getOne();
-                ResourceGroup group =
-                    rgman.findResourceGroupById(grpId.getId());
-                GroupMembershipCritterType groupMemType =
-                    new GroupMembershipCritterType();
-                return groupMemType.newInstance(group);
-            } catch (GroupException e) {
-                log.warn(e.getMessage(), e);
-            }
+            ResourceGroupManagerLocal rgman =
+                ResourceGroupManagerEJBImpl.getOne();
+            ResourceGroup group =
+                rgman.findResourceGroupById(grpId.getId());
+            GroupMembershipCritterType groupMemType =
+                new GroupMembershipCritterType();
+            return groupMemType.newInstance(group);
         }
         return null;
     }

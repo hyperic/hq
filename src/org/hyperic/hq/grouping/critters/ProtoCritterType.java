@@ -25,25 +25,33 @@
 
 package org.hyperic.hq.grouping.critters;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
+import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
 import org.hyperic.hq.grouping.prop.ProtoCritterProp;
+import org.hyperic.hq.grouping.prop.ResourceCritterProp;
 
 /**
  * Metadata for ProtoCritter which matches all Prototypes in EAM_RESOURCE
  * by proto_id
  */
 public class ProtoCritterType extends BaseCritterType {
+    
+    private static final String PROP_NAME = "protoType";
 
     public ProtoCritterType() {
         super();
         initialize("org.hyperic.hq.grouping.Resources", "proto"); 
-        addPropDescription("protoType", CritterPropType.PROTO);
+        addPropDescription(PROP_NAME, CritterPropType.PROTO);
     }
 
     public Critter compose(CritterDump dump) throws GroupException {
@@ -75,6 +83,76 @@ public class ProtoCritterType extends BaseCritterType {
         validate(critterProps);
         ProtoCritterProp protoProp = (ProtoCritterProp)critterProps.get(0);
         return new ProtoCritter(protoProp.getProtoType(), this);
+    }
+    
+    /**
+     * Fetches all the Prototypes from EAM_RESOURCE by proto_id
+     */
+    public class ProtoCritter implements Critter {
+        
+        private final List _props; 
+        private final Resource _proto;
+        private final ProtoCritterType _type;
+        
+        ProtoCritter(Resource proto, ProtoCritterType type) {
+            _proto = proto;
+            List c = new ArrayList();
+            c.add(new ResourceCritterProp(
+                type.getComponentName(PROP_NAME), proto));
+            _props = Collections.unmodifiableList(c);
+            _type  = type;
+        }
+        
+        public Resource getProto() {
+            return _proto;
+        }
+        
+        public List getProps() {
+            return _props;
+        }
+        
+        public String getSql(CritterTranslationContext ctx, String resourceAlias) {
+            return "@proto@.id = :@protoId@";
+        }
+        
+        public String getSqlJoins(CritterTranslationContext ctx, 
+                                  String resourceAlias) 
+        {
+            return new StringBuilder()
+                .append("join EAM_RESOURCE @proto@ on ")
+                .append(resourceAlias)
+                .append(".proto_id = @proto@.id ").toString();
+        }
+        
+        public void bindSqlParams(CritterTranslationContext ctx, Query q) {
+            q.setParameter(ctx.escape("protoId"), _proto.getId());
+        }
+
+        public CritterType getCritterType() {
+            return _type;
+        }
+        
+        public String getConfig() {
+            Object[] args = {_proto.getName()};
+            return _type.getInstanceConfig().format(args);
+        }
+        
+        public boolean equals(Object other) {
+            if (this == other) return true;
+            if (!(other instanceof ProtoCritter)) return false;
+            
+            // make assumptions explicit
+            assert _proto != null;
+            
+            ProtoCritter critter = (ProtoCritter) other;
+            if (!_proto.equals(critter._proto)) return false;
+            return true;
+        }
+
+        public int hashCode() {
+            int result = _proto != null ? _proto.hashCode() : 0;
+            return result;
+        }
     }
 
 }

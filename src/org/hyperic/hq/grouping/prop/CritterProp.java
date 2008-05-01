@@ -34,4 +34,5 @@ package org.hyperic.hq.grouping.prop;
  */
 public interface CritterProp {
     CritterPropType getType();
+    String getName();
 }

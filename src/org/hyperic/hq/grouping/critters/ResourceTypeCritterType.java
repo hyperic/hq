@@ -26,24 +26,30 @@
 package org.hyperic.hq.grouping.critters;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
+import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
 import org.hyperic.hq.grouping.prop.StringCritterProp;
 
 /**
- * Metadata for ResourceTypeCritter which matches ResourceTypeName
+ * Meta data for ResourceTypeCritter which matches ResourceTypeName
  * joined from EAM_RESOURCE_TYPE table
  */
 public class ResourceTypeCritterType extends BaseCritterType {
     
+    private static final String PROP_NAME = "name";
+
     public ResourceTypeCritterType() {
         super();
         initialize("org.hyperic.hq.grouping.Resources", "resourceType"); 
-        addPropDescription("name", CritterPropType.STRING);
+        addPropDescription(PROP_NAME, CritterPropType.STRING);
     }
 
     public Critter compose(CritterDump dump) throws GroupException {
@@ -60,15 +66,85 @@ public class ResourceTypeCritterType extends BaseCritterType {
     }
 
     public Critter newInstance(String resTypeName) throws GroupException {
-        List list = new ArrayList();
-        list.add(new StringCritterProp(resTypeName));
-        return newInstance(list);
+        return new ResourceTypeCritter(resTypeName, this);
     }
 
     public Critter newInstance(List critterProps) throws GroupException {
         validate(critterProps);
         StringCritterProp prop = (StringCritterProp)critterProps.get(0);
         return new ResourceTypeCritter(prop.getString(), this);
+    }
+    
+    /**
+     * Fetches all Resources which match the ResourceTypeName, joins the
+     * EAM_RESOURCE_TYPE table, doesn't use proto
+     */
+    public class ResourceTypeCritter extends Object implements Critter {
+        private String _resTypeName;
+        private List _props;
+        private ResourceTypeCritterType _type;
+
+        public ResourceTypeCritter(String resTypeName,
+                                        ResourceTypeCritterType type)
+        {
+            _resTypeName = resTypeName;
+            List c = new ArrayList();
+            c.add(new StringCritterProp(
+                type.getComponentName(PROP_NAME), resTypeName));
+            _props = Collections.unmodifiableList(c);
+            _type  = type;
+        }
+
+        public void bindSqlParams(CritterTranslationContext ctx, Query q) {
+            q.setParameter(ctx.escape("resTypeName"), _resTypeName);
+        }
+
+        public String getConfig() {
+            Object[] args = {_resTypeName};
+            return _type.getInstanceConfig().format(args);
+        }
+
+        public CritterType getCritterType() {
+            return _type;
+        }
+
+        public List getProps() {
+            return _props;
+        }
+
+        public String getSql(CritterTranslationContext ctx, String resourceAlias) {
+            String  bool = ctx.getDialect().toBooleanValueString(false);
+            return new StringBuilder()
+                .append("(@type@.name = :@resTypeName@ and ")
+                .append(resourceAlias).append(".fsystem = ")
+                .append(bool).append(")").toString();
+        }
+
+        public String getSqlJoins(CritterTranslationContext ctx,
+                                  String resourceAlias)
+        {
+            return new StringBuilder()
+                .append("JOIN EAM_RESOURCE_TYPE @type@ on ")
+                .append(resourceAlias)
+                .append(".resource_type_id = @type@.id").toString();
+        }
+        
+        public boolean equals(Object other) {
+            if (this == other) return true;
+            if (!(other instanceof ResourceTypeCritter)) return false;
+            
+            // make assumptions explicit
+            assert _resTypeName != null;
+            
+            ResourceTypeCritter critter = (ResourceTypeCritter) other;
+            if (!_resTypeName.equals(critter._resTypeName)) return false;
+            return true;
+        }
+
+        public int hashCode() {
+            int result = _resTypeName != null ? _resTypeName.hashCode() : 0;
+            return result;
+        }
     }
 
 }

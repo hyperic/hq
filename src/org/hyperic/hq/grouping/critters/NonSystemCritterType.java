@@ -28,8 +28,11 @@ package org.hyperic.hq.grouping.critters;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
+import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 
 /**
@@ -65,5 +68,53 @@ public class NonSystemCritterType
     
     public boolean isSystem() {
         return true;
+    }
+    
+    class NonSystemCritter implements Critter {
+        private final List _props = Collections.EMPTY_LIST;
+        private final NonSystemCritterType _type;
+
+        NonSystemCritter(NonSystemCritterType type) {
+            _type = type;
+        }
+
+        public List getProps() {
+            return _props;
+        }
+
+        public String getSql(CritterTranslationContext ctx, String resourceAlias) {
+            return "@proto@.fsystem = :@isSystem@";
+        }
+
+        public String getSqlJoins(CritterTranslationContext ctx,
+            String resourceAlias) {
+            return "join EAM_RESOURCE @proto@ on " + resourceAlias
+                + ".proto_id = @proto@.id";
+        }
+
+        public void bindSqlParams(CritterTranslationContext ctx, Query q) {
+            q.setBoolean(ctx.escape("isSystem"), false);
+        }
+
+        public CritterType getCritterType() {
+            return _type;
+        }
+
+        public String getConfig() {
+            return _type.getInstanceConfig().format(new Object[0]);
+        }
+
+        public boolean equals(Object other) {
+            if (this == other)
+                return true;
+            if (!(other instanceof NonSystemCritter))
+                return false;
+            return true;
+        }
+
+        public int hashCode() {
+            // all nonsystem critters are logically identical for now
+            return 0;
+        }
     }
 }

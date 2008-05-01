@@ -26,11 +26,16 @@
 package org.hyperic.hq.grouping.critters;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
+import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
 import org.hyperic.hq.grouping.prop.StringCritterProp;
@@ -43,24 +48,22 @@ import org.hyperic.hq.grouping.prop.StringCritterProp;
 public class ResourceNameCritterType
     extends BaseCritterType
 {
+    private static final String PROP_NAME = "name";
+
     public ResourceNameCritterType() {
         initialize("org.hyperic.hq.grouping.Resources", "resourceName"); 
-        addPropDescription("name", CritterPropType.STRING);
+        addPropDescription(PROP_NAME, CritterPropType.STRING);
     }
 
     public ResourceNameCritter newInstance(String name) 
-        throws GroupException, PatternSyntaxException
-    {
-        List props = new ArrayList(1);
-        props.add(new StringCritterProp(name));
-        return (ResourceNameCritter)newInstance(props);
+        throws GroupException, PatternSyntaxException {
+        return new ResourceNameCritter(name, this);
     }
     
     public Critter newInstance(List critterProps)
         throws GroupException
     {
         validate(critterProps);
-        
         StringCritterProp c = (StringCritterProp) critterProps.get(0);
         return new ResourceNameCritter(c.getString(), this);
     }
@@ -83,5 +86,73 @@ public class ResourceNameCritterType
 
     public boolean isSystem() {
         return false;
+    }
+    
+    class ResourceNameCritter implements Critter {
+        private final String _nameRegex;
+        private final List _props;
+        private final ResourceNameCritterType _type;
+
+        ResourceNameCritter(String nameRegex, ResourceNameCritterType type)
+            throws PatternSyntaxException {
+            // will throw a PatternSyntaxException if there is something
+            // wrong with nameRegex
+            Pattern.compile(nameRegex);
+            _nameRegex = nameRegex;
+
+            List c = new ArrayList(1);
+            c.add(new StringCritterProp(
+                type.getComponentName(PROP_NAME), _nameRegex));
+            _props = Collections.unmodifiableList(c);
+            _type = type;
+        }
+
+        public List getProps() {
+            return _props;
+        }
+
+        public String getSql(CritterTranslationContext ctx, String resourceAlias) {
+            return ctx.getHQDialect().getRegExSQL(resourceAlias + ".name",
+                ":@resourceName@", false, false);
+        }
+
+        public String getSqlJoins(CritterTranslationContext ctx,
+            String resourceAlias) {
+            return "";
+        }
+
+        public void bindSqlParams(CritterTranslationContext ctx, Query q) {
+            q.setParameter(ctx.escape("resourceName"), _nameRegex);
+        }
+
+        public CritterType getCritterType() {
+            return _type;
+        }
+
+        public String getNameRegex() {
+            return _nameRegex;
+        }
+
+        public String getConfig() {
+            Object[] args = { _nameRegex };
+            return _type.getInstanceConfig().format(args);
+        }
+
+        public boolean equals(Object other) {
+            if (this == other) return true;
+            if (!(other instanceof ResourceNameCritter)) return false;
+        
+            // make assumptions explicit
+            assert _nameRegex != null;
+        
+            ResourceNameCritter critter = (ResourceNameCritter) other;
+            if (!_nameRegex.equals(critter._nameRegex)) return false;
+            return true;
+        }
+
+        public int hashCode() {
+            int result = _nameRegex != null ? _nameRegex.hashCode() : 0;
+            return result;
+        }
     }
 }

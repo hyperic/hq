@@ -30,9 +30,11 @@ public class ProtoCritterProp
     implements CritterProp
 {
     private final Resource _proto;
+    private final String _name;
     
-    public ProtoCritterProp(Resource proto) {
+    public ProtoCritterProp(String name, Resource proto) {
         _proto = proto;
+        _name = name;
     }
     
     public Resource getProtoType() {
@@ -45,5 +47,9 @@ public class ProtoCritterProp
 
     public CritterPropType getType() {
         return CritterPropType.PROTO;
+    }
+
+    public String getName() {
+        return _name;
     }
 }

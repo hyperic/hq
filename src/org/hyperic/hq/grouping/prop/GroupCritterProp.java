@@ -30,9 +30,11 @@ public class GroupCritterProp
     implements CritterProp
 {
     private final ResourceGroup _group;
+    private final String _name;
     
-    public GroupCritterProp(ResourceGroup group) {
+    public GroupCritterProp(String name, ResourceGroup group) {
         _group = group;
+        _name = name;
     }
     
     public ResourceGroup getGroup() {
@@ -41,6 +43,10 @@ public class GroupCritterProp
     
     public String toString() {
         return _group.getName();
+    }
+    
+    public String getName() {
+        return _name;
     }
 
     public CritterPropType getType() {

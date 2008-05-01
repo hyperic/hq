@@ -28,6 +28,7 @@ package org.hyperic.hq.grouping.critters;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -56,6 +57,11 @@ public abstract class BaseCritterType
     public BaseCritterType() {
     }
     
+    // XXX this is not really symmetrical since propName
+    // in addPropDescription takes a propName where
+    // the meaning is not the same.  Check the initialize() method
+    // specifically the params it passes in to this method
+    // I'd like to remove either this or getComponentName
     protected String getResourceProperty(String propName) {
         return _bundle.getString(_propPrefix + propName).trim();
     }
@@ -105,17 +111,24 @@ public abstract class BaseCritterType
     protected void addPropDescription(String propName, CritterPropType type,
                                       boolean required) 
     { 
-        String componentName = 
-            _bundle.getString(_propPrefix + "critterProp." + propName + 
-                              ".name");
-        String componentPurpose = 
-            _bundle.getString(_propPrefix + "critterProp." + propName + 
-                              ".purpose");
-        
+        String componentName = getComponentName(propName);
+        String componentPurpose = getComponentPurpose(propName);
         _propDescs.add(new CritterPropDescription(type, componentName, 
                                                   componentPurpose, required));
     }
-    
+
+    protected String getComponentPurpose(String propName) {
+        return _bundle.getString(new StringBuilder()
+                .append(_propPrefix).append("critterProp.")
+                .append(propName).append(".purpose").toString().trim());
+    }
+
+    protected String getComponentName(String propName) {
+        return _bundle.getString(new StringBuilder()
+                .append(_propPrefix).append("critterProp.")
+                .append(propName).append(".name").toString().trim());
+    }
+
     protected void addPropDescription(String propName, CritterPropType type) {
         addPropDescription(propName, type, true);
     }
@@ -149,24 +162,43 @@ public abstract class BaseCritterType
     protected void validate(List propDescs) 
         throws GroupException
     {
-        if (propDescs.size() != getPropDescriptions().size()) {
-            throw new GroupException("Critter requires " + 
-                                     getPropDescriptions().size() + " props");
-        }
-         
-        for (int i=0; i<propDescs.size(); i++) {
-            CritterPropDescription desc = (CritterPropDescription)
-                _propDescs.get(i);
-            CritterProp prop = (CritterProp)propDescs.get(i);
-            
-            if (!desc.getType().equals(prop.getType())) {
-                throw new GroupException("Property[" + i + "] must be of " +
-                                         "type " + 
-                                         desc.getType().getDescription() +
-                                         " (was " + 
-                                         prop.getType().getDescription() + ")");
+        for (Iterator it=_propDescs.iterator(); it.hasNext(); ) {
+            CritterPropDescription desc = (CritterPropDescription)it.next();
+            if (!desc.isRequired()) {
+                continue;
+            } else if (!containsName(propDescs, desc.getName())) {
+                throw new GroupException("CritterPropDescription Name, " +
+                    desc.getName() + " does not exist in props being validated");
             }
         }
+        for (Iterator it=propDescs.iterator(); it.hasNext(); ) {
+            CritterProp prop = (CritterProp)it.next();
+            if (!containsName(prop.getName())) {
+                throw new GroupException("CritterPropDescription Name, " +
+                    prop.getName() + " does not exist in this Object's " +
+                    "CritterPropDescriptions");
+            }
+        }
+    }
+    
+    private boolean containsName(String name) {
+        for (Iterator it=_propDescs.iterator(); it.hasNext(); ) {
+            CritterPropDescription desc = (CritterPropDescription)it.next();
+            if (desc.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private boolean containsName(List props, String name) {
+        for (Iterator it=props.iterator(); it.hasNext(); ) {
+            CritterProp prop = (CritterProp)it.next();
+            if (prop.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**

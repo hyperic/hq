@@ -30,9 +30,11 @@ public class DateCritterProp
     implements CritterProp
 {
     private final Date _date;
+    private final String _name;
     
-    public DateCritterProp(Date value) {
+    public DateCritterProp(String name, Date value) {
         _date = value;
+        _name = name;
     }
     
     public Date getDate() {
@@ -45,5 +47,9 @@ public class DateCritterProp
 
     public CritterPropType getType() {
         return CritterPropType.DATE;
+    }
+
+    public String getName() {
+        return _name;
     }
 }
