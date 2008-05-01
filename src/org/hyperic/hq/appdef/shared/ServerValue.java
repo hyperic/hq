@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -28,6 +28,8 @@
  * legacy DTO pattern (targeted to be replaced with hibernate pojo).
  */
 package org.hyperic.hq.appdef.shared;
+
+import org.hyperic.hq.appdef.server.session.Platform;
 
 /**
  * Value object for Server.
@@ -70,7 +72,7 @@ public class ServerValue extends AppdefResourceValue
     private boolean cTimeHasBeenSet = false;
     private ServerTypeValue ServerType;
     private boolean ServerTypeHasBeenSet = false;
-    private org.hyperic.hq.appdef.shared.PlatformLightValue Platform;
+    private Platform Platform;
     private boolean PlatformHasBeenSet = false;
 
     public ServerValue()
@@ -407,11 +409,11 @@ public class ServerValue extends AppdefResourceValue
         this.ServerType = ServerType;
         ServerTypeHasBeenSet = true;
     }
-    public org.hyperic.hq.appdef.shared.PlatformLightValue getPlatform()
+    public Platform getPlatform()
     {
         return this.Platform;
     }
-    public void setPlatform( org.hyperic.hq.appdef.shared.PlatformLightValue Platform )
+    public void setPlatform( Platform Platform )
     {
         this.Platform = Platform;
         PlatformHasBeenSet = true;

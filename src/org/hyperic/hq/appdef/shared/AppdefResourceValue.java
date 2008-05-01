@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -24,14 +24,6 @@
  */
 
 package org.hyperic.hq.appdef.shared;
-
-import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.PlatformLightValue;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerLightValue;
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceLightValue;
-import org.hyperic.hq.appdef.shared.ServiceValue;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -194,10 +186,7 @@ public abstract class AppdefResourceValue
         int entityType = this.getEntityId().getType();
         switch(entityType) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                if (this instanceof PlatformValue)
-                    return ((PlatformValue)this).getPlatformType();
-                else 
-                    return ((PlatformLightValue)this).getPlatformType();
+                return ((PlatformValue)this).getPlatformType();
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 if (this instanceof ServerValue)
                     return ((ServerValue)this).getServerType();

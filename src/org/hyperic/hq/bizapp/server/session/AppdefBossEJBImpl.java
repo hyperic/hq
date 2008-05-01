@@ -1306,7 +1306,7 @@ public class AppdefBossEJBImpl
 
             // Add it to the list
             List unscheduleList = new ArrayList();
-            unscheduleList.add(plat.getPlatformLightValue());
+            unscheduleList.add(plat);
 
             // Add dependent children to the list of metrics to unschedule
             // XXX: Use POJOs here.
@@ -1322,18 +1322,25 @@ public class AppdefBossEJBImpl
 
             AppdefEntityID[] toDeleteResourceIds =
                 new AppdefEntityID[unscheduleList.size()];
-            ArrayList toDeleteIdsList = new ArrayList();
+            ArrayList toDeleteIdsList = new ArrayList(unscheduleList.size());
 
             Iterator it = unscheduleList.iterator();
             for (int i = 0; it.hasNext(); i++) {
-                AppdefResourceValue v =(AppdefResourceValue)it.next();
-                AppdefEntityID thisId = v.getEntityId();
+                Object o = it.next();
+                AppdefEntityID thisId;
+                if (o instanceof Platform) {
+                    thisId = ((Platform) o).getEntityId();
+                }
+                else {
+                    AppdefResourceValue v =(AppdefResourceValue) o;
+                    thisId = v.getEntityId();
 
-                if (v instanceof ServerValue &&
-                    ((ServerValue)v).getServerType().getVirtual()) {
-                    // skip virtual servers
-                    toDeleteResourceIds[i] = thisId;
-                    continue;
+                    if (v instanceof ServerValue &&
+                            ((ServerValue)v).getServerType().getVirtual()) {
+                        // skip virtual servers
+                        toDeleteResourceIds[i] = thisId;
+                        continue;
+                    }
                 }
 
                 toDeleteIdsList.add(thisId);

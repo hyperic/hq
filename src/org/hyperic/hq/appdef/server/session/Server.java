@@ -208,7 +208,7 @@ public class Server extends ServerBase
         else
             _serverValue.setServerType(null);
         if ( getPlatform() != null ) {
-            _serverValue.setPlatform(getPlatform().getPlatformLightValue());
+            _serverValue.setPlatform(getPlatform());
         }
         else
             _serverValue.setPlatform(null);

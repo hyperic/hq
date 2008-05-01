@@ -38,7 +38,6 @@ import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.authz.HasAuthzOperations;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -262,41 +261,6 @@ public class Platform extends PlatformBase
         return _platformValue;
     }
 
-
-    private PlatformLightValue _platformLightValue = new PlatformLightValue();
-    /**
-     * legacy EJB DTO patter
-     * @deprecated use (this) Platform object instead
-     */
-    public PlatformLightValue getPlatformLightValue()
-    {
-        _platformLightValue.setSortName(getSortName());
-        _platformLightValue.setCommentText(getCommentText());
-        _platformLightValue.setModifiedBy(getModifiedBy());
-        _platformLightValue.setOwner(getOwner());
-        _platformLightValue.setConfigResponseId(getConfigResponse().getId());
-        _platformLightValue.setCertdn(getCertdn());
-        _platformLightValue.setFqdn(getFqdn());
-        _platformLightValue.setName(getName());
-        _platformLightValue.setLocation(getLocation());
-        _platformLightValue.setDescription(getDescription());
-        _platformLightValue.setCpuCount(getCpuCount());
-        _platformLightValue.setId(getId());
-        _platformLightValue.setMTime(getMTime());
-        _platformLightValue.setCTime(getCTime());
-        _platformLightValue.removeAllIpValues();
-        Iterator iIpValue = getIps().iterator();
-        while (iIpValue.hasNext()){
-            _platformLightValue.addIpValue(((Ip)iIpValue.next()).getIpValue());
-        }
-        _platformLightValue.cleanIpValue();
-        if ( getPlatformType() != null )
-            _platformLightValue.setPlatformType(
-                getPlatformType().getPlatformTypeValue() );
-        else
-            _platformLightValue.setPlatformType( null );
-        return _platformLightValue;
-    }
 
     /**
      * convenience method for copying simple values from
