@@ -14,17 +14,17 @@ public class MixedGroupType extends HypericEnum {
         ResourceBundle.getBundle("org.hyperic.hq.grouping.Resources");
     
     public static final MixedGroupType ALL_MIXED_GROUPS =
-        new MixedGroupType(1000, "All Mixed Group Appdef Constants",
+        new MixedGroupType(1000, "allMixedGroups",
             "authz.grouptype.typeServiceCluster");
     public static final MixedGroupType APPLICATION_GROUP =
         new MixedGroupType(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP,
-            "Application Group", "authz.grouptype.typeApplicationGroup");
+            "groupOfApps", "authz.grouptype.typeApplicationGroup");
     public static final MixedGroupType GROUP_OF_GROUPS =
         new MixedGroupType(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP,
-            "Group of Groups", "authz.grouptype.typeGroupOfGroups");
+            "groupOfGroups", "authz.grouptype.typeGroupOfGroups");
     public static final MixedGroupType PLATFORM_SERVER_SERVICE_GROUP =
         new MixedGroupType(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS,
-            "Platform Server Service Group",
+            "groupOfPlatsServersServices",
             "authz.grouptype.typePlatformServerServiceGroup");
 
     protected MixedGroupType(int code, String desc, String localeProp) {
