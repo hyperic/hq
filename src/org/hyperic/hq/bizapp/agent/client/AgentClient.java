@@ -518,7 +518,7 @@ public class AgentClient {
         ProviderInfo providerInfo;
         String provider, host, user, pword,  
             agentToken, response;
-        String agentIP = "localhost";
+        String agentIP;
         Properties bootP;
         int agentPort = -1;
         boolean isNewTransportAgent = false;
@@ -649,26 +649,33 @@ public class AgentClient {
             {
                 throw new AutoQuestionException("Invalid username/password");
             }
+        }
+
+        // Get info about agent
+        while(true){
+            String question;
+            
+            if (unidirectional) {
+                question = "What is the agent IP address";
+            } else {
+                question = "What IP should "+PRODUCT+" use to contact the agent";
+            }
+            
+            agentIP = this.askQuestion(question, 
+                                       getDefaultIpAddress(),
+                                       QPROP_AGENTIP);
+            
+            // Attempt to resolve, as a safeguard
+            try {
+                localHost = InetAddress.getByName(agentIP);
+                localHost.getHostAddress();
+                break;
+            } catch(UnknownHostException exc){
+                SYSTEM_ERR.println("- Unable to resolve host");
+            }
         } 
 
         if (!unidirectional) {
-            // Get info about server connecting to the agent
-            while(true){
-                agentIP = this.askQuestion("What IP should " + PRODUCT +
-                                           " use to contact the agent",
-                                           getDefaultIpAddress(),
-                                           QPROP_AGENTIP);
-                
-                // Attempt to resolve, as a safeguard
-                try {
-                    localHost = InetAddress.getByName(agentIP);
-                    localHost.getHostAddress();
-                    break;
-                } catch(UnknownHostException exc){
-                    SYSTEM_ERR.println("- Unable to resolve host");
-                }
-            } 
-
             while(true){
                 agentPort = this.askIntQuestion("What port should " + PRODUCT +
                                                 " use to contact the agent",
