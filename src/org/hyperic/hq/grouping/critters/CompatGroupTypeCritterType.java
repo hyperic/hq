@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Query;
-import org.hibernate.type.IntegerType;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
@@ -41,7 +39,6 @@ import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
 import org.hyperic.hq.grouping.prop.ProtoCritterProp;
-import org.hyperic.hq.grouping.prop.ResourceCritterProp;
 
 public class CompatGroupTypeCritterType extends BaseCritterType {
 
@@ -65,7 +62,7 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
     }
 
     public boolean isSystem() {
-        return true;
+        return false;
     }
 
     public Critter newInstance(Map props) throws GroupException {
@@ -76,12 +73,11 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
         return new CompatGroupTypeCritter(resource, this);
     }
 
-    public Critter newInstance(Resource proto)
-        throws GroupException {
+    public Critter newInstance(Resource proto) { 
         return new CompatGroupTypeCritter(proto, this);
     }
 
-    public Critter newInstance() throws GroupException {
+    public Critter newInstance() { 
         return new CompatGroupTypeCritter(null, this);
     }
 
@@ -90,29 +86,18 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
      * instance_id from EAM_RESOURCE_GROUP
      */
     class CompatGroupTypeCritter implements Critter {
-        private final List _groupTypes = new ArrayList();
         private final List _props;
         private final CompatGroupTypeCritterType _type;
-        private Resource _proto;
-        private final Integer COMPAT_GROUP_PLATFORM_SERVER = 
-            new Integer(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
-        private final Integer COMPAT_SERVICE_CLUSTER =
-            new Integer(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC);
+        private final Resource _proto;
 
-        /**
-         * @param groupTypes
-         *            List of Integers which represent grouptypes
-         */
         public CompatGroupTypeCritter(Resource prototype,
                                       CompatGroupTypeCritterType type) 
         {
-            _groupTypes.add(this.COMPAT_GROUP_PLATFORM_SERVER);
-            _groupTypes.add(this.COMPAT_SERVICE_CLUSTER);
-            _type = type;
+            _proto = prototype;
+            _type  = type;
             List props = new ArrayList();
             if (prototype != null) {
                 props.add(new ProtoCritterProp(PROTO_NAME_PROP, prototype));
-                _proto = prototype;
             }
             _props = Collections.unmodifiableList(props);
         }
@@ -129,16 +114,14 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
             if (_proto != null) {
                 q.setParameter(ctx.escape("proto"), _proto.getId());
             }
-            q.setParameterList(ctx.escape("groupTypes"), _groupTypes,
-                               new IntegerType());
         }
 
         public String getConfig() {
             if (_proto == null) {
-                Object[] args = { _groupTypes };
+                Object[] args = { "any" };
                 return _type.getInstanceConfig().format(args);
             } else {
-                Object[] args = { _groupTypes, _proto };
+                Object[] args = { _proto.getName() };
                 return _type.getInstanceConfig().format(args);
             }
         }
@@ -147,21 +130,23 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
             return _type;
         }
 
-        public String getSql(CritterTranslationContext ctx, String resourceAlias) {
+        public String getSql(CritterTranslationContext ctx, 
+                             String resourceAlias) 
+        {
             if (_proto == null) {
-                return "(@grp@.grouptype in (:@groupTypes@))";
+                return "true";
             } else {
-                return new StringBuilder().append(
-                    "(@grp@.grouptype in (:@groupTypes@) and ").append(
-                    "@grp@.resource_prototype = :@proto@)").toString();
+                return "@proto@.id = :@proto@";
             }
         }
 
         public String getSqlJoins(CritterTranslationContext ctx,
-            String resourceAlias) {
-            return new StringBuilder().append(
-                "JOIN EAM_RESOURCE_GROUP @grp@ on ").append(resourceAlias)
-                .append(".instance_id = @grp@.id ").toString();
+                                  String resourceAlias) 
+        {
+            return "join EAM_RESOURCE_GROUP @grp@ on " + 
+                       resourceAlias + ".id = @grp@.resource_id " +
+                   "join EAM_RESOURCE @proto@ on " + 
+                       "@grp@.resource_prototype = @proto@.id"; 
         }
 
         public boolean equals(Object other) {
@@ -178,7 +163,7 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
 
         public int hashCode() {
             if (_proto == null) {
-                return 0;
+                return 17;
             }
             return _proto.hashCode();
         }

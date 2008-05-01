@@ -63,7 +63,7 @@ public class ResourceTypeCritterType extends BaseCritterType {
     }
 
     public boolean isSystem() {
-        return false;
+        return true;
     }
 
     public Critter newInstance(String resTypeName) throws GroupException {
