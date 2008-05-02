@@ -319,6 +319,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
 
         try {
+            boolean updateProps = true;
+            
             for (int i = 0; i < templates.length; i++) {
                 Integer dTemplateId = templates[i];
                 long interval = intervals[i];
@@ -358,6 +360,11 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                              props);
                     }
                     else {
+                        if (updateProps) {  // Make sure that we update props
+                            getRmMan().updateMeasurements(id, props);
+                            updateProps = false;
+                        }
+                        
                         try {
                             argDm = updateMeasurementInterval(dTemplateId,
                                                               instanceId,
