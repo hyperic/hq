@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -41,6 +41,7 @@ import org.hyperic.hq.grouping.critters.ProtoCritterType;
 import org.hyperic.hq.grouping.critters.ProtoNameCritterType;
 import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
 import org.hyperic.hq.grouping.critters.ResourceTypeCritterType;
+import org.hyperic.hq.grouping.critters.OwnedCritterType;
 
 public class CritterRegistry {
     private static final CritterRegistry INSTANCE = new CritterRegistry();
@@ -60,6 +61,7 @@ public class CritterRegistry {
         register(new ProtoCritterType());
         register(new DescendantProtoCritterType());
         register(new NonSystemCritterType());
+        register(new OwnedCritterType());
     }
     
     public static final CritterRegistry getRegistry() {

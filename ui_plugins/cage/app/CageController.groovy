@@ -13,6 +13,7 @@ import org.hyperic.hq.grouping.prop.CritterPropType
 import org.hyperic.hq.grouping.prop.GroupCritterProp
 import org.hyperic.hq.grouping.prop.ProtoCritterProp
 import org.hyperic.hq.grouping.prop.ResourceCritterProp
+import org.hyperic.hq.grouping.prop.SubjectCritterProp
 import org.hyperic.dao.DAOFactory
 import org.hyperic.hibernate.Util
 import org.hyperic.util.HypericEnum
@@ -179,6 +180,9 @@ class CageController
                 } else if (propType == 'proto') { 
                     def proto  = resourceHelper.findResourcePrototype(propDef.text())
                     props[propId] = new ProtoCritterProp(propId, proto)
+                } else if (propType == 'subject') { 
+                    def subject  = userHelper.findUser(propDef.text())
+                    props[propId] = new SubjectCritterProp(propId, subject)
                 } else if (propType == 'enum') {
                     def desc = critterType.propDescriptions.find { it.id == propId }
                     if (!desc) {

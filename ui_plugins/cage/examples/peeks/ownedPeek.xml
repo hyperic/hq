@@ -1,0 +1,12 @@
+<critters isAny='false'>
+  <!--
+    This critter list finds all non-system resources which are owned by the user
+  -->
+
+  <critter class="org.hyperic.hq.grouping.critters.OwnedCritterType">
+    <subject id="owner">hqadmin</subject>
+  </critter>
+
+  <critter class="org.hyperic.hq.grouping.critters.NonSystemCritterType"/>
+</critters>
+
