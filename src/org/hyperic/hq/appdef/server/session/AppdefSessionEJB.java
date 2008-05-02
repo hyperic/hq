@@ -72,7 +72,6 @@ import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.dao.ServiceDAO;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -153,13 +152,13 @@ public abstract class AppdefSessionEJB
      * @param resTypeVal - the type
      * @param id - the id of the object
      */
-    protected void createAuthzResource(AuthzSubject who,
-                                       ResourceType resType,
-                                       Resource prototype,
-                                       Integer id,  String name,
-                                       Resource parent) 
+    protected Resource createAuthzResource(AuthzSubject who,
+                                           ResourceType resType,
+                                           Resource prototype, Integer id,
+                                           String name, Resource parent) 
     {
-        createAuthzResource(who, resType, prototype, id, name, false, parent);
+        return createAuthzResource(who, resType, prototype, id, name, false,
+                                   parent);
     }
     
     /**
@@ -171,13 +170,14 @@ public abstract class AppdefSessionEJB
      * @param name - the name of the resource
      * @param fsystem - true if the resource should be non-visible
      */
-    protected void createAuthzResource(AuthzSubject who, ResourceType resType,
-                                       Resource prototype, Integer id,
-                                       String name, boolean fsystem,
-                                       Resource parent) 
+    protected Resource createAuthzResource(AuthzSubject who,
+                                           ResourceType resType,
+                                           Resource prototype, Integer id,
+                                           String name, boolean fsystem,
+                                           Resource parent) 
     {
-        getResourceManager().createResource(who, resType, prototype, id, name, 
-                                            fsystem, parent);
+        return getResourceManager().createResource(who, resType, prototype, id,
+                                                   name, fsystem, parent);
     }
 
     /**

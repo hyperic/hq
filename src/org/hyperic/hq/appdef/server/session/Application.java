@@ -33,11 +33,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.authz.HasAuthzOperations;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class Application extends AppdefResource
@@ -61,6 +61,7 @@ public class Application extends AppdefResource
     private String _businessContact;
     private ApplicationType _applicationType;
     private Collection _appServices;
+    private Resource _resource;
 
     /**
      * default constructor
@@ -86,7 +87,7 @@ public class Application extends AppdefResource
         return _engContact;
     }
 
-    public void setEngContact(String engContact)
+    void setEngContact(String engContact)
     {
         _engContact = engContact;
     }
@@ -96,7 +97,7 @@ public class Application extends AppdefResource
         return _opsContact;
     }
 
-    public void setOpsContact(String opsContact)
+    void setOpsContact(String opsContact)
     {
         _opsContact = opsContact;
     }
@@ -106,7 +107,7 @@ public class Application extends AppdefResource
         return _businessContact;
     }
 
-    public void setBusinessContact(String businessContact)
+    void setBusinessContact(String businessContact)
     {
         _businessContact = businessContact;
     }
@@ -116,9 +117,23 @@ public class Application extends AppdefResource
         return _applicationType;
     }
 
-    public void setApplicationType(ApplicationType applicationType)
+    void setApplicationType(ApplicationType applicationType)
     {
         _applicationType = applicationType;
+    }
+
+    /**
+     * @return the resource
+     */
+    public Resource getResource() {
+        return _resource;
+    }
+
+    /**
+     * @param resource the resource to set
+     */
+    void setResource(Resource resource) {
+        _resource = resource;
     }
 
     public Collection getAppServices()
@@ -126,7 +141,7 @@ public class Application extends AppdefResource
         return _appServices;
     }
 
-    public void setAppServices(Collection appServices)
+    void setAppServices(Collection appServices)
     {
         _appServices = appServices;
     }
@@ -171,7 +186,7 @@ public class Application extends AppdefResource
         applicationValue.setName(getName());
         applicationValue.setSortName(getSortName());
         applicationValue.setModifiedBy(getModifiedBy());
-        applicationValue.setOwner(getOwner());
+        applicationValue.setOwner(getResource().getOwner().getName());
         applicationValue.setLocation(getLocation());
         applicationValue.setEngContact(getEngContact());
         applicationValue.setOpsContact(getOpsContact());
@@ -203,7 +218,7 @@ public class Application extends AppdefResource
         vo.setName(getName());
         vo.setSortName(getSortName());
         vo.setModifiedBy(getModifiedBy());
-        vo.setOwner(getOwner());
+        vo.setOwner(getResource().getOwner().getName());
         vo.setLocation(getLocation());
         vo.setEngContact(getEngContact());
         vo.setOpsContact(getOpsContact());

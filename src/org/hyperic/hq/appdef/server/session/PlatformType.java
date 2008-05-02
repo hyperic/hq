@@ -136,7 +136,6 @@ public class PlatformType extends AppdefResourceType {
         p.setPlatformType(this);
         p.setConfigResponse(config);
         p.setModifiedBy(initialOwner);
-        p.setOwner(initialOwner);
         p.setAgent(agent);
         registerNewPlatform(p);
         return p;
@@ -183,7 +182,6 @@ public class PlatformType extends AppdefResourceType {
         p.setFqdn(pv.getFqdn());
         p.setLocation(pv.getLocation());
         p.setModifiedBy(pv.getModifiedBy());
-        p.setOwner(pv.getOwner());
         p.setPlatformType(this);
         p.setAgent(agent);
         p.setConfigResponse(config);

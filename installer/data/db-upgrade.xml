@@ -8814,6 +8814,50 @@ has already been defined.
                         nullable="NOT NULL"/>
   </schemaSpec>
 
+  <schemaSpec version="3.116">
+    <schema-addColumn table="EAM_APPLICATION" column="RESOURCE_ID" columnType="INTEGER">
+      <initializer>
+          UPDATE EAM_APPLICATION SET RESOURCE_ID =
+              (SELECT r.ID FROM EAM_RESOURCE r WHERE RESOURCE_TYPE_ID = 401 AND r.INSTANCE_ID = EAM_APPLICATION.ID)
+      </initializer>
+      <foreignKey constraintName="FK6C0C122FC176AE" references="EAM_RESOURCE(ID)"/>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_PLATFORM" column="RESOURCE_ID" columnType="INTEGER">
+      <initializer>
+          UPDATE EAM_PLATFORM SET RESOURCE_ID =
+              (SELECT r.ID FROM EAM_RESOURCE r WHERE RESOURCE_TYPE_ID = 301 AND r.INSTANCE_ID = EAM_PLATFORM.ID)
+      </initializer>
+      <foreignKey constraintName="FKFED285C1FC176AE" references="EAM_RESOURCE(ID)"/>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_SERVER" column="RESOURCE_ID" columnType="INTEGER">
+      <initializer>
+          UPDATE EAM_SERVER SET RESOURCE_ID =
+              (SELECT r.ID FROM EAM_RESOURCE r WHERE RESOURCE_TYPE_ID = 303 AND r.INSTANCE_ID = EAM_SERVER.ID)
+      </initializer>
+      <foreignKey constraintName="FKEEEB4C11FC176AE" references="EAM_RESOURCE(ID)"/>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_SERVICE" column="RESOURCE_ID" columnType="INTEGER">
+      <initializer>
+          UPDATE EAM_SERVICE SET RESOURCE_ID =
+              (SELECT r.ID FROM EAM_RESOURCE r WHERE RESOURCE_TYPE_ID = 305 AND r.INSTANCE_ID = EAM_SERVICE.ID)
+      </initializer>
+      <foreignKey constraintName="FKEE7E4387FC176AE" references="EAM_RESOURCE(ID)"/>
+    </schema-addColumn>
+    <schema-directSQL>
+      <statement desc="Drop unused column OWNER.">
+        ALTER TABLE EAM_APPLICATION DROP COLUMN OWNER
+      </statement>
+      <statement desc="Drop unused column OWNER.">
+        ALTER TABLE EAM_PLATFORM DROP COLUMN OWNER
+      </statement>
+      <statement desc="Drop unused column OWNER.">
+        ALTER TABLE EAM_SERVER DROP COLUMN OWNER
+      </statement>
+      <statement desc="Drop unused column OWNER.">
+        ALTER TABLE EAM_SERVICE DROP COLUMN OWNER
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
 </dbupgrade>
 </target>
 </project>

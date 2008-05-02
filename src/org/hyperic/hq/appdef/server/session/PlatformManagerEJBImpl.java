@@ -91,7 +91,6 @@ import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -405,8 +404,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // AUTHZ CHECK
             // in order to succeed subject has to be in a role 
             // which allows creating of authz resources
-            createAuthzPlatform(pValue.getName(), platform.getId(),
-                                subject, pType);
+            createAuthzPlatform(subject, platform);
 
             // Create the virtual server types
             for (Iterator it = pType.getServerTypes().iterator(); it.hasNext();)
@@ -427,9 +425,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         } catch (FinderException e) {
             throw new CreateException("Unable to find PlatformType: " +
                                       platformTypeId + " : " + e.getMessage());
-        } catch (NamingException e) {
-            throw new CreateException("Unable to get LocalHome " +
-                                      e.getMessage());
         }
     }
 
@@ -478,8 +473,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         
         // AUTHZ CHECK
         try {
-            createAuthzPlatform(aipValue.getName(), platform.getId(), 
-                                subject, platType);
+            createAuthzPlatform(subject, platform);
         } catch(Exception e) {
             throw new SystemException(e);
         }
@@ -1167,8 +1161,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         ResourceValue authzRes = getPlatformResourceValue(platformId);
         // change the authz owner
         getResourceManager().setResourceOwner(who, authzRes, newOwner);
-        // update the owner field in the appdef table -- YUCK
-        platform.setOwner(newOwner.getName());
+        // update the modified field in the appdef table -- YUCK
         platform.setModifiedBy(who.getName());
     }
 
@@ -1196,10 +1189,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * has the createPlatform permission.
      * @param subject - the user creating
      */
-    private void createAuthzPlatform(String platName, Integer platId,
-                                     AuthzSubject subject, PlatformType pType)
-        throws CreateException, NamingException, FinderException,
-               PermissionException 
+    private void createAuthzPlatform(AuthzSubject subject,
+                                         Platform platform)
+        throws FinderException, PermissionException 
     {
         _log.debug("Begin Authz CreatePlatform");
         // check to make sure the user has createPlatform permission
@@ -1208,10 +1200,15 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         
         ResourceType platProtoType = getPlatformPrototypeResourceType();
         Resource proto = ResourceManagerEJBImpl.getOne()
-            .findResourcePojoByInstanceId(platProtoType, pType.getId());
-        _log.debug("User has permission to create platform. Adding AuthzResource");
-        createAuthzResource(subject, getPlatformResourceType(), proto, platId,
-                            platName, null);
+            .findResourcePojoByInstanceId(platProtoType,
+                                          platform.getPlatformType().getId());
+        _log.debug("User has permission to create platform. " +
+                   "Adding AuthzResource");
+        Resource resource = createAuthzResource(subject,
+                                                getPlatformResourceType(),
+                                                proto, platform.getId(),
+                                                platform.getName(), null);
+        platform.setResource(resource);
     }
 
     /**

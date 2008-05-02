@@ -23,7 +23,7 @@
  * USA. 
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,15 +32,12 @@ import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.dao.HibernateDAO;
 
 public class ServiceDAO extends HibernateDAO
 {
@@ -79,7 +76,6 @@ public class ServiceDAO extends HibernateDAO
         s.setDescription(desc);
         s.setModifiedBy(modifiedBy);
         s.setLocation(location);
-        s.setOwner(owner);
         s.setParentService(parent);
         s.setServiceType(type);
         s.setServer(server);
@@ -103,7 +99,6 @@ public class ServiceDAO extends HibernateDAO
         s.setDescription(sv.getDescription());
         s.setModifiedBy(sv.getModifiedBy());
         s.setLocation(sv.getLocation());
-        s.setOwner(sv.getOwner());
         s.setParentId(sv.getParentId());
 
         if (sv.getServiceType() != null) {

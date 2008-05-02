@@ -23,7 +23,7 @@
  * USA. 
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 
@@ -31,6 +31,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.dao.HibernateDAO;
 
 public class VirtualDAO extends HibernateDAO {
     public VirtualDAO(DAOFactory f) {

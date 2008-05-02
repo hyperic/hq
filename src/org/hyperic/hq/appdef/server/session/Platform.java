@@ -66,6 +66,7 @@ public class Platform extends PlatformBase
     private Agent _agent;
     private Collection _ips = new ArrayList();
     private Collection _servers =  new ArrayList();
+    private Resource _resource;
 
     public Platform() {
         super();
@@ -83,7 +84,7 @@ public class Platform extends PlatformBase
         return _platformType;
     }
 
-    public void setPlatformType(PlatformType platformType) {
+    void setPlatformType(PlatformType platformType) {
         _platformType = platformType;
     }
 
@@ -91,7 +92,7 @@ public class Platform extends PlatformBase
         return _configResponse;
     }
 
-    public void setConfigResponse(ConfigResponseDB configResponse) {
+    void setConfigResponse(ConfigResponseDB configResponse) {
         _configResponse = configResponse;
     }
 
@@ -99,7 +100,7 @@ public class Platform extends PlatformBase
         return _agent;
     }
 
-    public void setAgent(Agent agent) {
+    void setAgent(Agent agent) {
         _agent = agent;
     }
 
@@ -107,7 +108,7 @@ public class Platform extends PlatformBase
         return _ips;
     }
 
-    public void setIps(Collection ips) {
+    void setIps(Collection ips) {
         _ips = ips;
     }
 
@@ -148,7 +149,7 @@ public class Platform extends PlatformBase
         return _servers;
     }
 
-    public void setServers(Collection servers) {
+    void setServers(Collection servers) {
         _servers = servers;
     }
 
@@ -156,7 +157,7 @@ public class Platform extends PlatformBase
      * Update an existing appdef platform with data from an AI platform.
      * @param aiplatform the AI platform object to use for data
      */
-    public void updateWithAI(AIPlatformValue aiplatform, String owner,
+    void updateWithAI(AIPlatformValue aiplatform, String owner,
                              Resource resource) {
         setFqdn(aiplatform.getFqdn());
         setCertdn(aiplatform.getCertdn());
@@ -167,9 +168,9 @@ public class Platform extends PlatformBase
         }
         setModifiedBy(owner);
         // setLocation("");
-        setOwner(owner);
         setCpuCount(aiplatform.getCpuCount());
         setDescription(aiplatform.getDescription());
+        setResource(resource);
     }
 
     /**
@@ -199,8 +200,6 @@ public class Platform extends PlatformBase
             (this.getLocation() != null ?
                 this.getLocation().equals(obj.getLocation())
                 : (obj.getLocation() == null)) &&
-            (this.getOwner() != null ? this.getOwner().equals(obj.getOwner())
-                : (obj.getOwner() == null)) &&
         // now for the IP's
         // if there's any in the addedIp's collection, it was messed with
         // which means the match fails
@@ -231,7 +230,7 @@ public class Platform extends PlatformBase
         _platformValue.setSortName(getSortName());
         _platformValue.setCommentText(getCommentText());
         _platformValue.setModifiedBy(getModifiedBy());
-        _platformValue.setOwner(getOwner());
+        _platformValue.setOwner(getResource().getOwner().getName());
         _platformValue.setConfigResponseId(getConfigResponse().getId());
         _platformValue.setCertdn(getCertdn());
         _platformValue.setFqdn(getFqdn());
@@ -266,11 +265,10 @@ public class Platform extends PlatformBase
      * convenience method for copying simple values from
      * legacy Platform Value Object.
      */
-    public void setPlatformValue(PlatformValue pv) {
+    void setPlatformValue(PlatformValue pv) {
         setDescription(pv.getDescription());
         setCommentText(pv.getCommentText());
         setModifiedBy(pv.getModifiedBy());
-        setOwner(pv.getOwner());
         setLocation(pv.getLocation());
         setCpuCount(pv.getCpuCount());
         setCertdn(pv.getCertdn());
@@ -300,5 +298,19 @@ public class Platform extends PlatformBase
 
     protected String _getAuthzOp(String op) {
         return (String)_authOps.get(op);
+    }
+
+    /**
+     * @return the resource
+     */
+    public Resource getResource() {
+        return _resource;
+    }
+
+    /**
+     * @param resource the resource to set
+     */
+    void setResource(Resource resource) {
+        _resource = resource;
     }
 }

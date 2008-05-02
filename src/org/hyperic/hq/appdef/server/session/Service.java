@@ -31,13 +31,12 @@ import java.util.Map;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.HasAuthzOperations;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
@@ -66,6 +65,7 @@ public class Service extends AppdefResource
     private ResourceGroup _resourceGroup;
     private ConfigResponseDB _configResponse;
     private Collection _appServices;
+    private Resource _resource;
 
     public Service() {
     }
@@ -86,7 +86,7 @@ public class Service extends AppdefResource
         return isAutodiscoveryZombie();
     }
 
-    public void setAutodiscoveryZombie(boolean autodiscoveryZombie) {
+    void setAutodiscoveryZombie(boolean autodiscoveryZombie) {
         _autodiscoveryZombie = autodiscoveryZombie;
     }
 
@@ -119,7 +119,7 @@ public class Service extends AppdefResource
         return _parentService != null ? _parentService.getId() : null;
     }
 
-    public void setParentService(Service parentService) {
+    void setParentService(Service parentService) {
         _parentService = parentService;
     }
 
@@ -127,7 +127,7 @@ public class Service extends AppdefResource
      * legacy EJB getter for configresponse id
      * @deprecated use setParentService() instead
      */
-    public void setParentId(Integer parentId) {
+    void setParentId(Integer parentId) {
         if (parentId != null && parentId.intValue() != 0) {
             Service s = new Service();
             s.setId(parentId);
@@ -141,7 +141,7 @@ public class Service extends AppdefResource
         return _server;
     }
 
-    public void setServer(Server server) {
+    void setServer(Server server) {
         _server = server;
     }
 
@@ -149,7 +149,7 @@ public class Service extends AppdefResource
         return _serviceType;
     }
 
-    public void setServiceType(ServiceType serviceType) {
+    void setServiceType(ServiceType serviceType) {
         _serviceType = serviceType;
     }
 
@@ -157,7 +157,7 @@ public class Service extends AppdefResource
         return _resourceGroup;
     }
 
-    public void setResourceGroup(ResourceGroup resourceGroup) {
+    void setResourceGroup(ResourceGroup resourceGroup) {
         _resourceGroup = resourceGroup;
     }
 
@@ -173,15 +173,29 @@ public class Service extends AppdefResource
         return _configResponse != null ? _configResponse.getId() : null;
     }
 
-    public void setConfigResponse(ConfigResponseDB configResponse) {
+    void setConfigResponse(ConfigResponseDB configResponse) {
         _configResponse = configResponse;
+    }
+
+    /**
+     * @return the resource
+     */
+    public Resource getResource() {
+        return _resource;
+    }
+
+    /**
+     * @param resource the resource to set
+     */
+    void setResource(Resource resource) {
+        this._resource = resource;
     }
 
     public Collection getAppServices() {
         return _appServices;
     }
 
-    public void setAppServices(Collection appServices) {
+    void setAppServices(Collection appServices) {
         _appServices = appServices;
     }
 
@@ -197,7 +211,7 @@ public class Service extends AppdefResource
         _serviceLightValue.setServiceRt(isServiceRt());
         _serviceLightValue.setEndUserRt(isEndUserRt());
         _serviceLightValue.setModifiedBy(getModifiedBy());
-        _serviceLightValue.setOwner(getOwner());
+        _serviceLightValue.setOwner(getResource().getOwner().getName());
         _serviceLightValue.setLocation(getLocation());
         _serviceLightValue.setConfigResponseId(getConfigResponseId());
         _serviceLightValue.setParentId(getParentId());
@@ -232,7 +246,7 @@ public class Service extends AppdefResource
         _serviceValue.setServiceRt(isServiceRt());
         _serviceValue.setEndUserRt(isEndUserRt());
         _serviceValue.setModifiedBy(getModifiedBy());
-        _serviceValue.setOwner(getOwner());
+        _serviceValue.setOwner(getResource().getOwner().getName());
         _serviceValue.setLocation(getLocation());
         _serviceValue.setConfigResponseId(getConfigResponseId());
         _serviceValue.setParentId(getParentId());
@@ -278,8 +292,6 @@ public class Service extends AppdefResource
             (getLocation() != null ?
                 getLocation().equals(obj.getLocation())
                 : (obj.getLocation() == null)) &&
-            (getOwner() != null ? getOwner().equals(obj.getOwner())
-                : (obj.getOwner() == null)) &&
             (isEndUserRt() == obj.getEndUserRt()) &&
             (isServiceRt() == obj.getServiceRt());
         return matches;
@@ -292,13 +304,12 @@ public class Service extends AppdefResource
      * Set the value object. This method does *NOT* update any of the CMR's
      * included in the value object. This is for speed/locking reasons
      */
-    public void updateService(ServiceValue valueHolder) {
+    void updateService(ServiceValue valueHolder) {
         setDescription( valueHolder.getDescription() );
         setAutodiscoveryZombie( valueHolder.getAutodiscoveryZombie() );
         setServiceRt( valueHolder.getServiceRt() );
         setEndUserRt( valueHolder.getEndUserRt() );
         setModifiedBy( valueHolder.getModifiedBy() );
-        setOwner( valueHolder.getOwner() );
         setLocation( valueHolder.getLocation() );
         setParentId( valueHolder.getParentId() );
         setName( valueHolder.getName() );

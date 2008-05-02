@@ -23,7 +23,7 @@
  * USA. 
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,13 +34,11 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.dao.HibernateDAO;
 
 public class ServerDAO extends HibernateDAO
 {
@@ -92,7 +90,6 @@ public class ServerDAO extends HibernateDAO
         s.setRuntimeAutodiscovery(sv.getRuntimeAutodiscovery());
         s.setWasAutodiscovered(sv.getWasAutodiscovered());
         s.setAutodiscoveryZombie(false);
-        s.setOwner(sv.getOwner());
         s.setLocation(sv.getLocation());
         s.setModifiedBy(sv.getModifiedBy());
         s.setConfigResponse(configResponse);

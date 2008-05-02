@@ -156,7 +156,6 @@ public class ApplicationDAO extends HibernateDAO
         a.setSortName( appV.getName().toUpperCase() );
         a.setSortName( appV.getSortName() );
         a.setModifiedBy( appV.getModifiedBy() );
-        a.setOwner( appV.getOwner() );
         a.setLocation( appV.getLocation() );
         a.setEngContact( appV.getEngContact() );
         a.setOpsContact( appV.getOpsContact() );

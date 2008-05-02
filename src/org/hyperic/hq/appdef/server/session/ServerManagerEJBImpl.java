@@ -81,7 +81,6 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hq.dao.PlatformTypeDAO;
-import org.hyperic.hq.dao.ServerDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
@@ -182,8 +181,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 servers.add(server);
             }
 
-            createAuthzServer(sValue.getName(), server.getId(), platformId,
-                              serverType.isVirtual(), subject, serverType);
+            createAuthzServer(subject, server);
 
             // Send resource create event
             ResourceCreatedZevent zevent =
@@ -243,8 +241,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             servers.add(server);
         }
 
-        createAuthzServer(server.getName(), server.getId(), platform.getId(),
-                          st.isVirtual(), subject, st);
+        createAuthzServer(subject, server);
         return server;
     }
     
@@ -1163,8 +1160,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             ResourceValue authzRes = getServerResourceValue(serverId);
             // change the authz owner
             getResourceManager().setResourceOwner(who, authzRes, newOwner);
-            // update the owner field in the appdef table -- YUCK
-            server.setOwner(newOwner.getName());
+            // update the modified field in the appdef table -- YUCK
             server.setModifiedBy(who.getName());
         } catch (FinderException e) {
             throw new ServerNotFoundException(serverId, e);
@@ -1330,9 +1326,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Create the Authz resource and verify that the user has 
      * correct permissions
      */
-    private void createAuthzServer(String serverName, Integer serverId, 
-                                   Integer platformId, boolean isVirtual, 
-                                   AuthzSubject subject, ServerType st)
+    private void createAuthzServer(AuthzSubject subject, Server server)
         throws CreateException, FinderException, PermissionException 
     {
         log.debug("Being Authz CreateServer");
@@ -1340,12 +1334,16 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             log.debug("Checking for: " + AuthzConstants.platformOpAddServer + 
                 " for subject: " + subject);
         }
-        checkPermission(subject, getPlatformResourceType(), platformId,
+        Integer platformId = server.getPlatform().getId();
+        checkPermission(subject, getPlatformResourceType(),
+                        platformId,
                         AuthzConstants.platformOpAddServer);
 
         ResourceType serverProto = getServerPrototypeResourceType();
+        ServerType serverType = server.getServerType();
         Resource proto = ResourceManagerEJBImpl.getOne()
-            .findResourcePojoByInstanceId(serverProto, st.getId());
+            .findResourcePojoByInstanceId(serverProto,
+                                          serverType.getId());
         AppdefEntityID platId = 
             AppdefEntityID.newPlatformID(platformId);
         Resource parent = getResourceManager().findResource(platId);
@@ -1354,8 +1352,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             throw new SystemException("Unable to find parent platform [id=" +
                                       platId + "]");
         }
-        createAuthzResource(subject, getServerResourceType(), proto, serverId,
-                            serverName, isVirtual, parent);
+        Resource resource = createAuthzResource(subject,
+                                                getServerResourceType(), proto,
+                                                server.getId(),
+                                                server.getName(),
+                                                serverType.isVirtual(), parent);
+        server.setResource(resource);
     }
 
     /**

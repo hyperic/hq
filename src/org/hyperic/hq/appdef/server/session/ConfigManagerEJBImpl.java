@@ -54,9 +54,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.ConfigResponseDAO;
-import org.hyperic.hq.dao.ServerDAO;
-import org.hyperic.hq.dao.ServiceDAO;
-import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.zevents.ZeventManager;
 

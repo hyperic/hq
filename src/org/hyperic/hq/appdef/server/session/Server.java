@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.HasAuthzOperations;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class Server extends ServerBase
@@ -68,6 +69,7 @@ public class Server extends ServerBase
     private ServerType _serverType;
     private ConfigResponseDB _configResponse;
     private Collection _services = new ArrayList();
+    private Resource _resource;
 
     public Server() {
         super();
@@ -82,7 +84,7 @@ public class Server extends ServerBase
         return _platform;
     }
 
-    public void setPlatform(Platform platform) {
+    void setPlatform(Platform platform) {
         _platform = platform;
     }
 
@@ -98,7 +100,7 @@ public class Server extends ServerBase
         return _wasAutodiscovered;
     }
 
-    public void setWasAutodiscovered(boolean wasAutodiscovered) {
+    void setWasAutodiscovered(boolean wasAutodiscovered) {
         _wasAutodiscovered = wasAutodiscovered;
     }
 
@@ -106,7 +108,7 @@ public class Server extends ServerBase
         return _autodiscoveryZombie;
     }
 
-    public void setAutodiscoveryZombie(boolean autodiscoveryZombie) {
+    void setAutodiscoveryZombie(boolean autodiscoveryZombie) {
         _autodiscoveryZombie = autodiscoveryZombie;
     }
 
@@ -114,7 +116,7 @@ public class Server extends ServerBase
         return _serverType;
     }
 
-    public void setServerType(ServerType serverType) {
+    void setServerType(ServerType serverType) {
         _serverType = serverType;
     }
 
@@ -122,7 +124,7 @@ public class Server extends ServerBase
         return _configResponse;
     }
 
-    public void setConfigResponse(ConfigResponseDB configResponse) {
+    void setConfigResponse(ConfigResponseDB configResponse) {
         _configResponse = configResponse;
     }
 
@@ -130,11 +132,11 @@ public class Server extends ServerBase
         return _services;
     }
 
-    public void setServices(Collection services) {
+    void setServices(Collection services) {
         _services = services;
     }
     
-    public void addService(Service s) {
+    void addService(Service s) {
         _services.add(s);
     }
 
@@ -160,7 +162,7 @@ public class Server extends ServerBase
         _serverLightValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
         _serverLightValue.setConfigResponseId(getConfigResponseId());
         _serverLightValue.setModifiedBy(getModifiedBy());
-        _serverLightValue.setOwner(getOwner());
+        _serverLightValue.setOwner(getResource().getOwner().getName());
         _serverLightValue.setLocation(getLocation());
         _serverLightValue.setName(getName());
         _serverLightValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
@@ -192,7 +194,7 @@ public class Server extends ServerBase
         _serverValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
         _serverValue.setConfigResponseId(getConfigResponseId());
         _serverValue.setModifiedBy(getModifiedBy());
-        _serverValue.setOwner(getOwner());
+        _serverValue.setOwner(getResource().getOwner().getName());
         _serverValue.setLocation(getLocation());
         _serverValue.setName(getName());
         _serverValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
@@ -251,8 +253,6 @@ public class Server extends ServerBase
             (getLocation() != null ?
                 this.getLocation().equals(obj.getLocation())
                 : (obj.getLocation() == null)) &&
-            (getOwner() != null ? this.getOwner().equals(obj.getOwner())
-                : (obj.getOwner() == null)) &&
             (getRuntimeAutodiscovery() == obj.getRuntimeAutodiscovery()) &&
             (getInstallPath().equals(obj.getInstallPath())) &&
             (getAutoinventoryIdentifier() != null ?
@@ -268,7 +268,7 @@ public class Server extends ServerBase
      * @param sv
      * @exception ValidationException
      */
-    public void validateNewService(ServiceValue sv)
+    void validateNewService(ServiceValue sv)
         throws ValidationException
     {
         String msg = null;
@@ -309,13 +309,12 @@ public class Server extends ServerBase
      * legacy EJB method
      * @param valueHolder
      */
-    public void updateServer(ServerValue valueHolder) {
+    void updateServer(ServerValue valueHolder) {
         setDescription( valueHolder.getDescription() );
         setRuntimeAutodiscovery( valueHolder.getRuntimeAutodiscovery() );
         setWasAutodiscovered( valueHolder.getWasAutodiscovered() );
         setAutodiscoveryZombie( valueHolder.getAutodiscoveryZombie() );
         setModifiedBy( valueHolder.getModifiedBy() );
-        setOwner( valueHolder.getOwner() );
         setLocation( valueHolder.getLocation() );
         setName( valueHolder.getName() );
         setAutoinventoryIdentifier( valueHolder.getAutoinventoryIdentifier() );
@@ -373,5 +372,19 @@ public class Server extends ServerBase
 
     protected String _getAuthzOp(String op) {
         return (String)_authOps.get(op);
+    }
+
+    /**
+     * @return the resource
+     */
+    public Resource getResource() {
+        return _resource;
+    }
+
+    /**
+     * @param resource the resource to set
+     */
+    void setResource(Resource resource) {
+        this._resource = resource;
     }
 }

@@ -36,10 +36,6 @@
       <column name="MODIFIED_BY" not-null="false" length="100"/>
     </property>
 
-    <property name="owner" type="string">
-      <column name="OWNER" not-null="false" length="100"/>
-    </property>
-
     <property name="location" type="string">
       <column name="LOCATION" not-null="false" length="100"/>
     </property>
@@ -85,6 +81,9 @@
       <one-to-many class="org.hyperic.hq.appdef.AppService"/>
     </bag>
 
+    <many-to-one name="resource" class="org.hyperic.hq.authz.server.session.Resource">
+      <column name="RESOURCE_ID"/>
+    </many-to-one>
   </class>
 
 </hibernate-mapping>

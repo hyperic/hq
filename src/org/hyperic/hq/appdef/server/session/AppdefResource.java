@@ -38,7 +38,6 @@ public abstract class AppdefResource extends AppdefBean
     protected String sortName;
     protected String description;
     protected String modifiedBy;
-    protected String owner;
     protected String location;
 
     /**
@@ -67,16 +66,6 @@ public abstract class AppdefResource extends AppdefBean
     public void setModifiedBy(String modifiedBy)
     {
         this.modifiedBy = modifiedBy;
-    }
-
-    public String getOwner()
-    {
-        return this.owner;
-    }
-
-    public void setOwner(String owner)
-    {
-        this.owner = owner;
     }
 
     public String getLocation()

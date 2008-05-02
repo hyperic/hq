@@ -177,7 +177,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             // call the create
             Application application = getApplicationDAO().create(newApp);
             // AUTHZ CHECK
-            createAuthzApplication(application, subject, at);
+            createAuthzApplication(subject, application);
             // now add the services
             for(Iterator i = services.iterator(); i.hasNext();) {
                 ServiceValue aService = (ServiceValue)i.next();
@@ -301,7 +301,6 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             // change the authz owner
             getResourceManager().setResourceOwner(who, authzRes, newOwner);
             // update the owner field in the appdef table -- YUCK
-            app.setOwner(newOwner.getName());
             app.setModifiedBy(who.getName());
         } catch (FinderException e) {
             throw new ApplicationNotFoundException(appId);
@@ -738,8 +737,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * Create the authz resource and verify the subject has the createApplication
      * permission. 
      */
-    private void createAuthzApplication(Application app, AuthzSubject subject,
-                                        ApplicationType at)
+    private void createAuthzApplication(AuthzSubject subject, Application app)
         throws FinderException, PermissionException 
     {
         log.debug("Begin Authz CreateApplication");
@@ -751,9 +749,13 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         
         ResourceType appProto = getApplicationPrototypeResourceType();
         Resource proto = ResourceManagerEJBImpl.getOne()
-            .findResourcePojoByInstanceId(appProto, at.getId());
-        createAuthzResource(subject, getApplicationResourceType(), proto,
-                            app.getId(), app.getName(), null);
+            .findResourcePojoByInstanceId(appProto,
+                                          app.getApplicationType().getId());
+        Resource resource = createAuthzResource(subject,
+                                                getApplicationResourceType(),
+                                                proto, app.getId(),
+                                                app.getName(), null);
+        app.setResource(resource);
     }
 
     private class GroupDeleteWatcher 

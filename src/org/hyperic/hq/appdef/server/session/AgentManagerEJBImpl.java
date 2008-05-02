@@ -65,7 +65,6 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-import org.hyperic.hq.dao.PlatformDAO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
