@@ -136,16 +136,6 @@ public class AgentClient {
         this.config      = config;
         this.log         = LogFactory.getLog(AgentClient.class);
         this.nuking      = false;
-
-        // Detect weirdo IBM jdk
-        try {
-            this.sslHandlerPkg = "com.ibm.net.ssl.internal.www.protocol";
-            Class.forName(this.sslHandlerPkg + ".https.Regexp");
-        } catch(ClassNotFoundException exc){
-            this.sslHandlerPkg = "com.sun.net.ssl.internal.www.protocol";
-        }
-        
-        System.setProperty("java.protocol.handler.pkgs", this.sslHandlerPkg);
     }
 
     private long cmdPing(int numAttempts)
