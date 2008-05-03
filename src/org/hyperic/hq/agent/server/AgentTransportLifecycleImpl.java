@@ -38,6 +38,7 @@ import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.client.AgentClient;
 import org.hyperic.hq.bizapp.client.AgentCallbackClient;
+import org.hyperic.hq.common.YesOrNo;
 import org.hyperic.hq.transport.AgentTransport;
 
 /**
@@ -274,7 +275,8 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
                 isNewTransport = provider.isNewTransport();                
             }
         } else {
-            isNewTransport = Boolean.valueOf(isNewTransportString).booleanValue();
+            isNewTransport = 
+                YesOrNo.valueFor(isNewTransportString).toBoolean().booleanValue();
         }
         
         return isNewTransport;
@@ -304,7 +306,8 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
                 isUnidirectional = provider.isUnidirectional();
             }
         } else {
-            isUnidirectional = Boolean.valueOf(isUnidirectionalString).booleanValue();
+            isUnidirectional = 
+                YesOrNo.valueFor(isUnidirectionalString).toBoolean().booleanValue();
         }
         
         return isUnidirectional;    
