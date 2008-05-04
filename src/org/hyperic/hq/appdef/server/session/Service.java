@@ -29,11 +29,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.HasAuthzOperations;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -197,41 +195,6 @@ public class Service extends AppdefResource
 
     void setAppServices(Collection appServices) {
         _appServices = appServices;
-    }
-
-    private ServiceLightValue _serviceLightValue = new ServiceLightValue();
-    /**
-     * legacy EJB DTO pattern
-     * @deprecated use (this) Service object instead
-     */
-    public ServiceLightValue getServiceLightValue()
-    {
-        _serviceLightValue.setSortName(getSortName());
-        _serviceLightValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
-        _serviceLightValue.setServiceRt(isServiceRt());
-        _serviceLightValue.setEndUserRt(isEndUserRt());
-        _serviceLightValue.setModifiedBy(getModifiedBy());
-        _serviceLightValue.setOwner(getResource().getOwner().getName());
-        _serviceLightValue.setLocation(getLocation());
-        _serviceLightValue.setConfigResponseId(getConfigResponseId());
-        _serviceLightValue.setParentId(getParentId());
-        _serviceLightValue.setName(getName());
-        _serviceLightValue.setDescription(getDescription());
-        _serviceLightValue.setId(getId());
-        _serviceLightValue.setMTime(getMTime());
-        _serviceLightValue.setCTime(getCTime());
-        if ( getServiceType() != null ) {
-            // temporarily rely on EJB until
-            // it is hibernized
-            try {
-                _serviceLightValue.setServiceType(
-                    getServiceType().getServiceTypeValue());
-            } catch (ObjectNotFoundException e) {
-            }
-        }
-        else
-            _serviceLightValue.setServiceType(null);
-        return _serviceLightValue;
     }
 
     private ServiceValue _serviceValue = new ServiceValue();

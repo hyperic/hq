@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -29,6 +29,8 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import org.hyperic.hq.appdef.server.session.Service;
+
 /**
  * Value object for AppService.
  *
@@ -47,7 +49,7 @@ public class AppServiceValue
    private boolean mTimeHasBeenSet = false;
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
-   private org.hyperic.hq.appdef.shared.ServiceLightValue Service;
+   private Service service;
    private boolean ServiceHasBeenSet = false;
    private org.hyperic.hq.appdef.shared.ServiceClusterValue ServiceCluster;
    private boolean ServiceClusterHasBeenSet = false;
@@ -87,7 +89,7 @@ public class AppServiceValue
 	  this.cTime = otherValue.cTime;
 	  cTimeHasBeenSet = true;
 	// TODO Clone is better no ?
-	  this.Service = otherValue.Service;
+	  this.service = otherValue.service;
 	  ServiceHasBeenSet = true;
 	// TODO Clone is better no ?
 	  this.ServiceCluster = otherValue.ServiceCluster;
@@ -174,13 +176,13 @@ public class AppServiceValue
 	  return cTimeHasBeenSet;
    }
 
-   public org.hyperic.hq.appdef.shared.ServiceLightValue getService()
+   public Service getService()
    {
-	  return this.Service;
+	  return this.service;
    }
-   public void setService( org.hyperic.hq.appdef.shared.ServiceLightValue Service )
+   public void setService( Service service )
    {
-	  this.Service = Service;
+	  this.service = service;
 	  ServiceHasBeenSet = true;
    }
    public org.hyperic.hq.appdef.shared.ServiceClusterValue getServiceCluster()
@@ -277,13 +279,13 @@ public class AppServiceValue
 		 {
 			lEquals = lEquals && this.cTime.equals( that.cTime );
 		 }
-		 if( this.Service == null )
+		 if( this.service == null )
 		 {
-			lEquals = lEquals && ( that.Service == null );
+			lEquals = lEquals && ( that.service == null );
 		 }
 		 else
 		 {
-			lEquals = lEquals && this.Service.equals( that.Service );
+			lEquals = lEquals && this.service.equals( that.service );
 		 }
 		 if( this.ServiceCluster == null )
 		 {
@@ -322,7 +324,7 @@ public class AppServiceValue
 
       result = 37*result + ((this.cTime != null) ? this.cTime.hashCode() : 0);
 
-	  result = 37*result + ((this.Service != null) ? this.Service.hashCode() : 0);
+	  result = 37*result + ((this.service != null) ? this.service.hashCode() : 0);
 	  result = 37*result + ((this.ServiceCluster != null) ? this.ServiceCluster.hashCode() : 0);
 	  result = 37*result + ((this.ServiceType != null) ? this.ServiceType.hashCode() : 0);
 	  return result;

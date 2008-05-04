@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -25,16 +25,14 @@
 
 package org.hyperic.hq.appdef;
 
+import java.util.Collection;
+
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-
-import java.util.Collection;
 
 /**
  * Pojo for hibernate hbm mapping file
@@ -185,8 +183,7 @@ public class AppService extends AppdefBean
         appServiceValue.setMTime(getMTime());
         appServiceValue.setCTime(getCTime());
         if ( getService() != null )
-            appServiceValue.setService(
-                getService().getServiceLightValue() );
+            appServiceValue.setService(getService());
         else
             appServiceValue.setService( null );
         if ( getServiceType() != null )

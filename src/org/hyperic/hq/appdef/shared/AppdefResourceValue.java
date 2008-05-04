@@ -93,70 +93,6 @@ public abstract class AppdefResourceValue
     public abstract AppdefEntityID getEntityId();
 
     // get a map of resource types and instances
-    private static Map getResourceTypeMap(int mapType, Collection objColl) {
-        Map aMap = new HashMap();
-        switch (mapType) {
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                for(Iterator i = objColl.iterator();i.hasNext();) {
-                    ServerLightValue aServer = (ServerLightValue)i.next();
-                    ServerTypeValue aType = aServer.getServerType();
-                    if (!aMap.containsKey(aType.getName())) { 
-                        // collection needs to be initialized
-                        List aList = new ArrayList();
-                        aList.add(aServer);
-                        aMap.put(aType.getName(), aList);
-                    } else {
-                        // add it to the collection
-                        ((List)aMap.get(aType.getName())).add(aServer);
-                    }
-                }
-                break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    for(Iterator i = objColl.iterator();i.hasNext();) {
-                    ServiceLightValue aService = (ServiceLightValue)i.next();
-                    ServiceTypeValue aType = aService.getServiceType();
-                    if (!aMap.containsKey(aType.getName())) { 
-                        // collection needs to be initialized
-                        List aList = new ArrayList();
-                        aList.add(aService);
-                        aMap.put(aType.getName(), aList);
-                    } else {
-                        // add it to the collection
-                        ((List)aMap.get(aType.getName())).add(aService);
-                    }
-                }
-                break;
-
-            default:
-                throw new NoSuchElementException("Unrecognized type: " + 
-                                                 mapType);
-        }
-        return aMap;
-    }
-
-    /**
-     * Get a map of server types from this collection of serverlightvalues
-     * @param a collection of <code>ServerLightValue</code> objects
-     * @return map with key: serverTypeValue, value: a <code>List</code> 
-     * of ServerLightValues matching that type
-     */
-    public static Map getServerTypeMap(Collection serverColl) {
-        return getResourceTypeMap(
-            AppdefEntityConstants.APPDEF_TYPE_SERVER, serverColl);
-    }
-
-    /**
-     * Get a map of Service types from this collection of ServiceLightValue
-     * @param a collection of <code>ServiceLightValue</code> objects
-     * @return map with key: serviceTypeValue, value: a <code>List</code> 
-     * of ServiceLightValues matching that type
-     */
-    public static Map getServiceTypeMap(Collection serviceColl) {
-        return getResourceTypeMap(AppdefEntityConstants.APPDEF_TYPE_SERVICE, 
-                                  serviceColl);
-    }
-
-    // get a map of resource types and instances
     public static Map getResourceTypeCountMap(Collection objColl) {
         Map aMap = new HashMap();
                 
@@ -193,10 +129,7 @@ public abstract class AppdefResourceValue
                 else
                     return ((ServerLightValue)this).getServerType();
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                if (this instanceof ServiceValue)
-                    return ((ServiceValue)this).getServiceType();
-                else
-                    return ((ServiceLightValue)this).getServiceType();
+                return ((ServiceValue)this).getServiceType();
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 return ((ApplicationValue)this).getApplicationType()
                     .getAppdefResourceTypeValue();
