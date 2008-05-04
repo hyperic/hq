@@ -38,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
@@ -48,7 +49,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -711,8 +711,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
         List platforms = getPlatformAG(subject, platTypeId);
         
         // Get resource type name
-        PlatformTypeValue platType =
-            getPlatformManager().findPlatformTypeValueById(platTypeId.getId());
+        PlatformType platType =
+            getPlatformManager().findPlatformType(platTypeId.getId());
     
         // Look up the metric summaries of platforms
         return getResourceMetrics(subject, platforms, platType.getName(),

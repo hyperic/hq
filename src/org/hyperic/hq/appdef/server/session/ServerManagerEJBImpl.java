@@ -276,7 +276,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                VetoException
     {
         AppdefEntityID aeid = server.getEntityId();
-        Resource r = getAuthzResource(aeid);
+        Resource r = server.getResource();
         AuthzSubject svrPojo = AuthzSubjectManagerEJBImpl.getOne()
             .findSubjectById(subject.getId());
         Audit audit = ResourceAudit.deleteResource(r, svrPojo, 0, 0);
@@ -1130,7 +1130,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 log.debug("No changes found between value object and entity");
             } else {
                 if(!existing.getName().equals(server.getName())) {
-                    Resource rv = getAuthzResource(existing.getEntityId());
+                    Resource rv = server.getResource();
                     rv.setName(existing.getName());
                 }
 

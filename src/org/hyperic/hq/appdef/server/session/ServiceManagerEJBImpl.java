@@ -1237,8 +1237,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public Service updateService(AuthzSubject subject, ServiceValue existing)
         throws PermissionException, UpdateException, 
                AppdefDuplicateNameException, ServiceNotFoundException {
-        Service service =
-            getServiceDAO().findById(existing.getId());
+        Service service = getServiceDAO().findById(existing.getId());
         checkModifyPermission(subject, service.getEntityId());
         existing.setModifiedBy(subject.getName());
         existing.setMTime(new Long(System.currentTimeMillis()));
@@ -1248,7 +1247,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             log.debug("No changes found between value object and entity");
         } else {
             if(!existing.getName().equals(service.getName())) {
-                Resource rv = getAuthzResource(existing.getEntityId());
+                Resource rv = service.getResource();
                 rv.setName(existing.getName());
             }
 

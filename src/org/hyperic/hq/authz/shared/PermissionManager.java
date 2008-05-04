@@ -228,9 +228,9 @@ public abstract class PermissionManager extends AuthzSession {
     public abstract String getResourceTypeSQL(String table);
 
     public abstract String getResourceTypeSQL(String table,
-                                               int subjectId,
-                                               String resType,
-                                               String op);
+                                              Integer subjectId,
+                                              String resType,
+                                              String op);
 
     public abstract String getOperableGroupsHQL(String alias, String oper);
     

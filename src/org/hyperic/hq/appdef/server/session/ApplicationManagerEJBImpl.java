@@ -123,15 +123,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * Get ApplicationType by ID
      * @ejb:interface-method
      */
-    public ApplicationTypeValue findApplicationTypeById(Integer id) {
-        return findApplicationPojoTypeById(id).getApplicationTypeValue();
-    }
-
-    /**
-     * Get ApplicationType by ID
-     * @ejb:interface-method
-     */
-    public ApplicationType findApplicationPojoTypeById(Integer id) {
+    public ApplicationType findApplicationType(Integer id) {
         return getApplicationTypeDAO().findById(id);
     }
 
@@ -151,7 +143,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                AppdefDuplicateNameException
     {
         ApplicationType at = 
-            findApplicationPojoTypeById(newApp.getApplicationType().getId()); 
+            getApplicationTypeDAO().findById(newApp.getApplicationType().getId()); 
         if(log.isDebugEnabled()) {
             log.debug("Begin createApplication: " + newApp);
         }
@@ -226,8 +218,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 // fall through, will catch this later
             }
 
-            Resource rv = getAuthzResource(newValue.getEntityId());
-            rv.setName(newValue.getName());
+            app.getResource().setName(newValue.getName());
         }
         dao.setApplicationValue(app, newValue);
         return findApplicationById(subject, app.getId()).getApplicationValue();

@@ -131,29 +131,19 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Find a PlatformTypeValue by id.
-     * @deprecated Use findPlatformType instead.
-     * @ejb:interface-method
-     */
-    public PlatformTypeValue findPlatformTypeValueById(Integer id)
-        throws ObjectNotFoundException {
-        return findPlatformType(id).getPlatformTypeValue();
-    }
-
-    /**
      * Find a platform type by name
      * @param type - name of the platform type
      * @return platformTypeValue 
      * @ejb:interface-method
      */
-    public PlatformTypeValue findPlatformTypeByName(String type) 
+    public PlatformType findPlatformTypeByName(String type) 
         throws PlatformNotFoundException
     {
         PlatformType ptype = getPlatformTypeDAO().findByName(type);
         if (ptype == null) {
             throw new PlatformNotFoundException(type);
         }
-        return ptype.getPlatformTypeValue();
+        return ptype;
     }
 
     /**
@@ -285,7 +275,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                VetoException
     {
         AppdefEntityID aeid = platform.getEntityId();
-        Resource r = getAuthzResource(aeid);
+        Resource r = platform.getResource();
         AuthzSubject platPojo = 
             AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId());
         Audit audit = ResourceAudit.deleteResource(r, platPojo, 0, 0);
@@ -522,26 +512,20 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public PageList getRecentPlatforms(AuthzSubject subject,
                                        long range, int size)
         throws FinderException, PermissionException {
-
-        Collection platforms;
         PageControl pc = new PageControl(0, size);
 
-        try {
-            platforms =
-                getPlatformDAO().findByCTime(System.currentTimeMillis() - range);
+        Collection platforms =
+            getPlatformDAO().findByCTime(System.currentTimeMillis() - range);
 
-            // now get the list of PKs
-            List viewable = getViewablePlatformPKs(subject);
-            // and iterate over the list to remove any item not viewable
-            for(Iterator i = platforms.iterator(); i.hasNext();) {
-                Platform platform = (Platform)i.next();
-                if(!viewable.contains(platform.getId())) {
-                    // remove the item, user cant see it
-                    i.remove();
-                }
+        // now get the list of PKs
+        List viewable = getViewablePlatformPKs(subject);
+        // and iterate over the list to remove any item not viewable
+        for(Iterator i = platforms.iterator(); i.hasNext();) {
+            Platform platform = (Platform)i.next();
+            if(!viewable.contains(platform.getId())) {
+                // remove the item, user cant see it
+                i.remove();
             }
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
         
         // valuePager converts local/remote interfaces to value objects
@@ -809,8 +793,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             authzPks = getViewablePlatformPKs(subject);
         } catch(FinderException exc){
             return new PageList();
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
         
         Integer[] ids = new Integer[sIDs.size()];
@@ -931,8 +913,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             }
         
             return (Integer[]) platIds.toArray(new Integer[0]);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } catch (FinderException e) {
             // There are no viewable platforms
             return new Integer[0];
@@ -974,8 +954,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             }
         
             return valuePager.seek(platforms, PageControl.PAGE_ALL);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } catch (FinderException e) {
             // There are no viewable platforms
             return new PageList();
@@ -1060,9 +1038,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                         // fall through, will validate later
                     }
 
-                    // name has changed. Update authz resource table
-                    Resource rv = getAuthzResource(existing.getEntityId());
-                    rv.setName(existing.getName());
+                    plat.getResource().setName(existing.getName());
                 }
 
                 if(! (existing.getFqdn().equals(plat.getFqdn())))  {
@@ -1189,8 +1165,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * has the createPlatform permission.
      * @param subject - the user creating
      */
-    private void createAuthzPlatform(AuthzSubject subject,
-                                         Platform platform)
+    private void createAuthzPlatform(AuthzSubject subject, Platform platform)
         throws FinderException, PermissionException 
     {
         _log.debug("Begin Authz CreatePlatform");
@@ -1342,8 +1317,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             counter.addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
         
-        pLocal.updateWithAI(aiplatform, owner,
-                            getAuthzResource(pLocal.getEntityId()));
+        pLocal.updateWithAI(aiplatform, owner, pLocal.getResource());
     }
 
     /**

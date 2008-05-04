@@ -8844,20 +8844,32 @@ has already been defined.
       <foreignKey constraintName="FKEE7E4387FC176AE" references="EAM_RESOURCE(ID)"/>
     </schema-addColumn>
     <schema-directSQL>
-      <statement desc="Drop unused column OWNER.">
+      <statement desc="Drop unused column OWNER." fail="false">
         ALTER TABLE EAM_APPLICATION DROP COLUMN OWNER
       </statement>
-      <statement desc="Drop unused column OWNER.">
+      <statement desc="Drop unused column OWNER." fail="false">
         ALTER TABLE EAM_PLATFORM DROP COLUMN OWNER
       </statement>
-      <statement desc="Drop unused column OWNER.">
+      <statement desc="Drop unused column OWNER." fail="false">
         ALTER TABLE EAM_SERVER DROP COLUMN OWNER
       </statement>
-      <statement desc="Drop unused column OWNER.">
+      <statement desc="Drop unused column OWNER." fail="false">
         ALTER TABLE EAM_SERVICE DROP COLUMN OWNER
       </statement>
     </schema-directSQL>
   </schemaSpec>
+
+  <schemaSpec version="3.117">
+    <schema-directSQL>
+      <statement desc="Drop unused column NAME." fail="false">
+        ALTER TABLE EAM_PLATFORM DROP COLUMN NAME
+      </statement>
+      <statement desc="Drop unused column SORT_NAME." fail="false">
+        ALTER TABLE EAM_PLATFORM DROP COLUMN SORT_NAME
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

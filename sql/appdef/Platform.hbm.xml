@@ -16,16 +16,8 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <property name="name" type="string">
-      <column name="NAME" not-null="true" length="100" unique="true"/>
-    </property>
-
     <property name="fqdn" type="string">
       <column name="FQDN" not-null="true" length="200" unique="true"/>
-    </property>
-
-    <property name="sortName" type="string">
-      <column name="SORT_NAME" not-null="false" length="100"/>
     </property>
 
     <property name="certdn" type="string">

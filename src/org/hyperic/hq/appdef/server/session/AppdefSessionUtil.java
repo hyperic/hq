@@ -153,17 +153,17 @@ public abstract class AppdefSessionUtil {
         return DAOFactory.getDAOFactory().getAIServerDAO();
     }
 
-    protected AppdefResourceTypeValue findResourceType(int appdefType,
-                                                       int appdefTypeId)
+    protected AppdefResourceType findResourceType(int appdefType,
+                                                  int appdefTypeId)
         throws AppdefEntityNotFoundException
     {
         Integer id = new Integer(appdefTypeId);
 
         if(appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM){
-            return getPlatformMgrLocal().findPlatformTypeValueById(id);
+            return getPlatformMgrLocal().findPlatformType(id);
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER){
             try {
-                return getServerMgrLocal().findServerTypeById(id);
+                return getServerMgrLocal().findServerType(id);
             } catch(ObjectNotFoundException exc){
                 throw new ServerNotFoundException("Server type id=" +
                                                   appdefTypeId + 
@@ -171,14 +171,14 @@ public abstract class AppdefSessionUtil {
             }
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
             try {
-                return getServiceMgrLocal().findServiceTypeById(id);
+                return getServiceMgrLocal().findServiceType(id);
             } catch(ObjectNotFoundException exc){
                 throw new ServiceNotFoundException("Service type id=" +
                                                    appdefTypeId +
                                                    " not found");
             }
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
-            return getApplicationMgrLocal().findApplicationTypeById(id);
+            return getApplicationMgrLocal().findApplicationType(id);
         } else {
             throw new IllegalArgumentException("Unrecognized appdef type:"+
                                                " " + appdefType);

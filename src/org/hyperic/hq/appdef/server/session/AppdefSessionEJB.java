@@ -198,13 +198,6 @@ public abstract class AppdefSessionEJB
     }
 
     /**
-     * Retrieve the Resource POJO for a given Appdef Entity ID
-     */
-    protected Resource getAuthzResource(AppdefEntityID aeid) {
-        return getResourceManager().findResource(aeid);
-    }
-
-    /**
      * Get the authz resource type by AppdefEntityId
      */
     protected ResourceType getAuthzResourceType(AppdefEntityID id)
@@ -1120,7 +1113,7 @@ public abstract class AppdefSessionEJB
     } 
 
     protected List getViewablePlatformPKs(AuthzSubject who)
-        throws FinderException, PermissionException, NamingException {
+        throws FinderException, PermissionException {
         // now get a list of all the viewable items
         PermissionManager pm = PermissionManagerFactory.getInstance();
         Operation op = getOperationByName(getPlatformResourceType(),

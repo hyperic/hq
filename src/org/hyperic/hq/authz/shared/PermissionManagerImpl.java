@@ -363,10 +363,8 @@ public class PermissionManagerImpl
             "  AND RT.NAME = ? ";
     }
 
-    public String getResourceTypeSQL(String table,
-                                      int subjectId,
-                                      String resType,
-                                      String op) {
+    public String getResourceTypeSQL(String table, Integer subjectId,
+                                     String resType, String op) {
         return
             "SELECT TBL.ID FROM EAM_RESOURCE RES, " +
             " EAM_RESOURCE_TYPE RT, " + table + " TBL " +

@@ -55,7 +55,7 @@ public abstract class AuthzNamedBean extends PersistedObject
         return _sortName;
     }
 
-    protected void setSortName(String sortName) {
+    public void setSortName(String sortName) {
         _sortName = sortName != null ? sortName.toUpperCase() : null;
     }
 

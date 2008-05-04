@@ -658,7 +658,7 @@ public class ResourceGroupManagerEJBImpl
 
     private ApplicationType getApplicationTypeById (int id) {
         return ApplicationManagerEJBImpl.getOne()
-                   .findApplicationPojoTypeById(new Integer(id));
+                   .findApplicationType(new Integer(id));
     }
     
     /**

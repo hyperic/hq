@@ -928,10 +928,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             if (aiservice.getName() != null &&
                 !aiservice.getName().equals(service.getName())) {
                 service.setName(aiservice.getName().trim());
-                // Update Resource
-                Resource rv = ResourceManagerEJBImpl.getOne()
-                    .findResource(service.getEntityId());
-                rv.setName(service.getName());
+                service.getResource().setName(service.getName());
             }
             if (aiservice.getDescription() != null)
                 service.setDescription(aiservice.getDescription().trim());

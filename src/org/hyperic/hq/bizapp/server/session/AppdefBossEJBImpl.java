@@ -342,7 +342,8 @@ public class AppdefBossEJBImpl
         throws ApplicationException 
     {
         manager.authenticate(sessionId);
-        return getApplicationManager().findApplicationTypeById(id);
+        return getApplicationManager().findApplicationType(id)
+            .getApplicationTypeValue();
     }
 
     /**
@@ -1060,16 +1061,14 @@ public class AppdefBossEJBImpl
                                                         AppdefEntityTypeID id)
         throws SessionTimeoutException, SessionNotFoundException 
     {
-        manager.authenticate(sessionID);
         try {
             switch(id.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    return getPlatformManager()
-                        .findPlatformTypeValueById(id.getId());
+                    return findPlatformTypeById(sessionID, id.getId());
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    return getServerManager().findServerTypeById(id.getId());
+                    return findServerTypeById(sessionID, id.getId());
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    return getServiceManager().findServiceTypeById(id.getId());
+                    return findServiceTypeById(sessionID, id.getId());
                 default:
                     throw new IllegalArgumentException("Unknown appdef type: "
                                                        + id);
@@ -1087,7 +1086,7 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException
     {
         manager.authenticate(sessionID);
-        return getPlatformManager().findPlatformTypeValueById(id);
+        return getPlatformManager().findPlatformType(id).getPlatformTypeValue();
     }
 
     /**
@@ -1098,7 +1097,8 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException 
     {
         manager.authenticate(sessionID);
-        return getPlatformManager().findPlatformTypeByName(name);
+        return getPlatformManager().findPlatformTypeByName(name)
+            .getPlatformTypeValue();
     }
 
     /**

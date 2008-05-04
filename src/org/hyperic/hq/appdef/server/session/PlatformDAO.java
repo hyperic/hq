@@ -30,9 +30,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hibernate.criterion.Expression;
+import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Agent;
@@ -180,7 +179,7 @@ public class PlatformDAO extends HibernateDAO {
 
     public Collection findByNameOrFQDN(String name, String fqdn)
     {
-        String sql = "from Platform where sortName=? or lower(fqdn)=?";
+        String sql = "from Platform where resource.sortName=? or lower(fqdn)=?";
         return getSession()
             .createQuery(sql)
             .setString(0, name.toUpperCase())
@@ -191,7 +190,9 @@ public class PlatformDAO extends HibernateDAO {
     public Collection findAll_orderName(boolean asc)
     {
         return createCriteria()
-            .addOrder(asc ? Order.asc("sortName"): Order.desc("sortName"))
+            .createAlias("resource", "r")
+            .addOrder(asc ? Order.asc("r.sortName") :
+                            Order.desc("r.sortName"))
             .setCacheable(true)
             .setCacheRegion("Platform.findAll_orderName")
             .list();
@@ -212,7 +213,7 @@ public class PlatformDAO extends HibernateDAO {
     }
 
     public Platform findByName(String name) {
-        String sql = "from Platform where name=?";
+        String sql = "from Platform where resource.name=?";
         return (Platform)getSession()
             .createQuery(sql)
             .setString(0, name)
@@ -220,7 +221,7 @@ public class PlatformDAO extends HibernateDAO {
     }
 
     public Platform findBySortName(String name) {
-        String sql = "from Platform where sortName=?";
+        String sql = "from Platform where resource.sortName=?";
         return (Platform)getSession()
             .createQuery(sql)
             .setString(0, name.toUpperCase())
@@ -239,9 +240,12 @@ public class PlatformDAO extends HibernateDAO {
 
     public List findByServers(Integer[] ids)
     {
-        return createQuery("select distinct p from Platform p " +
-        		"join p.servers s where s.id in (:ids) order by p.sortName")
-            .setParameterList("ids", ids)
+        return createCriteria()
+            .createAlias("resource", "r")
+            .createAlias("servers", "s")
+            .add(Restrictions.in("s.id", ids))
+            .addOrder(Order.asc("r.sortName"))
+            .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
             .list();
     }
 
