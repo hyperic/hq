@@ -156,7 +156,7 @@ public class CPropManagerEJBImpl
     public void addKey(CpropKey key)
         throws AppdefEntityNotFoundException, CPropKeyExistsException
     {
-        AppdefResourceTypeValue recValue;
+        AppdefResourceType recValue;
         CpropKeyDAO cpHome;
         CpropKey cpKey;
 

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,10 +38,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
@@ -88,7 +87,7 @@ public class NewApplicationAction extends BaseAction {
             app.setOpsContact(newForm.getOpsContact()) ;
             app.setLocation(newForm.getLocation());
             log.trace("finding application type [" + applicationTypeId + "]");
-            ApplicationTypeValue applicationType =
+            ApplicationType applicationType =
                 boss.findApplicationTypeById(sessionId.intValue(),
                                              applicationTypeId);
             app.setApplicationType(applicationType);

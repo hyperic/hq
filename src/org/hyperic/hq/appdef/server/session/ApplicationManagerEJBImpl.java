@@ -46,7 +46,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -109,14 +108,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     public List getAllApplicationTypes(AuthzSubject who) 
         throws FinderException {
-        Collection ejbs = getApplicationTypeDAO().findAll();
-
-        ArrayList list = new ArrayList(ejbs.size());
-        for(Iterator i = ejbs.iterator(); i.hasNext();) {
-            ApplicationType appType = (ApplicationType)i.next();
-            list.add(appType.getApplicationTypeValue());
-        }
-        return list;
+        return getApplicationTypeDAO().findAll();
     }
 
     /**

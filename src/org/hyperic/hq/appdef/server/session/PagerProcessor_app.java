@@ -38,7 +38,7 @@ public class PagerProcessor_app implements PagerProcessor {
                 return ((Application)o).getApplicationValue();
             }
             if (o instanceof ApplicationType) {
-                return ((ApplicationType) o).getApplicationTypeValue();
+                return o;
             }
         } catch ( Exception e ) {
             throw new IllegalStateException("Error converting to " +

@@ -58,6 +58,7 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.CPropResource;
 import org.hyperic.hq.appdef.server.session.CPropResourceSortField;
 import org.hyperic.hq.appdef.server.session.Cprop;
@@ -89,7 +90,6 @@ import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
@@ -337,13 +337,12 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public ApplicationTypeValue findApplicationTypeById(int sessionId,
+    public ApplicationType findApplicationTypeById(int sessionId,
                                                         Integer id)
         throws ApplicationException 
     {
         manager.authenticate(sessionId);
-        return getApplicationManager().findApplicationType(id)
-            .getApplicationTypeValue();
+        return getApplicationManager().findApplicationType(id);
     }
 
     /**

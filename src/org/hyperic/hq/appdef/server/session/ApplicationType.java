@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -25,12 +25,11 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.authz.shared.AuthzConstants;
-
 import java.util.Collection;
+
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class ApplicationType extends AppdefResourceType
 {
@@ -80,29 +79,41 @@ public class ApplicationType extends AppdefResourceType
         return (obj instanceof ApplicationType) && super.equals(obj);
     }
 
-    private ApplicationTypeValue applicationTypeValue =
-        new ApplicationTypeValue();
-    /**
-     * legacy EJB DTO pattern
-     * @deprecated use (this) ApplicationType object instead
-     * @return
-     */
-    public ApplicationTypeValue getApplicationTypeValue()
-    {
-        applicationTypeValue.setName(getName());
-        applicationTypeValue.setSortName(getSortName());
-        applicationTypeValue.setDescription(getDescription());
-        applicationTypeValue.setId(getId());
-        applicationTypeValue.setMTime(getMTime());
-        applicationTypeValue.setCTime(getCTime());
-        return applicationTypeValue;
-    }
-
     public int getAppdefType() {
         return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
     }
 
     public AppdefResourceTypeValue getAppdefResourceTypeValue() {
-        return getApplicationTypeValue();
+        return new AppdefResourceTypeValue() {
+            public int getAppdefType() {
+                return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
+            }
+
+            public Long getCTime() {
+                return new Long(ApplicationType.this.getCreationTime());
+            }
+
+            public String getDescription() {
+                return ApplicationType.this.getDescription();
+            }
+
+            public Integer getId() {
+                return ApplicationType.this.getId();
+            }
+
+            public Long getMTime() {
+                return new Long(ApplicationType.this.getModifiedTime());
+            }
+
+            public String getName() {
+                return ApplicationType.this.getName();
+            }
+
+            public void setDescription(String desc) {}
+
+            public void setId(Integer id) {}
+
+            public void setName(String name) {}
+        };
     }
 }

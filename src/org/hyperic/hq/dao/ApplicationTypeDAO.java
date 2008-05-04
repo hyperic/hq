@@ -5,7 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -15,7 +14,7 @@ import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -55,11 +54,11 @@ public class ApplicationTypeDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public ApplicationType create(ApplicationTypeValue appType)
+    public ApplicationType create(String name, String desc)
     {
         ApplicationType type = new ApplicationType();
-        type.setName(appType.getName());
-        type.setDescription(appType.getDescription());
+        type.setName(name);
+        type.setDescription(desc);
         save(type);
         return type;
     }

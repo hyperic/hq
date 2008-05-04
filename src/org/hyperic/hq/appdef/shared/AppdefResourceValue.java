@@ -198,7 +198,8 @@ public abstract class AppdefResourceValue
                 else
                     return ((ServiceLightValue)this).getServiceType();
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                return ((ApplicationValue)this).getApplicationType();
+                return ((ApplicationValue)this).getApplicationType()
+                    .getAppdefResourceTypeValue();
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 if (this instanceof ServiceClusterValue)
                     return ((ServiceClusterValue) this).getServiceType();

@@ -27,6 +27,7 @@ package org.hyperic.hq.dao;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.LockMode;
@@ -103,7 +104,7 @@ public abstract class HibernateDAO {
         return false;
     }
     
-    public Collection findAll() {
+    public List findAll() {
         if (cacheFindAll()) {
             String region = getPersistentClass().getName() + ".findAll";
             return getSession().createCriteria(getPersistentClass())

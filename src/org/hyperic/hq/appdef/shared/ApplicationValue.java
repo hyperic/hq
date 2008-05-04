@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -30,6 +30,8 @@
 package org.hyperic.hq.appdef.shared;
 
 import java.util.Set;
+
+import org.hyperic.hq.appdef.server.session.ApplicationType;
 
 /**
  * Value object for Application.
@@ -63,7 +65,7 @@ public class ApplicationValue extends AppdefResourceValue
     private Long cTime;
     private boolean cTimeHasBeenSet = false;
     private Set AppServiceValues = new java.util.HashSet();
-    private org.hyperic.hq.appdef.shared.ApplicationTypeValue ApplicationType;
+    private ApplicationType ApplicationType;
     private boolean ApplicationTypeHasBeenSet = false;
 
     public ApplicationValue()
@@ -366,11 +368,11 @@ public class ApplicationValue extends AppdefResourceValue
         // TODO Clone the List ????
         this.AppServiceValues = from.AppServiceValues;
     }
-    public org.hyperic.hq.appdef.shared.ApplicationTypeValue getApplicationType()
+    public ApplicationType getApplicationType()
     {
         return this.ApplicationType;
     }
-    public void setApplicationType( org.hyperic.hq.appdef.shared.ApplicationTypeValue ApplicationType )
+    public void setApplicationType( ApplicationType ApplicationType )
     {
         this.ApplicationType = ApplicationType;
         ApplicationTypeHasBeenSet = true;

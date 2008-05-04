@@ -205,8 +205,7 @@ public class Application extends AppdefResource
         }
         applicationValue.cleanAppServiceValue();
         if ( getApplicationType() != null )
-            applicationValue.setApplicationType(
-                getApplicationType().getApplicationTypeValue() );
+            applicationValue.setApplicationType(getApplicationType());
         else
             applicationValue.setApplicationType( null );
         return applicationValue;
@@ -228,8 +227,7 @@ public class Application extends AppdefResource
         vo.setMTime(getMTime());
         vo.setCTime(getCTime());
         if ( getApplicationType() != null )
-            vo.setApplicationType(
-                getApplicationType().getApplicationTypeValue() );
+            vo.setApplicationType(getApplicationType());
         else
             vo.setApplicationType( null );
         return vo;
