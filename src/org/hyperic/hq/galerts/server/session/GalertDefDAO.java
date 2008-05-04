@@ -82,7 +82,7 @@ class GalertDefDAO
      * Finds all the galert defs which have not been marked for deletion.
      * Typically this is what people want to use.
      */
-    public Collection findAll() {
+    public List findAll() {
         return getSession().createQuery("from GalertDef d " + 
                                         "where d.deleted = false " +
                                         "order by name").list();
