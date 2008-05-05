@@ -285,22 +285,17 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     public void changeApplicationOwner(AuthzSubject who,
                                        Integer appId,
                                        AuthzSubject newOwner)
-        throws ApplicationNotFoundException,
-               PermissionException, CreateException {
-        try {
-            // first lookup the service
-            Application app = getApplicationDAO().findById(appId);
-            // check if the caller can modify this service
-            checkModifyPermission(who, app.getEntityId());
-            // now get its authz resource
-            ResourceValue authzRes = getApplicationResourceValue(appId);
-            // change the authz owner
-            getResourceManager().setResourceOwner(who, authzRes, newOwner);
-            // update the owner field in the appdef table -- YUCK
-            app.setModifiedBy(who.getName());
-        } catch (FinderException e) {
-            throw new ApplicationNotFoundException(appId);
-        }
+        throws PermissionException {
+        // first lookup the service
+        Application app = getApplicationDAO().findById(appId);
+        // check if the caller can modify this service
+        checkModifyPermission(who, app.getEntityId());
+        // now get its authz resource
+        Resource authzRes = app.getResource();
+        // change the authz owner
+        getResourceManager().setResourceOwner(who, authzRes, newOwner);
+        // update the owner field in the appdef table -- YUCK
+        app.setModifiedBy(who.getName());
     }
 
     /**
@@ -572,8 +567,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
         // We need to look up the service so that we can see if we need to 
         // look up its cluster, too
-        Service service =
-            (Service) getResource(AppdefEntityID.newServiceID(id));
+        Service service = getServiceMgrLocal().findServiceById(id);
         
         boolean cluster = service.getResourceGroup() != null;
         

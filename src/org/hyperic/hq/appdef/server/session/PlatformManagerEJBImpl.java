@@ -1135,13 +1135,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public void changePlatformOwner(AuthzSubject who,
                                     Integer platformId,
                                     AuthzSubject newOwner)
-        throws FinderException, PermissionException {
+        throws PermissionException {
         // first lookup the platform
         Platform platform = getPlatformDAO().findById(platformId);
         // check if the caller can modify this platform
         checkModifyPermission(who, platform.getEntityId());
         // now get its authz resource
-        ResourceValue authzRes = getPlatformResourceValue(platformId);
+        Resource authzRes = platform.getResource();
         // change the authz owner
         getResourceManager().setResourceOwner(who, authzRes, newOwner);
         // update the modified field in the appdef table -- YUCK

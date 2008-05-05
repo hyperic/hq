@@ -43,19 +43,15 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceLocal;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
-import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Operation;
@@ -69,7 +65,6 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
@@ -181,23 +176,6 @@ public abstract class AppdefSessionEJB
     }
 
     /**
-     * Update the authz resource. Used to update the name in the authz resource
-     * table
-     */
-    protected void updateAuthzResource(ResourceValue rv)
-        throws UpdateException {
-        getResourceManager().saveResource(rv);
-    }
-
-    /**
-     * Retrieve the ResourceValue object for a given Appdef Object
-     */
-    protected ResourceValue getAuthzResource(ResourceType rtV, Integer id)
-        throws FinderException {
-        return getResourceManager().findResourceByInstanceId(rtV, id);
-    }
-
-    /**
      * Get the authz resource type by AppdefEntityId
      */
     protected ResourceType getAuthzResourceType(AppdefEntityID id)
@@ -215,8 +193,8 @@ public abstract class AppdefSessionEJB
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 return getGroupResourceType();
             default:
-                throw new InvalidAppdefTypeException("Type: " + 
-                    type + " unknown");
+                throw new InvalidAppdefTypeException("Type: " + type +
+                                                     " unknown");
         }
     }
         
@@ -238,44 +216,6 @@ public abstract class AppdefSessionEJB
         // Send resource delete event
         ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, aeid);
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
-    }
-
-    /**
-     * Find a ApplicationTypeLocal by primary key
-     * @return ApplicationType
-     */
-    protected ApplicationType findApplicationTypeByPK(Integer pk)
-        throws FinderException, NamingException {
-        return getApplicationTypeDAO().findById(pk);
-    }
-
-    /**
-     * Find a ApplicationLocal by primary key
-     * @return Application
-     */
-    protected Application findApplicationByPK(Integer pk)
-        throws ApplicationNotFoundException, NamingException {
-        try {
-            return getApplicationDAO().findById(pk);
-        } catch (ObjectNotFoundException e) {
-            throw new ApplicationNotFoundException(pk, e);
-        }
-    }
-
-    /**
-     * Find an AppdefGroup by id
-     * @return AppdefGroupValue
-     * @throw AppdefGroupNotFoundException - when group doesn't exist
-     * @throw PermissionException - when subject isn't authz.
-     */
-    protected AppdefGroupValue findGroupById(AuthzSubject subject,
-                                             Integer groupId)
-        throws PermissionException 
-    {
-        ResourceGroupManagerLocal groupMan = 
-            ResourceGroupManagerEJBImpl.getOne();
-        ResourceGroup group = groupMan.findResourceGroupById(subject, groupId);
-        return groupMan.convertGroup(subject, group);
     }
 
     /**
@@ -857,17 +797,6 @@ public abstract class AppdefSessionEJB
     }
 
     /**
-     * Get the AUTHZ ResourceValue for a Server
-     * @return ResourceValue
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public ResourceValue getServerResourceValue(Integer pk)
-        throws FinderException {
-        return getAuthzResource(getServerResourceType(), pk);
-    }
- 
-    /**
      * Get the Authz Resource Type for a Group
      * @return ResourceTypeValue
      */
@@ -901,40 +830,6 @@ public abstract class AppdefSessionEJB
      }
 
      /**
-     * Get the AUTHZ ResourceValue for a Platform
-     * @return ResourceValue
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public ResourceValue getPlatformResourceValue(Integer pk)
-        throws FinderException
-    {
-        return getAuthzResource(getPlatformResourceType(), pk);
-    }
-
-    /**
-     * Get the AUTHZ ResourceValue for a Service
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public ResourceValue getServiceResourceValue(Integer pk)
-        throws FinderException
-    {
-        return getAuthzResource(getServiceResourceType(), pk);
-    }
-
-    /**
-     * Get the AUTHZ ResourceValue for a Application
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public ResourceValue getApplicationResourceValue(Integer  pk)
-        throws FinderException
-    {
-        return getAuthzResource(getApplicationResourceType(), pk);
-    }
-
-    /**
      * Get the scope of viewable services for a given user
      * @param whoami - the user
      * @return List of ServicePK's for which subject has AuthzConstants.serviceOpViewService
@@ -1151,29 +1046,6 @@ public abstract class AppdefSessionEJB
         }
         return valueList;
     } 
-
-    protected AppdefResource getResource(AppdefEntityID id)
-        throws AppdefEntityNotFoundException
-    {
-        try {
-            switch (id.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                return getPlatformMgrLocal().findPlatformById(id.getId());
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                return getServerMgrLocal().findServerById(id.getId());
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                return getServiceMgrLocal().findServiceById(id.getId());
-            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                return findApplicationByPK(id.getId());
-            default:
-                throw new IllegalArgumentException("The passed entity type " +
-                                                   "does not have a base of " +
-                                                   "AppdefResourceValue");
-            }
-        } catch(NamingException e){
-            throw new SystemException(e);
-        }
-    }
 
     protected void deleteCustomProperties(AppdefEntityID aeid) {
         CPropManagerLocal cpropMan = getCPropMgrLocal();

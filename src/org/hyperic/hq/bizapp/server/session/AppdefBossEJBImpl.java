@@ -1867,8 +1867,6 @@ public class AppdefBossEJBImpl
             }
         } catch (PermissionException e) {
             throw e;
-        } catch (FinderException e) {
-            throw new ApplicationException(e);
         } catch (Exception e) {
             // everything else is a system error
             throw new SystemException(e);
@@ -2943,50 +2941,46 @@ public class AppdefBossEJBImpl
     {
         ResourceGroupManagerLocal groupMan = getResourceGroupManager();
         
-        try {
-            // first look up the appdef resources by owner
-            ResourceValue[] resources
-                = getResourceManager().findResourceByOwner(currentOwner);
-            AuthzSubject overlord = getAuthzSubjectManager().getOverlordPojo();
-            for(int i = 0; i < resources.length; i++) {
-                ResourceValue aRes = resources[i];
-                String resType = aRes.getResourceTypeValue().getName();
-                // platforms
-                if(resType.equals(AuthzConstants.platformResType)) {
-                    // change platform owner
-                    getPlatformManager()
-                        .changePlatformOwner(overlord,
-                                             aRes.getInstanceId(),
-                                             overlord);
-                }
-                // servers
-                if(resType.equals(AuthzConstants.serverResType)) {
-                    // change server owner
-                    getServerManager()
-                        .changeServerOwner(overlord, aRes.getInstanceId(),
-                                           overlord);
-                }
-                if(resType.equals(AuthzConstants.serviceResType)) {
-                    // change service owner
-                    getServiceManager()
-                        .changeServiceOwner(overlord, aRes.getInstanceId(),
-                                            overlord);
-                }
-                if(resType.equals(AuthzConstants.applicationResType)) {
-                    // change app owner
-                    getApplicationManager()
-                        .changeApplicationOwner(overlord, aRes.getInstanceId(),
-                                                overlord);
-                }
-                if(resType.equals(AuthzConstants.groupResType)) {
-                    ResourceGroup g = 
-                        groupMan.findResourceGroupById(overlord, 
-                                                       aRes.getInstanceId());
-                    groupMan.changeGroupOwner(overlord, g, overlord);
-                }
+        // first look up the appdef resources by owner
+        ResourceValue[] resources
+            = getResourceManager().findResourceByOwner(currentOwner);
+        AuthzSubject overlord = getAuthzSubjectManager().getOverlordPojo();
+        for(int i = 0; i < resources.length; i++) {
+            ResourceValue aRes = resources[i];
+            String resType = aRes.getResourceTypeValue().getName();
+            // platforms
+            if(resType.equals(AuthzConstants.platformResType)) {
+                // change platform owner
+                getPlatformManager()
+                    .changePlatformOwner(overlord,
+                                         aRes.getInstanceId(),
+                                         overlord);
             }
-        } catch (CreateException e) {
-            throw new SystemException(e);
+            // servers
+            if(resType.equals(AuthzConstants.serverResType)) {
+                // change server owner
+                getServerManager()
+                    .changeServerOwner(overlord, aRes.getInstanceId(),
+                                       overlord);
+            }
+            if(resType.equals(AuthzConstants.serviceResType)) {
+                // change service owner
+                getServiceManager()
+                    .changeServiceOwner(overlord, aRes.getInstanceId(),
+                                        overlord);
+            }
+            if(resType.equals(AuthzConstants.applicationResType)) {
+                // change app owner
+                getApplicationManager()
+                    .changeApplicationOwner(overlord, aRes.getInstanceId(),
+                                            overlord);
+            }
+            if(resType.equals(AuthzConstants.groupResType)) {
+                ResourceGroup g = 
+                    groupMan.findResourceGroupById(overlord, 
+                                                   aRes.getInstanceId());
+                groupMan.changeGroupOwner(overlord, g, overlord);
+            }
         }
     }
 

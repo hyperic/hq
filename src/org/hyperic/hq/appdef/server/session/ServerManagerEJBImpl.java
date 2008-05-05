@@ -1157,23 +1157,16 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public void changeServerOwner(AuthzSubject who, Integer serverId,
                                   AuthzSubject newOwner)
         throws PermissionException, ServerNotFoundException {
-        Server server;
-        try {
-            // first lookup the server
-            server = getServerDAO().findById(serverId);
-            // check if the caller can modify this server
-            checkModifyPermission(who, server.getEntityId());
-            // now get its authz resource
-            ResourceValue authzRes = getServerResourceValue(serverId);
-            // change the authz owner
-            getResourceManager().setResourceOwner(who, authzRes, newOwner);
-            // update the modified field in the appdef table -- YUCK
-            server.setModifiedBy(who.getName());
-        } catch (FinderException e) {
-            throw new ServerNotFoundException(serverId, e);
-        } catch (ObjectNotFoundException e) {
-            throw new ServerNotFoundException(serverId, e);
-        }
+        // first lookup the server
+        Server server = getServerDAO().findById(serverId);
+        // check if the caller can modify this server
+        checkModifyPermission(who, server.getEntityId());
+        // now get its authz resource
+        Resource authzRes = server.getResource();
+        // change the authz owner
+        getResourceManager().setResourceOwner(who, authzRes, newOwner);
+        // update the modified field in the appdef table -- YUCK
+        server.setModifiedBy(who.getName());
     }
 
     /**
@@ -1365,17 +1358,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                                 server.getName(),
                                                 serverType.isVirtual(), parent);
         server.setResource(resource);
-    }
-
-    /**
-     * Get the AUTHZ ResourceValue for a Server
-     * 
-     * @return ResourceValue
-     * @ejb:interface-method
-     */
-    public ResourceValue getServerResourceValue(Integer pk)
-        throws FinderException {
-        return getAuthzResource(getServerResourceType(), pk);
     }
 
     /**

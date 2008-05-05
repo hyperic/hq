@@ -1263,13 +1263,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public void changeServiceOwner(AuthzSubject who, Integer serviceId,
                                    AuthzSubject newOwner)
-        throws FinderException, PermissionException, CreateException {
+        throws PermissionException {
         // first lookup the service
         Service service = getServiceDAO().findById(serviceId);
         // check if the caller can modify this service
         checkModifyPermission(who, service.getEntityId());
         // now get its authz resource
-        ResourceValue authzRes = getServiceResourceValue(serviceId);
+        Resource authzRes = service.getResource();
         // change the authz owner
         getResourceManager().setResourceOwner(who, authzRes, newOwner);
         // update the modified field in the appdef table -- YUCK
