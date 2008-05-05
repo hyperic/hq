@@ -45,6 +45,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hyperic.hibernate.HibernateInterceptorChain;
+import org.hyperic.hibernate.HypericInterceptor;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.transport.AgentProxyFactory;
@@ -52,7 +54,6 @@ import org.hyperic.hq.transport.ServerTransport;
 import org.hyperic.txsnatch.TxSnatch;
 import org.hyperic.util.callback.CallbackDispatcher;
 import org.hyperic.util.thread.ThreadWatchdog;
-import org.jboss.ejb.Interceptor;
 import org.jboss.invocation.Invocation;
 
 
@@ -86,6 +87,8 @@ public class HQApp {
     private AtomicBoolean _collectMethStats = new AtomicBoolean();
     
     private StartupFinishedCallback _startupFinished;
+    
+    private final HQHibernateLogger         _hiberLogger;
     
     
     static {
@@ -135,6 +138,8 @@ public class HQApp {
             _log.error("Unable to read tweak properties", e);
             _methWarnTime = 60 * 1000;
         }
+    
+        _hiberLogger = new HQHibernateLogger();
     }
 
     public void setMethodWarnTime(long warnTime) {
@@ -459,7 +464,7 @@ public class HQApp {
             }
         }
         
-        private Object invokeNextBoth(Interceptor next, 
+        private Object invokeNextBoth(org.jboss.ejb.Interceptor next, 
                                       org.jboss.proxy.Interceptor proxyNext,                                      
                                       Invocation v, boolean isHome) 
             throws Throwable
@@ -557,7 +562,7 @@ public class HQApp {
             return invokeNextBoth(null, next, v, false);
         }
 
-        public Object invokeNext(Interceptor next, Invocation v) 
+        public Object invokeNext(org.jboss.ejb.Interceptor next, Invocation v) 
             throws Exception 
         {
             try {
@@ -570,7 +575,8 @@ public class HQApp {
             
         }
         
-        public Object invokeHomeNext(Interceptor next, Invocation v) 
+        public Object invokeHomeNext(org.jboss.ejb.Interceptor next, 
+                                     Invocation v) 
             throws Exception
         {
             try {
@@ -706,6 +712,23 @@ public class HQApp {
         } finally {
             _txListeners.set(null);
         }
+    }
+    
+    /**
+     * Get an interceptor to process hibernate lifecycle methods.
+     * 
+     * This method is used by {@link HypericInterceptor}
+     */
+    public HibernateInterceptorChain getHibernateInterceptor() {
+        return _hiberLogger;
+    }
+    
+    /**
+     * Get the hibernate log manager, which allows the caller to execute
+     * code within the context of a logging hibernate interceptor.
+     */
+    public HibernateLogManager getHibernateLogManager() {
+        return _hiberLogger;
     }
     
     public static HQApp getInstance() {
