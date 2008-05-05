@@ -335,7 +335,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             if (pushed)
                 AuditManagerEJBImpl.getOne().popContainer(false);
         }
-    } 
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void handleResourceDelete(Resource resource) {
+        getPlatformDAO().clearResource(resource);
+    }
 
     /**
      * Create a Platform of a specified type

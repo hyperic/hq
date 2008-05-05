@@ -346,4 +346,10 @@ public class ServiceDAO extends HibernateDAO
         return (Number)getSession().createQuery("select count(*) from Service")
             .uniqueResult();
     }
+
+    void clearResource(Resource res) {
+        createQuery("update Service set resource = null where id = ?")
+            .setParameter(0, res.getInstanceId())
+            .executeUpdate();
+    }
 }

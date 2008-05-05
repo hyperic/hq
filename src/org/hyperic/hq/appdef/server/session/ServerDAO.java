@@ -243,4 +243,10 @@ public class ServerDAO extends HibernateDAO
             "where st.virtual=false";
         return (Number)getSession().createQuery(sql).uniqueResult();
     }
+
+    void clearResource(Resource res) {
+        createQuery("update Server set resource = null where id = ?")
+            .setParameter(0, res.getInstanceId())
+            .executeUpdate();
+    }
 }

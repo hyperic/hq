@@ -336,6 +336,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public void handleResourceDelete(Resource resource) {
+        getServerDAO().clearResource(resource);
+    }
+
+    /**
      * Find all server types
      * @return list of serverTypeValues
      * @ejb:interface-method

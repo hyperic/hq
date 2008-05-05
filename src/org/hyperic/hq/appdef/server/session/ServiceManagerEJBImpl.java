@@ -1467,6 +1467,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public void handleResourceDelete(Resource resource) {
+        getServiceDAO().clearResource(resource);
+    }
+
+    /**
      * Returns a list of 2 element arrays.  The first element is the name of
      * the service type, the second element is the # of services of that
      * type in the inventory.

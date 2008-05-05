@@ -362,4 +362,10 @@ public class PlatformDAO extends HibernateDAO {
         return (Number)getSession().createQuery("select count(*) from Platform")
             .uniqueResult();
     }
+    
+    void clearResource(Resource res) {
+        createQuery("update Platform set resource = null where id = ?")
+            .setParameter(0, res.getInstanceId())
+            .executeUpdate();
+    }
 }

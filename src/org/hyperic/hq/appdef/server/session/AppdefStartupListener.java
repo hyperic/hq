@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -26,8 +26,12 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.galerts.ResourceAuxLogProvider;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.common.VetoException;
 
 public class AppdefStartupListener
     implements StartupListener
@@ -48,6 +52,28 @@ public class AppdefStartupListener
                 app.registerCallbackCaller(ClusterDeleteCallback.class);
             _agentCreateCallback = (AgentCreateCallback)
                 app.registerCallbackCaller(AgentCreateCallback.class);
+            app.registerCallbackListener(ResourceDeleteCallback.class,
+                                         new ResourceDeleteCallback() {
+
+                public void preResourceDelete(Resource r)
+                    throws VetoException {
+                    switch (r.getResourceType().getAppdefType()) {
+                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                        PlatformManagerEJBImpl.getOne().handleResourceDelete(r);
+                        break;
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                        ServerManagerEJBImpl.getOne().handleResourceDelete(r);
+                        break;
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                        ServiceManagerEJBImpl.getOne().handleResourceDelete(r);
+                        break;
+                    case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                        ApplicationManagerEJBImpl.getOne()
+                            .handleResourceDelete(r);
+                        break;
+                    }
+                }
+            });
         }
         ApplicationManagerEJBImpl.getOne().startup();
     }

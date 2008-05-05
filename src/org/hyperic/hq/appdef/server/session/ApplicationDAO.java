@@ -38,6 +38,7 @@ import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.AppServiceDAO;
 import org.hyperic.hq.dao.AppSvcDependencyDAO;
@@ -305,5 +306,11 @@ public class ApplicationDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setParameter("group", g)
             .list();
+    }
+
+    void clearResource(Resource res) {
+        createQuery("update Application set resource = null where id = ?")
+            .setParameter(0, res.getInstanceId())
+            .executeUpdate();
     }
 }

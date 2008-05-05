@@ -266,6 +266,13 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
+    /**
+     * @ejb:interface-method
+     */
+    public void handleResourceDelete(Resource resource) {
+        getApplicationDAO().clearResource(resource);
+    }
+
     private AppServiceDAO getAppServiceDAO() {
         return new AppServiceDAO(DAOFactory.getDAOFactory());
     }
