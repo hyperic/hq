@@ -1,10 +1,14 @@
+import java.text.DateFormat
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.application.HQApp
 import org.hyperic.hq.product.GenericPlugin
+import org.hyperic.util.Runnee
 
-class ConsoleController extends BaseController { 
+class ConsoleController extends BaseController {
+    private final DateFormat df = 
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG)
+    
 	def ConsoleController() {
-        setTemplate('standard')
         addBeforeFilter({ 
             if (!user.isSuperUser()) {
                 render(inline: "Unauthorized")
@@ -49,10 +53,13 @@ class ConsoleController extends BaseController {
     }
     
     def execute(params) {
-        [result: executeCode(params.getOne('code')).toString().toHtml()]
+        boolean debug = params.getOne('debug')?.toBoolean() == true
+            
+        log.info "Params is ${params}"
+        executeCode(params.getOne('code'), debug)
     }
     
-    private def executeCode(code) {
+    private Map executeCode(code, debug) {
         log.info "Requested to execute code\n${code}\n"
 		File tmp = File.createTempFile('gcon', null)
         log.info "Writing tmp file: ${tmp.absolutePath}"
@@ -63,16 +70,25 @@ class ConsoleController extends BaseController {
 		def eng = new GroovyScriptEngine('.', 
 		                                 Thread.currentThread().contextClassLoader)
 		def res
+		def hiberStats = ''
 		try {
 			def script
 			if (GenericPlugin.isWin32()) {
 				//'file:/' spec required for windows
 				script = 'file:/' + tmp.absolutePath
-			}
-			else {
+			} else {
 				script = tmp.absolutePath
 			}
-			res = eng.run(script, new Binding())
+			
+			def runnee = [run: {res = eng.run(script, new Binding())}] as Runnee
+			if (debug) {
+			    def logger = new LoggingChainer()
+                HQApp.instance.getHibernateLogManager().log(logger, runnee)
+                hiberStats = createHtmlFromLog(logger)
+			} else {
+			    runnee.run()
+			}
+
 			log.info "Result: [${res}]"
 		} catch(Throwable e) {
 		    log.info "Exception thrown", e
@@ -82,6 +98,18 @@ class ConsoleController extends BaseController {
 		    pw.flush()
 		    res = sw.toString()
 		}
-		res
+		
+        [result: "${res}".toHtml(), 
+         hiberStats: hiberStats]
+    }
+    
+    private String createHtmlFromLog(LoggingChainer logger) {
+        Map stats = logger.getStats()
+        List logs = logger.getLogs()
+        
+        StringWriter sw = new StringWriter()
+        render([action: 'hiberStats', output: sw, 
+                locals: [stats:stats, logs:logs, dateFormat: df]])
+        return sw.toString()
     }
 }
