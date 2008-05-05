@@ -108,7 +108,13 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     public List getAllApplicationTypes(AuthzSubject who) 
         throws FinderException {
-        return getApplicationTypeDAO().findAll();
+        List all = getApplicationTypeDAO().findAll();
+        List ret = new ArrayList(all.size());
+        for (Iterator it = all.iterator(); it.hasNext(); ) {
+            ApplicationType type = (ApplicationType) it.next();
+            ret.add(type.getAppdefResourceTypeValue());
+        }
+        return ret;
     }
 
     /**

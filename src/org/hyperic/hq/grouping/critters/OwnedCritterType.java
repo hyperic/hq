@@ -52,6 +52,10 @@ public class OwnedCritterType
         initialize("org.hyperic.hq.grouping.Resources", "owned");
         addPropDescription(OWNER_PROP, CritterPropType.SUBJECT);
     }
+    
+    public Critter newInstance(AuthzSubject subj) {
+        return new OwnedCritter(subj, this);
+    }
 
     public Critter newInstance(Map critterProps)
         throws GroupException

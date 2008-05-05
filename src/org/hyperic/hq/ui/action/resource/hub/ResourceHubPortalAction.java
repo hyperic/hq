@@ -325,7 +325,7 @@ public class ResourceHubPortalAction extends BaseAction {
         // TODO: Pass groupSubType as int[]
         resources = appdefBoss.search(sessionId, entityType, resourceName,
                                       aetid, gid, groupSubtype, 
-                                      hubForm.isAny(),
+                                      hubForm.isAny(), hubForm.isOwn(),
                                       pc);
 
         watch.markTimeEnd("findCompatInventory");

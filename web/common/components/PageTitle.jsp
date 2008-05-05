@@ -42,6 +42,34 @@
 <tiles:importAttribute name="linkUrl" ignore="true"/>
 <tiles:importAttribute name="showSearch" ignore="true"/>
 
+<hq:constant var="PLATFORM"
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_PLATFORM"/>
+<hq:constant var="SERVER"
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_SERVER"/>
+<hq:constant var="SERVICE" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_SERVICE"/>
+<hq:constant var="APPLICATION"
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_APPLICATION"/>
+<hq:constant var="GROUP" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_GROUP"/>
+<hq:constant var="GROUP_COMPAT" 
+    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubPortalAction"
+    symbol="SELECTOR_GROUP_COMPAT"/>
+<hq:constant var="GROUP_ADHOC" 
+    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubPortalAction"
+    symbol="SELECTOR_GROUP_ADHOC"/>
+<hq:constant var="CHART"
+    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubForm"
+	symbol="CHART_VIEW"/>
+<hq:constant var="LIST"
+    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubForm"
+	symbol="LIST_VIEW"/>
+
 <c:if test="${not empty resourceOwner}">
   <hq:owner var="ownerStr" owner="${resourceOwner}"/>
 </c:if>
@@ -157,15 +185,66 @@
     </td>
     </c:when>
     <c:when test="${showSearch}">
-    <td>
+    <td style="vertical-align: middle;">
+<c:choose>
+  <c:when test="${ResourceHubForm.ff == PLATFORM}">
+    <c:set var="allTypesKey" value="resource.hub.filter.AllPlatformTypes"/>
+    <c:set var="section" value="platform"/>
+  </c:when>
+  <c:when test="${ResourceHubForm.ff == SERVER}">
+    <c:set var="allTypesKey" value="resource.hub.filter.AllServerTypes"/>
+    <c:set var="section" value="server"/>
+  </c:when>
+  <c:when test="${ResourceHubForm.ff == SERVICE}">
+    <c:set var="allTypesKey" value="resource.hub.filter.AllServiceTypes"/>
+    <c:set var="section" value="service"/>
+  </c:when>
+  <c:when test="${ResourceHubForm.ff == APPLICATION}">
+    <c:set var="section" value="application"/>
+  </c:when>
+  <c:when test="${ResourceHubForm.ff == GROUP}">
+    <c:set var="allTypesKey" value="resource.hub.filter.AllGroupTypes"/>
+    <c:set var="section" value="group"/>
+  </c:when>
+</c:choose>
+
       <!--  SEARCH TOOLBAR CONTENTS -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td nowrap class="SearchBold"><fmt:message key="resource.hub.search.label.Search"/></td>
-          <td class="SearchRegular"><html:text property="keywords" onfocus="ClearText(this)" value="${initSearchVal}" size="30" maxlength="40"/></td>
-          <td class="SearchRegular" width="100%"><html:image page="/images/4.0/icons/accept.png" property="ok"/></td>
-        </tr>
-      </table>
+    <!--  SEARCH TOOLBAR CONTENTS -->
+    <span style="padding-left: 4px;">
+      <fmt:message key="header.Search"/>
+      <html:text property="keywords" size="15" maxlength="40" onfocus="ClearText(this)" value="${initSearchVal}"/>
+    </span>
+    <c:choose>
+    <c:when test="${empty allTypesKey}">
+      <html:hidden property="ft" value=""/>&nbsp;
+    </c:when>
+    <c:otherwise>
+      <span style="padding-left: 4px;">
+      <html:select property="ft" styleClass="FilterFormText" size="1">
+        <html:option value="" key="${allTypesKey}"/>
+        <html:optionsCollection property="types"/>
+      </html:select>
+      </span>
+      <c:if test="${not empty AvailableResGrps}">
+      <span style="padding-left: 4px;">
+        <html:select property="fg" styleClass="FilterFormText">
+          <html:option value="" key="resource.hub.filter.AllGroupOption"/>
+          <html:optionsCollection name="AvailableResGrps"/>
+        </html:select>
+      </span>
+      </c:if>
+    </c:otherwise>
+    </c:choose>
+    <span style="padding-left: 4px; padding-right: 4px;">
+      <html:checkbox property="own" value="true"/> <fmt:message key="resource.hub.search.label.Owned"/>
+    </span>
+    <span style="background-color: #E4F2E4; padding: 6px;">
+    <fmt:message key="resource.hub.search.label.Match"/>
+    <html:radio property="any" value="true"/> <fmt:message key="any"/>
+    <html:radio property="any" value="false"/> <fmt:message key="all"/>
+    <html:image page="/images/4.0/icons/accept.png" property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
+    </span>
+
       <!--  /  -->
     </td>
     </c:when>

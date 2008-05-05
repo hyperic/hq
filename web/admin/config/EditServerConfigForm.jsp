@@ -94,7 +94,7 @@
   <tr>
     <td width="30%" class="BlockLabel"><fmt:message key="admin.settings.AnnouncementType"/></td>
     <td width="40%" class="BlockContent">
-    <html:radio property="updateMode" value="0"/><fmt:message key="admin.settings.All"/>
+    <html:radio property="updateMode" value="0"/><fmt:message key="all"/>
     <html:radio property="updateMode" value="1"/><fmt:message key="admin.settings.Major"/>
     <html:radio property="updateMode" value="2"/><fmt:message key="common.label.None"/>
     </td>
