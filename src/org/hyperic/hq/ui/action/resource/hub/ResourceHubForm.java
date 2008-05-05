@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -188,16 +188,10 @@ public class ResourceHubForm extends BaseValidatorForm {
         _any = any;
     }
 
-    /**
-     * @return the own
-     */
     public boolean isOwn() {
         return _own;
     }
 
-    /**
-     * @param own the own to set
-     */
     public void setOwn(boolean own) {
         _own = own;
     }
