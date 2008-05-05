@@ -133,6 +133,10 @@ public class AvailabilityCheckService
             ResourceDataPoint rdp = (ResourceDataPoint)i.next();
             Resource platform = rdp.getResource();
             DataPoint point = rdp.getDataPoint();
+            if (debug) {
+                _log.debug("platform measurement id " + point.getMetricId() +
+                           " is being marked down");
+            }
             backfillList.add(point);
             List associatedResources =
                 availMan.getAvailMeasurementChildren(platform);

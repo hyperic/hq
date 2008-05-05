@@ -77,4 +77,9 @@ public class AvailabilityDataId implements Serializable {
         }
         return false;
     }
+    
+    public String toString() {
+        return "startime -> " + _startime +
+            ", measId -> " + _measurement.getId();
+    }
 }

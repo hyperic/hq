@@ -79,6 +79,9 @@ public class AvailabilityDataDAO extends HibernateDAO {
     int updateStartime(AvailabilityDataRLE avail, long startime) {
         remove(avail);
         avail.setStartime(startime);
+        if (_log.isDebugEnabled()) {
+            _log.debug("update StartTime Avail: "+avail);
+        }
         save(avail);
         return 1;
     }
@@ -325,7 +328,9 @@ public class AvailabilityDataDAO extends HibernateDAO {
     {
         AvailabilityDataRLE availObj = new AvailabilityDataRLE(meas, startime,
                                                                availVal);
-        _log.debug("creating Avail: "+availObj);
+        if (_log.isDebugEnabled()) {
+            _log.debug("creating Avail: "+availObj);
+        }
         save(availObj);
         return availObj;
     }
