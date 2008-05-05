@@ -26,117 +26,122 @@
 package org.hyperic.hibernate;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
+import org.hibernate.EntityMode;
+import org.hibernate.Transaction;
 import org.hibernate.type.Type;
+import org.hyperic.hq.application.HQApp;
 
 /**
- * multi-purpose interceptor for injecting runtime logic,
- *
- * One use case is to set creation and modified time on
- * on save, merge or collection cascades
- *
- * TODO:  Consolidate into regular UserTyped AuditInfo stylee 
+ * This interceptor delegates to others in the chain.  Most of the meat
+ * is in {@link HypericInterceptorTarget} 
  */
 public class HypericInterceptor 
     extends EmptyInterceptor
 {
-    private final Log _log = LogFactory.getLog(HypericInterceptor.class);
+    private final HibernateInterceptorChain _chainer = 
+        HQApp.getInstance().getHibernateInterceptor(); 
+        
+    private final HypericInterceptorTarget _target = 
+        new HypericInterceptorTarget();
     
-    private boolean entHasContainerManagedTimestamp(Object o) {
-        return o instanceof ContainerManagedTimestampTrackable;
+    public String onPrepareStatement(String sql) {
+        return _chainer.onPrepareStatement(null, _target, sql);
     }
-    
+
     public boolean onFlushDirty(Object entity, Serializable id, 
                                 Object[] currentState, Object[] previousState, 
                                 String[] propertyNames, Type[] types)
     {
-        if (entHasContainerManagedTimestamp(entity))
-            return updateTimestamp((ContainerManagedTimestampTrackable)entity, 
-                                   currentState, previousState, propertyNames);
-        return false;
+        return _chainer.onFlushDirty(null, _target, entity, id, currentState, 
+                                     previousState, propertyNames, types);
     }
 
     public boolean onSave(Object entity, Serializable id, Object[] state, 
                           String[] propertyNames, Type[] types)
     {
-        if (entHasContainerManagedTimestamp(entity))
-            return updateTimestamp((ContainerManagedTimestampTrackable)entity, 
-                                   state, null, propertyNames);
-        return false;
+        return _chainer.onSave(null, _target, entity, id, state, propertyNames, 
+                               types);
     }
 
-    private boolean updateTimestamp(ContainerManagedTimestampTrackable entity, 
-                                    Object[] curState, Object[] prevState, 
-                                    String[] propertyNames) {
-        boolean modified = false;
-        long ts = System.currentTimeMillis();
-        int modifiedIdx = -1;
-        int createdIdx = -1;
-        int modifiedIdxToCheckMTime = -1;
-        for (int i = 0; i < propertyNames.length; i++) {
-            if (prevState != null) {
-                if (curState[i] == null && prevState[i] != null) {
-                    modified = true;
-                } else if (curState[i] != null && prevState[i] == null) {
-                    modified = true;
-                } else if (curState[i] != null && prevState[i] != null &&
-                    !curState[i].equals(prevState[i])) {
-                    modified = true;
-                }
-            }
-            if (("creationTime".equals(propertyNames[i]) ||
-                "ctime".equals(propertyNames[i])) && 
-                entity.allowContainerManagedCreationTime()) {
-                Long ctime = (Long)curState[i];
-                if (ctime == null || ctime.longValue() == 0) {
-                    createdIdx = i;
-                    modified =  true;
-                }
-            } else if ("modifiedTime".equals(propertyNames[i]) ||
-                       "mtime".equals(propertyNames[i])) {
-                if (entity.allowContainerManagedLastModifiedTime()) {
-                    modified = true;                    
-                    modifiedIdx = i;  
-                } else {
-                    modifiedIdxToCheckMTime = i;
-                }
-            }
-        }
-        if (createdIdx >= 0) {
-            curState[createdIdx] = new Long(ts);
-        }
-        if (modifiedIdx >= 0 && modified) {
-            curState[modifiedIdx] = new Long(ts);
-        }
-        
-        enforceMTimeAtLeastCTime(curState, modifiedIdxToCheckMTime, createdIdx);   
-        
-        return modified;
+    public void afterTransactionBegin(Transaction tx) {
+        _chainer.afterTransactionBegin(null, _target, tx);
     }
 
-    /**
-     * The mtime must be at least equal to the ctime. Otherwise, set 
-     * the mtime to the ctime. This may be an issue when the mtime is 
-     * managed explicitly, but the ctime is managed by the container.
-     * 
-     * @param curState
-     * @param modifiedIdx
-     * @param createdIdx
-     */
-    private void enforceMTimeAtLeastCTime(Object[] curState, 
-                                          int modifiedIdx,
-                                          int createdIdx) {
-        if (createdIdx >= 0 && modifiedIdx >= 0) {
-            Long ctime = (Long)curState[createdIdx];
-            Long mtime = (Long)curState[modifiedIdx];
-            
-            if (ctime != null && mtime != null && mtime.longValue() < ctime.longValue()) {
-                curState[modifiedIdx] = ctime;
-            }
-        }
+    public void afterTransactionCompletion(Transaction tx) {
+        _chainer.afterTransactionCompletion(null, _target, tx);
     }
-    
+
+    public void beforeTransactionCompletion(Transaction tx) {
+        _chainer.beforeTransactionCompletion(null, _target, tx);
+    }
+
+    public int[] findDirty(Object entity, Serializable id, 
+                           Object[] currentState, Object[] previousState, 
+                           String[] propertyNames, Type[] types) 
+    {
+        return _chainer.findDirty(null, _target, entity, id, currentState, 
+                                  previousState, propertyNames, types); 
+    }
+
+    public Object getEntity(String entityName, Serializable id) {
+        return _chainer.getEntity(null, _target, entityName, id);
+    }
+
+    public String getEntityName(Object object) {
+        return _chainer.getEntityName(null, _target, object);
+    }
+
+    public Object instantiate(String entityName, EntityMode entityMode, 
+                              Serializable id) 
+    {
+        return _chainer.instantiate(null, _target, entityName, entityMode, id);
+    }
+
+    public Boolean isTransient(Object entity) {
+        return _chainer.isTransient(null, _target, entity);
+    }
+
+    public void onCollectionRecreate(Object collection, Serializable key) 
+        throws CallbackException 
+    {
+        _chainer.onCollectionRecreate(null, _target, collection, key);
+    }
+
+    public void onCollectionRemove(Object collection, Serializable key) 
+        throws CallbackException 
+    {
+        _chainer.onCollectionRemove(null, _target, collection, key);
+    }
+
+    public void onCollectionUpdate(Object collection, Serializable key) 
+        throws CallbackException 
+    {
+        _chainer.onCollectionUpdate(null, _target, collection, key);
+    }
+
+    public void onDelete(Object entity, Serializable id, Object[] state, 
+                         String[] propertyNames, Type[] types) 
+    {
+        _chainer.onDelete(null, _target, entity, id, state, propertyNames, 
+                          types);
+    }
+
+    public boolean onLoad(Object entity, Serializable id, Object[] state, 
+                          String[] propertyNames, Type[] types) 
+    {
+        return _chainer.onLoad(null, _target, entity, id, state, propertyNames, 
+                               types);
+    }
+
+    public void postFlush(Iterator entities) {
+        _chainer.postFlush(null, _target, entities);
+    }
+
+    public void preFlush(Iterator entities) {
+        _chainer.preFlush(null, _target, entities);
+    }
 }
