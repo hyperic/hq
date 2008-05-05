@@ -1,5 +1,6 @@
 <script type="text/javascript">
 function sendCode() {
+  dojo.byId('timeStatus').innerHTML = '... executing';
   dojo.xhrPost({
     url: '<%= urlFor(action:"execute") %>',
     handleAs: "json-comment-filtered",
@@ -10,6 +11,7 @@ function sendCode() {
     load: function(responseObject, ioArgs) {
       dojo.byId('result').innerHTML     = responseObject.result;
       dojo.byId('hiberStats').innerHTML = responseObject.hiberStats;
+      dojo.byId('timeStatus').innerHTML = responseObject.timeStatus;
     },
     error: function(response, ioArgs) {
       alert('error! ' + response);
@@ -45,6 +47,11 @@ Templates:
 <br/>
 <button onclick="sendCode()">Execute</button>
 <input type="checkbox" id="hiberDebug">Hibernate Debugging</input>
+<br/>
+
+<div id='timeStatus'>
+  Status:  Idle
+</div>
 
 <br/>
 <div id='hiberStats'>

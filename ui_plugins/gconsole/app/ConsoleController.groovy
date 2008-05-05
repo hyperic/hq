@@ -71,6 +71,7 @@ class ConsoleController extends BaseController {
 		                                 Thread.currentThread().contextClassLoader)
 		def res
 		def hiberStats = ''
+		long start = now()
 		try {
 			def script
 			if (GenericPlugin.isWin32()) {
@@ -99,8 +100,10 @@ class ConsoleController extends BaseController {
 		    res = sw.toString()
 		}
 		
+		long end = now()
         [result: "${res}".toHtml(), 
-         hiberStats: hiberStats]
+         hiberStats: hiberStats,
+         timeStatus: "Executed in ${end - start} ms"]
     }
     
     private String createHtmlFromLog(LoggingChainer logger) {
