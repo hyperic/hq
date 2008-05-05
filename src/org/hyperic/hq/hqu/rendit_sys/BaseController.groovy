@@ -181,19 +181,19 @@ abstract class BaseController {
 			    methRes = invokeMethod(action, params)
 			}
 			    
+		    if (action in jsonMethods) {
+		        def json = methRes as JSONObject
+				render(inline:"/* ${json} */", 
+				       contentType:'text/json-comment-filtered')
+		    } else if (action in xmlMethods) {
+		        if (xmlBuilder == methRes) 
+		            render(inline:"${xmlWriter}", contentType:'text/xml')
+		        else
+		            render(inline:"${methRes}", contentType:'text/xml')
+		    }
+		    
     		if (!rendered) {
-    		    if (action in jsonMethods) {
-    		        def json = methRes as JSONObject
-    				render(inline:"/* ${json} */", 
-    				       contentType:'text/json-comment-filtered')
-    		    } else if (action in xmlMethods) {
-    		        if (xmlBuilder == methRes) 
-    		            render(inline:"${xmlWriter}", contentType:'text/xml')
-    		        else
-    		            render(inline:"${methRes}", contentType:'text/xml')
-    		    } else {
-    		        render([action : action])
-    		    }
+    		    render([action : action])
 	        }
 	    } finally {
 	        if (log.debugEnabled) {
@@ -234,10 +234,6 @@ abstract class BaseController {
     protected void render(opts) {
         opts = (opts == null) ? [:] : opts
 
-        if (rendered) {
-            throw new IllegalArgumentException("Only able to render once " + 
-                                               "per controller call")
-        }
         rendered = true
         opts['createDefaultOutput'] = {
             def outStream = invokeArgs.response.outputStream
