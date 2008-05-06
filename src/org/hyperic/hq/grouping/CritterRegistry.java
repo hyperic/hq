@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.grouping.critters.AvailabilityCritterType;
 import org.hyperic.hq.grouping.critters.CompatGroupTypeCritterType;
 import org.hyperic.hq.grouping.critters.DescendantProtoCritterType;
 import org.hyperic.hq.grouping.critters.GroupMembershipCritterType;
@@ -53,6 +54,7 @@ public class CritterRegistry {
     private CritterRegistry() {
         // Seed ourselves with a few types
         register(new ResourceNameCritterType());
+        register(new AvailabilityCritterType());
         register(new GroupMembershipCritterType());
         register(new MixedGroupTypeCritterType());
         register(new CompatGroupTypeCritterType());

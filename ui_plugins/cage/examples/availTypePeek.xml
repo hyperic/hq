@@ -1,0 +1,6 @@
+<critters>
+  <critter class="org.hyperic.hq.grouping.critters.AvailabilityCritterType">
+    <enum id="value">down</enum>
+  </critter>
+</critters>
+
