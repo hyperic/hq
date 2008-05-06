@@ -211,7 +211,7 @@
       <!--  SEARCH TOOLBAR CONTENTS -->
     <!--  SEARCH TOOLBAR CONTENTS -->
     <span style="padding-left: 4px;">
-      <fmt:message key="header.Search"/>
+      <fmt:message key="resource.hub.Search"/>
       <html:text property="keywords" size="15" maxlength="40" onfocus="ClearText(this)" value="${initSearchVal}"/>
     </span>
     <c:choose>
