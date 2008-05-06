@@ -311,7 +311,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
         
         DescendantProtoCritterType descType = new DescendantProtoCritterType();
         CritterTranslator trans             = new CritterTranslator();
-        CritterTranslationContext ctx       = new CritterTranslationContext();
+        CritterTranslationContext ctx       =
+            new CritterTranslationContext(subject);
         
         for (int i = 0; i < aids.length; i++) {
             Resource r = rman.findResource(aids[i]);
