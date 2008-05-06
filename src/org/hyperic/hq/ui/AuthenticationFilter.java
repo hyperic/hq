@@ -141,8 +141,16 @@ public final class AuthenticationFilter extends BaseFilter {
         } else {
             try {
                 chain.doFilter(request, response);
+            } catch (ServletException e) {
+                Throwable trace = e;
+                if (e.getRootCause() != null) {
+                    trace = e.getRootCause();
+                }
+                log.error("Caught ServletException from client "
+                        + request.getRemoteAddr() + ": "
+                        + e.getMessage(), trace);
             } catch (Exception e) {
-                log.warn("Caught IO Exception from client "
+                log.warn("Caught Exception from client "
                         + request.getRemoteAddr() + ": " + e.getMessage());
             }
         }
