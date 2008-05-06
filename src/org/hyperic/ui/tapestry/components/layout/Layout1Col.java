@@ -25,19 +25,20 @@
 package org.hyperic.ui.tapestry.components.layout;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.tapestry.IAsset;
 import org.apache.tapestry.IRender;
 import org.apache.tapestry.annotations.Asset;
 import org.apache.tapestry.annotations.InjectObject;
 import org.apache.tapestry.annotations.Parameter;
-import org.hyperic.ui.tapestry.components.BaseComponent;
+import org.hyperic.ui.tapestry.components.BaseLayout;
 import org.hyperic.ui.tapestry.components.navigation.NavigationMenu;
 
 /**
  * The single column liquid layout
  *
  */
-public abstract class Layout1Col extends BaseComponent{
+public abstract class Layout1Col extends BaseLayout{
     @Parameter(name ="styleSheets")
     public abstract List<IAsset> getStyleSheets();
     public abstract void setStyleSheets(List<IAsset> sheets);
@@ -85,6 +86,10 @@ public abstract class Layout1Col extends BaseComponent{
     public List<IAsset> getStyleSheetList(){
         List<IAsset> list = new ArrayList<IAsset>();
         list.add(getHQ40Theme());
+        list.addAll(getDojoTundraThemeSheets());
+        list.addAll(getDojoGridTundraThemeSheets());
+        list.addAll(getDojoSheets());
+        list.addAll(getDijitSheets());
         List<IAsset> optional = getStyleSheets();
         if(optional != null)
             list.addAll(optional);
