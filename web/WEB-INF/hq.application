@@ -15,6 +15,7 @@
 	<meta key="org.apache.tapestry.component-class-packages" value="org.hyperic.ui.tapestry.components"/>
     
     <library id="hyperic" specification-path="classpath:/org/hyperic/ui/tapestry/components/hypericTapUI.library"/>
+    <library id="hyperic-ee" specification-path="classpath:/com/hyperic/ui/tapestry/components/hypericTapUI.library"/>
     
     <library id="contrib" specification-path="classpath:/org/apache/tapestry/contrib/Contrib.library"/>
     <library id="tacos" specification-path="classpath:/net/sf/tacos/Tacos.library"/>
