@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.authz.shared;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
@@ -171,6 +169,16 @@ public abstract class PermissionManager extends AuthzSession {
                                                String searchFor, 
                                                PageControl pc);
     
+    /**
+     * Get a clause that you can append to an existing WHERE clause to make it
+     * authz-aware.  Note that your WHERE clause must include at least 1
+     * condition, as the value returned from this method begins with 'AND'.
+     * Also, the alias of the EAM_RESOURCE table is assumed to be 'res'.
+     *
+     * @return a clause that can be appended to a WHERE clause to query against
+     *  authz data.
+     */
+    public abstract String getSQLWhere(Integer subjectId);
 
     /**
      * Get all operations for a given subject
@@ -181,52 +189,6 @@ public abstract class PermissionManager extends AuthzSession {
         getAllOperations(AuthzSubject subject, PageControl pc)
         throws PermissionException, FinderException;
 
-
-    /**
-     * Utilities for generation of custom authz-aware SQL.
-     */
-    public static final String AUTHZ_FROM = ", EAM_RESOURCE authz_r ";
-
-    /**
-     * Get a WHERE clause that you can append to an existing WHERE clause
-     * to make it authz-aware.  Note that your WHERE clause must include
-     * at least 1 condition, as the value returned from this method begins
-     * with 'AND'.  If you don't have any existing conditions, you can just
-     * add "WHERE 1=1" and then append the return value of this method to that.
-     *
-     * @param resIdKey The value to join to the resource table.  If
-     * the operationColumnName parameter is null, then this field will
-     * be joined against the instance_id column.  If operationColumnName
-     * is non-null, then this field will be joined against the id column.
-     * This can be an absolute value like a number or a column name if you 
-     * want to do a join.
-     *
-     * @return a WHERE clause that can be used to query against authz data.
-     */
-    public abstract String getSQLWhere(Integer subjectId, String resId);
-
-    /**
-     * Populate a prepared statement with the appropriate authz parameters.
-     *
-     * @param ps The prepared statement.  The SQL that this statement is based
-     * on must include the return value from getSQLWhere method.
-     * @param ps_idx The parameter index for the prepared statement where we'll 
-     * start setting parameter values. The caller has to take care to ensure 
-     * that this index lines up with the placement of the authz where clause in
-     * the original SQL that the prepared statement is based on.
-     * @param subjectId The subject to evaluate permissions against.
-     * @param resType The resource type to restrict the query to.
-     * @param operationId The operation to check permissions for.
-     * @return The new ps_idx value, in case the caller has more parameters
-     * to set in the prepared statement.
-     */
-    public abstract int 
-        prepareSQL(PreparedStatement ps, int ps_idx, Integer subjectId, 
-                   Integer resType, Integer operationId) 
-        throws SQLException;
-
-    public abstract String getResourceTypeSQL(String table);
-
     public abstract String getResourceTypeSQL(String table,
                                               Integer subjectId,
                                               String resType,
@@ -234,13 +196,6 @@ public abstract class PermissionManager extends AuthzSession {
 
     public abstract String getOperableGroupsHQL(String alias, String oper);
     
-    public abstract int prepareResourceTypeSQL(PreparedStatement ps,
-                                               int ps_idx,
-                                               int subjectId,
-                                               String resType,
-                                               String op)
-        throws SQLException;
-
     public abstract Collection 
         getGroupResources(Integer subjectId, Integer groupId, Boolean fsystem);
                                                  

@@ -2612,7 +2612,7 @@ public class AppdefBossEJBImpl
         PageList res = new PageList();
 
         CritterTranslator trans       = new CritterTranslator();
-        CritterTranslationContext ctx = new CritterTranslationContext();
+        CritterTranslationContext ctx = new CritterTranslationContext(subject);
         CritterList cList = getCritterList(subject, matchAny,appdefResType,
                                            resourceName, grpId, grpEntId,
                                            groupType, appdefTypeId, matchOwn);

@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -87,8 +88,10 @@ public class CritterTranslator {
             Critter c = (Critter)i.next();
             String prefix = "x" + (prefixCnt++);
             CritterTranslationContext critterCtx = 
-                new CritterTranslationContext(ctx.getSession(), 
-                                              ctx.getHQDialect(), prefix);
+                new CritterTranslationContext(ctx.getSubject(),
+                                              ctx.getSession(), 
+                                              ctx.getHQDialect(),
+                                              prefix);
             txContexts.put(c, critterCtx);
             sql.append(critterCtx.escapeSql(c.getSqlJoins(critterCtx, "res")));
             sql.append(" ");
@@ -147,6 +150,10 @@ public class CritterTranslator {
             }
             sql.append(") ");
         }
+        
+        // Get PermissionManager
+        sql.append(PermissionManagerFactory.getInstance()
+                .getSQLWhere(ctx.getSubject().getId()));
 
         if (!issueCount) {
             sql.append(" order by res.name");

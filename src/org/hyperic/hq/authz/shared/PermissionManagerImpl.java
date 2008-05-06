@@ -84,10 +84,6 @@ public class PermissionManagerImpl
         "SELECT res.instance_id FROM EAM_RESOURCE res, EAM_OPERATION o " +
         "WHERE o.resource_type_id = res.resource_type_id and o.id = ?";
 
-    private static final String AUTHZ_WHERE_OVERLORD_INSTANCE
-        = " AND authz_r.RESOURCE_TYPE_ID = ? "
-        + "AND authz_r.INSTANCE_ID = %%RESID%%";
-    
     private static final String VIEWABLE_SEARCH =
         "WHERE EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND " +
               "RESOURCE_TYPE_ID IN (3, 301, 303, 305, 308)  AND "+
@@ -337,32 +333,6 @@ public class PermissionManagerImpl
         }
     }
 
-    public String getSQLWhere(Integer subjectId, String resId) {
-        return StringUtil.replace(AUTHZ_WHERE_OVERLORD_INSTANCE,
-                                  "%%RESID%%", resId);
-    }
-
-    public int prepareSQL(PreparedStatement ps, 
-                          int ps_idx, 
-                          Integer subjectId, 
-                          Integer resType,
-                          Integer operationId) 
-        throws SQLException
-    {
-        ps.setInt(ps_idx++, resType.intValue());
-        return ps_idx;
-    }
-
-    public String getResourceTypeSQL(String table) {
-        return
-            "SELECT TBL.ID FROM EAM_RESOURCE RES, " +
-            " EAM_RESOURCE_TYPE RT, " + table + " TBL " +
-            "WHERE TBL.ID = RES.INSTANCE_ID " +
-            "  AND RES.FSYSTEM = " + _falseToken + 
-            "  AND RES.RESOURCE_TYPE_ID = RT.ID " +
-            "  AND RT.NAME = ? ";
-    }
-
     public String getResourceTypeSQL(String table, Integer subjectId,
                                      String resType, String op) {
         return
@@ -372,17 +342,6 @@ public class PermissionManagerImpl
             "  AND RES.FSYSTEM = " + _falseToken + 
             "  AND RES.RESOURCE_TYPE_ID = RT.ID " +
             "  AND RT.NAME = '" + resType + "'";
-    }
-
-    public int prepareResourceTypeSQL(PreparedStatement ps,
-                                      int ps_idx,
-                                      int subjectId,
-                                      String resType,
-                                      String op)
-        throws SQLException
-    {
-        ps.setString(++ps_idx, resType);
-        return ps_idx;
     }
 
     public List getAllOperations(AuthzSubject subject, PageControl pc)
@@ -484,4 +443,8 @@ public class PermissionManagerImpl
     }
 
     public String getOperableGroupsHQL(String alias, String oper) { return ""; }
+
+    public String getSQLWhere(Integer subjectId) {
+        return "";
+    }
 }

@@ -26,13 +26,13 @@
 package org.hyperic.hq.grouping;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.dialect.Dialect;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.util.StringUtil;
 
 /**
@@ -49,28 +49,26 @@ public class CritterTranslationContext {
     private final HQDialect _hqDialect;
     private final Dialect   _dialect;
     private final String    _prefix;
+    private final AuthzSubject _subject;
     
-    public CritterTranslationContext() {
-        _session = Util.getSessionFactory().getCurrentSession();
-        _hqDialect = Util.getHQDialect();
-        _dialect = Util.getDialect();
-        _prefix  = "x";
+    public CritterTranslationContext(AuthzSubject subj) {
+        this(subj, Util.getSessionFactory().getCurrentSession(),
+             Util.getHQDialect(), "x");
     }
 
-    public CritterTranslationContext(Session s, HQDialect d) {
-        _session = s;
-        _hqDialect = d;
-        _dialect = Util.getDialect();
-        _prefix  = "x";
-    }
-    
-    public CritterTranslationContext(Session s, HQDialect d, String prefix) {
+    public CritterTranslationContext(AuthzSubject subj, Session s, HQDialect d,
+                                     String prefix) {
+        _subject = subj;
         _session = s;
         _hqDialect = d;
         _dialect = Util.getDialect();
         _prefix  = prefix;
     }
     
+    public AuthzSubject getSubject() {
+        return _subject;
+    }
+
     public Session getSession() {
         return _session;
     }
