@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping package="org.hyperic.hq.authz.server.session">
 
-  <class name="ResourceType" table="EAM_RESOURCE_TYPE">
+  <class name="ResourceType" table="EAM_RESOURCE_TYPE" mutable="false" 
+         lazy="true">
     <cache usage="read-write"/>
 
     <id name="id" type="integer">
@@ -27,7 +28,8 @@
       <column name="FSYSTEM" not-null="false"/>
     </property>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="operationsBag" table="EAM_OPERATION" lazy="false">
+    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" 
+         name="operationsBag" table="EAM_OPERATION" lazy="false">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="RESOURCE_TYPE_ID"/>
       <one-to-many class="Operation"/>

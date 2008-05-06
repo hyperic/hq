@@ -2,7 +2,8 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping package="org.hyperic.hq.authz.server.session">
 
-  <class name="ResourceRelation" table="EAM_RESOURCE_RELATION">
+  <class name="ResourceRelation" table="EAM_RESOURCE_RELATION" lazy="true"
+         mutable="false">
     <cache usage="read-write"/>
 
     <id name="id" type="integer">
