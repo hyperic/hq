@@ -37,16 +37,32 @@
 
     <component-type type="InputField" specification-path="form/InputField.jwc"/>
     <component-type type="Button" specification-path="form/Button.jwc"/>
+    <component-type type="ComboButton" specification-path="form/ComboButton.jwc"/>
     <component-type type="FieldSet" specification-path="form/FieldSet.jwc"/>
+    
     
     <component-type type="Attachment" specification-path="hqu/Attachment.jwc"/>
     
+    <component-type type="Grid" specification-path="grid/Grid.jwc"/>
+    
     <component-type type="Layout1Col" specification-path="layout/Layout1Col.jwc"/>
+    <component-type type="Layout2Col" specification-path="layout/Layout2Col.jwc"/>
+    <component-type type="Layout3Col" specification-path="layout/Layout3Col.jwc"/>
+    <component-type type="Layout3Panel" specification-path="layout/Layout3Panel.jwc"/>
+    <component-type type="LayoutContainer" specification-path="layout/LayoutContainer.jwc"/>
+    <component-type type="LayoutPanel" specification-path="layout/LayoutPanel.jwc"/>
+    <component-type type="TabContainer" specification-path="layout/TabContainer.jwc"/>
     
     <component-type type="Header" specification-path="navigation/Header.jwc"/>
     <component-type type="NavigationTabs" specification-path="navigation/NavigationTabs.jwc"/>
+    <component-type type="NavigationContext" specification-path="navigation/NavigationContext.jwc"/>
     
+    <component-type type="ListPanel" specification-path="panel/ListPanel.jwc"/>
     <component-type type="MessagePanel" specification-path="panel/MessagePanel.jwc"/>
+    <component-type type="NotificationPanel" specification-path="panel/NotificationPanel.jwc"/>
     <component-type type="SearchPanel" specification-path="panel/SearchPanel.jwc"/>
+    <component-type type="TitlePanel" specification-path="panel/TitlePanel.jwc"/>
     
+    <component-type type="Tree" specification-path="tree/Tree.jwc"/>
+        
 </library-specification>
