@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,11 +25,7 @@
 
 package org.hyperic.hq.appdef.shared;
 
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 
 /**
  * This object is used to represent a users permissions as they
@@ -38,7 +34,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
  */
 public class AppdefResourcePermissions implements java.io.Serializable {
 
-    private AuthzSubjectValue subject;
+    private AuthzSubject subject;
     private AppdefEntityID entity;
 
     private boolean canCreateChild;
@@ -59,7 +55,7 @@ public class AppdefResourcePermissions implements java.io.Serializable {
      * @param canControl - can the user perform control actions on the entity
      * @param canMeasure - can the user look at measurement data for the entity
      */
-    public AppdefResourcePermissions(AuthzSubjectValue subject,
+    public AppdefResourcePermissions(AuthzSubject subject,
                                      AppdefEntityID eid,
                                      boolean canView,
                                      boolean canCreateChild,
@@ -130,7 +126,7 @@ public class AppdefResourcePermissions implements java.io.Serializable {
         return canMeasure;
     }
     
-    public AuthzSubjectValue getSubject() {
+    public AuthzSubject getSubject() {
         return this.subject;
     }
 

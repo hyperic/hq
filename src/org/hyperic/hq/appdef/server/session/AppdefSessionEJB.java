@@ -664,56 +664,58 @@ public abstract class AppdefSessionEJB
             boolean canControl = false;
             boolean canAlert = false;
             try {
-                this.checkViewPermission(who, eid);
+                checkViewPermission(who, eid);
                 canView = true;
             } catch (PermissionException e) {
             }
             try {
-                this.checkModifyPermission(who, eid);
+                checkModifyPermission(who, eid);
                 canModify = true;
             } catch (PermissionException e) {
             }
             try {
-                this.checkRemovePermission(who, eid);
+                checkRemovePermission(who, eid);
                 canRemove = true;
             } catch (PermissionException e) {
             }    
             try {
-                this.checkControlPermission(who, eid);
+                checkControlPermission(who, eid);
                 canControl = true;
             } catch (PermissionException e) { 
             }
             try {
-                this.checkMonitorPermission(who, eid);
+                checkMonitorPermission(who, eid);
                 canMonitor = true;
             } catch (PermissionException e) {
             }
             try {
-                this.checkAlertingPermission(who, eid);
+                checkAlertingPermission(who, eid);
                 canAlert = true;
             } catch (PermissionException e) {                
             }
             try {
-                if(eid.getType() != AppdefEntityConstants.APPDEF_TYPE_SERVICE){
-                    this.checkCreateChildPermission(who, eid);                    
+                if (!eid.isService()) {
+                    checkCreateChildPermission(who, eid);                    
                     canCreateChild = true;
                 }
             } catch (PermissionException e) {
             } catch (InvalidAppdefTypeException e) {
             }
             // finally create the object
-            return new AppdefResourcePermissions(who.getAuthzSubjectValue(),
-                                                 eid, canView,
+            return new AppdefResourcePermissions(who, eid,
+                                                 canView,
                                                  canCreateChild,
-                                                 canModify, canRemove,
+                                                 canModify,
+                                                 canRemove,
                                                  canControl,
-                                                 canMonitor, canAlert);
+                                                 canMonitor,
+                                                 canAlert);
     }
     
     /**
-     * Get the root resourceType object. Used to check permissions
-     * such as createPlatform which are associated with the root
-     * resourceType
+     * Get the root resourceType object. Used to check permissions such as
+     * createPlatform which are associated with the root resourceType
+     * 
      * @return rootResTypeValue - the root resource type
      */
     protected ResourceType getRootResourceType() 
