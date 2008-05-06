@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping package="org.hyperic.hq.appdef.server.session">
 
-  <class name="CpropKey" table="EAM_CPROP_KEY">
+  <class name="CpropKey" table="EAM_CPROP_KEY" mutable="false">
     <id name="id" type="integer">
       <meta attribute="scope-set"><![CDATA[private]]></meta>
       <column name="ID" not-null="true"/>
@@ -29,11 +29,6 @@
     <property name="description" type="string">
       <column name="DESCRIPTION" not-null="true" length="200"/>
     </property>
-
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="cprops" table="EAM_CPROP" lazy="true">
-      <key on-delete="cascade" column="KEYID"/>
-      <one-to-many class="Cprop"/>
-    </bag>
     
   </class>
 

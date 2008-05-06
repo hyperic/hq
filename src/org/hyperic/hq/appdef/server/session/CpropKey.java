@@ -37,16 +37,16 @@ public class CpropKey extends PersistedObject
     private String _description;
     private Collection _cprops;
 
-    public Collection getCprops() {
-        return _cprops;
-    }
-
-    protected void setCprops(Collection cprops) {
-        _cprops = cprops;
-    }
-
     public CpropKey() {
         super();
+    }
+
+    public CpropKey(int appdefType, int appdefTypeId, String key,
+                    String description) {
+        _appdefType = appdefType;
+        _appdefTypeId = appdefTypeId;
+        _key = key;
+        _description = description;
     }
 
     public int getAppdefType() {

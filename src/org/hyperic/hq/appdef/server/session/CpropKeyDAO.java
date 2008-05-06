@@ -51,11 +51,8 @@ public class CpropKeyDAO extends HibernateDAO
     CpropKey create(int appdefType, int appdefTypeId, String key,
                     String description)
     {
-        CpropKey cpropkey = new CpropKey();
-        cpropkey.setAppdefType(appdefType);
-        cpropkey.setAppdefTypeId(appdefTypeId);
-        cpropkey.setKey(key);
-        cpropkey.setDescription(description);
+        CpropKey cpropkey = new CpropKey(appdefType, appdefTypeId,
+                                         key, description);
         save(cpropkey);
         return cpropkey;
     }
