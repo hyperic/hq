@@ -22,6 +22,10 @@ class ResourceGroupCategory {
         groupMan.setResources(user, group, resources)
     }
 
+    static Collection getResources(ResourceGroup group) {
+        groupMan.getMembers(group)
+    }
+    
     /**
      * Returns true if the ResourceGroup is compatible (i.e. only contains
      * resources of a homogenous type)
