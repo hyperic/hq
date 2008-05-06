@@ -131,6 +131,11 @@ class CageController
             return xmlOut
         }
 
+        if (group == null) {
+            xmlOut.error("Unable to find group [${xmlIn.'@name'}]")
+            return xmlOut
+        }
+        
         CritterList clist = new CritterList(critters, isAny == true)
         GroupMan.one.setCriteria(user, group, clist)
         
