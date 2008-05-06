@@ -1,0 +1,29 @@
+<shell jwcid="@Shell" title="ognl:pageTitle + ' - ' + staticTitle" stylesheets='ognl:styleSheetList' 
+       delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.remainingHead)"
+       ajaxDelegate="ognl:ajaxDelegate">
+<block jwcid="remainingHead@Block">
+<link rel="icon" href="/images/4.0/icons/favicon.ico"/>
+<style type="text/css">
+        @import "/js/dojo-1.0.2/dijit/themes/dijit.css";
+        @import "/js/dojo-1.0.2/dijit/themes/soria/soria.css";
+    </style>
+<script language="JavaScript" type="text/javascript" src="/js/lib/lib.js"></script>
+<script type="text/javascript">
+    djConfig= {isDebug: false, parseOnLoad: true, defaultTestTheme: 'soria'}
+</script>
+</block>
+<body jwcid="@Body" class="soria">
+
+<div id="wrapper">
+        
+<span jwcid="@Header" statusElement="ognl:statusElement" navigationMenu="ognl:navigationMenu"/>
+
+<div id="wrapper">
+	<div id="content">
+	    <span jwcid="@RenderBody">Page content goes here.</span>
+	    <!-- TODO put the layout delegates here-->
+	</div>
+</div>
+</div>
+</body>
+</shell>
