@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping package="org.hyperic.hq.authz.server.session">
 
-  <class name="ResourceGroup" table="EAM_RESOURCE_GROUP">
+  <class name="ResourceGroup" table="EAM_RESOURCE_GROUP" lazy="true">
     <cache usage="read-write"/>
     <id name="id" type="integer">
       <meta attribute="scope-set"><![CDATA[private]]></meta>
@@ -67,37 +67,25 @@
       <column name="RESOURCE_ID" not-null="true"/>
     </many-to-one>
 
-    <set name="resourceSet" table="EAM_RES_GRP_RES_MAP" optimistic-lock="false">
+    <bag name="memberBag" table="EAM_RES_GRP_RES_MAP" inverse="true">
       <cache usage="read-write"/>
       <key column="RESOURCE_GROUP_ID"/>
-      <many-to-many class="Resource" column="RESOURCE_ID"/>
-    </set>
-
+      <one-to-many class="GroupMember"/>
+    </bag>
+    
     <set name="roles" table="EAM_ROLE_RESOURCE_GROUP_MAP">
       <cache usage="read-write"/>
       <key column="RESOURCE_GROUP_ID"/>
       <many-to-many class="Role" column="ROLE_ID"/>
     </set>
     
-    <list name="criteriaList" table="EAM_CRITERIA" inverse="true" cascade="all-delete-orphan">
+    <list name="criteriaList" table="EAM_CRITERIA" inverse="true" 
+          cascade="all-delete-orphan">
       <cache usage="read-write"/>
       <key column="RESOURCE_GROUP_ID"/>
       <list-index column="LIST_INDEX"/>
       <one-to-many class="PersistedCritter"/>
     </list>
-  </class>
-
-  <class name="ResGrpResMap" table="EAM_RES_GRP_RES_MAP">
-    <cache usage="read-write"/>
-    <composite-id name="id" class="ResGrpResMapId">
-      <key-many-to-one name="resource" class="Resource">
-        <column name="RESOURCE_ID" not-null="true"/>
-      </key-many-to-one>
-
-      <key-many-to-one name="resourceGroup" class="ResourceGroup">
-        <column name="RESOURCE_GROUP_ID" not-null="true"/>
-      </key-many-to-one>
-    </composite-id>
   </class>
 
 </hibernate-mapping>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.authz.server.session">
+
+  <class name="GroupMember" table="EAM_RES_GRP_RES_MAP" 
+         lazy="true" mutable="false">
+    <cache usage="read-write"/>
+    <id name="id" type="integer">
+      <meta attribute="scope-set"><![CDATA[private]]></meta>
+      <column name="ID" not-null="true"/>
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
+        <param name="sequence">EAM_RES_GRP_RES_MAP_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="resource">
+      <column name="RESOURCE_ID" not-null="true" index="group_member_idx"
+              unique-key="eam_res_grp_idx"/>
+    </many-to-one>
+
+    <many-to-one name="group">
+      <column name="RESOURCE_GROUP_ID" not-null="true"
+              index="group_group_idx" unique-key="eam_res_grp_idx"/>
+    </many-to-one>
+    
+    <property name="entryTime">
+      <column name="ENTRY_TIME" not-null="true"/>
+    </property>
+  </class>
+
+</hibernate-mapping>

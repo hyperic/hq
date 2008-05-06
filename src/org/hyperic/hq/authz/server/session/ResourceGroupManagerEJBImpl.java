@@ -28,6 +28,7 @@ package org.hyperic.hq.authz.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -379,10 +380,13 @@ public class ResourceGroupManagerEJBImpl
                  AuthzConstants.perm_modifyResourceGroup);
 
         ResourceDAO resDao = getResourceDAO();
+        List resourcePojos = new ArrayList(resources.length);
         for (int i = 0; i < resources.length; i++) {
             Resource resource = resDao.findById(resources[i].getId());
-            resGroup.addResource(resource);
+            resourcePojos.add(resource);
         }
+        
+        grpDao.addMembers(resGroup, resourcePojos);
 
         GroupingStartupListener.getCallbackObj().groupMembersChanged(resGroup);
     }
@@ -399,7 +403,8 @@ public class ResourceGroupManagerEJBImpl
         pm.check(whoami.getId(), AuthzConstants.authzGroup,
                  group.getId(), AuthzConstants.perm_modifyResourceGroup);
 
-        group.addResource(resource);
+        getResourceGroupDAO().addMembers(group, 
+                                         Collections.singleton(resource));
         GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
         return group;
     }
@@ -416,16 +421,15 @@ public class ResourceGroupManagerEJBImpl
         throws PermissionException 
     {
         ResourceGroupDAO grpDao = getResourceGroupDAO();
-        ResourceGroup groupLocal = grpDao.findByName(group.getName());
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(),
                  AuthzConstants.authzGroup,
-                 groupLocal.getId(),
+                 group.getId(),
                  AuthzConstants.perm_modifyResourceGroup);
         
-        grpDao.removeResources(groupLocal, resources);
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(groupLocal);
+        grpDao.removeMembers(group, resources);
+        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
     }
 
     /**
@@ -447,7 +451,7 @@ public class ResourceGroupManagerEJBImpl
                  resGroup.getId(),
                  AuthzConstants.perm_modifyResourceGroup);
 
-        dao.removeAllResources(resGroup);
+        dao.removeAllMembers(resGroup);
         GroupingStartupListener.getCallbackObj().groupMembersChanged(resGroup);
     }
 
@@ -485,15 +489,15 @@ public class ResourceGroupManagerEJBImpl
                              ResourceValue[] resources)
         throws PermissionException 
     {
-        ResourceGroup group =
-            getResourceGroupDAO().findById(grpVal.getId());
+        ResourceGroupDAO gDao = getResourceGroupDAO();
+        ResourceGroup group = gDao.findById(grpVal.getId());
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(),
                  AuthzConstants.authzGroup, group.getId(),
                  AuthzConstants.perm_modifyResourceGroup);
 
-        group.setResourceSet(toPojos(resources));
+        gDao.setMembers(group, toPojos(resources));
         GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
     }
 
@@ -513,8 +517,7 @@ public class ResourceGroupManagerEJBImpl
                  AuthzConstants.authzGroup, group.getId(),
                  AuthzConstants.perm_modifyResourceGroup);
 
-        group.removeAllResources();
-        group.addResources(resources);
+        getResourceGroupDAO().setMembers(group, resources);
         GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
     }
 
@@ -547,21 +550,37 @@ public class ResourceGroupManagerEJBImpl
      * Get all the members of a group.
      * 
      * @return {@link Resource}s
-     * 
-     * TODO:  Currently a placeholder until ResourceGroup.getResources() is
-     *        made package-private.
      * @ejb:interface-method
      */
     public Collection getMembers(ResourceGroup g) {
-        return g.getResources();
+        return getResourceGroupDAO().getMembers(g);
     }
 
+    /**
+     * Get all the groups a resource belongs to
+     * 
+     * @return {@link ResourceGroup}s
+     * @ejb:interface-method
+     */
+    public Collection getGroups(Resource r) {
+        return getResourceGroupDAO().getGroups(r);
+    }
+    
+    /**
+     * Returns true if the passed resource is a member of the given group.
+     * @ejb:interface-method
+     */
+    public boolean isMember(ResourceGroup group, Resource resource) {
+        return getResourceGroupDAO().isMember(group, resource);
+    }
+    
+    
     /**
      * Get the # of members in a group
      * @ejb:interface-method
      */
     public int getNumMembers(ResourceGroup g) {
-        return g.getResources().size();
+        return getMembers(g).size();
     }
     
     
@@ -572,7 +591,8 @@ public class ResourceGroupManagerEJBImpl
      */
     public AppdefGroupValue convertGroup(AuthzSubject subj, ResourceGroup g) {
         AppdefGroupValue retVal = new AppdefGroupValue();
-
+        Collection members = getMembers(g);
+        
         // Create our return group vo
         retVal.setId(g.getId());
         retVal.setName(g.getName());
@@ -581,7 +601,7 @@ public class ResourceGroupManagerEJBImpl
         retVal.setGroupType(g.getGroupType().intValue());
         retVal.setGroupEntType(g.getGroupEntType().intValue());
         retVal.setGroupEntResType(g.getGroupEntResType().intValue());
-        retVal.setTotalSize(g.getResources().size() );
+        retVal.setTotalSize(members.size());
         retVal.setSubject(subj);
         retVal.setClusterId(g.getClusterId().intValue());
         retVal.setMTime(new Long(g.getMtime()));
@@ -590,7 +610,7 @@ public class ResourceGroupManagerEJBImpl
         retVal.setOwner(subj.getName());
                 
         // Add the group members
-        for (Iterator i = g.getResources().iterator(); i.hasNext();) {
+        for (Iterator i = members.iterator(); i.hasNext();) {
             Resource r= (Resource) i.next();
             GroupEntry ge = new GroupEntry(r.getInstanceId(),
                                            r.getResourceType().getName());

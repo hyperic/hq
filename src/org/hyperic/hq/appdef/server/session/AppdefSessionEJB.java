@@ -1101,7 +1101,8 @@ public abstract class AppdefSessionEJB
         sc.setDescription(group.getDescription());
         sc.setGroup(group);
         
-        Collection resources = group.getResources();
+        Collection resources = 
+            ResourceGroupManagerEJBImpl.getOne().getMembers(group);
     
         Set services = new HashSet(resources.size());
         ServiceDAO dao = getServiceDAO();

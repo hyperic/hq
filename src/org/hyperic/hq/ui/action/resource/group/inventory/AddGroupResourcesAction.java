@@ -39,7 +39,12 @@ import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.grouping.shared.GroupVisitorException;
 import org.hyperic.hq.ui.Constants;
@@ -133,15 +138,22 @@ public class AddGroupResourcesAction extends BaseAction {
                                                      agroup.getId());
             
             List newIds = new ArrayList();
+            ResourceGroupManagerLocal groupMan = 
+                ResourceGroupManagerEJBImpl.getOne();
+            ResourceManagerLocal resourceMan = 
+                ResourceManagerEJBImpl.getOne();
             for (Iterator i=pendingResourceIds.iterator(); i.hasNext(); ) {
                 String id = (String) i.next();
                 AppdefEntityID entity = new AppdefEntityID(id);
+                Resource r = resourceMan.findResource(entity);
                 
-                if (!group.existsAppdefEntity(entity)) {
+                if (!groupMan.isMember(group, r)) {
                     newIds.add(entity);
                 }            
             }
 
+            // XXX:  We have the list of resources above.  Should use this
+            //       instead of passing in IDs.. waste of effort.
             boss.addResourcesToGroup(sessionId.intValue(), group, newIds);
 
             log.trace("removing pending user list");

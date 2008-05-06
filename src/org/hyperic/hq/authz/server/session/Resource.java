@@ -42,11 +42,11 @@ public class Resource extends AuthzNamedBean {
     private Integer      _instanceId;
     private AuthzSubject _owner;
     private boolean      _system = false;
-    private Collection   _resourceGroups = new ArrayList();
     private Collection   _virtuals = new ArrayList();
     private Collection   _fromEdges = new ArrayList();
     private Collection   _toEdges = new ArrayList();
-
+    private Collection   _groupBag = new ArrayList();
+    
     private ResourceValue resourceValue = new ResourceValue();
 
     protected Resource() {
@@ -63,6 +63,14 @@ public class Resource extends AuthzNamedBean {
         _system       = system;
     }
 
+    protected Collection getGroupBag() {
+        return _groupBag;
+    }
+    
+    protected void setGroupBag(Collection b) {
+        _groupBag = b;
+    }
+    
     public ResourceType getResourceType() {
         return _resourceType;
     }
@@ -118,14 +126,6 @@ public class Resource extends AuthzNamedBean {
         _virtuals = virtuals;
     }
 
-    protected void setResourceGroups(Collection val) {
-        _resourceGroups = val;
-    }
-
-    protected Collection getResourceGroups() {
-        return _resourceGroups;
-    }
-    
     protected void setFromEdges(Collection e) {
         _fromEdges = e;
     }
@@ -142,10 +142,6 @@ public class Resource extends AuthzNamedBean {
         return _toEdges;
     }
 
-    public Collection getGroups() {
-        return Collections.unmodifiableCollection(_resourceGroups);
-    }
-    
     /**
      * @deprecated use (this) Resource instead
      */

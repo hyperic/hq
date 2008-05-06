@@ -30,11 +30,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TreeSet;
 
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.grouping.Critter;
@@ -57,7 +55,7 @@ public class ResourceGroup extends AuthzNamedBean
     private String _modifiedBy;
     private Resource _resource;
     private Resource _resourcePrototype;
-    private Collection _resourceSet = new HashSet();
+    private Collection _memberBag = new ArrayList();
     private Collection _roles = new HashSet();
     private List _criteria = new ArrayList();
 
@@ -110,6 +108,10 @@ public class ResourceGroup extends AuthzNamedBean
         _resourcePrototype = cInfo.getResourcePrototype();
         _ctime = _mtime    = System.currentTimeMillis();
         _modifiedBy        = creator.getName();
+    }
+    
+    void markDirty() {
+        _mtime = System.currentTimeMillis();
     }
     
     /**
@@ -236,10 +238,14 @@ public class ResourceGroup extends AuthzNamedBean
         _modifiedBy = val;
     }
 
-    protected Collection getResourceSet() {
-        return _resourceSet;
+    protected Collection getMemberBag() {
+        return _memberBag;
     }
-
+    
+    protected void setMemberBag(Collection b) {
+        _memberBag = b;
+    }
+    
     protected void setResourcePrototype(Resource r) {
         _resourcePrototype = r;
     }
@@ -274,49 +280,6 @@ public class ResourceGroup extends AuthzNamedBean
         return _resource;
     }
     
-    public Collection getResources()
-    {
-        TreeSet resources = new TreeSet(new AuthzNamedBean.Comparator());
-        // Filter our the resource that is this group
-        for (Iterator it = getResourceSet().iterator(); it.hasNext(); ) {
-            Resource res = (Resource) it.next();
-            if (!res.getInstanceId().equals(getId()) ||
-                !res.getResourceType().getId().equals(AuthzConstants.authzGroup)
-               ) {
-                resources.add(res);
-            }
-        }
-        return resources;
-    }
-
-    protected void setResourceSet(Collection val) {
-        _resourceSet = val;
-    }
-
-    public void addResource(Resource resource) {
-        resource.getResourceGroups().add(this);
-        _resourceSet.add(resource);
-    }
-    
-    public void addResources(Collection r) {
-        for (Iterator i = r.iterator(); i.hasNext(); ) {
-            addResource((Resource)i.next());
-        }
-    }
-
-    public void removeResource(Resource resource) {
-        _resourceSet.remove(resource);
-    }
-
-    public void removeAllResources() {
-        /**
-         * Why is this not symmetrical?  addResource also adds the group to
-         * the resource's list.  we should remove ourselves here as well
-         * XXX
-         */
-        _resourceSet.clear();
-    }
-
     public Collection getRoles() {
         return _roles;
     }
@@ -387,21 +350,6 @@ public class ResourceGroup extends AuthzNamedBean
 
     public void removeAllRoles() {
         _roles.clear();
-    }
-
-    /**
-     * Returns true if this group contains a resource of the specified ID
-     * @deprecated Should use call into the manager instead.
-     */
-    public boolean existsAppdefEntity(AppdefEntityID ent) {
-        for (Iterator i=getResources().iterator(); i.hasNext(); ) {
-            Resource r = (Resource)i.next();
-            AppdefEntityID rId = new AppdefEntityID(r);
-            
-            if (rId.equals(ent))
-                return true;
-        }
-        return false;
     }
 
     /**

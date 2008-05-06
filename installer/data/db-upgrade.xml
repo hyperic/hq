@@ -8870,6 +8870,72 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.118">
+    <schema-addColumn table="EAM_RES_GRP_RES_MAP" 
+                      column="ID" columnType="INTEGER">
+      <initializer>
+          update EAM_RES_GRP_RES_MAP set ID = 
+              (select count(*) from EAM_RES_GRP_RES_MAP m 
+                  where EAM_RES_GRP_RES_MAP.resource_group_id > m.resource_group_id)
+            + (select count(*) from EAM_RES_GRP_RES_MAP m 
+                  where EAM_RES_GRP_RES_MAP.resource_group_id = m.resource_group_id 
+                    and EAM_RES_GRP_RES_MAP.resource_id > m.resource_id)
+      </initializer>
+    </schema-addColumn>
+  
+    <schema-directSQL>
+      <statement>
+        alter table EAM_RES_GRP_RES_MAP drop constraint EAM_RES_GRP_RES_MAP_PKEY;
+      </statement>
+      <statement>
+        alter table EAM_RES_GRP_RES_MAP add primary key (ID)
+      </statement>
+      <statement>
+        create index group_group_idx on EAM_RES_GRP_RES_MAP(resource_group_id)
+      </statement>
+      <statement>
+        create index group_member_idx on EAM_RES_GRP_RES_MAP(resource_id)
+      </statement>
+      <statement>
+        alter table EAM_RES_GRP_RES_MAP add constraint eam_res_grp_res_map_resource_id_key
+              unique (resource_id, resource_group_id)
+      </statement>    	
+      <statement targetDB="mysql">
+          insert into HQ_SEQUENCE (seq_name, seq_val) 
+                 select 'EAM_RES_GRP_RES_MAP', ifnull(max(id), 10000)/100+1 from EAM_RES_GRP_RES_MAP
+      </statement>
+    </schema-directSQL>
+
+    <schema-addColumn table="EAM_RES_GRP_RES_MAP"
+                      column="ENTRY_TIME"
+                      columnType="LONG"/>
+    <groovy>
+      SQL.execute("update EAM_RES_GRP_RES_MAP set ENTRY_TIME = ${System.currentTimeMillis()}")
+    </groovy> 
+    <groovy targetDB="postgresql">
+      def row   = SQL.firstRow("select max(id) from EAM_RES_GRP_RES_MAP")
+      SQL.execute("""CREATE SEQUENCE eam_res_grp_res_map_id_seq
+                     START WITH ${row.max.toInteger() + 1}
+                     INCREMENT BY 1
+                     NO MAXVALUE
+                     NO MINVALUE
+                     CACHE 1""")
+    </groovy>
+    <groovy targetDB="oracle">
+      def row   = SQL.firstRow("select max(id) from EAM_RES_GRP_RES_MAP")
+      SQL.execute("""CREATE SEQUENCE eam_res_grp_res_map_id_seq
+                     START WITH ${row.max.toInteger() + 1}
+                     INCREMENT BY 1
+                     NOMAXVALUE
+                     NOCYCLE
+                     CACHE 10""")
+    </groovy>
+    <schema-alterColumn table="EAM_RES_GRP_RES_MAP"
+                        column="ENTRY_TIME"
+                        nullable="NOT NULL"/>
+  </schemaSpec>
+  
+  
 </dbupgrade>
 </target>
 </project>

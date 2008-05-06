@@ -109,9 +109,8 @@ public class RoleDAO extends HibernateDAO {
             throw new SystemException("Should always be able to create a " +
                                       "group for roles, but got exceptin", e);
         }
-        // add our resource
-        group.addResource(myResource);
-        groups.add(group);
+        
+        resourceGroupDAO.addMembers(group, Collections.singleton(myResource));
 
         role.setResourceGroups(groups);
 

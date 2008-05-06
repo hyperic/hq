@@ -127,30 +127,30 @@
 
     <!-- dump all reources into authz resource group -->
     <table name="EAM_RES_GRP_RES_MAP">
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:0"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:1"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:2"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:3"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:4"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:5"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:501"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:601"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:602"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:603"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              RESOURCE_ID="%EAM_RESOURCE.ID:604"/>
+        <data ID="0" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:0"/>
+        <data ID="1" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:1"/>
+        <data ID="2" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:2"/>
+        <data ID="3" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:3"/>
+        <data ID="4" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:4"/>
+        <data ID="5" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:5"/>
+        <data ID="6" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
+        <data ID="7" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:501"/>
+        <data ID="8" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:601"/>
+        <data ID="9" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:602"/>
+        <data ID="10" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:603"/>
+        <data ID="11" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:604"/>
     </table>
 
     <table name="EAM_OPERATION">
@@ -411,11 +411,11 @@
     <!-- put the role resource into the root resource group so we can
          actually operate on it -->
     <table name="EAM_RES_GRP_RES_MAP">
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
-            RESOURCE_ID="%EAM_RESOURCE.ID:8"/>
+        <data ID="12" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:8"/>
         <!-- the root resource group includes the root user as well -->
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
-            RESOURCE_ID="%EAM_RESOURCE.ID:6"/>
+        <data ID="13" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:6"/>
     </table>
 
     <!-- add the root resource group to the role -->
@@ -582,10 +582,10 @@
 
     <!-- add the user and role to the root resource group -->
     <table name="EAM_RES_GRP_RES_MAP">
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
-              RESOURCE_ID="%EAM_RESOURCE.ID:10"/>
-        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
-              RESOURCE_ID="%EAM_RESOURCE.ID:11"/>
+        <data ID="14" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:10"/>
+        <data ID="15" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
+              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:11"/>
     </table>
 
     <!-- add the guest user to the view only role -->

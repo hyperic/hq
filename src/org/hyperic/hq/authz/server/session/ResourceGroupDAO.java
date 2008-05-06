@@ -27,13 +27,18 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.GroupCreationException;
@@ -41,11 +46,13 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.util.pager.PageList;
 
 public class ResourceGroupDAO extends HibernateDAO
 {
+    private static final Log _log
+        = LogFactory.getLog(ResourceGroupDAO.class.getName());
+    
     public ResourceGroupDAO(DAOFactory f) {
         super(ResourceGroup.class, f);
     }
@@ -123,11 +130,99 @@ public class ResourceGroupDAO extends HibernateDAO
         r.setInstanceId(resGrp.getId());
         save(r);
         flushSession();
-        
-        resGrp.setResourceSet(new HashSet(resources));
+
+        setMembers(resGrp, new HashSet(resources));
         resGrp.setRoles(new HashSet(roles));
         
         return resGrp;
+    }
+    
+    void removeAllMembers(ResourceGroup group) {
+        group.markDirty();
+        createQuery("delete from GroupMember g " + 
+                    "where g.group = :group")
+            .setParameter("group", group)
+            .executeUpdate();
+    }
+
+    boolean isMember(ResourceGroup group, Resource resource) {
+        GroupMember gm = (GroupMember) 
+            createQuery("from GroupMember g where g.group = :group " + 
+                        " and g.resource = :resource")
+                .setParameter("group", group)
+                .setParameter("resource", resource)
+                .uniqueResult();
+        
+        return gm != null; 
+    }
+
+    void removeMembers(ResourceGroup group, Collection members) {
+        group.markDirty();
+        
+        List memberIds = new ArrayList(members.size());
+        
+        for (Iterator i=members.iterator(); i.hasNext(); ) {
+            Resource r = (Resource)i.next();
+            memberIds.add(r.getId());
+        }
+        int numDeleted = 
+            createQuery("delete from GroupMember where group = :group " +
+                    "and resource.id in (:members)")
+            .setParameter("group", group)
+            .setParameterList("members", memberIds)
+            .executeUpdate();
+        
+        if (numDeleted != members.size()) {
+            _log.warn("Expected to delete " + members.size() + " members " + 
+                      "but only deleted " + numDeleted + " (group=" + 
+                      group.getId());
+        }
+    }
+    
+    void addMember(ResourceGroup group, Resource resource) {
+        addMembers(group, Collections.singleton(resource));
+    }
+    
+    void addMembers(ResourceGroup group, Collection resources) {
+        Session sess = getSession();
+        
+        group.markDirty();
+        for (Iterator i=resources.iterator(); i.hasNext(); ) {
+            Resource r = (Resource)i.next();
+            GroupMember m = new GroupMember(group, r);
+            
+            sess.save(m);
+        }
+    }
+    
+    void setMembers(ResourceGroup group, Collection resources) {
+        removeAllMembers(group);
+        addMembers(group, resources);
+    }
+    
+    /**
+     * Get groups that a resource belongs to via the persistence mechanism
+     * (i.e. mapping table)
+     * 
+     * @return {@link ResourceGroup}s
+     */
+    Collection getGroups(Resource r) {
+        return createQuery("select g.group from GroupMember g " + 
+                           "where g.resource = :resource")
+            .setParameter("resource", r)
+            .list();
+    }
+    
+    /**
+     * Get resources belonging to a group via the persistence mechanism.
+     * 
+     * @return {@link Resource}s
+     */
+    Collection getMembers(ResourceGroup g) {
+        return createQuery("select g.resource from GroupMember g " +
+                           "where g.group = :group")
+            .setParameter("group", g)
+            .list();
     }
 
     public ResourceGroup findById(Integer id) {
@@ -145,8 +240,8 @@ public class ResourceGroupDAO extends HibernateDAO
     public void remove(ResourceGroup entity) {
         // remove all roles
         entity.getRoles().clear();
-        // remove all resources
-        entity.getResourceSet().clear();
+        
+        removeAllMembers(entity);
 
         super.remove(entity);
         flushSession();
@@ -158,22 +253,6 @@ public class ResourceGroupDAO extends HibernateDAO
         flushSession();
     }
     
-    public void addResource(ResourceGroup entity, Resource res) {
-        entity.getResources().add(res);
-    }
-    
-    public void removeAllResources(ResourceGroup entity) {
-        entity.getResourceSet().clear();
-    }
-
-    public void removeResources(ResourceGroup entity, Collection resources) {
-        Collection resCol = entity.getResourceSet();
-        
-        for (Iterator i=resources.iterator(); i.hasNext(); ) {
-            resCol.remove(i.next());
-        }
-    }
-
     public ResourceGroup findRootGroup() {
         ResourceGroup res = findByName(AuthzConstants.rootResourceGroupName);
         
@@ -348,8 +427,8 @@ public class ResourceGroupDAO extends HibernateDAO
         
         PermissionManager pm = PermissionManagerFactory.getInstance();
         hql += "g.id " + inclusionStr + " in ( " + 
-               "   select m.id.resourceGroup.id from ResGrpResMap m " + 
-               "   where m.id.resource = :resource " + 
+               "   select m.group.id from GroupMember m " + 
+               "   where m.resource = :resource " + 
                ") ";
         
         String pmql = pm.getOperableGroupsHQL("g",

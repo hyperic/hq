@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping package="org.hyperic.hq.authz.server.session">
 
-  <class name="Resource" table="EAM_RESOURCE">
+  <class name="Resource" table="EAM_RESOURCE" lazy="true">
     <cache usage="read-write"/>
 
     <id name="id" type="integer">
@@ -45,12 +45,13 @@
       <column name="FSYSTEM" not-null="false"/>
     </property>
 
-    <bag inverse="true" name="resourceGroups" table="EAM_RES_GRP_RES_MAP">
+    <bag name="groupBag" table="EAM_RES_GRP_RES_MAP" inverse="true">
+      <cache usage="read-write"/>
       <key column="RESOURCE_ID"/>
-      <many-to-many class="ResourceGroup" column="RESOURCE_GROUP_ID"/>
+      <one-to-many class="GroupMember"/>
     </bag>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="virtuals" table="EAM_VIRTUAL">
+    <bag inverse="true" cascade="all" name="virtuals" table="EAM_VIRTUAL">
       <key on-delete="cascade" column="RESOURCE_ID"/>
       <one-to-many class="Virtual"/>
     </bag>
@@ -61,11 +62,11 @@
       <key column="FROM_ID"/>
       <one-to-many class="ResourceEdge"/>
     </bag>
+    
     <bag inverse="true" cascade="none" name="toEdges" table="EAM_RESOURCE_EDGE">
       <key column="TO_ID"/>
       <one-to-many class="ResourceEdge"/>
     </bag>
-
   </class>
 
 </hibernate-mapping>

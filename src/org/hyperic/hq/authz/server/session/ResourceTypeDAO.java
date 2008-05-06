@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import java.util.Collections;
+
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
@@ -45,7 +47,9 @@ public class ResourceTypeDAO
 
         // ResourceTypes also have Resources associated with them, so create
         // that and link  'em up.
-        ResourceDAO rDao = DAOFactory.getDAOFactory().getResourceDAO();
+        DAOFactory fact = DAOFactory.getDAOFactory();
+        ResourceDAO rDao = fact.getResourceDAO();
+        ResourceGroupDAO gDao = fact.getResourceGroupDAO();
         ResourceType typeResType = findTypeResourceType();
         Resource prototype = rDao.findById(AuthzConstants.rootResourceId); 
         Resource res = rDao.create(typeResType, prototype, resType.getName(), 
@@ -60,8 +64,8 @@ public class ResourceTypeDAO
             throw new IllegalArgumentException("Resource Group not found: " +
                                                AuthzConstants.authzResourceGroupName);
         }
-        authzGroup.addResource(res);
-
+        
+        gDao.addMembers(authzGroup, Collections.singleton(res));
         return resType;
     }
 

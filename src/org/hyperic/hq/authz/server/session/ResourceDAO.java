@@ -27,6 +27,7 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -66,9 +67,10 @@ public class ResourceDAO
         save(resource);
 
         /* add it to the root resourcegroup */
-        ResourceGroup authzGroup =
-            new ResourceGroupDAO(DAOFactory.getDAOFactory()).findRootGroup();
-        authzGroup.addResource(resource);
+        ResourceGroupDAO gDao = 
+            DAOFactory.getDAOFactory().getResourceGroupDAO();
+        ResourceGroup authzGroup = gDao.findRootGroup();
+        gDao.addMembers(authzGroup, Collections.singleton(resource));
 
         // Need to flush so that later permission checking can succeed
         getSession().flush();
@@ -89,20 +91,16 @@ public class ResourceDAO
     }
 
     public void remove(Resource entity) {
-        // remove resource from all resourceGroups
-        // Currently the resourceGroup collection is the inverse=true
-        // end of many-to-many with ResourceGroup
-        // Have to iterate thru resoucegroups and remove from each group
-        // the resource belongs to.  Wish Hibernate supported cascade deletes
-        // on many-to-many collections.
-        for (Iterator i = entity.getResourceGroups().iterator(); i.hasNext();) {
-            ResourceGroup rg = (ResourceGroup) i.next();
-            rg.removeResource(entity);
+        ResourceGroupDAO gDao = getFactory().getResourceGroupDAO();
+        // Is this really necessary?  We should technically always make sure
+        // the group is optimistically updated even when resources are removed.
+        for (Iterator i = gDao.getGroups(entity).iterator(); i.hasNext(); ) {
+            ResourceGroup group = (ResourceGroup)i.next();
+            
+            group.markDirty();
         }
-        entity.getResourceGroups().clear();        
         
-        // Remove any references to the group from the group_resource map
-        String sql = "delete ResGrpResMap g where g.id.resource = :resource";
+        String sql = "delete GroupMember g where g.resource = :resource";
         getSession().createQuery(sql)
             .setParameter("resource", entity)
             .executeUpdate();
