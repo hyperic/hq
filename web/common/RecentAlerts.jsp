@@ -6,7 +6,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@
 <% response.setHeader("Cache-Control","no-store");%>
 <% response.setDateHeader("Expires",-1);%>
 <hq:recentAlerts var="recentAlerts" sizeVar="recentAlertsSize" maxAlerts="2"/>
-  <table id="recentAlertsText"><tr><td nowrap="true">
+  <span id="recentAlertsText">
 <c:choose>
   <c:when test="${recentAlertsSize > 0}">
     <ul class="boxy">
@@ -47,7 +47,7 @@
     </ul>
   </c:when>
   <c:otherwise>
-    <span class="MastheadContent"><fmt:message key="header.NoRecentAlerts"/></span>
+    <span class="MastheadContent" style="color: #FFF;"><fmt:message key="header.NoRecentAlerts"/></span>
   </c:otherwise>
 </c:choose>
-  </td></tr></table>
+  </span>

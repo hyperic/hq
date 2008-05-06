@@ -29,6 +29,16 @@ a:visited,a:hover,a {
     background: #2D6EBE none repeat scroll 0
 }
 
+#headerAlerts {
+    position: absolute;
+    top: 0;
+    left: 320px;
+    width: 410px;
+    height: 38px;
+    font-size: 10px;
+    color: #FFF;
+}
+
 #headerLinks {
     position: absolute;
     top: 0;

@@ -62,8 +62,35 @@
         dojo.subscribe('escape', searchWidget, "toggleSearchBox");
     });
     
-</script>
-<div id="header">
+      <!--
+      var refreshCount = 0;
+                                                                                    
+      function refreshAlerts() {
+        refreshCount++;
+
+        new Ajax.Request('<html:rewrite page="/common/RecentAlerts.jsp"/>',
+                         {method: 'get', onSuccess:showRecentAlertResponse});
+      }
+
+      function showRecentAlertResponse(originalRequest) {
+        if (originalRequest.responseText.indexOf('recentAlertsText') > 0) {
+          $('recentAlerts').innerHTML = originalRequest.responseText;
+        }
+        else {
+          refreshCount = 31;
+        }
+
+        if (refreshCount < 30) {
+          setTimeout( "refreshAlerts()", 60*1000 );
+        } else if (autoLogout) {
+          top.location.href = "<html:rewrite action="/Logout"/>";
+        }
+      }
+
+      onloads.push( refreshAlerts );
+      //-->
+      </script>
+    <div id="header">
     <div id="headerLogo" title="Home" onclick="/Dashboard.do">&nbsp;</div>
     <div id="navTabContainer">
         <c:set var="pageURL" value="${requestURL}"/>
@@ -99,6 +126,14 @@
 	        <tiles:put name="location" value="tracking"/>
 	    </tiles:insert>
 	</div>
+    <div id="headerAlerts">
+      <div class="headAlertWrapper">
+        <div class="recentText">
+          <fmt:message key="header.RecentAlerts"/>
+        </div>
+        <div id="recentAlerts"></div>
+      </div>
+    </div>
     <div id="headerLinks">
         <fmt:message key="header.Welcome"/>
          <c:choose>

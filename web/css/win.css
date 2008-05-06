@@ -593,7 +593,7 @@ a.guidelink:hover {
 }
 
 .headalertwrapper {
-    color: #333;
+    color: #888;
     font-weight: 700;
     height: 38px;
     left: 10px;
@@ -631,14 +631,14 @@ a.guidelink:hover {
     display: inline;
     float: left;
     padding-top: 5px;
-    width: 85px
+    width: 80px
 }
 
 #recentalerts {
-    color: #000;
+    color: #FFF;
     font-size: 11px;
     font-weight: 700;
-    padding-left: 80px;
+    padding-left: 70px;
     padding-top: 1px;
     position: absolute;
     top: 0;
