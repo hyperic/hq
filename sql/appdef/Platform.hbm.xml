@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping package="org.hyperic.hq.appdef.server.session">
-  <class name="Platform" table="EAM_PLATFORM">
+  <class name="Platform" table="EAM_PLATFORM" lazy="true">
 
     <cache usage="read-write"/>
 
@@ -68,8 +68,8 @@
       <column name="AGENT_ID" not-null="false"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="ips" table="EAM_IP"
-         optimistic-lock="false">
+    <bag inverse="true" cascade="all"
+         name="ips" table="EAM_IP" optimistic-lock="false">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="PLATFORM_ID"/>
       <one-to-many class="org.hyperic.hq.appdef.Ip"/>
