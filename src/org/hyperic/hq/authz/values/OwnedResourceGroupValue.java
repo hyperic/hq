@@ -25,11 +25,12 @@
 
 package org.hyperic.hq.authz.values;
 
-import org.hyperic.hq.authz.shared.*;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.ResourceGroupValue;
 
 public class OwnedResourceGroupValue extends ResourceGroupValue {
 
-    private AuthzSubjectValue owner;
+    private AuthzSubject owner;
 
     public OwnedResourceGroupValue()
     {
@@ -37,17 +38,17 @@ public class OwnedResourceGroupValue extends ResourceGroupValue {
     }
 
     public OwnedResourceGroupValue(ResourceGroupValue parent,
-				   AuthzSubjectValue owner) {
+                                   AuthzSubject owner) {
         super(parent);
-	this.setId(parent.getId());
+        this.setId(parent.getId());
         this.setOwner(owner);
     }
 
-    public AuthzSubjectValue getOwner() {
+    public AuthzSubject getOwner() {
         return this.owner;
     }
 
-    public void setOwner(AuthzSubjectValue owner) {
+    public void setOwner(AuthzSubject owner) {
         this.owner = owner;
     }
 }

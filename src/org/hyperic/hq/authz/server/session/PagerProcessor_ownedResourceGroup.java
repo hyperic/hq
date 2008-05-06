@@ -48,8 +48,8 @@ public class PagerProcessor_ownedResourceGroup implements PagerProcessor {
                     dao.findByInstanceId(AuthzConstants.authzGroup,
                                          group.getId());
 
-                return new OwnedResourceGroupValue(group.getResourceGroupValue(), 
-						   resource.getOwner().getAuthzSubjectValue());
+                return new OwnedResourceGroupValue(group.getResourceGroupValue(),
+                                                   resource.getOwner());
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to OwnedResourceGroupValue: " + e);

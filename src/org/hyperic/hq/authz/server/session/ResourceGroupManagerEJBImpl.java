@@ -662,56 +662,6 @@ public class ResourceGroupManagerEJBImpl
     }
     
     /**
-     * Get all the resource groups that contain a particular resource. Exclude
-     * the root resource group. 
-     * 
-     * @ejb:interface-method
-     */
-    public PageList 
-        getAllResourceGroupsResourceInclusive(AuthzSubject subject, 
-                                              PageControl pc,
-                                              ResourceValue resource)
-        throws PermissionException, FinderException 
-    {
-        List toBePaged = new ArrayList();
-
-        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
-
-        // first get the list of groups subject can view
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        List authGroupIds =
-            pm.findOperationScopeBySubject(subject, 
-                                           AuthzConstants.groupOpViewResourceGroup,
-                                           AuthzConstants.groupResourceTypeName, 
-                                           pc);
-
-        // Now fetch the ones that are inclusive.
-        Collection incGroups;
-        switch (pc.getSortattribute()) {
-        case SortAttribute.RESOURCE_NAME:
-            incGroups = getResourceGroupDAO()
-             .findContaining_orderName(resource.getInstanceId(),
-                                       resource.getResourceTypeValue().getId(),
-                                       pc.isAscending());
-            break;
-        default:
-            incGroups = getResourceGroupDAO()
-              .findContaining_orderName(resource.getInstanceId(),
-                                        resource.getResourceTypeValue().getId(),
-                                        true);
-        }
-
-        for (Iterator i=incGroups.iterator();i.hasNext();) {
-            ResourceGroup rgLoc = (ResourceGroup) i.next();
-            if (authGroupIds.contains(rgLoc.getId())) {
-                toBePaged.add(rgLoc);
-            }
-        }
-        return _ownedGroupPager.seek(toBePaged, pc.getPagenum(), 
-                                     pc.getPagesize());
-    }   
-
-    /**
      * Get a list of {@link ResourceGroup}s which are compatable with
      * the specified prototype.
      * 
@@ -841,9 +791,8 @@ public class ResourceGroupManagerEJBImpl
 
     /**
      * Get all the resource groups excluding the root resource group and paged
-     * @ejb:interface-method
      */
-    public PageList getAllResourceGroups(AuthzSubject subject,
+    private PageList getAllResourceGroups(AuthzSubject subject,
                                          PageControl pc,
                                          boolean excludeRoot)
         throws PermissionException, FinderException 
