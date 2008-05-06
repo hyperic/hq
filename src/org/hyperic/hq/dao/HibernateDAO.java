@@ -63,6 +63,10 @@ public abstract class HibernateDAO {
         return _daoFactory.getCurrentSession();
     }
             
+    public DAOFactory getFactory() {
+        return _daoFactory;
+    }
+    
     public void flushSession() {
         getSession().flush();
     }
