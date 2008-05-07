@@ -54,8 +54,14 @@ public class AgentConfig {
 
     public static final String PROP_PROPFILE = "agent.propFile";
     public static final String DEFAULT_PROPFILE = "agent.properties";
+    
+    public static final String PROP_LATHER_PROXYHOST = "lather.proxyHost";
+    public static final String PROP_LATHER_PROXYPORT = "lather.proxyPort";
 
     public static final String IP_GLOBAL = "*";
+    
+    private static final String DEFAULT_PROXY_HOST = "";
+    private static final int DEFAULT_PROXY_PORT = -1;
 
     // The following final objects are the properties which are usable
     // within the configuation object.  The first element in the array
@@ -80,9 +86,15 @@ public class AgentConfig {
     public static final String[] PROP_PDK = 
     { ProductPluginManager.PROP_PDK_DIR,
       System.getProperty(ProductPluginManager.PROP_PDK_DIR, "./pdk") };
+    public static final String[] PROP_PROXYHOST = 
+    { "agent.proxyHost", DEFAULT_PROXY_HOST };
+    public static final String[] PROP_PROXYPORT = 
+    { "agent.proxyPort", String.valueOf(DEFAULT_PROXY_PORT)};
 
     private static final String[][] propertyList = {
         PROP_LISTENPORT,
+        PROP_PROXYHOST, 
+        PROP_PROXYPORT,
         PROP_STORAGEPROVIDER,
         PROP_STORAGEPROVIDERINFO,
         PROP_INSTALLHOME,
@@ -94,12 +106,16 @@ public class AgentConfig {
 
     private int        listenPort;          // Port the agent should listen on
     private String     listenIp;            // IP the agent listens on
+    private int        proxyPort;           // Proxy server port
+    private String     proxyIp;             // IP for the proxy server
     private String     storageProvider;     // Classname for the provider
     private String     storageProviderInfo;  // Argument to the storage init()
     private Properties bootProps;           // Bootstrap properties
     private String     tokenFile;
 
     private AgentConfig(){
+        this.proxyIp = AgentConfig.DEFAULT_PROXY_HOST;
+        this.proxyPort = AgentConfig.DEFAULT_PROXY_PORT;
     }
 
     /**
@@ -252,7 +268,28 @@ public class AgentConfig {
         listenIp = appProps.getProperty(AgentConfig.PROP_LISTENIP[0],
                                         AgentConfig.PROP_LISTENIP[1]);
         this.setListenIp(listenIp);
-
+        
+        String proxyPort = 
+            appProps.getProperty(AgentConfig.PROP_PROXYPORT[0], 
+                                 AgentConfig.PROP_PROXYPORT[1]);
+                
+        try {
+            int proxyPortInt = Integer.parseInt(proxyPort);
+            
+            if (proxyPortInt != AgentConfig.DEFAULT_PROXY_PORT) {
+                this.setProxyPort(proxyPortInt);
+            }
+        } catch(NumberFormatException exc){
+            throw new AgentConfigException(AgentConfig.PROP_PROXYPORT[0]
+                                           + " is not an integer");
+        }
+        
+        String proxyIp = 
+            appProps.getProperty(AgentConfig.PROP_PROXYHOST[0], 
+                                 AgentConfig.PROP_PROXYPORT[1]);
+        
+        this.setProxyIp(proxyIp);
+        
         storageProvider = 
             appProps.getProperty(AgentConfig.PROP_STORAGEPROVIDER[0],
                                  AgentConfig.PROP_STORAGEPROVIDER[1]);
@@ -348,6 +385,60 @@ public class AgentConfig {
 
     public String getListenIp(){
         return this.listenIp;
+    }
+    
+    /**
+     * Sets the proxy port.
+     * 
+     * @param port New port to set.  The port should be in the range of
+     *             1 to 65535
+     *
+     * @throws AgentConfigException indicating the port was not within a valid
+     *                              range
+     */
+    public void setProxyPort(int port) throws AgentConfigException {
+        
+        if(port < 1 || port > 65535)
+            throw new AgentConfigException("Invalid port (not in range " +
+                                           "1->65535)");
+        
+        this.proxyPort = port;
+    }
+    
+    /**
+     * @return <code>true</code> if a proxy server is configured; 
+     *         <code>false</code> otherwise.
+     */
+    public boolean isProxyServerSet() {
+        return this.getProxyPort() != AgentConfig.DEFAULT_PROXY_PORT && 
+               !AgentConfig.DEFAULT_PROXY_HOST.equals(this.getProxyIp());
+    }
+    
+    /**
+     * Get the proxy port.
+     * 
+     * @return The port or <code>-1</code> if no proxy server is set.
+     */
+    public int getProxyPort() {
+        return this.proxyPort;
+    }
+    
+    /**
+     * Set the IP for the proxy server.
+     * 
+     * @param ip The IP for the proxy server.
+     */
+    public void setProxyIp(String ip) {
+        this.proxyIp = ip;
+    }
+    
+    /**
+     * Get the IP for the proxy server.
+     * 
+     * @return The IP or the empty string if no proxy server is set.
+     */
+    public String getProxyIp() {
+        return this.proxyIp;
     }
 
     /**
