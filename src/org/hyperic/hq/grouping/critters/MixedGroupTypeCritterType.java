@@ -152,7 +152,8 @@ public class MixedGroupTypeCritterType extends BaseCritterType {
             return new StringBuilder()
                 .append("JOIN EAM_RESOURCE_GROUP @grp@ on ")
                 .append(resourceAlias)
-                .append(".instance_id = @grp@.id ").toString();
+                .append(".instance_id = @grp@.id ")
+                .append("AND @grp@.grouptype in (:@groupTypes@)").toString();
         }
 
         public boolean equals(Object other) {
