@@ -1893,6 +1893,8 @@
     <plugin type="log_track"
             class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>    
 
+    <property name="VERSION_FILE" value="enotimpl.dll"/>
+
     <properties>
        <property name="version"
                  description="Exchange Version"/>
@@ -1926,10 +1928,14 @@
   <server name="Exchange"
           version="2000"
           include="5.5">
+
+    <property name="VERSION_FILE" value="peexch60.dll"/>
   </server>
 
   <server name="Exchange"
           version="2003"
           include="2000">
+
+    <property name="VERSION_FILE" value="masperf.dll"/>
   </server>
 </plugin>
