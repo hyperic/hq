@@ -236,7 +236,10 @@
     </c:otherwise>
     </c:choose>
     <span style="padding-left: 4px; padding-right: 4px;">
-      <html:checkbox property="own" value="true"/> <fmt:message key="resource.hub.search.label.Owned"/>
+      <html:checkbox property="own" value="true"/>
+      <fmt:message key="resource.hub.search.label.Owned">
+        <fmt:param><c:out value="${sessionScope.webUser.name}"/></fmt:param>
+      </fmt:message>
     </span>
     <span style="background-color: #E4F2E4; padding: 6px;">
     <fmt:message key="resource.hub.search.label.Match"/>
