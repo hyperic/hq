@@ -28,6 +28,7 @@
       <entry key="build.number" value="${build}"/>
       <entry key="build.date" type="date" pattern="MMM dd, yyyy" value="now"/>
       <entry key="build.comment" value="${release.comment}"/>
+      <entry key="hq.isDev" value="${hq.isDev}"/>
     </propertyfile>
   </target>
 

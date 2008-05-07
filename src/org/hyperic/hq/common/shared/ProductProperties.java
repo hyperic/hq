@@ -39,6 +39,7 @@ public class ProductProperties {
     private static final String PROP_COMMENT    = "build.comment";
     private static final String PROP_BUILD_DATE = "build.date";
     private static final String PROP_FLAVOUR    = "hq.flavour";
+    private static final String PROP_ISDEV      = "hq.isDev";
 
     private static final Log  _log = 
         LogFactory.getLog(ProductProperties.class);
@@ -66,6 +67,10 @@ public class ProductProperties {
 
     public static String getFlavour() {
         return getRequiredProperty(PROP_FLAVOUR);
+    }
+
+    public static boolean isDev() {
+        return Boolean.valueOf(getRequiredProperty(PROP_ISDEV)).booleanValue();
     }
 
     private static void load(String name, boolean required) {

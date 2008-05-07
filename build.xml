@@ -175,7 +175,7 @@
   <target name="init-props" unless="init-props.notrequired">
      <property file="${version.properties}" />
      <property name="release.comment" value="Development Build"/>
-
+     <property name="hq.isDev" value="true"/>
      <echo>${release.comment}, version: ${version}, build number: ${build}</echo>
      <property name="init-props.notrequired" value="true"/>
   </target>
