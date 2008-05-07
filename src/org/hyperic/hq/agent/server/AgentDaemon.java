@@ -424,6 +424,14 @@ public class AgentDaemon
         this.listener = new CommandListener(this.dispatcher);
         defListener   = new DefaultConnectionListener(cfg);
         this.setConnectionListener(defListener);
+        
+        // set the lather proxy host and port if applicable
+        if (cfg.isProxyServerSet()) {
+            System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, 
+                    cfg.getProxyIp());
+            System.setProperty(AgentConfig.PROP_LATHER_PROXYPORT, 
+                    String.valueOf(cfg.getProxyPort()));                
+        }
 
         // Server Handlers
         this.serverHandlers = new Vector();
