@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -86,15 +86,15 @@
  <script  type="text/javascript">
   var help = "<hq:help/>";
 </script>
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<table width="100%" cellspacing="0" cellpadding="0" style="border: 0px;">
   <tr>
     <td colspan="4">
 
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 0px; padding-bottom: 10px;">
   <tr class="PageTitleBar"> 
     <td width="5"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td width="15"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
-    <td width="85%" colspan="2" nowrap>
+    <td colspan="2" nowrap>
 <c:choose>
   <c:when test="${not empty titleKey}">
     <fmt:message key="${titleKey}">
@@ -116,19 +116,17 @@
     </td>
 <c:choose>
   <c:when test="${not empty titleBgStyle && not empty titleImg}">
-    <td width="14%"><html:img page="/images/${titleImg}" width="202" height="26" alt="" border="0" style="float: right;"/></td>
-    <td><html:img page="/images/spacer.gif" width="20" height="20" alt="" border="0"/></td>
+    <td width="15%" style="padding-right: 20px;"><html:img page="/images/${titleImg}" width="202" height="26" alt="" border="0" style="float: right;"/></td>
   </c:when>
   <c:otherwise>
-    <td width="33%"><html:img page="/images/spacer.gif" width="1" height="26" alt="" border="0"/></td>
-    <td><html:img page="/images/spacer.gif" width="20" height="20" alt="" border="0"/></td>
+    <td width="10%" style="padding-right: 20px;">&nbsp;</td>
   </c:otherwise>
 </c:choose>
   </tr>
   <tr>
-    <td width="5" rowspan="99" class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
-    <td valign="top" align="left" rowspan="99"></td>
-    <td colspan="4"><html:img page="/images/spacer.gif" width="1" height="10" alt="" border="0"/></td>
+    <td rowspan="99" class="PageTitle">&nbsp;</td>
+    <td valign="top" align="left" rowspan="99">&nbsp;</td>
+    <td colspan="3">&nbsp;</td>
   </tr>
 <c:if test="${not empty resource || not empty linkUrl || not empty showSearch}">
   <tr valign="top"> 
@@ -252,12 +250,11 @@
     </td>
     </c:when>
     <c:otherwise>
-    <td class="PageTitleSmallText">&nbsp;</td>
-    <td>&nbsp;</td>
+    <td class="PageTitleSmallText" colspan="2">&nbsp;</td>
     </c:otherwise>
   </c:choose>
 
-  <td colspan="2" style="padding-top:4px;padding-bottom:4px;">
+  <td style="padding: 4px;">
     <c:if test="${not empty linkUrl}">
       <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan" border="0"/></a></span>
     <div style="clear: both"></div>
@@ -272,9 +269,6 @@
     </td>
   </tr>
 </c:if>
-  <tr> 
-    <td colspan="4"><html:img page="/images/spacer.gif" height="10" alt="" border="0"/></td>
-  </tr>
 </table>
 
     </td>
