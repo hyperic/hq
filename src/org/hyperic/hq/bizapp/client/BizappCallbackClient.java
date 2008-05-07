@@ -26,6 +26,7 @@
 package org.hyperic.hq.bizapp.client;
 
 import org.hyperic.lather.NullLatherValue;
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.hq.bizapp.shared.lather.RegisterAgent_args;
@@ -38,8 +39,17 @@ import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
 public class BizappCallbackClient 
     extends AgentCallbackClient
 {
-    public BizappCallbackClient(ProviderFetcher fetcher){
+    public BizappCallbackClient(ProviderFetcher fetcher, AgentConfig config){
         super(fetcher);
+        
+        // configure lather proxy settings
+        if (config.isProxyServerSet()) {
+            System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, 
+                               config.getProxyIp());
+            System.setProperty(AgentConfig.PROP_LATHER_PROXYPORT, 
+                               String.valueOf(config.getProxyPort()));
+        }
+        
     }
 
     public void bizappPing()
