@@ -208,10 +208,12 @@
 
       <!--  SEARCH TOOLBAR CONTENTS -->
     <!--  SEARCH TOOLBAR CONTENTS -->
-    <span style="padding-left: 4px;">
+      <div style="position: absolute; width: 50px;font-size: 11px; font-weight: 700; ">
       <fmt:message key="resource.hub.Search"/>
+      </div>
+      <div style="width: 600px; padding-left: 50px;">
+      <div>
       <html:text property="keywords" size="15" maxlength="40" onfocus="ClearText(this)" value="${initSearchVal}"/>
-    </span>
     <c:choose>
     <c:when test="${empty allTypesKey}">
       <html:hidden property="ft" value=""/>&nbsp;
@@ -233,18 +235,24 @@
       </c:if>
     </c:otherwise>
     </c:choose>
-    <span style="padding-left: 4px; padding-right: 4px;">
+    </div>
+    <div style="padding: 4px;">
+      <html:checkbox property="unavail" value="true"/>
+      <fmt:message key="resource.hub.legend.unavailable"/>
+    <span style="padding: 6px;">
       <html:checkbox property="own" value="true"/>
       <fmt:message key="resource.hub.search.label.Owned">
         <fmt:param><c:out value="${sessionScope.webUser.name}"/></fmt:param>
       </fmt:message>
     </span>
-    <span style="background-color: #E4F2E4; padding: 6px;">
+    <span style="background-color: #D5D8DE; padding: 6px;">
     <fmt:message key="resource.hub.search.label.Match"/>
     <html:radio property="any" value="true"/> <fmt:message key="any"/>
     <html:radio property="any" value="false"/> <fmt:message key="all"/>
     <html:image page="/images/4.0/icons/accept.png" property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
     </span>
+    </div>
+    </div>
 
       <!--  /  -->
     </td>

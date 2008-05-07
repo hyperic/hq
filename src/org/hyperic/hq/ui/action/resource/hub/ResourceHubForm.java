@@ -72,6 +72,7 @@ public class ResourceHubForm extends BaseValidatorForm {
     private String   _fg;      // The group to filter by
     private boolean  _any;     // Meet any criteria (vs. all)
     private boolean  _own;
+    private boolean  _unavail;
 
     private ImageButtonBean _group = null;
     
@@ -196,6 +197,14 @@ public class ResourceHubForm extends BaseValidatorForm {
         _own = own;
     }
 
+    public boolean isUnavail() {
+        return _unavail;
+    }
+
+    public void setUnavail(boolean unavail) {
+        _unavail = unavail;
+    }
+
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         setDefaults();
@@ -213,6 +222,7 @@ public class ResourceHubForm extends BaseValidatorForm {
         _fg = null;
         _any = false;
         _own = false;
+        _unavail = false;
     }
 
     public String toString() {
@@ -239,7 +249,9 @@ public class ResourceHubForm extends BaseValidatorForm {
          .append(" any=")
          .append(_any)
          .append(" own=")
-         .append(_own);
+         .append(_own)
+         .append(" unavail=")
+         .append(_unavail);
 
         return s.toString();
     }

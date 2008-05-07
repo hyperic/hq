@@ -158,6 +158,7 @@ import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.GroupException;
+import org.hyperic.hq.grouping.critters.AvailabilityCritterType;
 import org.hyperic.hq.grouping.critters.CompatGroupTypeCritterType;
 import org.hyperic.hq.grouping.critters.GroupMembershipCritterType;
 import org.hyperic.hq.grouping.critters.MixedGroupTypeCritterType;
@@ -170,6 +171,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.AvailabilityType;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
@@ -2579,7 +2581,8 @@ public class AppdefBossEJBImpl
     public PageList search(int sessionId, int appdefTypeId, String searchFor,
                            AppdefEntityTypeID appdefResType, Integer groupId,
                            int[] groupSubType, boolean matchAny, 
-                           boolean matchOwn, PageControl pc)
+                           boolean matchOwn, boolean matchUnavail,
+                           PageControl pc)
         throws PermissionException, SessionException, PatternSyntaxException
     {
         int grpEntId = APPDEF_GROUP_TYPE_UNDEFINED;
@@ -2595,27 +2598,16 @@ public class AppdefBossEJBImpl
         if (groupSubType != null) {
             appdefTypeId = AppdefEntityConstants.APPDEF_TYPE_GROUP;
         }
-        return findInventoryFromCBG(sessionId, appdefTypeId, appdefResType,
-                                    grpEntId, grpId, searchFor, groupSubType,
-                                    matchAny, matchOwn, pc);
-    }
-    
-    private PageList findInventoryFromCBG(int sessionId, int appdefTypeId,
-                                          AppdefEntityTypeID appdefResType,
-                                          int grpEntId, AppdefEntityID grpId,
-                                          String resourceName, int[] groupType,
-                                          boolean matchAny, boolean matchOwn,
-                                          PageControl pc)
-        throws PermissionException, SessionException, PatternSyntaxException
-    {
+        
         AuthzSubject subject = manager.getSubject(sessionId);
         PageList res = new PageList();
-
+        
         CritterTranslator trans       = new CritterTranslator();
         CritterTranslationContext ctx = new CritterTranslationContext(subject);
         CritterList cList = getCritterList(subject, matchAny,appdefResType,
-                                           resourceName, grpId, grpEntId,
-                                           groupType, appdefTypeId, matchOwn);
+                                           searchFor, grpId, grpEntId,
+                                           groupSubType, appdefTypeId, matchOwn,
+                                           matchUnavail);
         PageList children = trans.translate(ctx, cList, pc);
         res.ensureCapacity(children.size());
         res.setTotalSize(children.getTotalSize());
@@ -2642,7 +2634,7 @@ public class AppdefBossEJBImpl
                                        String resourceName,
                                        AppdefEntityID grpId, int grpEntId,
                                        int[] groupTypes, int appdefTypeId,
-                                       boolean matchOwn)
+                                       boolean matchOwn, boolean matchUnavail)
         throws PatternSyntaxException
     {
         Critter tmp;
@@ -2676,6 +2668,9 @@ public class AppdefBossEJBImpl
         }
         if (matchOwn) {
             critters.add(getOwnCritter(subj));
+        }
+        if (matchUnavail) {
+            critters.add(getUnavailCritter());
         }
         return new CritterList(critters, matchAny);
     }
@@ -2758,6 +2753,11 @@ public class AppdefBossEJBImpl
     private Critter getOwnCritter(AuthzSubject subj) {
         OwnedCritterType ct = new OwnedCritterType();
         return ct.newInstance(subj);
+    }
+    
+    private Critter getUnavailCritter() {
+        AvailabilityCritterType ct = new AvailabilityCritterType();
+        return ct.newInstance(AvailabilityType.AVAIL_DOWN);
     }
 
     /**

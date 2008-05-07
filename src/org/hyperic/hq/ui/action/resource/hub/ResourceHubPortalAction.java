@@ -326,7 +326,7 @@ public class ResourceHubPortalAction extends BaseAction {
         resources = appdefBoss.search(sessionId, entityType, resourceName,
                                       aetid, gid, groupSubtype, 
                                       hubForm.isAny(), hubForm.isOwn(),
-                                      pc);
+                                      hubForm.isUnavail(), pc);
 
         watch.markTimeEnd("findCompatInventory");
 
