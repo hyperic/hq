@@ -49,7 +49,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
     private static final Log _log = LogFactory.getLog(AgentTransportLifecycleImpl.class);
     
     private final AgentDaemon _agent;
-    private final Properties _bootProperties;
+    private final AgentConfig _config;
     private final AgentStorageProvider _storageProvider;
     private final Map _serviceInterfaceName2ServiceInterface;
     private final Map _serviceInterface2ServiceImpl;
@@ -59,7 +59,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
                                        AgentConfig bootConfig, 
                                        AgentStorageProvider storageProvider) {
         _agent = agent;
-        _bootProperties = bootConfig.getBootProperties();
+        _config = bootConfig;
         _storageProvider = storageProvider;
         _serviceInterfaceName2ServiceInterface = new HashMap();
         _serviceInterface2ServiceImpl = new HashMap();
@@ -84,7 +84,9 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
         // Boot properties override stored values        
         ProviderInfo provider = CommandsAPIInfo.getProvider(_storageProvider);
         
-        boolean isNewTransport = isNewTransport(_bootProperties, provider);
+        Properties bootProperties = _config.getBootProperties();
+        
+        boolean isNewTransport = isNewTransport(bootProperties, provider);
         
         if (!isNewTransport) {
             _log.info("Agent is not using new transport.");
@@ -95,19 +97,19 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
         		  "Looking for properties to start the new transport.");
         
         boolean isUnidirectionalPropertySet = 
-            isUnidirectionalPropertySet(_bootProperties, provider);
+            isUnidirectionalPropertySet(bootProperties, provider);
         
         _log.info("Unidirectional property set="+isUnidirectionalPropertySet);
         
         boolean unidirectional = false;
         
         if (isUnidirectionalPropertySet) {
-            unidirectional = isUnidirectional(_bootProperties, provider);
+            unidirectional = isUnidirectional(bootProperties, provider);
             
             _log.info("Unidirectional="+unidirectional);
         }
         
-        String host = getHost(_bootProperties, provider);
+        String host = getHost(bootProperties, provider);
         
         if (host == null) {
             _log.info("Host is not currently set.");
@@ -115,7 +117,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
             _log.info("Host="+host);
         }
         
-        int unidirectionalPort = getUndirectionalPort(_bootProperties, provider);
+        int unidirectionalPort = getUndirectionalPort(bootProperties, provider);
         
         if (unidirectionalPort == -1) {
             _log.info("Unidirectional port is not currently set.");
@@ -132,7 +134,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
             _log.info("Agent token="+agentToken);                
         }
         
-        long pollingFrequency = getPollingFrequency(_bootProperties);
+        long pollingFrequency = getPollingFrequency(bootProperties);
         
         _log.info("Polling frequency="+pollingFrequency);
         
@@ -160,6 +162,14 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
             InetSocketAddress pollerBindAddr = 
                 new InetSocketAddress(host, unidirectionalPort);
             
+            if (_config.isProxyServerSet()) {                
+                _log.info("Configuring proxy host and port: host="+
+                         _config.getProxyIp()+"; port="+_config.getProxyPort());
+                
+                System.setProperty("https.proxyHost", _config.getProxyIp());
+                System.setProperty("https.proxyPort", String.valueOf(_config.getProxyPort()));
+            }            
+            
             _agentTransport = 
                 new AgentTransport(pollerBindAddr, 
                                    "transport/ServerInvokerServlet", 
@@ -172,6 +182,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
             _log.info("Setting up bidirectional transport");
             // TODO need to implement bidirectional transport and return 
             // an agent transport instead of null
+            // do we need to set up a proxy server for http or https protocol?
             _agentTransport = null;
         }
         
@@ -208,8 +219,9 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
      */
     public void handleNotification(String msgClass, String msg) {
         ProviderInfo provider = CommandsAPIInfo.getProvider(_storageProvider);
+        Properties bootProperties = _config.getBootProperties();
         
-        if (!isNewTransport(_bootProperties, provider)) {
+        if (!isNewTransport(bootProperties, provider)) {
             return;
         }
         
@@ -226,7 +238,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
         
         // If the agent transport is still not started and we are using 
         // the new transport, then we have a problem!
-        if (_agentTransport == null && isUnidirectional(_bootProperties, provider)) {            
+        if (_agentTransport == null && isUnidirectional(bootProperties, provider)) {            
             _log.error("Failed to start agent transport after agent setup");                
             
             return;
