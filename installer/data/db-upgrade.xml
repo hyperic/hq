@@ -8875,7 +8875,7 @@ has already been defined.
                       column="ID" columnType="INTEGER"/>
     <schema-directSQL>
       <statement targetDB="mysql">
-        set foreign_key_checks=0;
+        set foreign_key_checks=0
       </statement>
       <statement targetDB="mysql">
         create table EAM_RES_GRP_RES_MAP_TMP (
@@ -8883,24 +8883,24 @@ has already been defined.
            resource_group_id int(11) not null,
            id int(11) default null AUTO_INCREMENT,
            primary key (ID)
-        );
+        )
       </statement>
       <statement targetDB="mysql">
         insert into EAM_RES_GRP_RES_MAP_TMP (resource_id, resource_group_id) 
-        select resource_id, resource_group_id from EAM_RES_GRP_RES_MAP;
+        select resource_id, resource_group_id from EAM_RES_GRP_RES_MAP
       </statement>
       <statement targetDB="mysql">
-        delete from EAM_RES_GRP_RES_MAP;
+        delete from EAM_RES_GRP_RES_MAP
       </statement>
       <statement targetDB="mysql">
         insert into EAM_RES_GRP_RES_MAP (resource_id, resource_group_id, id) 
-        select resource_id, resource_group_id, id from EAM_RES_GRP_RES_MAP_TMP;
+        select resource_id, resource_group_id, id from EAM_RES_GRP_RES_MAP_TMP
       </statement>
       <statement targetDB="mysql">
-        drop table EAM_RES_GRP_RES_MAP_TMP;
+        drop table EAM_RES_GRP_RES_MAP_TMP
       </statement>
       <statement targetDB="mysql">
-        set foreign_key_checks=1;
+        set foreign_key_checks=1
       </statement>
       <statement targetDB="oracle">
           update EAM_RES_GRP_RES_MAP set ID = 
@@ -8918,8 +8918,14 @@ has already been defined.
                   where EAM_RES_GRP_RES_MAP.resource_group_id = m.resource_group_id 
                     and EAM_RES_GRP_RES_MAP.resource_id > m.resource_id)
       </statement>
-      <statement>
-        alter table EAM_RES_GRP_RES_MAP drop constraint EAM_RES_GRP_RES_MAP_PKEY;
+      <statement targetDB="mysql">
+        alter table EAM_RES_GRP_RES_MAP drop primary key
+      </statement>
+      <statement targetDB="oracle">
+        alter table EAM_RES_GRP_RES_MAP drop primary key
+      </statement>
+      <statement targetDB="postgresql">
+        alter table EAM_RES_GRP_RES_MAP drop constraint EAM_RES_GRP_RES_MAP_PKEY
       </statement>
       <statement>
         alter table EAM_RES_GRP_RES_MAP add primary key (ID)
