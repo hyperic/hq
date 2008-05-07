@@ -195,6 +195,11 @@ public class AgentClient {
             else
                 SYSTEM_OUT.print("Server port:       ");
             SYSTEM_OUT.println(url.getPort());
+            
+            if (pInfo.isNewTransport()) {
+                SYSTEM_OUT.println("Using new transport; unidirectional="+
+                                  pInfo.isUnidirectional());
+            }
         } catch(Exception exc){
             SYSTEM_OUT.println("Unable to parse provider info (" + 
                                address + "): " + exc.getMessage());
@@ -202,6 +207,13 @@ public class AgentClient {
         
         SYSTEM_OUT.println("Agent listen port: " + 
                            this.config.getListenPort());
+        
+        
+        if (this.config.isProxyServerSet()) {
+            SYSTEM_OUT.println("Proxy server IP address: "+this.config.getProxyIp());
+            SYSTEM_OUT.println("Proxy server port: "+this.config.getProxyPort());
+        }
+        
         return 0;
     }
 
@@ -388,7 +400,7 @@ public class AgentClient {
 
         fetcher = new StaticProviderFetcher(new ProviderInfo(provider, 
                                                              "no-auth"));
-        res = new BizappCallbackClient(fetcher);
+        res = new BizappCallbackClient(fetcher, config);
         res.bizappPing();
         return res;
     }
@@ -606,8 +618,18 @@ public class AgentClient {
                     unidirectionalPort = this.askIntQuestion("What is the " + PRODUCT +
                                        " server SSL port for unidirectional communications",
                                                    7443, QPROP_SSLPORT);
+                    
+                    // The unidirectional transport is not hosted via the 
+                    // JBossLather servlet, but this is ok, since the 
+                    // undirectional servlet is in the same container as 
+                    // the JBossLather servlet. We are just testing connectivity 
+                    // to the servlet container here.
+                    String unidirectionalProvider = 
+                        AgentCallbackClient.getDefaultProviderURL(host,
+                                                        unidirectionalPort,
+                                                        true);
                     try {
-                        getConnection(provider, true);
+                        getConnection(unidirectionalProvider, true);
                     } catch (AgentCallbackClientException e) {
                         continue;
                     }
@@ -803,15 +825,15 @@ public class AgentClient {
         throws AgentInvokeException
     {
         try {
-            DataInputStream dIs;
-            Socket conn;
-
-            conn = startupSock.accept();
-            dIs  = new DataInputStream(conn.getInputStream());
+            
+            Socket conn = startupSock.accept();
+            DataInputStream dIs  = new DataInputStream(conn.getInputStream());
+            
             if(dIs.readInt() != 1){
                 throw new AgentInvokeException("Agent reported an error " +
                                                "while starting up");
-            }
+            }                
+            
         } catch(InterruptedIOException exc){
             throw new AgentInvokeException("Timed out waiting for Agent " +
                                            "to report startup success");
@@ -820,13 +842,14 @@ public class AgentClient {
         } finally {
             try { startupSock.close(); } catch(IOException exc){}
         }
-
+        
         try {
             this.agtCommands.ping();
         } catch(Exception exc){
             throw new AgentInvokeException("Unable to ping agent: " +
                                            exc.getMessage());
-        }
+        }            
+
     }
 
     private void nukeAgentAndDie(){
@@ -1080,14 +1103,17 @@ public class AgentClient {
         }
 
         SYSTEM_OUT.println("Agent successfully started");
-        if(providerInfo == null){
+        
+        // Only force a setup if we are running the agent in a new process 
+        // (not in Java Service Wrapper mode)
+        if(providerInfo == null && this.isProcess){
             SYSTEM_OUT.println();
             return FORCE_SETUP;
+        } else {
+            redirectOutputs(); //win32
+            return 0;            
         }
 
-        redirectOutputs(); //win32
-
-        return 0;
     }
 
     private static int getUseTime(String val){
