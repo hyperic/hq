@@ -801,10 +801,10 @@
   </target>
 
   <target name="deploy-ui" description="" depends="compile-ui">
-
+    <echo>deploying files from ${hq.home}</echo>
     <!-- Copy updated assets -->
     <copy todir="${jboss.deploy.war.dir}" >
-      <fileset dir="${webapp.home}">
+      <fileset dir="${hq.home}/web">
         <include name="**/*.js"/>
         <include name="**/*.xml"/>
         <include name="**/*.css"/>
@@ -821,9 +821,9 @@
       </fileset>
     </copy>
 
-    <jar file="${jboss.deploy.war.dir}/WEB-INF/lib/hq-ui.jar" basedir="${build.dir}/classes" update="true">
+    <jar file="${jboss.deploy.war.dir}/WEB-INF/lib/hq-ui.jar" basedir="${hq.home}/build/classes" update="true">
       <include name="org/hyperic/hq/ui/**" />
-      <fileset dir="${basedir}/src">
+      <fileset dir="${hq.home}/src">
         <include name="org/hyperic/hq/ui/**/*.html" />
         <include name="org/hyperic/hq/ui/**/*.page" />
         <include name="org/hyperic/hq/ui/**/*.properties" />
@@ -834,9 +834,9 @@
       <exclude name="org/hyperic/hq/ui/tapestry/**" />
     </jar>
 
-    <jar file="${jboss.deploy.war.dir}/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${build.dir}/classes" update="true">
+    <jar file="${jboss.deploy.war.dir}/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${hq.home}/build/classes" update="true">
       <include name="org/hyperic/ui/tapestry/**" />
-      <fileset dir="${basedir}/src">
+      <fileset dir="${hq.home}/src">
         <include name="org/hyperic/ui/tapestry/**/*.html" />
         <include name="org/hyperic/ui/tapestry/**/*.page" />
         <include name="org/hyperic/ui/tapestry/**/*.jwc" />
