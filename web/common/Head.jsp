@@ -49,3 +49,4 @@
 <script src="<html:rewrite page='/js/diagram.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/functions.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/lib/lib.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/timeplot/api/1.0/timeplot-api.js?local'/>" type="text/javascript"></script>
