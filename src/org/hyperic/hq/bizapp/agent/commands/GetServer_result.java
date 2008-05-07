@@ -34,6 +34,9 @@ public class GetServer_result
 {
     private static final String PROP_SERVER     = "server";
     private static final String PROP_AGENTTOKEN = "agentToken";
+    private static final String PROP_ISNEWTRANSPORT = "isNewTransport";
+    private static final String PROP_UNIDIRECTIONAL = "unidirectional";
+    private static final String PROP_UNIDIRECTIONAL_PORT = "unidirectionalPort";
 
     public GetServer_result(){
         super();
@@ -47,6 +50,12 @@ public class GetServer_result
         if(provider != null){
             this.setValue(PROP_SERVER, provider.getProviderAddress());
             this.setValue(PROP_AGENTTOKEN, provider.getAgentToken());
+            this.setValue(PROP_ISNEWTRANSPORT, String.valueOf(provider.isNewTransport()));
+            
+            if (provider.isNewTransport()) {
+                this.setValue(PROP_UNIDIRECTIONAL, String.valueOf(provider.isUnidirectional()));
+                this.setValue(PROP_UNIDIRECTIONAL_PORT, String.valueOf(provider.getUnidirectionalPort()));
+            }
         } 
     }
 
@@ -63,6 +72,21 @@ public class GetServer_result
             return null;
         }
 
-        return new ProviderInfo(server, agentToken);
-    }
+        ProviderInfo providerInfo = new ProviderInfo(server, agentToken);
+        
+        boolean isNewTransport = 
+            Boolean.valueOf(args.getValue(PROP_ISNEWTRANSPORT)).booleanValue();
+        
+        if (isNewTransport) {
+            boolean unidirectional = 
+                Boolean.valueOf(args.getValue(PROP_UNIDIRECTIONAL)).booleanValue();
+            int unidirectionalPort = 
+                Integer.valueOf(args.getValue(PROP_UNIDIRECTIONAL_PORT)).intValue();
+            
+            providerInfo.setNewTransport(unidirectional, unidirectionalPort);            
+        }
+        
+        return providerInfo;
+    }    
+    
 }
