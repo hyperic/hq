@@ -51,7 +51,7 @@ class CageController
         ResourceGroup g = resourceHelper.findGroup(r.instanceId) 
 
         def sess        = DAOFactory.getDAOFactory().currentSession
-        def ctx         = new CritterTranslationContext()
+        def ctx         = new CritterTranslationContext(user)
         def trans       = new CritterTranslator()
         def clist       = g.critterList
         def isAny       = clist.isAny()
@@ -221,7 +221,7 @@ class CageController
     private List getResources(CritterList clist) {
         def trans     = new CritterTranslator()
         def sess      = DAOFactory.getDAOFactory().currentSession
-        def ctx       = new CritterTranslationContext(sess, Util.getHQDialect())
+        def ctx       = new CritterTranslationContext(user)
         
         trans.translate(ctx, clist).list()
     }
