@@ -39,6 +39,7 @@ import org.hyperic.ui.tapestry.components.navigation.NavigationMenu;
  *
  */
 public abstract class Layout1Col extends BaseLayout{
+    
     @Parameter(name ="styleSheets")
     public abstract List<IAsset> getStyleSheets();
     public abstract void setStyleSheets(List<IAsset> sheets);

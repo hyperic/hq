@@ -23,12 +23,11 @@
  * USA.
  */
 package org.hyperic.ui.tapestry.components.layout;
-import org.hyperic.ui.tapestry.components.BaseComponent;
 
 /**
- * The single column liquid layout
+ * The 2 column liquid layout
  *
  */
-public abstract class Layout2Col extends BaseComponent{
+public abstract class Layout2Col extends Layout1Col {
 
 }

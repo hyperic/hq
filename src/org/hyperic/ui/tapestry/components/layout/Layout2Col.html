@@ -20,8 +20,10 @@
 
 <div id="wrapper">
 	<div id="content">
-	    <span jwcid="@RenderBody">Page content goes here.</span>
-	    <!-- TODO put the layout delegates here-->
+        
+        <span jwcid="@RenderBlock" block="ognl:leftBlock"/>
+	    <span jwcid="@RenderBlock" block="ognl:centerBlock"/>
+	    
 	</div>
 </div>
 </div>
