@@ -735,6 +735,7 @@
         <include name="standard.jar" />
         <include name="struts.jar" />               
         <include name="struts-el.jar" />
+        <include name="urlrewrite-3.1.0.jar" />
       </fileset>
     </copy>
 

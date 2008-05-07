@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE urlrewrite PUBLIC "-//tuckey.org//DTD UrlRewrite 3.1//EN"
+        "http://tuckey.org/res/dtds/urlrewrite3.1.dtd">
+
+<!--
+
+    Configuration file for UrlRewriteFilter
+    http://tuckey.org/urlrewrite/
+
+-->
+<urlrewrite>
+    <rule>
+        <from>^/timeplot/api/1.0/(.*)</from>
+        <to type="redirect">/js/timeplot/api/1.0/$1</to>
+    </rule>
+    <rule>
+        <from>^/timeline/api-2.0/(.*)</from>
+        <to type="redirect">/js/timeline/api-2.0/$1</to>
+    </rule>
+    <rule>
+        <from>^/ajax/api-2.0/(.*)</from>
+        <to type="redirect">/js/ajax/api-2.0/$1</to>
+    </rule>
+</urlrewrite>
