@@ -1938,4 +1938,11 @@
 
     <property name="VERSION_FILE" value="masperf.dll"/>
   </server>
+
+  <server name="Exchange"
+          version="2007"
+          include="2003">
+
+    <property name="VERSION_FILE" value="offfilt.dll"/>
+  </server>
 </plugin>
