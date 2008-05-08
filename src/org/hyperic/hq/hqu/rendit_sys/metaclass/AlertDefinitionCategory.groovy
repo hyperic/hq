@@ -9,8 +9,6 @@ class AlertDefinitionCategory {
 
     static void setEscalation(AlertDefinition d, AuthzSubject s,
                               Escalation e) {
-        AlertDefinitionManagerEJBImpl.one.setEscalation(s.authzSubjectValue,
-                                                        d.getId(),
-                                                        e.getId())
+        AlertDefinitionManagerEJBImpl.one.setEscalation(s, d.getId(), e.getId())
     }
 }
