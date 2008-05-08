@@ -933,6 +933,7 @@
   <metrics name="Exchange 5.5" include="exchange-is,exchange-mbox"/>
   <metrics name="Exchange 2000" include="exchange-is,exchange-mbox"/>
   <metrics name="Exchange 2003" include="exchange-is,exchange-mbox"/>
+  <metrics name="Exchange 2007" include="exchange-is,exchange-mbox"/>
 
   <metrics name="Exchange 5.5 POP3" include="POP3_V5"/>
   <metrics name="Exchange 2000 POP3" include="POP3_V5"/>
@@ -951,6 +952,7 @@
   <metrics name="Exchange 5.5 Web" include="Web"/>
   <metrics name="Exchange 2000 Web" include="Web"/>
   <metrics name="Exchange 2003 Web" include="Web"/>
+  <metrics name="Exchange 2007 Web" include="Web"/>
 
   <server name="Exchange"
           description="Mail Server"
@@ -1015,10 +1017,48 @@
     <property name="VERSION_FILE" value="masperf.dll"/>
   </server>
 
-  <server name="Exchange"
-          version="2007"
-          include="2003">
+  <!-- not using include="2003":
+       No MTA service
+       New Transport service
+       Service name changes for EVENT_LOG_SOURCE_FILTER
+  -->
+  <server name="Exchange" version="2007">
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="ExchangeDetector"/>
+
+    <property name="EVENT_LOG_SOURCE_FILTER"
+              value="MSExchange"/>
+
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>    
 
     <property name="VERSION_FILE" value="offfilt.dll"/>
+
+    <properties>
+       <property name="version"
+                 description="Exchange Version"/>
+       <property name="build"
+                 description="Build Number"/>
+    </properties>
+
+    <service name="POP3" internal="true">
+      <plugin type="measurement"/>
+      <plugin type="log_track"/>
+      <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangePOP3"/>
+    </service>
+
+    <service name="IMAP4" internal="true">
+      <plugin type="measurement"/>
+      <plugin type="log_track"/>
+      <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeIMAP4"/>
+    </service>
+
+    <service name="Web">
+      <plugin type="measurement"/>
+    </service>
   </server>
 </plugin>
