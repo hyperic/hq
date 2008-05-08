@@ -36,6 +36,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
@@ -59,6 +60,7 @@ public class ExchangeDetector
     private static final String EXCHANGE_KEY =
         "SOFTWARE\\Microsoft\\Exchange\\Setup";
 
+    private static final String WEBMAIL = "MSExchange Web Mail";
     private static final String EXCHANGE_IS = "MSExchangeIS";
 
     private static final Log log =
@@ -154,7 +156,13 @@ public class ExchangeDetector
             services.add(createService(name));
         }
 
-        services.add(createService(WEB_NAME));
+        try {
+            String[] web = Pdh.getInstances(WEBMAIL);
+            if (web.length != 0) {
+                services.add(createService(WEB_NAME));
+            } //else not enabled if no counters
+        } catch (Win32Exception e) {
+        }
 
         return services;
     }
