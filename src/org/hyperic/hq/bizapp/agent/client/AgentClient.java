@@ -900,7 +900,7 @@ public class AgentClient {
 
     private String getPdkClasspath(Properties props) {
         String pdkLib =
-            props.getProperty(AgentConfig.PROP_PDK_LIB_DIR[0]);
+            props.getProperty("agent.pdkLibDir", "./pdk/lib");
         File dir = new File(pdkLib);
         if (!dir.exists()) {
             throw new IllegalArgumentException(pdkLib +
@@ -1127,19 +1127,16 @@ public class AgentClient {
     private static AgentClient initializeAgent(){
         SecureAgentConnection conn;
         AgentConfig cfg;
-        String connIp, listenIp, authToken, propFile, bundleFile;
+        String connIp, listenIp, authToken, propFile;
         propFile =
             System.getProperty(AgentConfig.PROP_PROPFILE,
                                AgentConfig.DEFAULT_PROPFILE);
-        bundleFile =
-            System.getProperty(AgentConfig.BUNDLE_PROPFILE,
-                    AgentConfig.DEFAULT_BUNDLEFILE);
 
         //console appender until we have configured logging.
         BasicConfigurator.configure();
 
         try {
-            cfg = AgentConfig.newInstance(propFile, bundleFile);
+            cfg = AgentConfig.newInstance(propFile);
         } catch(IOException exc){
             SYSTEM_ERR.println("Error: " + exc);
             System.exit(-1);
@@ -1330,28 +1327,5 @@ public class AgentClient {
      */
     private static String normalizeClassPath(String s) {
         return StringUtil.replace(s, ":", File.pathSeparator);
-    }
-    
-    public static int start() {
-        AgentClient client = initializeAgent();
-        int errVal = -1;
-        try {
-            errVal = client.cmdStart(false);
-        } catch (Exception e) {
-            SYSTEM_ERR.println("AgentClient failed to start the agent: " + e);
-        }
-        return errVal;
-    }
-    
-    public static int stop() {
-        AgentClient client = initializeAgent();
-        int errVal = 0;
-        try {
-            client.cmdDie(30);
-        } catch (Exception e) {
-            SYSTEM_ERR.println("AgentClient failed to stop the agent: " + e);
-            errVal = -1;
-        }
-        return errVal;
     }
 }

@@ -120,8 +120,8 @@ public class AgentDaemon
         }
     }
 
-    private static File[] getLibJars(String dir) {
-        File[] jars = new File(dir).listFiles(new FileFilter() {
+    private static File[] getLibJars() {
+        File[] jars = new File("lib/handlers").listFiles(new FileFilter() {
                 public boolean accept(File file) {
                     String name = file.getName();
                     
@@ -388,9 +388,7 @@ public class AgentDaemon
         }
 
         //add lib/handlers/lib/*.jar classpath for handlers only
-        Properties bootProps = cfg.getBootProperties();
-        String handlersLibDir = bootProps.getProperty(AgentConfig.PROP_HANDLERS_LIB_DIR[0]);
-        File handlersLib = new File(handlersLibDir);
+        File handlersLib = new File("lib/handlers/lib");
         if (handlersLib.exists()) {
             this.handlerClassLoader.addURL(handlersLib);
         }
@@ -446,8 +444,7 @@ public class AgentDaemon
         // Load server handlers on the fly from lib/*.jar.  Server handler
         // jars  must have a Main-Class that implements the AgentServerHandler
         // interface.
-        String handlersDir = bootProps.getProperty(AgentConfig.PROP_HANDLERS_DIR[0]);
-        File[] libJars = getLibJars(handlersDir);
+        File[] libJars = getLibJars();
         for (int i=0; i<libJars.length; i++) {
             try {
                 JarFile jarFile = new JarFile(libJars[i]);
@@ -625,7 +622,8 @@ public class AgentDaemon
             this.ppm.init();
 
             pluginDir = 
-                bootProps.getProperty(AgentConfig.PROP_PDK_PLUGINS_DIR[0]);
+                bootProps.getProperty("agent.pdkPluginDir",
+                                      "pdk/plugins");
 
             this.ppm.registerPlugins(pluginDir);
             //check .. and higher for hq-plugins
@@ -811,7 +809,7 @@ public class AgentDaemon
         public void run() {
             AgentConfig cfg;
             AgentDaemon agent;
-            String propFile, bundleFile;
+            String propFile;
 
             // Setup basic logging facility -- if we need to override it, we can.
             BasicConfigurator.configure();
@@ -819,10 +817,6 @@ public class AgentDaemon
             propFile =
                 System.getProperty(AgentConfig.PROP_PROPFILE,
                                    AgentConfig.DEFAULT_PROPFILE);
-            
-            bundleFile =
-                System.getProperty(AgentConfig.BUNDLE_PROPFILE,
-                        AgentConfig.DEFAULT_BUNDLEFILE);
 
             //disabled to allow for configurable log directory.
             //also i think watching this file and not ~/.cam/agent.properties
@@ -832,7 +826,7 @@ public class AgentDaemon
             //PropertyConfigurator.configureAndWatch(propFile);
 
             try {
-                cfg = AgentConfig.newInstance(propFile, bundleFile);
+                cfg = AgentConfig.newInstance(propFile);
             } catch(Exception exc){
                 SYSTEM_ERR.println("Unable to configure agent: " + 
                                    exc.getMessage());

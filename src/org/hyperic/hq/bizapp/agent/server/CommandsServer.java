@@ -78,6 +78,7 @@ public class CommandsServer
     implements AgentServerHandler, TokenStorer, AgentNotificationHandler
 {
     private static final String KEYSTORE_PW = "storePW";
+    private static final String KEYSTORE_FILE = "data/agent.keystore";
 
     private static final long   TOKEN_TIMEOUT = 20 * 1000;   // 20 seconds
 
@@ -436,7 +437,7 @@ public class CommandsServer
             bootConfig   = cfg.getBootProperties();
             this.storage = agent.getStorageProvider();
             this.keystoreFile =
-                bootConfig.getProperty(AgentConfig.PROP_KEYSTORE[0]);
+                bootConfig.getProperty("agent.keystore", KEYSTORE_FILE);
             this.keyAlg =
                 bootConfig.getProperty("agent.keyalg", "RSA");
             keystore     = this.loadKeyStore();

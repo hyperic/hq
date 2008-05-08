@@ -53,10 +53,7 @@ public class AgentConfig {
     }
 
     public static final String PROP_PROPFILE = "agent.propFile";
-    public static final String DEFAULT_PROPFILE = "conf/agent.properties";
-    public static final String BUNDLE_PROPFILE = "bundle.propFile";
-    public static final String DEFAULT_BUNDLEFILE = "conf/bundle.properties";
-    
+    public static final String DEFAULT_PROPFILE = "agent.properties";
     
     public static final String PROP_LATHER_PROXYHOST = "lather.proxyHost";
     public static final String PROP_LATHER_PROXYPORT = "lather.proxyPort";
@@ -86,19 +83,9 @@ public class AgentConfig {
     { "agent.logDir", System.getProperty("agent.logDir", "log") };
     public static final String[] PROP_DATADIR = 
     { "agent.dataDir", System.getProperty("agent.dataDir", "data") };
-    public static final String[] PROP_KEYSTORE = 
-    { "agent.keystore", System.getProperty("agent.keystore", "data/keystore") };   
     public static final String[] PROP_PDK = 
     { ProductPluginManager.PROP_PDK_DIR,
       System.getProperty(ProductPluginManager.PROP_PDK_DIR, "./pdk") };
-    public static final String[] PROP_PDK_LIB_DIR = 
-    { "agent.pdkLibDir", System.getProperty("agent.pdkLibDir", "./pdk/lib") };
-    public static final String[] PROP_PDK_PLUGINS_DIR = 
-    { "agent.pdkPluginDir", System.getProperty("agent.pdkPluginDir", "./pdk/plugins") };
-    public static final String[] PROP_HANDLERS_DIR =
-    { "agent.handlersDir",  System.getProperty("agent.handlersDir", "./lib/handlers") };  
-    public static final String[] PROP_HANDLERS_LIB_DIR =
-    { "agent.handlersLibDir", System.getProperty("agent.handlersLibDir", "./lib/handlers/lib") };  
     public static final String[] PROP_PROXYHOST = 
     { "agent.proxyHost", DEFAULT_PROXY_HOST };
     public static final String[] PROP_PROXYPORT = 
@@ -106,20 +93,15 @@ public class AgentConfig {
 
     private static final String[][] propertyList = {
         PROP_LISTENPORT,
+        PROP_PROXYHOST, 
+        PROP_PROXYPORT,
         PROP_STORAGEPROVIDER,
         PROP_STORAGEPROVIDERINFO,
         PROP_INSTALLHOME,
         PROP_TMPDIR,
         PROP_LOGDIR,
         PROP_DATADIR,
-        PROP_KEYSTORE,
-        PROP_PDK,
-        PROP_PDK_LIB_DIR,
-        PROP_PDK_PLUGINS_DIR,
-        PROP_HANDLERS_DIR,
-        PROP_HANDLERS_LIB_DIR,
-        PROP_PROXYHOST, 
-        PROP_PROXYPORT
+        PROP_PDK
     };
 
     private int        listenPort;          // Port the agent should listen on
@@ -174,44 +156,17 @@ public class AgentConfig {
         }
     }
 
-    // this method sets up bundle-specific properties
-    private static void initBundleProperties(Properties useProps,
-            String bundleFile) throws AgentConfigException {
-        // load properties in bundle.properties
-        if (loadProps(useProps, new File(bundleFile))) {
-            // ignore exceptions if bundle.properties not found for now
-            String bundleHome = useProps.getProperty("agent.bundle.home");
-            useProps.setProperty(PROP_TMPDIR[0], bundleHome + File.separator
-                    + "tmp");
-            useProps.setProperty(PROP_DATADIR[0], bundleHome + File.separator
-                    + "data");
-            useProps.setProperty(PROP_KEYSTORE[0], bundleHome + File.separator
-                    + "data/keystore");
-             useProps.setProperty(PROP_HANDLERS_DIR[0], bundleHome + "/lib/handlers" );
-            useProps.setProperty(PROP_HANDLERS_LIB_DIR[0], bundleHome +  "/lib/handlers/lib" );
-            String pdkHome = bundleHome + File.separator + "pdk";
-            useProps.setProperty(PROP_PDK[0], pdkHome );
-            useProps.setProperty(PROP_PDK_LIB_DIR[0], pdkHome + "/lib" );
-            useProps.setProperty(PROP_PDK_PLUGINS_DIR[0], pdkHome + "/plugins" );
-            // try to load the bundle-specific properties as the last step
-            // ignore errors, since this file is optional
-            loadProps(useProps, new File(bundleHome + File.separator + "agent.properties"));
-        }
-    }
-
-    public static AgentConfig newInstance(String propsFile, String bundleFile)
+    public static AgentConfig newInstance(String propsFile)
         throws IOException, AgentConfigException
     {
         Properties useProps = new Properties();
+        File file = new File(propsFile);
 
         useProps.putAll(AgentConfig.getDefaultProperties());
 
-        // load properties in agent.properties
-        if (!loadProps(useProps, new File(propsFile))) {
+        if (!loadProps(useProps, file)) {
             throw new AgentConfigException("Failed to load: " + propsFile);
         }
-        // load properties in bundle.properties and initialize defaults
-        initBundleProperties(useProps, bundleFile);
 
         final String home = System.getProperty("user.home");
         String[] userFiles = {
@@ -225,11 +180,11 @@ public class AgentConfig {
             "deployer.properties"
         };
 
-        for (int i = 0; i < userFiles.length; i++) {
-            File file = new File(userFiles[i]);
+        for (int i=0; i<userFiles.length; i++) {
+            file = new File(userFiles[i]);
             if (loadProps(useProps, file)) {
-                // XXX logging not configured yet
-                // System.out.println("Loaded properties from: " + file);
+                //XXX logging not configured yet
+                //System.out.println("Loaded properties from: " + file);
             }
         }
         
