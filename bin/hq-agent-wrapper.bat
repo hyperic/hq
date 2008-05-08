@@ -55,10 +55,10 @@ goto :eof
 
 :validate
 rem Find the requested command.
-for /F %%v in ('echo %1^|findstr "^console$ ^start$ ^stop$ ^restart$ ^install$ ^remove$ ^query$ ^ping$ ^setup"') do call :exec set COMMAND=%%v
+for /F %%v in ('echo %1^|findstr "^start$ ^stop$ ^restart$ ^install$ ^remove$ ^query$ ^ping$ ^setup"') do call :exec set COMMAND=%%v
 
 if "%COMMAND%" == "" (
-    echo Usage: %0 { console : start : stop : restart : install : remove : query : ping : setup }
+    echo Usage: %0 { start : stop : restart : install : remove : query : ping : setup }
     pause
     goto :eof
 ) else (
@@ -79,12 +79,9 @@ call :%COMMAND%
 if errorlevel 1 pause
 goto :eof
 
-:console
-"%_WRAPPER_EXE%" -c %_WRAPPER_CONF%
-goto :eof
-
 :start
 "%_WRAPPER_EXE%" -t %_WRAPPER_CONF%
+call :setup-if-no-provider
 goto :eof
 
 :stop
@@ -124,3 +121,8 @@ goto :eof
 :setup
 "%JAVA_HOME%\bin\java" -Djava.compiler=NONE -Djava.security.auth.login.config=jaas.config -Dagent.mode=thread -Xmx256M -Xrs -Xmx128m -Djava.net.preferIPv4Stack=true -Djava.library.path="lib" -classpath "lib\AgentClient.jar;lib\AgentServer.jar;lib\lather.jar;pdk\lib\activation.jar;pdk\lib\ant.jar;pdk\lib\backport-util-concurrent.jar;pdk\lib\commons-beanutils.jar;pdk\lib\commons-codec-1.3.jar;pdk\lib\commons-collections.jar;pdk\lib\commons-httpclient-3.1.jar;pdk\lib\commons-logging.jar;pdk\lib\dnsjava-2.0.3.jar;pdk\lib\getopt.jar;pdk\lib\hq-product.jar;pdk\lib\hyperic-util.jar;pdk\lib\jakarta-oro-2.0.7.jar;pdk\lib\jdom_b8.jar;pdk\lib\jsch-0.1.34.jar;pdk\lib\json.jar;pdk\lib\junit.jar;pdk\lib\jxla.jar;pdk\lib\log4j-1.2.14.jar;pdk\lib\sigar.jar;pdk\lib\snmp4j.jar;pdk\lib\tomcat-jk.jar;pdk\lib\ws-commons-util-1.0.2.jar;pdk\lib\xalan.jar;pdk\lib\xml-apis.jar;pdk\lib\xmlrpc-client-3.1.jar;pdk\lib\xmlrpc-common-3.1.jar;pdk\lib\xpp3_min-1.1.3.4.O.jar;pdk\lib\xstream-1.2.1.jar" org.hyperic.hq.bizapp.agent.client.AgentClient setup
 goto :eof
+
+:setup-if-no-provider
+"%JAVA_HOME%\bin\java" -Djava.compiler=NONE -Djava.security.auth.login.config=jaas.config -Dagent.mode=thread -Xmx256M -Xrs -Xmx128m -Djava.net.preferIPv4Stack=true -Djava.library.path="lib" -classpath "lib\AgentClient.jar;lib\AgentServer.jar;lib\lather.jar;pdk\lib\activation.jar;pdk\lib\ant.jar;pdk\lib\backport-util-concurrent.jar;pdk\lib\commons-beanutils.jar;pdk\lib\commons-codec-1.3.jar;pdk\lib\commons-collections.jar;pdk\lib\commons-httpclient-3.1.jar;pdk\lib\commons-logging.jar;pdk\lib\dnsjava-2.0.3.jar;pdk\lib\getopt.jar;pdk\lib\hq-product.jar;pdk\lib\hyperic-util.jar;pdk\lib\jakarta-oro-2.0.7.jar;pdk\lib\jdom_b8.jar;pdk\lib\jsch-0.1.34.jar;pdk\lib\json.jar;pdk\lib\junit.jar;pdk\lib\jxla.jar;pdk\lib\log4j-1.2.14.jar;pdk\lib\sigar.jar;pdk\lib\snmp4j.jar;pdk\lib\tomcat-jk.jar;pdk\lib\ws-commons-util-1.0.2.jar;pdk\lib\xalan.jar;pdk\lib\xml-apis.jar;pdk\lib\xmlrpc-client-3.1.jar;pdk\lib\xmlrpc-common-3.1.jar;pdk\lib\xpp3_min-1.1.3.4.O.jar;pdk\lib\xstream-1.2.1.jar" org.hyperic.hq.bizapp.agent.client.AgentClient setup-if-no-provider
+goto :eof
+

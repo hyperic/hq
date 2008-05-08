@@ -177,6 +177,7 @@ CLIENT_CMD="${HQ_JAVA} \
 
 PING_CMD="${CLIENT_CMD} ping"
 SETUP_CMD="${CLIENT_CMD} setup"
+SETUP_IF_NO_PROVIDER_CMD="${CLIENT_CMD} setup-if-no-provider"
 # ------------- 
 # End HQ specific logic
 # ------------- 
@@ -513,20 +514,6 @@ testpid() {
         pid=""
     fi
 }
-
-console() {
-    echo "Running $APP_LONG_NAME..."
-    getpid
-    if [ "X$pid" = "X" ]
-    then
-        # The string passed to eval must handles spaces in paths correctly.
-        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.name=\"$APP_NAME\" wrapper.displayname=\"$APP_LONG_NAME\" $ANCHORPROP $STATUSPROP $LOCKPROP"
-        eval $COMMAND_LINE
-    else
-        echo "$APP_LONG_NAME is already running."
-        exit 1
-    fi
-}
  
 start() {
     echo -n "Starting $APP_LONG_NAME..."
@@ -564,6 +551,8 @@ start() {
     else 
         echo ""
     fi
+    
+    ${SETUP_IF_NO_PROVIDER_CMD}
 }
  
 stopit() {
@@ -719,11 +708,6 @@ setup() {
 
 case "$1" in
 
-    'console')
-        checkUser touchlock $1
-        console
-        ;;
-
     'start')
         checkUser touchlock $1
         start
@@ -771,7 +755,7 @@ case "$1" in
         ;;        
 
     *)
-        echo "Usage: $0 { console | start | stop | restart | status | dump | ping | setup }"
+        echo "Usage: $0 { start | stop | restart | status | dump | ping | setup }"
         exit 1
         ;;
 esac
