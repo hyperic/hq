@@ -1,1 +1,12 @@
-put something in me
+<div>
+    <ol>
+        <li jwcid="@For" source="ognl:listItems" value="ognl:item" element="li">
+            <li>
+                <span jwcid="@DirectLink" listener="ognl:selectItem" 
+                      parameters="ognl:item.id"> 
+                    <span jwcid="@Insert" value="ognl:item.label"/> 
+                </span>
+            </li>
+        </li>
+    </ol>
+</div>
