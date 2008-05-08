@@ -509,6 +509,22 @@ public class AgentClient {
 
         return address;
     }
+    
+    private void cmdSetupIfNoProvider() 
+        throws AgentConnectionException, AgentRemoteException, 
+               IOException, AutoQuestionException {
+                
+        // Sleep until the agent is started - at most for 10 seconds
+        this.cmdPing(30);
+        
+        // Prompt the agent to setup if the provider info is not specified.
+        ProviderInfo providerInfo = this.camCommands.getProviderInfo();
+
+        if (providerInfo == null) {
+            this.cmdSetup();
+        }
+                
+    }
 
     private void cmdSetup()
         throws AgentConnectionException, AgentRemoteException, IOException,
@@ -1204,14 +1220,15 @@ public class AgentClient {
         if(args.length < 1 || 
            !(args[0].equals("ping") || 
              args[0].equals("die")  ||
-             args[0].equals("start") ||
+             args[0].equals("start") || 
              args[0].equals("status") ||
              args[0].equals("restart") ||
-             args[0].equals("setup")))
+             args[0].equals("setup") ||
+             args[0].equals("setup-if-no-provider")))
         {
             SYSTEM_ERR.println("Syntax: program " +
                                "<ping [numAttempts] | die [dieTime] | start " +
-                               "| setup>");
+                               "| status | restart | setup | setup-if-no-provider >");
             System.exit(-1);
             return;
         }
@@ -1255,6 +1272,8 @@ public class AgentClient {
                 errVal = client.cmdStatus();
             } else if(args[0].equals("setup")){
                 client.cmdSetup();
+            } else if(args[0].equals("setup-if-no-provider")) {
+                client.cmdSetupIfNoProvider();
             } else if(args[0].equals("restart")){
                 client.cmdRestart();           
             } else
