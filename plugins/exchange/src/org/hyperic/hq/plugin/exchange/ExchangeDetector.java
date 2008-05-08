@@ -60,17 +60,20 @@ public class ExchangeDetector
     private static final String EXCHANGE_KEY =
         "SOFTWARE\\Microsoft\\Exchange\\Setup";
 
-    private static final String WEBMAIL = "MSExchange Web Mail";
-    private static final String EXCHANGE_IS = "MSExchangeIS";
+    private static final String EX = "MSExchange";
+    private static final String WEBMAIL = EX + " Web Mail";
+    private static final String EXCHANGE_IS = EX + "IS";
 
     private static final Log log =
         LogFactory.getLog(ExchangeDetector.class.getName());
 
     private boolean isExchangeServiceRunning(String name) {
         if (name.equals(MTA_NAME)) {
-            return isWin32ServiceRunning("MSExchangeMTA");
+            return isWin32ServiceRunning(EX + "MTA");
         }
-        return isWin32ServiceRunning(name + "Svc");
+        return
+            isWin32ServiceRunning(name + "Svc") ||
+            isWin32ServiceRunning(EX + name); //changed in 2007 
     }
 
     private ServiceResource createService(String name) {
