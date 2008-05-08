@@ -8941,7 +8941,7 @@ has already been defined.
         create index group_member_idx on EAM_RES_GRP_RES_MAP(resource_id)
       </statement>
       <statement>
-        alter table EAM_RES_GRP_RES_MAP add constraint eam_res_grp_res_map_resource_id_key
+        alter table EAM_RES_GRP_RES_MAP add constraint eam_res_grp_idx
               unique (resource_id, resource_group_id)
       </statement>    	
       <statement targetDB="mysql">
