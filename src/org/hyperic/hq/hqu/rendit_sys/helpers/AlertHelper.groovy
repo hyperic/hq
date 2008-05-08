@@ -30,9 +30,10 @@ class AlertHelper extends BaseHelper {
      *                  sort parameters
      */
     def findAlerts(AlertSeverity severity, long timeRange, long endTime, 
-                   PageInfo pInfo) 
+                   boolean escOnly, PageInfo pInfo) 
     {
-        alertMan.findAlerts(user.id, severity.code, timeRange, endTime, pInfo)
+        alertMan.findAlerts(user.id, severity.code, timeRange, endTime, escOnly,
+                            pInfo)
     }
     
     /**
@@ -58,10 +59,11 @@ class AlertHelper extends BaseHelper {
      *                  sort parameters
      * @return a list of GalertLogs
      */
-    def findGroupAlerts(AlertSeverity severity, long timeRange, long endTime, 
-                        PageInfo pInfo) 
+    def findGroupAlerts(AlertSeverity severity, long timeRange, long endTime,
+                        boolean escOnly, PageInfo pInfo) 
     {
-        galertMan.findAlerts(userValue, severity, timeRange, endTime, pInfo)
+        galertMan.findAlerts(userValue, severity, timeRange, endTime, escOnly,
+                             pInfo)
     }
     
     /**

@@ -441,7 +441,7 @@ public class GalertManagerEJBImpl
             AlertSeverity s = AlertSeverity.findByCode(priority);
             alerts = _logDAO.findByCreateTimeAndPriority(subj.getId(),
                                                          endTime - timeRange,
-                                                         endTime, s, 
+                                                         endTime, s, false,
                                                          pInfo);
         }
             
@@ -465,11 +465,12 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method
      */
     public List findAlerts(AuthzSubject subj, AlertSeverity severity,
-                           long timeRange, long endTime, PageInfo pInfo)
+                           long timeRange, long endTime, boolean inEsc,
+                           PageInfo pInfo)
     {
         return _logDAO.findByCreateTimeAndPriority(subj.getId(), 
                                                    endTime - timeRange, endTime, 
-                                                   severity, pInfo);
+                                                   severity, inEsc, pInfo);
     }
 
     /**

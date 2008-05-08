@@ -212,12 +212,12 @@ public abstract class PermissionManager extends AuthzSession {
                                    String opListParam); 
          
     
-    public abstract String getAlertsHQL();
-    
+    public abstract String getAlertsHQL(boolean inEscalation);
+        
     public abstract String getAlertDefsHQL();
 
-    public abstract String getGroupAlertsHQL();
-    
+    public abstract String getGroupAlertsHQL(boolean inEscalation);
+
     public abstract String getGroupAlertDefsHQL();    
 
     /**
@@ -229,7 +229,6 @@ public abstract class PermissionManager extends AuthzSession {
                                 "distance", "ops");
     }
 
-    
     /**
      * Generates an object which aids in the creation of hierarchical,
      * permission checking SQL.

@@ -64,6 +64,14 @@ onloads.push(setSelectedOption);
         <div class="filters">
           <div class="BlockTitle">${l.AlertFilter}</div>
           <div class="filterBox">
+            <div class="fieldSetStacked" style="margin-bottom:8px;">
+              <span><strong>${l.Show}:</strong></span>
+              <div>
+              <input type="radio" id="escOnly" name="inEscalation" value="true" onchange="refreshAlertTables()">${l.InEscalation}
+              <input type="radio" id="all" name="inEscalation" value="false" checked="checked" onchange="refreshAlertTables()">${l.All}
+              </div>          
+            </div>
+
             <% if (isEE) { %>
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.AlertType}:</strong></span>
@@ -185,6 +193,15 @@ onloads.push(setSelectedOption);
         var timeSelect = dojo.byId('alertTimeSelect');
         res['minPriority'] = sevSelect.options[sevSelect.selectedIndex].value;
         res['alertTime']   = timeSelect.options[timeSelect.selectedIndex].value;
+
+        var escOnly    = dojo.byId('escOnly');
+        if (escOnly.checked) {
+          res['escOnly'] = 'true'
+        }
+        else {
+          res['escOnly'] = 'false'
+        }
+
         return res;
     }
     
