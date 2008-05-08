@@ -235,7 +235,7 @@ public interface PermissionManager {
                                                         String subjectParam,
                                                         String opListParam); 
     
-    public String getAlertsHQL();
+    public String getAlertsHQL(boolean inEscalation);
     
     public String getAlertDefsHQL();
 

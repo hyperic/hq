@@ -30,9 +30,9 @@ class AlertHelper extends BaseHelper {
      *                  sort parameters
      */
     def findAlerts(AlertSeverity severity, long timeRange, long endTime, 
-                   PageInfo pInfo) 
+                   boolean escOnly, PageInfo pInfo) 
     {
-        alertMan.findAlerts(user.id, severity.code, timeRange, endTime, pInfo)
+        alertMan.findAlerts(user.id, severity.code, timeRange, endTime, escOnly, pInfo)
     }
     
     /**
