@@ -39,7 +39,8 @@ class AlertController
         getData: {pageInfo, params -> 
             def alertTime = params.getOne('alertTime', "${now}").toLong()
             def escOnly   = params.getOne('escOnly', "false").toBoolean()
-            alertHelper.findAlerts(getPriority(params), alertTime, now, escOnly, pageInfo)
+            alertHelper.findAlerts(getPriority(params), alertTime, now,
+                                   escOnly, pageInfo)
         },
         defaultSort: AlertSortField.DATE,
         defaultSortOrder: 0,  // descending
@@ -74,8 +75,9 @@ class AlertController
     private final GALERT_TABLE_SCHEMA = [
         getData: {pageInfo, params -> 
             def alertTime = params.getOne('alertTime', "${now}").toLong()
+            def escOnly   = params.getOne('escOnly', "false").toBoolean()
             alertHelper.findGroupAlerts(getPriority(params), alertTime, now, 
-                                        pageInfo)
+                                        escOnly, pageInfo)
         },
         defaultSort: GalertLogSortField.DATE,
         defaultSortOrder: 0,  // descending

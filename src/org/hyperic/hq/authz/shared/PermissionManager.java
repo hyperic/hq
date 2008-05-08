@@ -239,7 +239,7 @@ public interface PermissionManager {
     
     public String getAlertDefsHQL();
 
-    public String getGroupAlertsHQL();
+    public String getGroupAlertsHQL(boolean inEscalation);
     
     public String getGroupAlertDefsHQL();    
     

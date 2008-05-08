@@ -367,11 +367,14 @@ public class PermissionManagerImpl
          "where d.priority >= :priority";
     }
 
-    public String getGroupAlertsHQL() {
-        return "select a from GalertLog a " +
+    public String getGroupAlertsHQL(boolean inEscalation) {
+        return "select a from " + (inEscalation ? "EscalationState es, " : "") +
+                "GalertLog a " +
                "join a.alertDef d " +
          "where a.timestamp between :begin and :end " + 
-           "and d.severityEnum >= :priority ";
+           "and d.severityEnum >= :priority " +
+                (inEscalation ? "and a.id = es.alertId and " +
+                                    "es.alertDefinitionId = d.id " : "");
     }
 
     public String getGroupAlertDefsHQL() {

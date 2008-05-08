@@ -126,12 +126,13 @@ class GalertLogDAO
     }
     
     List findByCreateTimeAndPriority(Integer subjectId, long begin, long end, 
-                                     AlertSeverity severity, PageInfo pageInfo) 
+                                     AlertSeverity severity, boolean inEsc,
+                                     PageInfo pageInfo) 
     {
         GalertLogSortField sort = (GalertLogSortField)pageInfo.getSort();
         String op = AuthzConstants.groupOpManageAlerts;
         String sql = 
-            PermissionManagerFactory.getInstance().getGroupAlertsHQL() +
+            PermissionManagerFactory.getInstance().getGroupAlertsHQL(inEsc) +
             " order by " + sort.getSortString("a", "d", "g") + 
             (pageInfo.isAscending() ? "" : " DESC");
 
