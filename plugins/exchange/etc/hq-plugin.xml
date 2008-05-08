@@ -558,8 +558,7 @@
 
   <filter name="template" value="${mbox}:${name}"/>
   <metrics name="exchange-mbox">
-    <metric name="Send Queue Size"
-            indicator="true"/>
+    <metric name="Send Queue Size"/> <!-- gone in 2007? -->
 
     <metric name="Receive Queue Size"
             indicator="true"/>
