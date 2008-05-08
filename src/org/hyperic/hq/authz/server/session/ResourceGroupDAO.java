@@ -307,7 +307,8 @@ public class ResourceGroupDAO extends HibernateDAO
     {
 
         String sql="select distinct rg from ResourceGroup rg " +
-                   "join fetch rg.resourceSet r " +
+                   "join rg.memberBag g " +
+                   "join g.resource r " +
                    "where r.instanceId = ? and  r.resourceType.id = ? " +
                    "order by rg.sortName " +
                    (asc ? "asc" : "desc");
@@ -319,7 +320,8 @@ public class ResourceGroupDAO extends HibernateDAO
 
     public Collection findContaining(Resource r) {
         String sql = "select distinct rg from ResourceGroup rg " +
-                   "join fetch rg.resourceSet r " +
+                   "join rg.memberBag g " +
+                   "join g.resource r " +
                    "where r.instanceId = ? and  r.resourceType.id = ?";
         return getSession().createQuery(sql)
             .setInteger(0, r.getInstanceId().intValue())
@@ -351,9 +353,11 @@ public class ResourceGroupDAO extends HibernateDAO
     public Long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
         String sql =
             "select max(m.interval) from Measurement m, " +
-            "ResourceGroup g join g.resourceSet r " +
+            "ResourceGroup rg " +
+            "join rg.memberBag g " +
+            "join g.resource r " +
             "where m.instanceId = r.instanceId and "+
-            "g = ? and m.template.id = ?";
+            "rg = ? and m.template.id = ?";
 
         return (Long)getSession().createQuery(sql)
             .setParameter(0, g)
@@ -375,9 +379,11 @@ public class ResourceGroupDAO extends HibernateDAO
     public List getMetricsCollecting(ResourceGroup g, Integer templateId) {
         String sql =
             "select m from Measurement m, " +
-            "ResourceGroup g join g.resourceSet r " +
+            "ResourceGroup rg " +
+            "join rg.memberBag g " +
+            "join g.resource r " +
             "where m.instanceId = r.instanceId and "+
-            "g = ? and m.template.id = ? and m.enabled = true";
+            "rg = ? and m.template.id = ? and m.enabled = true";
 
         return getSession().createQuery(sql)
             .setParameter(0, g)
