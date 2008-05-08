@@ -16,6 +16,7 @@ import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
 import org.hyperic.hq.authz.HasAuthzOperations
+import org.hyperic.util.pager.PageControl
 
 class ResourceHelper extends BaseHelper {
     private rman = ResourceManagerEJBImpl.one
@@ -293,5 +294,10 @@ class ResourceHelper extends BaseHelper {
     
     Resource findResource(int id) {
         rman.findResourcePojoById(id)
+    }
+
+    List findViewableInstances(user, type, name) {
+        rman.findViewableInstances(user, type, name, null, null,
+                                   PageControl.PAGE_ALL)
     }
 }
