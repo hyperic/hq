@@ -597,11 +597,6 @@
 
   <filter name="template" value="${imap4}:${name}"/>
   <metrics name="IMAP4">
-    <metric name="Availability"
-            template="win32:Service=IMAP4Svc:${alias}"
-            category="AVAILABILITY"
-            indicator="true"/>
-
     <metric name="APPEND Total"
             collectionType="trendsup"/>
 
@@ -776,12 +771,6 @@
             indicator="true"
             collectionType="trendsup"/>
 
-    <metric name="Connections Total"
-            collectionType="trendsup"/>
-
-    <metric name="Connections Current"
-            indicator="true"/>
-
     <metric name="Connections Failed"
             collectionType="trendsup"/>
 
@@ -789,13 +778,38 @@
             collectionType="trendsup"/>
   </metrics>
 
-  <filter name="template" value="${pop3}:${name}"/>
-  <metrics name="POP3">
+  <metrics name="IMAP4_V5" include="IMAP">
     <metric name="Availability"
-            template="win32:Service=POP3Svc:${alias}"
+            template="win32:Service=IMAP4Svc:${alias}"
             category="AVAILABILITY"
             indicator="true"/>
 
+    <metric name="Connections Total"
+            collectionType="trendsup"/>
+
+    <metric name="Connections Current"
+            indicator="true"/>
+  </metrics>
+
+  <metrics name="IMAP4_V8" include="IMAP">
+    <!-- 2007 service name changearoo -->
+    <metric name="Availability"
+            template="win32:Service=MSExchangeImap4:${alias}"
+            category="AVAILABILITY"
+            indicator="true"/>
+
+    <!-- 2007 name swaparoo -->
+    <metric name="Connections Total"
+            template="${imap4}:Total Connections"
+            collectionType="trendsup"/>
+
+    <metric name="Connections Current"
+            template="${imap4}:Current Connections"
+            indicator="true"/>
+  </metrics>
+
+  <filter name="template" value="${pop3}:${name}"/>
+  <metrics name="POP3">
     <metric name="AUTH Total"
             collectionType="trendsup"/>
 
@@ -870,12 +884,6 @@
     <metric name="USER Failures"
             collectionType="trendsup"/>
 
-    <metric name="LAST Total"
-            collectionType="trendsup"/>
-
-    <metric name="LAST Failures"
-            collectionType="trendsup"/>
-
     <metric name="Invalid Commands"
             indicator="true"
             collectionType="trendsup"/>
@@ -900,25 +908,49 @@
             collectionType="trendsup"/>
   </metrics>
 
+  <metrics name="POP3_V5" include="POP3">
+    <metric name="Availability"
+            template="win32:Service=POP3Svc:${alias}"
+            category="AVAILABILITY"
+            indicator="true"/>
+
+    <!-- gone in 2007 -->
+    <metric name="LAST Total"
+            collectionType="trendsup"/>
+
+    <metric name="LAST Failures"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="POP3_V8" include="POP3">
+    <!-- 2007 service name changearoo -->
+    <metric name="Availability"
+            template="win32:Service=MSExchangePop3:${alias}"
+            category="AVAILABILITY"
+            indicator="true"/>
+  </metrics>
+
+  <metrics name="Exchange 5.5" include="exchange-is,exchange-mbox"/>
   <metrics name="Exchange 2000" include="exchange-is,exchange-mbox"/>
   <metrics name="Exchange 2003" include="exchange-is,exchange-mbox"/>
-  <metrics name="Exchange 5.5" include="exchange-is,exchange-mbox"/>
 
-  <metrics name="Exchange 2000 POP3" include="POP3"/>
-  <metrics name="Exchange 2003 POP3" include="POP3"/>
-  <metrics name="Exchange 5.5 POP3" include="POP3"/>
+  <metrics name="Exchange 5.5 POP3" include="POP3_V5"/>
+  <metrics name="Exchange 2000 POP3" include="POP3_V5"/>
+  <metrics name="Exchange 2003 POP3" include="POP3_V5"/>
+  <metrics name="Exchange 2007 POP3" include="POP3_V8"/>
 
-  <metrics name="Exchange 2000 IMAP4" include="IMAP4"/>
-  <metrics name="Exchange 2003 IMAP4" include="IMAP4"/>
-  <metrics name="Exchange 5.5 IMAP4" include="IMAP4"/>
+  <metrics name="Exchange 5.5 IMAP4" include="IMAP4_V5"/>
+  <metrics name="Exchange 2000 IMAP4" include="IMAP4_V5"/>
+  <metrics name="Exchange 2003 IMAP4" include="IMAP4_V5"/>
+  <metrics name="Exchange 2007 IMAP4" include="IMAP4_V8"/>
 
+  <metrics name="Exchange 5.5 MTA" include="MTA"/>
   <metrics name="Exchange 2000 MTA" include="MTA"/>
   <metrics name="Exchange 2003 MTA" include="MTA"/>
-  <metrics name="Exchange 5.5 MTA" include="MTA"/>
 
+  <metrics name="Exchange 5.5 Web" include="Web"/>
   <metrics name="Exchange 2000 Web" include="Web"/>
   <metrics name="Exchange 2003 Web" include="Web"/>
-  <metrics name="Exchange 5.5 Web" include="Web"/>
 
   <server name="Exchange"
           description="Mail Server"
