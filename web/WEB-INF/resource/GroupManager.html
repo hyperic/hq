@@ -1,8 +1,16 @@
-<div jwcid="@hyperic:Layout2Col" pageTitle="message:title" navigationMenu="ognl:navigationMenu">
-    <div jwcid="left@Block">
-        <div jwcid="@hyperic:ListPanel"/>
-    </div>
+<div jwcid="@hyperic:Layout2Col" pageTitle="message:title" 
+     navigationMenu="ognl:navigationMenu">
+     
     <div jwcid="center@Block">
-        center panel
+      The Center Panel
+      <div jwcid="innerDiv@Any" id="innerDiv">
+        <div jwcid="time@Insert" value="ognl:time"/>
+      </div>
     </div>
+
+    <div jwcid="left@Block">
+        <div jwcid="@hyperic:ListPanel" listItems="ognl:groupList"
+             selectListener="listener:selectGroup"/>
+    </div>
+     
 </div>
