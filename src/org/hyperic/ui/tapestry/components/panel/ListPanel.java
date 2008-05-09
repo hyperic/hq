@@ -9,6 +9,7 @@ import org.apache.tapestry.IMarkupWriter;
 import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.annotations.InjectObject;
 import org.apache.tapestry.annotations.Parameter;
+import org.apache.tapestry.annotations.Persist;
 import org.apache.tapestry.listener.ListenerInvoker;
 import org.hyperic.ui.tapestry.components.BaseComponent;
 
@@ -20,6 +21,10 @@ public abstract class ListPanel extends BaseComponent {
         String getLabel();
     }
 
+    @Persist
+    public abstract void setCurrentSelection(String id);
+    public abstract String getCurrentSelection();
+    
     @Parameter(name = "listItems", required = true)
     public abstract void setListItems(List listItems);
     public abstract List getListItems();
@@ -37,11 +42,22 @@ public abstract class ListPanel extends BaseComponent {
     public abstract void setItem(ListItem item);
     public abstract ListItem getItem();
 
+    public boolean getLoopedItemIsSelected() {
+        String curId = getCurrentSelection();
+        
+        if (curId == null)
+            return false;
+        
+        return curId.equals(getItem().getId());
+    }
+    
     /**
      * Listener, called when an item is selected via DirectLink. 
      */
     public void selectItem(IRequestCycle cycle, String id) {
-        _log.debug("ListPanel selected id = " + id);
+        _log.info("ListPanel selected id = " + id);
+        setCurrentSelection(id);
+        cycle.getResponseBuilder().updateComponent("listContents");
         getListenerInvoker().invokeListener(getSelectListener(), this, cycle);
     }
     

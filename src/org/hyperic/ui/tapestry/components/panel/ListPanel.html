@@ -1,11 +1,16 @@
-<div id='listPanel'>
+<div jwcid='listContents@Any'>
     <ol>
         <li jwcid="listLinks@For" source="ognl:listItems" value="ognl:item" element="li">
             <li>
-                <span jwcid="listLink@DirectLink" 
+                <span jwcid="listLink@DirectLink" async="true"
                       listener="listener:selectItem" 
                       parameters="ognl:item.id">
-                    <span jwcid="@Insert" value="ognl:item.label"/> 
+                    <span jwcid="@If" condition="ognl:loopedItemIsSelected">
+                        <span jwcid="@Insert" style="color:red" renderTag="true" value="ognl:item.label"/>
+                    </span>
+                    <span jwcid="@Else">
+                        <span jwcid="@Insert" style="color:blue" renderTag="true" value="ognl:item.label"/>
+                    </span>
                 </span>
             </li>
         </li>
