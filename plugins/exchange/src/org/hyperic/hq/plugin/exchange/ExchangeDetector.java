@@ -36,6 +36,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
@@ -59,16 +60,20 @@ public class ExchangeDetector
     private static final String EXCHANGE_KEY =
         "SOFTWARE\\Microsoft\\Exchange\\Setup";
 
-    private static final String EXCHANGE_IS = "MSExchangeIS";
+    private static final String EX = "MSExchange";
+    private static final String WEBMAIL = EX + " Web Mail";
+    private static final String EXCHANGE_IS = EX + "IS";
 
     private static final Log log =
         LogFactory.getLog(ExchangeDetector.class.getName());
 
     private boolean isExchangeServiceRunning(String name) {
         if (name.equals(MTA_NAME)) {
-            return isWin32ServiceRunning("MSExchangeMTA");
+            return isWin32ServiceRunning(EX + "MTA");
         }
-        return isWin32ServiceRunning(name + "Svc");
+        return
+            isWin32ServiceRunning(name + "Svc") ||
+            isWin32ServiceRunning(EX + name); //changed in 2007 
     }
 
     private ServiceResource createService(String name) {
@@ -154,7 +159,13 @@ public class ExchangeDetector
             services.add(createService(name));
         }
 
-        services.add(createService(WEB_NAME));
+        try {
+            String[] web = Pdh.getInstances(WEBMAIL);
+            if (web.length != 0) {
+                services.add(createService(WEB_NAME));
+            } //else not enabled if no counters
+        } catch (Win32Exception e) {
+        }
 
         return services;
     }
