@@ -296,27 +296,27 @@ public class UIPluginManagerEJBImpl
                                       AuthzSubject user) 
     {
         ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+        Collection attachments;
         Resource r;
         
         if (ent.isGroup()) {
-            AuthzSubject overlord =
-                AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(); 
-            ResourceGroup group;
-            
-            group = ResourceGroupManagerEJBImpl.getOne() 
-                        .findResourceGroupById(ent.getId());
-            
-            if (group.isMixed()) {
-                r = rman.findRootResource();
-            } else {
-                r = group.getResourcePrototype();
+            ResourceGroup group =
+                ResourceGroupManagerEJBImpl.getOne()
+                    .findResourceGroupById(ent.getId());
+            attachments = _attachRsrcDAO.findFor(rman.findRootResource(), cat);
+
+            if (!group.isMixed()) {
+                // For compatible groups add in attachments specific to that
+                // resource type.
+                Collection compatAttachments =
+                    _attachRsrcDAO.findFor(group.getResourcePrototype(), cat);
+                attachments.addAll(compatAttachments);
             }
         } else {
-            r = rman.findResource(ent);
-        } 
+            attachments = _attachRsrcDAO.findFor(rman.findResource(ent), cat);
+        }
         
-        Collection attachments = _attachRsrcDAO.findFor(r, cat);
-        Resource viewedResource = 
+        Resource viewedResource =
             ResourceManagerEJBImpl.getOne().findResource(ent);
         return convertAttachmentsToDescriptors(attachments, viewedResource, 
                                                user);
