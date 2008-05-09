@@ -297,7 +297,6 @@ public class UIPluginManagerEJBImpl
     {
         ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
         Collection attachments;
-        Resource r;
         
         if (ent.isGroup()) {
             ResourceGroup group =
