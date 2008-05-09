@@ -10,6 +10,7 @@ import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.annotations.InjectObject;
 import org.apache.tapestry.annotations.Parameter;
 import org.apache.tapestry.annotations.Persist;
+import org.apache.tapestry.components.Block;
 import org.apache.tapestry.listener.ListenerInvoker;
 import org.hyperic.ui.tapestry.components.BaseComponent;
 
@@ -36,6 +37,14 @@ public abstract class ListPanel extends BaseComponent {
     @InjectObject("infrastructure:listenerInvoker")
     public abstract ListenerInvoker getListenerInvoker();
     
+    public Block getSelectedBlock() {
+        return (Block)getContainer().getComponent("selectedBlock");
+    }
+    
+    public Block getUnselectedBlock() {
+        return (Block)getContainer().getComponent("unselectedBlock");
+    }
+
     /**
      * Used for iterating over the collection.
      */
