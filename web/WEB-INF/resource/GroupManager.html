@@ -10,7 +10,16 @@
 
     <div jwcid="left@Block">
         <div jwcid="@hyperic:ListPanel" listItems="ognl:groupList"
-             selectListener="listener:selectGroup"/>
+             selectListener="listener:selectGroup">
+          <div jwcid="selectedBlock@Block">
+            <span jwcid="@Insert" style="color:red" renderTag="true" 
+                  value="ognl:components.selectedBlock.getParameter('item').label"/>            
+          </div>
+          <div jwcid="unselectedBlock@Block">
+            <span jwcid="@Insert" style="color:blue" renderTag="true" 
+                  value="ognl:components.unselectedBlock.getParameter('item').label"/>            
+          </div>
+        </div>
     </div>
      
 </div>
