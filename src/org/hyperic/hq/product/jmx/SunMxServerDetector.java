@@ -44,6 +44,8 @@ public class SunMxServerDetector extends MxServerDetector {
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException {
 
+        setPlatformConfig(platformConfig);
+
         //XXX disabled by default for now
         String enabled =
             getManager().getProperty("jmx.sun.discover", "false");
@@ -92,13 +94,16 @@ public class SunMxServerDetector extends MxServerDetector {
 
                     String identifier = args[j];
                     String installpath = getProcExe(pid);
-                    ServerResource server =
-                        createServerResource(installpath);
-                    server.setName(server.getName() + " " + name);
+                    ServerResource server = newServerResource(installpath);
                     if (!server.getIdentifier().equals(installpath)) {
                         //only if INVENTORY_ID was not set
                         server.setIdentifier(identifier);    
                     }
+
+                    //setName() before discoverServerConfig() to allow user override
+                    server.setName(server.getName() + " " + name);
+                    discoverServerConfig(server, pid);
+
                     getLog().debug(server.getName() + " identifier=" + identifier);
                     setProductConfig(server, config);
                     server.setMeasurementConfig();
