@@ -3,6 +3,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.events.server.session.AlertDefSortField
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl
@@ -62,7 +63,7 @@ class AlertHelper extends BaseHelper {
     def findGroupAlerts(AlertSeverity severity, long timeRange, long endTime,
                         boolean escOnly, PageInfo pInfo) 
     {
-        galertMan.findAlerts(userValue, severity, timeRange, endTime, escOnly,
+        galertMan.findAlerts(user, severity, timeRange, endTime, escOnly,
                              pInfo)
     }
     
@@ -73,7 +74,7 @@ class AlertHelper extends BaseHelper {
      */
     def findGroupAlerts(AlertSeverity severity, PageInfo pInfo) {
         long millis = System.currentTimeMillis()
-        galertMan.findAlerts(userValue, severity, millis, millis, pInfo)
+        galertMan.findAlerts(user, severity, millis, millis, pInfo)
     }
     
     /**
@@ -111,11 +112,11 @@ class AlertHelper extends BaseHelper {
      *              {@link AlertDefSortField}
      */
     def findTypeBasedDefinitions(Boolean enabled, PageInfo pInfo) { 
-        defMan.findTypeBasedDefinitions(userValue, enabled, pInfo) 
+        defMan.findTypeBasedDefinitions(user, enabled, pInfo) 
     }
      
     def findTypeBasedDefinitions() {
-        defMan.findTypeBasedDefinitions(userValue, null, 
+        defMan.findTypeBasedDefinitions(user, null, 
                                         PageInfo.getAll(AlertDefSortField.NAME,
                                                         true))
     }
@@ -133,5 +134,9 @@ class AlertHelper extends BaseHelper {
                              Boolean enabled, PageInfo pInfo)
     {
         galertMan.findAlertDefs(user, minSeverity, enabled, pInfo)
+    }
+
+    def deleteDefinition(AlertDefinition definition) {
+        defMan.deleteAlertDefinitions(user, [ definition.id ] as Integer[])
     }
 }
