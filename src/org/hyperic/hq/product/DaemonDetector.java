@@ -176,9 +176,10 @@ public class DaemonDetector
         }
 
         String id = (String)opts.get(INVENTORY_ID);
-        if (id != null) {
-            server.setIdentifier(formatName(id, pconfig, sconfig, oconfig));
+        if (id == null) {
+            id = server.getIdentifier(); //might be defined in plugin.xml
         }
+        server.setIdentifier(formatName(id, pconfig, sconfig, oconfig));
     }
 
     protected ServerResource newServerResource(long pid, String exe) {
