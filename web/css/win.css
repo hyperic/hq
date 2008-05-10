@@ -1303,6 +1303,17 @@ ul.boxy li {
     padding-left: 4px
 }
 
+ul.eventDetails li {
+    margin-left: -2em;
+    font-size: 10px;
+}
+
+.bigEventDetails {
+    height: 300px;
+    width: 100%;
+    overflow: auto;
+}
+
 .overlay_dialog {
     -moz-opacity: 0.6;
     background-color: #666;

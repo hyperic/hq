@@ -57,6 +57,7 @@ import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
+import org.json.JSONObject;
 import org.apache.commons.lang.StringEscapeUtils;
 /**
  *
@@ -120,7 +121,7 @@ public class EventDetailsAction extends BaseAction {
                 res.getMessage("resource.common.monitor.text.events.None"));
         }
         else {
-            html = new StringBuffer("<ul class=\"boxy\">");
+            html = new StringBuffer("<ul class=\"eventDetails\">");
         
             for (Iterator it = events.iterator(); it.hasNext(); ) {
                 EventLog elv = (EventLog) it.next();
@@ -167,36 +168,12 @@ public class EventDetailsAction extends BaseAction {
         
             html.append("</ul>");
         }
-
-        request.setAttribute(Constants.AJAX_TYPE, Constants.AJAX_ELEMENT);
-        request.setAttribute(Constants.AJAX_ID, "eventsSummary");
-        request.setAttribute(Constants.AJAX_HTML, html);
         
-        return mapping.findForward(Constants.SUCCESS_URL);
-    }
-    
-    // In our Javascript, we are enclosing the whole string in single-quotes.
-    // However, just escaping it does not seem to work because we are setting
-    // the innerHTML.  So, just to be safe, we're getting rid of all single
-    // quotes, double quotes, whitespace characters, and carat
-    private String ridBadChars(String source) {
-        int sourceLen = source.length();
-        if (sourceLen == 0)
-            return source;
+        JSONObject details = new JSONObject();
+        details.put("id", begin);
+        details.put("html", html);
 
-        StringTokenizer st = new StringTokenizer(source);
-        StringBuffer buffer = new StringBuffer();
-        while (st.hasMoreElements()) {
-            String tok = st.nextToken();
-            tok = tok.replaceAll("['\"]", " ");
-            tok = tok.replaceAll("\\&", "&amp;");
-            
-            if (tok.indexOf('<') > -1)
-                tok = StringUtil.replace(tok, "<", "&lt;");
-
-            buffer.append(tok).append(" ");
-        }
-
-        return buffer.toString();
+        response.getWriter().write(details.toString());
+        return null;
     }
 }
