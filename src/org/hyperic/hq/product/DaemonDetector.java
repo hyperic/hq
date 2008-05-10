@@ -162,14 +162,22 @@ public class DaemonDetector
             server.setProductConfig(config);
         }
 
+        ConfigResponse
+            pconfig = getPlatformConfig(),
+            sconfig = server.getProductConfig(),
+            oconfig = new ConfigResponse(opts);
+
         String name =
             formatAutoInventoryName(server.getType(),
-                                    getPlatformConfig(),
-                                    server.getProductConfig(),
-                                    new ConfigResponse(opts));
+                                    pconfig, sconfig, oconfig);
 
         if (name != null) {
             server.setName(name);
+        }
+
+        String id = (String)opts.get(INVENTORY_ID);
+        if (id != null) {
+            server.setIdentifier(formatName(id, pconfig, sconfig, oconfig));
         }
     }
 
@@ -207,12 +215,10 @@ public class DaemonDetector
             return servers;
         }
 
-        //we can only report one of these to prevent duplication,
-        //since they will all have the same default configuration
         List processes = getProcessResources(platformConfig);
-        if (processes.size() != 0) {
+        for (int i=0; i<processes.size(); i++) {
             ServerResource server =
-                (ServerResource)processes.get(0);
+                (ServerResource)processes.get(i);
 
             if (isInstallTypeVersion(server.getInstallPath())) {
                 servers.add(server);
