@@ -78,7 +78,7 @@ function timeLineOnLoad() {
       var eventId = eventText.id;
       var evt = eventSource.getEvent(eventId);
       var eventHtml = eventText.html;
-      if (eventHtml.length > 500) {
+      if (eventHtml.length > 850) {
         eventHtml = "<div class=\"bigEventDetails\">" + eventHtml +
                    "</div>";
       }
