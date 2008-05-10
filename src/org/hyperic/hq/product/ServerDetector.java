@@ -80,7 +80,7 @@ public abstract class ServerDetector
     private static final String INSTALLPATH_NOMATCH = "INSTALLPATH_NOMATCH";
     private static final String INSTALLPATH = "INSTALLPATH";
     private static final String INVENTORY_ID = "INVENTORY_ID";
-
+    private static final String AUTOINVENTORY_NAME = "AUTOINVENTORY_NAME";
     private static final String[] NO_ARGS = new String[0];
     private static final long[] NO_PIDS = new long[0];
     private static final List NO_MODULES = Arrays.asList(NO_ARGS);
@@ -523,10 +523,16 @@ public abstract class ServerDetector
                                              ConfigResponse config,
                                              ConfigResponse cprops) {
         String name =
-            getTypeProperty(type, "AUTOINVENTORY_NAME");
+            getTypeProperty(type, AUTOINVENTORY_NAME);
 
         if (name == null) {
-            return null;
+            if (cprops != null) {
+                //defined outside plugin, e.g. process cmdline args
+                name = cprops.getValue(AUTOINVENTORY_NAME);
+            }
+            if (name == null) {
+                return null;
+            }
         }
 
         if (parentConfig != null) {
