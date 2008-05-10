@@ -16,6 +16,7 @@ import org.hyperic.hq.appdef.shared.ServerValue
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
+import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as DMan
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as AlertMan
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
@@ -24,6 +25,7 @@ import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.hyperic.util.config.ConfigResponse
 import org.hyperic.hq.hqu.rendit.util.ResourceConfig
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
+import org.hyperic.hq.auth.shared.SessionManager
 
 /**
  * This class provides tonnes of abstractions over the Appdef layer.
@@ -395,6 +397,21 @@ class ResourceCategory {
             throw new IllegalArgumentException("Resource prototype [" + 
                                                "${proto.name} not available " + 
                                                "to createInstance()")
+        }
+    }
+
+    static void remove(Resource r, AuthzSubject user) {
+        def boss = AppdefBoss.one
+        def mgr = SessionManager.instance
+        def sessionId = mgr.put(user)
+        if (r.isPlatform()) {
+            boss.removePlatform(sessionId, r.instanceId)
+        }
+        else if (r.isServer()) {
+            boss.removeServer(sessionId, r.instanceId)
+        }
+        else if (r.isService()) {
+            boss.removeService(sessionId, r.instanceId)
         }
     }
 
