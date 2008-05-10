@@ -159,18 +159,18 @@ public class DaemonDetector
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException {
 
-        //we can only report one of these to prevent duplication,
-        //since they will all have the same default configuration
-        List servers = new ArrayList();
-        List found = getFileResources(platformConfig);
-        ServerResource server = null;
+        List servers = getFileResources(platformConfig);
 
-        if (found.size() == 0) {
-            found = getProcessResources(platformConfig);
+        if (servers.size() != 0) {
+            return servers;
         }
 
-        if (found.size() != 0) {
-            server = (ServerResource)found.get(0);
+        //we can only report one of these to prevent duplication,
+        //since they will all have the same default configuration
+        List processes = getProcessResources(platformConfig);
+        if (processes.size() != 0) {
+            ServerResource server =
+                (ServerResource)processes.get(0);
 
             if (isInstallTypeVersion(server.getInstallPath())) {
                 servers.add(server);
