@@ -426,10 +426,12 @@ Timeline.DefaultEventSource.Event.prototype = {
         theme.event.bubble.bodyStyler(divBody);
         elmt.appendChild(divBody);
         
+        /*
         var divTime = doc.createElement("div");
         this.fillTime(divTime, labeller);
         theme.event.bubble.timeStyler(divTime);
         elmt.appendChild(divTime);
+        */
         
         var divWiki = doc.createElement("div");
         this.fillWikiInfo(divWiki);

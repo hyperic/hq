@@ -653,11 +653,13 @@ Timeline._Band.prototype.createLayerDiv = function(zIndex, className) {
     
     var innerDiv = this._timeline.getDocument().createElement("div");
     innerDiv.className = "timeline-band-layer-inner";
+    /*
     if (SimileAjax.Platform.browser.isIE) {
         innerDiv.style.cursor = "move";
     } else {
         innerDiv.style.cursor = "-moz-grab";
     }
+    */
     div.appendChild(innerDiv);
     
     return innerDiv;
@@ -690,7 +692,7 @@ Timeline._Band.prototype.showBubbleForEvent = function(eventID) {
 Timeline._Band.prototype._onMouseDown = function(innerFrame, evt, target) {
     this.closeBubble();
     
-    this._dragging = true;
+    this._dragging = false;
     this._dragX = evt.clientX;
     this._dragY = evt.clientY;
 };

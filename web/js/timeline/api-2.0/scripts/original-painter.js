@@ -182,14 +182,16 @@ Timeline.OriginalEventPainter.prototype.paintPreciseInstantEvent = function(evt,
         metrics.trackHeight / 2 - labelSize.height / 2);
         
     var iconElmtData = this._paintEventIcon(evt, track, iconLeftEdge, metrics, theme);
-    var labelElmtData = this._paintEventLabel(evt, text, labelLeft, labelTop, labelSize.width, labelSize.height, theme);
 
     var self = this;
     var clickHandler = function(elmt, domEvt, target) {
         return self._onClickInstantEvent(iconElmtData.elmt, domEvt, evt);
     };
     SimileAjax.DOM.registerEvent(iconElmtData.elmt, "mousedown", clickHandler);
-    SimileAjax.DOM.registerEvent(labelElmtData.elmt, "mousedown", clickHandler);
+    if (this._params.showText) {
+        var labelElmtData = this._paintEventLabel(evt, text, labelLeft, labelTop, labelSize.width, labelSize.height, theme);
+        SimileAjax.DOM.registerEvent(labelElmtData.elmt, "mousedown", clickHandler);
+    }
     
     this._createHighlightDiv(highlightIndex, iconElmtData, theme);
     
@@ -220,7 +222,7 @@ Timeline.OriginalEventPainter.prototype.paintImpreciseInstantEvent = function(ev
         metrics.trackHeight / 2 - labelSize.height / 2);
     
     var iconElmtData = this._paintEventIcon(evt, track, iconLeftEdge, metrics, theme);
-    var labelElmtData = this._paintEventLabel(evt, text, labelLeft, labelTop, labelSize.width, labelSize.height, theme);
+    // var labelElmtData = this._paintEventLabel(evt, text, labelLeft, labelTop, labelSize.width, labelSize.height, theme);
     var tapeElmtData = this._paintEventTape(evt, track, startPixel, endPixel, 
         theme.event.instant.impreciseColor, theme.event.instant.impreciseOpacity, metrics, theme);
     
@@ -230,7 +232,7 @@ Timeline.OriginalEventPainter.prototype.paintImpreciseInstantEvent = function(ev
     };
     SimileAjax.DOM.registerEvent(iconElmtData.elmt, "mousedown", clickHandler);
     SimileAjax.DOM.registerEvent(tapeElmtData.elmt, "mousedown", clickHandler);
-    SimileAjax.DOM.registerEvent(labelElmtData.elmt, "mousedown", clickHandler);
+    // SimileAjax.DOM.registerEvent(labelElmtData.elmt, "mousedown", clickHandler);
     
     this._createHighlightDiv(highlightIndex, iconElmtData, theme);
     
@@ -321,6 +323,8 @@ Timeline.OriginalEventPainter.prototype.paintImpreciseDurationEvent = function(e
 };
 
 Timeline.OriginalEventPainter.prototype._findFreeTrack = function(rightEdge) {
+    // Force only 1 track
+    return 0;
     for (var i = 0; i < this._tracks.length; i++) {
         var t = this._tracks[i];
         if (t > rightEdge) {
