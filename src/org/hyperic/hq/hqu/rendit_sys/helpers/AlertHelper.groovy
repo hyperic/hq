@@ -134,4 +134,8 @@ class AlertHelper extends BaseHelper {
     {
         galertMan.findAlertDefs(user, minSeverity, enabled, pInfo)
     }
+
+    def deleteDefinition(AlertDefinition definition) {
+        defMan.deleteAlertDefinitions(userValue, [ definition.id ] as Integer[])
+    }
 }
