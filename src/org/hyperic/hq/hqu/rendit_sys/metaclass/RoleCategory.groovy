@@ -27,4 +27,8 @@ class RoleCategory {
         roleMan.removeAllOperations(user.valueObject, role.valueObject)
         roleMan.addOperations(user.valueObject, role.valueObject, ops)
     }
+
+    static void remove(Role role, AuthzSubject user) {
+        roleMan.removeRole(user, role.id)
+    }
 }
