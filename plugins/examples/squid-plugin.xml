@@ -204,7 +204,7 @@
                 value="cacheMedianTime"/>
 
       <property name="AUTOINVENTORY_NAME"
-                value="Cache Median %snmpIndexValue% Min"/>
+                value="%serverName% Cache Median %snmpIndexValue% Min"/>
 
       <config>
         <option name="snmpIndexName"
