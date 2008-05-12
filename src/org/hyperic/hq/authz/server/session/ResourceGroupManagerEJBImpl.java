@@ -742,6 +742,11 @@ public class ResourceGroupManagerEJBImpl
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         List groupIds;
         
+        /**
+         * XXX:  Seems this could be optimized to actually get the real
+         *       list of viewable resource groups instead of going through
+         *       the perm manager to get the IDs
+         */
         try {
             groupIds = pm.findOperationScopeBySubject(subject, 
                                         AuthzConstants.groupOpViewResourceGroup, 
