@@ -1022,7 +1022,7 @@
        New Transport service
        Service name changes for EVENT_LOG_SOURCE_FILTER
   -->
-  <server name="Exchange" version="2007">
+  <server name="Exchange" version="2007" platforms="Win32">
 
     <plugin type="measurement"
             class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
