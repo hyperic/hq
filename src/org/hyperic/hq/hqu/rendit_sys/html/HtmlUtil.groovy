@@ -183,8 +183,11 @@ class HtmlUtil {
 	 *
 	 * @param htmlOpts A map, specifying key=value pairs to place as options
 	 *                 on the returned <select> tag
+	 *
+	 * @param selected String value that will set the default option.  Can be
+	 *                 null if no default is desired.
 	 */
-	static String selectList(vals, htmlOpts) {
+	static String selectList(vals, htmlOpts, selected) {
         def res = "<select "
         
         for (i in htmlOpts) {
@@ -193,7 +196,11 @@ class HtmlUtil {
         res += ">\n"
         
         for (i in vals) {
-            res += "<option value='${i.code}'>${escapeHtml(i.value)}</option>\n"    
+            if (selected && (i.code.toString() == selected.toString())) {
+                res += "<option value='${i.code}' selected='selected'>${escapeHtml(i.value)}</option>\n"
+            } else {
+                res += "<option value='${i.code}'>${escapeHtml(i.value)}</option>\n"
+            }
         }
         
         res += "</select>\n"
