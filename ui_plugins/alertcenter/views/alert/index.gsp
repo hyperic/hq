@@ -88,7 +88,7 @@ onloads.push(setSelectedOption);
               <span><strong>${l.MinPriority}</strong></span>
               <div><%= selectList(severities, 
      	                     [id:'alertSevSelect',
-     	                      onchange:'refreshAlertTables();']) %>
+     	                      onchange:'refreshAlertTables();'], null) %>
      	      </div>
             </div>          
 
@@ -96,7 +96,7 @@ onloads.push(setSelectedOption);
               <span><strong>${l.InTheLast}</strong></span>
        	      <div><%= selectList(lastDays, 
      	                     [id:'alertTimeSelect',
-     	                      onchange:'refreshAlertTables();']) %>
+     	                      onchange:'refreshAlertTables();'], null) %>
      	                      
      	      </div>
             </div>          
