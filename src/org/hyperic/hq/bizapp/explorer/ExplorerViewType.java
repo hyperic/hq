@@ -24,8 +24,27 @@
  */
 package org.hyperic.hq.bizapp.explorer;
 
+import java.util.ResourceBundle;
 
-public interface ExplorerViewType {
-    String getName();
-    ExplorerView getModeFor(ExplorerItem item);
+import org.hyperic.util.HypericEnum;
+
+/**
+ * An ExplorerViewType is a way to get information about how to display
+ * content on the right-hand side of an Explorer. 
+ */
+public class ExplorerViewType extends HypericEnum {
+    private static final ResourceBundle BUNDLE =
+        ResourceBundle.getBundle("org.hyperic.hq.bizapp.Resources");
+    
+    public static final ExplorerViewType HQU_GROUP_VIEW =
+        new ExplorerViewType(1, "hquGroupView",
+                             "explorer.viewType.hquGroupView");
+
+    protected ExplorerViewType(int code, String desc, String localeProp) {
+        super(ExplorerViewType.class, code, desc, localeProp, BUNDLE);
+    }
+
+    public static ExplorerViewType findByCode(int code) {
+        return (ExplorerViewType)findByCode(ExplorerViewType.class, code);  
+    }
 }

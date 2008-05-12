@@ -24,7 +24,25 @@
  */
 package org.hyperic.hq.bizapp.explorer;
 
+/**
+ * An ExplorerView represents a complex view of a selection the left-hand
+ * side of an explorer.  
+ */
 public interface ExplorerView {
+    /**
+     * Get the styleclass used to render the view buttons on the right-hand
+     * side of the explorer. 
+     */
     String getStyleClass();
+    
+    /**
+     * Get the stylesheet which contains the styleclass needed to render
+     * the view.  
+     */
     String getStyleSheet();
+    
+    /**
+     * Get the type of view that this object is. 
+     */
+    ExplorerViewType getType();
 }

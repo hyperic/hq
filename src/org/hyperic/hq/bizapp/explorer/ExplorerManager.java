@@ -34,6 +34,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.explorer.providers.HQUGroupProvider;
 import org.hyperic.hq.bizapp.explorer.types.GroupItemType;
 import org.hyperic.hq.bizapp.explorer.types.GroupManagerRootItemType;
 import org.hyperic.util.StringUtil;
@@ -57,8 +58,9 @@ public class ExplorerManager {
     private static final ExplorerManager INSTANCE = new ExplorerManager();
     private static final Log _log = 
         LogFactory.getLog(ExplorerManager.class);
-    
-    private Map _types;
+
+    private final Map _types;
+    private final Map _viewProviders;
     
     private ExplorerManager() {
         _types = new HashMap();
@@ -69,6 +71,44 @@ public class ExplorerManager {
         
         GroupItemType groupType = new GroupItemType();
         _types.put(groupType.getName(), groupType);
+        
+        _viewProviders = new HashMap();
+        HQUGroupProvider gProvider = new HQUGroupProvider();
+        
+        _viewProviders.put(gProvider.getName(), gProvider);
+    }
+    
+    public void registerProvider(HQUGroupProvider provider) {
+        synchronized (_viewProviders) {
+            _viewProviders.put(provider.getName(), provider);
+        }
+    }
+    
+    public void unregisterProvider(String providerName) {
+        synchronized (_viewProviders) {
+            _viewProviders.remove(providerName);
+        }
+    }
+    
+    /**
+     * Get a list of {@link ExplorerView}s relevant to the specified item.
+     * 
+     * @return a list of {@link ExplorerView}s 
+     */
+    public List getViewsFor(ExplorerContext ctx, ExplorerItem item) {
+        Collection providers;
+        List res = new ArrayList();
+        
+        synchronized (_viewProviders) {
+            providers = new ArrayList(_viewProviders.values());
+        }
+        
+        for (Iterator i=providers.iterator(); i.hasNext(); ) {
+            ExplorerViewProvider p = (ExplorerViewProvider)i.next();
+            
+            res.addAll(p.getViewFor(ctx, item));
+        }
+        return res;
     }
     
     /**
@@ -78,7 +118,7 @@ public class ExplorerManager {
      * The type is keyed off {@link ExplorerItemType#getName()}, so any
      * item type previously using that name will be unregistered.
      */
-    public void register(ExplorerItemType type) {
+    public void registerType(ExplorerItemType type) {
         _log.info("Registring explorer item type [" + type.getName() + "]");
         synchronized (_types) {
             _types.put(type.getName(), type);
@@ -91,7 +131,7 @@ public class ExplorerManager {
      * @param name the name of the item type, as from 
      *             {@link ExplorerItemType#getName()}
      */
-    public void unregister(String name) {
+    public void unregisterType(String name) {
         _log.info("Unregistring explorer item type [" + name + "]");
         synchronized (_types) {
             _types.remove(name);

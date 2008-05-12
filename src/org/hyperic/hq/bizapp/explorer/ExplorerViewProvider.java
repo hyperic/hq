@@ -22,49 +22,21 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.bizapp.explorer.types;
+package org.hyperic.hq.bizapp.explorer;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
 
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.bizapp.explorer.ExplorerItem;
-import org.hyperic.hq.bizapp.explorer.ExplorerItemType;
-
-public class GroupItem implements ExplorerItem {
-    private final ExplorerItem  _parent;
-    private final ResourceGroup _group;
+public interface ExplorerViewProvider {
+    /**
+     * Get the name of this provider  -- a short name, used for registering
+     * and unregistring a provider.  
+     */
+    String getName();
     
-    GroupItem(ExplorerItem parent, ResourceGroup group) {
-        _parent = parent;
-        _group  = group;
-    }
-    
-    public ExplorerItem getParent() {
-        return _parent;
-    }
-
-    public String getCode() {
-        return GroupItemType.CODE_PREFIX + _group.getId();
-    }
-
-    public ResourceGroup getGroup() {
-        return _group;
-    }
-    
-    public String getLabel() {
-        return _group.getName();
-    }
-    
-    public String toString() {
-        return getLabel();
-    }
-    
-    public List getChildren() {
-        return Collections.EMPTY_LIST;
-    }
-    
-    public ExplorerItemType getType() {
-        return new GroupItemType();
-    }
+    /**
+     * Get views for a specific item.  A provider may provide multiple views.
+     * 
+     * @return a list of {@link ExplorerView}s 
+     */
+    Collection getViewFor(ExplorerContext ctx, ExplorerItem item);
 }
