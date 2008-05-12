@@ -50,14 +50,19 @@ public abstract class GroupManager extends MenuPage {
         }
     }
     
-    public List getGroupList() {
+    private SimpleExplorerContext makeContext() {
         Integer sId = getBaseSessionBean().getWebUser().getSubject().getId();
         AuthzSubject subject = 
             AuthzSubjectManagerEJBImpl.getOne().findSubjectById(sId);
-        SimpleExplorerContext ctx = new SimpleExplorerContext(subject);
         
+        return new SimpleExplorerContext(subject); 
+    }
+    
+    public List getGroupList() {
+        ExplorerContext ctx = makeContext();
         GroupManagerRootItem root = (GroupManagerRootItem) 
-            _expMan.findChild(ctx, null, GroupManagerRootItemType.CODE); 
+            _expMan.findChild(ctx, null, 
+                              GroupManagerRootItemType.CODE); 
                               
         List res = new ArrayList();
         flattenList(ctx, res, root, 0);
@@ -70,7 +75,21 @@ public abstract class GroupManager extends MenuPage {
     }
     
     public void selectGroup(IRequestCycle cycle, String id) {
-        _log.info("Selected item [" + id + "]");
-        cycle.getResponseBuilder().updateComponent("innerDiv");        
+        _log.info("Item selected: [" + id + "]");
+        ExplorerContext ctx = makeContext();
+        ExplorerManager expMan = ExplorerManager.getInstance();
+        ExplorerItem item = expMan.findItem(ctx, id);
+        _log.info("Item for id[" + id + "] = " + item);
+        
+        if (item == null) {
+            _log.warn("Unable to find explorer item by id[" + id + "]");
+            return;
+        }
+        
+        _log.info("Finding views for id[" + id + "]");
+        List views = expMan.getViewsFor(ctx, item);  
+        
+        _log.info("Found views [" + views + "] for item id[" + id + "]");
+        cycle.getResponseBuilder().updateComponent("innerDiv");
     }
 }
