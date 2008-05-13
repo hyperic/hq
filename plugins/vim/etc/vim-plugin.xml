@@ -1,3 +1,16 @@
 <plugin>
+  <!-- from netservices-plugin -->
+  <property name="hostname" value="esxhost"/>
+  <property name="port" value="443"/>
+  <config name="vi" include="sockaddr,credentials"/>
 
+  <platform name="VI Host">
+
+    <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+    <plugin type="collector" class="org.hyperic.hq.plugin.vim.VimHostCollector"/>
+
+    <property name="template" value="vim:${vi.config},Type=VIHost:${alias}"/>
+
+    <metric name="Availability" indicator="true"/>
+  </platform>
 </plugin>
