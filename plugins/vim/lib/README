@@ -1,0 +1,9 @@
+vi-sdk-2.5.0-64154.zip:
+vim.jar - (rebuilt w/ jdk 1.4)
+
+axis-bin-1_4.tar.gz:
+axis.jar
+commons-discovery-0.2.jar
+jaxrpc.jar
+saaj.jar
+wsdl4j-1.5.1.jar
