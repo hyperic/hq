@@ -189,7 +189,7 @@ public abstract class PermissionManager extends AuthzSession {
         getAllOperations(AuthzSubject subject, PageControl pc)
         throws PermissionException, FinderException;
 
-    public abstract String getResourceTypeSQL(String table,
+    public abstract String getResourceTypeSQL(String instanceId,
                                               Integer subjectId,
                                               String resType,
                                               String op);

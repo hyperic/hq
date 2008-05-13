@@ -135,8 +135,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "SELECT PLATT.NAME, COUNT(PLAT.ID) " +
                 "FROM EAM_PLATFORM_TYPE PLATT, " + TBL_PLATFORM +" PLAT " +
                 "WHERE PLAT.PLATFORM_TYPE_ID = PLATT.ID " +
-                "  AND PLAT.ID IN (" +
-                    pm.getResourceTypeSQL(TBL_PLATFORM, subjectId, platformResType, platformOpViewPlatform) + ") " + 
+                "  AND EXISTS (" +
+                    pm.getResourceTypeSQL("PLAT.ID", subjectId, platformResType, platformOpViewPlatform) + ") " + 
                 "GROUP BY PLATT.NAME ORDER BY PLATT.NAME";
             stmt = conn.createStatement();
     
@@ -180,9 +180,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             String sql =
                 "SELECT COUNT(PLAT.ID) " +
                 "FROM EAM_PLATFORM_TYPE PLATT, " + TBL_PLATFORM + " PLAT " +
-                "WHERE PLAT.PLATFORM_TYPE_ID = PLATT.ID " +
-                "  AND PLAT.ID IN (" +
-                    pm.getResourceTypeSQL(TBL_PLATFORM, subjectId, platformResType, platformOpViewPlatform) + ")";
+                "WHERE PLAT.PLATFORM_TYPE_ID = PLATT.ID AND EXISTS (" +
+                    pm.getResourceTypeSQL("PLAT.ID", subjectId, platformResType, platformOpViewPlatform) + ")";
             stmt = conn.createStatement();
 
             if (log.isDebugEnabled())
@@ -220,9 +219,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             String sql =
                 "SELECT SERVT.NAME, COUNT(SERV.ID) " +
                 "FROM EAM_SERVER_TYPE SERVT, " + TBL_SERVER + " SERV " +
-                "WHERE SERV.SERVER_TYPE_ID = SERVT.ID " +
-                "  AND SERV.ID IN (" +
-                    pm.getResourceTypeSQL(TBL_SERVER, subjectId, serverResType, serverOpViewServer) + ") " +
+                "WHERE SERV.SERVER_TYPE_ID = SERVT.ID AND EXISTS (" +
+                    pm.getResourceTypeSQL("SERV.ID", subjectId, serverResType, serverOpViewServer) + ") " +
                 "GROUP BY SERVT.NAME ORDER BY SERVT.NAME";
             stmt = conn.createStatement();
     
@@ -261,9 +259,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             String sql =
                 "SELECT COUNT(SERV.ID) " +
                 "FROM EAM_SERVER_TYPE SERVT, " + TBL_SERVER + " SERV " +
-                "WHERE SERV.SERVER_TYPE_ID = SERVT.ID " +
-                "  AND SERV.ID IN (" +
-                    pm.getResourceTypeSQL(TBL_SERVER, subjectId, serverResType, serverOpViewServer) + ") ";
+                "WHERE SERV.SERVER_TYPE_ID = SERVT.ID AND EXISTS (" +
+                    pm.getResourceTypeSQL("SERV.ID", subjectId, serverResType, serverOpViewServer) + ") ";
             stmt = conn.createStatement();
     
             rs = stmt.executeQuery(sql);
@@ -300,7 +297,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "FROM EAM_SERVICE_TYPE SVCT, " + TBL_SERVICE + " SVC " +
                 "WHERE SVC.SERVICE_TYPE_ID = SVCT.ID " +
                 "  AND SVC.ID IN (" +
-                    pm.getResourceTypeSQL(TBL_SERVICE, subjectId, serviceResType, serviceOpViewService) + ") " +
+                    pm.getResourceTypeSQL("SVC.ID", subjectId, serviceResType, serviceOpViewService) + ") " +
                 "GROUP BY SVCT.NAME ORDER BY SVCT.NAME";
             stmt = conn.createStatement();
     
@@ -338,14 +335,13 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             String sql =
                 "SELECT COUNT(SVC.ID) " +
                 "FROM EAM_SERVICE_TYPE SVCT, " + TBL_SERVICE + " SVC " +
-                "WHERE SVC.SERVICE_TYPE_ID = SVCT.ID " +
-                "  AND SVC.ID IN (" +
-                    pm.getResourceTypeSQL(TBL_SERVICE, subjectId, serviceResType, serviceOpViewService) + ") ";
+                "WHERE SVC.SERVICE_TYPE_ID = SVCT.ID AND EXISTS (" +
+                    pm.getResourceTypeSQL("SVC.ID", subjectId, serviceResType, serviceOpViewService) + ") ";
             stmt = conn.createStatement();
     
             rs = stmt.executeQuery(sql);
     
-            while (rs.next()) {
+            if (rs.next()) {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
@@ -376,8 +372,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "SELECT APPT.NAME, COUNT(APP.ID) " +
                 "FROM EAM_APPLICATION_TYPE APPT, EAM_APPLICATION APP " +
                 "WHERE APP.APPLICATION_TYPE_ID = APPT.ID " +
-                " AND APP.ID IN (" +
-                    pm.getResourceTypeSQL("EAM_APPLICATION", subjectId, applicationResType, applicationOpViewApplication)
+                " AND EXISTS (" +
+                    pm.getResourceTypeSQL("APP.ID", subjectId, applicationResType, applicationOpViewApplication)
                     + ") " +
                 "GROUP BY APPT.NAME ORDER BY APPT.NAME";
             stmt = conn.createStatement();
@@ -418,8 +414,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "SELECT COUNT(APP.ID) " +
                 "FROM EAM_APPLICATION_TYPE APPT, EAM_APPLICATION APP " +
                 "WHERE APP.APPLICATION_TYPE_ID = APPT.ID " +
-                " AND APP.ID IN (" +
-                    pm.getResourceTypeSQL("EAM_APPLICATION", subjectId, applicationResType, applicationOpViewApplication) +
+                " AND EXISTS (" +
+                    pm.getResourceTypeSQL("APP.ID", subjectId, applicationResType, applicationOpViewApplication) +
                 ") ";
             stmt = conn.createStatement();
     
@@ -458,8 +454,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 String sql =
                     "SELECT COUNT(*) FROM " + TBL_GROUP + " GRP " +
                     "WHERE GRP.GROUPTYPE = " + groupTypes[x] + " " +
-                    " AND GRP.ID IN (" +
-                        pm.getResourceTypeSQL(TBL_GROUP,
+                    " AND EXISTS (" +
+                        pm.getResourceTypeSQL("GRP.ID",
                                               subjectId, groupResType,
                                               groupOpViewResourceGroup)
                         + ")";
@@ -558,16 +554,15 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                .append("        FROM   EAM_APP_SERVICE appsvc ");
             if (DB_TYPE == DBUtil.DATABASE_ORACLE_8) {
                 buf.append(", EAM_APPLICATION app ")
-                   .append("WHERE app.id=appsvc.application_id(+) AND ")
-                   .append("app.id IN (")
-                   .append(pm.getResourceTypeSQL("EAM_APPLICATION", subjectId,applicationResType, applicationOpViewApplication))
+                   .append("WHERE app.id=appsvc.application_id(+) AND EXISTS (")
+                   .append(pm.getResourceTypeSQL("app.id", subjectId,applicationResType, applicationOpViewApplication))
                    .append(") ) app_appsvc, ");
             }
             else {
                 buf.append("RIGHT JOIN EAM_APPLICATION app ")
                    .append("ON app.id=appsvc.application_id ")
-                   .append("WHERE app.id IN (")
-                   .append(pm.getResourceTypeSQL("EAM_APPLICATION", subjectId, applicationResType, applicationOpViewApplication))
+                   .append("WHERE EXISTS (")
+                   .append(pm.getResourceTypeSQL("app.id", subjectId, applicationResType, applicationOpViewApplication))
                    .append(") ) app_appsvc RIGHT JOIN ");
             }
             buf.append("(SELECT svr_svrt.server_id, svr_svrt.server_name,")
@@ -582,8 +577,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                .append("               FROM   " + TBL_SERVICE + " svc, ")
                .append("                      EAM_SERVICE_TYPE svct ")
                .append("               WHERE  svc.service_type_id=svct.id ") 
-               .append("                  AND svc.id IN (")
-               .append(pm.getResourceTypeSQL(TBL_SERVICE, subjectId, serviceResType, serviceOpViewService))
+               .append("                  AND EXISTS (")
+               .append(pm.getResourceTypeSQL("svc.id", subjectId, serviceResType, serviceOpViewService))
                .append(") ) svc_svct ");
             if(DB_TYPE == DBUtil.DATABASE_ORACLE_8) {
                 buf.append(",");
@@ -602,8 +597,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                // exclude virtual server types from the navMap
                .append("                    AND svrt.fvirtual = " + falseStr + " ")
                .append("                    AND svrt.id=svr.server_type_id ")
-               .append("                    AND svr.id IN (")
-               .append(pm.getResourceTypeSQL(TBL_SERVER, subjectId,serverResType, serverOpViewServer))
+               .append("                    AND EXISTS (")
+               .append(pm.getResourceTypeSQL("svr.id", subjectId,serverResType, serverOpViewServer))
                .append(") ) svr_svrt ");
             if(DB_TYPE == DBUtil.DATABASE_ORACLE_8) {
                 buf.append(" WHERE svr_svrt.server_id=svc_svct.server_id(+)")
@@ -728,14 +723,14 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                     DB_TYPE == DBUtil.DATABASE_ORACLE_10) {
                 buf.append("                 , EAM_APPLICATION app ")
                    .append("                 WHERE     app.id=appsvc.application_id(+) ")
-                   .append("                       AND app.id IN (")
-                   .append(pm.getResourceTypeSQL("EAM_APPLICATION", subjectId,applicationResType, applicationOpViewApplication))
+                   .append("                       AND EXISTS (")
+                   .append(pm.getResourceTypeSQL("app.id", subjectId,applicationResType, applicationOpViewApplication))
                    .append(") ) app_appsvc, ");
             } else {
                 buf.append("                 RIGHT JOIN EAM_APPLICATION app ")
                    .append("                 ON app.id=appsvc.application_id ")
-                   .append("        WHERE app.id IN (")
-                   .append(pm.getResourceTypeSQL("EAM_APPLICATION", subjectId,applicationResType, applicationOpViewApplication))
+                   .append("        WHERE EXISTS (")
+                   .append(pm.getResourceTypeSQL("app.id", subjectId,applicationResType, applicationOpViewApplication))
                    .append(") ) app_appsvc RIGHT JOIN ");
             }
             buf.append("       (SELECT svc_svct.service_id, svc_svct.service_name, ")
@@ -750,8 +745,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                .append("                      FROM   " + TBL_SERVICE + " svc, ")
                .append("                             EAM_SERVICE_TYPE svct ")
                .append("                      WHERE  svc.service_type_id=svct.id ")
-               .append("                             AND svc.id IN (")
-               .append(pm.getResourceTypeSQL(TBL_SERVICE, subjectId, serviceResType, serviceOpViewService))
+               .append("                             AND EXISTS (")
+               .append(pm.getResourceTypeSQL("svc.id", subjectId, serviceResType, serviceOpViewService))
                .append(") ) svc_svct ");
             if(DB_TYPE == DBUtil.DATABASE_ORACLE_8 || DB_TYPE == DBUtil.DATABASE_ORACLE_9
                     || DB_TYPE == DBUtil.DATABASE_ORACLE_10) {
@@ -764,8 +759,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                .append(serverVo.getId().intValue())
                .append("                          AND platt.id=plat.platform_type_id ")
                .append("                          AND plat.id=svr.platform_id ")
-               .append("                          AND plat.id IN (")
-               .append(pm.getResourceTypeSQL(TBL_PLATFORM, subjectId,platformResType, platformOpViewPlatform))
+               .append("                          AND EXISTS (")
+               .append(pm.getResourceTypeSQL("plat.id", subjectId,platformResType, platformOpViewPlatform))
                .append(") AND plat.resource_id = res0.id ");
             
             if(DB_TYPE == DBUtil.DATABASE_ORACLE_8 || DB_TYPE == DBUtil.DATABASE_ORACLE_9
@@ -898,8 +893,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                                     "platt.name as platform_type_name " +
                              "FROM EAM_PLATFORM_TYPE platt, " + TBL_PLATFORM + " plat, EAM_RESOURCE res0 "+
                              "WHERE plat.platform_type_id=platt.id AND plat.resource_id = res0.id AND " +
-                                   "plat.id IN (")
-               .append(pm.getResourceTypeSQL(TBL_PLATFORM, subjectId, platformResType, platformOpViewPlatform))
+                                   "EXISTS (")
+               .append(pm.getResourceTypeSQL("plat.id", subjectId, platformResType, platformOpViewPlatform))
                .append(")) plat ");
             
             if(DB_TYPE == DBUtil.DATABASE_ORACLE_8) {
@@ -928,8 +923,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 buf.append("                            , EAM_APPLICATION app, EAM_APPLICATION_TYPE ")
                    .append("                              WHERE     app.id=appsvc.application_id(+) ")
                    .append("                                    AND EAM_APPLICATION_TYPE.id=app.application_type_id ")
-                   .append("                                    AND app.id IN (")
-                   .append(pm.getResourceTypeSQL("EAM_APPLICATION", subjectId, applicationResType, applicationOpViewApplication))
+                   .append("                                    AND EXISTS (")
+                   .append(pm.getResourceTypeSQL("app.id", subjectId, applicationResType, applicationOpViewApplication))
                    .append(") ) app_appsvc, " + TBL_SERVICE + " svc WHERE svc.id=app_appsvc.service_id(+) AND svc.id=")
                    .append(serviceVo.getId().intValue())
                    .append(") asvc ");
@@ -938,8 +933,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                    .append("                                    ON app.id=appsvc.application_id, ")
                    .append("                                    EAM_APPLICATION_TYPE  ")
                    .append("                            WHERE EAM_APPLICATION_TYPE.id=app.application_type_id AND ")
-                   .append("                                  app.id IN (")
-                   .append(pm.getResourceTypeSQL("EAM_APPLICATION", subjectId, applicationResType, applicationOpViewApplication))
+                   .append("                                  EXISTS (")
+                   .append(pm.getResourceTypeSQL("app.id", subjectId, applicationResType, applicationOpViewApplication))
                    .append(") ) app_appsvc RIGHT JOIN " + TBL_SERVICE + " svc ")
                    .append("                            ON svc.id=app_appsvc.service_id ")
                    .append("                        WHERE     svc.id=")
@@ -951,22 +946,22 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                    .append("             WHERE svr.server_type_id=svrt.id ")
                    .append("               AND asvc.server_id=svr.id(+) ")
                    .append("               AND (fvirtual = ").append(trueStr)
-                   .append("                OR svr.id IN (")
-                   .append(pm.getResourceTypeSQL(TBL_SERVER, subjectId, serverResType, serverOpViewServer))
+                   .append("                OR EXISTS (")
+                   .append(pm.getResourceTypeSQL("svr.id", subjectId, serverResType, serverOpViewServer))
                    .append(")) ) asvc_svr, ")
                    .append("      EAM_PLATFORM_TYPE platt ")
                    .append("WHERE plat.platform_type_id=platt.id ")
                    .append("  AND asvc_svr.platform_id=plat.id(+) ")
-                   .append("  AND plat.id IN (")
-                   .append(pm.getResourceTypeSQL(TBL_PLATFORM, subjectId, platformResType, platformOpViewPlatform))
+                   .append("  AND EXISTS (")
+                   .append(pm.getResourceTypeSQL("plat.id", subjectId, platformResType, platformOpViewPlatform))
                    .append(") ");
             } else {
                 buf.append("      ON asvc.server_id=svr.id, ")
                    .append("            EAM_SERVER_TYPE svrt ")
                    .append("             WHERE svr.server_type_id=svrt.id ")
                    .append("               AND (fvirtual = ").append(trueStr)
-                   .append("                OR svr.id IN (")
-                   .append(pm.getResourceTypeSQL(TBL_SERVER, subjectId, serverResType, serverOpViewServer))
+                   .append("                OR EXISTS (")
+                   .append(pm.getResourceTypeSQL("svr.id", subjectId, serverResType, serverOpViewServer))
                    .append(")) ) asvc_svr ")
                    .append("     ON asvc_svr.platform_id = plat.platform_id");
             }
@@ -1091,8 +1086,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             .append("SELECT grp.id as group_id, grp.name as group_name,")
                 .append(" cluster_id ")
             .append(" FROM " + TBL_GROUP + " grp ")
-            .append(" WHERE grp.id IN (")
-            .append(pm.getResourceTypeSQL(TBL_GROUP, subjectId,
+            .append(" WHERE EXISTS (")
+            .append(pm.getResourceTypeSQL("grp.id", subjectId,
                 groupResType, groupOpViewResourceGroup))
             .append(")");
         return rtn.toString();
@@ -1103,8 +1098,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             .append("SELECT svc.id as service_id, svc.name as service_name,")
                 .append(" server_id")
         	.append(" FROM  " + TBL_SERVICE + " svc")
-        	.append(" WHERE svc.id IN (")
-            .append(pm.getResourceTypeSQL(TBL_SERVICE, subjectId,
+        	.append(" WHERE EXISTS (")
+            .append(pm.getResourceTypeSQL("svc.id", subjectId,
                 serviceResType, serviceOpViewService))
             .append(")");
         return rtn.toString();
@@ -1336,11 +1331,12 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             Connection conn = getDBConn();
 
             final String platAGSql =
-                "SELECT    p.id as platform_id, p.name as platform_name,            "+
+                "SELECT    p.id as platform_id, res.name as platform_name,          "+
                 "          pt.id as platform_type_id, pt.name as platform_type_name "+
-                "FROM      " + TBL_PLATFORM + " p, EAM_PLATFORM_TYPE pt                     "+
+                "FROM      " + TBL_PLATFORM + " p, EAM_PLATFORM_TYPE pt, EAM_RESOURCE res   "+
                 "WHERE     p.platform_type_id=pt.id AND platform_type_id="+artVo.getId()+
-                "      AND p.id IN (" + pm.getResourceTypeSQL(TBL_PLATFORM, subjectId,platformResType, platformOpViewPlatform) + ") ";
+                "      AND p.resource_id = res.id AND EXISTS (" +
+                pm.getResourceTypeSQL("p.id", subjectId,platformResType, platformOpViewPlatform) + ") ";
 
             final String svrAGSql =
                 "SELECT    s.id as server_id, s.name as server_name,                "+
@@ -1349,7 +1345,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "WHERE     s.server_type_id=st.id AND platform_id in                "+
                 "          ( "+bindMarkerStr+" )                                    "+
                 "      AND server_type_id="+artVo.getId()                            +
-                "      AND s.id IN (" + pm.getResourceTypeSQL(TBL_SERVER, subjectId,serverResType, serverOpViewServer) + ") ";
+                "      AND EXISTS (" + pm.getResourceTypeSQL("s.id", subjectId,serverResType, serverOpViewServer) + ") ";
 
             final String svcAGSql = 
                 "SELECT    s.id as service_id, s.name as service_name,              "+
@@ -1358,7 +1354,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "WHERE     s.service_type_id=st.id AND s.server_id in               "+
                 "          ( "+bindMarkerStr+" )                                    "+
                 "      AND s.service_type_id="+artVo.getId()                         +
-                "      AND s.id IN (" + pm.getResourceTypeSQL(TBL_SERVICE, subjectId,serviceResType, serviceOpViewService) + ") ";
+                "      AND EXISTS (" + pm.getResourceTypeSQL("s.id", subjectId,serviceResType, serviceOpViewService) + ") ";
 
             final String appSvcAGSql = 
                 "SELECT    s.id as service_id, s.name as service_name,              "+
@@ -1367,7 +1363,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "WHERE     s.service_type_id=st.id and s.id=aps.service_id          "+
                 "          and aps.application_id in ( "+bindMarkerStr+" )          "+
                 "      AND s.service_type_id="+artVo.getId()                         +
-                "      AND s.id IN (" + pm.getResourceTypeSQL(TBL_SERVICE, subjectId,serviceResType, serviceOpViewService) + ") ";
+                "      AND EXISTS (" + pm.getResourceTypeSQL("s.id", subjectId,serviceResType, serviceOpViewService) + ") ";
 
             switch (pEntityType) {
             case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM) :
@@ -1523,9 +1519,10 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             Connection conn = getDBConn();
 
             final String grpPlatSql = 
-                "SELECT    p.id as platform_id, p.name as platform_name "+
-                "FROM      " + TBL_PLATFORM + " p "+       
-                "WHERE     p.id IN ("+bindMarkerStr+") ";
+                "SELECT    p.id as platform_id, res.name as platform_name "+
+                "FROM      " + TBL_PLATFORM + " p, EAM_RESOURCE res "+       
+                "WHERE     p.id IN ("+bindMarkerStr+") AND " +
+                		  "p.resource_id = res.id";
 
             final String grpSvrSql = 
                 "SELECT    s.id as server_id, s.name as server_name "+
