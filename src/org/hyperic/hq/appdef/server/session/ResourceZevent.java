@@ -66,7 +66,16 @@ public abstract class ResourceZevent extends Zevent {
         }
 
         public boolean equals(Object other) {
-            return _id.equals(other);
+            if (other == this) {
+                return true;
+            }
+            
+            if (other instanceof ResourceZeventSource) {
+                ResourceZeventSource src = (ResourceZeventSource)other;
+                return _id.equals(src._id);                
+            }
+            
+            return false;
         }
     }
 
