@@ -191,7 +191,10 @@ public class PluginDumper {
 
             try {
                 is = new FileInputStream(file);
-                this.props.load(is);
+                Properties pp = new Properties();
+                pp.load(is);
+                this.defines.putAll(pp);
+                this.props.putAll(pp);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
