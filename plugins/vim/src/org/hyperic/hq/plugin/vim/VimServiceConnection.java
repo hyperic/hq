@@ -92,6 +92,14 @@ public class VimServiceConnection {
         return _sic;
     }
 
+    public ManagedObjectReference getPropCol() {
+        return _sic.getPropertyCollector();
+    }
+
+    public ManagedObjectReference getRootFolder() {
+        return _sic.getRootFolder();
+    }
+
     public void disconnect() throws Exception {
         if (_service != null) {
             _service.logout(_sic.getSessionManager());

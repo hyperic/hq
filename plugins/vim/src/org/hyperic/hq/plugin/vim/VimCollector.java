@@ -25,37 +25,41 @@
 
 package org.hyperic.hq.plugin.vim;
 
+import java.util.Properties;
+
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 
 public abstract class VimCollector extends Collector {
 
     public static final String PROP_URL = "url";
+    protected Properties _props;
 
-    protected abstract void collect(VimServiceConnection conn)
+    protected abstract void collect(VimUtil vim)
         throws Exception;
 
     protected void init() throws PluginException {
         super.init();
-        setSource(VimUtil.getURL(getProperties()));
+        _props = getProperties();
+        setSource(VimUtil.getURL(_props));
+    }
+
+    protected String getHostname() {
+        return _props.getProperty(PROP_HOSTNAME);
     }
 
     public void collect() {
-        VimServiceConnection conn = null;
+        VimUtil vim = new VimUtil();
 
         try {
-            conn = VimUtil.getServiceConnection(getProperties());
-            setAvailability(conn.isConnected());
-            collect(conn);
+            vim.init(getProperties());
+            setAvailability(vim.getConn().isConnected());
+            collect(vim);
         } catch (Exception e) {
             setAvailability(false);
             setErrorMessage(e.getMessage(), e);
         } finally {
-            if (conn != null) {
-                try {
-                    conn.disconnect();
-                } catch (Exception e) { }
-            }
+            vim.dispose();
         }
     }
 }

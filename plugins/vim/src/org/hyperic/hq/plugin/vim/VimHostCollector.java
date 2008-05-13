@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.vim;
 
 public class VimHostCollector extends VimCollector {
 
-    public void collect(VimServiceConnection conn)
+    public void collect(VimUtil vim)
         throws Exception {
 
     }

@@ -29,18 +29,55 @@ import java.util.Properties;
 
 public class VimUtil {
 
+    VimServiceConnection _conn;
+    VimServiceUtil _util;
+
+    public VimUtil() {
+        _conn = new VimServiceConnection();
+        _util = new VimServiceUtil(_conn);
+    }
+
+    public void init(Properties props) throws Exception {
+        initServiceConnection(_conn, props);
+    }
+
+    public void dispose() {
+        if (_conn != null) {
+            try {
+                _conn.disconnect();
+            } catch (Exception e) {}
+        }
+        _conn = null;
+        _util = null;
+    }
+
+    public VimServiceConnection getConn() {
+        return _conn;
+    }
+
+    public VimServiceUtil getUtil() {
+        return _util;
+    }
+
     public static String getURL(Properties props) {
         return props.getProperty(VimCollector.PROP_URL);
+    }
+
+    private static void initServiceConnection(VimServiceConnection conn,
+                                              Properties props)
+        throws Exception {
+
+        String url = getURL(props);
+        String username = props.getProperty(VimCollector.PROP_USERNAME);
+        String password = props.getProperty(VimCollector.PROP_PASSWORD);        
+        conn.connect(url, username, password);
     }
 
     public static VimServiceConnection getServiceConnection(Properties props)
         throws Exception {
 
-        String url = getURL(props);
-        String username = props.getProperty(VimCollector.PROP_USERNAME);
-        String password = props.getProperty(VimCollector.PROP_PASSWORD);
         VimServiceConnection conn = new VimServiceConnection();
-        conn.connect(url, username, password);
+        initServiceConnection(conn, props);
         return conn;
     }
 }
