@@ -1142,6 +1142,8 @@
 
     <hqplugin name="vmware"/>
 
+    <hqplugin name="vim"/>
+
     <hqplugin name="groovy-scripting"/>
   </target>
   
