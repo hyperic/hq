@@ -271,10 +271,15 @@ class HQUPlugin implements IHQUPlugin {
                     return null
             }
         }
-                        
+
+        String iconClass = descriptor.getProperty('plugin.iconClass')
+        if (!iconClass) {
+            iconClass = "favoriteIcon";
+        }
+        
         new SimpleAttachmentDescriptor(a, 
                                        descriptor.getProperty('plugin.helpTag'), 
-                                       description)
+                                       description, iconClass)
     }
     
     String getDescription() {

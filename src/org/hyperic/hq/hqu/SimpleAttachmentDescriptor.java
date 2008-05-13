@@ -31,13 +31,22 @@ public class SimpleAttachmentDescriptor implements AttachmentDescriptor {
     private Attachment _attachment;
     private String     _helpTag;
     private String     _html;
+    private String     _iconClass;
 
     public SimpleAttachmentDescriptor(Attachment a, String helpTag,
                                       String html)
     {
+        this(a, helpTag, html, "favoriteIcon"); 
+        // XXX:  Need a better default than favouriteIcon
+    }
+    
+    public SimpleAttachmentDescriptor(Attachment a, String helpTag,
+                                      String html, String iconClass) 
+    {
         _attachment = a;
         _helpTag    = helpTag;
         _html       = html;
+        _iconClass  = iconClass;
     }
     
     public Attachment getAttachment() {
@@ -50,5 +59,9 @@ public class SimpleAttachmentDescriptor implements AttachmentDescriptor {
 
     public String getHTML() {
         return _html;
+    }
+    
+    public String getIconClass() {
+        return _iconClass;
     }
 }
