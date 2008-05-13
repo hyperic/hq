@@ -1,0 +1,10 @@
+<div>
+  <li jwcid="@For" source="ognl:buttons" value="ognl:button" element="li">
+    <span jwcid="@DirectLink" async="true"
+          listener="listener:selectButton" 
+          parameters="ognl:button.id">
+      <span jwcid="@RenderBlock" block="ognl:buttonBlock"
+            button="ognl:button"/>
+    </span>
+  </li>    
+</div>

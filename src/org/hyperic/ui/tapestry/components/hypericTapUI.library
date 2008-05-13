@@ -58,6 +58,7 @@
     <component-type type="NavigationContext" specification-path="navigation/NavigationContext.jwc"/>
     
     <component-type type="ListPanel" specification-path="panel/ListPanel.jwc"/>
+    <component-type type="RadioButtonPanel" specification-path="panel/RadioButtonPanel.jwc"/>
     <component-type type="MessagePanel" specification-path="panel/MessagePanel.jwc"/>
     <component-type type="NotificationPanel" specification-path="panel/NotificationPanel.jwc"/>
     <component-type type="SearchPanel" specification-path="panel/SearchPanel.jwc"/>
