@@ -28,10 +28,8 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeSet;
 
 import javax.ejb.EJBLocalObject;
@@ -43,7 +41,6 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -56,7 +53,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -1086,51 +1082,4 @@ public abstract class AppdefSessionEJB
         }
     }
 
-    /**
-     * Map a ResourceGroup to ServiceCluster, just temporary,
-     * should be able to remove when done with the
-     * ServiceCluster to ResourceGroup Migration
-     * @ejb:interface-method
-     */
-    public ServiceCluster getServiceCluster(ResourceGroup group) {
-        if (group == null) {
-            return null;
-        }
-        ServiceCluster sc = new ServiceCluster();
-        sc.setName(group.getName());
-        sc.setDescription(group.getDescription());
-        sc.setGroup(group);
-        
-        Collection resources = 
-            ResourceGroupManagerEJBImpl.getOne().getMembers(group);
-    
-        Set services = new HashSet(resources.size());
-        ServiceDAO dao = getServiceDAO();
-        ServiceType st = null;
-        for (Iterator i = resources.iterator(); i.hasNext();) {
-            Resource resource = (Resource) i.next();
-            // this should not be the case
-            if (!resource.getResourceType().getId()
-                    .equals(AuthzConstants.authzService)) {
-                continue;
-            }
-            Service service = dao.findById(resource.getInstanceId());
-            if (st == null) {
-                st = service.getServiceType();
-            }
-            services.add(service);
-            service.setResourceGroup(sc.getGroup());
-        }
-        sc.setServices(services);
-        
-        if (st == null && group.getResourcePrototype() != null) {
-            st = getServiceTypeDAO()
-                .findById(group.getResourcePrototype().getInstanceId());
-        }
-        
-        if (st != null) {
-            sc.setServiceType(st);
-        }
-        return sc;
-    }
 }
