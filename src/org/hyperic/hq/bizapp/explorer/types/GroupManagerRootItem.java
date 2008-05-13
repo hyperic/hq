@@ -99,6 +99,9 @@ public class GroupManagerRootItem implements ExplorerItem {
         for (Iterator i=sorted.iterator(); i.hasNext(); ) {
             ResourceGroup g = (ResourceGroup)i.next();
             
+            if (g.isSystem())
+                continue;
+            
             _groupItems.add(new GroupItem(this, g));
         }
         _groupItems = Collections.unmodifiableList(_groupItems);

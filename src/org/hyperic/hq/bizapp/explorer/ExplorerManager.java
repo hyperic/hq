@@ -53,6 +53,27 @@ import org.hyperic.util.StringUtil;
  * are adopted, and specified by some other {@link ExplorerItemType}.  Calling
  * the hierarchy methods from the manager ensures that both sets of children
  * are accounted for.
+ * 
+ * The major players in the Explorer code is the {@link ExplorerManager}, 
+ * the {@link ExplorerItemType}, and {@link ExplorerViewProvider}.
+ * 
+ * There are 2 main phases in dealing with the explorer.
+ * 
+ * First part:  Generating a tree
+ *   1 - Querying ExplorerManager (via findAllChildren(), you can create a 
+ *       tree represented by ExplorerItems
+ *   2 - To fill out this tree of ExplorerItems, the manager talks to 
+ *       ExplorerTypes which have been registered, asking if they have children
+ *       for the currently processed node.
+ *       
+ * Second part:  After selecting an ExplorerItem, getting the views
+ *   1 - Once an ExplorerItem is obtained, you can ask the ExplorerManager
+ *       which views it has onto that item.
+ *   2 - The ExplorerManager then asks all the registered ExplorerViewProviders
+ *       for their views of that item, and returns them in a list.
+ *       
+ * Finally, the UI can take that list of views and present their associated
+ * content in the right-hand side.
  */
 public class ExplorerManager {
     private static final ExplorerManager INSTANCE = new ExplorerManager();

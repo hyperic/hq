@@ -41,11 +41,18 @@ import org.hyperic.hq.bizapp.explorer.ExplorerViewType;
 import org.hyperic.hq.bizapp.explorer.types.GroupItem;
 import org.hyperic.hq.bizapp.explorer.types.GroupItemType;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
+import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
-import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
 
+/**
+ * This provider is capable of providing views for {@link GroupItem}s.
+ * 
+ * The views returned are of type {@link ExplorerViewHQUGroup} and represent
+ * all the views a user can see on their 'Views' tab of the group's 
+ * indicator page. 
+ */
 public class HQUGroupProvider implements ExplorerViewProvider {
     private final UIPluginManagerLocal _pluginMan = 
         UIPluginManagerEJBImpl.getOne();
@@ -72,20 +79,25 @@ public class HQUGroupProvider implements ExplorerViewProvider {
         List res = new ArrayList(desc.size());
         
         for (Iterator i=desc.iterator(); i.hasNext(); ) {
-            AttachmentDescriptor d = (AttachmentDescriptor)i.next();
-            final View v = d.getAttachment().getView();
+            final AttachmentDescriptor d = (AttachmentDescriptor)i.next();
+            final String viewName =
+                d.getAttachment().getView().getPlugin().getName();
             
             ExplorerView eview = new ExplorerViewHQUGroup() {
-                public String getStyleSheet() {
-                    return "myStyleSheet";
+                public String getName() {
+                    return viewName; 
+                }
+
+                public String getText() {
+                    return d.getAttachment().getView().getDescription();
                 }
 
                 public String getStyleClass() {
-                    return "myStyleClass";
+                    return d.getIconClass();
                 }
                 
-                public View getView() {
-                    return v;
+                public AttachmentDescriptor getAttachmentDescriptor() {
+                    return d;
                 }
 
                 public ExplorerViewType getType() {

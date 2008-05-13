@@ -24,12 +24,12 @@
  */
 package org.hyperic.hq.bizapp.explorer;
 
-import org.hyperic.hq.hqu.server.session.View;
+import org.hyperic.hq.hqu.AttachmentDescriptor;
 
 /**
  * Views of this type represent views that are tied to groups via the
  * resource / views tab. 
  */
 public interface ExplorerViewHQUGroup extends ExplorerView {
-    View getView();
+    AttachmentDescriptor getAttachmentDescriptor();
 }

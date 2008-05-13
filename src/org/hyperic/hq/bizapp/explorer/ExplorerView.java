@@ -25,21 +25,31 @@
 package org.hyperic.hq.bizapp.explorer;
 
 /**
- * An ExplorerView represents a complex view of a selection the left-hand
- * side of an explorer.  
+ * An ExplorerView represents 1 (of possibly many) views of the selection 
+ * on the left-hand side of the explorer.  
+ * 
+ * It describes 2 things:
+ *    1 - The button used to select the view
+ *    2 - The location of the view's content   
  */
 public interface ExplorerView {
+    /**
+     * Get the name of this view.  Should be a unique string like
+     * "criteriaEditor" or "alertCenter"
+     */
+    String getName();
+    
     /**
      * Get the styleclass used to render the view buttons on the right-hand
      * side of the explorer. 
      */
     String getStyleClass();
-    
+
     /**
-     * Get the stylesheet which contains the styleclass needed to render
-     * the view.  
+     * Get a text description of this view:
+     *   e.g. "Criteria Editor" 
      */
-    String getStyleSheet();
+    String getText();
     
     /**
      * Get the type of view that this object is. 
