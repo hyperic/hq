@@ -178,7 +178,10 @@
               
         <data ID="59" PROPKEY="REPORT_STATS_SIZE" PROPVALUE="1000" 
               DEFAULT_PROPVALUE="1000" FREAD_ONLY="FALSE"/>
-              
+		
+		<!-- Agent upgrade settings -->
+        <data ID="60" PROPKEY="AGENT_BUNDLE_REPOSITORY_DIR" PROPVALUE="hq-agent-bundles" 
+              DEFAULT_PROPVALUE="" FREAD_ONLY="FALSE"/>      
     </table>
 
 </Covalent.DBSetup>
