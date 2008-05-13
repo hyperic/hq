@@ -15,7 +15,7 @@ APP_NAME="hq-agent"
 APP_LONG_NAME="HQ Agent"
 
 # Wrapper
-WRAPPER_CMD="sbin/wrapper"
+WRAPPER_CMD="../../wrapper/sbin/wrapper"
 WRAPPER_CONF="conf/wrapper.conf"
 
 # Priority at which to run the wrapper.  See "man nice" for valid priorities.
@@ -128,7 +128,9 @@ REALDIR=`pwd`
 # Begin HQ Agent specific logic
 # ------------- 
 AGENTPROPFILE_PROP=agent.propFile
-AGENT_PROPS=agent.properties
+AGENT_PROPS=../../conf/agent.properties
+AGENTLOGDIR_PROP=agent.logDir
+AGENTLOGDIR=../../log
 AGENT_LIB=./lib
 PDK_LIB=./pdk/lib
 # for /proc/net/tcp mirror
@@ -173,6 +175,7 @@ CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 CLIENT_CMD="${HQ_JAVA} \
     -Djava.net.preferIPv4Stack=true \
     -D${AGENTPROPFILE_PROP}=${AGENT_PROPS} \
+    -D${AGENTLOGDIR_PROP}=${AGENTLOGDIR} \
     -cp ${CLIENT_CLASSPATH} ${CLIENT_CLASS}"
 
 PING_CMD="${CLIENT_CMD} ping"

@@ -1,7 +1,9 @@
 #!/bin/sh
 
 AGENTPROPFILE_PROP=agent.propFile
-AGENT_PROPS=agent.properties
+AGENT_PROPS=../../conf/agent.properties
+AGENTLOGDIR_PROP=agent.logDir
+AGENTLOGDIR=../../log
 AGENT_LIB=./lib
 PDK_LIB=./pdk/lib
 # for /proc/net/tcp mirror
@@ -67,6 +69,7 @@ CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 CLIENT_CMD="${HQ_JAVA} \
     -Djava.net.preferIPv4Stack=true \
     -D${AGENTPROPFILE_PROP}=${AGENT_PROPS} \
+    -D${AGENTLOGDIR_PROP}=${AGENTLOGDIR} \
     -cp ${CLIENT_CLASSPATH} ${CLIENT_CLASS}"
 
 START_CMD="${CLIENT_CMD} start"
