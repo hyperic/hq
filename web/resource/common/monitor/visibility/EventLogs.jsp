@@ -59,6 +59,12 @@ function timeLineOnLoad() {
 
   tl = Timeline.create(timelineDiv, bandInfos);
 
+  setTimeout("fillEventLogs()", 5000);
+ }
+
+  onloads.push( timeLineOnLoad );
+
+  function fillEventLogs() {
   <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">
       <c:if test="${timeTick.eventsExist}">
         <c:url var="ajaxUrl" value="/resource/common/monitor/visibility/EventDetails.do">
@@ -69,9 +75,7 @@ function timeLineOnLoad() {
                          {method: 'get', onSuccess:showEventResponse});
       </c:if>
   </c:forEach>
- }
-
-  onloads.push( timeLineOnLoad );
+  }
 
   function showEventResponse(originalRequest) {
       var eventText = eval("(" + originalRequest.responseText + ")");
