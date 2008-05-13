@@ -55,6 +55,14 @@ public class AgentConfig {
     public static final String PROP_PROPFILE = "agent.propFile";
     public static final String DEFAULT_PROPFILE = "agent.properties";
     
+    public static final String ROLLBACK_PROPFILE = "agent.rollbackPropFile";
+    public static final String DEFAULT_ROLLBACKPROPFILE = "../../conf/rollback.properties";
+    
+    // properties used with JSW
+    public static final String JSW_PROP_AGENT_BUNDLE = "set.HQ_AGENT_BUNDLE";
+    public static final String JSW_PROP_AGENT_ROLLBACK_BUNDLE = 
+        "set.HQ_AGENT_ROLLBACK_BUNDLE";
+    
     public static final String PROP_LATHER_PROXYHOST = "lather.proxyHost";
     public static final String PROP_LATHER_PROXYPORT = "lather.proxyPort";
 
@@ -83,6 +91,8 @@ public class AgentConfig {
     { "agent.logDir", System.getProperty("agent.logDir", "log") };
     public static final String[] PROP_DATADIR = 
     { "agent.dataDir", System.getProperty("agent.dataDir", "data") };
+    public static final String[] PROP_KEYSTORE = 
+    { "agent.keystore", PROP_DATADIR[1] + "/keystore" };
     public static final String[] PROP_PDK = 
     { ProductPluginManager.PROP_PDK_DIR,
       System.getProperty(ProductPluginManager.PROP_PDK_DIR, "./pdk") };
@@ -101,6 +111,7 @@ public class AgentConfig {
         PROP_TMPDIR,
         PROP_LOGDIR,
         PROP_DATADIR,
+        PROP_KEYSTORE,
         PROP_PDK
     };
 

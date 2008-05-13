@@ -131,6 +131,8 @@ AGENTPROPFILE_PROP=agent.propFile
 AGENT_PROPS=../../conf/agent.properties
 AGENTLOGDIR_PROP=agent.logDir
 AGENTLOGDIR=../../log
+AGENTDATADIR_PROP=agent.dataDir
+AGENTDATADIR=../../data
 AGENT_LIB=./lib
 PDK_LIB=./pdk/lib
 # for /proc/net/tcp mirror
@@ -176,6 +178,7 @@ CLIENT_CMD="${HQ_JAVA} \
     -Djava.net.preferIPv4Stack=true \
     -D${AGENTPROPFILE_PROP}=${AGENT_PROPS} \
     -D${AGENTLOGDIR_PROP}=${AGENTLOGDIR} \
+    -D${AGENTDATADIR_PROP}=${AGENTDATADIR} \
     -cp ${CLIENT_CLASSPATH} ${CLIENT_CLASS}"
 
 PING_CMD="${CLIENT_CMD} ping"
