@@ -1,15 +1,27 @@
 <plugin>
-  <!-- from netservices-plugin -->
-  <property name="hostname" value="esxhost"/>
-  <property name="port" value="443"/>
-  <config name="vi" include="sockaddr,credentials"/>
+
+  <config name="vi">
+    <option name="url"
+            description="VI sdk url"
+            default="https://esx/sdk"/>
+
+    <option name="user"
+            description="Username"/>
+
+    <option name="pass"
+            type="secret"
+            description="Password"/>
+
+    <option name="hostname"
+            description="ESX host name"/>
+  </config>
 
   <platform name="VI Host">
 
     <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
     <plugin type="collector" class="org.hyperic.hq.plugin.vim.VimHostCollector"/>
 
-    <property name="template" value="vim:${vi.config},Type=VIHost:${alias}"/>
+    <property name="template" value="${vi.template}:${alias}"/>
 
     <metric name="Availability" indicator="true"/>
   </platform>

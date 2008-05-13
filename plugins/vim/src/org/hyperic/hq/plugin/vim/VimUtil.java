@@ -27,22 +27,18 @@ package org.hyperic.hq.plugin.vim;
 
 import java.util.Properties;
 
-import org.hyperic.hq.product.Collector;
-
 public class VimUtil {
 
     public static String getURL(Properties props) {
-        String host = props.getProperty(Collector.PROP_HOSTNAME);
-        String port = props.getProperty(Collector.PROP_PORT);
-        return "https://" + host + ":" + port + "/sdk";        
+        return props.getProperty(VimCollector.PROP_URL);
     }
 
     public static VimServiceConnection getServiceConnection(Properties props)
         throws Exception {
 
         String url = getURL(props);
-        String username = props.getProperty(Collector.PROP_USERNAME);
-        String password = props.getProperty(Collector.PROP_PASSWORD);
+        String username = props.getProperty(VimCollector.PROP_USERNAME);
+        String password = props.getProperty(VimCollector.PROP_PASSWORD);
         VimServiceConnection conn = new VimServiceConnection();
         conn.connect(url, username, password);
         return conn;

@@ -30,6 +30,8 @@ import org.hyperic.hq.product.PluginException;
 
 public abstract class VimCollector extends Collector {
 
+    public static final String PROP_URL = "url";
+
     protected abstract void collect(VimServiceConnection conn)
         throws Exception;
 
