@@ -220,14 +220,14 @@ public class ProductPluginDeployer
         }
     }
 
-    protected void processNestedDeployments(DeploymentInfo di)
-        throws DeploymentException {
-
-        if (di.isDirectory) {
-            super.processNestedDeployments(di);
+    protected boolean isDeployable(String name, URL url) {
+        boolean isDeployable = super.isDeployable(name, url);
+        if (isDeployable && name.endsWith(SubDeployerSupport.nativeSuffix)) {
+            //e.g. JBoss will attempt to deploy a .so regardless of linux/solaris/etc
+            _log.info("Skipping deployment: " + name);
+            return false;
         }
-
-        //else do not process nested jars
+        return isDeployable;
     }
 
     public void addNotificationListener(NotificationListener listener,
