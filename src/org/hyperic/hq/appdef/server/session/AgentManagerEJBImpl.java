@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
@@ -62,9 +63,10 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.Pager;
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.util.ConfigPropertyException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -79,7 +81,7 @@ import org.hibernate.ObjectNotFoundException;
  * @ejb:util generate="physical"
  */
 public class AgentManagerEJBImpl
-    extends    AppdefSessionUtil
+    extends    AppdefSessionEJB
     implements SessionBean
 {
     // XXX: These should go elsewhere.
@@ -433,24 +435,82 @@ public class AgentManagerEJBImpl
             throw new AgentNotFoundException("No agent found for " + aID);
         }
     }
-
+    
     /**
-     * Send file data to an agent
-     *
+     * Transfer an agent bundle residing on the HQ server to an agent.
+     * 
+     * @param subject The subject issuing the request.
+     * @param aid The agent id.
+     * @param bundleFileName The agent bundle name.
+     * @throws PermissionException if the subject does not have proper permissions 
+     *                             to issue an agent bundle transfer.
+     * @throws FileNotFoundException if the agent bundle is not found on the HQ server.
+     * @throws AgentRemoteException if an exception occurs on the remote agent side.
+     * @throws AgentConnectionException  if the connection to the agent fails.
+     * @throws AgentNotFoundException if no agent exists with the given agent id.
+     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
-    public FileDataResult[] agentSendFileData(AuthzSubject subject,
-                                              AppdefEntityID id,
-                                              String[][] files,
-                                              int[] modes)
+    public void transferAgentBundle(AuthzSubject subject,
+                                    AppdefEntityID aid,  
+                                    String bundleFileName) 
+        throws PermissionException, 
+               AgentNotFoundException, 
+               AgentConnectionException, 
+               AgentRemoteException,
+               FileNotFoundException, 
+               ConfigPropertyException {
+        
+        ServerConfigManagerLocal configMan = ServerConfigManagerEJBImpl.getOne();
+        
+        Properties config = configMan.getConfig();
+        
+        String[][] files = new String[1][2];
+        
+        String repositoryDir = config.getProperty(HQConstants.AgentBundleRepositoryDir);
+        
+        File repository = new File(repositoryDir);
+        
+        // A relative repository dir should be resolved against jboss.server.home.dir. 
+        // An absolute repository dir is allowed in case the bundle repository 
+        // resides outside of the HQ server install.        
+        if (!repository.isAbsolute()) {            
+            String hqEarDir = System.getProperty("jboss.server.home.dir")+
+                              File.separator+"deploy"+File.separator+"hq.ear";
+            repository = new File(hqEarDir, repository.getPath());
+        }
+        
+        File src = new File(repository, bundleFileName);
+        
+        files[0][0] = src.getPath();
+        
+        File dest = new File(HQConstants.AgentBundleDropDir, bundleFileName);
+        
+        files[0][1] = dest.getPath();
+        
+        int[] modes = {FileData.WRITETYPE_CREATEOROVERWRITE};        
+        
+        log.info("Transferring agent bundle from local repository at "+files[0][0]+
+                 " to remote agent "+aid.getID()+" at "+files[0][1]);
+                
+        agentSendFileData(subject, aid, files, modes);
+    }
+
+    /**
+     * Send file data to an agent
+     */
+    private FileDataResult[] agentSendFileData(AuthzSubject subject,
+                                               AppdefEntityID id,
+                                               String[][] files,
+                                               int[] modes)
         throws AgentNotFoundException, AgentConnectionException, 
                AgentRemoteException, PermissionException, FileNotFoundException
     {
+        checkCreatePlatformPermission(subject);        
+        
         AgentCommandsClient client = 
-            AgentCommandsClientFactory.getInstance().getClient(id);
-
-        //XXX: Check for superuser role
+            AgentCommandsClientFactory.getInstance().getClient(id);       
 
         FileData[] data = new FileData[files.length];
         InputStream[] streams = new InputStream[files.length];
