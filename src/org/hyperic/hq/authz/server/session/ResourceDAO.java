@@ -90,7 +90,8 @@ public class ResourceDAO
         super.save(entity);
     }
 
-    private void removeGroupAssociations(Resource entity) {
+    // XXX: What about the preAppdefResourcesDelete or resource edge tables?
+    public void remove(Resource entity) {
         ResourceGroupDAO gDao = getFactory().getResourceGroupDAO();
         // Is this really necessary?  We should technically always make sure
         // the group is optimistically updated even when resources are removed.
@@ -129,23 +130,7 @@ public class ResourceDAO
         return is;
     }
 
-    private Map groupByAuthzType(AppdefEntityID[] ids) {
-
-        HashMap m = new HashMap();
-        for (int i = 0; i < ids.length; i++) {
-            String type =
-                AppdefUtil.appdefTypeIdToAuthzTypeStr(ids[i].getType());
-            ArrayList idList = (ArrayList)m.get(type);
-            if (idList == null) {
-                idList = new ArrayList();
-                m.put(type, idList);
-            }
-            idList.add(ids[i].getId());
-        }
-        return m;
-    }
-
-    int deleteByInstances(AppdefEntityID[] ids) {
+    void deleteByInstances(AppdefEntityID[] ids) {
         ResourceStartupListener.getCallbackObj().preAppdefResourcesDelete(ids);
 
         new ResourceEdgeDAO(DAOFactory.getDAOFactory()).deleteEdges(ids);
@@ -154,34 +139,8 @@ public class ResourceDAO
         for (int i = 0; i < ids.length; i++) {
             Resource r = findByInstanceId(ids[i].getAuthzTypeId(),
                                           ids[i].getId());
-            removeGroupAssociations(r);
+            remove(r);
         }
-
-        // Now delete the resources
-        Map map = groupByAuthzType(ids);
-        StringBuffer sql = new StringBuffer("delete Resource where ");
-        
-        for (int i = 0; i < map.size(); i++) {
-            if (i > 0) {
-                sql.append(" or ");
-            }
-
-            sql.append("(instanceId in (:list" +  i + ") and resourceType.id=");
-            
-            sql.append("(select rt.id from ResourceType rt " +
-                        "where rt.name = :rtname" + i + ")");
-            
-            sql.append(')');
-        }
-        
-        Query q = getSession().createQuery(sql.toString());
-        int j = 0;
-        for (Iterator i = map.entrySet().iterator(); i.hasNext(); j++) {
-            Map.Entry entry = (Map.Entry) i.next();
-            q.setString("rtname" + j, (String) entry.getKey())
-             .setParameterList("list" + j, (List) entry.getValue());
-        }
-        return q.executeUpdate();
     }
 
     public Resource findByInstanceId(ResourceType type, Integer id) {
