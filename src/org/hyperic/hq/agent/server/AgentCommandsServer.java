@@ -96,7 +96,6 @@ public class AgentCommandsServer
         } else if(cmd.equals(AgentCommandsAPI.command_receive_file)){
             AgentReceiveFileData_args aa =
                 new AgentReceiveFileData_args(args);
-            this.log.error("Received receive file command");
             agentCommandsService.agentSendFileData(aa, inStream);
             return new AgentRemoteValue();
         } else {
