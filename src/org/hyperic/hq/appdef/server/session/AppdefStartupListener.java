@@ -32,6 +32,7 @@ import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.zevents.ZeventManager;
 
 public class AppdefStartupListener
     implements StartupListener
@@ -76,6 +77,8 @@ public class AppdefStartupListener
             });
         }
         ApplicationManagerEJBImpl.getOne().startup();
+        
+        registerTransferAgentBundleZeventListener();
     }
     
     static ClusterDeleteCallback getClusterDeleteCallback() {
@@ -89,4 +92,11 @@ public class AppdefStartupListener
             return _agentCreateCallback;
         }
     }
+    
+    private void registerTransferAgentBundleZeventListener() {
+        ZeventManager.getInstance()
+        .addBufferedListener(TransferAgentBundleZevent.class,
+                             new TransferAgentBundleZeventListener());
+    }
+
 }

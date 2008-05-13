@@ -68,6 +68,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 
 import org.apache.commons.logging.Log;
@@ -439,6 +440,54 @@ public class AgentManagerEJBImpl
     }
     
     /**
+     * Transfer asynchronously an agent bundle residing on the HQ server to an agent. 
+     * This operation blocks long enough only to do some basic failure condition 
+     * checking (permissions, agent existence, file existence, config property 
+     * existence) then delegates the actual file transfer to the Zevent subsystem.
+     * 
+     * @param subject The subject issuing the request.
+     * @param aid The agent id.
+     * @param bundleFileName The agent bundle name.
+     * @throws PermissionException if the subject does not have proper permissions 
+     *                             to issue an agent bundle transfer.
+     * @throws FileNotFoundException if the agent bundle is not found on the HQ server.
+     * @throws AgentNotFoundException if no agent exists with the given agent id.
+     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
+     * @throws InterruptedException if enqueuing the Zevent is interrupted.
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public void transferAgentBundleAsync(AuthzSubject subject,
+                                         AppdefEntityID aid,  
+                                         String bundleFileName) 
+        throws PermissionException, 
+               AgentNotFoundException, 
+               FileNotFoundException, 
+               ConfigPropertyException, 
+               InterruptedException {
+        
+        // check permissions
+        checkCreatePlatformPermission(subject);
+        
+        // check agent existence
+        AgentManagerEJBImpl.getOne().getAgent(aid);    
+        
+        // check bundle file existence        
+        File src = resolveAgentBundleFile(bundleFileName);
+        
+        if (!src.exists()) {
+            throw new FileNotFoundException("file does not exist: "+src);
+        }
+        
+        log.info("Enqueuing Zevent to transfer agent bundle from "+src+ 
+                 " to agent "+aid.getID());
+        
+        ZeventManager.getInstance()
+            .enqueueEvent(new TransferAgentBundleZevent(bundleFileName, aid));
+        
+    }    
+    
+    /**
      * Transfer an agent bundle residing on the HQ server to an agent.
      * 
      * @param subject The subject issuing the request.
@@ -464,12 +513,35 @@ public class AgentManagerEJBImpl
                FileNotFoundException, 
                ConfigPropertyException {
         
+        String[][] files = new String[1][2];
+        
+        File src = resolveAgentBundleFile(bundleFileName);   
+        
+        files[0][0] = src.getPath();
+        
+        File dest = new File(HQConstants.AgentBundleDropDir, bundleFileName);
+        
+        files[0][1] = dest.getPath();
+        
+        int[] modes = {FileData.WRITETYPE_CREATEOROVERWRITE};        
+        
+        log.info("Transferring agent bundle from local repository at "+files[0][0]+
+                 " to agent "+aid.getID()+" at "+files[0][1]);
+                
+        agentSendFileData(subject, aid, files, modes);
+    }
+    
+    /**
+     * Resolve the agent bundle file based on the file name and the configured 
+     * agent bundle repository on the HQ server.
+     */
+    private File resolveAgentBundleFile(String bundleFileName) 
+        throws ConfigPropertyException {
+        
         ServerConfigManagerLocal configMan = ServerConfigManagerEJBImpl.getOne();
         
         Properties config = configMan.getConfig();
-        
-        String[][] files = new String[1][2];
-        
+               
         String repositoryDir = config.getProperty(HQConstants.AgentBundleRepositoryDir);
         
         File repository = new File(repositoryDir);
@@ -483,20 +555,7 @@ public class AgentManagerEJBImpl
             repository = new File(hqEarDir, repository.getPath());
         }
         
-        File src = new File(repository, bundleFileName);
-        
-        files[0][0] = src.getPath();
-        
-        File dest = new File(HQConstants.AgentBundleDropDir, bundleFileName);
-        
-        files[0][1] = dest.getPath();
-        
-        int[] modes = {FileData.WRITETYPE_CREATEOROVERWRITE};        
-        
-        log.info("Transferring agent bundle from local repository at "+files[0][0]+
-                 " to remote agent "+aid.getID()+" at "+files[0][1]);
-                
-        agentSendFileData(subject, aid, files, modes);
+        return new File(repository, bundleFileName);        
     }
 
     /**
@@ -547,7 +606,7 @@ public class AgentManagerEJBImpl
             }
         }
     }
-
+    
     public static AgentManagerLocal getOne() {
         try {
             return AgentManagerUtil.getLocalHome().create();
