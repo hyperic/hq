@@ -8979,7 +8979,12 @@ has already been defined.
                         nullable="NOT NULL"/>
   </schemaSpec>
   
-  
+  <schemaSpec version="3.119">
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (60, 'AGENT_BUNDLE_REPOSITORY_DIR', 'hq-agent-bundles', '', '0')"/>
+  </schemaSpec>
+		  
 </dbupgrade>
 </target>
 </project>
