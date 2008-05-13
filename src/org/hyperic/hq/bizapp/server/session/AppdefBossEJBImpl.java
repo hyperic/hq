@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,8 +51,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.SortField;
 import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
@@ -3051,25 +3048,6 @@ public class AppdefBossEJBImpl
     {
         manager.authenticate(sessionId);
         return getAgentManager().getAgent(ip, port);
-    }
-
-    /**
-     * Transfer files to a remote agent.
-     *
-     * @param id Appdef ID of any resource on this agent
-     * @param files List of files and destinations
-     * @param modes Writer mode.  One of FileData.WRITETYPE_*
-     * @ejb:interface-method
-     */
-    public FileDataResult[] agentSendFileData(int sessionId, AppdefEntityID id,
-                                              String[][] files, int[] modes)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException, AgentNotFoundException,
-               AgentRemoteException, AgentConnectionException,
-               FileNotFoundException
-    {
-        AuthzSubject who = manager.getSubject(sessionId);
-        return getAgentManager().agentSendFileData(who, id, files, modes);
     }
 
     /**
