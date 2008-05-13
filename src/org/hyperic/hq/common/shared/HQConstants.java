@@ -83,4 +83,14 @@ public class HQConstants {
     public static final String EventLogPurge = "EVENT_LOG_PURGE";
     public static final String ExternalHelp = "EXTERNAL_HELP";
     public static final String OOBEnabled = "OOB_ENABLED";
+    
+    // The config prop key for the directory on the HQ server where the 
+    // agent upgrade bundles reside.
+    public static final String AgentBundleRepositoryDir = "AGENT_BUNDLE_REPOSITORY_DIR";
+    
+    // The directory on the HQ agent where the agent upgrade bundles will be copied.
+    // This value is hard coded on the agent side so we are hard coding it on 
+    // the server.
+    public static final String AgentBundleDropDir = "bundles";
+    
 }
