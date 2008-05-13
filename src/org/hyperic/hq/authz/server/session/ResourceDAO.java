@@ -90,7 +90,7 @@ public class ResourceDAO
         super.save(entity);
     }
 
-    public void remove(Resource entity) {
+    private void removeGroupAssociations(Resource entity) {
         ResourceGroupDAO gDao = getFactory().getResourceGroupDAO();
         // Is this really necessary?  We should technically always make sure
         // the group is optimistically updated even when resources are removed.
@@ -104,7 +104,7 @@ public class ResourceDAO
         getSession().createQuery(sql)
             .setParameter("resource", entity)
             .executeUpdate();
-        
+
         getSession().flush();
         super.remove(entity);
     }
@@ -118,8 +118,7 @@ public class ResourceDAO
             /* XXX throw exception instead */
         } else {
             /* overlord owns every thing */
-            if (is = possibleOwner.equals(AuthzConstants.overlordId)
-                    == false) {
+            if (is = possibleOwner.equals(AuthzConstants.overlordId) == false) {
                 if (_log.isDebugEnabled() && possibleOwner != null) {
                     _log.debug("User is " + possibleOwner +
                                " owner is " + entity.getOwner().getId());
@@ -146,45 +145,18 @@ public class ResourceDAO
         return m;
     }
 
-    private int deleteResourceObject(AppdefEntityID[] ids, String object,
-                                     String col)
-    {
-        Map map = groupByAuthzType(ids);
-        StringBuffer sql = new StringBuffer()
-            .append("delete ")
-            .append(object)
-            .append(" where ");
-        for (int i = 0; i < map.size(); i++) {
-            if (i > 0) {
-                sql.append(" or ");
-            }
-            sql.append(col)
-                .append(" in (")
-                .append("select r.id from Resource r, " +
-                        "ResourceType rt where r.resourceType.id=rt.id and ")
-                .append("rt.name = :rtname" + i + " and " )
-                .append("r.instanceId in (:list" +  i + ") ")
-                .append(") ");
-        }
-        int j = 0;
-        Query q = getSession().createQuery(sql.toString());
-        for (Iterator i = map.keySet().iterator(); i.hasNext(); j++) {
-            String rtname = (String)i.next();
-            List list = (List)map.get(rtname);
-            q.setString("rtname" + j, rtname)
-                .setParameterList("list" + j, list);
-        }
-        return q.executeUpdate();
-    }
-
     int deleteByInstances(AppdefEntityID[] ids) {
         ResourceStartupListener.getCallbackObj().preAppdefResourcesDelete(ids);
 
         new ResourceEdgeDAO(DAOFactory.getDAOFactory()).deleteEdges(ids);
-        // kludge to work around hiberate's limitation to define
-        // on-delete="cascade" on many-to-many relationships
-        deleteResourceObject(ids, "ResGrpResMap", "id.resource.id");
-        
+
+        // Remove from group map table
+        for (int i = 0; i < ids.length; i++) {
+            Resource r = findByInstanceId(ids[i].getAuthzTypeId(),
+                                          ids[i].getId());
+            removeGroupAssociations(r);
+        }
+
         // Now delete the resources
         Map map = groupByAuthzType(ids);
         StringBuffer sql = new StringBuffer("delete Resource where ");
