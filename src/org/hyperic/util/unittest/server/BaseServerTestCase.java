@@ -381,11 +381,10 @@ public abstract class BaseServerTestCase extends TestCase {
             String driverClass = element.getChild("driver-class").getText();
             if (forRestore && driverClass.toLowerCase().contains("mysql")) {
                 String buf = "?";
-                if (driverClass.toLowerCase().contains("?")) {
+                if (url.toLowerCase().contains("?")) {
                     buf = "&";
                 }
-                driverClass = driverClass +
-                buf + "sessionVariables=FOREIGN_KEY_CHECKS=0";
+                url = url + buf + "sessionVariables=FOREIGN_KEY_CHECKS=0";
             }
             Driver driver = (Driver)Class.forName(driverClass).newInstance();
             Properties props = new Properties();
