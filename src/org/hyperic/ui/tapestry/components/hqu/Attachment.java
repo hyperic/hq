@@ -93,8 +93,10 @@ public abstract class Attachment extends BaseComponent {
                     charSet = "UTF-8";
             }
             try {
-                r = new InputStreamReader(i, charSet);
+                //r = new InputStreamReader(i, charSet);
+                r = new InputStreamReader(i, "UTF-8");
             } catch (Exception ex) {
+                log.warn("unable to render via charset = " + charSet, ex);
                 r = new InputStreamReader(i, encoding);
             }
 
@@ -114,13 +116,14 @@ public abstract class Attachment extends BaseComponent {
             while ((c = br.read()) != -1)
                 sb.append((char)c);
 
+            log.info("Returning " + sb);
             return sb.toString();
             
         } catch (IOException ex) {
-            log.error(ex.getMessage());
+            log.error("unable to render attachment", ex);
             return "";
         } catch (RuntimeException ex) {
-            log.error(ex.getMessage());
+            log.error("unable to render attachment", ex);
             return "";
         }
         
