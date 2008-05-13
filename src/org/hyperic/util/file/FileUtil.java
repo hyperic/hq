@@ -146,13 +146,18 @@ public class FileUtil {
     /** Copy a file from one file to another */
     public static void copyFile(File inFile, File outFile)
             throws FileNotFoundException, IOException {
-        BufferedInputStream is =
-            new BufferedInputStream(new FileInputStream(inFile));
-        BufferedOutputStream os =
-            new BufferedOutputStream(new FileOutputStream(outFile));
-        copyStream(is, os);
-        is.close();
-        os.close();
+        
+        BufferedInputStream is = null;
+        BufferedOutputStream os = null;
+        
+        try {
+            is = new BufferedInputStream(new FileInputStream(inFile));
+            os = new BufferedOutputStream(new FileOutputStream(outFile));
+            copyStream(is, os);            
+        } finally {
+            safeCloseStream(is);
+            safeCloseStream(os);
+        }
     }
 
     /** Default buffer size for copyStream method */
@@ -377,4 +382,27 @@ public class FileUtil {
         
         return res;
     }
+    
+    private static void safeCloseStream(InputStream in) 
+    {
+        if (in != null) {
+            try {
+                in.close();
+            } catch (IOException e) {
+                // just swallow it
+            }            
+        }
+    }
+    
+    private static void safeCloseStream(OutputStream out) 
+    {
+        if (out != null) {
+            try {
+                out.close();
+            } catch (IOException e) {
+                // just swallow it
+            }            
+        }
+    }
+    
 }
