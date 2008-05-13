@@ -392,6 +392,7 @@
     <mkdir dir="${ear.dir}/common-mbeans.sar/META-INF" />
     <mkdir dir="${ear.dir}/measurement-mbeans.sar/META-INF" />
     <mkdir dir="${ear.dir}/scheduler-mbeans.sar/META-INF" />
+    <mkdir dir="${ear.dir}/hq-agent-bundles" />
 
     <copy todir="${ear.dir}/autoinventory-mbeans.sar/META-INF" 
           file="etc/jboss/autoinventory/sar/jboss-service.xml" />
