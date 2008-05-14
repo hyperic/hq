@@ -28,6 +28,7 @@ package org.hyperic.hq.bizapp.agent.client;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -69,7 +70,9 @@ import org.hyperic.sigar.SigarException;
 import org.hyperic.util.JDK;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.exec.Background;
+import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.security.SecurityUtil;
+import org.tanukisoftware.wrapper.WrapperManager;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -1106,7 +1109,30 @@ public class AgentClient {
 
         /* Now comes the painful task of figuring out if the agent
            started correctly. */
-        this.verifyAgentRunning(startupSock);
+        try {
+            this.verifyAgentRunning(startupSock);
+        } catch (AgentInvokeException aie) {
+            SYSTEM_ERR.println("Failed to start agent! Rolling back to previous agent bundle...");
+            boolean success = false;
+            try {
+                success = writeRollbackProperties();
+            }
+            catch (IOException ioe) {
+                SYSTEM_ERR.println("Caught error while writing rollback properties: " + ioe);
+            }
+            if (!success) {
+                SYSTEM_ERR.println("Failed to write rollback properties!");
+            }
+            // request a JVM restart in Java Service Wrapper mode
+            if (WrapperManager.isControlledByNativeWrapper()) {
+                WrapperManager.restart();
+            } 
+            // otherwise rethrow exception
+            else {
+                throw aie;
+            }
+        }
+        
 
         // Ask the agent if they have a server setup
         try {
@@ -1130,6 +1156,46 @@ public class AgentClient {
             return 0;            
         }
 
+    }
+
+    // overwrites agent bundle home Java Service Wrapper config property
+    // with rollback agent bundle home
+    private boolean writeRollbackProperties() throws IOException {
+
+        Properties rollbackProps = new Properties();
+        FileInputStream fis = null;
+        String propFileName = System.getProperty(AgentConfig.ROLLBACK_PROPFILE,
+                AgentConfig.DEFAULT_ROLLBACKPROPFILE);
+        File propFile = new File(propFileName);
+        File tempPropFile = new File(propFileName + ".tmp");
+        try {
+            fis = new FileInputStream(propFile);
+            rollbackProps.load(fis);
+            String rollbackHome = rollbackProps
+                    .getProperty(AgentConfig.JSW_PROP_AGENT_ROLLBACK_BUNDLE);
+            rollbackProps.setProperty(AgentConfig.JSW_PROP_AGENT_BUNDLE,
+                    rollbackHome);
+        }
+        finally {
+            FileUtil.safeCloseStream(fis);
+        }
+        // write out the updated rollback properties
+        FileOutputStream fos = null;
+        try {
+            try {
+                tempPropFile.delete();
+                fos = new FileOutputStream(tempPropFile);
+                rollbackProps.store(fos,
+                        "Auto-generated rollback properties do not edit!");
+            }
+            finally {
+                FileUtil.safeCloseStream(fos);
+            }
+            return FileUtil.safeFileMove(tempPropFile, propFile);
+        }
+        finally {
+            tempPropFile.delete();
+        }
     }
 
     private static int getUseTime(String val){
