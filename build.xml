@@ -678,22 +678,22 @@
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"
              classpathref="alljars"/>
 
-    <mkdir dir="${build.dir}/classes" />
+    <mkdir dir="${hq.home}/build/classes" />
     <mkdir dir="${war.dir}/WEB-INF/lib" />
 
-    <hq-javac destdir="${build.dir}/classes" source="1.5" target="1.5">
+    <hq-javac destdir="${hq.home}/build/classes" source="1.5" target="1.5">
       <!-- The UI needs to be built with 1.5 features -->
       <classpath>
         <path refid="alljars" />
         <path refid="testjars" />
       </classpath>
       <src>
-        <path location="src" />
+        <path location="${hq.home}/src" />
         <!-- Test sources --> 
-        <path location="unittest/src"/>
+        <path location="${hq.home}/unittest/src"/>
       </src>
-      <include name="**/hq/ui/**" />
-      <include name="**/ui/tapestry/**" />
+      <include name="org/hyperic/hq/ui/**" />
+      <include name="org/hyperic/ui/tapestry/**" />
     </hq-javac>
 
   </target>
@@ -742,7 +742,7 @@
     </copy>
 
     <!--copy todir="${war.dir}/WEB-INF/classes" >
-      <fileset dir="${build.dir}/classes" includes="**/*Test*.class" />
+      <fileset dir="${hq.home}/build/classes" includes="**/*Test*.class" />
     </copy-->
 
     <copy todir="${war.dir}/" >
@@ -757,7 +757,7 @@
       </fileset>
     </copy>
 
-    <jar file="${war.dir}/WEB-INF/lib/hq-ui.jar" basedir="${build.dir}/classes" update="true">
+    <jar file="${war.dir}/WEB-INF/lib/hq-ui.jar" basedir="${hq.home}/build/classes" update="true">
       <include name="org/hyperic/hq/ui/**" />
       <fileset dir="${basedir}/src">
         <include name="org/hyperic/hq/ui/**/*.html" />
@@ -770,7 +770,7 @@
       <exclude name="org/hyperic/hq/ui/tapestry/**" />
     </jar>
 
-    <jar file="${war.dir}/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${build.dir}/classes" update="true">
+    <jar file="${war.dir}/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${hq.home}/build/classes" update="true">
       <include name="org/hyperic/ui/tapestry/**" />
       <fileset dir="${basedir}/src">
         <include name="org/hyperic/ui/tapestry/**/*.html" />
@@ -783,7 +783,7 @@
       </fileset>
     </jar>
 
-    <jar file="${war.dir}/WEB-INF/lib/display-taglib.jar" basedir="${build.dir}/classes" >
+    <jar file="${war.dir}/WEB-INF/lib/display-taglib.jar" basedir="${hq.home}/build/classes" >
       <include name="org/apache/taglibs/display/**" />
     </jar>
 
@@ -791,7 +791,7 @@
     <mkdir dir="${ROOT.war}" />
     <mkdir dir="${ROOT.war}/WEB-INF" />
     <mkdir dir="${ROOT.war}/WEB-INF/lib" />
-    <jar file="${ROOT.war}/WEB-INF/lib/boot-ui.jar" basedir="${build.dir}/classes" >
+    <jar file="${ROOT.war}/WEB-INF/lib/boot-ui.jar" basedir="${hq.home}/build/classes" >
       <include name="org/hyperic/util/notReady/StartupServlet.class" />
       <include name="org/hyperic/util/notReady/NotReadyAppender*" />
     </jar>
