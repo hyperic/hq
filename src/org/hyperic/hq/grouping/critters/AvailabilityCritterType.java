@@ -68,7 +68,7 @@ public class AvailabilityCritterType extends BaseCritterType {
     }
 
     public boolean isSystem() {
-        return false;
+        return true;
     }
 
     public Critter newInstance(AvailabilityType availType) {
@@ -119,17 +119,16 @@ public class AvailabilityCritterType extends BaseCritterType {
 
         public String getSql(CritterTranslationContext ctx,
                              String resourceAlias) {
-            return "(@rle@.availval = :@availval@ AND @rle@.endtime = :@last@)";
+            return "@rle@.availval = :@availval@ AND @rle@.endtime = :@last@";
         }
 
         public String getSqlJoins(CritterTranslationContext ctx,
                                   String resourceAlias) {
             return new StringBuilder()
                 .append("JOIN EAM_MEASUREMENT @meas@ on ")
-                .append(resourceAlias)
-                .append(".id = @meas@.resource_id ")
-                .append("JOIN HQ_AVAIL_DATA_RLE @rle@ on ")
-                .append("@rle@.measurement_id = @meas@.id")
+                .append(resourceAlias).append(".id = @meas@.resource_id")
+                .append(" JOIN HQ_AVAIL_DATA_RLE @rle@ on")
+                .append(" @rle@.measurement_id = @meas@.id")
                 .toString();
         }
 

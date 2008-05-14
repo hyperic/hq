@@ -57,7 +57,7 @@ public class ResourceNameCritterType
     }
 
     public ResourceNameCritter newInstance(String name) 
-        throws GroupException, PatternSyntaxException {
+        throws PatternSyntaxException {
         return new ResourceNameCritter(name, this);
     }
     
@@ -113,7 +113,7 @@ public class ResourceNameCritterType
 
         public String getSql(CritterTranslationContext ctx, String resourceAlias) {
             return ctx.getHQDialect().getRegExSQL(resourceAlias + ".name",
-                ":@resourceName@", false, false);
+                ":@resourceName@", true, false);
         }
 
         public String getSqlJoins(CritterTranslationContext ctx,

@@ -46,6 +46,7 @@ import org.hyperic.util.pager.PageList;
  */
 public class CritterTranslator {
     private final Log _log = LogFactory.getLog(CritterTranslator.class);
+    public static final String EMPTY_SQL = "";
     
     public CritterTranslator() {
     }
@@ -71,17 +72,88 @@ public class CritterTranslator {
         return translate(ctx,cList,false);
     }
     
-    public SQLQuery translate(CritterTranslationContext ctx, CritterList cList,
-                              boolean issueCount)
-    {
+    public SQLQuery translate(CritterTranslationContext ctx,
+                              CritterList cList,
+                              boolean issueCount) {
         StringBuilder sql = new StringBuilder();
         Map txContexts = new HashMap(cList.getCritters().size());
-        
         if (issueCount) {
-            sql.append("select count(1) from EAM_RESOURCE res ");
+            sql.append("select count(1) from ");
         } else {
-            sql.append("select {res.*} from EAM_RESOURCE res ");
+            sql.append("select {res.*} from ");
         }
+        if (cList.isAll()) {
+            sql.append("EAM_RESOURCE res \n");
+            sql.append(getSQLConstraints(ctx, cList, txContexts));
+        } else {
+            sql.append(getUnionStmts(ctx, cList, txContexts));
+        }
+        // Get PermissionManager
+        sql.append(PermissionManagerFactory.getInstance()
+                .getSQLWhere(ctx.getSubject().getId()));
+        if (!issueCount) {
+            sql.append(" ORDER BY res.name");
+        }
+        if (_log.isDebugEnabled()) {
+            _log.debug("Created SQL: [" + sql + "]");
+        }
+        SQLQuery res = ctx.getSession().createSQLQuery(sql.toString());
+        if (_log.isDebugEnabled()) {
+            _log.debug("Translated into: [" + res.getQueryString() + "]");
+        }
+        if (!issueCount) {
+            res.addEntity("res", Resource.class);
+        }
+        for (Iterator i = cList.getCritters().iterator(); i.hasNext(); ) {
+            Critter c = (Critter)i.next();
+            c.bindSqlParams((CritterTranslationContext)txContexts.get(c), res);
+        }
+        return res;
+    }
+
+    private String getUnionStmts(CritterTranslationContext ctx,
+                                 CritterList cList,
+                                 Map txContexts) {
+        StringBuilder sql = new StringBuilder();
+        List sysCritters = new ArrayList();
+        List critters = new ArrayList();
+        for (Iterator i = cList.getCritters().iterator(); i.hasNext();) {
+            Critter c = (Critter) i.next();
+            if (c.getCritterType().isSystem()) {
+                sysCritters.add(c);
+            } else {
+                critters.add(c);
+            }
+        }
+        CritterList critterList = new CritterList(critters, false);
+        if (critterList.getCritters().size() > 0) {
+            sql.append("(");
+            for (Iterator i = critterList.getCritters().iterator(); i.hasNext();) {
+                Critter c = (Critter) i.next();
+                List l = new ArrayList(sysCritters);
+                l.add(c);
+                CritterList list = new CritterList(l, true);
+                sql.append("select res.* from EAM_RESOURCE res ").append(
+                    getSQLConstraints(ctx, list, txContexts));
+                if (i.hasNext()) {
+                    sql.append(" UNION ");
+                }
+            }
+            CritterList sysCritList = new CritterList(sysCritters, false);
+            String sysSQL = getSQLConstraints(ctx, sysCritList, txContexts);
+            sql.append(") res ").append(sysSQL);
+        } else {
+            CritterList sysCritList = new CritterList(sysCritters, false);
+            sql.append("EAM_RESOURCE res ");
+            sql.append(getSQLConstraints(ctx, sysCritList, txContexts));
+        }
+        return sql.toString();
+    }
+
+    private String getSQLConstraints(CritterTranslationContext ctx,
+                                     CritterList cList,
+                                     Map txContexts) {
+        StringBuilder sql = new StringBuilder();
         
         int prefixCnt = 0;
         for (Iterator i=cList.getCritters().iterator(); i.hasNext(); ) {
@@ -97,8 +169,6 @@ public class CritterTranslator {
             sql.append(" ");
         }
 
-        sql.append(" where ");
-
         List systemCritters = new ArrayList();
         List regularCritters = new ArrayList();
         
@@ -110,72 +180,51 @@ public class CritterTranslator {
             else
                 regularCritters.add(c);
         }
+        
+        boolean whereEnabled = false;
 
         if (!regularCritters.isEmpty()) {
-            sql.append(" (");
         
             for (Iterator i=regularCritters.iterator(); i.hasNext(); ) {
                 Critter c = (Critter)i.next();
             
                 CritterTranslationContext critterCtx = 
                     (CritterTranslationContext)txContexts.get(c);
-                sql.append(critterCtx.escapeSql(c.getSql(critterCtx, "res"))); 
-            
-                if (i.hasNext()) {
-                    if (cList.isAll()) {
-                        sql.append(" and ");
-                    } else {
-                        sql.append(" or ");
-                    }
+                String critterSql = c.getSql(critterCtx, "res");
+                if (critterSql.equals(EMPTY_SQL)) {
+                    continue;
                 }
+                if (!whereEnabled) {
+                    sql.append(" where (");
+                    whereEnabled = true;
+                } else {
+                    sql.append(" and (");
+                }
+                sql.append(critterCtx.escapeSql(critterSql));
+                sql.append(") ");
             }
-            sql.append(") ");
         }
         
         if (!systemCritters.isEmpty()) {
-            if (!regularCritters.isEmpty()) {
-                sql.append(" and ");
-            }
-            sql.append(" (");
             for (Iterator i=systemCritters.iterator(); i.hasNext(); ) {
                 Critter c = (Critter)i.next();
             
                 CritterTranslationContext critterCtx = 
                     (CritterTranslationContext)txContexts.get(c);
-                sql.append(critterCtx.escapeSql(c.getSql(critterCtx, "res"))); 
-                
-                if (i.hasNext()) {
-                    sql.append(" and ");
+                String critterSql = c.getSql(critterCtx, "res");
+                if (critterSql.equals(EMPTY_SQL)) {
+                    continue;
                 }
+                if (!whereEnabled) {
+                    sql.append(" where (");
+                    whereEnabled = true;
+                } else {
+                    sql.append(" and (");
+                }
+                sql.append(critterCtx.escapeSql(critterSql));
+                sql.append(") ");
             }
-            sql.append(") ");
         }
-        
-        // Get PermissionManager
-        sql.append(PermissionManagerFactory.getInstance()
-                .getSQLWhere(ctx.getSubject().getId()));
-
-        if (!issueCount) {
-            sql.append(" order by res.name");
-        }
-
-        if (_log.isDebugEnabled())
-            _log.debug("Created SQL: [" + sql + "]");
-        
-        SQLQuery res = ctx.getSession().createSQLQuery(sql.toString());
-        
-        if (_log.isDebugEnabled())
-            _log.debug("Translated into: [" + res.getQueryString() + "]");
-        
-        if (!issueCount) {
-            res.addEntity("res", Resource.class);
-        }
-        for (Iterator i = cList.getCritters().iterator(); i.hasNext(); ) {
-            Critter c = (Critter)i.next();
-
-            c.bindSqlParams((CritterTranslationContext)txContexts.get(c), res);
-        }
-        
-        return res;
+        return sql.toString();
     }
 }

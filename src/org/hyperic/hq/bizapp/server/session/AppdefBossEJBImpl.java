@@ -2677,21 +2677,16 @@ public class AppdefBossEJBImpl
             groupTypes[0] == APPDEF_GROUP_TYPE_UNDEFINED) {
             return null;
         }
-        try {
-            if (AppdefEntityConstants.isGroupCompat(groupTypes[0])) {
-                CompatGroupTypeCritterType critter =
-                    new CompatGroupTypeCritterType();
-                return critter.newInstance(proto);
-            } else {
-                MixedGroupType type = MixedGroupType.findByCode(groupTypes);
-                MixedGroupTypeCritterType critter =
-                    new MixedGroupTypeCritterType();
-                return critter.newInstance(type);
-            }
-        } catch (GroupException e) {
-            log.warn(e.getMessage(), e);
+        if (AppdefEntityConstants.isGroupCompat(groupTypes[0])) {
+            CompatGroupTypeCritterType critter =
+                new CompatGroupTypeCritterType();
+            return critter.newInstance(proto);
+        } else {
+            MixedGroupType type = MixedGroupType.findByCode(groupTypes);
+            MixedGroupTypeCritterType critter =
+                new MixedGroupTypeCritterType();
+            return critter.newInstance(type);
         }
-        return null;
     }
 
     private Critter getProtoCritter(AppdefEntityTypeID appdefResType,
@@ -2723,26 +2718,17 @@ public class AppdefBossEJBImpl
             return null;
         }
         String resTypeName = AppdefUtil.appdefTypeIdToAuthzTypeStr(appdefTypeId);
-        try {
-            ResourceTypeCritterType type = new ResourceTypeCritterType();
-            return type.newInstance(resTypeName);
-        } catch (GroupException e) {
-            log.warn(e.getMessage(), e);
-        }
-        return null;
+        ResourceTypeCritterType type = new ResourceTypeCritterType();
+        return type.newInstance(resTypeName);
     }
 
     private Critter getResourceNameCritter(String resourceName)
         throws PatternSyntaxException
     {
         if (resourceName != null) {
-            try {
-                ResourceNameCritterType resNameCritterType =
-                    new ResourceNameCritterType();
-                return resNameCritterType.newInstance(resourceName);
-            } catch (GroupException e) {
-                log.warn(e.getMessage(), e);
-            }
+            ResourceNameCritterType resNameCritterType =
+                new ResourceNameCritterType();
+            return resNameCritterType.newInstance(resourceName);
         }
         return null;
     }

@@ -34,6 +34,7 @@ import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
@@ -66,7 +67,7 @@ public class ResourceTypeCritterType extends BaseCritterType {
         return true;
     }
 
-    public Critter newInstance(String resTypeName) throws GroupException {
+    public Critter newInstance(String resTypeName) {
         return new ResourceTypeCritter(resTypeName, this);
     }
 
@@ -116,7 +117,8 @@ public class ResourceTypeCritterType extends BaseCritterType {
             return _props;
         }
 
-        public String getSql(CritterTranslationContext ctx, String resourceAlias) {
+        public String getSql(CritterTranslationContext ctx,
+                             String resourceAlias) {
             String  bool = ctx.getDialect().toBooleanValueString(false);
             return new StringBuilder()
                 .append("(@type@.name = :@resTypeName@ and ")
@@ -130,7 +132,8 @@ public class ResourceTypeCritterType extends BaseCritterType {
             return new StringBuilder()
                 .append("JOIN EAM_RESOURCE_TYPE @type@ on ")
                 .append(resourceAlias)
-                .append(".resource_type_id = @type@.id").toString();
+                .append(".resource_type_id = @type@.id ")
+                .toString();
         }
         
         public boolean equals(Object other) {

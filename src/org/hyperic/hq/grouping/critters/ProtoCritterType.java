@@ -114,9 +114,10 @@ public class ProtoCritterType extends BaseCritterType {
                                   String resourceAlias) 
         {
             return new StringBuilder()
-                .append("join EAM_RESOURCE @proto@ on ")
+                .append("JOIN EAM_RESOURCE @proto@ on ")
                 .append(resourceAlias)
-                .append(".proto_id = @proto@.id ").toString();
+                .append(".proto_id = @proto@.id ")
+                .toString();
         }
         
         public void bindSqlParams(CritterTranslationContext ctx, Query q) {

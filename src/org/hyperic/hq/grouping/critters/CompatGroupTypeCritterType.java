@@ -35,6 +35,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
@@ -130,23 +131,22 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
             return _type;
         }
 
-        public String getSql(CritterTranslationContext ctx, 
-                             String resourceAlias) 
+        public String getSql(CritterTranslationContext ctx, String resourceAlias) 
         {
             if (_proto == null) {
-                return "true";
+                return "@grp@.resource_prototype is not null";
             } else {
-                return "@proto@.id = :@proto@";
+                return  "@grp@.resource_prototype = :@proto@";
             }
         }
 
         public String getSqlJoins(CritterTranslationContext ctx,
                                   String resourceAlias) 
         {
-            return "join EAM_RESOURCE_GROUP @grp@ on " + 
-                       resourceAlias + ".id = @grp@.resource_id " +
-                   "join EAM_RESOURCE @proto@ on " + 
-                       "@grp@.resource_prototype = @proto@.id"; 
+            return new StringBuilder()
+                .append("JOIN EAM_RESOURCE_GROUP @grp@ on ")
+                .append(resourceAlias)
+                .append(".id = @grp@.resource_id").toString();
         }
 
         public boolean equals(Object other) {

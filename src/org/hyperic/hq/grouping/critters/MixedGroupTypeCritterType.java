@@ -76,7 +76,7 @@ public class MixedGroupTypeCritterType extends BaseCritterType {
     }
 
     public boolean isSystem() {
-        return false;
+        return true;
     }
 
     public Critter newInstance(Map props) throws GroupException {
@@ -86,7 +86,7 @@ public class MixedGroupTypeCritterType extends BaseCritterType {
         return new MixedGroupTypeCritter(type, this);
     }
 
-    public Critter newInstance(MixedGroupType type) throws GroupException {
+    public Critter newInstance(MixedGroupType type) {
         return new MixedGroupTypeCritter(type, this);
     }
     
@@ -152,8 +152,7 @@ public class MixedGroupTypeCritterType extends BaseCritterType {
             return new StringBuilder()
                 .append("JOIN EAM_RESOURCE_GROUP @grp@ on ")
                 .append(resourceAlias)
-                .append(".instance_id = @grp@.id ")
-                .append("AND @grp@.grouptype in (:@groupTypes@)").toString();
+                .append(".instance_id = @grp@.id ").toString();
         }
 
         public boolean equals(Object other) {

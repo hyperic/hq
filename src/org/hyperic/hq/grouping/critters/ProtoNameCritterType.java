@@ -53,7 +53,7 @@ public class ProtoNameCritterType extends BaseCritterType {
         addPropDescription(PROP_NAME, CritterPropType.STRING);
     }
 
-    public ProtoNameCritter newInstance(String name) throws GroupException {
+    public ProtoNameCritter newInstance(String name) {
         return new ProtoNameCritter(name, this);
     }
 
@@ -99,13 +99,13 @@ public class ProtoNameCritterType extends BaseCritterType {
 
         public String getSql(CritterTranslationContext ctx, String resourceAlias) {
             return ctx.getHQDialect().getRegExSQL("@proto@.name",
-                                                  ":@protoName@", false, false);
+                                                  ":@protoName@", true, false);
         }
 
         public String getSqlJoins(CritterTranslationContext ctx,
             String resourceAlias) {
             return new StringBuilder()
-                .append("join EAM_RESOURCE @proto@ on ")
+                .append("JOIN EAM_RESOURCE @proto@ on ")
                 .append(resourceAlias)
                 .append(".proto_id = @proto@.id").toString();
         }
