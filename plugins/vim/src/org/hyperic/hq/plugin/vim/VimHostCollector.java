@@ -57,7 +57,7 @@ public class VimHostCollector extends VimCollector {
         System.out.println("     />");
     }
 
-    public void collect(VimUtil vim)
+    protected void collect(VimUtil vim)
         throws Exception {
 
         ManagedObjectReference mor = getManagedObjectReference(vim);

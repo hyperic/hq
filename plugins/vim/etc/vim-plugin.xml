@@ -16,6 +16,11 @@
             description="ESX host name"/>
   </config>
 
+  <config name="vm">
+    <option name="vm"
+            description="Virtual Machine name"/>
+  </config>
+
   <platform name="VI Host">
 
     <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
@@ -24,5 +29,14 @@
     <property name="template" value="${vi.template}:${alias}"/>
 
     <metric name="Availability" indicator="true"/>
+
+    <server name="Virtual Machine">
+      <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+      <plugin type="collector" class="org.hyperic.hq.plugin.vim.VimVmCollector"/>
+
+      <property name="template" value="${vi.template},${vm.config}:${alias}"/>
+
+      <metric name="Availability" indicator="true"/>
+    </server>
   </platform>
 </plugin>
