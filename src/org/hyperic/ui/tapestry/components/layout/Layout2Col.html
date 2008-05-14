@@ -3,16 +3,12 @@
        ajaxDelegate="ognl:ajaxDelegate">
 <block jwcid="remainingHead@Block">
 <link rel="icon" href="/images/4.0/icons/favicon.ico"/>
-<style type="text/css">
-        @import "/js/dojo-1.0.2/dijit/themes/dijit.css";
-        @import "/js/dojo-1.0.2/dijit/themes/soria/soria.css";
-    </style>
 <script language="JavaScript" type="text/javascript" src="/js/lib/lib.js"></script>
 <script type="text/javascript">
-    djConfig= {isDebug: false, parseOnLoad: true, defaultTestTheme: 'soria'}
+    djConfig= {isDebug: false, parseOnLoad: true}
 </script>
 </block>
-<body jwcid="@Body" class="soria">
+<body jwcid="@Body" class="ognl:'white '+@org.hyperic.ui.tapestry.components.BaseLayout@DOJO_THEME">
 
 <div id="wrapper">
         
@@ -20,10 +16,15 @@
 
 <div id="wrapper">
 	<div id="content">
-        
-        <span jwcid="@RenderBlock" block="ognl:leftBlock"/>
-	    <span jwcid="@RenderBlock" block="ognl:centerBlock"/>
-	    
+        <div dojoType="dijit.layout.BorderContainer" design="sidebar" persist="true"
+            style="width: 100%; height: 800px;margin-top:20px">
+            <div jwcid="@Any" dojoType="dijit.layout.ContentPane" region="left" style="ognl:width">
+                <span jwcid="@RenderBlock" block="ognl:leftBlock"/>
+            </div>
+            <div dojoType="dijit.layout.ContentPane" region="center">
+                <span jwcid="@RenderBlock" block="ognl:centerBlock"/>
+            </div>
+	    </div>
 	</div>
 </div>
 </div>

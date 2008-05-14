@@ -41,7 +41,7 @@ public abstract class BaseLayout extends BaseComponent {
     /**
      * Dojo look and feel theme name
      */
-    public static final String DOJO_TUNDRA_THEME = "tundra";
+    public static final String DOJO_THEME = "tundra";
 
     /**
      * Dojo Version
@@ -87,7 +87,7 @@ public abstract class BaseLayout extends BaseComponent {
 
     public List<IAsset> getDijitSheets() {
         List<IAsset> sheets = new ArrayList<IAsset>();
-        sheets.add(getDijitStyleSheet());
+        //sheets.add(getDijitStyleSheet());
         return sheets;
     }
 

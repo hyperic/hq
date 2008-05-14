@@ -24,10 +24,38 @@
  */
 package org.hyperic.ui.tapestry.components.layout;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.tapestry.IMarkupWriter;
+import org.apache.tapestry.IRequestCycle;
+import org.apache.tapestry.IScript;
+import org.apache.tapestry.PageRenderSupport;
+import org.apache.tapestry.TapestryUtils;
+import org.apache.tapestry.annotations.InjectScript;
+import org.apache.tapestry.annotations.Parameter;
+
 /**
  * The 2 column liquid layout
- *
+ * 
  */
 public abstract class Layout2Col extends Layout1Col {
+
+    @Parameter(name = "rightPanelWidth", defaultValue = "literal:width:250px", required = false)
+    public abstract String getWidth();
+    public abstract void setWidth(String width);
+
+    @InjectScript("Layout2Col.script")
+    public abstract IScript getScript();
+    
+    public void renderComponent(IMarkupWriter writer, IRequestCycle cycle) {
+        if (!cycle.isRewinding()) {
+            Map map = new HashMap();
+            PageRenderSupport pageRenderSupport = TapestryUtils
+                    .getPageRenderSupport(cycle, this);
+            getScript().execute(this, cycle, pageRenderSupport, map);
+        }
+        super.renderComponent(writer, cycle);
+    }
 
 }
