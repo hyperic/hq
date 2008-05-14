@@ -25,21 +25,31 @@
 
 package org.hyperic.hq.agent.commands;
 
-import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 
 public class AgentUpgrade_args extends AgentRemoteValue {
  
-    public static final String BUNDLE_FILE_ARG = "bundleFile";
-    public static final String DESTINATION_DIR_ARG = "destinationDir";
-    
-    public AgentUpgrade_args(){
+    private static final String BUNDLE_FILE_ARG = "bundleFile";
+    private static final String DESTINATION_DIR_ARG = "destinationDir";
+
+    public AgentUpgrade_args(String bundleFile, String destinationDir) {
         super();
+        setValue(BUNDLE_FILE_ARG, bundleFile);
+        setValue(DESTINATION_DIR_ARG, destinationDir);
+    }
+    
+    public AgentUpgrade_args(AgentRemoteValue args) {
+        super();
+        // copy the values from the AgentRemoteValue object
+        setValue(BUNDLE_FILE_ARG, getValue(BUNDLE_FILE_ARG));
+        setValue(DESTINATION_DIR_ARG, getValue(DESTINATION_DIR_ARG));       
     }
 
-    public AgentUpgrade_args(AgentRemoteValue args) 
-        throws AgentRemoteException 
-    {
-        super(args);
+    public String getBundleFile() {
+        return getValue(BUNDLE_FILE_ARG);
+    }
+    
+    public String getDestination() {
+        return getValue(DESTINATION_DIR_ARG);
     }
 }

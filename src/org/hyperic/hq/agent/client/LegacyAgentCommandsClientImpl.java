@@ -205,9 +205,7 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
     public void upgrade(String tarFile, String destination)
             throws AgentRemoteException, AgentConnectionException {
         // set the arguments to the command
-        AgentUpgrade_args args = new AgentUpgrade_args();
-        args.setValue(AgentUpgrade_args.BUNDLE_FILE_ARG, tarFile);
-        args.setValue(AgentUpgrade_args.DESTINATION_DIR_ARG, destination);
+        AgentUpgrade_args args = new AgentUpgrade_args(tarFile, destination);
         AgentUpgrade_result result;
         AgentRemoteValue cmdRes;
 

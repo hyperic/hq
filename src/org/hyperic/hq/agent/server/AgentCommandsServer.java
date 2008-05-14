@@ -92,8 +92,8 @@ public class AgentCommandsServer
             return new AgentRestart_result();
         } else if(cmd.equals(AgentCommandsAPI.command_upgrade)){
             AgentUpgrade_args upgradeArgs = new AgentUpgrade_args(args);  // Just parse the args
-            String bundleFile = upgradeArgs.getValue(AgentUpgrade_args.BUNDLE_FILE_ARG);
-            String dest = upgradeArgs.getValue(AgentUpgrade_args.DESTINATION_DIR_ARG);
+            String bundleFile = upgradeArgs.getBundleFile();
+            String dest = upgradeArgs.getDestination();
             agentCommandsService.upgrade(bundleFile, dest);
             return new AgentRestart_result();
         } else if(cmd.equals(AgentCommandsAPI.command_die)){
