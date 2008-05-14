@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.common.shared;
 
+import java.io.File;
+
 /**
  * Global constants file to be used for Config Properties, 
  * as well as any other constant used across subsystems
@@ -90,7 +92,9 @@ public class HQConstants {
     
     // The directory on the HQ agent where the agent upgrade bundles will be copied.
     // This value is hard coded on the agent side so we are hard coding it on 
-    // the server.
-    public static final String AgentBundleDropDir = "bundles";
+    // the server. The agent working directory is the agent bundle directory for 
+    // the currently running agent. The new agent bundle will reside in the 
+    // parent "bundles" directory.
+    public static final String AgentBundleDropDir = ".."+File.separator;
     
 }
