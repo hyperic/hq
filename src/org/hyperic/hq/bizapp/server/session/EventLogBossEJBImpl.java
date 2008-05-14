@@ -36,8 +36,19 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.bizapp.shared.EventsBossLocal;
+import org.hyperic.hq.bizapp.shared.EventsBossUtil;
+import org.hyperic.hq.bizapp.shared.EventLogBossLocal;
+import org.hyperic.hq.bizapp.shared.EventLogBossUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /** 
  * The BizApp's interface to the Events/Logs
@@ -53,6 +64,8 @@ import org.hyperic.hq.events.shared.EventLogManagerLocal;
 public class EventLogBossEJBImpl extends BizappSessionEJB implements
         SessionBean {
 
+    private Log _log = LogFactory.getLog(EventLogBossEJBImpl.class);
+    
     private EventLogManagerLocal eventLogManager = null;
 
     private SessionManager manager;
@@ -118,7 +131,7 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
      * Find events based on event type and time range for multiple
      * resources
      *
-     * @param eventType Event classname (ControlEvent.class.getName())
+     * @param eventTypes Array of event class names. (ControlEvent.class.getName())
      * @return List of EventLogValue objects or an empty List if
      *         no events are found
      * 
@@ -136,7 +149,6 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
      * Find events based on status and time range for multiple
      * resources
      *
-     * @param eventType Event classname (ControlEvent.class.getName())
      * @return List of EventLogValue objects or an empty List if
      *         no events are found
      * 
@@ -171,15 +183,36 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public void startup() {
+        _log.info("Event Log Boss starting up!");
+
+        HQApp app = HQApp.getInstance();
+
+        app.registerCallbackListener(ResourceDeleteCallback.class,
+            new ResourceDeleteCallback() {
+                public void preResourceDelete(Resource r) throws VetoException {
+                    EventLogManagerLocal elm = EventLogManagerEJBImpl.getOne();
+                    elm.deleteLogs(r);
+                }
+            }
+        );
+    }
+
+    public static EventLogBossLocal getOne() {
+        try {
+            return EventLogBossUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    /**
      * @ejb:create-method
      */
     public void ejbCreate() {}
-
     public void ejbRemove() {}
-
     public void ejbActivate() {}
-
     public void ejbPassivate() {}
-
     public void setSessionContext(SessionContext ctx) {}
 }

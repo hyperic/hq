@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,10 +35,8 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
-import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -56,7 +50,6 @@ import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.TrackEvent;
-import org.hyperic.util.jdbc.DBUtil;
 
 /**
  * <p> Stores Events to and deletes Events from storage</p>
@@ -70,11 +63,6 @@ import org.hyperic.util.jdbc.DBUtil;
  * @ejb:transaction type="REQUIRED"
  */
 public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
-    private final String logCtx =
-        EventLogManagerEJBImpl.class.getName();
-    
-    private final String TABLE_EVENT_LOG = "EAM_EVENT_LOG";
-    private final String TABLE_EAM_NUMBERS = "EAM_NUMBERS";
     
     private static final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
     private static final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
@@ -251,7 +239,16 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
                                                      intervals);
     }
 
-    /** 
+    /**
+     * Delete event logs for the given resource
+     * TODO: Authz check.
+     * @ejb:interface-method
+     */
+    public int deleteLogs(Resource r) {
+        return getEventLogDAO().deleteLogs(r);
+    }
+
+    /**
      * Purge old event logs.
      * 
      * @param from Delete all records starting from (and including) this time.

@@ -53,8 +53,6 @@ public class EventLogDAO extends HibernateDAO {
             AuthzConstants.serverOpViewServer,
             AuthzConstants.serviceOpViewService,
         });
-    
-    private static final String TIMESTAMP = "timestamp";
 
     public EventLogDAO(DAOFactory f) {
         super(EventLog.class, f);
@@ -284,7 +282,22 @@ public class EventLogDAO extends HibernateDAO {
         
         return result.intValue();
     }
-    
+
+    /**
+     * Delete event logs by resource.
+     * TODO: Chunking?
+     *
+     * @param r The resource in which to delete event logs
+     * @return The number of entries deleted.
+     */
+    int deleteLogs(Resource r) {
+        String sql = "delete EventLog l where resource = :resource";
+
+        return getSession().createQuery(sql)
+            .setParameter("resource", r)
+            .executeUpdate();
+    }
+
     /**
      * Delete event logs in chunks.
      * 
