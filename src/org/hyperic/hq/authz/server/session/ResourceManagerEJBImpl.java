@@ -429,6 +429,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     {
         ResourceDeleteCallback cb = AuthzStartupListener.getResourceDeleteCallback();
         ResourceDAO dao = getResourceDAO();
+        // No factory method for ResourceEdgeDAO?
+        ResourceEdgeDAO edgeDao = new ResourceEdgeDAO(DAOFactory.getDAOFactory());
+
         long now = System.currentTimeMillis();
         
         for (int i=0; i < ids.length; i++) {
@@ -436,8 +439,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                               ids[i].getId());
             cb.preResourceDelete(r);
             ResourceAudit.deleteResource(r, subject, now, now);
+            edgeDao.deleteEdges(r);
+            dao.remove(r);
         }
-        getResourceDAO().deleteByInstances(ids);
     }
 
     /**

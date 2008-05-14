@@ -917,39 +917,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Disable all Measurements for an instance
-     *
-     * @ejb:interface-method
-     */
-    public void disableMeasurements(AuthzSubject subject, Integer[] mids)
-        throws PermissionException, MeasurementNotFoundException {
-        AppdefEntityID aid = null;
-        for (int i = 0; i < mids.length; i++) {
-            Measurement m =
-                getMeasurementDAO().findById(mids[i]);
-
-            if (m == null) {
-                throw new MeasurementNotFoundException("Measurement id " +
-                                                       mids[i] + " not " +
-                                                       "found");
-            }
-
-            // Check removal permission
-            if (aid == null) {
-                aid = getAppdefEntityId(m);
-                checkModifyPermission(subject.getId(), aid);
-            }
-            m.setEnabled(false);
-        }
-
-        removeMeasurementsFromCache(mids);
-        
-        enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-        
-        sendAgentSchedule(aid);
-    }
-
-    /**
      * Disable measurements for an instance
      *
      * @ejb:interface-method

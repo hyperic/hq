@@ -67,8 +67,9 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceChangeCallback;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
+import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
@@ -80,6 +81,7 @@ import org.hyperic.hq.bizapp.shared.EventsBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -1821,15 +1823,11 @@ public class EventsBossEJBImpl
             }
         );
         
-        app.registerCallbackListener(ResourceChangeCallback.class,
-            new ResourceChangeCallback() {
-                public void preAppdefResourcesDelete(AppdefEntityID[] ids) {
-                    // Need to tell alert definitions to dissociate the
-                    // Resources
+        app.registerCallbackListener(ResourceDeleteCallback.class,
+            new ResourceDeleteCallback() {
+                public void preResourceDelete(Resource r) throws VetoException {
                     AlertDefinitionManagerLocal adm = getADM();
-                    for (int i = 0; i < ids.length; i++) {
-                        adm.disassociateResource(ids[i]);
-                    }
+                    adm.disassociateResource(r);
                 }
             }
         );

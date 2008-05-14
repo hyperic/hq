@@ -25,22 +25,16 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
-import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -57,9 +51,7 @@ public class ResourceDAO
                     AuthzSubject creator, Integer instanceId, boolean system) 
     {
         if (type == null) {
-            throw new IllegalArgumentException("ResourceTypevValue is not " +
-                                               "defined");
-            
+            throw new IllegalArgumentException("ResourceType not set");
         }
         Resource resource = new Resource(type, prototype, name, creator, 
                                          instanceId, system);
@@ -90,14 +82,13 @@ public class ResourceDAO
         super.save(entity);
     }
 
-    // XXX: What about the preAppdefResourcesDelete or resource edge tables?
     public void remove(Resource entity) {
+
         ResourceGroupDAO gDao = getFactory().getResourceGroupDAO();
         // Is this really necessary?  We should technically always make sure
         // the group is optimistically updated even when resources are removed.
         for (Iterator i = gDao.getGroups(entity).iterator(); i.hasNext(); ) {
-            ResourceGroup group = (ResourceGroup)i.next();
-            
+            ResourceGroup group = (ResourceGroup)i.next();   
             group.markDirty();
         }
         
@@ -128,19 +119,6 @@ public class ResourceDAO
             }
         }
         return is;
-    }
-
-    void deleteByInstances(AppdefEntityID[] ids) {
-        ResourceStartupListener.getCallbackObj().preAppdefResourcesDelete(ids);
-
-        new ResourceEdgeDAO(DAOFactory.getDAOFactory()).deleteEdges(ids);
-
-        // Remove from group map table
-        for (int i = 0; i < ids.length; i++) {
-            Resource r = findByInstanceId(ids[i].getAuthzTypeId(),
-                                          ids[i].getId());
-            remove(r);
-        }
     }
 
     public Resource findByInstanceId(ResourceType type, Integer id) {

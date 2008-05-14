@@ -48,6 +48,7 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
@@ -584,12 +585,12 @@ public class AlertDefinitionManagerEJBImpl
     }
     
     /**
-     * Set Resource to null on appdef entity's alert definitions
+     * Set Resource to null on entity's alert definitions
      * @ejb:interface-method
      */
-    public void disassociateResource(AppdefEntityID aeid) {
+    public void disassociateResource(Resource r) {
         AlertDefinitionDAO aDao = getAlertDefDAO();
-        List adefs = aDao.findAllByEntity(aeid);
+        List adefs = aDao.findAllByEntity(new AppdefEntityID(r));
 
         for (Iterator i = adefs.iterator(); i.hasNext(); ) {
             AlertDefinition alertdef = (AlertDefinition) i.next();

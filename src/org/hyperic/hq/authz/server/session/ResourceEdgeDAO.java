@@ -102,21 +102,11 @@ public class ResourceEdgeDAO
                 .list();
     }
     
-    void deleteEdges(AppdefEntityID[] ids) {
-        ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
-        List rsrcIds = new ArrayList();
-            
-        // XXX:  This could be a lot more performant!
-        for (int i=0; i<ids.length; i++) {
-            Resource r = rDao.findByInstanceId(ids[i].getAuthzTypeId(), 
-                                               ids[i].getId());
-            rsrcIds.add(r.getId());
-        }
-        
-        String sql = "delete ResourceEdge where to_id in (:resources) " +
-                     "or from_id in (:resources)";
+    void deleteEdges(Resource r) {
+        String sql = "delete ResourceEdge where to_id = :to or from_id = :from)";
         getSession().createQuery(sql)
-                    .setParameterList("resources", rsrcIds)
+                    .setParameter("to", r)
+                    .setParameter("from", r)
                     .executeUpdate();
     }
 }
