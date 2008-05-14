@@ -536,6 +536,81 @@ public class AgentManagerEJBImpl
     }
     
     /**
+     * Upgrade to the specified agent bundle residing on the HQ agent.
+     * 
+     * @param subject The subject issuing the request.
+     * @param aid The agent id.
+     * @param bundleFileName The agent bundle name.
+     * @throws PermissionException if the subject does not have proper permissions 
+     *                             to issue an agent bundle transfer.
+     * @throws FileNotFoundException if the agent bundle is not found on the HQ server.
+     * @throws IOException if an I/O error occurs, such as failing to calculate 
+     *                     the file MD5 checksum.
+     * @throws AgentRemoteException if an exception occurs on the remote agent side.
+     * @throws AgentConnectionException  if the connection to the agent fails.
+     * @throws AgentNotFoundException if no agent exists with the given agent id.
+     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public void upgradeAgentBundle(AuthzSubject subject,
+                                    AppdefEntityID aid,  
+                                    String bundleFileName) 
+        throws PermissionException, 
+               AgentNotFoundException, 
+               AgentConnectionException, 
+               AgentRemoteException,
+               FileNotFoundException, 
+               IOException, 
+               ConfigPropertyException {
+
+        log.info("Upgrading to agent bundle  " + bundleFileName + " on agent "
+                + aid.getID());
+
+        checkCreatePlatformPermission(subject);
+
+        AgentCommandsClient client = AgentCommandsClientFactory.getInstance()
+                .getClient(aid);
+        client.upgrade(bundleFileName, HQConstants.AgentBundleDropDir);
+    }
+    
+    /**
+     * Restarts the specified agent using the Java Service Wrapper.
+     * 
+     * @param subject The subject issuing the request.
+     * @param aid The agent id.
+     * @throws PermissionException if the subject does not have proper permissions 
+     *                             to issue an agent bundle transfer.
+     * @throws FileNotFoundException if the agent bundle is not found on the HQ server.
+     * @throws IOException if an I/O error occurs, such as failing to calculate 
+     *                     the file MD5 checksum.
+     * @throws AgentRemoteException if an exception occurs on the remote agent side.
+     * @throws AgentConnectionException  if the connection to the agent fails.
+     * @throws AgentNotFoundException if no agent exists with the given agent id.
+     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public void restartAgent(AuthzSubject subject,
+                                    AppdefEntityID aid) 
+        throws PermissionException, 
+               AgentNotFoundException, 
+               AgentConnectionException, 
+               AgentRemoteException,
+               FileNotFoundException, 
+               IOException, 
+               ConfigPropertyException {
+
+        log.info("Restarting agent " + aid.getID());
+
+        checkCreatePlatformPermission(subject);
+
+        AgentCommandsClient client = AgentCommandsClientFactory.getInstance()
+                .getClient(aid);
+        client.restart();
+    }
+    
+    /**
      * Resolve the agent bundle file based on the file name and the configured 
      * agent bundle repository on the HQ server.
      */
@@ -561,7 +636,7 @@ public class AgentManagerEJBImpl
         
         return new File(repository, bundleFileName);        
     }
-
+    
     /**
      * Send file data to an agent
      */

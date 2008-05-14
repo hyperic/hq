@@ -95,6 +95,6 @@ public class HQConstants {
     // the server. The agent working directory is the agent bundle directory for 
     // the currently running agent. The new agent bundle will reside in the 
     // parent "bundles" directory.
-    public static final String AgentBundleDropDir = ".."+File.separator;
+    public static final String AgentBundleDropDir = "..";
     
 }
