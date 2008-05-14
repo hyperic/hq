@@ -283,10 +283,24 @@ public class AgentCommandsService implements AgentCommandsClient {
             // delete work directory in case it wasn't cleaned up
             FileUtil.deleteDir(workDir);
             // untar to work directory
-            FileUtil.untar(tarFile, workDir);
+            try {
+                FileUtil.untar(tarFile, workDir);
+            }
+            catch (IOException e) {
+                _log.error("Failed to untar " + tarball + " at destination " + workDir, e);
+                throw new AgentRemoteException(
+                        "Failed to untar " + tarball + " at destination " + workDir);
+            }
 
             // update the wrapper configuration for next JVM restart
-            writeWrapperConfig(bundleHome);
+            try {
+                writeWrapperConfig(bundleHome);
+            }
+            catch (IOException e) {
+                _log.error("Failed to write new bundle home " + bundleHome + " into rollback properties", e);
+                throw new AgentRemoteException(
+                        "Failed to write new bundle home " + bundleHome + " into rollback properties");
+            }
 
             final File extractedBundleDir = new File(workDir,  bundleHome);
             // verify that top level dir exists
@@ -300,11 +314,6 @@ public class AgentCommandsService implements AgentCommandsClient {
                 throw new AgentRemoteException(
                         "Failed to copy agent bundle from " + extractedBundleDir + " to " + bundleDir);
             }
-        }
-        catch (IOException e) {
-            _log.error("Failed to invoke upgrade on location " + tarball, e);
-            throw new AgentRemoteException(
-                    "Failed to invoke upgrade on location " + tarball);
         }
         // cleanup work dir files and tarball
         finally {
