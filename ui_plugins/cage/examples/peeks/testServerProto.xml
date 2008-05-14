@@ -1,0 +1,11 @@
+<critters isAny='true'>
+  <critter class="org.hyperic.hq.grouping.critters.ResourceTypeCritterType">
+    <string id="typeName">covalentEAMServer</string>
+  </critter>
+  <critter class="org.hyperic.hq.grouping.critters.ProtoCritterType">
+    <proto id="protoType">MySQL 5.x</proto>
+  </critter>
+  <critter class="org.hyperic.hq.grouping.critters.ResourceNameCritterType">
+    <string id="name">HQ</string>
+  </critter>
+</critters>

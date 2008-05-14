@@ -1,6 +1,6 @@
 <critters>
   <critter class="org.hyperic.hq.grouping.critters.ResourceNameCritterType">
-    <string>%Network%</string>
+    <string id="name">%Network%</string>
   </critter>
 </critters>
 
