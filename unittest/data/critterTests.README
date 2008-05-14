@@ -1,0 +1,24 @@
+Here is the command to generate the critterTests.xml.gz.
+
+In case the db changes the expectedCount vars need to be changed in CritterTranslator_testEJBImpl to matched the database.
+
+exportTable.sh -l jdbc:mysql://localhost:3306/hqdb -u hqadmin -p hqadmin \
+-d /home/scottmf/workspace/hq_trunk/unittest/data/critterTests \
+-t EAM_RESOURCE,\
+EAM_RESOURCE_TYPE,\
+EAM_RESOURCE_EDGE,\
+EAM_RESOURCE_RELATION,\
+EAM_RES_GRP_RES_MAP,\
+EAM_RESOURCE_GROUP,\
+EAM_SERVER,\
+EAM_SERVER_TYPE,\
+EAM_SERVICE,\
+EAM_SERVICE_TYPE,\
+EAM_PLATFORM,\
+EAM_PLATFORM_TYPE,\
+EAM_MEASUREMENT,\
+EAM_MEASUREMENT_TEMPL,\
+HQ_SEQUENCE,\
+EAM_SUBJECT,\
+EAM_ROLE,\
+HQ_AVAIL_DATA_RLE
