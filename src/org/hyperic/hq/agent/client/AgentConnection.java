@@ -216,7 +216,7 @@ public class AgentConnection {
                                                exc.getMessage());
         } finally {
             try { 
-                streamPair.getSocket().close(); 
+                streamPair.close(); 
             } catch(IOException ignoreexc){
             }
         }
