@@ -30,6 +30,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.util.security.MD5;
+
 /**
  * A class which has the ability to write to files, deal with
  * permissions/ownership, and rollback changes later on.
@@ -40,12 +44,15 @@ public class FileWriter
     private static final int MODE_CREATEONLY        = 1;
     private static final int MODE_CREATEOROVERWRITE = 2;
     private static final int MODE_REWRITE           = 3;
+    
+    private final Log log = LogFactory.getLog(FileWriter.class);
 
     private File                 destFile;
     private InputStream          inStream;
     private WriterHandler        writer;
     private int                  mode;
     private long                 length;
+    private String               expectedMD5Sum;
 
     public FileWriter(File destFile, InputStream inStream, long size){
         super();
@@ -58,6 +65,15 @@ public class FileWriter
 
     public FileWriter(File destFile, byte[] data){
         this(destFile, new ByteArrayInputStream(data), data.length);
+    }
+    
+    /**
+     * Verify the MD5 check sum on file write.
+     * 
+     * @param expectedMD5sum The expected MD5 check sum.
+     */
+    public void setVerifyMD5CheckSumOnWrite(String expectedMD5sum) {
+        this.expectedMD5Sum = expectedMD5sum;
     }
 
     public File getDestFile(){
@@ -102,6 +118,11 @@ public class FileWriter
         this.writer.cleanup();
     }
 
+    /**
+     * Write the file.
+     * 
+     * @throws IOException if the file write fails.
+     */
     public void write()
         throws IOException
     {
@@ -124,4 +145,31 @@ public class FileWriter
 
         this.writer.write();
     }
+    
+    /**
+     * Verify the MD5 check sum of the written file.
+     * 
+     * @throws IOException if the MD5 check sum verification fails.
+     * @throws IllegalStateException if the file has not been written yet.
+     */
+    public void verifyMD5CheckSum() throws IOException {
+        if (this.writer == null || !this.writer.hasWritten()) {
+            throw new IllegalStateException("the file must be written before " +
+            		"verifying the MD5 check sum");
+        }
+        
+        if (this.expectedMD5Sum != null) {
+            String actualMD5Sum = MD5.getDigestString(getDestFile());
+            
+            log.debug("Verifying MD5 check sum for file "+getDestFile()+
+                      "; expected="+this.expectedMD5Sum+", actual="+actualMD5Sum);
+            
+            if (!this.expectedMD5Sum.equals(actualMD5Sum)) {
+                throw new IOException("MD5 check sum failed for file "+
+                                      getDestFile()+"; expected="+this.expectedMD5Sum+
+                                      ", actual="+actualMD5Sum);
+            }
+        }
+    }
+
 }

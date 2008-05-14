@@ -33,18 +33,40 @@ public class FileData {
     private String destFile;
     private long   size;
     private int    writeType;
+    private String md5sum;
 
-    public FileData(String destFile, long size, int writeType){
+    public FileData(String destFile, long size, int writeType) {
         this.destFile  = destFile;
         this.size      = size;
-        this.writeType = writeType;
-
+        this.writeType = writeType;     
+        
         if(this.writeType < WRITETYPE_CREATEONLY ||
            this.writeType > WRITETYPE_REWRITE)
         {
             throw new IllegalArgumentException("Unknown write-type, " +
                                                writeType);
         }
+    }
+    
+    /**
+     * Set the MD5 check sum for this file.
+     * 
+     * @param md5sum The check sum.
+     * @throws NullPointerException if the check sum is <code>null</code>.
+     */
+    public void setMD5CheckSum(String md5sum) {
+        if (md5sum == null) {
+            throw new NullPointerException("md5sum check sum is null");
+        }
+        
+        this.md5sum = md5sum;
+    }
+    
+    /**
+     * @return The MD5 check sum or <code>null</code> if never set.
+     */
+    public String getMD5CheckSum() {
+        return this.md5sum;
     }
 
     public String getDestFile(){
@@ -58,4 +80,5 @@ public class FileData {
     public int getWriteType(){
         return this.writeType;
     }
+        
 }

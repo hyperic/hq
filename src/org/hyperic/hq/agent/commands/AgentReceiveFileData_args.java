@@ -36,6 +36,7 @@ public class AgentReceiveFileData_args
     private static final String PROP_FILENAME  = "file.";
     private static final String PROP_FILESIZE  = "size.";
     private static final String PROP_WRITETYPE = "type.";
+    private static final String PROP_MD5SUM    = "md5sum.";
     
     public AgentReceiveFileData_args(){
         super();
@@ -52,9 +53,8 @@ public class AgentReceiveFileData_args
         this.setNumFiles(0);
         nFiles = getNumFiles(args);
         for(int i=0; i<nFiles; i++){
-            this.addFileData(new FileData(getFileName(args, i),
-                                          getFileSize(args, i),
-                                          getWriteType(args, i)));
+            FileData fileData = getFileData(args, i);
+            this.addFileData(fileData);
         }
     }
 
@@ -67,21 +67,42 @@ public class AgentReceiveFileData_args
         this.setFileName(numFiles, data.getDestFile());
         this.setFileSize(numFiles, data.getSize());
         this.setWriteType(numFiles, data.getWriteType());
+        
+        String md5sum = data.getMD5CheckSum();
+        
+        if (md5sum != null) {
+            this.setMD5CheckSum(numFiles, md5sum);    
+        }
+        
         this.setNumFiles(numFiles + 1);
     }
-
+    
     public FileData getFile(int idx)
         throws AgentRemoteException
     {
-        return new FileData(getFileName(this, idx),
-                            getFileSize(this, idx),
-                            getWriteType(this, idx));
+        return getFileData(this, idx);
     }
 
     public int getNumFiles()
         throws AgentRemoteException
     {
         return getNumFiles(this);
+    }
+    
+    private FileData getFileData(AgentRemoteValue args, int idx) 
+        throws AgentRemoteException {
+        
+        FileData fileData = new FileData(getFileName(args, idx),
+                                         getFileSize(args, idx),
+                                         getWriteType(args, idx));
+
+        String md5sum = getMD5CheckSum(args, idx);
+
+        if (md5sum != null) {
+            fileData.setMD5CheckSum(md5sum);
+        }
+        
+        return fileData;
     }
 
     private int getNumFiles(AgentRemoteValue val)
@@ -123,4 +144,13 @@ public class AgentReceiveFileData_args
     private void setWriteType(int idx, int type){
         this.setValue(PROP_WRITETYPE + idx, Integer.toString(type));
     }
+    
+    private static String getMD5CheckSum(AgentRemoteValue val, int idx) {
+        return val.getValue(PROP_MD5SUM + idx);
+    }
+    
+    private void setMD5CheckSum(int idx, String md5sum) {
+        this.setValue(PROP_MD5SUM + idx, md5sum);
+    }
+    
 }

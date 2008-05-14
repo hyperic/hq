@@ -70,6 +70,7 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.util.security.MD5;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -496,6 +497,8 @@ public class AgentManagerEJBImpl
      * @throws PermissionException if the subject does not have proper permissions 
      *                             to issue an agent bundle transfer.
      * @throws FileNotFoundException if the agent bundle is not found on the HQ server.
+     * @throws IOException if an I/O error occurs, such as failing to calculate 
+     *                     the file MD5 checksum.
      * @throws AgentRemoteException if an exception occurs on the remote agent side.
      * @throws AgentConnectionException  if the connection to the agent fails.
      * @throws AgentNotFoundException if no agent exists with the given agent id.
@@ -511,6 +514,7 @@ public class AgentManagerEJBImpl
                AgentConnectionException, 
                AgentRemoteException,
                FileNotFoundException, 
+               IOException, 
                ConfigPropertyException {
         
         String[][] files = new String[1][2];
@@ -566,7 +570,8 @@ public class AgentManagerEJBImpl
                                                String[][] files,
                                                int[] modes)
         throws AgentNotFoundException, AgentConnectionException, 
-               AgentRemoteException, PermissionException, FileNotFoundException
+               AgentRemoteException, PermissionException, 
+               FileNotFoundException, IOException
     {
         checkCreatePlatformPermission(subject);        
         
@@ -579,8 +584,15 @@ public class AgentManagerEJBImpl
         try {
             for (int i = 0; i < files.length; i++) {
                 File file = new File(files[i][0]);
-                FileData fileData = new FileData(files[i][1], file.length(), 
+                
+                FileData fileData = new FileData(files[i][1], 
+                                                 file.length(), 
                                                  modes[i]);
+                
+                String md5sum = MD5.getDigestString(file);
+
+                fileData.setMD5CheckSum(md5sum);
+                
                 FileInputStream is = new FileInputStream(file);
 
                 data[i] = fileData;

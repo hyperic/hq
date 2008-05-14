@@ -95,6 +95,9 @@ public class AgentCommandsService implements AgentCommandsClient {
                     " (type=" + data.getWriteType() + ")");
             writer = new FileWriter(new File(data.getDestFile()), 
                     inStream, data.getSize());
+            
+            writer.setVerifyMD5CheckSumOnWrite(data.getMD5CheckSum());
+            
             switch(data.getWriteType()){
             case FileData.WRITETYPE_CREATEONLY:
                 writer.setCreateOnly();
@@ -114,6 +117,8 @@ public class AgentCommandsService implements AgentCommandsClient {
         }
 
 //      Now do the actual writing
+        boolean checkSumFailed = false;
+        
         for (i = 0; i < fList.size(); i++) {
             FileWriter writer = (FileWriter)fList.get(i);
 
@@ -121,6 +126,13 @@ public class AgentCommandsService implements AgentCommandsClient {
                 _log.info("Writing to '" + 
                         writer.getDestFile().getAbsolutePath() + "'");
                 writer.write();
+                
+                try {
+                    writer.verifyMD5CheckSum();                    
+                } catch (IOException e) {
+                    checkSumFailed = true;
+                    throw e;
+                }
             } catch(IOException exc) {
                 errorMessage ="Error writing to '" + 
                 writer.getDestFile().getAbsolutePath() + "': " +
@@ -128,16 +140,23 @@ public class AgentCommandsService implements AgentCommandsClient {
 
                 _log.error(errorMessage, exc);
                 break;
-            }
+            }            
         }
 
 //      Make sure the streams are synchronized by chomping off all the
 //      data from the input stream that we would have eaten, had the 
 //      operation succeeded
         for(int j=i; j<fList.size(); j++){
+            // if the failure occurred because of the md5 check sum, we don't 
+            // need to chomp the first stream
+            if (checkSumFailed && j==i) {
+                continue;
+            }
+            
             FileData data = args.getFile(j);
 
             _log.debug("Resynching stream:  Reading " + data.getSize() +" bytes");
+            
             try {
                 byteChomper(inStream, data.getSize());
             } catch(IOException exc){
@@ -145,7 +164,7 @@ public class AgentCommandsService implements AgentCommandsClient {
                         exc.getMessage());
             }
         }
-
+        
         if (errorMessage != null) {
 //          'i' is the last writer we tried to write.  Go from
 //          that, back to 0, rolling back 
@@ -173,6 +192,7 @@ public class AgentCommandsService implements AgentCommandsClient {
 
             _log.info("Successfully wrote: " + destFile);
         }
+            
     }
 
     /**
