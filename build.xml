@@ -1302,7 +1302,8 @@
       <include name="org/hyperic/hq/common/*.class"/>
 	  <exclude name="org/hyperic/hq/common/*_test*.class"/>	
 	  <include name="org/hyperic/hq/common/Resources.properties"/>	
-      <exclude name="org/hyperic/hq/agent/server/AgentTransportLifecycleImpl.class"/>         
+      <exclude name="org/hyperic/hq/agent/server/AgentTransportLifecycleImpl.class"/>   
+	  <include name="org/hyperic/util/security/MD5.class"/>	      
     </jar>
 
     <!-- Control agent server handler -->
