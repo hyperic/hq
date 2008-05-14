@@ -8966,13 +8966,9 @@ has already been defined.
                      CACHE 1""")
     </groovy>
     <groovy targetDB="oracle">
-      def row   = SQL.firstRow("select max(id) from EAM_RES_GRP_RES_MAP")
-      SQL.execute("""CREATE SEQUENCE eam_res_grp_res_map_id_seq
-                     START WITH ${row.max.toInteger() + 1}
-                     INCREMENT BY 1
-                     NOMAXVALUE
-                     NOCYCLE
-                     CACHE 10""")
+      def row   = SQL.firstRow("select max(id) as maxvalue from EAM_RES_GRP_RES_MAP")
+      def value = row.maxvalue.toInteger() + 1
+      SQL.execute("CREATE SEQUENCE eam_res_grp_res_map_id START WITH " + value + " INCREMENT BY 1 NOMAXVALUE NOCYCLE CACHE 10")
     </groovy>
     <schema-alterColumn table="EAM_RES_GRP_RES_MAP"
                         column="ENTRY_TIME"
