@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.common.shared;
 
-import java.io.File;
 
 /**
  * Global constants file to be used for Config Properties, 
