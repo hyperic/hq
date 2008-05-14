@@ -27,10 +27,10 @@ package org.hyperic.hq.plugin.vim;
 
 import com.vmware.vim.ManagedObjectReference;
 
-public class VimVmCollector extends VimHostCollector {
+public class VimPoolCollector extends VimHostCollector {
 
     protected String getName() {
-        return getProperties().getProperty("vm");
+        return getProperties().getProperty("pool");
     }
 
     protected ManagedObjectReference getRoot() {
@@ -38,7 +38,7 @@ public class VimVmCollector extends VimHostCollector {
     }
 
     protected String getType() {
-        return "VirtualMachine";
+        return "ResourcePool";
     }
 
     protected void collect(VimUtil vim) throws Exception {
