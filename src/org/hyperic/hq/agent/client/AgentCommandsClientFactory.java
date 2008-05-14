@@ -26,7 +26,6 @@
 package org.hyperic.hq.agent.client;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
