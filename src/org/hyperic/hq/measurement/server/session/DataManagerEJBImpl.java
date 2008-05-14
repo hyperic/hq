@@ -2046,7 +2046,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch a map of aggregate data values keyed by metrics given
      * a start and stop time range
      *
-     * @param mids The id's of the Measurement
+     * @param measurements The id's of the Measurement
      * @param begin The start of the time range
      * @param end The end of the time range
      * @param useAggressiveRollup uses a measurement rollup table to fetch the 
@@ -2062,16 +2062,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         for (Iterator i=measurements.iterator(); i.hasNext(); ) {
             Measurement meas = (Measurement)i.next();
             MeasurementTemplate t = meas.getTemplate();
-            if (t.getAlias().equalsIgnoreCase("availability")) {
-                avids.add(meas);
+            if (t.isAvailability()) {
+                avids.add(meas.getId());
             } else {
-                mids.add(meas);
+                mids.add(meas.getId());
             }
         }
         Map rtn = getAggDataByMetric(
-            (Integer[])mids.toArray(new Integer[0]), begin, end, true);
+            (Integer[]) mids.toArray(new Integer[mids.size()]), begin, end,
+            useAggressiveRollup);
         rtn.putAll(getAvailMan().getAggregateData(
-            (Integer[])avids.toArray(new Integer[0]), begin, end));
+            (Integer[]) avids.toArray(new Integer[avids.size()]), begin, end));
         return rtn;
     }
 
@@ -2080,7 +2081,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     private Map getAggDataByMetric(Integer[] mids, long begin,
-                                        long end, boolean useAggressiveRollup)
+                                   long end, boolean useAggressiveRollup)
     {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
