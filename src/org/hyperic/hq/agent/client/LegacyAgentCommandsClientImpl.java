@@ -194,11 +194,25 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
         sPair = this.agentConn.sendCommandHeaders(cmd, 
                                                   this.verAPI.getVersion(), 
                                                   args);
-        try {
-            return this.sendData(sPair.getOutputStream(), destFiles, streams);
+        try {            
+            FileDataResult[] rs = this.sendData(sPair.getOutputStream(), destFiles, streams);
+            
+            // this is necessary so that remote exceptions are propagated 
+            // back to the client
+            this.agentConn.getCommandResult(sPair);
+            
+            return rs;
         } catch(IOException exc){
             throw new AgentRemoteException("IO Exception while sending " +
                                            "file data: " + exc.getMessage());
+        } finally {
+            // make sure the socket is closed - may not be closed if sendData() 
+            // throws an exception
+           try {
+               sPair.close();
+           } catch (IOException e) {
+            // swallow
+           } 
         }
     }
 
