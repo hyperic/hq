@@ -41,8 +41,8 @@ public class AgentUpgrade_args extends AgentRemoteValue {
     public AgentUpgrade_args(AgentRemoteValue args) {
         super();
         // copy the values from the AgentRemoteValue object
-        setValue(BUNDLE_FILE_ARG, getValue(BUNDLE_FILE_ARG));
-        setValue(DESTINATION_DIR_ARG, getValue(DESTINATION_DIR_ARG));       
+        setValue(BUNDLE_FILE_ARG, args.getValue(BUNDLE_FILE_ARG));
+        setValue(DESTINATION_DIR_ARG, args.getValue(DESTINATION_DIR_ARG));       
     }
 
     public String getBundleFile() {
