@@ -25,10 +25,80 @@
 
 package org.hyperic.hq.plugin.vim;
 
+import org.hyperic.util.collection.IntHashMap;
+
+import com.vmware.vim.ManagedObjectReference;
+import com.vmware.vim.PerfCounterInfo;
+import com.vmware.vim.PerfEntityMetric;
+import com.vmware.vim.PerfEntityMetricBase;
+import com.vmware.vim.PerfMetricId;
+import com.vmware.vim.PerfMetricIntSeries;
+import com.vmware.vim.PerfMetricSeries;
+import com.vmware.vim.PerfQuerySpec;
+
 public class VimHostCollector extends VimCollector {
+ 
+    protected ManagedObjectReference getRoot() {
+        return null;
+    }
+
+    protected String getType() {
+        return "HostSystem";
+    }
+
+    protected String getName() {
+        return getHostname();
+    }
+
+    protected void printXml(PerfCounterInfo info, String key) {
+        String name = info.getNameInfo().getLabel();
+        System.out.println("    <metric name=\"" + name + "\"");
+        System.out.println("                  alias=\"" + key + "\"");
+        System.out.println("     />");
+    }
 
     public void collect(VimUtil vim)
         throws Exception {
 
+        ManagedObjectReference mor = getManagedObjectReference(vim);
+        ManagedObjectReference perfManager = vim.getPerfManager();
+        IntHashMap counters = getCounterInfo(vim, perfManager);
+        PerfMetricId[] ids = getPerfMetricIds(vim, perfManager, mor);
+
+        PerfQuerySpec spec = new PerfQuerySpec();
+        spec.setEntity(mor);
+        spec.setMetricId(ids);
+        spec.setMaxSample(new Integer(1));
+        spec.setIntervalId(new Integer(20));
+       
+        PerfQuerySpec[] query = new PerfQuerySpec[] { spec };      
+        PerfEntityMetricBase[] values =
+            vim.getConn().getService().queryPerf(perfManager, query);
+        
+        PerfEntityMetric metric = (PerfEntityMetric)values[0];
+        PerfMetricSeries[] vals = metric.getValue();
+
+        for (int i=0; i<vals.length; i++) {
+            PerfCounterInfo info =
+                (PerfCounterInfo)counters.get(vals[i].getId().getCounterId());
+
+            if (info == null) {
+                continue;
+            }
+
+            if (!(vals[i] instanceof PerfMetricIntSeries)) {
+                continue;
+            }
+            PerfMetricIntSeries series = (PerfMetricIntSeries)vals[i];
+            String key = getCounterKey(info);
+            String instance = series.getId().getInstance();
+            if (instance.length() != 0) {
+                continue;
+            }
+            long val = series.getValue()[0];
+            if (info.getStatsType().getValue().equals("absolute")) {
+                setValue(key, val);
+            }
+        }
     }
 }

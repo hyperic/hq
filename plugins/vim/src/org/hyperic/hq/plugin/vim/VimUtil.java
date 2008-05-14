@@ -27,6 +27,8 @@ package org.hyperic.hq.plugin.vim;
 
 import java.util.Properties;
 
+import com.vmware.vim.ManagedObjectReference;
+
 public class VimUtil {
 
     VimServiceConnection _conn;
@@ -79,5 +81,9 @@ public class VimUtil {
         VimServiceConnection conn = new VimServiceConnection();
         initServiceConnection(conn, props);
         return conn;
+    }
+
+    public ManagedObjectReference getPerfManager() {
+        return getConn().getServiceContent().getPerfManager();
     }
 }

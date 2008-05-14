@@ -27,16 +27,32 @@ package org.hyperic.hq.plugin.vim;
 
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.util.collection.IntHashMap;
+
+import com.vmware.vim.ManagedObjectReference;
+import com.vmware.vim.PerfCounterInfo;
+import com.vmware.vim.PerfMetricId;
 
 public abstract class VimCollector extends Collector {
+
+    private static final Log log =
+        LogFactory.getLog(VimCollector.class.getName());
 
     public static final String PROP_URL = "url";
     protected Properties _props;
 
     protected abstract void collect(VimUtil vim)
         throws Exception;
+
+    protected abstract ManagedObjectReference getRoot();
+
+    protected abstract String getType();
+
+    protected abstract String getName();
 
     protected void init() throws PluginException {
         super.init();
@@ -46,6 +62,56 @@ public abstract class VimCollector extends Collector {
 
     protected String getHostname() {
         return _props.getProperty(PROP_HOSTNAME);
+    }
+
+    protected String getCounterKey(PerfCounterInfo info) {
+        String group = info.getGroupInfo().getKey();
+        String name = info.getNameInfo().getKey();
+        String rollup = info.getRollupType().getValue();
+        return group + "." + name + "." + rollup;
+    }
+
+    //http://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.PerformanceManager.html
+    //interval that summarizes statistics for five minute intervals, the ID is 300
+    private static final Integer PERF_INTERVAL_ID = new Integer(300);
+
+    protected PerfMetricId[] getPerfMetricIds(VimUtil vim,
+                                              ManagedObjectReference perfManager,
+                                              ManagedObjectReference entity)
+        throws Exception {
+
+        PerfMetricId[] ids =
+            vim.getConn().getService().queryAvailablePerfMetric(perfManager, 
+                                                                entity, 
+                                                                null, 
+                                                                null, 
+                                                                PERF_INTERVAL_ID);
+        return ids;
+    }    
+
+    protected ManagedObjectReference getManagedObjectReference(VimUtil vim) 
+        throws Exception {
+
+        ManagedObjectReference obj =
+            vim.getUtil().getDecendentMoRef(getRoot(), getType(), getName());
+        if (obj == null) {
+            throw new PluginException(getType() + "/" + getName() + ": not found");
+        }
+        return obj;
+    }
+
+    protected IntHashMap getCounterInfo(VimUtil vim,
+                                        ManagedObjectReference perfManager)
+        throws Exception {
+
+        PerfCounterInfo[] counters =
+            (PerfCounterInfo[])vim.getUtil().getDynamicProperty(perfManager,
+                                                                "perfCounter");
+        IntHashMap info = new IntHashMap(counters.length);
+        for (int i=0; i<counters.length; i++) {
+            info.put(counters[i].getKey(), counters[i]);
+        }
+        return info;
     }
 
     public void collect() {
@@ -58,6 +124,7 @@ public abstract class VimCollector extends Collector {
         } catch (Exception e) {
             setAvailability(false);
             setErrorMessage(e.getMessage(), e);
+            log.error(e);
         } finally {
             vim.dispose();
         }
