@@ -1,0 +1,7 @@
+<div id="mainTabContainer" dojoType="dijit.layout.TabContainer" style="">
+    <div jwcid="@For" source="ognl:tabs" value="ognl:tab">
+        <div id="tab.id" dojoType="dijit.layout.ContentPane" title="ognl:tab.label" closable="tab.isClosable" selected="ognl:selectedId==tab.id">
+            <span jwcid="@RenderBlock" block="ognl:tab.block"></span>
+        </div>
+    </div>
+</div>
