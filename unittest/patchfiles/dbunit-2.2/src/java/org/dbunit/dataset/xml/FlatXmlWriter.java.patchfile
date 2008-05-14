@@ -1,0 +1,15 @@
+Index: src/java/org/dbunit/dataset/xml/FlatXmlWriter.java
+===================================================================
+--- src/java/org/dbunit/dataset/xml/FlatXmlWriter.java	(revision 546)
++++ src/java/org/dbunit/dataset/xml/FlatXmlWriter.java	(working copy)
+@@ -156,7 +156,9 @@
+                 // Skip null value
+                 if (value == null)
+                 {
+-                    continue;
++                    // XXX scottmf fix
++                    //continue;
++                    value = "%%NULL%%";
+                 }
+ 
+                 try

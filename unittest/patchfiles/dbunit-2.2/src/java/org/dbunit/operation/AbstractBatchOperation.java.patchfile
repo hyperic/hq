@@ -1,0 +1,19 @@
+Index: src/java/org/dbunit/operation/AbstractBatchOperation.java
+===================================================================
+--- src/java/org/dbunit/operation/AbstractBatchOperation.java	(revision 546)
++++ src/java/org/dbunit/operation/AbstractBatchOperation.java	(working copy)
+@@ -174,8 +174,12 @@
+                                 Column column = columns[j];
+                             	try
+ 								{
+-	                                statement.addValue(table.getValue(row,
+-	                                        column.getColumnName()), column.getDataType());
++                            	    // XXX scottmf updates
++                            	    Object val = table.getValue(row, column.getColumnName());
++                            	    if (val != null && val.equals("%%NULL%%")) {
++                            	        val = null;
++                            	    }
++	                                statement.addValue(val, column.getDataType());
+ 								}
+                                 catch (TypeCastException e)
+ 								{

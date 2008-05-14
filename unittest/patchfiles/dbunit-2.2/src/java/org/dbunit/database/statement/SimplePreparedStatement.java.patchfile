@@ -1,0 +1,16 @@
+Index: src/java/org/dbunit/database/statement/SimplePreparedStatement.java
+===================================================================
+--- src/java/org/dbunit/database/statement/SimplePreparedStatement.java	(revision 546)
++++ src/java/org/dbunit/database/statement/SimplePreparedStatement.java	(working copy)
+@@ -53,7 +53,10 @@
+             throws TypeCastException, SQLException
+     {
+         // Special NULL handling
+-        if (value == null || value == ITable.NO_VALUE)
++        // XXX scottmf fixed null issue
++        if (value == null ||
++            value == ITable.NO_VALUE ||
++            value.equals("%%NULL%%"))
+         {
+             _statement.setNull(++_index, dataType.getSqlType());
+             return;
