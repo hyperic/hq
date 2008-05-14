@@ -43,6 +43,8 @@ import org.hyperic.hq.agent.commands.AgentPing_result;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.agent.commands.AgentRestart_args;
 import org.hyperic.hq.agent.commands.AgentRestart_result;
+import org.hyperic.hq.agent.commands.AgentUpgrade_args;
+import org.hyperic.hq.agent.commands.AgentUpgrade_result;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.util.math.MathUtil;
 
@@ -198,5 +200,22 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
             throw new AgentRemoteException("IO Exception while sending " +
                                            "file data: " + exc.getMessage());
         }
+    }
+
+    public void upgrade(String tarFile, String destination)
+            throws AgentRemoteException, AgentConnectionException {
+        // set the arguments to the command
+        AgentUpgrade_args args = new AgentUpgrade_args();
+        args.setValue(AgentUpgrade_args.BUNDLE_FILE_ARG, tarFile);
+        args.setValue(AgentUpgrade_args.DESTINATION_DIR_ARG, destination);
+        AgentUpgrade_result result;
+        AgentRemoteValue cmdRes;
+
+        cmdRes = this.agentConn.sendCommand(AgentCommandsAPI.command_upgrade,
+                this.verAPI.getVersion(), args);
+        
+        // We don't really do anything with this result object -- it's just
+        // here for future expansion.
+        result = new AgentUpgrade_result(cmdRes);
     }
 }

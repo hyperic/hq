@@ -43,6 +43,7 @@ import org.hyperic.hq.agent.commands.AgentPing_result;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.agent.commands.AgentRestart_args;
 import org.hyperic.hq.agent.commands.AgentRestart_result;
+import org.hyperic.hq.agent.commands.AgentUpgrade_args;
 
 /**
  * The server-side of the commands the Agent supports.  This object 
@@ -88,6 +89,12 @@ public class AgentCommandsServer
         } else if(cmd.equals(AgentCommandsAPI.command_restart)){
             new AgentRestart_args(args);  // Just parse the args
             agentCommandsService.restart();
+            return new AgentRestart_result();
+        } else if(cmd.equals(AgentCommandsAPI.command_upgrade)){
+            AgentUpgrade_args upgradeArgs = new AgentUpgrade_args(args);  // Just parse the args
+            String bundleFile = upgradeArgs.getValue(AgentUpgrade_args.BUNDLE_FILE_ARG);
+            String dest = upgradeArgs.getValue(AgentUpgrade_args.DESTINATION_DIR_ARG);
+            agentCommandsService.upgrade(bundleFile, dest);
             return new AgentRestart_result();
         } else if(cmd.equals(AgentCommandsAPI.command_die)){
             new AgentDie_args(args);  // Just parse the args

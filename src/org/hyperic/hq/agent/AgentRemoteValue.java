@@ -33,6 +33,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.hyperic.util.GenericValueMap;
@@ -82,6 +83,16 @@ public class AgentRemoteValue implements GenericValueMap, Externalizable {
         }
     }
     
+    // copies all the keys from args to the new AgentRemoteValue instance
+    public AgentRemoteValue(AgentRemoteValue args) {
+        this.setup();
+        Set keys = args.getKeys();
+        for (Iterator it = keys.iterator(); it.hasNext();) {
+            String key = (String)it.next();
+            setValue(key, args.getValue(key));
+        }
+    }
+
     private void setup(){
         this.vals = new Hashtable();
     }

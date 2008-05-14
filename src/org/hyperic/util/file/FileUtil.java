@@ -25,6 +25,8 @@
 
 package org.hyperic.util.file;
 
+import org.apache.tools.tar.TarEntry;
+import org.apache.tools.tar.TarInputStream;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.collection.IntHashMap;
 
@@ -43,6 +45,7 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 public class FileUtil {
     private static IntHashMap invalidChars = null;
@@ -382,8 +385,73 @@ public class FileUtil {
         
         return res;
     }
+     
+    /** 
+     * 
+     * Deletes all files and subdirectories under dir.
+     * Returns true if all deletions were successful.
+     * If a deletion fails, the method stops attempting to delete and returns
+     * false.
+     * @param dir Directory to delete recursively
+     * @return returns true iff directory was successfully deleted including all its children.
+     */
+    public static boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        // The directory is now empty so delete it
+        return dir.delete();
+    }
     
-    private static void safeCloseStream(InputStream in) 
+    public static void untar(File tarFile, File destinationDir)
+    throws IOException {
+        TarInputStream tin = null;
+        try {
+            tin = new TarInputStream(new GZIPInputStream(new FileInputStream(
+                    tarFile)));
+            // get the first entry in the archive
+            TarEntry tarEntry = tin.getNextEntry();
+
+            while (tarEntry != null) {
+                // create a file with the same name as the tarEntry
+                File destPath = new File(destinationDir, tarEntry.getName());
+                // create any parent directories
+                File parent = destPath.getParentFile();
+                if (parent != null) {
+                    parent.mkdirs();
+                }
+                // if entry is directory, create it
+                if (tarEntry.isDirectory()) {
+                    destPath.mkdirs();
+                }
+                else {
+                    FileOutputStream fout = null;
+                    try {
+                        // delete the file it already exists
+                        if (destPath.exists())
+                            destPath.delete();
+                        fout = new FileOutputStream(destPath);
+                        tin.copyEntryContents(fout);
+                    }
+                    finally {
+                        safeCloseStream(fout);
+                    }
+                }
+                tarEntry = tin.getNextEntry();
+            }
+        }
+        finally {
+            safeCloseStream(tin);
+        }
+    }
+
+    public static void safeCloseStream(InputStream in) 
     {
         if (in != null) {
             try {
@@ -394,7 +462,7 @@ public class FileUtil {
         }
     }
     
-    private static void safeCloseStream(OutputStream out) 
+    public static void safeCloseStream(OutputStream out) 
     {
         if (out != null) {
             try {
@@ -404,5 +472,5 @@ public class FileUtil {
             }            
         }
     }
-    
+ 
 }

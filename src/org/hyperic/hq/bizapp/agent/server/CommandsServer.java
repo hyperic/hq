@@ -437,7 +437,7 @@ public class CommandsServer
             bootConfig   = cfg.getBootProperties();
             this.storage = agent.getStorageProvider();
             this.keystoreFile =
-                bootConfig.getProperty("agent.keystore", KEYSTORE_FILE);
+                bootConfig.getProperty(AgentConfig.PROP_KEYSTORE[0]);
             this.keyAlg =
                 bootConfig.getProperty("agent.keyalg", "RSA");
             keystore     = this.loadKeyStore();

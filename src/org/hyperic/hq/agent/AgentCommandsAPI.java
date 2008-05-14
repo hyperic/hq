@@ -41,6 +41,8 @@ public final class AgentCommandsAPI extends AgentAPIInfo {
     public static final int DEFAULT_PORT = 2144;
     public static final String command_ping = 
         commandPrefix + "ping";
+    public static final String command_upgrade = 
+        commandPrefix + "upgrade";   
     public static final String command_restart = 
         commandPrefix + "restart";   
     public static final String command_die = 
@@ -50,6 +52,7 @@ public final class AgentCommandsAPI extends AgentAPIInfo {
 
     public static final String[] commandSet = {
         AgentCommandsAPI.command_ping,
+        AgentCommandsAPI.command_upgrade,
         AgentCommandsAPI.command_restart,
         AgentCommandsAPI.command_die,
         AgentCommandsAPI.command_receive_file

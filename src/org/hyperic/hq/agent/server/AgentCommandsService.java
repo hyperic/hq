@@ -26,20 +26,25 @@
 package org.hyperic.hq.agent.server;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.file.FileWriter;
 import org.hyperic.util.math.MathUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
@@ -222,6 +227,140 @@ public class AgentCommandsService implements AgentCommandsClient {
             public void run() {
                 WrapperManager.restart();
             }}  , 0);
+    }
+
+    /**
+     * @see org.hyperic.hq.agent.client.AgentCommandsClient#ping()
+     */
+    public void upgrade(String tarball, String destination)
+            throws AgentRemoteException {
+        final File tarFile = new File(tarball);
+        final File workDir = new File(destination, "work");
+        try {
+            // check that we are running in Java Service Wrapper mode
+            if (!WrapperManager.isControlledByNativeWrapper()) {
+                throw new AgentRemoteException(
+                        "Upgrade command is not supported without the Java Service Wrapper.");
+            }
+            
+            // check that the tar file exists and is a file
+            // we are assuming at this point that the file is not corrupted
+            if (!tarFile.isFile()) {
+                throw new AgentRemoteException("Upgrade agent bundle "
+                        + tarball + " is not a valid file");
+            }
+
+            // assume that the tarball name is the same as the top level directory
+            final String bundleHome = getBundleHome(tarFile);
+
+            // check if the bundle home directory exists
+            final File bundleDir = new File(destination, bundleHome);
+            if (bundleDir.exists()) {
+                throw new AgentRemoteException("Bundle directory "
+                        + bundleDir.toString() + " already exists");
+            }
+
+            // delete work directory in case it wasn't cleaned up
+            FileUtil.deleteDir(workDir);
+            // untar to work directory
+            FileUtil.untar(tarFile, workDir);
+
+            // update the wrapper configuration for next JVM restart
+            writeWrapperConfig(bundleHome);
+
+            final File extractedBundleDir = new File(workDir,  bundleHome);
+            // verify that top level dir exists
+            if (!extractedBundleDir.isDirectory()) {
+                throw new AgentRemoteException(
+                        "Invalid agent bundle tar file detected; missing top-level "
+                                + bundleDir + " directory");
+            }
+         // if everything went well, move extracted files to destination
+            if (!extractedBundleDir.renameTo(bundleDir)) {
+                throw new AgentRemoteException(
+                        "Failed to copy agent bundle from " + extractedBundleDir + " to " + bundleDir);
+            }
+        }
+        catch (IOException e) {
+            _log.error("Failed to invoke upgrade on location " + tarball, e);
+            throw new AgentRemoteException(
+                    "Failed to invoke upgrade on location " + tarball);
+        }
+        // cleanup work dir files and tarball
+        finally {
+            tarFile.delete();
+            FileUtil.deleteDir(workDir);
+        }
+    }
+
+    private String getBundleHome(File tarFile)
+            throws AgentRemoteException {
+        final int index;
+        String tarFileName = tarFile.getName();
+        if (tarFileName.endsWith(".tar.gz"))
+            index = tarFileName.lastIndexOf(".tar.gz");
+        else if (tarFileName.endsWith(".tgz"))
+            index = tarFileName.lastIndexOf(".tgz");
+        else
+            throw new AgentRemoteException(
+                    "Invalid file format for the agent bundle tar file (.tar.gz or .tgz expected)");
+        return tarFileName.substring(0, index);
+    }
+
+    // replaces the old bundle home with the new one
+    // copying over the old one as rollback in the rollback properties
+    // file used by Java Server Wrapper
+    private void writeWrapperConfig(String bundleDir) throws IOException {
+
+        Properties rollbackProps = new Properties();
+        FileInputStream fis = null;
+        String propFileName = System.getProperty(AgentConfig.ROLLBACK_PROPFILE,
+                AgentConfig.DEFAULT_ROLLBACKPROPFILE);
+        File propFile = new File(propFileName);
+        File temPropFile = new File(propFileName + ".tmp");
+        try {
+            fis = new FileInputStream(propFile);
+            rollbackProps.load(fis);
+            String oldBundleDir = rollbackProps
+                    .getProperty(AgentConfig.JSW_PROP_AGENT_BUNDLE);
+            rollbackProps.setProperty(AgentConfig.JSW_PROP_AGENT_BUNDLE,
+                    bundleDir);
+            rollbackProps.setProperty(
+                    AgentConfig.JSW_PROP_AGENT_ROLLBACK_BUNDLE, oldBundleDir);
+        }
+        catch (IOException e) {
+            _log.error("Failed to load rollback properties file", e);
+            throw e;
+        }
+        finally {
+            FileUtil.safeCloseStream(fis);
+        }
+        // write out the updated rollback properties
+        FileOutputStream fos = null;
+        boolean success = true;
+        try {
+            temPropFile.delete();
+            fos = new FileOutputStream(temPropFile);
+            rollbackProps.store(fos,
+                    "Auto-generated rollback properties do not edit!");
+        }
+        catch (IOException e) {
+            success = false;
+            _log.error("Failed to write rollback properties file", e);
+            throw e;
+        }
+        finally {
+            FileUtil.safeCloseStream(fos);
+            // remove lingering temp properties file
+            if (!success)
+                temPropFile.delete();
+        }
+        // try overwriting properties with temp file
+        // if this fails, delete properties first and move temp file
+        if (!temPropFile.renameTo(propFile)) {
+            propFile.delete();
+            temPropFile.renameTo(propFile);
+        }
     }
 
 }

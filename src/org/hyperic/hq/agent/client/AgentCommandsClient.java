@@ -50,6 +50,15 @@ public interface AgentCommandsClient {
 
     long ping() throws AgentRemoteException, AgentConnectionException;
 
+    /**
+     * Tell the agent to restart.
+     *
+     * @throws AgentRemoteException indicating the server failed to 
+     *                              understand our request.
+     * @throws AgentConnectionException indicating an error connecting to or
+     *                                  communicating with the agent.
+     */
+    
     void restart() throws AgentRemoteException, AgentConnectionException;
 
     /**
@@ -62,6 +71,20 @@ public interface AgentCommandsClient {
      */
 
     void die() throws AgentRemoteException, AgentConnectionException;
+    
+    /**
+     * Tell the agent to upgrade itself upon JVM restart.
+     *
+     * @param tarFile  Agent bundle tarball used to update the agent.
+     * @param destination  Destination directory on the agent where the bundle will reside.
+     *     
+     * @throws AgentRemoteException indicating the server failed to 
+     *                              understand our request.
+     * @throws AgentConnectionException indicating an error connecting to or
+     *                                  communicating with the agent.
+     */
+    
+    void upgrade(String tarFile, String destination) throws AgentRemoteException, AgentConnectionException;
 
     /**
      * Send file data to a remote agent

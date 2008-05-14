@@ -125,6 +125,19 @@ public class AgentCommandsClientImpl
             safeDestroyService(proxy);
         }
     }
+    
+    public void upgrade(String tarFile, String destination) throws AgentRemoteException, 
+        AgentConnectionException {
+        
+        AgentCommandsClient proxy = null;
+        
+        try {
+            proxy = (AgentCommandsClient)getSynchronousProxy(AgentCommandsClient.class);
+            proxy.upgrade(tarFile, destination);           
+        } finally {
+            safeDestroyService(proxy);
+        }
+    }
 
     /**
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#restart()
