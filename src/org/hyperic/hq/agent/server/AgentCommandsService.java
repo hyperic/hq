@@ -293,13 +293,20 @@ public class AgentCommandsService implements AgentCommandsClient {
             }
 
             // update the wrapper configuration for next JVM restart
+            boolean success = false;
             try {
-                writeWrapperConfig(bundleHome);
+                success = writeRollbackProperties(bundleHome);
             }
             catch (IOException e) {
-                _log.error("Failed to write new bundle home " + bundleHome + " into rollback properties", e);
-                throw new AgentRemoteException(
-                        "Failed to write new bundle home " + bundleHome + " into rollback properties");
+                _log.error("Failed to write new bundle home " + bundleHome
+                        + " into rollback properties", e);
+            }
+            finally {
+                if (!success) {
+                    throw new AgentRemoteException(
+                            "Failed to write new bundle home " + bundleHome
+                            + " into rollback properties");
+                }
             }
 
             final File extractedBundleDir = new File(workDir,  bundleHome);
@@ -317,9 +324,14 @@ public class AgentCommandsService implements AgentCommandsClient {
         }
         // cleanup work dir files and tarball
         finally {
-            tarFile.delete();
-            FileUtil.deleteDir(workDir);
+            doUpgradeCleanup(tarFile, workDir);
         }
+    }
+
+    private void doUpgradeCleanup(File tarFile, File workDir) {
+        tarFile.delete();
+        // recursive delete
+        FileUtil.deleteDir(workDir);
     }
 
     private String getBundleHome(File tarFile)
@@ -339,14 +351,14 @@ public class AgentCommandsService implements AgentCommandsClient {
     // replaces the old bundle home with the new one
     // copying over the old one as rollback in the rollback properties
     // file used by Java Server Wrapper
-    private void writeWrapperConfig(String bundleDir) throws IOException {
+    private boolean writeRollbackProperties(String bundleDir) throws IOException {
 
         Properties rollbackProps = new Properties();
         FileInputStream fis = null;
         String propFileName = System.getProperty(AgentConfig.ROLLBACK_PROPFILE,
                 AgentConfig.DEFAULT_ROLLBACKPROPFILE);
         File propFile = new File(propFileName);
-        File temPropFile = new File(propFileName + ".tmp");
+        File tempPropFile = new File(propFileName + ".tmp");
         try {
             fis = new FileInputStream(propFile);
             rollbackProps.load(fis);
@@ -366,29 +378,24 @@ public class AgentCommandsService implements AgentCommandsClient {
         }
         // write out the updated rollback properties
         FileOutputStream fos = null;
-        boolean success = true;
         try {
-            temPropFile.delete();
-            fos = new FileOutputStream(temPropFile);
-            rollbackProps.store(fos,
-                    "Auto-generated rollback properties do not edit!");
-        }
-        catch (IOException e) {
-            success = false;
-            _log.error("Failed to write rollback properties file", e);
-            throw e;
+            try {
+                tempPropFile.delete();
+                fos = new FileOutputStream(tempPropFile);
+                rollbackProps.store(fos,
+                        "Auto-generated rollback properties do not edit!");
+            }
+            catch (IOException e) {
+                _log.error("Failed to write rollback properties file", e);
+                throw e;
+            }
+            finally {
+                FileUtil.safeCloseStream(fos);
+            }
+            return FileUtil.safeFileMove(tempPropFile, propFile);
         }
         finally {
-            FileUtil.safeCloseStream(fos);
-            // remove lingering temp properties file
-            if (!success)
-                temPropFile.delete();
-        }
-        // try overwriting properties with temp file
-        // if this fails, delete properties first and move temp file
-        if (!temPropFile.renameTo(propFile)) {
-            propFile.delete();
-            temPropFile.renameTo(propFile);
+            tempPropFile.delete();
         }
     }
 

@@ -473,4 +473,18 @@ public class FileUtil {
         }
     }
  
+    public static boolean safeFileMove(File moveFrom, File moveTo) {
+        if (moveFrom.isDirectory()) {
+            throw new IllegalArgumentException("moveFrom is a directory " + moveFrom);
+        }
+        if (moveTo.isDirectory()) {
+            throw new IllegalArgumentException("moveTo is a directory " + moveTo);
+        }
+        boolean success = moveFrom.renameTo(moveTo);
+        if (!success) {
+            moveTo.delete();
+            success = moveFrom.renameTo(moveTo);
+        }
+        return success;
+    }
 }
