@@ -25,20 +25,26 @@
 
 package org.hyperic.util.unittest.util;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.database.QueryDataSet;
+import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSet;
+import org.dbunit.operation.DatabaseOperation;
+import org.hyperic.util.jdbc.DBUtil;
 
 public class TableExport
 {
@@ -46,6 +52,7 @@ public class TableExport
                           _user,
                           _passwd,
                           _destFilename;
+    private static boolean _import = false;
     private static Connection _conn;
     private static List _tables = new ArrayList();
 
@@ -53,7 +60,11 @@ public class TableExport
     {
         getArgs(args);
         _conn = getConnection();
-        exportPartialDataSet();
+        if (_import) {
+            importDataSet();
+        } else {
+            exportPartialDataSet();
+        }
     }
 
     private static void getArgs(String[] args)
@@ -71,6 +82,8 @@ public class TableExport
                 setTables(tables);
             } else if (args[i].equals("--file")) {
                 _destFilename = args[++i];
+            } else if (args[i].equals("--import")) {
+                _import = true;
             }
         }
     }
@@ -80,6 +93,31 @@ public class TableExport
         String[] toks = tables.split(",");
         for (int i=0; i<toks.length; i++) {
             _tables.add(toks[i]);
+        }
+    }
+    
+    private static final void importDataSet() throws Exception {
+
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = getConnection();
+            IDatabaseConnection idbConn = new DatabaseConnection(conn);
+            conn.setAutoCommit(false);
+            stmt = conn.createStatement();
+            // this is done for MySQL via another method
+            if (DBUtil.isPostgreSQL(conn)) {
+                stmt.execute("set constraints all deferred");
+            } else if (DBUtil.isOracle(conn)) {
+                stmt.execute("alter session set constraints = deferred");
+            }
+            IDataSet dataset = new FlatXmlDataSet(new GZIPInputStream(
+                new FileInputStream(_destFilename)));
+            DatabaseOperation.CLEAN_INSERT.execute(idbConn, dataset);
+            conn.commit();
+        } finally {
+            DBUtil.closeJDBCObjects(TableExport.class.getName(),
+                conn, stmt, null);
         }
     }
 

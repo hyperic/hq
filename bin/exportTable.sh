@@ -16,6 +16,7 @@ url="jdbc:postgresql://localhost:5432/hqdb?protocolVersion=2"
 uflag=
 pflag=
 tflag=
+iflag=
 
 usage()
 {
@@ -23,9 +24,11 @@ usage()
     printf "default url = $url\nexample urls:\nmysql = jdbc:mysql://localhost:3306/hqdb\noracle = jdbc:oracle:thin:@localhost:1521:orcl\n"
 }
 
-while getopts 'd:p:l:u:t:' name
+while getopts 'id:p:l:u:t:' name
 do
      case $name in
+     i)     iflag=1
+            import="--import";;
      p)     pflag=1
             passwd="$OPTARG";;
      l)     lflag=1
@@ -39,6 +42,9 @@ do
             exit 2;;
      esac
 done
+if [ ! -z "$iflag" ]; then
+   [ "$DEBUG" ] && printf "Option --import specified\n"
+fi
 if [ ! -z "$lflag" ]; then
    [ "$DEBUG" ] && printf "Option --url $url specified\n"
 else
@@ -79,4 +85,4 @@ PKGS="${DB_PKGS}:${DBUNIT_PKGS}:$basedir/../build/hq.ear/hq.jar"
 ARGS="-Djdbc.drivers=${DRIVER} -cp ${PKGS}"
 JAVA="${JAVA_HOME}/bin/java"
 
-${JAVA} ${ARGS} org.hyperic.util.unittest.util.TableExport --url $url --passwd $passwd --user $user --tables $tables --file $dest
+${JAVA} ${ARGS} org.hyperic.util.unittest.util.TableExport --url $url --passwd $passwd --user $user --tables $tables --file $dest $import
