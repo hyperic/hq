@@ -88,14 +88,12 @@ public class VimHostCollector extends VimCollector {
         }
 
         if (!VALID_UNITS.contains(units)) {
-            System.out.println("    <!-- units=" + units + " -->"); 
+            System.out.println("    <!-- units=" + units + " -->");
+            units = MeasurementConstants.UNITS_NONE;
         }
         System.out.println("    <metric name=\"" + name + "\"");
-        System.out.println("                  alias=\"" + key + "\"");
-        if (VALID_UNITS.contains(units)) {
-            System.out.println("                  units=\"" + units + "\"");
-        }
-        System.out.println("     />\n");
+        System.out.println("            alias=\"" + key + "\"");
+        System.out.println("            units=\"" + units + "\"/>\n");
     }
 
     protected void collect(VimUtil vim)
