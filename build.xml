@@ -752,11 +752,14 @@
 
     <copy todir="${war.dir}/" >
      <fileset dir="${webapp.home}" includes="**/*.js*">
-        <include name="**/*.js"/>
-        <include name="**/*.css"/>
         <include name="**/images/*"/>
-        <include name="**/*.page"/>
         <include name="**/*.property"/>
+        <include name="**/*.js"/>
+        <include name="**/*.xml"/>
+        <include name="**/*.css"/>
+        <include name="**/*.properties"/>
+        <include name="**/*.application"/>
+        <include name="**/*.page"/>
         <include name="**/*.html"/>
         <exclude name="**/*.jsp"/>
       </fileset>
@@ -871,6 +874,22 @@
   </target>
 
   <target name="redeploy-ui" depends="undeploy-ui,deploy-ui,trigger-jboss-reload"/>
+
+  <target name="minify-ui" depends="init-taskdefs, init-internal-taskdefs, pack-war">
+    <for param="file">
+      <path>
+        <fileset dir="${war.dir}" includes="**/*.js"/>
+        <fileset dir="${war.dir}" includes="**/*.css"/>
+      </path>
+      <sequential>
+        <tempfile property="@{file}" suffix=".temp" destDir="build"/>
+        <echo>-o @{file} @{file}</echo>
+        <java fork="true" jar="${thirdparty.lib}/minify/yuicompressor-2.3.5.jar">
+            <arg value="-o @{file} @{file}"/>
+        </java>
+      </sequential>
+    </for>
+  </target>
 
   <!-- ==================== PDK packaging ==================== -->
   <target name="pdk-javadoc">
