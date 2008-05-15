@@ -267,6 +267,8 @@ public class AgentCommandsService implements AgentCommandsClient {
         final File tarFile = new File(tarball);
         final File workDir = new File(destination, "work");
         try {
+            _log.info("Preparing to upgrade agent bundle from tarball " + tarball +
+                    " at destination " + destination);
             // check that we are running in Java Service Wrapper mode
             if (!WrapperManager.isControlledByNativeWrapper()) {
                 throw new AgentRemoteException(
@@ -331,6 +333,7 @@ public class AgentCommandsService implements AgentCommandsClient {
                 throw new AgentRemoteException(
                         "Failed to copy agent bundle from " + extractedBundleDir + " to " + bundleDir);
             }
+            _log.info("Successfully upgraded to new agent bundle");
         }
         // cleanup work dir files and tarball
         finally {

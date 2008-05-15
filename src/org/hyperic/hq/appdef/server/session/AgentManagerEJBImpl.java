@@ -601,7 +601,8 @@ public class AgentManagerEJBImpl
 
         AgentCommandsClient client = AgentCommandsClientFactory.getInstance()
                 .getClient(aid);
-        client.upgrade(bundleFileName, HQConstants.AgentBundleDropDir);
+        File bundleFile = new File(HQConstants.AgentBundleDropDir, bundleFileName);
+        client.upgrade(bundleFile.getPath(), HQConstants.AgentBundleDropDir);
     }
     
     /**
