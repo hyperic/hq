@@ -85,43 +85,32 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     public EventLog createLog(AbstractEvent event, 
                               String subject,
                               String status, 
-                              boolean save) {
-        EventLog eval = new EventLog();
-
-        // Set the time to the event time
-        eval.setTimestamp(event.getTimestamp());
-
-        // Must set the detail and the type
-        eval.setType(event.getClass().getName());
-
+                              boolean save)
+    {
         String detail = event.toString();
         if (detail.length() > MSGMAX) {
             detail = detail.substring(0, MSGMAX - 1);
         }
 
-        eval.setDetail(detail);
-
-        if (status != null)
-            eval.setStatus(status);
-
         if (subject != null) {
             if (subject.length() > SRCMAX) {
                 subject = subject.substring(0, SRCMAX - 1);
             }
-            eval.setSubject(subject);
         }
 
+        Resource r = null;
         if (event instanceof ResourceEventInterface) {
             AppdefEntityID aeId =
                 ((ResourceEventInterface) event).getResource();
-            Resource r = ResourceManagerEJBImpl.getOne().findResource(aeId);
-            eval.setResource(r);
+            r = ResourceManagerEJBImpl.getOne().findResource(aeId);
         }
 
+        EventLog e = new EventLog(r, subject, event.getClass().getName(),
+                                  detail, event.getTimestamp(), status);
         if (save) {
-            return getEventLogDAO().create(eval);            
+            return getEventLogDAO().create(e);
         } else {
-            return eval;
+            return e;
         }
     }
     

@@ -43,6 +43,16 @@ public class EventLog extends PersistedObject implements IEventPoint {
     protected EventLog() {
     }
 
+    protected EventLog(Resource r, String subject, String type, String detail,
+                       long timestamp, String status) {
+        _resource = r;
+        _subject = subject;
+        _type = type;
+        _detail = detail;
+        _timestamp = timestamp;
+        _status = status;
+    }
+
     public String getDetail() {
         return _detail;
     }
