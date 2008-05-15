@@ -51,9 +51,10 @@
   <property name="war.dir" location="${build.dir}/hq.ear/hq.war" />
   <property name="ROOT.war" location="${build.dir}/ROOT.war"/>
   <property name="agent.dir" location="${build.dir}/agent" />
+  <property name="agent.bundle.dir" value="agent-${version}-${build}"/>    
 
   <!-- PDK destination -->
-  <property name="pdk.dir" location="${agent.dir}/bundles/agent-${version}/pdk" />
+  <property name="pdk.dir" location="${agent.dir}/bundles/${agent.bundle.dir}/pdk" />
   <property name="pdk.lib" location="${pdk.dir}/lib" />
   <property name="pdk.plugins" location="${pdk.dir}/plugins" />
   <property name="pdk.mibs" location="${pdk.dir}/mibs" />
@@ -1243,22 +1244,22 @@
     <mkdir dir="${agent.dir}/wrapper" />
     <mkdir dir="${agent.dir}/wrapper/lib" />
     <mkdir dir="${agent.dir}/wrapper/sbin" />
-    <mkdir dir="${agent.dir}/bundles/agent-${version}/lib" />
-    <mkdir dir="${agent.dir}/bundles/agent-${version}/lib/handlers/lib" />	 
-    <mkdir dir="${agent.dir}/bundles/agent-${version}/rcfiles" />
-    <mkdir dir="${agent.dir}/bundles/agent-${version}/tmp" />
-    <mkdir dir="${agent.dir}/bundles/agent-${version}/conf" />
+    <mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/lib" />
+    <mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib" />	 
+    <mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/rcfiles" />
+    <mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/tmp" />
+    <mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/conf" />
 
     <!-- Touch the agent log file so that "smart" unzippers don't forget
          to create the log directory -->
     <touch file="${agent.dir}/log/agent.log"/>
-    <touch file="${agent.dir}/bundles/agent-${version}/tmp/empty"/>
+    <touch file="${agent.dir}/bundles/${agent.bundle.dir}/tmp/empty"/>
 
-    <copy todir="${agent.dir}/bundles/agent-${version}/lib" >
+    <copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib" >
       <fileset dir="${lather.lib}" includes="lather.jar" />
     </copy>
   	
-    <copy todir="${agent.dir}/bundles/agent-${version}/lib/handlers/lib" >
+    <copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib" >
 		<fileset dir="${thirdparty.lib}">
 		  <include name="jboss-remoting.jar"/>
 		  <include name="jboss-common.jar"/>
@@ -1276,7 +1277,7 @@
     </copy> 	
 	  
     <!-- Autoinventory jars -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/agent-${version}/lib/handlers/AgentAutoinventoryServer.jar">
+    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/AgentAutoinventoryServer.jar">
       <include name="org/hyperic/hq/autoinventory/**"/>
       <include name="org/hyperic/hq/authz/client/**"/>
       <include name="org/hyperic/hq/authz/shared/**"/>
@@ -1288,7 +1289,7 @@
     </jar>
 
     <!-- Bizapp jars -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/agent-${version}/lib/handlers/AgentBizappServer.jar">
+    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/AgentBizappServer.jar">
       <include name="org/hyperic/hq/bizapp/agent/server/**"/>
       <include name="org/hyperic/hq/bizapp/agent/commands/**"/>
       <include name="org/hyperic/hq/bizapp/agent/*"/>
@@ -1298,7 +1299,7 @@
     </jar>
 
     <!-- Measurement jars -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/agent-${version}/lib/handlers/AgentMeasurementServer.jar">
+    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/AgentMeasurementServer.jar">
         <include name="org/hyperic/hq/measurement/agent/**"/>
         <include name="org/hyperic/hq/measurement/ext/**"/>
         <include name="org/hyperic/hq/measurement/shared/**"/>
@@ -1314,7 +1315,7 @@
     </jar>
 	  
 	  <!-- New Handler for Transport -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/agent-${version}/lib/handlers/lib/AgentTransport.jar">
+    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib/AgentTransport.jar">
 	  <include name="org/hyperic/hq/agent/server/AgentTransportLifecycleImpl.class"/> 	
       <include name="org/hyperic/hq/transport/AgentTransport*.class"/>
       <include name="org/hyperic/hq/transport/PollerClient.class"/>
@@ -1324,7 +1325,7 @@
     </jar>	  
 	  
     <!-- Top level stuff -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/agent-${version}/lib/AgentServer.jar">
+    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/AgentServer.jar">
       <include name="org/hyperic/hq/agent/**"/>
       <include name="org/hyperic/hq/bizapp/agent/*.class"/>
       <include name="org/hyperic/hq/bizapp/client/*.class"/>
@@ -1338,7 +1339,7 @@
 
     <!-- Control agent server handler -->
     <jar basedir="${build.dir}/classes"
-         jarfile="${agent.dir}/bundles/agent-${version}/lib/handlers/AgentControlServer.jar">
+         jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/AgentControlServer.jar">
       <include name="org/hyperic/hq/control/**"/>
       <exclude name="org/hyperic/hq/control/**/*_test.java"/>
       <manifest>
@@ -1347,14 +1348,14 @@
     </jar>
 
     <jar basedir="${build.dir}/classes"
-         jarfile="${agent.dir}/bundles/agent-${version}/lib/handlers/LiveDataServer.jar">
+         jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/LiveDataServer.jar">
       <include name="org/hyperic/hq/livedata/**"/>
       <manifest>
         <attribute name="Main-Class" value="org.hyperic.hq.livedata.agent.server.LiveDataCommandsServer" />
       </manifest>
     </jar>
 
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/agent-${version}/lib/AgentClient.jar">
+    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/AgentClient.jar">
       <exclude name="org/hyperic/hq/agent/server/**"/>
       <include name="org/hyperic/hq/agent/**"/>
       <include name="org/hyperic/hq/appdef/shared/*.class"/>
@@ -1371,17 +1372,17 @@
         tofile="${agent.dir}/conf/agent.properties"/>
 
     <copy file="bin/background.sh"
-        tofile="${agent.dir}/bundles/agent-${version}/background.sh"/>
+        tofile="${agent.dir}/bundles/${agent.bundle.dir}/background.sh"/>
     <copy file="bin/background.bat"
-        tofile="${agent.dir}/bundles/agent-${version}/background.bat"/>
+        tofile="${agent.dir}/bundles/${agent.bundle.dir}/background.bat"/>
     <copy file="etc/agent.jaas.config"
-        tofile="${agent.dir}/bundles/agent-${version}/jaas.config"/>
+        tofile="${agent.dir}/bundles/${agent.bundle.dir}/jaas.config"/>
     <copy file="bin/agent.rc"
-        tofile="${agent.dir}/bundles/agent-${version}/rcfiles/agent.rc"/>
+        tofile="${agent.dir}/bundles/${agent.bundle.dir}/rcfiles/agent.rc"/>
 
     <!-- DEPRECATED: replaced hq-agent.exe with Java Service Wrapper
     <copy file="${launcher.dir}/hq-agent.exe"
-        tofile="${agent.dir}/bundles/agent-${version}/hq-agent.exe" />
+        tofile="${agent.dir}/bundles/${agent.bundle.dir}/hq-agent.exe" />
     -->
     <copy file="bin/hq-agent-master.sh"
         tofile="${agent.dir}/bin/hq-agent.sh"/>  
@@ -1389,20 +1390,21 @@
           tofile="${agent.dir}/bin/hq-agent.bat"/>  
   	
     <copy file="bin/hq-agent.sh"
-        tofile="${agent.dir}/bundles/agent-${version}/bin/hq-agent-nowrapper.sh"/>
+        tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent-nowrapper.sh"/>
   	
     <copy file="bin/hq-agent-wrapper.bat"
-        tofile="${agent.dir}/bundles/agent-${version}/bin/hq-agent.bat" />
+        tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent.bat" />
     <copy file="bin/hq-agent-wrapper.sh"
-        tofile="${agent.dir}/bundles/agent-${version}/bin/hq-agent.sh"/> 	
+        tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent.sh"/> 	
   	
     <copy file="etc/wrapper.conf"
-        tofile="${agent.dir}/bundles/agent-${version}/conf/wrapper.conf"/> 		
+        tofile="${agent.dir}/bundles/${agent.bundle.dir}/conf/wrapper.conf"/> 		
   	
     <copy file="etc/rollback.properties"
         tofile="${agent.dir}/conf/rollback.properties"/>      	
     <replace file="${agent.dir}/conf/rollback.properties">
     	<replacefilter token="@@@VERSION@@@" value="${version}"/>
+		<replacefilter token="@@@BUILD@@@" value="${build}"/>
     </replace>
   	
     <antcall target="chmod-exec">
