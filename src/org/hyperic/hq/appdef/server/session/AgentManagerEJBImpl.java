@@ -642,6 +642,44 @@ public class AgentManagerEJBImpl
     }
     
     /**
+     * Pings the specified agent.
+     * 
+     * @param subject The subject issuing the request.
+     * @param aid The agent id.
+     * @return the time it took (in milliseconds) for the round-trip time of the request to the 
+     *                  agent.
+     * @throws PermissionException if the subject does not have proper permissions 
+     *                             to issue an agent bundle transfer.
+     * @throws FileNotFoundException if the agent bundle is not found on the HQ server.
+     * @throws IOException if an I/O error occurs, such as failing to calculate 
+     *                     the file MD5 checksum.
+     * @throws AgentRemoteException if an exception occurs on the remote agent side.
+     * @throws AgentConnectionException  if the connection to the agent fails.
+     * @throws AgentNotFoundException if no agent exists with the given agent id.
+     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public long pingAgent(AuthzSubject subject,
+                                    AppdefEntityID aid) 
+        throws PermissionException, 
+               AgentNotFoundException, 
+               AgentConnectionException, 
+               AgentRemoteException,
+               FileNotFoundException, 
+               IOException, 
+               ConfigPropertyException {
+
+        log.info("Pinging agent " + aid.getID());
+
+        checkCreatePlatformPermission(subject);
+
+        AgentCommandsClient client = AgentCommandsClientFactory.getInstance()
+                .getClient(aid);
+        return client.ping();
+    }
+    
+    /**
      * Resolve the agent bundle file based on the file name and the configured 
      * agent bundle repository on the HQ server.
      */
