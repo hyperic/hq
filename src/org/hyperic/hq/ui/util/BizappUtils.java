@@ -883,10 +883,11 @@ public class BizappUtils {
                 // construct a StringTokenizer . If the oldKeys contains 
                 // this option use its value and construct , otherwise use an 
                 // eppty-string.
-                StringTokenizer tok = new StringTokenizer(oldKeys.
-                                            contains(option.getName()) ?
-                                            oldResponse.getValue(option.getName()) :
-                                            ""," ");
+                StringTokenizer tok =
+                    new StringTokenizer(oldResponse.getValue(option.getName())
+                                        != null ?
+                                        oldResponse.getValue(option.getName()) :
+                                        ""," ");
                 List uiArrayOptions = new ArrayList();
                 
                 while (tok.hasMoreTokens()) {
