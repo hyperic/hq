@@ -36,6 +36,7 @@ import org.hyperic.hq.agent.AgentCommandsAPI;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.agent.commands.AgentBundle_result;
 import org.hyperic.hq.agent.commands.AgentDie_args;
 import org.hyperic.hq.agent.commands.AgentDie_result;
 import org.hyperic.hq.agent.commands.AgentPing_args;
@@ -104,7 +105,11 @@ public class AgentCommandsServer
             AgentReceiveFileData_args aa =
                 new AgentReceiveFileData_args(args);
             agentCommandsService.agentSendFileData(aa, inStream);
-            return new AgentRemoteValue();
+            return new AgentRemoteValue(); 
+        } else if (cmd.equals(AgentCommandsAPI.command_getCurrentAgentBundle)) {
+            String currentAgentBundle = 
+                agentCommandsService.getCurrentAgentBundle();
+            return new AgentBundle_result(currentAgentBundle);
         } else {
             throw new AgentAssertionException("Unknown command '" + cmd + "'");
         }

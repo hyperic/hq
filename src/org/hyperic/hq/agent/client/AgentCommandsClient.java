@@ -73,6 +73,17 @@ public interface AgentCommandsClient {
     void die() throws AgentRemoteException, AgentConnectionException;
     
     /**
+     * Return the bundle that the agent is currently running.
+     * 
+     * @return The agent bundle name.
+     * @throws AgentRemoteException indicating the server failed to 
+     *                              understand our request.
+     * @throws AgentConnectionException indicating an error connecting to or
+     *                                  communicating with the agent.
+     */
+    String getCurrentAgentBundle() throws AgentRemoteException, AgentConnectionException;
+    
+    /**
      * Tell the agent to upgrade itself upon JVM restart.
      *
      * @param tarFile  Agent bundle tarball used to update the agent.

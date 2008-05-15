@@ -441,6 +441,36 @@ public class AgentManagerEJBImpl
     }
     
     /**
+     * Return the bundle that is currently running on a give agent. The returned 
+     * bundle name may be parsed to retrieve the current agent version.
+     * 
+     * @param subject The subject issuing the request.
+     * @param aid The agent id.
+     * @return The bundle name currently running.
+     * @throws PermissionException if the subject does not have proper permissions 
+     *                             to issue the query.
+     * @throws AgentNotFoundException if no agent exists with the given agent id.                         
+     * @throws AgentRemoteException if an exception occurs on the remote agent side.
+     * @throws AgentConnectionException  if the connection to the agent fails.
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public String getCurrentAgentBundle(AuthzSubject subject, AppdefEntityID aid) 
+        throws PermissionException, 
+               AgentNotFoundException, 
+               AgentRemoteException, 
+               AgentConnectionException {
+        
+        // check permissions
+        checkCreatePlatformPermission(subject);
+        
+        AgentCommandsClient client = 
+            AgentCommandsClientFactory.getInstance().getClient(aid); 
+        
+        return client.getCurrentAgentBundle();
+    }
+    
+    /**
      * Transfer asynchronously an agent bundle residing on the HQ server to an agent. 
      * This operation blocks long enough only to do some basic failure condition 
      * checking (permissions, agent existence, file existence, config property 

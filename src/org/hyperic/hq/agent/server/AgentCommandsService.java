@@ -38,6 +38,7 @@ import java.util.TimerTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
@@ -247,6 +248,15 @@ public class AgentCommandsService implements AgentCommandsClient {
             public void run() {
                 WrapperManager.restart();
             }}  , 0);
+    }
+    
+    /**
+     * @see org.hyperic.hq.agent.client.AgentCommandsClient#getCurrentAgentBundle()
+     */
+    public String getCurrentAgentBundle() throws AgentRemoteException {
+        // The current working directory is the agent bundle directory
+        File workingDir = new File(System.getProperty("user.dir"));
+        return workingDir.getName();
     }
 
     /**

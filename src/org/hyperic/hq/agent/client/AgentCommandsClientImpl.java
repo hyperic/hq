@@ -126,8 +126,27 @@ public class AgentCommandsClientImpl
         }
     }
     
-    public void upgrade(String tarFile, String destination) throws AgentRemoteException, 
-        AgentConnectionException {
+    /**
+     * @see org.hyperic.hq.agent.client.AgentCommandsClient#getCurrentAgentBundle()
+     */
+    public String getCurrentAgentBundle() 
+        throws AgentRemoteException, AgentConnectionException {
+
+        AgentCommandsClient proxy = null;
+        
+        try {
+            proxy = (AgentCommandsClient)getSynchronousProxy(AgentCommandsClient.class);
+            return proxy.getCurrentAgentBundle();           
+        } finally {
+            safeDestroyService(proxy);
+        }
+    }  
+    
+    /**
+     * @see org.hyperic.hq.agent.client.AgentCommandsClient#upgrade(java.lang.String, java.lang.String)
+     */
+    public void upgrade(String tarFile, String destination) 
+        throws AgentRemoteException, AgentConnectionException {
         
         AgentCommandsClient proxy = null;
         
@@ -161,6 +180,6 @@ public class AgentCommandsClientImpl
         if (_agentRegistrationClient) {
             throw new AgentConnectionException("Only client ping is allowed");
         }        
-    }    
+    }  
 
 }

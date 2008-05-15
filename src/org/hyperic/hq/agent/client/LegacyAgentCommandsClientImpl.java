@@ -36,6 +36,8 @@ import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.AgentStreamPair;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
+import org.hyperic.hq.agent.commands.AgentBundle_args;
+import org.hyperic.hq.agent.commands.AgentBundle_result;
 import org.hyperic.hq.agent.commands.AgentDie_args;
 import org.hyperic.hq.agent.commands.AgentDie_result;
 import org.hyperic.hq.agent.commands.AgentPing_args;
@@ -216,6 +218,9 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
         }
     }
 
+    /**
+     * @see org.hyperic.hq.agent.client.AgentCommandsClient#upgrade(java.lang.String, java.lang.String)
+     */
     public void upgrade(String tarFile, String destination)
             throws AgentRemoteException, AgentConnectionException {
         // set the arguments to the command
@@ -230,4 +235,20 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
         // here for future expansion.
         result = new AgentUpgrade_result(cmdRes);
     }
+    
+    /**
+     * @see org.hyperic.hq.agent.client.AgentCommandsClient#getCurrentAgentBundle()
+     */
+    public String getCurrentAgentBundle() throws AgentRemoteException, AgentConnectionException {
+        
+        AgentBundle_args args = new AgentBundle_args();
+        
+        AgentRemoteValue cmdRes = 
+            this.agentConn.sendCommand(AgentCommandsAPI.command_getCurrentAgentBundle, 
+                                       this.verAPI.getVersion(), 
+                                       args);
+        
+        return new AgentBundle_result(cmdRes).getCurrentAgentBundle();
+    }    
+
 }
