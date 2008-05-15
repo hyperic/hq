@@ -36,124 +36,124 @@
     <metric name="Availability" indicator="true"/>
 
     <metric name="Uptime"
-                  alias="sys.uptime.latest"
-                  units="sec"
-                  category="AVAILABILITY"/>
+            alias="sys.uptime.latest"
+            units="sec"
+            category="AVAILABILITY"/>
 
     <!-- units=MHz -->
     <metric name="CPU Reserved Capacity"
-                  alias="cpu.reservedCapacity.average"/>
+            alias="cpu.reservedCapacity.average"/>
 
     <metric name="CPU Throttled (1 min. Average)"
-                  alias="rescpu.maxLimited1.latest"
-                  units="percent"/>
+            alias="rescpu.maxLimited1.latest"
+            units="percent"/>
 
     <metric name="CPU Throttled (5 min. Average)"
-                  alias="rescpu.maxLimited5.latest"
-                  units="percent"/>
+            alias="rescpu.maxLimited5.latest"
+            units="percent"/>
 
     <metric name="CPU Throttled (15 min. Average)"
-                  alias="rescpu.maxLimited15.latest"
-                  units="percent"/>
+            alias="rescpu.maxLimited15.latest"
+            units="percent"/>
 
     <metric name="CPU Running (1 min. Average)"
-                  alias="rescpu.runav1.latest"
-                  units="percent"/>
+            alias="rescpu.runav1.latest"
+            units="percent"/>
 
     <metric name="CPU Running (5 min. Average)"
-                  alias="rescpu.runav5.latest"
-                  units="percent"/>
+            alias="rescpu.runav5.latest"
+            units="percent"/>
 
     <metric name="CPU Running (15 min. Average)"
-                  alias="rescpu.runav15.latest"
-                  units="percent"/>
+            alias="rescpu.runav15.latest"
+            units="percent"/>
 
     <metric name="CPU Active (1 min. Average)"
-                  alias="rescpu.actav1.latest"
-                  units="percent"/>
+            alias="rescpu.actav1.latest"
+            units="percent"/>
 
     <metric name="CPU Active (5 min. Average)"
-                  indicator="true"
-                  alias="rescpu.actav5.latest"
-                  units="percent"/>
+            indicator="true"
+            alias="rescpu.actav5.latest"
+            units="percent"/>
 
     <metric name="CPU Active (15 min. Average)"
-                  alias="rescpu.actav15.latest"
-                  units="percent"/>
+            alias="rescpu.actav15.latest"
+            units="percent"/>
 
     <metric name="Memory Swap In"
-                  alias="mem.swapin.average"
-                  units="KB"/>
+            alias="mem.swapin.average"
+            units="KB"/>
 
     <metric name="Memory Swap Out"
-                  alias="mem.swapout.average"
-                  units="KB"/>
+            alias="mem.swapout.average"
+            units="KB"/>
 
     <metric name="Memory Swap Used"
-                  alias="mem.swapused.average"
-                  units="KB"/>
+            alias="mem.swapused.average"
+            units="KB"/>
 
     <metric name="Memory Balloon"
-                  indicator="true"
-                  alias="mem.vmmemctl.average"
-                  units="KB"/>
+            indicator="true"
+            alias="mem.vmmemctl.average"
+            units="KB"/>
 
     <metric name="Memory Unreserved"
-                  alias="mem.unreserved.average"
-                  units="KB"/>
+            alias="mem.unreserved.average"
+            units="KB"/>
 
     <metric name="Memory Usage"
-                  alias="mem.usage.average"
-                  units="percent"/>
+            alias="mem.usage.average"
+            units="percent"/>
 
     <metric name="Memory Heap"
-                  alias="mem.heap.average"
-                  units="KB"/>
+            alias="mem.heap.average"
+            units="KB"/>
 
     <metric name="Memory Heap Free"
-                  alias="mem.heapfree.average"
-                  units="KB"/>
+            alias="mem.heapfree.average"
+            units="KB"/>
 
     <metric name="Memory Overhead"
-                  alias="mem.overhead.average"
-                  units="KB"/>
+            alias="mem.overhead.average"
+            units="KB"/>
 
     <metric name="Memory Zero"
-                  alias="mem.zero.average"
-                  units="KB"/>
+            alias="mem.zero.average"
+            units="KB"/>
 
     <metric name="Memory Reserved Capacity"
-                  alias="mem.reservedCapacity.average"
-                  units="MB"/>
+            alias="mem.reservedCapacity.average"
+            units="MB"/>
 
     <metric name="Memory Active"
-                  indicator="true"
-                  alias="mem.active.average"
-                  units="KB"/>
+            indicator="true"
+            alias="mem.active.average"
+            units="KB"/>
 
     <metric name="Memory Shared"
-                  indicator="true"
-                  alias="mem.shared.average"
-                  units="KB"/>
+            indicator="true"
+            alias="mem.shared.average"
+            units="KB"/>
 
     <metric name="Memory Granted"
-                  alias="mem.granted.average"
-                  units="KB"/>
+            alias="mem.granted.average"
+            units="KB"/>
 
     <metric name="Memory Consumed"
-                  alias="mem.consumed.average"
-                  units="KB"/>
+            alias="mem.consumed.average"
+            units="KB"/>
 
     <metric name="Memory State"
-                  alias="mem.state.latest"/>
+            alias="mem.state.latest"/>
 
     <metric name="Memory Shared Common"
-                  alias="mem.sharedcommon.average"
-                  units="KB"/>
+            alias="mem.sharedcommon.average"
+            units="KB"/>
 
     <metric name="Memory Used by vmkernel"
-                  alias="mem.sysUsage.average"
-                  units="KB"/>
+            alias="mem.sysUsage.average"
+            units="KB"/>
 
     <server name="Resource Pool">
       <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
