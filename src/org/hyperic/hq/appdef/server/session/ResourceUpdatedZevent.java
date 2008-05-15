@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.zevents.ZeventManager;
 
 /**
@@ -40,5 +41,34 @@ public class ResourceUpdatedZevent extends ResourceZevent {
 
     public ResourceUpdatedZevent(AuthzSubject subject, AppdefEntityID id) {
         super(subject.getId(), id);
+    }
+    
+    public ResourceUpdatedZevent(AuthzSubject subject, AppdefEntityID id,
+                                 AllConfigResponses allConfgs) {
+        super(new ResourceZeventSource(id),
+              new ResourceConfigZeventPayload(subject.getId(), id, allConfgs));
+    }
+    
+    public AllConfigResponses getAllConfigs() {
+         ResourceZeventPayload payload = (ResourceZeventPayload) getPayload();
+         if (payload instanceof ResourceConfigZeventPayload)
+             return ((ResourceConfigZeventPayload) payload).getAllConfigs();
+         
+         return null;
+    }
+    
+    private static class ResourceConfigZeventPayload 
+        extends ResourceZeventPayload {
+        private AllConfigResponses _allConfigs;
+        
+        public ResourceConfigZeventPayload(Integer subject, AppdefEntityID id,
+                                           AllConfigResponses allConfgs) {
+            super(subject, id);
+            _allConfigs = allConfgs;
+        }
+        
+        public AllConfigResponses getAllConfigs() {
+            return _allConfigs;
+        }
     }
 }
