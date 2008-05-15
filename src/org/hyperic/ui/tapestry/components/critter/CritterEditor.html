@@ -1,0 +1,50 @@
+<div jwcid='editor@Any'>
+  The Critter editor
+  <ul>
+    <li jwcid="critters@For" source="ognl:critters" 
+        value="ognl:critter" element="li">
+      <li>
+        <!-- Block associated with critters we are editing -->
+        <span jwcid="@If" condition="ognl:editingCritter">
+          [Edit Mode]
+          <span jwcid="@Insert" value="ognl:critter.type.name"/>
+          (<span jwcid="@Insert" value="ognl:critter.type.description"/>)
+          
+          <ul>
+            <form jwcid="propEdit@Form" listener="listener:critterSubmit" 
+                  async="true">
+              <li jwcid="props@For" source="ognl:editingProps"
+                  value="ognl:prop">
+                <li>
+                    <span jwcid="@If" condition="ognl:prop.stringProp">
+                      <span jwcid="@Insert" value="ognl:prop.name"/>
+                      <input jwcid="@TextField" value="ognl:prop.stringValue"/>
+                    </span>
+                    <span jwcid="@DirectLink" async="true"
+                          listener="listener:savePropsClicked"
+                          parameters="ognl:critter.index">[Save]</span>
+                    <span jwcid="@DirectLink" async="true"
+                          listener="listener:cancelPropsClicked"
+                          parameters="ognl:critter.index">[Cancel]</span>
+                </li>
+              </li>
+            </form>
+          </ul>
+        </span>
+        
+        <!-- Block associated with critters NOT being edited -->
+        <span jwcid="@Else">
+          <span jwcid="@Insert" value="ognl:critter.config"/>
+
+          <!-- Plus-signs -->
+          <span jwcid="@If" condition="ognl:showPlusSigns">        
+            <span jwcid="@DirectLink" async="true" 
+                  listener="listener:addCritterClicked"
+                  parameters="ognl:critter.index">+</span>
+          </span>
+        </span>
+
+      </li>
+    </li>
+  </ul>
+</div>

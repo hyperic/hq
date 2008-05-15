@@ -65,5 +65,7 @@
     <component-type type="TitlePanel" specification-path="panel/TitlePanel.jwc"/>
     
     <component-type type="Tree" specification-path="tree/Tree.jwc"/>
+
+    <component-type type="CritterEditor" specification-path="critter/CritterEditor.jwc"/>
         
 </library-specification>
