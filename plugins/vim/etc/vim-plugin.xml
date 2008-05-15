@@ -162,6 +162,43 @@
       <property name="template" value="${vi.template},${pool.config}:${alias}"/>
 
       <metric name="Availability" indicator="true"/>
+
+      <!-- units=MHz -->
+      <metric name="CPU Usage"
+              indicator="true"
+              alias="cpu.usagemhz.average"
+              units="none"/>
+  
+      <metric name="Memory Balloon"
+              indicator="true"
+              alias="mem.vmmemctl.average"
+              units="KB"/>
+  
+      <metric name="Memory Overhead"
+              alias="mem.overhead.average"
+              units="KB"/>
+  
+      <metric name="Memory Zero"
+              alias="mem.zero.average"
+              units="KB"/>
+  
+      <metric name="Memory Active"
+              indicator="true"
+              alias="mem.active.average"
+              units="KB"/>
+  
+      <metric name="Memory Shared"
+              indicator="true"
+              alias="mem.shared.average"
+              units="KB"/>
+  
+      <metric name="Memory Granted"
+              alias="mem.granted.average"
+              units="KB"/>
+  
+      <metric name="Memory Swapped"
+              alias="mem.swapped.average"
+              units="KB"/>
     </server>
 
     <server name="Virtual Machine">
