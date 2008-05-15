@@ -438,6 +438,24 @@ tapestry.form = {
         }
     },
     
+    /**
+     * Function: setFormValidating
+     * 
+     * If a form registered with the specified formId
+     * exists a local property will be set that causes
+     * validation to be turned on/off depending on the argument.
+     * 
+     * Parameters:
+     * 
+     * formId - The id of the form to turn validation on/off for.
+     * validate - Boolean for whether or not to validate form, if not specified assumes true.
+     */
+    setFormValidating:function(formId, validate){
+        if (this.forms[formId]){
+            this.forms[formId].validateForm = validate;
+        }
+    },
+    
     submitAsync:function(form, content, submitName, parms){
         form=dojo.byId(form);
         if (!form) {
