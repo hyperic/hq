@@ -72,7 +72,7 @@
                   alias="rescpu.actav1.latest"
                   units="percent"/>
 
-    <metric name="CPU Active (5 min. average)"
+    <metric name="CPU Active (5 min. Average)"
                   indicator="true"
                   alias="rescpu.actav5.latest"
                   units="percent"/>
@@ -171,6 +171,102 @@
       <property name="template" value="${vi.template},${vm.config}:${alias}"/>
 
       <metric name="Availability" indicator="true"/>
+  
+      <metric name="Uptime"
+              alias="sys.uptime.latest"
+              units="sec"
+              category="AVAILABILITY"/>
+
+      <metric name="CPU Throttled (1 min. Average)"
+              alias="rescpu.maxLimited1.latest"
+              units="percent"/>
+  
+      <metric name="CPU Throttled (15 min. Average)"
+              alias="rescpu.maxLimited15.latest"
+              units="percent"/>
+  
+      <metric name="CPU Throttled (5 min. Average)"
+              alias="rescpu.maxLimited5.latest"
+              units="percent"/>
+  
+      <metric name="CPU Running (1 min. Average)"
+              alias="rescpu.runav1.latest"
+              units="percent"/>
+  
+      <metric name="CPU Running (5 min. Average)"
+              alias="rescpu.runav5.latest"
+              units="percent"/>
+  
+      <metric name="CPU Running (15 min. Average)"
+              alias="rescpu.runav15.latest"
+              units="percent"/>
+
+      <metric name="CPU Active (1 min. Average)"
+              alias="rescpu.actav1.latest"
+              units="percent"/>
+  
+      <metric name="CPU Active (5 min. Average)"
+              indicator="true"
+              alias="rescpu.actav5.latest"
+              units="percent"/>
+  
+      <metric name="CPU Active (15 min. Average)"
+              alias="rescpu.actav15.latest"
+              units="percent"/>
+  
+      <metric name="Memory Swap Out"
+              alias="mem.swapout.average"
+              units="KB"/>
+  
+      <metric name="Memory Swap In"
+              alias="mem.swapin.average"
+              units="KB"/>
+  
+      <metric name="Memory Swap Target"
+              alias="mem.swaptarget.average"
+              units="KB"/>
+  
+      <metric name="Memory Swapped"
+              alias="mem.swapped.average"
+              units="KB"/>
+
+      <metric name="Memory Usage"
+              alias="mem.usage.average"
+              units="percent"/>
+  
+      <metric name="Memory Overhead"
+              alias="mem.overhead.average"
+              units="KB"/>
+  
+      <metric name="Memory Balloon"
+              indicator="true"
+              alias="mem.vmmemctl.average"
+              units="KB"/>
+  
+      <metric name="Memory Balloon Target"
+              alias="mem.vmmemctltarget.average"
+              units="KB"/>
+  
+      <metric name="Memory Zero"
+              alias="mem.zero.average"
+              units="KB"/>
+  
+      <metric name="Memory Active"
+              alias="mem.active.average"
+              units="KB"/>
+  
+      <metric name="Memory Shared"
+              alias="mem.shared.average"
+              units="KB"/>
+  
+      <metric name="Memory Granted"
+              alias="mem.granted.average"
+              units="KB"/>
+  
+      <metric name="Memory Consumed"
+              indicator="true"
+              alias="mem.consumed.average"
+              units="KB"/>
     </server>
   </platform>
 </plugin>
