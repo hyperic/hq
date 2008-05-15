@@ -169,8 +169,11 @@ public class AgentClient {
         ProviderInfo pInfo;
         String address;
         URL url;
+        String currentAgentBundle;
 
         try {
+            currentAgentBundle = this.agtCommands.getCurrentAgentBundle();
+            
             pInfo = this.camCommands.getProviderInfo();
         } catch(AgentConnectionException exc){
             SYSTEM_ERR.println("Unable to contact agent: " + exc.getMessage());
@@ -180,6 +183,8 @@ public class AgentClient {
                                exc.getMessage());
             return -1;
         }
+        
+        SYSTEM_OUT.println("Current agent bundle: "+currentAgentBundle);
 
         if(pInfo == null || (address = pInfo.getProviderAddress()) == null){
             SYSTEM_OUT.println("Agent not yet setup");
