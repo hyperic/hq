@@ -27,6 +27,9 @@ public abstract class TabContainer extends BaseComponent{
     @Parameter(name="selectedId")
     public abstract String getSelectedId();
     
+    public abstract Tab getTab();
+    public abstract void setTab(Tab tab);
+    
     public void renderComponent(IMarkupWriter writer, IRequestCycle cycle) {
         if (!cycle.isRewinding()) {
             Map map = new HashMap();
