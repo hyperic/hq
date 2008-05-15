@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -65,7 +65,6 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -145,7 +144,6 @@ import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
 import org.hyperic.hq.bizapp.shared.AppdefBossUtil;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
-import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportData;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportException;
 import org.hyperic.hq.bizapp.shared.resourceImport.Validator;
@@ -153,6 +151,7 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
@@ -334,7 +333,7 @@ public class AppdefBossEJBImpl
                                                         Integer id)
         throws ApplicationException {
         try {
-            manager.getSubjectPojo(sessionId);
+            manager.authenticate(sessionId);
             return getApplicationManager().findApplicationTypeById(id);
         } catch (FinderException e) {
             throw new ApplicationException(e);
@@ -3482,21 +3481,6 @@ public class AppdefBossEJBImpl
         return retVal;
     }
 
-    /**
-     * @ejb:interface-method 
-     */
-    public void setAllConfigResponses(int sessionInt, 
-                                      AllConfigResponses allConfigs,
-                                      AllConfigResponses allConfigsRollback )
-        throws PermissionException, ConfigFetchException, EncodingException,
-               PluginException, ApplicationException, FinderException,
-               ScheduleWillNeverFireException, AgentConnectionException,
-               AutoinventoryException          
-    {
-        AuthzSubject subject = manager.getSubjectPojo(sessionInt);
-        setAllConfigResponses(subject, allConfigs, allConfigsRollback);
-    }
-    
    /**
     * A method to set ALL the configs of a resource.  This includes the
     * resourceConfig, metricConfig, rtConfig and controlConfig.This also
@@ -3507,33 +3491,32 @@ public class AppdefBossEJBImpl
     * @param allConfigs The full configuation information.
     * @param allConfigsRollback The configuation to rollback to if an error 
     *                           occurs.
-    * @ejb:interface-method
+    * @ejb:interface-method 
     */
-    public void setAllConfigResponses(AuthzSubject subject,
+    public void setAllConfigResponses(int sessionInt, 
                                       AllConfigResponses allConfigs,
                                       AllConfigResponses allConfigsRollback )
-        throws PermissionException, ConfigFetchException, EncodingException,
-               PluginException, ApplicationException, FinderException,
-               ScheduleWillNeverFireException, AgentConnectionException,
-               AutoinventoryException          
+        throws PermissionException, EncodingException, PluginException,
+               ApplicationException, FinderException, AutoinventoryException,
+               ScheduleWillNeverFireException, AgentConnectionException
     {
+        AuthzSubject subject = manager.getSubjectPojo(sessionInt);
         boolean doRollback = true;
         boolean doValidation = (allConfigsRollback != null);
         AppdefEntityID id = allConfigs.getResource().getEntityId();
 
         try {
             doSetAll(subject, allConfigs, doValidation, false);
+
             AuthzSubjectValue subj = subject.getAuthzSubjectValue();
+
             if (doValidation) {
                 getConfigManager().clearValidationError(subj, id);
             }
             
             doRollback = false;
             
-            // Wait until we have validated the config, send the configs
-            AIConversionUtil.sendNewConfigEvent(subj, id, allConfigs);
-            
-            //run an auto-scan for platforms
+            // run an auto-scan for platforms
             if (id.isPlatform()) {
                 getAutoInventoryManager().startScan(subject, id, 
                                                     new ScanConfigurationCore(),
@@ -3551,31 +3534,32 @@ public class AppdefBossEJBImpl
         }
     }
 
-    private void doSetAll(AuthzSubject subject, 
-                          AllConfigResponses allConfigs, boolean doValidation,
-                          boolean force)
+    private void doSetAll(AuthzSubject subject, AllConfigResponses allConfigs,
+                          boolean doValidation, boolean force)
         throws EncodingException, FinderException, PermissionException,
                ConfigFetchException, PluginException, ApplicationException
     {
         AppdefEntityID entityId = allConfigs.getResource().getEntityId();
-        ProductBossLocal productBossLocal = getProductBoss();
-        AppdefEntityID[] ids;
+        Set ids = new HashSet();
         try {
             if (entityId.isPlatform()) {
-                updatePlatform(subject, (PlatformValue) allConfigs.getResource());
+                updatePlatform(subject,
+                               (PlatformValue) allConfigs.getResource());
             } else if (entityId.isService()) {
                 updateService(subject, (ServiceValue) allConfigs.getResource(),
                               null);
             }
 
             AuthzSubjectValue subj = subject.getAuthzSubjectValue();
-            ids = getConfigManager().configureResource(
+            if (getConfigManager().configureResource(
                 subj, entityId,
                 ConfigResponse.safeEncode(allConfigs.getProductConfig()),
                 ConfigResponse.safeEncode(allConfigs.getMetricConfig()),
                 ConfigResponse.safeEncode(allConfigs.getControlConfig()),
                 ConfigResponse.safeEncode(allConfigs.getRtConfig()),
-                Boolean.TRUE, !doValidation, force);
+                Boolean.TRUE, !doValidation, force) != null) {
+                ids.add(entityId);
+            }
             
             if (doValidation) {
                 Set validationTypes = new HashSet();
@@ -3595,10 +3579,11 @@ public class AppdefBossEJBImpl
                 if (entityId.isService()) {
                     ServiceManagerLocal svcMan = getServiceManager();
                     Service svc = svcMan.findServiceById(entityId.getId());
-                    
+
                     // These flags
-                    if (allConfigs.getEnableServiceRT() != svc.isServiceRt() ||
-                        allConfigs.getEnableEuRT() != svc.isEndUserRt()) {
+                    if (allConfigs.getEnableServiceRT() != svc.isServiceRt()
+                        || allConfigs.getEnableEuRT() != svc.isEndUserRt())
+                    {
                         allConfigs.setShouldConfig(
                             ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME, true);
                         svc.setServiceRt(allConfigs.getEnableServiceRT());
@@ -3614,19 +3599,51 @@ public class AppdefBossEJBImpl
                     validationTypes.add(ProductPlugin.TYPE_CONTROL);
                 }
 
-                Iterator validations = validationTypes.iterator();
-                while (validations.hasNext()) {
-                    productBossLocal.doValidation(subject, 
-                                                  (String) validations.next(),
-                                                  ids);
-                }
-                
-                List events = new ArrayList(ids.length);
-                for (int i = 0; i < ids.length; i++)
-                    events.add(new ResourceUpdatedZevent(subj, ids[i]));
-                
-                ZeventManager.getInstance().enqueueEventsAfterCommit(events);
+                ConfigValidator configValidator =
+                    (ConfigValidator) ProductProperties
+                    .getPropertyInstance(ConfigValidator.PDT_PROP);
 
+                // See if we can validate
+                if (configValidator != null) {
+                    Iterator validations = validationTypes.iterator();
+                    AppdefEntityID[] idArr = (AppdefEntityID[]) ids
+                            .toArray(new AppdefEntityID[0]);
+
+                    while (validations.hasNext()) {
+                        configValidator.validate(subject,
+                                                 (String)validations.next(),
+                                                 idArr);
+                    }
+                }
+            }
+
+
+            if (entityId.isServer() && (allConfigs.shouldConfigProduct() ||
+                allConfigs.shouldConfigMetric())) {
+                // Look up the server's services
+                Server server =
+                    getServerManager().findServerById(entityId.getId());
+                for (Iterator it = server.getServices().iterator();
+                     it.hasNext(); ) {
+                    Service service = (Service) it.next();
+                    ids.add(service.getEntityId());
+                }
+            }
+            
+            // if should configure RT
+            if (allConfigs.shouldConfigRt())
+                ids.add(entityId);
+
+            if (ids.size() > 0) {   // Actually updated
+                ZeventManager zmgr = ZeventManager.getInstance();
+                List events = new ArrayList(ids.size());
+                for (Iterator it = ids.iterator(); it.hasNext(); ) {
+                    events.add(
+                        new ResourceUpdatedZevent(subj,
+                                                  (AppdefEntityID)it.next(),
+                                                  allConfigs));
+                }
+                zmgr.enqueueEventsAfterCommit(events);
             }
 
             if (entityId.isServer() || entityId.isService()) {
