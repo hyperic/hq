@@ -409,38 +409,30 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                AppdefEntityNotFoundException
     {
         ConfigManagerLocal cMan;
-        AppdefEntityID[] ids;
         boolean doRollback = true;
         try {
             cMan = getConfigManager();
-            ids = cMan.setConfigResponse(subject, id, response, type, true);
-            
-            if (shouldValidate) {
-                doValidation(subject, type, ids);
+            if (cMan.setConfigResponse(subject, id, response, type, true)
+                    != null) {
+                AppdefEntityID[] ids = new AppdefEntityID[] { id };
+
+                ConfigValidator configValidator =
+                    (ConfigValidator) ProductProperties
+                        .getPropertyInstance(ConfigValidator.PDT_PROP);
+                
+                if (shouldValidate) {
+                    configValidator.validate(subject, type, ids);
+                }
             }
+            
             doRollback = false;
-            return ids;
+            return new AppdefEntityID[0];
 
         } finally {
             if (doRollback) {
                 rollback();
             }
         }
-    }
-
-    /**
-     * @ejb:interface-method view-type="local"
-     */
-    public void doValidation(AuthzSubject subject, String type,
-                             AppdefEntityID[] ids)
-        throws PermissionException, EncodingException, ConfigFetchException,
-               AppdefEntityNotFoundException, InvalidConfigException {
-
-        ConfigValidator configValidator = (ConfigValidator) ProductProperties
-                .getPropertyInstance("hyperic.hq.bizapp.configValidator");
-        
-        if (configValidator != null)
-            configValidator.validate(subject, type, ids);
     }
 
     /**
