@@ -601,7 +601,7 @@ public class AppdefBossEJBImpl
     {
         return (ServerValue) 
             findServers(sessionID,
-                        AppdefEntityID.newServerID(serviceID), null).get(0);
+                        AppdefEntityID.newServiceID(serviceID), null).get(0);
     }
 
     /**
