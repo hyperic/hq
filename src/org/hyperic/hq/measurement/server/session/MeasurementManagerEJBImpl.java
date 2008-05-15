@@ -85,6 +85,7 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 
@@ -363,22 +364,29 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     /**
      * Update the Measurements of a resource
      * 
-     * @ejb:interface-method
      */
-    public void updateMeasurements(AuthzSubject subject,
-                                   AppdefEntityID id, ConfigResponse props)
+    private void updateMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                    ConfigResponse props)
         throws PermissionException, MeasurementCreateException
     {
         try {
-            // Now see which Measurements need to be rescheduled
-            List mcol = getMeasurementDAO()
-                .findEnabledByResource(getResource(id));
+            List all = getMeasurementDAO().findByResource(getResource(id));
+            List mcol = new ArrayList();
+            for (Iterator it = all.iterator(); it.hasNext();) {
+                // Translate all dsns
+                Measurement dm = (Measurement)it.next();
+                dm.setDsn(translate(dm.getTemplate().getTemplate(), props));
+                
+                // Now see which Measurements need to be rescheduled
+                if (dm.isEnabled())
+                    mcol.add(dm);
+            }
 
             Integer[] templates = new Integer[mcol.size()];
             long[] intervals = new long[mcol.size()];
             int idx = 0;
-            for (Iterator i = mcol.iterator(); i.hasNext(); idx++) {
-                Measurement dm = (Measurement)i.next();
+            for (Iterator it = mcol.iterator(); it.hasNext(); idx++) {
+                Measurement dm = (Measurement)it.next();
                 templates[idx] = dm.getTemplate().getId();
                 intervals[idx] = dm.getInterval();
             }
@@ -961,11 +969,12 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public void syncPluginMetrics(String plugin) {
+        ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();
         List entities = getMeasurementDAO().findMetricsCountMismatch(plugin);
         
         AuthzSubject overlord =
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-        
+
         for (Iterator it = entities.iterator(); it.hasNext(); ) {
             Object[] vals = (Object[]) it.next();
             
@@ -976,13 +985,19 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
             try {
                 log.info("syncPluginMetrics sync'ing metrics for " + aeid);
-                enableDefaultMetrics(overlord, aeid, false);
+                ConfigResponse c =
+                    cm.getMergedConfigResponse(overlord,
+                                               ProductPlugin.TYPE_MEASUREMENT,
+                                               aeid, true);
+                enableDefaultMetrics(overlord, aeid, c, false);
             } catch (AppdefEntityNotFoundException e) {
                 // Move on since we did this query based on measurement table
                 // not resource table
             } catch (PermissionException e) {
                 // Quite impossible
                 assert(false);
+            } catch (Exception e) {
+                // No valid configuration to use to enable metrics
             }
         }
     }
@@ -1052,9 +1067,17 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     
                 // For either create or update events, schedule the default
                 // metrics
+                ConfigResponse c =
+                    cm.getMergedConfigResponse(subject,
+                                               ProductPlugin.TYPE_MEASUREMENT,
+                                               id, true);
                 if (getEnabledMetricsCount(subject, id) == 0) {
                     log.info("Enabling default metrics for [" + id + "]");
-                    enableDefaultMetrics(subject, id, true);
+                    enableDefaultMetrics(subject, id, c, true);
+                }
+                else {
+                    // Update the configuration
+                    updateMeasurements(subject, id, c);
                 }
     
                 if (isCreate) {
@@ -1062,10 +1085,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                     // tracking is enabled.  If so, enable it.  We don't auto
                     // enable log or config tracking for update events since
                     // in the callback we don't know if that flag has changed.
-                    ConfigResponse c =
-                        cm.getMergedConfigResponse(subject,
-                                                   ProductPlugin.TYPE_MEASUREMENT,
-                                                   id, true);
                     tm.enableTrackers(subject, id, c);
                 }
     
@@ -1190,12 +1209,11 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * be called by the {@link MeasurementEnabler}.  If you want the behavior
      * of this method, use the {@link MeasurementEnabler} 
      */
-    private void enableDefaultMetrics(AuthzSubject subj, 
-                                      AppdefEntityID id, boolean verify)
+    private void enableDefaultMetrics(AuthzSubject subj, AppdefEntityID id,
+                                      ConfigResponse config, boolean verify)
         throws AppdefEntityNotFoundException, PermissionException 
     {
         ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
-        ConfigResponse config;
         String mtype;
     
         try {
@@ -1212,15 +1230,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             else {
                 return;
             }
-    
-            config = 
-                cfgMan.getMergedConfigResponse(subj,
-                                               ProductPlugin.TYPE_MEASUREMENT,
-                                               id, true);
-        } catch (ConfigFetchException e) {
-            log.debug("Unable to enable default metrics for [" + id + "]", e);
-            return;
-        }  catch (Exception e) {
+        } catch (Exception e) {
             log.error("Unable to enable default metrics for [" + id + "]", e);
             return;
         }
