@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.struts.action.ActionMapping;
 
-import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 /**
@@ -53,8 +52,6 @@ public class ListServiceDependenciesForm extends BaseValidatorForm {
     // the values are AppServiceNodeBean objects
     private List appSvcDependers = new ArrayList();
     private List appSvcDependees = new ArrayList();
-    // the service (which is associated to our application) under discussion
-    private AppServiceValue theCurrentAppSvc;
     // the AppService's id 
     private Integer appSvcId;
     // the id for the application under discussion
@@ -137,22 +134,6 @@ public class ListServiceDependenciesForm extends BaseValidatorForm {
     }
 
     /**
-     * Returns the theCurrentAppSvc.
-     * @return AppServiceValue
-     */
-    public AppServiceValue getCurrentAppSvc() {
-        return theCurrentAppSvc;
-    }
-
-    /**
-     * Sets the theCurrentAppSvc.
-     * @param theCurrentAppSvc The theCurrentAppSvc to set
-     */
-    public void setCurrentAppSvc(AppServiceValue theCurrentAppSvc) {
-        this.theCurrentAppSvc = theCurrentAppSvc;
-    }
-
-    /**
      * Returns the rid.
      * @return Integer
      */
@@ -190,8 +171,6 @@ public class ListServiceDependenciesForm extends BaseValidatorForm {
         sb.append(appSvcDependers);
         sb.append("],appSvcDependees=[");
         sb.append(appSvcDependees);
-        sb.append("],theCurrentAppSvc=");
-        sb.append(theCurrentAppSvc);
         sb.append(",appSvcId=");
         sb.append(appSvcId);
         sb.append(",rid=");
@@ -207,11 +186,9 @@ public class ListServiceDependenciesForm extends BaseValidatorForm {
         super.reset(mapping, request);
         appSvcDependers = new ArrayList();
         appSvcDependees = new ArrayList();
-        theCurrentAppSvc = null;
         appSvcId = null;
         rid = null;
         type = null;
         serviceLabel = null;
     }
-
 }

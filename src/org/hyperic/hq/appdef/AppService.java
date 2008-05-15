@@ -27,146 +27,120 @@ package org.hyperic.hq.appdef;
 
 import java.util.Collection;
 
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.dao.DAOFactory;
 
-/**
- * Pojo for hibernate hbm mapping file
- */
 public class AppService extends AppdefBean
 {
-    private Service service;
-    private ResourceGroup resourceGroup;
-    private Application application;
-    private boolean isGroup;
-    private String modifiedBy;
-    private boolean isEntryPoint = true;
-    private ServiceType serviceType;
-    private Collection appSvcDependencies;
+    private Service _service;
+    private ResourceGroup _resourceGroup;
+    private Application _application;
+    private boolean _isGroup;
+    private String _modifiedBy;
+    private boolean _isEntryPoint = true;
+    private ServiceType _serviceType;
+    private Collection _appSvcDependencies;
 
-    /**
-     * default constructor
-     */
-    public AppService()
-    {
+    public AppService() {
         super();
     }
 
-    public AppService(Integer id)
-    {
+    public AppService(Integer id) {
         super(id);
     }
 
-    public Service getService()
-    {
-        return this.service;
+    public Service getService() {
+        return _service;
     }
 
-    public void setService(Service service)
-    {
-        this.service = service;
+    public void setService(Service service) {
+        _service = service;
     }
 
-    public ResourceGroup getResourceGroup()
-    {
-        return this.resourceGroup;
+    public ResourceGroup getResourceGroup() {
+        return _resourceGroup;
     }
 
-    public void setResourceGroup(ResourceGroup group)
-    {
-        this.resourceGroup = group;
+    public void setResourceGroup(ResourceGroup group) {
+        _resourceGroup = group;
     }
 
-    public Application getApplication()
-    {
-        return this.application;
+    public Application getApplication() {
+        return _application;
     }
 
-    public void setApplication(Application application)
-    {
-        this.application = application;
+    public void setApplication(Application application) {
+        _application = application;
     }
 
-    public boolean isIsGroup()
-    {
-        return this.isGroup;
+    public boolean isIsGroup() {
+        return _isGroup;
     }
 
-    public void setIsGroup(boolean isGroup)
-    {
-        this.isGroup = isGroup;
+    public void setIsGroup(boolean isGroup) {
+        _isGroup = isGroup;
     }
 
-    public String getModifiedBy()
-    {
-        return this.modifiedBy;
+    public String getModifiedBy() {
+        return _modifiedBy;
     }
 
-    public void setModifiedBy(String modifiedBy)
-    {
-        this.modifiedBy = modifiedBy;
+    public void setModifiedBy(String modifiedBy) {
+        _modifiedBy = modifiedBy;
     }
 
-    public boolean isEntryPoint()
-    {
-        return this.isEntryPoint;
+    public boolean isEntryPoint() {
+        return _isEntryPoint;
     }
 
-    public void setEntryPoint(boolean entryPoint)
-    {
-        this.isEntryPoint = entryPoint;
+    public void setEntryPoint(boolean entryPoint) {
+        _isEntryPoint = entryPoint;
     }
 
-    public ServiceType getServiceType()
-    {
-        return this.serviceType;
+    public ServiceType getServiceType() {
+        return _serviceType;
     }
 
-    public void setServiceType(ServiceType serviceType)
-    {
-        this.serviceType = serviceType;
+    public void setServiceType(ServiceType serviceType) {
+        _serviceType = serviceType;
     }
 
-    public Collection getAppSvcDependencies()
-    {
-        return this.appSvcDependencies;
+    public Collection getAppSvcDependencies() {
+        return _appSvcDependencies;
     }
 
-    public void setAppSvcDependencies(Collection dependents)
-    {
-        this.appSvcDependencies = dependents;
+    public void setAppSvcDependencies(Collection dependents) {
+        _appSvcDependencies = dependents;
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (!(obj instanceof AppService) || !super.equals(obj)) {
             return false;
         }
         AppService o = (AppService)obj;
-        return (service == o.getService() ||
-                (service!=null && o.getService()!=null &&
-                 service.equals(o.getService())))
+        return (_service == o.getService() ||
+                (_service!=null && o.getService()!=null &&
+                 _service.equals(o.getService())))
                &&
-               (resourceGroup == o.getResourceGroup() ||
-                (resourceGroup!=null && o.getResourceGroup()!=null &&
-                 resourceGroup.equals(o.getResourceGroup())))
+               (_resourceGroup == o.getResourceGroup() ||
+                (_resourceGroup!=null && o.getResourceGroup()!=null &&
+                 _resourceGroup.equals(o.getResourceGroup())))
                &&
-               (application == o.getApplication() ||
-                (application!=null && o.getApplication()!=null &&
-                 application.equals(o.getApplication())));
+               (_application == o.getApplication() ||
+                (_application!=null && o.getApplication()!=null &&
+                 _application.equals(o.getApplication())));
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = super.hashCode();
 
-        result = 37*result + (service!=null ? service.hashCode() : 0);
-        result = 37*result + (application!=null ? application.hashCode() : 0);
-        result = 37*result + (resourceGroup!=null?resourceGroup.hashCode():0);
+        result = 37*result + (_service!=null ? _service.hashCode() : 0);
+        result = 37*result + (_application!=null ? _application.hashCode() : 0);
+        result = 37*result + (_resourceGroup!=null ? _resourceGroup.hashCode() : 0);
 
         return result;
     }
@@ -206,17 +180,16 @@ public class AppService extends AppdefBean
 
         if (value.getServiceCluster() != null) {
             Integer i = value.getServiceCluster().getId();
-            ResourceGroup gr = 
+            ResourceGroup gr =
                 DAOFactory.getDAOFactory().getResourceGroupDAO().findById(i);
             setResourceGroup(gr);
         }
 
         if (value.getServiceType() != null) {
             Integer i = value.getServiceType().getId();
-            ServiceType st = 
+            ServiceType st =
                 DAOFactory.getDAOFactory().getServiceTypeDAO().findById(i);
             setServiceType(st);
         }
     }
-
 }

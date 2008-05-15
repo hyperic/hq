@@ -40,9 +40,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
+import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
@@ -94,7 +94,7 @@ public class RemoveServiceDependenciesAction extends BaseAction {
             List toRemove = new ArrayList();
             for(int i =0;i< resources.length; i++) {
                 for(Iterator it = children.iterator(); it.hasNext();) {
-                    AppServiceValue asv = (AppServiceValue)it.next();
+                    AppService asv = (AppService)it.next();
                     if(resources[i].equals(asv.getId())) {
                         // remove this one
                         toRemove.add(asv);
@@ -102,19 +102,10 @@ public class RemoveServiceDependenciesAction extends BaseAction {
                 }
             }
             for(Iterator it = toRemove.iterator(); it.hasNext();) {
-                AppServiceValue asv = (AppServiceValue)it.next();
+                AppService asv = (AppService)it.next();
                 depNode.removeChild(asv);
             }
-/*            for (Iterator i = children.iterator(); i.hasNext();) {
-                AppServiceValue child = (AppServiceValue) i.next();
-                Integer lookFor = child.getId();
-                log.debug("searching [" + appSvcIdList + "] for " + lookFor);
-                if (appSvcIdList.contains(lookFor)) {
-                    log.debug("found " + lookFor);
-                    // if it's in the list of things to ditch, say adios
-                    depNode.removeChild(child);
-                }                                                
-            }*/
+
             log.debug("saving tree " + tree);            
             boss.setAppDependencyTree(sessionId.intValue(), tree);   
             DependencyTree savedTree = boss.getAppDependencyTree(sessionId.intValue(), tree.getApplication().getId());

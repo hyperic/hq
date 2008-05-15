@@ -135,7 +135,7 @@ public class DependencyNode implements Serializable, Comparable {
         return _removedNodes;
     }
 
-    public void removeChild(AppServiceValue aDep) {
+    public void removeChild(AppService aDep) {
         getChildren().remove(aDep);
         getRemovedChildren().add(aDep);
     }
@@ -158,14 +158,14 @@ public class DependencyNode implements Serializable, Comparable {
         if (hasChildren()) {
             sb.append(" \nchildren(\n");
             for (Iterator iter = getChildren().iterator(); iter.hasNext();) {
-                AppServiceValue child = (AppServiceValue) iter.next();
+                AppService child = (AppService) iter.next();
                 sb.append(" childAppServiceId=").append(child.getId()).append("\n");
-                if(!child.getIsCluster()) {
+                if(!child.isIsGroup()) {
                     sb.append(" \tchildServiceId=").append(child.getService().getId()).append("\n");
                     sb.append(" \tchildServiceName=").append(child.getService().getName()).append("\n");
                 } else {
-                    sb.append(" \tchildServiceClusterId=").append(child.getServiceCluster().getGroupId()).append("\n");
-                    sb.append(" \tchildServiceClusterName=").append(child.getServiceCluster().getName()).append("\n");
+                    sb.append(" \tchildServiceClusterId=").append(child.getResourceGroup().getId()).append("\n");
+                    sb.append(" \tchildServiceClusterName=").append(child.getResourceGroup().getName()).append("\n");
                 }
             }
             sb.append(")"); 
@@ -189,7 +189,7 @@ public class DependencyNode implements Serializable, Comparable {
     private HashSet compChildren() {
         HashSet childSet = new HashSet();
         for (Iterator i = getChildren().iterator(); i.hasNext();) {
-            AppServiceValue child = (AppServiceValue) i.next();
+            AppService child = (AppService) i.next();
             childSet.add(child.getId());
         }
         return childSet;        
@@ -198,5 +198,4 @@ public class DependencyNode implements Serializable, Comparable {
     public int compareTo(Object arg0) {
         return getName().compareTo(((DependencyNode) arg0).getName());
     }
-
 }
