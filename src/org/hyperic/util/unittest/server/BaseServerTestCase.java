@@ -228,7 +228,7 @@ public abstract class BaseServerTestCase extends TestCase {
      */
     protected final void insertSchemaData(String filename)
         throws UnitTestDBException {
-        overlayDBData(filename, DatabaseOperation.REFRESH);
+        overlayDBData(filename, DatabaseOperation.CLEAN_INSERT);
     }
 
     /**
@@ -240,7 +240,7 @@ public abstract class BaseServerTestCase extends TestCase {
      */
     protected final void insertSchemaData(List filenames)
         throws UnitTestDBException {
-        overlayDBData(filenames, DatabaseOperation.REFRESH);
+        overlayDBData(filenames, DatabaseOperation.CLEAN_INSERT);
     }
     
     /**
