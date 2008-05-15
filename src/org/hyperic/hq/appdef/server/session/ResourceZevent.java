@@ -25,10 +25,10 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.zevents.Zevent;
-import org.hyperic.hq.zevents.ZeventSourceId;
-import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventPayload;
+import org.hyperic.hq.zevents.ZeventSourceId;
 
 /**
  * Abstract class for appdef resource events.
@@ -38,6 +38,11 @@ public abstract class ResourceZevent extends Zevent {
     public ResourceZevent(Integer subject, AppdefEntityID id) {
         super(new ResourceZeventSource(id),
               new ResourceZeventPayload(subject, id));
+    }
+
+    public ResourceZevent(ResourceZeventSource source,
+                          ResourceZeventPayload payload) {
+        super(source, payload);
     }
 
     public AppdefEntityID getAppdefEntityID() {
@@ -50,7 +55,7 @@ public abstract class ResourceZevent extends Zevent {
             getAuthzSubjectId();
     }
 
-    private static class ResourceZeventSource
+    protected static class ResourceZeventSource
         implements ZeventSourceId
     {
         private static final long serialVersionUID = -2799620967593343325L;
@@ -79,7 +84,7 @@ public abstract class ResourceZevent extends Zevent {
         }
     }
 
-    private static class ResourceZeventPayload
+    protected static class ResourceZeventPayload
         implements ZeventPayload
     {
         private AppdefEntityID _id;
