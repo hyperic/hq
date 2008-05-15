@@ -87,14 +87,7 @@
     </script>
 </head>
 <body style="background-color: #FFFFFF;" class="tundra">
-  <c:choose>    
-    <c:when test="${portal.dialog}">    
-     <tiles:insert attribute="headerSmall"/>
-    </c:when>
-    <c:otherwise>
-     <tiles:insert attribute="header" />
-    </c:otherwise>
-  </c:choose>  
+  <tiles:insert attribute="header" />
   <div id="migContainer">
   <tiles:insert attribute='body' />
   <tiles:insert attribute="footer" />
