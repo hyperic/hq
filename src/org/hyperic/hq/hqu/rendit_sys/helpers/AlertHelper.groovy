@@ -3,6 +3,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.events.server.session.AlertDefSortField
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl
