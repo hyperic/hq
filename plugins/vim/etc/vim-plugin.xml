@@ -26,7 +26,7 @@
             description="Resource Pool name"/>
   </config>
 
-  <platform name="VI Host">
+  <platform name="VI3 Host">
 
     <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
     <plugin type="collector" class="org.hyperic.hq.plugin.vim.VimHostCollector"/>
