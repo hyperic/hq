@@ -161,8 +161,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         try {
             trimStrings(sValue);
 
-            Platform platform =
-                getPlatformMgrLocal().findPlatformById(platformId);
+            Platform platform = getPlatformDAO().findById(platformId);
             ServerType serverType = getServerTypeDAO().findById(serverTypeId);
 
             sValue.setServerType(serverType.getServerTypeValue());
@@ -176,10 +175,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             Server server = getServerDAO().create(sValue, platform);
 
             // Add server to parent collection
-            Collection servers = platform.getServers();
-            if (!servers.contains(server)) {
-                servers.add(server);
-            }
+            platform.getServers().add(server);
 
             createAuthzServer(subject, server);
 
@@ -189,13 +185,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
 
             return server;
-        /*
-        } catch (PermissionException e) {
-            // rollback the transaction if no permission to create
-            // a server; otherwise, a server record gets created without its
-            // corresponding resource record.
-            throw e;
-         */
         } catch (CreateException e) {
             throw e;
         } catch (FinderException e) {

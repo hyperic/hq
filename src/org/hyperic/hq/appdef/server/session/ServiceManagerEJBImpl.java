@@ -130,10 +130,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         createAuthzService(subject, service);
 
         // Add Service to parent collection
-        Collection services = server.getServices();
-        if (!services.contains(service)) {
-            services.add(service);
-        }
+        server.getServices().add(service);
 
         ResourceCreatedZevent zevent =
             new ResourceCreatedZevent(subject, service.getEntityId());
