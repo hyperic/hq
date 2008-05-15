@@ -274,6 +274,7 @@
           <!-- Plugin sources -->
           <dirset dir="plugins">
             <include name="*/src"/>
+            <exclude name="xen/src"/>
           </dirset>
         </src>
         <exclude name="org/hyperic/hq/ui/**/*.java" />
@@ -689,11 +690,15 @@
       </classpath>
       <src>
         <path location="${hq.home}/src" />
+        <path location="${hq.home}/plugins/xen/src" />
         <!-- Test sources --> 
         <path location="${hq.home}/unittest/src"/>
       </src>
       <include name="org/hyperic/hq/ui/**" />
       <include name="org/hyperic/ui/tapestry/**" />
+      <!-- Xen api requires 1.5 -->
+      <include name="org/hyperic/hq/plugin/xen/**"/>
+      <include name="com/xensource/**"/>
     </hq-javac>
 
   </target>
@@ -1144,6 +1149,12 @@
     <hqplugin name="vmware"/>
 
     <hqplugin name="vim"/>
+
+    <hqplugin name="xen">
+       <!-- XXX Xen sdk built w/ 1.6 + mods for Xen 4.0 compat -->
+       <fileset dir="${build.dir}/classes"
+                includes="com/xensource/xenapi/*.class"/>
+    </hqplugin>
 
     <hqplugin name="groovy-scripting"/>
   </target>
