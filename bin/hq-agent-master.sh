@@ -20,6 +20,8 @@ PROP_NAME=set.HQ_AGENT_BUNDLE
 AGENT_BUNDLE=`grep $PROP_NAME $ROLLBACK_PROPERTIES | awk -F= '{print $2}'`
 
 if test -d "./bundles/$AGENT_BUNDLE"; then
+  # be safe and set permissions for the invoked script
+  chmod -R +x ./bundles/$AGENT_BUNDLE/bin/*
   # pass on the command to the bundle
   #echo "Invoking agent bundle $AGENT_BUNDLE"
   ./bundles/$AGENT_BUNDLE/bin/hq-agent.sh "$@"
