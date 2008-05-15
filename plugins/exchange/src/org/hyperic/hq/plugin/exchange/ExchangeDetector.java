@@ -60,7 +60,7 @@ public class ExchangeDetector
     private static final String EXCHANGE_KEY =
         "SOFTWARE\\Microsoft\\Exchange\\Setup";
 
-    private static final String EX = "MSExchange";
+    static final String EX = "MSExchange";
     private static final String WEBMAIL = EX + " Web Mail";
     private static final String EXCHANGE_IS = EX + "IS";
 
