@@ -182,7 +182,7 @@
 
   <target name="roll-pdk-bundle">
     <antcall target="compress-dir">
-      <param name="archive-dir" value="${agent.dir}/bundles/agent-${version}/pdk"/>
+      <param name="archive-dir" value="${agent.dir}/bundles/${agent.bundle.dir}/pdk"/>
       <param name="archive-file" value="${build.dir}/hyperic-pdk-${version}-${build}.zip"/>
       <param name="compress-mode" value="zip"/>
     </antcall>
@@ -195,8 +195,8 @@
 	<mkdir dir="${build.dir}/agent-upgrade"/>  
 	  	  
     <antcall target="compress-dir">
-      <param name="archive-dir" value="${agent.dir}/bundles/agent-${version}"/>
-      <param name="archive-file" value="${build.dir}/agent-upgrade/agent-${version}.tgz"/>
+      <param name="archive-dir" value="${agent.dir}/bundles/${agent.bundle.dir}"/>
+      <param name="archive-file" value="${build.dir}/agent-upgrade/${agent.bundle.dir}.tgz"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>	  
   </target>	
