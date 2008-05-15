@@ -179,8 +179,7 @@ var tapestry={
         }        
     },
     
-    loadJson: function(){
-        tapestry.log('loadJson');
+    loadJson: function(type, data, http, kwArgs){        
     },
     
     loadContent: function(id, node, element){
@@ -560,6 +559,47 @@ tapestry.form = {
 };
 
 tapestry.event = {
+    buildEventProperties:function(event, props, args){
+       if (!props) props={};
+
+       var isEvent = (typeof event != "undefined") && (event)
+           && (typeof Event != "undefined") && (event.eventPhase);
+       if (isEvent) {
+           if(event["type"]) props.beventtype=event.type;
+           if(event["keys"]) props.beventkeys=event.keys;
+           if(event["charCode"]) props.beventcharCode=event.charCode;
+           if(event["pageX"]) props.beventpageX=event.pageX;
+           if(event["pageY"]) props.beventpageY=event.pageY;
+           if(event["layerX"]) props.beventlayerX=event.layerX;
+           if(event["layerY"]) props.beventlayerY=event.layerY;
+
+           if (event["target"]) 
+               this.buildTargetProperties(props, event.target);
+       }
+
+       props.methodArguments = dojo.toJson( args );
+
+       return props;
+   },
+   
+   buildTargetProperties:function(props, target){
+       if(!target) { return; }
+
+       var isNode = target.nodeType && target.cloneNode;
+       if (isNode) {
+           return this.buildNodeProperties(props, target);
+       } else {
+           dojo.raise("buildTargetProperties() Unknown target type:" + target);
+       }
+   }, 
+   
+   buildNodeProperties:function(props, node) {
+       if (node.getAttribute("id")) {
+           props["beventtarget.id"]=node.getAttribute("id");
+       }
+   },   
+       
+       
     stopEvent: dojo.stopEvent
 };
 
