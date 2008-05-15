@@ -460,11 +460,11 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AppdefEntityID[] setConfigResponse(AuthzSubject subject,
-                                              AppdefEntityID id,
-                                              ConfigResponse response,
-                                              String type,
-                                              boolean sendConfigEvent)
+    public AppdefEntityID setConfigResponse(AuthzSubject subject,
+                                            AppdefEntityID id,
+                                            ConfigResponse response,
+                                            String type,
+                                            boolean sendConfigEvent)
         throws ConfigFetchException, AppdefEntityNotFoundException,
                PermissionException, EncodingException, FinderException
     {
@@ -472,8 +472,7 @@ public class ConfigManagerEJBImpl
         byte[] measurementBytes = null;
         byte[] controlBytes = null;
         byte[] rtBytes = null;
-        byte[] autoinventoryBytes = null;
-
+        
         if(type.equals(ProductPlugin.TYPE_PRODUCT)) {
             productBytes = response.encode();
         } else if (type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
@@ -483,8 +482,6 @@ public class ConfigManagerEJBImpl
         } else if (type.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
             rtBytes = response.encode();
         } else if (type.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
-            //XXX: not handled.
-            autoinventoryBytes = response.encode();
         } else {
             throw new IllegalArgumentException("Unknown config type: " + type);
         }
@@ -502,15 +499,15 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AppdefEntityID[] configureResource(AuthzSubject subject,
-                                              AppdefEntityID appdefID,
-                                              byte[] productConfig,
-                                              byte[] measurementConfig,
-                                              byte[] controlConfig,
-                                              byte[] rtConfig,
-                                              Boolean userManaged,
-                                              boolean sendConfigEvent,
-                                              boolean force)
+    public AppdefEntityID configureResource(AuthzSubject subject,
+                                            AppdefEntityID appdefID,
+                                            byte[] productConfig,
+                                            byte[] measurementConfig,
+                                            byte[] controlConfig,
+                                            byte[] rtConfig,
+                                            Boolean userManaged,
+                                            boolean sendConfigEvent,
+                                            boolean force)
         throws ConfigFetchException, AppdefEntityNotFoundException,
                PermissionException, FinderException
     {
@@ -578,9 +575,9 @@ public class ConfigManagerEJBImpl
                 ZeventManager.getInstance().enqueueEventAfterCommit(event);
             }
             
-            return new AppdefEntityID[] { appdefID };
+            return appdefID;
         } else {
-            return new AppdefEntityID[] {};
+            return null;
         }
     }
 
