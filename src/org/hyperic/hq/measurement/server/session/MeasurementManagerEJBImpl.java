@@ -85,7 +85,6 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 
@@ -171,25 +170,15 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         throws MeasurementCreateException
     {
         String dsn = translate(mt.getTemplate(), props);
-
         return getMeasurementDAO().create(instanceId, mt, dsn, interval);
-    }
-
-    /**
-     * Look up a Measurement's appdef entity ID
-     * @param m The Measurement
-     * @return The AppdefEntityID for the given Measurement
-     */
-    private AppdefEntityID getAppdefEntityId(Measurement m) {
-        return new AppdefEntityID(m.getAppdefType(), m.getInstanceId());
     }
 
     private void sendAgentSchedule(final Serializable obj) {
         // Sending of the agent schedule should only occur once the current
         // transaction is completed.
         try {
-            HQApp.getInstance().addTransactionListener(new TransactionListener() {
-
+            HQApp.getInstance().addTransactionListener(new TransactionListener()
+            {
                 public void beforeCommit() {
                 }
 
@@ -300,9 +289,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @return a List of the associated Measurement objects
      * @ejb:interface-method
      */
-    public List createMeasurements(AuthzSubject subject, 
-                                   AppdefEntityID id, Integer[] templates,
-                                   ConfigResponse props)
+    public List createMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                   Integer[] templates, ConfigResponse props)
         throws PermissionException, MeasurementCreateException,
                TemplateNotFoundException {
         long[] intervals = new long[templates.length];
@@ -429,7 +417,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * Look up a Measurement for an instance and an alias and an alias.
      *
      * @return The Measurement for the AppdefEntityId of the given alias.
-     * @deprecated Use getMeasurement(AuthzSubject, Resource, String) instread.
+     * @deprecated Use getMeasurement(AuthzSubject, Resource, String) instead.
      * @ejb:interface-method
      */
     public Measurement getMeasurement(AuthzSubject subject,
@@ -449,8 +437,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     {
         Measurement m = getMeasurementDAO().findByAliasAndID(alias, r);
         if (m == null) {
-            throw new MeasurementNotFoundException(alias + " for " + r.getName() +
-                                                   " not found");
+            throw new MeasurementNotFoundException(alias + " for " + r.getName()
+                                                   + " not found");
         }
         return m;
     }
@@ -624,7 +612,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
             meas = getMeasurementDAO().findEnabledByResource(getResource(id));
         } else {
-            meas = getMeasurementDAO().findByResourceForCategory(getResource(id), cat);
+            meas = getMeasurementDAO().findByResourceForCategory(getResource(id),
+                                                                 cat);
         }
     
         return meas;
