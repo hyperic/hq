@@ -34,6 +34,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.util.config.EncodingException;
 
 public interface ConfigValidator {
+    public static String PDT_PROP = "hyperic.hq.bizapp.configValidator";
 
     public void validate(AuthzSubject subject, String type,
                          AppdefEntityID[] ids)
