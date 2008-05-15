@@ -106,23 +106,24 @@ public abstract class Button extends BaseComponent {
     @InjectScript("Button.script")
     public abstract IScript getScript();
     
-    public void renderComponent(IMarkupWriter writer, IRequestCycle cycle){
+    public void renderComponent(IMarkupWriter writer, IRequestCycle cycle) {
         super.renderComponent(writer, cycle);
         if (!cycle.isRewinding()) {
-	    if (getEnableKeyListener()) {
-		Map map = new HashMap();
-		if (getScopeObjectName() == KEYPRESS_SCOPE_FORM) {
-		    IComponent form = TapestryUtils.getForm(cycle, this);
-		    map.put("scopeObjName", form.getClientId());
-		} else {
-		    map.put("scopeObjName", KEYPRESS_SCOPE_WINDOW);
-		}
-		AbstractFormComponent linksubmit = (AbstractFormComponent) this.getComponent("linksubmit");
-		map.put("buttonClientId", linksubmit.getName());
-		PageRenderSupport pageRenderSupport = TapestryUtils
-			.getPageRenderSupport(cycle, this);
-		getScript().execute(this, cycle, pageRenderSupport, map);
-	    }
+            if (getEnableKeyListener()) {
+                Map map = new HashMap();
+                if (getScopeObjectName() == KEYPRESS_SCOPE_FORM) {
+                    IComponent form = TapestryUtils.getForm(cycle, this);
+                    map.put("scopeObjName", form.getClientId());
+                } else {
+                    map.put("scopeObjName", KEYPRESS_SCOPE_WINDOW);
+                }
+                AbstractFormComponent linksubmit = (AbstractFormComponent) this
+                        .getComponent("linksubmit");
+                map.put("buttonClientId", linksubmit.getName());
+                PageRenderSupport pageRenderSupport = TapestryUtils
+                        .getPageRenderSupport(cycle, this);
+                getScript().execute(this, cycle, pageRenderSupport, map);
+            }
         }
     }
 }
