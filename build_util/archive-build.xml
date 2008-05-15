@@ -187,6 +187,19 @@
       <param name="compress-mode" value="zip"/>
     </antcall>
   </target>
+	
+  <target name="roll-upgrade-agent-bundle" 
+	      description="Rolls the bundle required for the agent auto upgrade">
+	  
+    <delete dir="${build.dir}/agent-upgrade"/>
+	<mkdir dir="${build.dir}/agent-upgrade"/>  
+	  	  
+    <antcall target="compress-dir">
+      <param name="archive-dir" value="${agent.dir}/bundles/agent-${version}"/>
+      <param name="archive-file" value="${build.dir}/agent-upgrade/agent-${version}.tgz"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>	  
+  </target>	
 
   <target name="bundle-pgsql" if="pgsql.available">
     <mkdir dir="${archive-dir}/installer-${version}/data/hqdb"/>
