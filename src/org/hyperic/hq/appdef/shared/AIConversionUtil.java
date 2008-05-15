@@ -27,13 +27,6 @@ package org.hyperic.hq.appdef.shared;
 
 import javax.ejb.FinderException;
 
-import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.bizapp.shared.AllConfigResponses;
-import org.hyperic.hq.common.util.Messenger;
-import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.zevents.ZeventManager;
-
 /**
  * A utility for converting value objects from AI to appdef.
  */
@@ -109,16 +102,5 @@ public class AIConversionUtil {
                            + " (" + System.currentTimeMillis() + ")");
         }
         return server;
-    }
-
-    public static void sendNewConfigEvent(AuthzSubjectValue subject,
-                                          AppdefEntityID aid,
-                                          AllConfigResponses config) {
-        AppdefEvent event = new AppdefEvent(subject, aid,
-                                            AppdefEvent.ACTION_NEWCONFIG,
-                                            config);
-
-        Messenger sender = new Messenger();
-        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
     }
 }
