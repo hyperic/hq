@@ -25,6 +25,12 @@
 
 package org.hyperic.hq.plugin.vim;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.collection.IntHashMap;
 
 import com.vmware.vim.ManagedObjectReference;
@@ -37,7 +43,23 @@ import com.vmware.vim.PerfMetricSeries;
 import com.vmware.vim.PerfQuerySpec;
 
 public class VimHostCollector extends VimCollector {
- 
+
+    private static final Set VALID_UNITS =
+        new HashSet(Arrays.asList(MeasurementConstants.VALID_UNITS));
+
+    private static final HashMap UNITS_MAP = new HashMap();
+    private static final String[][] UNITS_ALIAS = {
+        { "Second", MeasurementConstants.UNITS_SECONDS },
+        { "Millisecond", MeasurementConstants.UNITS_MILLIS },
+        { "Percent", MeasurementConstants.UNITS_PERCENT }
+    };
+    
+    static {
+        for (int i=0; i<UNITS_ALIAS.length; i++) {
+            UNITS_MAP.put(UNITS_ALIAS[i][0], UNITS_ALIAS[i][1]);
+        }
+    }
+
     protected ManagedObjectReference getRoot() {
         return null;
     }
@@ -51,15 +73,36 @@ public class VimHostCollector extends VimCollector {
     }
 
     protected void printXml(PerfCounterInfo info, String key) {
+        String rollup = info.getRollupType().getValue();
         String name = info.getNameInfo().getLabel();
+        String units = info.getUnitInfo().getLabel();
+
+        if (rollup.equals("minimum") || rollup.equals("maximum")) {
+            return;
+        }
+        if (name.indexOf("peak") != -1) {
+            return;
+        }
+        if (UNITS_MAP.containsKey(units)) {
+            units = (String)UNITS_MAP.get(units);
+        }
+
+        if (!VALID_UNITS.contains(units)) {
+            System.out.println("    <!-- units=" + units + " -->"); 
+        }
         System.out.println("    <metric name=\"" + name + "\"");
         System.out.println("                  alias=\"" + key + "\"");
-        System.out.println("     />");
+        if (VALID_UNITS.contains(units)) {
+            System.out.println("                  units=\"" + units + "\"");
+        }
+        System.out.println("     />\n");
     }
 
     protected void collect(VimUtil vim)
         throws Exception {
 
+        final boolean printMetric =
+            "true".equals(System.getProperty("vim.xml"));
         ManagedObjectReference mor = getManagedObjectReference(vim);
         ManagedObjectReference perfManager = vim.getPerfManager();
         IntHashMap counters = getCounterInfo(vim, perfManager);
@@ -98,6 +141,7 @@ public class VimHostCollector extends VimCollector {
             long val = series.getValue()[0];
             if (info.getStatsType().getValue().equals("absolute")) {
                 setValue(key, val);
+                if (printMetric) printXml(info, key);
             }
         }
     }
