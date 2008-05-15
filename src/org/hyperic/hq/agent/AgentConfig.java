@@ -54,6 +54,7 @@ public class AgentConfig {
 
     public static final String PROP_PROPFILE = "agent.propFile";
     public static final String DEFAULT_PROPFILE = "agent.properties";
+    public static final String BUNDLE_PROPFILE = "conf/agent.properties";
     
     public static final String ROLLBACK_PROPFILE = "agent.rollbackPropFile";
     public static final String DEFAULT_ROLLBACKPROPFILE = "../../conf/rollback.properties";
@@ -179,6 +180,11 @@ public class AgentConfig {
             throw new AgentConfigException("Failed to load: " + propsFile);
         }
 
+        // load bundle-level agent properties
+        file = new File(BUNDLE_PROPFILE);
+        // do nothing if file does not exist
+        loadProps(useProps, file);
+        
         final String home = System.getProperty("user.home");
         String[] userFiles = {
             //XXX Backwards compat, remove for 3.1 or 4.0?
