@@ -16,6 +16,7 @@ APP_LONG_NAME="HQ Agent"
 
 # Wrapper
 WRAPPER_CMD="../../wrapper/sbin/wrapper"
+WRAPPER_CMD_PS="sbin/wrapper"
 WRAPPER_CONF="conf/wrapper.conf"
 
 # Priority at which to run the wrapper.  See "man nice" for valid priorities.
@@ -23,7 +24,7 @@ WRAPPER_CONF="conf/wrapper.conf"
 PRIORITY=
 
 # Location of the pid file.
-PIDDIR="."
+PIDDIR="../../wrapper"
 
 # If uncommented, causes the Wrapper to be shutdown using an anchor file.
 #  When launched with the 'start' command, it will also ignore all INT and
@@ -461,10 +462,10 @@ getpid() {
                 #  the pid.  If it is not found then the pid file is considered to be stale.
                 case "$DIST_OS" in
                     'macosx')
-                        pidtest=`$PSEXE -ww -p $pid -o command | grep "$WRAPPER_CMD" | tail -1`
+                        pidtest=`$PSEXE -ww -p $pid -o command | grep "$WRAPPER_CMD_PS" | tail -1`
                         ;;
                     *)
-                        pidtest=`$PSEXE -p $pid -o args | grep "$WRAPPER_CMD" | tail -1`
+                        pidtest=`$PSEXE -p $pid -o args | grep "$WRAPPER_CMD_PS" | tail -1`
                         ;;
                 esac
 
