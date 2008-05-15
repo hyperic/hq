@@ -129,6 +129,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         // Create the authz resource type.  This also does permission checking
         createAuthzService(subject, service);
 
+        // Add Service to parent collection
+        Collection services = server.getServices();
+        if (!services.contains(service)) {
+            services.add(service);
+        }
+
         ResourceCreatedZevent zevent =
             new ResourceCreatedZevent(subject, service.getEntityId());
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
@@ -137,8 +143,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Create a Service which runs on a given server
-     * @return ServiceValue - the saved value object
-     * @exception CreateException - if it fails to add the service
+     * @return The service id.
      * @ejb:interface-method
      */
     public Integer createService(AuthzSubject subject, Integer serverId,
@@ -146,41 +151,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws CreateException, ValidationException, PermissionException,
                ServerNotFoundException, AppdefDuplicateNameException
     {
-        try {
-            validateNewService(sValue);
-            trimStrings(sValue);
+        Server server = getServerDAO().findById(serverId);
+        ServiceType serviceType =
+            getServiceTypeDAO().findById(serviceTypeId);
 
-            Server server = getServerMgrLocal().findServerById(serverId);
-            ServiceType serviceType =
-                getServiceTypeDAO().findById(serviceTypeId);
-            sValue.setServiceType(serviceType.getServiceTypeValue());
-            sValue.setOwner(subject.getName());
-            sValue.setModifiedBy(subject.getName());
-            Service service = getServiceDAO().createService(server, sValue);
-            
-            createAuthzService(subject, service);
-
-            // Add Service to parent collection
-            Collection services = server.getServices();
-            if (!services.contains(service)) {
-                services.add(service);
-            }
-
-            // Send resource create event
-            ResourceCreatedZevent zevent =
-                new ResourceCreatedZevent(subject, service.getEntityId());
-            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
-
-            return service.getId();
-        } catch (PermissionException e) {
-            // make sure that if there is a permission exception during
-            // service creation, rollback the whole service creation process;
-            // otherwise, there would be a EAM_SERVICE record without its
-            // cooresponding EAM_RESOURCE record
-            log.error("User: " + subject.getName() +
-                      " can not add services to server: " + serverId);
-            throw e;
-        }
+        Service s = createService(subject, server, serviceType,
+                                  sValue.getName(), sValue.getDescription(),
+                                  sValue.getLocation(), null);
+        return s.getId();
     }
 
     /**
@@ -1199,24 +1177,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         }
         return services;
     }
-
-    /**
-     * Private method to validate a new ServiceValue object
-     */
-    private void validateNewService(ServiceValue sv)
-        throws ValidationException {
-        String msg = null;
-        // first check if its new 
-        if(sv.idHasBeenSet()) {
-            msg = "This service is not new. It has id: " + sv.getId();
-        }
-        // else if(someotherthing)  ...
-
-        // Now check if there's a msg set and throw accordingly
-        if(msg != null) {
-            throw new ValidationException(msg);
-        }
-    }     
 
     /**
      * @ejb:interface-method
