@@ -108,13 +108,6 @@ public class ConfigValidatorImpl
                 continue;
             }
             
-            try {
-                dmMan.updateMeasurements(subject, ids[i], responses[i]);
-            } catch (MeasurementCreateException exc) {
-                throw new InvalidConfigException("Unable to update metrics: " +
-                                                 exc.getMessage(), exc);
-            }
-
             // Metric configuration has been validated, check if we need
             // to enable or disable log and config tracking.
             try {
