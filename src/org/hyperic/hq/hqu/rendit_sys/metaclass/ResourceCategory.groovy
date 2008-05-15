@@ -190,6 +190,22 @@ class ResourceCategory {
         }
         false
     }
+
+    /**
+     * Get the description for this Resource.  If no description exists (i.e.
+     * this is not a Platform, Server, or Service) an empty string is returned.
+     */
+    static String getDescription(Resource r) {
+        def description = null;
+        if (isPlatform(r)) {
+            description = toPlatform(r).getDescription()
+        } else if (isServer(r)) {
+            description = toServer(r).getDescription()
+        } else if (isService(r)) {
+            description = toService(r).getDescription()
+        }
+        return description == null ? "" : description
+    }
     
     /**
      * @see documentation for ResourceConfig.  We don't return it directly
