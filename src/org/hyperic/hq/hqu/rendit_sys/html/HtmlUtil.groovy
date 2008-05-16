@@ -208,6 +208,13 @@ class HtmlUtil {
     }
 
     /**
+     * Backwards compat selectList() Impl.
+     */
+    static String selectList(vals, htmlOpts) {
+        return selectList(vals, htmlOpts, null)
+    }
+    
+    /**
 	 * Create a string of key='value' pairs, usable for tag parameters
 	 * in HTML
 	 *
