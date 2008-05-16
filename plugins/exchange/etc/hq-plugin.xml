@@ -32,6 +32,9 @@
   <filter name="imap4" value="win32:Object=MSExchangeIMAP4,Instance=_Total"/>
   <filter name="pop3" value="win32:Object=MSExchangePOP3,Instance=_Total"/>
   <filter name="web" value="win32:Object=MSExchange Web Mail,Instance=_Total"/>
+  <filter name="queue" value="win32:Object=MSExchangeTransport Queues,Instance=_Total"/>
+  <filter name="smtpsend" value="win32:Object=MSExchangeTransport SmtpSend,Instance=%name%"/>
+  <filter name="smtprecv" value="win32:Object=MSExchangeTransport SmtpReceive,Instance=%name%"/>
 
   <!-- metrics for Exchange Information Store -->
   <filter name="template" value="${store}:${name}"/>
@@ -930,10 +933,150 @@
             indicator="true"/>
   </metrics>
 
+  <!-- metrics for MSExchangeTransport Queues -->
+  <filter name="template" value="${queue}:${name}"/>
+  <metrics name="exchange-transport">
+    <metric name="Availability"
+            template="win32:Service=MSExchangeTransport:${alias}"
+            indicator="true"/>
+
+    <metric name="Active Remote Delivery Queue Length"/>
+
+    <metric name="Retry Remote Delivery Queue Length"/>
+
+    <metric name="Active Mailbox Delivery Queue Length"/>
+
+    <metric name="Retry Mailbox Delivery Queue Length"/>
+
+    <metric name="Active Non-Smtp Delivery Queue Length"/>
+
+    <metric name="Retry Non-Smtp Delivery Queue Length"/>
+
+    <metric name="Aggregate Delivery Queue Length (All Queues)"
+            indicator="true"/>
+
+    <metric name="Items Queued For Delivery Total"
+            collectionType="trendsup"/>
+
+    <metric name="Items Completed Delivery Total"
+            collectionType="trendsup"/>
+
+    <metric name="Items Queued For Delivery Expired Total"
+            collectionType="trendsup"/>
+
+    <metric name="Items Deleted By Admin Total"
+            collectionType="trendsup"/>
+
+    <metric name="Items Resubmitted Total"
+            collectionType="trendsup"/>
+
+    <metric name="Messages Queued For Delivery Total"
+            collectionType="trendsup"/>
+
+    <metric name="Messages Completed Delivery Total"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Unreachable Queue Length"/>
+
+    <metric name="Poison Queue Length"/>
+
+    <metric name="Submission Queue Length"/>
+
+    <metric name="Messages Submitted Total"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Submission Queue Items Expired Total"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <filter name="template" value="${smtpsend}:${name}"/>
+  <metrics name="exchange-smtpsend">
+    <metric name="Availability"
+            template="win32:Service=MSExchangeTransport:${alias}"
+            indicator="true"/>
+
+    <metric name="Connections Current"/>
+
+    <metric name="Connections Total"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Messages Sent Total"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Message Bytes Sent Total"
+            indicator="true"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Sent Total"
+            collectionType="trendsup"/>
+
+    <metric name="Recipients Sent"
+            collectionType="trendsup"/>
+
+    <metric name="Average Recipients/message"/>
+
+    <metric name="Average Message bytes/message"
+            units="B"/>
+
+    <metric name="Average Messages/connection"/>
+
+    <metric name="Average Bytes/connection"
+            units="B"/>
+  </metrics>
+
+  <filter name="template" value="${smtprecv}:${name}"/>
+  <metrics name="exchange-smtprecv">
+    <metric name="Availability"
+            template="win32:Service=MSExchangeTransport:${alias}"
+            indicator="true"/>
+
+    <metric name="Connections Current"/>
+
+    <metric name="Connections Total"
+            indicator="true"/>
+
+    <metric name="Disconnections By Agents"/>
+
+    <metric name="Messages Received Total"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Message Bytes Received Total"
+            collectionType="trendsup"/>
+
+    <metric name="Messages Refused for Size"/>
+
+    <metric name="Recipients Accepted Total"
+            collectionType="trendsup"/>
+
+    <metric name="Average Bytes/message"
+            units="B"/>
+
+    <metric name="Average Recipients/message"/>
+
+    <metric name="Average Bytes/connection"
+            units="B"/>
+
+    <metric name="Average Messages/connection"/>
+
+    <metric name="Bytes Received Total"
+            collectionType="trendsup"/>
+
+    <metric name="Tarpitting Delays Authenticated"/>
+
+    <metric name="Tarpitting Delays Anonymous"/>
+  </metrics>
+
   <metrics name="Exchange 5.5" include="exchange-is,exchange-mbox"/>
   <metrics name="Exchange 2000" include="exchange-is,exchange-mbox"/>
   <metrics name="Exchange 2003" include="exchange-is,exchange-mbox"/>
   <metrics name="Exchange 2007" include="exchange-is,exchange-mbox"/>
+  <metrics name="Exchange Transport 2007" include="exchange-transport"/>
 
   <metrics name="Exchange 5.5 POP3" include="POP3_V5"/>
   <metrics name="Exchange 2000 POP3" include="POP3_V5"/>
@@ -953,6 +1096,12 @@
   <metrics name="Exchange 2000 Web" include="Web"/>
   <metrics name="Exchange 2003 Web" include="Web"/>
   <metrics name="Exchange 2007 Web" include="Web"/>
+
+  <metrics name="Exchange Transport 2007 SmtpSend"
+           include="exchange-smtpsend"/>
+
+  <metrics name="Exchange Transport 2007 SmtpReceive"
+           include="exchange-smtprecv"/>
 
   <server name="Exchange"
           description="Mail Server"
@@ -1058,6 +1207,35 @@
     </service>
 
     <service name="Web">
+      <plugin type="measurement"/>
+    </service>
+  </server>
+
+  <server name="Exchange Transport" version="2007" platforms="Win32">
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="ExchangeTransportDetector"/>
+
+    <property name="EVENT_LOG_SOURCE_FILTER"
+              value="MSExchangeTransport"/>
+
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>    
+
+    <service name="SmtpSend">
+      <config>
+        <option name="name" description="Name"/>
+      </config>
+      <plugin type="measurement"/>
+    </service>
+
+    <service name="SmtpReceive">
+      <config>
+        <option name="name" description="Name"/>
+      </config>
       <plugin type="measurement"/>
     </service>
   </server>
