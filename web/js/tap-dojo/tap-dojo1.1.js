@@ -118,7 +118,7 @@ var tapestry={
             var id=elms[i].getAttribute("id");
 
             if (elmType == "exception") {
-                    dojo.log.err("Remote server exception received.");
+                    console.log("Remote server exception received.");
                     tapestry.presentException(elms[i], kwArgs);
                     return;
             } else if (elmType == "page") {
@@ -323,10 +323,53 @@ tapestry.form = {
     },
 
     /** Same as submit, but forces cancel submission */
-    cancel: function(formId, submitName, parms) {tapestry.log('t.f.submit', arguments);},
+    cancel: function(formId, submitName, parms) {
+        form=dojo.byId(form);
+        if (!form){
+            tapestry.log("Form not found with id " + form);
+            return;
+        }
+
+        var formName=form.getAttribute("id");
+        var validateState=tapestry.form.forms[formName].validateForm;
+        tapestry.form.setFormValidating(formName, false);
+
+        var previous = form.submitmode.value;
+        form.submitmode.value="cancel";
+
+        if (parms && !dj_undef("async", parms) && parms.async){
+            this.submitAsync(form, null, submitName, parms);
+            form.submitmode.value = previous;
+            tapestry.form.setFormValidating(formName, validateState);
+        } else {
+            this.submit(form, submitName, parms);
+        }
+    },
+    
 
     /** Same as submit, but forces refresh submission */
-    refresh: function(formId, submitName, parms) {tapestry.log('t.f.submit', arguments);},
+    refresh: function(formId, submitName, parms) {
+        form=dojo.byId(form);
+        if (!form){
+            dojo.raise("Form not found with id " + form);
+            return;
+        }
+
+        var formName=form.getAttribute("id");
+        var validateState=tapestry.form.forms[formName].validateForm;
+        tapestry.form.setFormValidating(formName, false);
+
+        var previous = form.submitmode.value;
+        form.submitmode.value="refresh";
+
+        if (parms && !dj_undef("async", parms) && parms.async){
+            this.submitAsync(form, null, submitName, parms);
+            form.submitmode.value = previous;
+            tapestry.form.setFormValidating(formName, validateState);
+        } else {
+            this.submit(form, submitName, parms);
+        }
+    },
 
     /**
 	 * Registers a form and allows definition of its properties.
