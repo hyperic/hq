@@ -63,11 +63,11 @@ public class AgentRunner
             try {fIs.close();} catch(Exception e) {}
         }
 
-        p.setProperty("agent.storageProvider.info",
+        p.setProperty(AgentConfig.PROP_STORAGEPROVIDERINFO[0],
                       dataDir.getAbsolutePath() + ":m:100:20:50");  
-        p.setProperty("agent.dataDir", dataDir.getAbsolutePath());
-        p.setProperty("agent.keystore", 
-                      new File(dataDir, "agent.keystore").getAbsolutePath());
+        p.setProperty(AgentConfig.PROP_DATADIR[0], dataDir.getAbsolutePath());
+        p.setProperty(AgentConfig.PROP_KEYSTORE[0], 
+                      new File(dataDir, AgentConfig.PROP_KEYSTORE[0]).getAbsolutePath());
         
         try {
             AgentConfig cfg = AgentConfig.newInstance(p);

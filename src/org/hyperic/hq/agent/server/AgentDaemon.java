@@ -120,8 +120,8 @@ public class AgentDaemon
         }
     }
 
-    private static File[] getLibJars() {
-        File[] jars = new File("lib/handlers").listFiles(new FileFilter() {
+    private static File[] getLibJars(String libHandlersDir) {
+        File[] jars = new File(libHandlersDir).listFiles(new FileFilter() {
                 public boolean accept(File file) {
                     String name = file.getName();
                     
@@ -388,7 +388,9 @@ public class AgentDaemon
         }
 
         //add lib/handlers/lib/*.jar classpath for handlers only
-        File handlersLib = new File("lib/handlers/lib");
+        String libHandlersLibDir = 
+            cfg.getBootProperties().getProperty(AgentConfig.PROP_LIB_HANDLERS_LIB[0]);
+        File handlersLib = new File(libHandlersLibDir);
         if (handlersLib.exists()) {
             this.handlerClassLoader.addURL(handlersLib);
         }
@@ -444,7 +446,9 @@ public class AgentDaemon
         // Load server handlers on the fly from lib/*.jar.  Server handler
         // jars  must have a Main-Class that implements the AgentServerHandler
         // interface.
-        File[] libJars = getLibJars();
+        String libHandlersDir = 
+            cfg.getBootProperties().getProperty(AgentConfig.PROP_LIB_HANDLERS[0]);
+        File[] libJars = getLibJars(libHandlersDir);
         for (int i=0; i<libJars.length; i++) {
             try {
                 JarFile jarFile = new JarFile(libJars[i]);
@@ -622,8 +626,7 @@ public class AgentDaemon
             this.ppm.init();
 
             pluginDir = 
-                bootProps.getProperty("agent.pdkPluginDir",
-                                      "pdk/plugins");
+                bootProps.getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
 
             this.ppm.registerPlugins(pluginDir);
             //check .. and higher for hq-plugins

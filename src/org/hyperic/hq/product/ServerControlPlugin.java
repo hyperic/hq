@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.ProcState;
 import org.hyperic.sigar.Sigar;
@@ -421,7 +422,7 @@ public abstract class ServerControlPlugin extends ControlPlugin {
             //which do not background themselves
             Properties props = getManager().getProperties(); 
             String cwd = System.getProperty("user.dir");
-            String dir = props.getProperty("agent.install.home", cwd);
+            String dir = props.getProperty(AgentConfig.PROP_INSTALLHOME[0]);
 
             if (dir.equals(".")) {
                 //XXX: ./background.sh command silently fails when running

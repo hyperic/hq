@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.sigar.OperatingSystem;
@@ -54,11 +55,8 @@ import org.apache.commons.logging.Log;
  */
 public class ProductPluginManager extends PluginManager {
     public static final String PROP_PDK_DIR = "pdk.dir";
-
-    private static final String PLUGINS_DIR = "plugins";
     
-    private static final String PROP_PDK_PLUGINS_DIR =
-        PROP_PDK_DIR + "." + PLUGINS_DIR;
+    private static final String PROP_PDK_PLUGINS_DIR = "pdk.dir.plugins";
     
     private static final String PROP_PDK_WORK_DIR =
         PROP_PDK_DIR + "." + ClientPluginDeployer.WORK_DIR;
@@ -341,14 +339,14 @@ public class ProductPluginManager extends PluginManager {
     }
 
     private void setSystemProperties() {
-        final String pluginsDir = "/" + PLUGINS_DIR;
-        final String workDir = "/" + ClientPluginDeployer.WORK_DIR;
-
-        String pdk = getProperty(PROP_PDK_DIR);
+        String pdk = getProperty(AgentConfig.PROP_PDK_DIR[0]);
+        String workDir = getProperty(AgentConfig.PROP_PDK_WORK_DIR[0]);
+        String pluginsDir = getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
+        
         if (pdk != null) {
             setPdkDir(pdk);
-            setPdkWorkDir(pdk + workDir);
-            setPdkPluginsDir(pdk + pluginsDir);
+            setPdkWorkDir(workDir);
+            setPdkPluginsDir(pluginsDir);
             log.info(PROP_PDK_DIR + "=" + getPdkDir());
         }
         else {

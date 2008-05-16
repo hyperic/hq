@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.system;
 
 import java.io.File;
 
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.product.ConfigFileTrackPlugin;
 import org.hyperic.hq.product.ExecutableMeasurementPlugin;
 import org.hyperic.hq.product.ExecutableProcess;
@@ -149,7 +150,7 @@ public class SystemPlugin extends ProductPlugin {
         //where processing /proc/net/tcp may block or otherwise take much longer
         //than reading a plain 'ol text file
         //should only happen agent-side
-        String dir = manager.getProperty("agent.tmpDir", "tmp");
+        String dir = manager.getProperty(AgentConfig.PROP_TMPDIR[0]);
         ProcFileMirror mirror = null;
         final String[] procnet = {
             "/proc/net/tcp",

@@ -32,7 +32,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
-import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.ClientPluginDeployer;
 import org.hyperic.util.PropertyUtil;
 
 /**
@@ -53,11 +53,10 @@ public class AgentConfig {
     }
 
     public static final String PROP_PROPFILE = "agent.propFile";
-    public static final String DEFAULT_PROPFILE = "agent.properties";
-    public static final String BUNDLE_PROPFILE = "conf/agent.properties";
+    public static final String DEFAULT_PROPFILE = "conf/agent.properties";
     
     public static final String ROLLBACK_PROPFILE = "agent.rollbackPropFile";
-    public static final String DEFAULT_ROLLBACKPROPFILE = "../../conf/rollback.properties";
+    public static final String DEFAULT_ROLLBACKPROPFILE = "conf/rollback.properties";
     
     // properties used with JSW
     public static final String JSW_PROP_AGENT_BUNDLE = "set.HQ_AGENT_BUNDLE";
@@ -85,23 +84,41 @@ public class AgentConfig {
     public static final String[] PROP_STORAGEPROVIDERINFO =
     { "agent.storageProvider.info", "${agent.dataDir}|m|100|20|50" };
     public static final String[] PROP_INSTALLHOME =
-    { "agent.install.home", System.getProperty("agent.install.home", ".") };
+    { "agent.install.home", System.getProperty("agent.install.home", System.getProperty("user.dir")) };
+    // TODO - check default value
+    public static final String[] PROP_BUNDLEHOME =
+    { "agent.bundle.home", System.getProperty("agent.bundle.home", System.getProperty("user.dir")) };    
     public static final String[] PROP_TMPDIR =
-    { "agent.tmpDir", System.getProperty("agent.tmpDir", "./tmp") };
+    { "agent.tmpDir", System.getProperty("agent.tmpDir", PROP_BUNDLEHOME[1] + "/tmp") };
     public static final String[] PROP_LOGDIR =
-    { "agent.logDir", System.getProperty("agent.logDir", "log") };
+    { "agent.logDir", System.getProperty("agent.logDir", PROP_INSTALLHOME[1] + "/log") };
     public static final String[] PROP_DATADIR = 
-    { "agent.dataDir", System.getProperty("agent.dataDir", "data") };
+    { "agent.dataDir", System.getProperty("agent.dataDir", PROP_INSTALLHOME[1] + "/data") };
     public static final String[] PROP_KEYSTORE = 
     { "agent.keystore", PROP_DATADIR[1] + "/keystore" };
-    public static final String[] PROP_PDK = 
-    { ProductPluginManager.PROP_PDK_DIR,
-      System.getProperty(ProductPluginManager.PROP_PDK_DIR, "./pdk") };
+    public static final String[] PROP_LIB_HANDLERS = 
+    { "agent.lib.handlers", PROP_BUNDLEHOME[1] + "/lib/handlers" };
+    public static final String[] PROP_LIB_HANDLERS_LIB = 
+    { "agent.lib.handlers.lib", PROP_LIB_HANDLERS[1] + "/lib" };
+    public static final String[] PROP_PDK_DIR = 
+    { "agent.pdkDir", System.getProperty("agent.pdkDir", PROP_BUNDLEHOME[1] + "/pdk") };
+    public static final String[] PROP_PDK_LIB_DIR = 
+    { "agent.pdkLibDir", System.getProperty("agent.pdklibDir", PROP_PDK_DIR[1] + "/lib") };    
+    public static final String[] PROP_PDK_PLUGIN_DIR = 
+    { "agent.pdkPluginDir", 
+        System.getProperty("agent.pdkPluginDir", PROP_PDK_DIR[1] + "/plugins") };  
+    public static final String[] PROP_PDK_WORK_DIR = 
+    { "agent.pdkWorkDir", 
+        System.getProperty("agent.pdkWorkDir", 
+                PROP_PDK_DIR[1] + "/" + ClientPluginDeployer.WORK_DIR) };      
     public static final String[] PROP_PROXYHOST = 
     { "agent.proxyHost", DEFAULT_PROXY_HOST };
     public static final String[] PROP_PROXYPORT = 
     { "agent.proxyPort", String.valueOf(DEFAULT_PROXY_PORT)};
-
+    
+    public static final String BUNDLE_PROPFILE = PROP_BUNDLEHOME[1]
+            + "/conf/agent.properties";
+    
     private static final String[][] propertyList = {
         PROP_LISTENPORT,
         PROP_PROXYHOST, 
@@ -109,11 +126,17 @@ public class AgentConfig {
         PROP_STORAGEPROVIDER,
         PROP_STORAGEPROVIDERINFO,
         PROP_INSTALLHOME,
+        PROP_BUNDLEHOME,
         PROP_TMPDIR,
         PROP_LOGDIR,
         PROP_DATADIR,
         PROP_KEYSTORE,
-        PROP_PDK
+        PROP_LIB_HANDLERS,
+        PROP_LIB_HANDLERS_LIB,
+        PROP_PDK_DIR,
+        PROP_PDK_LIB_DIR,
+        PROP_PDK_PLUGIN_DIR,
+        PROP_PDK_WORK_DIR
     };
 
     private int        listenPort;          // Port the agent should listen on
@@ -173,7 +196,6 @@ public class AgentConfig {
     {
         Properties useProps = new Properties();
         File file = new File(propsFile);
-
         useProps.putAll(AgentConfig.getDefaultProperties());
 
         if (!loadProps(useProps, file)) {
@@ -231,7 +253,7 @@ public class AgentConfig {
         throws AgentConfigException 
     {
         AgentConfig res = new AgentConfig();
-
+        
         res.useProperties(props);
         return res;
     }
@@ -249,8 +271,8 @@ public class AgentConfig {
 
         // Setup default properties
         for(int i=0; i < AgentConfig.propertyList.length; i++){
-            defaultProps.setProperty(AgentConfig.propertyList[i][0],
-                                     AgentConfig.propertyList[i][1]);
+                defaultProps.setProperty(AgentConfig.propertyList[i][0],
+                    AgentConfig.propertyList[i][1]);
         }
         return defaultProps;
     }
