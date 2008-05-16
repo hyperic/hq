@@ -323,7 +323,7 @@ tapestry.form = {
     },
 
     /** Same as submit, but forces cancel submission */
-    cancel: function(formId, submitName, parms) {
+    cancel: function(form, submitName, parms) {
         form=dojo.byId(form);
         if (!form){
             tapestry.log("Form not found with id " + form);
@@ -348,7 +348,7 @@ tapestry.form = {
     
 
     /** Same as submit, but forces refresh submission */
-    refresh: function(formId, submitName, parms) {
+    refresh: function(form, submitName, parms) {
         form=dojo.byId(form);
         if (!form){
             dojo.raise("Form not found with id " + form);
