@@ -262,7 +262,7 @@ public class AgentCommandsService implements AgentCommandsClient {
     }
 
     /**
-     * @see org.hyperic.hq.agent.client.AgentCommandsClient#ping()
+     * @see org.hyperic.hq.agent.client.AgentCommandsClient#upgrade(java.lang.String, java.lang.String)
      */
     public void upgrade(String tarball, String destination)
             throws AgentRemoteException {
