@@ -24,28 +24,28 @@ public class ResourceGroupManager_test extends BaseServerTestCase {
 
     public void testDuplicateNameCreate() throws Exception {
         ResourceGroupManager_testLocal rmMan =
-             (ResourceGroupManager_testLocal)
-                  _registry.getLocalInterface(ResourceGroupManager_testEJBImpl.class,
-                                              ResourceGroupManager_testLocal.class);
-        
+            (ResourceGroupManager_testLocal)
+                _registry.getLocalInterface(ResourceGroupManager_testEJBImpl.class,
+                                            ResourceGroupManager_testLocal.class);
+
         rmMan.testDuplicateNameCreate();
     }
 
     public void testUpdate() throws Exception {
         ResourceGroupManager_testLocal rmMan =
-             (ResourceGroupManager_testLocal)
-                  _registry.getLocalInterface(ResourceGroupManager_testEJBImpl.class,
-                                              ResourceGroupManager_testLocal.class);
+            (ResourceGroupManager_testLocal)
+                _registry.getLocalInterface(ResourceGroupManager_testEJBImpl.class,
+                                            ResourceGroupManager_testLocal.class);
 
-        rmMan.testUpdate();        
+        rmMan.testUpdate();
     }
-    
+
     public void testResourceGroupSetCriteria() throws Exception {
         ResourceGroupManager_testLocal rmMan =
             (ResourceGroupManager_testLocal)
-                 _registry.getLocalInterface(ResourceGroupManager_testEJBImpl.class,
-                                             ResourceGroupManager_testLocal.class);
+                _registry.getLocalInterface(ResourceGroupManager_testEJBImpl.class,
+                                            ResourceGroupManager_testLocal.class);
 
-       rmMan.testResourceGroupSetCriteria();
-   }
+        rmMan.testResourceGroupSetCriteria();
+    }
 }
