@@ -30,6 +30,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -101,6 +102,7 @@ public abstract class NetServicesCollector extends Collector {
     }
 
     protected void init() throws PluginException {
+        Properties props = getProperties();
         this.enableNetstat = 
             !"false".equals(getPlugin().getManagerProperty(PROP_NETSTAT));
         if (this.enableNetstat) {
@@ -116,8 +118,8 @@ public abstract class NetServicesCollector extends Collector {
                                       getHostname(), e);
         }
 
-        this.user = getProperty(PROP_USERNAME);
-        this.pass = getProperty(PROP_PASSWORD);
+        this.user = props.getProperty(PROP_USERNAME);
+        this.pass = props.getProperty(PROP_PASSWORD);
 
         this.hasCredentials =
             (this.user != null) || (this.pass != null);
@@ -138,11 +140,11 @@ public abstract class NetServicesCollector extends Collector {
             getIntegerTypeProperty(PROP_SSLPORT);
 
         this.isSSL =
-            "true".equals(getProperty(PROP_SSL)) || //ssl=true, default to TLS
-            PROTOCOL_HTTPS.equals(getProperty(PROP_PROTOCOL)); //back-compat
+            "true".equals(props.getProperty(PROP_SSL)) || //ssl=true, default to TLS
+            PROTOCOL_HTTPS.equals(props.getProperty(PROP_PROTOCOL)); //back-compat
 
         this.sslProtcol =
-            getProperty(PROP_SSL_PROTOCOL);
+            props.getProperty(PROP_SSL_PROTOCOL);
         if (this.sslProtcol != null) {
             //using sslprotocol=SSL|TLS instead of ssl=true
             this.isSSL =
@@ -160,7 +162,7 @@ public abstract class NetServicesCollector extends Collector {
     }
 
     public String getHostname() {
-        return getProperty(PROP_HOSTNAME, DEFAULT_HOSTNAME);
+        return getProperties().getProperty(PROP_HOSTNAME, DEFAULT_HOSTNAME);
     }
 
     protected int getIntegerTypeProperty(String key) {
@@ -209,11 +211,11 @@ public abstract class NetServicesCollector extends Collector {
     }
 
     public boolean isFollow() {
-        return "true".equals(getProperty(PROP_FOLLOW));
+        return "true".equals(getProperties().getProperty(PROP_FOLLOW));
     }
     
     public String getPath() {
-        return getProperty(PROP_PATH, "/");
+        return getProperties().getProperty(PROP_PATH, "/");
     }
 
     public InetSocketAddress getSocketAddress() {

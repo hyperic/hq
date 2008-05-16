@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -462,7 +462,7 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AppdefEntityID[] setConfigResponse(AuthzSubjectValue subject,
+    public AppdefEntityID setConfigResponse(AuthzSubjectValue subject,
                                               AppdefEntityID id,
                                               ConfigResponse response,
                                               String type,
@@ -474,8 +474,7 @@ public class ConfigManagerEJBImpl
         byte[] measurementBytes = null;
         byte[] controlBytes = null;
         byte[] rtBytes = null;
-        byte[] autoinventoryBytes = null;
-
+        
         if(type.equals(ProductPlugin.TYPE_PRODUCT)) {
             productBytes = response.encode();
         } else if (type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
@@ -485,8 +484,6 @@ public class ConfigManagerEJBImpl
         } else if (type.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
             rtBytes = response.encode();
         } else if (type.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
-            //XXX: not handled.
-            autoinventoryBytes = response.encode();
         } else {
             throw new IllegalArgumentException("Unknown config type: " + type);
         }
@@ -504,15 +501,15 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AppdefEntityID[] configureResource(AuthzSubjectValue subject,
-                                              AppdefEntityID appdefID,
-                                              byte[] productConfig,
-                                              byte[] measurementConfig,
-                                              byte[] controlConfig,
-                                              byte[] rtConfig,
-                                              Boolean userManaged,
-                                              boolean sendConfigEvent,
-                                              boolean force)
+    public AppdefEntityID configureResource(AuthzSubjectValue subject,
+                                            AppdefEntityID appdefID,
+                                            byte[] productConfig,
+                                            byte[] measurementConfig,
+                                            byte[] controlConfig,
+                                            byte[] rtConfig,
+                                            Boolean userManaged,
+                                            boolean sendConfigEvent,
+                                            boolean force)
         throws ConfigFetchException, AppdefEntityNotFoundException,
                PermissionException, FinderException
     {
@@ -580,9 +577,9 @@ public class ConfigManagerEJBImpl
                 ZeventManager.getInstance().enqueueEventAfterCommit(event);
             }
             
-            return new AppdefEntityID[] { appdefID };
+            return appdefID;
         } else {
-            return new AppdefEntityID[] {};
+            return null;
         }
     }
 

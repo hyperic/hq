@@ -232,6 +232,8 @@ public class MxServerDetector
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException {
 
+        setPlatformConfig(platformConfig);
+
         List servers = new ArrayList();
         List procs = getServerProcessList();
 
@@ -244,7 +246,7 @@ public class MxServerDetector
             }
 
             // Create the server resource
-            ServerResource server = createServerResource(dir);
+            ServerResource server = newServerResource(dir);
             adjustClassPath(dir);
 
             ConfigResponse config = new ConfigResponse();
@@ -280,16 +282,7 @@ public class MxServerDetector
 
             // default anything not auto-configured
             setProductConfig(server, config);
-
-            String name =
-                formatAutoInventoryName(server.getType(),
-                                     platformConfig,
-                                     server.getProductConfig(),
-                                     new ConfigResponse());
-
-            if (name != null) {
-                server.setName(name);
-            }
+            discoverServerConfig(server, process.getPid());
 
             server.setMeasurementConfig();
             servers.add(server);

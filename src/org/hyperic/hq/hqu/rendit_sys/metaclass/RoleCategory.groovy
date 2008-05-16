@@ -29,4 +29,8 @@ class RoleCategory {
         roleMan.addOperations(user.valueObject, role.valueObject,
                               (ops.collect { it.valueObject }) as OperationValue[])
     }
+
+    static void remove(Role role, AuthzSubject user) {
+        roleMan.removeRole(user.valueObject, role.id)
+    }
 }

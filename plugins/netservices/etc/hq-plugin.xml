@@ -212,6 +212,14 @@
             description="RPC version"
             default="2"
             type="int"/>
+
+    <option name="protocol"
+            description="RPC protocol"
+            type="enum">
+      <include name="any"/>
+      <include name="udp"/>
+      <include name="tcp"/>
+    </option>
   </config>
 
   <config name="snmp" type="global">

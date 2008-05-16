@@ -3,6 +3,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.events.server.session.AlertDefSortField
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl
@@ -30,9 +31,10 @@ class AlertHelper extends BaseHelper {
      *                  sort parameters
      */
     def findAlerts(AlertSeverity severity, long timeRange, long endTime, 
-                   PageInfo pInfo) 
+                   boolean escOnly, PageInfo pInfo) 
     {
-        alertMan.findAlerts(user.id, severity.code, timeRange, endTime, pInfo)
+        alertMan.findAlerts(user.id, severity.code, timeRange, endTime, escOnly,
+                            pInfo)
     }
     
     /**
@@ -58,10 +60,11 @@ class AlertHelper extends BaseHelper {
      *                  sort parameters
      * @return a list of GalertLogs
      */
-    def findGroupAlerts(AlertSeverity severity, long timeRange, long endTime, 
-                        PageInfo pInfo) 
+    def findGroupAlerts(AlertSeverity severity, long timeRange, long endTime,
+                        boolean escOnly, PageInfo pInfo) 
     {
-        galertMan.findAlerts(userValue, severity, timeRange, endTime, pInfo)
+        galertMan.findAlerts(userValue, severity, timeRange, endTime, escOnly,
+                             pInfo)
     }
     
     /**
@@ -131,5 +134,9 @@ class AlertHelper extends BaseHelper {
                              Boolean enabled, PageInfo pInfo)
     {
         galertMan.findAlertDefs(user, minSeverity, enabled, pInfo)
+    }
+
+    def deleteDefinition(AlertDefinition definition) {
+        defMan.deleteAlertDefinitions(userValue, [ definition.id ] as Integer[])
     }
 }

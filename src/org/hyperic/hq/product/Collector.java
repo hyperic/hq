@@ -188,7 +188,7 @@ public abstract class Collector implements Runnable {
     }
 
     protected int getIntegerProperty(String key, int defVal) {
-        String val = getProperty(key);
+        String val = getProperties().getProperty(key);
         if (val == null) {
             if (defVal == -1) {
                 String msg = "Missing " + key + " property";
