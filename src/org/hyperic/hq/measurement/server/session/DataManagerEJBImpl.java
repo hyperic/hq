@@ -943,17 +943,38 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param m The Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
+     * @param prependUnknowns determines whether to prepend AVAIL_UNKNOWN if the
+     * corresponding time window is not accounted for in the database.  Since
+     * availability is contiguous this will not occur unless the time range
+     * precedes the first availability point.
+     * @return the list of data points
+     * @ejb:interface-method
+     */
+    public PageList getHistoricalData(Measurement m, long begin, long end,
+                                      PageControl pc,
+                                      boolean prependAvailUnknowns) {
+        if (m.getTemplate().isAvailability()) {
+            return getAvailMan().getHistoricalAvailData(m, begin, end, pc,
+                prependAvailUnknowns);
+        } else {
+            return getHistData(m, begin, end, pc);
+        }
+    }
+
+    /**
+     * Fetch the list of historical data points given
+     * a start and stop time range
+     *
+     * @param m The Measurement
+     * @param begin the start of the time range
+     * @param end the end of the time range
      * @return the list of data points
      * @ejb:interface-method
      */
     public PageList getHistoricalData(Measurement m, long begin, long end,
                                       PageControl pc)
     {
-        if (m.getTemplate().isAvailability()) {
-            return getAvailMan().getHistoricalAvailData(m, begin, end, pc);
-        } else {
-            return getHistData(m, begin, end, pc);
-        }
+        return getHistoricalData(m, begin, end, pc, true);
     }
 
     private PageList getHistData(Measurement m, long begin, long end,
@@ -1119,36 +1140,38 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param end The end of the time range
      * @param interval Interval for the time range
      * @param type Collection type for the metric
-     * @param returnNulls Specifies whether intervals with no data should be return as nulls
+     * @param returnMetricNulls Specifies whether intervals with no data should
+     * be return as nulls
+     * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl#getHistoricalData()
      * @return the list of data points
      * @ejb:interface-method
      */
     public PageList getHistoricalData(List measurements, long begin, long end,
                                       long interval, int type,
-                                      boolean returnNulls, PageControl pc) {
-
+                                      boolean returnMetricNulls,
+                                      PageControl pc) {
         List availIds = new ArrayList();
-        List measurementIds = new ArrayList();
+        List measIds = new ArrayList();
 
         for (Iterator i = measurements.iterator(); i.hasNext(); ) {
             Measurement m = (Measurement)i.next();
             if (m.getTemplate().isAvailability()) {
                 availIds.add(m.getId());
             } else {
-                measurementIds.add(m.getId());
+                measIds.add(m.getId());
             }
         }
 
         Integer[] avIds =
             (Integer[])availIds.toArray(new Integer[availIds.size()]);
         Integer[] mids =
-            (Integer[])measurementIds.toArray(new Integer[measurementIds.size()]);
+            (Integer[])measIds.toArray(new Integer[measIds.size()]);
 
         PageList rtn = getAvailMan().
-            getHistoricalAvailData(avIds, begin, end, interval, pc);
+            getHistoricalAvailData(avIds, begin, end, interval, pc, true);
 
         rtn.addAll(getHistData(mids, begin, end, interval,
-                               type, returnNulls, pc));
+                               type, returnMetricNulls, pc));
         return rtn;
     }
 

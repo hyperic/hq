@@ -160,27 +160,42 @@ public class AvailabilityManagerEJBImpl
      * @ejb:interface-method
      */
     public PageList getHistoricalAvailData(Measurement m, long begin, long end,
-                                           PageControl pc) {
+                                           PageControl pc,
+                                           boolean prependUnknowns) {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List availInfo = dao.getHistoricalAvails(m, begin,
                                                  end, pc.isDescending());
-        return getPageList(availInfo, begin, end, (end-begin)/DEFAULT_INTERVAL);
+        return getPageList(availInfo, begin, end, (end-begin)/DEFAULT_INTERVAL,
+            prependUnknowns);
     }
 
     /**
+     * Fetches historical availability encapsulating the specified time range
+     * for each measurement id in mids;
+     * @param mids measurement ids 
+     * @param begin time range start
+     * @param end time range end
+     * @param interval interval of each time range window
+     * @param pc page control
+     * @param prependUnknowns determines whether to prepend AVAIL_UNKNOWN if the
+     * corresponding time window is not accounted for in the database.  Since
+     * availability is contiguous this will not occur unless the time range
+     * precedes the first availability point.
+     * @see org.hyperic.hq.measurement.MeasurementConstants#AVAIL_UNKNOWN
      * @ejb:interface-method
      */
     public PageList getHistoricalAvailData(Integer[] mids, long begin, long end,
-                                           long interval, PageControl pc) {
+                                           long interval, PageControl pc,
+                                           boolean prependUnknowns) {
         if (mids.length == 0) {
             return new PageList();
         }
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         List availInfo = dao.getHistoricalAvails(mids, begin,
             end, pc.isDescending());
-        return getPageList(availInfo, begin, end, interval);
+        return getPageList(availInfo, begin, end, interval, prependUnknowns);
     }
-    
+
     private Collection getDefaultHistoricalAvail(long timestamp)
     {
         HighLowMetricValue[] rtn = new HighLowMetricValue[DEFAULT_INTERVAL];
@@ -189,7 +204,7 @@ public class AvailabilityManagerEJBImpl
     }
 
     private PageList getPageList(List availInfo, long begin, long end,
-                                 long interval) {
+                                 long interval, boolean prependUnknowns) {
         PageList rtn = new PageList();
         begin += interval;
         for (Iterator it=availInfo.iterator(); it.hasNext(); ) {
@@ -242,9 +257,12 @@ public class AvailabilityManagerEJBImpl
                 HighLowMetricValue val;
                 if (curr >= availStartime) {
                     val = getMetricValue(queue, curr);
-                } else {
+                } else if (prependUnknowns) {
                     val = new HighLowMetricValue(AVAIL_UNKNOWN, curr);
                     val.incrementCount();
+                } else {
+                    i++;
+                    continue;
                 }
                 if (rtn.size() <= i) {
                     rtn.add(val);

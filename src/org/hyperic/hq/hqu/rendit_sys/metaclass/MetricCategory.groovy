@@ -93,7 +93,9 @@ class MetricCategory {
     }
     
     static List getData(Measurement m, long start, long end) {
-        dataMan.getHistoricalData(m, start, end, new PageControl())
+        boolean prependAvailUnknowns = false;
+        dataMan.getHistoricalData(m, start, end, new PageControl(),
+            prependAvailUnknowns)
     }
     
     /**
