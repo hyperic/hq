@@ -324,9 +324,9 @@ tapestry.form = {
 
     /** Same as submit, but forces cancel submission */
     cancel: function(form, submitName, parms) {
-        form=dojo.byId(form);
+        var form=dojo.byId(formId);
         if (!form){
-            tapestry.log("Form not found with id " + form);
+            tapestry.log("Form not found with id " + formId);
             return;
         }
 
@@ -337,8 +337,8 @@ tapestry.form = {
         var previous = form.submitmode.value;
         form.submitmode.value="cancel";
 
-        if (parms && !dj_undef("async", parms) && parms.async){
-            this.submitAsync(form, null, submitName, parms);
+        if (parms && dojo.exists("async", parms) && parms.async){
+            tapestry.form.submitAsync(form, null, submitName, parms);
             form.submitmode.value = previous;
             tapestry.form.setFormValidating(formName, validateState);
         } else {
@@ -349,9 +349,9 @@ tapestry.form = {
 
     /** Same as submit, but forces refresh submission */
     refresh: function(form, submitName, parms) {
-        form=dojo.byId(form);
+        var form=dojo.byId(formId);
         if (!form){
-            dojo.raise("Form not found with id " + form);
+            dojo.raise("Form not found with id " + formId);
             return;
         }
 
@@ -362,8 +362,8 @@ tapestry.form = {
         var previous = form.submitmode.value;
         form.submitmode.value="refresh";
 
-        if (parms && !dj_undef("async", parms) && parms.async){
-            this.submitAsync(form, null, submitName, parms);
+        if (parms && dojo.exists("async", parms) && parms.async){
+            tapestry.form.submitAsync(form, null, submitName, parms);
             form.submitmode.value = previous;
             tapestry.form.setFormValidating(formName, validateState);
         } else {
