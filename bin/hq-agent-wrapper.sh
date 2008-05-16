@@ -128,14 +128,12 @@ REALDIR=`pwd`
 # ------------- 
 # Begin HQ Agent specific logic
 # ------------- 
-AGENTPROPFILE_PROP=agent.propFile
-AGENT_PROPS=../../conf/agent.properties
-AGENTLOGDIR_PROP=agent.logDir
-AGENTLOGDIR=../../log
-AGENTDATADIR_PROP=agent.dataDir
-AGENTDATADIR=../../data
-AGENT_LIB=./lib
-PDK_LIB=./pdk/lib
+AGENT_BUNDLE_HOME_PROP=agent.bundle.home
+AGENT_BUNDLE_HOME=${REALDIR}
+AGENT_INSTALL_HOME_PROP=agent.install.home
+AGENT_INSTALL_HOME=${REALDIR}/../..
+AGENT_LIB=$AGENT_BUNDLE_HOME/lib
+PDK_LIB=$AGENT_BUNDLE_HOME/pdk/lib
 # for /proc/net/tcp mirror
 SIGAR_PROC_NET=./tmp
 
@@ -177,9 +175,8 @@ CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 
 CLIENT_CMD="${HQ_JAVA} \
     -Djava.net.preferIPv4Stack=true \
-    -D${AGENTPROPFILE_PROP}=${AGENT_PROPS} \
-    -D${AGENTLOGDIR_PROP}=${AGENTLOGDIR} \
-    -D${AGENTDATADIR_PROP}=${AGENTDATADIR} \
+    -D${AGENT_INSTALL_HOME_PROP}=${AGENT_INSTALL_HOME} \
+    -D${AGENT_BUNDLE_HOME_PROP}=${AGENT_BUNDLE_HOME} \
     -cp ${CLIENT_CLASSPATH} ${CLIENT_CLASS}"
 
 PING_CMD="${CLIENT_CMD} ping"

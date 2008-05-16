@@ -51,12 +51,6 @@ public class AgentConfig {
                                "file:" + DEV_URANDOM);
         }
     }
-
-    public static final String PROP_PROPFILE = "agent.propFile";
-    public static final String DEFAULT_PROPFILE = "conf/agent.properties";
-    
-    public static final String ROLLBACK_PROPFILE = "agent.rollbackPropFile";
-    public static final String DEFAULT_ROLLBACKPROPFILE = "conf/rollback.properties";
     
     // properties used with JSW
     public static final String JSW_PROP_AGENT_BUNDLE = "set.HQ_AGENT_BUNDLE";
@@ -85,9 +79,9 @@ public class AgentConfig {
     { "agent.storageProvider.info", "${agent.dataDir}|m|100|20|50" };
     public static final String[] PROP_INSTALLHOME =
     { "agent.install.home", System.getProperty("agent.install.home", System.getProperty("user.dir")) };
-    // TODO - check default value
+    // has no default since we want to throw an error when property is not set
     public static final String[] PROP_BUNDLEHOME =
-    { "agent.bundle.home", System.getProperty("agent.bundle.home", System.getProperty("user.dir")) };    
+    { "agent.bundle.home", System.getProperty("agent.bundle.home") };    
     public static final String[] PROP_TMPDIR =
     { "agent.tmpDir", System.getProperty("agent.tmpDir", PROP_BUNDLEHOME[1] + "/tmp") };
     public static final String[] PROP_LOGDIR =
@@ -116,6 +110,14 @@ public class AgentConfig {
     public static final String[] PROP_PROXYPORT = 
     { "agent.proxyPort", String.valueOf(DEFAULT_PROXY_PORT)};
     
+    public static final String PROP_PROPFILE = "agent.propFile";
+    public static final String DEFAULT_PROPFILE = PROP_INSTALLHOME[1]
+            + "/conf/agent.properties";
+
+    public static final String ROLLBACK_PROPFILE = "agent.rollbackPropFile";
+    public static final String DEFAULT_ROLLBACKPROPFILE = PROP_INSTALLHOME[1]
+            + "/conf/rollback.properties";
+
     public static final String BUNDLE_PROPFILE = PROP_BUNDLEHOME[1]
             + "/conf/agent.properties";
     
@@ -161,6 +163,9 @@ public class AgentConfig {
 
     public static AgentConfig newInstance(){
         try {
+            // verify that the agent bundle home has been properly defined
+            // before populating the default properties
+            checkAgentBundleHome();
             return newInstance(AgentConfig.getDefaultProperties());
         } catch(AgentConfigException exc){
             throw new AgentAssertionException("Default properties should " +
@@ -168,6 +173,24 @@ public class AgentConfig {
         }
     }
 
+    // checks for the validity of the agent bundle home system property and
+    // throws an
+    // appropriate AgentConfigException if not valid
+    private static void checkAgentBundleHome() throws AgentConfigException {
+        String bundleHome = System.getProperty(PROP_BUNDLEHOME[0]);
+        if (bundleHome == null) {
+            throw new AgentConfigException(
+                    "No value for required system property "
+                            + PROP_BUNDLEHOME[0] + " provided!");
+        }
+        File bundleHomeDir = new File(bundleHome);
+        if (!bundleHomeDir.isDirectory()) {
+            throw new AgentConfigException("Invalid value "
+                    + PROP_BUNDLEHOME[1] + "for required system property "
+                    + PROP_BUNDLEHOME[0] + " provided!");
+        }
+    }
+    
     private static boolean loadProps(Properties props, File file) {
         FileInputStream fin = null;
 
@@ -194,6 +217,10 @@ public class AgentConfig {
     public static AgentConfig newInstance(String propsFile)
         throws IOException, AgentConfigException
     {
+        // verify that the agent bundle home has been properly defined
+        // before populating the default properties
+        checkAgentBundleHome();
+        
         Properties useProps = new Properties();
         File file = new File(propsFile);
         useProps.putAll(AgentConfig.getDefaultProperties());

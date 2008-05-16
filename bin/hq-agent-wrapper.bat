@@ -72,6 +72,34 @@ rem
 set _WRAPPER_CONF="%_REALPATH%\conf\wrapper.conf"
 
 rem
+rem Set some HQ properties
+rem
+set AGENT_BUNDLE_HOME_PROP=agent.bundle.home
+set AGENT_BUNDLE_HOME=%_REALPATH%
+set AGENT_INSTALL_HOME_PROP=agent.install.home
+set AGENT_INSTALL_HOME=%AGENT_BUNDLE_HOME%\..\..
+set AGENT_LIB=%AGENT_BUNDLE_HOME%\lib
+set PDK_LIB=%AGENT_BUNDLE_HOME%\pdk\lib
+
+set CLIENT_CLASSPATH=%AGENT_LIB%\AgentClient.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-logging.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\log4j-1.2.14.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hyperic-util.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\sigar.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-product.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-httpclient-3.1.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-codec-1.3.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%\lather.jar
+
+set CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
+
+set CLIENT_CMD="%JAVA_HOME%\bin\java" -Djava.net.preferIPv4Stack=true -D%AGENT_INSTALL_HOME_PROP%=%AGENT_INSTALL_HOME% -D%AGENT_BUNDLE_HOME_PROP%=%AGENT_BUNDLE_HOME% -cp %CLIENT_CLASSPATH% %CLIENT_CLASS%
+
+set PING_CMD=%CLIENT_CMD% ping
+set SETUP_CMD=%CLIENT_CMD% setup
+set SETUP_IF_NO_PROVIDER_CMD=%CLIENT_CMD% setup-if-no-provider
+
+rem
 rem Run the application.
 rem At runtime, the current directory will be that of wrapper.exe
 rem
@@ -114,15 +142,14 @@ rem HQ Agent specific commands
 rem
 
 :ping
-"%JAVA_HOME%\bin\java" -Djava.compiler=NONE -Djava.security.auth.login.config=jaas.config -Dagent.mode=thread -Xmx256M -Xrs -Xmx128m -Djava.net.preferIPv4Stack=true -Djava.library.path="lib" -Dagent.propFile="../../conf/agent.properties" -Dagent.logDir="../../log" -Dagent.dataDir="../../data" -classpath "lib\AgentClient.jar;lib\AgentServer.jar;lib\lather.jar;pdk\lib\activation.jar;pdk\lib\ant.jar;pdk\lib\backport-util-concurrent.jar;pdk\lib\commons-beanutils.jar;pdk\lib\commons-codec-1.3.jar;pdk\lib\commons-collections.jar;pdk\lib\commons-httpclient-3.1.jar;pdk\lib\commons-logging.jar;pdk\lib\dnsjava-2.0.3.jar;pdk\lib\getopt.jar;pdk\lib\hq-product.jar;pdk\lib\hyperic-util.jar;pdk\lib\jakarta-oro-2.0.7.jar;pdk\lib\jdom_b8.jar;pdk\lib\jsch-0.1.34.jar;pdk\lib\json.jar;pdk\lib\junit.jar;pdk\lib\jxla.jar;pdk\lib\log4j-1.2.14.jar;pdk\lib\sigar.jar;pdk\lib\snmp4j.jar;pdk\lib\tomcat-jk.jar;pdk\lib\ws-commons-util-1.0.2.jar;pdk\lib\xalan.jar;pdk\lib\xml-apis.jar;pdk\lib\xmlrpc-client-3.1.jar;pdk\lib\xmlrpc-common-3.1.jar;pdk\lib\xpp3_min-1.1.3.4.O.jar;pdk\lib\xstream-1.2.1.jar" org.hyperic.hq.bizapp.agent.client.AgentClient ping
+%PING_CMD%
 IF %ERRORLEVEL% NEQ 0 (echo Ping failed!) else echo Ping success!
 goto :eof
 
 :setup
-"%JAVA_HOME%\bin\java" -Djava.compiler=NONE -Djava.security.auth.login.config=jaas.config -Dagent.mode=thread -Xmx256M -Xrs -Xmx128m -Djava.net.preferIPv4Stack=true -Djava.library.path="lib" -Dagent.propFile="../../conf/agent.properties" -Dagent.logDir="../../log" -Dagent.dataDir="../../data" -classpath "lib\AgentClient.jar;lib\AgentServer.jar;lib\lather.jar;pdk\lib\activation.jar;pdk\lib\ant.jar;pdk\lib\backport-util-concurrent.jar;pdk\lib\commons-beanutils.jar;pdk\lib\commons-codec-1.3.jar;pdk\lib\commons-collections.jar;pdk\lib\commons-httpclient-3.1.jar;pdk\lib\commons-logging.jar;pdk\lib\dnsjava-2.0.3.jar;pdk\lib\getopt.jar;pdk\lib\hq-product.jar;pdk\lib\hyperic-util.jar;pdk\lib\jakarta-oro-2.0.7.jar;pdk\lib\jdom_b8.jar;pdk\lib\jsch-0.1.34.jar;pdk\lib\json.jar;pdk\lib\junit.jar;pdk\lib\jxla.jar;pdk\lib\log4j-1.2.14.jar;pdk\lib\sigar.jar;pdk\lib\snmp4j.jar;pdk\lib\tomcat-jk.jar;pdk\lib\ws-commons-util-1.0.2.jar;pdk\lib\xalan.jar;pdk\lib\xml-apis.jar;pdk\lib\xmlrpc-client-3.1.jar;pdk\lib\xmlrpc-common-3.1.jar;pdk\lib\xpp3_min-1.1.3.4.O.jar;pdk\lib\xstream-1.2.1.jar" org.hyperic.hq.bizapp.agent.client.AgentClient setup
+%SETUP_CMD%
 goto :eof
 
 :setup-if-no-provider
-"%JAVA_HOME%\bin\java" -Djava.compiler=NONE -Djava.security.auth.login.config=jaas.config -Dagent.mode=thread -Xmx256M -Xrs -Xmx128m -Djava.net.preferIPv4Stack=true -Djava.library.path="lib" -Dagent.propFile="../../conf/agent.properties" -Dagent.logDir="../../log" -Dagent.dataDir="../../data" -classpath "lib\AgentClient.jar;lib\AgentServer.jar;lib\lather.jar;pdk\lib\activation.jar;pdk\lib\ant.jar;pdk\lib\backport-util-concurrent.jar;pdk\lib\commons-beanutils.jar;pdk\lib\commons-codec-1.3.jar;pdk\lib\commons-collections.jar;pdk\lib\commons-httpclient-3.1.jar;pdk\lib\commons-logging.jar;pdk\lib\dnsjava-2.0.3.jar;pdk\lib\getopt.jar;pdk\lib\hq-product.jar;pdk\lib\hyperic-util.jar;pdk\lib\jakarta-oro-2.0.7.jar;pdk\lib\jdom_b8.jar;pdk\lib\jsch-0.1.34.jar;pdk\lib\json.jar;pdk\lib\junit.jar;pdk\lib\jxla.jar;pdk\lib\log4j-1.2.14.jar;pdk\lib\sigar.jar;pdk\lib\snmp4j.jar;pdk\lib\tomcat-jk.jar;pdk\lib\ws-commons-util-1.0.2.jar;pdk\lib\xalan.jar;pdk\lib\xml-apis.jar;pdk\lib\xmlrpc-client-3.1.jar;pdk\lib\xmlrpc-common-3.1.jar;pdk\lib\xpp3_min-1.1.3.4.O.jar;pdk\lib\xstream-1.2.1.jar" org.hyperic.hq.bizapp.agent.client.AgentClient setup-if-no-provider
+%SETUP_IF_NO_PROVIDER_CMD%
 goto :eof
-
