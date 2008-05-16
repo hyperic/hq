@@ -300,11 +300,7 @@ public class PluginData {
             if (isJar) {
                 is = openPluginResource(loader, PLUGIN_XML);
                 if (is == null) {
-                    String name = "etc/" + data.getPluginName() + "-plugin.xml";
-                    is = openPluginResource(loader, name);
-                    if (is == null) {
-                        log.debug(file + "!" + PLUGIN_XML + " does not exist");
-                    }
+                    log.debug(file + "!" + PLUGIN_XML + " does not exist");
                 }
                 resolver = new PluginResolver(data, loader);
             }

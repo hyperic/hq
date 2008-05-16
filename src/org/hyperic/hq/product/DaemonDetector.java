@@ -34,7 +34,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -48,31 +47,12 @@ public class DaemonDetector
     private static final Log log =
         LogFactory.getLog(DaemonDetector.class.getName());
 
-    private ConfigResponse _platformConfig;
-
     protected String getProcessQuery() {
         return getTypeProperty("PROC_QUERY");
     }
 
     protected boolean isSwitch(String arg) {
         return arg.startsWith("-");
-    }
-
-    private void addDefine(Map opts, String opt, int ix) {
-        String key = opt.substring(2, ix);
-        String val = opt.substring(ix+1);
-        opts.put(key, val);
-
-        //HQ_AUTOINVENTORY_NAME -> AUTOINVENTORY_NAME 
-        //hq.autoinventory.name -> AUTOINVENTORY_NAME 
-        if (key.startsWith("hq.")) {
-            key = StringUtil.replace(key.toUpperCase(), ".", "_");
-        }
-        else if (!key.startsWith("HQ_")) {
-            return;
-        }
-
-        opts.put(key.substring(3), val);
     }
 
     /**
@@ -96,10 +76,6 @@ public class DaemonDetector
             //"-p=22122"
             int ix = opt.indexOf('=');
             if (ix != -1) {
-                //java -Dfoo=bar or getopt cmd -d -- -Dfoo=bar
-                if (opt.startsWith("-D")) {
-                    addDefine(opts, opt, ix);
-                }
                 val = opt.substring(ix+1);
                 opt = opt.substring(ix);
             }
@@ -127,7 +103,7 @@ public class DaemonDetector
      * @param pid Process id
      */
     protected void discoverServerConfig(ServerResource server, long pid) {
-        Map opts = getProcOpts(pid);
+        Map opts = null;
         boolean isDebug = log.isDebugEnabled();
         boolean hasOpts = false;
         ConfigResponse config = server.getProductConfig();
@@ -146,6 +122,9 @@ public class DaemonDetector
             if (opt == null) {
                 continue;
             }
+            if (opts == null) {
+                opts = getProcOpts(pid);
+            }
 
             String val = (String)opts.get(opt);
             if (val != null) {
@@ -161,25 +140,6 @@ public class DaemonDetector
         if (hasOpts) {
             server.setProductConfig(config);
         }
-
-        ConfigResponse
-            pconfig = getPlatformConfig(),
-            sconfig = server.getProductConfig(),
-            oconfig = new ConfigResponse(opts);
-
-        String name =
-            formatAutoInventoryName(server.getType(),
-                                    pconfig, sconfig, oconfig);
-
-        if (name != null) {
-            server.setName(name);
-        }
-
-        String id = (String)opts.get(INVENTORY_ID);
-        if (id == null) {
-            id = server.getIdentifier(); //might be defined in plugin.xml
-        }
-        server.setIdentifier(formatName(id, pconfig, sconfig, oconfig));
     }
 
     protected ServerResource newServerResource(long pid, String exe) {
@@ -196,30 +156,21 @@ public class DaemonDetector
         return server;
     }
 
-    //XXX should be in ServerDetector?
-    protected void setPlatformConfig(ConfigResponse config) {
-        _platformConfig = config;
-    }
-
-    protected ConfigResponse getPlatformConfig() {
-        return _platformConfig;
-    }
-
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException {
 
-        setPlatformConfig(platformConfig);
+        //we can only report one of these to prevent duplication,
+        //since they will all have the same default configuration
+        List servers = new ArrayList();
+        List found = getFileResources(platformConfig);
+        ServerResource server = null;
 
-        List servers = getFileResources(platformConfig);
-
-        if (servers.size() != 0) {
-            return servers;
+        if (found.size() == 0) {
+            found = getProcessResources(platformConfig);
         }
 
-        List processes = getProcessResources(platformConfig);
-        for (int i=0; i<processes.size(); i++) {
-            ServerResource server =
-                (ServerResource)processes.get(i);
+        if (found.size() != 0) {
+            server = (ServerResource)found.get(0);
 
             if (isInstallTypeVersion(server.getInstallPath())) {
                 servers.add(server);

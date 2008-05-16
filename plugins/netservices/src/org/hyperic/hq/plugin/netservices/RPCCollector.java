@@ -34,7 +34,6 @@ import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.sigar.RPC;
-import org.hyperic.sigar.SigarException;
 
 public class RPCCollector extends NetServicesCollector {
 
@@ -46,7 +45,6 @@ public class RPCCollector extends NetServicesCollector {
         PROGRAMS.put(PROGRAM_NFS, new Long(100003));
     }
 
-    private int[] protocol;
     private long program, version;
 
     protected void init() throws PluginException {
@@ -56,7 +54,7 @@ public class RPCCollector extends NetServicesCollector {
         }
         super.init();
 
-        String program = getProperties().getProperty("program");
+        String program = getProperty("program");
         Long pnum = (Long)PROGRAMS.get(program);
         if (pnum != null) {
             this.program = pnum.longValue();
@@ -65,7 +63,7 @@ public class RPCCollector extends NetServicesCollector {
             this.program = RPC.getProgram(program);
         }
 
-        String version = getProperties().getProperty("version");
+        String version = getProperty("version");
         try {
             this.version = Long.parseLong(version);
         } catch (NumberFormatException e) {
@@ -75,42 +73,6 @@ public class RPCCollector extends NetServicesCollector {
         }
 
         setSource("portmapper@" + getHostname());
-
-        //agent.properties overrides
-        final String propProto =
-            "rpc." + program + "." + PROP_PROTOCOL;
-
-        String proto = getPlugin().getManagerProperty(propProto);
-        if (proto == null) {
-            proto =
-                getProperties().getProperty(PROP_PROTOCOL, "any");
-        }
-
-        if (proto.equals("any")) {
-            this.protocol = new int[] {
-                NetFlags.CONN_TCP,
-                NetFlags.CONN_UDP
-            };
-        }
-        else {
-            try {
-                this.protocol =
-                    new int[] { NetFlags.getConnectionProtocol(proto) };
-            } catch (SigarException e) {
-                throw new PluginException(e.getMessage());
-            }
-        }
-    }
-
-    private String getConnectionProtocol(int proto) {
-        switch (proto) {
-          case NetFlags.CONN_TCP:
-            return "tcp";
-          case NetFlags.CONN_UDP:
-            return "udp";
-          default:
-            return "unknown";
-        }
     }
 
     public void collect() {
@@ -128,29 +90,19 @@ public class RPCCollector extends NetServicesCollector {
             return;
         }
 
-        for (int i=0; i<this.protocol.length; i++) {
-            int proto = this.protocol[i];
-            int rc =
-                RPC.ping(address,
-                         proto,
-                         this.program,
-                         this.version);
+        int rc =
+            RPC.ping(address,
+                     NetFlags.CONN_UDP,
+                     this.program,
+                     this.version);
+        endTime();
 
-            if (rc == 0) {
-                endTime();
-                setAvailability(true);
-                String msg =
-                    getConnectionProtocol(proto) + 
-                    " program " + this.program +
-                    " version " + this.version +
-                    " ready and waiting";
-                setInfoMessage(msg);
-                break;
-            }
-            else {
-                setAvailability(false);
-                setErrorMessage(RPC.strerror(rc));
-            }
+        if (rc == 0) {
+            setAvailability(true);
+        }
+        else {
+            setAvailability(false);
+            setErrorMessage(RPC.strerror(rc));
         }
     }
 }

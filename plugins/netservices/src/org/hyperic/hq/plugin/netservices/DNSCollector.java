@@ -31,7 +31,6 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -59,7 +58,7 @@ public class DNSCollector extends NetServicesCollector {
     private SimpleResolver getResolver()
         throws UnknownHostException {
 
-        String ip = getHostname();
+        String ip = getProperty(PROP_HOSTNAME);
         if (ip == null) {
             //this can change, e.g. changing /etc/resolv.conf
             //XXX although, need to refresh() to pick up changes
@@ -79,12 +78,11 @@ public class DNSCollector extends NetServicesCollector {
     
     protected void init() throws PluginException {
         super.init();
-        Properties props = getProperties();
 
         try {
-            this.lookupName = props.getProperty("lookupname");
+            this.lookupName = getProperty("lookupname");
 
-            String pattern = props.getProperty("pattern");
+            String pattern = getProperty("pattern");
             if (pattern != null) {
                 if (pattern.equals("*")) {
                     pattern = ".*";
@@ -97,7 +95,7 @@ public class DNSCollector extends NetServicesCollector {
                 }
             }
 
-            String recordType = props.getProperty("type");
+            String recordType = getProperty("type");
             if (recordType != null) {
                 this.type = Type.value(recordType);
                 if (this.type == -1) {

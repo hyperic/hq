@@ -138,7 +138,7 @@ public class VMCollector extends Collector {
     protected void init() throws PluginException {
         VMwareProductPlugin.checkIsLoaded();
 
-        _config = getProperties().getProperty("Config");
+        _config = getProperty("Config");
         setSource(new File(_config).getName());
         _sigar = new Sigar();
     }

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,33 +25,43 @@
 
 package org.hyperic.hq.plugin.exchange;
 
-import java.io.File;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.AutoServerDetector;
+
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.RegistryServerDetector;
+import org.hyperic.hq.product.RuntimeDiscoverer;
+import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
-import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.sigar.win32.Pdh;
-import org.hyperic.sigar.win32.RegistryKey;
-import org.hyperic.sigar.win32.Service;
-import org.hyperic.sigar.win32.Win32Exception;
+
+import org.hyperic.hq.appdef.shared.AIServerExtValue;
+import org.hyperic.hq.appdef.shared.AIServiceValue;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
+
 import org.hyperic.util.config.ConfigResponse;
+
+import org.hyperic.sigar.win32.RegistryKey;
+import org.hyperic.sigar.win32.Win32Exception;
 
 public class ExchangeDetector
     extends ServerDetector
-    implements AutoServerDetector {
+    implements RegistryServerDetector, RuntimeDiscoverer {
 
     private static final String IMAP4_NAME   = "IMAP4";
     private static final String POP3_NAME    = "POP3";
     private static final String MTA_NAME     = "MTA";
     private static final String WEB_NAME     = "Web";
 
-    private static final String[] SERVICES = {
+    private static final String VERSION_2000 = "2000";
+    private static final String VERSION_2003 = "2003";
+    private static final String VERSION_55   = "5.5";
+
+    private static final String[] INTERNAL_SERVICES = {
         IMAP4_NAME,
         POP3_NAME,
         MTA_NAME,
@@ -60,113 +70,130 @@ public class ExchangeDetector
     private static final String EXCHANGE_KEY =
         "SOFTWARE\\Microsoft\\Exchange\\Setup";
 
-    static final String EX = "MSExchange";
-    private static final String WEBMAIL = EX + " Web Mail";
-    private static final String EXCHANGE_IS = EX + "IS";
+    private static final String[] SCAN_KEYS = {
+        EXCHANGE_KEY,
+    };
 
-    private static final Log log =
-        LogFactory.getLog(ExchangeDetector.class.getName());
+    private static final List SCAN_KEYS_LIST =
+        Arrays.asList(SCAN_KEYS);
+
+    static Log log = LogFactory.getLog("ExchangeDetector");
+
+    private Long nowTime;
+    private int serverId;
 
     private boolean isExchangeServiceRunning(String name) {
         if (name.equals(MTA_NAME)) {
-            return isWin32ServiceRunning(EX + "MTA");
+            return isWin32ServiceRunning("MSExchangeMTA");
         }
-        return
-            isWin32ServiceRunning(name + "Svc") ||
-            isWin32ServiceRunning(EX + name); //changed in 2007 
+        return isWin32ServiceRunning(name + "Svc");
     }
 
-    private ServiceResource createService(String name) {
-        ServiceResource service = new ServiceResource();
-        service.setType(this, name);
-        service.setServiceName(name);
-        service.setProductConfig();
-        service.setMeasurementConfig();
+    private AIServiceValue createInternalService(String name) {
+        AIServiceValue service = new AIServiceValue();
+        service.setServiceTypeName(getTypeInfo().getName() + " " + name);
+        service.setServerId(this.serverId);
+        service.setName("%serverName%" + " " + name);
+        service.setCTime(this.nowTime);
+        service.setMTime(this.nowTime);
+        service.setProductConfig(ConfigResponse.EMPTY_CONFIG);
+        service.setMeasurementConfig(ConfigResponse.EMPTY_CONFIG);
         return service;
     }
 
-    public List getServerResources(ConfigResponse platformConfig)
+    public RuntimeResourceReport discoverResources(int serverId,
+                                                   AIPlatformValue aiplatform,
+                                                   ConfigResponse config) 
         throws PluginException {
 
-        List servers = new ArrayList();
+        this.nowTime = new Long(System.currentTimeMillis());
+        this.serverId = serverId;
 
-        String exe, installpath;
-        Service exch = null;
+        ArrayList serviceList = new ArrayList();
+
+        //POP3 + IMAP4 are disabled by default, only report the services
+        //if they are enabled and running.
+        for (int i=0; i<INTERNAL_SERVICES.length; i++) {
+            String service = INTERNAL_SERVICES[i];
+            if (!isExchangeServiceRunning(service)) {
+                log.debug(service + " is not running");
+                continue;
+            }
+            else {
+                log.debug(service + " is running, adding to inventory");
+            }
+
+            serviceList.add(createInternalService(INTERNAL_SERVICES[i]));
+        }
+
+        serviceList.add(createInternalService(WEB_NAME));
+
+        AIServiceValue[] services =
+            (AIServiceValue[])serviceList.toArray(new AIServiceValue[0]);
+
+        AIServerExtValue thisServer = new AIServerExtValue();
+        thisServer.setPlaceholder(true);
+        thisServer.setId(new Integer(serverId));
+        thisServer.setAIServiceValues(services);
+        aiplatform.addAIServerValue(thisServer);
+
+        RuntimeResourceReport rrr = new RuntimeResourceReport(serverId);
+        rrr.addAIPlatform(aiplatform);
+        return rrr;
+    }
+
+    private static String getExchangeVersion(RegistryKey key) {
+        int version;
         try {
-            exch = new Service(EXCHANGE_IS);
-            if (exch.getStatus() != Service.SERVICE_RUNNING) {
-                return null;
-            }
-            exe = exch.getConfig().getExe().trim();
+            version = key.getIntValue("Services Version");
         } catch (Win32Exception e) {
-            return null;
-        } finally {
-            if (exch != null) {
-                exch.close();
-            }
+            return VERSION_55;
         }
 
-        File bin = new File(exe).getParentFile();
-        installpath = bin.getParent();
-        if (!isInstallTypeVersion(bin.getPath())) {
+        if (version >= 65) {
+            return VERSION_2003;
+        }
+
+        return VERSION_2000;
+    }
+
+    public List getServerResources(ConfigResponse platformConfig, String path, RegistryKey current) 
+        throws PluginException {
+
+        RegistryKey key = current;
+
+        String version = getExchangeVersion(key);
+
+        if (getName().indexOf(version) == -1) {
             return null;
         }
 
-        ServerResource server = createServerResource(installpath);
-        server.setProductConfig();
-        server.setMeasurementConfig();
+        ServerResource server = createServerResource(path);
 
-        RegistryKey key = null;
+        //dont bother enabling metrics/ai unless its running
+        if (isWin32ServiceRunning("MSExchangeIS")) {
+            server.setProductConfig();
+            server.setMeasurementConfig();
+        }
+
+        ConfigResponse cprops = new ConfigResponse();
         try {
-            //XXX does not work for 64-bit exchange running 32-bit agent
-            key = RegistryKey.LocalMachine.openSubKey(EXCHANGE_KEY);
-            ConfigResponse cprops = new ConfigResponse();
-            try {
-                cprops.setValue("version",
-                                key.getStringValue("Services Version"));
-                cprops.setValue("build",
-                                key.getStringValue("NewestBuild"));
-                server.setCustomProperties(cprops);
-            } catch (Win32Exception e) {
-            }
+            cprops.setValue("version", key.getStringValue("Services Version"));
+            cprops.setValue("build", key.getStringValue("NewestBuild"));
+            server.setCustomProperties(cprops);
         } catch (Win32Exception e) {
-        } finally {
-            if (key != null) {
-                key.close();
-            }
         }
 
+        ArrayList servers = new ArrayList();
         servers.add(server);
         return servers;
     }
 
-    protected List discoverServices(ConfigResponse config)
-        throws PluginException {
+    public List getRegistryScanKeys() {
+        return SCAN_KEYS_LIST;
+    }
 
-        List services = new ArrayList();
-
-        //POP3 + IMAP4 are disabled by default, only report the services
-        //if they are enabled and running.
-        for (int i=0; i<SERVICES.length; i++) {
-            String name = SERVICES[i];
-            if (!isExchangeServiceRunning(name)) {
-                log.debug(name + " is not running");
-                continue;
-            }
-            else {
-                log.debug(name + " is running, adding to inventory");
-            }
-            services.add(createService(name));
-        }
-
-        try {
-            String[] web = Pdh.getInstances(WEBMAIL);
-            if (web.length != 0) {
-                services.add(createService(WEB_NAME));
-            } //else not enabled if no counters
-        } catch (Win32Exception e) {
-        }
-
-        return services;
+    public RuntimeDiscoverer getRuntimeDiscoverer() {
+        return this;
     }
 }

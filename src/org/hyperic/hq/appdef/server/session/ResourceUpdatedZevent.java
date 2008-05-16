@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -25,10 +25,9 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.bizapp.shared.AllConfigResponses;
-import org.hyperic.hq.zevents.ZeventManager;
 
 /**
  * Event that indicates a resource has been updated.
@@ -42,35 +41,5 @@ public class ResourceUpdatedZevent extends ResourceZevent {
 
     public ResourceUpdatedZevent(AuthzSubjectValue subject, AppdefEntityID id) {
         super(subject, id);
-    }
-    
-    public ResourceUpdatedZevent(AuthzSubjectValue subject, AppdefEntityID id,
-                                 AllConfigResponses allConfgs) {
-        super(new ResourceZeventSource(id),
-              new ResourceConfigZeventPayload(subject, id, allConfgs));
-    }
-    
-    public AllConfigResponses getAllConfigs() {
-         ResourceZeventPayload payload = (ResourceZeventPayload) getPayload();
-         if (payload instanceof ResourceConfigZeventPayload)
-             return ((ResourceConfigZeventPayload) payload).getAllConfigs();
-         
-         return null;
-    }
-    
-    private static class ResourceConfigZeventPayload 
-        extends ResourceZeventPayload {
-        private AllConfigResponses _allConfigs;
-        
-        public ResourceConfigZeventPayload(AuthzSubjectValue subject,
-                                           AppdefEntityID id,
-                                           AllConfigResponses allConfgs) {
-            super(subject, id);
-            _allConfigs = allConfgs;
-        }
-        
-        public AllConfigResponses getAllConfigs() {
-            return _allConfigs;
-        }
     }
 }

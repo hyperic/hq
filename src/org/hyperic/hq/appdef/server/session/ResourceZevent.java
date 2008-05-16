@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -42,12 +42,6 @@ public abstract class ResourceZevent extends Zevent {
               new ResourceZeventPayload(subject, id));
     }
 
-
-    public ResourceZevent(ResourceZeventSource source,
-                          ResourceZeventPayload payload) {
-        super(source, payload);
-    }
-
     public AppdefEntityID getAppdefEntityID() {
         return ((ResourceZeventPayload)getPayload()).
             getAppdefEntityID();
@@ -58,7 +52,7 @@ public abstract class ResourceZevent extends Zevent {
             getAuthzSubjectValue();
     }
 
-    protected static class ResourceZeventSource
+    private static class ResourceZeventSource
         implements ZeventSourceId
     {
         private AppdefEntityID _id;
@@ -76,7 +70,7 @@ public abstract class ResourceZevent extends Zevent {
         }
     }
 
-    protected static class ResourceZeventPayload
+    private static class ResourceZeventPayload
         implements ZeventPayload
     {
         private AppdefEntityID _id;

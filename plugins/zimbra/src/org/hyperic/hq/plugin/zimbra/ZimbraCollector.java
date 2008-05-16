@@ -60,9 +60,7 @@ public class ZimbraCollector extends Collector
         try
         {
             //read 1st line of filename and create a List or String[] of the field names
-            myStatsFile =
-                getProperties().getProperty(ProductPlugin.PROP_INSTALLPATH) +
-                "/log/zimbrastats.csv";
+            myStatsFile = getProperty(ProductPlugin.PROP_INSTALLPATH)+"/log/zimbrastats.csv";
             myReader = new BufferedReader(new FileReader(myStatsFile));
             String line = myReader.readLine();
             if (line == null)

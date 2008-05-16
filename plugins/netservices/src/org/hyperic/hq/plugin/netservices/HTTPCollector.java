@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,13 +57,12 @@ public class HTTPCollector extends SocketChecker {
 
     protected void init() throws PluginException {
         super.init();
-        Properties props = getProperties();
 
         boolean isSSL = isSSL();
 
         String protocol =
-            props.getProperty(PROP_PROTOCOL,
-                              isSSL ? PROTOCOL_HTTPS : PROTOCOL_HTTP);
+            getProperty(PROP_PROTOCOL,
+                        isSSL ? PROTOCOL_HTTPS : PROTOCOL_HTTP);
 
         //back compat w/ old url.availability templates
         this.isPingCompat =
@@ -75,13 +73,13 @@ public class HTTPCollector extends SocketChecker {
         }
 
         this.method =
-            props.getProperty(PROP_METHOD, METHOD_HEAD);
+            getProperty(PROP_METHOD, METHOD_HEAD);
 
         this.hosthdr =
-            props.getProperty("hostheader");
+            getProperty("hostheader");
 
         this.realm =
-            props.getProperty("realm", getHostname());
+            getProperty("realm", getHostname());
 
         this.url = 
             protocol + "://" + getHostname() + ":" + getPort() + getPath();
@@ -94,13 +92,13 @@ public class HTTPCollector extends SocketChecker {
             UntrustedSSLProtocolSocketFactory.register();
         }
 
-        String pattern = props.getProperty("pattern");
+        String pattern = getProperty("pattern");
         if (pattern != null) {
             this.pattern = Pattern.compile(pattern);
             this.method = METHOD_GET;
         }
 
-        String proxy = props.getProperty("proxy");
+        String proxy = getProperty("proxy");
 
         if (proxy != null) {
             setSource(getSource() + " [via " + proxy + "]");

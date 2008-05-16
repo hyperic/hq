@@ -79,8 +79,8 @@ public abstract class ServerDetector
     private static final String INSTALLPATH_MATCH = "INSTALLPATH_MATCH";
     private static final String INSTALLPATH_NOMATCH = "INSTALLPATH_NOMATCH";
     private static final String INSTALLPATH = "INSTALLPATH";
-    protected static final String INVENTORY_ID = "INVENTORY_ID";
-    private static final String AUTOINVENTORY_NAME = "AUTOINVENTORY_NAME";
+    private static final String INVENTORY_ID = "INVENTORY_ID";
+
     private static final String[] NO_ARGS = new String[0];
     private static final long[] NO_PIDS = new long[0];
     private static final List NO_MODULES = Arrays.asList(NO_ARGS);
@@ -507,23 +507,6 @@ public abstract class ServerDetector
         return service;
     }
 
-    protected String formatName(String name,
-                                ConfigResponse parentConfig,
-                                ConfigResponse config,
-                                ConfigResponse cprops) {
-        if (parentConfig != null) {
-            name = Metric.translate(name, parentConfig);
-        }
-        if (config != null) {
-            name = Metric.translate(name, config);
-        }
-        if (cprops != null) {
-            name = Metric.translate(name, cprops);
-        }
-
-        return name;        
-    }
-
     /**
      * Format the auto-inventory name as defined by the plugin, for example: 
      * <property name="AUTOINVENTORY_NAME" value="My %Name% Service @ %Location%"/> 
@@ -540,19 +523,23 @@ public abstract class ServerDetector
                                              ConfigResponse config,
                                              ConfigResponse cprops) {
         String name =
-            getTypeProperty(type, AUTOINVENTORY_NAME);
+            getTypeProperty(type, "AUTOINVENTORY_NAME");
 
         if (name == null) {
-            if (cprops != null) {
-                //defined outside plugin, e.g. process cmdline args
-                name = cprops.getValue(AUTOINVENTORY_NAME);
-            }
-            if (name == null) {
-                return null;
-            }
+            return null;
         }
 
-        return formatName(name, parentConfig, config, cprops);
+        if (parentConfig != null) {
+            name = Metric.translate(name, parentConfig);
+        }
+        if (config != null) {
+            name = Metric.translate(name, config);
+        }
+        if (cprops != null) {
+            name = Metric.translate(name, cprops);
+        }
+
+        return name;
     }
 
     /**

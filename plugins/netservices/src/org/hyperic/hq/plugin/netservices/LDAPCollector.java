@@ -80,7 +80,6 @@ public class LDAPCollector extends NetServicesCollector {
 
         // Setup initial LDAP properties
         Properties env = new Properties();
-        Properties props = getProperties();
 
         // Set our default factory name if one is not given
         String factoryName = env.getProperty(Context.INITIAL_CONTEXT_FACTORY);
@@ -105,7 +104,7 @@ public class LDAPCollector extends NetServicesCollector {
         env.setProperty(Context.REFERRAL, "follow");
         
         // Base DN
-        String baseDN = props.getProperty(PROP_BASEDN);
+        String baseDN = getProperty(PROP_BASEDN);
         if (baseDN == null) {
             setErrorMessage("No Base DN given, refusing login");
             setAvailability(false);
@@ -113,11 +112,11 @@ public class LDAPCollector extends NetServicesCollector {
         }
 
         // Search filter
-        String filter = props.getProperty(PROP_FILTER);
+        String filter = getProperty(PROP_FILTER);
 
         // Load any information we may need to bind
-        String bindDN = props.getProperty(PROP_BINDDN);
-        String bindPW = props.getProperty(PROP_BINDPW);
+        String bindDN = getProperty(PROP_BINDDN);
+        String bindPW = getProperty(PROP_BINDPW);
         if (bindDN != null) {
             env.setProperty(Context.SECURITY_PRINCIPAL, bindDN);
             env.setProperty(Context.SECURITY_CREDENTIALS, bindPW);

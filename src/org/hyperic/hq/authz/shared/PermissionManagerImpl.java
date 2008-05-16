@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.shared.PermissionManager.RolePermNativeSQL;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -349,16 +350,13 @@ public class PermissionManagerImpl
         };
     }
     
-    public String getAlertsHQL(boolean inEscalation) {
+    public String getAlertsHQL() {
         // Join with Resource for sorting
-        return "select a from " + (inEscalation ? "EscalationState es, " : "") +
-        		"Alert a " +
+        return "select a from Alert a " +
                 "join a.alertDefinition d " +
                 "join d.resource r " +
           "where a.ctime between :begin and :end and " +
-                "d.priority >= :priority " +
-                (inEscalation ? "and a.id = es.alertId and " +
-                		            "es.alertDefinitionId = d.id " : "");
+                "d.priority >= :priority ";
     }
 
     public String getAlertDefsHQL() {
@@ -367,14 +365,11 @@ public class PermissionManagerImpl
          "where d.priority >= :priority";
     }
 
-    public String getGroupAlertsHQL(boolean inEscalation) {
-        return "select a from " + (inEscalation ? "EscalationState es, " : "") +
-                "GalertLog a " +
+    public String getGroupAlertsHQL() {
+        return "select a from GalertLog a " +
                "join a.alertDef d " +
          "where a.timestamp between :begin and :end " + 
-           "and d.severityEnum >= :priority " +
-                (inEscalation ? "and a.id = es.alertId and " +
-                                    "es.alertDefinitionId = d.id " : "");
+           "and d.severityEnum >= :priority ";
     }
 
     public String getGroupAlertDefsHQL() {

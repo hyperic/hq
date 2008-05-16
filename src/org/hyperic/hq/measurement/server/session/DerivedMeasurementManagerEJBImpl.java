@@ -319,8 +319,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
 
         try {
-            boolean updateProps = true;
-            
             for (int i = 0; i < templates.length; i++) {
                 Integer dTemplateId = templates[i];
                 long interval = intervals[i];
@@ -360,11 +358,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                              props);
                     }
                     else {
-                        if (updateProps) {  // Make sure that we update props
-                            getRmMan().updateMeasurements(id, props);
-                            updateProps = false;
-                        }
-                        
                         try {
                             argDm = updateMeasurementInterval(dTemplateId,
                                                               instanceId,
@@ -522,9 +515,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Update the derived measurements of a resource
+     * @ejb:interface-method
      */
-    private void updateMeasurements(AuthzSubject subject, AppdefEntityID id,
-                                    ConfigResponse props)
+    public void updateMeasurements(AuthzSubject subject,
+                                   AppdefEntityID id, ConfigResponse props)
         throws PermissionException, MeasurementCreateException
     {
         // Update all of the raw measurements first
@@ -1473,7 +1467,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public void syncPluginMetrics(String plugin) {
-        ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();
         List entities =
             getDerivedMeasurementDAO().findMetricsCountMismatch(plugin);
         
@@ -1490,19 +1483,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
             try {
                 log.info("syncPluginMetrics sync'ing metrics for " + aeid);
-                ConfigResponse c =
-                    cm.getMergedConfigResponse(overlord.getAuthzSubjectValue(),
-                                               ProductPlugin.TYPE_MEASUREMENT,
-                                               aeid, true);
-                enableDefaultMetrics(overlord, aeid, c, false);
+                enableDefaultMetrics(overlord, aeid, false);
             } catch (AppdefEntityNotFoundException e) {
                 // Move on since we did this query based on measurement table
                 // not resource table
             } catch (PermissionException e) {
                 // Quite impossible
                 assert(false);
-            } catch (Exception e) {
-                // No valid configuration to use to enable metrics
             }
         }
     }
@@ -1572,27 +1559,21 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     
                 // For either create or update events, schedule the default
                 // metrics
-                // For either create or update events, schedule the default
-                // metrics
-                ConfigResponse c =
-                    cm.getMergedConfigResponse(subject,
-                                               ProductPlugin.TYPE_MEASUREMENT,
-                                               id, true);
-                AuthzSubject subj = aman.findSubjectById(subject.getId());
                 if (getEnabledMetricsCount(subject, id) == 0) {
                     log.info("Enabling default metrics for [" + id + "]");
-                    enableDefaultMetrics(subj, id, c, true);
+                    AuthzSubject subj = aman.findSubjectById(subject.getId());
+                    enableDefaultMetrics(subj, id, true);
                 }
-                else {
-                    // Update the configuration
-                    updateMeasurements(subj, id, c);
-                }
-
+    
                 if (isCreate) {
                     // On initial creation of the service check if log or config
                     // tracking is enabled.  If so, enable it.  We don't auto
                     // enable log or config tracking for update events since
                     // in the callback we don't know if that flag has changed.
+                    ConfigResponse c =
+                        cm.getMergedConfigResponse(subject,
+                                                   ProductPlugin.TYPE_MEASUREMENT,
+                                                   id, true);
                     tm.enableTrackers(subject, id, c);
                 }
     
@@ -1609,11 +1590,12 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * be called by the {@link MeasurementEnabler}.  If you want the behavior
      * of this method, use the {@link MeasurementEnabler} 
      */
-    private void enableDefaultMetrics(AuthzSubject subj, AppdefEntityID id,
-                                      ConfigResponse config, boolean verify)
+    private void enableDefaultMetrics(AuthzSubject subj, 
+                                     AppdefEntityID id, boolean verify) 
         throws AppdefEntityNotFoundException, PermissionException 
     {
         ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
+        ConfigResponse config;
         String mtype;
     
         AuthzSubjectValue subject = subj.getAuthzSubjectValue();
@@ -1631,7 +1613,15 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             else {
                 return;
             }
-        } catch (Exception e) {
+    
+            config = 
+                cfgMan.getMergedConfigResponse(subject,
+                                               ProductPlugin.TYPE_MEASUREMENT,
+                                               id, true);
+        } catch (ConfigFetchException e) {
+            log.debug("Unable to enable default metrics for [" + id + "]", e);
+            return;
+        }  catch (Exception e) {
             log.error("Unable to enable default metrics for [" + id + "]", e);
             return;
         }

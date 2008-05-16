@@ -13,7 +13,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2008], Hyperic, Inc.
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -108,18 +108,18 @@
 					<td><html:radio property="startTime" value="onDate" onclick="turnOnRecurrence(true)"/>&nbsp;</td>
 					<td nowrap>
 						<html:select property="startMonth" styleId="startMonth" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1); changeDropDown('startMonth', 'startDay', 'startYear');">
-							<html:option value="0">01 (Jan)</html:option>
-							<html:option value="1">02 (Feb)</html:option>
-							<html:option value="2">03 (Mar)</html:option>
-							<html:option value="3">04 (Apr)</html:option>
-							<html:option value="4">05 (May)</html:option>
-							<html:option value="5">06 (Jun)</html:option>
-							<html:option value="6">07 (Jul)</html:option>
-							<html:option value="7">08 (Aug)</html:option>
-							<html:option value="8">09 (Sep)</html:option>
-							<html:option value="9">10 (Oct)</html:option>
-							<html:option value="10">11 (Nov)</html:option>
-							<html:option value="11">12 (Dec)</html:option>
+							<html:option value="1">01 (Jan)</html:option>
+							<html:option value="2">02 (Feb)</html:option>
+							<html:option value="3">03 (Mar)</html:option>
+							<html:option value="4">04 (Apr)</html:option>
+							<html:option value="5">05 (May)</html:option>
+							<html:option value="6">06 (Jun)</html:option>
+							<html:option value="7">07 (Jul)</html:option>
+							<html:option value="8">08 (Aug)</html:option>
+							<html:option value="9">09 (Sep)</html:option>
+							<html:option value="10">10 (Oct)</html:option>
+							<html:option value="11">11 (Nov)</html:option>
+							<html:option value="12">12 (Dec)</html:option>
 						</html:select>
 						/
 						<html:select property="startDay" styleId="startDay" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1); changeDropDown('startMonth', 'startDay', 'startYear');">

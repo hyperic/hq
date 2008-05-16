@@ -235,10 +235,24 @@ function getSelectValue(sel) {
 }
 
 function changeMonthDropdown (monthDropDown, selectedMonthValue, startMonthIndex){
-    if (selectedMonthValue < startMonthIndex)
-        selectedMonthValue = startMonthIndex;
+  var newMonthIndex = selectedMonthValue -2;
 
-    monthDropDown.selectedIndex = selectedMonthValue;
+  monthDropDown.options.length = 0;
+  monthDropDown.options.length = 12-startMonthIndex;
+  
+  for(i=startMonthIndex; i<12; i++) {
+    if (isIE) {
+      monthDropDown.options[i-startMonthIndex].text = monthArr[i];
+      monthDropDown.options[i-startMonthIndex].value = i;
+    }
+    else
+      monthDropDown.options[i-startMonthIndex] = new Option (monthArr[i], i);
+  }
+
+  if (newMonthIndex < 0)
+    newMonthIndex = 0;
+  
+  monthDropDown.selectedIndex = newMonthIndex;
 }
 
 function changeDateDropdown (dateDropDown, selectedMonthValue, selectedDateValue, selectedYearValue, startDateIndex) {

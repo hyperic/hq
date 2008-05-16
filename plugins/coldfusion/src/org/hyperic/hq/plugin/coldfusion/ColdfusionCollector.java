@@ -31,7 +31,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -62,11 +61,10 @@ public class ColdfusionCollector extends Collector
     {
         try
         {
-            Properties props = getProperties();
             //read 1st line of filename and create a List or String[] 
             //of the field names
-            myStatsFile = props.getProperty(ProductPlugin.PROP_INSTALLPATH) + "/" +
-                          props.getProperty("logfile");
+            myStatsFile = getProperty(ProductPlugin.PROP_INSTALLPATH) + "/" +
+                          getProperty("logfile");
 
             myWatcher = getWatcher();
 

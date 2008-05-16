@@ -245,22 +245,20 @@ public class SNMPDetector extends DaemonDetector {
                 resourceDescr = descriptions.get(i).toString();
             }
 
-            String resourceName = typeName + " " + indexValue;
-            String autoName =
+            String resourceName =
                 plugin.formatAutoInventoryName(type,
                                                parentConfig,
                                                config,
                                                cprops);
 
+            if (resourceName == null) {
+                resourceName = typeName + " " + indexValue;
+            }
+
             if (isServiceDiscovery) {
                 ServiceResource service = new ServiceResource();
                 service.setType(type);
-                if (autoName == null) {
-                    service.setServiceName(resourceName);
-                }
-                else {
-                    service.setName(autoName);
-                }
+                service.setServiceName(resourceName);
 
                 service.setProductConfig(config);
                 //required to auto-enable metric
@@ -275,12 +273,7 @@ public class SNMPDetector extends DaemonDetector {
             else {
                 ServerResource server = new ServerResource();
                 server.setType(type);
-                if (autoName == null) {
-                    server.setName(getPlatformName() + " " + resourceName);
-                }
-                else {
-                    server.setName(autoName);
-                }
+                server.setName(getPlatformName() + " " + resourceName);
                 server.setInstallPath("/"); //XXX
                 server.setIdentifier(server.getName());
 

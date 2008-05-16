@@ -44,8 +44,6 @@ class ResourceConfig {
      */
     
     private static PLATFORM_FIELD_KEYS = [
-        'name':        [get: { plat -> plat.name },
-                        set: { platVal, name -> platVal.name = name }], 
         'fqdn':        [get: { plat -> plat.fqdn },
                         set: { platVal, fqdn -> platVal.fqdn = fqdn }], 
         'comment':     [get: { plat -> plat.commentText },
@@ -57,14 +55,12 @@ class ResourceConfig {
     ]
     
     private static SERVER_FIELD_KEYS = [
-        'name':        [get: { svr -> svr.name },
-                        set: { svrVal, name -> svrVal.name = name} ],
-        'description': [get: { svr -> svr.description },
-                        set: { svrVal, desc -> svrVal.description = desc} ],
         'installPath': [get: { svr -> svr.installPath },
                         set: { svrVal, installPath -> svrVal.installPath = installPath} ],
         'autoIdentifier': [get: {svr -> svr.autoinventoryIdentifier },
                            set: {svrVal, autoIdentifier -> svrVal.autoinventoryIdentifier = autoIdentifier } ],
+        'description': [get: { svr -> svr.description },
+                        set: { svrVal, desc -> svrVal.description = desc} ],
         'location':    [get: { svr -> svr.location },
                         set: { svrVal, loc -> svrVal.location = loc} ],
         'runtimeDiscovery':  [get: { svr -> svr.runtimeAutodiscovery.toString() },
@@ -72,8 +68,6 @@ class ResourceConfig {
     ]
      
     private static SERVICE_FIELD_KEYS = [
-        'name':        [get: { svc -> svc.name },
-                        set: { svcVal, name -> svcVal.name = name }],
         'description': [get: { svc -> svc.description },
                         set: { svcVal, desc -> svcVal.description = desc }],
         'location':    [get: { svc -> svc.location },
