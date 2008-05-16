@@ -4,15 +4,19 @@
     <li jwcid="critters@For" source="ognl:critters" 
         value="ognl:critter" element="li">
       <li>
-        <!-- Block associated with critters we are editing -->
         <span jwcid="@If" condition="ognl:editingCritter">
-          [Edit Mode]
-          <span jwcid="@Insert" value="ognl:critter.type.name"/>
-          (<span jwcid="@Insert" value="ognl:critter.type.description"/>)
+          <!-- Block associated with critters we are editing -->
+          <form jwcid="propEdit@Form" 
+                success="listener:propsSubmit"
+                cancel="listener:propsCancel"
+                refresh="listener:propsRefresh">
+            [Edit Mode]
+            <select jwcid="propSelector@PropertySelection" 
+                    model="ognl:critterTypesList" 
+                    value="ognl:editingType"/>
+            (<span jwcid="@Insert" value="ognl:editingType.description"/>)
           
-          <ul>
-            <form jwcid="propEdit@Form" listener="listener:critterSubmit" 
-                  async="true">
+            <ul>
               <li jwcid="props@For" source="ognl:editingProps"
                   value="ognl:prop">
                 <li>
@@ -20,20 +24,20 @@
                       <span jwcid="@Insert" value="ognl:prop.name"/>
                       <input jwcid="@TextField" value="ognl:prop.stringValue"/>
                     </span>
-                    <span jwcid="@DirectLink" async="true"
-                          listener="listener:savePropsClicked"
-                          parameters="ognl:critter.index">[Save]</span>
-                    <span jwcid="@DirectLink" async="true"
-                          listener="listener:cancelPropsClicked"
-                          parameters="ognl:critter.index">[Cancel]</span>
                 </li>
               </li>
-            </form>
-          </ul>
+            </ul>
+            <input jwcid="@Submit"  submitType="refresh" 
+                   value="[Refresh]" async="true"/>
+            <input jwcid="@Submit" submitType="submit" 
+                   value="[Save]" async="true"/>
+            <input jwcid="@Submit" submitType="cancel" 
+                   value="[Cancel]" async="true"/>
+          </form>
         </span>
         
-        <!-- Block associated with critters NOT being edited -->
         <span jwcid="@Else">
+          <!-- Block associated with critters NOT being edited -->
           <span jwcid="@Insert" value="ognl:critter.config"/>
 
           <!-- Plus-signs -->
@@ -42,6 +46,14 @@
                   listener="listener:addCritterClicked"
                   parameters="ognl:critter.index">+</span>
           </span>
+          
+          <!-- Edit-signs -->
+          <span jwcid="@If" condition="ognl:showEditSigns">
+            <span jwcid="@DirectLink" async="true"
+                  listener="listener:editCritterClicked"
+                  parameters="ognl:critter.index">[Edit]</span>
+          </span>
+          
         </span>
 
       </li>

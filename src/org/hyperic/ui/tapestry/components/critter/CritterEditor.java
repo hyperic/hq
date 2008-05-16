@@ -14,8 +14,11 @@ import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.annotations.Persist;
 import org.apache.tapestry.event.PageBeginRenderListener;
 import org.apache.tapestry.event.PageEvent;
+import org.apache.tapestry.form.BeanPropertySelectionModel;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.grouping.Critter;
+import org.hyperic.hq.grouping.CritterRegistry;
+import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.critters.ProtoNameCritterType;
 import org.hyperic.hq.grouping.prop.CritterProp;
@@ -41,12 +44,39 @@ public abstract class CritterEditor
     public abstract void setEditingProps(List props);
     public abstract List getEditingProps();
     
+    @Persist
+    public abstract void setEditingType(CritterType t);
+    public abstract CritterType getEditingType();
+    
+    
     // A list of {@link EditableCritter}s 
     @Persist
     public abstract void setCritters(List critters);
     public abstract List getCritters();
 
-    public void savePropsClicked(IRequestCycle cycle) {
+    /*
+    @EventListener(targets = "propSelector", events = {"onchange"},
+                   submitForm = "propEdit")
+    */
+    public void propsRefresh(IRequestCycle cycle) {
+        _log.info("Refreshing form.  Current critter type = " + 
+                  getEditingType().getName());
+        
+        setEditingProps(makeEditableProps(getEditingType()));
+        for (Iterator i=getEditingProps().iterator(); i.hasNext(); ) {
+            EditableCritterProp p = (EditableCritterProp)i.next();
+            
+            _log.info("param = " + p.getType().getDescription());
+        }
+        cycle.getResponseBuilder().updateComponent("editor");
+    }
+    
+    public void propsCancel(IRequestCycle cycle) {
+        editNoCritters();
+        cycle.getResponseBuilder().updateComponent("editor");
+    }
+    
+    public void propsSubmit(IRequestCycle cycle) {
         int critterIdx = getEditingCritterIndex();
         if (critterIdx == -1) {
             _log.warn("Strange, save was called when I didn't have anything " + 
@@ -54,10 +84,14 @@ public abstract class CritterEditor
             return;
         }
 
+        _log.info("Selected critter type: [" + getEditingType().getName() +
+                  "]");
+
         EditableCritter c = (EditableCritter)getCritters().get(critterIdx);
         
         // Validate that the submitted props are valid for a real critter.
         EditableCritter clone = new EditableCritter(c);
+        clone.setType(getEditingType());
         Map submittedProps = new HashMap();
         for (Iterator i=getEditingProps().iterator(); i.hasNext(); ) {
             EditableCritterProp p = (EditableCritterProp)i.next();
@@ -80,14 +114,25 @@ public abstract class CritterEditor
         c.setProps(submittedProps);
         c.setConfig(critter.getConfig());
         
-        
         editNoCritters();
         cycle.getResponseBuilder().updateComponent("editor");
     }
+
+    public void critterSubmit(IRequestCycle cycle) {
+        _log.info("Editing props:");
+        for (Iterator i=getEditingProps().iterator(); i.hasNext(); ) {
+            EditableCritterProp p = (EditableCritterProp)i.next();
+            
+            _log.info("Prop [" + p.getName() + "]: " + p.getStringValue());
+        }
+        cycle.getResponseBuilder().updateComponent("propEdit");
+    }
     
-    public void cancelPropsClicked(IRequestCycle cycle) {
-        editNoCritters();
-        cycle.getResponseBuilder().updateComponent("editor");
+    
+    public BeanPropertySelectionModel getCritterTypesList() {
+        List types = 
+            new ArrayList(CritterRegistry.getRegistry().getCritterTypes());
+        return new BeanPropertySelectionModel(types, "name");
     }
     
     /**
@@ -100,21 +145,11 @@ public abstract class CritterEditor
         return c != null && c.getIndex() == getEditingCritterIndex();
     }
     
-    public void critterSubmit(IRequestCycle cycle) {
-        _log.info("Editing props:");
-        for (Iterator i=getEditingProps().iterator(); i.hasNext(); ) {
-            EditableCritterProp p = (EditableCritterProp)i.next();
-            
-            _log.info("Prop [" + p.getName() + "]: " + p.getStringValue());
-        }
-        cycle.getResponseBuilder().updateComponent("propEdit");
-    }
-    
     /**
      * Make up a new critter prop with a default value. 
      */
     private EditableCritterProp 
-        makeDefaultProp(final CritterPropDescription desc) 
+        makeDefaultProp(CritterPropDescription desc) 
     {
         String stringValue;
         
@@ -128,6 +163,18 @@ public abstract class CritterEditor
         return new EditableCritterProp(desc.getId(), desc.getName(),
                                        desc.getPurpose(), desc.getType(),
                                        stringValue);
+    }
+    
+    private List makeEditableProps(CritterType type) {
+        List res = new ArrayList();
+        
+        for (Iterator i=type.getPropDescriptions().iterator(); i.hasNext(); ) {
+            CritterPropDescription d = (CritterPropDescription)i.next();
+            EditableCritterProp p = makeDefaultProp(d);
+            
+            res.add(p);
+        }
+        return res;
     }
     
     /**
@@ -155,6 +202,10 @@ public abstract class CritterEditor
         
         return c.getType().newInstance(critterProps);
     }
+
+    public boolean getShowEditSigns() {
+        return getEditingCritterIndex() == -1;
+    }
     
     public boolean getShowPlusSigns() {
         return getEditingCritterIndex() == -1;
@@ -162,8 +213,15 @@ public abstract class CritterEditor
     
     public void addCritterClicked(IRequestCycle cycle, int idx) {
         _log.info("Add critter clicked on index = " + idx);
-        cycle.getResponseBuilder().updateComponent("critters");
+        cycle.getResponseBuilder().updateComponent("editor");
+    }
+    
+    public void editCritterClicked(IRequestCycle cycle, int idx) {
+        _log.info("Edit critter clicked on index = " + idx);
+        editCritter(idx);
+        cycle.getResponseBuilder().updateComponent("editor");
     }    
+    
     
     // Used for looping
     public abstract void setProp(EditableCritterProp prop);
@@ -182,19 +240,15 @@ public abstract class CritterEditor
     private void editNoCritters(){ 
         setEditingCritterIndex(-1);
         setEditingProps(Collections.EMPTY_LIST);
+        setEditingType(null);
     }
 
     private void editCritter(int idx) {
+        _log.info("editCritter[" + idx + "]");
         setEditingCritterIndex(idx);
         EditableCritter c = (EditableCritter)getCritters().get(idx);
-        List editingProps = new ArrayList(c.getProps().size());
-        
-        for (Iterator i=c.getProps().values().iterator(); i.hasNext(); ) {
-            EditableCritterProp p = (EditableCritterProp)i.next();
-            
-            editingProps.add(new EditableCritterProp(p));
-        }
-        setEditingProps(editingProps);
+        setEditingType(c.getType());
+        setEditingProps(makeEditableProps(c.getType()));
     }
     
     private void initCritters() {
