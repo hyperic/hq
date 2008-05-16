@@ -254,9 +254,11 @@ public class AgentCommandsService implements AgentCommandsClient {
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#getCurrentAgentBundle()
      */
     public String getCurrentAgentBundle() throws AgentRemoteException {
-        // The current working directory is the agent bundle directory
-        File workingDir = new File(System.getProperty("user.dir"));
-        return workingDir.getName();
+        String agentBundleHome = _agent.getBootConfig()
+              .getBootProperties().getProperty(AgentConfig.PROP_BUNDLEHOME[0]);
+                
+        File bundleDir = new File(agentBundleHome);
+        return bundleDir.getName();
     }
 
     /**
