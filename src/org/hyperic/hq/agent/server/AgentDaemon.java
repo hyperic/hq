@@ -211,6 +211,17 @@ public class AgentDaemon
     }
     
     /**
+     * @return The current agent bundle name.
+     */
+    public String getCurrentAgentBundle() {
+        String agentBundleHome = getBootConfig()
+                .getBootProperties().getProperty(AgentConfig.PROP_BUNDLEHOME[0]);
+          
+        File bundleDir = new File(agentBundleHome);
+        return bundleDir.getName();
+    }
+    
+    /**
      * Retrieve the agent transport lifecycle.
      * 
      * @throws AgentRunningException indicating the Agent was not running 
@@ -719,7 +730,7 @@ public class AgentDaemon
         Properties bootProps;
         String tmpDir;
 
-        this.logger.info("Agent starting up");
+        this.logger.info("Agent starting up, bundle name="+getCurrentAgentBundle());
         this.running = true;
 
         bootProps = this.bootConfig.getBootProperties();

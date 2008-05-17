@@ -254,11 +254,7 @@ public class AgentCommandsService implements AgentCommandsClient {
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#getCurrentAgentBundle()
      */
     public String getCurrentAgentBundle() throws AgentRemoteException {
-        String agentBundleHome = _agent.getBootConfig()
-              .getBootProperties().getProperty(AgentConfig.PROP_BUNDLEHOME[0]);
-                
-        File bundleDir = new File(agentBundleHome);
-        return bundleDir.getName();
+        return _agent.getCurrentAgentBundle();
     }
 
     /**
