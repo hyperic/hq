@@ -1371,6 +1371,9 @@
     <copy file="etc/agent.properties"
         tofile="${agent.dir}/conf/agent.properties"/>
 
+    <copy file="etc/wrapper-master.conf"
+        tofile="${agent.dir}/conf/wrapper.conf"/>
+  	
     <copy file="bin/background.sh"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/background.sh"/>
     <copy file="bin/background.bat"

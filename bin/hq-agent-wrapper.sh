@@ -17,7 +17,7 @@ APP_LONG_NAME="HQ Agent"
 # Wrapper
 WRAPPER_CMD="../../wrapper/sbin/wrapper"
 WRAPPER_CMD_PS="sbin/wrapper"
-WRAPPER_CONF="conf/wrapper.conf"
+WRAPPER_CONF="../../conf/wrapper.conf"
 
 # Priority at which to run the wrapper.  See "man nice" for valid priorities.
 #  nice is only used if a priority is specified.
@@ -121,17 +121,22 @@ do
     fi
 done
 
-# Change the current directory to the HQ Agent Home
+# resolve the current HQ Agent bundle home
 cd "`dirname "$REALPATH"`/.."
+
+AGENT_BUNDLE_HOME=`pwd`
+cd ../..
+AGENT_INSTALL_HOME=`pwd`
+# invoke the Java Service Wrapper from the wrapper sbin
+# directory for compatibility with Windows
+cd wrapper/sbin
 REALDIR=`pwd`
 
 # ------------- 
 # Begin HQ Agent specific logic
 # ------------- 
 AGENT_BUNDLE_HOME_PROP=agent.bundle.home
-AGENT_BUNDLE_HOME=${REALDIR}
 AGENT_INSTALL_HOME_PROP=agent.install.home
-AGENT_INSTALL_HOME=${REALDIR}/../..
 AGENT_LIB=$AGENT_BUNDLE_HOME/lib
 PDK_LIB=$AGENT_BUNDLE_HOME/pdk/lib
 # for /proc/net/tcp mirror
@@ -139,10 +144,10 @@ SIGAR_PROC_NET=./tmp
 
 if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
     HQ_JAVA_HOME=${HQ_JAVA_HOME}
-elif [ -d jre ]; then
-    HQ_JAVA_HOME=jre
+elif [ -d "${AGENT_INSTALL_HOME}/jre" ]; then
+    HQ_JAVA_HOME="${AGENT_INSTALL_HOME}"/jre
     # Just in case
-    chmod -R +x jre/bin/*
+    chmod -R +x "${AGENT_INSTALL_HOME}"/jre/bin/*
 elif [ "x$JAVA_HOME" != "x" ] ; then
     HQ_JAVA_HOME=${JAVA_HOME}
 else
@@ -157,7 +162,7 @@ else
     esac
 fi
 
-chmod +x ./pdk/scripts/*
+chmod +x "${AGENT_BUNDLE_HOME}"/pdk/scripts/*
 
 HQ_JAVA="${HQ_JAVA_HOME}/bin/java"
 

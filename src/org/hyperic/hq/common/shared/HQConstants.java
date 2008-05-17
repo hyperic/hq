@@ -92,6 +92,8 @@ public class HQConstants {
     // The directory on the HQ agent where the agent upgrade bundles will be copied.
     // This value is hard coded on the agent side so we are hard coding it on 
     // the server.
-    public static final String AgentBundleDropDir = "bundles";
+    // TODO should have a better way to resolve this based on agent.bundle.home
+    // agent property
+    public static final String AgentBundleDropDir = "../../bundles";
     
 }

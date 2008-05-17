@@ -15,7 +15,10 @@ rem
 rem Find the application home.
 rem
 rem %~dp0 is location of current script under NT
-set _REALPATH=%~dp0..\
+set _REALPATH=%~dp0..\..\..\wrapper\sbin\
+
+set AGENT_INSTALL_HOME=%~dp0..\..\..\
+set AGENT_BUNDLE_HOME=%~dp0..\
 
 rem
 rem Detect JAVA_HOME
@@ -28,8 +31,8 @@ if not "%HQ_JAVA_HOME%"=="" (
     set JAVA_HOME=%HQ_JAVA_HOME%
     goto gotjava
 )
-if EXIST %_REALPATH%\jre\nul (
-    set JAVA_HOME=%_REALPATH%\jre
+if EXIST %AGENT_INSTALL_HOME%\jre\nul (
+    set JAVA_HOME=%AGENT_INSTALL_HOME%\jre
     goto gotjava
 )
 
@@ -39,7 +42,7 @@ goto :eof
 
 :gotjava
 rem Decide on the wrapper binary.
-set _WRAPPER_BASE=..\..\wrapper\sbin\wrapper
+set _WRAPPER_BASE=wrapper
 set _WRAPPER_EXE=%_REALPATH%%_WRAPPER_BASE%-windows-x86-32.exe
 if exist "%_WRAPPER_EXE%" goto validate
 set _WRAPPER_EXE=%_REALPATH%%_WRAPPER_BASE%-windows-x86-64.exe
@@ -69,15 +72,13 @@ rem
 rem Find the wrapper.conf
 rem
 :conf
-set _WRAPPER_CONF="%_REALPATH%\conf\wrapper.conf"
+set _WRAPPER_CONF="%AGENT_INSTALL_HOME%\conf\wrapper.conf"
 
 rem
 rem Set some HQ properties
 rem
 set AGENT_BUNDLE_HOME_PROP=agent.bundle.home
-set AGENT_BUNDLE_HOME=%_REALPATH%
 set AGENT_INSTALL_HOME_PROP=agent.install.home
-set AGENT_INSTALL_HOME=%AGENT_BUNDLE_HOME%\..\..
 set AGENT_LIB=%AGENT_BUNDLE_HOME%\lib
 set PDK_LIB=%AGENT_BUNDLE_HOME%\pdk\lib
 
