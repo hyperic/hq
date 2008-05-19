@@ -1899,8 +1899,8 @@
     </antcall>
 
     <!-- Copy servlet instrumentation -->
-    <mkdir dir="${archive-dir}/agent-${version}/product_connectors/servlet-${version}"/>
-    <copy toDir="${archive-dir}/agent-${version}/product_connectors/servlet-${version}">
+    <mkdir dir="${archive-dir}/agent-${version}/bundles/${agent.bundle.dir}/product_connectors/servlet-${version}"/>
+    <copy toDir="${archive-dir}/agent-${version}/bundles/${agent.bundle.dir}/product_connectors/servlet-${version}">
       <fileset dir="${build.dir}/native_plugins">
         <include name="hyperic-hq/**" />
         <include name="libs/**" />
@@ -1910,7 +1910,7 @@
     </copy>
 
     <!-- Copy SNMP and RT packages -->
-    <copy toDir="${archive-dir}/agent-${version}/product_connectors">
+    <copy toDir="${archive-dir}/agent-${version}/bundles/${agent.bundle.dir}/product_connectors">
       <fileset dir="${hq.bin}/product_connectors">
         <include name="**" />
       </fileset>
