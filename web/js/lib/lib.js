@@ -1,12 +1,18 @@
 var init_lib = false;
 var urlXtraVar = [];
 var hyperic = {};
-hyperic.URLS = {}; hyperic.widget = {}; hyperic.utils = {}; hyperic.html = {}; hyperic.data = {}, hyperic.i18n = {};
+hyperic.URLS = {}; hyperic.widget = {}; hyperic.utils = {}; hyperic.html = {}; hyperic.data = {}; hyperic.i18n = {}; hyperic.config = {};
 
-hyperic.init = function(){
-    if(!init_lib)
-        dojo.require("dojox.Grid");
-}
+/**
+ * init the library
+ */
+(function(){
+  if(!init_lib){
+        init_lib = true;
+  }
+  hyperic.config.uniqueIndex = 0;
+})();
+
 hyperic.html = {
     show : function(/*String*/ node){
         dojo.style(node, 'display', '');
@@ -14,7 +20,8 @@ hyperic.html = {
     hide : function(/*String*/ node){
         dojo.style(node, 'display', 'none');
     }
-}
+};
+
 hyperic.form = {
     fieldFocus : function(/*DOMNode*/elem) {
         if (!elem.getAttribute('readonly')) {
@@ -60,6 +67,17 @@ hyperic.utils.key = {
             }
         }
     }
+};
+
+
+/**
+ * Get an DOM Id that is unique to this document
+ */
+hyperic.utils.getUniqueId = function(/*String*/ prefix){
+    if(prefix)
+        return prefix + hyperic.config.uniqueIndex++ +"";
+    else
+        return "unique" + hyperic.config.uniqueIndex++ +"";
 };
 
 /**
@@ -108,13 +126,13 @@ hyperic.utils.addKeyListener = function(/*Node*/node, /*Object*/ keyComb, /*Stri
     };
     dojo.connect(node, "onkeyup", this, this.keyListener);
     return this;
-}
+};
 
 hyperic.utils.addUrlXtraCallback = function(plugin_id, fn) {
     if(!urlXtraVar[plugin_id])
         urlXtraVar[plugin_id] = [];
     urlXtraVar[plugin_id].push(fn);
-}
+};
 
 /**
  * Make a query string for HQU plugins XHR calls
@@ -539,9 +557,432 @@ hyperic.data.Comparators = {
     }
     
 }
+function init_reporting(){
+    dojo.require("dijit.form.DateTextBox"); 
+    dojo.require("dijit.form.ComboBox");
+    dojo.require("dijit.form.ValidationTextBox");
+
+    dojo.connect(window, "onload", function(){
+        var reportList = dojo.byId("reports");
+        reportList.selectedIndex = 0;
+        selectedChanged(reportList);
+    });
+}
+
+/* OLD REPORTING */
+
+hyperic.hq = {};
+hyperic.hq.reporting = {};
+hyperic.hq.dom = {};
+
+hyperic.hq.dom.datePickerProps = {
+    displayWeeks : "6",
+    inputWidth : "15em",
+    formatLength : "full",
+    templateString : '<div class="fieldRow" dojoAttachPoint="fieldRowContainerNode">\n\t<label for="${this.widgetId}">\n\t\t<span class="fieldLabel ${this.fieldRequiredClass}"><img src="/images/icon_required.gif" height="9" width="9" border="0"><span dojoAttachPoint="fieldLabel">${this.label}</span></span>\n\t</label>\n\t\t<div class="fieldValue" dojoAttachPoint="fieldWrapper">\n\t\t<span style=\"white-space:nowrap\"><input type=\"hidden\" name=\"\" value=\"\" dojoAttachPoint=\"valueNode\" /><input name=\"\" type=\"text\" value=\"\" style=\"vertical-align:middle;\" dojoAttachPoint=\"inputNode\" dojoAttachEvent=\"onclick:onIconClick\" readonly=\"readonly\" autocomplete=\"off\" /> <img src=\"${this.iconURL}\" alt=\"${this.iconAlt}\" dojoAttachEvent=\"onclick:onIconClick\" dojoAttachPoint=\"buttonNode\" style=\"vertical-align:middle; cursor:pointer; cursor:hand\" /></span>\n<div dojoattachpoint="validationMessage" class="errorMsg"></div></div>\n</div>',
+    value : new Date(),
+    StartDate : new Date(1-1-2000)
+};
+    
+hyperic.hq.dom.validationTextboxProps = {
+    id : "ValidationWidget1",
+    type : 'text',
+    required : true,
+    missingClass : "",
+    size : 23,
+    maxlength : 60,
+    missingMessage : "",
+    requiredMessage : "this value is required",
+    listenOnKeyPress : false,
+    templateString : '<div class="fieldRow" dojoAttachPoint="fieldRowContainerNode">\n\t<label for="${this.widgetId}">\n\t\t<span class="fieldLabel ${this.fieldRequiredClass}"><img src="/images/icon_required.gif" height="9" width="9" border="0"><span dojoAttachPoint="fieldLabel">${this.label}</span></span>\n\t</label>\n\t\t<div class="fieldValue" dojoAttachPoint="fieldWrapper">\n\t\t<span style="float:${this.htmlfloat};">\n\t\t<input dojoAttachPoint="textbox" type="${this.type}" dojoAttachEvent="onblur;onfocus;onkeyup" id="${this.widgetId}" name="${this.name}" size="${this.size}" maxlength="${this.maxlength}" class="${this.className}" style="">\n\t\t\t<div dojoAttachPoint="invalidSpan" class="${this.invalidClass}">&nbsp;-&nbsp;${this.messages.invalidMessage}</div>\n\t\t<div dojoAttachPoint="missingSpan" class="${this.missingClass}">&nbsp;-&nbsp;${this.messages.missingMessage}</div>\n\t\t<div dojoAttachPoint="rangeSpan" class="${this.rangeClass}">&nbsp;-&nbsp;${this.messages.rangeMessage}</div>\n\t\t</span>\n</div>\n</div>',
+    templateCssString : ".dojoValidateEmpty{}\n.dojoValidateValid{}\n.dojoValidateInvalid{}\n.dojoValidateRange{}\n"
+};
+
+hyperic.hq.dom.selectboxProps = {
+   templateCssString : ".dojoComboBoxOuter {\n\tborder: 0px !important;\n\tmargin: 0px !important;\n\tpadding: 0px !important;\n\tbackground: transparent !important;\n\twhite-space: nowrap !important;\n}\n\n.dojoComboBox {\n\tborder: 1px inset #afafaf;\n\tmargin: 0px;\n\tpadding: 0px;\n\tvertical-align: middle !important;\n\tfloat: none !important;\n\twidth:172px;height:14px;position: static !important;\n\tdisplay: inline !important;\n}\n\n/* the input box */\ninput.dojoComboBox {\n\tborder-right-width: 0px !important; \n\tmargin-right: 0px !important;\n\tpadding-right: 0px !important;\n}\n\n/* the down arrow */\nimg.dojoComboBox {\n\tborder-left-width: 0px !important;\n\tpadding-left: 0px !important;\n\tmargin-left: 0px !important;height:15px;\n}\n\n/* IE vertical-alignment calculations can be off by +-1 but these margins are collapsed away */\n.dj_ie img.dojoComboBox {\n\tmargin-top: 1px; \n\tmargin-bottom: 1px; \n}\n\n/* the drop down */\n.dojoComboBoxOptions {\n\tfont-family: Verdana, Helvetica, Garamond, sans-serif;\n\t/* font-size: 0.7em; */\n\tbackground-color: white;\n\tborder: 1px solid #afafaf;\n\tposition: absolute;\n\tz-index: 1000; \n\toverflow: auto;\n\tcursor: default;width:200px;\n}\n\n.dojoComboBoxItem {\n\tpadding-left: 2px;\n\tpadding-top: 2px;\n\tmargin: 0px;\n}\n\n.dojoComboBoxItemEven {\n\tbackground-color: #f4f4f4;\n}\n\n.dojoComboBoxItemOdd {\n\tbackground-color: white;\n}\n\n.dojoComboBoxItemHighlight {\n\tbackground-color: #63709A;\n\tcolor: white;\n}\n",
+   templateString : '<div class="fieldRow"><label for="${this.widgetId}"><span class="fieldLabel ${this.fieldRequiredClass}"><img width="9" height="9" border="0" src="/images/icon_required.gif"/><span dojoAttachPoint="fieldLabel">${this.label}</span></span></label><div class="fieldValue" dojoAttachPoint="fieldWrapper"><span class=\"dojoComboBoxOuter\"\n\t><input style=\"display:none\"  tabindex=\"-1\" name=\"\" value=\"\" \n\t\tdojoAttachPoint=\"comboBoxValue\"\n\t><input style=\"display:none\"  tabindex=\"-1\" name=\"\" value=\"\" \n\t\tdojoAttachPoint=\"comboBoxSelectionValue\"\n\t><input type=\"text\" autocomplete=\"off\" class=\"dojoComboBox\"\n\t\tdojoAttachEvent=\"key:_handleKeyEvents; keyUp: onKeyUp; compositionEnd; onResize;\"\n\t\tdojoAttachPoint=\"textInputNode\"\n\t><img hspace=\"0\"\n\t\tvspace=\"0\"\n\t\tclass=\"dojoComboBox\"\n\t\tdojoAttachPoint=\"downArrowNode\"\n\t\tdojoAttachEvent=\"onMouseUp:handleArrowClick; onResize;\"\n\t\tsrc=\"${this.buttonSrc}\"></img></span>\n<div dojoattachpoint="validationMessage" class="errorMsg"></div></div></div></div>',
+   mode : 'local',
+   autoComplete : true,
+   fieldRequiredClass : "required",
+   forceValidOption : true,
+   maxListLength : 10
+};
+
+hyperic.hq.dom.createDatePicker = function(datePickerName){
+    hyperic.hq.dom.datePickerProps.label = datePickerName;
+    hyperic.hq.dom.datePickerProps.name = datePickerName;
+    hyperic.hq.dom.id = datePickerName;
+    var parentNode =  document.createElement('div');
+    parentNode.id = hyperic.utils.getUniqueId();
+    dojo.byId("reportOptions").appendChild(parentNode); 
+    var calendarWidget = new dijit.form.DateTextBox(hyperic.hq.dom.datePickerProps, parentNode);
+    calendarWidget.inputNode.id = calendarWidget.widgetId;
+    hyperic.hq.reporting.manager.currentReportOptions.push(calendarWidget);
+};
+
+hyperic.hq.dom.createTextBox = function(textboxName){
+    hyperic.hq.dom.validationTextboxProps.label = textboxName;
+    hyperic.hq.dom.validationTextboxProps.name = textboxName;
+    var parentNode =  document.createElement('div');
+    parentNode.id = hyperic.utils.getUniqueId();
+    dojo.byId("reportOptions").appendChild(parentNode); 
+    var validationWidget = new dijit.form.ValidationTextbox(hyperic.hq.dom.validationTextboxProps, parentNode);
+    hyperic.hq.reporting.manager.currentReportOptions.push(validationWidget);
+    return validationWidget;
+};
+
+hyperic.hq.dom.createSelectBox = function(selectboxName, optionsArray){
+    this.option = function(name, value){
+        return "<option value='" + value + '">' + name + "</option>";
+    };
+    var select = document.createElement('select');
+    select.id = "temp";
+    var option = document.createElement('option'); 
+    option.value = "-1";
+    option.innerHTML = "All Resources";
+    select.appendChild(option);
+    for(var i =0; i < optionsArray.length; i++){
+        option = document.createElement('option');
+        option.value = optionsArray[i].id;
+        option.innerHTML = optionsArray[i].name;
+        select.appendChild(option);
+    }
+    dojo.byId("reportOptions").appendChild(select);
+    hyperic.hq.dom.selectboxProps.label = selectboxName;
+    var selectWidget = dijit.form.ComboBox(hyperic.hq.dom.selectboxProps, select);
+    selectWidget.textInputNode.id = selectWidget.widgetId;
+    selectWidget.dataProvider.searchLimit = optionsArray.length + 1;
+    selectWidget.domNode = selectWidget.textInputNode;
+    hyperic.hq.reporting.manager.currentReportOptions.push(selectWidget);
+};
+
+hyperic.hq.reporting.manager = { 
+    currentReportOptions : [], 
+    preSubmit : function(){
+        var submit = this.validateReportOptions();
+        if(submit){
+            this.serializeReportOptions();
+            //dojo.byId("ReportingForm").submit();
+            var mp = dojo.byId("messagePanel");
+            if(mp){
+                mp.style.display="none";
+            }
+            return true;
+        }else{
+            return false;
+        }
+    },
+    serializeReportOptions : function(){
+        var obj = "{";
+        for(var i = 0; i < this.currentReportOptions.length; i++){
+            if(this.currentReportOptions[i].getDate){
+                obj += '"' + this.currentReportOptions[i].name + '":"' +  this.currentReportOptions[i].getDate().getTime() +'",'; 
+            }else if(this.currentReportOptions[i].getState){
+                var value = this.currentReportOptions[i].comboBoxSelectionValue.value;
+                if(dojo.ie){
+                    obj += '"' + this.currentReportOptions[i].label + '":"' + value +'",';
+                }else{
+                    obj += '"' + this.currentReportOptions[i].label + '":"' + value +'",';
+                }
+            }else if(this.currentReportOptions[i].textbox){
+                obj += '"' + this.currentReportOptions[i].name + '":"' +  this.currentReportOptions[i].getValue() +'",';
+            }
+        }
+        obj += "}";
+        dojo.byId("jsonData").value = obj;
+    },
+    validateReportOptions : function(){
+        var submit = true;
+        var dates ={};
+        for(var i =0; i < this.currentReportOptions.length; i++){
+            if(this.currentReportOptions[i].getDate){
+                if(this.currentReportOptions[i].label == "Start Date" ||
+                    this.currentReportOptions[i].label == "StartDate"){ 
+                    dates.StartDate = this.currentReportOptions[i].getDate();
+                    dates.StartDateNode = this.currentReportOptions[i];
+                }else{
+                    dates.EndDate = this.currentReportOptions[i].getDate();
+                    dates.EndDateNode = this.currentReportOptions[i];
+                }
+                if(this.currentReportOptions[i].inputNode.value === ''){
+                    this.currentReportOptions[i].fieldWrapper.className += ' error';
+                    this.currentReportOptions[i].validationMessage.innerHTML = "&nbsp;-&nbsp;this field is required ";
+                    submit = false && submit;
+                }else{
+                    this.currentReportOptions[i].fieldWrapper.className = 'fieldValue';
+                    this.currentReportOptions[i].validationMessage.innerHTML = "";
+                    submit = true && submit;                        
+                }
+            }else if(this.currentReportOptions[i].getState){
+                if(this.currentReportOptions[i].getValue() == "" && !this.currentReportOptions[i]._isValidOption()){
+                    this.currentReportOptions[i].fieldWrapper.className += ' error';
+                    this.currentReportOptions[i].validationMessage.innerHTML = "&nbsp;-&nbsp;this field is required ";
+                    submit = false && submit;  
+                }else{
+                    this.currentReportOptions[i].fieldWrapper.className = 'fieldValue';
+                    this.currentReportOptions[i].validationMessage.innerHTML = "";
+                    submit = true && submit;
+                }
+            }else if(this.currentReportOptions[i].getValue && !this.currentReportOptions[i].getState){
+                if(this.currentReportOptions[i].textbox.value == ''){
+                    this.currentReportOptions[i].fieldWrapper.className += ' error';
+                    this.currentReportOptions[i].validationMessage.innerHTML = "&nbsp;-&nbsp;this field is required ";
+                    submit = false && submit;                       
+                }else{
+                    this.currentReportOptions[i].fieldWrapper.className = 'fieldValue';
+                    this.currentReportOptions[i].validationMessage.innerHTML = "";
+                    submit = true && submit;                        
+                }
+            }
+        }
+        if(dates.EndDate && dates.StartDate){
+            if(dates.StartDate > dates.EndDate){
+                    dates.EndDateNode.fieldWrapper.className += ' error';
+                    dates.EndDateNode.validationMessage.innerHTML = '&nbsp;-&nbsp;The "End" date must be earlier than the "Start" date.';
+                    submit = false && submit;
+            }
+        }
+        return submit;
+    }
+};
+
+function resetReportOptions(){
+    dojo.byId("reportOptions").innerHTML = "";
+    hyperic.hq.reporting.manager.currentReportOptions = [];
+    //TODO iterate through and call destroy
+}
+
+function selectedChanged(selectNode){
+    //get the changed object
+    //send to the server
+    //inner html the response after checking the validity
+    var selected;
+    var textNode;
+    var textTargetNode = dojo.byId("reportDetails");
+    if(selectNode){
+        selected = selectNode.options[selectNode.selectedIndex];
+        textNode = dojo.byId(selected.value);
+        textTargetNode.innerHTML = textNode.innerHTML;
+    }
+    getReportOptions(selected.value);
+}
+
+function getReportOptions(reportName){
+    dojo.xhrGet({
+        url: "/reporting/ReportCenter.do?reportName=" + reportName,
+        handleAs: "json",
+        load: function(data, ioArgs){
+            if(data){ createInputFieldsFromJSON(data) } 
+        },
+        error: function(type, error){ alert(error) },
+    });
+}
+
+function createInputFieldsFromJSON(descriptor){
+    resetReportOptions();
+    //for(var key in descriptor){
+    var i = 0;
+    while(i < descriptor.length){
+        // var type = descriptor[key].type;
+        var type = descriptor[i]["descriptor"].type;
+        if(type !== undefined){
+            var o = descriptor[i]['descriptor'];
+            if(type.indexOf("String") != -1){
+                hyperic.hq.dom.createTextBox(o.name);
+            }else if(type.indexOf("Date") != -1){
+                hyperic.hq.dom.createDatePicker(o.name);
+            }else if(type.indexOf("Group") != -1){
+                hyperic.hq.dom.createSelectBox(o.name, o.options);
+            }
+        } 
+        i++; 
+    }
+}
+
+/* OLD SYSTEMS DOWN */
+
+var selectedItem;
+var currentCountFilter;
+var counter = 0;
+var url = "";
+var plugin={};plugin.accordion={};plugin.ajax={};
+var updateKWArgs = {};
+
+function getUniqueId(){
+    return "unique_"+counter;
+}
+
+plugin.ajax.getData = function(data, args) {
+    var unique = null;
+    if (data) {
+        if (data.length == 0) {
+            document.getElementById('resourceTree').innerHTML = '';
+            dojo.publish("XHRComplete", ["NO_DATA_RETURNED"]);
+        }else{
+            dojo.publish("XHRComplete", ["DATA_RETURNED"]);
+            var domTree = document.getElementById('resourceTree');
+            var tree = "";
+            for (var x = 0; x < data.length; x++) {
+                var parent = data[x]['parent'];
+                var children = data[x]['children'];
+                var innerChildren = "";
+                var markExpanded = false;
+                for (var i = 0; i < children.length; i++) {
+                    if(selectedItem){
+                        if(typeof(selectedItem) == 'string' && selectedItem == children[i]['id']){
+                            unique = getUniqueId();
+                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
+                            markExpanded = true;
+                        }else if(typeof(selectedItem) == 'object' && selectedItem.getAttribute('nodeid') == children[i]['id']){
+                            unique = getUniqueId();
+                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
+                            markExpanded = true;
+                        } else {
+                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
+                        }
+                    }else{
+                        innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
+                    }
+                }
+                if (selectedItem && typeof(selectedItem) == "string" && data[x]['id'] == selectedItem) {
+                     unique = getUniqueId();
+                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded, unique);
+                } else if (selectedItem && typeof(selectedItem) == "object" && data[x]['id'] == selectedItem.getAttribute('nodeid')) {
+                     unique = getUniqueId();
+                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded, unique);
+                } else {
+                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded);
+                }
+                
+            }
+            domTree.innerHTML = tree;
+            if(unique) {
+                plugin.accordion.setSelected(dojo.byId(unique));
+            }
+        }
+    }
+    if(unique != null)
+        selectedItem = dojo.byId(unique);
+}
+
+plugin.accordion.createParent = function(name, id, count, innerChildren, markExpanded, unique) {
+    var expandStyle = markExpanded?"collapse":"expand";
+    var ret;
+    if (unique) {
+    ret = '<div class="topCat" id="'+ unique + '" onclick="plugin.accordion.disableSelection(this);plugin.accordion.swapSelected(this);" nodeid="'
+              + id + '"><div class="' + expandStyle  + '" style="width:22px;height:18px;display:inline;" onclick="plugin.accordion' 
+              + '.swapVis(this);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div style="display:inline;position:relative;">'
+              + name + " ("+count+")</div></div>"  + '<div class="resourcetypelist"';
+    } else {
+    ret = '<div class="topCat" onclick="plugin.accordion.disableSelection(this);plugin.accordion.swapSelected(this);" nodeid="'
+              + id + '"><div class="' + expandStyle  + '" style="width:22px;height:18px;display:inline;" onclick="plugin.accordion' 
+              + '.swapVis(this);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div style="display:inline;position:relative;">'
+              + name + " ("+count+")</div></div>"  + '<div class="resourcetypelist"';
+    }
+    
+    if(markExpanded) {
+        ret += '>' ;
+    } else {
+        ret += 'style="display:none">' ;
+    }
+    ret += innerChildren;
+    ret += "</div>";
+    return ret;
+};
+
+plugin.accordion.createChild = function(name, id, count, unique) {
+    if(unique) {
+        return '<div class="listItem" onclick="plugin.accordion.swapSelected(this);plugin.accordion.itemClicked(this);" id="' + unique + '" nodeid="' + id + '">' + name + ' ('+count+')</div>';
+    } else
+        return '<div class="listItem" onclick="plugin.accordion.swapSelected(this);plugin.accordion.itemClicked(this);" nodeid="' + id + '">' + name + ' ('+count+')</div>';
+};
+
+plugin.ajax.bindMixin = {
+   load: plugin.ajax.getData,
+   handleAs: "json-comment-filtered"
+};
+
+plugin.ajax.bind = function (url){
+   plugin.ajax.bindMixin.url = url;
+   dojo.xhrPost(plugin.ajax.bindMixin);
+}
+
+
+plugin.accordion.updateCallback = function(name){
+    return updateKWArgs;
+}
+
+plugin.accordion.itemClicked = function(item) {
+    updateKWArgs.typeId = item.getAttribute("nodeid");
+}
+
+plugin.accordion.swapVis = function(elem) {
+    plugin.accordion.disableSelection(elem);
+    var sib = elem.parentNode.nextSibling;
+    if (dojo.style(sib,"display") == 'none') {
+        dojo.style(sib,"display", "block");
+        elem.className="collapse";
+    } else {
+        sib.style.display = 'none';
+        elem.className="expand";
+    }
+    //plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
+}
+
+plugin.accordion.swapSelected = function(elem) {
+    plugin.accordion.disableSelection(elem);
+    if (selectedItem && typeof(selectedItem) == 'object') {
+        selectedItem.style.padding = '3px 0px 3px 0px';
+        selectedItem.style.border = '';
+        selectedItem.style.background = '';
+    }
+    selectedItem = elem;
+    dojo.cookie('selecteditemid', elem.getAttribute('nodeid'));
+    plugin.accordion.setSelected(selectedItem);
+    plugin.accordion.itemClicked(elem);
+    plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
+}
+
+plugin.accordion.setSelected = function(elem) {
+    elem.style.padding = '3px 0px 3px 0px';
+    elem.style.border = '1px solid #dddddd';
+    elem.style.background = '#88BDEE none repeat scroll 0%';
+}
+
+plugin.accordion.disableSelection = function(element) {
+    element.onselectstart = function() {
+        return false;
+    };
+    element.unselectable = "on";
+    element.style.MozUserSelect = "none";
+}
+
+plugin.accordion.openAll = function() {
+    var tree = document.getElementById('resourceTree');
+    var x = tree.getElementsByTagName('div');
+    for (var i = 0; i < x.length; i++) {
+        if (x[i].className == 'resourcetypelist') {
+            x[i].style.display = '';
+        } else if (x[i].className == 'expand') {
+            x[i].className = 'collapse';
+        }
+    }
+}
+
+plugin.accordion.closeAll = function() {
+    var tree = document.getElementById('resourceTree');
+    var x = tree.getElementsByTagName('div');
+    for (var i = 0; i < x.length; i++) {
+        if (x[i].className == 'resourcetypelist') {
+            x[i].style.display = 'none';
+        } else if (x[i].className == 'collapse') {
+            x[i].className = 'expand';
+        }
+    }
+}
 
 /**
- * @eprecated used only for the struts header
+ * @deprecated used only for the struts header
  */
 function activateHeaderTab(){
     var l = document.location;
@@ -555,3 +996,4 @@ function activateHeaderTab(){
     if(l.indexOf("admin")!=-1 || l.indexOf("Adm")!=-1)
         dojo.byId("adminTab").className = "active";
 }
+

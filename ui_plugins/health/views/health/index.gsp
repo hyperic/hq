@@ -214,7 +214,7 @@ getSystemStats();
 </div>
 
 <div id="fullBody" style="clear:both">
-  <% dojoTabContainer(id:'bodyTabContainer', style:'width: 100%; height:500px;') { %>
+  <% dojoTabContainer(id:'tabs', style:'width: 100%; height:500px;') { %>
     <% dojoTabPane(id:'diagTab', label:l.diagnostics) { %>
       <div id="diagSelectControls">
         <select id="diagSelect" onchange='selectDiag(options[selectedIndex].value)'>
@@ -236,7 +236,8 @@ getSystemStats();
     <% dojoTabPane(id:'cacheTab', label:l.cache) { %>
       <%= dojoTable(id:'cacheTable', title:l.cache,
                     refresh:60, url:urlFor(action:'cacheData'),
-                    schema:cacheSchema, numRows:500, pageControls:false) %>
+                    schema:cacheSchema, numRows:500, pageControls:false,
+                    inTabContainer:true) %>
     <% } %>
 
     <% dojoTabPane(id:'loadTab', label:l.load) { %>
@@ -264,7 +265,7 @@ getSystemStats();
     <% dojoTabPane(id:'agentTab', label:l.agents) { %>
       <%= dojoTable(id:'agentTable', title:l.agents,
                    refresh:600, url:urlFor(action:'agentData'),
-                   schema:agentSchema, numRows:15) %>
+                   schema:agentSchema, numRows:15, inTabContainer:true) %>
     <% } %>
     
   <% } %>

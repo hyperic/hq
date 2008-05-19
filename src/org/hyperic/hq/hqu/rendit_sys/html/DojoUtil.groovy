@@ -65,186 +65,6 @@ class DojoUtil {
         def idVar   = "_hqu_${params.id}"
     	def res = new StringBuffer("""
             dojo.require("dojo.cookie");
-
-            var selectedItem;
-		    var currentCountFilter;
-            var counter = 0;
-		    var url = "";
-		    var plugin={};plugin.accordion={};plugin.ajax={};
-		    var updateKWArgs = {};
-
-            function getUniqueId(){
-                return "unique_"+counter;
-            }
-		    
-		    plugin.ajax.getData = function(data, args) {
-		        var unique = null;
-		        if (data) {
-                    if (data.length == 0) {
-                        document.getElementById('resourceTree').innerHTML = '';
-                        dojo.publish("XHRComplete", ["NO_DATA_RETURNED"]);
-                    }else{
-                        dojo.publish("XHRComplete", ["DATA_RETURNED"]);
-			            var domTree = document.getElementById('resourceTree');
-			            var tree = "";
-			            for (var x = 0; x < data.length; x++) {
-			                var parent = data[x]['parent'];
-			                var children = data[x]['children'];
-			                var innerChildren = "";
-			                var markExpanded = false;
-			                for (var i = 0; i < children.length; i++) {
-			                    if(selectedItem){
-			                        if(typeof(selectedItem) == 'string' && selectedItem == children[i]['id']){
-			                            unique = getUniqueId();
-			                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
-			                            markExpanded = true;
-			                        }else if(typeof(selectedItem) == 'object' && selectedItem.getAttribute('nodeid') == children[i]['id']){
-			                            unique = getUniqueId();
-			                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
-			                            markExpanded = true;
-			                        } else {
-			                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
-			                        }
-			                    }else{
-			                        innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
-			                    }
-			                }
-			                if (selectedItem && typeof(selectedItem) == "string" && data[x]['id'] == selectedItem) {
-			                     unique = getUniqueId();
-			                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded, unique);
-			                } else if (selectedItem && typeof(selectedItem) == "object" && data[x]['id'] == selectedItem.getAttribute('nodeid')) {
-			                     unique = getUniqueId();
-			                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded, unique);
-			                } else {
-			                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded);
-			                }
-			                
-			            }
-			            domTree.innerHTML = tree;
-			            if(unique) {
-			                plugin.accordion.setSelected(dojo.byId(unique));
-			            }
-                    }
-		        }
-		        if(unique != null)
-		            selectedItem = dojo.byId(unique);
-		    }
-		
-		    plugin.accordion.createParent = function(name, id, count, innerChildren, markExpanded, unique) {
-		        var expandStyle = markExpanded?"collapse":"expand";
-		        var ret;
-		        if (unique) {
-		        ret = '<div class="topCat" id="'+ unique + '" onclick="plugin.accordion.disableSelection(this);plugin.accordion.swapSelected(this);" nodeid="'
-                          + id + '"><div class="' + expandStyle  + '" style="width:22px;height:18px;display:inline;" onclick="plugin.accordion' 
-                          + '.swapVis(this);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div style="display:inline;position:relative;">'
-                          + name + " ("+count+")</div></div>"  + '<div class="resourcetypelist"';
-		        } else {
-		        ret = '<div class="topCat" onclick="plugin.accordion.disableSelection(this);plugin.accordion.swapSelected(this);" nodeid="'
-                          + id + '"><div class="' + expandStyle  + '" style="width:22px;height:18px;display:inline;" onclick="plugin.accordion' 
-                          + '.swapVis(this);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div style="display:inline;position:relative;">'
-                          + name + " ("+count+")</div></div>"  + '<div class="resourcetypelist"';
-		        }
-		        
-		        if(markExpanded) {
-		            ret += '>' ;
-		        } else {
-		            ret += 'style="display:none">' ;
-		        }
-		        ret += innerChildren;
-		        ret += "</div>";
-		        return ret;
-		    };
-		
-		    plugin.accordion.createChild = function(name, id, count, unique) {
-		        if(unique) {
-		            return '<div class="listItem" onclick="plugin.accordion.swapSelected(this);plugin.accordion.itemClicked(this);" id="' + unique + '" nodeid="' + id + '">' + name + ' ('+count+')</div>';
-		        } else
-		            return '<div class="listItem" onclick="plugin.accordion.swapSelected(this);plugin.accordion.itemClicked(this);" nodeid="' + id + '">' + name + ' ('+count+')</div>';
-		    };
-		    
-		    plugin.ajax.bindMixin = {
-		       load: plugin.ajax.getData,
-		       handleAs: "json-comment-filtered"
-		    };
-		
-		    plugin.ajax.bind = function (url){
-		       plugin.ajax.bindMixin.url = url;
-		       dojo.xhrPost(plugin.ajax.bindMixin);
-		    }
-		    
-    
-            plugin.accordion.updateCallback = function(name){
-                return updateKWArgs;
-            }
-            
-            plugin.accordion.itemClicked = function(item) {
-                updateKWArgs.typeId = item.getAttribute("nodeid");
-            }
-        
-            plugin.accordion.swapVis = function(elem) {
-                plugin.accordion.disableSelection(elem);
-                var sib = elem.parentNode.nextSibling;
-                if (dojo.style(sib,"display") == 'none') {
-                    dojo.style(sib,"display", "block");
-                    elem.className="collapse";
-                } else {
-                    sib.style.display = 'none';
-                    elem.className="expand";
-                }
-                //plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
-            }
-        
-            plugin.accordion.swapSelected = function(elem) {
-                plugin.accordion.disableSelection(elem);
-                if (selectedItem && typeof(selectedItem) == 'object') {
-                    selectedItem.style.padding = '3px 0px 3px 0px';
-                    selectedItem.style.border = '';
-                    selectedItem.style.background = '';
-                }
-                selectedItem = elem;
-                dojo.cookie('selecteditemid', elem.getAttribute('nodeid'));
-                plugin.accordion.setSelected(selectedItem);
-                plugin.accordion.itemClicked(elem);
-                plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
-            }
-        
-            plugin.accordion.setSelected = function(elem) {
-                elem.style.padding = '3px 0px 3px 0px';
-                elem.style.border = '1px solid #dddddd';
-                elem.style.background = '#88BDEE none repeat scroll 0%';
-            }
-        
-            plugin.accordion.disableSelection = function(element) {
-                element.onselectstart = function() {
-                    return false;
-                };
-                element.unselectable = "on";
-                element.style.MozUserSelect = "none";
-            }
-        
-            plugin.accordion.openAll = function() {
-                var tree = document.getElementById('resourceTree');
-                var x = tree.getElementsByTagName('div');
-                for (var i = 0; i < x.length; i++) {
-                    if (x[i].className == 'resourcetypelist') {
-                        x[i].style.display = '';
-                    } else if (x[i].className == 'expand') {
-                        x[i].className = 'collapse';
-                    }
-                }
-            }
-        
-            plugin.accordion.closeAll = function() {
-                var tree = document.getElementById('resourceTree');
-                var x = tree.getElementsByTagName('div');
-                for (var i = 0; i < x.length; i++) {
-                    if (x[i].className == 'resourcetypelist') {
-                        x[i].style.display = 'none';
-                    } else if (x[i].className == 'collapse') {
-                        x[i].className = 'expand';
-                    }
-                }
-            }
             
     		dojo.addOnLoad(function(){
                 //Register update callback
@@ -324,6 +144,7 @@ class DojoUtil {
      */
     static String dojoTable(Binding scriptBinding, params) {
         def id           = "${params.id}"
+        def inTabContainer = "${params.inTabContainer}"
         def containerId  = "${params.containerId}"
         def tableTitle   = params.get('title', '')
         def titleHtml    = params.get('titleHtml', '')
@@ -378,24 +199,176 @@ class DojoUtil {
         def res = new StringBuffer( """
             <script type="text/javascript">
                 var ${urlXtraVar} = [];
+                var ${pageNumVar}  = 0;
+                var ${ajaxCountVar} = 0;
+                var ${sortFieldVar};
+                var ${sortOrderVar};
+                var ${lastPageVar};
+                var ${id}_inTabContainer = ${inTabContainer}
+
+                if(${id}_inTabContainer){
+                    dojo.subscribe("tabs-selectChild", null, ${id}_refreshGrid);
+                }
+                
+                function ${id}_refreshGrid(){
+				    ${id}_grid.refresh();
+				}
+
 			    function ${id}_addUrlXtraCallback(fn) {
                     ${urlXtraVar}.push(fn);
 			    }
 
-                function ${id}_refreshTable(args){
+                function ${id}_loadTableData(data, ioArgs){
+                    ${sortFieldVar} = data.sortField;
+                    ${sortOrderVar} = data.sortOrder;
 
+                    document.${id}_model.setData(data.data);
+                    var sortColIdx = 0;
+                    //set sorted column
+
+                    ${pageNumVar}  = data.pageNum;
+                    ${lastPageVar} = data.lastPage;
+                    ${idVar}_setupPager();
+                    
+
+                    ${ajaxCountVar}--;
+                    if (${ajaxCountVar} == 0) {
+                        dojo.byId("${idVar}_loadMsg").style.visibility = 'hidden';
+                    }
+                    if (data.data == '') {
+                        dojo.publish("XHRComplete", ["NO_DATA_RETURNED"]);                        
+                    }else
+                        dojo.publish("XHRComplete", ["DATA_RETURNED"]);
+                    
                 }
-                var ${idVar}_layout = [ ${view.toString()} ];
-               
-                var ${idVar}_data = [[ ]];
-                var ${idVar}_model = new dojox.grid.data.Table(null, ${idVar}_data);
+
+                function ${id}_refreshTable(kwArgs){
+                    ${ajaxCountVar}++;
+		            if (${ajaxCountVar} > 0) {
+		                dojo.byId("${idVar}_loadMsg").style.visibility = 'visible';
+		            }
+                    dojo.xhrGet({
+                        handleAs: "json-comment-filtered",
+                        url: '${params.url}' + ${id}_makeQueryStr(kwArgs),
+                        load: ${id}_loadTableData,
+                        error: function(data, ioArgs){
+                            alert('Error loading table data');
+                         }
+                    });
+                }
+
+		        function ${id}_makeQueryStr(kwArgs) {
+		            var res = '?pageNum=' + ${pageNumVar};
+		            if (kwArgs && kwArgs.numRows)
+		                res += '&pageSize='+ kwArgs.numRows;
+		            else
+		                res += '&pageSize=${params.numRows}';
+		            if(kwArgs && kwArgs.typeId)
+		                res += '&typeId='+ kwArgs.typeId;
+		
+		            if (${sortFieldVar})
+		                res += '&sortField=' + ${sortFieldVar};
+		            if (${sortOrderVar} != null)
+		                res += '&sortOrder=' + ${sortOrderVar};
+		
+		            var callbacks = ${urlXtraVar};
+		            for (var i=0; i<callbacks.length; i++) {
+		                var cb = callbacks[i];
+		
+		                var cbmap = cb("${id}");
+		                for (var v in cbmap) {
+		                    if (v == 'extend') continue;
+		                    res += '&' + v + '=' + cbmap[v];
+		                }
+		            }
+		            return res;
+		        }
+
+				function ${idVar}_setupPager() {
+		            var leftClazz = "noprevious";
+		            var pageNumDisplay = dojo.byId("${idVar}_pageNumbers");
+		            pageNumDisplay.innerHTML = "${BUNDLE['dojoutil.PageNum']} " + 
+		                                       (${pageNumVar} + 1); 
+		
+		            if (${pageNumVar} != 0) {
+		                leftClazz = 'previousLeft';
+		            }
+		            dojo.byId("${idVar}_pageLeft").setAttribute((document.all ? 'className' : 'class'), leftClazz);
+		
+		            var rightClazz = "nonext";
+		            if (${lastPageVar} == false) {
+		                rightClazz = "nextRight";
+		            }
+		            dojo.byId("${idVar}_pageRight").setAttribute((document.all ? 'className' : 'class'), rightClazz);
+		        }
+		
+		        function ${idVar}_nextPage() {
+		            if (${lastPageVar} == false)  {
+		                ${pageNumVar}++;
+		                ${id}_refreshTable();
+		            }
+		        }
+		
+		        function ${idVar}_previousPage() {
+		            if (${pageNumVar} != 0) {
+		                ${pageNumVar}--;
+		                ${id}_refreshTable();
+		            }
+		        }
+
+                var ${id}_data = [{}];//[{"Severity":" Med","AckedBy":"&nbsp;","Definition":"HQ Demo Usage Alert","Resource":"hq.hyperic.net HQ Tomcat 5.5 hq Tomcat 5.5 Webapp","Fixed":"No","Date":"4/29/08 6:40 PM",},{"Severity":" Med","AckedBy":"&nbsp;","Definition":"HQ Demo Usage Alert","Resource":"hq.hyperic.net HQ Tomcat 5.5 hq Tomcat 5.5 Webapp","Fixed":"No","Date":"4/29/08 6:40 PM",}]
+	            dojo.addOnLoad(function(){
+	                var ${id}_layout = [ ${view.toString()} ];
+	                var ${id}_model = new dojox.grid.data.Objects(null, ${id}_data);
+	                ${id}_grid.setModel(${id}_model);
+                    ${id}_grid.setStructure(${id}_layout);                    
+                    ${id}_grid.setSortIndex(1, true);
+                    ${id}_grid.render();
+                    //var grid = ${id}_grid;
+                    //var foo = 0;
+                    document.${id}_model = ${id}_model;
+	            });
             </script>
         """)
         if(params.headerHTML) {
             res << params.get('headerHTML');
         }
         res << """
-            <div id="${id}_grid" class="dojogrid" dojoType="dojox.Grid" model="${idVar}_model" structure="${idVar}_layout">
+			<div class="pageCont">
+			  <div class="tableTitleWrapper">
+			  <div id="tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
+			    ${titleHtml}
+			  </div>
+			  <div id="${idVar}_noValues" style="float:left;padding-top:3px;padding-right:15px;font-weight:bold;font-size:12px;display:none;">
+			    There isn't any information currently
+			  </div>
+			  <div style="${pageControlStyle}">
+			    <div class="boldText" style="position:relative;display:inline;float:right;padding-left:5px;padding-right:10px;padding-top:5px;">
+			      ${BUNDLE['dojoutil.Next']}
+			    </div>
+			    <div class="pageButtonCont">
+			      <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;" class="previousLeft" onclick="${idVar}_previousPage();">
+			        &nbsp;
+			      </div>
+			      <div id="${idVar}_pageNumbers" style="position: relative;display:inline;padding-left: 5px;padding-right: 5px;padding-top: 5px;float: left;">
+			        &nbsp;
+			      </div>
+			      <div id="${idVar}_pageRight" style="position: relative;display:inline;width: 19px;height:20px;float: left;" class="nextRight" onclick="${idVar}_nextPage();">
+			        &nbsp;
+			      </div>
+			    </div>
+			    <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">
+			      ${BUNDLE['dojoutil.Previous']}
+			    </div>
+			  </div>
+			  <div class='refreshButton'>
+			    <img src='/hqu/public/images/arrow_refresh.gif' width='16' height='16' title="${BUNDLE['dojoutil.Refresh']}" onclick='${id}_refreshTable();'/>
+			  </div>
+			  <div class="acLoader" id="${idVar}_loadMsg">
+			    &nbsp;
+			  </div>
+			</div>
+            <div style="height:400px;width:100%" dojoType="dojox.Grid" jsId="${id}_grid" autoHeight="false" autoWidth="false" defaultHeight="400px">
             </div>
          """
          res.toString();   

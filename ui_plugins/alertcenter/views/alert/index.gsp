@@ -53,10 +53,12 @@ function setSelectedOption() {
   <% } %>
 }
 
-onloads.push(setSelectedOption);
+dojo.addOnLoad( function(){
+    setSelectedOption()
+});
 </script>
 
-<div dojoType="dijit.layout.TabContainer" id="mainTabContainer" 
+<div dojoType="dijit.layout.TabContainer" id="tabs" 
      style="width: 100%; height:500px;">
   <div dojoType="dijit.layout.ContentPane" title="Alerts">
     <div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">
@@ -104,15 +106,17 @@ onloads.push(setSelectedOption);
         </div>
       </div>
       <div style="float:right;width:78%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" id="alertsCont">
-        <div id="alertsTable" style="display:none;">
+        <div id="alertsTable" style="">
           <%= dojoTable(id:'Alerts', title:l.ClassicAlertsTable,
                         refresh:60, url:urlFor(action:'data'),
-                        schema:alertSchema, numRows:15) %>
+                        schema:alertSchema, numRows:15,
+                        inTabContainer:true) %>
         </div>
-        <div id="groupAlertsTable" style="display:none;">
+        <div id="groupAlertsTable" style="">
           <%= dojoTable(id:'GroupAlerts', title:l.GroupAlertsTable,
                         refresh:60, url:urlFor(action:'groupData'),
-                        schema:galertSchema, numRows:15) %>
+                        schema:galertSchema, numRows:15,
+                        inTabContainer:true) %>
         </div>
       </div>
     </div>
@@ -158,27 +162,30 @@ onloads.push(setSelectedOption);
         </div>
       </div>
        <div style="float:right;display:inline;width:78%;height: 445px;overflow-x: hidden; overflow-y: auto;" id="defsCont">
-        <div id="defsTable" style="display:none;">
+        <div id="defsTable" style=";">
           <%= dojoTable(id:'Defs', title:l.ClassicDefsTable,
                         url:urlFor(action:'defData'),
-                        schema:defSchema, numRows:15) %>
+                        schema:defSchema, numRows:15,
+                        inTabContainer:true) %>
         </div>
       
-        <div id="typeDefsTable" style="display:none;">
+        <div id="typeDefsTable" style=";">
           <% if (superUser) { %>
             <%= dojoTable(id:'TypeDefs', title:l.TypeDefsTable,
                           url:urlFor(action:'typeDefData'),
-                          schema:typeDefSchema, numRows:15) %>
+                          schema:typeDefSchema, numRows:15,
+                          inTabContainer:true) %>
           <% } %>
         </div>    
 
-        <div id="galertDefsTable" style="display:none;">
+        <div id="galertDefsTable" style=";">
           <%= dojoTable(id:'GalertDefs', 
                         title:l.GroupDefsTable,
                         url:urlFor(action:'galertDefData'),
                         schema:galertDefSchema, 
                         numRows:15,
-                        readOnly:true) %>
+                        readOnly:true,
+                        inTabContainer:true) %>
         </div>    
       </div>
     </div>
