@@ -5,6 +5,10 @@ body {
     margin: 0
 }
 
+.white{
+    background: #FFF;
+}
+
 #wrapper {
     min-width: 1038px
 }
