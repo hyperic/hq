@@ -6,7 +6,6 @@
 <script>
 <body>
 <unique>
-    dojo.require("dijit.layout.TabContainer");
 </unique>
 </body>
 </script>
