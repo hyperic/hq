@@ -154,6 +154,7 @@ body{
     border-top: 1px solid #D5D8DE;
     border-right: 1px solid #D5D8DE;
     border-left: 1px solid #D5D8DE;
+    height:20px
 }
 
 .pageButtonCont {
@@ -272,6 +273,7 @@ font-weight:bold;
     float: right;
     width:16px;
     height:16px;
+    cursor:pointer
 }
 
 .acLoader {
