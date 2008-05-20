@@ -69,8 +69,9 @@ dojo.addOnLoad( function(){
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.Show}:</strong></span>
               <div>
-              <input type="radio" id="escOnly" name="inEscalation" value="true" onchange="refreshAlertTables()">${l.InEscalation}
-              <input type="radio" id="all" name="inEscalation" value="false" checked="checked" onchange="refreshAlertTables()">${l.All}
+              <input type="radio" id="notFixed" name="show" value="notfixed" onchange="refreshAlertTables()">${l.NotFixed}
+              <input type="radio" id="escOnly" name="show" value="inescalation" onchange="refreshAlertTables()">${l.InEscalation}
+              <input type="radio" id="all" name="show" value="all" checked="checked" onchange="refreshAlertTables()">${l.All}
               </div>          
             </div>
 
@@ -202,11 +203,15 @@ dojo.addOnLoad( function(){
         res['alertTime']   = timeSelect.options[timeSelect.selectedIndex].value;
 
         var escOnly    = dojo.byId('escOnly');
+        var notFixed   = dojo.byId('notFixed');
         if (escOnly.checked) {
-          res['escOnly'] = 'true'
+          res['show'] = escOnly.value;
+        }
+        else if (notFixed.checked) {
+          res['show'] = notFixed.value;
         }
         else {
-          res['escOnly'] = 'false'
+          res['show'] = 'all';
         }
 
         return res;

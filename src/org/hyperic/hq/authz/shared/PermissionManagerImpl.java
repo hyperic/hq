@@ -385,13 +385,14 @@ public class PermissionManagerImpl
     }
                                                                    
     
-    public String getAlertsHQL(boolean inEscalation) {
+    public String getAlertsHQL(boolean inEscalation, boolean notFixed) {
         // Join with Resource for sorting
         return "select a from " + (inEscalation ? "EscalationState es, " : "") +
         		"Alert a " +
                 "join a.alertDefinition d " +
                 "join d.resource r " +
           "where a.ctime between :begin and :end and " +
+                (notFixed ? " a.fixed = false and " : "") +
                 "d.priority >= :priority " +
                 (inEscalation ? "and a.id = es.alertId and " +
                 		            "es.alertDefinitionId = d.id " : "");
@@ -403,11 +404,12 @@ public class PermissionManagerImpl
          "where d.priority >= :priority";
     }
 
-    public String getGroupAlertsHQL(boolean inEscalation) {
+    public String getGroupAlertsHQL(boolean inEscalation, boolean notFixed) {
         return "select a from " + (inEscalation ? "EscalationState es, " : "") +
                 "GalertLog a " +
                "join a.alertDef d " +
          "where a.timestamp between :begin and :end " + 
+           (notFixed ? " and a.fixed = false " : "") +
            "and d.severityEnum >= :priority " +
                 (inEscalation ? "and a.id = es.alertId and " +
                                     "es.alertDefinitionId = d.id " : "");
