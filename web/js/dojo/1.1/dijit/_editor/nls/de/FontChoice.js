@@ -1,0 +1,1 @@
+({"1":"XXS","2":"XS","formatBlock":"Format","monospaced":"Monospace","3":"S","4":"M","5":"L","6":"XL","7":"XXL","fantasy":"Fantasie","serif":"Serife","p":"Absatz","pre":"Vorformatiert","sans-serif":"Serifenlos","fontName":"Schriftart","h1":"Überschrift","h2":"Unterüberschrift","h3":"Unterunterüberschrift","fontSize":"Größe","cursive":"Kursiv","monospace":"monospace"})
