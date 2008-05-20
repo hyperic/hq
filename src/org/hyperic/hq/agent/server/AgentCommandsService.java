@@ -38,7 +38,6 @@ import java.util.TimerTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
@@ -260,12 +259,12 @@ public class AgentCommandsService implements AgentCommandsClient {
     /**
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#upgrade(java.lang.String, java.lang.String)
      */
-    public void upgrade(String tarball, String destination)
+    public void upgrade(String bundle, String destination)
             throws AgentRemoteException {
-        final File tarFile = new File(tarball);
+        final File bundleFile = new File(bundle);
         final File workDir = new File(destination, "work");
         try {
-            _log.info("Preparing to upgrade agent bundle from tarball " + tarball +
+            _log.info("Preparing to upgrade agent bundle from file " + bundle +
                     " at destination " + destination);
             // check that we are running in Java Service Wrapper mode
             if (!WrapperManager.isControlledByNativeWrapper()) {
@@ -273,15 +272,15 @@ public class AgentCommandsService implements AgentCommandsClient {
                         "Upgrade command is not supported without the Java Service Wrapper.");
             }
             
-            // check that the tar file exists and is a file
+            // check that the bundle file exists and is a file
             // we are assuming at this point that the file is not corrupted
-            if (!tarFile.isFile()) {
+            if (!bundleFile.isFile()) {
                 throw new AgentRemoteException("Upgrade agent bundle "
-                        + tarball + " is not a valid file");
+                        + bundle + " is not a valid file");
             }
 
-            // assume that the tarball name is the same as the top level directory
-            final String bundleHome = getBundleHome(tarFile);
+            // assume that the bundle name is the same as the top level directory
+            final String bundleHome = getBundleHome(bundleFile);
 
             // check if the bundle home directory exists
             final File bundleDir = new File(destination, bundleHome);
@@ -292,14 +291,14 @@ public class AgentCommandsService implements AgentCommandsClient {
 
             // delete work directory in case it wasn't cleaned up
             FileUtil.deleteDir(workDir);
-            // untar to work directory
+            // extract to work directory
             try {
-                FileUtil.untar(tarFile, workDir);
+                FileUtil.decompress(bundleFile, workDir);
             }
             catch (IOException e) {
-                _log.error("Failed to untar " + tarball + " at destination " + workDir, e);
+                _log.error("Failed to decompress " + bundle + " at destination " + workDir, e);
                 throw new AgentRemoteException(
-                        "Failed to untar " + tarball + " at destination " + workDir);
+                        "Failed to decompress " + bundle + " at destination " + workDir);
             }
 
             // update the wrapper configuration for next JVM restart
@@ -323,7 +322,7 @@ public class AgentCommandsService implements AgentCommandsClient {
             // verify that top level dir exists
             if (!extractedBundleDir.isDirectory()) {
                 throw new AgentRemoteException(
-                        "Invalid agent bundle tar file detected; missing top-level "
+                        "Invalid agent bundle file detected; missing top-level "
                                 + bundleDir + " directory");
             }
          // if everything went well, move extracted files to destination
@@ -333,30 +332,36 @@ public class AgentCommandsService implements AgentCommandsClient {
             }
             _log.info("Successfully upgraded to new agent bundle");
         }
-        // cleanup work dir files and tarball
+        // cleanup work dir files and bundle
         finally {
-            doUpgradeCleanup(tarFile, workDir);
+            doUpgradeCleanup(bundleFile, workDir);
         }
     }
 
-    private void doUpgradeCleanup(File tarFile, File workDir) {
-        tarFile.delete();
+    private void doUpgradeCleanup(File bundleFile, File workDir) {
+        bundleFile.delete();
         // recursive delete
         FileUtil.deleteDir(workDir);
     }
 
-    private String getBundleHome(File tarFile)
+    private String getBundleHome(File bundleFile)
             throws AgentRemoteException {
         final int index;
-        String tarFileName = tarFile.getName();
-        if (tarFileName.endsWith(".tar.gz"))
-            index = tarFileName.lastIndexOf(".tar.gz");
-        else if (tarFileName.endsWith(".tgz"))
-            index = tarFileName.lastIndexOf(".tgz");
-        else
+        String fileName = bundleFile.getName();
+        if (fileName.endsWith(".tar.gz")) {
+            index = fileName.lastIndexOf(".tar.gz");
+        }
+        else if (fileName.endsWith(".tgz")) {
+            index = fileName.lastIndexOf(".tgz");
+        }
+        else if (fileName.endsWith(".zip")) {
+            index = fileName.lastIndexOf(".zip");
+        }
+        else {
             throw new AgentRemoteException(
-                    "Invalid file format for the agent bundle tar file (.tar.gz or .tgz expected)");
-        return tarFileName.substring(0, index);
+                    "Invalid file format for the agent bundle tar file (.zip, .tar.gz or .tgz expected)");
+        }
+        return fileName.substring(0, index);
     }
 
     // replaces the old bundle home with the new one

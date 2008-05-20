@@ -46,6 +46,8 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class FileUtil {
     private static IntHashMap invalidChars = null;
@@ -409,6 +411,21 @@ public class FileUtil {
         return dir.delete();
     }
     
+    public static void decompress(File compressedFile, File destination)
+            throws IOException {
+        if (compressedFile.getName().endsWith(".zip")) {
+            unzip(compressedFile, destination);
+        }
+        else if (compressedFile.getName().endsWith(".tgz")
+                || compressedFile.getName().endsWith(".tar.gz")) {
+            untar(compressedFile, destination);
+        }
+        else {
+            throw new IllegalArgumentException(
+                    "Invalid file format; must be one of zip, tgz, or tar.gz.");
+        }
+    }
+    
     public static void untar(File tarFile, File destinationDir)
     throws IOException {
         TarInputStream tin = null;
@@ -451,6 +468,55 @@ public class FileUtil {
         }
     }
 
+    public static void unzip(File tarFile, File destinationDir)
+    throws IOException {
+        ZipInputStream zis = null;
+        final int BUFFER = 2048;
+        try {
+            zis = new ZipInputStream(new FileInputStream(tarFile));
+            // get the first entry in the archive
+            ZipEntry zipEntry = zis.getNextEntry();
+
+            while (zipEntry != null) {
+                // create a file with the same name as the tarEntry
+                File destPath = new File(destinationDir, zipEntry.getName());
+                // create any parent directories
+                File parent = destPath.getParentFile();
+                if (parent != null) {
+                    parent.mkdirs();
+                }
+                // if entry is directory, create it
+                if (zipEntry.isDirectory()) {
+                    destPath.mkdirs();
+                }
+                else {
+                    int count;
+                    byte data[] = new byte[BUFFER];
+                    FileOutputStream fout = null;
+                    BufferedOutputStream bos = null;
+                    try {
+                        // delete the file it already exists
+                        if (destPath.exists())
+                            destPath.delete();
+                        fout = new FileOutputStream(destPath);
+                        bos = new BufferedOutputStream(fout, BUFFER);
+                        while ((count = zis.read(data, 0, BUFFER)) != -1) {
+                            bos.write(data, 0, count);
+                        }
+                        bos.flush();
+                    }
+                    finally {
+                        safeCloseStream(bos);
+                    }
+                }
+                zipEntry = zis.getNextEntry();
+            }
+        }
+        finally {
+            safeCloseStream(zis);
+        }
+    }
+    
     public static void safeCloseStream(InputStream in) 
     {
         if (in != null) {
