@@ -322,16 +322,18 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public List findAlerts(Integer subj, int priority, long timeRange,
-                           long endTime, boolean inEsc, PageInfo pageInfo) 
+                           long endTime, boolean inEsc, boolean notFixed,
+                           PageInfo pageInfo) 
         throws PermissionException 
     {
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
         endTime = TimingVoodoo.roundUpTime(endTime, 60000);
         return getAlertDAO().findByCreateTimeAndPriority(subj,
-                                                         endTime- timeRange,
+                                                         endTime - timeRange,
                                                          endTime, priority,
-                                                         inEsc, pageInfo);
+                                                         inEsc, notFixed,
+                                                         pageInfo);
     }
     
     /**
@@ -354,7 +356,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             PageInfo pInfo = PageInfo.create(index, count, AlertSortField.DATE,
                                              false);
             List alerts = findAlerts(subj.getId(), priority, timeRange,
-                                     endTime, false, pInfo);
+                                     endTime, false, false, pInfo);
             if (alerts.size() == 0)
                 break;
             
