@@ -27,6 +27,7 @@ package org.hyperic.hq.agent.server;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.util.Hashtable;
@@ -46,6 +47,7 @@ import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentMonitorValue;
+import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
@@ -74,12 +76,11 @@ public class AgentDaemon
     public static final String PROP_CERTDN = "agent.certDN";
     public static final String PROP_HOSTNAME = "agent.hostName";
 
-    private static final PrintStream SYSTEM_ERR = System.err;
     private static AgentDaemon mainInstance;
     private static Object      mainInstanceLock = new Object();
 
     private double               startTime;
-    private Log                  logger;
+    private final static Log                  logger = LogFactory.getLog(AgentDaemon.class);
     private ServerHandlerLoader  handlerLoader;
     private PluginLoader         handlerClassLoader;
     private CommandDispatcher    dispatcher;
@@ -94,7 +95,7 @@ public class AgentDaemon
     private volatile boolean     running;         // Are we running?
 
     private ProductPluginManager ppm;
-
+    
     public static AgentDaemon getMainInstance(){
         synchronized(AgentDaemon.mainInstanceLock){
             return AgentDaemon.mainInstance;
@@ -105,7 +106,6 @@ public class AgentDaemon
         // Fields which get re-used are initialized here.
         // See cleanup()/configure() for fields which can
         // be re-configured
-        this.logger        = LogFactory.getLog(AgentDaemon.class);
         this.handlerClassLoader =
             PluginLoader.create("ServerHandlerLoader",
                                 getClass().getClassLoader());
@@ -327,7 +327,7 @@ public class AgentDaemon
             try {
                 this.storageProvider.flush();
             } catch(AgentStorageException exc){
-                this.logger.error("Failed to flush Agent storage", exc);
+                logger.error("Failed to flush Agent storage", exc);
             } finally {
                 this.storageProvider.dispose();
                 this.storageProvider = null;
@@ -643,7 +643,7 @@ public class AgentDaemon
             //check .. and higher for hq-plugins
             this.ppm.registerCustomPlugins("..");
             
-            this.logger.info("Product Plugin Manager initalized");
+            logger.info("Product Plugin Manager initalized");
         } catch(PluginExistsException exc){
             logger.error("Plugin initialize > 1 time", exc);
             throw new AgentStartException("Unable to initialize plugin " +
@@ -730,7 +730,7 @@ public class AgentDaemon
         Properties bootProps;
         String tmpDir;
 
-        this.logger.info("Agent starting up, bundle name="+getCurrentAgentBundle());
+        logger.info("Agent starting up, bundle name="+getCurrentAgentBundle());
         this.running = true;
 
         bootProps = this.bootConfig.getBootProperties();
@@ -784,19 +784,19 @@ public class AgentDaemon
             this.agentTransportLifecycle.startAgentTransport();                
             
             this.listener.setup();
-            this.logger.info("Agent started successfully");
+            logger.info("Agent started successfully");
             this.sendNotification(NOTIFY_AGENT_UP, "we're up, baby!");
             this.listener.listenLoop();
             this.sendNotification(NOTIFY_AGENT_DOWN, "goin' down, baby!");
         } catch(AgentStartException exc){
-            this.logger.error(exc.getMessage(), exc);
+            logger.error(exc.getMessage(), exc);
             throw exc;
         } catch(Exception exc){
-            this.logger.error("Error running agent", exc);
+            logger.error("Error running agent", exc);
             throw new AgentStartException("Error running agent: " +
                                           exc.getMessage());
         } catch(Throwable exc){
-            this.logger.error("Critical error running agent", exc);
+            logger.error("Critical error running agent", exc);
             // We don't flush the storage here, since we may be out of
             // memory, etc -- stuff just isn't in a good state at all.
             if(this.storageProvider != null){
@@ -816,7 +816,7 @@ public class AgentDaemon
             if(this.storageProvider != null)
                 this.storageProvider.dispose();
         }
-        this.logger.info("Agent shut down");
+        logger.info("Agent shut down");
     }
 
     public static class RunnableAgent implements Runnable {
@@ -824,9 +824,6 @@ public class AgentDaemon
             AgentConfig cfg;
             AgentDaemon agent;
             String propFile;
-
-            // Setup basic logging facility -- if we need to override it, we can.
-            BasicConfigurator.configure();
 
             propFile =
                 System.getProperty(AgentConfig.PROP_PROPFILE,
@@ -842,9 +839,7 @@ public class AgentDaemon
             try {
                 cfg = AgentConfig.newInstance(propFile);
             } catch(Exception exc){
-                SYSTEM_ERR.println("Unable to configure agent: " + 
-                                   exc.getMessage());
-                exc.printStackTrace(SYSTEM_ERR);
+                logger.error("Unable to configure agent", exc);
                 return;
             }
   
@@ -852,22 +847,49 @@ public class AgentDaemon
             // allow logging configuration to come from the user's
             // .cam/agent.properties.
             PropertyConfigurator.configure(cfg.getBootProperties());
- 
+            boolean isStarted = false;
             try {
                 agent = AgentDaemon.newInstance(cfg);
                 agent.start();
+                // if we reach here, assume we have started successfully
+                isStarted = true;
             } catch(AgentConfigException exc) {
-                SYSTEM_ERR.println("Unable to configure agent: " + 
-                                   exc.getMessage());
-                System.exit(-1);
+                logger.error("Unable to configure agent: ", exc);
             } catch(AgentStartException exc) {
-                SYSTEM_ERR.println("Agent startup error: " + exc.getMessage());
-                System.exit(-1);
+                    logger.error("Agent startup error", exc);
+            } finally {
+                if (!isStarted) {
+                    rollbackAndRestartJVM();
+                    // if not in Java Service Wrapper mode, explicitly shutdown the JVM
+                    System.exit(-1);
+                }
             }
         }
     }
 
+    // rollback agent bundle and issue JVM restart if in Java Service Wrapper mode
+    private static void rollbackAndRestartJVM() {
+        logger.info("Attempting to rollback agent bundle");
+        boolean success = false;
+        try {
+            success = AgentUpgradeManager.rollback();
+        }
+        catch (IOException e) {
+            logger.error("Unable to rollback agent bundle", e);
+        }
+        if (!success) {
+            logger.error("Rollback of agent bundle was not succesful.");
+        }
+        logger.info("Restarting JVM...");
+        AgentUpgradeManager.restartJVM();
+    }
+    
     public static void main(String[] args) {
+        // Setup basic logging facility -- if we need to override it, we can.
+        // only need this in process mode, since AgentClient already configured
+        // logging system in thread mode
+        BasicConfigurator.configure();
+        
         new RunnableAgent().run();
     }
 }
