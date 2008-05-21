@@ -65,6 +65,12 @@ public class AgentConfig {
     private static final String DEFAULT_PROXY_HOST = "";
     private static final int DEFAULT_PROXY_PORT = -1;
 
+    //PluginDumper needs these to be constant folded
+    public static final String PDK_DIR_KEY = "agent.pdkDir";
+    public static final String PDK_LIB_DIR_KEY = "agent.pdkLibDir";
+    public static final String PDK_PLUGIN_DIR_KEY = "agent.pdkPluginDir";
+    public static final String PDK_WORK_DIR_KEY = "agent.pdkWorkDir";
+
     // The following final objects are the properties which are usable
     // within the configuation object.  The first element in the array
     // is the property name, the second is the default value
@@ -95,15 +101,15 @@ public class AgentConfig {
     public static final String[] PROP_LIB_HANDLERS_LIB = 
     { "agent.lib.handlers.lib", PROP_LIB_HANDLERS[1] + "/lib" };
     public static final String[] PROP_PDK_DIR = 
-    { "agent.pdkDir", System.getProperty("agent.pdkDir", PROP_BUNDLEHOME[1] + "/pdk") };
+    { PDK_DIR_KEY, System.getProperty(PDK_DIR_KEY, PROP_BUNDLEHOME[1] + "/pdk") };
     public static final String[] PROP_PDK_LIB_DIR = 
-    { "agent.pdkLibDir", System.getProperty("agent.pdklibDir", PROP_PDK_DIR[1] + "/lib") };    
+    { PDK_LIB_DIR_KEY, System.getProperty(PDK_LIB_DIR_KEY, PROP_PDK_DIR[1] + "/lib") };    
     public static final String[] PROP_PDK_PLUGIN_DIR = 
-    { "agent.pdkPluginDir", 
-        System.getProperty("agent.pdkPluginDir", PROP_PDK_DIR[1] + "/plugins") };  
+    { PDK_PLUGIN_DIR_KEY, 
+        System.getProperty(PDK_PLUGIN_DIR_KEY, PROP_PDK_DIR[1] + "/plugins") };  
     public static final String[] PROP_PDK_WORK_DIR = 
-    { "agent.pdkWorkDir", 
-        System.getProperty("agent.pdkWorkDir", 
+    { PDK_WORK_DIR_KEY, 
+        System.getProperty(PDK_WORK_DIR_KEY, 
                 PROP_PDK_DIR[1] + "/" + ClientPluginDeployer.WORK_DIR) };      
     public static final String[] PROP_PROXYHOST = 
     { "agent.proxyHost", DEFAULT_PROXY_HOST };

@@ -339,9 +339,9 @@ public class ProductPluginManager extends PluginManager {
     }
 
     private void setSystemProperties() {
-        String pdk = getProperty(AgentConfig.PROP_PDK_DIR[0]);
-        String workDir = getProperty(AgentConfig.PROP_PDK_WORK_DIR[0]);
-        String pluginsDir = getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
+        String pdk = getProperty(AgentConfig.PDK_DIR_KEY);
+        String workDir = getProperty(AgentConfig.PDK_WORK_DIR_KEY);
+        String pluginsDir = getProperty(AgentConfig.PDK_PLUGIN_DIR_KEY);
         
         if (pdk != null) {
             setPdkDir(pdk);
