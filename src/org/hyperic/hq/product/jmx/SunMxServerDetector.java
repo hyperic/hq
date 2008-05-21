@@ -93,9 +93,9 @@ public class SunMxServerDetector extends MxServerDetector {
                     }
 
                     String identifier = args[j];
-                    String installpath = getProcExe(pid);
+                    String installpath = getCanonicalPath(getProcExe(pid));
                     ServerResource server = newServerResource(installpath);
-                    if (!server.getIdentifier().equals(installpath)) {
+                    if (server.getIdentifier().equals(installpath)) {
                         //only if INVENTORY_ID was not set
                         server.setIdentifier(identifier);    
                     }
