@@ -1402,10 +1402,6 @@
   	
     <copy file="etc/wrapper.conf"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/conf/wrapper.conf"/> 		
-    <replace file="${agent.dir}/bundles/${agent.bundle.dir}/conf/wrapper.conf">
-      <replacefilter token="@@@VERSION@@@" value="${version}"/>
-    <replacefilter token="@@@BUILD@@@" value="${build}"/>
-    </replace>
   	
     <copy file="etc/rollback.properties"
         tofile="${agent.dir}/conf/rollback.properties"/>      	
