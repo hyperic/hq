@@ -856,7 +856,7 @@ public class AgentDaemon
             } catch(AgentConfigException exc) {
                 logger.error("Unable to configure agent: ", exc);
             } catch(AgentStartException exc) {
-                    logger.error("Agent startup error", exc);
+                logger.error("Agent startup error", exc);
             } finally {
                 if (!isStarted) {
                     rollbackAndRestartJVM();
