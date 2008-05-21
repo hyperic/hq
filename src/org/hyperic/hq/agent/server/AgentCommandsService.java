@@ -26,19 +26,16 @@
 package org.hyperic.hq.agent.server;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
@@ -304,7 +301,7 @@ public class AgentCommandsService implements AgentCommandsClient {
             // update the wrapper configuration for next JVM restart
             boolean success = false;
             try {
-                success = writeRollbackProperties(bundleHome);
+                success = AgentUpgradeManager.upgrade(bundleHome);
             }
             catch (IOException e) {
                 _log.error("Failed to write new bundle home " + bundleHome
@@ -362,57 +359,6 @@ public class AgentCommandsService implements AgentCommandsClient {
                     "Invalid file format for the agent bundle tar file (.zip, .tar.gz or .tgz expected)");
         }
         return fileName.substring(0, index);
-    }
-
-    // replaces the old bundle home with the new one
-    // copying over the old one as rollback in the rollback properties
-    // file used by Java Server Wrapper
-    private boolean writeRollbackProperties(String bundleDir) throws IOException {
-
-        Properties rollbackProps = new Properties();
-        FileInputStream fis = null;
-        String propFileName = System.getProperty(AgentConfig.ROLLBACK_PROPFILE,
-                AgentConfig.DEFAULT_ROLLBACKPROPFILE);
-        File propFile = new File(propFileName);
-        File tempPropFile = new File(propFileName + ".tmp");
-        try {
-            fis = new FileInputStream(propFile);
-            rollbackProps.load(fis);
-            String oldBundleDir = rollbackProps
-                    .getProperty(AgentConfig.JSW_PROP_AGENT_BUNDLE);
-            rollbackProps.setProperty(AgentConfig.JSW_PROP_AGENT_BUNDLE,
-                    bundleDir);
-            rollbackProps.setProperty(
-                    AgentConfig.JSW_PROP_AGENT_ROLLBACK_BUNDLE, oldBundleDir);
-        }
-        catch (IOException e) {
-            _log.error("Failed to load rollback properties file", e);
-            throw e;
-        }
-        finally {
-            FileUtil.safeCloseStream(fis);
-        }
-        // write out the updated rollback properties
-        FileOutputStream fos = null;
-        try {
-            try {
-                tempPropFile.delete();
-                fos = new FileOutputStream(tempPropFile);
-                rollbackProps.store(fos,
-                        "Auto-generated rollback properties do not edit!");
-            }
-            catch (IOException e) {
-                _log.error("Failed to write rollback properties file", e);
-                throw e;
-            }
-            finally {
-                FileUtil.safeCloseStream(fos);
-            }
-            return FileUtil.safeFileMove(tempPropFile, propFile);
-        }
-        finally {
-            tempPropFile.delete();
-        }
     }
 
 }
