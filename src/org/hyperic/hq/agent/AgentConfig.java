@@ -192,7 +192,7 @@ public class AgentConfig {
         File bundleHomeDir = new File(bundleHome);
         if (!bundleHomeDir.isDirectory()) {
             throw new AgentConfigException("Invalid value "
-                    + PROP_BUNDLEHOME[1] + "for required system property "
+                    + PROP_BUNDLEHOME[1] + " for required system property "
                     + PROP_BUNDLEHOME[0] + " provided!");
         }
     }
