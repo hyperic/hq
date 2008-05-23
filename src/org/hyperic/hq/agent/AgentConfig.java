@@ -116,16 +116,25 @@ public class AgentConfig {
     public static final String[] PROP_PROXYPORT = 
     { "agent.proxyPort", String.valueOf(DEFAULT_PROXY_PORT)};
     
+    // A property provided for testing rollback during agent auto-upgrade.
+    // Set the property value to the bundle name that will fail when starting 
+    // the agent so that the upgrade will revert to the rollback bundle.
+    public static final String[] PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE = 
+    { "agent.rollbackAgentBundleUpgrade", ""};    
+    
     public static final String PROP_PROPFILE = "agent.propFile";
+    
+    public static final String DEFAULT_AGENT_PROPFILE_NAME = "agent.properties";
+    
     public static final String DEFAULT_PROPFILE = PROP_INSTALLHOME[1]
-            + "/conf/agent.properties";
+            + "/conf/"+DEFAULT_AGENT_PROPFILE_NAME;
 
     public static final String ROLLBACK_PROPFILE = "agent.rollbackPropFile";
     public static final String DEFAULT_ROLLBACKPROPFILE = PROP_INSTALLHOME[1]
             + "/conf/rollback.properties";
 
     public static final String BUNDLE_PROPFILE = PROP_BUNDLEHOME[1]
-            + "/conf/agent.properties";
+            + "/conf/"+DEFAULT_AGENT_PROPFILE_NAME;
     
     private static final String[][] propertyList = {
         PROP_LISTENPORT,
@@ -144,7 +153,8 @@ public class AgentConfig {
         PROP_PDK_DIR,
         PROP_PDK_LIB_DIR,
         PROP_PDK_PLUGIN_DIR,
-        PROP_PDK_WORK_DIR
+        PROP_PDK_WORK_DIR, 
+        PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE
     };
 
     private int        listenPort;          // Port the agent should listen on
@@ -243,9 +253,9 @@ public class AgentConfig {
         final String home = System.getProperty("user.home");
         String[] userFiles = {
             //XXX Backwards compat, remove for 3.1 or 4.0?
-            home + File.separator + ".cam" + File.separator + DEFAULT_PROPFILE,
+            home + File.separator + ".cam" + File.separator + DEFAULT_AGENT_PROPFILE_NAME,
             //User overrides
-            home + File.separator + ".hq" + File.separator + DEFAULT_PROPFILE,
+            home + File.separator + ".hq" + File.separator + DEFAULT_AGENT_PROPFILE_NAME,
             //XXX considering yet another for windows where only cygwin can 'mkdir .hq'?
             //"../" + File.separator + "hq-" + DEFAULT_PROPFILE,
             //Check if the deployer has generated setup properties
