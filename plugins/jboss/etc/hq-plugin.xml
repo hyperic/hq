@@ -32,6 +32,7 @@
 <plugin name="jboss" class="JBossProductPlugin">
 
   <classpath>
+    <include name="pdk/lib/mx4j/hq-jmx.jar"/>
     <include name="client/jnp-client.jar"/>
     <include name="client/jboss-common-client.jar"/>
     <include name="client/jboss-jsr77-client.jar"/>

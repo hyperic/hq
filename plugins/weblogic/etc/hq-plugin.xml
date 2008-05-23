@@ -28,6 +28,7 @@
 <plugin name="weblogic" class="WeblogicProductPlugin">
 
   <classpath>
+    <include name="pdk/lib/mx4j/hq-jmx.jar"/>
     <!-- look for service pack jar as weblogic does in their scripts. -->
     <include name="server/lib/weblogic_sp.jar"/>
     <include name="server/lib/weblogic.jar"/>

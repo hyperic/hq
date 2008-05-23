@@ -26,118 +26,57 @@
 package org.hyperic.hq.plugin.weblogic.jmx;
 
 import java.security.PrivilegedAction;
-import java.util.Iterator;
 
-import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.ObjectInstance;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.naming.Context;
 
 import org.hyperic.hq.plugin.weblogic.WeblogicAuth;
+import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
+import org.hyperic.hq.plugin.weblogic.WeblogicUtil;
+import org.hyperic.hq.product.jmx.MBeanDumper;
+import org.hyperic.hq.product.jmx.MxUtil;
 
-import weblogic.jndi.Environment;
-import weblogic.management.MBeanHome;
-import weblogic.management.RemoteMBeanServer;
-
-public class DumpMBeans implements PrivilegedAction {
-    private String url, username, password;
+public class DumpMBeans extends MBeanDumper implements PrivilegedAction {
+    private MBeanServer mServer;
 
     public static void main(String[] args) throws Exception {
-
-        if (args.length > 0) {
-            if (args.length < 3) {
-                System.out.println("usage: url username password");
-                return;
-            }
-        }
-        else {
-            args = new String[]{"t3://localhost:7001", "weblogic", "weblogic"};
-        }
-
         DumpMBeans dumper = new DumpMBeans();
-        dumper.url      = args[0];
-        dumper.username = args[1];
-        dumper.password = args[2];
+        dumper.getConfig(args);
 
         WeblogicAuth auth =
-            WeblogicAuth.getInstance(dumper.url,
-                                     dumper.username,
-                                     dumper.password);
+            WeblogicAuth.getInstance(dumper._config);
+
         auth.runAs(dumper);
     }
-    
+
+    protected MBeanInfo getMBeanInfo(ObjectName obj) throws Exception {
+        return mServer.getMBeanInfo(obj);
+    }
+
+    protected Object getAttribute(ObjectName obj, String name) throws Exception {
+        return mServer.getAttribute(obj, name);
+    }
+
     public Object run() {
         try {
-            dump();
+            mServer = WeblogicUtil.getMBeanServer(this._config);
+            dump(mServer.queryNames(getQuery(), null));
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private void dump() throws Exception {
-        Environment env = new Environment();
-
-        env.setProviderUrl(url);
-        env.setSecurityPrincipal(username);
-        env.setSecurityCredentials(password);
-
-        Context ctx = env.getInitialContext();
-
-        MBeanHome home;
-
-        try {
-            home = (MBeanHome)ctx.lookup(MBeanHome.ADMIN_JNDI_NAME);
-        } finally {
-            ctx.close();
-        }
-
-        RemoteMBeanServer mServer = home.getMBeanServer();
-
-        Iterator iter = mServer.queryMBeans(null, null).iterator();
-        int maxLen = 275;
-
-        while (iter.hasNext()) {
-            ObjectInstance obj = (ObjectInstance)iter.next();
-            ObjectName oName = obj.getObjectName();
-            MBeanInfo info = mServer.getMBeanInfo(oName);
-            
-            System.out.println("MBean: " + info.getClassName());
-            System.out.println("Name:  " + oName);
-
-            MBeanAttributeInfo[] attrs = info.getAttributes();
-
-            for (int k = 0; k < attrs.length; k++) {
-                String name = attrs[k].getName();
-                String value = "null";
-
-                try {
-                    Object o = mServer.getAttribute(oName, name);
-                    if (o != null) {
-                        value = o.toString();
-                    }
-                } catch (Exception e) {
-
-                }
-
-                if (value.length() > maxLen) {
-                    value = value.substring(0, maxLen) + "...";
-                }
-
-                System.out.println("\t" + k + ". Attribute: " +
-                                   name + " = " + value);
-            }
-
-            MBeanOperationInfo[] ops = info.getOperations();
-
-            for (int i=0; i<ops.length; i++) {
-                System.out.println("\t Operation: " + ops[i].getName());
-            }
-
-            System.out.println("");
-        }
+    protected String[][] getPropertyMap() {
+        return new String[][] {
+            { MxUtil.PROP_JMX_URL, WeblogicMetric.PROP_ADMIN_URL },
+            { MxUtil.PROP_JMX_USERNAME, WeblogicMetric.PROP_ADMIN_USERNAME },
+            { MxUtil.PROP_JMX_PASSWORD, WeblogicMetric.PROP_ADMIN_PASSWORD },
+        };
     }
 
+    protected boolean isValidURL(String url) {
+        return url.startsWith("t3://");
+    }
 }

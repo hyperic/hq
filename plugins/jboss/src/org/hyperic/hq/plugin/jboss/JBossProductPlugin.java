@@ -103,7 +103,10 @@ public class JBossProductPlugin
         }
 
         for (int i=0; i<classpath.length; i++) {
-            classpath[i] = installDir + "/" + classpath[i];
+            File jar = new File(installDir, classpath[i]);
+            if (jar.exists()) {
+                classpath[i] = jar.getPath();
+            }
         }
 
         return classpath;

@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
@@ -46,11 +47,15 @@ import org.apache.commons.logging.LogFactory;
 public class MBeanDumper {
 
     private static Log log = LogFactory.getLog(MBeanDumper.class);
+    protected Properties _config;
+    private MBeanServerConnection _server;
+    
+    protected static final String PROP_JMX_QUERY = "jmx.query";
 
     private static final String DEFAULT_URL =
         "service:jmx:rmi://localhost/jndi/rmi://localhost:1099/jmxrmi";
 
-    private static boolean isValidObjectName(String name) {
+    protected boolean isValidObjectName(String name) {
         try {
             new ObjectName(name);
             return true;
@@ -59,7 +64,7 @@ public class MBeanDumper {
         }
     }
 
-    private static boolean isValidURL(String url) {
+    protected boolean isValidURL(String url) {
         if (url.startsWith(MxUtil.PTQL_PREFIX)) {
             return true;
         }
@@ -71,9 +76,13 @@ public class MBeanDumper {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    protected Properties getConfig(String[] args) {
+        _config = new Properties();
+
         String url = DEFAULT_URL;
         String query = "*:*";
+        String user = System.getProperty("user");
+        String pass = System.getProperty("pass");
 
         for (int i=0; i<args.length; i++) {
             String arg = args[i];
@@ -83,38 +92,84 @@ public class MBeanDumper {
             else if (isValidObjectName(arg)) {
                 query = arg;
             }
+            else if (user == null) {
+                user = arg;
+            }
+            else if (pass == null) {
+                pass = arg;
+            }
             else {
-                System.err.println("Invalid argument: " + arg);
-                return;
+                throw new IllegalArgumentException("Invalid argument: " + arg);
             }
         }
 
-        Properties config = new Properties();
-        config.putAll(System.getProperties());
+        _config.putAll(System.getProperties());
 
-        if (config.getProperty(MxUtil.PROP_JMX_URL) == null) {
-            config.setProperty(MxUtil.PROP_JMX_URL, url);
+        if (_config.getProperty(MxUtil.PROP_JMX_URL) == null) {
+            _config.setProperty(MxUtil.PROP_JMX_URL, url);
         }
 
-        //compat
-        String user = System.getProperty("user");
-        String pass = System.getProperty("pass");
+        _config.setProperty(PROP_JMX_QUERY, query);
+
         if (user != null) {
-            config.setProperty(MxUtil.PROP_JMX_USERNAME, user);
+            _config.setProperty(MxUtil.PROP_JMX_USERNAME, user);
         }
         if (pass != null) {
-            config.setProperty(MxUtil.PROP_JMX_PASSWORD, pass);
+            _config.setProperty(MxUtil.PROP_JMX_PASSWORD, pass);
         }
 
-        MBeanServerConnection mServer = MxUtil.getMBeanServer(config);
-        ObjectName qName = new ObjectName(query);
+        String[][] keys = getPropertyMap();
+        for (int i=0; i<keys.length; i++) {
+            _config.setProperty(keys[i][1], _config.getProperty(keys[i][0]));
+        }
 
-        Iterator iter = mServer.queryNames(qName, null).iterator();
+        return _config;
+    }
+
+    protected String[][] getPropertyMap() {
+        return new String[0][0];
+    }
+
+    protected MBeanServerConnection getMBeanServer(Properties config)
+        throws Exception {
+
+        _server = MxUtil.getMBeanServer(config);
+        return _server;
+    }
+
+    protected MBeanInfo getMBeanInfo(ObjectName obj) throws Exception {
+        return _server.getMBeanInfo(obj);
+    }
+
+    protected Object getAttribute(ObjectName obj, String name) throws Exception {
+        return _server.getAttribute(obj, name);
+    }
+
+    protected ObjectName getQuery() {
+        String query = _config.getProperty(PROP_JMX_QUERY);
+        try {
+            return new ObjectName(query);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(query);
+        }
+    }
+
+    public void dump(String[] args) throws Exception {
+        dump(getConfig(args));
+    }
+    
+    public void dump(Properties config) throws Exception {
+        MBeanServerConnection mServer = getMBeanServer(config);
+        dump(mServer.queryNames(getQuery(), null));
+    }
+    
+    public void dump(Set beans) {
+        Iterator iter = beans.iterator();
 
         while (iter.hasNext()) {
             ObjectName obj = (ObjectName)iter.next();
             try {
-                MBeanInfo info = mServer.getMBeanInfo(obj);
+                MBeanInfo info = getMBeanInfo(obj);
             
                 System.out.println("MBean: " + info.getClassName());
                 System.out.println("Name:  " + obj);
@@ -125,7 +180,7 @@ public class MBeanDumper {
                     String value = "null";
 
                     try {
-                        Object o = mServer.getAttribute(obj, name);
+                        Object o = getAttribute(obj, name);
                         if (o != null) {
                             if (o.getClass().isArray()) {
                                 value = Arrays.asList((Object[])o).toString();
@@ -172,5 +227,9 @@ public class MBeanDumper {
 
             System.out.println("");
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        new MBeanDumper().dump(args);
     }
 }

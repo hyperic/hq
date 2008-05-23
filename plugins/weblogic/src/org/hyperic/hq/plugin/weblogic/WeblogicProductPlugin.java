@@ -201,7 +201,10 @@ public class WeblogicProductPlugin extends ProductPlugin {
         } catch (IOException e) { }
 
         for (int i=0; i<classpath.length; i++) {
-            classpath[i] = installpath + "/" + classpath[i];
+            File jar = new File(installpath, classpath[i]);
+            if (jar.exists()) {
+                classpath[i] = jar.getPath();
+            }
         }
 
         return classpath;

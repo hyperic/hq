@@ -25,79 +25,36 @@
 
 package org.hyperic.hq.plugin.jboss;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Properties;
 
-import javax.management.*;
+import javax.management.MBeanServerConnection;
 import javax.naming.Context;
 
-import org.hyperic.hq.plugin.jboss.JBossUtil;
-import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
+import org.hyperic.hq.product.jmx.MBeanDumper;
+import org.hyperic.hq.product.jmx.MxUtil;
 
-public class JBossMBeanDumper {
+public class JBossMBeanDumper extends MBeanDumper {
+
+    protected boolean isValidURL(String url) {
+        return url.startsWith("jnp://") || super.isValidURL(url);
+    }
+
+    protected String[][] getPropertyMap() {
+        return new String[][] {
+            { MxUtil.PROP_JMX_URL, Context.PROVIDER_URL },
+            { MxUtil.PROP_JMX_USERNAME, Context.SECURITY_PRINCIPAL },
+            { MxUtil.PROP_JMX_PASSWORD, Context.SECURITY_CREDENTIALS },
+        };
+    }
+
+    protected MBeanServerConnection getMBeanServer(Properties config)
+        throws Exception {
+
+        return (MBeanServerConnection)JBossUtil.getMBeanServer(_config);
+    }
 
     //java -jar pdk/lib/hq-product.jar jboss JBossMBeanDumper
     public static void main(String[] args) throws Exception {
-        RMIAdaptor mServer = null;
-        String url;
-
-        if (args.length == 1) {
-            url = args[0];
-        }
-        else {
-            url = "jnp://localhost:1099";
-        }
-
-        Properties config = new Properties();
-        config.setProperty(Context.PROVIDER_URL, url);
-        mServer = JBossUtil.getMBeanServer(config);
-
-        Iterator iter = mServer.queryNames(null, null).iterator();
-
-        while (iter.hasNext()) {
-            ObjectName obj = (ObjectName)iter.next();
-            try {
-                MBeanInfo info = mServer.getMBeanInfo(obj);
-            
-                System.out.println("MBean: " + info.getClassName());
-                System.out.println("Name:  " + obj);
-
-                MBeanAttributeInfo[] attrs = info.getAttributes();
-                for (int k = 0; k < attrs.length; k++) {
-                    String name = attrs[k].getName();
-                    String value = "null";
-
-                    try {
-                        Object o = mServer.getAttribute(obj, name);
-                        if (o != null) {
-                            value = o.toString();
-                        }
-                    } catch (Exception e) {
-                        
-                    }
-
-                    System.out.println("\t" + k + ". Attribute: " +
-                                       name + " = " + value);
-                }
-
-                MBeanOperationInfo[] ops = info.getOperations();
-
-                for (int i=0; i<ops.length; i++) {
-                    ArrayList sig = new ArrayList();
-                    MBeanParameterInfo[] params = ops[i].getSignature();
-                    for (int j=0; j<params.length; j++) {
-                        sig.add(params[j].getType());
-                    }
-                    System.out.println("\t Operation: " +
-                                       ops[i].getReturnType() + " " +
-                                       ops[i].getName() + " " + sig);
-                }
-            } catch (Exception e) {
-
-            }
-
-            System.out.println("");
-        }
+        new JBossMBeanDumper().dump(args);
     }
 }
