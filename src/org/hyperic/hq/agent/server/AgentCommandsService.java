@@ -239,11 +239,7 @@ public class AgentCommandsService implements AgentCommandsClient {
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#restart()
      */
     public void restart() throws AgentRemoteException {
-        Timer t = new Timer();
-        t.schedule(new TimerTask()  { 
-            public void run() {
-                WrapperManager.restart();
-            }}  , 0);
+        AgentUpgradeManager.restartJVM();
     }
     
     /**
