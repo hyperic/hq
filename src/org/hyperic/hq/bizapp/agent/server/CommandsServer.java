@@ -26,7 +26,6 @@
 package org.hyperic.hq.bizapp.agent.server;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -41,10 +40,17 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Properties;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.AgentStartupCallback;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentNotificationHandler;
 import org.hyperic.hq.agent.server.AgentRunningException;
@@ -68,12 +74,6 @@ import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
 import org.hyperic.util.security.SecurityUtil;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-
 public class CommandsServer 
     implements AgentServerHandler, TokenStorer, AgentNotificationHandler
 {
@@ -91,6 +91,7 @@ public class CommandsServer
     private String               tokenFile;
     private String               keystoreFile;
     private String               keyAlg;
+    private AgentStartupCallback agentStartupCallback;
 
     public CommandsServer(){
         this.verAPI       = new CommandsAPIInfo();
@@ -101,6 +102,7 @@ public class CommandsServer
         this.startupSock  = null;
         this.keystoreFile = null;
         this.keyAlg       = null;
+        this.agentStartupCallback = null;
     }
 
     public AgentAPIInfo getAPIInfo(){
@@ -385,43 +387,35 @@ public class CommandsServer
     }
 
     public void handleNotification(String msgClass, String msg){
-        if(msgClass.equals(AgentDaemon.NOTIFY_AGENT_UP)){
-            try {
-                DataOutputStream dOs;
-
-                dOs = new DataOutputStream(this.startupSock.getOutputStream());
-                dOs.writeInt(1);
-            } catch(IOException exc){
-                this.log.error("Error writing startup state to startup port: "+
-                               exc.getMessage());
-            } finally {
-                try {this.startupSock.close();} catch(IOException iexc){}
-            }
+        this.log.debug("handling notification: "+msgClass+":"+ msg);
+        
+        if (this.agentStartupCallback != null) {
+            this.log.debug("calling back to agent");
+            if(msgClass.equals(AgentDaemon.NOTIFY_AGENT_UP)){
+                this.agentStartupCallback.onAgentStartup(true);
+            } else if (msgClass.equals(AgentDaemon.NOTIFY_AGENT_FAILED_START)) {
+                this.agentStartupCallback.onAgentStartup(false);
+            }            
         }
+        
     }
-
+    
     public void startup(AgentDaemon agent)
         throws AgentStartException 
     {
-        String startupPort;
-        int sPort;
-
-        startupPort = System.getProperty(CommandsAPIInfo.PROP_UP_PORT);
-        if(startupPort == null){
-            this.log.warn("Failure to find startup " +
-                          "reporting port in sys properties");
-        } else {
-            sPort = Integer.parseInt(startupPort);
-            try {
-                this.startupSock = new Socket("127.0.0.1", sPort);
-            } catch(IOException exc){
-                throw new AgentStartException("Failed to connect to startup " +
-                                              "port (" + sPort + "): " +
-                                              exc.getMessage(), exc);
-            }
+        try {
+            this.agentStartupCallback = new AgentStartupCallback();
             agent.registerNotifyHandler(this, AgentDaemon.NOTIFY_AGENT_UP);
+            agent.registerNotifyHandler(this, AgentDaemon.NOTIFY_AGENT_FAILED_START);
         }
-
+        catch (AgentConfigException e) {
+            this.log.warn("Failure to find startup " +
+                            "reporting port in sys properties");
+        }
+        catch (IOException e) {
+            throw new AgentStartException("Wrapped Exception", e);
+        }
+        
         this.agent = agent;
 
         try {
