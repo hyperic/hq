@@ -47,6 +47,7 @@ import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentMonitorValue;
+import org.hyperic.hq.agent.AgentStartupCallback;
 import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
@@ -72,6 +73,8 @@ public class AgentDaemon
         AgentDaemon.class.getName() + ".agentUp";
     public static final String NOTIFY_AGENT_DOWN =
         AgentDaemon.class.getName() + ".agentDown";
+    public static final String NOTIFY_AGENT_FAILED_START = 
+        AgentDaemon.class.getName()+ ".agentFailedStart";
 
     public static final String PROP_CERTDN = "agent.certDN";
     public static final String PROP_HOSTNAME = "agent.hostName";
@@ -727,26 +730,25 @@ public class AgentDaemon
     public void start() 
         throws AgentStartException 
     {
-        Properties bootProps;
-        String tmpDir;
-
-        logger.info("Agent starting up, bundle name="+getCurrentAgentBundle());
+        
         this.running = true;
-
-        bootProps = this.bootConfig.getBootProperties();
-        tmpDir = bootProps.getProperty(AgentConfig.PROP_TMPDIR[0]);
-        if (tmpDir != null) {
-            //this should always be the case.
-            cleanTmpDir(tmpDir);
-            System.setProperty("java.io.tmpdir", tmpDir);
-        }
-
-        this.monitorClients = new Hashtable();
-        this.registerMonitor("agent", this);
-        this.registerMonitor("agent.commandListener", this.listener);
-        redirectStreams(bootProps);
-                
+        boolean agentStarted = false;
+        
         try {
+            logger.info("Agent starting up, bundle name="+getCurrentAgentBundle());
+
+            Properties bootProps = this.bootConfig.getBootProperties();
+            String tmpDir = bootProps.getProperty(AgentConfig.PROP_TMPDIR[0]);
+            if (tmpDir != null) {
+                //this should always be the case.
+                cleanTmpDir(tmpDir);
+                System.setProperty("java.io.tmpdir", tmpDir);
+            }
+
+            this.monitorClients = new Hashtable();
+            this.registerMonitor("agent", this);
+            this.registerMonitor("agent.commandListener", this.listener);
+            redirectStreams(bootProps);
             
             // Load the agent transport in the server handler classloader.
             // This is necessary because we don't want the jboss remoting 
@@ -784,8 +786,13 @@ public class AgentDaemon
             this.agentTransportLifecycle.startAgentTransport();                
             
             this.listener.setup();
+
+            tryForceAgentFailure();
+                        
             logger.info("Agent started successfully");
+
             this.sendNotification(NOTIFY_AGENT_UP, "we're up, baby!");
+            agentStarted = true;
             this.listener.listenLoop();
             this.sendNotification(NOTIFY_AGENT_DOWN, "goin' down, baby!");
         } catch(AgentStartException exc){
@@ -801,87 +808,141 @@ public class AgentDaemon
             // memory, etc -- stuff just isn't in a good state at all.
             if(this.storageProvider != null){
                 this.storageProvider.dispose();
+                this.storageProvider = null;
             }
-            System.exit(1);
-            // The next line will never execute 
+
             throw new AgentStartException("Critical shutdown");
         } finally {
+            if (!agentStarted) {
+                logger.debug("Notifying that agent startup failed");
+                this.sendNotification(NOTIFY_AGENT_FAILED_START, "agent startup failed!");
+            }
+            
             if (this.agentTransportLifecycle != null) {
                 this.agentTransportLifecycle.stopAgentTransport();
             }
             
             this.running = false;
+            
             try {this.cleanup();} catch(AgentRunningException exc){}
         
-            if(this.storageProvider != null)
-                this.storageProvider.dispose();
+            if(this.storageProvider != null) {
+                this.storageProvider.dispose();                
+            }
+            
+            logger.info("Agent shut down");
         }
-        logger.info("Agent shut down");
+    }
+    
+    private void tryForceAgentFailure() throws AgentStartException {
+        String rollbackBundle = getBootConfig().getBootProperties()
+                .getProperty(AgentConfig.PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE[0]);
+        
+        if (getCurrentAgentBundle().equals(rollbackBundle)) {
+            throw new AgentStartException(AgentConfig.PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE[0]+ 
+                    " property set to force rollback of agent bundle upgrade: "+
+                    rollbackBundle);
+        }
     }
 
     public static class RunnableAgent implements Runnable {
-        public void run() {
-            AgentConfig cfg;
-            AgentDaemon agent;
-            String propFile;
-
-            propFile =
+        
+        private final boolean inNewProcess;
+        
+        public RunnableAgent() {
+            this(true);
+        }
+        
+        public RunnableAgent(boolean inNewProcess) {
+            this.inNewProcess = inNewProcess;
+        }
+        
+        public void run() {            
+            String propFile =
                 System.getProperty(AgentConfig.PROP_PROPFILE,
                                    AgentConfig.DEFAULT_PROPFILE);
+                        
 
-            //disabled to allow for configurable log directory.
-            //also i think watching this file and not ~/.cam/agent.properties
-            //will wipe out custom log config if this file changes.
-            //XXX and unclear if it is worth having the extra thread
-            //around to watch for log config changes.
-            //PropertyConfigurator.configureAndWatch(propFile);
-
+            boolean isConfigured = false;
+            
+            AgentDaemon agent = null;
+            
             try {
-                cfg = AgentConfig.newInstance(propFile);
-            } catch(Exception exc){
-                logger.error("Unable to configure agent", exc);
-                return;
-            }
-  
-            // Re-configue with the merged agent configuration.  This will
-            // allow logging configuration to come from the user's
-            // .cam/agent.properties.
-            PropertyConfigurator.configure(cfg.getBootProperties());
-            boolean isStarted = false;
-            try {
+                AgentConfig cfg = AgentConfig.newInstance(propFile);
+                // Re-configue with the merged agent configuration.  This will
+                // allow logging configuration to come from the user's
+                // .hq/agent.properties.
+                PropertyConfigurator.configure(cfg.getBootProperties());
+                
                 agent = AgentDaemon.newInstance(cfg);
-                agent.start();
-                // if we reach here, assume we have started successfully
-                isStarted = true;
-            } catch(AgentConfigException exc) {
-                logger.error("Unable to configure agent: ", exc);
-            } catch(AgentStartException exc) {
-                logger.error("Agent startup error", exc);
+                isConfigured = true;
+            } catch (AgentConfigException e) {
+                logger.error("Agent configuration error: ", e);    
+            } catch (Exception e) {
+                logger.error("Agent configuration failed: ", e);                                
             } finally {
-                if (!isStarted) {
-                    rollbackAndRestartJVM();
-                    // if not in Java Service Wrapper mode, explicitly shutdown the JVM
-                    System.exit(-1);
+                if (!isConfigured) {
+                    cleanUpOnAgentConfigFailure();
                 }
             }
-        }
-    }
 
-    // rollback agent bundle and issue JVM restart if in Java Service Wrapper mode
-    private static void rollbackAndRestartJVM() {
-        logger.info("Attempting to rollback agent bundle");
-        boolean success = false;
-        try {
-            success = AgentUpgradeManager.rollback();
+            boolean isStarted = false;
+            
+            if (agent != null) {
+                try {
+                    agent.start();
+                    isStarted = true;
+                } catch(AgentStartException e) {
+                    logger.error("Agent startup error: ", e);                                
+                } catch (Exception e) {
+                    logger.error("Agent startup failed: ", e);                
+                } finally {
+                    if (!isStarted) {
+                        cleanUpOnAgentStartFailure();
+                    }
+                }                
+            }
         }
-        catch (IOException e) {
-            logger.error("Unable to rollback agent bundle", e);
+        
+        private void cleanUpOnAgentConfigFailure() {
+            try {
+                AgentStartupCallback agentStartupCallback = new AgentStartupCallback();
+                agentStartupCallback.onAgentStartup(false);
+            } catch (Exception e) {
+                logger.error("Failed to callback on startup failure.", e);
+            }
+            
+            cleanUpOnAgentStartFailure();
         }
-        if (!success) {
-            logger.error("Rollback of agent bundle was not succesful.");
+        
+        private void cleanUpOnAgentStartFailure() {
+            if (this.inNewProcess) {
+                System.exit(-1);
+            } else {
+                rollbackAndRestartJVM();
+            } 
         }
-        logger.info("Restarting JVM...");
-        AgentUpgradeManager.restartJVM();
+        
+        // rollback agent bundle and issue JVM restart if in Java Service Wrapper mode
+        private void rollbackAndRestartJVM() {
+            logger.info("Attempting to rollback agent bundle");
+            boolean success = false;
+            try {
+                success = AgentUpgradeManager.rollback();
+            }
+            catch (IOException e) {
+                logger.error("Unable to rollback agent bundle", e);
+            }
+            if (success) {
+                logger.info("Rollback of agent bundle was successful");
+            } else {
+                logger.error("Rollback of agent bundle was not successful");
+            }
+            
+            logger.info("Restarting JVM...");
+            AgentUpgradeManager.restartJVM();
+        }
+        
     }
     
     public static void main(String[] args) {
