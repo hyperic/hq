@@ -40,10 +40,9 @@ public class AgentUpgradeManager {
      * Request a JVM restart if in Java Service Wrapper mode
      */
     public static void restartJVM() {
-        // request a JVM restart in Java Service Wrapper mode
         if (WrapperManager.isControlledByNativeWrapper()) {
-            WrapperManager.restart();
-        }
+            WrapperManager.restartAndReturn();
+        }        
     }
     
     /**
