@@ -235,11 +235,13 @@ public interface PermissionManager {
                                                         String subjectParam,
                                                         String opListParam); 
     
-    public String getAlertsHQL(boolean inEscalation, boolean notFixed);
+    public String getAlertsHQL(boolean inEscalation, boolean notFixed,
+                               Integer groupId);
     
     public String getAlertDefsHQL();
 
-    public String getGroupAlertsHQL(boolean inEscalation, boolean notFixed);
+    public String getGroupAlertsHQL(boolean inEscalation, boolean notFixed,
+                                    Integer groupId);
     
     public String getGroupAlertDefsHQL();    
     

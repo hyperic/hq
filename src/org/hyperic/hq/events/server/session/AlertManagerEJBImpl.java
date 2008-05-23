@@ -323,7 +323,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public List findAlerts(Integer subj, int priority, long timeRange,
                            long endTime, boolean inEsc, boolean notFixed,
-                           PageInfo pageInfo) 
+                           Integer groupId, PageInfo pageInfo) 
         throws PermissionException 
     {
         // Time voodoo the end time to the nearest minute so that we might
@@ -333,16 +333,19 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                                          endTime - timeRange,
                                                          endTime, priority,
                                                          inEsc, notFixed,
-                                                         pageInfo);
+                                                         groupId, pageInfo);
     }
     
     /**
      * Search alerts given a set of criteria
-     * @param timeRange the amount of milliseconds prior to current that the
-     *                  alerts will be contained in.  e.g. the beginning of the  
-     *                  time range will be (current - timeRante)
-     * @param page TODO
-     *
+     * 
+     * @param timeRange
+     *            the amount of milliseconds prior to current that the alerts
+     *            will be contained in. e.g. the beginning of the time range
+     *            will be (current - timeRante)
+     * @param page
+     *            TODO
+     * 
      * @ejb:interface-method
      */
     public List findAlerts(AuthzSubjectValue subj, int count, int priority,
@@ -356,7 +359,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             PageInfo pInfo = PageInfo.create(index, count, AlertSortField.DATE,
                                              false);
             List alerts = findAlerts(subj.getId(), priority, timeRange,
-                                     endTime, false, false, pInfo);
+                                     endTime, false, false, null, pInfo);
             if (alerts.size() == 0)
                 break;
             

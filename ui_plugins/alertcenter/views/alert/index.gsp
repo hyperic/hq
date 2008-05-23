@@ -99,7 +99,15 @@ onloads.push(setSelectedOption);
      	                      onchange:'refreshAlertTables();']) %>
      	                      
      	      </div>
-            </div>          
+            </div>
+            <div class="fieldSetStacked" style="margin-bottom:8px;">
+              <span><strong>${l.GroupFilter}</strong></span>
+       	      <div><%= selectList(groups, 
+     	                     [id:'alertGroupSelect',
+     	                      onchange:'refreshAlertTables();']) %>
+     	                      
+     	      </div>
+            </div>
             </div>
         </div>
       </div>
@@ -188,8 +196,10 @@ onloads.push(setSelectedOption);
         var res = {};
         var sevSelect  = dojo.byId('alertSevSelect');
         var timeSelect = dojo.byId('alertTimeSelect');
+        var groupSelect = dojo.byId('alertGroupSelect');
         res['minPriority'] = sevSelect.options[sevSelect.selectedIndex].value;
         res['alertTime']   = timeSelect.options[timeSelect.selectedIndex].value;
+        res['group']   = groupSelect.options[groupSelect.selectedIndex].value;
 
         var escOnly    = dojo.byId('escOnly');
         var notFixed   = dojo.byId('notFixed');

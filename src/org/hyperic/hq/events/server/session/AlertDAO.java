@@ -81,7 +81,8 @@ public class AlertDAO extends HibernateDAO {
 
     List findByCreateTimeAndPriority(Integer subj, long begin, long end,
                                      int priority, boolean inEsc,
-                                     boolean notFixed, PageInfo pageInfo)   
+                                     boolean notFixed, Integer groupId,
+                                     PageInfo pageInfo)   
     {
         String[] ops =
             new String[] { AuthzConstants.platformOpManageAlerts,
@@ -91,7 +92,7 @@ public class AlertDAO extends HibernateDAO {
         Query q;
         
         String sql = PermissionManagerFactory.getInstance()
-                        .getAlertsHQL(inEsc, notFixed)
+                        .getAlertsHQL(inEsc, notFixed, groupId)
                      + " order by " + sort.getSortString("a", "d", "r")
                      + (pageInfo.isAscending() ? "" : " DESC");
         

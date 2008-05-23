@@ -450,7 +450,7 @@ public class GalertManagerEJBImpl
             alerts = _logDAO.findByCreateTimeAndPriority(subj.getId(),
                                                          endTime - timeRange,
                                                          endTime, s, false,
-                                                         false, pInfo);
+                                                         false, null, pInfo);
         }
             
         List result = new ArrayList();
@@ -474,12 +474,12 @@ public class GalertManagerEJBImpl
      */
     public List findAlerts(AuthzSubjectValue subj, AlertSeverity severity,
                            long timeRange, long endTime, boolean inEsc,
-                           boolean notFixed, PageInfo pInfo)
+                           boolean notFixed, Integer groupId, PageInfo pInfo)
     {
         return _logDAO.findByCreateTimeAndPriority(subj.getId(), 
                                                    endTime - timeRange, endTime, 
                                                    severity, inEsc, notFixed,
-                                                   pInfo);
+                                                   groupId, pInfo);
     }
 
     /**
