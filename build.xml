@@ -55,6 +55,7 @@
 
   <!-- PDK destination -->
   <property name="pdk.dir" location="${agent.dir}/bundles/${agent.bundle.dir}/pdk" />
+  <property name="agent.pdkDir" location="${pdk.dir}" />
   <property name="pdk.lib" location="${pdk.dir}/lib" />
   <property name="pdk.plugins" location="${pdk.dir}/plugins" />
   <property name="pdk.mibs" location="${pdk.dir}/mibs" />

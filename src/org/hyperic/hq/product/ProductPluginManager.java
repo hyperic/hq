@@ -54,12 +54,14 @@ import org.apache.commons.logging.Log;
  * and is also a manager of plugin managers.
  */
 public class ProductPluginManager extends PluginManager {
-    public static final String PROP_PDK_DIR = "pdk.dir";
+    public static final String PROP_PDK_DIR =
+        AgentConfig.PDK_DIR_KEY;
     
-    private static final String PROP_PDK_PLUGINS_DIR = "pdk.dir.plugins";
+    private static final String PROP_PDK_PLUGINS_DIR =
+        AgentConfig.PDK_PLUGIN_DIR_KEY;
     
     private static final String PROP_PDK_WORK_DIR =
-        PROP_PDK_DIR + "." + ClientPluginDeployer.WORK_DIR;
+        AgentConfig.PDK_WORK_DIR_KEY;
 
     //this is really verbose and not very helpful
     static final boolean DEBUG_LIFECYCLE = false;
@@ -339,9 +341,13 @@ public class ProductPluginManager extends PluginManager {
     }
 
     private void setSystemProperties() {
-        String pdk = getProperty(AgentConfig.PDK_DIR_KEY);
-        String workDir = getProperty(AgentConfig.PDK_WORK_DIR_KEY);
-        String pluginsDir = getProperty(AgentConfig.PDK_PLUGIN_DIR_KEY);
+        String pdk = getProperty(PROP_PDK_DIR);
+        String workDir =
+            getProperty(PROP_PDK_WORK_DIR,
+                        pdk + "/" + ClientPluginDeployer.WORK_DIR);
+        String pluginsDir =
+            getProperty(PROP_PDK_PLUGINS_DIR,
+                        pdk + "/plugins");
         
         if (pdk != null) {
             setPdkDir(pdk);
