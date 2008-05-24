@@ -212,12 +212,13 @@ public abstract class PermissionManager extends AuthzSession {
                                    String opListParam); 
          
     
-    public abstract String getAlertsHQL(boolean inEscalation, boolean notFixed);
+    public abstract String getAlertsHQL(boolean inEscalation, boolean notFixed,
+                                        Integer groupId);
         
     public abstract String getAlertDefsHQL();
 
     public abstract String getGroupAlertsHQL(boolean inEscalation,
-                                             boolean notFixed);
+                                             boolean notFixed, Integer groupId);
 
     public abstract String getGroupAlertDefsHQL();    
 

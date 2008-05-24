@@ -39,8 +39,10 @@ class AlertController
         getData: {pageInfo, params -> 
             def alertTime = params.getOne('alertTime', "${now}").toLong()
             def show      = params.getOne('show', "all")
+            def group     = params.getOne('group', "0")
             alertHelper.findAlerts(getPriority(params), alertTime, now,
                                    show == "inescalation", show == "notfixed",
+                                   group != "0" ? group.toInteger() : null,
                                    pageInfo)
         },
         defaultSort: AlertSortField.DATE,
@@ -77,9 +79,12 @@ class AlertController
         getData: {pageInfo, params -> 
             def alertTime = params.getOne('alertTime', "${now}").toLong()
             def show      = params.getOne('show', "all")
+            def group     = params.getOne('group', "0")
             alertHelper.findGroupAlerts(getPriority(params), alertTime,
                                         now, show == "inescalation",
-                                        show == "notfixed", pageInfo)
+                                        show == "notfixed",
+                                        group != "0" ? group.toInteger() : null,
+                                        pageInfo)
         },
         defaultSort: GalertLogSortField.DATE,
         defaultSortOrder: 0,  // descending
@@ -233,6 +238,14 @@ class AlertController
         res
     }
 
+    private getGroups() {
+        def res = [[code:0, value:localeBundle.AllGroups]]
+        resourceHelper.findViewableGroups().each { group ->
+            res << [code: group.id, value: group.name]
+        }
+        res
+    }
+
     def AlertController() {
         setTemplate('standard')
     }
@@ -246,7 +259,8 @@ class AlertController
     	               severities      : AlertSeverity.all,
     	               lastDays        : lastDays,
     	               superUser       : user.isSuperUser(), 
-    	               isEE            : HQUtil.isEnterpriseEdition()])
+    	               isEE            : HQUtil.isEnterpriseEdition(),
+                       groups          : groups])
     }
     
     private getOnlyShowDisabled(params) { 
