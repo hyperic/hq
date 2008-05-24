@@ -8,6 +8,7 @@ import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
+import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
@@ -295,7 +296,9 @@ class ResourceConfig {
         
         appdefHandler.populateAllCfg(allConfigs, targetForGet)
         // XXX:  Undo this rollback crap when Appdef gets itself figured out.
-        appBoss.setAllConfigResponses(subject, allConfigs, allConfigsRoll)
+        def mgr = SessionManager.instance
+        def sessionId = mgr.put(subject)
+        appBoss.setAllConfigResponses(sessionId, allConfigs, allConfigsRoll)
     }
     
     private getAppdefHandler(Resource r) {
