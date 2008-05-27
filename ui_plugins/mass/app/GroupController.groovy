@@ -77,7 +77,7 @@ class GroupController extends BaseController {
     }
     
     def sync(xmlOut, params) {
-        def xmlDef = new XmlParser().parse(new StringReader(params.getOne('args')))
+        def xmlDef = new XmlParser().parse(new StringReader(getUpload('args')))
         def deleteMissing = xmlDef.'@deleteMissing'?.toBoolean()
             
         def found     = []
