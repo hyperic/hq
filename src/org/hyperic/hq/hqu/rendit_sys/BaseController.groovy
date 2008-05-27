@@ -109,6 +109,15 @@ abstract class BaseController {
         }
     }
     
+    protected String getUpload(argName) {
+        def res
+        eachUpload() { upload ->
+            if (upload.fieldName == argName)
+                res = upload.openStream().getText()
+        }
+        res
+    }
+
     def getLocaleBundle() {
         localeBundle
     }
