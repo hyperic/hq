@@ -274,7 +274,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         try {
             AuditManagerEJBImpl.getOne().pushContainer(audit);
             pushed = true;
-            checkRemovePermission(subject, server.getEntityId());
+            if (!server.getServerType().isVirtual()) {
+                checkRemovePermission(subject, server.getEntityId());
+            }
 
             // Service manager will update the collection, so we need to copy
             Collection services = new ArrayList(server.getServices());
