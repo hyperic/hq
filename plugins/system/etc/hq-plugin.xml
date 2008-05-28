@@ -671,7 +671,7 @@
             collectionType="dynamic"/>
 
     <metric name="Disk Usage"
-            template="sigar:Type=DirUsage,Arg=%path%:DiskUsage"
+            template="sigar:Type=DirStats,Arg=%path%:DiskUsage"
             category="UTILIZATION"
             units="B"
             collectionType="dynamic"/>
