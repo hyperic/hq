@@ -53,8 +53,6 @@ public abstract class NetServicesCollector extends Collector {
     private boolean isSSL, enableNetstat;
     private String sslProtcol;
 
-    private InetSocketAddress sockaddr;
-
     private String user, pass;
 
     private boolean hasCredentials;
@@ -76,9 +74,9 @@ public abstract class NetServicesCollector extends Collector {
             return;
         }
 
-        byte[] address =
-            getSocketAddress().getAddress().getAddress();
-        int port = getSocketAddress().getPort();
+        InetSocketAddress saddr = getSocketAddress();
+        byte[] address = saddr.getAddress().getAddress();
+        int port = saddr.getPort();
         NetStat netstat;
         synchronized (sigar) {
             try {
@@ -219,16 +217,14 @@ public abstract class NetServicesCollector extends Collector {
     }
 
     public InetSocketAddress getSocketAddress() {
-        if (this.sockaddr == null) {
-            String host = getHostname();
-            int port = getPort();
-            this.sockaddr =
-                new InetSocketAddress(host, port);
-            if (getSource() == null) {
-                setSource(host + ":" + port);
-            }
+        String host = getHostname();
+        int port = getPort();
+        if (getSource() == null) {
+            setSource(host + ":" + port);
         }
-        return this.sockaddr;
+        InetSocketAddress saddr =
+            new InetSocketAddress(host, port);
+        return saddr;
     }
     
     public String getHostAddress() {
@@ -265,12 +261,13 @@ public abstract class NetServicesCollector extends Collector {
     protected void connect(Socket socket)
         throws IOException {
 
+        InetSocketAddress saddr = getSocketAddress();
         try {
-            socket.connect(getSocketAddress(), getTimeoutMillis());
+            socket.connect(saddr, getTimeoutMillis());
             socket.setSoTimeout(getTimeoutMillis());
             setMessage("OK");
         } catch (IOException e) {
-            setMessage("connect " + getSocketAddress(), e);
+            setMessage("connect " + saddr, e);
             throw e;
         }        
     }
