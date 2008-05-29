@@ -180,6 +180,11 @@ public class DaemonDetector
             id = server.getIdentifier(); //might be defined in plugin.xml
         }
         server.setIdentifier(formatName(id, pconfig, sconfig, oconfig));
+
+        String installpath = (String)opts.get(INSTALLPATH);
+        if (installpath != null) {
+            server.setInstallPath(installpath);
+        }
     }
 
     protected ServerResource newServerResource(long pid, String exe) {

@@ -78,7 +78,7 @@ public abstract class ServerDetector
     private static final String VERSION_FILE = "VERSION_FILE";
     private static final String INSTALLPATH_MATCH = "INSTALLPATH_MATCH";
     private static final String INSTALLPATH_NOMATCH = "INSTALLPATH_NOMATCH";
-    private static final String INSTALLPATH = "INSTALLPATH";
+    protected static final String INSTALLPATH = "INSTALLPATH";
     protected static final String INVENTORY_ID = "INVENTORY_ID";
     private static final String AUTOINVENTORY_NAME = "AUTOINVENTORY_NAME";
     private static final String[] NO_ARGS = new String[0];
