@@ -350,8 +350,9 @@ public class MxUtil {
 
     private static void removeMBeanConnector(Properties config) {
         String jmxUrl = config.getProperty(MxUtil.PROP_JMX_URL);
-        if (cache.remove(jmxUrl) != null) {
-            log.debug("Removing cached connection for: " + jmxUrl);
+        if (cache.get(jmxUrl) != null) {
+            log.debug("Removing (stale) cached connection for: " + jmxUrl);
+            disconnect(jmxUrl);
         }
     }
 
@@ -441,6 +442,49 @@ public class MxUtil {
         return connector;
     }
 
+    private static void disconnect(String jmxUrl) {
+        Object obj = cache.remove(jmxUrl);
+        if (obj != null) {
+            JMXConnector connector =
+                ((ConnectorInstance)obj).connector;
+            try {
+                connector.close();
+                log.debug("Closed previous connector (" +
+                          address(connector) + ") for: " + jmxUrl);
+            } catch (IOException e) {
+                log.debug("Previous connector (" +
+                           address(connector) + ") already closed (" +
+                           e.getMessage() + ") for: " + jmxUrl);
+            }
+        }        
+    }
+
+    private static JMXConnector connect(Properties config,
+                                        String jmxUrl,
+                                        String jmxUsername,
+                                        String jmxPassword)
+        throws IOException {
+
+        disconnect(jmxUrl);
+        JMXConnector connector = getMBeanConnector(config);
+        cache.put(jmxUrl, new ConnectorInstance(connector, jmxUsername, jmxPassword));
+        log.debug("Opened new connector (" +
+                  address(connector) + ") for: " + jmxUrl);
+        return connector;
+    }
+
+    private static String address(Object obj) {
+        return "@" + Integer.toHexString(obj.hashCode());
+    }
+
+    private static String mask(String val) {
+        return val.replaceAll(".", "*");
+    }
+
+    private static String diff(String old, String cur) {
+        return "'" + old + "'->'" + cur + "'";  
+    }
+
     public static MBeanServerConnection getMBeanServer(Properties config)
         throws MalformedURLException,
                IOException {
@@ -456,18 +500,30 @@ public class MxUtil {
             connector = instance.connector;
             String username = instance.username;
             String password = instance.password;
-
-            if (!username.equals(jmxUsername) || !password.equals(jmxPassword)) {
-                log.debug("Credentials changed, reconnecting cached connection for: " + jmxUrl);
-                connector = getMBeanConnector(config);
-                cache.put(jmxUrl, new ConnectorInstance(connector, jmxUsername, jmxPassword));
+            boolean usernameChanged = !username.equals(jmxUsername);
+            boolean passwordChanged = !password.equals(jmxPassword);
+            if (usernameChanged || passwordChanged) {
+                if (log.isDebugEnabled()) {
+                    String diff = "";
+                    if (usernameChanged) {
+                        diff += "user:" + diff(username, jmxUsername);
+                    }
+                    if (passwordChanged) {
+                        if (diff.length() != 0) {
+                            diff += ",";
+                        }
+                        diff += "pass:" + diff(mask(password), mask(jmxPassword));
+                    }
+                    log.debug("Credentials changed (" + diff +
+                              ") reconnecting cached connection for: " + jmxUrl);                    
+                }
+                connector = connect(config, jmxUrl, jmxUsername, jmxPassword);
             }
             else {
                 isCached = true;
             }
         } else {
-            connector = getMBeanConnector(config);
-            cache.put(jmxUrl, new ConnectorInstance(connector, jmxUsername, jmxPassword));
+            connector = connect(config, jmxUrl, jmxUsername, jmxPassword);
             log.debug("Caching connector for: " + jmxUrl);
         }
 
@@ -476,8 +532,7 @@ public class MxUtil {
         } catch (IOException e) {
             if (isCached) {
                 log.debug("Reconnecting cached connection for: " + jmxUrl);
-                connector = getMBeanConnector(config);
-                cache.put(jmxUrl, new ConnectorInstance(connector, jmxUsername, jmxPassword));
+                connector = connect(config, jmxUrl, jmxUsername, jmxPassword);
                 return connector.getMBeanServerConnection();
             }
             else {
