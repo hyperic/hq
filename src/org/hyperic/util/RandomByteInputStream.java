@@ -49,7 +49,12 @@ public class RandomByteInputStream extends InputStream {
      * The number of bytes that can be read from this input stream.
      */
     protected int count;
-
+    
+    /**
+     * The random char that will be used to fill up this InputStream
+     */
+    protected char random;
+    
     /**
      * Creates a <code>RandomByteInputStream</code> of the specified
      * <code>length</code>.
@@ -59,13 +64,13 @@ public class RandomByteInputStream extends InputStream {
     public RandomByteInputStream(int length) {
         this.pos = 0;
         this.count = length;
+        this.random = (char) (Math.random() * ('z' - 'A') + 'A');
     }
 
     // initializes the array to a random identical ascii value
-    private void getRandomBytes(byte[] b) {
-        char t = (char) (Math.random() * ('z' - 'A') + 'A');
+    private void getRandomBytes(byte[] b ) {
         for (int i = 0; i < b.length; i++) {
-            b[i] = (byte) t;
+            b[i] = (byte) this.random;
         }
     }
 
