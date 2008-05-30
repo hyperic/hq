@@ -34,6 +34,7 @@ import java.util.Properties;
 
 import org.hyperic.hq.product.ClientPluginDeployer;
 import org.hyperic.util.PropertyUtil;
+import org.hyperic.util.file.FileUtil;
 
 /**
  * The configuration object for the AgentDaemon.  This class performs
@@ -387,19 +388,25 @@ public class AgentConfig {
                                  PROP_DATADIR[1]);
 
         File dir = new File(dataDir);
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                String parent 
-                    = new File(dir.getAbsolutePath())
-                    .getParentFile().getAbsolutePath();
-                throw new AgentConfigException
-                    ("Error creating data directory: " + dir.getAbsolutePath()
-                     + "\nMake sure that the " + parent + " directory is "
-                     + "owned by user '" + System.getProperty("user.name")
-                     + "' and is not a read-only directory.");
-            }
+        
+        boolean succeeded;
+        
+        try {
+            succeeded = FileUtil.makeDirs(dir, 3);
+        } catch (InterruptedException e) {
+            throw new AgentConfigException("creating data directory was interrupted");
         }
-
+        
+        if (!succeeded) {
+            String parent = new File(dir.getAbsolutePath())
+                                    .getParentFile().getAbsolutePath();
+            throw new AgentConfigException
+                   ("Error creating data directory: " + dir.getAbsolutePath()
+                    + "\nMake sure that the " + parent + " directory is "
+                    + "owned by user '" + System.getProperty("user.name")
+                    + "' and is not a read-only directory.");            
+        }
+        
         this.tokenFile = 
             appProps.getProperty("agent.tokenFile",
                                  dataDir + File.separator + "tokendata");
@@ -412,12 +419,24 @@ public class AgentConfig {
                                  PROP_LOGDIR[1]);
 
         dir = new File(logDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-            //XXX need a log or exception here.
+        
+        try {
+            succeeded = FileUtil.makeDirs(dir, 3);
+        } catch (InterruptedException e) {
+            throw new AgentConfigException("creating log directory was interrupted");
+        }
+        
+        if (!succeeded) {
+            String parent = new File(dir.getAbsolutePath())
+                                    .getParentFile().getAbsolutePath();
+            throw new AgentConfigException
+                   ("Error creating log directory: " + dir.getAbsolutePath()
+                    + "\nMake sure that the " + parent + " directory is "
+                    + "owned by user '" + System.getProperty("user.name")
+                    + "' and is not a read-only directory.");            
         }
     }
-
+    
     /**
      * Sets the port the Agent should listen on.
      *
