@@ -4,10 +4,12 @@ import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResMan
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
+import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.server.session.Platform
 import org.hyperic.hq.appdef.shared.PlatformValue
 import org.hyperic.hq.appdef.server.session.Server
@@ -23,6 +25,7 @@ import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
 import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.hyperic.util.config.ConfigResponse
+import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.hqu.rendit.util.ResourceConfig
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.auth.shared.SessionManager
@@ -282,6 +285,14 @@ class ResourceCategory {
 
     static boolean isServicePrototype(Resource r) {
         return r.resourceType.id == AuthzConstants.authzServiceProto
+    }
+    
+    static Resource getPlatform(Resource r, AuthzSubject subject) {
+        def aeid = new AppdefEntityID(r.resourceValue)
+        def aeval = new AppdefEntityValue(aeid, subject)
+        def plats = aeval.getAssociatedPlatforms(PageControl.PAGE_ALL);
+        def plat = plats[0]
+        return ResMan.one.findResource(plat.entityId)
     }
 
     /**

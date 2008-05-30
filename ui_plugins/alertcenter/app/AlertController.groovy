@@ -51,19 +51,22 @@ class AlertController
         columns: [
             [field:AlertSortField.DATE, width:'12%',
              label:{df.format(it.timestamp)}],
-            [field:AlertSortField.DEFINITION, width:'25%',
+            [field:AlertSortField.DEFINITION, width:'20%',
              label:{linkTo(it.alertDefinition.name, [resource:it]) }],
-            [field:AlertSortField.RESOURCE, width:'40%',
+            [field:AlertSortField.RESOURCE, width:'30%',
              label:{linkTo(it.alertDefinition.resource.name,
                            [resource:it.alertDefinition.resource])}],
+            [field:AlertSortField.PLATFORM, width:'20%',
+             label:{linkTo(it.alertDefinition.resource.getPlatform(user).name,
+                           [resource:it.alertDefinition.resource.getPlatform(user)])}],
             [field:AlertSortField.FIXED, width:'5%',
              label:{YesOrNo.valueFor(it.fixed).value.capitalize()}],
-            [field:AlertSortField.ACKED_BY, width:'8%',
+            [field:AlertSortField.ACKED_BY, width:'7%',
              label:{
                  def by = it.acknowledgedBy
                  by == null ? "" : by.fullName
             }],
-            [field:AlertSortField.SEVERITY, width:'10%',
+            [field:AlertSortField.SEVERITY, width:'6%',
              label:{
                 def s = it.alertDefinition.severity
                 def imgUrl = urlFor(asset:'images') + 
