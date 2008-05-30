@@ -115,6 +115,18 @@ public abstract class AlertSortField
         }
     };
 
+    public static final AlertSortField PLATFORM = 
+        new AlertSortField(6, "Platform", "alert.sortField.platform")
+    {
+        String getSortString(String alert, String def, String resource) {
+            return resource + ".platform";
+        }
+
+        public boolean isSortable() {
+            return true;
+        }
+    };
+    
     private AlertSortField(int code, String desc, String localeProp) {
         super(AlertSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));
