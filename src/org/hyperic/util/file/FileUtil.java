@@ -387,6 +387,38 @@ public class FileUtil {
         
         return res;
     }
+    
+    /**
+     * Create a directory and its parent directories if necessary. If directory 
+     * creation fails, it will be retried up to the specified number of tries.
+     * 
+     * @param dir The directory to create.
+     * @param numTries The number of tries to create the directory.
+     * @return <code>true</code> if directory creation succeeds; 
+     *         <code>false</code> if it fails.
+     * @throws InterruptedException if the operation is interrupted.        
+     * @throws IllegalArgumentException if the number of tries is less than one.        
+     */
+    public static boolean makeDirs(File dir, int numTries) throws InterruptedException {        
+        if (numTries < 1) {
+            throw new IllegalArgumentException("number of tries must be greater than zero");
+        }
+        
+        if (!dir.exists()) {
+            int tries = 0;
+            boolean succeeded = dir.mkdirs();
+
+            while (!succeeded && ++tries < numTries) {
+                Thread.sleep(10);
+
+                succeeded = dir.mkdirs();
+            }
+
+            return succeeded;
+        } else {
+            return true;
+        }
+    }
      
     /** 
      * 
