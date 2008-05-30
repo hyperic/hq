@@ -1041,12 +1041,13 @@ public class PluginDumper {
             boolean wantedPlugin =
                 type.getName().equals(runPlugin);
 
-            if ((runPlugin != null) && !wantedPlugin) {
-                continue; //filter for -t arg
+            if (runPlugin != null) {
+                if (!wantedPlugin) {
+                    continue; //filter for -t arg
+                }
             }
-
-            if ((type.getType() == TypeInfo.TYPE_PLATFORM) &&
-                !type.getName().equals(OS))
+            else if ((type.getType() == TypeInfo.TYPE_PLATFORM) &&
+                     !type.getName().equals(OS))
             {
                 continue;
             }
