@@ -56,6 +56,8 @@ public class SaveEscalation
             Boolean.valueOf(((String[])p.get("allowPause"))[0]).booleanValue();
         boolean notifyAll = 
             Boolean.valueOf(((String[])p.get("notifyAll"))[0]).booleanValue();
+        boolean repeat = 
+            Boolean.valueOf(((String[])p.get("repeat"))[0]).booleanValue();
             
         // These specify an optional alert definition to attach to
         String[] aDef  = (String[])p.get(ALERTDEF_ID);
@@ -75,9 +77,10 @@ public class SaveEscalation
             ContextUtils.getEventsBoss(context.getServletContext());
         JSONObject result;
         try {
-            Escalation e = eBoss.createEscalation(context.getSessionId(), name, 
-                                                  desc, pausable, maxWait, 
-                                                  notifyAll, alertType, alertDefId); 
+            Escalation e = eBoss.createEscalation(context.getSessionId(), name,
+                                                  desc, pausable, maxWait,
+                                                  notifyAll, repeat, alertType,
+                                                  alertDefId); 
              result = Escalation.getJSON((e));
         } catch (DuplicateObjectException exception) {
             //An escalation by this name already exists show error msg.

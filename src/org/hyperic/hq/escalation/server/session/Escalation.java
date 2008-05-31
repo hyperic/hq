@@ -59,6 +59,9 @@ public class Escalation
     // If true, notify everyone specified by the chain, else just the previous
     // notifications.
     private boolean _notifyAll;
+    
+    // If true, repeat the escalation chain once it reaches end
+    private boolean _repeat;
 
     private long _ctime;
     private long _mtime;
@@ -67,7 +70,7 @@ public class Escalation
     protected Escalation() {}
 
     Escalation(String name, String description, boolean pauseAllowed,
-                long maxPauseTime, boolean notifyAll)
+                long maxPauseTime, boolean notifyAll, boolean repeat)
     {
         _name         = name;
         _description  = description;
@@ -76,6 +79,7 @@ public class Escalation
         _notifyAll    = notifyAll;
         _ctime        = System.currentTimeMillis();
         _mtime        = _ctime;
+        _repeat       = repeat;
     }
     
     /**
@@ -184,6 +188,14 @@ public class Escalation
         return null;
     }
 
+    public boolean isRepeat() {
+        return _repeat;
+    }
+
+    public void setRepeat(boolean repeat) {
+        _repeat = repeat;
+    }
+
     public JSONObject toJSON() {
         try {
             JSONArray actions = new JSONArray();
@@ -202,6 +214,7 @@ public class Escalation
                 .put("notifyAll", isNotifyAll())
                 .put("creationTime", getCreationTime())
                 .put("modifiedTime", getModifiedTime())
+                .put("repeat", isRepeat())
                 .put("actions", actions);
 
             if (getId() != null) {

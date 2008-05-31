@@ -64,6 +64,8 @@ public class UpdateEscalation
             Boolean.valueOf(((String[])p.get("allowPause"))[0]).booleanValue();
         boolean notifyAll = 
             Boolean.valueOf(((String[])p.get("notifyAll"))[0]).booleanValue();
+        boolean repeat = 
+            Boolean.valueOf(((String[])p.get("repeat"))[0]).booleanValue();
 
         Integer id = Integer.valueOf(((String[]) p.get(ID))[0]);
 
@@ -74,7 +76,7 @@ public class UpdateEscalation
         JSONObject result;
         try {
             eBoss.updateEscalation(context.getSessionId(), escalation, name,
-                    desc, maxWait, pausable, notifyAll);
+                    desc, maxWait, pausable, notifyAll, repeat);
             result = Escalation.getJSON(escalation);
         } catch (DuplicateObjectException exception) {
             // An escalation by this name already exists show error msg.

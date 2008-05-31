@@ -79,6 +79,7 @@ function showViewEscResponse(originalRequest) {
       
 	    var creationTime = tmp.escalation.creationTime;
 	    var notifyAll = tmp.escalation.notifyAll;
+	    var repeat = tmp.escalation.repeat;
 	    var _version_ = tmp.escalation._version_;
 	    var modifiedTime = tmp.escalation.modifiedTime;
 	    var actions = tmp.escalation.actions;
@@ -120,6 +121,15 @@ function showViewEscResponse(originalRequest) {
 	        dojo.byId('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
 	        dojo.byId('notifyAllFalse').checked = "true";
 	
+	    }
+
+	    if (repeat) {
+	        dojo.byId('ended').innerHTML = '<fmt:message key="alert.config.escalation.state.ended.repeat" />';
+	        dojo.byId('repeatTrue').checked = "true";
+	    }
+	    else {
+	        dojo.byId('ended').innerHTML = '<fmt:message key="alert.config.escalation.state.ended.stop" />';
+	        dojo.byId('repeatFalse').checked = "true";
 	    }
 	
 	    var escViewUL = dojo.byId('viewEscalationUL');
@@ -190,6 +200,7 @@ function showViewEscResponse(originalRequest) {
 	        dojo.byId('modifiedTime').value = modifiedTime;
 	        dojo.byId('allowPause').value = allowPause;
 	        dojo.byId('id').value = id;
+	        dojo.byId('repeat').value = repeat;
 	
 	        escViewUL.appendChild(viewLi)
 	
@@ -1223,17 +1234,8 @@ function saveAddEscalation() {
 
 <c:if test="${useroperations['modifyEscalation']}">
 <div class="ListHeaderInactive"
-     style="border: 1px solid rgb(213, 216, 222); margin-bottom: 10px;">
-    <table cellspacing="0" cellpadding="3" border="0">
-        <tbody>
-            <tr>
-                <td>
-                    <fmt:message
-                            key="inform.config.escalation.scheme.inProgressEscalation"/>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+     style="border: 1px solid rgb(213, 216, 222); margin-bottom: 10px; padding: 4px; font-weight: normal;">
+     <fmt:message key="inform.config.escalation.scheme.inProgressEscalation"/>
 </div>
 </c:if>
 
@@ -1301,6 +1303,12 @@ function saveAddEscalation() {
                         key="alert.config.escalation.state.change"/>
             </td>
             <td id="changed" class="BlockContent"></td>
+        </tr>
+        <tr>
+            <td class="BlockLabel" nowrap="true">
+                <fmt:message key="alert.config.escalation.state.ended"/>
+            </td>
+            <td id="ended" class="BlockContent"></td>
         </tr>
         <c:if test="${useroperations['modifyEscalation']}">
             <tr class="ToolbarContent">
@@ -1433,6 +1441,34 @@ function saveAddEscalation() {
                             checked="true"/>
                         <fmt:message
                                 key="alert.config.escalation.state.change.notify.previous"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </td>
+</tr>
+<tr>
+    <td class="BlockTitle">
+        <fmt:message key="alert.config.escalation.state.ended"/>
+        <br>
+    </td>
+</tr>
+<tr class="BlockContent">
+    <td style="padding-left:15px;padding-bottom:10px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tbody>
+                <tr>
+                    <td style="padding-top:2px;padding-bottom:2px;"><input
+                            type="radio" name="repeat" id="repeatFalse" value="false"
+                            checked="true"/>
+                        <fmt:message key="alert.config.escalation.state.ended.stop"/>
+                    </td>
+                </tr>
+               <tr>
+                    <td style="padding-top:2px;padding-bottom:2px;"><input
+                            type="radio" name="repeat" id="repeatTrue" value="true"
+                            onClick="this.value=true;"/>
+                        <fmt:message key="alert.config.escalation.state.ended.repeat"/>
                     </td>
                 </tr>
             </tbody>

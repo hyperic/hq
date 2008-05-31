@@ -111,14 +111,14 @@ public class EscalationManagerEJBImpl
      */
     public Escalation createEscalation(String name, String description,
                                        boolean pauseAllowed, long maxWaitTime,
-                                       boolean notifyAll) 
+                                       boolean notifyAll, boolean repeat) 
         throws DuplicateObjectException
     {
         Escalation res;
         
         assertEscalationNameIsUnique(name);
         res = new Escalation(name, description, pauseAllowed, maxWaitTime,
-                             notifyAll); 
+                             notifyAll, repeat); 
                               
         _esclDAO.save(res);
         return res;
@@ -133,7 +133,7 @@ public class EscalationManagerEJBImpl
     public void updateEscalation(AuthzSubject subject, Escalation esc,
                                  String name, String description,
                                  boolean pauseAllowed, long maxWaitTime,
-                                 boolean notifyAll) 
+                                 boolean notifyAll, boolean repeat) 
         throws DuplicateObjectException, PermissionException
     {
         SessionBase.canModifyEscalation(subject.getId());
@@ -147,6 +147,7 @@ public class EscalationManagerEJBImpl
         esc.setPauseAllowed(pauseAllowed);
         esc.setMaxPauseTime(maxWaitTime);
         esc.setNotifyAll(notifyAll);
+        esc.setRepeat(repeat);
     }
 
     private void unscheduleEscalation(Escalation e) {
@@ -468,10 +469,15 @@ public class EscalationManagerEJBImpl
         //        we allow this to proceed
         _log.debug("Executing state[" + s.getId() + "]");
         if (actionIdx >= e.getActions().size()) {
-            _log.debug("Reached the end of the escalation state[" + 
-                       s.getId() + "].  Ending it");
-            endEscalation(s);
-            return;
+            if (e.isRepeat()) {
+                actionIdx = 0;          // Loop back
+            }
+            else {
+                _log.debug("Reached the end of the escalation state[" + 
+                           s.getId() + "].  Ending it");
+                endEscalation(s);
+                return;
+            }
         }
         
         eAction = (EscalationAction)e.getActions().get(actionIdx);
@@ -481,7 +487,8 @@ public class EscalationManagerEJBImpl
 
         // Always make sure that we increase the state offset of the
         // escalation so we don't loop fo-eva 
-        long nextTime = System.currentTimeMillis() + eAction.getWaitTime();
+        long nextTime = System.currentTimeMillis() + 
+            Math.max(60000, eAction.getWaitTime());
             
         _log.debug("Moving onto next state of escalation, but chillin' for "
                    + eAction.getWaitTime() + " ms");

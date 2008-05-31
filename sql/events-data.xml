@@ -10,6 +10,6 @@
   </table>	
   <table name="EAM_ESCALATION">
     <data ID="100" VERSION_COL="0" NAME="Default Escalation" CTIME="0"
-          MTIME="0" DESCRIPTION="This is an Escalation Scheme created by HQ that performs no actions" ALLOW_PAUSE="FALSE" MAX_WAIT_TIME="300000" NOTIFY_ALL="FALSE"/>
+          MTIME="0" DESCRIPTION="This is an Escalation Scheme created by HQ that performs no actions" ALLOW_PAUSE="FALSE" MAX_WAIT_TIME="300000" NOTIFY_ALL="FALSE" REPEAT="FALSE"/>
   </table>
 </Covalent.DBSetup> 

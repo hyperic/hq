@@ -8032,6 +8032,27 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.96.7">
+      <schema-addColumn table="EAM_ESCALATION"
+                        column="REPEAT"
+                        columnType="boolean"/>
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+        UPDATE EAM_ESCALATION SET REPEAT = false WHERE REPEAT IS NULL
+        </statement>
+        <statement targetDB="oracle">
+        UPDATE EAM_ESCALATION SET REPEAT = 0 WHERE REPEAT IS NULL
+        </statement>
+        <statement targetDB="mysql">
+        UPDATE EAM_ESCALATION SET REPEAT = 0 WHERE REPEAT IS NULL
+        </statement>
+      </schema-directSQL>
+      <schema-alterColumn table="EAM_ESCALATION"
+                          column="REPEAT"
+                          default="false"
+                          nullable="NOT NULL"/>
+  </schemaSpec>
+
   <schemaSpec version="3.97">
     <schema-addColumn table="EAM_MEASUREMENT" column="RESOURCE_ID" 
                       columnType="INTEGER">
@@ -8981,6 +9002,27 @@ has already been defined.
                    insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (60, 'AGENT_BUNDLE_REPOSITORY_DIR', 'hq-agent-bundles', '', %%FALSE%%)"/>
   </schemaSpec>
 		  
+  <schemaSpec version="3.120">
+      <schema-addColumn table="EAM_ESCALATION"
+                        column="REPEAT"
+                        columnType="boolean"/>
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+        UPDATE EAM_ESCALATION SET REPEAT = false WHERE REPEAT IS NULL
+        </statement>
+        <statement targetDB="oracle">
+        UPDATE EAM_ESCALATION SET REPEAT = 0 WHERE REPEAT IS NULL
+        </statement>
+        <statement targetDB="mysql">
+        UPDATE EAM_ESCALATION SET REPEAT = 0 WHERE REPEAT IS NULL
+        </statement>
+      </schema-directSQL>
+      <schema-alterColumn table="EAM_ESCALATION"
+                          column="REPEAT"
+                          default="false"
+                          nullable="NOT NULL"/>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
