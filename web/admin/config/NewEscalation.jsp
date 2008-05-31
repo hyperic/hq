@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
 
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
 
   HQ is free software; you can redistribute it and/or modify
@@ -985,6 +985,28 @@ function editEscalation (row) {
       </table>
       </td>
     </tr>
+    <tr>
+      <td class="BlockTitle"><fmt:message key="alert.config.escalation.state.ended" /><br>
+      </td>
+    </tr>
+    <tr class="ListRow">
+      <td style="padding-left:15px;padding-bottom:10px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tbody>
+          <tr>
+            <td style="padding-top:2px;padding-bottom:2px;"><input
+              type="radio" name="repeat" value="false" checked="true" /> <fmt:message
+              key="alert.config.escalation.state.ended.stop" /></td>
+          </tr>
+          <tr>
+            <td style="padding-top:2px;padding-bottom:2px;"><input
+              type="radio" name="repeat" value="true" /> <fmt:message
+              key="alert.config.escalation.state.ended.repeat" /></td>
+          </tr>
+        </tbody>
+      </table>
+      </td>
+    </tr>
     <tr class="ToolbarContent"><!-- SET TOOLBAR -->
       <td>
         <tiles:insert page="/common/components/ActionButton.jsp">
@@ -1080,7 +1102,8 @@ function editEscalation (row) {
 <input type="hidden" value="" id="creationTime"> <input type="hidden"
   value="" id="_version_"> <input type="hidden" value="" id="notifyAll">
 <input type="hidden" value="" id="modifiedTime"> <input type="hidden"
-  value="" id="allowPause"> <input type="hidden" value="" id="escName">
+  value="" id="allowPause"> <input type="repeat" value="" id="repeat">
+  <input type="hidden" value="" id="escName">
 <input type="hidden" value="" id="id"></form>
 </c:if>
 

@@ -123,7 +123,7 @@ public abstract class AlertSortField
         }
 
         public boolean isSortable() {
-            return true;
+            return false;
         }
     };
     

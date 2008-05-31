@@ -8030,6 +8030,26 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.96.7">
+      <schema-addColumn table="EAM_ESCALATION"
+                        column="REPEAT"
+                        columnType="boolean"/>
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+        UPDATE EAM_ESCALATION SET REPEAT = false WHERE REPEAT IS NULL
+        </statement>
+        <statement targetDB="oracle">
+        UPDATE EAM_ESCALATION SET REPEAT = 0 WHERE REPEAT IS NULL
+        </statement>
+        <statement targetDB="mysql">
+        UPDATE EAM_ESCALATION SET REPEAT = 0 WHERE REPEAT IS NULL
+        </statement>
+      </schema-directSQL>
+      <schema-alterColumn table="EAM_ESCALATION"
+                        column="REPEAT"
+                        default="false"
+                        nullable="NOT NULL"/>
+  </schemaSpec>
 </dbupgrade>
 </target>
 

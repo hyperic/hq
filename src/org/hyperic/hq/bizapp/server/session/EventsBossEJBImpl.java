@@ -1722,7 +1722,7 @@ public class EventsBossEJBImpl
      */
     public Escalation createEscalation(int sessionID, String name, String desc,
                                        boolean allowPause, long maxWaitTime,
-                                       boolean notifyAll, 
+                                       boolean notifyAll, boolean repeat,
                                        EscalationAlertType alertType,
                                        Integer alertDefId)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -1734,7 +1734,7 @@ public class EventsBossEJBImpl
         // XXX -- We need to do perm-checking here
         
         res = getEscMan().createEscalation(name, desc, allowPause, maxWaitTime, 
-                                           notifyAll);
+                                           notifyAll, repeat);
         
         if (alertDefId != null) {
             // The alert def needs to use this escalation
@@ -1750,14 +1750,15 @@ public class EventsBossEJBImpl
      */
     public void updateEscalation(int sessionID, Escalation escalation,
                                  String name, String desc, long maxWait,
-                                 boolean pausable, boolean notifyAll)
+                                 boolean pausable, boolean notifyAll,
+                                 boolean repeat)
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, DuplicateObjectException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
         getEscMan().updateEscalation(subject, escalation, name, desc, 
-                                     pausable, maxWait, notifyAll);
+                                     pausable, maxWait, notifyAll, repeat);
     }
 
     /**
