@@ -259,7 +259,9 @@ class ResourceHelper extends BaseHelper {
      * Find all {@link ResourceGroup}s viewable to the passed user.
      */
     List findViewableGroups() {
-        groupMan.getAllResourceGroups(user, true) // excludeRoot
+        groupMan.getAllResourceGroups(user, true).grep {
+            !it.system
+        }
     }
      
     /**
