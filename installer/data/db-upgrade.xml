@@ -8050,7 +8050,18 @@ has already been defined.
       <schema-alterColumn table="EAM_ESCALATION"
                           column="REPEAT"
                           default="false"
-                          nullable="NOT NULL"/>
+                          nullable="NOT NULL"
+                          targetDB="postgresql"/>
+      <schema-alterColumn table="EAM_ESCALATION"
+                          column="REPEAT"
+                          default="0"
+                          nullable="NOT NULL"
+                          targetDB="oracle"/>
+      <schema-alterColumn table="EAM_ESCALATION"
+                          column="REPEAT"
+                          default="0"
+                          nullable="NOT NULL"
+                          targetDB="mysql"/>
   </schemaSpec>
 
   <schemaSpec version="3.97">
@@ -9020,7 +9031,18 @@ has already been defined.
       <schema-alterColumn table="EAM_ESCALATION"
                           column="REPEAT"
                           default="false"
-                          nullable="NOT NULL"/>
+                          nullable="NOT NULL"
+                          targetDB="postgresql"/>
+      <schema-alterColumn table="EAM_ESCALATION"
+                          column="REPEAT"
+                          default="0"
+                          nullable="NOT NULL"
+                          targetDB="oracle"/>
+      <schema-alterColumn table="EAM_ESCALATION"
+                          column="REPEAT"
+                          default="0"
+                          nullable="NOT NULL"
+                          targetDB="mysql"/>
   </schemaSpec>
 
 </dbupgrade>
