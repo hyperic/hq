@@ -399,7 +399,56 @@
             units="ms"/>
   </metrics>
 
-  <metrics name="Linux" include="system-common-unix,cpu-wait,tcp,nfs">
+  <metrics name="cpu-irq">
+    <metric name="Cpu Irq"
+            alias="CpuIrq"
+            template="sigar:Type=CpuPerc:Irq"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="percentage"/>
+
+    <metric name="Cpu Irq Time"
+            alias="CpuIrqSec"
+            template="sigar:Type=Cpu:Irq"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="ms"/>
+  </metrics>
+
+  <metrics name="cpu-softirq">
+    <metric name="Cpu SoftIrq"
+            alias="CpuSoftIrq"
+            template="sigar:Type=CpuPerc:SoftIrq"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="percentage"/>
+
+    <metric name="Cpu SoftIrq Time"
+            alias="CpuSoftIrqSec"
+            template="sigar:Type=Cpu:SoftIrq"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="ms"/>
+  </metrics>
+
+  <metrics name="cpu-stolen">
+    <metric name="Cpu Stolen"
+            alias="CpuStolen"
+            template="sigar:Type=CpuPerc:Stolen"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="percentage"/>
+
+    <metric name="Cpu Stolen Time"
+            alias="CpuStolenSec"
+            template="sigar:Type=Cpu:Stolen"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="ms"/>
+  </metrics>
+
+  <metrics name="Linux"
+           include="system-common-unix,cpu-wait,cpu-irq,cpu-softirq,cpu-stolen,tcp,nfs">
     <metric name="Free Memory (+ buffers/cache)"
             alias="ActualMemFree"
             template="sigar:Type=Mem:ActualFree"
