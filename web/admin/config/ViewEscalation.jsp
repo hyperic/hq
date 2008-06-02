@@ -149,6 +149,14 @@ function showViewEscResponse(originalRequest) {
 	        $('viewSection').style.display = "";
 	    }
 	
+        $('creationTime').value = creationTime;
+        $('notifyAll').value = notifyAll;
+        $('repeat').value = repeat;
+        $('_version_').value = _version_;
+        $('modifiedTime').value = modifiedTime;
+        $('allowPause').value = allowPause;
+        $('id').value = id;
+	
 	    for (i = 0; i < actions.length; i++) {
 	        var actionConfig = actions[i].action.config;
 	        var configListType = actionConfig.listType;
@@ -195,14 +203,6 @@ function showViewEscResponse(originalRequest) {
 	        var anchor = document.createElement("a");
 	
 	        var emailInfo = actionConfig.names;
-	
-	        $('creationTime').value = creationTime;
-	        $('notifyAll').value = notifyAll;
-	        $('repeat').value = repeat;
-	        $('_version_').value = _version_;
-	        $('modifiedTime').value = modifiedTime;
-	        $('allowPause').value = allowPause;
-	        $('id').value = id;
 	
 	        escViewUL.appendChild(viewLi)
 	
@@ -1545,11 +1545,12 @@ function saveAddEscalation() {
         value='<c:out value="${alertDef.id}"/>'/> <input type="hidden" value=""
                                                          id="creationTime"> <input type="hidden" value=""
                                                                                    id="_version_">
-    <input type="hidden" value="" id="notifyAll"> <input type="hidden"
-                                                         value="" id="modifiedTime"> <input type="hidden" value=""
-                                                                                            id="allowPause"> <input
-        type="hidden" value="" id="escName"> <input
-        type="hidden" value="" id="id">
+    <input type="hidden" value="" id="notifyAll">
+    <input type="hidden" value="" id="modifiedTime">
+    <input type="hidden" value="" id="allowPause">
+    <input type="hidden" value="" id="escName">
+    <input type="hidden" value="" id="id">
+    <input type="hidden" value="" id="repeat">
 
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <thead>
