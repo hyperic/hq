@@ -68,296 +68,296 @@ function showViewEscResponse(originalRequest) {
     var tmp = eval('(' + originalRequest.responseText + ')');
     if(tmp.error){
         var escmsg = dojo.byId('errMsg');
-		escmsg.innerHTML = tmp.error;
-		var example = dojo.byId('escError');
-		example.style.display= '';
+        escmsg.innerHTML = tmp.error;
+        var example = dojo.byId('escError');
+        example.style.display= '';
     } else{
          dojo.byId('escMsg').innerHTML = '';
          dojo.byId('example').style.display= 'none';
          dojo.byId('errMsg').innerHTML = '';
          dojo.byId('escError').style.display= 'none';
       
-	    var creationTime = tmp.escalation.creationTime;
-	    var notifyAll = tmp.escalation.notifyAll;
-	    var repeat = tmp.escalation.repeat;
-	    var _version_ = tmp.escalation._version_;
-	    var modifiedTime = tmp.escalation.modifiedTime;
-	    var actions = tmp.escalation.actions;
-	    var allowPause = tmp.escalation.allowPause;
-	    var escName = tmp.escalation.name;
-	    var description = tmp.escalation.description;
-	    var id = tmp.escalation.id;
-	    var maxWaitTime = (tmp.escalation.maxWaitTime / 60000) +
-	                      " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
-	
-	    dojo.byId('viewEscalation').style.display = "";
-	
-	    dojo.byId('escId').value = id;
-	    dojo.byId('id').value = id;
-	
-	    dojo.byId('name').innerHTML = '<b>' + escName + '</b>';
-	    dojo.byId('escName').value = escName;
-	
-	    dojo.byId('description').innerHTML = description + "&nbsp;";
-	    if (description) {
-	        dojo.byId('escDesc').value = description;
-	    }
-	
-	    if (allowPause) {
-	        dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
-	        dojo.byId('allowPauseTrue').checked = "true";
-	    }
-	    else {
-	        dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
-	        dojo.byId('allowPauseFalse').checked = "true";
-	    }
-	
-	    if (notifyAll) {
-	        dojo.byId('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.all" />';
-	        dojo.byId('notifyAllTrue').checked = "true";
-	
-	    }
-	    else {
-	        dojo.byId('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
-	        dojo.byId('notifyAllFalse').checked = "true";
-	
-	    }
+        var creationTime = tmp.escalation.creationTime;
+        var notifyAll = tmp.escalation.notifyAll;
+        var repeat = tmp.escalation.repeat;
+        var _version_ = tmp.escalation._version_;
+        var modifiedTime = tmp.escalation.modifiedTime;
+        var actions = tmp.escalation.actions;
+        var allowPause = tmp.escalation.allowPause;
+        var escName = tmp.escalation.name;
+        var description = tmp.escalation.description;
+        var id = tmp.escalation.id;
+        var maxWaitTime = (tmp.escalation.maxWaitTime / 60000) +
+                          " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
+    
+        dojo.byId('viewEscalation').style.display = "";
+    
+        dojo.byId('escId').value = id;
+        dojo.byId('id').value = id;
+    
+        dojo.byId('name').innerHTML = '<b>' + escName + '</b>';
+        dojo.byId('escName').value = escName;
+    
+        dojo.byId('description').innerHTML = description + "&nbsp;";
+        if (description) {
+            dojo.byId('escDesc').value = description;
+        }
+    
+        if (allowPause) {
+            dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
+            dojo.byId('allowPauseTrue').checked = "true";
+        }
+        else {
+            dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
+            dojo.byId('allowPauseFalse').checked = "true";
+        }
+    
+        if (notifyAll) {
+            dojo.byId('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.all" />';
+            dojo.byId('notifyAllTrue').checked = "true";
+    
+        }
+        else {
+            dojo.byId('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
+            dojo.byId('notifyAllFalse').checked = "true";
+    
+        }
 
-	    if (repeat) {
-	        dojo.byId('ended').innerHTML = '<fmt:message key="alert.config.escalation.state.ended.repeat" />';
-	        dojo.byId('repeatTrue').checked = "true";
-	    }
-	    else {
-	        dojo.byId('ended').innerHTML = '<fmt:message key="alert.config.escalation.state.ended.stop" />';
-	        dojo.byId('repeatFalse').checked = "true";
-	    }
-	
-	    var escViewUL = dojo.byId('viewEscalationUL');
-	
-	    for (var i = escViewUL.childNodes.length - 1; i > -1; i--) {
-	        escViewUL.removeChild(escViewUL.childNodes[i]);
-	    }
-	
-	    if (actions.length == 0) {
-	        dojo.byId('step2create').style.display = '';
-	        dojo.byId('noActions').style.display = "";
-	    }
-	    else {
-	        dojo.byId('step2create').style.display = 'none';
-	        dojo.byId('viewSection').style.display = "";
-	    }
-	
-	    for (i = 0; i < actions.length; i++) {
-	        var actionConfig = actions[i].action.config;
-	        var configListType = actionConfig.listType;
-	        var configNames = actionConfig.names;
-	        var configSms = actionConfig.sms;
-	        var configMeta = actionConfig.meta;
-	        var configVersion = actionConfig.version;
-	        var configProduct = actionConfig.product;
-	        var configSnmpOID = actionConfig.oid;
-	        var configSnmpIP = actionConfig.address;
-	        var actionId = actions[i].action.id;
-	        var actionsClassName = actions[i].action.className;
-	        var actionsVersion = actions[i].action._version_;
-	        var actionWaitTime = formatWaitTime(null, actions[i].waitTime, '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>',  '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
-	        
-	        var liID = actionId;
-	        var viewLi = document.createElement('li');
-	        var remDiv = document.createElement('div');
-	        var usersDiv = document.createElement('div');
-	        var usersTextDiv = document.createElement('div');
-	        var usersEditDiv = document.createElement('div');
-	        var rolesDiv = document.createElement('div');
-	        var othersDiv = document.createElement('div');
-	        var waitDiv = document.createElement('div');
-	        var editWaitDiv = document.createElement('div');
-	        var sysDiv = document.createElement('div');
-	        var snmpDiv = document.createElement('div');
-	        var escTable = document.createElement('table');
-	        var escTableBody = document.createElement('tbody');
-	        var escTr1 = document.createElement('tr');
-	        var escTr2 = document.createElement('tr');
-	        var escTrHeader = document.createElement('tr');
-	        var td1 = document.createElement('td');
-	        var td2 = document.createElement('td');
-	        var td3 = document.createElement('td');
-	        var td4 = document.createElement('td');
-	        var td5 = document.createElement('td');
-	        var td6 = document.createElement('td');
-	        var td7 = document.createElement('td');
-	        var td8 = document.createElement('td');
-	        var select1 = document.createElement("select");
-	        var select2 = document.createElement("select");
-	        var select3 = document.createElement("select");
-	        var anchor = document.createElement("a");
-	
-	        var emailInfo = actionConfig.names;
-	
-	        dojo.byId('creationTime').value = creationTime;
-	        dojo.byId('notifyAll').value = notifyAll;
-	        dojo.byId('_version_').value = _version_;
-	        dojo.byId('modifiedTime').value = modifiedTime;
-	        dojo.byId('allowPause').value = allowPause;
-	        dojo.byId('id').value = id;
-	        dojo.byId('repeat').value = repeat;
-	
-	        escViewUL.appendChild(viewLi)
-	
-	        viewLi.setAttribute((document.all ? 'className' : 'class'), "BlockContent");
-	        viewLi.setAttribute('id', 'row_' + liID);
-	        dojo.byId('row_' + liID).style.margin = "0px";
-	        dojo.byId('row_' + liID).style.padding = "0px";
-	
-	        viewLi.appendChild(escTable);
-	        escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
-	        escTable.setAttribute('id', 'escTbl_' + liID);
-	        escTable.setAttribute('border', '0');
-	        escTable.setAttribute('cellpadding', '2');
-	
-	        escTable.appendChild(escTableBody);
-	        escTableBody.appendChild(escTrHeader);
-	        escTableBody.appendChild(escTr2);
-	        escTableBody.appendChild(escTr1);
-	
-	
-	        escTrHeader.appendChild(td6);
-	        td6.setAttribute('colSpan', '3');
-	        td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
-	        td6.innerHTML = '<div style="cursor:move;width:100%;background:#cccccc;padding:2px; border:1px solid #aeb0b5;">Action Details</div>';
-	
-	    <c:if test="${useroperations['modifyEscalation']}">
-	        escTrHeader.appendChild(td8);
-	        td8.setAttribute('vAlign', 'top');
-	        td8.setAttribute('rowSpan', '3');
-	        td8.setAttribute((document.all ? 'className' : 'class'), "remove");
-	        td8.innerHTML = '<a href="#" onclick="removeRow(this);removeAction(' + actionId + ');"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
-	    </c:if>
-	
-	        escTr1.appendChild(td1);
-	        td1.setAttribute((document.all ? 'className' : 'class'), "waitTd");
-	        td1.setAttribute('colSpan', '2');
-	        td1.appendChild(waitDiv);
-	        waitDiv.setAttribute('id', 'wait_' + liID);
-	        waitDiv.setAttribute('width', '100%');
-	        waitDiv.innerHTML = "Wait time before escalating: " + actionWaitTime + "<br>";
-	
-	
-	        td1.appendChild(editWaitDiv);
-	        editWaitDiv.setAttribute('id', 'editWait_' + liID);
-	
-	        escTr2.appendChild(td2);
-	        td2.setAttribute('width', '100%');
-	        td2.setAttribute('vAlign', 'top');
-	        td2.setAttribute((document.all ? 'className' : 'class'), "wrap");
-	        td2.appendChild(usersTextDiv);
-	        td2.setAttribute('id', 'usersList_' + liID);
-	
-	        var actionClass = actionsClassName.split('.');
-	
-	        for (var d = 0; d < actionClass.length; d++) {
-	            if (actionClass[d] == "SyslogAction") {
-	                usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Log to the Syslog:</td><td style="padding:0px 2px 2px 2px;">meta: ' + configMeta + '</td></tr><tr><td style="padding:2px;">product: ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;">version: ' + configVersion + '</td></tr></table>'
-	            } else if (actionClass[d] == "NoOpAction") {
-	                usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
-	                waitDiv.innerHTML = "&nbsp;";
-	            } else if (actionClass[d] == "SnmpAction") {
-	                usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Snmp Trap:</td><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr></table>'
-	            }
-	        }
-	
-	        if (configListType == "1") {
-	            var emailAdds = emailInfo.split(',');
-	            for (var b = 0; b < emailAdds.length; b++) {
-	                var displayEmails = "";
-	                var emailAdds = emailInfo.split(',');
-	                var comma = ", ";
-	                for (var b = 0; b < emailAdds.length; b++) {
-	                    displayEmails += emailAdds[b];
-	
-	                    if (b < emailAdds.length - 1) {
-	                        displayEmails += comma;
-	                    }
-	                }
-	
-	                if (configSms == "true") {
-	                    usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> <fmt:message key="alert.config.action.notify.via.sms"/> " + displayEmails + "<br>";
-	                } else {
-	                    usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> <fmt:message key="alert.config.action.notify.via.email"/> " + displayEmails + "<br>";
-	
-	                }
-	                //usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + displayEmails + "<br>";
-	
-	            }
-	
-	        } else if (configListType == "2") {
-	            var uids = emailInfo.split(',');
-	            var userNames = "";
-	            for (var b = 0; b < uids.length; b++) {
-	            <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
-	                if (uids[b] == '<c:out value="${user.id}"/>') {
-	                    userNames += '<c:out value="${user.name}" />, ';
-	                }
-	            </c:forEach>
-	            }
-	
-	            if (configSms == "true") {
-	                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> <fmt:message key="alert.config.action.notify.via.sms"/> " + userNames + "<br>";
-	            } else {
-	                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> <fmt:message key="alert.config.action.notify.via.email"/> " + userNames + "<br>";
-	
-	            }
-	        } else  if (configListType == "3") {
-	            var rids = emailInfo.split(',');
-	            var roleNames = "";
-	            for (var b = 0; b < rids.length; b++) {
-	            <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
-	                if (rids[b] == '<c:out value="${role.id}"/>') {
-	                    roleNames += '<c:out value="${role.name}" />, ';
-	                }
-	            </c:forEach>
-	            }
-	
-	            if (configSms == "true") {
-	                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/> <fmt:message key="alert.config.action.notify.via.sms"/> " + roleNames + "<br>";
-	            } else {
-	                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/> <fmt:message key="alert.config.action.notify.via.email"/> " + roleNames + "<br>";
-	            }
-	        }
-	
-	        escTr2.appendChild(td3);
-	        td3.setAttribute((document.all ? 'className' : 'class'), "td3");
-	        td3.setAttribute('width', '20%');
-	        td3.setAttribute('vAlign', 'top');
-	
-	        switch (configListType) {
-	            case 1:
-	                td3.innerHTML = emailInfo + "<br>";
-	                break;
-	        }
-	
-	        td3.style.paddingTop = "5px";
-	
-	        escTr2.appendChild(td4);
-	        td5.setAttribute('width', '50%');
-	
-	        td4.appendChild(usersEditDiv);
-	        usersEditDiv.style.display = 'none';
-	        usersEditDiv.setAttribute('class', 'escInput' + liID);
-	        usersEditDiv.setAttribute('id', 'usersEditDiv_' + liID);
-	        usersEditDiv.setAttribute('width', '40%');
-	        usersEditDiv.innerHTML = " ";
-	        dojo.byId('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
-	
-	    }
-	
-	    Sortable.create('viewEscalationUL', {containment:'viewEscalationUL',
-	        onUpdate: function() {
-	            var pars = "&id=" + id;
-	            var url = '<html:rewrite action="/escalation/updateEscalationOrder"/>?' + Sortable.serialize("viewEscalationUL") + pars;
-	            new Ajax.Request(url, {method: 'post', onFailure :reportError});
-	        },
-	        constraint: 'vertical'});
+        if (repeat) {
+            dojo.byId('ended').innerHTML = '<fmt:message key="alert.config.escalation.state.ended.repeat" />';
+            dojo.byId('repeatTrue').checked = "true";
+        }
+        else {
+            dojo.byId('ended').innerHTML = '<fmt:message key="alert.config.escalation.state.ended.stop" />';
+            dojo.byId('repeatFalse').checked = "true";
+        }
+    
+        var escViewUL = dojo.byId('viewEscalationUL');
+    
+        for (var i = escViewUL.childNodes.length - 1; i > -1; i--) {
+            escViewUL.removeChild(escViewUL.childNodes[i]);
+        }
+    
+        if (actions.length == 0) {
+            dojo.byId('step2create').style.display = '';
+            dojo.byId('noActions').style.display = "";
+        }
+        else {
+            dojo.byId('step2create').style.display = 'none';
+            dojo.byId('viewSection').style.display = "";
+        }
+    
+        dojo.byId('creationTime').value = creationTime;
+        dojo.byId('notifyAll').value = notifyAll;
+        dojo.byId('_version_').value = _version_;
+        dojo.byId('modifiedTime').value = modifiedTime;
+        dojo.byId('allowPause').value = allowPause;
+        dojo.byId('id').value = id;
+        dojo.byId('repeat').value = repeat;
+
+        for (i = 0; i < actions.length; i++) {
+            var actionConfig = actions[i].action.config;
+            var configListType = actionConfig.listType;
+            var configNames = actionConfig.names;
+            var configSms = actionConfig.sms;
+            var configMeta = actionConfig.meta;
+            var configVersion = actionConfig.version;
+            var configProduct = actionConfig.product;
+            var configSnmpOID = actionConfig.oid;
+            var configSnmpIP = actionConfig.address;
+            var actionId = actions[i].action.id;
+            var actionsClassName = actions[i].action.className;
+            var actionsVersion = actions[i].action._version_;
+            var actionWaitTime = formatWaitTime(null, actions[i].waitTime, '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>',  '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
+            
+            var liID = actionId;
+            var viewLi = document.createElement('li');
+            var remDiv = document.createElement('div');
+            var usersDiv = document.createElement('div');
+            var usersTextDiv = document.createElement('div');
+            var usersEditDiv = document.createElement('div');
+            var rolesDiv = document.createElement('div');
+            var othersDiv = document.createElement('div');
+            var waitDiv = document.createElement('div');
+            var editWaitDiv = document.createElement('div');
+            var sysDiv = document.createElement('div');
+            var snmpDiv = document.createElement('div');
+            var escTable = document.createElement('table');
+            var escTableBody = document.createElement('tbody');
+            var escTr1 = document.createElement('tr');
+            var escTr2 = document.createElement('tr');
+            var escTrHeader = document.createElement('tr');
+            var td1 = document.createElement('td');
+            var td2 = document.createElement('td');
+            var td3 = document.createElement('td');
+            var td4 = document.createElement('td');
+            var td5 = document.createElement('td');
+            var td6 = document.createElement('td');
+            var td7 = document.createElement('td');
+            var td8 = document.createElement('td');
+            var select1 = document.createElement("select");
+            var select2 = document.createElement("select");
+            var select3 = document.createElement("select");
+            var anchor = document.createElement("a");
+    
+            var emailInfo = actionConfig.names;
+    
+            escViewUL.appendChild(viewLi)
+    
+            viewLi.setAttribute((document.all ? 'className' : 'class'), "BlockContent");
+            viewLi.setAttribute('id', 'row_' + liID);
+            dojo.byId('row_' + liID).style.margin = "0px";
+            dojo.byId('row_' + liID).style.padding = "0px";
+    
+            viewLi.appendChild(escTable);
+            escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
+            escTable.setAttribute('id', 'escTbl_' + liID);
+            escTable.setAttribute('border', '0');
+            escTable.setAttribute('cellpadding', '2');
+    
+            escTable.appendChild(escTableBody);
+            escTableBody.appendChild(escTrHeader);
+            escTableBody.appendChild(escTr2);
+            escTableBody.appendChild(escTr1);
+    
+    
+            escTrHeader.appendChild(td6);
+            td6.setAttribute('colSpan', '3');
+            td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
+            td6.innerHTML = '<div style="cursor:move;width:100%;background:#cccccc;padding:2px; border:1px solid #aeb0b5;">Action Details</div>';
+    
+        <c:if test="${useroperations['modifyEscalation']}">
+            escTrHeader.appendChild(td8);
+            td8.setAttribute('vAlign', 'top');
+            td8.setAttribute('rowSpan', '3');
+            td8.setAttribute((document.all ? 'className' : 'class'), "remove");
+            td8.innerHTML = '<a href="#" onclick="removeRow(this);removeAction(' + actionId + ');"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
+        </c:if>
+    
+            escTr1.appendChild(td1);
+            td1.setAttribute((document.all ? 'className' : 'class'), "waitTd");
+            td1.setAttribute('colSpan', '2');
+            td1.appendChild(waitDiv);
+            waitDiv.setAttribute('id', 'wait_' + liID);
+            waitDiv.setAttribute('width', '100%');
+            waitDiv.innerHTML = "Wait time before escalating: " + actionWaitTime + "<br>";
+    
+    
+            td1.appendChild(editWaitDiv);
+            editWaitDiv.setAttribute('id', 'editWait_' + liID);
+    
+            escTr2.appendChild(td2);
+            td2.setAttribute('width', '100%');
+            td2.setAttribute('vAlign', 'top');
+            td2.setAttribute((document.all ? 'className' : 'class'), "wrap");
+            td2.appendChild(usersTextDiv);
+            td2.setAttribute('id', 'usersList_' + liID);
+    
+            var actionClass = actionsClassName.split('.');
+    
+            for (var d = 0; d < actionClass.length; d++) {
+                if (actionClass[d] == "SyslogAction") {
+                    usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Log to the Syslog:</td><td style="padding:0px 2px 2px 2px;">meta: ' + configMeta + '</td></tr><tr><td style="padding:2px;">product: ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;">version: ' + configVersion + '</td></tr></table>'
+                } else if (actionClass[d] == "NoOpAction") {
+                    usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
+                    waitDiv.innerHTML = "&nbsp;";
+                } else if (actionClass[d] == "SnmpAction") {
+                    usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Snmp Trap:</td><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr></table>'
+                }
+            }
+    
+            if (configListType == "1") {
+                var emailAdds = emailInfo.split(',');
+                for (var b = 0; b < emailAdds.length; b++) {
+                    var displayEmails = "";
+                    var emailAdds = emailInfo.split(',');
+                    var comma = ", ";
+                    for (var b = 0; b < emailAdds.length; b++) {
+                        displayEmails += emailAdds[b];
+    
+                        if (b < emailAdds.length - 1) {
+                            displayEmails += comma;
+                        }
+                    }
+    
+                    if (configSms == "true") {
+                        usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> <fmt:message key="alert.config.action.notify.via.sms"/> " + displayEmails + "<br>";
+                    } else {
+                        usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> <fmt:message key="alert.config.action.notify.via.email"/> " + displayEmails + "<br>";
+    
+                    }
+                    //usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + displayEmails + "<br>";
+    
+                }
+    
+            } else if (configListType == "2") {
+                var uids = emailInfo.split(',');
+                var userNames = "";
+                for (var b = 0; b < uids.length; b++) {
+                <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
+                    if (uids[b] == '<c:out value="${user.id}"/>') {
+                        userNames += '<c:out value="${user.name}" />, ';
+                    }
+                </c:forEach>
+                }
+    
+                if (configSms == "true") {
+                    usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> <fmt:message key="alert.config.action.notify.via.sms"/> " + userNames + "<br>";
+                } else {
+                    usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> <fmt:message key="alert.config.action.notify.via.email"/> " + userNames + "<br>";
+    
+                }
+            } else  if (configListType == "3") {
+                var rids = emailInfo.split(',');
+                var roleNames = "";
+                for (var b = 0; b < rids.length; b++) {
+                <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
+                    if (rids[b] == '<c:out value="${role.id}"/>') {
+                        roleNames += '<c:out value="${role.name}" />, ';
+                    }
+                </c:forEach>
+                }
+    
+                if (configSms == "true") {
+                    usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/> <fmt:message key="alert.config.action.notify.via.sms"/> " + roleNames + "<br>";
+                } else {
+                    usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/> <fmt:message key="alert.config.action.notify.via.email"/> " + roleNames + "<br>";
+                }
+            }
+    
+            escTr2.appendChild(td3);
+            td3.setAttribute((document.all ? 'className' : 'class'), "td3");
+            td3.setAttribute('width', '20%');
+            td3.setAttribute('vAlign', 'top');
+    
+            switch (configListType) {
+                case 1:
+                    td3.innerHTML = emailInfo + "<br>";
+                    break;
+            }
+    
+            td3.style.paddingTop = "5px";
+    
+            escTr2.appendChild(td4);
+            td5.setAttribute('width', '50%');
+    
+            td4.appendChild(usersEditDiv);
+            usersEditDiv.style.display = 'none';
+            usersEditDiv.setAttribute('class', 'escInput' + liID);
+            usersEditDiv.setAttribute('id', 'usersEditDiv_' + liID);
+            usersEditDiv.setAttribute('width', '40%');
+            usersEditDiv.innerHTML = " ";
+            dojo.byId('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
+    
+        }
+    
+        Sortable.create('viewEscalationUL', {containment:'viewEscalationUL',
+            onUpdate: function() {
+                var pars = "&id=" + id;
+                var url = '<html:rewrite action="/escalation/updateEscalationOrder"/>?' + Sortable.serialize("viewEscalationUL") + pars;
+                new Ajax.Request(url, {method: 'post', onFailure :reportError});
+            },
+            constraint: 'vertical'});
     }
 }
 
@@ -1538,16 +1538,16 @@ function saveAddEscalation() {
 
 <br/>
 
-<form name="viewEscalation" id="viewEscalation" style="display:none;"><input
-        type="hidden" id="alertDefId" name="alertDefId"
-        value='<c:out value="${alertDef.id}"/>'/> <input type="hidden" value=""
-                                                         id="creationTime"> <input type="hidden" value=""
-                                                                                   id="_version_">
-    <input type="hidden" value="" id="notifyAll"> <input type="hidden"
-                                                         value="" id="modifiedTime"> <input type="hidden" value=""
-                                                                                            id="allowPause"> <input
-        type="hidden" value="" id="escName"> <input
-        type="hidden" value="" id="id">
+<form name="viewEscalation" id="viewEscalation" style="display:none;">
+    <input type="hidden" id="alertDefId" name="alertDefId" value='<c:out value="${alertDef.id}"/>'/>
+    <input type="hidden" value="" id="creationTime">
+    <input type="hidden" value="" id="_version_">
+    <input type="hidden" value="" id="notifyAll">
+    <input type="hidden" value="" id="modifiedTime">
+    <input type="hidden" value="" id="allowPause">
+    <input type="hidden" value="" id="escName">
+    <input type="hidden" value="" id="id">
+    <input type="hidden" value="" id="repeat">
 
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <thead>
@@ -1609,7 +1609,7 @@ function saveAddEscalation() {
                     </ul>
                 </td>
             </tr>
-	        <c:if test="${useroperations['createEscalation'] || useroperations['modifyEscalation']}">
+            <c:if test="${useroperations['createEscalation'] || useroperations['modifyEscalation']}">
                 <tr class="ToolbarContent">
                     <td id="addRowButton">
                         <table cellspacing="4" cellpadding="0">
