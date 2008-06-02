@@ -43,7 +43,7 @@
     </property>
 
     <property name="repeat" type="boolean">
-      <column name="REPEAT" not-null="true"/>
+      <column name="FREPEAT" not-null="true"/>
     </property>
 
     <list name="actionsList" table="EAM_ESCALATION_ACTION">
