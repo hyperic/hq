@@ -263,13 +263,21 @@ public class SigarPlatformDetector extends PlatformDetector {
 
             try {
                 CpuInfo[] infos = sigar.getCpuInfoList();
+                CpuInfo info = infos[0];
+                int numSockets = info.getTotalSockets();
+                int numCores = info.getCoresPerSocket();
+                int numTotal = info.getTotalCores();
                 //for license restrictions
-                platform.setCpuCount(new Integer(infos.length));
+                platform.setCpuCount(new Integer(numSockets));
 
-                String cpuSpeed = infos[0].getMhz() + " MHz";
-                if (infos.length > 1) {
+                String cpuSpeed = info.getMhz() + " MHz";
+                if (numTotal > 1) {
                     cpuSpeed =
-                        infos.length + " @ " + cpuSpeed;
+                        numTotal + " @ " + cpuSpeed;
+                    if (numCores != 1) {
+                        cpuSpeed +=
+                            " (" + numSockets + "x" + numCores + ")";
+                    }
                 }
                 cprops.setValue("cpuSpeed", cpuSpeed);
             } catch (SigarException e) {
