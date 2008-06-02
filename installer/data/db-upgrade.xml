@@ -8046,9 +8046,20 @@ has already been defined.
         </statement>
       </schema-directSQL>
       <schema-alterColumn table="EAM_ESCALATION"
-                        column="REPEAT"
-                        default="false"
-                        nullable="NOT NULL"/>
+                          column="REPEAT"
+                          default="false"
+                          nullable="NOT NULL"
+                          targetDB="postgresql"/>
+      <schema-alterColumn table="EAM_ESCALATION"
+                          column="REPEAT"
+                          default="0"
+                          nullable="NOT NULL"
+                          targetDB="oracle"/>
+      <schema-alterColumn table="EAM_ESCALATION"
+                          column="REPEAT"
+                          default="0"
+                          nullable="NOT NULL"
+                          targetDB="mysql"/>
   </schemaSpec>
 </dbupgrade>
 </target>
