@@ -8034,32 +8034,30 @@ has already been defined.
 
   <schemaSpec version="3.96.7">
       <schema-addColumn table="EAM_ESCALATION"
-                        column="REPEAT"
-                        columnType="boolean"/>
+                        column="FREPEAT"
+                        columnType="BOOLEAN"/>
       <schema-directSQL>
         <statement targetDB="postgresql">
-        UPDATE EAM_ESCALATION SET REPEAT = false WHERE REPEAT IS NULL
+        UPDATE EAM_ESCALATION SET FREPEAT = false WHERE FREPEAT IS NULL
         </statement>
         <statement targetDB="oracle">
-        UPDATE EAM_ESCALATION SET REPEAT = 0 WHERE REPEAT IS NULL
+        UPDATE EAM_ESCALATION SET FREPEAT = 0 WHERE FREPEAT IS NULL
         </statement>
         <statement targetDB="mysql">
-        UPDATE EAM_ESCALATION SET REPEAT = 0 WHERE REPEAT IS NULL
+        UPDATE EAM_ESCALATION SET FREPEAT = 0 WHERE FREPEAT IS NULL
         </statement>
       </schema-directSQL>
       <schema-alterColumn table="EAM_ESCALATION"
-                          column="REPEAT"
-                          default="false"
+                          column="FREPEAT"
                           nullable="NOT NULL"
                           targetDB="postgresql"/>
       <schema-alterColumn table="EAM_ESCALATION"
-                          column="REPEAT"
-                          default="0"
+                          column="FREPEAT"
                           nullable="NOT NULL"
                           targetDB="oracle"/>
       <schema-alterColumn table="EAM_ESCALATION"
-                          column="REPEAT"
-                          default="0"
+                          column="FREPEAT"
+                          columnType="BOOLEAN"
                           nullable="NOT NULL"
                           targetDB="mysql"/>
   </schemaSpec>
@@ -9015,32 +9013,30 @@ has already been defined.
 		  
   <schemaSpec version="3.120">
       <schema-addColumn table="EAM_ESCALATION"
-                        column="REPEAT"
-                        columnType="boolean"/>
+                        column="FREPEAT"
+                        columnType="BOOLEAN"/>
       <schema-directSQL>
         <statement targetDB="postgresql">
-        UPDATE EAM_ESCALATION SET REPEAT = false WHERE REPEAT IS NULL
+        UPDATE EAM_ESCALATION SET FREPEAT = false WHERE FREPEAT IS NULL
         </statement>
         <statement targetDB="oracle">
-        UPDATE EAM_ESCALATION SET REPEAT = 0 WHERE REPEAT IS NULL
+        UPDATE EAM_ESCALATION SET FREPEAT = 0 WHERE FREPEAT IS NULL
         </statement>
         <statement targetDB="mysql">
-        UPDATE EAM_ESCALATION SET REPEAT = 0 WHERE REPEAT IS NULL
+        UPDATE EAM_ESCALATION SET FREPEAT = 0 WHERE FREPEAT IS NULL
         </statement>
       </schema-directSQL>
       <schema-alterColumn table="EAM_ESCALATION"
-                          column="REPEAT"
-                          default="false"
+                          column="FREPEAT"
                           nullable="NOT NULL"
                           targetDB="postgresql"/>
       <schema-alterColumn table="EAM_ESCALATION"
-                          column="REPEAT"
-                          default="0"
+                          column="FREPEAT"
                           nullable="NOT NULL"
                           targetDB="oracle"/>
       <schema-alterColumn table="EAM_ESCALATION"
-                          column="REPEAT"
-                          default="0"
+                          column="FREPEAT"
+                          columnType="BOOLEAN"
                           nullable="NOT NULL"
                           targetDB="mysql"/>
   </schemaSpec>
