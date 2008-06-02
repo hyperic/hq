@@ -245,6 +245,12 @@
             category="UTILIZATION"
             collectionType="dynamic"
             units="B"/>
+    <metric name="Percent Free Memory"
+            template="sigar:Type=Mem:FreePercent"
+            units="percent"/>
+    <metric name="Percent Used Memory"
+            template="sigar:Type=Mem:UsedPercent"
+            units="percent"/>
     <metric name="Number of CPUs"
             alias="NumCPUs"
             template="sigar.ext:Type=CpuInfo:Total"
