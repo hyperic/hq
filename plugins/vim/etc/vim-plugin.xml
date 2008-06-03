@@ -212,8 +212,31 @@
     </server>
 
     <server name="Virtual Machine">
+      <plugin type="autoinventory" class="org.hyperic.hq.plugin.vim.VimVmDetector"/>
       <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
       <plugin type="collector" class="org.hyperic.hq.plugin.vim.VimVmCollector"/>
+
+      <config include="vm"/>
+
+      <properties>
+         <property name="guestOS"
+                   description="Guest OS"/>
+
+         <property name="ip"
+                   description="IP Address"/>
+
+         <property name="macAddress"
+                   description="MAC Address"/>
+
+         <property name="memsize"
+                   description="Memory Size"/>
+
+         <property name="numvcpus"
+                   description="Virtual CPUs"/>
+
+         <property name="toolsVersion"
+                   description="Tools Version"/>
+      </properties>
 
       <property name="template" value="${vi.template},${vm.config}:${alias}"/>
 
