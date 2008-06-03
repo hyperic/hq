@@ -39,7 +39,10 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.commons.httpclient.params.HttpClientParams;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 
+import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.security.UntrustedSSLProtocolSocketFactory;
@@ -254,6 +257,10 @@ public class HTTPCollector extends SocketChecker {
         boolean isHEAD =
             getMethod().equals(METHOD_HEAD);
         HttpClient client = new HttpClient();
+        HttpClientParams params = new HttpClientParams();
+        String userAgent = "Hyperic-HQ-Agent/" + ProductProperties.getVersion();
+        params.setParameter(HttpMethodParams.USER_AGENT, userAgent);
+        client.setParams(params);
         client.setConnectionTimeout(getTimeoutMillis());
         client.setTimeout(getTimeoutMillis());
 
