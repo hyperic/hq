@@ -44,6 +44,8 @@ import com.vmware.vim.PerfQuerySpec;
 
 public class VimHostCollector extends VimCollector {
 
+    static final String TYPE = "HostSystem";
+
     private static final Set VALID_UNITS =
         new HashSet(Arrays.asList(MeasurementConstants.VALID_UNITS));
 
@@ -65,7 +67,7 @@ public class VimHostCollector extends VimCollector {
     }
 
     protected String getType() {
-        return "HostSystem";
+        return TYPE;
     }
 
     protected String getName() {

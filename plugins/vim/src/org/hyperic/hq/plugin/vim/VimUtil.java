@@ -27,9 +27,16 @@ package org.hyperic.hq.plugin.vim;
 
 import java.util.Properties;
 
+import org.hyperic.hq.product.PluginException;
+
 import com.vmware.vim.ManagedObjectReference;
 
 public class VimUtil {
+
+    static final String PROP_URL = VimCollector.PROP_URL;
+    static final String PROP_HOSTNAME = VimCollector.PROP_HOSTNAME;
+    static final String PROP_USERNAME = VimCollector.PROP_USERNAME;
+    static final String PROP_PASSWORD = VimCollector.PROP_PASSWORD;
 
     VimServiceConnection _conn;
     VimServiceUtil _util;
@@ -85,5 +92,16 @@ public class VimUtil {
 
     public ManagedObjectReference getPerfManager() {
         return getConn().getServiceContent().getPerfManager();
+    }
+
+    public ManagedObjectReference getHost(String name)
+        throws Exception {
+
+        ManagedObjectReference obj =
+            getUtil().getDecendentMoRef(null, VimHostCollector.TYPE, name);
+        if (obj == null) {
+            throw new PluginException(name + ": not found");
+        }
+        return obj;
     }
 }
