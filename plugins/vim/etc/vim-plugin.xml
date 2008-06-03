@@ -28,8 +28,18 @@
 
   <platform name="VI3 Host">
 
+    <plugin type="autoinventory" class="org.hyperic.hq.plugin.vim.VimHostDetector"/>
     <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
     <plugin type="collector" class="org.hyperic.hq.plugin.vim.VimHostCollector"/>
+
+    <config include="vi"/>
+    <properties>
+      <property name="version"
+                description="VMware Version"/>
+
+      <property name="build"
+                description="Build"/>
+    </properties>
 
     <property name="template" value="${vi.template}:${alias}"/>
 
