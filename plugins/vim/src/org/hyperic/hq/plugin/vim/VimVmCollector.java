@@ -29,8 +29,11 @@ import com.vmware.vim.ManagedObjectReference;
 
 public class VimVmCollector extends VimHostCollector {
 
+    static final String TYPE = "VirtualMachine";
+    static final String PROP_VM = "vm";
+
     protected String getName() {
-        return getProperties().getProperty("vm");
+        return getProperties().getProperty(PROP_VM);
     }
 
     protected ManagedObjectReference getRoot() {
@@ -38,7 +41,7 @@ public class VimVmCollector extends VimHostCollector {
     }
 
     protected String getType() {
-        return "VirtualMachine";
+        return TYPE;
     }
 
     protected void collect(VimUtil vim) throws Exception {

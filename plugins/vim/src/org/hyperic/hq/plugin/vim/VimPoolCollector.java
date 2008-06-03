@@ -29,6 +29,8 @@ import com.vmware.vim.ManagedObjectReference;
 
 public class VimPoolCollector extends VimHostCollector {
 
+    static final String TYPE = "ResourcePool";
+
     protected String getName() {
         return getProperties().getProperty("pool");
     }
@@ -38,7 +40,7 @@ public class VimPoolCollector extends VimHostCollector {
     }
 
     protected String getType() {
-        return "ResourcePool";
+        return TYPE;
     }
 
     protected void collect(VimUtil vim) throws Exception {
