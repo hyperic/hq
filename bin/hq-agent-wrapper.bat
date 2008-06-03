@@ -15,10 +15,10 @@ rem
 rem Find the application home.
 rem
 rem %~dp0 is location of current script under NT
-set _REALPATH=%~dp0..\..\..\wrapper\sbin\
+set _REALPATH=%~dp0..\..\..\wrapper\sbin
 
-set AGENT_INSTALL_HOME=%~dp0..\..\..\
-set AGENT_BUNDLE_HOME=%~dp0..\
+set AGENT_INSTALL_HOME=%~dp0..\..\..
+set AGENT_BUNDLE_HOME=%~dp0..
 
 rem
 rem Detect JAVA_HOME
@@ -43,16 +43,16 @@ goto :eof
 :gotjava
 rem Decide on the wrapper binary.
 set _WRAPPER_BASE=wrapper
-set _WRAPPER_EXE=%_REALPATH%%_WRAPPER_BASE%-windows-x86-32.exe
+set _WRAPPER_EXE=%_REALPATH%\%_WRAPPER_BASE%-windows-x86-32.exe
 if exist "%_WRAPPER_EXE%" goto validate
-set _WRAPPER_EXE=%_REALPATH%%_WRAPPER_BASE%-windows-x86-64.exe
+set _WRAPPER_EXE=%_REALPATH%\%_WRAPPER_BASE%-windows-x86-64.exe
 if exist "%_WRAPPER_EXE%" goto validate
-set _WRAPPER_EXE=%_REALPATH%%_WRAPPER_BASE%.exe
+set _WRAPPER_EXE=%_REALPATH%\%_WRAPPER_BASE%.exe
 if exist "%_WRAPPER_EXE%" goto validate
 echo Unable to locate a Wrapper executable using any of the following names:
-echo %_REALPATH%%_WRAPPER_BASE%-windows-x86-32.exe
-echo %_REALPATH%%_WRAPPER_BASE%-windows-x86-64.exe
-echo %_REALPATH%%_WRAPPER_BASE%.exe
+echo %_REALPATH%\%_WRAPPER_BASE%-windows-x86-32.exe
+echo %_REALPATH%\%_WRAPPER_BASE%-windows-x86-64.exe
+echo %_REALPATH%\%_WRAPPER_BASE%.exe
 pause
 goto :eof
 
@@ -95,7 +95,7 @@ set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%\lather.jar
 
 set CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 
-set CLIENT_CMD="%JAVA_HOME%\bin\java" -Djava.net.preferIPv4Stack=true -D%AGENT_INSTALL_HOME_PROP%=%AGENT_INSTALL_HOME% -D%AGENT_BUNDLE_HOME_PROP%=%AGENT_BUNDLE_HOME% -cp %CLIENT_CLASSPATH% %CLIENT_CLASS%
+set CLIENT_CMD="%JAVA_HOME%\bin\java" -Djava.net.preferIPv4Stack=true -D%AGENT_INSTALL_HOME_PROP%="%AGENT_INSTALL_HOME%" -D%AGENT_BUNDLE_HOME_PROP%="%AGENT_BUNDLE_HOME%" -cp "%CLIENT_CLASSPATH%" %CLIENT_CLASS%
 
 set PING_CMD=%CLIENT_CMD% ping
 set SETUP_CMD=%CLIENT_CMD% setup
