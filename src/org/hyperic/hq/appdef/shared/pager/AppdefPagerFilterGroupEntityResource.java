@@ -175,7 +175,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         case GROUP_ADHOC_APP:
         case GROUP_ADHOC_GRP:
         case GROUP_ADHOC_PSS:
-            return isGroupAdhoc(aev);
+            return isGroupCompatible(aev) ;
         case GROUP_COMPAT_PS:
             if (groupSelected)
                 return isResourceCompatible(entity);
@@ -207,17 +207,22 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     // ADHOC_APP      -1           -1             Applications
     // ADHOC_APP      APP          -1             Applications
     // ADHOC_APP      GROUP        -1             Applications
-    private boolean isGroupAdhoc(AppdefEntityValue aev)
+    private boolean isGroupCompatible(AppdefEntityValue aev)
         throws AppdefGroupNotFoundException, PermissionException {
         AppdefGroupValue vo = aev.getAppdefGroupValue();
-        if (!vo.isGroupAdhoc())
-            return false;
         
         if (_resourceType != UNDEFINED) {
-            return vo.getGroupEntResType() == _resourceType;
+            if (_groupType == GROUP_COMPAT_PS || _groupType == GROUP_COMPAT_SVC)
+                return vo.getGroupEntResType() == _resourceType;
+            
+            if (_resourceType == GROUP_COMPAT_PS)
+                return vo.getGroupType() == GROUP_COMPAT_PS ||
+                       vo.getGroupType() == GROUP_COMPAT_SVC;
+            
+            return vo.getGroupType() == _resourceType;
         }
         
-        return true;
+        return vo.isGroupAdhoc();
     }
 
     // Resource compatibility implies both appdef type and resource type
