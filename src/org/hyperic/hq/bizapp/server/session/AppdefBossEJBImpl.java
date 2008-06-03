@@ -3618,15 +3618,34 @@ public class AppdefBossEJBImpl
             }
 
 
-            if (entityId.isServer() && (allConfigs.shouldConfigProduct() ||
-                allConfigs.shouldConfigMetric())) {
-                // Look up the server's services
-                Server server =
-                    getServerManager().findServerById(entityId.getId());
-                for (Iterator it = server.getServices().iterator();
-                     it.hasNext(); ) {
-                    Service service = (Service) it.next();
-                    ids.add(service.getEntityId());
+            if (allConfigs.shouldConfigProduct() ||
+                allConfigs.shouldConfigMetric()) {
+                List servers = new ArrayList();
+                if (entityId.isServer()) {
+                    servers.add(
+                        getServerManager().findServerById(entityId.getId()));
+                }
+                else if (entityId.isPlatform()) {
+                    // Get the virtual servers
+                    Platform plat =
+                        getPlatformManager().findPlatformById(entityId.getId());
+                    for (Iterator it = plat.getServers().iterator();
+                         it.hasNext(); ) {
+                        Server server = (Server) it.next();
+                        if (server.getServerType().isVirtual()) {
+                            servers.add(server);
+                        }
+                    }
+                }
+                
+                for (Iterator it = servers.iterator(); it.hasNext(); ) {
+                    // Look up the server's services
+                    Server server = (Server) it.next();
+                    for (Iterator sit = server.getServices().iterator();
+                         sit.hasNext(); ) {
+                        Service service = (Service) sit.next();
+                        ids.add(service.getEntityId());
+                    }
                 }
             }
             
