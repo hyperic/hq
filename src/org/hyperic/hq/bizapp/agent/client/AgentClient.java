@@ -515,9 +515,12 @@ public class AgentClient {
     private void cmdSetupIfNoProvider() 
         throws AgentConnectionException, AgentRemoteException, 
                IOException, AutoQuestionException {
-                
-        // Sleep until the agent is started - at most for 30 seconds
-        this.cmdPing(30);
+               
+        Properties bootProps = this.config.getBootProperties();        
+        int timeout = getStartupTimeout(bootProps);
+        
+        // Sleep until the agent is started
+        this.cmdPing(timeout / 1000);
         
         // Prompt the agent to setup if the provider info is not specified.
         ProviderInfo providerInfo = this.camCommands.getProviderInfo();
@@ -1007,16 +1010,7 @@ public class AgentClient {
         }
 
         try {
-            String sleepTime;
-            int iSleepTime;
-
-            sleepTime = bootProps.getProperty(PROP_STARTUP_TIMEOUT);
-
-            try {
-                iSleepTime = Integer.parseInt(sleepTime) * 1000;
-            } catch(NumberFormatException exc){
-                iSleepTime = AGENT_STARTUP_TIMEOUT;
-            }
+            int iSleepTime = getStartupTimeout(bootProps);
 
             startupSock = new ServerSocket(0);
             startupSock.setSoTimeout(iSleepTime);
@@ -1131,6 +1125,19 @@ public class AgentClient {
             return 0;            
         }
 
+    }
+
+    // returns the startup timeout in milliseconds
+    private int getStartupTimeout(Properties bootProps) {
+        int iSleepTime = AGENT_STARTUP_TIMEOUT;
+        String sleepTime = bootProps.getProperty(PROP_STARTUP_TIMEOUT);
+
+        try {
+            iSleepTime = Integer.parseInt(sleepTime) * 1000;
+        } catch(NumberFormatException exc){
+            // do nothing - keep default
+        }
+        return iSleepTime;
     }
 
     private static int getUseTime(String val){
