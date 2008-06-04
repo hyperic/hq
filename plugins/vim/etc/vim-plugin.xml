@@ -26,7 +26,7 @@
             description="Resource Pool name"/>
   </config>
 
-  <platform name="VI3 Host">
+  <platform name="VMware VI3 Host">
 
     <plugin type="autoinventory" class="org.hyperic.hq.plugin.vim.VimHostDetector"/>
     <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
@@ -165,7 +165,7 @@
             alias="mem.sysUsage.average"
             units="KB"/>
 
-    <server name="Resource Pool">
+    <server name="VMware VI3 Resource Pool">
       <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
       <plugin type="collector" class="org.hyperic.hq.plugin.vim.VimPoolCollector"/>
 
@@ -211,7 +211,7 @@
               units="KB"/>
     </server>
 
-    <server name="Virtual Machine">
+    <server name="VMware VI3 VM">
       <plugin type="autoinventory" class="org.hyperic.hq.plugin.vim.VimVmDetector"/>
       <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
       <plugin type="collector" class="org.hyperic.hq.plugin.vim.VimVmCollector"/>
