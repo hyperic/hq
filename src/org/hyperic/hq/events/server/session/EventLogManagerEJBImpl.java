@@ -181,17 +181,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
             eTypes = Arrays.asList(eventTypes);
         
         if (r.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
-            List logs = new ArrayList();
-            
-            // Iterate through the group's members
-            ResourceGroupManagerLocal rm = ResourceGroupManagerEJBImpl.getOne();
-            Collection members = rm.getMembers(r);
-            for (Iterator it = members.iterator(); it.hasNext(); ) {
-                Resource member = (Resource) it.next();
-                logs.addAll(eDAO.findByEntity(user, member, begin, end, eTypes));
-            }
-            
-            return logs;
+            return eDAO.findByGroup(r, begin, end, eTypes);
         }
         else {
             return eDAO.findByEntity(user, r, begin, end, eTypes);

@@ -230,6 +230,28 @@ public class EventLogDAO extends HibernateDAO {
                                                  0, VIEW_PERMISSIONS).list();
     }
     
+    List findByGroup(Resource g, long begin, long end, Collection eventTypes) {
+        String hql = "select l from EventLog l join l.resource res " +
+        		     "join res.groupBag gb join gb.group g " +
+        		     "where g.resource = :r " +
+        		     "and l.timestamp between :begin and :end ";
+        
+        if (!eventTypes.isEmpty())
+            hql += "and l.type in (:eventTypes) ";
+        
+        hql += "order by l.timestamp"; 
+        
+        Query q = createQuery(hql)
+            .setParameter("r", g)
+            .setLong("begin", begin)
+            .setLong("end", end);
+
+        if (!eventTypes.isEmpty()) 
+            q.setParameterList("eventTypes", eventTypes);
+
+        return q.list();
+    }
+    
     List findLastByType(Resource proto) {
         String hql = "from EventLog as el " + 
             "  where " +  

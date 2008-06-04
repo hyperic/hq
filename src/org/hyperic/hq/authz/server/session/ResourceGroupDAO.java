@@ -343,12 +343,6 @@ public class ResourceGroupDAO extends HibernateDAO
             .list();
     }
 
-    ResourceGroup findByResource(Resource r) {
-        return (ResourceGroup) createCriteria()
-            .add(Restrictions.eq("resource", r))
-            .uniqueResult();
-    }
-    
     /**
      * Return the maximum collection interval for the given template within
      * the group.

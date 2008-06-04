@@ -557,15 +557,6 @@ public class ResourceGroupManagerEJBImpl
     }
     
     /**
-     * Get all the members of a group, identified by the resource passed in
-     * @ejb:interface-method
-     */
-    public Collection getMembers(Resource r) {
-        ResourceGroup g = getResourceGroupDAO().findByResource(r);
-        return getMembers(g);
-    }
-
-    /**
      * Get all the groups a resource belongs to
      * 
      * @return {@link ResourceGroup}s
