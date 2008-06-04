@@ -36,12 +36,13 @@ import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
 
+import com.vmware.vim.GuestInfo;
+import com.vmware.vim.GuestNicInfo;
 import com.vmware.vim.ManagedObjectReference;
 import com.vmware.vim.ToolsConfigInfo;
 import com.vmware.vim.VirtualHardware;
 import com.vmware.vim.VirtualMachineConfigInfo;
 import com.vmware.vim.VirtualMachineFileInfo;
-import com.vmware.vim.VirtualMachinePowerState;
 import com.vmware.vim.VirtualMachineRuntimeInfo;
 
 public class VimVmDetector
@@ -61,34 +62,64 @@ public class VimVmDetector
         VirtualMachineConfigInfo info =
             (VirtualMachineConfigInfo)vim.getUtil().getDynamicProperty(vm, "config");
 
+        GuestInfo guest =
+            (GuestInfo)vim.getUtil().getDynamicProperty(vm, "guest");
+
+        ManagedObjectReference pool =
+            (ManagedObjectReference)vim.getUtil().getDynamicProperty(vm, "resourcePool");
+
         ServerResource server = createServerResource("/");
         VirtualMachineFileInfo files = info.getFiles();
         server.setInstallPath(files.getVmPathName());
         server.setIdentifier(info.getUuid());
         server.setName(info.getName());
+
         ConfigResponse config = new ConfigResponse();
         config.setValue(VimVmCollector.PROP_VM, info.getName());
         server.setProductConfig(config);
-
+        //ConfigInfo
         ConfigResponse cprops = new ConfigResponse();
         cprops.setValue("guestOS", info.getGuestFullName());
         cprops.setValue("version", info.getVersion());
+        //HardwareInfo
         VirtualHardware hw = info.getHardware();
         cprops.setValue("numvcpus", hw.getNumCPU());
         cprops.setValue("memsize", hw.getMemoryMB());
+        //ToolsInfo
         ToolsConfigInfo tools = info.getTools();
         Integer toolsVersion = tools.getToolsVersion();
         if (toolsVersion != null) {
             cprops.setValue("toolsVersion", toolsVersion.toString());
         }
-        server.setCustomProperties(cprops);
+        //PoolInfo
+        cprops.setValue("pool",
+                        (String)vim.getUtil().getDynamicProperty(pool, "name"));
+
         String state = runtime.getPowerState().getValue();
-        if (state.equals(VirtualMachinePowerState.poweredOn)) {
+        if (state.equals("poweredOn")) {
             server.setMeasurementConfig();
+            String name;
+            if ((name = guest.getHostName()) != null) {
+                cprops.setValue("hostName", name);
+            }
+            //NetInfo
+            GuestNicInfo[] nics = guest.getNet();
+            if (nics != null) {
+                for (int i=0; i<nics.length; i++) {
+                    String mac = nics[i].getMacAddress();
+                    String[] ips = nics[i].getIpAddress();
+                    if ((mac != null) && (ips != null) && (ips.length != 0)) {
+                        cprops.setValue("macAddress", mac);
+                        cprops.setValue("ip", ips[0]);
+                    }
+                }
+            }
         }
         else {
             _log.info(info.getName() + " powerState=" + state);
         }
+
+        server.setCustomProperties(cprops);
         return server;
     }
 

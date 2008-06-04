@@ -228,6 +228,12 @@
          <property name="macAddress"
                    description="MAC Address"/>
 
+         <property name="hostName"
+                   description="Hostname"/>
+
+         <property name="pool"
+                   description="Resource Pool"/>
+
          <property name="memsize"
                    description="Memory Size"/>
 
