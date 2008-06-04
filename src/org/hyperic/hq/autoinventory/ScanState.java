@@ -29,12 +29,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileReader;
-import java.io.PrintStream;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +43,6 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
 import org.hyperic.hq.product.ServerResource;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.StringifiedException;
 
 import org.apache.commons.logging.Log;
@@ -59,10 +55,6 @@ public class ScanState {
     static {
         loadInstalldirExcludes();
     }
-
-    private DateFormat dateFmt
-        = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                                         DateFormat.MEDIUM);
     
     private ScanStateCore _core;
 
@@ -96,16 +88,6 @@ public class ScanState {
         return _core.getStartTime();
     }
 
-    /**
-     * @return the formatted start time 
-     */
-    public String getStartTimeStr() {
-        if ( getStartTime() == 0 )
-            return "00/00/00 00:00:00";
-        
-        return dateFmt.format(new Long(getStartTime()));
-    }
-
     public void setStartTime(long startTime) {
         _core.setStartTime(startTime);
     }
@@ -114,33 +96,8 @@ public class ScanState {
         return _core.getEndTime();
     }
 
-    public String getEndTimeStr() {
-        if ( getEndTime() == 0 )
-            return "00/00/00 00:00:00";
-        
-        return dateFmt.format(new Long(getEndTime()));
-    }
-
     public void setEndTime(long endTime) {
         _core.setEndTime(endTime);
-    }
-
-    /**
-     * @return the formatted relapsed time 
-     */
-    public String getElapsedTimeStr() {
-        long end = 0;
-        
-        // if the start time is zero, return no elapsed time
-        if (getStartTime() == 0)
-            return StringUtil.formatDuration(0);
-            
-        if (getEndTime() == 0)
-            end = (new Date()).getTime();
-        else
-            end = getEndTime();
-            
-        return StringUtil.formatDuration(end - getStartTime());
     }
 
     public boolean getIsDone () { return _core.getIsDone(); }
@@ -348,151 +305,6 @@ public class ScanState {
             }
         }
         smState.setServers(newServers);
-    }
-
-    /**
-     * For debugging purposes, print out the servers that were
-     * detected.
-     */
-    public void printServers () {
-
-        ScanMethodState[] smStates = _core.getScanMethodStates();
-        AIServerValue[] servers;
-        for ( int i=0; i<smStates.length; i++ ) {
-            System.err.println("Detected by: " + smStates[i].getMethodClass());
-            servers = smStates[i].getServers();
-            for ( i=0; i<servers.length; i++ ) {
-                System.err.println("\t" + servers[i]);
-            }
-        }
-    }
-
-    /**
-     * For debugging purposes, print stack traces for all exceptions
-     */
-    public void printStackTraces () {
-        ScanMethodState[] smStates = _core.getScanMethodStates();
-        AIServerValue[] servers;
-        StringifiedException[] exc;
-        for ( int i=0; i<smStates.length; i++ ) {
-            exc = smStates[i].getExceptions();
-            if ( exc != null && exc.length > 0 ) {
-                System.err.println("Exceptions for method "
-                                   + smStates[i].getMethodClass() + ":");
-                for ( int j=0; j<exc.length; j++ ) {
-                    System.err.println("\n" + exc[j].getStackTrace());
-                }
-            }
-        }
-    }
-
-    /**
-     * For debugging and command-line use, pretty-print full status info.
-     * @param out The stream to write to.
-     */
-    public void printFullStatus ( PrintStream out ) 
-        throws AutoinventoryException {
-
-        StringifiedException globalEx = _core.getGlobalException();
-        ScanMethodState[] smStates = _core.getScanMethodStates();
-
-        if ( globalEx != null ) {
-                out.println("Severe failure: " + globalEx);
-                out.println(globalEx.getStackTrace());
-        }
-
-        if ( smStates == null ) {
-            out.println("scan not yet started.");
-            return;
-        }
-        printMainStatus(out);
-
-        for ( int i=0; i<smStates.length; i++ ) {
-            printMethodStatus(smStates[i], out);
-        }
-    }
-
-    public void printMainStatus ( PrintStream out ) {
-
-        out.print("\nOVERALL STATUS: ");
-
-        String status = null;
-        if ( _core.getIsInterrupted() ) {
-            status = "interrupted before normal completion";
-
-        } else if ( _core.getIsDone() ) {
-            status = "completed";
-
-        } else {
-            status = "scan in progress";
-        }
-
-        if ( _core.getGlobalException() != null ) {
-            status += ", however a general scanning error occurred";
-        } else if ( hasExceptions() ) {
-            status += " successfully, however one or more scan methods had errors";
-        } else if ( _core.getIsDone() ) {
-            status += " successfully with no errors";
-        }
-
-        out.println(status);
-
-        String duration = StringUtil.formatDuration(getScanDuration());
-        out.println("Run time: " + duration);
-
-        AIPlatformValue platform = _core.getPlatform();
-        if ( platform != null ) {
-            out.println("\nPlatform Detected:");
-            out.println("\t" + platform);
-            out.println("\tIP addresses: " 
-                        + StringUtil.arrayToString(platform.getAIIpValues()));
-        } else {
-            out.println("\nNo Platform Detected!");
-        }
-    }
-
-    public void printMethodStatus ( ScanMethodState smState, PrintStream out ) 
-        throws AutoinventoryException {
-
-        ScanMethod method = findScanMethod(smState.getMethodClass());
-        out.println("\n" + method.getName() + ":");
-
-        // Print exception (if any)
-        StringifiedException[] t = smState.getExceptions();
-        String status = smState.getStatus();
-        if ( t != null && t.length > 0 ) {
-            out.println("\t* SCAN FAILED: ");
-            if ( status != null ) {
-                out.println("\t* Last status before failure: " + status);
-            } else {
-                out.println("\t* No status message available.");
-            }
-            for  ( int i=0; i<t.length; i++ ) {
-                out.println("\t* " + t[i].toString());
-                out.println("\t* Stack Trace:");
-                out.println(t[i].getStackTrace());
-            }
-
-        } else {
-            if ( status == null ) {
-                out.println("\t* Status: unknown");
-            } else {
-                out.println("\t* Status: " + status);
-            }
-        }
-
-        // PRINT SERVERS DETECTED
-        AIServerValue[] servers = smState.getServers();
-        if ( servers == null || servers.length == 0 ) {
-            out.println("\t* No Servers Detected");
-            
-        } else {
-            out.println("\t* Detected Servers:");
-            for ( int i=0; i<servers.length; i++ ) {
-                out.println("\t" + servers[i]);
-            }
-        }
-        out.println("\n");
     }
 
     public String toString () {
