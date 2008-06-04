@@ -9041,6 +9041,20 @@ has already been defined.
                           targetDB="mysql"/>
   </schemaSpec>
 
+  <schemaSpec version="3.121">
+    <schema-directSQL>
+      <statement fail="false" targetDB="oracle">
+            alter table EAM_ESCALATION RENAME COLUMN REPEAT to FREPEAT
+      </statement>
+      <statement fail="false" targetDB="postgresql">
+            alter table EAM_ESCALATION RENAME COLUMN REPEAT to FREPEAT
+      </statement>
+      <statement fail="false" targetDB="mysql">
+            alter table EAM_ESCALATION CHANGE COLUMN REPEAT FREPEAT TINYINT
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
