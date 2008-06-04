@@ -25,9 +25,11 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.CreateException;
@@ -40,7 +42,10 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventLogStatus;
@@ -174,7 +179,23 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
             eTypes = Collections.EMPTY_LIST;
         else
             eTypes = Arrays.asList(eventTypes);
-        return eDAO.findByEntity(user, r, begin, end, eTypes);
+        
+        if (r.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
+            List logs = new ArrayList();
+            
+            // Iterate through the group's members
+            ResourceGroupManagerLocal rm = ResourceGroupManagerEJBImpl.getOne();
+            Collection members = rm.getMembers(r);
+            for (Iterator it = members.iterator(); it.hasNext(); ) {
+                Resource member = (Resource) it.next();
+                logs.addAll(eDAO.findByEntity(user, member, begin, end, eTypes));
+            }
+            
+            return logs;
+        }
+        else {
+            return eDAO.findByEntity(user, r, begin, end, eTypes);
+        }
     }
 
     /** 

@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -342,6 +343,12 @@ public class ResourceGroupDAO extends HibernateDAO
             .list();
     }
 
+    ResourceGroup findByResource(Resource r) {
+        return (ResourceGroup) createCriteria()
+            .add(Restrictions.eq("resource", r))
+            .uniqueResult();
+    }
+    
     /**
      * Return the maximum collection interval for the given template within
      * the group.
