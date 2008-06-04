@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.collection.IntHashMap;
 
@@ -45,6 +47,9 @@ import com.vmware.vim.PerfQuerySpec;
 public class VimHostCollector extends VimCollector {
 
     static final String TYPE = "HostSystem";
+
+    private static final Log _log =
+        LogFactory.getLog(VimHostCollector.class.getName());
 
     private static final Set VALID_UNITS =
         new HashSet(Arrays.asList(MeasurementConstants.VALID_UNITS));
@@ -117,7 +122,11 @@ public class VimHostCollector extends VimCollector {
         PerfQuerySpec[] query = new PerfQuerySpec[] { spec };      
         PerfEntityMetricBase[] values =
             vim.getConn().getService().queryPerf(perfManager, query);
-        
+        if (values == null) {
+            _log.error("No performance metrics available for: " +
+                       getName() + " " + getType());
+            return;
+        }
         PerfEntityMetric metric = (PerfEntityMetric)values[0];
         PerfMetricSeries[] vals = metric.getValue();
 
