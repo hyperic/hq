@@ -39,7 +39,7 @@ import com.vmware.vim.PerfMetricId;
 
 public abstract class VimCollector extends Collector {
 
-    private static final Log log =
+    private static final Log _log =
         LogFactory.getLog(VimCollector.class.getName());
 
     public static final String PROP_URL = "url";
@@ -124,7 +124,7 @@ public abstract class VimCollector extends Collector {
         } catch (Exception e) {
             setAvailability(false);
             setErrorMessage(e.getMessage(), e);
-            log.error(e);
+            _log.error(e.getMessage(), e);
         } finally {
             vim.dispose();
         }
