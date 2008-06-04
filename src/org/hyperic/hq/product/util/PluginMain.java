@@ -34,8 +34,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URLClassLoader;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Properties;
 
-import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.PropertyConfigurator;
 
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
@@ -220,11 +221,30 @@ public class PluginMain {
         }
     }
 
-    private static void configureLogging(String level) {
-        String logPackage = "org.apache.commons.logging.";
-        System.setProperty(logPackage + "Log", logPackage + "impl.SimpleLog");
-        System.setProperty(logPackage + "simplelog.defaultlog", level);
-        BasicConfigurator.configure();
+    private static final String[][] LOG_PROPS = {
+        { "log4j.appender.R", "org.apache.log4j.ConsoleAppender" },
+        { "log4j.appender.R.layout.ConversionPattern", "%-5p [%t] [%c{1}] %m%n" },
+        { "log4j.appender.R.layout", "org.apache.log4j.PatternLayout" }        
+    };
+
+    private static void configureLogging(String pdkDir, String level) {
+        if (new File(level).exists()) {
+            PropertyConfigurator.configure(level);
+            return;
+        }
+        //pickup categories from from agent.properties
+        File agentProperties =
+            new File(pdkDir, "../../../conf/agent.properties");
+        if (agentProperties.exists()) {
+            PropertyConfigurator.configure(agentProperties.getPath());
+        }
+        Properties props = new Properties();
+        props.setProperty("log4j.rootLogger", level.toUpperCase() + ", R");
+        for (int i=0; i<LOG_PROPS.length; i++) {
+            props.setProperty(LOG_PROPS[i][0], LOG_PROPS[i][1]);
+        }
+        props.putAll(System.getProperties());
+        PropertyConfigurator.configure(props);
     }
 
     public static void main(String[] args) throws Exception {
@@ -254,7 +274,7 @@ public class PluginMain {
         System.setProperty("org.hyperic.sigar.path", pdkLib);
         ProductPluginManager.setPdkDir(pdkDir);
 
-        configureLogging(logLevel);
+        configureLogging(pdkDir, logLevel);
 
         PluginDumper pd = new PluginDumper(args);
 
