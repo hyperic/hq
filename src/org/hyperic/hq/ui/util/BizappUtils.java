@@ -664,10 +664,10 @@ public class BizappUtils {
      * 
      * @return a list of AppdefResourceValue objects
      */
-    public static List buildGroupResources(AppdefBoss boss, int sessionId,
-                                           AppdefGroupValue group,
-                                           PageControl pc) 
-        throws ObjectNotFoundException, RemoteException, PermissionException,
+    public static PageList buildGroupResources(AppdefBoss boss, int sessionId,
+                                               AppdefGroupValue group,
+                                               PageControl pc) 
+        throws ObjectNotFoundException, RemoteException,
                SessionTimeoutException, SessionNotFoundException 
     {
         List grpEntries = group.getAppdefGroupEntries();
@@ -675,7 +675,11 @@ public class BizappUtils {
         AppdefEntityID[] entities = new AppdefEntityID[grpEntries.size()];
         entities = (AppdefEntityID[]) grpEntries.toArray(entities);
                     
-        return boss.findByIds(sessionId, entities, pc);
+        try {
+            return boss.findByIds(sessionId, entities, pc);
+        } catch (PermissionException e) {
+            return new PageList();
+        }
     }
 
 
