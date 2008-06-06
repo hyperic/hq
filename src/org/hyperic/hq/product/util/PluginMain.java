@@ -27,6 +27,8 @@ package org.hyperic.hq.product.util;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
@@ -34,6 +36,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URLClassLoader;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Iterator;
 import java.util.Properties;
 
 import org.apache.log4j.PropertyConfigurator;
@@ -232,13 +235,34 @@ public class PluginMain {
             PropertyConfigurator.configure(level);
             return;
         }
+        Properties props = new Properties();
+        Properties agentProps = new Properties();
         //pickup categories from from agent.properties
         File agentProperties =
             new File(pdkDir, "../../../conf/agent.properties");
         if (agentProperties.exists()) {
-            PropertyConfigurator.configure(agentProperties.getPath());
+            InputStream is = null;
+            try {
+                is = new FileInputStream(agentProperties);
+                agentProps.load(is);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (is != null) {
+                    try { is.close(); } catch (Exception e) {}
+                }
+            }
         }
-        Properties props = new Properties();
+        for (Iterator it = agentProps.keySet().iterator();
+             it.hasNext();)
+        {
+            String key = (String)it.next();
+            if (key.startsWith("log4j.logger.") ||
+                key.startsWith("log4j.category."))
+            {
+                props.setProperty(key, agentProps.getProperty(key));
+            }
+        }
         props.setProperty("log4j.rootLogger", level.toUpperCase() + ", R");
         for (int i=0; i<LOG_PROPS.length; i++) {
             props.setProperty(LOG_PROPS[i][0], LOG_PROPS[i][1]);
