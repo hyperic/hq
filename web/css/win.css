@@ -92,14 +92,14 @@ input.compactbuttoninactive {
 
 .pagetitle,.pagetitlebar,.pagetitlebar td {
     background-color: #FFF;
-    color: #fff;
+    color: #CCC;
     font-family: arial, sans-serif;
     font-size: 12px;
     font-weight: 700
 }
 
 .pagetitlebar a,.pagetitlebar td a {
-    color: #FFF
+    color: #CCC
 }
 
 .pagetitleserverbg {
