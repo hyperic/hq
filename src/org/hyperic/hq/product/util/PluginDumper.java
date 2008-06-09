@@ -664,6 +664,25 @@ public class PluginDumper {
         } catch (Exception ioe) { }
     }
 
+    private void reportException(Exception e, String template,
+                                 MeasurementPlugin mPlugin) {
+        String exClass = e.getClass().getName();
+        int ix = exClass.lastIndexOf(".");
+        exClass = exClass.substring(ix+1);
+
+        System.err.println("getValue failed for metric: " +
+                           template);
+        System.err.println(exClass + ": " + e.getMessage());
+
+        if ("debug".equals(getProperty("log"))) {
+            e.printStackTrace();
+            System.err.println("classloader=" +
+                               mPlugin.getClass().getClassLoader());
+            System.err.println("config=" + config);
+        }
+        promptContinue();
+    }
+
     public boolean fetchMetrics(TypeInfo type,
                                 boolean translateOnly,
                                 ConfigResponse config)
@@ -748,41 +767,30 @@ public class PluginDumper {
 
             StopWatch timer = new StopWatch();
 
-            try {
-                for (int x=0; x<iterations; x++) {
-                    MetricValue value = getValue(template);
-                    if (value.isNone()) {
-                        continue;
-                    }
-                    FormattedNumber number =
-                        UnitsConvert.convert(value.getValue(),
-                                             metrics[j].getUnits());
-                    if ((iter == null) || isPause) {
-                        System.out.println("   =>" + number + "<=");
-                    }
-                    if (isPause) {
-                        promptContinue();
-                    }
+            for (int x=0; x<iterations; x++) {
+                MetricValue value;
+                    
+                try {
+                    value = getValue(template);
+                } catch (Exception e) {
+                    reportException(e, template, mPlugin);
+                    continue;
                 }
-                if ((iter != null) && !isPause) {
-                    System.out.println("   [" + timer + "]");
+                if (value.isNone()) {
+                    continue;
                 }
-            } catch (Exception e) {
-                String exClass = e.getClass().getName();
-                int ix = exClass.lastIndexOf(".");
-                exClass = exClass.substring(ix+1);
-
-                System.err.println("getValue failed for metric: " +
-                                   template);
-                System.err.println(exClass + ": " + e.getMessage());
-
-                if ("debug".equals(getProperty("log"))) {
-                    e.printStackTrace();
-                    System.out.println("classloader=" +
-                                       mPlugin.getClass().getClassLoader());
-                    System.out.println("config=" + config);
+                FormattedNumber number =
+                    UnitsConvert.convert(value.getValue(),
+                                         metrics[j].getUnits());
+                if ((iter == null) || isPause) {
+                    System.out.println("   =>" + number + "<=");
                 }
-                promptContinue();
+                if (isPause) {
+                    promptContinue();
+                }
+            }
+            if ((iter != null) && !isPause) {
+                System.out.println("   [" + timer + "]");
             }
         }
 
