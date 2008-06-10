@@ -1234,3 +1234,6 @@ border-left:1px solid #D5D8DE;
 
 .italicInfo {font-size: 11px; font-style: italic; color:#333333;}
 
+#alertcenter #alertGroupSelect {
+    width: 150;
+}

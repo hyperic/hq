@@ -55,6 +55,7 @@ function setSelectedOption() {
 onloads.push(setSelectedOption);
 </script>
 
+<div id="alertcenter">
 <div dojoType="TabContainer" id="mainTabContainer" 
      style="width: 100%; height:500px;">
   <div dojoType="ContentPane" label="Alerts">
@@ -189,6 +190,7 @@ onloads.push(setSelectedOption);
     </div>
  <div style="clear:both;height:1px;"></div>
   </div>
+</div>
 </div>
 
 <script type="text/javascript">
