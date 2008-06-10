@@ -111,6 +111,8 @@ public class ResourceType extends AuthzNamedBean {
             return AppdefEntityConstants.APPDEF_TYPE_SERVER;
         } else if (getId().equals(AuthzConstants.authzService)) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+        } else if (getId().equals(AuthzConstants.authzApplication)) {
+            return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
         } else {
             throw new IllegalArgumentException("ResourceType " + getId() +
                                                " not supported");
