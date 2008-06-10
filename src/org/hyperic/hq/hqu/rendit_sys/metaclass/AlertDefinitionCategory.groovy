@@ -15,6 +15,21 @@ class AlertDefinitionCategory {
     }
 
     static void unsetEscalation(AlertDefinition d, AuthzSubject s) {
-        EscMan.one.setEscalation(ClassicEscalationAlertType.CLASSIC, d.getId(), null)
+        EscMan.one.setEscalation(ClassicEscalationAlertType.CLASSIC, d.getId(),
+                                 null)
+    }
+
+    /**
+     * Enable/Disable an alert definition
+     *
+     * @param d           The alert definition {@link AlertDefinition}
+     * @param s           The caller {@link AuthzSubject}
+     * @param enabled     Specifies whether the alert definition 
+     *                    should be enabled or disabled.
+     */
+    static void updateAlertDefinitionActiveStatus(AlertDefinition d,
+                                                  AuthzSubject s,
+                                                  boolean enable) {
+        AdefMan.one.updateAlertDefinitionActiveStatus(s, d, enable)
     }
 }
