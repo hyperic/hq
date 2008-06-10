@@ -30,6 +30,7 @@ import java.util.Properties;
 import org.hyperic.sigar.FileInfo;
 import org.hyperic.sigar.NetFlags;
 
+import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
@@ -40,7 +41,15 @@ import org.hyperic.hq.product.SigarMeasurementPlugin;
 public class SystemMeasurementPlugin
     extends SigarMeasurementPlugin
 {
-    
+
+    private void reportError(Metric metric, Exception e) {
+        getLog().error(metric + ": " + e.getMessage(), e);
+        getManager().reportEvent(metric,
+                                 System.currentTimeMillis(),
+                                 LogTrackPlugin.LOGLEVEL_ERROR,
+                                 "system", e.getMessage());
+    }
+
     public MetricValue getValue(Metric metric) 
         throws PluginException,
                MetricNotFoundException,
@@ -90,6 +99,7 @@ public class SystemMeasurementPlugin
                 avail = Metric.AVAIL_UP;
             } catch (Exception e) {
                 avail = Metric.AVAIL_DOWN;
+                reportError(metric, e);
             }
 
             return new MetricValue(avail);
