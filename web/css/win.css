@@ -1894,3 +1894,7 @@ a.black:link,a.black:visited {
     color: #fff;
     font-weight: 700
 }
+
+#alertcenter #alertGroupSelect {
+    width: 150;
+}

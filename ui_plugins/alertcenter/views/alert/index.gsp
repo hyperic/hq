@@ -58,6 +58,7 @@ dojo.addOnLoad( function(){
 });
 </script>
 
+<div id="alertcenter">
 <div dojoType="dijit.layout.TabContainer" id="tabs" 
      style="width: 100%; height:500px;">
   <div dojoType="dijit.layout.ContentPane" title="Alerts">
@@ -200,6 +201,7 @@ dojo.addOnLoad( function(){
     </div>
  <div style="clear:both;height:1px;"></div>
   </div>
+</div>
 </div>
 
 <script type="text/javascript">
