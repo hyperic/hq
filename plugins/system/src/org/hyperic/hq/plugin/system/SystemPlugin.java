@@ -247,11 +247,13 @@ public class SystemPlugin extends ProductPlugin {
             else if (info.isService(FILE_NAME)) {
                 return new FileServiceLogPlugin();
             }
-            else if (info.getName().equals(SCRIPT_NAME)) {
-                return new LogTrackPlugin();
-            }
             else if (info.getName().equals(PROCESS_NAME)) {
                 return new LogFileTailPlugin();
+            }
+            else if (info.getName().equals(SCRIPT_NAME) ||
+                     info.isService(FS_NAME))
+            {
+                return new LogTrackPlugin();
             }
         }
         else if (type.equals(ProductPlugin.TYPE_LIVE_DATA)) {
