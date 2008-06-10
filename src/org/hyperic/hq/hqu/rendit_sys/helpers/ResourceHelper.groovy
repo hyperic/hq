@@ -302,4 +302,20 @@ class ResourceHelper extends BaseHelper {
         rman.findViewableInstances(user, type, name, null, null,
                                    PageControl.PAGE_ALL)
     }
+    
+    /**
+     * Find a platform by name.
+     */
+    def findPlatformByFQDN(user, name) {
+        PlatMan.one.findPlatformByFqdn(user, name)
+    }
+    
+    /**
+     * Find services by server ID.
+     */
+    def findServicesByServer(user, id) {
+        ServiceMan.one.getServicesByServer(user, id,
+                                           PageControl.PAGE_ALL)
+
+    }
 }
