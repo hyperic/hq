@@ -41,7 +41,7 @@ To start the Hyperic HQ Agent from the Windows Command Prompt:
 1. Open a Windows Command Prompt Window
 
 2. Execute the following command:
-	 bin\hq-agent.exe start
+	 bin\hq-agent.bat start
 
 Note: Logging out of the Windows user session will shutdown the Hyperic HQ
       Agent. You should start the Hyperic HQ Agent from the Windows Service
@@ -55,7 +55,7 @@ To stop the Hyperic HQ Agent from the Windows Command Prompt:
 1. Open a Windows Command Prompt Window
 
 2. Execute the following command:
-	 hq-agent.exe stop
+	 bin\hq-agent.bat stop
 
 
 ================================================================================

@@ -49,7 +49,7 @@ public class AgentConfig extends BaseConfig {
     }
 
     public static final String[] MARKER_FILES
-        = { "hq-agent.sh", "hq-agent.exe", "hq-agent.bat" };
+        = { "hq-agent.sh", "hq-agent.bat" };
 
     protected String[] getMarkerFiles () {
         return MARKER_FILES;
@@ -59,7 +59,7 @@ public class AgentConfig extends BaseConfig {
         StringBuffer s = new StringBuffer();
         String sp = File.separator;
         String startup = getProductInstallDir(config);
-        startup += PRODUCT.toLowerCase() + "-agent" + getExtension();
+        startup += "bin" + sp + PRODUCT.toLowerCase() + "-agent" + getScriptExtension();
         char nl = '\n';
         s.append("__ll__")
             .append(nl)
