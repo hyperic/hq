@@ -84,11 +84,13 @@ public class SystemMeasurementPlugin
         }
 
         if (isFsUsage) {
-            double val = super.getValue(metric).getValue();
-            double avail =
-                (val < 100) ?
-                Metric.AVAIL_UP :
-                Metric.AVAIL_DOWN;
+            double avail;
+            try {
+                super.getValue(metric).getValue();
+                avail = Metric.AVAIL_UP;
+            } catch (Exception e) {
+                avail = Metric.AVAIL_DOWN;
+            }
 
             return new MetricValue(avail);
         }
