@@ -141,4 +141,8 @@ class AlertHelper extends BaseHelper {
     def deleteDefinition(AlertDefinition definition) {
         defMan.deleteAlertDefinitions(userValue, [ definition.id ] as Integer[])
     }
+
+    def updateAlertDefinitionActiveStatus(user, ad, enable) {
+        defMan.updateAlertDefinitionActiveStatus(user.valueObject, ad, enable)
+    }
 }
