@@ -37,6 +37,7 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.BasicScheme;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
@@ -53,7 +54,6 @@ public class HTTPCollector extends SocketChecker {
     private String url;
     private String method;
     private String hosthdr;
-    private String realm;
     private Pattern pattern;
     private ArrayList matches = new ArrayList();
     private String proxyHost = null;
@@ -82,9 +82,6 @@ public class HTTPCollector extends SocketChecker {
 
         this.hosthdr =
             props.getProperty("hostheader");
-
-        this.realm =
-            props.getProperty("realm", getHostname());
 
         this.url = 
             protocol + "://" + getHostname() + ":" + getPort() + getPath();
@@ -285,14 +282,25 @@ public class HTTPCollector extends SocketChecker {
             UsernamePasswordCredentials credentials =
                 new UsernamePasswordCredentials(getUsername(),
                                                 getPassword());
+            String realm = getProperties().getProperty("realm", "");
 
-            client.getState().setCredentials(this.realm,
-                                             getHostname(),
-                                             credentials);
-                    
-            method.setDoAuthentication(true);
+            if (realm.length() == 0) {
+                //send header w/o challenge
+                String auth =
+                    BasicScheme.authenticate(credentials,
+                                             method.getParams().getCredentialCharset());
+
+                method.addRequestHeader(new Header("Authorization", auth));
+            }
+            else {
+                client.getState().setCredentials(realm,
+                                                 getHostname(),
+                                                 credentials);
+
+                method.setDoAuthentication(true);
+            }
         }
-        
+
         if (this.hosthdr != null) {
             method.setRequestHeader("Host", this.hosthdr);
         }
