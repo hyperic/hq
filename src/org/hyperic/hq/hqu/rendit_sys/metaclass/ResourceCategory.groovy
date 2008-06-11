@@ -4,6 +4,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResMan
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
 import org.hyperic.hq.appdef.Agent
@@ -185,6 +186,11 @@ class ResourceCategory {
     static Service toService(Resource r) {
         assert isService(r)
         svcMan.findServiceById(r.instanceId)
+    }
+    
+    static ResourceGroup toGroup(Resource r) {
+        assert isGroup(r)
+        groupMan.findResourceGroupById(authzMan.overlordPojo, r.instanceId)
     }
 
     static boolean isVirtual(Resource t) {
