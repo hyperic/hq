@@ -36,6 +36,8 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import org.hyperic.util.GenericValueMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * An object representing key/value pairs to be passed to, and returned from,
@@ -46,6 +48,9 @@ import org.hyperic.util.GenericValueMap;
  */
 
 public class AgentRemoteValue implements GenericValueMap, Externalizable {
+
+    private Log _log = LogFactory.getLog(AgentRemoteValue.class);
+
     private Hashtable vals;
     
     /**
@@ -93,10 +98,10 @@ public class AgentRemoteValue implements GenericValueMap, Externalizable {
      * @param val Value to assign to the key
      */
     public void setValue(String key, String val){
-        if (key == null) {
-            throw new IllegalArgumentException("Null key found for value=" + val);
-        } else if (val == null) {
-            throw new IllegalArgumentException("Null value found for key=" + key);
+        if (key == null || val == null) {
+            _log.warn("Invalid key/value found.  Key='" + key +
+                      "' value='" + val + "'");
+            return;
         }
 
         this.vals.put(key, val);
