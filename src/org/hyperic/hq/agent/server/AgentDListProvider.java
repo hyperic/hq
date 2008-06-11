@@ -260,14 +260,14 @@ public class AgentDListProvider
     }
 
     /**
-     * DList info string is a series of properties seperated by ':'
+     * DList info string is a series of properties seperated by '|'
      * Three properties are expected.
      *
      * Directory to place the data files
      * Size in MB to start checking for unused blocks
      * Maximum percentage of free blocks allowed
      *
-     * Default is 'data:20:50'
+     * Default is 'data|20|50'
      */
     public void init(String info)
         throws AgentStorageException 
@@ -278,7 +278,7 @@ public class AgentDListProvider
         long nEnts;
 
         // Parse out configuration
-        StringTokenizer st = new StringTokenizer(info, ":");
+        StringTokenizer st = new StringTokenizer(info, "|");
         if (st.countTokens() != 5) {
             throw new AgentStorageException(info + " is an invalid agent" +
                                             " storage provider configuration");
