@@ -1063,41 +1063,69 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 }
 
                 // See if we need to create an AIPlatform
-                if (plat.getAgent() == null && existing.getAgent() != null) {
-                    // Create AIPlatform for manually created platform
-                    AIQueueManagerLocal aiqManagerLocal;
-                    try {
-                        aiqManagerLocal =
-                            AIQueueManagerUtil.getLocalHome().create();
-                    } catch (CreateException e) {
-                        throw new SystemException(e);
-                    }
-                    AIPlatformValue aiPlatform = new AIPlatformValue();
-                    aiPlatform.setFqdn(existing.getFqdn());
-                    aiPlatform.setName(existing.getName());
-                    aiPlatform.setDescription(existing.getDescription());
-                    aiPlatform.setPlatformTypeName(existing.getPlatformType().getName());
-                    aiPlatform.setCertdn(existing.getCertdn());
-                    aiPlatform.setAgentToken(
-                            existing.getAgent().getAgentToken());
-                    
-                    IpValue[] ipVals = existing.getIpValues();
-                    for (int i = 0; i < ipVals.length; i++) {
-                        AIIpValue aiIpVal = new AIIpValue();
-                        aiIpVal.setAddress(ipVals[i].getAddress());
-                        aiIpVal.setNetmask(ipVals[i].getNetmask());
-                        aiIpVal.setMACAddress(ipVals[i].getMACAddress());
-                        aiPlatform.addAIIpValue(aiIpVal);
-                    }
+                if (existing.getAgent() != null) {
+                    if (plat.getAgent() == null) {
+                        // Create AIPlatform for manually created platform
+                        AIQueueManagerLocal aiqManagerLocal;
+                        try {
+                            aiqManagerLocal =
+                                AIQueueManagerUtil.getLocalHome().create();
+                        } catch (CreateException e) {
+                            throw new SystemException(e);
+                        }
+                        AIPlatformValue aiPlatform = new AIPlatformValue();
+                        aiPlatform.setFqdn(existing.getFqdn());
+                        aiPlatform.setName(existing.getName());
+                        aiPlatform.setDescription(existing.getDescription());
+                        aiPlatform.setPlatformTypeName(existing.getPlatformType()
+                                                       .getName());
+                        aiPlatform.setCertdn(existing.getCertdn());
+                        aiPlatform.setAgentToken(existing.getAgent()
+                                                  .getAgentToken());
 
-                    try {
-                        aiqManagerLocal.queue(subject, aiPlatform, false,
-                                              false, true);
-                    } catch (RemoveException e) {
-                        _log.error("Cannot remove from AIQueue", e);
+                        IpValue[] ipVals = existing.getIpValues();
+                        for (int i = 0; i < ipVals.length; i++) {
+                            AIIpValue aiIpVal = new AIIpValue();
+                            aiIpVal.setAddress(ipVals[i].getAddress());
+                            aiIpVal.setNetmask(ipVals[i].getNetmask());
+                            aiIpVal.setMACAddress(ipVals[i].getMACAddress());
+                            aiPlatform.addAIIpValue(aiIpVal);
+                        }
+
+                        try {
+                            aiqManagerLocal.queue(subject, aiPlatform, false,
+                                                  false, true);
+                        } catch (RemoveException e) {
+                            _log.error("Cannot remove from AIQueue", e);
+                        }
+                    }
+                    else if (!plat.getAgent().equals(existing.getAgent())){
+                        // Need to enqueue the ResourceUpdatedZevent if the
+                        // agent changed to get the metrics scheduled
+                        ZeventManager zmgr = ZeventManager.getInstance();
+                        List events = new ArrayList();
+                        events.add(new ResourceUpdatedZevent(subject,
+                                                           plat.getEntityId()));
+                        for (Iterator it = plat.getServers().iterator();
+                             it.hasNext(); ) {
+                            Server svr = (Server) it.next();
+                            events.add(
+                                new ResourceUpdatedZevent(subject,
+                                                          svr.getEntityId()));
+                            
+                            for (Iterator sit = svr.getServices().iterator();
+                                 sit.hasNext(); ) {
+                                Service svc = (Service) sit.next();
+                                events.add(
+                                    new ResourceUpdatedZevent(subject,
+                                                            svc.getEntityId()));
+                            }
+                        }
+                        
+                        zmgr.enqueueEventsAfterCommit(events);
                     }
                 }
-                getPlatformDAO().updatePlatform(existing);
+                getPlatformDAO().updatePlatform(plat, existing);
                 return true;
             }
         } catch (FinderException e) {

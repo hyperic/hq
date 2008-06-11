@@ -87,11 +87,8 @@ public class PlatformDAO extends HibernateDAO {
      *
      * @param existing - a platform value object.
      */
-    public void updatePlatform(PlatformValue existing)
+    public void updatePlatform(Platform platform, PlatformValue existing)
     {
-        // reassociate platform
-        Platform platform = findById(existing.getId());
-        
         // retrieve current list of ips
         Collection curips = platform.getIps();
         if (curips == null) {
@@ -133,11 +130,8 @@ public class PlatformDAO extends HibernateDAO {
         // if there is a agent
         if (existing.getAgent() != null)
         {
-            // get the agent token and set the agent tp the platform
-            AgentDAO agentLHome = DAOFactory.getDAOFactory().getAgentDAO();
-            Agent agentLocal = agentLHome.findById(
-                existing.getAgent().getId());
-            platform.setAgent(agentLocal);
+            // get the agent token and set the agent to the platform
+            platform.setAgent(existing.getAgent());
         }
         save(platform);
         // it is a good idea to
