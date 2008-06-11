@@ -187,6 +187,7 @@ CLIENT_CMD="${HQ_JAVA} \
 
 PING_CMD="${CLIENT_CMD} ping"
 SETUP_CMD="${CLIENT_CMD} setup"
+STATUS_CMD="${CLIENT_CMD} status"
 SETUP_IF_NO_PROVIDER_CMD="${CLIENT_CMD} setup-if-no-provider"
 # ------------- 
 # End HQ specific logic
@@ -637,9 +638,11 @@ status() {
         if [ "X$DETAIL_STATUS" = "X" ]
         then
             echo "$APP_LONG_NAME is running (PID:$pid)."
+            ${STATUS_CMD}
         else
             getstatus
             echo "$APP_LONG_NAME is running (PID:$pid, Wrapper:$STATUS, Java:$JAVASTATUS)"
+            ${STATUS_CMD}
         fi
         exit 0
     fi
