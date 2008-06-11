@@ -183,15 +183,16 @@ public class HTTPCollector extends SocketChecker {
         }
 
         if (length == null) {
-            return;
+            //return; //XXX ?
         }
-
-        try {
-            if (Integer.parseInt(length.getValue()) > 8192) {
+        else {
+            try {
+                if (Integer.parseInt(length.getValue()) > 8192) {
+                    return;
+                }
+            } catch (NumberFormatException e) {
                 return;
             }
-        } catch (NumberFormatException e) {
-            return;
         }
 
         try {
