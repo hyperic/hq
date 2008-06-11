@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.application.StartupListener;
@@ -59,6 +60,7 @@ public class AIStartupListener
         Set events = new HashSet();
         events.add(ResourceCreatedZevent.class);
         events.add(ResourceUpdatedZevent.class);
+        events.add(ResourceRefreshZevent.class);
         ZeventManager.getInstance().
             addBufferedListener(events, new RuntimeAIEnabler());
         
