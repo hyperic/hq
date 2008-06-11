@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -47,6 +48,7 @@ public class AIStartupListener
         Set events = new HashSet();
         events.add(ResourceCreatedZevent.class);
         events.add(ResourceUpdatedZevent.class);
+        events.add(ResourceRefreshZevent.class);
         ZeventManager.getInstance().
             addBufferedListener(events, new RuntimeAIEnabler());
         
