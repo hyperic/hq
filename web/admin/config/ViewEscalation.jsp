@@ -353,6 +353,7 @@ function showViewEscResponse(originalRequest) {
 	
 	    }
 	
+	    <c:if test="${useroperations['modifyEscalation']}">
 	    Sortable.create('viewEscalationUL', {containment:'viewEscalationUL',
 	        onUpdate: function() {
 	            var pars = "&id=" + id;
@@ -360,6 +361,7 @@ function showViewEscResponse(originalRequest) {
 	            new Ajax.Request(url, {method: 'post', onFailure :reportError});
 	        },
 	        constraint: 'vertical'});
+        </c:if>
     }
 }
 
