@@ -153,7 +153,7 @@ public class EditForm extends BaseValidatorForm  {
      *
      */
     public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
+        this.emailAddress = emailAddress.trim();
     }
     
     public boolean isHtmlEmail() {
