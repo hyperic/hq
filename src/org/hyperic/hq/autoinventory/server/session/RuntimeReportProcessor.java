@@ -348,10 +348,19 @@ public class RuntimeReportProcessor {
         String appdefServerAIID, aiServerAIID;
         aiServerAIID = aiserver.getAutoinventoryIdentifier();
         Integer aiserverId = aiserver.getId();
+        AIServerExtValue aiserverExt = null;
+        boolean isPlaceholder = false;
+        if (aiserver instanceof AIServerExtValue) {
+            aiserverExt = (AIServerExtValue) aiserver;
+            isPlaceholder = aiserverExt.getPlaceholder();
+        }
 
-        _log.info("Merging Server into inventory: name: " +
-                 aiserver.getName() + " AIIdentifier: " +
-                 aiserver.getAutoinventoryIdentifier());
+        _log.info("Merging Server into inventory: " +
+                  " id=" + aiserver.getId() + "," +
+                  " placeholder=" + isPlaceholder + "," +
+                  " name=" + aiserver.getName() + "," +
+                  " AIIdentifier=" + aiserver.getAutoinventoryIdentifier());
+
         for (int i=0; i<appdefServers.size(); i++) {
             appdefServer = (ServerValue) appdefServers.get(i);
 
@@ -389,6 +398,12 @@ public class RuntimeReportProcessor {
 
         try {
             if (foundAppdefServer == null) {
+                if (isPlaceholder) {
+                    _log.error("Placeholder serverId=" + aiserver.getId() +
+                               " not found for platformId=" + platform.getId() +
+                               ", fqdn=" + platform.getFqdn());
+                    return;
+                }
                 update = false;
                 // CREATE the server
                 // replace %serverName% in aisever's name.
@@ -445,12 +460,8 @@ public class RuntimeReportProcessor {
         // Only update the server and its config if it is not
         // a placeholder.  A placeholder is an AIServerExtValue that
         // exists solely to hold services underneath it.
-        AIServerExtValue aiserverExt = null;
-        if (aiserver instanceof AIServerExtValue) {
-            aiserverExt = (AIServerExtValue) aiserver;
-        }
 
-        if (!isPlaceholder(aiserverExt)) {             
+        if (!isPlaceholder) {
             // CONFIGURE SERVER
             try {
                 // Configure resource, telling the config manager to send
@@ -504,7 +515,7 @@ public class RuntimeReportProcessor {
             }
 
             List aiServices = 
-                ((AIServerExtValue) aiserver).getAIServiceValuesAsList();
+                aiserverExt.getAIServiceValuesAsList();
 
             // Change the service names if they require expansion. 
             for (Iterator i=aiServices.iterator(); i.hasNext(); ) {
@@ -577,9 +588,5 @@ public class RuntimeReportProcessor {
                       "server: " + serverId, e);
             return false;
         }
-    }
-
-    private boolean isPlaceholder(AIServerExtValue aiserverExt) {
-        return (aiserverExt != null && aiserverExt.getPlaceholder());
     }
 }
