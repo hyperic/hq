@@ -1,6 +1,7 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField
 
@@ -12,9 +13,11 @@ import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
 import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.HasAuthzOperations
+import org.hyperic.util.pager.PageControl
 
 class MetricHelper extends BaseHelper {
     private tmplMan = TemplateManagerEJBImpl.one
+    private measMan = DerivedMeasurementManagerEJBImpl.one
     
     MetricHelper(AuthzSubject user) {
         super(user)
@@ -36,17 +39,21 @@ class MetricHelper extends BaseHelper {
      */
      def find(Map args) {
          args = args + [:]
-         ['all', 'withPaging', 'resourceType', 'enabled'].each {args.get(it, null)}
+         ['all', 'withPaging', 'resourceType', 'enabled', 'entity'].each {
+             args.get(it, null)
+         }
          args.get('user', user)
          args.get('permCheck', true)
 
          if (!args.permCheck && !args.user.isSuperUser()) {
              args.user = overlord
          }
-             
+
          if (args.all == 'templates') {
              if (args.withPaging == null) {
-                 args.withPaging = PageInfo.getAll(MeasurementTemplateSortField.TEMPLATE_NAME, true) 
+                 args.withPaging =
+                     PageInfo.getAll(MeasurementTemplateSortField.TEMPLATE_NAME,
+                                     true) 
              }
 
              def filter = {it}
@@ -68,7 +75,12 @@ class MetricHelper extends BaseHelper {
                  return tmplMan.findTemplates(args.user, args.withPaging,
                                               args.enabled)
              }
-         } 
+         } else if (args.all == 'metrics') {
+             // XXX: This actually only finds the enabled measurements, need
+             // to find all regardless of enablement
+             return measMan.findMeasurements(args.user, args.entity, null,
+                                             PageControl.PAGE_ALL)
+         }
          
          throw new IllegalArgumentException("Unsupported find args")
      }
