@@ -148,15 +148,13 @@ elif [ -d "${AGENT_INSTALL_HOME}/jre" ]; then
     HQ_JAVA_HOME="${AGENT_INSTALL_HOME}"/jre
     # Just in case
     chmod -R +x "${AGENT_INSTALL_HOME}"/jre/bin/*
-elif [ "x$JAVA_HOME" != "x" ] ; then
-    HQ_JAVA_HOME=${JAVA_HOME}
 else
     case "`uname`" in
     Darwin)
         HQ_JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
         ;;
     *)
-        echo "HQ_JAVA_HOME or JAVA_HOME must be set when invoking the agent"
+        echo "HQ_JAVA_HOME must be set when invoking the agent"
         exit 1
         ;;
     esac
@@ -293,14 +291,6 @@ else
             DIST_ARCH="parisc"
             ;;
     esac
-fi
-
-# OSX always places Java in the same location so we can reliably set JAVA_HOME
-if [ "$DIST_OS" = "macosx" ]
-then
-    if [ -z "$JAVA_HOME" ]; then
-        JAVA_HOME="/Library/Java/Home"; export JAVA_HOME
-    fi
 fi
 
 outputFile() {
