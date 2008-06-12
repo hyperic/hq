@@ -11,7 +11,7 @@
     </id>
 
     <property name="detail" type="string">
-      <column name="DETAIL" not-null="true" length="500"/>
+      <column name="DETAIL" not-null="true" length="4000"/>
     </property>
 
     <property name="type" type="string">

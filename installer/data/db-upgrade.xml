@@ -9054,7 +9054,12 @@ has already been defined.
       </statement>
     </schema-directSQL>
   </schemaSpec>
-
+	
+  <schemaSpec version="3.122">
+    <schema-alterColumn table="EAM_EVENT_LOG" column="DETAIL" 
+          nullable="NOT NULL" precision="4000" columnType="VARCHAR2"/>
+  </schemaSpec>
+	
 </dbupgrade>
 </target>
 </project>
