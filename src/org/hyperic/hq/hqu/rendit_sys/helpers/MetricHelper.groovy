@@ -7,6 +7,7 @@ import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.measurement.server.session.Measurement
+import org.hyperic.util.pager.PageControl
 
 class MetricHelper extends BaseHelper {
     private tmplMan = TemplateManagerEJBImpl.one
@@ -31,17 +32,21 @@ class MetricHelper extends BaseHelper {
      */
      def find(Map args) {
          args = args + [:]
-         ['all', 'withPaging', 'resourceType', 'enabled'].each {args.get(it, null)}
+         ['all', 'withPaging', 'resourceType', 'enabled', 'entity'].each {
+             args.get(it, null)
+         }
          args.get('user', user)
          args.get('permCheck', true)
 
          if (!args.permCheck && !args.user.isSuperUser()) {
              args.user = overlord
          }
-             
+
          if (args.all == 'templates') {
              if (args.withPaging == null) {
-                 args.withPaging = PageInfo.getAll(MeasurementTemplateSortField.TEMPLATE_NAME, true) 
+                 args.withPaging =
+                     PageInfo.getAll(MeasurementTemplateSortField.TEMPLATE_NAME,
+                                     true) 
              }
 
              def filter = {it}
@@ -63,7 +68,12 @@ class MetricHelper extends BaseHelper {
                  return tmplMan.findTemplates(args.user, args.withPaging,
                                               args.enabled)
              }
-         } 
+         } else if (args.all == 'metrics') {
+             // XXX: This actually only finds the enabled measurements, need
+             // to find all regardless of enablement
+             return measMan.findMeasurements(args.user, args.entity, null,
+                                             PageControl.PAGE_ALL)
+         }
          
          throw new IllegalArgumentException("Unsupported find args")
      }
