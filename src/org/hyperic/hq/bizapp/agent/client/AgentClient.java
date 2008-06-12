@@ -708,13 +708,25 @@ public class AgentClient {
 
         if (!unidirectional) {
             while(true){
+        	int listenPort = this.config.getListenPort();
                 agentPort = this.askIntQuestion("What port should " + PRODUCT +
                                                 " use to contact the agent",
-                                                this.config.getListenPort(),
+                                                listenPort,
                                                 QPROP_AGENTPORT);
                 if(agentPort < 1 || agentPort > 65535){
                     SYSTEM_ERR.println("- Invalid port");
                 } else {
+                    if (agentPort!= listenPort){
+                        SYSTEM_ERR.println("- To setup agent port to "+ 
+                				agentPort + "," +
+                                           " Stop the agent," +
+                                           " Update agent properties" +
+                                           " for "+ QPROP_AGENTPORT +
+                                           " and start the agent again");
+                        SYSTEM_OUT.println("- Now Agent uses the default port:"
+                                            +listenPort);
+                        agentPort = listenPort;
+                    }
                     break;
                 }
             }            
