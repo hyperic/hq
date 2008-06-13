@@ -8059,6 +8059,12 @@ has already been defined.
                           nullable="NOT NULL"
                           targetDB="mysql"/>
   </schemaSpec>
+
+  <schemaSpec version="3.96.8">
+    <schema-alterColumn table="EAM_EVENT_LOG" column="DETAIL" 
+          nullable="NOT NULL" precision="4000" columnType="VARCHAR2"/>
+  </schemaSpec> 
+	
 </dbupgrade>
 </target>
 
