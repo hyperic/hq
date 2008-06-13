@@ -8089,6 +8089,11 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
   
+  <schemaSpec version="3.96.8">
+    <schema-alterColumn table="EAM_EVENT_LOG" column="DETAIL" 
+          nullable="NOT NULL" precision="4000" columnType="VARCHAR2"/>
+  </schemaSpec>	
+	
   <schemaSpec version="3.98">
 	<schema-directSQL>
     <statement targetDB="postgresql">
@@ -9053,11 +9058,6 @@ has already been defined.
             alter table EAM_ESCALATION CHANGE COLUMN REPEAT FREPEAT TINYINT
       </statement>
     </schema-directSQL>
-  </schemaSpec>
-	
-  <schemaSpec version="3.122">
-    <schema-alterColumn table="EAM_EVENT_LOG" column="DETAIL" 
-          nullable="NOT NULL" precision="4000" columnType="VARCHAR2"/>
   </schemaSpec>
 	
 </dbupgrade>
