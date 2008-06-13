@@ -88,4 +88,8 @@ class MetricHelper extends BaseHelper {
      MeasurementTemplate findTemplateById(int id) {
          tmplMan.getTemplate(id)
      }
+
+     def findMeasurementById(int id) {
+         measMan.getMeasurement(id)
+     }
 }
