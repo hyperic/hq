@@ -8062,6 +8062,11 @@ has already been defined.
                           targetDB="mysql"/>
   </schemaSpec>
 
+  <schemaSpec version="3.96.8">
+    <schema-alterColumn table="EAM_EVENT_LOG" column="DETAIL" 
+          nullable="NOT NULL" precision="4000" columnType="VARCHAR2"/>
+  </schemaSpec> 
+	
   <schemaSpec version="3.97">
     <schema-addColumn table="EAM_MEASUREMENT" column="RESOURCE_ID" 
                       columnType="INTEGER">
@@ -8088,11 +8093,6 @@ has already been defined.
       </statement>
     </schema-directSQL>
   </schemaSpec>
-  
-  <schemaSpec version="3.96.8">
-    <schema-alterColumn table="EAM_EVENT_LOG" column="DETAIL" 
-          nullable="NOT NULL" precision="4000" columnType="VARCHAR2"/>
-  </schemaSpec>	
 	
   <schemaSpec version="3.98">
 	<schema-directSQL>
