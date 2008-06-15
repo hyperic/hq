@@ -125,7 +125,7 @@ public class ApacheServerDetector
             !this.discoverModSnmp;
     }
 
-    private static void getServerInfo(ApacheBinaryInfo info, String[] args) {
+    private void getServerInfo(ApacheBinaryInfo info, String[] args) {
         final String nameProp = "-Dhq.name=";
         String root = null;
         for (int i=1; i<args.length; i++) {
@@ -148,8 +148,8 @@ public class ApacheServerDetector
         }
     }
 
-    private static void findServerProcess(List servers, String query,
-                                          String version) {
+    private void findServerProcess(List servers, String query,
+                                   String version) {
         long[] pids = getPids(query);
 
         for (int i=0; i<pids.length; i++) {
@@ -175,8 +175,8 @@ public class ApacheServerDetector
         }
     }
 
-    protected static List getServerProcessList(String version,
-                                               String[] queries) {
+    protected List getServerProcessList(String version,
+                                        String[] queries) {
         ArrayList servers = new ArrayList();
 
         for (int i=0; i<queries.length; i++) {
@@ -418,7 +418,7 @@ public class ApacheServerDetector
         return new ConfigResponse(props);
     }
 
-    private static String[] getPtqlQueries() {
+    private String[] getPtqlQueries() {
         if (isWin32()) {
             return PTQL_QUERIES_WIN32;
         }
@@ -690,19 +690,6 @@ public class ApacheServerDetector
 
         public String toString() {
             return this.start + ".." + this.end;
-        }
-    }
-
-    public static void main(String[] args) throws Exception {
-        String[] versions = {"1.3", "2.0"};
-
-        for (int i=0; i<versions.length; i++) {
-            List servers = getServerProcessList(versions[i],
-                                                getPtqlQueries());
-
-            for (int j=0; j<servers.size(); j++) {
-                System.out.println(versions[i] + " " + servers.get(j));
-            }
         }
     }
 }

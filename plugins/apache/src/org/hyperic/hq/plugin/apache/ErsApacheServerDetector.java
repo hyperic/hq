@@ -200,16 +200,4 @@ public class ErsApacheServerDetector
         // prepend the type because ERS-tomcat will use the same AIID
         return "ERS-Apache " + serverRoot;
     }
-
-    public static void main(String[] args) throws Exception {
-        String[] versions = {"1.3", "2.0"};
-
-        for (int i=0; i<versions.length; i++) {
-            List servers = getServerProcessList(versions[i], PTQL_QUERIES_20);
-
-            for (int j=0; j<servers.size(); j++) {
-                System.out.println(versions[i] + " " + servers.get(j));
-            }
-        }
-    }
 }
