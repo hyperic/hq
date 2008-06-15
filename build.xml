@@ -1407,8 +1407,7 @@
     <copy file="etc/rollback.properties"
         tofile="${agent.dir}/conf/rollback.properties"/>      	
     <replace file="${agent.dir}/conf/rollback.properties">
-    	<replacefilter token="@@@VERSION@@@" value="${version}"/>
-		<replacefilter token="@@@BUILD@@@" value="${build}"/>
+    	<replacefilter token="@@@AGENT_BUNDLE_DIR@@@" value="${agent.bundle.dir}"/>
     </replace>
   	
     <antcall target="chmod-exec">
