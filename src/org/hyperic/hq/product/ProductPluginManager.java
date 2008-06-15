@@ -338,6 +338,11 @@ public class ProductPluginManager extends PluginManager {
 
         Properties props = getProperties();
         props.putAll(ProductProperties.getProperties());
+        //not the same as platform.fqdn
+        String name = props.getProperty(ProductPlugin.PROP_PLATFORM_NAME);
+        if (name != null) {
+            GenericPlugin.setPlatformName(name);
+        }
 
         initPluginFilters();
 

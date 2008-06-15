@@ -145,6 +145,10 @@ public abstract class GenericPlugin {
         return isWin32;
     }
 
+    static void setPlatformName(String name) {
+        hostname = name;
+    }
+
     /**
      * Method to assist with naming of resources.
      * 
