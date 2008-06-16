@@ -445,7 +445,6 @@
             template="${asp}:Platform=Win32:${name}"
             category="PERFORMANCE"
             group="Performance"
-            indicator="true"
             collectionType="dynamic"
             units="sec"/>
     <metric name="Request Wait Time"
