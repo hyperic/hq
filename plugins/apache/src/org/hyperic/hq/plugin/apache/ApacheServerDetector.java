@@ -37,10 +37,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.Collector;
+import org.hyperic.hq.product.ConfigFileTrackPlugin;
 import org.hyperic.hq.product.FileServerDetector;
+import org.hyperic.hq.product.LogFileTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ServerDetector;
@@ -48,6 +51,7 @@ import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.hq.product.Win32ControlPlugin;
 
+import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.snmp.SNMPClient;
 import org.hyperic.snmp.SNMPException;
 
@@ -125,7 +129,52 @@ public class ApacheServerDetector
             !this.discoverModSnmp;
     }
 
-    private static void getServerInfo(ApacheBinaryInfo info, String[] args) {
+    private String getConfigValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.charAt(0) != '/') {
+            return value;
+        }
+        StringTokenizer tok = new StringTokenizer(value, ",");
+        while (tok.hasMoreTokens()) {
+            String file = tok.nextToken();
+            if (exists(file)) {
+                return file;
+            }
+        }
+        return null;
+    }
+
+    protected String getConfigProperty(String name, String defval) {
+        String key = "apache." + name;
+        String val = getManager().getProperty(key); //agent.properties
+        if (val != null) {
+            log.debug("ConfigProperty: " + key + "==" + val);
+            return val;
+        }
+        Properties props = getProperties();
+        OperatingSystem os = OperatingSystem.getInstance();
+        String[] prefix = {
+           os.getVendor(),
+           os.getName()
+        };
+        for (int i=0; i<prefix.length; i++) {
+            key = prefix[i] + "." + name;
+            val = getConfigValue(props.getProperty(key));
+            if (val != null) {
+                log.debug("ConfigProperty: " + key + "==" + val);
+                return val;
+            }
+        }
+        return defval;
+    }
+
+    protected String getConfigProperty(String name) {
+        return getConfigProperty(name, null);
+    }
+
+    private void getServerInfo(ApacheBinaryInfo info, String[] args) {
         final String nameProp = "-Dhq.name=";
         String root = null;
         for (int i=1; i<args.length; i++) {
@@ -148,12 +197,15 @@ public class ApacheServerDetector
         }
     }
 
-    private static void findServerProcess(List servers, String query,
-                                          String version) {
+    private void findServerProcess(List servers, String query,
+                                   String version) {
         long[] pids = getPids(query);
 
         for (int i=0; i<pids.length; i++) {
-            String httpd = getProcExe(pids[i]);
+            String httpd;
+            if ((httpd = getProcExe(pids[i])) == null) {
+                httpd = getConfigProperty("exe");
+            }
 
             if (httpd == null) {
                 continue;
@@ -175,8 +227,8 @@ public class ApacheServerDetector
         }
     }
 
-    protected static List getServerProcessList(String version,
-                                               String[] queries) {
+    protected List getServerProcessList(String version,
+                                        String[] queries) {
         ArrayList servers = new ArrayList();
 
         for (int i=0; i<queries.length; i++) {
@@ -184,6 +236,19 @@ public class ApacheServerDetector
         }
 
         return servers;
+    }
+
+    private void addTrackConfig(ConfigResponse config) {
+        String[] keys = {
+            LogFileTrackPlugin.PROP_FILES_SERVER,
+            ConfigFileTrackPlugin.PROP_FILES_SERVER
+        };
+        for (int i=0; i<keys.length; i++) {
+            String val = getConfigProperty(keys[i]);
+            if (val != null) {
+                config.setValue(keys[i], val);
+            }
+        }
     }
 
     protected boolean configureServer(ServerResource server)
@@ -194,6 +259,8 @@ public class ApacheServerDetector
         File snmpConfig = getSnmpdConf(installpath);
         boolean snmpConfigExists = snmpConfig.exists();
 
+        controlConfig = getControlConfig(installpath);
+
         if (snmpConfigExists || this.discoverModSnmp) {
             if (!snmpConfigExists) {
                 log.debug(snmpConfig +
@@ -202,9 +269,9 @@ public class ApacheServerDetector
             }
             metricConfig = getSnmpConfig(snmpConfig);
             productConfig = getProductConfig(metricConfig);
-            controlConfig = getControlConfig(installpath);
 
             if (productConfig != null) {
+                addTrackConfig(productConfig);
                 setProductConfig(server, productConfig);
                 setMeasurementConfig(server, metricConfig);
                 if (controlConfig != null) {
@@ -245,7 +312,10 @@ public class ApacheServerDetector
                 //XXX need to auto-configure port and path
                 //server.setMeasurementConfig();
             }
-
+            addTrackConfig(productConfig);
+            if (controlConfig != null) {
+                setControlConfig(server, controlConfig);
+            }
             server.setDescription("mod_status monitor");
             server.setType(TYPE_HTTPD);
             //in the event that mod_snmp is added later,
@@ -393,32 +463,43 @@ public class ApacheServerDetector
         }
     }
 
+    private boolean exists(String name) {
+        if (name == null) return false;
+        return new File(name).exists();
+    }
+
     protected ConfigResponse getControlConfig(String path) {
         Properties props = new Properties();
 
         if (isWin32()) {
             props.setProperty(Win32ControlPlugin.PROP_SERVICENAME,
                               getWindowsServiceName());
+            return new ConfigResponse(props);
         }
         else {
-            String script = path + "/" + getDefaultControlScript();
+            String file = path + "/" + getDefaultControlScript();
 
-            if (new File(script).exists()) {
-                props.setProperty(ApacheControlPlugin.PROP_PROGRAM,
-                                  script);
+            if (!exists(file)) {
+                file = getConfigProperty(ApacheControlPlugin.PROP_PROGRAM);
             }
-            else {
-                return null; //XXX
+            if (file == null) {
+                return null;
             }
 
-            props.setProperty(ApacheControlPlugin.PROP_PIDFILE,
-                              path + "/" + getDefaultPidFile());
+            props.setProperty(ApacheControlPlugin.PROP_PROGRAM, file);
+
+            file = path + "/" + getDefaultPidFile();
+            if (!exists(file)) {
+                file = getConfigProperty(ApacheControlPlugin.PROP_PIDFILE);
+            }
+            if (file != null) {
+                props.setProperty(ApacheControlPlugin.PROP_PIDFILE, file);
+            }
+            return new ConfigResponse(props);
         }
-
-        return new ConfigResponse(props);
     }
 
-    private static String[] getPtqlQueries() {
+    private String[] getPtqlQueries() {
         if (isWin32()) {
             return PTQL_QUERIES_WIN32;
         }
@@ -690,19 +771,6 @@ public class ApacheServerDetector
 
         public String toString() {
             return this.start + ".." + this.end;
-        }
-    }
-
-    public static void main(String[] args) throws Exception {
-        String[] versions = {"1.3", "2.0"};
-
-        for (int i=0; i<versions.length; i++) {
-            List servers = getServerProcessList(versions[i],
-                                                getPtqlQueries());
-
-            for (int j=0; j<servers.size(); j++) {
-                System.out.println(versions[i] + " " + servers.get(j));
-            }
         }
     }
 }
