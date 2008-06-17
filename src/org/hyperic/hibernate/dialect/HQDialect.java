@@ -41,6 +41,12 @@ public interface HQDialect
      *               may be table percentage or random number
      */
     public String getOptimizeStmt(String table, int cost);
+    
+    /*
+     * Returns true if using the EAM_NUMBERS table to iterate over a
+     * certain amount of time ranges is optimal for the database
+     */
+    public boolean useEamNumbers();
 
     /*
      * Returns true if the database supports a multi insert stmt.

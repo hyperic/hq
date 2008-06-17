@@ -388,4 +388,8 @@ public class MySQL5InnoDBDialect
     public boolean usesSequenceGenerator() {
         return false;
     }
+
+    public boolean useEamNumbers() {
+        return false;
+    }
 }

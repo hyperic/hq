@@ -134,4 +134,8 @@ public class PostgreSQLDialect
     public boolean usesSequenceGenerator() {
         return true;
     }
+
+    public boolean useEamNumbers() {
+        return true;
+    }
 }

@@ -139,5 +139,9 @@ public class Oracle9Dialect
     public boolean usesSequenceGenerator() {
         return true;
     }
+
+    public boolean useEamNumbers() {
+        return true;
+    }
     
 }

@@ -41,13 +41,14 @@ import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.ResourceEventInterface;
-import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -241,18 +242,39 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
                     ", interval="+interval);
         }
         
+        HQDialect dialect = Util.getHQDialect();
         StringBuffer sql = new StringBuffer();
-        sql.append("SELECT i FROM ").append(TABLE_EAM_NUMBERS)
-           .append(" WHERE i < ").append(intervals)
-           .append(" AND EXISTS (SELECT id FROM ").append(TABLE_EVENT_LOG)
-           .append(" WHERE timestamp BETWEEN (")
-           .append(begin).append(" + (").append(interval).append(" * i)) AND ((")
-           .append(begin).append(" + (").append(interval).append(" * (i + 1))) - 1)")
-           .append(" AND entity_id = ").append(entityId.getID())
-           .append(" AND entity_type = ").append(entityId.getType())
-           .append(' ')
-           .append(Util.getHQDialect().getLimitString(1))
-           .append(')');
+        if (!dialect.useEamNumbers()) {
+            for (int i=0; i<intervals; i++) {
+                sql.append("(SELECT ").append(i).append(" FROM ")
+                   .append(TABLE_EVENT_LOG).append(" WHERE timestamp BETWEEN (")
+                   .append(begin).append(" + (").append(interval)
+                   .append(" * ").append(i).append(")) AND ((")
+                   .append(begin).append(" + (").append(interval)
+                   .append(" * (").append(i).append(" + 1))) - 1)")
+                   .append(" AND entity_id = ").append(entityId.getID())
+                   .append(" AND entity_type = ").append(entityId.getType())
+                   .append(' ').append(dialect.getLimitString(1)).append(')');
+                if (i<intervals-1) {
+                    sql.append(" UNION ALL ");
+                }
+            }
+        }
+        else {
+            sql.append("SELECT i FROM ").append(TABLE_EAM_NUMBERS)
+               .append(" WHERE i < ").append(intervals)
+               .append(" AND EXISTS (SELECT id FROM ").append(TABLE_EVENT_LOG)
+               .append(" WHERE timestamp BETWEEN (")
+               .append(begin).append(" + (").append(interval)
+               .append(" * i)) AND ((")
+               .append(begin).append(" + (").append(interval)
+               .append(" * (i + 1))) - 1)")
+               .append(" AND entity_id = ").append(entityId.getID())
+               .append(" AND entity_type = ").append(entityId.getType())
+               .append(' ')
+               .append(dialect.getLimitString(1))
+               .append(')');
+        }
         
         if (log.isDebugEnabled()) {
             log.debug(sql.toString());
