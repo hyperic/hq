@@ -358,7 +358,7 @@ public class MxUtil {
 
     //vmid == pid; use undocumented ConnectorAddressLink.importFrom(pid)
     //to get the local JMXServiceURL
-    private static String getUrlFromPid(String ptql) throws IOException {
+    static String getUrlFromPid(String ptql) throws IOException {
         Sigar sigar = new Sigar();
         String address;
         long pid;
@@ -377,8 +377,14 @@ public class MxUtil {
             address =
                 (String)importFrom.invoke(caddrLinkClass,
                                           new Object[] { new Integer((int)pid) });
+        } catch (ClassNotFoundException e) {
+            String jvm =
+                System.getProperty("java.vm.name") + " " +
+                System.getProperty("java.vm.version");
+            throw new IOException(ptql + " " + e.getMessage() +
+                                  " not supported by " + jvm);
         } catch (Exception e) {
-            throw new IOException(ptql + " " + e.getMessage());
+            throw new IOException(ptql + " " + e);
         } finally {
             sigar.close();
         }

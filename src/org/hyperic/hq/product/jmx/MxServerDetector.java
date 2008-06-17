@@ -244,6 +244,9 @@ public class MxServerDetector
             if (!isInstallTypeVersion(dir)) {
                 continue;
             }
+            String query =
+                PROC_JAVA + ",Args.*.eq=-D" +
+                getProcHomeProperty() + "=" + dir;
 
             // Create the server resource
             ServerResource server = newServerResource(dir);
@@ -260,14 +263,13 @@ public class MxServerDetector
 
                 if (option != null) {
                     // Configure process.query
-                    String query =
-                        PROC_JAVA + ",Args.*.eq=-D" +
-                        getProcHomeProperty() + "=" + dir;
                     config.setValue(option.getName(), query);
                 }
             }
 
+            boolean configuredURL = false, hasRemote = false;
             if (process.getURL() != null) {
+                configuredURL = true;
                 config.setValue(MxUtil.PROP_JMX_URL,
                                 process.getURL());
             }
@@ -275,11 +277,26 @@ public class MxServerDetector
                 String[] args = process.getArgs();
                 for (int j=0; j<args.length; j++) {
                     if (configureMxURL(config, args[j])) {
+                        configuredURL = true;
                         break;
+                    }
+                    else if (args[j].equals(SUN_JMX_REMOTE)) {
+                        hasRemote = true;
                     }
                 }
             }
 
+            if (hasRemote && !configuredURL) {
+                try {
+                    //verify local url access is supported by this JVM
+                    //and we have the appropriate permissions
+                    MxUtil.getUrlFromPid(query);
+                    config.setValue(MxUtil.PROP_JMX_URL,
+                                    MxUtil.PTQL_PREFIX + query);
+                } catch (Exception e) {
+                    log.debug(e.getMessage());
+                }
+            }
             // default anything not auto-configured
             setProductConfig(server, config);
             discoverServerConfig(server, process.getPid());
