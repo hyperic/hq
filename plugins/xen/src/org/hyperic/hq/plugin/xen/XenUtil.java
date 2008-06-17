@@ -73,7 +73,7 @@ public class XenUtil {
         try {
             return new Connection(url, username, password);
         } catch (Exception e) {
-            throw new PluginException("Session setup error: " + e.getMessage(), e);
+            throw new PluginException("Connection error: " + e, e);
         }
     }
 
