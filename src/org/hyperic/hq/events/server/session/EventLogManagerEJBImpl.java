@@ -51,6 +51,7 @@ import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerUtil;
+import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.util.jdbc.DBUtil;
