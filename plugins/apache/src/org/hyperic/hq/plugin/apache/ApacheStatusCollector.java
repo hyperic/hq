@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.netservices.HTTPCollector;
+import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.StringUtil;
 
@@ -51,6 +53,21 @@ public class ApacheStatusCollector extends HTTPCollector {
         String url = getURL();
         if (!url.endsWith(AUTO_FLAG)) {
             setURL(url + AUTO_FLAG);
+        }
+    }
+
+    public void collect() {
+        super.collect();
+        //ApacheServerDetector will auto-configure for localhost:80/server-status
+        //if GET /server-status returns 404, assume httpd itself is available
+        MetricValue value =
+            getResult().getMetricValue(ATTR_RESPONSE_CODE);
+        if ((value != null) &&
+            (value.getValue() == HttpURLConnection.HTTP_NOT_FOUND))
+        {
+            setAvailability(true);
+            String path = getProperties().getProperty(PROP_PATH);
+            log.warn(METHOD_GET + " " + path + ": " + getMessage());
         }
     }
 

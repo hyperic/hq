@@ -310,8 +310,8 @@ public class ApacheServerDetector
                 productConfig.setValue(Collector.PROP_HOSTNAME, address);
                 productConfig.setValue(Collector.PROP_PORT, port);
                 productConfig.setValue(Collector.PROP_PATH, "/server-status");
-                //XXX need to auto-configure port and path
-                //server.setMeasurementConfig();
+                //XXX need to auto-configure port and path, using defaults for now
+                server.setMeasurementConfig();
             }
             addTrackConfig(productConfig);
             if (controlConfig != null) {
