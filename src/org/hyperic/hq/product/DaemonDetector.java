@@ -182,9 +182,10 @@ public class DaemonDetector
         server.setIdentifier(formatName(id, pconfig, sconfig, oconfig));
 
         String installpath = (String)opts.get(INSTALLPATH);
-        if (installpath != null) {
-            server.setInstallPath(installpath);
+        if (installpath == null) {
+            installpath = server.getInstallPath();
         }
+        server.setInstallPath(formatName(installpath, pconfig, sconfig, oconfig));
     }
 
     protected ServerResource newServerResource(long pid, String exe) {
