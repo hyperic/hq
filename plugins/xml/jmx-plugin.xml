@@ -38,13 +38,11 @@
 
     <option name="jmx.username"
             description="JMX username"
-            optional="true"
-            default="system"/>
+            optional="true"/>
 
     <option name="jmx.password"
             description="JMX password"
             optional="true"
-            default="manager"
             type="secret"/>
   </config>
 
