@@ -75,6 +75,7 @@ public class ApacheServerDetector
     static final String[] PTQL_QUERIES = {
         "State.Name.eq=httpd,State.Name.Pne=$1",
         "State.Name.eq=apache2,State.Name.Pne=$1",
+        "State.Name.eq=apache,State.Name.Pne=$1",
         "State.Name.eq=httpd2-worker,State.Name.Pne=$1",
         "State.Name.eq=httpd2-prefork,State.Name.Pne=$1",
     };
