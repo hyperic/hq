@@ -49,6 +49,7 @@ public abstract class XenCollector extends Collector {
                                           " property must be configured");
             }
         }
+        connect();
     }
 
     protected Connection connect() throws PluginException {
