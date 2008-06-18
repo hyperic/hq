@@ -64,7 +64,7 @@ public class AgentRunner
         }
 
         p.setProperty(AgentConfig.PROP_STORAGEPROVIDERINFO[0],
-                      dataDir.getAbsolutePath() + ":m:100:20:50");  
+                      dataDir.getAbsolutePath() + "|m|100|20|50");  
         p.setProperty(AgentConfig.PROP_DATADIR[0], dataDir.getAbsolutePath());
         p.setProperty(AgentConfig.PROP_KEYSTORE[0], 
                       new File(dataDir, AgentConfig.PROP_KEYSTORE[0]).getAbsolutePath());
