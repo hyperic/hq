@@ -84,8 +84,9 @@ public class TriggerEvent extends LongIdPersistedObject {
         return ArrayUtil.clone(_eventObject);
     }
     
-    protected void setEventObject(AbstractEvent eventObject) { 
-        ByteArrayOutputStream baOs = new ByteArrayOutputStream();
+    protected void setEventObject(AbstractEvent eventObject) {
+        // Event objects are typically around 1k in size
+        ByteArrayOutputStream baOs = new ByteArrayOutputStream(1024);
         
         try {
             ObjectOutputStream objectOs = new ObjectOutputStream(baOs);
