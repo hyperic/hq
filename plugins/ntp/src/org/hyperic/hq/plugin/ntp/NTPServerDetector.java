@@ -99,6 +99,20 @@ public class NTPServerDetector
         return null;
     }
 
+    private String findNtpdc(String path) {
+        File ntpd = new File(path);
+        //(ntpd | xntpd) + "c"
+        String program = ntpd.getName() + "c";
+        File ntpdc = new File(ntpd.getParent(), program);
+        if (!ntpdc.exists()) {
+            ntpdc = new File("/usr/bin", program);
+            if (!ntpd.exists()) {
+                return program; //to be resolved by ExecutableProcess
+            }
+        }
+        return ntpdc.getPath();
+    }
+
     public List getServerResources(ConfigResponse platformConfig) 
         throws PluginException
     {
@@ -119,8 +133,7 @@ public class NTPServerDetector
 
         if (ntpd != null) {
             // ntpd is running
-            String ntpdc =
-                new File(getParentDir(ntpd, 1), "ntpdc").getAbsolutePath();
+            String ntpdc = findNtpdc(ntpd);
 
             ServerResource server = createServerResource(ntpd);
 
