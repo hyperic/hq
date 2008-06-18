@@ -80,7 +80,7 @@ public abstract class ServerDetector
     private static final String INSTALLPATH_NOMATCH = "INSTALLPATH_NOMATCH";
     protected static final String INSTALLPATH = "INSTALLPATH";
     protected static final String INVENTORY_ID = "INVENTORY_ID";
-    private static final String AUTOINVENTORY_NAME = "AUTOINVENTORY_NAME";
+    protected static final String AUTOINVENTORY_NAME = "AUTOINVENTORY_NAME";
     private static final String[] NO_ARGS = new String[0];
     private static final long[] NO_PIDS = new long[0];
     private static final List NO_MODULES = Arrays.asList(NO_ARGS);

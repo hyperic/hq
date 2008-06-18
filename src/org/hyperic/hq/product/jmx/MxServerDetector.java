@@ -103,6 +103,25 @@ public class MxServerDetector
         return true;
     }
 
+    protected boolean configureLocalMxURL(ConfigResponse config,
+                                          String arg, String query) {
+        if ((query == null) || !arg.equals(SUN_JMX_REMOTE)) {
+            return false;
+        }
+
+        try {
+            //verify local url access is supported by this JVM
+            //and we have the appropriate permissions
+            MxUtil.getUrlFromPid(query);
+            config.setValue(MxUtil.PROP_JMX_URL,
+                            MxUtil.PTQL_PREFIX + query);
+            return true;
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+            return false;
+        }
+    }
+
     protected String getProcMainClass() {
         return getTypeProperty(PROC_MAIN_CLASS);
     }
@@ -267,9 +286,7 @@ public class MxServerDetector
                 }
             }
 
-            boolean configuredURL = false, hasRemote = false;
             if (process.getURL() != null) {
-                configuredURL = true;
                 config.setValue(MxUtil.PROP_JMX_URL,
                                 process.getURL());
             }
@@ -277,26 +294,14 @@ public class MxServerDetector
                 String[] args = process.getArgs();
                 for (int j=0; j<args.length; j++) {
                     if (configureMxURL(config, args[j])) {
-                        configuredURL = true;
                         break;
                     }
-                    else if (args[j].equals(SUN_JMX_REMOTE)) {
-                        hasRemote = true;
+                    else if (configureLocalMxURL(config, args[j], query)) {
+                        //continue as .port might come later
                     }
                 }
             }
 
-            if (hasRemote && !configuredURL) {
-                try {
-                    //verify local url access is supported by this JVM
-                    //and we have the appropriate permissions
-                    MxUtil.getUrlFromPid(query);
-                    config.setValue(MxUtil.PROP_JMX_URL,
-                                    MxUtil.PTQL_PREFIX + query);
-                } catch (Exception e) {
-                    log.debug(e.getMessage());
-                }
-            }
             // default anything not auto-configured
             setProductConfig(server, config);
             discoverServerConfig(server, process.getPid());

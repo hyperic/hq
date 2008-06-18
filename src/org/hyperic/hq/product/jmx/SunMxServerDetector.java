@@ -33,12 +33,26 @@ import org.hyperic.sigar.SigarException;
 
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
  * Detector for Sun 1.5+ JVMs with remote JMX enabled 
  */
 public class SunMxServerDetector extends MxServerDetector {
+    //prefer -Dhq.autoinventory.name for local jmx.url query
+    private static final String HQ_NAME =
+        "-Dhq." + StringUtil.replace(AUTOINVENTORY_NAME.toLowerCase(), "_", ".") + "=";
+
+    private static final String URL_QUERY = PROC_JAVA + ",Args.*.eq=";
+
+    private String getMainClass(long pid) {
+        try {
+            return ProcUtil.getJavaMainClass(getSigar(), pid);
+        } catch (SigarException e) {
+            return null;
+        }
+    }
 
     //XXX can also find this stuff reading hotspot perf data
     public List getServerResources(ConfigResponse platformConfig)
@@ -60,18 +74,32 @@ public class SunMxServerDetector extends MxServerDetector {
             long pid = pids[i];
             String[] args = getProcArgs(pid);
             ConfigResponse config = new ConfigResponse();
+            String name = null, query = null, identifier = null;
+            boolean configuredURL = false;
 
             for (int j=0; j<args.length; j++) {
                 String arg = args[j];
 
-                if (configureMxURL(config, arg)) {
-                    String name = null;
-                    try {
-                        name =
-                            ProcUtil.getJavaMainClass(getSigar(), pid);
-                    } catch (SigarException e) {
+                if (!arg.startsWith(SUN_JMX_REMOTE)) {
+                    //-Dhq.autoinventory.name=...
+                    if (arg.startsWith(HQ_NAME)) {
+                        query = URL_QUERY + arg;
+                        name = arg.substring(HQ_NAME.length());
+                        identifier = name;
                     }
+                    continue;
+                }
 
+                if (name == null) {
+                    if ((name = getMainClass(pid)) != null) {
+                        query = URL_QUERY + arg;
+                    }
+                }
+
+                if (configureMxURL(config, arg) ||
+                    configureLocalMxURL(config, arg, query))
+                {
+                    configuredURL = true;
                     if ((name == null) ||
                         (name = name.trim()).length() == 0)
                     {
@@ -81,6 +109,9 @@ public class SunMxServerDetector extends MxServerDetector {
                         }
                         else {
                             name = "@ " + port;
+                            if (identifier == null) {
+                                identifier = arg;
+                            }
                         }
                     }
                     else {
@@ -91,27 +122,31 @@ public class SunMxServerDetector extends MxServerDetector {
                             name = productName;
                         }
                     }
-
-                    String identifier = args[j];
-                    String installpath = getCanonicalPath(getProcExe(pid));
-                    ServerResource server = newServerResource(installpath);
-                    if (server.getIdentifier().equals(installpath)) {
-                        //only if INVENTORY_ID was not set
-                        server.setIdentifier(identifier);    
-                    }
-
-                    //setName() before discoverServerConfig() to allow user override
-                    server.setName(server.getName() + " " + name);
-                    discoverServerConfig(server, pid);
-
-                    getLog().debug(server.getName() + " identifier=" + identifier);
-                    setProductConfig(server, config);
-                    server.setMeasurementConfig();
-
-                    servers.add(server);
-                    break;
                 }
             }
+
+            if (!configuredURL) {
+                continue;
+            }
+
+            String installpath = getCanonicalPath(getProcExe(pid));
+            ServerResource server = newServerResource(installpath);
+            if ((identifier != null) &&
+                server.getIdentifier().equals(installpath))
+            {
+                //only if INVENTORY_ID was not set
+                server.setIdentifier(identifier);    
+            }
+
+            //setName() before discoverServerConfig() to allow user override
+            server.setName(server.getName() + " " + name);
+            discoverServerConfig(server, pid);
+
+            getLog().debug(server.getName() + " identifier=" + identifier);
+            setProductConfig(server, config);
+            server.setMeasurementConfig();
+
+            servers.add(server);
         }
 
         return servers;
