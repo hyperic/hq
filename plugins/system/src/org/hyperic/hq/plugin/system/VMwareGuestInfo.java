@@ -106,7 +106,9 @@ public class VMwareGuestInfo {
                 while ((line = in.readLine()) != null) {
                     //Seen on windows:
                     //Warning: GuestApp: no value for option 'log'
-                    if (line.startsWith("Warning:")) {
+                    if (line.startsWith("Warning:") ||
+                        line.startsWith("No value found"))
+                    {
                         continue;
                     }
                     info.put(key, line);
