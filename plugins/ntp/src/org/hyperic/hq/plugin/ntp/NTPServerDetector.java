@@ -49,7 +49,8 @@ public class NTPServerDetector
         "/usr/sbin/ntpd",
         "/usr/bin/ntpd",
         "/sbin/ntpd",
-        "/bin/ntpd"
+        "/bin/ntpd",
+        "/usr/sbin/xntpd"
     };
 
     private static final String[] NTPD_PID_PATHS = {
@@ -126,7 +127,7 @@ public class NTPServerDetector
         if (ntpdPid != null) {
             query = "Pid.PidFile.eq=" + ntpdPid.getAbsolutePath();
         } else {
-            query = "State.Name.eq=ntpd";
+            query = "State.Name.ew=ntpd";
         }
 
         ntpd = getServerProcess(query);
