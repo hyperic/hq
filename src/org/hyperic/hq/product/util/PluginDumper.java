@@ -708,10 +708,12 @@ public class PluginDumper {
         boolean isPause =
             "true".equals(getProperty("metric-pause"));
 
+        String collect = getProperty("metric-collect");
         //-Dmetric-collect=default
-        boolean isDefault =
-            "default".equals(getProperty("metric-collect"));
-
+        boolean isDefault = "default".equals(collect);
+        if (isDefault) {
+            collect = null;
+        }
         //-Dmetric-indicator=true
         boolean isIndicator =
             "true".equals(getProperty("metric-indicator"));
@@ -737,7 +739,11 @@ public class PluginDumper {
                 !category.equalsIgnoreCase(metrics[j].getCategory())) {
                 continue;
             }
-
+            if ((collect != null) &&
+                !metrics[j].getName().equals(collect))
+            {
+                continue;
+            }
             String template = metrics[j].getTemplate();
 
             try {
