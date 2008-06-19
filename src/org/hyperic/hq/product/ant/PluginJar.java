@@ -59,7 +59,7 @@ public class PluginJar extends Jar {
             if (new File(dir).exists()) {
                 return dir;
             }
-            return ".";
+            return getProperty("basedir", ".");
         }
         return this.pluginDir;
     }
