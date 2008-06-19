@@ -195,6 +195,14 @@ public class AvailabilityManagerEJBImpl
             end, pc.isDescending());
         return getPageList(availInfo, begin, end, interval, prependUnknowns);
     }
+    
+    /**
+     * Get the list of RLE data for a resource
+     * @ejb:interface-method
+     */
+    public List getHistoricalAvailData(Resource res, long begin, long end) {
+        return getAvailabilityDataDAO().getHistoricalAvails(res, begin, end);
+    }
 
     private Collection getDefaultHistoricalAvail(long timestamp)
     {

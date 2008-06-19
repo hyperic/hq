@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 
@@ -201,20 +202,39 @@ public class AvailabilityDataDAO extends HibernateDAO {
         String sql = new StringBuffer()
                     .append("SELECT rle")
                     .append(" FROM AvailabilityDataRLE rle")
-				    .append(" JOIN rle.availabilityDataId.measurement m")
-				 	.append(" WHERE m.id in (:mids)")
-				 	.append(" AND (rle.availabilityDataId.startime > :startime")
-				 	.append("   OR rle.endtime > :startime)")
-				 	.append(" AND (rle.availabilityDataId.startime < :endtime")
-				 	.append("   OR rle.endtime < :endtime)")
-				 	.append(" ORDER BY rle.availabilityDataId.measurement,")
-				 	.append(" rle.availabilityDataId.startime")
-				 	.append(((descending) ? " DESC" : " ASC")).toString();
+                    .append(" JOIN rle.availabilityDataId.measurement m")
+                    .append(" WHERE m.id in (:mids)")
+                    .append(" AND rle.endtime > :startime")
+                    .append(" AND rle.availabilityDataId.startime < :endtime")
+                    .append(" ORDER BY rle.availabilityDataId.measurement,")
+                    .append(" rle.availabilityDataId.startime")
+                    .append(((descending) ? " DESC" : " ASC")).toString();
         return getSession()
             .createQuery(sql)
             .setLong("startime", start)
             .setLong("endtime", end)
             .setParameterList("mids", mids, new IntegerType())
+            .list();
+    }
+
+    /**
+     * @return List of AvailabilityDataRLE objs
+     */
+    List getHistoricalAvails(Resource res, long start,
+                             long end) {
+        String sql = new StringBuffer()
+                    .append("SELECT rle")
+                    .append(" FROM AvailabilityDataRLE rle")
+                    .append(" JOIN rle.availabilityDataId.measurement m")
+                    .append(" WHERE m.resource = :resource")
+                    .append(" AND rle.endtime > :startime")
+                    .append(" AND rle.availabilityDataId.startime < :endtime")
+                    .append(" ORDER BY rle.availabilityDataId.startime").toString();
+        return getSession()
+            .createQuery(sql)
+            .setParameter("resource", res)
+            .setLong("startime", start)
+            .setLong("endtime", end)
             .list();
     }
 
