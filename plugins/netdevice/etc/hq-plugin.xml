@@ -33,9 +33,6 @@
 <plugin name="netdevice"
         class="org.hyperic.hq.plugin.netdevice.NetworkDeviceProductPlugin">
 
-  <filter name="storage.config"
-          value="snmpIndexName=hrStorageDescr,snmpIndexValue=%storage%"/>
-
   <metrics name="netdevice-platform">
     <metric name="Uptime"
             template="${snmp.template}:sysUpTime"
@@ -280,25 +277,28 @@
             category="UTILIZATION"/>
   </metrics>
 
+  <filter name="template"
+          value="hr-${snmp.template},snmpIndexName=hrStorageDescr,snmpColumn=${oid}:%storage%.${oid}"/>
+
   <metrics name="nethost-storage">
     <metric name="Availability"
-            template="${snmp.template},Avail=true:hrStorageAllocationUnits:${storage.config}"
+            template="hr-${snmp.template},snmpIndexName=hrStorageDescr,snmpColumn=hrStorageAllocationUnits:%storage%.${alias}"
             indicator="true"/>
 
     <metric name="Used"
-            template="${snmp.template}:hrStorageUsed:${storage.config}"
+            oid="hrStorageUsed"
             category="UTILIZATION"
             units="B"
             indicator="true"/>
 
     <metric name="Size"
-            template="${snmp.template}:hrStorageSize:${storage.config}"
+            oid="hrStorageSize"
             category="UTILIZATION"
             units="B"
             indicator="true"/>
 
     <metric name="Allocation Failures"
-            template="${snmp.template}:hrStorageAllocationFailures:${storage.config}"
+            oid="hrStorageAllocationFailures"
             category="AVAILABILITY"
             collectionType="trendsup"/>
   </metrics>
@@ -425,7 +425,15 @@
                   description="Storage Name"/>
         </config>
 
+        <property name="Availability" value="hrStorageAllocationUnits"/>
+
         <metrics include="nethost-storage"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="collector"
+                class="org.hyperic.hq.plugin.netdevice.HrStorageCollector"/>
       </service>
     </server>
   </platform>
