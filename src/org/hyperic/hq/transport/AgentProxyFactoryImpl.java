@@ -65,13 +65,11 @@ public class AgentProxyFactoryImpl implements AgentProxyFactory {
     }
     
     /**
-     * @see org.hyperic.hq.transport.AgentProxyFactory#createSyncService(Agent, java.lang.Class, boolean)
+     * @see org.hyperic.hq.transport.AgentProxyFactory#createSyncService(Agent, java.lang.Class)
      */
-    public Object createSyncService(Agent agent, 
-                                    Class serviceInterface, 
-                                    boolean unidirectional) throws Exception {
+    public Object createSyncService(Agent agent, Class serviceInterface) throws Exception {
         
-        if (unidirectional) {
+        if (agent.isUnidirectional()) {
             throw new UnsupportedOperationException(
                     ".ORG instance does not support the unidirectional transport.");
         } else {
@@ -81,15 +79,14 @@ public class AgentProxyFactoryImpl implements AgentProxyFactory {
     }
     
     /**
-     * @see org.hyperic.hq.transport.AgentProxyFactory#createAsyncService(Agent, java.lang.Class, boolean, boolean)
+     * @see org.hyperic.hq.transport.AgentProxyFactory#createAsyncService(Agent, java.lang.Class, boolean)
      */
-    public Object createAsyncService(Agent agent,
+    public Object createAsyncService(Agent agent, 
                                      Class serviceInterface,
-                                     boolean guaranteed,
-                                     boolean unidirectional) throws Exception {
+                                     boolean guaranteed) throws Exception {
         TransportUtils.assertVoidReturnTypes(serviceInterface);
         
-        if (unidirectional) {
+        if (agent.isUnidirectional()) {
             throw new UnsupportedOperationException(
                 ".ORG instance does not support the unidirectional transport.");
         } else {

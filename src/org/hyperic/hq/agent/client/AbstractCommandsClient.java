@@ -64,8 +64,7 @@ public abstract class AbstractCommandsClient {
     
         try {
             proxy = _factory.createSyncService(_agent, 
-                                               serviceInterface, 
-                                               _agent.isUnidirectional());
+                                               serviceInterface);
         } catch (Exception e) {
             _log.error("Error creating proxy to remote service.", e);
             throw new AgentConnectionException("Error creating proxy to remote service.", e);
@@ -83,8 +82,7 @@ public abstract class AbstractCommandsClient {
         try {
             proxy = _factory.createAsyncService(_agent, 
                                                 serviceInterface, 
-                                                guaranteed, 
-                                                _agent.isUnidirectional());
+                                                guaranteed);
         } catch (Exception e) {
             _log.error("Error creating proxy to remote service.", e);
             throw new AgentConnectionException("Error creating proxy to remote service.", e);

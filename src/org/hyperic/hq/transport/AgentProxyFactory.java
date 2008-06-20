@@ -37,13 +37,10 @@ public interface AgentProxyFactory {
      * 
      * @param agent The agent.
      * @param serviceInterface The service interface.
-     * @param unidirectional <code>true</code> for a unidirectional transport; 
-     *                       <code>false</code> for a bidirectional transport.
      * @return A proxy to the agent service.
      * @throws Exception if an exception occurs acquiring the proxy.
      */
-    Object createSyncService(Agent agent, Class serviceInterface,
-            boolean unidirectional) throws Exception;
+    Object createSyncService(Agent agent, Class serviceInterface) throws Exception;
 
     /**
      * Create an asynchronous proxy to an agent service where proxy method 
@@ -57,13 +54,10 @@ public interface AgentProxyFactory {
      * @param serviceInterface The service interface.
      * @param guaranteed <code>true</code> to guarantee message delivery;
      *                   <code>false</code> if guaranteed delivery is not required.                        
-     * @param unidirectional <code>true</code> for a unidirectional transport; 
-     *                       <code>false</code> for a bidirectional transport.
      * @return A proxy to the agent service.
      * @throws Exception if an exception occurs acquiring the proxy.
      */
-    Object createAsyncService(Agent agent, Class serviceInterface,
-            boolean guaranteed, boolean unidirectional) throws Exception;
+    Object createAsyncService(Agent agent, Class serviceInterface, boolean guaranteed) throws Exception;
 
     /**
      * When a proxy to an agent service is no longer in use, it should be 
