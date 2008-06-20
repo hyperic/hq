@@ -127,6 +127,13 @@ public class SNMPCollector extends Collector {
 
     protected Map getIndexedColumn(SNMPSession session, String name)
         throws SNMPException {
+
+        return getIndexedColumn(session, name, true);
+    }
+
+    protected Map getIndexedColumn(SNMPSession session, String name,
+                                   boolean asString)
+        throws SNMPException {
         //XXX expose walk() in SNMPClient
         List column;
         Map values = new HashMap();
@@ -138,7 +145,14 @@ public class SNMPCollector extends Collector {
             for (int i=0; i<column.size(); i++) {
                 SNMPValue val = (SNMPValue)column.get(i);
                 String ix = getColumnIndex(val);
-                values.put(ix, val.toString().trim());
+                Object obj;
+                if (asString) {
+                    obj = val.toString().trim();
+                }
+                else {
+                    obj = val;
+                }
+                values.put(ix, obj);
             }
         } catch (Exception e) {
             getLog().error("getBulk(" + name + "): " + e);
@@ -147,7 +161,34 @@ public class SNMPCollector extends Collector {
         return values;
     }
 
+    public interface ColumnValueConverter {
+        public double convert(String index, SNMPValue value)
+            throws Exception;
+    }
+
+    public static class GenericColumnValueConverter
+        implements ColumnValueConverter {
+
+        public double convert(String index, SNMPValue value)
+            throws Exception {
+            return value.toLong();
+        }
+    }
+
     protected void collectIndexedColumn() {
+        collectIndexedColumn(new GenericColumnValueConverter());
+    }
+
+    protected SNMPSession getSession() throws Exception {
+        try {
+            return _client.getSession(_props);
+        } catch (Exception e) {
+            setErrorMessage(e.getMessage());
+            throw e;
+        }
+    }
+
+    protected void collectIndexedColumn(ColumnValueConverter converter) {
         String indexName = getIndexName();
         String columnName = getColumnName();
         String counterName = getCounterName();
@@ -157,11 +198,10 @@ public class SNMPCollector extends Collector {
         Map indexNames;
 
         try {
-            session = _client.getSession(_props);
+            session = getSession();
             indexNames = getIndexedColumn(session, indexName);
             column = session.getBulk(columnName);
         } catch (Exception e) {
-            setErrorMessage(e.getMessage());
             return;
         }
         if (isEmpty(column, columnName) ||
@@ -175,9 +215,9 @@ public class SNMPCollector extends Collector {
             String ix = getColumnIndex(val);
             String name = (String)indexNames.get(ix);
             try {
-                setValue(name + "." + counterName, val.toLong());
+                setValue(name + "." + counterName, converter.convert(ix, val));
             } catch (Exception e) {
-                getLog().warn(columnName + ".toLong failed for " +
+                getLog().warn(columnName + ".convert failed for " +
                               name + "@" + getInfo());
             }
             if (isAvail) {
