@@ -227,8 +227,6 @@ public class SNMPCollector extends Collector {
     }
 
     public void init() throws PluginException {
-        super.init();
-
         _client = new SNMPClient();
         _props = getProperties();
         for (int i=0; i<DEFAULT_PROPS.length; i++) {
