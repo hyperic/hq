@@ -28,7 +28,10 @@ package org.hyperic.hq.plugin.netdevice;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
@@ -46,7 +49,6 @@ import org.hyperic.snmp.SNMPException;
 import org.hyperic.snmp.SNMPSession;
 import org.hyperic.snmp.SNMPValue;
 
-import org.hyperic.util.collection.IntHashMap;
 import org.hyperic.util.config.ConfigResponse;
 
 public class NetworkDeviceDetector extends PlatformServiceDetector {
@@ -56,7 +58,7 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
     static final String PROP_IF_IX = PROP_IF + ".index";
     static final String IF_DESCR   = "ifDescr";
     static final String IF_NAME    = "ifName";
-    private static final String MAC_COLUMN = "ifPhysAddress";
+    private static final String IF_MAC = "ifPhysAddress";
     private static final String IP_IF_IX   = "ipAdEntIfIndex";
     private static final String IP_NETMASK = "ipAdEntNetMask";
 
@@ -67,16 +69,6 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
     };
 
     private SNMPSession session;
-
-    private Object get(String name, List column, int ix) {
-        int size = column.size();
-        if (ix >= size) {
-            getLog().warn(name + " column index [" + ix + "] " +
-                          "out-of-bounds [" + size + "]");
-            return null;
-        }
-        return column.get(ix);
-    }
 
     public List discoverServices(ConfigResponse serverConfig)
         throws PluginException {
@@ -142,7 +134,7 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
                 continue;
             }
             try {
-                cpropColumns.put(key, getColumn(key));
+                cpropColumns.put(key, getIfColumn(key));
             } catch (PluginException e) {
                 log.warn("Error getting '" + key + "': " +
                          e.getMessage());
@@ -153,30 +145,27 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
         if (columnName == null) {
             columnName = IF_DESCR;
         }
-        List interfaces = getColumn(columnName);
+        Map interfaces = getIfColumn(columnName);
         log.debug("Found " + interfaces.size() + " interfaces using " +
                   columnName);
 
         String descrColumn =
             columnName.equals(IF_DESCR) ? IF_NAME : IF_DESCR;
-        List descriptions;
+        Map descriptions;
         
         try {
-            descriptions = getColumn(descrColumn);
+            descriptions = getIfColumn(descrColumn);
         } catch (PluginException e) {
-            descriptions = null;
+            descriptions = new HashMap();
             String msg =
                 "Error getting descriptions from " +
                 descrColumn + ": " + e;
             log.warn(msg);
         }
 
-        boolean hasDescriptions = 
-            (descriptions != null) && (descriptions.size() == interfaces.size());
-
         List ip_if_ix = getColumn(IP_IF_IX);
-        IntHashMap ips = new IntHashMap();
-        IntHashMap netmasks = new IntHashMap();
+        HashMap ips = new HashMap();
+        HashMap netmasks = new HashMap();
         final String IF_IX_OID = SNMPClient.getOID(IP_IF_IX) + ".";
         final String NETMASK_OID = SNMPClient.getOID(IP_NETMASK) + ".";
         String ip, netmask;
@@ -185,7 +174,7 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
             SNMPValue value = (SNMPValue)ip_if_ix.get(i);
             String oid = value.getOID();
 
-            int ix = Integer.parseInt(value.toString()) - 1;
+            String ix = value.toString();
             if (oid.startsWith(IF_IX_OID)) {
                 ip = oid.substring(IF_IX_OID.length());
                 ips.put(ix, ip);
@@ -199,10 +188,14 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
             }
         }
 
-        for (int i=0; i<interfaces.size(); i++) {
+        for (Iterator it = interfaces.entrySet().iterator();
+             it.hasNext();)
+        {
             ConfigResponse config = new ConfigResponse();
             ConfigResponse cprops = new ConfigResponse();
-            String name = interfaces.get(i).toString().trim();
+            Map.Entry entry = (Map.Entry)it.next();
+            String ix = (String)entry.getKey();
+            String name = (String)entry.getValue();
             String mac = null;
 
             ServiceResource service = createServiceResource(SVC_NAME);
@@ -215,26 +208,22 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
 
             for (int j=0; j<keys.length; j++) {
                 String key = keys[j];
-                List data = (List)cpropColumns.get(key);
+                Map data = (Map)cpropColumns.get(key);
                 if (data == null) {
                     continue;
                 }
-                String val;
-                Object obj = get(key, data, i);
-                if (obj == null) {
+                String val = (String)data.get(ix);
+                if (val == null) {
                     continue;
                 }
-                if (key.equals(MAC_COLUMN)) {
-                    mac = val = ((SNMPValue)obj).toPhysAddressString();
-                }
-                else {
-                    val = obj.toString();
-                }
                 cprops.setValue(key, val);
+                if (key.equals(IF_MAC)) {
+                    mac = val;
+                }
             }
 
-            ip = (String)ips.get(i);
-            netmask = (String)netmasks.get(i);
+            ip = (String)ips.get(ix);
+            netmask = (String)netmasks.get(ix);
             if (ip == null) {
                 ip = "0.0.0.0";
             }
@@ -253,11 +242,9 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
                 name += " (" + mac + ")";
             }
             service.setServiceName(name);
-            if (hasDescriptions) {
-                Object obj = get(IF_DESCR, descriptions, i);
-                if (obj != null) {
-                    service.setDescription(obj.toString());
-                }
+            Object obj = descriptions.get(ix);
+            if (obj != null) {
+                service.setDescription(obj.toString());
             }
             services.add(service);
         }
@@ -284,7 +271,31 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
     protected void closeSession() {
         this.session = null;
     }
-    
+
+    private String getIfIndex(SNMPValue val) {
+        String oid = val.getOID();
+        int last = oid.lastIndexOf('.');
+        return oid.substring(last+1);        
+    }
+
+    protected Map getIfColumn(String name) throws PluginException {
+        Map map = new LinkedHashMap(); 
+        List column = getColumn(name);
+        for (int i=0; i<column.size(); i++) {
+            SNMPValue ent = (SNMPValue)column.get(i);
+            String ix = getIfIndex(ent);
+            String val;
+            if (name.equals(IF_MAC)) {
+                val = ent.toPhysAddressString();
+            }
+            else {
+                val = ent.toString().trim();
+            }
+            map.put(ix, val);
+        }
+        return map;
+    }
+
     protected List getColumn(String name) throws PluginException {
         try {
             return this.session.getColumn(name);
