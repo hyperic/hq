@@ -4,6 +4,8 @@
                   description="Interface Name"/>
         </config>
 
+        <property name="Availability" value="ifOperStatus"/>
+
         <properties>
           <property name="ifPhysAddress"
                     type="macaddress"
@@ -25,6 +27,9 @@
         <metrics include="netdevice-interface"/>
 
         <plugin type="measurement"
-                class="org.hyperic.hq.plugin.netdevice.NetworkInterfaceMeasurementPlugin"/>
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="collector"
+                class="org.hyperic.hq.plugin.netdevice.IfTableCollector"/>
 
       </service>

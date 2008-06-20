@@ -33,9 +33,6 @@
 <plugin name="netdevice"
         class="org.hyperic.hq.plugin.netdevice.NetworkDeviceProductPlugin">
 
-  <filter name="if.config"
-          value="snmpIndexName=%interface.index%,snmpIndexValue=%interface%"/>
-
   <filter name="storage.config"
           value="snmpIndexName=hrStorageDescr,snmpIndexValue=%storage%"/>
 
@@ -149,13 +146,13 @@
             collectionType="trendsup"/>
   </metrics>
 
-  <!-- note 'if-' prefix on several templates is to bypass the
-       snmp: proxy and use NetworkInterfaceMeasurementPlugin to
-       conditionally handle 64 bit counters -->
+  <filter name="template"
+          value="if-${snmp.template},snmpIndexName=%interface.index%,snmpColumn=${oid}:%interface%.${oid}"/>
 
   <metrics name="netdevice-interface">
+    <!-- use ifOperStatus Collector -->
     <metric name="Availability"
-            template="${snmp.template},Avail=true:ifOperStatus:${if.config}"
+            template="if-${snmp.template},snmpIndexName=%interface.index%,snmpColumn=ifOperStatus:%interface%.${alias}"
             indicator="true"/>
 
     <!--
@@ -170,7 +167,7 @@
                           - lower-layer interface(s)
     -->
     <metric name="Operational Status"
-            template="${snmp.template}:ifOperStatus:${if.config}"
+            oid="ifOperStatus"
             category="AVAILABILITY"/>
 
     <!--
@@ -179,23 +176,23 @@
         testing(3)   - in some test mode
     -->
     <metric name="Admin Status"
-            template="${snmp.template}:ifAdminStatus:${if.config}"
+            oid="ifAdminStatus"
             category="AVAILABILITY"/>
 
     <metric name="Last Change"
-            template="${snmp.template}:ifLastChange:${if.config}"
+            oid="ifLastChange"
             category="AVAILABILITY"
             units="jiffys"
             collectionType="static"/>
 
     <metric name="Bytes Received"
-            template="if-${snmp.template}:ifInOctets:${if.config}"
+            oid="ifInOctets"
             category="THROUGHPUT"
             units="B"
             collectionType="trendsup"/>
 
     <metric name="Bits Received"
-            template="if-${snmp.template}:ifInOctets:${if.config}"
+            oid="ifInOctets"
             category="THROUGHPUT"
             indicator="true"
             units="bytesToBits"
@@ -203,38 +200,38 @@
             collectionType="trendsup"/>
 
     <metric name="Inbound Packets"
-            template="if-${snmp.template}:ifInUcastPkts:${if.config}"
+            oid="ifInUcastPkts"
             category="THROUGHPUT"
             rate="1s"
             collectionType="trendsup"/>
 
     <metric name="Inbound Multicast Packets"
-            template="if-${snmp.template}:ifInNUcastPkts:${if.config}"
+            oid="ifInNUcastPkts"
             category="THROUGHPUT"
             rate="1s"
             collectionType="trendsup"/>
 
     <metric name="Inbound Packet Discards"
-            template="${snmp.template}:ifInDiscards:${if.config}"
+            oid="ifInDiscards"
             category="THROUGHPUT"
             indicator="true"
             rate="1s"
             collectionType="trendsup"/>
 
     <metric name="Inbound Errors"
-            template="${snmp.template}:ifInErrors:${if.config}"
+            oid="ifInErrors"
             category="THROUGHPUT"
             rate="1s"
             collectionType="trendsup"/>
 
     <metric name="Bytes Sent"
-            template="if-${snmp.template}:ifOutOctets:${if.config}"
+            oid="ifOutOctets"
             category="THROUGHPUT"
             units="B"
             collectionType="trendsup"/>
 
     <metric name="Bits Sent"
-            template="if-${snmp.template}:ifOutOctets:${if.config}"
+            oid="ifOutOctets"
             category="THROUGHPUT"
             indicator="true"
             units="bytesToBits"
@@ -242,32 +239,32 @@
             collectionType="trendsup"/>
 
     <metric name="Outbound Packets"
-            template="if-${snmp.template}:ifOutUcastPkts:${if.config}"
+            oid="ifOutUcastPkts"
             category="THROUGHPUT"
             rate="1s"
             collectionType="trendsup"/>
 
     <metric name="Outbound Multicast Packets"
-            template="if-${snmp.template}:ifOutNUcastPkts:${if.config}"
+            oid="ifOutNUcastPkts"
             category="THROUGHPUT"
             indicator="true"
             rate="1s"
             collectionType="trendsup"/>
 
     <metric name="Outbound Packet Discards"
-            template="if-${snmp.template}:ifOutDiscards:${if.config}"
+            oid="ifOutDiscards"
             category="THROUGHPUT"
             rate="1s"
             collectionType="trendsup"/>
 
     <metric name="Outbound Errors"
-            template="${snmp.template}:ifOutErrors:${if.config}"
+            oid="ifOutErrors"
             category="THROUGHPUT"
             rate="1s"
             collectionType="trendsup"/>
 
     <metric name="Outbound Packets Queues"
-            template="${snmp.template}:ifOutQLen:${if.config}"
+            oid="ifOutQLen"
             category="THROUGHPUT"
             rate="1s"
             collectionType="trendsup"/>
