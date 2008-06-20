@@ -781,7 +781,7 @@
             collectionType="trendsup"/>
   </metrics>
 
-  <metrics name="IMAP4_V5" include="IMAP">
+  <metrics name="IMAP4_V5" include="IMAP4">
     <metric name="Availability"
             template="win32:Service=IMAP4Svc:${alias}"
             category="AVAILABILITY"
@@ -794,7 +794,7 @@
             indicator="true"/>
   </metrics>
 
-  <metrics name="IMAP4_V8" include="IMAP">
+  <metrics name="IMAP4_V8" include="IMAP4">
     <!-- 2007 service name changearoo -->
     <metric name="Availability"
             template="win32:Service=MSExchangeImap4:${alias}"
