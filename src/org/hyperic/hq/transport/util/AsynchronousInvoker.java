@@ -97,12 +97,13 @@ public class AsynchronousInvoker {
      */
     public void invoke(AsynchronousInvocationHandler handler) {
         if (handler.isInvocationGuaranteed()) {
-            // TODO - need to implement guaranteed delivery correctly
+            // TODO - need to implement guaranteed delivery correctly (don't just execute immediately)
             // 1) Store the externalized handler to a persistent queue
             // 2) A background thread will peek() and execute the handler immediately, 
             // calling handleInvocation() since it throws an Exception.
             // 3) After the handler is executed, the handler will be removed
             // If we store the handlers in the database, this could be made transactional
+            _executor.execute(handler);
         } else {
             _executor.execute(handler);                        
         }
