@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class AgentRemoteValue implements GenericValueMap, Externalizable {
 
-    private Log _log = LogFactory.getLog(AgentRemoteValue.class);
+    private static Log _log = LogFactory.getLog(AgentRemoteValue.class);
 
     private Hashtable vals;
     
