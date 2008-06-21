@@ -235,7 +235,7 @@ public class SNMPDetector extends DaemonDetector {
             for (int j=0; j<keys.length; j++) {
                 String key = keys[j];
                 List data = (List)cpropColumns.get(key);
-                if (data == null) {
+                if ((data == null) || data.isEmpty()) {
                     continue;
                 }
                 String val = data.get(i).toString().trim();
