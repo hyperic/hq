@@ -558,7 +558,10 @@ public abstract class Collector implements Runnable {
             log.error("Error running " + this.plugin.getName() +
                       " collector: " + e, e);
             return;
-        // XXX: catch NoClassDefFoundError ?
+        } catch (NoClassDefFoundError e) {
+            log.error("Error running " + this.plugin.getName() +
+                      " collector: " + e, e);
+            return;
         } finally {
             if (setClassLoader) {
                 PluginLoader.resetClassLoader(this);
