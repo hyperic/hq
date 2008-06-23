@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -83,10 +83,12 @@ public class PostgreSQLServerDetector
     static final String VERSION_80 = "8.0";
     static final String VERSION_81 = "8.1";
     static final String VERSION_82 = "8.2";
+    static final String VERSION_83 = "8.3";
 
     static final String HQ_SERVER_DB = "HQ PostgreSQL";
     static final String HQ_SERVER_DB81 = "HQ PostgreSQL 8.1";
     static final String HQ_SERVER_DB82 = "HQ PostgreSQL 8.2";
+    static final String HQ_SERVER_DB83 = "HQ PostgreSQL 8.3";
 
     private static List getServerProcessList() {
         ArrayList servers = new ArrayList();
@@ -290,6 +292,18 @@ public class PostgreSQLServerDetector
                     name = getPlatformName() + " " +
                             HQ_SERVER_DB82;
                     server.setIdentifier(HQ_SERVER_DB82);
+                } else {
+                    name = getPlatformName() + " " +
+                        SERVER_NAME + " " + version;
+                }
+            }
+        } else if (getTypeInfo().getVersion().equals(VERSION_83)) {
+            if (version.indexOf(VERSION_83) != -1) {
+                String name;
+                if (installPath.indexOf("hqdb") != -1) {
+                    name = getPlatformName() + " " +
+                            HQ_SERVER_DB83;
+                    server.setIdentifier(HQ_SERVER_DB83);
                 } else {
                     name = getPlatformName() + " " +
                         SERVER_NAME + " " + version;
