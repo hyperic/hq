@@ -74,13 +74,6 @@
 
   <property name="installer.dir" value="${build.dir}/installer"/>
 
-  <property name="rendit_sys.dir" 
-	        value="${basedir}/src/org/hyperic/hq/hqu/rendit_sys"/>
-  <property name="hqu.deployed.dir"
-            value="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu"/>
-  <property name="hqu.deployed.rendit_sys.dir"
-	        value="${jboss.home}/server/default/deploy/hq.ear/rendit_sys"/>
-
   <property name="jboss.deploy.dir"
               value="${jboss.home}/server/default/deploy" />
               
@@ -203,38 +196,6 @@
       </sequential>
     </macrodef>
 
-    <macrodef name="hqu-copy">
-      <attribute name="eardir"/>
-      <attribute name="wardir"/>
-      <sequential>
-        <mkdir dir="@{eardir}/rendit_sys/org/hyperic/hq/hqu/rendit"/>
-        <copy todir="@{eardir}/rendit_sys/org/hyperic/hq/hqu/rendit">
-          <fileset dir="${rendit_sys.dir}"/>
-        </copy>
-        <mkdir dir="@{wardir}/hqu"/>
-        <copy todir="@{wardir}/hqu">
-          <fileset dir="${basedir}/ui_plugins">
-            <exclude name="scaffold/**"/>
-            <exclude name="extra/**"/>
-            <exclude name="old/**"/>
-          </fileset>
-        </copy>
-      </sequential>
-    </macrodef>
-    
-    <macrodef name="hqu-redeploy-plugin">
-      <attribute name="eardir"/>
-      <attribute name="wardir"/>
-      <attribute name="plugin"/>
-      <sequential>
-        <delete dir="${hqu.deployed.dir}/@{plugin}"/>
-        <sleep seconds="2"/>
-        <copy todir="@{wardir}/hqu/@{plugin}">
-          <fileset dir="${basedir}/ui_plugins/@{plugin}"/>
-        </copy>
-      </sequential>
-    </macrodef>
-
     <property name="init-internal-taskdefs.notrequired" value="true"/>
   </target>
 
@@ -251,8 +212,6 @@
     <taskdef name="post" classname="net.sf.antcontrib.net.PostTask"
              classpathref="alljars"/>
     <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
-             classpathref="custom-ant-tasks.path"/>
-    <taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc"
              classpathref="custom-ant-tasks.path"/>
     <property name="init-taskdefs.notrequired" value="true"/>
   </target>
@@ -336,6 +295,9 @@
 
   <import file="${hq.home}/build_util/xdoclet-build.xml"/>
   <import file="${hq.home}/build_util/hibernate-build.xml"/>
+ 
+  <!-- HQU -->
+  <import file="${hq.home}/build_util/hqu-build.xml"/>
 
   <!-- ================== DB Setup =================== -->
 
@@ -607,76 +569,9 @@
   <target name="build-war" description="Build and create the war" 
           depends="compile,pack-war" />
   
-  <!-- HQU == UI Plugins -->
-  <target name="hqu-deploy" depends="init">
-    <hqu-copy eardir="${jboss.home}/server/default/deploy/hq.ear" wardir="${jboss.home}/server/default/deploy/hq.ear/hq.war"/>
-  </target>
-
-  <target name="hqu-undeploy" depends="init">
-    <delete dir="${hqu.deployed.dir}"/>
-    <mkdir dir="${hqu.deployed.dir}"/>
-    <delete dir="${hqu.deployed.rendit_sys.dir}"/>
-  </target>
-
-  <target name="hqu-redeploy-plugin" depends="init">
-    <hqu-redeploy-plugin eardir="${jboss.home}/server/default/deploy/hq.ear"
-                         wardir="${jboss.home}/server/default/deploy/hq.ear/hq.war"
-                         plugin="${plugin}"/>
-  </target>
-    
-    
-  <target name="hqu-gen-scaffold" depends="init">
-    <echo>
-    Use this task to generate a basic HQ plugin.
-    
-    Syntax:  hqu-gen-scaffold -Dplugin=cool -Dcontroller=Registry -DcontrollerDir=registry
-    
-    Where:  -Dplugin=         used to specify the short, plugin directory name
-            -Dcontroller=     Must be upper-case, specifies controlller in /app (ex:  Alert)
-            -DcontrollerDir=  must be lower-case, specifies views in /views/{dir}  (ex: alert)
-    </echo>
-
-    <fail unless="plugin"/>
-    <fail unless="controller"/>
-    <fail unless="controllerDir"/>
-    
-    <property name="targetDir" value="${basedir}/ui_plugins/${plugin}"/>
-    <available property="target.exists" file="${targetDir}"/>
-    <fail if="target.exists">
-       Plugin at ${targetDir} already exists.  
-    </fail>
-    
-    <copy todir="${basedir}/ui_plugins/${plugin}" overwrite="false" 
-          verbose="true">
-      <fileset dir="${basedir}/ui_plugins/scaffold"/>
-    </copy>
-  	
-  	<replace dir="${targetDir}" token="@PLUGIN_NAME@" value="${plugin}"/>
-    <replace dir="${targetDir}" token="@CONTROLLER_NAME@" value="${controller}"/>
-    <replace dir="${targetDir}" token="@CONTROLLER_DIR@" value="${controllerDir}"/>
-  	<replace dir="${targetDir}" token="@NEW_PLUGIN_PATH@" 
-  		     value="${targetDir}"/>
-
-    <move file="${targetDir}/etc/scaffold_i18n.properties" overwrite="false"
-          tofile="${targetDir}/etc/${plugin}_i18n.properties"/>
-    
-    <move file="${targetDir}/app/SampleController.groovy" overwrite="false"
-          tofile="${targetDir}/app/${controller}Controller.groovy"/>
-    
-    <move file="${targetDir}/views/sample" overwrite="false"
-          tofile="${targetDir}/views/${controllerDir}"/>
-    
-  	<echo>
- 		Your plugin is in:           ${targetDir}
-  		To deploy it to your server:  ant hqu-redeploy-plugin -Dplugin=${plugin}
-  		The URL to access it:  localhost:7080/hqu/${plugin}/${controllerDir}/index.hqu
-  	</echo>
-  </target>
-	  	
   <!-- ==================== UI packaging ==================== -->
 
   <target name="compile-ui" description="compiles the ui classes" depends="init">
-    
 
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"
              classpathref="alljars"/>
@@ -809,7 +704,10 @@
           file="src/org/hyperic/util/notReady/web.xml"/>
 
     <!-- Pack UI plugins -->
-    <hqu-copy eardir="${ear.dir}" wardir="${war.dir}"/>
+    <antcall target="hqu-deploy">
+      <param name="eardir" value="${ear.dir}"/>
+      <param name="wardir" value="${war.dir}"/>
+    </antcall>
   </target>
 
   <target name="deploy-ui" description="" depends="compile-ui">
@@ -2039,11 +1937,4 @@
     </javadoc>
   </target>
 
-  <target name="hqu-doc" depends="init,init-taskdefs">
-    <groovydoc destdir="${build.dir}/hqudoc"
-               sourcepath="${build.dir}/hq.ear/rendit_sys"
-               use="true"
-               windowtitle="groovydoc"
-               private="false"/>    
-  </target>
 </project>
