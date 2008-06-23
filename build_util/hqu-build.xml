@@ -88,10 +88,10 @@
 
     <copy todir="${basedir}/ui_plugins/${plugin}" overwrite="false"
           verbose="true">
-      <fileset dir="${basedir}/ui_plugins/scaffold"/>
+      <fileset dir="${hq.home}/ui_plugins/scaffold"/>
     </copy>
           
-        <replace dir="${targetDir}" token="@PLUGIN_NAME@" value="${plugin}"/>
+    <replace dir="${targetDir}" token="@PLUGIN_NAME@" value="${plugin}"/>
     <replace dir="${targetDir}" token="@CONTROLLER_NAME@" value="${controller}"/>
     <replace dir="${targetDir}" token="@CONTROLLER_DIR@" value="${controllerDir}"/>
         <replace dir="${targetDir}" token="@NEW_PLUGIN_PATH@"
