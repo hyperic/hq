@@ -89,4 +89,53 @@ public class TransportUtils_test extends TestCase {
         assertTrue(TransportUtils.isOneWayInvocation(invocation));
     }
     
+    public void testThrowsExpectedException() {
+        // this should work
+        TransportUtils.assertOperationsThrowException(GoodInterface.class, BaseException.class);
+        
+        try {
+            TransportUtils.assertOperationsThrowException(BadInterface1.class, BaseException.class);
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected outcome
+        }
+        
+        try {
+            TransportUtils.assertOperationsThrowException(BadInterface2.class, BaseException.class);
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected outcome
+        }        
+    }
+    
+    
+    public interface BadInterface1 {
+        void foo();
+    }
+
+    public interface BadInterface2 {
+        void foo() throws BaseException;
+        
+        // throwing a subclass of the expected exception is not allowed
+        void bar() throws SubclassException;
+    }
+    
+    public interface GoodInterface {
+        void foo() throws BaseException;
+        
+        void bar() throws BaseException;
+    }
+    
+    public class BaseException extends Exception {
+        public BaseException(String msg) {
+            super(msg);
+        }
+    }
+    
+    public class SubclassException extends BaseException {
+        public SubclassException(String msg) {
+            super(msg);
+        }
+    }
+    
 }
