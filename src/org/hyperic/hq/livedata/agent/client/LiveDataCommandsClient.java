@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.livedata.agent.client;
 
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.util.config.ConfigResponse;
@@ -32,6 +33,6 @@ import org.hyperic.util.config.ConfigResponse;
 public interface LiveDataCommandsClient {
 
     LiveDataResult getData(AppdefEntityID id, String type, String command,
-            ConfigResponse config);
+            ConfigResponse config) throws AgentRemoteException;
 
 }
