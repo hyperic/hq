@@ -34,6 +34,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClientFactory;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -236,7 +237,11 @@ public class LiveDataManagerEJBImpl implements SessionBean {
         ConfigResponse config = getConfig(subject, cmd);
         String type = getType(subject, cmd);
 
-        res = client.getData(id, type, cmd.getCommand(), config);
+        try {
+            res = client.getData(id, type, cmd.getCommand(), config);
+        } catch(AgentRemoteException e) {
+            throw new LiveDataException("Exception executing liveData", e);
+        }
 
         if (cacheTimeout != NO_CACHE) {
             putElement(cmd, res);
