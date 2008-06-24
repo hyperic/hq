@@ -111,6 +111,39 @@ public class TransportUtils {
     }
     
     /**
+     * Assert that all interface operations throw the expected exception.
+     * 
+     * @param serviceInterface The interface to inspect.
+     * @param expectedExceptionType The expected exception type.
+     * @throws IllegalArgumentException if an interface operation does not throw 
+     *                                  the expected exception.
+     */
+    public static void assertOperationsThrowException(Class serviceInterface, Class expectedExceptionType) {
+        Method[] methods = serviceInterface.getMethods();
+        
+        for (int i = 0; i < methods.length; i++) {
+            Method method = methods[i];
+            Class[] exceptions = method.getExceptionTypes();
+            
+            boolean throwsExpectedException = false;
+            
+            for (int j = 0; j < exceptions.length; j++) {
+                Class exception = exceptions[j];
+                
+                if (expectedExceptionType.equals(exception)) {
+                    throwsExpectedException = true;
+                    break;
+                }
+            }
+            
+            if (!throwsExpectedException) {
+                throw new IllegalArgumentException(serviceInterface+" operation: "+
+                        method+" does not throw "+expectedExceptionType);
+            }
+        }         
+    }
+    
+    /**
      * Attempt to load the poller client implementation from the context 
      * class loader.
      * 
