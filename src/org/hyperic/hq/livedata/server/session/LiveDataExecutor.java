@@ -25,19 +25,19 @@
 
 package org.hyperic.hq.livedata.server.session;
 
-import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
-import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
+import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
+import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
+import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 public class LiveDataExecutor extends ThreadPoolExecutor {
 
@@ -92,10 +92,11 @@ public class LiveDataExecutor extends ThreadPoolExecutor {
                                                          cmd.getType(),
                                                          cmd.getCommand(),
                                                          cmd.getConfig());
-                    _results.add(res);
                 } catch (AgentRemoteException e) {
-                    _log.error("Error while running cmd '"+cmd+"'", e);
+                    res = new LiveDataResult(cmd.getAppdefEntityID(), e, e.getMessage());
                 }
+                
+                _results.add(res);
             }
         }
     }
