@@ -29,6 +29,7 @@ import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
 
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.apache.commons.logging.Log;
@@ -85,11 +86,16 @@ public class LiveDataExecutor extends ThreadPoolExecutor {
                 LiveDataExecutorCommand cmd = (LiveDataExecutorCommand)i.next();
                 _log.debug("Running cmd '" + cmd + "' in thread " +
                            Thread.currentThread().getName());
-                LiveDataResult res = _client.getData(cmd.getAppdefEntityID(),
-                                                     cmd.getType(),
-                                                     cmd.getCommand(),
-                                                     cmd.getConfig());
-                _results.add(res);
+                LiveDataResult res;
+                try {
+                    res = _client.getData(cmd.getAppdefEntityID(),
+                                                         cmd.getType(),
+                                                         cmd.getCommand(),
+                                                         cmd.getConfig());
+                    _results.add(res);
+                } catch (AgentRemoteException e) {
+                    _log.error("Error while running cmd '"+cmd+"'", e);
+                }
             }
         }
     }
