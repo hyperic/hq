@@ -932,7 +932,6 @@
         <!-- for JMX based plugins -->
         <include name="mx4j/*.jar"/>
         <!-- for XPathAPI -->
-        <include name="xalan.jar"/>
         <include name="xml-apis.jar"/>
         <!-- for live data translation -->
         <include name="json.jar"/>
