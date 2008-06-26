@@ -173,8 +173,15 @@ public class CommandsServer
         ProviderInfo provider;
 
         provider = args.getProvider();
-        this.log.info("Setting the HQ server to: " + 
-                      provider.getProviderAddress());
+        
+        String providerMsg = "Setting the HQ server to: "+provider.getProviderAddress();
+                
+        if (provider.isNewTransport()) {
+            providerMsg+="; unidirectional="+provider.isUnidirectional();
+        }
+        
+        this.log.info(providerMsg);
+                
         CommandsAPIInfo.setProvider(this.storage, provider);
         try {
             this.storage.flush();
