@@ -1,8 +1,5 @@
 package org.hyperic.hq.plugin.websphere;
 
-import java.util.Map;
-
-import javax.management.ObjectName;
 import javax.management.j2ee.statistics.Stats;
 
 import org.hyperic.hq.product.PluginException;
@@ -11,7 +8,8 @@ import com.ibm.websphere.management.AdminClient;
 
 public class WebsphereServerCollector extends WebsphereCollector {
 
-    private ObjectName txName;
+    private boolean isJVM;
+    private String[][] attrs;
 
     //MBean Attribute -> legacy pmi name
     private static final String[][] TX_ATTRS = {
@@ -32,26 +30,52 @@ public class WebsphereServerCollector extends WebsphereCollector {
     protected void init(AdminClient mServer) throws PluginException {
         super.init(mServer);
 
-        this.name =
-            newObjectNamePattern("name=JVM," +
-                                 "type=JVM," +
-                                 "j2eeType=JVM," +
-                                  getServerAttributes());
+        String module = getProperties().getProperty("Module");
 
-        this.name = resolve(mServer, this.name);
+        if (module.equals("jvmRuntimeModule")) {
+            isJVM = true;
+            this.name =
+                newObjectNamePattern("name=JVM," +
+                                     "type=JVM," +
+                                     "j2eeType=JVM," +
+                                     getServerAttributes());
 
-        this.txName =
-            newObjectNamePattern("type=TransactionService," +
-                                 "j2eeType=JTAResource");
+            this.name = resolve(mServer, this.name);
+        }
+        else if (module.equals("transactionModule")) {
+            this.name =
+                newObjectNamePattern("type=TransactionService," +
+                                     "j2eeType=JTAResource");
 
-        try {
-            this.txName = resolve(mServer, this.txName);
-        } catch (PluginException e) {
-            this.txName = null;
+            this.name = resolve(mServer, this.name);
+            this.attrs = TX_ATTRS;
+        }
+        else if (module.equals("servletSessionsModule")) {
+            this.name = null; //XXX
+            setSource(module);
+        }
+        else if (module.equals("webappModule")) {
+            this.name = null; //XXX
+            setSource(module);
+        }
+        else if (module.equals("beanModule")) {
+            this.name = null; //XXX
+            setSource(module);
+        }
+        else if (module.equals("threadPoolModule")) {
+            this.name = null; //XXX
+            setSource(module);
+        }
+        else if (module.equals("connectionPoolModule")) {
+            this.name = null; //XXX
+            setSource(module);
         }
     }
 
     public void collect() {
+        if (this.name == null) {
+            return; //XXX see above
+        }
         AdminClient mServer = getMBeanServer();
         if (mServer == null) {
             return;
@@ -59,25 +83,22 @@ public class WebsphereServerCollector extends WebsphereCollector {
 
         setAvailability(true);
 
-        Map values = getResult().getValues();
-
-        Stats jvmStats =
+        Stats stats =
             (Stats)getStats(mServer, this.name);
 
-        if (jvmStats != null) {
-            double total = getStatCount(jvmStats, "HeapSize");
-            double used  = getStatCount(jvmStats, "UsedMemory");
-            values.put("totalMemory", new Double(total));
-            values.put("usedMemory", new Double(used));
-            values.put("freeMemory", new Double(total-used));
+        if (stats == null) {
+            return;
         }
 
-        if (this.txName != null) {
-            Stats txStats =
-                (Stats)getStats(mServer, this.txName);
-            if (txStats != null) {
-                collectStatCount(txStats, TX_ATTRS);
-            }
+        if (isJVM) {
+            double total = getStatCount(stats, "HeapSize");
+            double used  = getStatCount(stats, "UsedMemory");
+            setValue("totalMemory", total);
+            setValue("usedMemory", used);
+            setValue("freeMemory", total-used);
+        }
+        else {
+            collectStatCount(stats, this.attrs);
         }
     }
 }
