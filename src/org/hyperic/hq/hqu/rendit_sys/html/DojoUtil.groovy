@@ -219,27 +219,27 @@ class DojoUtil {
 			    }
 
                 function ${id}_loadTableData(data, ioArgs){
-                    ${sortFieldVar} = data.sortField;
-                    ${sortOrderVar} = data.sortOrder;
+                    if (data.data.length > 0) {
+	                    ${sortFieldVar} = data.sortField;
+	                    ${sortOrderVar} = data.sortOrder;
 
-                    document.${id}_model.setData(data.data);
-                    var sortColIdx = 0;
-                    //set sorted column
+	                    document.${id}_model.setData(data.data);
+	                    var sortColIdx = 0;
+	                    //set sorted column
 
-                    ${pageNumVar}  = data.pageNum;
-                    ${lastPageVar} = data.lastPage;
-                    ${idVar}_setupPager();
+	                    ${pageNumVar}  = data.pageNum;
+	                    ${lastPageVar} = data.lastPage;
+	                    ${idVar}_setupPager();
                     
 
-                    ${ajaxCountVar}--;
-                    if (${ajaxCountVar} == 0) {
-                        dojo.byId("${idVar}_loadMsg").style.visibility = 'hidden';
-                    }
-                    if (data.data == '') {
-                        dojo.publish("XHRComplete", ["NO_DATA_RETURNED"]);                        
-                    }else
-                        dojo.publish("XHRComplete", ["DATA_RETURNED"]);
-                    
+	                    ${ajaxCountVar}--;
+	                    if (${ajaxCountVar} == 0) {
+	                        dojo.byId("${idVar}_loadMsg").style.visibility = 'hidden';
+	                    }
+	                    dojo.publish("XHRComplete", ["DATA_RETURNED"]);
+                    } else {
+                        dojo.publish("XHRComplete", ["NO_DATA_RETURNED"]);
+					}
                 }
 
                 function ${id}_refreshTable(kwArgs){
@@ -252,8 +252,8 @@ class DojoUtil {
                         url: '${params.url}' + ${id}_makeQueryStr(kwArgs),
                         load: ${id}_loadTableData,
                         error: function(data, ioArgs){
-                            alert('Error loading table data');
-                         }
+                            dojo.debug('Error loading table data: the response was: '+data);
+                        }
                     });
                 }
 
