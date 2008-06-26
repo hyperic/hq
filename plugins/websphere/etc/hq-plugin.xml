@@ -142,7 +142,6 @@
             alias="LiveSessions"
             template="${domain}:Module=servletSessionsModule:liveSessions"
             category="UTILIZATION"
-            indicator="true"
             group="Resource Utilization"
             collectionType="dynamic"
             units="none"/>
@@ -173,7 +172,6 @@
             template="${domain}:Module=threadPoolModule:poolSize"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
             collectionType="dynamic"
             units="none"/>
     <!-- XXX transactionModule - globalTranDuration,
@@ -242,6 +240,7 @@
             template="${domain}:Module=transactionModule:globalTransRolledBack"
             category="THROUGHPUT"
             group="Throughput"
+            indicator="true"
             collectionType="trendsup"
             units="none"/>
     <metric name="Local Transactions Rolled Back"
