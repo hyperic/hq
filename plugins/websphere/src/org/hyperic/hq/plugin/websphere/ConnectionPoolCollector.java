@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.plugin.websphere;
 
+import java.util.Set;
+
+import javax.management.ObjectName;
 import javax.management.j2ee.statistics.JDBCConnectionPoolStats;
 import javax.management.j2ee.statistics.JDBCStats;
 
@@ -33,6 +36,46 @@ import org.hyperic.hq.product.PluginException;
 import com.ibm.websphere.management.AdminClient;
 
 public class ConnectionPoolCollector extends WebsphereCollector {
+
+    protected ObjectName resolve(AdminClient server, ObjectName name)
+            throws PluginException {
+
+        Set beans;
+        try {
+            beans = server.queryNames(name, null);
+        } catch (Exception e) {
+            String msg =
+                "resolve(" + name + "): " + e.getMessage();
+            throw new PluginException(msg, e);
+        }
+
+        if ((beans.size() == 0) || (beans.size() > 2)) {
+            String msg =
+                name + " query returned " +
+                beans.size() + " results";
+            throw new PluginException(msg);
+        }
+        ObjectName fullName =
+            (ObjectName)beans.iterator().next();
+
+        if (beans.size() == 1) {
+            return fullName;
+        }
+        else {
+            //XXX seen in samples, two beans where all attributes are equal
+            //with the exception of mbeanIdentifier
+            String id = fullName.getKeyProperty("mbeanIdentifier");
+            if (id != null) {
+                if (id.indexOf(getServerName()) != -1) {
+                    return fullName;
+                }
+                else {
+                    return (ObjectName)beans.iterator().next();
+                }
+            }
+        }
+        throw new PluginException("Failed to resolve: " + name);
+    }
 
     protected void init(AdminClient mServer) throws PluginException {
         super.init(mServer);
