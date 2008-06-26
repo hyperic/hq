@@ -254,30 +254,147 @@ public class AgentManagerEJBImpl
         }
         return agent;
     }
-
+    
     /**
-     * Update an existing Agent given an IP and port.
+     * Update an existing Agent given the old agent token. The auth token will 
+     * be reset. The type of the agent that is updated is the 'hyperic-hq-remoting' agent. 
+     * This type of agent may be configured to use either a bidirectional or 
+     * unidirectional transport.
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      * @return An Agent object representing the updated agent
      */
-    public Agent updateAgent(String ip, int port, String authToken,
-                             String agentToken, String version)
+    public Agent updateNewTransportAgent(String agentToken, 
+                                         String ip, int port, 
+                                         String authToken,
+                                         String version, 
+                                         boolean unidirectional)
         throws AgentNotFoundException
     {
+        AgentType type = getAgentTypeDAO().findByName(HQ_AGENT_REMOTING_TYPE);
+        
+        if (type == null){
+            throw new SystemException("Unable to find agent type '" +
+                                        HQ_AGENT_REMOTING_TYPE + "'");
+        }
+        
+        Agent agent;
+
+        agent = this.getAgentInternal(agentToken);
+        agent.setAddress(ip);
+        agent.setPort(port);
+        agent.setAuthToken(authToken);
+        agent.setVersion(version);
+        agent.setAgentType(type);
+        agent.setUnidirectional(unidirectional);
+        agent.setModifiedTime(new Long(System.currentTimeMillis()));
+        return agent;
+    }
+    
+    /**
+     * Update an existing Agent given the old agent token. The auth token will 
+     * be reset. The type of the agent that is updated is the legacy 'covalent-eam' type.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     * @return An Agent object representing the updated agent
+     */
+    public Agent updateLegacyAgent(String agentToken,
+                                   String ip, int port, 
+                                   String authToken,
+                                   String version)
+        throws AgentNotFoundException
+    {
+        AgentType type = getAgentTypeDAO().findByName(CAM_AGENT_TYPE);
+        
+        if (type == null){
+            throw new SystemException("Unable to find agent type '" +
+                                      CAM_AGENT_TYPE + "'");
+        }
+        
+        Agent agent;
+
+        agent = this.getAgentInternal(agentToken);
+        agent.setAddress(ip);
+        agent.setPort(port);
+        agent.setAuthToken(authToken);
+        agent.setVersion(version);
+        agent.setAgentType(type);
+        agent.setUnidirectional(false);
+        agent.setModifiedTime(new Long(System.currentTimeMillis()));
+        return agent;
+    }    
+    
+    /**
+     * Update an existing Agent given an IP and port. The type of the agent that 
+     * is updated is the 'hyperic-hq-remoting' agent. This type of agent may be 
+     * configured to use either a bidirectional or unidirectional transport.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     * @return An Agent object representing the updated agent
+     */
+    public Agent updateNewTransportAgent(String ip, int port, String authToken,
+                                         String agentToken, String version, 
+                                         boolean unidirectional)
+        throws AgentNotFoundException
+    {
+        AgentType type = getAgentTypeDAO().findByName(HQ_AGENT_REMOTING_TYPE);
+        
+        if (type == null){
+            throw new SystemException("Unable to find agent type '" +
+                                        HQ_AGENT_REMOTING_TYPE + "'");
+        }
+        
         Agent agent;
 
         agent = this.getAgentInternal(ip, port);
         agent.setAuthToken(authToken);
         agent.setAgentToken(agentToken);
         agent.setVersion(version);
+        agent.setAgentType(type);
+        agent.setUnidirectional(unidirectional);
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
         return agent;
     }
 
     /**
-     * Update an existing agent's IP and port based on an agent token.
+     * Update an existing Agent given an IP and port. The type of the agent 
+     * that is updated is the legacy 'covalent-eam' type.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     * @return An Agent object representing the updated agent
+     */
+    public Agent updateLegacyAgent(String ip, int port, String authToken,
+                                   String agentToken, String version)
+        throws AgentNotFoundException
+    {
+        AgentType type = getAgentTypeDAO().findByName(CAM_AGENT_TYPE);
+        
+        if (type == null){
+            throw new SystemException("Unable to find agent type '" +
+                                      CAM_AGENT_TYPE + "'");
+        }
+        
+        Agent agent;
+
+        agent = this.getAgentInternal(ip, port);
+        agent.setAuthToken(authToken);
+        agent.setAgentToken(agentToken);
+        agent.setVersion(version);
+        agent.setAgentType(type);
+        agent.setUnidirectional(false);
+        agent.setModifiedTime(new Long(System.currentTimeMillis()));
+        return agent;
+    }
+    
+    /**
+     * Update an existing agent's IP and port based on an agent token. The type 
+     * of the agent that is updated is the 'hyperic-hq-remoting' agent. This type 
+     * of agent may be configured to use either a bidirectional or unidirectional 
+     * transport.
      *
      * @param agentToken Token that the agent uses to connect to HQ
      * @param ip         The new IP address
@@ -287,14 +404,57 @@ public class AgentManagerEJBImpl
      * @ejb:transaction type="REQUIRED"
      * @return An Agent object representing the updated agent
      */
-    public Agent updateAgent(String agentToken, String ip, int port)
+    public Agent updateNewTransportAgent(String agentToken, String ip, 
+                                         int port, boolean unidirectional)
         throws AgentNotFoundException
     {
+        AgentType type = getAgentTypeDAO().findByName(HQ_AGENT_REMOTING_TYPE);
+        
+        if (type == null){
+            throw new SystemException("Unable to find agent type '" +
+                                        HQ_AGENT_REMOTING_TYPE + "'");
+        }
+        
         Agent agent;
 
         agent = this.getAgentInternal(agentToken);
         agent.setAddress(ip);
         agent.setPort(port);
+        agent.setAgentType(type);
+        agent.setUnidirectional(unidirectional);
+        agent.setModifiedTime(new Long(System.currentTimeMillis()));
+        return agent;
+    }
+
+    /**
+     * Update an existing agent's IP and port based on an agent token. The type 
+     * of the agent that is updated is the legacy 'covalent-eam' type.
+     *
+     * @param agentToken Token that the agent uses to connect to HQ
+     * @param ip         The new IP address
+     * @param port       The new port
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     * @return An Agent object representing the updated agent
+     */
+    public Agent updateLegacyAgent(String agentToken, String ip, int port)
+        throws AgentNotFoundException
+    {
+        AgentType type = getAgentTypeDAO().findByName(CAM_AGENT_TYPE); 
+        
+        if (type == null){
+            throw new SystemException("Unable to find agent type '" +
+                                      CAM_AGENT_TYPE + "'");
+        }
+        
+        Agent agent;
+
+        agent = this.getAgentInternal(agentToken);
+        agent.setAddress(ip);
+        agent.setPort(port);
+        agent.setAgentType(type);
+        agent.setUnidirectional(false);
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
         return agent;
     }
