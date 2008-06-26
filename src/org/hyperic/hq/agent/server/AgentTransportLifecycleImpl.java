@@ -211,6 +211,8 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
                 _agentTransport.stop();
             } catch (InterruptedException e) {
             }
+            
+            _agentTransport = null;
         }
     }
     
@@ -222,6 +224,8 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
         Properties bootProperties = _config.getBootProperties();
         
         if (!isNewTransport(bootProperties, provider)) {
+            _log.info("Stopping agent transport.");
+            stopAgentTransport();
             return;
         }
         
