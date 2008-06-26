@@ -62,6 +62,10 @@ public class IfTableCollector extends SNMPCollector {
             "v1".equals(_props.getProperty(SNMPClient.PROP_VERSION));
         _columnName = super.getColumnName();
 
+        if (_columnName == null) {
+            throw new PluginException(PROP_COLUMN + " not defined: " +
+                                      getProperties() + " (stale template?)");
+        }
         if (_isVersion1) {
             return;
         }
