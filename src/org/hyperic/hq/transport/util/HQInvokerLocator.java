@@ -53,6 +53,7 @@ public class HQInvokerLocator extends InvokerLocator {
      * @param path The invoker locator path or <code>null</code>.
      * @param parameters The invoker locator parameters or <code>null</code>.
      * @param agentToken The agent token.
+     * @throws NullPointerException if the agent token is <code>null</code>.
      */
     public HQInvokerLocator(String protocol, 
                             String host, 
@@ -61,6 +62,11 @@ public class HQInvokerLocator extends InvokerLocator {
                             Map parameters, 
                             String agentToken) {
         super(protocol, host, port, path, parameters);
+        
+        if (agentToken == null) {
+            throw new NullPointerException("agent token is null");
+        }
+        
         _agentToken = agentToken;
     }
     
@@ -70,13 +76,20 @@ public class HQInvokerLocator extends InvokerLocator {
      * 
      * @param agentToken The new agent token value.
      * @return The cloned instance.
+     * @throws NullPointerException if the agent token is <code>null</code>.
      */
     public HQInvokerLocator cloneWithNewAgentToken(String agentToken) {
+        Map parameters = null;
+        
+        if (this.getParameters() != null) {
+            parameters = new HashMap(this.getParameters());
+        }
+        
         HQInvokerLocator locator = new HQInvokerLocator(this.getProtocol(), 
                                                         this.getHost(), 
                                                         this.getPort(), 
                                                         this.getPath(), 
-                                                        new HashMap(this.getParameters()), 
+                                                        parameters, 
                                                         agentToken);
         
         locator._invoker = this._invoker;
@@ -151,6 +164,28 @@ public class HQInvokerLocator extends InvokerLocator {
      */
     public boolean isDeliveryGuaranteed() {
         return _guaranteed;
+    }
+    
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        
+        if (obj instanceof HQInvokerLocator) {
+            HQInvokerLocator locator = (HQInvokerLocator)obj;
+            
+            return super.equals(obj) && locator.getAgentToken().equals(this.getAgentToken());            
+        }
+        
+        return false;
+    }
+    
+    public int hashCode() {
+        int result = super.hashCode();
+        
+        result = 17*result+this.getAgentToken().hashCode();
+        
+        return result;
     }
 
 }
