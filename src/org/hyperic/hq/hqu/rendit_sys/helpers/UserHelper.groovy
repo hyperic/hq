@@ -2,9 +2,11 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubjectMan
+import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl as AuthMan
 
 class UserHelper extends BaseHelper {
     private subjectMan = SubjectMan.one
+    private authMan = AuthMan.one
 
     UserHelper(AuthzSubject user) {
         super(user)
@@ -34,6 +36,16 @@ class UserHelper extends BaseHelper {
      */
     public createUser(userName, active, dsn, dept, email, first, last, phone, sms, html) { 
         subjectMan.createSubject(user, userName, active, dsn, dept, email, first, last, phone, sms, html)
+    }
+
+    /**
+     * Create a user with the given password.
+     * @return a {@link AuthzSubject}s
+     */
+    public createUser(userName, pass, active, dsn, dept, email, first, last, phone, sms, html) { 
+        def user = subjectMan.createSubject(user, userName, active, dsn, dept, email, first, last, phone, sms, html)
+        authMan.addUser(user, userName, pass)
+        user
     }
 
     /**
