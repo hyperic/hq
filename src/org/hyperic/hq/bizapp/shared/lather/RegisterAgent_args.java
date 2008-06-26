@@ -60,6 +60,21 @@ public class RegisterAgent_args
     public int getCpuCount() {
         return this.getIntValue(PROP_CPUCOUNT);
     }
+    
+    /**
+     * @return The agent token or <code>null</code>.
+     */
+    public String getAgentToken(){
+        String agentToken = null;
+        
+        try {
+            agentToken = super.getAgentToken();
+        } catch (LatherKeyNotFoundException e) {
+            // the agent token does not need to be set to register an agent
+        }
+        
+        return agentToken;
+    }
 
     public void validate()
         throws LatherRemoteException

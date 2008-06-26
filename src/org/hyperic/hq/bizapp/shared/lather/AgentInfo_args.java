@@ -38,6 +38,7 @@ public abstract class AgentInfo_args
     private static final String PROP_AGENTPORT = "agentPort";
     private static final String PROP_UNIDIRECTIONAL = "isUnidirectional";
     private static final String PROP_NEWTRANSPORTTYPE = "isNewTransportAgent";
+    private static final String PROP_AGENTTOKEN = "agentToken";
 
     public AgentInfo_args(){
         super();
@@ -104,6 +105,14 @@ public abstract class AgentInfo_args
 
     public int getAgentPort(){
         return this.getIntValue(PROP_AGENTPORT);
+    }
+    
+    public void setAgentToken(String agentToken){
+        this.setStringValue(PROP_AGENTTOKEN, agentToken);
+    }
+
+    public String getAgentToken(){
+        return this.getStringValue(PROP_AGENTTOKEN);
     }
 
     public void validate()
