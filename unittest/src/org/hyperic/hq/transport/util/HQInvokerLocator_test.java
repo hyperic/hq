@@ -49,6 +49,25 @@ public class HQInvokerLocator_test extends TestCase {
             new HQInvokerLocator("protocol", "localhost", 8080, null, null, "token");
     }
     
+    /**
+     * Expect a NullPointerException here.
+     */
+    public void testNullAgentToken() throws Exception {
+        try {
+            new HQInvokerLocator("protocol", "localhost", 8080, null, null, null);
+            fail("Expected NPE");
+        } catch (NullPointerException e) {
+            // expected outcome
+        }
+        
+        try {
+            _locator.cloneWithNewAgentToken(null);
+            fail("Expected NPE");
+        } catch (NullPointerException e) {
+            // expected outcome
+        }
+    }
+    
     public void testGetAgentToken() {
         assertEquals("token", _locator.getAgentToken());
     }
@@ -89,6 +108,21 @@ public class HQInvokerLocator_test extends TestCase {
         } catch (Exception e) {
             fail("Expected NullPointerException instead of: "+e);
         }
+    }
+    
+    /**
+     * Test equals where the agent tokens are the same and different.
+     */
+    public void testEquals() {
+        HQInvokerLocator equalLocator = _locator.cloneWithNewAgentToken(_locator.getAgentToken());
+        
+        HQInvokerLocator notEqualLocator = _locator.cloneWithNewAgentToken(_locator.getAgentToken()+"_not_equal");
+        
+        assertTrue(_locator.equals(_locator));
+        assertTrue(_locator.equals(equalLocator));
+        assertEquals(_locator.hashCode(), equalLocator.hashCode());
+        
+        assertFalse(_locator.equals(notEqualLocator));
     }
 
 }
