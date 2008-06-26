@@ -155,13 +155,46 @@ public class SST_AlterColumn extends SchemaSpecTask {
         }
 
         if (_nullable != null) {
-            alterSql += " " + _nullable;
+            alterSql += " " + getNullable(c);
         }
         alterSql += (withParen) ? ")" : "";
 
         List sql = new ArrayList();
         sql.add(alterSql);
         doAlter(c, sql);
+    }
+
+    private String getNullable(Connection conn) throws BuildException {
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            if (!DBUtil.isOracle(conn)) {
+                return _nullable;
+            }
+            String sql = "select nullable from ALL_TAB_COLS" +
+                         " WHERE table_name = ?" +
+                         " AND column_name = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, _table.toUpperCase());
+            pstmt.setString(2, _column.toUpperCase());
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                String nullable = rs.getString(1);
+                if (nullable.equals("N") &&
+                    _nullable.equalsIgnoreCase("NOT NULL")) {
+                    return "";
+                } else if (nullable.equals("Y") &&
+                    _nullable.equalsIgnoreCase("NULL")) {
+                    return "";
+                }
+                return _nullable;
+            }
+        } catch (SQLException e) {
+            throw new BuildException(
+                "Error while determining nullable value for oracle: "+e.getMessage(),
+                e);
+        }
+        return null;
     }
 
     private void alterMySQLTable (Connection c, boolean withParen)
