@@ -53,7 +53,7 @@ public class PostgreSQLDialect
         return false;
     }
 
-	public String getCreateSequenceString(String sequenceName) {
+    public String getCreateSequenceString(String sequenceName) {
         return new StringBuffer()
             .append("create sequence ")
             .append(sequenceName)
@@ -154,5 +154,9 @@ public class PostgreSQLDialect
             .append(op)
             .append(regex)
             .toString();
+    }
+
+    public boolean useEamNumbers() {
+        return true;
     }
 }

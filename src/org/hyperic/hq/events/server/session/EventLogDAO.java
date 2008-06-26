@@ -36,6 +36,8 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -45,8 +47,12 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.PermissionManager.RolePermNativeSQL;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.EventLogStatus;
+import org.hyperic.hq.measurement.server.session.Number;
 
 public class EventLogDAO extends HibernateDAO {
+    private final String TABLE_EVENT_LOG = "EAM_EVENT_LOG";
+    private final String TABLE_EAM_NUMBERS = "EAM_NUMBERS";
+
     private static final List VIEW_PERMISSIONS = 
         Arrays.asList(new String[] { 
             AuthzConstants.platformOpViewPlatform,
@@ -188,7 +194,7 @@ public class EventLogDAO extends HibernateDAO {
                                String status) 
     {
         EdgePermCheck wherePermCheck =
-            getPermissionManager().makePermCheckSql("rez");
+            getPermissionManager().makePermCheckHql("rez");
         String hql = "select l from EventLog l " +
             "join l.resource rez " +
             wherePermCheck +
@@ -208,7 +214,7 @@ public class EventLogDAO extends HibernateDAO {
                       Collection eventTypes)
     {
         EdgePermCheck wherePermCheck = 
-            getPermissionManager().makePermCheckSql("rez");
+            getPermissionManager().makePermCheckHql("rez");
         String hql = " select l from EventLog l " + 
             "join l.resource rez " +
             wherePermCheck +
@@ -378,38 +384,72 @@ public class EventLogDAO extends HibernateDAO {
         }
     }
     
+    private String getLogsExistSQL(Resource resource, long begin,
+                                   long end, int intervals,
+                                   EdgePermCheck wherePermCheck) {
+        HQDialect dialect = Util.getHQDialect();
+        StringBuilder sql = new StringBuilder();
+        String resVar = wherePermCheck.getResourceVar();
+        String permSql = wherePermCheck.getSql();
+        if (!dialect.useEamNumbers()) {
+            for (int i=0; i<intervals; i++) {
+                sql.append("(SELECT ").append(i).append(" AS I FROM ")
+                   .append(TABLE_EVENT_LOG).append(" evlog")
+                   .append(" JOIN EAM_RESOURCE ").append(resVar).append(" on ")
+                   .append("evlog.resource_id = ").append(resVar).append(".id")
+                   .append(permSql)
+                   .append(" AND timestamp BETWEEN (:begin + (:interval * ")
+                   .append(i).append(")) AND ((:begin + (:interval * (")
+                   .append(i).append(" + 1))) - 1)")
+                   .append(" AND ").append(resVar).append(".id = :resourceId ")
+                   .append(dialect.getLimitString(1)).append(')');
+                if (i<intervals-1) {
+                    sql.append(" UNION ALL ");
+                }
+            }
+        }
+        else {
+            sql.append("SELECT i AS I FROM ").append(TABLE_EAM_NUMBERS)
+               .append(" WHERE i < ").append(intervals)
+               .append(" AND EXISTS (")
+               .append("SELECT 1 FROM ")
+               .append(TABLE_EVENT_LOG).append(" evlog")
+               .append(" JOIN EAM_RESOURCE ").append(resVar).append(" on ")
+               .append("evlog.resource_id = ").append(resVar).append(".id")
+               .append(permSql)
+               .append(" AND timestamp BETWEEN (:begin + (:interval")
+               .append(" * i)) AND ((:begin + (:interval")
+               .append(" * (i + 1))) - 1)")
+               .append(" AND ").append(resVar).append(".id = :resourceId ")
+               .append(dialect.getLimitString(1))
+               .append(')');
+        }
+        return sql.toString();
+    }
+    
     boolean[] logsExistPerInterval(Resource resource, AuthzSubject subject,
-                                   long begin, long end,  
-                                   int intervals) 
+                                   long begin, long end, int intervals) 
     {
+        long interval = (end - begin) / intervals;
         EdgePermCheck wherePermCheck = 
             getPermissionManager().makePermCheckSql("rez");
-        String hql = "select i.I from Number i " +
-            "where I < :intervals " +
-            " and exists (" +
-            "    select l.id from EventLog l " +
-            "    join l.resource rez  " +
-            wherePermCheck +
-            "     and timestamp between (:begin + (:interval * I))"+
-            "                    and ((:begin + (:interval * (I + 1))) - 1) " +
-            " ) "; 
-    
-        long interval = (end - begin) / intervals;
-        boolean[] eventLogsInIntervals = new boolean[intervals];
-    
-        Query q = createQuery(hql)
+
+        String sql = getLogsExistSQL(resource, begin, end, intervals,
+                                     wherePermCheck);
+        Query q = getSession().createSQLQuery(sql)
+            .addEntity("I",
+                org.hyperic.hq.measurement.server.session.Number.class)
+            .setInteger("resourceId", resource.getId().intValue())
             .setLong("begin", begin)
-            .setInteger("intervals", intervals)
             .setLong("interval", interval);
-        
-        List result = 
-            wherePermCheck.addQueryParameters(q, subject, resource, 
-                                              0, VIEW_PERMISSIONS).list();
-        
+        List result = wherePermCheck.addQueryParameters(
+            q, subject, resource,  0, VIEW_PERMISSIONS).list();
+
+        boolean[] eventLogsInIntervals = new boolean[intervals];
+
         for (Iterator i=result.iterator(); i.hasNext(); ) {
             Number n = (Number)i.next();
-        
-            eventLogsInIntervals[n.intValue()] = true;
+            eventLogsInIntervals[(int)n.getI()] = true;
         }        
         return eventLogsInIntervals;
     }

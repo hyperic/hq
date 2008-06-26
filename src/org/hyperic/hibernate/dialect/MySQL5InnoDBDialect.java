@@ -407,4 +407,8 @@ public class MySQL5InnoDBDialect
                 .toString();
         }
     }
+
+    public boolean useEamNumbers() {
+        return false;
+    }
 }

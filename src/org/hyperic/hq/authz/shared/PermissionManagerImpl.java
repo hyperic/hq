@@ -433,9 +433,33 @@ public class PermissionManagerImpl
     public boolean hasGuestRole() {
         return false;
     }
+    
+    public EdgePermCheck makePermCheckSql(String subjectParam,
+                                             String resVar,
+                                             String resParam,
+                                             String distanceParam,
+                                             String opsParam) {
+        String sql = new StringBuilder()
+            .append(" JOIN EAM_RESOURCE_EDGE edge")
+            .append(" ON ").append(resVar).append(".id = edge.TO_ID")
+            .append(" AND ").append(resVar).append(".id = edge.FROM_ID")
+            .append(" WHERE edge.distance >= :").append(distanceParam)
+            .append(" AND ").append(resVar).append(".id = :").append(resParam)
+            .append(" ").toString();
+
+        return new EdgePermCheck(sql, subjectParam, resVar, resParam,
+                                 distanceParam, opsParam) {
+            public Query addQueryParameters(Query q, AuthzSubject subject,
+                                            Resource r, int distance,
+                                            List ops) {
+                return q.setInteger(getDistanceParam(), distance)
+                        .setInteger(getResourceParam(), r.getId().intValue());
+            }
+        };
+    }
 
     public EdgePermCheck
-        makePermCheckSql(String subjectParam, 
+        makePermCheckHql(String subjectParam, 
                          String resourceVar, String resourceParam,
                          String distanceParam, String opsParam)
     {

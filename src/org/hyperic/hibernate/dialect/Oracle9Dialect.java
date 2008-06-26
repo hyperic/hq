@@ -154,4 +154,8 @@ public class Oracle9Dialect
             .append((ignoreCase) ? ", 'i')" : ")")
             .toString();
     }
+
+    public boolean useEamNumbers() {
+        return true;
+    }
 }

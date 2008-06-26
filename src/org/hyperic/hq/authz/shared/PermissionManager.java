@@ -224,7 +224,7 @@ public abstract class PermissionManager extends AuthzSession {
 
     /**
      * Creates an edge perm check with default names of the replacement
-     * variables and parameters.
+     * variables and parameters.  Used for a SQL query.
      */
     public EdgePermCheck makePermCheckSql(String resourceVar) {
         return makePermCheckSql("subject", resourceVar, "resource",
@@ -232,10 +232,49 @@ public abstract class PermissionManager extends AuthzSession {
     }
 
     /**
+     * Creates an edge perm check with default names of the replacement
+     * variables and parameters.  Used for a HQL query.
+     */
+    public EdgePermCheck makePermCheckHql(String resourceVar) {
+        return makePermCheckHql("subject", resourceVar, "resource",
+                                "distance", "ops");
+    }
+
+    /**
      * Generates an object which aids in the creation of hierarchical,
-     * permission checking SQL.
+     * permission checking SQL.  This is the SQL version of makePermCheckHql
      * 
      * This method spits out a piece of SQL, like:
+     *  JOIN EAM_RESOURCE_EDGE edge ON edge.TO_ID = resId edge.FROM_ID = resId
+     *  WHERE (resId = :resParam
+     *  AND edge.distance >= :distParam
+     *  AND resSubjId = :subjParam
+     *  AND ...
+     *  AND ...)
+     *   
+     * Therefore, it must used between the select and last parts of the
+     * where clause, preceded by an 'and'
+     * 
+     * The arguments ending with 'Param' are used to identify names of
+     * Query parameters which will later passed in. 
+     *   (e.g. query.setParameter("subject", s)
+     *   
+     * The arguments ending in 'Var' are the SQL variable names used
+     * straight in the SQL text.  
+     *   (e.g.  "select rez from Resource rez "... , you would specify
+     *    the name of your resourceVar as 'rez')
+     */
+    public abstract EdgePermCheck makePermCheckSql(String subjectParam, 
+                                                   String resourceVar,
+                                                   String resourceParam,
+                                                   String distanceParam,
+                                                   String opsParam); 
+
+    /**
+     * Generates an object which aids in the creation of hierarchical,
+     * permission checking HQL.
+     * 
+     * This method spits out a piece of HQL, like:
      *   join r.toEdges _e 
      *  ... 
      *  where _e.fromDistance > :distance
@@ -255,7 +294,7 @@ public abstract class PermissionManager extends AuthzSession {
      *    the name of your resourceVar as 'rez')
      */
     public abstract EdgePermCheck
-        makePermCheckSql(String subjectParam, 
+        makePermCheckHql(String subjectParam, 
                          String resourceVar, String resourceParam,
                          String distanceParam, String opsParam); 
 }
