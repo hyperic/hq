@@ -50,6 +50,11 @@
 
   <!-- HQU == UI Plugins -->
   <target name="hqu-deploy" depends="hqu-init">
+    <!-- Default eardir & wardir to the running jboss if not defined -->
+    <property name="eardir"
+              value="${jboss.home}/server/default/deploy/hq.ear"/>
+    <property name="wardir"
+              value="${jboss.home}/server/default/deploy/hq.ear/hq.war"/>
     <hqu-copy eardir="${eardir}" wardir="${wardir}"/>
   </target>
 
