@@ -60,6 +60,6 @@ class UserHelper extends BaseHelper {
      * Remove a user from database
      */
     public removeUser(uid) {
-        subjectMan.removeSubject(user.valueObject, uid)
+        subjectMan.removeSubject(user, uid)
     }
  }
