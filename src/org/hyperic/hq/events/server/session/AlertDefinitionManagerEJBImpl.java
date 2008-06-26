@@ -814,7 +814,9 @@ public class AlertDefinitionManagerEJBImpl
         Collection ads = def.getChildren();
         for (Iterator i=ads.iterator(); i.hasNext(); ) {
             AlertDefinition child = (AlertDefinition)i.next();
-            vals.add(child.getAlertDefinitionValue());
+            if (!child.isDeleted()) {   // Don't touch the deleted children
+                vals.add(child.getAlertDefinitionValue());
+            }
         }
 
         return new PageList(vals, vals.size());
