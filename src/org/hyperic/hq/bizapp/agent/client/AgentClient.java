@@ -731,6 +731,12 @@ public class AgentClient {
                 }
             }            
         }
+        
+        // The old agent token may be needed if re-registering an existing agent 
+        // but changing from non-unidirectional to unidirectional transport. 
+        // In this case, the agent port will change, so we will need to lookup 
+        // the agent by the old agent token instead of agent IP and port.
+        String oldAgentToken = null;
 
         /* Check to see if this agent already has a setup for a server.
            If it does, allow the user to re-register with the new IP address */
@@ -738,6 +744,8 @@ public class AgentClient {
            providerInfo.getProviderAddress() != null &&
            providerInfo.getAgentToken() != null)
         {
+            oldAgentToken = providerInfo.getAgentToken();
+            
             boolean setupTokens;
 
             SYSTEM_OUT.println("- Agent is already setup for " +
@@ -755,7 +763,9 @@ public class AgentClient {
                 try {
                     response = bizapp.updateAgent(providerInfo.getAgentToken(),
                                                   user, pword, agentIP, 
-                                                  agentPort);
+                                                  agentPort, 
+                                                  isNewTransportAgent, 
+                                                  unidirectional);
                     if(response != null)
                         SYSTEM_ERR.println("- Error updating agent: " +
                                            response);
@@ -763,6 +773,21 @@ public class AgentClient {
                     SYSTEM_ERR.println("- Error updating agent: " + 
                                        exc.getMessage());
                 }
+                
+                if (providerInfo.isNewTransport()!=isNewTransportAgent || 
+                    providerInfo.isUnidirectional()!=unidirectional) {
+                    
+                    ProviderInfo registeredProviderInfo = 
+                        new ProviderInfo(provider, providerInfo.getAgentToken());
+                    
+                    if (isNewTransportAgent) {
+                        registeredProviderInfo.setNewTransport(unidirectional, 
+                                                               unidirectionalPort);
+                    }
+                    
+                    this.camCommands.setProviderInfo(registeredProviderInfo);
+                }
+                
                 return;
             }
         }
@@ -783,7 +808,9 @@ public class AgentClient {
         SYSTEM_OUT.println("- Registering agent with " + PRODUCT);
         RegisterAgentResult result;
         try {
-            result = bizapp.registerAgent(user, pword, tokenRes.getToken(), 
+            result = bizapp.registerAgent(oldAgentToken, 
+                                          user, pword, 
+                                          tokenRes.getToken(), 
                                           agentIP, agentPort,
                                           ProductProperties.getVersion(),
                                           getCpuCount(), isNewTransportAgent, 
@@ -840,7 +867,7 @@ public class AgentClient {
                 String unidirectionalPortString = "";
                 if (providerInfo.isUnidirectional()) {
                     unidirectionalPortString = ", port="+
-                                               providerInfo.getUnidirectionalPort();
+                    providerInfo.getUnidirectionalPort();
                 }
                 
                 SYSTEM_OUT.println("- Agent using new transport, unidirectional="+
