@@ -204,12 +204,29 @@ public abstract class WebsphereCollector extends Collector {
         else {
             log.error("Unsupported stat type: " +
                       stat.getName() + "/" + stat.getClass().getName());
-            return Double.NaN;
+            return MetricValue.VALUE_NONE;
         }        
     }
 
     protected double getStatCount(Stats stats, String metric) {
-        return getStatCount(stats.getStatistic(metric));
+        Statistic stat = stats.getStatistic(metric);
+        if (stat == null) {
+            return MetricValue.VALUE_NONE;
+        }
+        return getStatCount(stat);
+    }
+
+    protected void collectStatCount(Stats stats, String[][] attrs) {
+        for (int i=0; i<attrs.length; i++) {
+            String[] entry = attrs[i];
+            String statKey = entry[0];
+            String pmiKey = entry.length == 1 ? statKey : entry[1]; 
+            double val = getStatCount(stats, statKey);
+            if (val == MetricValue.VALUE_NONE) {
+                continue;
+            }
+            setValue(pmiKey, val);
+        }
     }
 
     public MetricValue getValue(Metric metric, CollectorResult result) {
