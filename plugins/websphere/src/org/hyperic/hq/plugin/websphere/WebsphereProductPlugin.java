@@ -26,11 +26,20 @@
 package org.hyperic.hq.plugin.websphere;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -106,6 +115,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     private static boolean autoRT = false;
     private static boolean hasSoapConfig = false;
     private static boolean isOSGi = false;
+    private static boolean useExt = true;
     static boolean useJMX = false;
 
     //if we are running with the ibm jdk we can configure
@@ -276,6 +286,93 @@ public class WebsphereProductPlugin extends ProductPlugin {
         addClassPath(path, dir, files);
     }
 
+    //XXX bigmac hackattack
+    //org.apache.commons.logging is embedded in this .jar
+    //conflicts with our pdk/lib/commons-logging.jar
+    //rewrite the .jar and remove the conflicting package
+    private File runtimeJarHack(File file) throws Exception {
+        String tmp = System.getProperty("java.io.tmpdir"); //agent/tmp
+        File newJar = new File(tmp, file.getName());
+        if (newJar.exists()) {
+            return newJar;
+        }
+        log.debug("Creating " + newJar);
+        JarFile jar = new JarFile(file);
+        JarOutputStream os = new JarOutputStream(new FileOutputStream(newJar));
+        byte[] buffer = new byte[1024];
+        try {
+            for (Enumeration e = jar.entries(); e.hasMoreElements();) {
+                int n;
+                JarEntry entry = (JarEntry)e.nextElement();
+
+                if (entry.getName().startsWith("org/apache/commons/logging/")) {
+                    continue;
+                }
+                InputStream entryStream = jar.getInputStream(entry);
+                
+                os.putNextEntry(entry);
+                while ((n = entryStream.read(buffer)) != -1) {
+                    os.write(buffer, 0, n);
+                }
+                entryStream.close();
+            }
+        } finally {
+            jar.close();
+            os.close();
+        }
+        return newJar;
+    }
+
+    //XXX HHQ-2044 emulate -Djava.ext.dirs
+    private void setExtDirs(String installDir) throws Exception {
+        ClassLoader parent = getClass().getClassLoader().getParent();
+        URLClassLoader loader = null;
+
+        //rewind to top most parent, which should (must) be ExtClassLoader
+        while (parent != null) {
+            if (parent instanceof URLClassLoader) {
+                loader = (URLClassLoader)parent;
+            }
+            parent = parent.getParent();
+        }
+
+        log.debug("Using java.ext.dirs loader=" + loader);
+
+        //bypass protected access.
+        Method addURL =
+            URLClassLoader.class.getDeclaredMethod("addURL",
+                                                   new Class[] {
+                                                       URL.class
+                                                   });
+
+        addURL.setAccessible(true);
+
+        String[] dirs = {
+            "lib",
+            "plugins",
+        };
+
+        for (int i=0; i<dirs.length; i++) {
+            File dir = new File(installDir, dirs[i]);
+            String[] jars = dir.list();
+            if (jars == null) {
+                continue;
+            }
+            for (int j=0; j<jars.length; j++) {
+                File jar = new File(dir, jars[j]);
+                if (jar.isDirectory() || !jars[j].endsWith(".jar")) {
+                    continue;
+                }
+                log.debug("classpath += " + jar);
+                if (jars[j].startsWith("com.ibm.ws.runtime_")) {
+                    jar = runtimeJarHack(jar);
+                }
+                URL url = sun.net.www.ParseUtil.fileToEncodedURL(jar);
+                addURL.invoke(loader, new Object[] { url });
+            }
+        }
+    }
+
     private String[] getClassPathOSGi(String installDir) {
         ArrayList path = new ArrayList();
 
@@ -312,7 +409,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public String[] getClassPath(ProductPluginManager manager) {
         if (isWin32()) {
             String prop = "websphere.regkey";
-            REG_KEY = getPluginProperty(prop);
+            REG_KEY = getProperties().getProperty(prop);
             if (REG_KEY == null) {
                 throw new IllegalArgumentException(prop +
                                                    " property undefined");
@@ -324,6 +421,8 @@ public class WebsphereProductPlugin extends ProductPlugin {
         autoRT = "true".equals(managerProps.getProperty("websphere.autort"));
 
         useJMX = "true".equals(managerProps.getProperty("websphere.usejmx"));
+
+        useExt = !"false".equals(managerProps.getProperty("websphere.useext"));
 
         String installDir =
             managerProps.getProperty(PROP_INSTALLPATH);
@@ -428,6 +527,14 @@ public class WebsphereProductPlugin extends ProductPlugin {
         System.setProperty(PROP_INSTALL_ROOT, installDir);
 
         if (isOSGi) {
+            if (useExt) {
+                try {
+                    setExtDirs(installDir);
+                    return new String[0];
+                } catch (Exception e) {
+                    log.error("setExtDirs: " + e, e);
+                }
+            }
             return getClassPathOSGi(installDir);
         }
 
