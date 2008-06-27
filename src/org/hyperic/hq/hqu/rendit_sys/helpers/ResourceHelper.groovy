@@ -135,7 +135,11 @@ class ResourceHelper extends BaseHelper {
 
         throw new IllegalArgumentException('Unknown arguments passed to find()')
     }
-     
+    
+    public Resource findById(id) {
+        rman.findResourcePojoById(id)
+    }
+    
     private Resource findPrototype(Map args) {
         rman.findResourcePrototypeByName(args.prototype)
     }

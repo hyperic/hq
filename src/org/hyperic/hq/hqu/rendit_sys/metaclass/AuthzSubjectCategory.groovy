@@ -1,5 +1,7 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
+import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl
+import org.hyperic.hq.authz.shared.PermissionManager
 import org.hyperic.hq.authz.shared.PermissionManagerFactory
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl
@@ -35,5 +37,10 @@ class AuthzSubjectCategory {
         ConfigResponse cr = subMan.getUserPrefs(subject, subject.id)
         cr.setValue(key, val)
         subMan.setUserPrefs(subject, subject.id, cr)
+    }
+    
+    static getPassword(AuthzSubject subject) {
+        def principal = AuthManagerEJBImpl.one.getPrincipal(subject)
+        principal?.password
     }
 }

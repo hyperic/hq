@@ -29,7 +29,6 @@ import java.util.Collection;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.auth.Principal;
-import org.jboss.security.Util;
 
 /**
  *
@@ -55,11 +54,8 @@ public class PrincipalDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public Principal create(String principal, String password)
+    public Principal create(String principal, String passwordHash)
     {
-        // All passwords are stored encrypted
-        String passwordHash = Util.createPasswordHash("MD5", "base64",
-                                                      null, null, password);
         Principal p = new Principal();
 
         p.setPrincipal(principal);

@@ -1,5 +1,6 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
+import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubjectMan
 import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl as AuthMan
@@ -34,8 +35,10 @@ class UserHelper extends BaseHelper {
      * Create a user
      * @return a {@link AuthzSubject}s
      */
-    public createUser(userName, active, dsn, dept, email, first, last, phone, sms, html) { 
-        subjectMan.createSubject(user, userName, active, dsn, dept, email, first, last, phone, sms, html)
+    public createUser(userName, active, dsn, dept, email, first, last, phone,
+                      sms, html) { 
+        subjectMan.createSubject(user, userName, active, dsn, dept, email,
+                                 first, last, phone, sms, html)
     }
 
     /**
@@ -52,8 +55,17 @@ class UserHelper extends BaseHelper {
      * Update a user
      * @return a {@link AuthzSubject}s
      */
-    public updateUser(found, active, dsn, dept, email, first, last, phone, sms, html) {
-        subjectMan.updateSubject(user, found, active, dsn, dept, email, first, last, phone, sms, html)
+    public updateUser(found, active, dsn, dept, email, first, last, phone, sms,
+                      html) {
+        subjectMan.updateSubject(user, found, active, dsn, dept, email, first,
+                                 last, phone, sms, html)
+    }
+     
+    /**
+     * Update a user's password
+     */
+    public updateUserPassword(subject, password) {
+        AuthManagerEJBImpl.one.changePasswordHash(userValue, subject, password)
     }
 
     /**
