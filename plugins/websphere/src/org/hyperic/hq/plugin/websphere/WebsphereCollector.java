@@ -40,6 +40,7 @@ import javax.management.j2ee.statistics.CountStatistic;
 import javax.management.j2ee.statistics.RangeStatistic;
 import javax.management.j2ee.statistics.Statistic;
 import javax.management.j2ee.statistics.Stats;
+import javax.management.j2ee.statistics.TimeStatistic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -200,6 +201,18 @@ public abstract class WebsphereCollector extends Collector {
         }
         else if (stat instanceof RangeStatistic) {
             return ((RangeStatistic)stat).getCurrent();
+        }
+        else if (stat instanceof TimeStatistic) {
+            // get the average time (same as MxUtil)
+            double value;
+            long count = ((TimeStatistic)stat).getCount();
+            if (count == 0) {
+                value = 0;
+            }
+            else {
+                value = ((TimeStatistic)stat).getTotalTime() / count;
+            }
+            return value;
         }
         else {
             log.error("Unsupported stat type: " +
