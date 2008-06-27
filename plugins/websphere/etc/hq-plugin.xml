@@ -545,8 +545,7 @@
   </metrics>
 
   <metrics name="WebSphere 5.0" include="server-pmi,websphere-jvm">
-    <!-- XXX this avail check can be more robust -->
-    <metric name="Server Availability"
+    <metric name="Availability"
             alias="Availability"
             template="${domain}:Module=jvmRuntimeModule:Availability"
             category="AVAILABILITY"
@@ -560,7 +559,7 @@
 	    value="node=%server.node%,Server=%server.name%"/>
 
   <metrics name="WebSphere 5.0 Application">
-    <metric name="Application Availability"
+    <metric name="Availability"
             alias="Availability"
             template="${domain}/applicationModule:Module=%app%:Availability"
             category="AVAILABILITY"
@@ -570,7 +569,7 @@
   </metrics>
 
   <metrics name="WebSphere 5.0 Thread Pool" include="thread-pool-pmi">
-    <metric name="Thread Pool Availability"
+    <metric name="Availability"
             alias="Availability"
             template="${domain}/threadPoolModule:Module=%thrpool%:Availability"
             category="AVAILABILITY"
@@ -580,7 +579,7 @@
   </metrics>
 
   <metrics name="WebSphere 5.0 Connection Pool" include="conn-pool-pmi">
-    <metric name="JDBC Pool Availability"
+    <metric name="Availability"
             alias="Availability"
             template="${domain}/connectionPoolModule:Module=%connpool%:Availability"
             category="AVAILABILITY"
@@ -596,7 +595,7 @@
 	    value="${server.props},Application=%app%"/>
 
   <metrics name="WebSphere 5.0 Webapp">
-    <metric name="Webapp Availability"
+    <metric name="Availability"
             alias="Availability"
             template="${domain}/webAppModule:Module=${webapp.name}:Availability"
             category="AVAILABILITY"
@@ -640,7 +639,7 @@
 	    value="%app%#%ejb%"/>
 
   <metrics name="WebSphere 5.0 EJB">
-    <metric name="EJB Availability"
+    <metric name="Availability"
             alias="Availability"
             template="${domain}/beanModule:Module=${ejb.module}:Availability"
             category="AVAILABILITY"
