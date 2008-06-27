@@ -421,7 +421,6 @@
             alias="TotalRequests"
             template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:totalRequests"
             category="THROUGHPUT"
-            indicator="true"
             collectionType="trendsup"
             units="none"/>
       <metric name="Webapp Concurrent Requests"
@@ -620,7 +619,6 @@
             alias="TotalRequests"
             template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:totalRequests"
             category="UTILIZATION"
-            indicator="true"
             collectionType="trendsup"
             units="none"/>
       <metric name="Webapp Concurrent Requests"
