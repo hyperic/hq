@@ -29,8 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,7 +38,6 @@ import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.file.FileWriter;
 import org.hyperic.util.math.MathUtil;
@@ -60,10 +57,9 @@ public class AgentCommandsService implements AgentCommandsClient {
     }
 
     /**
-     * @see org.hyperic.hq.agent.client.AgentCommandsClient#agentSendFileData(org.hyperic.hq.appdef.shared.AppdefEntityID, org.hyperic.hq.agent.FileData[], java.io.InputStream[])
+     * @see org.hyperic.hq.agent.client.AgentCommandsClient#agentSendFileData(org.hyperic.hq.agent.FileData[], java.io.InputStream[])
      */
-    public FileDataResult[] agentSendFileData(AppdefEntityID id,
-                                              FileData[] destFiles, 
+    public FileDataResult[] agentSendFileData(FileData[] destFiles,
                                               InputStream[] streams)
             throws AgentRemoteException {
         

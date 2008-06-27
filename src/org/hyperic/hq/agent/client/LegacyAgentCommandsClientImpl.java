@@ -47,7 +47,6 @@ import org.hyperic.hq.agent.commands.AgentRestart_args;
 import org.hyperic.hq.agent.commands.AgentRestart_result;
 import org.hyperic.hq.agent.commands.AgentUpgrade_args;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.util.math.MathUtil;
 
 /**
@@ -170,10 +169,9 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
     }
 
     /**
-     * @see org.hyperic.hq.agent.client.AgentCommandsClient#agentSendFileData(org.hyperic.hq.appdef.shared.AppdefEntityID, org.hyperic.hq.agent.FileData[], java.io.InputStream[])
+     * @see org.hyperic.hq.agent.client.AgentCommandsClient#agentSendFileData(org.hyperic.hq.agent.FileData[], java.io.InputStream[])
      */
-    public FileDataResult[] agentSendFileData(AppdefEntityID id,
-                                              FileData[] destFiles,
+    public FileDataResult[] agentSendFileData(FileData[] destFiles,
                                               InputStream[] streams)
         throws AgentRemoteException, AgentConnectionException
     {

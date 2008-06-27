@@ -903,7 +903,7 @@ public class AgentManagerEJBImpl
                 streams[i] = is;
             }                
 
-            return client.agentSendFileData(id, data, streams);            
+            return client.agentSendFileData(data, streams);            
         } finally {
             safeCloseStreams(streams);
         }

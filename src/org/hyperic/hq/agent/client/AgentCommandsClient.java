@@ -31,7 +31,6 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 public interface AgentCommandsClient {
 
@@ -99,11 +98,9 @@ public interface AgentCommandsClient {
 
     /**
      * Send file data to a remote agent
-     *
      * @param destFiles  Info about the file data to send
      */
-    FileDataResult[] agentSendFileData(AppdefEntityID id, 
-                                       FileData[] destFiles,
+    FileDataResult[] agentSendFileData(FileData[] destFiles, 
                                        InputStream[] streams) 
         throws AgentRemoteException, AgentConnectionException;
 

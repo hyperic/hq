@@ -32,7 +32,6 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.transport.AgentProxyFactory;
 
 /**
@@ -73,10 +72,9 @@ public class AgentCommandsClientImpl
     }
 
     /**
-     * @see org.hyperic.hq.agent.client.AgentCommandsClient#agentSendFileData(org.hyperic.hq.appdef.shared.AppdefEntityID, org.hyperic.hq.agent.FileData[], java.io.InputStream[])
+     * @see org.hyperic.hq.agent.client.AgentCommandsClient#agentSendFileData(org.hyperic.hq.agent.FileData[], java.io.InputStream[])
      */
-    public FileDataResult[] agentSendFileData(AppdefEntityID id,
-                                              FileData[] destFiles, 
+    public FileDataResult[] agentSendFileData(FileData[] destFiles,
                                               InputStream[] streams)
             throws AgentRemoteException, AgentConnectionException {
         
