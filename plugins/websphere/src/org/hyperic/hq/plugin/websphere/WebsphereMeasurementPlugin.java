@@ -38,12 +38,16 @@ import org.hyperic.hq.product.PluginException;
 public class WebsphereMeasurementPlugin
     extends MeasurementPlugin {
 
+    public boolean useJMX() {
+        return false;
+    }
+
     public MetricValue getValue(Metric metric)
         throws PluginException,
         MetricUnreachableException,
         MetricNotFoundException {
 
-        if (WebsphereProductPlugin.useJMX) {
+        if (useJMX()) {
             return super.getValue(metric); //collector
         }
         else {

@@ -617,7 +617,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
               value="lib/jmxc.jar"/>
 
     <plugin type="measurement"
-            class="WebsphereMeasurementPlugin"/>
+            class="WebsphereAdminMeasurementPlugin"/>
 
     <plugin type="collector"
             class="WebsphereAdminServerCollector"/>
@@ -774,7 +774,11 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
 
   <server name="WebSphere"
           version="6.0"
-          include="5.0"/>
+          include="5.0">
+
+    <plugin type="measurement"
+            class="WebsphereJmxMeasurementPlugin"/>
+  </server>
 
   <server name="WebSphere Admin"
           version="6.0"

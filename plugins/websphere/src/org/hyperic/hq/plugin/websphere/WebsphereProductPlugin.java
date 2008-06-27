@@ -113,7 +113,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     private static boolean hasSoapConfig = false;
     private static boolean isOSGi = false;
     private static boolean useExt = true;
-    static boolean useJMX = false;
+    static boolean useJMX = true;
 
     //if we are running with the ibm jdk we can configure
     //websphere.installpath ourselves.
@@ -417,7 +417,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
         autoRT = "true".equals(managerProps.getProperty("websphere.autort"));
 
-        useJMX = "true".equals(managerProps.getProperty("websphere.usejmx"));
+        useJMX = !"false".equals(managerProps.getProperty("websphere.usejmx"));
 
         useExt = !"false".equals(managerProps.getProperty("websphere.useext"));
 
