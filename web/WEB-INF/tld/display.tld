@@ -497,6 +497,18 @@
       <type>String</type>
     </attribute>    
     <attribute>
+      <name>id</name>
+      <required>false</required>
+      <rtexprvalue>false</rtexprvalue>
+      <type>String</type>
+    </attribute>    
+    <attribute>
+      <name>label</name>
+      <required>false</required>
+      <rtexprvalue>false</rtexprvalue>
+      <type>String</type>
+    </attribute>    
+    <attribute>
       <name>suppress</name>
       <required>false</required>
       <rtexprvalue>false</rtexprvalue>
