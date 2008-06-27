@@ -27,310 +27,217 @@
 
 <plugin name="websphere" class="WebsphereProductPlugin"> 
   <filter name="domain"
-           value="%server.node%/%server.name%"/>
+          value="%server.node%/%server.name%"/>
   <filter name="auth"
           value="username=%username%,password=%password%"/>
   <property name="template-config"
             value="admin.host=%admin.host%,admin.port=%admin.port%,${auth}"/>
 
-  <metrics name="websphere-jvm">
+  <filter name="template"
+          value="${domain}:Module=jvmRuntimeModule:${alias}"/>
+
+  <metrics name="jvm">
+    <metric name="Availability"
+            category="AVAILABILITY"
+            indicator="true"/>
+
     <metric name="JVM Total Memory"
-            alias="TotalMemory"
-            template="${domain}:Module=jvmRuntimeModule:totalMemory"
+            alias="totalMemory"
             units="KB"/>
     <metric name="JVM Free Memory"
-            alias="FreeMemory"
-            template="${domain}:Module=jvmRuntimeModule:freeMemory"
+            alias="freeMemory"
             units="KB"/>
     <metric name="JVM Used Memory"
-            alias="UsedMemory"
-            template="${domain}:Module=jvmRuntimeModule:usedMemory"
+            alias="usedMemory"
             indicator="true"
             units="KB"/>
   </metrics>
 
-  <metrics name="server-pmi">
+  <filter name="template"
+          value="${domain}:Module=connectionPoolModule:${alias}"/>
+
+  <metrics name="connection">
     <!-- XXX connectionPoolModule avgWaitTime,percentUsed,percentMaxed -->
     <metric name="JDBC Pool Number of Creates"
-            alias="NumCreates"
-            template="${domain}:Module=connectionPoolModule:numCreates"
+            alias="numCreates"
             collectionType="trendsup"/>
     <metric name="JDBC Pool Number of Destroys"
-            alias="NumDestroys"
-            template="${domain}:Module=connectionPoolModule:numDestroys"
+            alias="numDestroys"
             collectionType="trendsup"/>
     <metric name="JDBC Pool Number of Allocates"
-            alias="NumAllocates"
-            template="${domain}:Module=connectionPoolModule:numAllocates"
+            alias="numAllocates"
             collectionType="trendsup"/>
     <metric name="JDBC Pool Number of Returns"
-            alias="NumReturns"
-            template="${domain}:Module=connectionPoolModule:numReturns"
+            alias="numReturns"
             collectionType="trendsup"/>
     <metric name="JDBC Pool Size"
-            alias="JdbcPoolSize"
-            template="${domain}:Module=connectionPoolModule:poolSize"/>
+            alias="poolSize"/>
     <metric name="JDBC Pool Concurrent Waiters"
-            alias="ConcurrentWaiters"
-            template="${domain}:Module=connectionPoolModule:concurrentWaiters"/>
+            alias="concurrentWaiters"/>
     <metric name="JDBC Pool Number of Faults"
-            alias="Faults"
-            template="${domain}:Module=connectionPoolModule:faults"
+            alias="faults"
             collectionType="trendsup"/>
     <metric name="JDBC Pool Prepared Statement Cache Discards"
-            alias="PrepStmtCacheDiscards"
-            template="${domain}:Module=connectionPoolModule:prepStmtCacheDiscards"
+            alias="prepStmtCacheDiscards"
             collectionType="trendsup"/>
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Module=servletSessionsModule:${alias}"/>
+
+  <metrics name="servlet">
     <!-- XXX servletSessionsModule sessionLifeTime -->
     <metric name="Servlet Sessions Created"
-            alias="CreatedSessions"
-            template="${domain}:Module=servletSessionsModule:createdSessions"
+            alias="createdSessions"
             collectionType="trendsup"/>
     <metric name="Servlet Sessions Invalidated"
-            alias="InvalidatedSessions"
-            template="${domain}:Module=servletSessionsModule:invalidatedSessions"
+            alias="invalidatedSessions"
             collectionType="trendsup"/>
     <metric name="Servlet Sessions Active"
-            alias="ActiveSessions"
-            template="${domain}:Module=servletSessionsModule:activeSessions"/>
+            alias="activeSessions"/>
     <metric name="Servlet Sessions Live"
-            alias="LiveSessions"
-            template="${domain}:Module=servletSessionsModule:liveSessions"/>
+            alias="liveSessions"/>
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Module=threadPoolModule:${alias}"/>
+
+  <metrics name="threadpool">
     <!-- XXX threadPoolModule percentMaxed -->
     <metric name="Thread Pool Creates"
-            alias="ThreadCreates"
-            template="${domain}:Module=threadPoolModule:threadCreates"
+            alias="threadCreates"
             collectionType="trendsup"/>
     <metric name="Thread Pool Destroys"
-            alias="ThreadDestroys"
-            template="${domain}:Module=threadPoolModule:threadDestroys"
+            alias="threadDestroys"
             collectionType="trendsup"/>
     <metric name="Thread Pool Active Threads"
-            alias="ActiveThreads"
-            template="${domain}:Module=threadPoolModule:activeThreads"/>
+            alias="activeThreads"/>
     <metric name="Thread Pool Size"
-            alias="ThreadPoolSize"
-            template="${domain}:Module=threadPoolModule:poolSize"/>
+            alias="poolSize"/>
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Module=transactionModule:${alias}"/>
+
+  <metrics name="tx">
     <!-- XXX transactionModule - globalTranDuration,
          localTranDuration, globalBeforeCompletionDuration,
          globalPrepareDuration, globalCommitDuration
          localBeforeCompletionDuration, localCommitDuration -->
     <metric name="Global Transactions Begun"
-            alias="GlobalTransBegun"
-            template="${domain}:Module=transactionModule:globalTransBegun"
+            alias="globalTransBegun"
             category="THROUGHPUT"
             collectionType="trendsup"/>
     <metric name="Global Transactions Involved"
-            alias="GlobalTransInvolved"
-            template="${domain}:Module=transactionModule:globalTransInvolved"
+            alias="globalTransInvolved"
             category="THROUGHPUT"/>
     <metric name="Local Transactions Begun"
-            alias="LocalTransBegun"
-            template="${domain}:Module=transactionModule:localTransBegun"
+            alias="localTransBegun"
             category="THROUGHPUT"
             collectionType="trendsup"/>
     <metric name="Global Transactions Active"
-            alias="ActiveGlobalTrans"
-            template="${domain}:Module=transactionModule:activeGlobalTrans"
+            alias="activeGlobalTrans"
             category="THROUGHPUT"/>
     <metric name="Local Transactions Active"
-            alias="ActiveLocalTrans"
-            template="${domain}:Module=transactionModule:activeLocalTrans"
+            alias="activeLocalTrans"
             category="THROUGHPUT"/>
     <metric name="Optmized Transactions"
-            alias="NumOptimization"
-            template="${domain}:Module=transactionModule:numOptimization"
+            alias="numOptimization"
             collectionType="trendsup"/>
     <metric name="Global Transactions Committed"
-            alias="GlobalTransCommitted"
-            template="${domain}:Module=transactionModule:globalTransCommitted"
+            alias="globalTransCommitted"
             category="THROUGHPUT"
             indicator="true"
             collectionType="trendsup"/>
     <metric name="Local Transactions Committed"
-            alias="LocalTransCommitted"
-            template="${domain}:Module=transactionModule:localTransCommitted"
+            alias="localTransCommitted"
             category="THROUGHPUT"
             collectionType="trendsup"/>
     <metric name="Global Transactions Rolled Back"
-            alias="GlobalTransRolledBack"
-            template="${domain}:Module=transactionModule:globalTransRolledBack"
+            alias="globalTransRolledBack"
             category="THROUGHPUT"
             indicator="true"
             collectionType="trendsup"/>
     <metric name="Local Transactions Rolled Back"
-            alias="LocalTransRolledBack"
-            template="${domain}:Module=transactionModule:localTransRolledBack"
+            alias="localTransRolledBack"
             category="THROUGHPUT"
             collectionType="trendsup"/>
     <metric name="Global Transactions Timed Out"
-            alias="GlobalTransTimeout"
-            template="${domain}:Module=transactionModule:globalTransTimeout"
+            alias="globalTransTimeout"
             category="THROUGHPUT"
             collectionType="trendsup"/>
     <metric name="Local Transactions Timed Out"
-            alias="LocalTransTimeout"
-            template="${domain}:Module=transactionModule:localTransTimeout"
+            alias="localTransTimeout"
             category="THROUGHPUT"
             collectionType="trendsup"/>
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Module=webAppModule:${alias}"/>
+
+  <metrics name="webapp">
     <metric name="Webapp Number of Loaded Servlets"
-            alias="NumLoadedServlets"
-            template="${domain}:Module=webAppModule:numLoadedServlets"/>
+            alias="numLoadedServlets"/>
     <metric name="Webapp Number of Servlet Reloads"
-            alias="NumReloads"
-            template="${domain}:Module=webAppModule:numReloads"
+            alias="numReloads"
             collectionType="trendsup"/>
     <!-- XXX beanModule avgMethodRt, avgCreateTime,
              avgRemoveTime, avgDrainSize -->
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Module=beanModule:${alias}"/>
+
+  <metrics name="bean">
     <metric name="EJB Creates"
-            alias="Creates"
-            template="${domain}:Module=beanModule:creates"
+            alias="creates"
             collectionType="trendsup"/>
     <metric name="EJB Removes"
-            alias="Removes"
-            template="${domain}:Module=beanModule:removes"
+            alias="removes"
             collectionType="trendsup"/>
     <metric name="EJB Activates"
-            alias="Activates"
-            template="${domain}:Module=beanModule:activates"
+            alias="activates"
             collectionType="trendsup"/>
     <metric name="EJB Passivates"
-            alias="Passivates"
-            template="${domain}:Module=beanModule:passivates"
+            alias="passivates"
             collectionType="trendsup"/>
     <metric name="EJB Instantiates"
-            alias="Instantiates"
-            template="${domain}:Module=beanModule:instantiates"
+            alias="instantiates"
             collectionType="trendsup"/>
     <metric name="EJB Destroys"
-            alias="Destroys"
-            template="${domain}:Module=beanModule:destroys"
+            alias="destroys"
             collectionType="trendsup"/>
     <metric name="EJB Loads"
-            alias="Loads"
-            template="${domain}:Module=beanModule:loads"
+            alias="loads"
             collectionType="trendsup"/>
     <metric name="EJB Stores"
-            alias="Stores"
-            template="${domain}:Module=beanModule:stores"
+            alias="stores"
             collectionType="trendsup"/>
     <metric name="EJB Conncurrent Lives"
-            alias="ConcurrentLives"
-            template="${domain}:Module=beanModule:concurrentLives"/>
+            alias="concurrentLives"/>
     <metric name="EJB Total Method Calls"
-            alias="TotalMethodCalls"
-            template="${domain}:Module=beanModule:totalMethodCalls"
+            alias="totalMethodCalls"
             collectionType="trendsup"/>
     <metric name="EJB Active Methods"
-            alias="ActiveMethods"
-            template="${domain}:Module=beanModule:activeMethods"/>
+            alias="activeMethods"/>
     <metric name="EJB Gets From Pool"
-            alias="GetsFromPool"
-            template="${domain}:Module=beanModule:getsFromPool"
+            alias="getsFromPool"
             collectionType="trendsup"/>
     <metric name="EJB Gets Found"
-            alias="GetsFound"
-            template="${domain}:Module=beanModule:getsFound"
+            alias="getsFound"
             collectionType="trendsup"/>
     <metric name="EJB Returns to Pool"
-            alias="ReturnsToPool"
-            template="${domain}:Module=beanModule:returnsToPool"
+            alias="returnsToPool"
             collectionType="trendsup"/>
     <metric name="EJB Returns Discarded"
-            alias="ReturnsDiscarded"
-            template="${domain}:Module=beanModule:returnsDiscarded"
+            alias="returnsDiscarded"
             collectionType="trendsup"/>
     <metric name="EJB Drains From Pool"
-            alias="DrainsFromPool"
-            template="${domain}:Module=beanModule:drainsFromPool"
+            alias="drainsFromPool"
             collectionType="trendsup"/>
     <metric name="EJB Pool Size"
-            alias="EjbPoolSize"
-            template="${domain}:Module=beanModule:poolSize"/>
+            alias="poolSize"/>
   </metrics>
-
-  <property name="webapp.name"
-            value="%server.name%.%webapp.display%"/>
-
-  <metrics name="webapp-pmi">
-      <metric name="Webapp Number of Loaded Servlets"
-            alias="NumLoadedServlets"
-            template="${domain}/webAppModule:Module=${webapp.name}:numLoadedServlets"/>
-      <metric name="Webapp Number of Servlet Reloads"
-            alias="NumReloads"
-            template="${domain}/webAppModule:Module=${webapp.name}:numReloads"
-            collectionType="trendsup"/>
-      <metric name="Webapp Total Requests"
-            alias="TotalRequests"
-            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:totalRequests"
-            category="THROUGHPUT"
-            collectionType="trendsup"/>
-      <metric name="Webapp Concurrent Requests"
-            alias="ConcurrentRequests"
-            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:concurrentRequests"/>
-      <!-- XXX responseTime -->
-      <metric name="Webapp Number of Errors"
-            alias="NumErrors"
-            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:numErrors"
-            collectionType="trendsup"/>
-  </metrics>
-
-  <metrics name="thread-pool-pmi">
-    <!-- XXX percentMaxed -->
-    <metric name="Thread Pool Creates"
-            alias="ThreadCreates"
-            template="${domain}/threadPoolModule:Module=%thrpool%:threadCreates"
-            collectionType="trendsup"/>
-    <metric name="Thread Pool Destroys"
-            alias="ThreadDestroys"
-            template="${domain}/threadPoolModule:Module=%thrpool%:threadDestroys"
-            collectionType="trendsup"/>
-    <metric name="Thread Pool Active Threads"
-            alias="ActiveThreads"
-            template="${domain}/threadPoolModule:Module=%thrpool%:activeThreads"/>
-    <metric name="Thread Pool Size"
-            alias="ThreadPoolSize"
-            template="${domain}/threadPoolModule:Module=%thrpool%:poolSize"
-            indicator="true"/>
-  </metrics>
-
-  <metrics name="conn-pool-pmi">
-    <!-- XXX connectionPoolModule avgWaitTime,percentUsed,percentMaxed -->
-    <metric name="JDBC Pool Number of Creates"
-            alias="NumCreates"
-            template="${domain}/connectionPoolModule:Module=%connpool%:numCreates"
-            collectionType="trendsup"/>
-    <metric name="JDBC Pool Number of Destroys"
-            alias="NumDestroys"
-            template="${domain}/connectionPoolModule:Module=%connpool%:numDestroys"
-            collectionType="trendsup"/>
-    <metric name="JDBC Pool Number of Allocates"
-            alias="NumAllocates"
-            template="${domain}/connectionPoolModule:Module=%connpool%:numAllocates"
-            collectionType="trendsup"/>
-    <metric name="JDBC Pool Number of Returns"
-            alias="NumReturns"
-            template="${domain}/connectionPoolModule:Module=%connpool%:numReturns"
-            collectionType="trendsup"/>
-    <metric name="JDBC Pool Size"
-            alias="JdbcPoolSize"
-            template="${domain}/connectionPoolModule:Module=%connpool%:poolSize"
-            indicator="true"/>
-    <metric name="JDBC Pool Concurrent Waiters"
-            alias="ConcurrentWaiters"
-            template="${domain}/connectionPoolModule:Module=%connpool%:concurrentWaiters"
-            indicator="true"/>
-    <metric name="JDBC Pool Number of Faults"
-            alias="Faults"
-            template="${domain}/connectionPoolModule:Module=%connpool%:faults"
-            collectionType="trendsup"/>
-    <metric name="JDBC Pool Prepared Statement Cache Discards"
-            alias="PrepStmtCacheDiscards"
-            template="${domain}/connectionPoolModule:Module=%connpool%:prepStmtCacheDiscards"
-            collectionType="trendsup"/>
-  </metrics>
-
-  <!-- 5.0 -->
 
   <metrics name="WebSphere Admin 5.0">
     <metric name="Availability"
@@ -344,15 +251,8 @@
             indicator="true"/>
   </metrics>
 
-  <metrics name="WebSphere 5.0" include="server-pmi,websphere-jvm">
-    <metric name="Availability"
-            template="${domain}:Module=jvmRuntimeModule:Availability"
-            category="AVAILABILITY"
-            indicator="true"/>
-  </metrics>
-
-  <property name="server.props"
-	    value="node=%server.node%,Server=%server.name%"/>
+  <metrics name="WebSphere 5.0"
+           include="jvm,connection,servlet,threadpool,tx,webapp,bean"/>
 
   <metrics name="WebSphere 5.0 Application">
     <metric name="Availability"
@@ -361,127 +261,132 @@
             indicator="true"/>
   </metrics>
 
-  <metrics name="WebSphere 5.0 Thread Pool" include="thread-pool-pmi">
+  <filter name="template"
+          value="${domain}/threadPoolModule:Module=%thrpool%:${alias}"/>
+
+  <metrics name="WebSphere 5.0 Thread Pool">
     <metric name="Availability"
-            template="${domain}/threadPoolModule:Module=%thrpool%:Availability"
             category="AVAILABILITY"
+            indicator="true"/>
+    <!-- XXX percentMaxed -->
+    <metric name="Thread Pool Creates"
+            alias="threadCreates"
+            collectionType="trendsup"/>
+    <metric name="Thread Pool Destroys"
+            alias="threadDestroys"
+            collectionType="trendsup"/>
+    <metric name="Thread Pool Active Threads"
+            alias="activeThreads"/>
+    <metric name="Thread Pool Size"
+            alias="poolSize"
             indicator="true"/>
   </metrics>
 
-  <metrics name="WebSphere 5.0 Connection Pool" include="conn-pool-pmi">
+  <filter name="template"
+          value="${domain}/connectionPoolModule:Module=%connpool%:${alias}"/>
+
+  <metrics name="WebSphere 5.0 Connection Pool">
     <metric name="Availability"
-            template="${domain}/connectionPoolModule:Module=%connpool%:Availability"
             category="AVAILABILITY"
             indicator="true"/>
+    <!-- XXX connectionPoolModule avgWaitTime,percentUsed,percentMaxed -->
+    <metric name="JDBC Pool Number of Creates"
+            alias="numCreates"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Number of Destroys"
+            alias="numDestroys"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Number of Allocates"
+            alias="numAllocates"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Number of Returns"
+            alias="numReturns"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Size"
+            alias="poolSize"
+            indicator="true"/>
+    <metric name="JDBC Pool Concurrent Waiters"
+            alias="concurrentWaiters"
+            indicator="true"/>
+    <metric name="JDBC Pool Number of Faults"
+            alias="faults"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Prepared Statement Cache Discards"
+            alias="prepStmtCacheDiscards"
+            collectionType="trendsup"/>
   </metrics>
 
-  <property name="webapp.name"
-            value="%app%#%webapp%"/>
-
-  <property name="app.props"
-	    value="${server.props},Application=%app%"/>
+  <filter name="template"
+          value="${domain}/webAppModule:Module=%app%#%webapp%:${alias}"/>
 
   <metrics name="WebSphere 5.0 Webapp">
     <metric name="Availability"
-            template="${domain}/webAppModule:Module=${webapp.name}:Availability"
             category="AVAILABILITY"
             indicator="true"/>
       <metric name="Webapp Number of Loaded Servlets"
-            alias="NumLoadedServlets"
-            template="${domain}/webAppModule:Module=${webapp.name}:numLoadedServlets"/>
+            alias="numLoadedServlets"/>
       <metric name="Webapp Number of Servlet Reloads"
-            alias="NumReloads"
-            template="${domain}/webAppModule:Module=${webapp.name}:numReloads"
-            collectionType="trendsup"/>
-      <metric name="Webapp Total Requests"
-            alias="TotalRequests"
-            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:totalRequests"
-            collectionType="trendsup"/>
-      <metric name="Webapp Concurrent Requests"
-            alias="ConcurrentRequests"
-            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:concurrentRequests"/>
-      <!-- XXX responseTime -->
-      <metric name="Webapp Number of Errors"
-            alias="NumErrors"
-            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:numErrors"
+            alias="numReloads"
             collectionType="trendsup"/>
   </metrics>
 
-  <property name="ejb.module"
-	    value="%app%#%ejb%"/>
+  <filter name="template"
+          value="${domain}/beanModule:Module=%app%#%ejb%:${alias}"/>
 
   <metrics name="WebSphere 5.0 EJB">
     <metric name="Availability"
-            template="${domain}/beanModule:Module=${ejb.module}:Availability"
             category="AVAILABILITY"
             indicator="true"/>
     <!-- XXX beanModule avgMethodRt, avgCreateTime,
              avgRemoveTime, avgDrainSize -->
     <metric name="EJB Creates"
-            alias="Creates"
-            template="${domain}/beanModule:Module=${ejb.module}:creates"
+            alias="creates"
             collectionType="trendsup"/>
     <metric name="EJB Removes"
-            alias="Removes"
-            template="${domain}/beanModule:Module=${ejb.module}:removes"
+            alias="removes"
             collectionType="trendsup"/>
     <metric name="EJB Activates"
-            alias="Activates"
-            template="${domain}/beanModule:Module=${ejb.module}:activates"
+            alias="activates"
             collectionType="trendsup"/>
     <metric name="EJB Passivates"
-            alias="Passivates"
-            template="${domain}/beanModule:Module=${ejb.module}:passivates"
+            alias="passivates"
             collectionType="trendsup"/>
     <metric name="EJB Instantiates"
-            alias="Instantiates"
-            template="${domain}/beanModule:Module=${ejb.module}:instantiates"
+            alias="instantiates"
             collectionType="trendsup"/>
     <metric name="EJB Destroys"
-            alias="Destroys"
-            template="${domain}/beanModule:Module=${ejb.module}:destroys"
+            alias="destroys"
             collectionType="trendsup"/>
     <metric name="EJB Loads"
-            alias="Loads"
-            template="${domain}/beanModule:Module=${ejb.module}:loads"
+            alias="loads"
             collectionType="trendsup"/>
     <metric name="EJB Stores"
-            alias="Stores"
-            template="${domain}/beanModule:Module=${ejb.module}:stores"
+            alias="stores"
             collectionType="trendsup"/>
     <metric name="EJB Conncurrent Lives"
-            alias="ConcurrentLives"
-            template="${domain}/beanModule:Module=${ejb.module}:concurrentLives"/>
+            alias="concurrentLives"/>
     <metric name="EJB Total Method Calls"
-            alias="TotalMethodCalls"
-            template="${domain}/beanModule:Module=${ejb.module}:totalMethodCalls"
+            alias="totalMethodCalls"
             collectionType="trendsup"/>
     <metric name="EJB Active Methods"
-            alias="ActiveMethods"
-            template="${domain}/beanModule:Module=${ejb.module}:activeMethods"/>
+            alias="activeMethods"/>
     <metric name="EJB Gets From Pool"
-            alias="GetsFromPool"
-            template="${domain}/beanModule:Module=${ejb.module}:getsFromPool"
+            alias="getsFromPool"
             collectionType="trendsup"/>
     <metric name="EJB Gets Found"
-            alias="GetsFound"
-            template="${domain}/beanModule:Module=${ejb.module}:getsFound"
+            alias="getsFound"
             collectionType="trendsup"/>
     <metric name="EJB Returns to Pool"
-            alias="ReturnsToPool"
-            template="${domain}/beanModule:Module=${ejb.module}:returnsToPool"
+            alias="returnsToPool"
             collectionType="trendsup"/>
     <metric name="EJB Returns Discarded"
-            alias="ReturnsDiscarded"
-            template="${domain}/beanModule:Module=${ejb.module}:returnsDiscarded"
+            alias="returnsDiscarded"
             collectionType="trendsup"/>
     <metric name="EJB Drains From Pool"
-            alias="DrainsFromPool"
-            template="${domain}/beanModule:Module=${ejb.module}:drainsFromPool"
+            alias="drainsFromPool"
             collectionType="trendsup"/>
     <metric name="EJB Pool Size"
-            alias="EjbPoolSize"
-            template="${domain}/beanModule:Module=${ejb.module}:poolSize"/>
+            alias="poolSize"/>
   </metrics>
 
   <help name="enable-pmi-5">
