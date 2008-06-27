@@ -52,7 +52,7 @@ class TrackerThread implements Runnable {
     private static final int    MAX_EVENT_BATCHSIZE = 100;
     private static final String CONFIGTRACK_LISTNAME = "configtrack_spool";
     private static final String LOGTRACK_LISTNAME    = "logtrack_spool";
-    private static final int    LOGTRACK_RECSIZE     = 4096;
+    private static final int    LOGTRACK_RECSIZE     = 5120;
 
     private volatile boolean   shouldDie;
     private volatile Thread    myThread;
