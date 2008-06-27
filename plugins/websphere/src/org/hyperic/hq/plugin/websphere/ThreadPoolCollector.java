@@ -25,11 +25,20 @@
 
 package org.hyperic.hq.plugin.websphere;
 
+import javax.management.j2ee.statistics.Stats;
+
 import org.hyperic.hq.product.PluginException;
 
 import com.ibm.websphere.management.AdminClient;
 
 public class ThreadPoolCollector extends WebsphereCollector {
+
+    private static final String[][] ATTRS = { 
+        { "PoolSize", "poolSize" },
+        { "CreateCount", "threadCreates" },
+        { "DestroyCount", "threadDestroys" },
+        { "ActiveCount", "activeThreads" }
+    };
 
     protected void init(AdminClient mServer) throws PluginException {
         super.init(mServer);
@@ -43,12 +52,21 @@ public class ThreadPoolCollector extends WebsphereCollector {
     }
 
     public void collect() {
-        if (!collectStats(this.name)) {
+        AdminClient mServer = getMBeanServer();
+        if (mServer == null) {
+            return;
+        }
+        Stats stats = getStats(mServer, this.name);
+        if (stats == null) {
             //XXX certain threadpools have no stats, why?
-            Object o = getAttribute(getMBeanServer(), this.name, "name");
+            Object o = getAttribute(mServer, this.name, "name");
             if (o != null) {
                 setAvailability(true);
             }
+        }
+        else {
+            setAvailability(true);
+            collectStatCount(stats, ATTRS);
         }
     }
 }
