@@ -28,14 +28,28 @@ package org.hyperic.hq.plugin.websphere;
 import java.util.Set;
 
 import javax.management.ObjectName;
-import javax.management.j2ee.statistics.JDBCConnectionPoolStats;
 import javax.management.j2ee.statistics.JDBCStats;
+import javax.management.j2ee.statistics.Stats;
 
 import org.hyperic.hq.product.PluginException;
 
 import com.ibm.websphere.management.AdminClient;
 
 public class ConnectionPoolCollector extends WebsphereCollector {
+
+    private static final String[][] ATTRS = {
+        //basic (default) PMI level
+        { "CreateCount", "numCreates" },
+        { "CloseCount", "numDestroys" },
+        { "PoolSize", "poolSize" },
+        { "FreePoolSize" }, //XXX
+        { "WaitingThreadCount", "concurrentWaiters" },
+        //non-default PMI level
+        { "AllocateCount", "numAllocates" },
+        { "ReturnCount", "numReturns" },
+        { "PrepStmtCacheDiscardCount", "prepStmtCacheDiscards" },
+        { "FaultCount", "faults" }
+    };
 
     protected ObjectName resolve(AdminClient server, ObjectName name)
             throws PluginException {
@@ -99,21 +113,9 @@ public class ConnectionPoolCollector extends WebsphereCollector {
             return;
         }
         setAvailability(true);
-
-        double size=0, waiters=0, close=0, create=0;
-
-        JDBCConnectionPoolStats[] poolStats = stats.getConnectionPools();
-        for (int i=0; i<poolStats.length; i++) {
-            JDBCConnectionPoolStats pool = poolStats[i];
-            size += getStatCount(pool.getPoolSize());
-            waiters += getStatCount(pool.getWaitingThreadCount());
-            close += getStatCount(pool.getCloseCount());
-            create += getStatCount(pool.getCreateCount());
+        Stats[] pools = stats.getConnectionPools();
+        for (int i=0; i<pools.length; i++) {
+            collectStatCount(pools[i], ATTRS);
         }
-
-        setValue("poolSize", size);
-        setValue("concurrentWaiters", waiters);
-        setValue("numDestroys", close);
-        setValue("numCreates", create);
     }
 }
