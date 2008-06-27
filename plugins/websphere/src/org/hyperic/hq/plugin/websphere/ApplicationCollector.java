@@ -35,14 +35,28 @@ public class ApplicationCollector extends WebsphereCollector {
         super.init(mServer);
 
         this.name =
-            newObjectNamePattern("type=J2EEApplication," +
+            newObjectNamePattern("j2eeType=J2EEApplication," +
                                  "name=" + getModuleName() + "," +
                                  getProcessAttributes());
-        
-        this.name = resolve(mServer, this.name);
+
+        try {
+            this.name = resolve(mServer, this.name);
+        } catch (PluginException e) {
+            //XXX 6.0 hack
+            if (getModuleName().equals("adminconsole")) {
+                this.name = null;
+            }
+            else {
+                throw e;
+            }
+        }
     }
 
     public void collect() {
+        if (this.name == null) {
+            setAvailability(true);
+            return;
+        }
         Object state =
             getAttribute(getMBeanServer(), this.name, "state");
 
