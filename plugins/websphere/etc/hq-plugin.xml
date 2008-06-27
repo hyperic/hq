@@ -528,7 +528,7 @@
     <!-- XXX this avail check can be more robust -->
     <metric name="Availability"
             alias="Availability"
-	    template="TCP Socket:hostname=%admin.host%,port=%admin.port%,timeout=60:Availability"
+            template="${domain}:Module=adminModule:${alias}"
             category="AVAILABILITY"
             group="Reliability"
             indicator="true"
@@ -538,7 +538,7 @@
          collected before turning on runtime AI -->
     <metric name="Number of JVMs"
             alias="NumJVMs"
-            template="ws.custom:name=JVM,mbeanIdentifier=JVM,type=JVM,node=%server.node%,*:stats"
+            template="${domain}:Module=adminModule:${alias}"
             category="UTILIZATION"
             indicator="true"
             collectionType="dynamic"
@@ -984,6 +984,9 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
 
     <plugin type="measurement"
             class="WebsphereMeasurementPlugin"/>
+
+    <plugin type="collector"
+            class="WebsphereAdminServerCollector"/>
 
     <plugin type="control"
             class="WebsphereControlPlugin"/>
