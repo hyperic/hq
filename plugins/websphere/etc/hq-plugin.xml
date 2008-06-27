@@ -31,7 +31,7 @@
   <filter name="auth"
           value="username=%username%,password=%password%"/>
   <property name="template-config"
-            value="admin.host=%admin.host%,admin.port=%admin.port%,admin.vers=${admin.vers},${auth}"/>
+            value="admin.host=%admin.host%,admin.port=%admin.port%,${auth}"/>
 
   <metrics name="websphere-jvm">
     <metric name="JVM Total Memory"

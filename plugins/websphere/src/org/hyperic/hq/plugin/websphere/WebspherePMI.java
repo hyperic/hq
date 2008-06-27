@@ -102,26 +102,12 @@ public class WebspherePMI {
         }
     }
     
-    public static PmiClient getPmiClient(Properties cfg, String version)
+    public static PmiClient getPmiClient(Properties cfg)
         throws RemoteException {
 
         Properties props = getAdminProperties(cfg);
 
-        String vers =
-            cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_VERS,
-                            version);
-
-        if (vers.equals(WebsphereProductPlugin.VERSION_WS5)) {
-            //this method does not exist in WAS 4.0
-            return new PmiClientWrapper(props, vers);
-        }
-        else {
-            String host =
-                cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_HOST);
-            String port =
-                cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_PORT);
-            return new PmiClientWrapper(host, port, vers);
-        }
+        return new PmiClientWrapper(props, "WAS50");
     }
 
     private static PmiClient getPmiClient(Metric metric)
@@ -136,7 +122,7 @@ public class WebspherePMI {
         }
 
         if (pmiclient == null) {
-            pmiclient = getPmiClient(metric.getProperties(), null);
+            pmiclient = getPmiClient(metric.getProperties());
 
             synchronized (clientCache) {
                 clientCache.put(key, pmiclient);

@@ -65,8 +65,6 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public static final String WEBAPP_NAME   = "Webapp";
     public static final String EJB_NAME      = "EJB";
 
-    public static final String VERSION_WS5 = "WAS50";
-
     public static final String SERVER_ADMIN_NAME =
         SERVER_NAME + " " + ADMIN_NAME;
 
@@ -75,7 +73,6 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public static final String PROP_INSTALL_ROOT   = "was.install.root";
     public static final String PROP_ADMIN_HOST     = "admin.host";
     public static final String PROP_ADMIN_PORT     = "admin.port";
-    public static final String PROP_ADMIN_VERS     = "admin.vers";
     public static final String PROP_USERNAME       = "username";
     public static final String PROP_PASSWORD       = "password";
 

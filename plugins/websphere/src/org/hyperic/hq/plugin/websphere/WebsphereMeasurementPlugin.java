@@ -35,10 +35,6 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 
-import org.hyperic.util.config.ConfigResponse;
-
-import org.hyperic.util.StringUtil;
-
 public class WebsphereMeasurementPlugin
     extends MeasurementPlugin {
 
@@ -84,13 +80,5 @@ public class WebsphereMeasurementPlugin
         }
 
         return props;
-    }
-
-    public String translate(String template, ConfigResponse config) {
-        template = StringUtil.replace(template,
-                                      "${admin.vers}",
-                                      WebsphereProductPlugin.VERSION_WS5);
-
-        return super.translate(template, config);
     }
 }
