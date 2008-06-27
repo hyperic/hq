@@ -78,8 +78,13 @@ class GroupController extends BaseController {
     
     def sync(xmlOut, params) {
         def xmlDef = new XmlParser().parse(new StringReader(getUpload('args')))
-        def deleteMissing = xmlDef.'@deleteMissing'?.toBoolean()
-            
+        //def deleteMissing = xmlDef.'@deleteMissing'?.toBoolean()
+
+        if (xmlDef.group.size() != 1) {
+            xmlOut.error("Only 1 group supported for sync")
+            return xmlOut
+        }
+                        
         def found     = []
         def allGroups = resourceHelper.findAllGroups()
         def processed = []
@@ -93,6 +98,7 @@ class GroupController extends BaseController {
             processed << syncGroup(group, groupDef)
         }
         
+        /*
         if (deleteMissing) {
             def toDelete  = allGroups - found
 
@@ -105,6 +111,7 @@ class GroupController extends BaseController {
                 agroupMan.deleteGroup(user.valueObject, group.id)
             }
         }
+        */
     
         _list(xmlOut, params, processed)
         xmlOut
@@ -183,6 +190,7 @@ class GroupController extends BaseController {
     }
     
     private AppdefGroupValue createAppGroup(def groupDef) {
+        log.info "Creating group of apps [${groupDef.'@name'}]"
         agroupMan.createGroup(user.valueObject,
                               AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
                               groupDef.'@name',
@@ -191,6 +199,7 @@ class GroupController extends BaseController {
     }
     
     private AppdefGroupValue createGroupOfGroups(def groupDef) {
+        log.info "Creating group of groups [${groupDef.'@name'}]"
         agroupMan.createGroup(user.valueObject,
                               AppdefEntityConstants.APPDEF_TYPE_GROUP,
                               groupDef.'@name',
@@ -304,7 +313,8 @@ class GroupController extends BaseController {
             groupVal.description = groupDef.'@description'
         if (groupDef.'@location')
             groupVal.location = groupDef.'@location'
-            
+
+        log.info "Saving group ${groupVal.name}: ${groupVal.groupEntries.size()}"
         agroupMan.saveGroup(user.valueObject, groupVal)
         return rgroupMan.findResourceGroupByName(user.valueObject, 
                                                  groupDef.'@name')
