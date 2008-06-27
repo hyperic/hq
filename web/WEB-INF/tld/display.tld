@@ -499,13 +499,13 @@
     <attribute>
       <name>id</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
       <type>String</type>
     </attribute>    
     <attribute>
       <name>label</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
       <type>String</type>
     </attribute>    
     <attribute>
