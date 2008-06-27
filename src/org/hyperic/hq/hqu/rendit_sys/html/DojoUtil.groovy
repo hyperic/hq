@@ -252,7 +252,7 @@ class DojoUtil {
                         url: '${params.url}' + ${id}_makeQueryStr(kwArgs),
                         load: ${id}_loadTableData,
                         error: function(data, ioArgs){
-                            dojo.debug('Error loading table data: the response was: '+data);
+                            console.debug('Error loading table data: the response was: '+data);
                         }
                     });
                 }
