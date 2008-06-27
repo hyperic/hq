@@ -41,7 +41,6 @@ public class WebsphereAdminServerCollector extends WebsphereCollector {
         this.name =
             newObjectNamePattern("name=JVM," +
                                  "type=JVM," +
-                                 "j2eeType=JVM," +
                                  "node=" + getNodeName());
         this.name = resolve(mServer, this.name);
 
