@@ -42,38 +42,12 @@ import org.hyperic.util.StringUtil;
 public class WebsphereMeasurementPlugin
     extends MeasurementPlugin {
 
-    protected double getAvailValue(Metric metric) {
-        return WebsphereUtil.isRunning(metric) ?
-                Metric.AVAIL_UP :
-                Metric.AVAIL_DOWN;
-    }
-
-    protected double getCustomValue(Metric metric)
-        throws PluginException,
-        MetricUnreachableException,
-        MetricNotFoundException {
-
-        return WebsphereUtil.getMBeanCount(metric);
-    }
-    
     public MetricValue getValue(Metric metric)
         throws PluginException,
         MetricUnreachableException,
         MetricNotFoundException {
 
-        String domain = metric.getDomainName();
-        if (domain.equals("ws.avail")) {
-            double avail = getAvailValue(metric);
-            return new MetricValue(avail);
-        }
-        else if (domain.equals("ws.custom")) {
-            return new MetricValue(getCustomValue(metric));
-        }
-        else if (domain.equals("hyperic-hq")) {
-            //XXX these templates have been removed
-            return MetricValue.NONE;
-        }
-        else if (WebsphereProductPlugin.useJMX) {
+        if (WebsphereProductPlugin.useJMX) {
             return super.getValue(metric); //collector
         }
         else {

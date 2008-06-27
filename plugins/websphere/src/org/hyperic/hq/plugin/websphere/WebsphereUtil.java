@@ -152,28 +152,6 @@ public class WebsphereUtil {
         return mServer;
     }
 
-    public static double getMBeanCount(Metric metric)
-        throws MetricUnreachableException,
-               MetricNotFoundException {
-
-        AdminClient mServer = getMBeanServer(metric);
-        ObjectName query;
-        
-        try {
-            String queryName =
-                mServer.getDomainName() + ":" +
-                metric.getObjectPropString();
-            query = new ObjectName(queryName);
-        } catch (MalformedObjectNameException e) {
-            throw new MetricInvalidException(metric.getObjectName());
-        } catch (ConnectorException e) {
-            throw new MetricUnreachableException(metric.getObjectName() +
-                                                 ": " + e.getMessage(), e);
-        }
-
-        return getMBeanCount(mServer, query, metric.getAttributeName());
-    }
-
     //only use this for 1 metric at the moment, to
     //verify the admin server has been given proper
     //configuration.
