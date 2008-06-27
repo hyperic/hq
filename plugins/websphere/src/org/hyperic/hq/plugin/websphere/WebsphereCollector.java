@@ -47,7 +47,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.ibm.websphere.management.AdminClient;
 import com.ibm.websphere.management.exception.ConnectorException;
-import com.ibm.websphere.pmi.stat.WSStats;
 
 public abstract class WebsphereCollector extends Collector {
 
@@ -55,7 +54,6 @@ public abstract class WebsphereCollector extends Collector {
         LogFactory.getLog(WebsphereCollector.class.getName());
 
     protected ObjectName name;
-    private ObjectName perf;
     private String domain;
 
     protected ObjectName getObjectName() {
@@ -103,37 +101,6 @@ public abstract class WebsphereCollector extends Collector {
     protected void init(AdminClient mServer)
         throws PluginException {
 
-    }
-
-    protected ObjectName getPerfObjectName(AdminClient mServer)
-        throws PluginException {
-
-        if (this.perf == null) {
-            this.perf =
-                newObjectNamePattern("name=PerfMBean," +
-                                     "type=Perf," +
-                                     getProcessAttributes());
-        
-            this.perf = resolve(mServer, this.perf);
-        }
-
-        return this.perf;
-    }
-
-    protected WSStats getStatsObject(AdminClient mServer, ObjectName name) {
-        Object[] params = { name, Boolean.FALSE };
-        String[] sig = {
-            ObjectName.class.getName(),
-            Boolean.class.getName()
-        };
-
-        try {
-            return (WSStats)mServer.invoke(getPerfObjectName(mServer),
-                                           "getStatsObject", params, sig);
-        } catch (Exception e) {
-            log.error("getStatsObject(" + name + "): " + e.getMessage(), e);
-            return null;
-        }
     }
 
     protected String getNodeName() {
