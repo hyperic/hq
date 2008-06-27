@@ -25,11 +25,6 @@
 
 package org.hyperic.hq.auth.server.session;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -72,6 +67,11 @@ public class AuthManagerEJBImpl implements SessionBean {
     private static final String appName = HQConstants.ApplicationName;
 
     public AuthManagerEJBImpl() {}
+
+
+    private PrincipalDAO getPrincipalDAO() {
+        return new PrincipalDAO(DAOFactory.getDAOFactory());
+    }
 
 
     private boolean isReady() {
@@ -184,8 +184,10 @@ public class AuthManagerEJBImpl implements SessionBean {
     public void addUser(AuthzSubjectValue subject, 
                         String username, String password)
     {
-        PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
-        lhome.create(username, password);
+        // All passwords are stored encrypted
+        String passwordHash = Util.createPasswordHash("MD5", "base64",
+                                                      null, null, password);
+        getPrincipalDAO().create(username, passwordHash);
     }
     
     /**
@@ -208,13 +210,41 @@ public class AuthManagerEJBImpl implements SessionBean {
             // peeps with modifyUsers can modify other 
             AuthzSubjectManagerEJBImpl.getOne().checkModifyUsers(subject);
         }
-        PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
-        Principal local = lhome.findByUsername(username);
+        Principal local = getPrincipalDAO().findByUsername(username);
         // hash the password as is done in ejbCreate. Fixes 4661
         String hash = Util.createPasswordHash("MD5", "base64",
                                               null, null, password);
         local.setPassword(hash);
     }
+
+    /**
+     * Change the hashed password for a user.
+     *
+     * @param subject The subject of the currently logged in user
+     * @param username The username whose password will be changed.
+     * @param password The new password for this user
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void changePasswordHash(AuthzSubjectValue subject, String username,
+                                   String hash)
+        throws PermissionException
+    {
+        // AUTHZ check
+        if(!subject.getName().equals(username)) {
+            // users can change their own passwords... only
+            // peeps with modifyUsers can modify other 
+            AuthzSubjectManagerEJBImpl.getOne().checkModifyUsers(subject);
+        }
+        PrincipalDAO dao = getPrincipalDAO();
+        Principal local = dao.findByUsername(username);
+        if (local != null)
+            local.setPassword(hash);
+        else
+            dao.create(username, hash);
+    }
+
 
     /**
      * Delete a user from the internal database
@@ -226,7 +256,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="REQUIRED"
      */
     public void deleteUser(AuthzSubjectValue subject, String username) {
-        PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
+        PrincipalDAO lhome = getPrincipalDAO();
         Principal local = lhome.findByUsername(username);
 
         // Principal does not exist for users authenticated by other JAAS
@@ -246,30 +276,19 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="Required"
      */
     public boolean isUser(AuthzSubjectValue subject, String username) {
-        PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
-        return lhome.findByUsername(username) != null;
+        return getPrincipalDAO().findByUsername(username) != null;
     }
 
     /**
-     * Get a collection of all users
+     * Get the principle of a user
      *
-     * @param subject The subject of the currently logged in user
+     * @param subject The subject for whom to return the principle
      *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public Collection getAllUsers(AuthzSubjectValue subject) {
-        PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
-        
-        Collection principals = lhome.findAllUsers();
-        Collection users = new ArrayList();
-        
-        for (Iterator i = principals.iterator(); i.hasNext();) {
-            Principal p = (Principal)i.next();
-            users.add(p.getPrincipal());
-        }
-        
-        return users;
+    public Principal getPrincipal(AuthzSubject subject) {
+        return getPrincipalDAO().findByUsername(subject.getName());
     }
 
     public static AuthManagerLocal getOne() {

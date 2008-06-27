@@ -179,18 +179,6 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     }
 
     /**
-     * Get a collection of all users
-     *
-     * @ejb:interface-method
-     */
-    public Collection getAllUsers(int sessionID)
-        throws SessionException
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getAuthManager().getAllUsers(subject);
-    }
-
-    /**
      * @ejb:create-method
      */
     public void ejbCreate() {}
