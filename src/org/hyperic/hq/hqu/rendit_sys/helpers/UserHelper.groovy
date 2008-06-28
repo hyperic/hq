@@ -70,7 +70,8 @@ class UserHelper extends BaseHelper {
      * Update a user's password
      */
     public updateUserPassword(subject, password) {
-        AuthManagerEJBImpl.one.changePasswordHash(userValue, subject, password)
+        AuthManagerEJBImpl.one.changePasswordHash(userValue, subject.name,
+                                                  password)
     }
 
     /**
