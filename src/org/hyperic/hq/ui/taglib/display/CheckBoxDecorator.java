@@ -117,7 +117,7 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
     }
 
     public String getLabel() {
-        return label;
+        return this.label;
     }
 
     public void setLabel(String label) {
@@ -125,7 +125,7 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
     }
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
