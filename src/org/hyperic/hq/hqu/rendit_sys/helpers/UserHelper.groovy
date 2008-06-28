@@ -1,5 +1,7 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
+import java.util.List
+
 import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubjectMan
@@ -17,7 +19,7 @@ class UserHelper extends BaseHelper {
      * Find all users
      * @return a List of {@link AuthzSubject}s
      */
-    public getAllUsers() {
+    public List getAllUsers() {
         subjectMan.getAllSubjects(user, [], null).collect {
             subjectMan.findSubjectById(it.id)
         }
@@ -27,7 +29,7 @@ class UserHelper extends BaseHelper {
      * Find a user by name
      * @return a {@link AuthzSubject}s
      */
-    public findUser(name) {
+    public AuthzSubject findUser(name) {
         subjectMan.findSubjectByName(name)
     }
 
@@ -35,8 +37,9 @@ class UserHelper extends BaseHelper {
      * Create a user
      * @return a {@link AuthzSubject}s
      */
-    public createUser(userName, active, dsn, dept, email, first, last, phone,
-                      sms, html) { 
+    public AuthzSubject createUser(userName, active, dsn, dept, email,
+                                   first, last, phone,
+                                   sms, html) {
         subjectMan.createSubject(user, userName, active, dsn, dept, email,
                                  first, last, phone, sms, html)
     }
@@ -45,18 +48,20 @@ class UserHelper extends BaseHelper {
      * Create a user with the given password.
      * @return a {@link AuthzSubject}s
      */
-    public createUser(userName, pass, active, dsn, dept, email, first, last, phone, sms, html) { 
-        def user = subjectMan.createSubject(user, userName, active, dsn, dept, email, first, last, phone, sms, html)
+    public AuthzSubject createUser(userName, pass, active, dsn, dept, email,
+                                   first, last, phone, sms, html) {
+        def user = subjectMan.createSubject(user, userName, active, dsn,
+                                            dept, email, first, last, phone,
+                                            sms, html)
         authMan.addUser(user, userName, pass)
         user
     }
 
     /**
      * Update a user
-     * @return a {@link AuthzSubject}s
      */
-    public updateUser(found, active, dsn, dept, email, first, last, phone, sms,
-                      html) {
+    public void updateUser(found, active, dsn, dept, email, first,
+                           last, phone, sms, html) {
         subjectMan.updateSubject(user, found, active, dsn, dept, email, first,
                                  last, phone, sms, html)
     }
