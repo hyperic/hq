@@ -79,6 +79,8 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
         styleClass = "listMember";
         name = "";
         onclick = "";
+        id = "";
+        label = "";
     }
 
     // accessors 
@@ -152,11 +154,11 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
         }
         catch (NullAttributeException ne) {
             log.debug("bean " + this.id + " not found");
-            id = null;
+            id = "";
         }
         catch (JspException je) {
             log.debug("can't evaluate id [" + this.id + "]: ", je);
-            id = null;
+            id = "";
         }
 
         try {
@@ -273,6 +275,8 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
         suppress = null;
         parent = null;
         context = null;
+        id = null;
+        label = null;
     }
 
     private Object evalAttr(String name, String value, Class type)
