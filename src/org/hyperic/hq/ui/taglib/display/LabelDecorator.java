@@ -38,49 +38,35 @@ import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
 /**
  * This class is a two in one decorator/tag for use within the display:table
- * tag, it is a ColumnDecorator tag that that creates a column of checkboxes.
+ * tag, it is a ColumnDecorator tag that that creates a column of form element labels.
  */
-public class CheckBoxDecorator extends ColumnDecorator implements Tag
+public class LabelDecorator extends ColumnDecorator implements Tag
 {
 
     //----------------------------------------------------static variables
 
     private static Log log =
-        LogFactory.getLog(CheckBoxDecorator.class.getName());
+        LogFactory.getLog(LabelDecorator.class.getName());
 
     //----------------------------------------------------instance variables
 
-    /** The class property of the checkbox.
+    /** The class property of the Label.
      */
     private String styleClass = null;
 
-    /** The name="foo" property of the checkbox.
+    /** The for="foo" property of the Label.
      */
-    private String name = null;
+    private String forElement = null;
 
-    /** The onClick attribute of the checkbox.
+    /** The onClick attribute of the Label.
      */
     private String onclick = null;
 
-    /** A flag indicating whether or not to suppress the checkbox
-     */
-    private String suppress = null;
-
-    /** A string label to display after checkbox
-     */
-    private String label = null;
-
-    /** A string ID for the checkbox
-     */
-    private String elementId = null;
-
     // ctors
-    public CheckBoxDecorator() {
-        styleClass = "listMember";
-        name = "";
+    public LabelDecorator() {
+        styleClass = "listMemberCheckbox";
+        forElement = "";
         onclick = "";
-        elementId = "";
-        label = "";
     }
 
     // accessors 
@@ -92,12 +78,12 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
         this.styleClass = c;
     }
     
-    public String getName() {
-        return this.name;
+    public String getForElement() {
+        return this.forElement;
     }
     
-    public void setName(String n) {
-        this.name = n;
+    public void setForElement(String n) {
+        this.forElement = n;
     }
     
     public String getOnclick() {
@@ -108,59 +94,33 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
         this.onclick = o;
     }
     
-    public String getSuppress() {
-        return this.suppress;
-    }
-    
-    public void setSuppress(String o) {
-        this.suppress = o;
-    }
-
-    public String getLabel() {
-        return this.label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    public String getElementId() {
-        return this.elementId;
-    }
-
-    public void setElementId(String id) {
-        this.elementId = id;
-    }
-
     public String decorate(Object obj) {
-        String name = null;
-		String elementId = null;
-        String value = null;
-		String label = null;
+        String name = null, id = null;
+        String value = null, label = null;
         String click = "";
 
         try {
-            name = (String) evalAttr("name", this.name, String.class);
+            forElement = (String) evalAttr("forElement", this.forElement, String.class);
         }
         catch (NullAttributeException ne) {
-            log.debug("bean " + this.name + " not found");
+            log.debug("bean " + this.forElement + " not found");
             return "";
         }
         catch (JspException je) {
-            log.debug("can't evaluate name [" + this.name + "]: ", je);
+            log.debug("can't evaluate forElement [" + this.forElement + "]: ", je);
             return "";
         }
 
         try {
-            elementId = (String) evalAttr("elementId", this.elementId, String.class);
+            styleClass = (String) evalAttr("styleClass", this.styleClass, String.class);
         }
         catch (NullAttributeException ne) {
-            log.debug("bean " + this.elementId + " not found");
-            elementId = "";
+            log.debug("bean " + this.styleClass + " not found");
+            return "";
         }
         catch (JspException je) {
-            log.debug("can't evaluate id [" + this.elementId + "]: ", je);
-            elementId = "";
+            log.debug("can't evaluate styleClass [" + this.styleClass + "]: ", je);
+            return "";
         }
 
         try {
@@ -177,32 +137,6 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
 
         if (value == null)
             value = obj.toString();
-        
-        try {
-            label = (String) evalAttr("label", this.label, String.class);
-        }
-        catch (NullAttributeException ne) {
-            log.debug("bean " + this.label + " not found");
-            label = null;
-        }
-        catch (JspException je) {
-            log.debug("can't evaluate label [" + this.label + "]: ", je);
-            label = null;
-        }
-
-        try {
-            String suppress = (String) evalAttr("suppress", getSuppress(),
-                                                String.class);
-            if (value.equals(suppress))
-                return "";
-        }
-        catch (NullAttributeException ne) {
-            // No suppression
-        }
-        catch (JspException je) {
-            log.debug("can't evaluate suppress [" + this.suppress + "]: ", je);
-            return "";
-        }
 
         try {
             click = (String) evalAttr("onclick", this.getOnclick(), String.class);
@@ -214,27 +148,15 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
 
         StringBuffer buf = new StringBuffer();
         
-        if (label != null) {
-            buf.append("<label>");
-        }
-        
-        buf.append("<input type=\"checkbox\" onclick=\"");
+        buf.append("<label for=\"");
+        buf.append(forElement);
+        buf.append("\" onclick=\"");
         buf.append(click);
         buf.append("\" class=\"");
-        buf.append(getStyleClass());
-        buf.append("\" id=\"");
-        buf.append(elementId);
-        buf.append("\" name=\"");
-        buf.append(name);
-        buf.append("\" value=\"");
+        buf.append(styleClass);
+        buf.append("\">");
         buf.append(value);
-        buf.append("\"");
-        buf.append(">");
-        
-        if (label != null) {
-            buf.append(label)
-               .append("</label>");
-        }
+        buf.append("</label>");
         
         return buf.toString();
     }
@@ -242,7 +164,7 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
     public int doStartTag() throws javax.servlet.jsp.JspException {
         ColumnTag ancestorTag = (ColumnTag)TagSupport.findAncestorWithClass(this, ColumnTag.class);
         if (ancestorTag == null) {
-            throw new JspTagException("A CheckboxDecorator must be used within a ColumnTag.");
+            throw new JspTagException("A LabelDecorator must be used within a ColumnTag.");
         }
         ancestorTag.setDecorator(this);
         return SKIP_BODY;
@@ -272,18 +194,15 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
 
     public void release() {
         styleClass = null;
-        name = null;
+        forElement = null;
         onclick = null;
-        suppress = null;
         parent = null;
         context = null;
-        elementId = null;
-        label = null;
     }
 
     private Object evalAttr(String name, String value, Class type)
         throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("checkboxdecorator", name, value,
+        return ExpressionUtil.evalNotNull("Labeldecorator", name, value,
                                           type, this, context);
     }
     

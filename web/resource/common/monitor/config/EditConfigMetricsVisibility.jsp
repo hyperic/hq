@@ -198,7 +198,7 @@
 <c:when test="${Resource.entityId.type == APPDEF_TYPE_GROUP ||
                 not empty ChildResourceType}">
 <!-- AUTOGROUP METRICS LIST -->
-<!--  AVAILABILITY CONTENTS -->
+<!--  AVAILABILITY CONTENTS 3 -->
 <display:table items="${availabilityMetrics}" var="grpavailmetric" 
          action="${selfPaAction}" orderValue="soa" order="${param.soa}" sortValue="sca" 
          sort="${param.sca}" pageValue="pn" page="${param.pn}" pageSizeValue="ps" pageSize="${param.ps}" 
@@ -270,26 +270,46 @@
 </c:when>
 <c:when test="${not empty entityTypeId}">
 <!-- RESOURCE TYPE METRIC LIST -->
-<!--  AVAILABILITY CONTENTS -->
+<!--  AVAILABILITY CONTENTS 1 -->
 <display:table items="${availabilityMetrics}" var="availtemplate" 
          action="${selfPaAction}" orderValue="soa" order="${param.soa}"
          sortValue="sca" sort="${param.sca}" pageValue="pn" page="${param.pn}"
          pageSizeValue="ps" pageSize="${param.ps}" styleId="fromTable"
          width="100%" cellpadding="0" cellspacing="0" border="0"
          emptyMsg="${emptyMsg}" nowrapHeader="true">
+<%-- 
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember1')\" name=\"listMember1All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember1"/>
  </display:column>
+--%>
  <display:column property="name" title="resource.common.monitor.visibility.AvailabilityTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
  <%-- <display:column property="instanceId" title="common.header.Description" width="60%" headerStyleClass="ListHeaderInactiveSorted" /> --%>
  <display:column property="defaultInterval" title="resource.common.monitor.visibility.config.CollectionIntervalTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactiveSorted">
   <display:datedecorator isElapsedTime="true"/>
  </display:column>
- <display:column property="defaultOn" title="resource.common.monitor.visibility.config.DefaultOnTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactiveSorted">
-    <display:booleandecorator flagKey="yesno"/>
+
+<%--
+ <display:column width="1%" property="id" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
+  <display:checkboxdecorator name="defaultOn[${availtemplate.id}]" id="defaultOn[${availtemplate.id}]" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember1"/>
  </display:column>
- <display:column property="designate" title="resource.common.monitor.visibility.config.IndicatorTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactiveSorted">
-    <display:booleandecorator flagKey="yesno"/>
+--%>
+
+ <display:column property="defaultOn" title="resource.common.monitor.visibility.config.DefaultOnTH" align="left" nowrap="true" width="15%"  headerStyleClass="ListHeaderInactiveSorted">
+
+<%--
+  <display:labeldecorator forElement="defaultOn[${availtemplate.id}]" value="Collect ${availtemplate.name} Data" />
+	--%>
+
+	<display:checkboxdecorator name="defaultOn[${availtemplate.id}]" elementId="defaultOn[${availtemplate.id}]" label=" Collect ${availtemplate.name} Data" styleClass="listMember1"/>
+		<%-- <display:booleandecorator flagKey="yesno"/> --%>
+		<%-- <label><input type="checkbox" onclick="ToggleRemoveGo(this, widgetProperties, 'listMember1')" name="listMember1"><display:booleandecorator flagKey="yesno"/></label> --%>
+		<%-- <display:checkboxdecorator name="defaultOn" styleClass="listMember1"/> --%>
+ </display:column>
+ <display:column property="designate" title="resource.common.monitor.visibility.config.IndicatorTH" align="left" nowrap="true" width="15%" headerStyleClass="ListHeaderInactiveSorted">
+	<display:checkboxdecorator name="designate[${availtemplate.id}]"  elementId="designate[${availtemplate.id}]" label=" Use ${availtemplate.name} as Indicator" styleClass="listMember2"/>
+<%--
+<display:booleandecorator flagKey="yesno"/>
+--%>
  </display:column>
 </display:table>
 <!--  /  -->
@@ -362,7 +382,7 @@
 </c:when>
 <c:otherwise>
 <!-- SINGLE RESOURCE METRIC LIST -->
-<!--  AVAILABILITY CONTENTS -->
+<!--  AVAILABILITY CONTENTS 2 -->
 <display:table items="${availabilityMetrics}" var="availmetric" 
          action="${selfPaAction}" orderValue="soa" order="${param.soa}" sortValue="sca" 
          sort="${param.sca}" pageValue="pn" page="${param.pn}" pageSizeValue="ps" pageSize="${param.ps}" 
