@@ -40,13 +40,13 @@ import javax.management.j2ee.statistics.CountStatistic;
 import javax.management.j2ee.statistics.RangeStatistic;
 import javax.management.j2ee.statistics.Statistic;
 import javax.management.j2ee.statistics.Stats;
+import javax.management.j2ee.statistics.TimeStatistic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.ibm.websphere.management.AdminClient;
 import com.ibm.websphere.management.exception.ConnectorException;
-import com.ibm.websphere.pmi.stat.WSStats;
 
 public abstract class WebsphereCollector extends Collector {
 
@@ -54,7 +54,6 @@ public abstract class WebsphereCollector extends Collector {
         LogFactory.getLog(WebsphereCollector.class.getName());
 
     protected ObjectName name;
-    private ObjectName perf;
     private String domain;
 
     protected ObjectName getObjectName() {
@@ -102,37 +101,6 @@ public abstract class WebsphereCollector extends Collector {
     protected void init(AdminClient mServer)
         throws PluginException {
 
-    }
-
-    protected ObjectName getPerfObjectName(AdminClient mServer)
-        throws PluginException {
-
-        if (this.perf == null) {
-            this.perf =
-                newObjectNamePattern("name=PerfMBean," +
-                                     "type=Perf," +
-                                     getProcessAttributes());
-        
-            this.perf = resolve(mServer, this.perf);
-        }
-
-        return this.perf;
-    }
-
-    protected WSStats getStatsObject(AdminClient mServer, ObjectName name) {
-        Object[] params = { name, Boolean.FALSE };
-        String[] sig = {
-            ObjectName.class.getName(),
-            Boolean.class.getName()
-        };
-
-        try {
-            return (WSStats)mServer.invoke(getPerfObjectName(mServer),
-                                           "getStatsObject", params, sig);
-        } catch (Exception e) {
-            log.error("getStatsObject(" + name + "): " + e.getMessage(), e);
-            return null;
-        }
     }
 
     protected String getNodeName() {
@@ -201,15 +169,44 @@ public abstract class WebsphereCollector extends Collector {
         else if (stat instanceof RangeStatistic) {
             return ((RangeStatistic)stat).getCurrent();
         }
+        else if (stat instanceof TimeStatistic) {
+            // get the average time (same as MxUtil)
+            double value;
+            long count = ((TimeStatistic)stat).getCount();
+            if (count == 0) {
+                value = 0;
+            }
+            else {
+                value = ((TimeStatistic)stat).getTotalTime() / count;
+            }
+            return value;
+        }
         else {
             log.error("Unsupported stat type: " +
                       stat.getName() + "/" + stat.getClass().getName());
-            return Double.NaN;
+            return MetricValue.VALUE_NONE;
         }        
     }
 
     protected double getStatCount(Stats stats, String metric) {
-        return getStatCount(stats.getStatistic(metric));
+        Statistic stat = stats.getStatistic(metric);
+        if (stat == null) {
+            return MetricValue.VALUE_NONE;
+        }
+        return getStatCount(stat);
+    }
+
+    protected void collectStatCount(Stats stats, String[][] attrs) {
+        for (int i=0; i<attrs.length; i++) {
+            String[] entry = attrs[i];
+            String statKey = entry[0];
+            String pmiKey = entry.length == 1 ? statKey : entry[1]; 
+            double val = getStatCount(stats, statKey);
+            if (val == MetricValue.VALUE_NONE) {
+                continue;
+            }
+            setValue(pmiKey, val);
+        }
     }
 
     public MetricValue getValue(Metric metric, CollectorResult result) {

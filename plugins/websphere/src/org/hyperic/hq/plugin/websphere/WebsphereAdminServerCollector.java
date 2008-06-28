@@ -25,30 +25,31 @@
 
 package org.hyperic.hq.plugin.websphere;
 
-import javax.management.j2ee.statistics.Stats;
-
 import org.hyperic.hq.product.PluginException;
 
 import com.ibm.websphere.management.AdminClient;
 
-public class ThreadPoolCollector extends WebsphereCollector {
+public class WebsphereAdminServerCollector extends WebsphereCollector {
 
-    private static final String[][] ATTRS = { 
-        { "PoolSize", "poolSize" },
-        { "CreateCount", "threadCreates" },
-        { "DestroyCount", "threadDestroys" },
-        { "ActiveCount", "activeThreads" }
-    };
+    private double count(AdminClient mServer) throws Exception {
+        return WebsphereUtil.getMBeanCount(mServer, this.name, null);
+    }
 
     protected void init(AdminClient mServer) throws PluginException {
         super.init(mServer);
 
         this.name =
-            newObjectNamePattern("type=ThreadPool," +
-                                 "name=" + getModuleName() + "," +
-                                 getProcessAttributes());
-        
+            newObjectNamePattern("name=JVM," +
+                                 "type=JVM," +
+                                 "node=" + getNodeName());
         this.name = resolve(mServer, this.name);
+
+        try {
+            count(mServer);
+        } catch (Exception e) {
+            throw new PluginException("Invalid configuration: " +
+                                      e.getMessage());
+        }
     }
 
     public void collect() {
@@ -56,17 +57,12 @@ public class ThreadPoolCollector extends WebsphereCollector {
         if (mServer == null) {
             return;
         }
-        Stats stats = getStats(mServer, this.name);
-        if (stats == null) {
-            //XXX certain threadpools have no stats, why?
-            Object o = getAttribute(mServer, this.name, "name");
-            if (o != null) {
-                setAvailability(true);
-            }
-        }
-        else {
-            setAvailability(true);
-            collectStatCount(stats, ATTRS);
+
+        setAvailability(true);
+        try {
+            setValue("NumJVMs", count(mServer));
+        } catch (Exception e) {
+            //XXX
         }
     }
 }

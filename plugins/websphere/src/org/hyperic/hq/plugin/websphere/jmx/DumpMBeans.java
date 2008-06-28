@@ -97,8 +97,10 @@ public class DumpMBeans {
                     System.out.println("Stats-Class: " +
                                        stats.getClass().getName());
                     System.out.println("Stats: " + stats);
-                } catch (Exception e) {
+                } catch (AttributeNotFoundException e) {
                     System.out.println("Stats: NONE");
+                } catch (Exception e) {
+                    System.out.println("Stats: " + e);
                 }
                 continue;
             }
@@ -120,7 +122,7 @@ public class DumpMBeans {
                         }
                     }
                 } catch (Exception e) {
-
+                    value = e.getMessage();
                 }
 
                 System.out.println("\t" + k + ". Attribute: " +

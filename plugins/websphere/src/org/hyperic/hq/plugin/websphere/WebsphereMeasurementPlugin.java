@@ -35,45 +35,19 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 
-import org.hyperic.util.config.ConfigResponse;
-
-import org.hyperic.util.StringUtil;
-
 public class WebsphereMeasurementPlugin
     extends MeasurementPlugin {
 
-    protected double getAvailValue(Metric metric) {
-        return WebsphereUtil.isRunning(metric) ?
-                Metric.AVAIL_UP :
-                Metric.AVAIL_DOWN;
+    public boolean useJMX() {
+        return false;
     }
 
-    protected double getCustomValue(Metric metric)
-        throws PluginException,
-        MetricUnreachableException,
-        MetricNotFoundException {
-
-        return WebsphereUtil.getMBeanCount(metric);
-    }
-    
     public MetricValue getValue(Metric metric)
         throws PluginException,
         MetricUnreachableException,
         MetricNotFoundException {
 
-        String domain = metric.getDomainName();
-        if (domain.equals("ws.avail")) {
-            double avail = getAvailValue(metric);
-            return new MetricValue(avail);
-        }
-        else if (domain.equals("ws.custom")) {
-            return new MetricValue(getCustomValue(metric));
-        }
-        else if (domain.equals("hyperic-hq")) {
-            //XXX these templates have been removed
-            return MetricValue.NONE;
-        }
-        else if (WebsphereProductPlugin.useJMX) {
+        if (useJMX()) {
             return super.getValue(metric); //collector
         }
         else {
@@ -110,13 +84,5 @@ public class WebsphereMeasurementPlugin
         }
 
         return props;
-    }
-
-    public String translate(String template, ConfigResponse config) {
-        template = StringUtil.replace(template,
-                                      "${admin.vers}",
-                                      WebsphereProductPlugin.VERSION_WS5);
-
-        return super.translate(template, config);
     }
 }
