@@ -51,6 +51,7 @@ import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
+import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
@@ -186,19 +187,24 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         
         GetMeasurements_result res = new GetMeasurements_result();
         int i, nArgs = args.getNumMeasurements();
-        
+        boolean isDebug = _log.isDebugEnabled();
+
         for(i=0; i<nArgs; i++){
             Exception tExc = null;
             String arg = args.getMeasurement(i);
             String excMsg = null;
+            String tmpl = arg.substring(arg.indexOf(':')+1);
 
-            _log.debug("Getting real time measurement: " + arg);
             try {
                 MetricValue val;
 
                 val = _pluginManager.getValue(arg);
                 res.addMeasurement(val);
-                _log.debug("Result was: " + val);
+                if(isDebug){
+                    tmpl = Metric.parse(tmpl).toDebugString();
+                    _log.debug("Getting real time measurement: " + tmpl);
+                    _log.debug("Result was: " + val);
+                }
             } catch(PluginNotFoundException exc){
                 excMsg = "Plugin not found: ";
                 tExc = exc;
@@ -223,9 +229,10 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
                     excMsg = excMsg + tExc.getMessage();
                 }
                     
-                if(_log.isDebugEnabled()){
+                if(isDebug){
+                    tmpl = Metric.parse(tmpl).toDebugString();
                     _log.debug("Error getting real time measurement '" + 
-                                   arg + "': " + excMsg, tExc);
+                               tmpl + "': " + excMsg, tExc);
                 } else {
                     _log.error("Error getting real time measurement: " +
                                    excMsg);

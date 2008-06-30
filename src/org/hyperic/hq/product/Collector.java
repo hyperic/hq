@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -352,14 +353,17 @@ public abstract class Collector implements Runnable {
     }
 
     String mapToString(Map map) {
-        Map props;
-        if (map.get(PROP_PASSWORD) != null) {
-            props = new HashMap();
-            props.putAll(map);
-            props.put(PROP_PASSWORD, "*****");
-        }
-        else {
-            props = map;
+        Map props = new HashMap();
+        for (Iterator it = map.entrySet().iterator();
+             it.hasNext();)
+        {
+            Map.Entry entry = (Map.Entry)it.next();
+            String key = (String)entry.getKey();
+            String val = (String)entry.getValue();
+            if (Metric.isSecret(key)) {
+                val = Metric.mask(val);
+            }
+            props.put(key, val);
         }
         return props.toString();
     }

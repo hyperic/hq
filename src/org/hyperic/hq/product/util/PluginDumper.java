@@ -56,6 +56,7 @@ import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.MeasurementPluginManager;
+import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -683,6 +684,14 @@ public class PluginDumper {
         promptContinue();
     }
 
+    private boolean printHeader(TypeInfo type, MeasurementInfo info, String tmpl) {
+        System.out.println(type.getName() + " " +
+                           info.getName() + ":");
+        Metric metric = Metric.parse(tmpl);
+        System.out.println("   " + metric.toDebugString());
+        return true;
+    }
+
     public boolean fetchMetrics(TypeInfo type,
                                 boolean translateOnly,
                                 ConfigResponse config)
@@ -753,21 +762,18 @@ public class PluginDumper {
                 continue; //notgonna happen
             }
 
+            String tmpl = template.substring(template.indexOf(":")+1);
+            boolean printedHeader = false;
             if (templateOnly) {
                 if (template.indexOf(MeasurementInfo.RATE_KEY) != -1) {
                     continue;
                 }
                 //just the template (minus plugin name) for Metric.main
-                System.out.println(template.substring(template.indexOf(":")));
-            }
-            else {
-                System.out.println(type.getName() + " " +
-                                   metrics[j].getName() + ":");
-
-                System.out.println("   " + template);
+                System.out.println(tmpl);
             }
 
             if (translateOnly) {
+                printHeader(type, metrics[j], tmpl);
                 continue;
             }
 
@@ -779,11 +785,17 @@ public class PluginDumper {
                 try {
                     value = getValue(template);
                 } catch (Exception e) {
+                    if (!printedHeader) {
+                        printedHeader = printHeader(type, metrics[j], tmpl);
+                    }
                     reportException(e, template, mPlugin);
                     continue;
                 }
                 if (value.isNone()) {
                     continue;
+                }
+                if (!printedHeader) {
+                    printedHeader = printHeader(type, metrics[j], tmpl);
                 }
                 FormattedNumber number =
                     UnitsConvert.convert(value.getValue(),

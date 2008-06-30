@@ -61,6 +61,7 @@ public class Metric {
     public static final double AVAIL_PAUSED  = MeasurementConstants.AVAIL_PAUSED;
 
     private static HashMap cache = new HashMap();
+    private static HashMap secrets = new HashMap();
     private static final MetricProperties NO_PROPERTIES =
         new MetricProperties();
     
@@ -118,7 +119,11 @@ public class Metric {
 
         return '0';
     }
-    
+
+    public static void addSecret(String key) {
+        secrets.put(key, Boolean.TRUE);
+    }
+
     //we only encode/decode property values
     //which are input by a user or auto inventory
     public static String encode(String val) {
@@ -203,6 +208,62 @@ public class Metric {
 
     public String toString() {
         return this.template;
+    }
+
+    static boolean isSecret(String key) {
+        return secrets.get(key) == Boolean.TRUE;
+    }
+
+    static String mask(String val) {
+        if (val == null) {
+            return "";
+        }
+        StringBuffer sb = new StringBuffer();
+        for (int i=0; i<val.length(); i++) {
+            sb.append('*');
+        }
+        return sb.toString();
+    }
+
+    private String toDebugString(String orig, Properties props) {
+        if (props == null) {
+            return orig;    
+        }
+        StringBuffer ds = new StringBuffer();
+        StringTokenizer tok = new StringTokenizer(orig, ",");
+        while (tok.hasMoreTokens()) {
+            String pair = tok.nextToken();
+            int ix = pair.indexOf('=');
+            if (ix == -1) {
+                ds.append(pair);
+                continue;
+            }
+            String key = pair.substring(0, ix);
+            if (isSecret(key)) {
+                String val = props.getProperty(key);
+                ds.append(key).append('=');
+                ds.append(mask(val));
+            }
+            else {
+                ds.append(pair);
+            }
+            if (tok.hasMoreTokens()) {
+                ds.append(',');
+            }
+        }
+        return ds.toString();
+    }
+
+    public String toDebugString() {
+        StringBuffer dm = new StringBuffer();
+        dm.append(this.domainName).append(':');
+        dm.append(toDebugString(this.objectPropString, this.objectProperties));
+        dm.append(':').append(this.attributeName);
+        if (this.propString != null) {
+            dm.append(':');
+            dm.append(toDebugString(this.propString, this.props));
+        }
+        return dm.toString();
     }
 
     public Properties getProperties() {

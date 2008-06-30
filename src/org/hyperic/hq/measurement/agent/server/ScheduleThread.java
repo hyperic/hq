@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
@@ -177,7 +176,7 @@ public class ScheduleThread
             }
         } catch (ScheduleException e) {
             _log.error("Unable to schedule metric '" +
-                      logMetric(meas.getDSN()) + "', skipping. Cause is " +
+                      getParsedTemplate(meas) + "', skipping. Cause is " +
                       e.getMessage(), e);
             return;
         }
@@ -195,13 +194,13 @@ public class ScheduleThread
         interruptMe();
     }
 
-    private void logCache(String basicMsg, String dsn, String msg,
+    private void logCache(String basicMsg, ParsedTemplate tmpl, String msg,
                           Exception exc, boolean printStack){
         String oldMsg;
         boolean isDebug = _log.isDebugEnabled();
 
         synchronized(_errors){
-            oldMsg = (String)_errors.get(dsn);
+            oldMsg = (String)_errors.get(tmpl.metric.toString());
         }
 
         if(!isDebug && oldMsg != null && oldMsg.equals(msg)){
@@ -209,7 +208,7 @@ public class ScheduleThread
         }
 
         if(isDebug){
-            _log.error(basicMsg + " while processing Metric '" + dsn + "'", exc);
+            _log.error(basicMsg + " while processing Metric '" + tmpl + "'", exc);
         } else {
             _log.error(basicMsg + ": " + msg);
             if (printStack) {
@@ -218,7 +217,7 @@ public class ScheduleThread
         }
 
         synchronized(_errors){
-            _errors.put(dsn, msg);
+            _errors.put(tmpl.metric.toString(), msg);
         }
     }
 
@@ -227,34 +226,23 @@ public class ScheduleThread
      * ensures that we don't perform excessive logging when plugins
      * generate a lot of errors. 
      */
-    private void logCache(String basicMsg, String dsn, Exception exc){
-        logCache(basicMsg, dsn, exc.getMessage(), exc, false);
+    private void logCache(String basicMsg, ParsedTemplate tmpl, Exception exc){
+        logCache(basicMsg, tmpl, exc.getMessage(), exc, false);
     }
 
-    private void clearLogCache(String dsn){
+    private void clearLogCache(ParsedTemplate tmpl){
         synchronized(_errors){
-            _errors.remove(dsn);
-        }
-    }
-
-    //remove connections properties, if any, to avoid logging passwords
-    private String logMetric(String metric) {
-        if (_log.isDebugEnabled()) {
-            return metric;
-        }
-        StringTokenizer tok = new StringTokenizer(metric, ":");
-        if (tok.countTokens() == 4) {
-            int ix = metric.lastIndexOf(':');
-            return metric.substring(0, ix);
-        }
-        else {
-            return metric;
+            _errors.remove(tmpl.metric.toString());
         }
     }
 
     private class ParsedTemplate {
         String plugin;
         Metric metric;
+        
+        public String toString() {
+            return plugin + ":" + metric.toDebugString();
+        }
     }
 
     private ParsedTemplate getParsedTemplate(ScheduledMeasurement meas) {
@@ -269,18 +257,21 @@ public class ScheduleThread
         return tmpl;
     }
 
-    private MetricValue getValue(ScheduledMeasurement meas)
-        throws PluginException, PluginNotFoundException,
-               MetricNotFoundException, MetricUnreachableException
-    {
+    private ParsedTemplate toParsedTemplate(ScheduledMeasurement meas) {
         AppdefEntityID aid = meas.getEntity();
         int id = aid.getID();
         int type = aid.getType();
-
         ParsedTemplate tmpl = getParsedTemplate(meas);
         tmpl.metric.setId(type, id);
         tmpl.metric.setCategory(meas.getCategory());
         tmpl.metric.setInterval(meas.getInterval());
+        return tmpl;
+    }
+
+    private MetricValue getValue(ParsedTemplate tmpl)
+        throws PluginException, PluginNotFoundException,
+               MetricNotFoundException, MetricUnreachableException
+    {
         return _manager.getValue(tmpl.plugin, tmpl.metric);
     }
 
@@ -343,7 +334,7 @@ public class ScheduleThread
 
             AppdefEntityID aid = meas.getEntity();
             String category = meas.getCategory();
-            String dsn = meas.getDSN();
+            ParsedTemplate dsn = toParsedTemplate(meas);
             MetricValue data = null;
             long currTime, timeDiff;
             boolean success = false;
@@ -370,7 +361,7 @@ public class ScheduleThread
                     }
                     continue; //avoid dups
                 }
-                data = getValue(meas);
+                data = getValue(dsn);
                 rs._collected.put(mid, Boolean.TRUE);
                 success = true;
                 clearLogCache(dsn);
@@ -403,7 +394,7 @@ public class ScheduleThread
                 _stat_minFetchTime = timeDiff;
 
             if (timeDiff > WARN_FETCH_TIME) {
-                _log.warn("Collection of metric: '" + logMetric(dsn) + 
+                _log.warn("Collection of metric: '" + dsn + 
                           "' took: " + timeDiff + "ms");
             }
 
