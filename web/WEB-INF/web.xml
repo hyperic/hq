@@ -250,11 +250,6 @@
     <servlet-name>hqu</servlet-name>
     <url-pattern>*.hqu</url-pattern>
   </servlet-mapping>
-<!-- Matches the hqu webservice API plugin -->
-  <servlet-mapping>
-    <servlet-name>hqu</servlet-name>
-    <url-pattern>/hqu/*/*.html</url-pattern>
-  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>hqu</servlet-name>
     <url-pattern>*.groovy</url-pattern>
