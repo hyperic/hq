@@ -526,7 +526,7 @@
             alias="DiskServiceTime"
             template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:DiskServiceTime"
             category="UTILIZATION"
-            units="percentage"
+            units="percent"
             collectionType="dynamic"/>
 
     <!-- Win32 does not have inodes, rendering these metric two useless -->
