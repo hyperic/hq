@@ -59,6 +59,7 @@ import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.security.SecurityUtil;
+import org.tanukisoftware.wrapper.WrapperManager;
 
 /**
  * The main daemon which processes requests from clients.  The Agent has
@@ -916,7 +917,7 @@ public class AgentDaemon
         }
         
         private void cleanUpOnAgentStartFailure() {
-            if (this.inNewProcess) {
+            if (!WrapperManager.isControlledByNativeWrapper()) {
                 System.exit(-1);
             } else {
                 rollbackAndRestartJVM();

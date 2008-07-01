@@ -70,6 +70,7 @@ import org.hyperic.util.JDK;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.exec.Background;
 import org.hyperic.util.security.SecurityUtil;
+import org.tanukisoftware.wrapper.WrapperManager;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -1154,9 +1155,8 @@ public class AgentClient {
 
         SYSTEM_OUT.println("Agent successfully started");
         
-        // Only force a setup if we are running the agent in a new process 
-        // (not in Java Service Wrapper mode)
-        if(providerInfo == null && this.isProcess){
+        // Only force a setup if we are not running the agent in Java Service Wrapper mode
+        if(providerInfo == null && !WrapperManager.isControlledByNativeWrapper()){
             SYSTEM_OUT.println();
             return FORCE_SETUP;
         } else {
@@ -1308,7 +1308,7 @@ public class AgentClient {
                 int errVal = client.cmdStart(false);
                 if(errVal == FORCE_SETUP){
                     errVal = 0;
-                    client.cmdSetup();
+                    client.cmdSetupIfNoProvider();
                 }
             } else if(args[0].equals("status")){
                 client.cmdStatus();

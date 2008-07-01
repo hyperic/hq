@@ -8,6 +8,7 @@ AGENTDATADIR_PROP=agent.dataDir
 AGENTDATADIR=../../data
 AGENT_LIB=./lib
 PDK_LIB=./pdk/lib
+WRAPPER_LIB=../../wrapper/lib
 # for /proc/net/tcp mirror
 SIGAR_PROC_NET=./tmp
 
@@ -49,31 +50,36 @@ chmod +x ./pdk/scripts/*
 
 HQ_JAVA="${HQ_JAVA_HOME}/bin/java"
 
-JDK13_LIBS="${AGENT_LIB}/jdk1.3-compat"
-JDK13_COMPAT="${JDK13_LIBS}/jce1_2_2.jar"
-JDK13_COMPAT="${JDK13_COMPAT}:${JDK13_LIBS}/sunjce_provider.jar"
-JDK13_COMPAT="${JDK13_COMPAT}:${JDK13_LIBS}/jsse.jar"
+CLIENT_CLASSPATH=
+for i in `ls ${AGENT_LIB}/*.jar`
+do
+  CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${i}"
+done
 
-CLIENT_CLASSPATH="${AGENT_LIB}/AgentClient.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/ant.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-logging.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/log4j-1.2.14.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hyperic-util.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/sigar.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-product.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-httpclient-3.1.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-codec-1.3.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/lather.jar"
+for i in `ls ${PDK_LIB}/*.jar`
+do
+  CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${i}"
+done
 
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${JDK13_COMPAT}"
+for i in `ls ${WRAPPER_LIB}/*.jar`
+do
+  CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${i}"
+done
 
 CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 
-CLIENT_CMD="${HQ_JAVA} \
+HQ_JAVA_OPTS="${HQ_JAVA_OPTS} \
     -Djava.net.preferIPv4Stack=true \
+    -Dagent.mode=thread \
+    -Dagent.install.home=../.. \
+    -Dagent.bundle.home=. \
+    -Djava.library.path=${WRAPPER_LIB}
     -D${AGENTPROPFILE_PROP}=${AGENT_PROPS} \
     -D${AGENTLOGDIR_PROP}=${AGENTLOGDIR} \
-    -D${AGENTDATADIR_PROP}=${AGENTDATADIR} \
+    -D${AGENTDATADIR_PROP}=${AGENTDATADIR}"
+
+CLIENT_CMD="${HQ_JAVA} \
+    ${HQ_JAVA_OPTS}
     -cp ${CLIENT_CLASSPATH} ${CLIENT_CLASS}"
 
 START_CMD="${CLIENT_CMD} start"
