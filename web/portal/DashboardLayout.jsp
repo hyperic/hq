@@ -280,17 +280,9 @@ dojo.connect(window, "onload", function(){
 	      <c:set var="width" value="width='100%'" />
 	    </c:when>
 	  
-	    <c:when test="${narrow eq 'true'}">      
-	      <c:set var="hr" value="180" />
-	      <c:set var="width">
-	        <%= narrowWidth %>
-	      </c:set>
-	    </c:when>
-	    
 	    <c:otherwise>
-	      <c:set var="narrow" value="false" />
-	      <c:set var="hr" value="75%" />
-	      <c:set var="width" value="width='75%'" />
+	      <c:set var="hr" value="50%" />
+	      <c:set var="width" value="width='50%'" />
 	    </c:otherwise>
 	  </c:choose>
 	
