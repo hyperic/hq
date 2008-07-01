@@ -370,7 +370,7 @@ class ResourceCategory {
         platVal.fqdn     = cfg.fqdn
         platVal.cpuCount = 1  // XXX:  How can we better gauge?
 
-        def plat  = platMan.createPlatform(subject.valueObject, proto.instanceId,
+        def plat  = platMan.createPlatform(subject, proto.instanceId,
                                            platVal, agent.id)
         for (ip in ips) {
             platMan.addIp(plat, ip.address, ip.netmask, ip.mac)
