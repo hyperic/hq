@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
 import groovy.xml.MarkupBuilder
+import groovy.xml.StreamingMarkupBuilder	    
 
 /**
  * The base controller is invoked by the dispatcher when it detects that
@@ -240,6 +241,42 @@ abstract class BaseController {
 		response.sendRedirect(targetUrl)
 	}
     
+	/**
+	 * Render XML to the remote client in a streamed fashion.  
+	 * The opts map is able to specify both the encoding and contentType
+	 * of the target stream.
+	 * 
+	 * This method cannot be used in conjuction with other render() methods
+	 * which output content directly to the client, as this method sets the
+	 * response headers for content type.
+	 * 
+	 * For example:
+	 * 
+	 *     renderXml() {
+	 *         userList() {
+	 *             user(name: 'Joe', id: 34)
+	 *             user(name: 'Bob', id: 35)
+	 *         }
+	 *     }
+	 *     
+	 * Or:
+	 *     renderXml(encoding:'utf-8', contentType:'x-fancyXml') {
+	 *         properties() {
+	 *             prop(name: 'maxMem', value:'1024m')
+	 *         }
+	 *     }
+	 */
+	protected void renderXml(Map opts = [encoding:"utf-8",
+	                                     contentType:'text/xml'], 
+	                         Closure c) 
+	{
+	    rendered = true
+        invokeArgs.response.setContentType(opts.contentType)
+        StreamingMarkupBuilder b = new StreamingMarkupBuilder()
+        b.encoding = opts.encoding
+        b.bind(c).writeTo(invokeArgs.response.writer)
+	}
+	
     protected void render(opts) {
         opts = (opts == null) ? [:] : opts
 
