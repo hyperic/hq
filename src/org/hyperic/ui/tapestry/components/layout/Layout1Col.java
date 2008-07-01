@@ -71,7 +71,7 @@ public abstract class Layout1Col extends BaseLayout{
     @InjectObject("service:hq.ajax.DojoOnePointOneShellDelegate")
     public abstract IRender getAjaxDelegate();
     
-    @Asset("context:css/HQ_40_OS.css")
+    @Asset("context:css/HQ_40.css")
     public abstract IAsset getHQ40Theme();
     
     /**
