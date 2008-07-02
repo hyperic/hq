@@ -99,24 +99,30 @@
   <c:when test="${not empty titleKey}">
     <fmt:message key="${titleKey}">
       <c:if test="${not empty titleName}">
+        <span class="resourceTitle">
         <fmt:param value="${titleName}"/>
+        </span>
       </c:if>
       <c:if test="${not empty subTitleName}">
+        <span class="resourceSubTitle">
         <fmt:param value="${subTitleName}"/>
+        </span>
       </c:if>
     </fmt:message>
   </c:when>
   <c:otherwise>
     <c:out value="${titleName}" escapeXml="false"/>
       <c:if test="${not empty subTitleName}">
+        <span class="resourceSubTitle">
         <c:out value="${subTitleName}"/>
+        </span>
       </c:if>
   </c:otherwise>
 </c:choose>
     </td>
 <c:choose>
   <c:when test="${not empty titleBgStyle && not empty titleImg}">
-    <td width="15%" style="padding-right: 20px;"><html:img page="/images/${titleImg}" width="202" height="26" alt="" border="0" style="float: right;"/></td>
+    <td width="15%" style="padding-right: 20px;"></td>
   </c:when>
   <c:otherwise>
     <td width="10%" style="padding-right: 20px;">&nbsp;</td>
@@ -205,76 +211,85 @@
     <c:set var="section" value="group"/>
   </c:when>
 </c:choose>
+<!-- TOOLS -->
+<c:if test="${not empty linkUrl}">
+    <div class="toolsMenu">
+        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan" border="0"/></a></span>
+        <div style="clear: both"></div>
+        <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;z-index:5">
+            <tiles:insert attribute="linkUrl">
+                <c:if test="${not empty resource}">
+                    <tiles:put name="resource" beanName="resource"/>
+                </c:if>
+            </tiles:insert>
+        </div>
+    </div>
+</c:if>
+<!-- END TOOLS -->
+<!-- FILTERBOXZ CONTENTS -->
+<div class="filterBox">
+    <div class="filterBoxTitle">
+        <fmt:message key="resource.hub.Search"/>
+    </div>
+    <div class="filterBoxFields">
+        
+            <html:text property="keywords" size="15" maxlength="40" onfocus="ClearText(this)"
+                value="${initSearchVal}"/>
+            <c:choose>
+                <c:when test="${empty allTypesKey}">
+                    <html:hidden property="ft" value=""/>&nbsp;
+                </c:when>
+                <c:otherwise>
+                    <span style="padding-left: 4px;">
+                        <html:select property="ft" styleClass="FilterFormText" size="1">
+                            <html:option value="" key="${allTypesKey}"/>
+                            <html:optionsCollection property="types"/>
+                        </html:select>
+                    </span>
+                    <c:if test="${not empty AvailableResGrps}">
+                        <span style="padding-left: 4px;">
+                            <html:select property="fg" styleClass="FilterFormText">
+                                <html:option value="" key="resource.hub.filter.AllGroupOption"/>
+                                <html:optionsCollection name="AvailableResGrps"/>
+                            </html:select>
+                        </span>
+                    </c:if>
+                </c:otherwise>
+            </c:choose>
+        
+        
+            <html:checkbox styleId="unavail" property="unavail" value="true"/>
+            <label for="unavail"><fmt:message key="resource.hub.legend.unavailable"/></label>
+            <html:checkbox styleId="own" property="own" value="true"/>
+            <label for="own">
+                <fmt:message key="resource.hub.search.label.Owned">
+                    <fmt:param>
+                        <c:out value="${sessionScope.webUser.name}"/>
+                    </fmt:param>
+                </fmt:message>
+            </label>
+            <span><fmt:message key="resource.hub.search.label.Match"/></span>
+            <html:radio styleId="anyRadio" property="any" value="true"/>
+            <label for="anyRadio"><fmt:message key="any"/></label>
+            <html:radio styleId="allRadio" property="any" value="false"/>
+            <label for="allRadio"><fmt:message key="all"/></label>
+            <html:image page="/images/4.0/icons/accept.png" property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
+        
+    </div>
+</div>
 
-      <!--  SEARCH TOOLBAR CONTENTS -->
-    <!--  SEARCH TOOLBAR CONTENTS -->
-      <div style="position: absolute; width: 50px;font-size: 11px; font-weight: 700; ">
-      <fmt:message key="resource.hub.Search"/>
-      </div>
-      <div style="width: 600px; padding-left: 50px;">
-      <div>
-      <html:text property="keywords" size="15" maxlength="40" onfocus="ClearText(this)" value="${initSearchVal}"/>
-    <c:choose>
-    <c:when test="${empty allTypesKey}">
-      <html:hidden property="ft" value=""/>&nbsp;
-    </c:when>
-    <c:otherwise>
-      <span style="padding-left: 4px;">
-      <html:select property="ft" styleClass="FilterFormText" size="1">
-        <html:option value="" key="${allTypesKey}"/>
-        <html:optionsCollection property="types"/>
-      </html:select>
-      </span>
-      <c:if test="${not empty AvailableResGrps}">
-      <span style="padding-left: 4px;">
-        <html:select property="fg" styleClass="FilterFormText">
-          <html:option value="" key="resource.hub.filter.AllGroupOption"/>
-          <html:optionsCollection name="AvailableResGrps"/>
-        </html:select>
-      </span>
-      </c:if>
-    </c:otherwise>
-    </c:choose>
-    </div>
-    <div style="padding: 4px;">
-      <html:checkbox property="unavail" value="true"/>
-      <fmt:message key="resource.hub.legend.unavailable"/>
-    <span style="padding: 6px;">
-      <html:checkbox property="own" value="true"/>
-      <fmt:message key="resource.hub.search.label.Owned">
-        <fmt:param><c:out value="${sessionScope.webUser.name}"/></fmt:param>
-      </fmt:message>
-    </span>
-    <span style="background-color: #D5D8DE; padding: 6px;">
-    <fmt:message key="resource.hub.search.label.Match"/>
-    <html:radio property="any" value="true"/> <fmt:message key="any"/>
-    <html:radio property="any" value="false"/> <fmt:message key="all"/>
-    <html:image page="/images/4.0/icons/accept.png" property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
-    </span>
-    </div>
-    </div>
+<!-- END SEARCHBOX  -->
 
-      <!--  /  -->
     </td>
     </c:when>
     <c:otherwise>
     <td class="PageTitleSmallText" colspan="2">&nbsp;</td>
-    </c:otherwise>
-  </c:choose>
+</c:otherwise>
+</c:choose>
 
-  <td style="padding: 4px;">
-    <c:if test="${not empty linkUrl}">
-      <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan" border="0"/></a></span>
-    <div style="clear: both"></div>
-    <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;z-index:5">
-<tiles:insert attribute="linkUrl">
-  <c:if test="${not empty resource}">
-    <tiles:put name="resource" beanName="resource"/>
-  </c:if>
-</tiles:insert>
-      </div>
-    </c:if>
-    </td>
+<td style="padding: 4px;">
+    
+</td>
   </tr>
 </c:if>
 </table>
