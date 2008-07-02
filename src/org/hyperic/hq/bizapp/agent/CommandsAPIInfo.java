@@ -40,13 +40,6 @@ public final class CommandsAPIInfo
     public static final String NOTIFY_SERVER_SET = 
         CommandsAPIInfo.class.getName() + ".camServerSet";
 
-    /* 
-     * The port which the AgentClient defines where the CommandsServer
-     * can connect to notify it of a successful startup
-     */
-    public static final String PROP_UP_PORT =
-        CommandsAPIInfo.class.getName() + ".camUpPort";
-
     // XXX -- still need to have this naming provider here
     //        so tests will pass
     public static final String PROP_NAMING_PROVIDER =
