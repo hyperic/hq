@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.SNMPMeasurementPlugin;
 import org.hyperic.snmp.SNMPClient;
@@ -175,10 +176,6 @@ public class SNMPCollector extends Collector {
         }
     }
 
-    protected void collectIndexedColumn() {
-        collectIndexedColumn(new GenericColumnValueConverter());
-    }
-
     protected SNMPSession getSession() throws Exception {
         try {
             return _client.getSession(_props);
@@ -186,6 +183,14 @@ public class SNMPCollector extends Collector {
             setErrorMessage(e.getMessage());
             throw e;
         }
+    }
+
+    protected boolean isTotalCounter(String name) {
+        return false;
+    }
+
+    protected void collectIndexedColumn() {
+        collectIndexedColumn(new GenericColumnValueConverter());
     }
 
     protected void collectIndexedColumn(ColumnValueConverter converter) {
@@ -196,6 +201,8 @@ public class SNMPCollector extends Collector {
         SNMPSession session;
         List column;
         Map indexNames;
+        boolean doTotal = isTotalCounter(counterName);
+        double total = 0.0;
 
         try {
             session = getSession();
@@ -215,7 +222,13 @@ public class SNMPCollector extends Collector {
             String ix = getColumnIndex(val);
             String name = (String)indexNames.get(ix);
             try {
-                setValue(name + "." + counterName, converter.convert(ix, val));
+                double value = converter.convert(ix, val);
+                if (doTotal &&
+                    (value > 0.0) && (value != MetricValue.VALUE_NONE))
+                {
+                    total += value;
+                }
+                setValue(name + "." + counterName, value);
             } catch (Exception e) {
                 getLog().warn(columnName + ".convert failed for " +
                               name + "@" + getInfo());
@@ -224,6 +237,9 @@ public class SNMPCollector extends Collector {
                 setValue(name + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
             }
         }        
+        if (doTotal) {
+            setValue("_TOTAL_" + "." + counterName, total);
+        }
     }
 
     public void init() throws PluginException {

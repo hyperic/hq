@@ -33,6 +33,10 @@
 <plugin name="netdevice"
         class="org.hyperic.hq.plugin.netdevice.NetworkDeviceProductPlugin">
 
+  <!-- column sums from IfTableCollector -->
+  <filter name="iftotal.template"
+          value="if-${snmp.template},snmpIndexName=%interface.index%,snmpColumn=${oid}:_TOTAL_.${oid}"/>
+
   <metrics name="netdevice-platform">
     <metric name="Uptime"
             template="${snmp.template}:sysUpTime"
@@ -140,6 +144,20 @@
             template="${snmp.template}:ipFragCreates"
             category="THROUGHPUT"
             rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Received"
+            oid="ifInOctets"
+            template="${iftotal.template}"
+            category="THROUGHPUT"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Sent"
+            oid="ifOutOctets"
+            template="${iftotal.template}"
+            category="THROUGHPUT"
+            units="B"
             collectionType="trendsup"/>
   </metrics>
 

@@ -15,7 +15,10 @@
     </properties>
 
     <plugin type="measurement"
-            class="org.hyperic.hq.product.SNMPMeasurementPlugin"/>
+            class="org.hyperic.hq.plugin.netdevice.NetworkDeviceMeasurementPlugin"/>
+
+    <plugin type="collector"
+            class="org.hyperic.hq.plugin.netdevice.IfTableCollector"/>
 
     <plugin type="log_track"
             class="org.hyperic.hq.plugin.netdevice.SNMPTrapReceiverPlugin"/>

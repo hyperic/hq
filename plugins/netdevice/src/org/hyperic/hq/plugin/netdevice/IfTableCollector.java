@@ -88,6 +88,10 @@ public class IfTableCollector extends SNMPCollector {
         setSource(_columnName + "@" + getInfo());
     }
 
+    protected boolean isTotalCounter(String name) {
+        return name.endsWith("Octets");
+    }
+
     public void collect() {
         collectIndexedColumn();
     }
