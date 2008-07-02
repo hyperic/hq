@@ -847,26 +847,20 @@ public class AgentDaemon
     }
 
     public static class RunnableAgent implements Runnable {
-                
-        public RunnableAgent() {}
+        
+        private final AgentConfig config;
+        
+        
+        public RunnableAgent(AgentConfig config) {
+            this.config = config;
+        }
                 
         public void run() {            
-            String propFile =
-                System.getProperty(AgentConfig.PROP_PROPFILE,
-                                   AgentConfig.DEFAULT_PROPFILE);
-                        
-            boolean isConfigured = false;
-            
+            boolean isConfigured = false;            
             AgentDaemon agent = null;
             
             try {
-                AgentConfig cfg = AgentConfig.newInstance(propFile);
-                // Re-configue with the merged agent configuration.  This will
-                // allow logging configuration to come from the user's
-                // .hq/agent.properties.
-                PropertyConfigurator.configure(cfg.getBootProperties());
-                
-                agent = AgentDaemon.newInstance(cfg);
+                agent = AgentDaemon.newInstance(config);
                 isConfigured = true;
             } catch (AgentConfigException e) {
                 logger.error("Agent configuration error: ", e);    
@@ -874,7 +868,7 @@ public class AgentDaemon
                 logger.error("Agent configuration failed: ", e);                                
             } finally {
                 if (!isConfigured) {
-                    cleanUpOnAgentConfigFailure();
+                    cleanUpOnAgentConfigFailure(config);
                 }
             }
 
@@ -896,9 +890,9 @@ public class AgentDaemon
             }
         }
         
-        private void cleanUpOnAgentConfigFailure() {
+        private void cleanUpOnAgentConfigFailure(AgentConfig config) {
             try {
-                AgentStartupCallback agentStartupCallback = new AgentStartupCallback();
+                AgentStartupCallback agentStartupCallback = new AgentStartupCallback(config);
                 agentStartupCallback.onAgentStartup(false);
             } catch (Exception e) {
                 logger.error("Failed to callback on startup failure.", e);
@@ -936,13 +930,5 @@ public class AgentDaemon
         }
         
     }
-    
-    public static void main(String[] args) {
-        // Setup basic logging facility -- if we need to override it, we can.
-        // only need this in process mode, since AgentClient already configured
-        // logging system in thread mode
-        BasicConfigurator.configure();
-        
-        new RunnableAgent().run();
-    }
+
 }
