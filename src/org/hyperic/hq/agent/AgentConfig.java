@@ -65,6 +65,7 @@ public class AgentConfig {
     
     private static final String DEFAULT_PROXY_HOST = "";
     private static final int DEFAULT_PROXY_PORT = -1;
+    private static final int DEFAULT_NOTIFY_UP_PORT = -1;
 
     //PluginDumper needs these to be constant folded
     public static final String PDK_DIR_KEY = "agent.pdkDir";
@@ -157,11 +158,14 @@ public class AgentConfig {
         PROP_PDK_WORK_DIR, 
         PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE
     };
-
+    
     private int        listenPort;          // Port the agent should listen on
     private String     listenIp;            // IP the agent listens on
     private int        proxyPort;           // Proxy server port
     private String     proxyIp;             // IP for the proxy server
+    private int        notifyUpPort;        // The port which the AgentClient defines 
+                                            // where the CommandServer can connect to notify
+                                            // it of successful startup.
     private String     storageProvider;     // Classname for the provider
     private String     storageProviderInfo;  // Argument to the storage init()
     private Properties bootProps;           // Bootstrap properties
@@ -170,6 +174,7 @@ public class AgentConfig {
     private AgentConfig(){
         this.proxyIp = AgentConfig.DEFAULT_PROXY_HOST;
         this.proxyPort = AgentConfig.DEFAULT_PROXY_PORT;
+        this.notifyUpPort = AgentConfig.DEFAULT_NOTIFY_UP_PORT;
     }
 
     /**
@@ -450,10 +455,7 @@ public class AgentConfig {
     public void setListenPort(int port) 
         throws AgentConfigException
     {
-        if(port < 1 || port > 65535)
-            throw new AgentConfigException("Invalid port (not in range " +
-                                           "1->65535)");
-        
+        verifyValidPortRange(port);
         this.listenPort = port;
     }
 
@@ -498,11 +500,7 @@ public class AgentConfig {
      *                              range
      */
     public void setProxyPort(int port) throws AgentConfigException {
-        
-        if(port < 1 || port > 65535)
-            throw new AgentConfigException("Invalid port (not in range " +
-                                           "1->65535)");
-        
+        verifyValidPortRange(port);        
         this.proxyPort = port;
     }
     
@@ -558,6 +556,28 @@ public class AgentConfig {
         } else {
             return InetAddress.getByName(this.getListenIp());
         }
+    }
+    
+    /**
+     * @return The notify up port or -1 if not set.
+     */
+    public int getNotifyUpPort() {
+        return this.notifyUpPort;
+    }
+    
+    /**
+     * Sets the port which the AgentClient defines where the CommandServer 
+     * can connect to notify it of successful startup.
+     *
+     * @param port New port to set.  The port should be in the range of
+     *             1 to 65535
+     *
+     * @throws AgentConfigException indicating the port was not within a valid
+     *                              range
+     */
+    public void setNotifyUpPort(int port) throws AgentConfigException {
+        verifyValidPortRange(port);
+        this.notifyUpPort = port;
     }
 
     /**
@@ -618,6 +638,12 @@ public class AgentConfig {
 
     public String getTokenFile() {
         return this.tokenFile;
+    }
+    
+    private void verifyValidPortRange(int port) throws AgentConfigException {
+        if(port < 1 || port > 65535)
+            throw new AgentConfigException("Invalid port (not in range " +
+                                           "1->65535)");        
     }
 
 }
