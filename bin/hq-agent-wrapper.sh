@@ -164,7 +164,7 @@ fi
 
 # export the resolved HQ_JAVA_HOME so that it can be picked up by 
 # the Java Service Wrapper process
-export HQ_JAVA_HOME=${HQ_JAVA_HOME}
+export HQ_JAVA_HOME
 
 chmod +x "${AGENT_BUNDLE_HOME}"/pdk/scripts/*
 
