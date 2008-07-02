@@ -91,7 +91,7 @@ input.compactbuttoninactive {
 }
 
 .pagetitle,.pagetitlebar,.pagetitlebar td {
-    background-color: #FFF;
+    
     color: #CCC;
     font-family: arial, sans-serif;
     font-size: 12px;
@@ -99,7 +99,7 @@ input.compactbuttoninactive {
 }
 
 .pagetitlebar a,.pagetitlebar td a {
-    color: #CCC
+    color: #3179D4;
 }
 
 .pagetitleserverbg {
@@ -119,7 +119,7 @@ input.compactbuttoninactive {
 }
 
 .listtitle,.blocktitle {
-    background-color: #60a5ea;
+    background:transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 0%;
     color: #fff;
     font-size: 12px;
     font-weight: 700;
@@ -146,31 +146,31 @@ input.compactbuttoninactive {
 }
 
 .blockcontent {
-    background-color: #EBEDF2;
+    background-color: #FFF;
     padding: 3px
 }
 
 .blockcontentnopadding {
-    background-color: #EBEDF2;
+    background-color: #FFF;
     padding: 0
 }
 
 .blocklabel {
-    background-color: #EBEDF2;
+    background-color: #FFF;
     font-weight: 700;
     padding: 3px;
     text-align: right
 }
 
 .blockcheckboxlabel,.blockleftalignlabel {
-    background-color: #EBEDF2;
+    background-color: #FFF;
     font-weight: 700;
     padding: 3px;
     text-align: left
 }
 
 .blockbg {
-    background-color: #EBEDF2
+    background-color: #FFF
 }
 
 a.listheaderlink:hover {
@@ -178,8 +178,7 @@ a.listheaderlink:hover {
     text-decoration: underline
 }
 
-.listheader,.tablerowheader,.tablecellheader {
-    background-color: #DBE3F5;
+.listheader,.tablecellheader {
     border-bottom: solid #D5D8DE;
     border-top: solid #ABB1C7;
     border-width: 1px;
@@ -188,9 +187,22 @@ a.listheaderlink:hover {
     padding: 3px;
     text-align: left
 }
+.tablerowheader{
+	background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 25%;
+    border-bottom: solid #D5D8DE;
+    border-top: solid #ABB1C7;
+    border-width: 1px;
+    color: #FFF;
+    font-weight: 700;
+    padding: 3px;
+    text-align: left
+}
+
+.tablerowheader th{
+	color:#FFF
+}
 
 .listheadercheckbox {
-    background-color: #DBE3F5;
     border-bottom: solid #D5D8DE;
     border-top: solid #ABB1C7;
     border-width: 1px;
@@ -200,17 +212,15 @@ a.listheaderlink:hover {
 }
 
 .listheadersorted,.tablerowsorted {
-    background-color: #C6CFE5;
     border-bottom: solid #C6CFE5;
     border-top: solid #ABB1C7;
     border-width: 1px;
-    color: #004680;
+    color: #FFF;
     font-weight: 700;
     padding: 3px
 }
 
 .listheaderinactive,.tablerowinactive {
-    background-color: #DBE3F5;
     border-bottom: solid #C6CFE5;
     border-top: solid #ABB1C7;
     border-width: 1px;
@@ -248,14 +258,22 @@ a.listheaderlink:hover {
     text-align: center
 }
 
-.listrow,.tableroweven,.lineitem {
+.listrow,.lineitem {
     background-color: #F8F9FE;
 }
 
-.listrowselected,.tablerowaction,.tablerowodd {
+.tableroweven{
+	background-color:#FFF
+}
+
+.listrowselected,.tablerowaction {
     background-color: #EBEDF2;
     text-align: left
 }
+
+.tablerowodd{
+	background-color:#F4FAFA
+	}
 
 .listcell,.listcellselected,.tablecell,.redtablecell {
     border-bottom: solid #D5D8DE;
@@ -546,7 +564,7 @@ a.guidelink:hover {
 }
 
 .subtabcell {
-    background-color: #D9D9D9
+    background-color: #FFF
 }
 
 .dashtabs {
@@ -593,7 +611,7 @@ a.guidelink:hover {
 }
 
 .headalertwrapper {
-    color: #888;
+    color: #FFF;
     font-weight: 700;
     height: 38px;
     left: 10px;
@@ -631,15 +649,15 @@ a.guidelink:hover {
     display: inline;
     float: left;
     padding-top: 5px;
-    width: 80px
+    width: 80px;
+
 }
 
 #recentalerts {
     color: #FFF;
     font-size: 11px;
     font-weight: 700;
-    padding-left: 70px;
-    padding-top: 1px;
+    padding: 4px 0 0 75px;
     position: absolute;
     top: 0;
     white-space: nowrap
@@ -753,7 +771,7 @@ a.dashlink:hover {
 }
 
 .filterimage {
-    background-color: #D5D8DE;
+
     padding-left: 1px;
     padding-right: 1px
 }
@@ -780,9 +798,12 @@ a.displaylink:hover {
 }
 
 .monitorblockcontainer {
-    background-color: #EBEDF2;
-    border-spacing: 3px;
-    padding-top: 10px
+    background-color: #FFF;
+    border-left:1px solid gray;
+    border-right:1px solid gray;
+    border-bottom:1px solid gray;
+    padding-top: 10px;
+    
 }
 
 .monitorblocktopline {
@@ -915,7 +936,7 @@ a.displaylink:hover {
 }
 
 .resourcehubblocktitle {
-    background-color: #CCC;
+    border-bottom:1px solid gray;
     color: #F35E0C;
     font-size: 12px;
     font-weight: 700;
@@ -1687,7 +1708,6 @@ blk,.black,#usersconfigwindow .blockcontent,#rolesconfigwindow .blockcontent {
 }
 
 a:link,a:visited {
-    color: #039;
     font-weight: 700;
     text-decoration: none
 }
@@ -1702,12 +1722,15 @@ a.notbold:link,.dropdown a:link,a.notbold:visited,.dropdown a:visited {
     color: #999
 }
 
-.pagetitlegroupbg,.pagetitlerolebg,.pagetitleuserbg,.toolbarcontent {
+.pagetitlegroupbg,.pagetitlerolebg,.pagetitleuserbg{
     background-color: #E5E5E5
+}
+.toolbarcontent {
+    height:30px;
 }
 
 .pagetitlesmalltext,a.listcellpopup5:link,a.listcellpopup5:visited {
-    color: #666;
+    color: #555;
     font-size: 11px;
     line-height: 14px
 }
@@ -1900,31 +1923,31 @@ a.black:link,a.black:visited {
 }
 /*IE 6 OVERRIDES*/
 #recentAlerts {
-   padding-left:0px;
+   _padding-left:0px;
 }
 
 .headTopNav {
-    height:42px;
+    _height:42px;
 }
 
 .dojoMenuBar2 {
 }
 
 .dojoMenuBar2 .dojoMenuItem2 {
-    padding:3px 15px 3px; 15px;
+    _padding:3px 15px 3px; 15px;
 }
 
 .headUsrName {
-    font-size:10px;
-    z-index:10;
+    _font-size:10px;
+    _z-index:10;
 }
 
 #loading {
-    margin-bottom:-1px;
+    _margin-bottom:-1px;
 }
 
 #hb {
-    margin-bottom:-1px;
+    _margin-bottom:-1px;
 }
 
 /*MIG*/
