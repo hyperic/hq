@@ -169,6 +169,12 @@ export HQ_JAVA_HOME
 chmod +x "${AGENT_BUNDLE_HOME}"/pdk/scripts/*
 
 HQ_JAVA="${HQ_JAVA_HOME}/bin/java"
+# verify that the java command actually exists
+if [ ! -f "$HQ_JAVA" ]
+then
+        echo Invalid Java Home detected at ${HQ_JAVA_HOME}
+        exit 1
+fi
 
 CLIENT_CLASSPATH="${AGENT_LIB}/AgentClient.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/ant.jar"
