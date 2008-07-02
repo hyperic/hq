@@ -148,17 +148,23 @@ elif [ -d "${AGENT_INSTALL_HOME}/jre" ]; then
     HQ_JAVA_HOME="${AGENT_INSTALL_HOME}"/jre
     # Just in case
     chmod -R +x "${AGENT_INSTALL_HOME}"/jre/bin/*
+elif [ "x$JAVA_HOME" != "x" ] ; then
+    HQ_JAVA_HOME=${JAVA_HOME}
 else
     case "`uname`" in
     Darwin)
         HQ_JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
         ;;
     *)
-        echo "HQ_JAVA_HOME must be set when invoking the agent"
+        echo "HQ_JAVA_HOME or JAVA_HOME must be set when invoking the agent"
         exit 1
         ;;
     esac
 fi
+
+# export the resolved HQ_JAVA_HOME so that it can be picked up by 
+# the Java Service Wrapper process
+export HQ_JAVA_HOME=${HQ_JAVA_HOME}
 
 chmod +x "${AGENT_BUNDLE_HOME}"/pdk/scripts/*
 
