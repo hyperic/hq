@@ -99,10 +99,8 @@ public class AgentClient {
     private static final String QPROP_RESETUPTOK = QPROP_PRE + "resetupTokens";
     private static final String QPROP_TIMEOUT    = QPROP_PRE + "serverTimeout";
 
-    private static final String PROP_MODE       = "agent.mode";
     private static final String PROP_LOGFILE    = "agent.logFile";
-    private static final String PROP_STARTUP_TIMEOUT =
-        "agent.startupTimeOut";
+    private static final String PROP_STARTUP_TIMEOUT = "agent.startupTimeOut";
 
     private static final String AGENT_CLASS   = 
         "org.hyperic.hq.agent.server.AgentDaemon";
@@ -979,7 +977,7 @@ public class AgentClient {
         ServerSocket startupSock;
         ProviderInfo providerInfo;
         Properties bootProps;
-        String mode, logFile;
+        String logFile;
 
         // Try to ping the agent one time to see if the agent is already up
         try {
@@ -996,15 +994,6 @@ public class AgentClient {
 
         if((logFile = bootProps.getProperty(PROP_LOGFILE)) == null){
             throw new AgentInvokeException(PROP_LOGFILE + " is undefined");
-        }
-
-        mode =
-            bootProps.getProperty(PROP_MODE,
-                                  System.getProperty(PROP_MODE));
-        if (mode.equals("process")) {
-            // deprecated mode
-            throw new AgentInvokeException("Running agent in process mode has been " 
-                    + "deprecated");
         }
 
         try {
@@ -1024,7 +1013,7 @@ public class AgentClient {
 
         System.setProperty(CommandsAPIInfo.PROP_UP_PORT,
                 String.valueOf(startupSock.getLocalPort()));
-        Thread t = new Thread(new AgentDaemon.RunnableAgent(false));
+        Thread t = new Thread(new AgentDaemon.RunnableAgent());
         t.start();
         SYSTEM_OUT.println("- Agent thread running");
 
