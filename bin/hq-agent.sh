@@ -69,8 +69,11 @@ done
 CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 
 HQ_JAVA_OPTS="${HQ_JAVA_OPTS} \
+    -Xmx128m
+    -Dsun.net.inetaddr.ttl=60
     -Djava.net.preferIPv4Stack=true \
     -Dagent.mode=thread \
+    -Djava.security.auth.login.config=jaas.config
     -Dagent.install.home=../.. \
     -Dagent.bundle.home=. \
     -Djava.library.path=${WRAPPER_LIB}

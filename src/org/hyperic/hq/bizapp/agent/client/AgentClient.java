@@ -39,9 +39,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,9 +64,7 @@ import org.hyperic.hq.bizapp.client.StaticProviderFetcher;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
-import org.hyperic.util.JDK;
 import org.hyperic.util.StringUtil;
-import org.hyperic.util.exec.Background;
 import org.hyperic.util.security.SecurityUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
 
@@ -104,12 +100,7 @@ public class AgentClient {
     private static final String QPROP_TIMEOUT    = QPROP_PRE + "serverTimeout";
 
     private static final String PROP_MODE       = "agent.mode";
-    private static final String PROP_SERVERCP   = "agent.classPath";
     private static final String PROP_LOGFILE    = "agent.logFile";
-    private static final String PROP_JAVA_OPTS  = "agent.javaOpts";
-    private static final String PROP_OPTIT      = "agent.optIt";
-    private static final String PROP_OPTITDELAY = 
-        "agent.optItDelay";
     private static final String PROP_STARTUP_TIMEOUT =
         "agent.startupTimeOut";
 
@@ -128,7 +119,6 @@ public class AgentClient {
     private String              logFileStartup;
     private Log                 log;                 
     private boolean             nuking;
-    private boolean             isProcess = true;
     private boolean             redirectedOutputs = false;
 
     private AgentClient(AgentConfig config, SecureAgentConnection conn){
@@ -943,7 +933,7 @@ public class AgentClient {
     }
 
     private void redirectOutputs() {
-        if (this.isProcess || this.redirectedOutputs) {
+        if (this.redirectedOutputs) {
             return;
         }
         this.redirectedOutputs = true;
@@ -989,10 +979,7 @@ public class AgentClient {
         ServerSocket startupSock;
         ProviderInfo providerInfo;
         Properties bootProps;
-        StringTokenizer tok;
-        String mode, propFile, serverCP, logFile;
-        String javaOpts, optIt, optItDelay;
-        ArrayList invokeCmdL = new ArrayList();
+        String mode, logFile;
 
         // Try to ping the agent one time to see if the agent is already up
         try {
@@ -1007,46 +994,17 @@ public class AgentClient {
 
         bootProps = this.config.getBootProperties();
 
-        mode =
-            bootProps.getProperty(PROP_MODE,
-                                  System.getProperty(PROP_MODE));
-
-        if (mode != null) {
-            if (mode.equals("process")) {
-                //the default
-            }
-            else if (mode.equals("thread")) {
-                this.isProcess = false;
-            }
-            else {
-                throw new AgentInvokeException(PROP_MODE + "=" + mode);
-            }
-        }
-
-        if((serverCP = bootProps.getProperty(PROP_SERVERCP)) == null){
-            throw new AgentInvokeException(PROP_SERVERCP + " is undefined");
-        }
-
         if((logFile = bootProps.getProperty(PROP_LOGFILE)) == null){
             throw new AgentInvokeException(PROP_LOGFILE + " is undefined");
         }
 
-        // load the JAVA_OPTS
-        if((javaOpts = bootProps.getProperty(PROP_JAVA_OPTS)) == null){
-            javaOpts = "";
-        }
-
-        optIt = bootProps.getProperty(PROP_OPTIT);
-        optItDelay = bootProps.getProperty(PROP_OPTITDELAY);
-
-        propFile = System.getProperty(AgentConfig.PROP_PROPFILE);
-
-        invokeCmdL.add(new File(new File(System.getProperty("java.home"),
-                                         "bin"),
-                                "java").getAbsolutePath());
-
-        if (!JDK.IS_IBM) {
-            invokeCmdL.add("-client"); //not supported by IBM jre
+        mode =
+            bootProps.getProperty(PROP_MODE,
+                                  System.getProperty(PROP_MODE));
+        if (mode.equals("process")) {
+            // deprecated mode
+            throw new AgentInvokeException("Running agent in process mode has been " 
+                    + "deprecated");
         }
 
         try {
@@ -1059,83 +1017,16 @@ public class AgentClient {
                                            "listen for Agent startup: " +
                                            exc.getMessage());
         }
-                       
-        if(optIt != null){
-            invokeCmdL.add("-Xrunpri");
-            invokeCmdL.add("-Xbootclasspath/a:" + optIt + "/lib/oibcp.jar");
-            invokeCmdL.add("-Xboundthreads");
 
-            serverCP = serverCP + ":" + optIt + "/lib/optit.jar";
-            serverCP = serverCP + ":" + optIt + "/lib/oibcp.jar";
-        }
-
-        invokeCmdL.add("-D" + AgentConfig.PROP_PROPFILE + "=" + 
-                       propFile);
-        invokeCmdL.add("-D" + CommandsAPIInfo.PROP_UP_PORT + "=" + 
-                       startupSock.getLocalPort());
-        
-        // setting this system property avoids having to edit
-        // java.security for jaas login config.
-        // this file contains configuration for plugins such as weblogic
-
-        if(new File(JAAS_CONFIG).exists()) {
-            invokeCmdL.add("-Djava.security.auth.login.config=" + 
-                           JAAS_CONFIG);
-        }
-
-        // add the javaOpts options - as individual options.  If all
-        // of these options are added together, our Escape.escape would
-        // escape away the spaces - Process.exec does not like escaped
-        // spaces between java_opt
-
-        tok = new StringTokenizer(javaOpts);
-        while(tok.hasMoreTokens()) {
-            invokeCmdL.add((String)tok.nextToken());
-        }
-
-        serverCP += ":"  + getPdkClasspath(bootProps);
-
-        invokeCmdL.add("-classpath");
-        invokeCmdL.add(normalizeClassPath(serverCP));
-
-        if(optIt != null){
-            invokeCmdL.add("intuitive.audit.Audit");
-            invokeCmdL.add("-startCPUprofiler");
-            if (optItDelay != null) {
-                invokeCmdL.add("-offlineprofiling:delay=" + optItDelay + "m,"
-                               + "directory=tmp");
-            }
-        }
-
-        invokeCmdL.add(AGENT_CLASS);
         SYSTEM_OUT.println("- Invoking agent");
 
         this.logFileStartup = logFile + ".startup";
 
-        if (this.isProcess) {
-            SYSTEM_OUT.println("- Starting agent process");
-            handleSIGINT();
-            this.log.debug("Invoking agent: " + invokeCmdL);
-            try {
-                String[] invokeCmd;
-
-                invokeCmd = (String[])invokeCmdL.toArray(new String[0]);
-
-                Background.exec(invokeCmd, new File(this.logFileStartup), false,
-                                new File(this.logFileStartup), true);
-            } catch(IOException exc){
-                try {startupSock.close();} catch(IOException iexc){}
-                throw new AgentInvokeException("Unable to start background " +
-                                               "agent process: " + 
-                                               exc.getMessage());
-            }
-        } else {
-            System.setProperty(CommandsAPIInfo.PROP_UP_PORT,
-                               String.valueOf(startupSock.getLocalPort()));
-            Thread t = new Thread(new AgentDaemon.RunnableAgent(false));
-            t.start();
-            SYSTEM_OUT.println("- Agent thread running");
-        }
+        System.setProperty(CommandsAPIInfo.PROP_UP_PORT,
+                String.valueOf(startupSock.getLocalPort()));
+        Thread t = new Thread(new AgentDaemon.RunnableAgent(false));
+        t.start();
+        SYSTEM_OUT.println("- Agent thread running");
 
         /* Now comes the painful task of figuring out if the agent
            started correctly. */
