@@ -45,7 +45,7 @@ set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\groovy-all-1.5.jar
 
 set CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 
-set CLIENT_CMD="%JAVA%" -classpath "%CLIENT_CLASSPATH%" -Dagent.mode=thread %CLIENT_CLASS%
+set CLIENT_CMD="%JAVA%" -classpath "%CLIENT_CLASSPATH%" %CLIENT_CLASS%
 
 set START_CMD=%CLIENT_CMD% start
 set PING_CMD=%CLIENT_CMD% ping
