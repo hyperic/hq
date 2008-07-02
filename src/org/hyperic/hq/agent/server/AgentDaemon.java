@@ -847,23 +847,14 @@ public class AgentDaemon
     }
 
     public static class RunnableAgent implements Runnable {
-        
-        private final boolean inNewProcess;
-        
-        public RunnableAgent() {
-            this(true);
-        }
-        
-        public RunnableAgent(boolean inNewProcess) {
-            this.inNewProcess = inNewProcess;
-        }
-        
+                
+        public RunnableAgent() {}
+                
         public void run() {            
             String propFile =
                 System.getProperty(AgentConfig.PROP_PROPFILE,
                                    AgentConfig.DEFAULT_PROPFILE);
                         
-
             boolean isConfigured = false;
             
             AgentDaemon agent = null;
