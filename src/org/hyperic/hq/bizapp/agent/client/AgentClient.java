@@ -52,7 +52,6 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
-import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_args;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_result;
@@ -114,7 +113,6 @@ public class AgentClient {
     private CommandsClient   camCommands; 
     private AgentConfig   config;
     private String              sslHandlerPkg;
-    private String              logFileStartup;
     private Log                 log;                 
     private boolean             nuking;
     private boolean             redirectedOutputs = false;
@@ -538,7 +536,7 @@ public class AgentClient {
         int unidirectionalPort = -1;
 
         bootP = this.config.getBootProperties();
-
+        
         try {
             this.cmdPing(1);
         } catch(AgentConnectionException exc){
@@ -865,7 +863,7 @@ public class AgentClient {
             }
         }
 
-        redirectOutputs(); //win32
+        redirectOutputs(bootP); //win32
     }
 
     private void verifyAgentRunning(ServerSocket startupSock)
@@ -930,17 +928,19 @@ public class AgentClient {
         }
     }
 
-    private void redirectOutputs() {
+    private void redirectOutputs(Properties bootProp) {
         if (this.redirectedOutputs) {
             return;
         }
         this.redirectedOutputs = true;
+                
         try {
+            String startupLogFile = getStartupLogFile(bootProp);
             PrintStream os = 
-                new PrintStream(new FileOutputStream(this.logFileStartup));
+                new PrintStream(new FileOutputStream(startupLogFile));
             System.setErr(os);
             System.setOut(os);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace(SYSTEM_ERR);
         }
     }
@@ -977,7 +977,6 @@ public class AgentClient {
         ServerSocket startupSock;
         ProviderInfo providerInfo;
         Properties bootProps;
-        String logFile;
 
         // Try to ping the agent one time to see if the agent is already up
         try {
@@ -992,10 +991,6 @@ public class AgentClient {
 
         bootProps = this.config.getBootProperties();
 
-        if((logFile = bootProps.getProperty(PROP_LOGFILE)) == null){
-            throw new AgentInvokeException(PROP_LOGFILE + " is undefined");
-        }
-
         try {
             int iSleepTime = getStartupTimeout(bootProps);
 
@@ -1009,11 +1004,13 @@ public class AgentClient {
 
         SYSTEM_OUT.println("- Invoking agent");
 
-        this.logFileStartup = logFile + ".startup";
-
-        System.setProperty(CommandsAPIInfo.PROP_UP_PORT,
-                String.valueOf(startupSock.getLocalPort()));
-        Thread t = new Thread(new AgentDaemon.RunnableAgent());
+        try {
+            this.config.setNotifyUpPort(startupSock.getLocalPort());
+        } catch (AgentConfigException e) {
+            throw new AgentInvokeException("Invalid notify up port: "+startupSock.getLocalPort());
+        }
+                
+        Thread t = new Thread(new AgentDaemon.RunnableAgent(this.config));
         t.start();
         SYSTEM_OUT.println("- Agent thread running");
 
@@ -1040,12 +1037,22 @@ public class AgentClient {
             SYSTEM_OUT.println();
             return FORCE_SETUP;
         } else {
-            redirectOutputs(); //win32
+            redirectOutputs(bootProps); //win32
             return 0;            
         }
 
     }
-
+    
+    private String getStartupLogFile(Properties bootProps)  throws AgentConfigException {
+            String logFile;
+            
+            if((logFile = bootProps.getProperty(PROP_LOGFILE)) == null){
+                throw new AgentConfigException(PROP_LOGFILE + " is undefined");
+            }
+            
+            return logFile + ".startup";
+    }
+    
     // returns the startup timeout in milliseconds
     private int getStartupTimeout(Properties bootProps) {
         int iSleepTime = AGENT_STARTUP_TIMEOUT;
