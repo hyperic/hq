@@ -25,9 +25,9 @@ rem Detect HQ_JAVA_HOME
 rem
 cd %_REALPATH%
 
-if not "%HQ_JAVA_HOME%"=="" goto gotjava
+if not "%HQ_JAVA_HOME%"=="" goto gothqjava
 
-if EXIST %AGENT_INSTALL_HOME%\jre\nul (
+if EXIST "%AGENT_INSTALL_HOME%\jre" (
     set HQ_JAVA_HOME=%AGENT_INSTALL_HOME%\jre
     goto gotjava
 )
@@ -35,6 +35,12 @@ if EXIST %AGENT_INSTALL_HOME%\jre\nul (
 :nojava
   echo HQ_JAVA_HOME must be set when invoking the agent
 goto :eof
+
+:gothqjava
+if not EXIST "%HQ_JAVA_HOME%" (
+  echo HQ_JAVA_HOME must be set to a valid directory
+  goto :eof
+) 
 
 :gotjava
 rem Decide on the wrapper binary.
