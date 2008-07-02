@@ -102,6 +102,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </tiles:insert>
 
 <c:if test="${not empty ResourceSummary}">
+<div class="hubContainer">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
     <td class="ResourceHubBlockTitle" width="100%">
@@ -205,6 +206,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     </td>
   </tr>
 </table>
+
 </c:if>
 
 <tiles:insert definition=".portlet.confirm"/>
@@ -265,7 +267,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:otherwise>
 </c:choose>
 
-<div class="FilterImage" style="padding: 4px; border-top: 1px solid #ABB1C7;text-align: right;">
+<div class="FilterImage" style="padding: 4px; text-align: right;">
 	<c:choose>
 	  <c:when test="${ResourceHubForm.view == CHART}">
 	    <html:img page="/images/SubHub_ChartView_on.gif" alt="Chart View" width="104" height="15" border="0"/>
@@ -461,7 +463,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tiles:put name="pageNumAction" beanName="pnAction"/>  
   <tiles:put name="defaultSortColumn" value="5"/>
 </tiles:insert>
-
+</div>
 <html:hidden property="ff"/>
 <html:hidden property="g"/>
 <html:hidden property="pn"/>
