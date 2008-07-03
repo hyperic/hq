@@ -27,6 +27,7 @@ package org.hyperic.hq.agent.server;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
@@ -39,10 +40,8 @@ import java.util.jar.Manifest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
@@ -79,6 +78,8 @@ public class AgentDaemon
 
     public static final String PROP_CERTDN = "agent.certDN";
     public static final String PROP_HOSTNAME = "agent.hostName";
+    
+    private static final String AGENT_COMMANDS_SERVER_JAR_NAME = "AgentCommandsServer.jar";
 
     private static AgentDaemon mainInstance;
     private static Object      mainInstanceLock = new Object();
@@ -123,13 +124,31 @@ public class AgentDaemon
             }
         }
     }
+    
+    private static File getAgentCommandsServerJar(String libHandlersDir) 
+        throws FileNotFoundException {
+        
+        File[] jars = new File(libHandlersDir).listFiles(new FileFilter() {
+            public boolean accept(File file) {
+                String name = file.getName();
+                
+                return name.equals(AGENT_COMMANDS_SERVER_JAR_NAME);
+            }
+        });
 
-    private static File[] getLibJars(String libHandlersDir) {
+        if (jars == null || jars.length != 1) {
+            throw new FileNotFoundException(AGENT_COMMANDS_SERVER_JAR_NAME+" is not optional");
+        }
+        
+        return jars[0];
+    }
+
+    private static File[] getOtherCommandsServerJars(String libHandlersDir) {
         File[] jars = new File(libHandlersDir).listFiles(new FileFilter() {
                 public boolean accept(File file) {
                     String name = file.getName();
                     
-                    return name.endsWith(".jar");
+                    return name.endsWith(".jar") && !name.equals(AGENT_COMMANDS_SERVER_JAR_NAME);
                 }
             });
 
@@ -395,7 +414,6 @@ public class AgentDaemon
         throws AgentRunningException, AgentConfigException
     {
         DefaultConnectionListener defListener;
-        AgentServerHandler loadedHandler;
 
         if(this.isRunning()){
             throw new AgentRunningException("Agent cannot be configured while"+
@@ -453,17 +471,47 @@ public class AgentDaemon
         // Server Handlers
         this.serverHandlers = new Vector();
 
-        // Always add in the AgentCommandsServer
-        loadedHandler = new AgentCommandsServer();
-        this.serverHandlers.add(loadedHandler);
-        this.dispatcher.addServerHandler(loadedHandler);
-
         // Load server handlers on the fly from lib/*.jar.  Server handler
         // jars  must have a Main-Class that implements the AgentServerHandler
         // interface.
         String libHandlersDir = 
             cfg.getBootProperties().getProperty(AgentConfig.PROP_LIB_HANDLERS[0]);
-        File[] libJars = getLibJars(libHandlersDir);
+        
+        // The AgentCommandsServer is *NOT* optional. Make sure it is loaded
+        File agentCommandsServerJar;
+        
+        try {
+            agentCommandsServerJar = getAgentCommandsServerJar(libHandlersDir);
+        } catch (FileNotFoundException e) {
+            throw new AgentConfigException(e.getMessage());
+        }
+        
+        loadAgentServerHandlerJars(new File[]{agentCommandsServerJar});
+                
+        File[] otherCommandsServerJars = getOtherCommandsServerJars(libHandlersDir);
+                
+        loadAgentServerHandlerJars(otherCommandsServerJars);
+
+        // Make sure the storage provider has a certificate DN.
+        // If not, create one
+        String certDN = this.storageProvider.getValue(PROP_CERTDN);
+        if ( certDN == null || certDN.length() == 0 ) {
+            certDN = generateCertDN();
+            this.storageProvider.setValue(PROP_CERTDN, certDN);
+            try {
+                this.storageProvider.flush();
+            } catch ( AgentStorageException ase ) {
+                throw new AgentConfigException("Error storing certdn in "
+                                               + "agent storage: " + ase);
+            }
+        }
+
+        this.bootConfig = cfg;
+    }
+
+    private void loadAgentServerHandlerJars(File[] libJars)
+            throws AgentConfigException {
+        AgentServerHandler loadedHandler;
         for (int i=0; i<libJars.length; i++) {
             try {
                 JarFile jarFile = new JarFile(libJars[i]);
@@ -484,22 +532,6 @@ public class AgentDaemon
                                                e.getMessage());
             }
         }
-
-        // Make sure the storage provider has a certificate DN.
-        // If not, create one
-        String certDN = this.storageProvider.getValue(PROP_CERTDN);
-        if ( certDN == null || certDN.length() == 0 ) {
-            certDN = generateCertDN();
-            this.storageProvider.setValue(PROP_CERTDN, certDN);
-            try {
-                this.storageProvider.flush();
-            } catch ( AgentStorageException ase ) {
-                throw new AgentConfigException("Error storing certdn in "
-                                               + "agent storage: " + ase);
-            }
-        }
-
-        this.bootConfig = cfg;
     }
 
     /**
