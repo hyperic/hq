@@ -36,6 +36,7 @@ public class Agent extends AppdefBean {
     private String _authToken;
     private String _agentToken;
     private String _version;
+    private boolean _unidirectional;
     private AgentType _agentType;
     private Collection _platforms;
 
@@ -45,9 +46,18 @@ public class Agent extends AppdefBean {
     public Agent(AgentType type, String address, Integer port, String authToken,
                  String agentToken, String version)
     {
+	// TODO - remove this constructor
+	new Agent(type, address, port, false, authToken, agentToken, version);
+    }
+
+    public Agent(AgentType type, String address, Integer port,
+                 boolean unidirectional, String authToken,
+                 String agentToken, String version)
+    {
         _agentType  = type;
         _address    = address;
         _port       = port;
+        _unidirectional = unidirectional;
         _authToken  = authToken;
         _agentToken = agentToken;
         _version    = version;
@@ -97,6 +107,28 @@ public class Agent extends AppdefBean {
     public void setVersion(String version) {
         _version = version;
     }
+
+    public boolean isUnidirectional() {
+        return _unidirectional;
+    }
+
+    public void setUnidirectional(boolean unidirectional) {
+        _unidirectional = unidirectional;
+    }
+
+
+    // TODO need to add this
+    /**
+    public boolean isNewTransportAgent() {
+        AgentType type = getAgentType();
+
+        if (type != null) {
+            return type.isNewTransportType();
+        }
+
+        return false;
+    }
+    **/
 
     public AgentType getAgentType() {
         return _agentType;
