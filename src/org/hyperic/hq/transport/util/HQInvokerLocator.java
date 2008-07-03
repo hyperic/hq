@@ -36,13 +36,18 @@ import org.jboss.remoting.InvokerLocator;
  */
 public class HQInvokerLocator extends InvokerLocator {
     
+    /**
+     * The default value for the agent token when the agent token is not yet known.
+     */
+    public static final String UNKNOWN_AGENT_TOKEN = "UNKNOWN-AGENT-TOKEN";
+    
     private final String _agentToken;
     
-    private boolean _oneWay;
-    
-    private boolean _guaranteed;
-    
-    private AsynchronousInvoker _invoker;
+    private static final ThreadLocal THREADLOCAL_MESSAGE_DELIVERY_OPTIONS = new ThreadLocal() {
+        protected Object initialValue() {
+            return MessageDeliveryOptions.newSynchronousInstance();
+        }
+    };
     
     /**
      * Creates an instance.
@@ -54,6 +59,8 @@ public class HQInvokerLocator extends InvokerLocator {
      * @param parameters The invoker locator parameters or <code>null</code>.
      * @param agentToken The agent token.
      * @throws NullPointerException if the agent token is <code>null</code>.
+     * @throws IllegalArgumentException if the agent token is assigned the value 
+     *                                  {@link #UNKNOWN_AGENT_TOKEN}.
      */
     public HQInvokerLocator(String protocol, 
                             String host, 
@@ -67,16 +74,54 @@ public class HQInvokerLocator extends InvokerLocator {
             throw new NullPointerException("agent token is null");
         }
         
+        if (agentToken.equals(UNKNOWN_AGENT_TOKEN)) {
+            throw new IllegalArgumentException("illegal token name: "+UNKNOWN_AGENT_TOKEN);
+        }
+        
         _agentToken = agentToken;
     }
     
     /**
+     * Creates an instance where the agent token is not yet known.
+     *
+     * @param protocol The protocol.
+     * @param host The remote host.
+     * @param port The port on the remote host.
+     * @param path The invoker locator path or <code>null</code>.
+     * @param parameters The invoker locator parameters or <code>null</code>.
+     */
+    public HQInvokerLocator(String protocol, 
+                            String host, 
+                            int port, 
+                            String path, 
+                            Map parameters) {
+        super(protocol, host, port, path, parameters);
+        
+        _agentToken = UNKNOWN_AGENT_TOKEN;
+    }
+    
+    /**
+     * @return An invoker locator instance with the same connection info as this 
+     *         HQ invoker locator.
+     */
+    public InvokerLocator toInvokerLocator() {
+        return new InvokerLocator(this.getProtocol(), 
+                                  this.getHost(), 
+                                  this.getPort(), 
+                                  this.getPath(), 
+                                  this.getParameters());
+    }
+    
+    /**
      * Clone this instance of HQ invoker locator, setting the agent token 
-     * to a new value.
+     * to a new value. Note that the {@link MessageDeliveryOptions} are not 
+     * guaranteed to be passed to the cloned instance.
      * 
      * @param agentToken The new agent token value.
      * @return The cloned instance.
      * @throws NullPointerException if the agent token is <code>null</code>.
+     * @throws IllegalArgumentException if the agent token is assigned the value 
+     *                                  {@link #UNKNOWN_AGENT_TOKEN}.
      */
     public HQInvokerLocator cloneWithNewAgentToken(String agentToken) {
         Map parameters = null;
@@ -85,87 +130,53 @@ public class HQInvokerLocator extends InvokerLocator {
             parameters = new HashMap(this.getParameters());
         }
         
-        HQInvokerLocator locator = new HQInvokerLocator(this.getProtocol(), 
-                                                        this.getHost(), 
-                                                        this.getPort(), 
-                                                        this.getPath(), 
-                                                        parameters, 
-                                                        agentToken);
-        
-        locator._invoker = this._invoker;
-        locator._oneWay = this._oneWay;
-        locator._guaranteed = this._guaranteed;
-        
-        return locator;
+        return new HQInvokerLocator(this.getProtocol(), 
+                                    this.getHost(), 
+                                    this.getPort(), 
+                                    this.getPath(), 
+                                    parameters, 
+                                    agentToken);
     }
-    
-    /**
-     * Set the asynchronous invoker.
-     * 
-     * @param invoker The asynchronous invoker.
-     * @throws NullPointerException if the asychronous invoker is <code>null</code>.
-     */
-    public void setAsynchronousInvoker(AsynchronousInvoker invoker) {
-        if (invoker == null) {
-            throw new NullPointerException("async invoker is null");
-        }
         
-        _invoker = invoker;
-    }
-    
     /**
-     * @return The asynchronous invoker or <code>null</code>.
-     */
-    public AsynchronousInvoker getAsynchronousInvoker() {
-        return _invoker;
-    }
-    
-    /**
-     * @return The agent token.
+     * @return The agent token or {@link #UNKNOWN_AGENT_TOKEN} if the 
+     *         agent token is not yet known.
      */
     public String getAgentToken() {
         return _agentToken;
     }
     
     /**
-     * Set invocations as one-way meaning that the client invoker will 
-     * not block on the remote invocation. This also means the client 
-     * application should not expect a return value.
+     * @return <code>true</code> if the agent token is known; <code>false</code> otherwise.
      */
-    public void setOneWay() {
-        _oneWay = true;
+    public boolean isAgentTokenKnown() {
+        return !UNKNOWN_AGENT_TOKEN.equals(_agentToken);
     }
     
     /**
-     * @return <code>true</code> if the invocation is one-way.
-     */
-    public boolean isOneWay() {
-        return _oneWay;
-    }
-    
-    /**
-     * if invocations are already set as one-way, delivery may be specified 
-     * as guaranteed.
+     * Set the message delivery options on a thread local.
      * 
-     * @throws IllegalStateException if invocations are not already set as 
-     *                               {@link #setOneWay() one-way}.
+     * @param options The message delivery options.
+     * @throws NullPointerException if the message delivery options is <code>null</code>.
      */
-    public void setDeliveryGuaranteed() {
-        if (!isOneWay()) {
-            throw new IllegalStateException("guranteed delivery is only applicable " +
-            		                        "for one-way invocation");
+    public void setMessageDeliveryOptions(MessageDeliveryOptions options) {
+        if (options == null) {
+            throw new NullPointerException("message delivery options is null");
         }
         
-        _guaranteed = true;
+        THREADLOCAL_MESSAGE_DELIVERY_OPTIONS.set(options);
     }
     
     /**
-     * @return <code>true</code> if delivery is guaranteed.
+     * Retrieve the thread local message delivery options. By default returns 
+     * a synchronous message delivery options.
+     * 
+     * @return The message delivery options.
      */
-    public boolean isDeliveryGuaranteed() {
-        return _guaranteed;
+    public MessageDeliveryOptions getMessageDeliveryOptions() {
+        return (MessageDeliveryOptions)THREADLOCAL_MESSAGE_DELIVERY_OPTIONS.get();
     }
-    
+        
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
