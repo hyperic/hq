@@ -98,6 +98,7 @@ public class AgentStartupCallback {
     private void writeStartupState(int state) {
         if (_startupSock == null) {
             _log.debug("Agent startup callback is disabled");
+            return;
         }
         
         try {
