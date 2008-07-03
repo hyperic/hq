@@ -87,6 +87,9 @@
     <property name="DEFAULT_LOG_FILE"
               value="var/activemq.log"/>
 
+    <property name="VERSION_FILE"
+              value="lib/activemq-core-4.*.jar"/>
+
     <config include="jmx">
       <option name="process.query"
               description="Process Query"/>
@@ -225,5 +228,13 @@
 
     <!-- &sun-jvm-service; -->
 
+  </server>
+
+  <server name="ActiveMQ"
+          version="5.x"
+          include="4.0">
+
+    <property name="VERSION_FILE"
+              value="lib/activemq-core-5.*.jar"/>
   </server>
 </plugin>
