@@ -28,7 +28,10 @@ package org.hyperic.hq.product;
 import java.util.Properties;
 
 public class LogTrackPluginManager extends TrackEventPluginManager {
-    
+
+    public static final String DEFAULT_PLATFORM_PLUGIN =
+        "platform.log_track.default";
+
     public LogTrackPluginManager() {
         super();
     }

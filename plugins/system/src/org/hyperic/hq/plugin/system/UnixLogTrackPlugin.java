@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.system;
 
 import org.hyperic.hq.product.LogFileTailPlugin;
+import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -37,6 +38,9 @@ public class UnixLogTrackPlugin extends LogFileTailPlugin {
         super.configure(config);
         this.whoTracker = new WhoLogTrackPlugin(this);
         getManager().addRunnableTracker(this.whoTracker);
+        //XXX getManager().setDefaultPlatformPlugin(this)
+        final String prop = LogTrackPluginManager.DEFAULT_PLATFORM_PLUGIN;
+        getManager().getProperties().setProperty(prop, getName());
     }
 
     public void shutdown() throws PluginException {
