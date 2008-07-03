@@ -296,6 +296,9 @@ public class PostgreSQLServerDetector
                     name = getPlatformName() + " " +
                         SERVER_NAME + " " + version;
                 }
+
+                server.setName(name);
+                servers.add(server);
             }
         } else if (getTypeInfo().getVersion().equals(VERSION_83)) {
             if (version.indexOf(VERSION_83) != -1) {
