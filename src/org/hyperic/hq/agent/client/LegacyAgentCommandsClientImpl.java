@@ -39,14 +39,10 @@ import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.commands.AgentBundle_args;
 import org.hyperic.hq.agent.commands.AgentBundle_result;
 import org.hyperic.hq.agent.commands.AgentDie_args;
-import org.hyperic.hq.agent.commands.AgentDie_result;
 import org.hyperic.hq.agent.commands.AgentPing_args;
-import org.hyperic.hq.agent.commands.AgentPing_result;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.agent.commands.AgentRestart_args;
-import org.hyperic.hq.agent.commands.AgentRestart_result;
 import org.hyperic.hq.agent.commands.AgentUpgrade_args;
-import org.hyperic.hq.agent.commands.AgentUpgrade_result;
 import org.hyperic.util.math.MathUtil;
 
 /**
@@ -76,18 +72,12 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
         throws AgentRemoteException, AgentConnectionException 
     {
         AgentPing_args args = new AgentPing_args();
-        AgentPing_result result;
-        AgentRemoteValue cmdRes;
-        long sendTime, recvTime;
 
-        sendTime = System.currentTimeMillis();
-        cmdRes = this.agentConn.sendCommand(AgentCommandsAPI.command_ping,
-                                            this.verAPI.getVersion(), args);
-        recvTime = System.currentTimeMillis();
+        long sendTime = System.currentTimeMillis();
+        this.agentConn.sendCommand(AgentCommandsAPI.command_ping,
+                                   this.verAPI.getVersion(), args);
+        long recvTime = System.currentTimeMillis();
 
-        // We don't really do anything with this result object -- it's just
-        // here for future expansion.
-        result = new AgentPing_result(cmdRes);
         return recvTime - sendTime;
     }
 
@@ -98,15 +88,9 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
         throws AgentRemoteException, AgentConnectionException 
     {
         AgentRestart_args args = new AgentRestart_args();
-        AgentRestart_result result;
-        AgentRemoteValue cmdRes;
 
-        cmdRes = this.agentConn.sendCommand(AgentCommandsAPI.command_restart,
-                this.verAPI.getVersion(), args);
-
-        // We don't really do anything with this result object -- it's just
-        // here for future expansion.
-        result = new AgentRestart_result(cmdRes);
+        this.agentConn.sendCommand(AgentCommandsAPI.command_restart,
+                                   this.verAPI.getVersion(), args);
     }    
 
     /**
@@ -116,56 +100,9 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
         throws AgentRemoteException, AgentConnectionException 
     {
         AgentDie_args args = new AgentDie_args();
-        AgentDie_result result;
-        AgentRemoteValue cmdRes;
 
-        cmdRes = this.agentConn.sendCommand(AgentCommandsAPI.command_die,
-                                            this.verAPI.getVersion(), args);
-
-        result = new AgentDie_result(cmdRes);
-    }
-
-    private FileDataResult[] sendData(OutputStream outStream,
-                                      FileData[] destFiles,
-                                      InputStream[] streams)
-        throws IOException, AgentRemoteException
-    {
-        FileDataResult[] res = new FileDataResult[destFiles.length];
-        byte[] sendBuf = new byte[8192];
-
-        for(int i=0; i<destFiles.length; i++){
-            long startTime = System.currentTimeMillis();
-            long toSend = destFiles[i].getSize();
-            
-            while(toSend > 0){
-                int nToRead, nBytes;
-
-                if((nToRead = streams[i].available()) == 0){
-                    throw new AgentRemoteException("No available bytes to " +
-                                                   "read for '" + 
-                                                   destFiles[i].getDestFile() +
-                                                   "' - needed " + toSend +
-                                                   " more bytes to complete");
-                }
-                
-                nToRead = MathUtil.clamp(nToRead, 1, sendBuf.length);
-                nBytes  = streams[i].read(sendBuf, 0, nToRead);
-                if(nBytes == -1){
-                    throw new AgentRemoteException("Error reading from for '" +
-                                                   destFiles[i].getDestFile() +
-                                                   "' - read returned -1");
-                }
-
-                outStream.write(sendBuf, 0, nBytes);
-                toSend -= nBytes;
-            }
-
-            long sendTime = System.currentTimeMillis() - startTime;
-            res[i] = new FileDataResult(destFiles[i].getDestFile(),
-                                        destFiles[i].getSize(), sendTime);
-        }
-
-        return res;
+        this.agentConn.sendCommand(AgentCommandsAPI.command_die,
+                                   this.verAPI.getVersion(), args);
     }
 
     /**
@@ -194,8 +131,9 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
         sPair = this.agentConn.sendCommandHeaders(cmd, 
                                                   this.verAPI.getVersion(), 
                                                   args);
-        try {            
-            FileDataResult[] rs = this.sendData(sPair.getOutputStream(), destFiles, streams);
+        try {
+            FileStreamMultiplexer muxer = new FileStreamMultiplexer();
+            FileDataResult[] rs = muxer.sendData(sPair.getOutputStream(), destFiles, streams);
             
             // this is necessary so that remote exceptions are propagated 
             // back to the client
@@ -223,15 +161,9 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
             throws AgentRemoteException, AgentConnectionException {
         // set the arguments to the command
         AgentUpgrade_args args = new AgentUpgrade_args(tarFile, destination);
-        AgentUpgrade_result result;
-        AgentRemoteValue cmdRes;
 
-        cmdRes = this.agentConn.sendCommand(AgentCommandsAPI.command_upgrade,
-                this.verAPI.getVersion(), args);
-        
-        // We don't really do anything with this result object -- it's just
-        // here for future expansion.
-        result = new AgentUpgrade_result(cmdRes);
+        this.agentConn.sendCommand(AgentCommandsAPI.command_upgrade,
+                                   this.verAPI.getVersion(), args);
     }
     
     /**
