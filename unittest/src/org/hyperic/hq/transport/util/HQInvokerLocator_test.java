@@ -170,6 +170,7 @@ public class HQInvokerLocator_test extends TestCase {
         
         public void run() {
             _options = _locator.getMessageDeliveryOptions();
+            _latch.countDown();
         }
         
         public MessageDeliveryOptions getMessageDeliveryOptions() throws InterruptedException {
