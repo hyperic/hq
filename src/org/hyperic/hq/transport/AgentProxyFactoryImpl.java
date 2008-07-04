@@ -27,7 +27,6 @@ package org.hyperic.hq.transport;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.transport.util.AsynchronousInvoker;
-import org.hyperic.hq.transport.util.TransportUtils;
 import org.jboss.remoting.transporter.TransporterClient;
 
 /**
@@ -84,8 +83,6 @@ public class AgentProxyFactoryImpl implements AgentProxyFactory {
     public Object createAsyncService(Agent agent, 
                                      Class serviceInterface,
                                      boolean guaranteed) throws Exception {
-        TransportUtils.assertVoidReturnTypes(serviceInterface);
-        
         if (agent.isUnidirectional()) {
             throw new UnsupportedOperationException(
                 ".ORG instance does not support the unidirectional transport.");
