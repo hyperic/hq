@@ -122,13 +122,12 @@ public class AgentCommandsServer
         
         try {
             agentTransportLifecycle = agent.getAgentTransportLifecycle();
+            agentCommandsService = new AgentCommandsService(agent);
         } catch (Exception e) {
             throw new AgentStartException("Unable to get agent transport lifecycle: "+
                                             e.getMessage());
         }
-        
-        agentCommandsService = new AgentCommandsService(agent);
-        
+                
         log.info("Registering Agent Commands Service with Agent Transport");
         
         try {

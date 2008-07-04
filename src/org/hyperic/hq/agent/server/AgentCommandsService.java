@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +39,7 @@ import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
+import org.hyperic.hq.transport.util.RemoteInputStream;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.file.FileWriter;
 import org.hyperic.util.math.MathUtil;
@@ -51,11 +53,13 @@ public class AgentCommandsService implements AgentCommandsClient {
     private static final Log _log = LogFactory.getLog(AgentCommandsService.class);
 
     private final AgentDaemon _agent;
+    private final AgentTransportLifecycle _agentTransportLifecycle;
     
-    public AgentCommandsService(AgentDaemon agent) {
+    public AgentCommandsService(AgentDaemon agent) throws AgentRunningException {
         _agent = agent;
+        _agentTransportLifecycle = _agent.getAgentTransportLifecycle();
     }
-
+    
     /**
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#agentSendFileData(org.hyperic.hq.agent.FileData[], java.io.InputStream[])
      */
@@ -63,34 +67,59 @@ public class AgentCommandsService implements AgentCommandsClient {
                                               InputStream[] streams)
             throws AgentRemoteException {
         
-        // TODO need to support file transfer
-        throw new UnsupportedOperationException("file transfer not supported");    
+        // On the client side the streams representing each destination file 
+        // are written to a single stream which we see here.
+        if (streams.length != 1) {
+            throw new AgentRemoteException("streams array should only contain one input stream");
+        }
+        
+        RemoteInputStream inStream = (RemoteInputStream)streams[0];
+        
+        try {
+            inStream.setRemoteSourceInvokerLocator(
+                    _agentTransportLifecycle.getRemoteTransportLocator());
+        } catch (Exception e) {
+            throw new AgentRemoteException("failed to set the remote source invoker locator", e);
+        }
+        
+        readFilesFromStream(destFiles, inStream);
+
+        return new FileDataResult[0];
     }
     
-    void agentSendFileData(AgentReceiveFileData_args args,
-                           InputStream inStream) 
+    void agentSendFileData(AgentReceiveFileData_args args, InputStream inStream) 
         throws AgentRemoteException {
         
-        ArrayList fList = new ArrayList();
+        int numFiles = args.getNumFiles();
+        FileData[] destFiles = new FileData[numFiles];
+        
+        for (int i = 0; i < numFiles; i++) {
+            destFiles[i] = args.getFile(i);
+        }
+        
+        readFilesFromStream(destFiles, inStream);        
+    }
+    
+    private void readFilesFromStream(FileData[] destFiles, InputStream inStream) 
+        throws AgentRemoteException {
+
+        List fList = new ArrayList();
         String errorMessage = null;
-        int nFiles, i;
 
-        nFiles = args.getNumFiles();
+        int i;
 
-        for (i = 0; i < nFiles; i++) {
+        for (i = 0; i < destFiles.length; i++) {
             FileWriter writer;
-            FileData data;
-
-            data = args.getFile(i);
+            FileData data = destFiles[i];
 
             _log.info("Preparing to write " + data.getSize() +
                     " bytes to " + data.getDestFile() +
                     " (type=" + data.getWriteType() + ")");
             writer = new FileWriter(new File(data.getDestFile()), 
                     inStream, data.getSize());
-            
+
             writer.setVerifyMD5CheckSumOnWrite(data.getMD5CheckSum());
-            
+
             switch(data.getWriteType()){
             case FileData.WRITETYPE_CREATEONLY:
                 writer.setCreateOnly();
@@ -111,7 +140,7 @@ public class AgentCommandsService implements AgentCommandsClient {
 
 //      Now do the actual writing
         boolean checkSumFailed = false;
-        
+
         for (i = 0; i < fList.size(); i++) {
             FileWriter writer = (FileWriter)fList.get(i);
 
@@ -119,7 +148,7 @@ public class AgentCommandsService implements AgentCommandsClient {
                 _log.info("Writing to '" + 
                         writer.getDestFile().getAbsolutePath() + "'");
                 writer.write();
-                
+
                 try {
                     writer.verifyMD5CheckSum();                    
                 } catch (IOException e) {
@@ -145,11 +174,11 @@ public class AgentCommandsService implements AgentCommandsClient {
             if (checkSumFailed && j==i) {
                 continue;
             }
-            
-            FileData data = args.getFile(j);
+
+            FileData data = destFiles[j];
 
             _log.debug("Resynching stream:  Reading " + data.getSize() +" bytes");
-            
+
             try {
                 byteChomper(inStream, data.getSize());
             } catch(IOException exc){
@@ -157,7 +186,7 @@ public class AgentCommandsService implements AgentCommandsClient {
                         exc.getMessage());
             }
         }
-        
+
         if (errorMessage != null) {
 //          'i' is the last writer we tried to write.  Go from
 //          that, back to 0, rolling back 
@@ -185,8 +214,8 @@ public class AgentCommandsService implements AgentCommandsClient {
 
             _log.info("Successfully wrote: " + destFile);
         }
-            
-    }
+
+    }    
 
     /**
      * Read a certain # of bytes from a stream, throwing all the
