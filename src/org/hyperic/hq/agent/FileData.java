@@ -25,7 +25,12 @@
 
 package org.hyperic.hq.agent;
 
-public class FileData {
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
+public class FileData implements Externalizable {
     public static final int WRITETYPE_CREATEONLY        = 1;
     public static final int WRITETYPE_CREATEOROVERWRITE = 2;
     public static final int WRITETYPE_REWRITE           = 3;
@@ -34,8 +39,17 @@ public class FileData {
     private long   size;
     private int    writeType;
     private String md5sum;
+    
+    /**
+     * Default constructor for externalization only.
+     */
+    public FileData() {}
 
     public FileData(String destFile, long size, int writeType) {
+        if (destFile == null) {
+            throw new NullPointerException("destination file is null");
+        }
+        
         this.destFile  = destFile;
         this.size      = size;
         this.writeType = writeType;     
@@ -79,6 +93,20 @@ public class FileData {
 
     public int getWriteType(){
         return this.writeType;
+    }
+
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        this.destFile = in.readUTF();
+        this.size = in.readLong();
+        this.writeType = in.readInt();
+        this.md5sum = in.readUTF();
+    }
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(this.destFile);
+        out.writeLong(this.size);
+        out.writeInt(this.writeType);
+        out.writeUTF(this.md5sum);
     }
         
 }
