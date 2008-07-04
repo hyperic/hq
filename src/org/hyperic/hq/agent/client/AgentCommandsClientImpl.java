@@ -25,7 +25,9 @@
 
 package org.hyperic.hq.agent.client;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
@@ -33,6 +35,8 @@ import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.transport.AgentProxyFactory;
+import org.hyperic.hq.transport.util.InputStreamServiceImpl;
+import org.hyperic.hq.transport.util.RemoteInputStream;
 
 /**
  * The Agent Commands client that uses the new transport.
@@ -70,7 +74,7 @@ public class AgentCommandsClientImpl
         agent.setUnidirectional(unidirectional);
         return agent;
     }
-
+    
     /**
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#agentSendFileData(org.hyperic.hq.agent.FileData[], java.io.InputStream[])
      */
@@ -80,9 +84,96 @@ public class AgentCommandsClientImpl
         
         assertOnlyPingsAllowedForAgentRegistration();
         
-        // TODO need to support file transfer
-        throw new UnsupportedOperationException("file transfer not supported");
+        if(destFiles.length != streams.length){
+            throw new IllegalArgumentException("Streams and dest files " +
+                                               "arrays must be the same " +
+                                               "length");
+        }
+        
+        InputStreamServiceImpl streamService = InputStreamServiceImpl.getInstance();
+        
+        RemoteInputStream remoteIs = streamService.getRemoteStream();
+        
+        AgentCommandsClient proxy = null;
+        
+        try {
+            // must be an async proxy so the current thread is not blocked from 
+            // sending the file stream bytes to the remote client
+            proxy = (AgentCommandsClient)getAsynchronousProxy(AgentCommandsClient.class, false);
+            
+            proxy.agentSendFileData(destFiles, new InputStream[]{remoteIs});        
+        } finally {
+            safeDestroyService(proxy);
+        }
+        
+        OutputStream outStream = null;
+        
+        try {
+            outStream = new OutputStreamWrapper(streamService, remoteIs.getStreamId());
+            
+            FileStreamMultiplexer muxer = new FileStreamMultiplexer(32*1024);
+            
+            return muxer.sendData(outStream, destFiles, streams);
+        } catch(IOException exc){
+            throw new AgentRemoteException("IO Exception while sending " +
+                                           "file data: " + exc.getMessage());
+        } finally {
+            if (outStream != null) {
+                try {
+                    outStream.close();
+                } catch (IOException e) {
+                 // swallow
+                }                 
+            }
+        }
     }
+    
+    private static class OutputStreamWrapper extends OutputStream {
+        
+        private final InputStreamServiceImpl _streamService;
+        private final String _streamId;
+        
+        public OutputStreamWrapper(InputStreamServiceImpl streamService, String streamId) {
+            _streamService = streamService;
+            _streamId = streamId;
+        }
+        
+        public void write(byte b[], int off, int len) throws IOException {
+            byte[] buffer;
+            
+            if (off == 0 && len == b.length) {
+                buffer = b;
+            } else {
+                buffer = new byte[len-off];
+                System.arraycopy(b, off, buffer, 0, buffer.length);
+            }
+            
+            try {
+                _streamService.writeBufferToRemoteStream(_streamId, buffer);
+            } catch (InterruptedException e) {
+                throw new IOException("buffer write interrupted");
+            }
+        }
+
+        public void write(int b) throws IOException {
+            throw new UnsupportedOperationException("single byte writes not supported");
+        }
+        
+        public void close() throws IOException {
+            boolean eosSignaled = false;
+            int i = 0;
+            
+            while (!eosSignaled && i++ < 10) {
+                try {
+                    _streamService.signalEndOfRemoteStream(_streamId);
+                    eosSignaled = true;
+                } catch (InterruptedException e) {
+                    
+                }                
+            }
+        }
+        
+    }    
     
     /**
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#die()
