@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.agent.server;
 
+import org.jboss.remoting.InvokerLocator;
+
 /**
  * Implementors manage the new agent transport lifecycle.
  */
@@ -56,5 +58,11 @@ public interface AgentTransportLifecycle extends AgentNotificationHandler {
      *                                  interface.
      */
     void registerService(Class serviceInterface, Object serviceImpl);
+    
+    /**
+     * @return The invoker locator to the remote (server-side) transport or 
+     *         <code>null</code> if the agent transport has not been started.
+     */
+    InvokerLocator getRemoteTransportLocator();
 
 }
