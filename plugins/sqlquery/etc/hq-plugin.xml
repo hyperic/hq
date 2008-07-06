@@ -79,14 +79,8 @@
     <config name="sql" type="global">
       <option name="jdbcDriver" type="enum"
               description="JDBC Driver Class Name"
-              default="org.postgresql.Driver">
-        <include name="org.postgresql.Driver"/>
-        <include name="oracle.jdbc.driver.OracleDriver"/>
-        <include name="com.microsoft.jdbc.sqlserver.SQLServerDriver"/>
-        <include name="com.mysql.jdbc.Driver"/>
-        <include name="com.ibm.db2.jcc.DB2Driver"/>
-        <include name="com.sybase.jdbc2.jdbc.SybDriver"/>
-      </option>
+              default="org.postgresql.Driver"/>
+      <!-- jdbcUrl option overridden in SQLMeasurementPlugin -->
       <option name="jdbcUrl"
               description="JDBC Connection URL"/>
               default="jdbc:postgresql://localhost:9432/hqdb"/>
@@ -103,40 +97,5 @@
     </config>
 
   </server>
-
-  <help name="SQL Query">
-  <![CDATA[
-  <p>
-  If the <b>Oracle</b> driver is selected, the JDBC URL syntax is: 
-  <i>jdbc:oracle:thin:localhost:1521:TEST</i>
-  </p>
-
-  <p>
-  If the <b>MySQL</b> driver is selected, the JDBC URL syntax is: 
-  <i>jdbc:mysql://localhost/test</i>
-  </p>
-
-  <p>
-  If the <b>PostgreSQL</b> driver is selected, the JDBC URL syntax is: 
-  <i>jdbc:postgresql://localhost:5432/test</i>
-  </p>
-
-  <p>
-  If the <b>MS SQL 2000</b> driver is selected, the JDBC URL syntax is: 
-  <i>jdbc:microsoft:sqlserver://localhost:1433;databasename=test</i>
-  </p> 
-
-  <p>
-  If the <b>DB2</b> driver is selected, the JDBC URL syntax is: 
-  <i>jdbc:db2://localhost:50000/test</i>
-  </p> 
-
-  <p>
-  If the <b>Sybase</b> driver is selected, the JDBC URL syntax is: 
-  <i>jdbc:sybase:Tds:localhost:4100/test</i>
-  </p>
-  ]]>
-  </help>
-
 </plugin>
 
