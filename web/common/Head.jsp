@@ -35,11 +35,10 @@
 <!-- <link rel="stylesheet" href="<html:rewrite page="/js/dojo/1.1/dijit/themes/dijit.css"/>" type="text/css"/> -->
 <link rel="stylesheet" href="<html:rewrite page="/js/dojo/1.1/dijit/themes/tundra/tundra.css"/>" type="text/css"/>
 <script type="text/javascript">
-    var djConfig = {parseOnLoad: true, isDebug : false, locale : "<%=request.getLocale().toString().substring(0,2)%>"};
     var imagePath = "<html:rewrite page="/images/"/>";
+    var djConfig = {parseOnLoad: true, isDebug : true, locale : "<%=request.getLocale().toString().substring(0,2)%>"};
 </script>
-<!-- FOR DEBUG ONLY -->
-<script src="<html:rewrite page='/js/dojo/1.1/dojo/dojo.js.uncompressed.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/js/dojo/0.4.3/dojo.js.uncompressed.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/diagram.js'/>" type="text/javascript"></script>
