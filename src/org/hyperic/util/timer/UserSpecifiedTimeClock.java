@@ -23,39 +23,37 @@
  * USA.
  */
 
-package org.hyperic.hq.transport;
-
-import org.jboss.remoting.InvokerLocator;
+package org.hyperic.util.timer;
 
 /**
- * The poller client for the unidirectional transport.
+ * A clock that returns the value set by the user. This implementation is 
+ * particularly useful for unit testing frameworks.
  */
-public interface PollerClient {
-
-    /**
-     * Start the poller client.
-     */
-    void start();
-
-    /**
-     * Stop the poller client. This operation will block until the polling 
-     * thread dies or 30 seconds.
-     * 
-     * @throws InterruptedException 
-     */
-    void stop() throws InterruptedException;
-
-    /**
-     * Update the agent token uniquely identifying the agent.
-     * 
-     * @param agentToken The agent token.
-     */
-    void updateAgentToken(String agentToken);
+public class UserSpecifiedTimeClock implements Clock {
+    
+    private long _currentTimeMillis;
     
     /**
-     * @return The invoker locator for the remote end point to which this poller 
-     *         client is connected (the Poller Service end point).
+     * Creates an instance that defaults to the current system time.
      */
-    InvokerLocator getRemoteEndpointLocator();
+    public UserSpecifiedTimeClock() {
+        setCurrentTime(System.currentTimeMillis());
+    }
+    
+    /**
+     * Set the current time.
+     * 
+     * @param currentTimeMillis The current time in milliseconds.
+     */
+    public void setCurrentTime(long currentTimeMillis) {
+        _currentTimeMillis = currentTimeMillis;
+    }
+
+    /**
+     * @see org.hyperic.util.timer.Clock#currentTimeMillis()
+     */
+    public long currentTimeMillis() {
+        return _currentTimeMillis;
+    }
 
 }

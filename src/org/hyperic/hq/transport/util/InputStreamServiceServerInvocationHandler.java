@@ -23,39 +23,20 @@
  * USA.
  */
 
-package org.hyperic.hq.transport;
+package org.hyperic.hq.transport.util;
 
-import org.jboss.remoting.InvokerLocator;
+import org.jboss.remoting.transporter.TransporterHandler;
 
 /**
- * The poller client for the unidirectional transport.
+ * The server invocation handler that dispatches calls to the {@link InputStreamServiceImpl}.
  */
-public interface PollerClient {
+public class InputStreamServiceServerInvocationHandler extends TransporterHandler {
 
     /**
-     * Start the poller client.
+     * Default constructor required for configuration through the connector mbean.
      */
-    void start();
-
-    /**
-     * Stop the poller client. This operation will block until the polling 
-     * thread dies or 30 seconds.
-     * 
-     * @throws InterruptedException 
-     */
-    void stop() throws InterruptedException;
-
-    /**
-     * Update the agent token uniquely identifying the agent.
-     * 
-     * @param agentToken The agent token.
-     */
-    void updateAgentToken(String agentToken);
-    
-    /**
-     * @return The invoker locator for the remote end point to which this poller 
-     *         client is connected (the Poller Service end point).
-     */
-    InvokerLocator getRemoteEndpointLocator();
+    public InputStreamServiceServerInvocationHandler() {
+        super(InputStreamServiceImpl.getInstance());        
+    }
 
 }

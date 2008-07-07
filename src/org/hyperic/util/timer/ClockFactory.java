@@ -23,39 +23,35 @@
  * USA.
  */
 
-package org.hyperic.hq.transport;
-
-import org.jboss.remoting.InvokerLocator;
+package org.hyperic.util.timer;
 
 /**
- * The poller client for the unidirectional transport.
+ * A singleton factory class that returns {@link Clock} instances for 
+ * keeping time.
  */
-public interface PollerClient {
-
-    /**
-     * Start the poller client.
-     */
-    void start();
-
-    /**
-     * Stop the poller client. This operation will block until the polling 
-     * thread dies or 30 seconds.
-     * 
-     * @throws InterruptedException 
-     */
-    void stop() throws InterruptedException;
-
-    /**
-     * Update the agent token uniquely identifying the agent.
-     * 
-     * @param agentToken The agent token.
-     */
-    void updateAgentToken(String agentToken);
+public class ClockFactory {
+    
+    private static final ClockFactory INSTANCE = new ClockFactory();
     
     /**
-     * @return The invoker locator for the remote end point to which this poller 
-     *         client is connected (the Poller Service end point).
+     * Singletons should have a private constructor.
      */
-    InvokerLocator getRemoteEndpointLocator();
+    private ClockFactory() {
+    }
+    
+    /**
+     * @return The clock factory instance.
+     */
+    public static ClockFactory getInstance() {
+        return INSTANCE;
+    }
+    
+    /**
+     * @return A {@link Clock} for keeping time.
+     */
+    public Clock getClock() {
+        return SystemTimeClock.getInstance();
+    }
+    
 
 }

@@ -23,39 +23,26 @@
  * USA.
  */
 
-package org.hyperic.hq.transport;
+package org.hyperic.hq.transport.util;
 
-import org.jboss.remoting.InvokerLocator;
+import java.io.IOException;
+
+
 
 /**
- * The poller client for the unidirectional transport.
+ * The service hosted on the remote source that a {@link RemoteInputStream} 
+ * uses to refill its buffer.
  */
-public interface PollerClient {
-
-    /**
-     * Start the poller client.
-     */
-    void start();
-
-    /**
-     * Stop the poller client. This operation will block until the polling 
-     * thread dies or 30 seconds.
-     * 
-     * @throws InterruptedException 
-     */
-    void stop() throws InterruptedException;
-
-    /**
-     * Update the agent token uniquely identifying the agent.
-     * 
-     * @param agentToken The agent token.
-     */
-    void updateAgentToken(String agentToken);
+public interface InputStreamService {
     
     /**
-     * @return The invoker locator for the remote end point to which this poller 
-     *         client is connected (the Poller Service end point).
+     * Retrieve the next buffer of data for the {@link RemoteInputStream}
+     * 
+     * @param streamId The remote input stream id.
+     * @return The buffer of data.
+     * @throws IOException if there is no remote stream registered for the given stream id 
+     *                     or if there is no buffered data available to be read.
      */
-    InvokerLocator getRemoteEndpointLocator();
-
+    StreamBuffer getNextBuffer(String streamId) throws IOException;
+        
 }

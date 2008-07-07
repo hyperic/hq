@@ -46,6 +46,8 @@ public class AgentTransport {
     
     private final boolean _unidirectional;
     
+    private final InvokerLocator _remoteEndpointLocator;
+    
     private boolean _stopped;
     
     
@@ -77,7 +79,7 @@ public class AgentTransport {
         
         _unidirectional = unidirectional;
         
-        InvokerLocator invokerLocator;
+        InvokerLocator remotingServerInvokerLocator;
         
         if (_unidirectional) {
             _pollerClient = createPollerClient(serverTransportAddr, 
@@ -88,14 +90,26 @@ public class AgentTransport {
                                                asyncThreadPoolSize);
             // for a unidirectional agent - we can use a local invoker when registering 
             // services - since the poller client is in the agent's vm
-            invokerLocator = getLocalInvokerLocator();
+            remotingServerInvokerLocator = getLocalInvokerLocator();
+            _remoteEndpointLocator = _pollerClient.getRemoteEndpointLocator();
         } else {
-            // TODO - need to specify the invoker locator for bidirectional
+            // TODO - need to specify the invoker locator for bidirectional 
+            // (both remoting server invoker locator and remote end point invoker locator)
+            remotingServerInvokerLocator = null;
+            _remoteEndpointLocator = null;
             throw new UnsupportedOperationException("bidirectional not supported yet");
         }
         
-        _server = TransporterServer.createTransporterServer(invokerLocator, 
-                                                    new BootStrapService());
+        _server = TransporterServer.createTransporterServer(remotingServerInvokerLocator, 
+                                                            new BootStrapService());
+    }
+    
+    /**
+     * @return The invoker locator for the remote end point to which this 
+     *         transport is connected.
+     */
+    public InvokerLocator getRemoteEndpointLocator() {
+        return _remoteEndpointLocator;
     }
     
     /**
