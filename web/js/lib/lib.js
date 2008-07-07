@@ -15,10 +15,10 @@ hyperic.URLS = {}; hyperic.widget = {}; hyperic.utils = {}; hyperic.html = {}; h
 
 hyperic.html = {
     show : function(/*String*/ node){
-        dojo.style(node, 'display', '');
+        dojo.html.setStyle(node, 'display', '');
     },
     hide : function(/*String*/ node){
-        dojo.style(node, 'display', 'none');
+        dojo.html.setStyle(node, 'display', 'none');
     }
 };
 
@@ -55,7 +55,7 @@ hyperic.utils.key = {
             evt.stopPropagation();            
         }
         if (evt.keyCode == 13) {
-            dojo.publish('enter', [evt]);
+            dojo.event.publish('enter', [evt]);
         }
     },
     registerListener : function(/*DOMNode*/node, /*fp*/handler){
@@ -117,14 +117,15 @@ hyperic.utils.addKeyListener = function(/*Node*/node, /*Object*/ keyComb, /*Stri
             e.preventDefault();
             e.stopPropagation();
         }
-        dojo.publish(this.topic, [e]);
+        dojo.event.publish(this.topic, [e]);
     };
     this.cancel = function(){
         this.canceled = true;
-        dojo.disconnect(node, "onkeyup", this, this.keyListener);
+        dojo.event.disconnect(node, "onkeyup", this, this.keyListener);
         delete this;
     };
-    dojo.connect(node, "onkeyup", this, this.keyListener);
+    //dojo.connect(node, "onkeyup", this, this.keyListener);
+    dojo.event.connect(node, "onkeyup", this, this.keyListener);
     return this;
 };
 
@@ -215,6 +216,8 @@ hyperic.utils.passwd = {
 };
 
 hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Object*/ keyCode){
+    dojo.require('dojo.io');
+    dojo.
     this.opened     = false;
     this.minStrLen  = minStrLenth; 
     this.resourceURL= urls.resource;
@@ -238,13 +241,17 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
         var string = e.target.value;
         if(this.searchBox.value.length >= this.minStrLen){
             this.searchStarted();
-            dojo.xhrGet( {
+            dojo.io.bind( {
                 url: this.searchURL+'?q='+string, 
+                method: "post",
                 handleAs: "json",
                 timeout: 5000, 
-                load: loadSearchData,
-                error: this.error
+                handle: loadSearchData,
+                error: this.error,
+                mimetype:'text/json'
             });
+            
+           
         }else{
             this.searchEnded();
             this.nodeSearchResults.style.display = 'none';
@@ -261,14 +268,16 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
     this.toggleSearchBox = function() {
         if(this.opened) {
             this.nodeSearchResults.style.display = 'none';
-            dojo.fx.wipeOut({node:this.searchContainer, duration: 400}).play();
+            dojo.lfx.html.wipeOut([this.searchContainer], 400).play();
+            //dojo.fx.wipeOut({node:this.searchContainer, duration: 400}).play();
             this.opened = false;
             this.searchEnded();
             this.searchBox.value = '';
         }
         else {
             window.scrollTo(0,0);
-            dojo.fx.wipeIn({node:this.searchContainer, duration: 400}).play();
+            dojo.lfx.html.wipeIn([this.searchContainer], 400).play();
+            //dojo.fx.wipeIn({node:this.searchContainer, duration: 400}).play();
             this.opened = true;
             this.searchBox.focus();
         }
@@ -462,8 +471,8 @@ hyperic.widget.Grid = function(/*DOMNode*/ containerNode, /*String*/ tableId, /*
     };
     this._init = function(){
         //Build grid
-        dojo.require("dojox.grid.Grid");
-        this.dojoGrid = new dojox.grid.Grid({
+        dojo.require("dojox11.grid.Grid");
+        this.dojoGrid = new dojox11.grid.Grid({
             "id": tableId,
             "model": model,
             "structure": layout
@@ -571,6 +580,20 @@ function init_reporting(){
 
 /* OLD REPORTING */
 
+dojo.require("dojo.widget.DropdownDatePicker"); 
+dojo.require("dojo.widget.HtmlWidget");
+dojo.require("dojo.widget.ValidationTextbox");
+dojo.require("dojo.io");
+dojo.require("dojo.json");
+dojo.require("dojo.event");
+
+dojo.event.connect(window, "onload", function(){
+    var reportList = dojo.byId("reports");
+    reportList.selectedIndex = 0;
+    selectedChanged(reportList);
+});
+
+var hyperic = {};
 hyperic.hq = {};
 hyperic.hq.reporting = {};
 hyperic.hq.dom = {};
@@ -613,9 +636,9 @@ hyperic.hq.dom.createDatePicker = function(datePickerName){
     hyperic.hq.dom.datePickerProps.name = datePickerName;
     hyperic.hq.dom.id = datePickerName;
     var parentNode =  document.createElement('div');
-    parentNode.id = hyperic.utils.getUniqueId();
+    parentNode.id = dojo.dom.getUniqueId();
     dojo.byId("reportOptions").appendChild(parentNode); 
-    var calendarWidget = new dijit.form.DateTextBox(hyperic.hq.dom.datePickerProps, parentNode);
+    var calendarWidget = dojo.widget.createWidget("dropdowndatepicker", hyperic.hq.dom.datePickerProps, parentNode);
     calendarWidget.inputNode.id = calendarWidget.widgetId;
     hyperic.hq.reporting.manager.currentReportOptions.push(calendarWidget);
 };
@@ -624,9 +647,9 @@ hyperic.hq.dom.createTextBox = function(textboxName){
     hyperic.hq.dom.validationTextboxProps.label = textboxName;
     hyperic.hq.dom.validationTextboxProps.name = textboxName;
     var parentNode =  document.createElement('div');
-    parentNode.id = hyperic.utils.getUniqueId();
+    parentNode.id = dojo.dom.getUniqueId();
     dojo.byId("reportOptions").appendChild(parentNode); 
-    var validationWidget = new dijit.form.ValidationTextbox(hyperic.hq.dom.validationTextboxProps, parentNode);
+    var validationWidget = dojo.widget.createWidget("ValidationTextbox", hyperic.hq.dom.validationTextboxProps, parentNode);
     hyperic.hq.reporting.manager.currentReportOptions.push(validationWidget);
     return validationWidget;
 };
@@ -649,7 +672,7 @@ hyperic.hq.dom.createSelectBox = function(selectboxName, optionsArray){
     }
     dojo.byId("reportOptions").appendChild(select);
     hyperic.hq.dom.selectboxProps.label = selectboxName;
-    var selectWidget = dijit.form.ComboBox(hyperic.hq.dom.selectboxProps, select);
+    var selectWidget = dojo.widget.createWidget("ComboBox", hyperic.hq.dom.selectboxProps, select);
     selectWidget.textInputNode.id = selectWidget.widgetId;
     selectWidget.dataProvider.searchLimit = optionsArray.length + 1;
     selectWidget.domNode = selectWidget.textInputNode;
@@ -679,7 +702,7 @@ hyperic.hq.reporting.manager = {
                 obj += '"' + this.currentReportOptions[i].name + '":"' +  this.currentReportOptions[i].getDate().getTime() +'",'; 
             }else if(this.currentReportOptions[i].getState){
                 var value = this.currentReportOptions[i].comboBoxSelectionValue.value;
-                if(dojo.ie){
+                if(dojo.render.html.ie){
                     obj += '"' + this.currentReportOptions[i].label + '":"' + value +'",';
                 }else{
                     obj += '"' + this.currentReportOptions[i].label + '":"' + value +'",';
@@ -768,18 +791,18 @@ function selectedChanged(selectNode){
 }
 
 function getReportOptions(reportName){
-    dojo.xhrGet({
-        url: "/reporting/ReportCenter.do?reportName=" + reportName,
-        handleAs: "json",
-        load: function(data, ioArgs){
-            if(data){ createInputFieldsFromJSON(data) } 
-        },
-        error: function(type, error){ alert(error) },
-    });
+    var URL = "/reporting/ReportCenter.do?reportName=" + reportName;
+    var request = new dojo.io.Request(URL, "text/plain", "XMLHTTPTransport");
+    request.load = function(type, data, evt){
+        if(data){ createInputFieldsFromJSON(data); } 
+    };
+    request.error = function(type, error){};
+    dojo.io.bind(request);
 }
 
-function createInputFieldsFromJSON(descriptor){
+function createInputFieldsFromJSON(jsonArray){
     resetReportOptions();
+    var descriptor = dojo.json.evalJson(jsonArray);
     //for(var key in descriptor){
     var i = 0;
     while(i < descriptor.length){
@@ -799,187 +822,7 @@ function createInputFieldsFromJSON(descriptor){
     }
 }
 
-/* OLD SYSTEMS DOWN */
 
-var selectedItem;
-var currentCountFilter;
-var counter = 0;
-var url = "";
-var plugin={};plugin.accordion={};plugin.ajax={};
-var updateKWArgs = {};
-
-function getUniqueId(){
-    return "unique_"+counter;
-}
-
-plugin.ajax.getData = function(data, args) {
-    var unique = null;
-    if (data) {
-        if (data.length == 0) {
-            document.getElementById('resourceTree').innerHTML = '';
-            dojo.publish("XHRComplete", ["NO_DATA_RETURNED"]);
-        }else{
-            dojo.publish("XHRComplete", ["DATA_RETURNED"]);
-            var domTree = document.getElementById('resourceTree');
-            var tree = "";
-            for (var x = 0; x < data.length; x++) {
-                var parent = data[x]['parent'];
-                var children = data[x]['children'];
-                var innerChildren = "";
-                var markExpanded = false;
-                for (var i = 0; i < children.length; i++) {
-                    if(selectedItem){
-                        if(typeof(selectedItem) == 'string' && selectedItem == children[i]['id']){
-                            unique = getUniqueId();
-                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
-                            markExpanded = true;
-                        }else if(typeof(selectedItem) == 'object' && selectedItem.getAttribute('nodeid') == children[i]['id']){
-                            unique = getUniqueId();
-                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
-                            markExpanded = true;
-                        } else {
-                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
-                        }
-                    }else{
-                        innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
-                    }
-                }
-                if (selectedItem && typeof(selectedItem) == "string" && data[x]['id'] == selectedItem) {
-                     unique = getUniqueId();
-                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded, unique);
-                } else if (selectedItem && typeof(selectedItem) == "object" && data[x]['id'] == selectedItem.getAttribute('nodeid')) {
-                     unique = getUniqueId();
-                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded, unique);
-                } else {
-                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded);
-                }
-                
-            }
-            domTree.innerHTML = tree;
-            if(unique) {
-                plugin.accordion.setSelected(dojo.byId(unique));
-            }
-        }
-    }
-    if(unique != null)
-        selectedItem = dojo.byId(unique);
-}
-
-plugin.accordion.createParent = function(name, id, count, innerChildren, markExpanded, unique) {
-    var expandStyle = markExpanded?"collapse":"expand";
-    var ret;
-    if (unique) {
-    ret = '<div class="topCat" id="'+ unique + '" onclick="plugin.accordion.disableSelection(this);plugin.accordion.swapSelected(this);" nodeid="'
-              + id + '"><div class="' + expandStyle  + '" style="width:22px;height:18px;display:inline;" onclick="plugin.accordion' 
-              + '.swapVis(this);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div style="display:inline;position:relative;">'
-              + name + " ("+count+")</div></div>"  + '<div class="resourcetypelist"';
-    } else {
-    ret = '<div class="topCat" onclick="plugin.accordion.disableSelection(this);plugin.accordion.swapSelected(this);" nodeid="'
-              + id + '"><div class="' + expandStyle  + '" style="width:22px;height:18px;display:inline;" onclick="plugin.accordion' 
-              + '.swapVis(this);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div style="display:inline;position:relative;">'
-              + name + " ("+count+")</div></div>"  + '<div class="resourcetypelist"';
-    }
-    
-    if(markExpanded) {
-        ret += '>' ;
-    } else {
-        ret += 'style="display:none">' ;
-    }
-    ret += innerChildren;
-    ret += "</div>";
-    return ret;
-};
-
-plugin.accordion.createChild = function(name, id, count, unique) {
-    if(unique) {
-        return '<div class="listItem" onclick="plugin.accordion.swapSelected(this);plugin.accordion.itemClicked(this);" id="' + unique + '" nodeid="' + id + '">' + name + ' ('+count+')</div>';
-    } else
-        return '<div class="listItem" onclick="plugin.accordion.swapSelected(this);plugin.accordion.itemClicked(this);" nodeid="' + id + '">' + name + ' ('+count+')</div>';
-};
-
-plugin.ajax.bindMixin = {
-   load: plugin.ajax.getData,
-   handleAs: "json-comment-filtered"
-};
-
-plugin.ajax.bind = function (url){
-   plugin.ajax.bindMixin.url = url;
-   dojo.xhrPost(plugin.ajax.bindMixin);
-}
-
-
-plugin.accordion.updateCallback = function(name){
-    return updateKWArgs;
-}
-
-plugin.accordion.itemClicked = function(item) {
-    updateKWArgs.typeId = item.getAttribute("nodeid");
-}
-
-plugin.accordion.swapVis = function(elem) {
-    plugin.accordion.disableSelection(elem);
-    var sib = elem.parentNode.nextSibling;
-    if (dojo.style(sib,"display") == 'none') {
-        dojo.style(sib,"display", "block");
-        elem.className="collapse";
-    } else {
-        sib.style.display = 'none';
-        elem.className="expand";
-    }
-    //plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
-}
-
-plugin.accordion.swapSelected = function(elem) {
-    plugin.accordion.disableSelection(elem);
-    if (selectedItem && typeof(selectedItem) == 'object') {
-        selectedItem.style.padding = '3px 0px 3px 0px';
-        selectedItem.style.border = '';
-        selectedItem.style.background = '';
-    }
-    selectedItem = elem;
-    dojo.cookie('selecteditemid', elem.getAttribute('nodeid'));
-    plugin.accordion.setSelected(selectedItem);
-    plugin.accordion.itemClicked(elem);
-    plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
-}
-
-plugin.accordion.setSelected = function(elem) {
-    elem.style.padding = '3px 0px 3px 0px';
-    elem.style.border = '1px solid #dddddd';
-    elem.style.background = '#88BDEE none repeat scroll 0%';
-}
-
-plugin.accordion.disableSelection = function(element) {
-    element.onselectstart = function() {
-        return false;
-    };
-    element.unselectable = "on";
-    element.style.MozUserSelect = "none";
-}
-
-plugin.accordion.openAll = function() {
-    var tree = document.getElementById('resourceTree');
-    var x = tree.getElementsByTagName('div');
-    for (var i = 0; i < x.length; i++) {
-        if (x[i].className == 'resourcetypelist') {
-            x[i].style.display = '';
-        } else if (x[i].className == 'expand') {
-            x[i].className = 'collapse';
-        }
-    }
-}
-
-plugin.accordion.closeAll = function() {
-    var tree = document.getElementById('resourceTree');
-    var x = tree.getElementsByTagName('div');
-    for (var i = 0; i < x.length; i++) {
-        if (x[i].className == 'resourcetypelist') {
-            x[i].style.display = 'none';
-        } else if (x[i].className == 'collapse') {
-            x[i].className = 'expand';
-        }
-    }
-}
 
 /**
  * @deprecated used only for the struts header
