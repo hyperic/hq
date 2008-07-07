@@ -58,8 +58,7 @@ dojo.addOnLoad( function(){
 });
 </script>
 
-<div id="alertcenter">
-<div dojoType="dijit.layout.TabContainer" id="tabs" 
+<div dojoType="dijit.layout.TabContainer" id="mainTabContainer" 
      style="width: 100%; height:500px;">
   <div dojoType="dijit.layout.ContentPane" title="Alerts">
     <div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">
@@ -70,9 +69,8 @@ dojo.addOnLoad( function(){
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.Show}:</strong></span>
               <div>
-              <input type="radio" id="notFixed" name="show" value="notfixed" onchange="refreshAlertTables()">${l.NotFixed}
-              <input type="radio" id="escOnly" name="show" value="inescalation" onchange="refreshAlertTables()">${l.InEscalation}
-              <input type="radio" id="all" name="show" value="all" checked="checked" onchange="refreshAlertTables()">${l.All}
+              <input type="radio" id="escOnly" name="inEscalation" value="true" onchange="refreshAlertTables()">${l.InEscalation}
+              <input type="radio" id="all" name="inEscalation" value="false" checked="checked" onchange="refreshAlertTables()">${l.All}
               </div>          
             </div>
 
@@ -91,42 +89,32 @@ dojo.addOnLoad( function(){
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.MinPriority}</strong></span>
               <div><%= selectList(severities, 
-     	                     [id:'alertSevSelect',
-     	                      onchange:'refreshAlertTables();'], null) %>
-     	      </div>
+                             [id:'alertSevSelect',
+                              onchange:'refreshAlertTables();'], null) %>
+              </div>
             </div>          
 
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.InTheLast}</strong></span>
-       	      <div><%= selectList(lastDays, 
-     	                     [id:'alertTimeSelect',
-     	                      onchange:'refreshAlertTables();'], null) %>
-     	                      
-     	      </div>
-            </div>
-            <div class="fieldSetStacked" style="margin-bottom:8px;">
-              <span><strong>${l.GroupFilter}</strong></span>
-       	      <div><%= selectList(groups, 
-     	                     [id:'alertGroupSelect',
-     	                      onchange:'refreshAlertTables();']) %>
-     	                      
-     	      </div>
-            </div>
+              <div><%= selectList(lastDays, 
+                             [id:'alertTimeSelect',
+                              onchange:'refreshAlertTables();'], null) %>
+                              
+              </div>
+            </div>          
             </div>
         </div>
       </div>
       <div style="float:right;width:78%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" id="alertsCont">
-        <div id="alertsTable" style="">
+        <div id="alertsTable" style="display:none;">
           <%= dojoTable(id:'Alerts', title:l.ClassicAlertsTable,
                         refresh:60, url:urlFor(action:'data'),
-                        schema:alertSchema, numRows:15,
-                        inTabContainer:true) %>
+                        schema:alertSchema, numRows:15) %>
         </div>
-        <div id="groupAlertsTable" style="">
+        <div id="groupAlertsTable" style="display:none;">
           <%= dojoTable(id:'GroupAlerts', title:l.GroupAlertsTable,
                         refresh:60, url:urlFor(action:'groupData'),
-                        schema:galertSchema, numRows:15,
-                        inTabContainer:true) %>
+                        schema:galertSchema, numRows:15) %>
         </div>
       </div>
     </div>
@@ -172,36 +160,32 @@ dojo.addOnLoad( function(){
         </div>
       </div>
        <div style="float:right;display:inline;width:78%;height: 445px;overflow-x: hidden; overflow-y: auto;" id="defsCont">
-        <div id="defsTable" style=";">
+        <div id="defsTable" style="display:none;">
           <%= dojoTable(id:'Defs', title:l.ClassicDefsTable,
                         url:urlFor(action:'defData'),
-                        schema:defSchema, numRows:15,
-                        inTabContainer:true) %>
+                        schema:defSchema, numRows:15) %>
         </div>
       
-        <div id="typeDefsTable" style=";">
+        <div id="typeDefsTable" style="display:none;">
           <% if (superUser) { %>
             <%= dojoTable(id:'TypeDefs', title:l.TypeDefsTable,
                           url:urlFor(action:'typeDefData'),
-                          schema:typeDefSchema, numRows:15,
-                          inTabContainer:true) %>
+                          schema:typeDefSchema, numRows:15) %>
           <% } %>
         </div>    
 
-        <div id="galertDefsTable" style=";">
+        <div id="galertDefsTable" style="display:none;">
           <%= dojoTable(id:'GalertDefs', 
                         title:l.GroupDefsTable,
                         url:urlFor(action:'galertDefData'),
                         schema:galertDefSchema, 
                         numRows:15,
-                        readOnly:true,
-                        inTabContainer:true) %>
+                        readOnly:true) %>
         </div>    
       </div>
     </div>
  <div style="clear:both;height:1px;"></div>
   </div>
-</div>
 </div>
 
 <script type="text/javascript">
@@ -209,21 +193,15 @@ dojo.addOnLoad( function(){
         var res = {};
         var sevSelect  = dojo.byId('alertSevSelect');
         var timeSelect = dojo.byId('alertTimeSelect');
-        var groupSelect = dojo.byId('alertGroupSelect');
         res['minPriority'] = sevSelect.options[sevSelect.selectedIndex].value;
         res['alertTime']   = timeSelect.options[timeSelect.selectedIndex].value;
-        res['group']   = groupSelect.options[groupSelect.selectedIndex].value;
 
         var escOnly    = dojo.byId('escOnly');
-        var notFixed   = dojo.byId('notFixed');
         if (escOnly.checked) {
-          res['show'] = escOnly.value;
-        }
-        else if (notFixed.checked) {
-          res['show'] = notFixed.value;
+          res['escOnly'] = 'true'
         }
         else {
-          res['show'] = 'all';
+          res['escOnly'] = 'false'
         }
 
         return res;

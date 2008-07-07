@@ -91,16 +91,17 @@ function runCommand() {
     dojo.byId("spinner").style.visibility = 'visible';  
   }
     
-  dojo.xhrGet({
+  dojo.io.bind({
     url: url,
-    handleAs: "json-comment-filtered",
-    load: function(responseObj, ioArgs) {
+    method: "get",
+    mimetype: "text/json-comment-filtered",
+    load: function(type, data, evt) {
       if (--ajaxCount == 0) {
         dojo.byId("spinner").style.visibility = 'hidden';  
       }
-      processResult(responseObj);
+      processResult(data);
     },
-    error: function(responseObj, ioArgs) {
+    error: function(err, msg) {
       //alert('There has been an error:  ' + err);
     }
   });

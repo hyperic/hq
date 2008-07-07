@@ -4,6 +4,7 @@
                  "dojox.grid.Grid",
                  "dojo.data.ItemFileWriteStore",
                  "dojo.data.ItemFileReadStore",
+                 "dojox.grid._data.model",
                  "dojo.parser"
                  ])
                  %>

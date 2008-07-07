@@ -1,20 +1,17 @@
-<%= dojoInclude([
-                 "dijit.layout.ContentPane",
-                 "dijit.layout.TabContainer",
-                 "dojox.grid.Grid",
-                 "dojo.data.ItemFileWriteStore",
-                 "dojo.data.ItemFileReadStore",
-                 "dojo.parser"
-               ]) %>
+<%= dojoInclude(["dojo.event.*",
+                 "dojo.collections.Store",
+                 "dojo.widget.ContentPane",
+                 "dojo.widget.TabContainer",
+                 "dojo.widget.FilteringTable"]) %>
 <%= hquStylesheets() %>
 
 <script type="text/javascript">
-getDojo();
 function getSystemStats() {
-  dojo.xhrPost({
+  dojo.io.bind({
     url: '<%= urlFor(action:"getSystemStats") %>',
-    handleAs: "json-comment-filtered",
-    load: function(data, ioArgs) {
+    method: "post",
+    mimetype: "text/json-comment-filtered",
+    load: function(type, data, evt) {
       dojo.byId('userCPU').innerHTML = data.sysUserCpu;
       dojo.byId('userCPUBar').style.width = data.sysUserCpu;
       dojo.byId('sysCPU').innerHTML  = data.sysSysCpu;
@@ -214,7 +211,7 @@ getSystemStats();
 </div>
 
 <div id="fullBody" style="clear:both">
-  <% dojoTabContainer(id:'tabs', style:'width: 100%; height:500px;') { %>
+  <% dojoTabContainer(id:'bodyTabContainer', style:'width: 100%; height:500px;') { %>
     <% dojoTabPane(id:'diagTab', label:l.diagnostics) { %>
       <div id="diagSelectControls">
         <select id="diagSelect" onchange='selectDiag(options[selectedIndex].value)'>
@@ -236,8 +233,7 @@ getSystemStats();
     <% dojoTabPane(id:'cacheTab', label:l.cache) { %>
       <%= dojoTable(id:'cacheTable', title:l.cache,
                     refresh:60, url:urlFor(action:'cacheData'),
-                    schema:cacheSchema, numRows:500, pageControls:false,
-                    inTabContainer:true) %>
+                    schema:cacheSchema, numRows:500, pageControls:false) %>
     <% } %>
 
     <% dojoTabPane(id:'loadTab', label:l.load) { %>
@@ -265,7 +261,7 @@ getSystemStats();
     <% dojoTabPane(id:'agentTab', label:l.agents) { %>
       <%= dojoTable(id:'agentTable', title:l.agents,
                    refresh:600, url:urlFor(action:'agentData'),
-                   schema:agentSchema, numRows:15, inTabContainer:true) %>
+                   schema:agentSchema, numRows:15) %>
     <% } %>
     
   <% } %>
@@ -279,11 +275,12 @@ function selectDiag(d) {
     return;
   }
     
-  dojo.xhrPost({
+  dojo.io.bind({
     url: '<%= urlFor(action:"getDiag") %>' + '?diag=' + d,
-    handleAs: "json-comment-filtered",
-    load: function(responseObj, ioArgs) {
-      dojo.byId('diagData').innerHTML = responseObj.diagData;
+    method: "post",
+    mimetype: "text/json-comment-filtered",
+    load: function(type, data, evt) {
+      dojo.byId('diagData').innerHTML = data.diagData;
     }
   });
 }
@@ -306,11 +303,12 @@ function selectQuery(q) {
     return;
   }
     
-  dojo.xhrPost({
+  dojo.io.bind({
     url: '<%= urlFor(action:"runQuery") %>' + '?query=' + q,
-    handleAs: "json-comment-filtered",
-    load: function(responseObj, ioArgs) {
-      dojo.byId('queryData').innerHTML = responseObj.queryData;
+    method: "post",
+    mimetype: "text/json-comment-filtered",
+    load: function(type, data, evt) {
+      dojo.byId('queryData').innerHTML = data.queryData;
     }
   });
 }

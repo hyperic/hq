@@ -1,34 +1,36 @@
 <script type="text/javascript">
 function sendCode() {
   dojo.byId('timeStatus').innerHTML = '... executing';
-  dojo.xhrPost({
+   dojo.io.bind({
     url: '<%= urlFor(action:"execute") %>',
-    handleAs: "json-comment-filtered",
+    method: "post",
+    mimetype: "text/json-comment-filtered",
     content: {
         code:   dojo.byId("code").value,
         debug:  dojo.byId("hiberDebug").checked
     },
-    load: function(responseObject, ioArgs) {
-      dojo.byId('result').innerHTML     = responseObject.result;
+    load: function(type, data, evt) {
+      dojo.byId('result').innerHTML = data.result;
       dojo.byId('hiberStats').innerHTML = responseObject.hiberStats;
       dojo.byId('timeStatus').innerHTML = responseObject.timeStatus;
     },
-    error: function(response, ioArgs) {
-      alert('error! ' + response);
+    error: function(err, msg) {
+      alert('error! ' + err);
     }
   });
 }
 
 function chooseTemplate(t) {
-  dojo.xhrGet({
+  dojo.io.bind({
     url: '<%= urlFor(action:"getTemplate") %>',
-    handleAs: "json-comment-filtered",
+    method: "get",
+    mimetype: "text/json-comment-filtered",
     content: {template: t},
-    load: function(responseObject, ioArgs) {
-      dojo.byId('code').value = responseObject.result;
+    load: function(type, data, evt) {
+      dojo.byId('code').value = data.result;
     },
-    error: function(response, ioArgs) {
-      alert('error! ' + response);
+    error: function(err, msg) {
+      alert('error! ' + err);
     }
   });
 }
