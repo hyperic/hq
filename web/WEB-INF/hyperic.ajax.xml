@@ -10,13 +10,13 @@
     <implementation service-id="tapestry.js.JavascriptManager">
         <invoke-factory>
             <construct class="org.apache.tapestry.javascript.JavascriptManagerImpl">
-                <set-service property="assetSource" service-id="tapestry.asset.AssetSource"/>                
-                <set property="files" value="context:/js/dojo/1.1/dojo/dojo.js"/>
-                <set property="formFiles" value=""/>
-                <set property="widgetFiles" value=""/>
-                <set property="folder" value=""/>
-                <set property="tapestryFile" value="context:/js/tap-dojo/tap-dojo1.1.js"/>
-                <set property="tapestryFolder" value="context:/js/tap-dojo/"/>
+                <set-service property="assetSource" service-id="tapestry.asset.AssetSource"/>
+                <set property="files" value="classpath:/dojo-0.4.3-custom-4.1.5/dojo.js"/>
+                <set property="formFiles" value="classpath:/dojo-0.4.3-custom-4.1.5/dojo2.js"/>
+                <set property="widgetFiles" value="classpath:/dojo-0.4.3-custom-4.1.5/dojo3.js"/>
+                <set property="folder" value="classpath:/dojo-0.4.3-custom-4.1.5/"/>
+                <set property="tapestryFile" value="classpath:/tapestry-4.1.5/core.js"/>
+                <set property="tapestryFolder" value="classpath:/tapestry-4.1.5/"/>
             </construct>
         </invoke-factory>
     </implementation>  
