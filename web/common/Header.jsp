@@ -152,7 +152,7 @@
     </div>
     <div id="headerSearch"><fmt:message key="header.Search"/></div>
         <div id="headerSearchBox" style="display:none">
-            <div style="float:left;margin:3px 0px 3px 0px;">
+            <div style="float:left;margin:3px 0px 3px 5px;">
             <input type="text" id="searchBox" value=""/>
         </div>
     </div>
