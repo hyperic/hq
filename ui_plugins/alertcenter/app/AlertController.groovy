@@ -278,27 +278,27 @@ class AlertController
     
     def data(params) {
         def json = DojoUtil.processTableRequest(ALERT_TABLE_SCHEMA, params)
-		render(inline:"/* ${json} */", contentType:'json-comment-filtered')
+		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
     }
     
     def groupData(params) {
         def json = DojoUtil.processTableRequest(GALERT_TABLE_SCHEMA, params)
-		render(inline:"/* ${json} */", contentType:'json-comment-filtered')
+		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
     }
     
     def defData(params) {
         def json = DojoUtil.processTableRequest(DEF_TABLE_SCHEMA, params)
-		render(inline:"/* ${json} */", contentType:'json-comment-filtered')
+		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
     }
 
     def typeDefData(params) {
         def json = DojoUtil.processTableRequest(TYPE_DEF_TABLE_SCHEMA, params)
-		render(inline:"/* ${json} */", contentType:'json-comment-filtered')
+		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
     }
     
     def galertDefData(params) {
         def json = DojoUtil.processTableRequest(GALERT_DEF_TABLE_SCHEMA, params)
-		render(inline:"/* ${json} */", contentType:'json-comment-filtered')
+		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
     }
     
 }
