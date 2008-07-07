@@ -6,6 +6,4 @@
     
 <page-specification class="org.hyperic.hq.ui.pages.SignIn">
 
-    <asset name="HQ4_Theme" path="context:css/HQ_40.css"/>
-    
 </page-specification>
