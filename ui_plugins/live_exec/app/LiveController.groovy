@@ -115,6 +115,6 @@ class LiveController
         jsres.put('results', res)
         jsres.put('command', cmd)
         render(inline:"/* ${jsres} */", 
-    	       contentType:'json-comment-filtered')
+    	       contentType:'text/json-comment-filtered')
     }
 }
