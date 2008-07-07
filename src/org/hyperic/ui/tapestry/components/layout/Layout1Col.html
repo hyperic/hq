@@ -1,11 +1,7 @@
 <shell jwcid="@Shell" title="ognl:pageTitle + ' - ' + staticTitle" stylesheets='ognl:styleSheetList' 
-       delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.remainingHead)"
-       ajaxDelegate="ognl:ajaxDelegate">
+       delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.remainingHead)" parseWidgets="true" debugEnabled="true">
 <block jwcid="remainingHead@Block">
 <link rel="icon" href="/images/4.0/icons/favicon.ico"/>
-<script type="text/javascript">
-    djConfig= {isDebug: false, parseOnLoad: true, defaultTestTheme: 'tundra'}
-</script>
 <script type="text/javascript" src="/js/lib/lib.js"></script>
 </block>
 <body jwcid="@Body" class="tundra">
