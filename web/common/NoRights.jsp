@@ -29,15 +29,17 @@
   USA.
  --%>
 
-<script  type="text/javascript">
-  var help = "<hq:help/>";
-</script>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title><fmt:message key="securityAlert.SecurityAlert.Title"/></title>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+<script  type="text/javascript">
+  var help = "<hq:help/>";
+</script>
 </head>
 
 <body>

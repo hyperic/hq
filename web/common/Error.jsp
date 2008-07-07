@@ -135,13 +135,10 @@ document.write(
 );
 
 
-
-
-
 function displayStackTrace<%= randomNum %>() {
 	errorPopup = open("","errorPopup<%= randomNum %>","width=750,height=600,resizable=yes,scrollbars=yes,left=200,top=10");
 	errorPopup.document.open();
-	errorPopup.document.write("<html><title><fmt:message key="errors.jsp.problem"/></title>");
+	errorPopup.document.write("<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><title><fmt:message key="errors.jsp.problem"/></title>");
 	errorPopup.document.write("<body>\n" + 
 	"<link rel=stylesheet href=\"<html:rewrite page="/css/win.css"/>\" type=\"text/css\">" +
 	"<a name=\"top\"></a>\n" + 
