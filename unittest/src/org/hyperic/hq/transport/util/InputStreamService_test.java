@@ -161,6 +161,9 @@ public class InputStreamService_test extends TestCase {
         
         _streamService.writeBufferToRemoteStream(is1.getStreamId(), buffer);
         _streamService.writeBufferToRemoteStream(is2.getStreamId(), buffer);
+        
+        // need to age the buffers a bit
+        Thread.sleep(100);
 
         // now age out all the registered buffers
         int numAged = _streamService.ageOutOldBuffersFromRegistry(0);
