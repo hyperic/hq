@@ -771,4 +771,10 @@ body .dijitPopup {
 
 #propertiesAccordion{
 	background-color:#FFF
-	}
+}
+
+.mainMenu{
+position:absolute;
+}
+.mainMenuItem{
+}
