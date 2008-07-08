@@ -561,32 +561,23 @@ hyperic.data.Comparators = {
     }
     
 }
-function init_reporting(){
-    dojo.require("dijit.form.DateTextBox"); 
-    dojo.require("dijit.form.ComboBox");
-    dojo.require("dijit.form.ValidationTextBox");
 
-    dojo.connect(window, "onload", function(){
+/* OLD REPORTING */
+
+function init_reporting(){
+    dojo.require("dojo.widget.DropdownDatePicker"); 
+    dojo.require("dojo.widget.HtmlWidget");
+    dojo.require("dojo.widget.ValidationTextbox");
+    dojo.require("dojo.io");
+    dojo.require("dojo.json");
+    dojo.require("dojo.event");
+    
+    dojo.event.connect(window, "onload", function(){
         var reportList = dojo.byId("reports");
         reportList.selectedIndex = 0;
         selectedChanged(reportList);
     });
 }
-
-/* OLD REPORTING */
-
-dojo.require("dojo.widget.DropdownDatePicker"); 
-dojo.require("dojo.widget.HtmlWidget");
-dojo.require("dojo.widget.ValidationTextbox");
-dojo.require("dojo.io");
-dojo.require("dojo.json");
-dojo.require("dojo.event");
-
-dojo.event.connect(window, "onload", function(){
-    var reportList = dojo.byId("reports");
-    reportList.selectedIndex = 0;
-    selectedChanged(reportList);
-});
 
 var hyperic = {};
 hyperic.hq = {};
