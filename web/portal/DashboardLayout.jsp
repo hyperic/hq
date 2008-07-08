@@ -155,10 +155,10 @@ function fixSelect(){
     dojo.byId("dashSelect").value = '<c:out value="${DashboardForm.selectedDashboardId}"/>';
 }
 onloads.push(refreshPortlets);
-dojo.require("dijit.Dialog");
-dojo.connect(window, "onload", function(){
-<c:if test="${DashboardForm.dashboardSelectable}">
-   var dialogWidget = new dijit.Dialog({title: "<fmt:message key="dash.home.DashboardSelectionDialog"/>" },dojo.byId("dashboardSelectDialog"));
+dojo.require("dojo.widget.Dialog");
+    dojo.event.connect(window, "onload", function(){
+    <c:if test="${DashboardForm.dashboardSelectable}">
+        var dialogWidget = dojo.widget.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
     if(<c:out value="${DashboardForm.popDialog}"/>){
        dialogWidget.startup();
     }
