@@ -37,7 +37,7 @@ import org.jboss.remoting.transporter.TransporterClient;
 /**
  * An input stream that maintains a local byte buffer replenished via calls to a 
  * remote source. The stream id is used to maintain the stream state on the 
- * remote source.
+ * remote source. This class is not thread safe.
  *  
  *  The invoker locator to the remote source must be set before reading from this 
  *  stream.
@@ -54,6 +54,10 @@ public class RemoteInputStream
     private int _currentBufferIdx;
     
     private InputStreamService _streamService;
+    
+    private boolean _closed;
+    
+    private boolean _isEOS;
     
     /**
      * Default constructor for externalization only.
@@ -94,26 +98,54 @@ public class RemoteInputStream
      * @see java.io.InputStream#available()
      */
     public int available() throws IOException {
+        if (_closed) {
+            throw new IOException("stream is closed");
+        }
+        
         if (_currentBuffer == null) {
             return 0;
         }
         
         return _currentBuffer.length-_currentBufferIdx;
     }
-
+    
+    /**
+     * @see java.io.InputStream#read(byte[], int, int)
+     */
+    public int read(byte b[], int off, int len) throws IOException {
+        if (_closed) {
+            throw new IOException("stream is closed");
+        }
+        
+        _isEOS = retrieveNextBuffer();
+        
+        if (_isEOS) {
+            return -1;
+        }
+                
+        int avail = available();
+        int maxLen = len;
+        
+        if (avail > 0) {
+            // Only retrieve the next buffer if the current one is not depleted.
+            maxLen = Math.min(avail, len);
+        }
+        
+        return super.read(b, off, maxLen);            
+    }
+    
     /**
      * @see java.io.InputStream#read()
      */
     public int read() throws IOException {
-        if (_currentBuffer == null) {
-            StreamBuffer nextBuffer = getInputStreamService().getNextBuffer(_streamId);
-            
-            if (nextBuffer.isEOS()) {
-                return -1;
-            }
-            
-            _currentBuffer = nextBuffer.getBuffer();
-            _currentBufferIdx = 0;
+        if (_closed) {
+            throw new IOException("stream is closed");
+        }
+                
+        _isEOS = retrieveNextBuffer();
+        
+        if (_isEOS) {
+            return -1;
         }
         
         int c = 0xff & _currentBuffer[_currentBufferIdx++];
@@ -125,12 +157,38 @@ public class RemoteInputStream
         return c;
     }
     
+    private boolean retrieveNextBuffer() throws IOException {
+        if (_isEOS){
+            return true;
+        }
+        
+        if (_currentBuffer == null) {
+            StreamBuffer nextBuffer = getInputStreamService().getNextBuffer(_streamId);
+            
+            if (nextBuffer.isEOS()) {
+                return true;
+            }
+            
+            _currentBuffer = nextBuffer.getBuffer();
+            _currentBufferIdx = 0;
+        }
+        
+        return false;
+    }
+    
     /**
      * @see java.io.InputStream#close()
      */
     public void close() throws IOException {
-        if (_streamService != null) {
-            TransporterClient.destroyTransporterClient(_streamService);
+        if (!_closed) {
+            _closed = true;
+
+            if (_streamService != null) {
+                TransporterClient.destroyTransporterClient(_streamService);
+                _streamService = null;
+            }
+            
+            _currentBuffer = null;
         }
     }
     
