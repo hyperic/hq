@@ -111,6 +111,7 @@ public class AgentCommandsClientImpl
         try {
             outStream = new OutputStreamWrapper(streamService, remoteIs.getStreamId());
             
+            // Send the file to the agent in 32kb chunks
             FileStreamMultiplexer muxer = new FileStreamMultiplexer(32*1024);
             
             return muxer.sendData(outStream, destFiles, streams);
