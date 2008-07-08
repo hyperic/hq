@@ -45,6 +45,10 @@
       <column name="MTIME"/>
     </property>
 
+    <property name="unidirectional">
+      <column name="UNIDIRECTIONAL" not-null="true"/>
+    </property>
+
     <many-to-one name="agentType">
       <column name="AGENT_TYPE_ID" not-null="false"/>
     </many-to-one>

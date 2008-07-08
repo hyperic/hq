@@ -8065,6 +8065,29 @@ has already been defined.
           nullable="NOT NULL" precision="4000" columnType="VARCHAR2"/>
   </schemaSpec> 
 	
+  <schemaSpec version="3.96.9">
+    <schema-addColumn table="EAM_AGENT"
+                      column="UNIDIRECTIONAL"
+                      columnType="boolean"/>
+    <schema-directSQL>
+      <statement desc="Set all agents to be bi-directional"
+                 targetDB="postgresql">
+        UPDATE EAM_AGENT SET UNIDIRECTIONAL=FALSE
+      </statement>
+      <statement desc="Set all agents to be bi-directional"
+                 targetDB="oracle">
+        UPDATE EAM_AGENT SET UNIDIRECTIONAL=0
+      </statement>
+      <statement desc="Set all agents to be bi-directional"
+                 targetDB="mysql">
+        UPDATE EAM_AGENT SET UNIDIRECTIONAL=0
+      </statement>
+    </schema-directSQL>
+    <schema-alterColumn table="EAM_AGENT"
+                        column="UNIDIRECTIONAL"
+                        nullable="NOT NULL"/>
+  </schemaSpec>
+	
 </dbupgrade>
 </target>
 
