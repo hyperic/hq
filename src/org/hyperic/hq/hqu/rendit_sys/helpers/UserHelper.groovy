@@ -7,6 +7,9 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubjectMan
 import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl as AuthMan
 
+/**
+ * The UserHelper can be used to find Users in the HQ system.
+ */
 class UserHelper extends BaseHelper {
     private subjectMan = SubjectMan.one
     private authMan = AuthMan.one
@@ -29,8 +32,17 @@ class UserHelper extends BaseHelper {
      * Find a user by name
      * @return a {@link AuthzSubject}s
      */
-    public AuthzSubject findUser(name) {
+    public findUser(String name) {
         subjectMan.findSubjectByName(name)
+    }
+
+    /**
+     * Get a user by id.
+     * @return The {@link AuthzSubject} for this id, or null if the id does
+     * not exist.
+     */
+    public getUser(Integer id) {
+        subjectMan.getSubjectById(id)
     }
 
     /**
