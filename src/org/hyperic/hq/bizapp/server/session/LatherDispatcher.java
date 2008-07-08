@@ -48,6 +48,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -266,24 +267,28 @@ public class LatherDispatcher
         }
     }
 
-    private String testAgentConn(String agentIP, int agentPort, 
-                                 String authToken)
+    private String testAgentConn(String agentIP, 
+            int agentPort, 
+            String authToken, 
+            boolean isNewTransportAgent, 
+            boolean unidirectional)
     {
-        AgentCommandsClient agtCmds;
-        SecureAgentConnection agentConn;
-        
-        agentConn = new SecureAgentConnection(agentIP, agentPort, authToken);
-        agtCmds   = new AgentCommandsClient(agentConn);
-
-        try {
-            agtCmds.ping();
-        } catch(AgentConnectionException exc){
-            return "Failed to connect to agent: " + exc.getMessage();
-        } catch(AgentRemoteException exc){
-            return "Error communicating with agent: " + exc.getMessage();
-        }
-        
-        return null;
+        AgentCommandsClient client = 
+            AgentCommandsClientFactory
+                   .getInstance().getClient(agentIP, 
+                                            agentPort, 
+                                            authToken, 
+                                            isNewTransportAgent, 
+                                            unidirectional);
+    try {
+        client.ping();
+    } catch(AgentConnectionException exc){
+        return "Failed to connect to agent: " + exc.getMessage();
+    } catch(AgentRemoteException exc){
+        return "Error communicating with agent: " + exc.getMessage();
+    }
+    
+    return null;
     }
 
     /**
@@ -295,58 +300,108 @@ public class LatherDispatcher
                                                   RegisterAgent_args args)
         throws LatherRemoteException
     {
-        AgentValue agentVal;
-        String agentToken, errRes, agentIP, version;
-        int port;
-
         try {
             checkUserCanManageAgent(ctx, args.getUser(), args.getPword(), 
-                                         "register");
+                                    "register");
         } catch(PermissionException exc){
             return new RegisterAgent_result("Permission denied");
         }
 
-        agentIP = args.getAgentIP();
-        port    = args.getAgentPort();
-        version = args.getVersion();
-
-        errRes = testAgentConn(agentIP, port, args.getAuthToken());
+        String agentIP = args.getAgentIP();
+        int port    = args.getAgentPort();
+        String version = args.getVersion();
+        boolean isNewTransportAgent = args.isNewTransportAgent();
+        boolean unidirectional = args.isUnidirectional();
+        String errRes = testAgentConn(agentIP, port, args.getAuthToken(), 
+                                      isNewTransportAgent, unidirectional);
         if(errRes != null){
             return new RegisterAgent_result(errRes);
         }
 
-        agentToken = SecurityUtil.generateRandomToken();
-
-        agentVal = new AgentValue();
-        agentVal.setAddress(agentIP);
-        agentVal.setPort(port);
-        agentVal.setVersion(version);
-        agentVal.setAuthToken(args.getAuthToken());
-        agentVal.setAgentToken(agentToken);
-
-        // Check the to see if it already exists
+        boolean isOldAgentToken = true;
+        String agentToken = args.getAgentToken();
+        AgentManagerLocal agentMan = getAgentManager();
+        
+        if (agentToken == null) {
+            // Generate a unique agent token
+            agentToken = SecurityUtil.generateRandomToken();
+            
+            while (!agentMan.isAgentTokenUnique(agentToken)) {
+                agentToken = SecurityUtil.generateRandomToken();
+            }
+            
+            isOldAgentToken = false;
+        }
+                        
+        // Check the to see if the agent already exists.
+        // Lookup the agent by agent token (if it exists). Otherwise, use the 
+        // agent IP and port.
         Collection ids = null;
         try {
-            AgentValue origAgent =
-                getAgentManager().getAgent(agentIP, port);
-            
+            AgentValue origAgentVal;
+                        
+            if (isOldAgentToken) {
+                origAgentVal = agentMan.getAgent(agentToken);
+            } else {
+                origAgentVal = agentMan.getAgent(agentIP, port);    
+            }
+                                    
             try {
                 ids = getPlatformManager().
                     getPlatformPksByAgentToken(getOverlord(),
-                                               origAgent.getAgentToken());
+                            origAgentVal.getAgentToken());
             } catch (Exception e) {
                 // No platforms found, no a big deal
             }
-
-            log.info("Updating agent information for " + agentIP + ":" +
-                          port);
-            getAgentManager().updateAgent(agentIP, port, agentVal);
+            
+            log.info("Found preexisting agent during agent registration. " +
+                    "Updating agent information for " + agentIP + ":" + port + 
+                    "; new transport="+isNewTransportAgent+
+                    "; unidirectional="+unidirectional);
+            
+            if (isOldAgentToken) {
+                if (isNewTransportAgent) {
+                    agentMan.updateNewTransportAgent(agentToken,
+                                                     agentIP, port, 
+                                                     args.getAuthToken(),
+                                                     version, 
+                                                     unidirectional);
+                } else {
+                    agentMan.updateLegacyAgent(agentToken,
+                                               agentIP, 
+                                               port, 
+                                               args.getAuthToken(),
+                                               version);
+                }
+            } else {                
+                if (isNewTransportAgent) {
+                    agentMan.updateNewTransportAgent(agentIP, port, args.getAuthToken(),
+                                                     agentToken, version, unidirectional);
+                } else {
+                    agentMan.updateLegacyAgent(agentIP, port, args.getAuthToken(),
+                                                  agentToken, version);
+                }                
+            }
         } catch(AgentNotFoundException exc){
-            log.info("Registering agent at " + agentIP + ":" + port);
+            log.info("Registering agent at " + agentIP + ":" + port+"" +
+                    "; new transport="+isNewTransportAgent+
+                    "; unidirectional="+unidirectional);
             try {
-                getAgentManager().createAgent(agentIP, new Integer(port), 
-                                              args.getAuthToken(),
-                                              agentToken, version);
+                if (isNewTransportAgent) {
+                    agentMan.createNewTransportAgent(agentIP, 
+                                                      new Integer(port), 
+                                                      args.getAuthToken(), 
+                                                      agentToken,
+                                                      version, 
+                                                      unidirectional);
+                } else {
+                    agentMan.createLegacyAgent(agentIP, 
+                                                new Integer(port), 
+                                                args.getAuthToken(),
+                                                agentToken, 
+                                                version);                    
+                }
+                
             } catch(AgentCreateException oexc){
                 log.error("Error creating agent", oexc);
                 return new RegisterAgent_result("Error creating agent: " + 
@@ -361,7 +416,7 @@ public class LatherDispatcher
             return new RegisterAgent_result("Error updating agent:  " +
                                             "Internal system error");
         }
-
+        
         RegisterAgent_result result =
             new RegisterAgent_result("token:" + agentToken);
 
@@ -375,12 +430,13 @@ public class LatherDispatcher
             try {
                 List zevents = new ArrayList();
                 ResourceRefreshZevent zevent;
+                AuthzSubjectValue overlord = getOverlord();
                 for (Iterator it = ids.iterator(); it.hasNext();) {
                     Integer id = (Integer) it.next();
                     Platform platform = getPlatformManager()
                         .findPlatformById(id);
 
-                    zevent = new ResourceRefreshZevent(getOverlord(),
+                    zevent = new ResourceRefreshZevent(overlord,
                                                        platform.getEntityId());
                     zevents.add(zevent);
 
@@ -388,7 +444,7 @@ public class LatherDispatcher
                     for (Iterator i = servers.iterator(); i.hasNext(); ) {
                         Server server = (Server)i.next();
 
-                        zevent = new ResourceRefreshZevent(getOverlord(),
+                        zevent = new ResourceRefreshZevent(overlord,
                                                            server.getEntityId());
                         zevents.add(zevent);
 
@@ -397,7 +453,7 @@ public class LatherDispatcher
                              serviceItr.hasNext(); )
                         {
                             Service service = (Service)serviceItr.next();
-                            zevent = new ResourceRefreshZevent(getOverlord(),
+                            zevent = new ResourceRefreshZevent(overlord,
                                                                service.getEntityId());
                             zevents.add(zevent);
                         }
@@ -435,19 +491,39 @@ public class LatherDispatcher
         }
 
         validateAgent(ctx, args.getAgentToken(), false);
+        
+        String agentIP = args.getAgentIP();
+        int port    = args.getAgentPort();
+        boolean isNewTransportAgent = args.isNewTransportAgent();
+        boolean unidirectional = args.isUnidirectional();
+        
         try {
             agentVal = getAgentManager().getAgent(args.getAgentToken());
         
-            if((errRes = testAgentConn(args.getAgentIP(), 
-                                            args.getAgentPort(), 
-                                            agentVal.getAuthToken())) != null)
+            if((errRes = testAgentConn(agentIP, 
+                                       port,
+                                       agentVal.getAuthToken(), 
+                                       isNewTransportAgent, 
+                                       unidirectional)) != null)
             {
                 return new UpdateAgent_result(errRes);
             }
-        
-            agentVal.setAddress(args.getAgentIP());
-            agentVal.setPort(args.getAgentPort());
-            getAgentManager().updateAgent(args.getAgentToken(), agentVal);
+            
+            log.info("Updating agent at " + agentIP + ":" + port+"" +
+                    "; new transport="+isNewTransportAgent+
+                    "; unidirectional="+unidirectional);
+            
+            if (isNewTransportAgent) {
+                getAgentManager().updateNewTransportAgent(args.getAgentToken(),
+                        agentIP,
+                        port, 
+                        unidirectional);
+            } else {
+                getAgentManager().updateLegacyAgent(args.getAgentToken(),
+                        agentIP,
+                        port);
+            }
+
         } catch(AgentNotFoundException exc){
             return new UpdateAgent_result("Agent not found for update");
         }

@@ -27,12 +27,13 @@ package org.hyperic.hq.agent.client;
 
 import org.hyperic.hq.agent.AgentStreamPair;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
 
-class SocketStreamPair 
+public class SocketStreamPair 
     extends AgentStreamPair
 {
     private Socket sock;
@@ -42,7 +43,20 @@ class SocketStreamPair
         this.sock = s;
     }
 
-    Socket getSocket(){
+    public Socket getSocket(){
         return this.sock;
     }
+    
+    public void close() throws IOException {
+        try {
+            super.close();            
+        } finally {
+            Socket socket = getSocket();
+            
+            if (!socket.isClosed()) {
+                socket.close();
+            }
+        }
+    }
+    
 }

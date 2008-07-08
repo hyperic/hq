@@ -48,6 +48,7 @@ import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
@@ -88,9 +89,12 @@ public class AgentClient {
     // The following QPROP_* defines are properties which can be
     // placed in the agent properties file to perform automatic setup
     private static final String QPROP_PRE = "agent.setup.";
-    private static final String QPROP_IPADDR     = QPROP_PRE + "camIP";
-    private static final String QPROP_PORT       = QPROP_PRE + "camPort";
-    private static final String QPROP_SSLPORT    = QPROP_PRE + "camSSLPort";
+    public static final String QPROP_IPADDR     = QPROP_PRE + "camIP";
+    public static final String QPROP_PORT       = QPROP_PRE + "camPort";
+    public static final String QPROP_SSLPORT    = QPROP_PRE + "camSSLPort";
+    public  static final String QPROP_NEWTRANSPORT = QPROP_PRE + "newTransport";
+    public  static final String QPROP_UNI        = QPROP_PRE + "unidirectional";
+    public  static final String QPROP_UNI_POLLING_FREQUENCY = QPROP_PRE + "uniPollingFrequency";
     private static final String QPROP_SECURE     = QPROP_PRE + "camSecure";
     private static final String QPROP_LOGIN      = QPROP_PRE + "camLogin";
     private static final String QPROP_PWORD      = QPROP_PRE + "camPword";
@@ -128,7 +132,7 @@ public class AgentClient {
     private boolean             redirectedOutputs = false;
 
     private AgentClient(AgentConfig config, SecureAgentConnection conn){
-        this.agtCommands = new AgentCommandsClient(conn);
+        this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
         this.camCommands = new CommandsClient(conn);
         this.config      = config;
         this.log         = LogFactory.getLog(AgentClient.class);

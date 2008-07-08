@@ -41,8 +41,11 @@ import org.apache.commons.logging.LogFactory;
 class ServerHandlerLoader {
     private Log logger;
 
-    ServerHandlerLoader(){
+    private ClassLoader _loader;
+
+    ServerHandlerLoader(ClassLoader loader){
         this.logger = LogFactory.getLog(ServerHandlerLoader.class);
+        _loader = loader;
     }
 
     /**
@@ -67,8 +70,8 @@ class ServerHandlerLoader {
 
         try {
             PluginLoader loader = 
-                PluginLoader.create(jarPath,
-                                    this.getClass().getClassLoader());
+                PluginLoader.create(jarPath, _loader);
+
             PluginLoader.setClassLoader(loader);
 
             pluginClass = loader.loadPlugin();

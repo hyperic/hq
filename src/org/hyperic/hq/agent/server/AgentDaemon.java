@@ -27,7 +27,9 @@ package org.hyperic.hq.agent.server;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
@@ -53,6 +55,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginExistsException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.util.PluginLoader;
 import org.hyperic.util.security.SecurityUtil;
 
 /**
@@ -72,16 +75,20 @@ public class AgentDaemon
     public static final String PROP_CERTDN = "agent.certDN";
     public static final String PROP_HOSTNAME = "agent.hostName";
 
+    private static final String AGENT_COMMANDS_SERVER_JAR_NAME = "AgentCommandsServer.jar";
+    
     private static final PrintStream SYSTEM_ERR = System.err;
     private static AgentDaemon mainInstance;
     private static Object      mainInstanceLock = new Object();
 
     private double               startTime;
-    private Log                  logger;
+    private final static Log                  logger = LogFactory.getLog(AgentDaemon.class);
     private ServerHandlerLoader  handlerLoader;
+    private PluginLoader         handlerClassLoader;
     private CommandDispatcher    dispatcher;
     private AgentStorageProvider storageProvider;
     private CommandListener      listener;
+    private AgentTransportLifecycle agentTransportLifecycle;
     private Vector               serverHandlers;
     private Vector               startedHandlers;
     private AgentConfig    bootConfig;
@@ -101,8 +108,10 @@ public class AgentDaemon
         // Fields which get re-used are initialized here.
         // See cleanup()/configure() for fields which can
         // be re-configured
-        this.logger        = LogFactory.getLog(AgentDaemon.class);
-        this.handlerLoader = new ServerHandlerLoader();
+        this.handlerClassLoader =
+            PluginLoader.create("ServerHandlerLoader",
+                                getClass().getClassLoader());
+        this.handlerLoader = new ServerHandlerLoader(this.handlerClassLoader);        
         this.running       = false;
         this.startTime     = System.currentTimeMillis();
 
@@ -112,11 +121,32 @@ public class AgentDaemon
             }
         }
     }
+    
+    private static File getAgentCommandsServerJar(String libHandlersDir)
+            throws FileNotFoundException {
 
-    private static File[] getLibJars() {
-        File[] jars = new File("lib").listFiles(new FileFilter() {
+        File[] jars = new File(libHandlersDir).listFiles(new FileFilter() {
+            public boolean accept(File file) {
+                String name = file.getName();
+
+                return name.equals(AGENT_COMMANDS_SERVER_JAR_NAME);
+            }
+        });
+
+        if (jars == null || jars.length != 1) {
+            throw new FileNotFoundException(AGENT_COMMANDS_SERVER_JAR_NAME
+                    + " is not optional");
+        }
+
+        return jars[0];
+    }
+    
+    private static File[] getOtherCommandsServerJars(String libHandlersDir) {
+        File[] jars = new File(libHandlersDir).listFiles(new FileFilter() {
                 public boolean accept(File file) {
-                    return file.getName().endsWith(".jar");
+                    String name = file.getName();
+                    
+                    return name.endsWith(".jar") && !name.equals(AGENT_COMMANDS_SERVER_JAR_NAME);
                 }
             });
 
@@ -201,6 +231,24 @@ public class AgentDaemon
         return this.bootConfig;
     }
 
+    /**
+     * Retrieve the agent transport lifecycle.
+     * 
+     * @throws AgentRunningException indicating the Agent was not running 
+     *                               when the request was made.
+     */
+    public AgentTransportLifecycle getAgentTransportLifecycle() 
+        throws AgentRunningException 
+    {
+        
+        if(!this.isRunning()){
+            throw new AgentRunningException("Agent Transport Lifecycle cannot be retrieved if " +
+                                            "the Agent is not running");
+        }
+        
+        return this.agentTransportLifecycle;
+    }
+    
     /**
      * Register an object to be called when a notifiation of the specified
      * message class occurs;
@@ -338,26 +386,31 @@ public class AgentDaemon
     }
 
     /**
-     * Configure the agent to run with new parameters.  This routine will
-     * load jars, open sockets, and other resources in preparation for
-     * running.
-     *
+     * Configure the agent to run with new parameters. This routine will load
+     * jars, open sockets, and other resources in preparation for running.
+     * 
      * @param cfg Configuration to use to configure the Agent
-     *
+     * 
      * @throws AgentRunningException indicating the Agent was running when a
-     *                               reconfiguration was attempted.
-     * @throws AgentConfigException  indicating the configuration was invalid.
+     *             reconfiguration was attempted.
+     * @throws AgentConfigException indicating the configuration was invalid.
      */
 
-    public void configure(AgentConfig cfg)
-        throws AgentRunningException, AgentConfigException
-    {
+    public void configure(AgentConfig cfg) throws AgentRunningException,
+            AgentConfigException {
         DefaultConnectionListener defListener;
-        AgentServerHandler loadedHandler;
 
-        if(this.isRunning()){
-            throw new AgentRunningException("Agent cannot be configured while"+
-                                            " running");
+        if (this.isRunning()) {
+            throw new AgentRunningException("Agent cannot be configured while"
+                    + " running");
+        }
+
+        // add lib/handlers/lib/*.jar classpath for handlers only
+        String libHandlersLibDir = cfg.getBootProperties().getProperty(
+                AgentConfig.PROP_LIB_HANDLERS_LIB[0]);
+        File handlersLib = new File(libHandlersLibDir);
+        if (handlersLib.exists()) {
+            this.handlerClassLoader.addURL(handlersLib);
         }
 
         // Dispatcher
@@ -365,83 +418,111 @@ public class AgentDaemon
 
         this.storageProvider = AgentDaemon.createStorageProvider(cfg);
 
-        // Determine the hostname.  This will be stored in the storage provider
-        // and checked on each agent invocation.  This determines if this agent
-        // installation has been copied from another machine without removing 
+        // Determine the hostname. This will be stored in the storage provider
+        // and checked on each agent invocation. This determines if this agent
+        // installation has been copied from another machine without removing
         // the data directory.
-        String currentHost =
-            GenericPlugin.getPlatformName();
+        String currentHost = GenericPlugin.getPlatformName();
 
         String storedHost = this.storageProvider.getValue(PROP_HOSTNAME);
         if (storedHost == null || storedHost.length() == 0) {
             this.storageProvider.setValue(PROP_HOSTNAME, currentHost);
-        } else {
+        }
+        else {
             // Validate
             if (!storedHost.equals(currentHost)) {
-                String err =
-                    "Invalid hostname '" + currentHost + "'. This agent " +
-                    "has been configured for '" + storedHost + "'. If " +
-                    "this agent has been copied from a different machine " +
-                    "please remove the data directory and restart the agent";
+                String err = "Invalid hostname '"
+                        + currentHost
+                        + "'. This agent "
+                        + "has been configured for '"
+                        + storedHost
+                        + "'. If "
+                        + "this agent has been copied from a different machine "
+                        + "please remove the data directory and restart the agent";
 
                 throw new AgentConfigException(err);
             }
         }
 
         this.listener = new CommandListener(this.dispatcher);
-        defListener   = new DefaultConnectionListener(cfg);
+        defListener = new DefaultConnectionListener(cfg);
         this.setConnectionListener(defListener);
+
+        // set the lather proxy host and port if applicable
+        if (cfg.isProxyServerSet()) {
+            System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, cfg
+                    .getProxyIp());
+            System.setProperty(AgentConfig.PROP_LATHER_PROXYPORT, String
+                    .valueOf(cfg.getProxyPort()));
+        }
 
         // Server Handlers
         this.serverHandlers = new Vector();
 
-        // Always add in the AgentCommandsServer
-        loadedHandler = new AgentCommandsServer();
-        this.serverHandlers.add(loadedHandler);
-        this.dispatcher.addServerHandler(loadedHandler);
-
-        // Load server handlers on the fly from lib/*.jar.  Server handler
-        // jars  must have a Main-Class that implements the AgentServerHandler
+        // Load server handlers on the fly from lib/*.jar. Server handler
+        // jars must have a Main-Class that implements the AgentServerHandler
         // interface.
-        File[] libJars = getLibJars();
-        for (int i=0; i<libJars.length; i++) {
-            try {
-                JarFile jarFile = new JarFile(libJars[i]);
-                Manifest manifest = jarFile.getManifest();
-                String mainClass = manifest.getMainAttributes().
-                    getValue("Main-Class");
-                if (mainClass != null) {
-                    String jarPath = libJars[i].getAbsolutePath();
-                    loadedHandler = 
-                        this.handlerLoader.loadServerHandler(jarPath);
-                    this.serverHandlers.add(loadedHandler);
-                    this.dispatcher.addServerHandler(loadedHandler);
-                }
-            } catch (Exception e) {
-                throw new AgentConfigException("Failed to load " +
-                                               "'" + libJars[i] + 
-                                               "': " +
-                                               e.getMessage());
-            }
+        String libHandlersDir = cfg.getBootProperties().getProperty(
+                AgentConfig.PROP_LIB_HANDLERS[0]);
+
+        // The AgentCommandsServer is *NOT* optional. Make sure it is loaded
+        File agentCommandsServerJar;
+
+        try {
+            agentCommandsServerJar = getAgentCommandsServerJar(libHandlersDir);
         }
+        catch (FileNotFoundException e) {
+            throw new AgentConfigException(e.getMessage());
+        }
+
+        loadAgentServerHandlerJars(new File[] { agentCommandsServerJar });
+
+        File[] otherCommandsServerJars = getOtherCommandsServerJars(libHandlersDir);
+
+        loadAgentServerHandlerJars(otherCommandsServerJars);
 
         // Make sure the storage provider has a certificate DN.
         // If not, create one
         String certDN = this.storageProvider.getValue(PROP_CERTDN);
-        if ( certDN == null || certDN.length() == 0 ) {
+        if (certDN == null || certDN.length() == 0) {
             certDN = generateCertDN();
             this.storageProvider.setValue(PROP_CERTDN, certDN);
             try {
                 this.storageProvider.flush();
-            } catch ( AgentStorageException ase ) {
+            }
+            catch (AgentStorageException ase) {
                 throw new AgentConfigException("Error storing certdn in "
-                                               + "agent storage: " + ase);
+                        + "agent storage: " + ase);
             }
         }
 
         this.bootConfig = cfg;
     }
 
+    private void loadAgentServerHandlerJars(File[] libJars)
+            throws AgentConfigException {
+        AgentServerHandler loadedHandler;
+        for (int i = 0; i < libJars.length; i++) {
+            try {
+                JarFile jarFile = new JarFile(libJars[i]);
+                Manifest manifest = jarFile.getManifest();
+                String mainClass = manifest.getMainAttributes().getValue(
+                        "Main-Class");
+                if (mainClass != null) {
+                    String jarPath = libJars[i].getAbsolutePath();
+                    loadedHandler = this.handlerLoader
+                            .loadServerHandler(jarPath);
+                    this.serverHandlers.add(loadedHandler);
+                    this.dispatcher.addServerHandler(loadedHandler);
+                }
+            }
+            catch (Exception e) {
+                throw new AgentConfigException("Failed to load " + "'"
+                        + libJars[i] + "': " + e.getMessage());
+            }
+        }
+    }
+    
     /**
      * Generates a new certificate DN.
      * @return The new DN that was generated.
@@ -600,27 +681,22 @@ public class AgentDaemon
         }
     }
 
-    private void startHandlers()
-        throws AgentStartException
-    {
-        int i;
-
-        this.notifyHandlers  = new Hashtable();
-        this.startedHandlers = new Vector();
-
-        for(i=0; i<this.serverHandlers.size(); i++){
+    private void startHandlers() throws AgentStartException {
+        for (int i = 0; i < this.serverHandlers.size(); i++) {
             AgentServerHandler handler;
-            
+
             handler = (AgentServerHandler) this.serverHandlers.get(i);
             try {
                 handler.startup(this);
-            } catch(AgentStartException exc){
+            }
+            catch (AgentStartException exc) {
                 logger.error("Error starting plugin " + handler, exc);
                 throw exc;
-            } catch(Exception exc){
+            }
+            catch (Exception exc) {
                 logger.error("Unknown exception", exc);
-                throw new AgentStartException("Error starting plugin " +
-                                              handler, exc);
+                throw new AgentStartException("Error starting plugin "
+                        + handler, exc);
             }
             this.startedHandlers.add(handler);
         }
@@ -696,9 +772,41 @@ public class AgentDaemon
         this.registerMonitor("agent.commandListener", this.listener);
         redirectStreams(bootProps);
 
+        // Load the agent transport in the server handler classloader.
+        // This is necessary because we don't want the jboss remoting 
+        // classes in the root agent classloader - this causes conflicts 
+        // with the jboss plugins.
+        String agentTransportLifecycleClass = 
+            "org.hyperic.hq.agent.server.AgentTransportLifecycleImpl";
+        
         try {
+            try {
+                Class clazz = this.handlerClassLoader.loadClass(agentTransportLifecycleClass);
+                Constructor constructor = clazz.getConstructor(
+                                    new Class[]{AgentDaemon.class, 
+                                                AgentConfig.class, 
+                                                AgentStorageProvider.class
+                                                });
+
+                this.agentTransportLifecycle = 
+                    (AgentTransportLifecycle)constructor.newInstance(
+                                    new Object[]{this, 
+                                                 getBootConfig(), 
+                                                 getStorageProvider()
+                                                 });
+            } catch (ClassNotFoundException e) {
+                throw new AgentStartException(
+                        "Cannot find agent transport lifecycle class: "+
+                        agentTransportLifecycleClass);
+            }
+            
             this.startPluginManagers();
             this.startHandlers();
+            
+            // The started handlers should have already registered with the 
+            // agent transport lifecycle
+            this.agentTransportLifecycle.startAgentTransport();  
+            
             this.listener.setup();
             this.logger.info("Agent started successfully");
             this.sendNotification(NOTIFY_AGENT_UP, "we're up, baby!");
@@ -716,11 +824,16 @@ public class AgentDaemon
             // memory, etc -- stuff just isn't in a good state at all.
             if(this.storageProvider != null){
                 this.storageProvider.dispose();
+                this.storageProvider = null;
             }
             System.exit(1);
             // The next line will never execute 
             throw new AgentStartException("Critical shutdown");
         } finally {
+            if (this.agentTransportLifecycle != null) {
+                this.agentTransportLifecycle.stopAgentTransport();
+            }
+            
             this.running = false;
             try {this.cleanup();} catch(AgentRunningException exc){}
         

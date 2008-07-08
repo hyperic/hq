@@ -29,6 +29,8 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import org.hyperic.hq.appdef.AgentType;
+
 /**
  * Value object for Agent.
  *
@@ -55,6 +57,8 @@ public class AgentValue
    private boolean cTimeHasBeenSet = false;
    private org.hyperic.hq.appdef.shared.AgentTypeValue AgentType;
    private boolean AgentTypeHasBeenSet = false;
+   private boolean unidirectional = false;
+   private boolean unidirectionalHasBeenSet = false;
 
 
    public AgentValue()
@@ -118,6 +122,21 @@ public class AgentValue
 
    }
 
+   public boolean isUnidirectional() {
+       return this.unidirectional;
+   }
+   
+   public void setUnidirectional(boolean unidirectional) {
+       this.unidirectional = unidirectional;
+   }
+   
+   public boolean isNewTransportAgent() {       
+       if (AgentType != null) {
+           return AgentType.isNewTransportType();
+       }
+       return false;
+   }
+   
    public boolean addressHasBeenSet(){
 	  return addressHasBeenSet;
    }
@@ -303,6 +322,7 @@ public class AgentValue
 			lEquals = lEquals && this.address.equals( that.address );
 		 }
 		 lEquals = lEquals && this.port == that.port;
+         lEquals = lEquals && this.unidirectional == that.unidirectional;
 		 if( this.authToken == null )
 		 {
 			lEquals = lEquals && ( that.authToken == null );
@@ -351,7 +371,7 @@ public class AgentValue
 		 {
 			lEquals = lEquals && this.AgentType.equals( that.AgentType );
 		 }
-
+         
 		 return lEquals;
 	  }
 	  else
@@ -365,6 +385,8 @@ public class AgentValue
       result = 37*result + ((this.address != null) ? this.address.hashCode() : 0);
 
       result = 37*result + (int) port;
+      
+      result = 37*result + (this.unidirectional ? 1 : 0);
 
       result = 37*result + ((this.authToken != null) ? this.authToken.hashCode() : 0);
 
@@ -379,6 +401,7 @@ public class AgentValue
       result = 37*result + ((this.cTime != null) ? this.cTime.hashCode() : 0);
 
 	  result = 37*result + ((this.AgentType != null) ? this.AgentType.hashCode() : 0);
+	  
 	  return result;
    }
 

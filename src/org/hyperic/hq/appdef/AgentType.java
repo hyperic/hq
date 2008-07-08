@@ -25,38 +25,32 @@
 
 package org.hyperic.hq.appdef;
 
-import org.hyperic.hq.appdef.shared.AgentTypeValue;
-
 import java.util.Collection;
 
-/**
- *
- */
+import org.hyperic.hq.appdef.shared.AgentTypeValue;
+
 public class AgentType extends AppdefBean
 {
-    private String name;
+    public static final Integer TYPE_LEGACY_TRANSPORT = new Integer(1);
+    public static final Integer TYPE_NEW_TRANSPORT = new Integer(2);
+    
+    
+    private String _name;
     private String sortName;
-    private Collection agents;
+    private Collection _agents;
 
-    /**
-     * default constructor
-     */
-    public AgentType()
-    {
+    public AgentType() {
         super();
     }
 
-    public String getName()
-    {
-        return this.name;
+    public String getName() {
+        return _name;
     }
 
-    public void setName(String name)
-    {
-        this.name = name;
-        setSortName(name);
+    public void setName(String name) {
+        _name = name;
     }
-
+    
     public String getSortName()
     {
         return this.sortName;
@@ -66,17 +60,24 @@ public class AgentType extends AppdefBean
     {
         this.sortName = sortName != null ? sortName.toUpperCase() : null;
     }
-
-    public Collection getAgents()
-    {
-        return this.agents;
+    
+    public boolean isNewTransportType() {
+        Integer id = getId();
+        
+        if (id != null) {
+            return id.equals(TYPE_NEW_TRANSPORT);
+        }
+        
+        return false;
     }
 
-    public void setAgents(Collection agents)
-    {
-        this.agents = agents;
+    public Collection getAgents() {
+        return _agents;
     }
 
+    public void setAgents(Collection agents) {
+        _agents = agents;
+    }
     private AgentTypeValue agentTypeValue = new AgentTypeValue();
     /**
      * legacy EJB DTO pattern
@@ -91,22 +92,20 @@ public class AgentType extends AppdefBean
         agentTypeValue.setCTime(getCTime());
         return agentTypeValue;
     }
-
-    public boolean equals(Object obj)
-    {
+    
+    public boolean equals(Object obj) {
         if (!(obj instanceof AgentType) || !super.equals(obj)) {
             return false;
         }
         AgentType o = (AgentType)obj;
-        return (name == o.getName() || (name!=null && o.getName()!=null &&
-                                        name.equals(o.getName())));
+        return (_name == o.getName() || (_name != null && o.getName() != null &&
+                                         _name.equals(o.getName())));
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = super.hashCode();
 
-        result = 37*result + (name!=null ? name.hashCode() : 0);
+        result = 37*result + (_name != null ? _name.hashCode() : 0);
 
         return result;
     }

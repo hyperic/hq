@@ -43,13 +43,6 @@ public class Agent extends AppdefBean {
     public Agent() {
     }
 
-    public Agent(AgentType type, String address, Integer port, String authToken,
-                 String agentToken, String version)
-    {
-	// TODO - remove this constructor
-	new Agent(type, address, port, false, authToken, agentToken, version);
-    }
-
     public Agent(AgentType type, String address, Integer port,
                  boolean unidirectional, String authToken,
                  String agentToken, String version)
@@ -115,20 +108,16 @@ public class Agent extends AppdefBean {
     public void setUnidirectional(boolean unidirectional) {
         _unidirectional = unidirectional;
     }
-
-
-    // TODO need to add this
-    /**
+    
     public boolean isNewTransportAgent() {
         AgentType type = getAgentType();
-
+        
         if (type != null) {
             return type.isNewTransportType();
         }
-
+        
         return false;
     }
-    **/
 
     public AgentType getAgentType() {
         return _agentType;
@@ -169,7 +158,7 @@ public class Agent extends AppdefBean {
 
         return result;
     }
-
+    
     private AgentValue agentValue = new AgentValue();
     /**
      * legacy EJB code to get DTO (Value) object
@@ -194,6 +183,20 @@ public class Agent extends AppdefBean {
             agentValue.setAgentType( getAgentType().getAgentTypeValue() );
         else
             agentValue.setAgentType( null );
+        agentValue.setUnidirectional(isUnidirectional());
         return agentValue;
+    }
+    
+    public String connectionString() {
+        return getAddress()+":"+getPort();
+    }
+
+    public String toString() {
+        StringBuffer str = new StringBuffer("{");
+
+        str.append("address=").append(getAddress()).append(" ")
+           .append("port=").append(getPort()).append(" ")
+           .append("authToken=").append(getAuthToken()).append(" ");
+        return(str.toString());
     }
 }

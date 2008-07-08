@@ -28,6 +28,9 @@ package org.hyperic.hq.bizapp.agent;
 public class ProviderInfo {
     private String providerAddress;    // CAM connection string
     private String agentToken;         // Token the agent should use to connect
+    private boolean isNewTransport;
+    private boolean unidirectional;
+    private int unidirectionalPort;
 
     public ProviderInfo(String providerAddress, String agentToken){
         this.providerAddress = providerAddress;
@@ -38,6 +41,14 @@ public class ProviderInfo {
         {
             throw new IllegalArgumentException("No arguments can be null");
         }
+        
+        unidirectionalPort = -1;
+    }
+    
+    public void setNewTransport(boolean unidirectional, int unidirectionalPort) {
+        this.isNewTransport = true;
+        this.unidirectional = unidirectional;
+        this.unidirectionalPort = unidirectionalPort;
     }
 
     public String getProviderAddress(){
@@ -47,8 +58,29 @@ public class ProviderInfo {
     public String getAgentToken(){
         return this.agentToken;
     }
+    
+    public boolean isNewTransport() {
+        return this.isNewTransport;
+    }
+    
+    public boolean isUnidirectional() {
+        if (!isNewTransport()) {
+            throw new IllegalStateException("not a new transport");
+        }
+        
+        return this.unidirectional;
+    }
+    
+    public int getUnidirectionalPort() {
+        if (!isNewTransport()) {
+            throw new IllegalStateException("not a new transport");
+        }
+        
+        return this.unidirectionalPort;
+    }
 
     public String toString(){
         return this.providerAddress;
     }
+
 }

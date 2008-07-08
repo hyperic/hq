@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.agent;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -43,5 +44,19 @@ public class AgentStreamPair {
 
     public OutputStream getOutputStream(){
         return this.outStream;
+    }
+    
+    public void close() throws IOException {        
+        try {
+            getInputStream().close();
+        } catch (Exception e) {
+            // swallow
+        }
+        
+        try {
+            getOutputStream().close();
+        } catch (Exception e) {
+            // swallow
+        }
     }
 }

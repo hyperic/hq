@@ -81,6 +81,14 @@ public class AgentTypeValue
 	  cTimeHasBeenSet = true;
 
    }
+   
+   public boolean isNewTransportType() {
+       Integer id = getId();
+       if (id != null) {
+           return id.equals(org.hyperic.hq.appdef.AgentType.TYPE_NEW_TRANSPORT);
+       }
+       return false;
+   }
 
    public java.lang.String getName()
    {

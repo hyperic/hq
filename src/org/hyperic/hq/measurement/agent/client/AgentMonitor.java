@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement.agent.client;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.measurement.server.session.SRN;
@@ -76,7 +77,8 @@ public class AgentMonitor implements MonitorInterface
         conn = new SecureAgentConnection(agent);
 
         AgentCommandsClient client =
-                new AgentCommandsClient(conn);
+            AgentCommandsClientFactory.
+            getInstance().getClient(agent);
         try {
             client.ping();
         } catch (AgentRemoteException e) {
