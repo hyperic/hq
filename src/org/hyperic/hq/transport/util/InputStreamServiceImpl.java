@@ -118,7 +118,8 @@ public class InputStreamServiceImpl implements InputStreamService {
      * @return The remote input stream.
      */
     public RemoteInputStream getRemoteStream() {
-        cleanOldBuffersFromRegistry();
+        // remove any registered buffers that haven't been touched in 30 minutes
+        ageOutOldBuffersFromRegistry(30*60000);
               
         String streamId = UID.asString();
         _streamBufferRegistry.put(streamId, new RegisteredStreamBuffer(_clock, _timeout));
@@ -128,12 +129,22 @@ public class InputStreamServiceImpl implements InputStreamService {
     /**
      * Iterate through the stream buffer registry and remove any registered 
      * buffers that have not been touched by the remote client within the 
-     * last 30 minutes. This prevents a memory leak in the case that the 
-     * remote client connection is dropped in the middle of reading from the 
-     * remote stream.
+     * value specified by the maxAge. This prevents a memory leak in the case 
+     * that the remote client connection is dropped in the middle of 
+     * reading from the remote stream.
+     * 
+     * @param maxAge The maximum allowed age for the registered buffers (in milliseconds).
+     * @return The number of registered buffers aged out.
+     * @throws IllegalArgumentException if the maxAge is less than zero;
      */
-    private void cleanOldBuffersFromRegistry() {
-        long oldestBufferRetrieveTime = _clock.currentTimeMillis() - 30*60000;
+    int ageOutOldBuffersFromRegistry(long maxAge) {
+        if (maxAge < 0) {
+            throw new IllegalArgumentException("max age must not be negative: maxAge="+maxAge);
+        }
+        
+        int numAgedBuffers = 0;
+        
+        long oldestBufferRetrieveTime = _clock.currentTimeMillis() - maxAge;
         
         synchronized (_streamBufferRegistry) {            
             for (Iterator iter = _streamBufferRegistry.values().iterator(); 
@@ -142,9 +153,12 @@ public class InputStreamServiceImpl implements InputStreamService {
                 
                 if (registeredBuffer.lastBufferRetrieveTime() < oldestBufferRetrieveTime) {
                     iter.remove();
+                    numAgedBuffers++;
                 }
             }
         }
+        
+        return numAgedBuffers;
     }
     
     /**
