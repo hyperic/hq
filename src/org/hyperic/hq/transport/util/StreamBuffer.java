@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+import org.hyperic.util.security.MD5;
+
 
 /**
  * The buffers containing the data stream chunks for a {@link RemoteInputStream}.
@@ -50,7 +52,7 @@ public class StreamBuffer implements Externalizable {
      * that enforce a consistent object initial state.
      */
     private StreamBuffer(boolean isEOS, byte[] buffer) {
-        _isEOS = false;
+        _isEOS = isEOS;
         _buffer = buffer;
     }
     
@@ -102,12 +104,31 @@ public class StreamBuffer implements Externalizable {
         int length = in.readInt();
         _buffer = new byte[length];
         in.readFully(_buffer);
+        
+        if (!_isEOS) {
+            String expectedChecksum = in.readUTF();
+            
+            MD5 checksum = new MD5();
+            checksum.add(_buffer);
+            String actualChecksum = checksum.getDigestString();
+            
+            if (!expectedChecksum.equals(actualChecksum)) {
+                throw new IOException("stream buffer checksum failed; expected="+
+                                      expectedChecksum+"; actual="+actualChecksum);
+            }            
+        }
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeBoolean(_isEOS);
         out.writeInt(_buffer.length);
         out.write(_buffer);
+        
+        if (!_isEOS) {
+            MD5 checksum = new MD5();
+            checksum.add(_buffer);
+            out.writeUTF(checksum.getDigestString());            
+        }
     }
 
 }
