@@ -32,10 +32,7 @@
   USA.
  --%>
 <script type="text/javascript">
-    dojo.require("dijit.Menu");
-    dojo.require("dojo.parser");
-    dojo.require("dijit.Tooltip");
-    
+        
     function getUpdateStatus(opt) {
         if (opt == "<fmt:message key="header.Acknowledge"/>") {
             var pars = "update=true";
@@ -60,6 +57,10 @@
         dojo.subscribe('enter', searchWidget, "search");
         dojo.subscribe('search', searchWidget, "toggleSearchBox");
         dojo.subscribe('escape', searchWidget, "toggleSearchBox");
+        document.menu1 = new hyperic.widget.Menu();
+        document.menu2 = new hyperic.widget.Menu();
+        document.menu3 = new hyperic.widget.Menu();
+        
     });
     
       <!--
@@ -88,6 +89,7 @@
       }
 
       onloads.push( refreshAlerts );
+      
       //-->
       </script>
     <div id="header">
@@ -96,36 +98,30 @@
         <c:set var="pageURL" value="${requestURL}"/>
         <ul>
             <li id="dashTab" class=""><a href="/Dashboard.do"><span><fmt:message key="header.dashboard"/></span></a></li>
-            <li id="resTab" class=""><a><span id="resource" onclick="hyperic.widget.menu.onclick(this)"><fmt:message key="header.resources"/></span></a></li>
-            <li id="analyzeTab" class=""><a><span id="analyze" onclick="hyperic.widget.menu.onclick(this)"><fmt:message key="header.analyze"/></span></a></li>
+            <li id="resTab" class=""><a><span id="resource" onclick="document.menu1.onclick(this)"><fmt:message key="header.resources"/></span></a></li>
+            <li id="analyzeTab" class=""><a><span id="analyze" onclick="document.menu2.onclick(this)"><fmt:message key="header.analyze"/></span></a></li>
             <li id="setTab" class=""><a href="/Settings.html"><span><fmt:message key="header.settings"/></span></a></li>
             <li id="adminTab" class=""><a href="/Admin.do"><span><fmt:message key="header.admin"/></span></a></li>
         </ul>
     </div>
-	<div dojoType="dijit.Menu" id="resource_1" popupDelay="500" style="display: none;">
-	    <div dojoType="dijit.MenuItem" iconClass="resourceIcon" onClick="document.location='/ResourceHub.do'"><fmt:message key="header.browse"/></div>
-	    <tiles:insert definition=".header.optional.tabs">
-	        <tiles:put name="location" value="resources"/>
-	    </tiles:insert>
-	    <div dojoType="dijit.PopupMenuItem" iconClass="favoriteIcon" id="submenu2">
-	        <span><fmt:message key="header.favorite"/></span>
-	        <div dojoType="dijit.Menu">
-	            <div dojoType="dijit.MenuItem" onClick="">Placeholder</div>
-	        </div>
-	    </div>
-	    <div dojoType="dijit.PopupMenuItem" iconClass="recentIcon" id="submenu3">
-	        <span><fmt:message key="header.recent"/></span>
-	        <div dojoType="dijit.Menu">
-	            <tiles:insert definition=".toolbar.recentResources"/>
-	        </div>
-	    </div>
-	</div>
-	<div dojoType="dijit.Menu" id="analyze_1" popupDelay="500" contextMenuForWindow="false" style="display: none;">
-	    <div dojoType="dijit.MenuItem" iconClass="reportIcon" onClick="/document.location='reporting/ReportCenter.do'"><fmt:message key="reporting.reporting.ReportCenterTitle"/></div>
-	    <tiles:insert definition=".header.optional.tabs">
-	        <tiles:put name="location" value="tracking"/>
-	    </tiles:insert>
-	</div>
+    <div class="mainMenu" id="resource_1" style="display:none">
+        <div class="mainMenuItem" onClick="location.href='<html:rewrite page="/ResourceHub.do"/>'"><fmt:message key="header.Browse"/></div>
+        <tiles:insert definition=".header.optional.tabs">
+            <tiles:put name="location" value="resources"/>
+        </tiles:insert>
+        <div class="mainMenuItem" onmouseover="document.menu3.onclick(this)" id="submenu"><fmt:message key=".dashContent.recentResources"/></div>
+    </div>
+    <div class="mainMenu" id="submenu_1" style="display:none;">
+        <tiles:insert definition=".toolbar.recentResources"/>
+    </div>
+    <div class="mainMenu" id="analyze" style="display:none;">
+        <tiles:insert definition=".header.optional.tabs">
+            <tiles:put name="location" value="tracking"/>
+        </tiles:insert>
+    </div>
+    <div style="display:none;" id="loading">
+        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16"/>
+    </div>
     <div id="headerAlerts">
       <div class="headAlertWrapper">
         <div class="recentText">

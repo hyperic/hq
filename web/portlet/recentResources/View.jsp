@@ -35,10 +35,10 @@
 <c:choose>
   <c:when test="${not empty resources}">
   <c:forEach var="resource" items="${resources}">
-    <div dojoType="dijit.MenuItem" onClick="location.href='<html:rewrite page="/Resource.do?eid=${resource.entityId}"/>'"><c:out value="${resource.name}"/></div>
+    <div class="mainMenuItem" onClick="location.href='<html:rewrite page="/Resource.do?eid=${resource.entityId}"/>'"><c:out value="${resource.name}"/></div>
   </c:forEach>
   </c:when>
   <c:otherwise>
-      <div dojoType="dijit.MenuItem"><fmt:message key="common.label.None"/></div>
+      <div class="mainMenuItem"><fmt:message key="common.label.None"/></div>
   </c:otherwise>
 </c:choose>

@@ -29,13 +29,13 @@
 <c:set var="location" scope="request"><tiles:getAsString name="location"/></c:set>
   <c:choose>
   <c:when test="${location eq 'resources'}">
-	  <c:forEach var="attachment" items="${mastheadResourceAttachments}">
-          <div dojoType="dijit.MenuItem" onClick="document.location='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>'"><c:out value="${attachment.HTML}"/></div>
+      <c:forEach var="attachment" items="${mastheadResourceAttachments}">
+          <div class="mainMenuItem" onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>'"><c:out value="${attachment.HTML}"/></div>
       </c:forEach>
   </c:when>
   <c:when test="${location eq 'tracking'}">
     <c:forEach var="attachment" items="${mastheadTrackerAttachments}">
-          <div dojoType="dijit.MenuItem" onClick="document.location='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>'"><c:out value="${attachment.HTML}"/></div>
+          <div class="mainMenuItem" onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>'"><c:out value="${attachment.HTML}"/></div>
       </c:forEach>
   </c:when>
   </c:choose>
