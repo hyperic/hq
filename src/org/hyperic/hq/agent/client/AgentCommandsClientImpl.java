@@ -139,14 +139,10 @@ public class AgentCommandsClientImpl
         }
         
         public void write(byte b[], int off, int len) throws IOException {
-            byte[] buffer;
-            
-            if (off == 0 && len == b.length) {
-                buffer = b;
-            } else {
-                buffer = new byte[len-off];
-                System.arraycopy(b, off, buffer, 0, buffer.length);
-            }
+            // Always copy the buffer since the invoking thread may be 
+            // reusing this buffer.
+            byte[] buffer = new byte[len-off];
+            System.arraycopy(b, off, buffer, 0, buffer.length);            
             
             try {
                 _streamService.writeBufferToRemoteStream(_streamId, buffer);
