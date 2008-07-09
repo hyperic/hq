@@ -29,19 +29,25 @@
 <link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
-<link rel="stylesheet" href="<html:rewrite page="/js/dojo/1.1/dojo/resources/dojo.css"/>" type="text/css"/>
-<link rel="stylesheet" href="<html:rewrite page="/js/dojo/1.1/dojox/grid/_grid/tundraGrid.css"/>" type="text/css"/>
-<!-- <link rel="stylesheet" href="<html:rewrite page="/js/dojo/1.1/dojox/grid/_grid/Grid.css"/>" type="text/css"/> -->
-<!-- <link rel="stylesheet" href="<html:rewrite page="/js/dojo/1.1/dijit/themes/dijit.css"/>" type="text/css"/> -->
-<link rel="stylesheet" href="<html:rewrite page="/js/dojo/1.1/dijit/themes/tundra/tundra.css"/>" type="text/css"/>
+<script type="text/javascript">
+djConfig = { isDebug: false }
+</script>
+<script type="text/javascript" src="<html:rewrite page='/js/dojo/0.4.3/dojo.js.uncompressed.js'/>"></script> 
+<script type="text/javascript">
+djConfig.parseOnLoad = true;
+djConfig.baseUrl = '/js/dojo/1.1/dojo/';
+djConfig.scopeMap = [
+        ["dojo", "dojo11"],
+        ["dijit", "dijit11"],
+        ["dojox", "dojox11"]
+    ];
+</script>
+<script src="<html:rewrite page='/js/dojo/1.1/dojo/dojo.js.uncompressed.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
     var imagePath = "<html:rewrite page="/images/"/>";
-    var djConfig = {parseOnLoad: true, isDebug : true, locale : "<%=request.getLocale().toString().substring(0,2)%>"};
 </script>
-<script src="<html:rewrite page='/js/dojo/0.4.3/dojo.js.uncompressed.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/diagram.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/functions.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/lib/lib.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/timeplot/api/1.0/timeplot-api.js?local'/>" type="text/javascript"></script>
