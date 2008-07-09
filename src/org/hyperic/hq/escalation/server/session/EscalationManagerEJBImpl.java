@@ -356,9 +356,9 @@ public class EscalationManagerEJBImpl
             // Checks if there is a committed escalation state for this def.
             existsInDb = _stateDAO.find(def) != null;                
         } catch (Exception e) {
-            _log.warn("There is more than one escalation in progress for " +
+            _log.warn("There is already one escalation in progress for " +
                     "alert def id="+def.getId()+
-                    "; type="+def.getAlertType().getCode(), e);
+                    "; type="+def.getAlertType().getCode());
           // HHQ-915: A hibernate exception will occur when looking up the 
           // escalation state if more than one exists. This shouldn't happen, 
           // but if it does, don't create another escalation.
