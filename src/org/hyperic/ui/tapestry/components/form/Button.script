@@ -9,8 +9,8 @@
 <body>
 document.${buttonClientId}Connect = function(){
     hyperic.utils.key.registerListener(dojo.byId('${scopeObjName}'), hyperic.utils.key.enterKeyHandler);
-    dojo.subscribe('enter', null, function(){tapestry.form.submit('${scopeObjName}', '${buttonClientId}');});
+    dojo.event.topic.subscribe('enter', null, function(){tapestry.form.submit('${scopeObjName}', '${buttonClientId}');});
 }
-dojo.connect(window, "onload", document, "${buttonClientId}Connect");
+dojo.event.connect(window, "onload", document, "${buttonClientId}Connect");
 </body>
 </script>

@@ -55,7 +55,7 @@ hyperic.utils.key = {
             evt.stopPropagation();            
         }
         if (evt.keyCode == 13) {
-            dojo.event.publish('enter', [evt]);
+            dojo.event.topic.publish('enter', [evt]);
         }
     },
     registerListener : function(/*DOMNode*/node, /*fp*/handler){
@@ -117,7 +117,7 @@ hyperic.utils.addKeyListener = function(/*Node*/node, /*Object*/ keyComb, /*Stri
             e.preventDefault();
             e.stopPropagation();
         }
-        dojo.event.publish(this.topic, [e]);
+        dojo.event.topic.publish(this.topic, [e]);
     };
     this.cancel = function(){
         this.canceled = true;
@@ -217,7 +217,7 @@ hyperic.utils.passwd = {
 
 hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Object*/ keyCode){
     dojo.require('dojo.io');
-    dojo.
+    dojo.require('dojo.lfx.html');
     this.opened     = false;
     this.minStrLen  = minStrLenth; 
     this.resourceURL= urls.resource;
@@ -574,12 +574,13 @@ function init_reporting(){
     
     dojo.event.connect(window, "onload", function(){
         var reportList = dojo.byId("reports");
-        reportList.selectedIndex = 0;
-        selectedChanged(reportList);
+        if(reportList){
+            reportList.selectedIndex = 0;
+            selectedChanged(reportList);
+        }
     });
 }
 
-var hyperic = {};
 hyperic.hq = {};
 hyperic.hq.reporting = {};
 hyperic.hq.dom = {};

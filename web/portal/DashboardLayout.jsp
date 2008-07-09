@@ -42,7 +42,7 @@ if (top != self){
 autoLogout = false;
 
 function removePortlet(name, label) {
-    dojo.xhrGet({
+    dojo11.xhrGet({
         url: '<html:rewrite page="/dashboard/RemovePortlet.do"/>',
         load: function(){postRemovet(name,label)}
     });
@@ -160,7 +160,7 @@ dojo.require("dojo.widget.Dialog");
     <c:if test="${DashboardForm.dashboardSelectable}">
         var dialogWidget = dojo.widget.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
     if(<c:out value="${DashboardForm.popDialog}"/>){
-       dialogWidget.startup();
+       dialogWidget.show();
     }
     fixSelect();
  </c:if>
@@ -321,7 +321,7 @@ dojo.require("dojo.widget.Dialog");
 	           format: /^(.*)$/,
 	           containment: ["<c:out value="narrowList_${narrow}"/>"],
 	           onUpdate: function() {
-	                dojo.xhrPost({
+	                dojo11.xhrPost({
 	                    url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
 	                    load: function(){ }
 	                });},

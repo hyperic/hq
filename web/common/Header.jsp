@@ -31,6 +31,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
+
 <script type="text/javascript">
         
     function getUpdateStatus(opt) {
@@ -45,18 +46,18 @@
     }
     var resourceURL = '/Resource.do';
     var searchWidget = new hyperic.widget.search({search:'/search.shtml'}, 3, {keyCode: 83, ctrl: true});
-    dojo.require("dojo.fx");
-    dojo.connect(window, "onload",function(){ 
+    dojo.require("dojo.lfx.html");
+    dojo.event.connect(window, "onload",function(){ 
         activateHeaderTab();
         searchWidget.create();
         //Connect the events for the box, cancel and search buttons
-        dojo.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
-        dojo.connect(searchWidget.nodeCancel, "onclick", searchWidget, "toggleSearchBox");
-        dojo.connect(searchWidget.nodeSearchButton, "onclick", searchWidget,  "toggleSearchBox");
+        dojo.event.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
+        dojo.event.connect(searchWidget.nodeCancel, "onclick", searchWidget, "toggleSearchBox");
+        dojo.event.connect(searchWidget.nodeSearchButton, "onclick", searchWidget,  "toggleSearchBox");
         // What should the hot-keys do?
-        dojo.subscribe('enter', searchWidget, "search");
-        dojo.subscribe('search', searchWidget, "toggleSearchBox");
-        dojo.subscribe('escape', searchWidget, "toggleSearchBox");
+        dojo11.subscribe('enter', searchWidget, "search");
+        dojo.event.topic.subscribe('search', searchWidget, "toggleSearchBox");
+        dojo.event.topic.subscribe('escape', searchWidget, "toggleSearchBox");
         document.menu1 = new hyperic.widget.Menu();
         document.menu2 = new hyperic.widget.Menu();
         document.menu3 = new hyperic.widget.Menu();
