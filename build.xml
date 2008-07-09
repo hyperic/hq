@@ -1173,10 +1173,28 @@
       <include name="org/hyperic/hq/bizapp/agent/*.class"/>
       <include name="org/hyperic/hq/bizapp/client/*.class"/>
       <include name="org/hyperic/hq/bizapp/shared/*.class"/>
-      <include name="org/hyperic/hq/common/*Exception.class"/>
-      <exclude name="org/hyperic/hq/agent/client/**"/>
+      <include name="org/hyperic/hq/common/*.class"/>
+    <exclude name="org/hyperic/hq/common/*_test*.class"/> 
+    <include name="org/hyperic/hq/common/Resources.properties"/>  
+      <exclude name="org/hyperic/hq/agent/server/AgentTransportLifecycleImpl.class"/>   
+    <include name="org/hyperic/util/security/MD5.class"/> 
+    
+    <!-- The agent commands server must be in its own server handler classloader for 
+       agent send file data (over the new transport) to work correctly. Note 
+       that the AgentCommandsService depends directly on new transport classes. -->
+      <exclude name="org/hyperic/hq/agent/server/AgentCommandsServer.class"/>
+      <exclude name="org/hyperic/hq/agent/server/AgentCommandsService.class"/>       
     </jar>
 
+      <!-- Agent commands server handler (this handler is NOT optional) -->
+       <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/handlers/AgentCommandsServer.jar">
+          <include name="org/hyperic/hq/agent/server/AgentCommandsServer.class"/>
+          <include name="org/hyperic/hq/agent/server/AgentCommandsService.class"/> 
+          <manifest>
+              <attribute name="Main-Class" value="org.hyperic.hq.agent.server.AgentCommandsServer"/>
+          </manifest>
+      </jar>  
+  	
     <!-- Control agent server handler -->
     <jar basedir="${build.dir}/classes"
          jarfile="${agent.dir}/lib/handlers/AgentControlServer.jar">
