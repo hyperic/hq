@@ -384,7 +384,7 @@ public class AgentClient {
 
         fetcher = new StaticProviderFetcher(new ProviderInfo(provider, 
                                                              "no-auth"));
-        res = new BizappCallbackClient(fetcher);
+        res = new BizappCallbackClient(fetcher, config);
         res.bizappPing();
         return res;
     }
@@ -506,6 +506,9 @@ public class AgentClient {
             agentToken, response;
         Properties bootP;
         int agentPort;
+        boolean isNewTransportAgent = false;
+        boolean unidirectional = false;
+        int unidirectionalPort = -1;
 
         bootP = this.config.getBootProperties();
 
@@ -520,14 +523,43 @@ public class AgentClient {
 
         SYSTEM_OUT.println("[ Running agent setup ]");
 
-        // If not, ask the appropriate questions
+        // FIXME - For now we will only setup the new transport if the                                                                       
+        // unidirectional agent is available (since currently we don't                                                                       
+        // have a bidirectional agent). Once we have a bidirectional                                                                         
+        // agent, we should always ask if agent communications should                                                                        
+        // use the new transport.                                                                                                            
 
+        //        isNewTransportAgent = askYesNoQuestion("Should Agent communications to " +                                                         
+        //                PRODUCT + " use the new transport ",                                                                                       
+        //                false, QPROP_NEWTRANSPORT);                                                                                                
+
+        String version = ProductProperties.getVersion();
+
+        log.debug("Agent version: "+version);
+
+        boolean isUnidirectionalAgentSupported =
+            version.toLowerCase().indexOf("ee") != -1;
+
+        if (isUnidirectionalAgentSupported) {
+            unidirectional = askYesNoQuestion("Should Agent communications to " +
+                                              PRODUCT + " be unidirectional",
+                                              false, QPROP_UNI);
+
+            // FIXME For now enable the new transport only if we have                                                                        
+            // a unidirectional agent.                                                                                                       
+            isNewTransportAgent = unidirectional;
+        }        
+        
+        // If not, ask the appropriate questions
+        
+        boolean secure;
+        int port;
+        
         while(true){
-            int port;
             host = this.askQuestion("What is the " + PRODUCT +
                                     " server IP address",
                                     null, QPROP_IPADDR);
-            boolean secure = askYesNoQuestion("Should Agent communications " +
+            secure = askYesNoQuestion("Should Agent communications " +
                                               "to " + PRODUCT + " always " +
                                               "be secure", 
                                               false, QPROP_SECURE);
@@ -557,6 +589,36 @@ public class AgentClient {
             }
 
             break;
+        }
+        
+        if (unidirectional) {
+            if (secure) {
+                unidirectionalPort = port;
+            } else {
+                // unidirectional only uses secure communication. Ask for SSL port and verify                                                
+                while(true){
+                    unidirectionalPort = this.askIntQuestion("What is the " + PRODUCT +
+                                       " server SSL port for unidirectional communications",
+                                                   7443, QPROP_SSLPORT);
+
+                    // The unidirectional transport is not hosted via the                                                                    
+                    // JBossLather servlet, but this is ok, since the                                                                        
+                    // undirectional servlet is in the same container as                                                                     
+                    // the JBossLather servlet. We are just testing connectivity                                                             
+                    // to the servlet container here.                                                                                        
+                    String unidirectionalProvider =
+                        AgentCallbackClient.getDefaultProviderURL(host,
+                                                        unidirectionalPort,
+                                                        true);
+                    try {
+                        getConnection(unidirectionalProvider, true);
+                    } catch (AgentCallbackClientException e) {
+                        continue;
+                    }
+
+                    break;
+                }
+            }
         }
 
         while(true){
@@ -612,12 +674,20 @@ public class AgentClient {
             }
         }
 
+        // The old agent token may be needed if re-registering an existing agent                                                             
+        // but changing from non-unidirectional to unidirectional transport.                                                                 
+        // In this case, the agent port will change, so we will need to lookup                                                               
+        // the agent by the old agent token instead of agent IP and port.                                                                    
+        String oldAgentToken = null;
+        
         /* Check to see if this agent already has a setup for a server.
            If it does, allow the user to re-register with the new IP address */
         if((providerInfo = this.camCommands.getProviderInfo()) != null &&
            providerInfo.getProviderAddress() != null &&
            providerInfo.getAgentToken() != null)
         {
+            oldAgentToken = providerInfo.getAgentToken();
+            
             boolean setupTokens;
 
             SYSTEM_OUT.println("- Agent is already setup for " +
@@ -634,8 +704,10 @@ public class AgentClient {
                                    " about agent setup changes");
                 try {
                     response = bizapp.updateAgent(providerInfo.getAgentToken(),
-                                                  user, pword, agentIP, 
-                                                  agentPort);
+                            user, pword, agentIP,
+                            agentPort,
+                            isNewTransportAgent,
+                            unidirectional);
                     if(response != null)
                         SYSTEM_ERR.println("- Error updating agent: " +
                                            response);
@@ -643,6 +715,21 @@ public class AgentClient {
                     SYSTEM_ERR.println("- Error updating agent: " + 
                                        exc.getMessage());
                 }
+                
+                if (providerInfo.isNewTransport()!=isNewTransportAgent ||
+                        providerInfo.isUnidirectional()!=unidirectional) {
+
+                        ProviderInfo registeredProviderInfo =
+                            new ProviderInfo(provider, providerInfo.getAgentToken());
+
+                        if (isNewTransportAgent) {
+                            registeredProviderInfo.setNewTransport(unidirectional,
+                                                                   unidirectionalPort);
+                        }
+
+                        this.camCommands.setProviderInfo(registeredProviderInfo);
+                    }
+                
                 return;
             }
         }
@@ -663,10 +750,13 @@ public class AgentClient {
         SYSTEM_OUT.println("- Registering agent with " + PRODUCT);
         RegisterAgentResult result;
         try {
-            result = bizapp.registerAgent(user, pword, tokenRes.getToken(), 
-                                          agentIP, agentPort,
-                                          ProductProperties.getVersion(),
-                                          getCpuCount());
+            result = bizapp.registerAgent(oldAgentToken,
+                    user, pword,
+                    tokenRes.getToken(),
+                    agentIP, agentPort,
+                    ProductProperties.getVersion(),
+                    getCpuCount(), isNewTransportAgent,
+                    unidirectional);
             response = result.response;
             if(!response.startsWith("token:")){
                 SYSTEM_ERR.println("- Unable to register agent: " + response);
@@ -686,9 +776,16 @@ public class AgentClient {
                            " gave us the following agent token");
         SYSTEM_OUT.println("    " + agentToken);
         SYSTEM_OUT.println("- Informing agent of new " + PRODUCT + " server");
-        this.camCommands.setProviderInfo(new ProviderInfo(provider, agentToken));
+        ProviderInfo registeredProviderInfo = new ProviderInfo(provider, agentToken);
+
+        if (isNewTransportAgent) {
+            registeredProviderInfo.setNewTransport(unidirectional, unidirectionalPort);
+        }
+        
+        this.camCommands.setProviderInfo(registeredProviderInfo);
         SYSTEM_OUT.println("- Validating");
         providerInfo = this.camCommands.getProviderInfo();
+        
         if(providerInfo == null || 
            providerInfo.getProviderAddress().equals(provider) == false ||
            providerInfo.getAgentToken().equals(agentToken) == false)
@@ -706,6 +803,18 @@ public class AgentClient {
 
         } else {
             SYSTEM_OUT.println("- Successfully setup agent");
+            
+            if (providerInfo.isNewTransport()) {
+                String unidirectionalPortString = "";
+                if (providerInfo.isUnidirectional()) {
+                    unidirectionalPortString = ", port="+
+                    providerInfo.getUnidirectionalPort();
+                }
+
+                SYSTEM_OUT.println("- Agent using new transport, unidirectional="+
+                                    providerInfo.isUnidirectional()+
+                                    unidirectionalPortString);
+            }
         }
 
         redirectOutputs(); //win32
