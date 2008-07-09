@@ -61,9 +61,13 @@ import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
@@ -515,22 +519,37 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @param subject AuthzSubject
      * @param resIdsToTemplIds Map of Integer of resourceIds to List of templateIds
      * @return Map of Resource to List of Measurements
+     * @throws PermissionException 
      * @ejb:interface-method
      */
     public Map findMeasurements(AuthzSubject subject, Map resIdsToTemplIds)
+        throws PermissionException
     {
         Map rtn = new HashMap();
         MeasurementDAO dao = getMeasurementDAO();
         ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+        ResourceGroupManagerLocal gMan = ResourceGroupManagerEJBImpl.getOne();
         for (Iterator i=resIdsToTemplIds.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry entry = (Map.Entry)i.next();
             Integer resId = (Integer)entry.getKey();
             List templs = (List)entry.getValue();
             Integer[] tids = (Integer[])templs.toArray(new Integer[0]);
-            // TODO need to do more here if the resource represents a group
-            // TODO need to add permission checking
+            // TODO need to add permission checking for resource
             Resource resource = rMan.findResourcePojoById(resId);
-            rtn.put(resource, dao.findByTemplatesForInstance(tids, resource));
+            Integer resTypeId = resource.getResourceType().getId();
+            if (resTypeId.equals(AuthzConstants.authzGroup)) {
+                ResourceGroup grp = gMan.findResourceGroupById(
+                    subject, resource.getInstanceId());
+                Collection mems = gMan.getMembers(grp);
+                for (Iterator it=mems.iterator(); it.hasNext(); ) {
+                    Resource res = (Resource)it.next();
+                    rtn.put(
+                        res, dao.findByTemplatesForInstance(tids, res));
+                }
+            } else {
+                rtn.put(
+                    resource, dao.findByTemplatesForInstance(tids, resource));
+            }
         }
         return rtn;
     }

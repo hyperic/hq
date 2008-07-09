@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.authz.server.session;
+package org.hyperic.hq.bizapp.server.session;
 
 import java.rmi.RemoteException;
 import java.text.DateFormat;
@@ -42,9 +42,10 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.DashboardPortletBossLocal;
-import org.hyperic.hq.authz.shared.DashboardPortletBossUtil;
-import org.hyperic.hq.bizapp.server.session.MetricSessionEJB;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.DashboardPortletBossLocal;
+import org.hyperic.hq.bizapp.shared.DashboardPortletBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
@@ -58,7 +59,7 @@ import org.json.JSONObject;
 
 /**
  * @ejb:bean name="DashboardPortletBoss"
- *      jndi-name="ejb/authz/DashboardPortletBoss"
+ *      jndi-name="ejb/bizapp/DashboardPortletBoss"
  *      local-jndi-name="LocalDashboardPortletBoss"
  *      view-type="both"
  *      type="Stateless"
@@ -74,12 +75,16 @@ public class DashboardPortletBossEJBImpl
     /**
      * @return JSONArray made up of several JSONObjects.  Output looks similar
      * to this:
-     * [{"data":{"2008-07-08T17:31:15-0700":[1]},"resourceName":"name"},
-     *  {"data":{"2008-07-08T17:32:15-0700":[1]},"resourceName":"name"}]
+     * [[{"data":{"2008-07-09T10:45:28-0700":[1],"2008-07-09T10:46:28-0700":[1],
+     *            "2008-07-09T10:48:28-0700":[1],"2008-07-09T10:58:28-0700":[1]},
+     *    "resourceName":"clone-0"}]]
+     * @throws PermissionException 
      * @ejb:interface-method
      */
     public JSONArray getMeasurementData(AuthzSubject subj, Map resIdsToTemplIds,
-                                        long begin, long end) {
+                                        long begin, long end)
+        throws PermissionException
+    {
         JSONArray rtn = new JSONArray();
         MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
         DataManagerLocal dMan = DataManagerEJBImpl.getOne();
@@ -94,21 +99,21 @@ public class DashboardPortletBossEJBImpl
             List measurements = (List)entry.getValue();
             List data = dMan.getHistoricalData(measurements, begin, end, intv,
                 0, true, pc);
-            for (Iterator it=data.iterator(); it.hasNext(); ) {
-                HighLowMetricValue pt = (HighLowMetricValue)it.next();
-                JSONObject jObj = new JSONObject();
-                try {
+            JSONObject jObj = new JSONObject();
+            try {
+                jObj.put("resourceName", res.getName());
+                JSONObject dataObj = new JSONObject();
+                jObj.put("data", dataObj);
+                for (Iterator it=data.iterator(); it.hasNext(); ) {
                     JSONArray array = new JSONArray();
-                    JSONObject obj = new JSONObject();
+                    HighLowMetricValue pt = (HighLowMetricValue)it.next();
                     array.put(pt.getValue());
                     Date date = new Date(pt.getTimestamp());
-                    obj.put(dateFmt.format(date), array);
-	                jObj.put("resourceName", res.getName());
-	                jObj.put("data", obj);
-                    rtn.put(jObj);
-                } catch (JSONException e) {
-                    _log.error(e.getMessage(), e);
+                    dataObj.put(dateFmt.format(date), array);
                 }
+                rtn.put(jObj);
+            } catch (JSONException e) {
+                _log.error(e.getMessage(), e);
             }
         }
         return rtn;
