@@ -79,11 +79,20 @@ class UserHelper extends BaseHelper {
     }
      
     /**
-     * Update a user's password
+     * Update a user's password hash.
+     * XXX: This method should be renamed to indicate the hashed value
+     *      of the password is required.
      */
     public updateUserPassword(subject, password) {
-        AuthManagerEJBImpl.one.changePasswordHash(userValue, subject.name,
+        AuthManagerEJBImpl.one.changePasswordHash(user, subject.name,
                                                   password)
+    }
+
+    /**
+     * Change the password for a user
+     */
+    public changeUserPassword(subject, password) {
+        AuthManagerEJBImpl.one.changePassword(user, subject.name, password)
     }
 
     /**
