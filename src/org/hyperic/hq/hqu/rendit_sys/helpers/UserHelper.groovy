@@ -2,10 +2,9 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 import java.util.List
 
-import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl
+import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl as AuthMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubjectMan
-import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl as AuthMan
 
 /**
  * The UserHelper can be used to find Users in the HQ system.
@@ -30,7 +29,7 @@ class UserHelper extends BaseHelper {
 
     /**
      * Find a user by name
-     * @return a {@link AuthzSubject}s
+     * @return a {@link AuthzSubject}
      */
     public findUser(String name) {
         subjectMan.findSubjectByName(name)
@@ -49,9 +48,10 @@ class UserHelper extends BaseHelper {
      * Create a user
      * @return a {@link AuthzSubject}s
      */
-    public AuthzSubject createUser(userName, active, dsn, dept, email,
-                                   first, last, phone,
-                                   sms, html) {
+    public createUser(String userName, boolean active, String dsn,
+                      String dept, String email, String first,
+                      String last, String phone, String sms,
+                      boolean html) {
         subjectMan.createSubject(user, userName, active, dsn, dept, email,
                                  first, last, phone, sms, html)
     }
@@ -60,8 +60,10 @@ class UserHelper extends BaseHelper {
      * Create a user with the given password.
      * @return a {@link AuthzSubject}s
      */
-    public AuthzSubject createUser(userName, pass, active, dsn, dept, email,
-                                   first, last, phone, sms, html) {
+    public createUser(String userName, String pass, boolean active,
+                      String dsn, String dept, String email,
+                      String first, String last, String phone,
+                      String sms, boolean html) {
         def user = subjectMan.createSubject(user, userName, active, dsn,
                                             dept, email, first, last, phone,
                                             sms, html)
@@ -71,34 +73,34 @@ class UserHelper extends BaseHelper {
 
     /**
      * Update a user
+     * @param found The {@link AuthzSubject} to update.
      */
-    public void updateUser(found, active, dsn, dept, email, first,
-                           last, phone, sms, html) {
+    public void updateUser(found, boolean active, String dsn,
+                           String dept, String email, String first,
+                           String last, String phone, String sms, boolean html) {
         subjectMan.updateSubject(user, found, active, dsn, dept, email, first,
                                  last, phone, sms, html)
     }
      
     /**
      * Update a user's password hash.
-     * XXX: This method should be renamed to indicate the hashed value
-     *      of the password is required.
      */
-    public updateUserPassword(subject, password) {
-        AuthManagerEJBImpl.one.changePasswordHash(user, subject.name,
-                                                  password)
+    public void updateUserPassword(String subject, String hash) {
+        authMan.changePasswordHash(user, subject.name, hash)
     }
 
     /**
      * Change the password for a user
+     * @param subject The {@link AuthzSubject} to change the password for
      */
-    public changeUserPassword(subject, password) {
-        AuthManagerEJBImpl.one.changePassword(user, subject.name, password)
+    public void changeUserPassword(subject, String password) {
+        authMan.changePassword(user, subject.name, password)
     }
 
     /**
      * Remove a user from database
      */
-    public removeUser(uid) {
-        subjectMan.removeSubject(user, uid)
+    public void removeUser(Integer id) {
+        subjectMan.removeSubject(user, id)
     }
  }
