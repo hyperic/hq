@@ -119,6 +119,8 @@ public class AgentConfig {
     private String     tokenFile;
 
     private AgentConfig(){
+        this.proxyIp = AgentConfig.DEFAULT_PROXY_HOST;
+        this.proxyPort = AgentConfig.DEFAULT_PROXY_PORT;
     }
 
     /**
@@ -271,6 +273,27 @@ public class AgentConfig {
         listenIp = appProps.getProperty(AgentConfig.PROP_LISTENIP[0],
                                         AgentConfig.PROP_LISTENIP[1]);
         this.setListenIp(listenIp);
+        
+        String proxyPort = 
+            appProps.getProperty(AgentConfig.PROP_PROXYPORT[0], 
+                                 AgentConfig.PROP_PROXYPORT[1]);
+                
+        try {
+            int proxyPortInt = Integer.parseInt(proxyPort);
+            
+            if (proxyPortInt != AgentConfig.DEFAULT_PROXY_PORT) {
+                this.setProxyPort(proxyPortInt);
+            }
+        } catch(NumberFormatException exc){
+            throw new AgentConfigException(AgentConfig.PROP_PROXYPORT[0]
+                                           + " is not an integer");
+        }
+        
+        String proxyIp = 
+            appProps.getProperty(AgentConfig.PROP_PROXYHOST[0], 
+                                 AgentConfig.PROP_PROXYPORT[1]);
+        
+        this.setProxyIp(proxyIp);
 
         storageProvider = 
             appProps.getProperty(AgentConfig.PROP_STORAGEPROVIDER[0],
