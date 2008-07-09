@@ -14,6 +14,7 @@ import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.helpers.AgentHelper
 import org.hyperic.hq.hqu.rendit.helpers.AlertHelper
 import org.hyperic.hq.hqu.rendit.helpers.AuditHelper
+import org.hyperic.hq.hqu.rendit.helpers.EscalationHelper
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.rendit.helpers.MetricHelper
 import org.hyperic.hq.hqu.rendit.helpers.UserHelper
@@ -359,6 +360,10 @@ abstract class BaseController {
 
     protected UserHelper getUserHelper() {
         new UserHelper(user)
+    }
+    
+    protected EscalationHelper getEscalationHelper() {
+        new EscalationHelper(user)
     }
 
     /**
