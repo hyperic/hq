@@ -90,9 +90,9 @@ public class AgentDaemon
     private CommandListener      listener;
     private AgentTransportLifecycle agentTransportLifecycle;
     private Vector               serverHandlers;
-    private Vector               startedHandlers;
+    private Vector               startedHandlers = new Vector();
     private AgentConfig    bootConfig;
-    private Hashtable            notifyHandlers;
+    private Hashtable            notifyHandlers = new Hashtable();
     private Hashtable            monitorClients;
     private volatile boolean     running;         // Are we running?
 
