@@ -97,7 +97,7 @@ public class AgentConfig {
 
     private static final String[][] propertyList = {
         PROP_LISTENPORT,
-        PROP_PROXYHOST, 
+        PROP_PROXYHOST,
         PROP_PROXYPORT,
         PROP_STORAGEPROVIDER,
         PROP_STORAGEPROVIDERINFO,
@@ -105,7 +105,8 @@ public class AgentConfig {
         PROP_TMPDIR,
         PROP_LOGDIR,
         PROP_DATADIR,
-        PROP_PDK
+        PROP_LIB_HANDLERS,
+        PROP_LIB_HANDLERS_LIB
     };
 
     private int        listenPort;          // Port the agent should listen on
