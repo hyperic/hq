@@ -105,6 +105,7 @@ public class AgentConfig {
         PROP_TMPDIR,
         PROP_LOGDIR,
         PROP_DATADIR,
+        PROP_PDK,
         PROP_LIB_HANDLERS,
         PROP_LIB_HANDLERS_LIB
     };
