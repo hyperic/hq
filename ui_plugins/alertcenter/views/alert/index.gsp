@@ -58,9 +58,9 @@ dojo.addOnLoad( function(){
 });
 </script>
 
-<div dojoType="dijit.layout.TabContainer" id="mainTabContainer" 
+<div dojoType="TabContainer" id="mainTabContainer" 
      style="width: 100%; height:500px;">
-  <div dojoType="dijit.layout.ContentPane" title="Alerts">
+  <div dojoType="ContentPane" label="Alerts">
     <div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">
       <div style="float:left;width:18%;margin-right:10px;">
         <div class="filters">
@@ -121,7 +121,7 @@ dojo.addOnLoad( function(){
 <div style="clear:both;height:1px;"></div>
   </div>
   
-  <div dojoType="dijit.layout.ContentPane" title="Definitions">
+  <div dojoType="ContentPane" label="Definitions">
    <div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">
       <div style="float:left;display:inline;width:18%;margin-right:10px;">
         <div class="filters">
@@ -202,6 +202,9 @@ dojo.addOnLoad( function(){
         }
         else {
           res['escOnly'] = 'false'
+        }
+        else {
+          res['show'] = 'all';
         }
 
         return res;
