@@ -8065,7 +8065,19 @@ has already been defined.
           nullable="NOT NULL" precision="4000" columnType="VARCHAR2"/>
   </schemaSpec> 
 	
+  <!-- Add new agent type, remove unused sort_name field. -->
   <schemaSpec version="3.96.9">
+    <schema-directSQL>
+      <statement desc="Add new hyperic-hq-remoting agent type">
+          UPDATE EAM_AGENT_TYPE SET name='hyperic-hq-remoting' WHERE name='Other'
+      </statement>
+      <statement desc="Remove unused sort_field column">
+          ALTER TABLE EAM_AGENT_TYPE DROP COLUMN sort_name
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+	
+  <schemaSpec version="3.96.10">
     <schema-addColumn table="EAM_AGENT"
                       column="UNIDIRECTIONAL"
                       columnType="boolean"/>
