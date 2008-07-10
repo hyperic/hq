@@ -52,6 +52,11 @@ public class AIServerDAO extends HibernateDAO
         return (AIServer)super.findById(id);
     }
 
+    public AIServer get(Integer id)
+    {
+        return (AIServer)super.get(id);
+    }    
+
     public AIServer create(AIServerValue server)
     {
         AIServer as = new AIServer();

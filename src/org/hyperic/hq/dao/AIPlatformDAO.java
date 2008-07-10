@@ -54,6 +54,10 @@ public class AIPlatformDAO extends HibernateDAO
         return (AIPlatform)super.findById(id);
     }
 
+    public AIPlatform get(Integer id) {
+        return (AIPlatform)super.get(id);
+    }
+    
     public void save(AIPlatform entity) {
         super.save(entity);
     }

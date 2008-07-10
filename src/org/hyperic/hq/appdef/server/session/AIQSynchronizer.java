@@ -65,7 +65,6 @@ public class AIQSynchronizer {
                                 boolean updateServers,
                                 boolean isApproval,
                                 boolean isReport)
-        throws CreateException, RemoveException, NamingException
     {
         // Is there an entry in the queue for this platform?
         AIPlatform existingQplatform;

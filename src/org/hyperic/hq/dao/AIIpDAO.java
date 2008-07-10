@@ -42,6 +42,11 @@ public class AIIpDAO extends HibernateDAO
         return (AIIp)super.findById(id);
     }
 
+    public AIIp get(Integer id)
+    {
+        return (AIIp)super.get(id);
+    }
+    
     public void save(AIIp entity)
     {
         super.save(entity);

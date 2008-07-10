@@ -123,7 +123,6 @@ public class AIQueueManagerEJBImpl
                                  boolean updateServers,
                                  boolean isApproval,
                                  boolean isReport)
-        throws NamingException, CreateException, RemoveException
     {
         AIPlatformDAO aiplatformLH = getAIPlatformDAO();
         PlatformManagerLocal pmLocal = getPlatformMgrLocal();
@@ -145,8 +144,7 @@ public class AIQueueManagerEJBImpl
         if (revisedAIplatform == null) {
             // log.info("AIQmgr.queue (post appdef-diff): aiplatform=NULL");
             AIPlatform aiplatformLocal;
-            aiplatformLocal =
-                aiplatformLH.findById(aiplatform.getId());
+            aiplatformLocal = aiplatformLH.get(aiplatform.getId());
             removeFromQueue(aiplatformLocal);
             return null;
         }
@@ -187,9 +185,7 @@ public class AIQueueManagerEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public AIPlatformValue syncQueue(AIPlatformValue aiplatform, 
-                                     boolean isApproval) 
-        throws NamingException, CreateException,  RemoveException,
-               FinderException 
+                                     boolean isApproval)
     {
         // Act as admin for now
         AuthzSubjectValue subject = 
@@ -335,42 +331,40 @@ public class AIQueueManagerEJBImpl
     }
 
     /**
-     * Get details of a single ai platform by aiplatformID.
+     * Get an AIPlatformValue by id.
+     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
+     * @return An AIPlatformValue with the given id, or null if that platform
+     * id is not present in the queue.
      */
     public AIPlatformValue findAIPlatformById(AuthzSubjectValue subject,
                                               int aiplatformID)
-        throws NamingException, CreateException, 
-               FinderException, RemoveException {
+    {
+        AIPlatform aiplatform = getAIPlatformDAO().get(new Integer(aiplatformID));
+        if (aiplatform == null) {
+            return null;
+        }
 
-        AIPlatform aiplatform;
-        AIPlatformValue aiplatformValue;
-
-        aiplatform = getAIPlatformDAO().findById(new Integer(aiplatformID));
-        aiplatformValue = aiplatform.getAIPlatformValue();
-
-        aiplatformValue = syncQueue(aiplatformValue, false);
-
-        return aiplatformValue;
+        return syncQueue(aiplatform.getAIPlatformValue(), false);
     }
 
     /**
-     * Get details of a single ai platform by FQDN.
+     * Get an AIPlatformValue by FQDN.
+     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
+     * @return The AIPlatformValue with the given FQDN, or null if that FQDN
+     * does not exist in the queue.
      */
     public AIPlatformValue findAIPlatformByFqdn(AuthzSubjectValue subject,
                                                 String fqdn)
-        throws NamingException, CreateException, FinderException,
-               RemoveException
     {
-        Collection aiplatforms;
         AIPlatform aiplatform = null;
         AIPlatformValue aiplatformValue = null;
 
         // XXX Do authz check
-        aiplatforms = getAIPlatformDAO().findByFQDN(fqdn);
+        Collection aiplatforms = getAIPlatformDAO().findByFQDN(fqdn);
 
         Iterator i = aiplatforms.iterator();
         while (i.hasNext()) {
@@ -381,81 +375,89 @@ public class AIQueueManagerEJBImpl
             aiplatformValue = aiplatform.getAIPlatformValue();
         }
 
-        if (aiplatformValue == null)
+        if (aiplatformValue == null) {
             return null;
-                        
+        }
+
         aiplatformValue = syncQueue(aiplatformValue, false);
         return aiplatformValue;
     }
 
     /**
-     * Get details of a single ai server by serverID.
+     * Get an AIServerValue by Id.
+     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
+     * @return The AIServerValue with the given id, or null if that server id
+     * does not exist in the queue.
      */
     public AIServerValue findAIServerById(AuthzSubjectValue subject,
                                           int serverID)
-        throws FinderException {
+    {
+        AIServer aiserver = getAIServerDAO().get(new Integer(serverID));
 
-        AIServer aiserver;
-        AIServerValue aiserverValue;
+        if (aiserver == null) {
+            return null;
+        }
 
-        aiserver =
-            getAIServerDAO().findById(new Integer(serverID));
-        aiserverValue = aiserver.getAIServerValue();
-        return aiserverValue;
+        return aiserver.getAIServerValue();
     }
 
     /**
-     * Get details of a single ai server by Name.
+     * Get an AIServerValue by name.
+     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
+     * @return The AIServerValue with the given id, or null if that server name
+     * does not exist in the queue.
      */
     public AIServerValue findAIServerByName(AuthzSubjectValue subject,
                                             String name )
-        throws FinderException {
-
+    {
         // XXX Do authz check
         AIServer aiserver = getAIServerDAO().findByName(name);
         if (aiserver == null) {
-            throw new FinderException("can't find server:" + name);
+            return null;
         }
 
-        AIServerValue aiserverValue = aiserver.getAIServerValue();
-        return aiserverValue;
+        return aiserver.getAIServerValue();
     }
 
     /**
-     * Get details of a single ai ip by ipID.
+     * Get an AIIp by id.
+     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
+     * @return  The AIIp with the given id, or null if that ip does not exist.
      */
     public AIIpValue findAIIpById(AuthzSubjectValue subject,
                                   int ipID )
-        throws FinderException {
-
-        AIIp aiip = getAIIpDAO().findById(new Integer(ipID));
-        AIIpValue aiipValue = aiip.getAIIpValue();
-        return aiipValue;
+    {
+        AIIp aiip = getAIIpDAO().get(new Integer(ipID));
+        if (aiip == null) {
+            return null;
+        }
+        return aiip.getAIIpValue();        
     }
 
     /**
-     * Get details of a single ai ip by Address.
+     * Get an AIIpValue by address.
+     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
+     * @return The AIIpValue with the given address, or null if an ip with
+     * that address does not exist in the queue.
      */
     public AIIpValue findAIIpByAddress(AuthzSubjectValue subject,
                                        String address)
-        throws FinderException {
-
+    {
         // XXX Do authz check
         List aiips = getAIIpDAO().findByAddress(address);
         if (aiips.size() == 0) {
-            throw new FinderException("Can't find ip: " + address);
+            return null;
         }
 
-        AIIpValue aiipValue = ((AIIp) aiips.get(0)).getAIIpValue();
-        return aiipValue;
+        return ((AIIp) aiips.get(0)).getAIIpValue();
     }
 
     /**
@@ -553,7 +555,7 @@ public class AIQueueManagerEJBImpl
                 }
 
                 try {
-                    aiplatform = aiplatformLH.findById(id);
+                    aiplatform = aiplatformLH.get(id);
                 } catch ( ObjectNotFoundException e ) {
                     if (isPurgeAction) continue;
                     else throw e;
@@ -589,7 +591,7 @@ public class AIQueueManagerEJBImpl
                     continue;
                 }
                 try {
-                    aiip = aiipLH.findById(id);
+                    aiip = aiipLH.get(id);
                 } catch (ObjectNotFoundException e) {
                     if (isPurgeAction) continue;
                     else throw e;
@@ -611,7 +613,7 @@ public class AIQueueManagerEJBImpl
                     continue;
                 }
                 try {
-                    aiserver = aiserverLH.findById(id);
+                    aiserver = aiserverLH.get(id);
                 } catch (ObjectNotFoundException e) {
                     if (isPurgeAction) continue;
                     else throw e;
@@ -637,8 +639,7 @@ public class AIQueueManagerEJBImpl
             iter = aiplatformsToResync.keySet().iterator();
             while ( iter.hasNext() ) { 
                 id = (Integer) iter.next();
-                aiplatform =
-                    aiplatformLH.findById(id);
+                aiplatform = aiplatformLH.get(id);
                 syncQueue(aiplatform.getAIPlatformValue(), isApproveAction);
             }
             
@@ -661,7 +662,7 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void removeFromQueue(AIPlatform aiplatform ) throws RemoveException {
+    public void removeFromQueue(AIPlatform aiplatform ) {
         // Remove the platform, this should recursively remove all queued 
         // servers and IPs
         DAOFactory.getDAOFactory().getAIPlatformDAO().remove(aiplatform);
@@ -679,7 +680,7 @@ public class AIQueueManagerEJBImpl
         AIPlatform aiplatform;
 
         // XXX Do authz check
-        aiplatform = getAIPlatformDAO().findById(new Integer(aiPlatformID));
+        aiplatform = getAIPlatformDAO().get(new Integer(aiPlatformID));
         return getPlatformByAI(subject, aiplatform);
     }
 
@@ -689,9 +690,9 @@ public class AIQueueManagerEJBImpl
      */
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubjectValue subject,
                                                      int platformID)
-        throws FinderException, NamingException, PermissionException
+        throws PermissionException
     {
-        Platform pLocal = getPlatformDAO().findById(new Integer(platformID));
+        Platform pLocal = getPlatformDAO().get(new Integer(platformID));
 
         Collection ips = pLocal.getIps();
         // We can't use the FQDN to find a platform, because

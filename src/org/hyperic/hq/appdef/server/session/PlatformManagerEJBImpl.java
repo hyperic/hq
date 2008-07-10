@@ -1130,15 +1130,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                         aiPlatform.addAIIpValue(aiIpVal);
                     }
 
-                    try {
-                        aiqManagerLocal.queue(subject, aiPlatform,
-                                              false, false, true);
-                    } catch (CreateException e) {
-                        _log.error("Cannot create AIPlatform for " +
-                                  existing.getName(), e);
-                    } catch (RemoveException e) {
-                        _log.error("Cannot remove from AIQueue", e);
-                    }
+                    aiqManagerLocal.queue(subject, aiPlatform,
+                                          false, false, true);
                 }
                 getPlatformDAO().updatePlatform(existing);
                 return true;
