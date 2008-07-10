@@ -48,4 +48,13 @@ class EscalationHelper extends BaseHelper {
         }
     }
 
+    /**
+     * Create an Escalation
+     */
+     Escalation createEscalation(String name, String description,
+                                 boolean pauseAllowed, long maxWaitTime,
+                                 boolean notifyAll, boolean repeat) {
+        escMan.createEscalation(name, description, pauseAllowed, maxWaitTime,
+                                notifyAll, repeat)
+    }
 }
