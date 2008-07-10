@@ -39,6 +39,16 @@ class AutodiscoveryHelper extends BaseHelper {
     }
 
     /**
+     * Find an AIPlatformValue by id.
+     * @param id The id to look up.
+     * @return A {@link AIPlatformValue} with the given id or null if a
+     * queued platform with the given id does not exist.
+     */
+    public AIPlatformValue findById(int id) {
+        aiqMan.findAIPlatformById(user, id)
+    }
+    
+    /**
      * Approve the platform with the given fqdn.
      * @param fqdn The platform fqdn to approve
      * @return A List of {@link org.hyperic.hq.appdef.server.session.AppdefResource}s
