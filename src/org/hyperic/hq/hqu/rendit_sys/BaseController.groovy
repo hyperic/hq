@@ -18,6 +18,7 @@ import org.hyperic.hq.hqu.rendit.helpers.EscalationHelper
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.rendit.helpers.MetricHelper
 import org.hyperic.hq.hqu.rendit.helpers.UserHelper
+import org.hyperic.hq.hqu.rendit.helpers.AutodiscoveryHelper
 import org.hyperic.hq.hqu.rendit.render.RenderFrame
 
 import org.apache.commons.fileupload.servlet.ServletFileUpload
@@ -364,6 +365,10 @@ abstract class BaseController {
     
     protected EscalationHelper getEscalationHelper() {
         new EscalationHelper(user)
+    }
+
+    protected AutodiscoveryHelper getAutodiscoveryHelper() {
+        new AutodiscoveryHelper(user)
     }
 
     /**
