@@ -819,6 +819,7 @@ public class AgentDaemon
             this.listener.listenLoop();
             this.sendNotification(NOTIFY_AGENT_DOWN, "goin' down, baby!");
         } catch(AgentStartException exc){
+            logger.error(exc.getMessage(), exc);
             throw exc;
         } catch(Exception exc){
             this.logger.error("Error running agent", exc);
