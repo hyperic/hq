@@ -102,9 +102,7 @@ public final class AuthenticationFilter extends BaseFilter {
                                              webUser);
                     } catch (Exception e) {
                         // Unsuccessful login
-                        log.error("Unsuccessful login from " + user);
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                        return;
+                        log.debug("User attempted to log in with " + userpass);
                     }
                 }
             }
