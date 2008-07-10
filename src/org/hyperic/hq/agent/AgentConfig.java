@@ -62,6 +62,7 @@ public class AgentConfig {
     
     private static final String DEFAULT_PROXY_HOST = "";
     private static final int DEFAULT_PROXY_PORT = -1;
+    private static final int DEFAULT_NOTIFY_UP_PORT = -1;
 
     // The following final objects are the properties which are usable
     // within the configuation object.  The first element in the array
@@ -114,6 +115,9 @@ public class AgentConfig {
     private String     listenIp;            // IP the agent listens on
     private int        proxyPort;           // Proxy server port
     private String     proxyIp;             // IP for the proxy server
+    private int        notifyUpPort;        // The port which the AgentClient defines 
+    // where the CommandServer can connect to notify
+    // it of successful startup.
     private String     storageProvider;     // Classname for the provider
     private String     storageProviderInfo;  // Argument to the storage init()
     private Properties bootProps;           // Bootstrap properties
@@ -122,6 +126,7 @@ public class AgentConfig {
     private AgentConfig(){
         this.proxyIp = AgentConfig.DEFAULT_PROXY_HOST;
         this.proxyPort = AgentConfig.DEFAULT_PROXY_PORT;
+        this.notifyUpPort = AgentConfig.DEFAULT_NOTIFY_UP_PORT;
     }
 
     /**
@@ -460,6 +465,28 @@ public class AgentConfig {
         } else {
             return InetAddress.getByName(this.getListenIp());
         }
+    }
+    
+    /**
+     * @return The notify up port or -1 if not set.
+     */
+    public int getNotifyUpPort() {
+        return this.notifyUpPort;
+    }
+    
+    /**
+     * Sets the port which the AgentClient defines where the CommandServer 
+     * can connect to notify it of successful startup.
+     *
+     * @param port New port to set.  The port should be in the range of
+     *             1 to 65535
+     *
+     * @throws AgentConfigException indicating the port was not within a valid
+     *                              range
+     */
+    public void setNotifyUpPort(int port) throws AgentConfigException {
+        verifyValidPortRange(port);
+        this.notifyUpPort = port;
     }
     
     /**

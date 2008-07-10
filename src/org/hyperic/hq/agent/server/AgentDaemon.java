@@ -71,6 +71,8 @@ public class AgentDaemon
         AgentDaemon.class.getName() + ".agentUp";
     public static final String NOTIFY_AGENT_DOWN =
         AgentDaemon.class.getName() + ".agentDown";
+    public static final String NOTIFY_AGENT_FAILED_START = 
+        AgentDaemon.class.getName()+ ".agentFailedStart";
 
     public static final String PROP_CERTDN = "agent.certDN";
     public static final String PROP_HOSTNAME = "agent.hostName";
@@ -760,6 +762,7 @@ public class AgentDaemon
 
         this.logger.info("Agent starting up");
         this.running = true;
+        boolean agentStarted = false;
 
         bootProps = this.bootConfig.getBootProperties();
         tmpDir = bootProps.getProperty(AgentConfig.PROP_TMPDIR[0]);
@@ -812,6 +815,7 @@ public class AgentDaemon
             this.listener.setup();
             this.logger.info("Agent started successfully");
             this.sendNotification(NOTIFY_AGENT_UP, "we're up, baby!");
+            agentStarted = true;
             this.listener.listenLoop();
             this.sendNotification(NOTIFY_AGENT_DOWN, "goin' down, baby!");
         } catch(AgentStartException exc){
@@ -830,8 +834,13 @@ public class AgentDaemon
             }
             System.exit(1);
             // The next line will never execute 
-            throw new AgentStartException("Critical shutdown");
+            throw new AgentStartException("Critical shutdown");   
         } finally {
+            if (!agentStarted) {
+                logger.debug("Notifying that agent startup failed");
+                this.sendNotification(NOTIFY_AGENT_FAILED_START, "agent startup failed!");
+            }
+            
             if (this.agentTransportLifecycle != null) {
                 this.agentTransportLifecycle.stopAgentTransport();
             }
