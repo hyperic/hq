@@ -113,8 +113,8 @@ public class AgentMonitor implements MonitorInterface
 
         try {
             ScheduleMeasurements_args args = new ScheduleMeasurements_args();
-            MeasurementCommandsClient client =
-                new MeasurementCommandsClient(conn);
+            MeasurementCommandsClient client = 
+                MeasurementCommandsClientFactory.getInstance().getClient(agent);
             
             args.setSRN(srn);
 
@@ -165,8 +165,8 @@ public class AgentMonitor implements MonitorInterface
         conn = new SecureAgentConnection(agent);
 
         try {
-            MeasurementCommandsClient client =
-                new MeasurementCommandsClient(conn);
+            MeasurementCommandsClient client = 
+                MeasurementCommandsClientFactory.getInstance().getClient(agent);
 
             UnscheduleMeasurements_args args = 
                 new UnscheduleMeasurements_args();
@@ -216,7 +216,8 @@ public class AgentMonitor implements MonitorInterface
                 args.addMeasurement(dsns[i]);
             }
 
-            client = new MeasurementCommandsClient(conn);
+            client = 
+                MeasurementCommandsClientFactory.getInstance().getClient(agent);
             result = client.getMeasurements(args);
             res    = new MetricValue[dsns.length];
 

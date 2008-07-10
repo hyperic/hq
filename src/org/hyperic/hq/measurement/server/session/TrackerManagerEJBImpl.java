@@ -39,6 +39,7 @@ import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
+import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClientFactory;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerUtil;
 import org.hyperic.hq.product.PluginException;
@@ -80,7 +81,7 @@ public class TrackerManagerEJBImpl
 
     private MeasurementCommandsClient getClient(AppdefEntityID aid)
         throws PermissionException, AgentNotFoundException {
-        return new MeasurementCommandsClient(AgentConnectionUtil.getClient(aid));
+        return MeasurementCommandsClientFactory.getInstance().getClient(aid);
     }
 
     /** 
