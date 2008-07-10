@@ -450,6 +450,8 @@ public class AgentDaemon
 
         // set the lather proxy host and port if applicable
         if (cfg.isProxyServerSet()) {
+            this.logger.info("Setting proxy server: host="+cfg.getProxyIp()+
+                             "; port="+cfg.getProxyPort()); 
             System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, cfg
                     .getProxyIp());
             System.setProperty(AgentConfig.PROP_LATHER_PROXYPORT, String
