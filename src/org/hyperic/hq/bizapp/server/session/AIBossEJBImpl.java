@@ -414,14 +414,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException {
         
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        AIServerValue aiserver;
 
-        try {
-            aiserver = getAIManager().findAIServerById(subject, serverID);
-        } catch(FinderException exc){
-            throw new SystemException(exc);
-        }
-        return aiserver;
+        return getAIManager().findAIServerById(subject, serverID);
     }
 
     /**
@@ -432,12 +426,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-
-        try {
-            return getAIManager().findAIServerByName(subject, name);
-        } catch(FinderException exc){
-            throw new SystemException(exc);
-        }
+        return getAIManager().findAIServerByName(subject, name);
     }
 
     /**
@@ -448,12 +437,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException {
         
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-
-        try {
-            return getAIManager().findAIIpById(subject, ipID);
-        } catch(FinderException exc){
-            throw new SystemException(exc);
-        }
+        return getAIManager().findAIIpById(subject, ipID);
     }
 
     /**
@@ -464,11 +448,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        try {
-            return getAIManager().findAIIpByAddress(subject, address);
-        } catch(FinderException exc){
-            throw new SystemException(exc);
-        }
+        return getAIManager().findAIIpByAddress(subject, address);
     }
 
     /**
@@ -560,12 +540,9 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        try {
-            AIPlatformValue aiplatform =
-                getAIManager().getAIPlatformByPlatformID(subject, platformID);
-            if (aiplatform != null)
-                return aiplatform;
-        } catch(FinderException exc){
+        AIPlatformValue aiplatform =
+            getAIManager().getAIPlatformByPlatformID(subject, platformID);
+        if (aiplatform != null) {
             throw new PlatformNotFoundException(platformID);
         }
 

@@ -1092,12 +1092,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                             aiPlatform.addAIIpValue(aiIpVal);
                         }
 
-                        try {
-                            aiqManagerLocal.queue(subject, aiPlatform, false,
-                                                  false, true);
-                        } catch (RemoveException e) {
-                            _log.error("Cannot remove from AIQueue", e);
-                        }
+                        aiqManagerLocal.queue(subject, aiPlatform, false,
+                                              false, true);
                     }
                     else if (!plat.getAgent().equals(existing.getAgent())){
                         // Need to enqueue the ResourceUpdatedZevent if the
