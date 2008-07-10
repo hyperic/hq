@@ -395,15 +395,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        AIPlatformValue aiplatform;
 
-        try {
-            aiplatform = getAIManager().findAIPlatformByFqdn(subject, fqdn);
-        } catch(Exception exc){
-            throw new SystemException(exc);
-        }
-
-        return aiplatform;
+        return getAIManager().findAIPlatformByFqdn(subject, fqdn);
     }
 
     /**
