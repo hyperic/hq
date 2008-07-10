@@ -25,7 +25,12 @@
 
 package org.hyperic.hq.agent;
 
-public class FileData {
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
+public class FileData implements Externalizable {
     public static final int WRITETYPE_CREATEONLY        = 1;
     public static final int WRITETYPE_CREATEOROVERWRITE = 2;
     public static final int WRITETYPE_REWRITE           = 3;
@@ -33,18 +38,49 @@ public class FileData {
     private String destFile;
     private long   size;
     private int    writeType;
+    private String md5sum;
+    
+    /**
+     * Default constructor for externalization only.
+     */
+    public FileData() {}
 
-    public FileData(String destFile, long size, int writeType){
+    public FileData(String destFile, long size, int writeType) {
+        if (destFile == null) {
+            throw new NullPointerException("destination file is null");
+        }
+        
         this.destFile  = destFile;
         this.size      = size;
-        this.writeType = writeType;
-
+        this.writeType = writeType;     
+        
         if(this.writeType < WRITETYPE_CREATEONLY ||
            this.writeType > WRITETYPE_REWRITE)
         {
             throw new IllegalArgumentException("Unknown write-type, " +
                                                writeType);
         }
+    }
+    
+    /**
+     * Set the MD5 check sum for this file.
+     * 
+     * @param md5sum The check sum.
+     * @throws NullPointerException if the check sum is <code>null</code>.
+     */
+    public void setMD5CheckSum(String md5sum) {
+        if (md5sum == null) {
+            throw new NullPointerException("md5sum check sum is null");
+        }
+        
+        this.md5sum = md5sum;
+    }
+    
+    /**
+     * @return The MD5 check sum or <code>null</code> if never set.
+     */
+    public String getMD5CheckSum() {
+        return this.md5sum;
     }
 
     public String getDestFile(){
@@ -58,4 +94,19 @@ public class FileData {
     public int getWriteType(){
         return this.writeType;
     }
+
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        this.destFile = in.readUTF();
+        this.size = in.readLong();
+        this.writeType = in.readInt();
+        this.md5sum = in.readUTF();
+    }
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(this.destFile);
+        out.writeLong(this.size);
+        out.writeInt(this.writeType);
+        out.writeUTF(this.md5sum);
+    }
+        
 }

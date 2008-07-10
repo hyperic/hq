@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
@@ -67,6 +68,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.hyperic.util.security.MD5;
 import org.hyperic.hq.dao.PlatformDAO;
 
 import org.apache.commons.logging.Log;
@@ -661,7 +663,8 @@ public class AgentManagerEJBImpl
                                               String[][] files,
                                               int[] modes)
         throws AgentNotFoundException, AgentConnectionException, 
-               AgentRemoteException, PermissionException, FileNotFoundException
+               AgentRemoteException, PermissionException, 
+               FileNotFoundException, IOException
     {
         AgentCommandsClient client = 
             AgentCommandsClientFactory.getInstance().getClient(id);
@@ -670,18 +673,43 @@ public class AgentManagerEJBImpl
 
         FileData[] data = new FileData[files.length];
         InputStream[] streams = new InputStream[files.length];
+        
+        try {
+            for (int i = 0; i < files.length; i++) {
+                File file = new File(files[i][0]);
+                
+                FileData fileData = new FileData(files[i][1], 
+                                                 file.length(), 
+                                                 modes[i]);
+                
+                String md5sum = MD5.getDigestString(file);
 
-        for (int i = 0; i < files.length; i++) {
-            File file = new File(files[i][0]);
-            FileData fileData = new FileData(files[i][1], file.length(), 
-                                             modes[i]);
-            FileInputStream is = new FileInputStream(file);
+                fileData.setMD5CheckSum(md5sum);
+                
+                FileInputStream is = new FileInputStream(file);
 
-            data[i] = fileData;
-            streams[i] = is;
-        }                
+                data[i] = fileData;
+                streams[i] = is;
+            }                
 
-        return client.agentSendFileData(data, streams);
+            return client.agentSendFileData(data, streams);            
+        } finally {
+            safeCloseStreams(streams);
+        }
+    }
+    
+    private void safeCloseStreams(InputStream[] streams) {
+        for (int i = 0; i < streams.length; i++) {
+            InputStream is = streams[i];
+            
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // swallow
+                }
+            }
+        }
     }
 
     public static AgentManagerLocal getOne() {

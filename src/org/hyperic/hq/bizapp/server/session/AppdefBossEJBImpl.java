@@ -26,6 +26,7 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -3326,7 +3327,7 @@ public class AppdefBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, AgentNotFoundException,
                AgentRemoteException, AgentConnectionException,
-               FileNotFoundException
+               FileNotFoundException, IOException
     {
         AuthzSubjectValue who;
 

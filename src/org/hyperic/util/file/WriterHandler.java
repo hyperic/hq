@@ -41,6 +41,10 @@ class WriterHandler {
         this.cleanedUp  = false;
         this.wrote      = false;
     }
+    
+    public boolean hasWritten() {
+        return this.wrote;
+    }
 
     public void cleanup(){
         if(this.cleanedUp){
