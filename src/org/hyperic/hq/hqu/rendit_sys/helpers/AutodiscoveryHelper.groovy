@@ -5,7 +5,6 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue
 import org.hyperic.hq.appdef.shared.AIQueueConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.util.pager.PageControl
-import org.hyperic.hq.appdef.server.session.AppdefResource
 
 /**
  * The AutodiscoveryHelper can be used to list and approve resources into
@@ -14,7 +13,6 @@ import org.hyperic.hq.appdef.server.session.AppdefResource
 class AutodiscoveryHelper extends BaseHelper {
 
     private aiqMan = AIQMan.one
-    AppdefResource res;
     AutodiscoveryHelper(AuthzSubject user) {
         super(user)
     }
