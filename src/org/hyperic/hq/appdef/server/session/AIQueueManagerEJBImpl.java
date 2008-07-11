@@ -70,7 +70,6 @@ import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
-import org.hyperic.hq.autoinventory.server.session.AIUtil;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
