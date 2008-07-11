@@ -47,6 +47,7 @@ import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentMonitorValue;
+import org.hyperic.hq.agent.AgentStartupCallback;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
@@ -833,7 +834,7 @@ public class AgentDaemon
                 this.storageProvider.dispose();
                 this.storageProvider = null;
             }
-            System.exit(1);
+
             // The next line will never execute 
             throw new AgentStartException("Critical shutdown");   
         } finally {
@@ -857,8 +858,9 @@ public class AgentDaemon
 
     public static class RunnableAgent implements Runnable {
         public void run() {
-            AgentConfig cfg;
-            AgentDaemon agent;
+            boolean isConfigured = false;  
+            AgentConfig cfg = null;
+            AgentDaemon agent = null;
             String propFile;
 
             // Setup basic logging facility -- if we need to override it, we can.
@@ -867,21 +869,17 @@ public class AgentDaemon
             propFile =
                 System.getProperty(AgentConfig.PROP_PROPFILE,
                                    AgentConfig.DEFAULT_PROPFILE);
-
-            //disabled to allow for configurable log directory.
-            //also i think watching this file and not ~/.cam/agent.properties
-            //will wipe out custom log config if this file changes.
-            //XXX and unclear if it is worth having the extra thread
-            //around to watch for log config changes.
-            //PropertyConfigurator.configureAndWatch(propFile);
-
             try {
                 cfg = AgentConfig.newInstance(propFile);
-            } catch(Exception exc){
-                SYSTEM_ERR.println("Unable to configure agent: " + 
-                                   exc.getMessage());
-                exc.printStackTrace(SYSTEM_ERR);
-                return;
+                isConfigured = true;
+            } catch (AgentConfigException e) {
+                logger.error("Agent configuration error: ", e);    
+            } catch (Exception e) {
+                logger.error("Agent configuration failed: ", e);                                
+            } finally {
+                if (!isConfigured) {
+                    cleanUpOnAgentConfigFailure();
+                }
             }
   
             // Re-configue with the merged agent configuration.  This will
@@ -889,18 +887,41 @@ public class AgentDaemon
             // .cam/agent.properties.
             PropertyConfigurator.configure(cfg.getBootProperties());
  
-            try {
-                agent = AgentDaemon.newInstance(cfg);
-                agent.start();
-            } catch(AgentConfigException exc) {
-                SYSTEM_ERR.println("Unable to configure agent: " + 
-                                   exc.getMessage());
-                System.exit(-1);
-            } catch(AgentStartException exc) {
-                SYSTEM_ERR.println("Agent startup error: " + exc.getMessage());
-                System.exit(-1);
+            boolean isStarted = false;
+            
+            if (agent != null) {
+                try {
+                    agent = AgentDaemon.newInstance(cfg);
+                    agent.start();
+                    isStarted = true;
+                } catch(AgentStartException e) {
+                    logger.error("Agent startup error: ", e);                                
+                } catch (Exception e) {
+                    logger.error("Agent startup failed: ", e);                
+                } finally {
+                    if (!isStarted) {
+                        cleanUpOnAgentStartFailure();
+                    }
+                }                
             }
+            
         }
+        
+        private void cleanUpOnAgentConfigFailure() {
+            try {
+                AgentStartupCallback agentStartupCallback = new AgentStartupCallback();
+                agentStartupCallback.onAgentStartup(false);
+            } catch (Exception e) {
+                logger.error("Failed to callback on startup failure.", e);
+            }
+            
+            cleanUpOnAgentStartFailure();
+        }
+        
+        private void cleanUpOnAgentStartFailure() {
+            System.exit(-1);
+        }
+        
     }
 
     public static void main(String[] args) {
