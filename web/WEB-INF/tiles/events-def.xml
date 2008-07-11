@@ -25,31 +25,26 @@
   <definition name=".page.title.events.platform"
       extends=".page.title">
     <put name="titleBgStyle" value="PageTitlePlatformBg"/>
-    <put name="titleImg" value="title_platform.gif"/>
   </definition>
 
   <definition name=".page.title.events.server"
       extends=".page.title">
     <put name="titleBgStyle" value="PageTitleServerBg"/>
-    <put name="titleImg" value="title_server.gif"/>
   </definition>
 
   <definition name=".page.title.events.service"
       extends=".page.title">
       <put name="titleBgStyle" value="PageTitleServiceBg"/>
-    <put name="titleImg" value="title_service.gif"/>
   </definition>
 
   <definition name=".page.title.events.application"
       extends=".page.title">
       <put name="titleBgStyle" value="PageTitleApplicationBg"/>
-    <put name="titleImg" value="title_application.gif"/>
   </definition>
 
   <definition name=".page.title.events.group"
       extends=".page.title">
       <put name="titleBgStyle" value="PageTitleGroupBg"/>
-    <put name="titleImg" value="title_group.gif"/>
   </definition>
 
   <!-- list is different because of the resource owner stuff -->
@@ -58,7 +53,6 @@
       <put name="linkUrl" 
           value="/resource/platform/inventory/PlatformLinks.jsp"/>
     <put name="titleBgStyle" value="PageTitlePlatformBg"/>
-    <put name="titleImg" value="title_platform.gif"/>
   </definition>
   
   <definition name=".page.title.events.list.server"
@@ -66,7 +60,6 @@
       <put name="linkUrl" 
           value="/resource/server/inventory/ServerLinks.jsp"/>
     <put name="titleBgStyle" value="PageTitleServerBg"/>
-    <put name="titleImg" value="title_server.gif"/>
   </definition>
   
   <definition name=".page.title.events.list.service"
@@ -74,7 +67,6 @@
       <put name="linkUrl" 
           value="/resource/service/inventory/ServiceLinks.jsp"/>
       <put name="titleBgStyle" value="PageTitleServiceBg"/>
-      <put name="titleImg" value="title_service.gif"/>
   </definition>
   
   <definition name=".page.title.events.list.application"
@@ -82,7 +74,6 @@
       <put name="linkUrl" 
           value="/resource/application/inventory/ApplicationLinks.jsp"/>
       <put name="titleBgStyle" value="PageTitleApplicationBg"/>
-    <put name="titleImg" value="title_application.gif"/>
   </definition>
   
   <definition name=".page.title.events.list.group"
@@ -90,7 +81,6 @@
       <put name="linkUrl" 
           value="/resource/group/inventory/GroupLinks.jsp"/>
       <put name="titleBgStyle" value="PageTitleGroupBg"/>
-      <put name="titleImg" value="title_group.gif"/>
   </definition>
   
   <!-- view -->
