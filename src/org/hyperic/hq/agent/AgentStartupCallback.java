@@ -31,6 +31,7 @@ import java.net.Socket;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 
 /**
  * A callback class that notifies the starting entity (most likely the agent 
@@ -45,15 +46,19 @@ public class AgentStartupCallback {
     /**
      * Creates an instance.
      *
-     * @param config The agent configuration.
+     * @throws AgentConfigException  if the "camUpPort" is not specified.
      * @throws IOException if the callback fails to establish a connection 
      *                      to the starting entity.
      */
-    public AgentStartupCallback(AgentConfig config) throws AgentConfigException, IOException {
+    public AgentStartupCallback() throws AgentConfigException, IOException {
+        String startupPort = System.getProperty(CommandsAPIInfo.PROP_UP_PORT);
         
-        int sPort = config.getNotifyUpPort();
-
-        if (sPort != -1) {
+        if(startupPort == null){
+            throw new AgentConfigException("Failure to find startup " +
+                                           "reporting port in sys properties");
+        } else {
+            int sPort = Integer.parseInt(startupPort);
+            
             try {
                 _startupSock = new Socket("127.0.0.1", sPort);
             } catch(IOException exc){
@@ -62,11 +67,8 @@ public class AgentStartupCallback {
                 throw new IOException("Failed to connect to startup " +
                                       "port (" + sPort + "): " +
                                       exc.getMessage());
-            }            
-        } else {
-            _log.debug("Agent startup callback is disabled");
-            _startupSock = null;
-        }
+            }
+        }        
     }
     
     /**
