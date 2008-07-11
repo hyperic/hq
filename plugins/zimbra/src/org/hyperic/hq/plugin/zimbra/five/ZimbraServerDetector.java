@@ -70,7 +70,7 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 
 	private final static String[][] SERVICES = { { "MySQL", "/db/mysql.pid" }, { "Postfix", "/data/postfix/spool/pid/master.pid" }, { "Log Watch", "/log/logswatch.pid" }, { "Logger MySQL", "/logger/db/mysql.pid" }, { "OpenLDAP", "/openldap/var/run/slapd.pid" }, { "Swatch", "/log/swatch.pid" }, { "MTA Config", "/log/zmmtaconfig.pid" }, { "memcached", "/log/memcached.pid" }, { "ClamAV", "/log/clamd.pid" }, { "Convertd Monitor", "/log/zmconvertdmon.pid" }, { "Jetty Process", "/log/zmmailboxd_java.pid" } };
 	private final static String[][] MULTI_SERVICES = { { "AMaViS", "/log/amavisd.pid" }, { "HTTPD", "/log/httpd.pid" }, { "NGINX", "/log/nginx.pid" }, { "Cyrus SASL", "/cyrus-sasl/state/saslauthd.pid" } };
-	private final static String[][] OTHER_SERVICES = { { "MTAQueue Stats", "/zmstat/mtaqueue.csv" }, { "PROC Stats", "/zmstat/proc.csv" }, { "VM Stats", "/zmstat/vm.csv" } };
+	private final static String[][] OTHER_SERVICES = { { "MTAQueue Stats", "/zmstat/mtaqueue.csv" }, { "VM Stats", "/zmstat/vm.csv" } };
 
 	protected List discoverServices(ConfigResponse config) throws PluginException {
 		log.debug("discoverServices(" + config + ")");
