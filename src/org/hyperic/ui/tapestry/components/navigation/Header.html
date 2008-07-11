@@ -1,5 +1,5 @@
 <div id="header">
-    <div id="headerLogo" title="Home" onclick="/Dashboard.do">&nbsp;</div>
+    <div id="headerLogo" title="Home" onclick="location.href='/Dashboard.do'">&nbsp;</div>
     <if jwcid="@If" condition="ognl:isLoggedIn" renderTag="false">
     <div jwcid="@NavigationTabs" navigationMenu="ognl:navigationMenu"/>
     </if>
