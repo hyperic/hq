@@ -860,7 +860,7 @@ public class AgentDaemon
         public void run() {
             boolean isConfigured = false;  
             AgentConfig cfg = null;
-            AgentDaemon agent = null;
+            AgentDaemon agent;
             String propFile;
 
             // Setup basic logging facility -- if we need to override it, we can.
@@ -889,7 +889,7 @@ public class AgentDaemon
  
             boolean isStarted = false;
             
-            if (agent != null) {
+            if (cfg != null) {
                 try {
                     agent = AgentDaemon.newInstance(cfg);
                     agent.start();
