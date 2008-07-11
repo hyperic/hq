@@ -1407,7 +1407,7 @@ ul.eventDetails li {
 }
 
 .dialog_content {
-    background-color: #eee;
+    background-color: #FFF;
     color: #DDD;
     font-family: Tahoma, Arial, sans-serif;
     font-size: 10px;
@@ -1423,16 +1423,28 @@ ul.eventDetails li {
 }
 
 .dialog {
-    background: #ccc;
+    background-color: #fff;
     border-color: #F35E0C;
     border-style: solid;
     border-width: 1px;
     display: block;
-    filter: alpha(opacity=85);
-    opacity: 0.85;
     position: absolute;
     z-index: 300
 }
+.dialog table .PageTitle{
+	background-color:#fff; 
+}
+.dialog table .displaylabel {
+	background-color:#fff
+}
+
+.dialog table .displaysubhead {
+    background-color:#fff
+}
+
+.dialog table .displaycontent {
+    background-color:#fff
+}   
 
 .dialog table.table_window {
     border-collapse: collapse;
