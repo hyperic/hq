@@ -60,11 +60,13 @@ hyperic.utils.key = {
     },
     registerListener : function(/*DOMNode*/node, /*fp*/handler){
         if (handler && node) {
+            dojo.event.connect(node, 'onkeyup', handler);
+            /*
             if (dojo.isIE) {
-                node.attachEvent("onkeyup", handler);
+                node.attachEvent("keyup", handler);
             } else {
                 node.addEventListener("keyup", handler, false);
-            }
+            }*/
         }
     }
 };
@@ -133,46 +135,6 @@ hyperic.utils.addUrlXtraCallback = function(plugin_id, fn) {
     if(!urlXtraVar[plugin_id])
         urlXtraVar[plugin_id] = [];
     urlXtraVar[plugin_id].push(fn);
-};
-
-/**
- * Make a query string for HQU plugins XHR calls
- * Currently used for the dojo Grid
- * 
- * @param keywordArgs 
- * @param pageNumVar
- * @param sortOrderVar
- * @param sortFieldVar
- * @param urlXtraVar
- * @param id
- * 
- */
-hyperic.utils.makeQueryString = function(kwArgs, pageNumVar, sortFieldVar, 
-        sortOrderVar, urlXtraVar, id){
-    var res = '?pageNum=' + pageNumVar;
-    if (kwArgs && kwArgs.numRows)
-        res += '&pageSize='+ kwArgs.numRows;
-    else
-        res += '&pageSize='+numRows;
-    if(kwArgs && kwArgs.typeId)
-        res += '&typeId='+ kwArgs.typeId;
-
-    if (sortFieldVar)
-        res += '&sortField=' + sortFieldVar;
-    if (sortOrderVar != null)
-        res += '&sortOrder=' + sortOrderVar;
-
-    var callbacks = urlXtraVar;
-    for (var i=0; i<callbacks.length; i++) {
-        var cb = callbacks[i];
-
-        var cbmap = cb(id);
-        for (var v in cbmap) {
-            if (v == 'extend') continue;
-            res += '&' + v + '=' + cbmap[v];
-        }
-    }
-    return res;
 };
 
 hyperic.utils.passwd = {
@@ -315,252 +277,81 @@ function loadSearchData(response, ioArgs) {
     }
 }
 
-hyperic.widget.Menu = function() {
-    this.onclick = function(node) {   
-        if(!isInit){
-            this.init(dojo.byId(node.id+'_1'));
-        }
-        if(!this.isShowingNow){
+/**
+ *
+ * @args kwArgs - keys 
+ *
+ *
+ */
+hyperic.widget.Menu = function(kwArgs) {
+    var that = this;
+    that.show = function(node){
+    };
+    that.onclick = function(evt) {
+        if(!this._isVisible) {
             var x,y;
-            x=node.offsetLeft;
-            y=node.clientHeight+node.offsetTop-3;
-            this.node.style.top = y;
-            this.node.style.left = x;
+            var node = evt.target;
+            if(this._isSubMenu) {
+                //put it on the right
+                x=node.offsetLeft+node.clientWidth+12;
+                y=node.clientHeight+node.offsetTop+4;
+            }else {
+                //put it underneath
+                x=node.offsetLeft;
+                y=node.clientHeight+node.offsetTop;
+            }
+            this.node.style['top'] = y+'px';
+            this.node.style['left'] = x+'px';
             this.node.style.display = 'block';
-            this.isShowing = true;
+            this._isVisible = true;
+            if(this._isSubMuenu)
+                this.isFocused = true;
         }
     };
-    this.onblur = function() {
-        this.node.style.display = 'none';
-    };
-    this.init = function(node) {
-        this.node = node;
-        var that = this;
-        dojo.event.connect(node, 'onblur', that, 'onblur');
-        this.init = true; 
-    }; 
-    this.isInit = false;
-    this.isShowing = false;
-    this.node = null;
-};
-
-/**
- * Hyperic Dojo Grid
- *
- * Some nomenclature
- *  Columns - Vertical groups of cells of the same type, continuity is not required
- *  Rows - horizontal contiguous groups of cells of the same type
- *  Cells - a single entity in the grid
- *  Views - a collection of cells (row groups) that form a logical row
- *  Layouts - a collection of views, side by side (sets of columns)
- *
- * Columns have the following schema variables
- *  name: The title of the column - ex "foo"
- *  width: the style width of the column - ex "150px"
- *  field: the index of the array of each row in the data array
- *  height: the style height of the colum cell
- *  formatter: a function that performs some display formatting and conversion - ex [0,1] -> [False,True]   
- *      can return any string including HTML
- * 
- * Example
- *  build a hyperic.widget.Grid.Model, hyperic.widget.Grid.View and a layout descriptor then
- *  var myGrid = new hyperic.widget.grid(node, "myGridNode", model, layout);
- *  var myDojoGrid = myGrid.dojoGrid; //the dojo grid
- * 
- * Example Layout Descriptor
- *  var subrow = [
- *      { name: '' },
- *      { name: '', formatter: formatPercentage }
- *  ];
- *
- *  var view = {
- *      rows: [
- *          subrow // 1..n
- *      ]
- *  };
- *
- *  var structure = [
- *      view // 1..n
- *  ];
- *
- * 
- * @param containerNode
- * @param tableId
- * @param model
- * @param layout
- * 
- */
-hyperic.widget.Grid = function(/*DOMNode*/ containerNode, /*String*/ tableId, /*Object*/ model,
-     /*Object*/ layout, /*Number*/ autoRefreshInterval) {
-    this.dojoGrid = null;
-    this.data   = null;
-    this.store = null;
-    this.model  = model;
-    
-    this._autoRefresh = false;
-    this._autoRefreshInterval = autoRefreshInterval; //1 sec;
-    this._intervalVar = -1;
-    this._currentPage   = 0;
-    this._isSortable    = false;
-    this._sortIdx        = 0;
-    this._sortOrder     = 0;
-    
-    /**
-     * Turn off/on auto refresh on the grid.
-     * @param a new interval to refresh on
-     */
-    this.toggleAutoRefresh = function(interval){
-        if(interval && interval > 100){
-             this._autoRefreshInterval = interval;
-             clearInterval(this._intervalVar);
-             this._initInterval();
+    this.onUnHover = function() {
+        if(this.child){
+            if(!this.child.isFocused){
+            }else{
+                this.node.style.display = 'none';
+                this.isFocused = false;
+                this._isVisible = false;
+            }
         }else{
-            if(this._autoRefresh){
-                this._autoRefresh = false;
-                clearInterval(this._intervalVar);
+           this.node.style.display = 'none';
+           this.isFocused = false;
+            this._isVisible = false;
+        }
+
+    };
+    this.onHover = function() {
+        this.isFocused = true;
+    };
+    this._init = function(kwArgs) {
+        if(kwArgs.child) {
+            this.child = kwArgs.child;
+        }
+        var that = this;
+        if(kwArgs.menuNode) {
+            this.node = kwArgs.menuNode;
+            this.node.style.display='none';
+            dojo.connect(this.node, 'onmouseenter', that, 'onHover');
+            dojo.connect(this.node, 'onmouseleave', that, 'onUnHover');
+        }
+        if(kwArgs.toggleNode) {
+            if(kwArgs.subMenu){
+                this._isSubMenu = true;
+                dojo.connect(kwArgs.toggleNode, 'onmouseover', that, 'onclick');
+            }else{
+                dojo.connect(kwArgs.toggleNode, 'onclick', that, 'onclick');
             }
-            else{
-                this._autoRefresh = true;
-                this._initInterval();
-            }
-        }
-    };
-    this.nextPage = function(){
-        if (this._currentPage != 0) {
-            this._currentPage++;
-            
-            this.refreshTable();
         }
         
-    };
-    this.previousPage = function(){
-        if (this._currentPage != 0) {
-            this._currentPage--;
-            this.refreshTable();
-        }
-    };
-    this.refreshGrid = function(){
-        this.dojoGrid.model.refresh();
-         
-    };
-    this.highlightRow = function(){
-    
-    };
-    this._setupHeader = function(){
-    
-    };
-    this._setSortField = function(){
-        if (!this._isSortable)
-                return;
-        var curSortIdx = this.dojoGrid.getSortAsc(this.dojoGrid.sortInfo);
-        this.sortOrder = this.dojoGrid.getSortIndex(this.dojoGrid.sortInfo);
-        if (curSortIdx == el.getAttribute('idx')) {
-            sortOrder = ~sortOrder & 1;
-        } else {
-            sortOrder = 0;
-        } 
-        this.dojoGrid.setSortIndex(curSortIdx, this.sortOrder);
-        this._sortIdx = curSortIdx;
-        this._currentPage = 0;
-        this.refreshGrid();
-    };
-    this._init = function(){
-        //Build grid
-        dojo.require("dojox11.grid.Grid");
-        this.dojoGrid = new dojox11.grid.Grid({
-            "id": tableId,
-            "model": model,
-            "structure": layout
-        });
-        //add the grid to the parent node
-        if(typeof(containerNode) == "string")
-            var node = dojo.byId(containerNode);
-            node.appendChild(this.dojoGrid.domNode);    
-        
-        //do connects
-            //connect header sort onclick
-        //auto refresh
-        this._initInterval();
-        
-    };
-    this._initInterval = function(){
-        if(this._autoRefresh){
-            var that = this;
-            this._intervalVar = setInterval( function(){that.refreshGrid();}, this._autoRefreshInterval);
-        }
-    };
-    this._init();
+    }; 
+    this.isFocused = false;
+    this._isVisible = false;
+    this._init(kwArgs);
 };
 
-/**
- * A datastore for a Grid
- * Don't really care which kind of datastore since they are being depricated quickly
- * just return the one that pages and writes or not
- * 
- * Example
- * var datastore = new hyperic.widget.Grid.Datastore(true, true, 'http://foo.org/tableData.html');
- * 
- * @param readOnlyGrid is this grid going to be editable
- * @param paging does this grid page data remotely
- * @param dataServiceUrl where can it get the data from
- * 
- */
-hyperic.data.GridDatastore = function(/*boolean*/ readOnlyGrid, /*boolean*/ paging, /*String*/ dataServiceUrl){
-    var store;
-    //create the datastore
-    if(readOnlyGrid && !paging){
-        dojo.require("dojo.data.ItemFileReadStore");
-        store = new dojo.data.ItemFileReadStore({url:dataServiceUrl});
-    }else if(!paging){
-        dojo.require("dojo.data.ItemFileWriteStore");
-        store = new dojo.data.ItemFileWriteStore({url:dataServiceUrl});
-    }else{
-        dojo.require("dojox.data.QueryReadStore");
-        store = new dojox.data.QueryReadStore({url:dataServiceUrl, requestMethod:"post", doClientPaging: false});
-        //need to create the xhr to handle the optional writes to the server
-    }
-    return store;
-};
-
-/**
- * The Grid Model
- *  
- * Example
- * var model = new hyperic.widget.Grid.Model(500, myDatastoreObj, false);
- * 
- * add a comparator to the model
- *  ex -  model.fields.get(4).compare = function(a, b){ return (b > a ? 1 : (a == b ? 0 : -1)); }
- * 
- * @param tableHeight - the integer height of the table used to specify #rows for virtual scrolling
- * @param datastore - a dojo datastore or json object of the data
- * @param isClientDataSource is this data local or remote
- */
-hyperic.data.GridModel = function(tableHeight, datastore, rows, clientSort, query, data){
-    dojo.require("dojox.grid._data.model")
-    //create the model    
-    var model;
-    if(datastore) {
-        model = new dojox.grid.data.DojoData(null, datastore, {
-            rowsPerPage: rows,
-            clientSort: false,
-            doClientPaging:false,
-            /*clientSort: clientSort,*/
-            getRowCount: function(){
-                return 500;
-            },
-        });
-    } else {
-        model = new dojox.grid.data.Table(null, data);
-    }
-    return model;
-};
-
-hyperic.data.Comparators = {
-    string : function(){
-        
-    }
-    
-}
 
 /* OLD REPORTING */
 
