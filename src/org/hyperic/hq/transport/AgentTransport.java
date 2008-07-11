@@ -147,9 +147,9 @@ public class AgentTransport {
                 new Object[]{serverTransportAddr, 
                              path, 
                              Boolean.valueOf(encrypted), 
-                             Long.valueOf(pollingFrequency), 
+                             new Long(pollingFrequency), 
                              agentToken, 
-                             Integer.valueOf(asyncThreadPoolSize)});
+                             new Integer(asyncThreadPoolSize)});
     }
     
     /**
