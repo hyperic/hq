@@ -4,8 +4,8 @@ import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl as AIQMan
 import org.hyperic.hq.appdef.shared.AIPlatformValue
 import org.hyperic.hq.appdef.shared.AIQueueConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.authz.shared.AuthzSubjectValue
 import org.hyperic.util.pager.PageControl
-import org.hyperic.hq.appdef.server.session.AppdefResource
 
 /**
  * The AutodiscoveryHelper can be used to list and approve resources into
@@ -14,16 +14,18 @@ import org.hyperic.hq.appdef.server.session.AppdefResource
 class AutodiscoveryHelper extends BaseHelper {
 
     private aiqMan = AIQMan.one
-    AppdefResource res;
+    private AuthzSubjectValue userValue
+
     AutodiscoveryHelper(AuthzSubject user) {
         super(user)
+        userValue = user.valueObject
     }
 
     /**
       * Return a List of {@link AIPlatformValue}s in the queue.
       */
     public List getQueue() {
-        aiqMan.getQueue(user, true, true, PageControl.PAGE_ALL)
+        aiqMan.getQueue(userValue, true, true, PageControl.PAGE_ALL)
     }
 
     /**
@@ -35,7 +37,7 @@ class AutodiscoveryHelper extends BaseHelper {
      *
      */
     public AIPlatformValue findByFqdn(String fqdn) {
-        aiqMan.findAIPlatformByFqdn(user, fqdn)
+        aiqMan.findAIPlatformByFqdn(userValue, fqdn)
     }
 
     /**
@@ -45,7 +47,7 @@ class AutodiscoveryHelper extends BaseHelper {
      * queued platform with the given id does not exist.
      */
     public AIPlatformValue findById(int id) {
-        aiqMan.findAIPlatformById(user, id)
+        aiqMan.findAIPlatformById(userValue, id)
     }
     
     /**
@@ -67,7 +69,7 @@ class AutodiscoveryHelper extends BaseHelper {
         // All IP changes get auto-approved
         List ipIds = platform.AIIpValues.id
 
-        aiqMan.processQueue(user, platformIds, serverIds, ipIds,
+        aiqMan.processQueue(userValue, platformIds, serverIds, ipIds,
                             AIQueueConstants.Q_DECISION_APPROVE)
     }
 }

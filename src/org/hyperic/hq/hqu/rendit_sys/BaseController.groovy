@@ -366,8 +366,8 @@ abstract class BaseController {
         new UserHelper(user)
     }
 
-    protected AutodiscoveryHelper() {
-        new AutodiscoveryHelper()
+    protected AutodiscoveryHelper getAutodiscoveryHelper() {
+        new AutodiscoveryHelper(user)
     }
 
     /**
