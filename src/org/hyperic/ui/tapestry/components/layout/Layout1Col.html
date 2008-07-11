@@ -1,10 +1,10 @@
 <shell jwcid="@Shell" title="ognl:pageTitle + ' - ' + staticTitle" stylesheets='ognl:styleSheetList' 
-       delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.remainingHead)" parseWidgets="true" debugEnabled="true">
+       delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.remainingHead)" parseWidgets="true" debugEnabled="true" preventBackButtonFix="true">
 <block jwcid="remainingHead@Block">
 <link rel="icon" href="/images/4.0/icons/favicon.ico"/>
-<script type="text/javascript" src="/js/lib/lib.js"></script>
 </block>
 <body jwcid="@Body" class="tundra">
+<script type="text/javascript" src="/js/lib/lib.js"></script>
 
 <div id="wrapper">
         
