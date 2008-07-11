@@ -55,7 +55,6 @@ public abstract class VimCollector extends Collector {
     protected abstract String getName();
 
     protected void init() throws PluginException {
-        super.init();
         _props = getProperties();
         setSource(VimUtil.getURL(_props));
     }
