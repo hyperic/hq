@@ -51,7 +51,6 @@ import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
-import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
