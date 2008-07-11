@@ -795,3 +795,9 @@ body .dijitPopup {
     background-color: #E2F5FF;
 
 }
+
+.ajaxLoading{
+    position:absolute;
+    top:40px;
+    right:5px;
+}
