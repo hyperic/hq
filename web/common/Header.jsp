@@ -146,8 +146,8 @@
         </tiles:insert>
         </ul>
     </div>
-    <div style="display:none;" id="loading">
-        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16"/>
+    <div class="ajaxLoading" style="display:none;" id="loading">
+        <html:img page="/images/4.0/icons/ajax-loader.gif" border="0" width="16" height="16"/>
     </div>
     <div id="headerAlerts">
       <div class="headAlertWrapper">
