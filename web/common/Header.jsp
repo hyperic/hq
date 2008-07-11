@@ -33,7 +33,27 @@
  --%>
 
 <script type="text/javascript">
-        
+    dojo.addOnLoad(function() {
+    /*document.menu3 = new hyperic.widget.Menu(
+        {
+            toggleNode : dojo.byId('submenu'),           
+            menuNode   : dojo.byId('submenu_1'),
+            subMenu    : true
+         });
+    */
+    document.menu2 = new hyperic.widget.Menu(
+        {
+            toggleNode : dojo.byId('analyze'),
+            menuNode   : dojo.byId('analyze_1'),
+            
+        });
+    document.menu1 = new hyperic.widget.Menu(
+        { 
+            toggleNode : dojo.byId('resource'),
+            menuNode   : dojo.byId('resource_1'),
+            /*child      : document.menu3*/
+        });
+    });
     function getUpdateStatus(opt) {
         if (opt == "<fmt:message key="header.Acknowledge"/>") {
             var pars = "update=true";
@@ -94,7 +114,7 @@
       //-->
       </script>
     <div id="header">
-    <div id="headerLogo" title="Home" onclick="/Dashboard.do">&nbsp;</div>
+    <div id="headerLogo" title="Home" onclick="location.href='/Dashboard.do'">&nbsp;</div>
     <div id="navTabContainer">
         <c:set var="pageURL" value="${requestURL}"/>
         <ul>
@@ -106,19 +126,25 @@
         </ul>
     </div>
     <div class="mainMenu" id="resource_1" style="display:none">
-        <div class="mainMenuItem" onClick="location.href='<html:rewrite page="/ResourceHub.do"/>'"><fmt:message key="header.Browse"/></div>
+        <ul>
+        <li class="mainMenuItem resourceIcon" onClick="location.href='<html:rewrite page="/ResourceHub.do"/>'"><fmt:message key="header.Browse"/></li>
         <tiles:insert definition=".header.optional.tabs">
             <tiles:put name="location" value="resources"/>
         </tiles:insert>
-        <div class="mainMenuItem" onmouseover="document.menu3.onclick(this)" id="submenu"><fmt:message key=".dashContent.recentResources"/></div>
+        <li class="mainMenuItem recentIcon" id="submenu"><fmt:message key=".dashContent.recentResources"/></li>
+        </ul>
     </div>
     <div class="mainMenu" id="submenu_1" style="display:none;">
+        <ul>
         <tiles:insert definition=".toolbar.recentResources"/>
+        </ul>
     </div>
-    <div class="mainMenu" id="analyze" style="display:none;">
+    <div class="mainMenu" id="analyze_1" style="display:none;">
+        <ul>
         <tiles:insert definition=".header.optional.tabs">
             <tiles:put name="location" value="tracking"/>
         </tiles:insert>
+        </ul>
     </div>
     <div style="display:none;" id="loading">
         <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16"/>
