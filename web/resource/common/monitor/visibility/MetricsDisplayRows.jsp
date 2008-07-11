@@ -196,7 +196,7 @@
                               ,"ctype=<c:out value="${ctype}"/>"
                             </c:if>
                             );--%>
-    dojo.xhrPOST( {
+    dojo11.xhrPOST( {
         url: '<html:rewrite page="/resource/common/monitor/visibility/CurrentMetricValues.do"/>', 
         handleAs: "text",
         timeout: 5000,
