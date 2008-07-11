@@ -44,6 +44,7 @@ import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerUtil;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
+import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.scheduler.server.session.BaseJob;
 import org.hyperic.hq.dao.AIHistoryDAO;
@@ -93,7 +94,8 @@ public abstract class AIJob extends BaseJob {
         String errorMsg = null;
 
         try {
-            AICommandsClient client = AIUtil.getClient(id);
+            AICommandsClient client = 
+                AICommandsClientFactory.getInstance().getClient(id);
             commandHistory =
                 createHistory(id, groupId, batchId,
                               subject.getName(),
@@ -106,8 +108,6 @@ public abstract class AIJob extends BaseJob {
 
         } catch (AutoinventoryException e) {
             errorMsg = "AI exception: " + e.getMessage();
-        } catch (PermissionException e) {
-            errorMsg = "Permission denied: " + e.getMessage();
         } catch (AgentNotFoundException e) {
             errorMsg = "Agent not found: " + e.getMessage();
         } catch (AgentConnectionException e) {
