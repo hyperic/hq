@@ -411,7 +411,7 @@ public class CommandsServer
         throws AgentStartException 
     {
         try {
-            this.agentStartupCallback = new AgentStartupCallback(agent.getBootConfig());
+            this.agentStartupCallback = new AgentStartupCallback();
             agent.registerNotifyHandler(this, AgentDaemon.NOTIFY_AGENT_UP);
             agent.registerNotifyHandler(this, AgentDaemon.NOTIFY_AGENT_FAILED_START);
         }
