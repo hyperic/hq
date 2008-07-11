@@ -137,9 +137,7 @@ public class QuicknavUtil {
         
         buf.append("<img src=\"")
            .append(req.getContextPath())
-           .append(src)
-           .append("?");
-        QuicknavUtil.parameterizeUrl(rv, buf);
+           .append(src);
         buf.append("\" width=\"")
            .append(QuicknavUtil.ICON_WIDTH)
            .append("\" height=\"")
