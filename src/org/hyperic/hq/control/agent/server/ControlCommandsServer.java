@@ -51,9 +51,6 @@ import org.hyperic.hq.control.agent.commands.ControlPluginCommand_result;
 import org.hyperic.hq.control.agent.commands.ControlPluginRemove_args;
 import org.hyperic.hq.control.agent.commands.ControlPluginRemove_result;
 import org.hyperic.hq.product.ControlPluginManager;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginExistsException;
-import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 
