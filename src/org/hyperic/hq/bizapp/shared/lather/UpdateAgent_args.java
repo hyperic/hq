@@ -31,18 +31,8 @@ import org.hyperic.lather.LatherRemoteException;
 public class UpdateAgent_args 
     extends AgentInfo_args
 {
-    private static final String PROP_AGENTTOKEN = "agentToken";
-
     public UpdateAgent_args(){
         super();
-    }
-
-    public void setAgentToken(String agentToken){
-        this.setStringValue(PROP_AGENTTOKEN, agentToken);
-    }
-
-    public String getAgentToken(){
-        return this.getStringValue(PROP_AGENTTOKEN);
     }
 
     public void validate()
