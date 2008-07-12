@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -95,18 +96,18 @@ public class PIFMetrics extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("io_read_kbs", this.ioReadKbs);
-            map.put("io_write_kbs", this.ioWriteKbs);
-            map.put("carrier", this.carrier);
-            map.put("vendor_id", this.vendorId);
-            map.put("vendor_name", this.vendorName);
-            map.put("device_id", this.deviceId);
-            map.put("device_name", this.deviceName);
-            map.put("speed", this.speed);
-            map.put("duplex", this.duplex);
-            map.put("pci_bus_path", this.pciBusPath);
-            map.put("last_updated", this.lastUpdated);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("io_read_kbs", this.ioReadKbs == null ? 0.0 : this.ioReadKbs);
+            map.put("io_write_kbs", this.ioWriteKbs == null ? 0.0 : this.ioWriteKbs);
+            map.put("carrier", this.carrier == null ? false : this.carrier);
+            map.put("vendor_id", this.vendorId == null ? "" : this.vendorId);
+            map.put("vendor_name", this.vendorName == null ? "" : this.vendorName);
+            map.put("device_id", this.deviceId == null ? "" : this.deviceId);
+            map.put("device_name", this.deviceName == null ? "" : this.deviceName);
+            map.put("speed", this.speed == null ? 0 : this.speed);
+            map.put("duplex", this.duplex == null ? false : this.duplex);
+            map.put("pci_bus_path", this.pciBusPath == null ? "" : this.pciBusPath);
+            map.put("last_updated", this.lastUpdated == null ? new Date(0) : this.lastUpdated);
             return map;
         }
 

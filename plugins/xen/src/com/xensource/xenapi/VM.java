@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -119,6 +120,7 @@ public class VM extends XenAPIObject {
             print.printf("%1$20s: %2$s\n", "isControlDomain", this.isControlDomain);
             print.printf("%1$20s: %2$s\n", "metrics", this.metrics);
             print.printf("%1$20s: %2$s\n", "guestMetrics", this.guestMetrics);
+            print.printf("%1$20s: %2$s\n", "lastBootedRecord", this.lastBootedRecord);
             print.printf("%1$20s: %2$s\n", "recommendations", this.recommendations);
             print.printf("%1$20s: %2$s\n", "xenstoreData", this.xenstoreData);
             return writer.toString();
@@ -129,52 +131,53 @@ public class VM extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("allowed_operations", this.allowedOperations);
-            map.put("current_operations", this.currentOperations);
-            map.put("power_state", this.powerState);
-            map.put("name_label", this.nameLabel);
-            map.put("name_description", this.nameDescription);
-            map.put("user_version", this.userVersion);
-            map.put("is_a_template", this.isATemplate);
-            map.put("suspend_VDI", this.suspendVDI);
-            map.put("resident_on", this.residentOn);
-            map.put("affinity", this.affinity);
-            map.put("memory_static_max", this.memoryStaticMax);
-            map.put("memory_dynamic_max", this.memoryDynamicMax);
-            map.put("memory_dynamic_min", this.memoryDynamicMin);
-            map.put("memory_static_min", this.memoryStaticMin);
-            map.put("VCPUs_params", this.VCPUsParams);
-            map.put("VCPUs_max", this.VCPUsMax);
-            map.put("VCPUs_at_startup", this.VCPUsAtStartup);
-            map.put("actions_after_shutdown", this.actionsAfterShutdown);
-            map.put("actions_after_reboot", this.actionsAfterReboot);
-            map.put("actions_after_crash", this.actionsAfterCrash);
-            map.put("consoles", this.consoles);
-            map.put("VIFs", this.VIFs);
-            map.put("VBDs", this.VBDs);
-            map.put("crash_dumps", this.crashDumps);
-            map.put("VTPMs", this.VTPMs);
-            map.put("PV_bootloader", this.PVBootloader);
-            map.put("PV_kernel", this.PVKernel);
-            map.put("PV_ramdisk", this.PVRamdisk);
-            map.put("PV_args", this.PVArgs);
-            map.put("PV_bootloader_args", this.PVBootloaderArgs);
-            map.put("PV_legacy_args", this.PVLegacyArgs);
-            map.put("HVM_boot_policy", this.HVMBootPolicy);
-            map.put("HVM_boot_params", this.HVMBootParams);
-            map.put("HVM_shadow_multiplier", this.HVMShadowMultiplier);
-            map.put("platform", this.platform);
-            map.put("PCI_bus", this.PCIBus);
-            map.put("other_config", this.otherConfig);
-            map.put("domid", this.domid);
-            map.put("domarch", this.domarch);
-            map.put("last_boot_CPU_flags", this.lastBootCPUFlags);
-            map.put("is_control_domain", this.isControlDomain);
-            map.put("metrics", this.metrics);
-            map.put("guest_metrics", this.guestMetrics);
-            map.put("recommendations", this.recommendations);
-            map.put("xenstore_data", this.xenstoreData);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("allowed_operations", this.allowedOperations == null ? new HashSet<Types.VmOperations>() : this.allowedOperations);
+            map.put("current_operations", this.currentOperations == null ? new HashMap<String, Types.VmOperations>() : this.currentOperations);
+            map.put("power_state", this.powerState == null ? Types.VmPowerState.UNRECOGNIZED : this.powerState);
+            map.put("name_label", this.nameLabel == null ? "" : this.nameLabel);
+            map.put("name_description", this.nameDescription == null ? "" : this.nameDescription);
+            map.put("user_version", this.userVersion == null ? 0 : this.userVersion);
+            map.put("is_a_template", this.isATemplate == null ? false : this.isATemplate);
+            map.put("suspend_VDI", this.suspendVDI == null ? com.xensource.xenapi.VDI.getInstFromRef("OpaqueRef:NULL") : this.suspendVDI);
+            map.put("resident_on", this.residentOn == null ? com.xensource.xenapi.Host.getInstFromRef("OpaqueRef:NULL") : this.residentOn);
+            map.put("affinity", this.affinity == null ? com.xensource.xenapi.Host.getInstFromRef("OpaqueRef:NULL") : this.affinity);
+            map.put("memory_static_max", this.memoryStaticMax == null ? 0 : this.memoryStaticMax);
+            map.put("memory_dynamic_max", this.memoryDynamicMax == null ? 0 : this.memoryDynamicMax);
+            map.put("memory_dynamic_min", this.memoryDynamicMin == null ? 0 : this.memoryDynamicMin);
+            map.put("memory_static_min", this.memoryStaticMin == null ? 0 : this.memoryStaticMin);
+            map.put("VCPUs_params", this.VCPUsParams == null ? new HashMap<String, String>() : this.VCPUsParams);
+            map.put("VCPUs_max", this.VCPUsMax == null ? 0 : this.VCPUsMax);
+            map.put("VCPUs_at_startup", this.VCPUsAtStartup == null ? 0 : this.VCPUsAtStartup);
+            map.put("actions_after_shutdown", this.actionsAfterShutdown == null ? Types.OnNormalExit.UNRECOGNIZED : this.actionsAfterShutdown);
+            map.put("actions_after_reboot", this.actionsAfterReboot == null ? Types.OnNormalExit.UNRECOGNIZED : this.actionsAfterReboot);
+            map.put("actions_after_crash", this.actionsAfterCrash == null ? Types.OnCrashBehaviour.UNRECOGNIZED : this.actionsAfterCrash);
+            map.put("consoles", this.consoles == null ? new HashSet<Console>() : this.consoles);
+            map.put("VIFs", this.VIFs == null ? new HashSet<VIF>() : this.VIFs);
+            map.put("VBDs", this.VBDs == null ? new HashSet<VBD>() : this.VBDs);
+            map.put("crash_dumps", this.crashDumps == null ? new HashSet<Crashdump>() : this.crashDumps);
+            map.put("VTPMs", this.VTPMs == null ? new HashSet<VTPM>() : this.VTPMs);
+            map.put("PV_bootloader", this.PVBootloader == null ? "" : this.PVBootloader);
+            map.put("PV_kernel", this.PVKernel == null ? "" : this.PVKernel);
+            map.put("PV_ramdisk", this.PVRamdisk == null ? "" : this.PVRamdisk);
+            map.put("PV_args", this.PVArgs == null ? "" : this.PVArgs);
+            map.put("PV_bootloader_args", this.PVBootloaderArgs == null ? "" : this.PVBootloaderArgs);
+            map.put("PV_legacy_args", this.PVLegacyArgs == null ? "" : this.PVLegacyArgs);
+            map.put("HVM_boot_policy", this.HVMBootPolicy == null ? "" : this.HVMBootPolicy);
+            map.put("HVM_boot_params", this.HVMBootParams == null ? new HashMap<String, String>() : this.HVMBootParams);
+            map.put("HVM_shadow_multiplier", this.HVMShadowMultiplier == null ? 0.0 : this.HVMShadowMultiplier);
+            map.put("platform", this.platform == null ? new HashMap<String, String>() : this.platform);
+            map.put("PCI_bus", this.PCIBus == null ? "" : this.PCIBus);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
+            map.put("domid", this.domid == null ? 0 : this.domid);
+            map.put("domarch", this.domarch == null ? "" : this.domarch);
+            map.put("last_boot_CPU_flags", this.lastBootCPUFlags == null ? new HashMap<String, String>() : this.lastBootCPUFlags);
+            map.put("is_control_domain", this.isControlDomain == null ? false : this.isControlDomain);
+            map.put("metrics", this.metrics == null ? com.xensource.xenapi.VMMetrics.getInstFromRef("OpaqueRef:NULL") : this.metrics);
+            map.put("guest_metrics", this.guestMetrics == null ? com.xensource.xenapi.VMGuestMetrics.getInstFromRef("OpaqueRef:NULL") : this.guestMetrics);
+            map.put("last_booted_record", this.lastBootedRecord == null ? "" : this.lastBootedRecord);
+            map.put("recommendations", this.recommendations == null ? "" : this.recommendations);
+            map.put("xenstore_data", this.xenstoreData == null ? new HashMap<String, String>() : this.xenstoreData);
             return map;
         }
 
@@ -355,6 +358,10 @@ public class VM extends XenAPIObject {
          */
         public VMGuestMetrics guestMetrics;
         /**
+         * marshalled value containing VM record at time of last boot, updated dynamically to reflect the runtime state of the domain
+         */
+        public String lastBootedRecord;
+        /**
          * An XML specification of recommended values and ranges for properties of this VM
          */
         public String recommendations;
@@ -407,6 +414,27 @@ public class VM extends XenAPIObject {
      * Create a new VM instance, and return its handle.
      *
      * @param record All constructor arguments
+     * @return Task
+     */
+    public static Task createAsync(Connection c, VM.Record record) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.create";
+        String session = c.getSessionReference();
+        Map<String, Object> record_map = record.toMap();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(record_map)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a new VM instance, and return its handle.
+     *
+     * @param record All constructor arguments
      * @return reference to the newly created object
      */
     public static VM create(Connection c, VM.Record record) throws
@@ -420,6 +448,25 @@ public class VM extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toVM(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy the specified VM.  The VM is completely removed from the system.  This function can only be called when the VM is in the Halted State.
+     *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -1299,6 +1346,25 @@ public class VM extends XenAPIObject {
     }
 
     /**
+     * Get the last_booted_record field of the given VM.
+     *
+     * @return value of the field
+     */
+    public String getLastBootedRecord(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "VM.get_last_booted_record";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toString(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
      * Get the recommendations field of the given VM.
      *
      * @return value of the field
@@ -2086,6 +2152,40 @@ public class VM extends XenAPIObject {
      * Clones the specified VM, making a new VM. Clone automatically exploits the capabilities of the underlying storage repository in which the VM's disk images are stored (e.g. Copy on Write).   This function can only be called when the VM is in the Halted State.
      *
      * @param newName The name of the cloned VM
+     * @return Task
+     */
+    public Task createCloneAsync(Connection c, String newName) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.SrFull,
+       Types.OperationNotAllowed {
+        String method_call = "Async.VM.clone";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(newName)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("SR_FULL")) {
+                throw new Types.SrFull((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Clones the specified VM, making a new VM. Clone automatically exploits the capabilities of the underlying storage repository in which the VM's disk images are stored (e.g. Copy on Write).   This function can only be called when the VM is in the Halted State.
+     *
+     * @param newName The name of the cloned VM
      * @return The reference of the newly created VM.
      */
     public VM createClone(Connection c, String newName) throws
@@ -2101,6 +2201,41 @@ public class VM extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toVM(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("SR_FULL")) {
+                throw new Types.SrFull((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Copied the specified VM, making a new VM. Unlike clone, copy does not exploits the capabilities of the underlying storage repository in which the VM's disk images are stored. Instead, copy guarantees that the disk images of the newly created VM will be 'full disks' - i.e. not part of a CoW chain.  This function can only be called when the VM is in the Halted State.
+     *
+     * @param newName The name of the copied VM
+     * @param sr An SR to copy all the VM's disks into (if an invalid reference then it uses the existing SRs)
+     * @return Task
+     */
+    public Task copyAsync(Connection c, String newName, SR sr) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.SrFull,
+       Types.OperationNotAllowed {
+        String method_call = "Async.VM.copy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(newName), Marshalling.toXMLRPC(sr)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         } else if(response.get("Status").equals("Failure")) {
             Object[] error = (Object[]) response.get("ErrorDescription");
             if(error[0].equals("VM_BAD_POWER_STATE")) {
@@ -2154,6 +2289,39 @@ public class VM extends XenAPIObject {
     /**
      * Inspects the disk configuration contained within the VM's other_config, creates VDIs and VBDs and then executes any applicable post-install script.
      *
+     * @return Task
+     */
+    public Task provisionAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.SrFull,
+       Types.OperationNotAllowed {
+        String method_call = "Async.VM.provision";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("SR_FULL")) {
+                throw new Types.SrFull((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Inspects the disk configuration contained within the VM's other_config, creates VDIs and VBDs and then executes any applicable post-install script.
+     *
      */
     public void provision(Connection c) throws
        Types.BadServerResponse,
@@ -2178,6 +2346,65 @@ public class VM extends XenAPIObject {
             }
             if(error[0].equals("OPERATION_NOT_ALLOWED")) {
                 throw new Types.OperationNotAllowed((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Start the specified VM.  This function can only be called with the VM is in the Halted State.
+     *
+     * @param startPaused Instantiate VM in paused state if set to true.
+     * @param force Attempt to force the VM to start. If this flag is false then the VM may fail pre-boot safety checks (e.g. if the CPU the VM last booted on looks substantially different to the current one)
+     * @return Task
+     */
+    public Task startAsync(Connection c, Boolean startPaused, Boolean force) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.VmHvmRequired,
+       Types.VmIsTemplate,
+       Types.OtherOperationInProgress,
+       Types.OperationNotAllowed,
+       Types.BootloaderFailed,
+       Types.UnknownBootloader,
+       Types.NoHostsAvailable,
+       Types.LicenceRestriction {
+        String method_call = "Async.VM.start";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(startPaused), Marshalling.toXMLRPC(force)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("VM_HVM_REQUIRED")) {
+                throw new Types.VmHvmRequired((String) error[1]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
+            if(error[0].equals("OTHER_OPERATION_IN_PROGRESS")) {
+                throw new Types.OtherOperationInProgress((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("BOOTLOADER_FAILED")) {
+                throw new Types.BootloaderFailed((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("UNKNOWN_BOOTLOADER")) {
+                throw new Types.UnknownBootloader((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("NO_HOSTS_AVAILABLE")) {
+                throw new Types.NoHostsAvailable();
+            }
+            if(error[0].equals("LICENCE_RESTRICTION")) {
+                throw new Types.LicenceRestriction();
             }
         }
         throw new Types.BadServerResponse(response);
@@ -2247,6 +2474,54 @@ public class VM extends XenAPIObject {
      * @param host The Host on which to start the VM
      * @param startPaused Instantiate VM in paused state if set to true.
      * @param force Attempt to force the VM to start. If this flag is false then the VM may fail pre-boot safety checks (e.g. if the CPU the VM last booted on looks substantially different to the current one)
+     * @return Task
+     */
+    public Task startOnAsync(Connection c, Host host, Boolean startPaused, Boolean force) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.VmIsTemplate,
+       Types.OtherOperationInProgress,
+       Types.OperationNotAllowed,
+       Types.BootloaderFailed,
+       Types.UnknownBootloader {
+        String method_call = "Async.VM.start_on";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(startPaused), Marshalling.toXMLRPC(force)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
+            if(error[0].equals("OTHER_OPERATION_IN_PROGRESS")) {
+                throw new Types.OtherOperationInProgress((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("BOOTLOADER_FAILED")) {
+                throw new Types.BootloaderFailed((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("UNKNOWN_BOOTLOADER")) {
+                throw new Types.UnknownBootloader((String) error[1], (String) error[2]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Start the specified VM on a particular host.  This function can only be called with the VM is in the Halted State.
+     *
+     * @param host The Host on which to start the VM
+     * @param startPaused Instantiate VM in paused state if set to true.
+     * @param force Attempt to force the VM to start. If this flag is false then the VM may fail pre-boot safety checks (e.g. if the CPU the VM last booted on looks substantially different to the current one)
      */
     public void startOn(Connection c, Host host, Boolean startPaused, Boolean force) throws
        Types.BadServerResponse,
@@ -2291,6 +2566,43 @@ public class VM extends XenAPIObject {
     /**
      * Pause the specified VM. This can only be called when the specified VM is in the Running state.
      *
+     * @return Task
+     */
+    public Task pauseAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.OtherOperationInProgress,
+       Types.OperationNotAllowed,
+       Types.VmIsTemplate {
+        String method_call = "Async.VM.pause";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("OTHER_OPERATION_IN_PROGRESS")) {
+                throw new Types.OtherOperationInProgress((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Pause the specified VM. This can only be called when the specified VM is in the Running state.
+     *
      */
     public void pause(Connection c) throws
        Types.BadServerResponse,
@@ -2313,6 +2625,39 @@ public class VM extends XenAPIObject {
             }
             if(error[0].equals("OTHER_OPERATION_IN_PROGRESS")) {
                 throw new Types.OtherOperationInProgress((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Resume the specified VM. This can only be called when the specified VM is in the Paused state.
+     *
+     * @return Task
+     */
+    public Task unpauseAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.OperationNotAllowed,
+       Types.VmIsTemplate {
+        String method_call = "Async.VM.unpause";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
             }
             if(error[0].equals("OPERATION_NOT_ALLOWED")) {
                 throw new Types.OperationNotAllowed((String) error[1]);
@@ -2359,6 +2704,43 @@ public class VM extends XenAPIObject {
     /**
      * Attempt to cleanly shutdown the specified VM. (Note: this may not be supported---e.g. if a guest agent is not installed). This can only be called when the specified VM is in the Running state.
      *
+     * @return Task
+     */
+    public Task cleanShutdownAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.OtherOperationInProgress,
+       Types.OperationNotAllowed,
+       Types.VmIsTemplate {
+        String method_call = "Async.VM.clean_shutdown";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("OTHER_OPERATION_IN_PROGRESS")) {
+                throw new Types.OtherOperationInProgress((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Attempt to cleanly shutdown the specified VM. (Note: this may not be supported---e.g. if a guest agent is not installed). This can only be called when the specified VM is in the Running state.
+     *
      */
     public void cleanShutdown(Connection c) throws
        Types.BadServerResponse,
@@ -2374,6 +2756,43 @@ public class VM extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("OTHER_OPERATION_IN_PROGRESS")) {
+                throw new Types.OtherOperationInProgress((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Attempt to cleanly shutdown the specified VM (Note: this may not be supported---e.g. if a guest agent is not installed). This can only be called when the specified VM is in the Running state.
+     *
+     * @return Task
+     */
+    public Task cleanRebootAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.OtherOperationInProgress,
+       Types.OperationNotAllowed,
+       Types.VmIsTemplate {
+        String method_call = "Async.VM.clean_reboot";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         } else if(response.get("Status").equals("Failure")) {
             Object[] error = (Object[]) response.get("ErrorDescription");
             if(error[0].equals("VM_BAD_POWER_STATE")) {
@@ -2431,6 +2850,43 @@ public class VM extends XenAPIObject {
     /**
      * Stop executing the specified VM without attempting a clean shutdown.
      *
+     * @return Task
+     */
+    public Task hardShutdownAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.OtherOperationInProgress,
+       Types.OperationNotAllowed,
+       Types.VmIsTemplate {
+        String method_call = "Async.VM.hard_shutdown";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("OTHER_OPERATION_IN_PROGRESS")) {
+                throw new Types.OtherOperationInProgress((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Stop executing the specified VM without attempting a clean shutdown.
+     *
      */
     public void hardShutdown(Connection c) throws
        Types.BadServerResponse,
@@ -2467,6 +2923,25 @@ public class VM extends XenAPIObject {
     /**
      * Reset the power-state of the VM to halted in the database only. (Used to recover from slave failures in pooling scenarios by resetting the power-states of VMs running on dead slaves to halted.) This is a potentially dangerous operation; use with care.
      *
+     * @return Task
+     */
+    public Task powerStateResetAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.power_state_reset";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Reset the power-state of the VM to halted in the database only. (Used to recover from slave failures in pooling scenarios by resetting the power-states of VMs running on dead slaves to halted.) This is a potentially dangerous operation; use with care.
+     *
      */
     public void powerStateReset(Connection c) throws
        Types.BadServerResponse,
@@ -2478,6 +2953,43 @@ public class VM extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Stop executing the specified VM without attempting a clean shutdown and immediately restart the VM.
+     *
+     * @return Task
+     */
+    public Task hardRebootAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.OtherOperationInProgress,
+       Types.OperationNotAllowed,
+       Types.VmIsTemplate {
+        String method_call = "Async.VM.hard_reboot";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("OTHER_OPERATION_IN_PROGRESS")) {
+                throw new Types.OtherOperationInProgress((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
         }
         throw new Types.BadServerResponse(response);
     }
@@ -2500,6 +3012,43 @@ public class VM extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("OTHER_OPERATION_IN_PROGRESS")) {
+                throw new Types.OtherOperationInProgress((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Suspend the specified VM to disk.  This can only be called when the specified VM is in the Running state.
+     *
+     * @return Task
+     */
+    public Task suspendAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.OtherOperationInProgress,
+       Types.OperationNotAllowed,
+       Types.VmIsTemplate {
+        String method_call = "Async.VM.suspend";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         } else if(response.get("Status").equals("Failure")) {
             Object[] error = (Object[]) response.get("ErrorDescription");
             if(error[0].equals("VM_BAD_POWER_STATE")) {
@@ -2559,6 +3108,41 @@ public class VM extends XenAPIObject {
      *
      * @param startPaused Resume VM in paused state if set to true.
      * @param force Attempt to force the VM to resume. If this flag is false then the VM may fail pre-resume safety checks (e.g. if the CPU the VM was running on looks substantially different to the current one)
+     * @return Task
+     */
+    public Task resumeAsync(Connection c, Boolean startPaused, Boolean force) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.OperationNotAllowed,
+       Types.VmIsTemplate {
+        String method_call = "Async.VM.resume";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(startPaused), Marshalling.toXMLRPC(force)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Awaken the specified VM and resume it.  This can only be called when the specified VM is in the Suspended state.
+     *
+     * @param startPaused Resume VM in paused state if set to true.
+     * @param force Attempt to force the VM to resume. If this flag is false then the VM may fail pre-resume safety checks (e.g. if the CPU the VM was running on looks substantially different to the current one)
      */
     public void resume(Connection c, Boolean startPaused, Boolean force) throws
        Types.BadServerResponse,
@@ -2573,6 +3157,42 @@ public class VM extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Awaken the specified VM and resume it on a particular Host.  This can only be called when the specified VM is in the Suspended state.
+     *
+     * @param host The Host on which to resume the VM
+     * @param startPaused Resume VM in paused state if set to true.
+     * @param force Attempt to force the VM to resume. If this flag is false then the VM may fail pre-resume safety checks (e.g. if the CPU the VM was running on looks substantially different to the current one)
+     * @return Task
+     */
+    public Task resumeOnAsync(Connection c, Host host, Boolean startPaused, Boolean force) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.OperationNotAllowed,
+       Types.VmIsTemplate {
+        String method_call = "Async.VM.resume_on";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(startPaused), Marshalling.toXMLRPC(force)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         } else if(response.get("Status").equals("Failure")) {
             Object[] error = (Object[]) response.get("ErrorDescription");
             if(error[0].equals("VM_BAD_POWER_STATE")) {
@@ -2628,6 +3248,53 @@ public class VM extends XenAPIObject {
      *
      * @param host The target host
      * @param options Extra configuration operations
+     * @return Task
+     */
+    public Task poolMigrateAsync(Connection c, Host host, Map<String, String> options) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState,
+       Types.OtherOperationInProgress,
+       Types.VmIsTemplate,
+       Types.OperationNotAllowed,
+       Types.VmMigrateFailed,
+       Types.VmMissingPvDrivers {
+        String method_call = "Async.VM.pool_migrate";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(options)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("OTHER_OPERATION_IN_PROGRESS")) {
+                throw new Types.OtherOperationInProgress((String) error[1], (String) error[2]);
+            }
+            if(error[0].equals("VM_IS_TEMPLATE")) {
+                throw new Types.VmIsTemplate((String) error[1]);
+            }
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
+            if(error[0].equals("VM_MIGRATE_FAILED")) {
+                throw new Types.VmMigrateFailed((String) error[1], (String) error[2], (String) error[3], (String) error[4]);
+            }
+            if(error[0].equals("VM_MISSING_PV_DRIVERS")) {
+                throw new Types.VmMissingPvDrivers((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Migrate a VM to another Host. This can only be called when the specified VM is in the Running state.
+     *
+     * @param host The target host
+     * @param options Extra configuration operations
      */
     public void poolMigrate(Connection c, Host host, Map<String, String> options) throws
        Types.BadServerResponse,
@@ -2636,7 +3303,8 @@ public class VM extends XenAPIObject {
        Types.OtherOperationInProgress,
        Types.VmIsTemplate,
        Types.OperationNotAllowed,
-       Types.VmMigrateFailed {
+       Types.VmMigrateFailed,
+       Types.VmMissingPvDrivers {
         String method_call = "VM.pool_migrate";
         String session = c.getSessionReference();
         Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(options)};
@@ -2661,6 +3329,29 @@ public class VM extends XenAPIObject {
             if(error[0].equals("VM_MIGRATE_FAILED")) {
                 throw new Types.VmMigrateFailed((String) error[1], (String) error[2], (String) error[3], (String) error[4]);
             }
+            if(error[0].equals("VM_MISSING_PV_DRIVERS")) {
+                throw new Types.VmMissingPvDrivers((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Set this VM's VCPUs/at_startup value, and set the same value on the VM, if running
+     *
+     * @param nvcpu The number of VCPUs
+     * @return Task
+     */
+    public Task setVCPUsNumberLiveAsync(Connection c, Long nvcpu) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.set_VCPUs_number_live";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(nvcpu)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -2689,6 +3380,27 @@ public class VM extends XenAPIObject {
      *
      * @param key The key
      * @param value The value
+     * @return Task
+     */
+    public Task addToVCPUsParamsLiveAsync(Connection c, String key, String value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.add_to_VCPUs_params_live";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(key), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Add the given key-value pair to VM.VCPUs_params, and apply that value on the running VM
+     *
+     * @param key The key
+     * @param value The value
      */
     public void addToVCPUsParamsLive(Connection c, String key, String value) throws
        Types.BadServerResponse,
@@ -2700,6 +3412,26 @@ public class VM extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Set the balloon driver's target on a running VM
+     *
+     * @param target The target in bytes
+     * @return Task
+     */
+    public Task setMemoryTargetLiveAsync(Connection c, Long target) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.set_memory_target_live";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(target)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -2727,6 +3459,26 @@ public class VM extends XenAPIObject {
      * Set the shadow memory on a running VM with the new shadow multiplier
      *
      * @param multiplier The new shadow multiplier to set
+     * @return Task
+     */
+    public Task setShadowMultiplierLiveAsync(Connection c, Double multiplier) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.set_shadow_multiplier_live";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(multiplier)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Set the shadow memory on a running VM with the new shadow multiplier
+     *
+     * @param multiplier The new shadow multiplier to set
      */
     public void setShadowMultiplierLive(Connection c, Double multiplier) throws
        Types.BadServerResponse,
@@ -2738,6 +3490,32 @@ public class VM extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Send the given key as a sysrq to this VM.  The key is specified as a single character (a String of length 1).  This can only be called when the specified VM is in the Running state.
+     *
+     * @param key The key to send
+     * @return Task
+     */
+    public Task sendSysrqAsync(Connection c, String key) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState {
+        String method_call = "Async.VM.send_sysrq";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(key)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
         }
         throw new Types.BadServerResponse(response);
     }
@@ -2771,6 +3549,32 @@ public class VM extends XenAPIObject {
      * Send the named trigger to this VM.  This can only be called when the specified VM is in the Running state.
      *
      * @param trigger The trigger to send
+     * @return Task
+     */
+    public Task sendTriggerAsync(Connection c, String trigger) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VmBadPowerState {
+        String method_call = "Async.VM.send_trigger";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(trigger)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VM_BAD_POWER_STATE")) {
+                throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Send the named trigger to this VM.  This can only be called when the specified VM is in the Running state.
+     *
+     * @param trigger The trigger to send
      */
     public void sendTrigger(Connection c, String trigger) throws
        Types.BadServerResponse,
@@ -2788,6 +3592,27 @@ public class VM extends XenAPIObject {
             if(error[0].equals("VM_BAD_POWER_STATE")) {
                 throw new Types.VmBadPowerState((String) error[1], (String) error[2], (String) error[3]);
             }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Returns the maximum amount of guest memory which will fit, together with overheads, in the supplied amount of physical memory. If 'exact' is true then an exact calculation is performed using the VM's current settings. If 'exact' is false then a more conservative approximation is used
+     *
+     * @param total Total amount of physical RAM to fit within
+     * @param approximate If false the limit is calculated with the guest's current exact configuration. Otherwise a more approximate calculation is performed
+     * @return Task
+     */
+    public Task maximiseMemoryAsync(Connection c, Long total, Boolean approximate) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.maximise_memory";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(total), Marshalling.toXMLRPC(approximate)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -2836,6 +3661,26 @@ public class VM extends XenAPIObject {
      * Check to see whether this operation is acceptable in the current state of the system, raising an error if the operation is invalid for some reason
      *
      * @param op proposed operation
+     * @return Task
+     */
+    public Task assertOperationValidAsync(Connection c, Types.VmOperations op) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.assert_operation_valid";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(op)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Check to see whether this operation is acceptable in the current state of the system, raising an error if the operation is invalid for some reason
+     *
+     * @param op proposed operation
      */
     public void assertOperationValid(Connection c, Types.VmOperations op) throws
        Types.BadServerResponse,
@@ -2847,6 +3692,25 @@ public class VM extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Recomputes the list of acceptable operations
+     *
+     * @return Task
+     */
+    public Task updateAllowedOperationsAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.update_allowed_operations";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -2910,6 +3774,25 @@ public class VM extends XenAPIObject {
     /**
      * Return the list of hosts on which this VM may run.
      *
+     * @return Task
+     */
+    public Task getPossibleHostsAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.get_possible_hosts";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Return the list of hosts on which this VM may run.
+     *
      * @return The possible hosts
      */
     public Set<Host> getPossibleHosts(Connection c) throws
@@ -2930,11 +3813,90 @@ public class VM extends XenAPIObject {
      * Returns an error if the VM could not boot on this host for some reason
      *
      * @param host The host
+     * @return Task
+     */
+    public Task assertCanBootHereAsync(Connection c, Host host) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.HostNotEnoughFreeMemory,
+       Types.VmRequiresSr {
+        String method_call = "Async.VM.assert_can_boot_here";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(host)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("HOST_NOT_ENOUGH_FREE_MEMORY")) {
+                throw new Types.HostNotEnoughFreeMemory();
+            }
+            if(error[0].equals("VM_REQUIRES_SR")) {
+                throw new Types.VmRequiresSr((String) error[1], (String) error[2]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Returns an error if the VM could not boot on this host for some reason
+     *
+     * @param host The host
      */
     public void assertCanBootHere(Connection c, Host host) throws
        Types.BadServerResponse,
-       XmlRpcException {
+       XmlRpcException,
+       Types.HostNotEnoughFreeMemory,
+       Types.VmRequiresSr {
         String method_call = "VM.assert_can_boot_here";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(host)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("HOST_NOT_ENOUGH_FREE_MEMORY")) {
+                throw new Types.HostNotEnoughFreeMemory();
+            }
+            if(error[0].equals("VM_REQUIRES_SR")) {
+                throw new Types.VmRequiresSr((String) error[1], (String) error[2]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * 
+     *
+     * @param host The host to set resident_on to
+     * @return Task
+     */
+    public Task atomicSetResidentOnAsync(Connection c, Host host) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VM.atomic_set_resident_on";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(host)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * 
+     *
+     * @param host The host to set resident_on to
+     */
+    public void atomicSetResidentOn(Connection c, Host host) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "VM.atomic_set_resident_on";
         String session = c.getSessionReference();
         Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(host)};
         Map response = c.dispatch(method_call, method_params);

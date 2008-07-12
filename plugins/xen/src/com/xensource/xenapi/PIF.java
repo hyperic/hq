@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -104,27 +105,27 @@ public class PIF extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("device", this.device);
-            map.put("network", this.network);
-            map.put("host", this.host);
-            map.put("MAC", this.MAC);
-            map.put("MTU", this.MTU);
-            map.put("VLAN", this.VLAN);
-            map.put("metrics", this.metrics);
-            map.put("physical", this.physical);
-            map.put("currently_attached", this.currentlyAttached);
-            map.put("ip_configuration_mode", this.ipConfigurationMode);
-            map.put("IP", this.IP);
-            map.put("netmask", this.netmask);
-            map.put("gateway", this.gateway);
-            map.put("DNS", this.DNS);
-            map.put("bond_slave_of", this.bondSlaveOf);
-            map.put("bond_master_of", this.bondMasterOf);
-            map.put("VLAN_master_of", this.VLANMasterOf);
-            map.put("VLAN_slave_of", this.VLANSlaveOf);
-            map.put("management", this.management);
-            map.put("other_config", this.otherConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("device", this.device == null ? "" : this.device);
+            map.put("network", this.network == null ? com.xensource.xenapi.Network.getInstFromRef("OpaqueRef:NULL") : this.network);
+            map.put("host", this.host == null ? com.xensource.xenapi.Host.getInstFromRef("OpaqueRef:NULL") : this.host);
+            map.put("MAC", this.MAC == null ? "" : this.MAC);
+            map.put("MTU", this.MTU == null ? 0 : this.MTU);
+            map.put("VLAN", this.VLAN == null ? 0 : this.VLAN);
+            map.put("metrics", this.metrics == null ? com.xensource.xenapi.PIFMetrics.getInstFromRef("OpaqueRef:NULL") : this.metrics);
+            map.put("physical", this.physical == null ? false : this.physical);
+            map.put("currently_attached", this.currentlyAttached == null ? false : this.currentlyAttached);
+            map.put("ip_configuration_mode", this.ipConfigurationMode == null ? Types.IpConfigurationMode.UNRECOGNIZED : this.ipConfigurationMode);
+            map.put("IP", this.IP == null ? "" : this.IP);
+            map.put("netmask", this.netmask == null ? "" : this.netmask);
+            map.put("gateway", this.gateway == null ? "" : this.gateway);
+            map.put("DNS", this.DNS == null ? "" : this.DNS);
+            map.put("bond_slave_of", this.bondSlaveOf == null ? com.xensource.xenapi.Bond.getInstFromRef("OpaqueRef:NULL") : this.bondSlaveOf);
+            map.put("bond_master_of", this.bondMasterOf == null ? new HashSet<Bond>() : this.bondMasterOf);
+            map.put("VLAN_master_of", this.VLANMasterOf == null ? com.xensource.xenapi.VLAN.getInstFromRef("OpaqueRef:NULL") : this.VLANMasterOf);
+            map.put("VLAN_slave_of", this.VLANSlaveOf == null ? new HashSet<VLAN>() : this.VLANSlaveOf);
+            map.put("management", this.management == null ? false : this.management);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
             return map;
         }
 
@@ -718,6 +719,36 @@ public class PIF extends XenAPIObject {
      * @param network network to which this interface should be connected
      * @param host physical machine to which this PIF is connected
      * @param VLAN VLAN tag for the new interface
+     * @return Task
+     */
+   @Deprecated public static Task createVLANAsync(Connection c, String device, Network network, Host host, Long VLAN) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VlanTagInvalid {
+        String method_call = "Async.PIF.create_VLAN";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(device), Marshalling.toXMLRPC(network), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(VLAN)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VLAN_TAG_INVALID")) {
+                throw new Types.VlanTagInvalid((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a VLAN interface from an existing physical interface
+     * @deprecated
+     *
+     * @param device physical interface on which to create the VLAN interface
+     * @param network network to which this interface should be connected
+     * @param host physical machine to which this PIF is connected
+     * @param VLAN VLAN tag for the new interface
      * @return The reference of the created PIF object
      */
    @Deprecated public static PIF createVLAN(Connection c, String device, Network network, Host host, Long VLAN) throws
@@ -735,6 +766,32 @@ public class PIF extends XenAPIObject {
             Object[] error = (Object[]) response.get("ErrorDescription");
             if(error[0].equals("VLAN_TAG_INVALID")) {
                 throw new Types.VlanTagInvalid((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy the PIF object (provided it is a VLAN interface)
+     * @deprecated
+     *
+     * @return Task
+     */
+   @Deprecated public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.PifIsPhysical {
+        String method_call = "Async.PIF.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("PIF_IS_PHYSICAL")) {
+                throw new Types.PifIsPhysical((String) error[1]);
             }
         }
         throw new Types.BadServerResponse(response);
@@ -773,6 +830,30 @@ public class PIF extends XenAPIObject {
      * @param netmask the new netmask
      * @param gateway the new gateway
      * @param DNS the new DNS settings
+     * @return Task
+     */
+    public Task reconfigureIpAsync(Connection c, Types.IpConfigurationMode mode, String IP, String netmask, String gateway, String DNS) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.PIF.reconfigure_ip";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(mode), Marshalling.toXMLRPC(IP), Marshalling.toXMLRPC(netmask), Marshalling.toXMLRPC(gateway), Marshalling.toXMLRPC(DNS)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Reconfigure the IP address settings for this interface
+     *
+     * @param mode whether to use dynamic/static/no-assignment
+     * @param IP the new IP address
+     * @param netmask the new netmask
+     * @param gateway the new gateway
+     * @param DNS the new DNS settings
      */
     public void reconfigureIp(Connection c, Types.IpConfigurationMode mode, String IP, String netmask, String gateway, String DNS) throws
        Types.BadServerResponse,
@@ -784,6 +865,26 @@ public class PIF extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Scan for physical interfaces on a host and create PIF objects to represent them
+     *
+     * @param host The host on which to scan
+     * @return Task
+     */
+    public static Task scanAsync(Connection c, Host host) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.PIF.scan";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(host)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -813,6 +914,28 @@ public class PIF extends XenAPIObject {
      * @param host The host on which the interface exists
      * @param MAC The MAC address of the interface
      * @param device The device name to use for the interface
+     * @return Task
+     */
+    public static Task introduceAsync(Connection c, Host host, String MAC, String device) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.PIF.introduce";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(MAC), Marshalling.toXMLRPC(device)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a PIF object matching a particular network interface
+     *
+     * @param host The host on which the interface exists
+     * @param MAC The MAC address of the interface
+     * @param device The device name to use for the interface
      * @return The reference of the created PIF object
      */
     public static PIF introduce(Connection c, Host host, String MAC, String device) throws
@@ -825,6 +948,25 @@ public class PIF extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toPIF(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy the PIF object matching a particular network interface
+     *
+     * @return Task
+     */
+    public Task forgetAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.PIF.forget";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }

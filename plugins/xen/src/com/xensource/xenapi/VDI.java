@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -104,27 +105,27 @@ public class VDI extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("name_label", this.nameLabel);
-            map.put("name_description", this.nameDescription);
-            map.put("allowed_operations", this.allowedOperations);
-            map.put("current_operations", this.currentOperations);
-            map.put("SR", this.SR);
-            map.put("VBDs", this.VBDs);
-            map.put("crash_dumps", this.crashDumps);
-            map.put("virtual_size", this.virtualSize);
-            map.put("physical_utilisation", this.physicalUtilisation);
-            map.put("type", this.type);
-            map.put("sharable", this.sharable);
-            map.put("read_only", this.readOnly);
-            map.put("other_config", this.otherConfig);
-            map.put("storage_lock", this.storageLock);
-            map.put("location", this.location);
-            map.put("managed", this.managed);
-            map.put("missing", this.missing);
-            map.put("parent", this.parent);
-            map.put("xenstore_data", this.xenstoreData);
-            map.put("sm_config", this.smConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("name_label", this.nameLabel == null ? "" : this.nameLabel);
+            map.put("name_description", this.nameDescription == null ? "" : this.nameDescription);
+            map.put("allowed_operations", this.allowedOperations == null ? new HashSet<Types.VdiOperations>() : this.allowedOperations);
+            map.put("current_operations", this.currentOperations == null ? new HashMap<String, Types.VdiOperations>() : this.currentOperations);
+            map.put("SR", this.SR == null ? com.xensource.xenapi.SR.getInstFromRef("OpaqueRef:NULL") : this.SR);
+            map.put("VBDs", this.VBDs == null ? new HashSet<VBD>() : this.VBDs);
+            map.put("crash_dumps", this.crashDumps == null ? new HashSet<Crashdump>() : this.crashDumps);
+            map.put("virtual_size", this.virtualSize == null ? 0 : this.virtualSize);
+            map.put("physical_utilisation", this.physicalUtilisation == null ? 0 : this.physicalUtilisation);
+            map.put("type", this.type == null ? Types.VdiType.UNRECOGNIZED : this.type);
+            map.put("sharable", this.sharable == null ? false : this.sharable);
+            map.put("read_only", this.readOnly == null ? false : this.readOnly);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
+            map.put("storage_lock", this.storageLock == null ? false : this.storageLock);
+            map.put("location", this.location == null ? "" : this.location);
+            map.put("managed", this.managed == null ? false : this.managed);
+            map.put("missing", this.missing == null ? false : this.missing);
+            map.put("parent", this.parent == null ? com.xensource.xenapi.VDI.getInstFromRef("OpaqueRef:NULL") : this.parent);
+            map.put("xenstore_data", this.xenstoreData == null ? new HashMap<String, String>() : this.xenstoreData);
+            map.put("sm_config", this.smConfig == null ? new HashMap<String, String>() : this.smConfig);
             return map;
         }
 
@@ -257,6 +258,27 @@ public class VDI extends XenAPIObject {
      * Create a new VDI instance, and return its handle.
      *
      * @param record All constructor arguments
+     * @return Task
+     */
+    public static Task createAsync(Connection c, VDI.Record record) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.create";
+        String session = c.getSessionReference();
+        Map<String, Object> record_map = record.toMap();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(record_map)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a new VDI instance, and return its handle.
+     *
+     * @param record All constructor arguments
      * @return reference to the newly created object
      */
     public static VDI create(Connection c, VDI.Record record) throws
@@ -270,6 +292,25 @@ public class VDI extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toVDI(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy the specified VDI instance.
+     *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -769,25 +810,6 @@ public class VDI extends XenAPIObject {
     }
 
     /**
-     * Set the read_only field of the given VDI.
-     *
-     * @param readOnly New value to set
-     */
-    public void setReadOnly(Connection c, Boolean readOnly) throws
-       Types.BadServerResponse,
-       XmlRpcException {
-        String method_call = "VDI.set_read_only";
-        String session = c.getSessionReference();
-        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(readOnly)};
-        Map response = c.dispatch(method_call, method_params);
-        if(response.get("Status").equals("Success")) {
-            Object result = response.get("Value");
-            return;
-        }
-        throw new Types.BadServerResponse(response);
-    }
-
-    /**
      * Set the other_config field of the given VDI.
      *
      * @param otherConfig New value to set
@@ -965,9 +987,93 @@ public class VDI extends XenAPIObject {
      * Take a read-only snapshot of the VDI, returning a reference to the snapshot. If any driver_params are specified then these are passed through to the storage-specific substrate driver that takes the snapshot. NB the snapshot lives in the same Storage Repository as its parent.
      *
      * @param driverParams Optional parameters that can be passed through to backend driver in order to specify storage-type-specific snapshot options
+     * @return Task
+     */
+    public Task snapshotAsync(Connection c, Map<String, String> driverParams) throws
+       Types.BadServerResponse,
+       Types.VersionException,
+       XmlRpcException {
+
+        if(c.rioConnection){
+            if (driverParams.isEmpty()){
+                return rioSnapshotAsync(c);
+            } else {
+                throw new Types.VersionException("driverParams parameter must be empty map for Rio (legacy XenServer) host");
+            }
+        } else {
+            return miamiSnapshotAsync(c, driverParams);
+        }
+    }
+
+
+
+    private Task rioSnapshotAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.snapshot";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    private Task miamiSnapshotAsync(Connection c, Map<String, String> driverParams) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.snapshot";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(driverParams)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Take a read-only snapshot of the VDI, returning a reference to the snapshot. If any driver_params are specified then these are passed through to the storage-specific substrate driver that takes the snapshot. NB the snapshot lives in the same Storage Repository as its parent.
+     *
+     * @param driverParams Optional parameters that can be passed through to backend driver in order to specify storage-type-specific snapshot options
      * @return The ID of the newly created VDI.
      */
     public VDI snapshot(Connection c, Map<String, String> driverParams) throws
+       Types.BadServerResponse,
+       Types.VersionException,
+       XmlRpcException {
+
+        if(c.rioConnection){
+            if (driverParams.isEmpty()){
+                return rioSnapshot(c);
+            } else {
+                throw new Types.VersionException("driverParams parameter must be empty map for Rio (legacy XenServer) host");
+            }
+        } else {
+            return miamiSnapshot(c, driverParams);
+        }
+    }
+
+
+
+    private VDI rioSnapshot(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "VDI.snapshot";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toVDI(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    private VDI miamiSnapshot(Connection c, Map<String, String> driverParams) throws
        Types.BadServerResponse,
        XmlRpcException {
         String method_call = "VDI.snapshot";
@@ -985,9 +1091,93 @@ public class VDI extends XenAPIObject {
      * Take an exact copy of the VDI and return a reference to the new disk. If any driver_params are specified then these are passed through to the storage-specific substrate driver that implements the clone operation. NB the clone lives in the same Storage Repository as its parent.
      *
      * @param driverParams Optional parameters that are passed through to the backend driver in order to specify storage-type-specific clone options
+     * @return Task
+     */
+    public Task createCloneAsync(Connection c, Map<String, String> driverParams) throws
+       Types.BadServerResponse,
+       Types.VersionException,
+       XmlRpcException {
+
+        if(c.rioConnection){
+            if (driverParams.isEmpty()){
+                return rioCreateCloneAsync(c);
+            } else {
+                throw new Types.VersionException("driverParams parameter must be empty map for Rio (legacy XenServer) host");
+            }
+        } else {
+            return miamiCreateCloneAsync(c, driverParams);
+        }
+    }
+
+
+
+    private Task rioCreateCloneAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.clone";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    private Task miamiCreateCloneAsync(Connection c, Map<String, String> driverParams) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.clone";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(driverParams)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Take an exact copy of the VDI and return a reference to the new disk. If any driver_params are specified then these are passed through to the storage-specific substrate driver that implements the clone operation. NB the clone lives in the same Storage Repository as its parent.
+     *
+     * @param driverParams Optional parameters that are passed through to the backend driver in order to specify storage-type-specific clone options
      * @return The ID of the newly created VDI.
      */
     public VDI createClone(Connection c, Map<String, String> driverParams) throws
+       Types.BadServerResponse,
+       Types.VersionException,
+       XmlRpcException {
+
+        if(c.rioConnection){
+            if (driverParams.isEmpty()){
+                return rioCreateClone(c);
+            } else {
+                throw new Types.VersionException("driverParams parameter must be empty map for Rio (legacy XenServer) host");
+            }
+        } else {
+            return miamiCreateClone(c, driverParams);
+        }
+    }
+
+
+
+    private VDI rioCreateClone(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "VDI.clone";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toVDI(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    private VDI miamiCreateClone(Connection c, Map<String, String> driverParams) throws
        Types.BadServerResponse,
        XmlRpcException {
         String method_call = "VDI.clone";
@@ -997,6 +1187,26 @@ public class VDI extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toVDI(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Resize the VDI.
+     *
+     * @param size The new size of the VDI
+     * @return Task
+     */
+    public Task resizeAsync(Connection c, Long size) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.resize";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(size)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -1016,6 +1226,42 @@ public class VDI extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a new VDI record in the database only
+     *
+     * @param uuid The uuid of the disk to introduce
+     * @param nameLabel The name of the disk record
+     * @param nameDescription The description of the disk record
+     * @param SR The SR that the VDI is in
+     * @param type The type of the VDI
+     * @param sharable true if this disk may be shared
+     * @param readOnly true if this disk may ONLY be mounted read-only
+     * @param otherConfig additional configuration
+     * @param location location information
+     * @param xenstoreData Data to insert into xenstore
+     * @param smConfig Storage-specific config
+     * @return Task
+     */
+    public static Task introduceAsync(Connection c, String uuid, String nameLabel, String nameDescription, SR SR, Types.VdiType type, Boolean sharable, Boolean readOnly, Map<String, String> otherConfig, String location, Map<String, String> xenstoreData, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.SrOperationNotSupported {
+        String method_call = "Async.VDI.introduce";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(uuid), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(SR), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(sharable), Marshalling.toXMLRPC(readOnly), Marshalling.toXMLRPC(otherConfig), Marshalling.toXMLRPC(location), Marshalling.toXMLRPC(xenstoreData), Marshalling.toXMLRPC(smConfig)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("SR_OPERATION_NOT_SUPPORTED")) {
+                throw new Types.SrOperationNotSupported((String) error[1]);
+            }
         }
         throw new Types.BadServerResponse(response);
     }
@@ -1057,6 +1303,123 @@ public class VDI extends XenAPIObject {
     }
 
     /**
+     * Create a new VDI record in the database only
+     *
+     * @param uuid The uuid of the disk to introduce
+     * @param nameLabel The name of the disk record
+     * @param nameDescription The description of the disk record
+     * @param SR The SR that the VDI is in
+     * @param type The type of the VDI
+     * @param sharable true if this disk may be shared
+     * @param readOnly true if this disk may ONLY be mounted read-only
+     * @param otherConfig additional configuration
+     * @param location location information
+     * @param xenstoreData Data to insert into xenstore
+     * @param smConfig Storage-specific config
+     * @return Task
+     */
+    public static Task dbIntroduceAsync(Connection c, String uuid, String nameLabel, String nameDescription, SR SR, Types.VdiType type, Boolean sharable, Boolean readOnly, Map<String, String> otherConfig, String location, Map<String, String> xenstoreData, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.db_introduce";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(uuid), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(SR), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(sharable), Marshalling.toXMLRPC(readOnly), Marshalling.toXMLRPC(otherConfig), Marshalling.toXMLRPC(location), Marshalling.toXMLRPC(xenstoreData), Marshalling.toXMLRPC(smConfig)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a new VDI record in the database only
+     *
+     * @param uuid The uuid of the disk to introduce
+     * @param nameLabel The name of the disk record
+     * @param nameDescription The description of the disk record
+     * @param SR The SR that the VDI is in
+     * @param type The type of the VDI
+     * @param sharable true if this disk may be shared
+     * @param readOnly true if this disk may ONLY be mounted read-only
+     * @param otherConfig additional configuration
+     * @param location location information
+     * @param xenstoreData Data to insert into xenstore
+     * @param smConfig Storage-specific config
+     * @return The ref of the newly created VDI record.
+     */
+    public static VDI dbIntroduce(Connection c, String uuid, String nameLabel, String nameDescription, SR SR, Types.VdiType type, Boolean sharable, Boolean readOnly, Map<String, String> otherConfig, String location, Map<String, String> xenstoreData, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "VDI.db_introduce";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(uuid), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(SR), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(sharable), Marshalling.toXMLRPC(readOnly), Marshalling.toXMLRPC(otherConfig), Marshalling.toXMLRPC(location), Marshalling.toXMLRPC(xenstoreData), Marshalling.toXMLRPC(smConfig)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toVDI(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Removes a VDI record from the database
+     *
+     * @return Task
+     */
+    public Task dbForgetAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.db_forget";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Removes a VDI record from the database
+     *
+     */
+    public void dbForget(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "VDI.db_forget";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Make a fresh VDI in the specified SR and copy the supplied VDI's data to the new disk
+     *
+     * @param sr The destination SR
+     * @return Task
+     */
+    public Task copyAsync(Connection c, SR sr) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.copy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(sr)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
      * Make a fresh VDI in the specified SR and copy the supplied VDI's data to the new disk
      *
      * @param sr The destination SR
@@ -1072,6 +1435,26 @@ public class VDI extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toVDI(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the VDI's managed field
+     *
+     * @param value The new value of the VDI's managed field
+     * @return Task
+     */
+    public Task setManagedAsync(Connection c, Boolean value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.set_managed";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -1098,6 +1481,25 @@ public class VDI extends XenAPIObject {
     /**
      * Removes a VDI record from the database
      *
+     * @return Task
+     */
+    public Task forgetAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.forget";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Removes a VDI record from the database
+     *
      */
     public void forget(Connection c) throws
        Types.BadServerResponse,
@@ -1105,6 +1507,162 @@ public class VDI extends XenAPIObject {
         String method_call = "VDI.forget";
         String session = c.getSessionReference();
         Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the VDI's read_only field
+     *
+     * @param value The new value of the VDI's read_only field
+     * @return Task
+     */
+    public Task setReadOnlyAsync(Connection c, Boolean value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.set_read_only";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the VDI's read_only field
+     *
+     * @param value The new value of the VDI's read_only field
+     */
+    public void setReadOnly(Connection c, Boolean value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "VDI.set_read_only";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the VDI's missing field
+     *
+     * @param value The new value of the VDI's missing field
+     * @return Task
+     */
+    public Task setMissingAsync(Connection c, Boolean value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.set_missing";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the VDI's missing field
+     *
+     * @param value The new value of the VDI's missing field
+     */
+    public void setMissing(Connection c, Boolean value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "VDI.set_missing";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the VDI's virtual_size field
+     *
+     * @param value The new value of the VDI's virtual size
+     * @return Task
+     */
+    public Task setVirtualSizeAsync(Connection c, Long value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.set_virtual_size";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the VDI's virtual_size field
+     *
+     * @param value The new value of the VDI's virtual size
+     */
+    public void setVirtualSize(Connection c, Long value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "VDI.set_virtual_size";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the VDI's physical_utilisation field
+     *
+     * @param value The new value of the VDI's physical utilisation
+     * @return Task
+     */
+    public Task setPhysicalUtilisationAsync(Connection c, Long value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VDI.set_physical_utilisation";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the VDI's physical_utilisation field
+     *
+     * @param value The new value of the VDI's physical utilisation
+     */
+    public void setPhysicalUtilisation(Connection c, Long value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "VDI.set_physical_utilisation";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
         Map response = c.dispatch(method_call, method_params);
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");

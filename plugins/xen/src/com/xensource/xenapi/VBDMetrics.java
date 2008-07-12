@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -87,10 +88,10 @@ public class VBDMetrics extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("io_read_kbs", this.ioReadKbs);
-            map.put("io_write_kbs", this.ioWriteKbs);
-            map.put("last_updated", this.lastUpdated);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("io_read_kbs", this.ioReadKbs == null ? 0.0 : this.ioReadKbs);
+            map.put("io_write_kbs", this.ioWriteKbs == null ? 0.0 : this.ioWriteKbs);
+            map.put("last_updated", this.lastUpdated == null ? new Date(0) : this.lastUpdated);
             return map;
         }
 

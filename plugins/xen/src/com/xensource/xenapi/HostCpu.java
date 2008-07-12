@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -95,18 +96,18 @@ public class HostCpu extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("host", this.host);
-            map.put("number", this.number);
-            map.put("vendor", this.vendor);
-            map.put("speed", this.speed);
-            map.put("modelname", this.modelname);
-            map.put("family", this.family);
-            map.put("model", this.model);
-            map.put("stepping", this.stepping);
-            map.put("flags", this.flags);
-            map.put("features", this.features);
-            map.put("utilisation", this.utilisation);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("host", this.host == null ? com.xensource.xenapi.Host.getInstFromRef("OpaqueRef:NULL") : this.host);
+            map.put("number", this.number == null ? 0 : this.number);
+            map.put("vendor", this.vendor == null ? "" : this.vendor);
+            map.put("speed", this.speed == null ? 0 : this.speed);
+            map.put("modelname", this.modelname == null ? "" : this.modelname);
+            map.put("family", this.family == null ? 0 : this.family);
+            map.put("model", this.model == null ? 0 : this.model);
+            map.put("stepping", this.stepping == null ? "" : this.stepping);
+            map.put("flags", this.flags == null ? "" : this.flags);
+            map.put("features", this.features == null ? "" : this.features);
+            map.put("utilisation", this.utilisation == null ? 0.0 : this.utilisation);
             return map;
         }
 

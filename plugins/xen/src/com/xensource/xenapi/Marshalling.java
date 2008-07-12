@@ -54,6 +54,8 @@ public final class Marshalling {
             return result;
 	} else if (o instanceof XenAPIObject) {
 	    return ((XenAPIObject) o).toWireString();
+	} else if (o instanceof Enum) {
+	    return o.toString();
 	}else if (o == null){
 	    return "";
         } else {

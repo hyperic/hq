@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -91,14 +92,14 @@ public class Pool extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("name_label", this.nameLabel);
-            map.put("name_description", this.nameDescription);
-            map.put("master", this.master);
-            map.put("default_SR", this.defaultSR);
-            map.put("suspend_image_SR", this.suspendImageSR);
-            map.put("crash_dump_SR", this.crashDumpSR);
-            map.put("other_config", this.otherConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("name_label", this.nameLabel == null ? "" : this.nameLabel);
+            map.put("name_description", this.nameDescription == null ? "" : this.nameDescription);
+            map.put("master", this.master == null ? com.xensource.xenapi.Host.getInstFromRef("OpaqueRef:NULL") : this.master);
+            map.put("default_SR", this.defaultSR == null ? com.xensource.xenapi.SR.getInstFromRef("OpaqueRef:NULL") : this.defaultSR);
+            map.put("suspend_image_SR", this.suspendImageSR == null ? com.xensource.xenapi.SR.getInstFromRef("OpaqueRef:NULL") : this.suspendImageSR);
+            map.put("crash_dump_SR", this.crashDumpSR == null ? com.xensource.xenapi.SR.getInstFromRef("OpaqueRef:NULL") : this.crashDumpSR);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
             return map;
         }
 
@@ -486,10 +487,39 @@ public class Pool extends XenAPIObject {
      * @param masterAddress The hostname of the master of the pool to join
      * @param masterUsername The username of the master (for initial authentication)
      * @param masterPassword The password for the master (for initial authentication)
+     * @return Task
+     */
+    public static Task joinAsync(Connection c, String masterAddress, String masterUsername, String masterPassword) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.JoiningHostCannotContainSharedSrs {
+        String method_call = "Async.pool.join";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(masterAddress), Marshalling.toXMLRPC(masterUsername), Marshalling.toXMLRPC(masterPassword)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("JOINING_HOST_CANNOT_CONTAIN_SHARED_SRS")) {
+                throw new Types.JoiningHostCannotContainSharedSrs();
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Instruct host to join a new pool
+     *
+     * @param masterAddress The hostname of the master of the pool to join
+     * @param masterUsername The username of the master (for initial authentication)
+     * @param masterPassword The password for the master (for initial authentication)
      */
     public static void join(Connection c, String masterAddress, String masterUsername, String masterPassword) throws
        Types.BadServerResponse,
-       XmlRpcException {
+       XmlRpcException,
+       Types.JoiningHostCannotContainSharedSrs {
         String method_call = "pool.join";
         String session = c.getSessionReference();
         Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(masterAddress), Marshalling.toXMLRPC(masterUsername), Marshalling.toXMLRPC(masterPassword)};
@@ -497,6 +527,33 @@ public class Pool extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("JOINING_HOST_CANNOT_CONTAIN_SHARED_SRS")) {
+                throw new Types.JoiningHostCannotContainSharedSrs();
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Instruct host to join a new pool
+     *
+     * @param masterAddress The hostname of the master of the pool to join
+     * @param masterUsername The username of the master (for initial authentication)
+     * @param masterPassword The password for the master (for initial authentication)
+     * @return Task
+     */
+    public static Task joinForceAsync(Connection c, String masterAddress, String masterUsername, String masterPassword) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool.join_force";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(masterAddress), Marshalling.toXMLRPC(masterUsername), Marshalling.toXMLRPC(masterPassword)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -518,6 +575,26 @@ public class Pool extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Instruct a pool master to eject a host from the pool
+     *
+     * @param host The host to eject
+     * @return Task
+     */
+    public static Task ejectAsync(Connection c, Host host) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool.eject";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(host)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -581,6 +658,25 @@ public class Pool extends XenAPIObject {
     /**
      * Instruct a pool master, M, to try and contact its slaves and, if slaves are in emergency mode, reset their master address to M.
      *
+     * @return Task
+     */
+    public static Task recoverSlavesAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool.recover_slaves";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Instruct a pool master, M, to try and contact its slaves and, if slaves are in emergency mode, reset their master address to M.
+     *
      * @return list of hosts whose master address were succesfully reset
      */
     public static Set<Host> recoverSlaves(Connection c) throws
@@ -593,6 +689,34 @@ public class Pool extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toSetOfHost(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create PIFs, mapping a network to the same physical interface/VLAN on each host
+     *
+     * @param device physical interface on which to create the VLAN interface
+     * @param network network to which this interface should be connected
+     * @param VLAN VLAN tag for the new interface
+     * @return Task
+     */
+    public static Task createVLANAsync(Connection c, String device, Network network, Long VLAN) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VlanTagInvalid {
+        String method_call = "Async.pool.create_VLAN";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(device), Marshalling.toXMLRPC(network), Marshalling.toXMLRPC(VLAN)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VLAN_TAG_INVALID")) {
+                throw new Types.VlanTagInvalid((String) error[1]);
+            }
         }
         throw new Types.BadServerResponse(response);
     }
@@ -628,6 +752,25 @@ public class Pool extends XenAPIObject {
     /**
      * Turn on High Availability mode
      *
+     * @return Task
+     */
+    public static Task enableHaAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool.enable_ha";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Turn on High Availability mode
+     *
      */
     public static void enableHa(Connection c) throws
        Types.BadServerResponse,
@@ -639,6 +782,25 @@ public class Pool extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Turn off High Availability mode
+     *
+     * @return Task
+     */
+    public static Task disableHaAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool.disable_ha";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -664,6 +826,25 @@ public class Pool extends XenAPIObject {
     /**
      * Forcibly synchronise the database now
      *
+     * @return Task
+     */
+    public static Task syncDatabaseAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool.sync_database";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Forcibly synchronise the database now
+     *
      */
     public static void syncDatabase(Connection c) throws
        Types.BadServerResponse,
@@ -675,6 +856,26 @@ public class Pool extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Perform an orderly handover of the role of master to the referenced host.
+     *
+     * @param host The host who should become the new master
+     * @return Task
+     */
+    public static Task designateNewMasterAsync(Connection c, Host host) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool.designate_new_master";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(host)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }

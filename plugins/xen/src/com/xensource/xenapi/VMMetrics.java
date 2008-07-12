@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -94,17 +95,17 @@ public class VMMetrics extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("memory_actual", this.memoryActual);
-            map.put("VCPUs_number", this.VCPUsNumber);
-            map.put("VCPUs_utilisation", this.VCPUsUtilisation);
-            map.put("VCPUs_CPU", this.VCPUsCPU);
-            map.put("VCPUs_params", this.VCPUsParams);
-            map.put("VCPUs_flags", this.VCPUsFlags);
-            map.put("state", this.state);
-            map.put("start_time", this.startTime);
-            map.put("install_time", this.installTime);
-            map.put("last_updated", this.lastUpdated);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("memory_actual", this.memoryActual == null ? 0 : this.memoryActual);
+            map.put("VCPUs_number", this.VCPUsNumber == null ? 0 : this.VCPUsNumber);
+            map.put("VCPUs_utilisation", this.VCPUsUtilisation == null ? new HashMap<Long, Double>() : this.VCPUsUtilisation);
+            map.put("VCPUs_CPU", this.VCPUsCPU == null ? new HashMap<Long, Long>() : this.VCPUsCPU);
+            map.put("VCPUs_params", this.VCPUsParams == null ? new HashMap<String, String>() : this.VCPUsParams);
+            map.put("VCPUs_flags", this.VCPUsFlags == null ? new HashMap<Long, Set<String>>() : this.VCPUsFlags);
+            map.put("state", this.state == null ? new HashSet<String>() : this.state);
+            map.put("start_time", this.startTime == null ? new Date(0) : this.startTime);
+            map.put("install_time", this.installTime == null ? new Date(0) : this.installTime);
+            map.put("last_updated", this.lastUpdated == null ? new Date(0) : this.lastUpdated);
             return map;
         }
 

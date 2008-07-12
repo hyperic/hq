@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -105,28 +106,28 @@ public class VBD extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("allowed_operations", this.allowedOperations);
-            map.put("current_operations", this.currentOperations);
-            map.put("VM", this.VM);
-            map.put("VDI", this.VDI);
-            map.put("device", this.device);
-            map.put("userdevice", this.userdevice);
-            map.put("bootable", this.bootable);
-            map.put("mode", this.mode);
-            map.put("type", this.type);
-            map.put("unpluggable", this.unpluggable);
-            map.put("storage_lock", this.storageLock);
-            map.put("empty", this.empty);
-            map.put("other_config", this.otherConfig);
-            map.put("currently_attached", this.currentlyAttached);
-            map.put("status_code", this.statusCode);
-            map.put("status_detail", this.statusDetail);
-            map.put("runtime_properties", this.runtimeProperties);
-            map.put("qos_algorithm_type", this.qosAlgorithmType);
-            map.put("qos_algorithm_params", this.qosAlgorithmParams);
-            map.put("qos_supported_algorithms", this.qosSupportedAlgorithms);
-            map.put("metrics", this.metrics);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("allowed_operations", this.allowedOperations == null ? new HashSet<Types.VbdOperations>() : this.allowedOperations);
+            map.put("current_operations", this.currentOperations == null ? new HashMap<String, Types.VbdOperations>() : this.currentOperations);
+            map.put("VM", this.VM == null ? com.xensource.xenapi.VM.getInstFromRef("OpaqueRef:NULL") : this.VM);
+            map.put("VDI", this.VDI == null ? com.xensource.xenapi.VDI.getInstFromRef("OpaqueRef:NULL") : this.VDI);
+            map.put("device", this.device == null ? "" : this.device);
+            map.put("userdevice", this.userdevice == null ? "" : this.userdevice);
+            map.put("bootable", this.bootable == null ? false : this.bootable);
+            map.put("mode", this.mode == null ? Types.VbdMode.UNRECOGNIZED : this.mode);
+            map.put("type", this.type == null ? Types.VbdType.UNRECOGNIZED : this.type);
+            map.put("unpluggable", this.unpluggable == null ? false : this.unpluggable);
+            map.put("storage_lock", this.storageLock == null ? false : this.storageLock);
+            map.put("empty", this.empty == null ? false : this.empty);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
+            map.put("currently_attached", this.currentlyAttached == null ? false : this.currentlyAttached);
+            map.put("status_code", this.statusCode == null ? 0 : this.statusCode);
+            map.put("status_detail", this.statusDetail == null ? "" : this.statusDetail);
+            map.put("runtime_properties", this.runtimeProperties == null ? new HashMap<String, String>() : this.runtimeProperties);
+            map.put("qos_algorithm_type", this.qosAlgorithmType == null ? "" : this.qosAlgorithmType);
+            map.put("qos_algorithm_params", this.qosAlgorithmParams == null ? new HashMap<String, String>() : this.qosAlgorithmParams);
+            map.put("qos_supported_algorithms", this.qosSupportedAlgorithms == null ? new HashSet<String>() : this.qosSupportedAlgorithms);
+            map.put("metrics", this.metrics == null ? com.xensource.xenapi.VBDMetrics.getInstFromRef("OpaqueRef:NULL") : this.metrics);
             return map;
         }
 
@@ -263,6 +264,27 @@ public class VBD extends XenAPIObject {
      * Create a new VBD instance, and return its handle.
      *
      * @param record All constructor arguments
+     * @return Task
+     */
+    public static Task createAsync(Connection c, VBD.Record record) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VBD.create";
+        String session = c.getSessionReference();
+        Map<String, Object> record_map = record.toMap();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(record_map)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a new VBD instance, and return its handle.
+     *
+     * @param record All constructor arguments
      * @return reference to the newly created object
      */
     public static VBD create(Connection c, VBD.Record record) throws
@@ -276,6 +298,25 @@ public class VBD extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toVBD(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy the specified VBD instance.
+     *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VBD.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -949,6 +990,35 @@ public class VBD extends XenAPIObject {
     /**
      * Remove the media from the device and leave it empty
      *
+     * @return Task
+     */
+    public Task ejectAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VbdNotRemovableMedia,
+       Types.VbdIsEmpty {
+        String method_call = "Async.VBD.eject";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VBD_NOT_REMOVABLE_MEDIA")) {
+                throw new Types.VbdNotRemovableMedia((String) error[1]);
+            }
+            if(error[0].equals("VBD_IS_EMPTY")) {
+                throw new Types.VbdIsEmpty((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Remove the media from the device and leave it empty
+     *
      */
     public void eject(Connection c) throws
        Types.BadServerResponse,
@@ -969,6 +1039,36 @@ public class VBD extends XenAPIObject {
             }
             if(error[0].equals("VBD_IS_EMPTY")) {
                 throw new Types.VbdIsEmpty((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Insert new media into the device
+     *
+     * @param vdi The new VDI to 'insert'
+     * @return Task
+     */
+    public Task insertAsync(Connection c, VDI vdi) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.VbdNotRemovableMedia,
+       Types.VbdNotEmpty {
+        String method_call = "Async.VBD.insert";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(vdi)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("VBD_NOT_REMOVABLE_MEDIA")) {
+                throw new Types.VbdNotRemovableMedia((String) error[1]);
+            }
+            if(error[0].equals("VBD_NOT_EMPTY")) {
+                throw new Types.VbdNotEmpty((String) error[1]);
             }
         }
         throw new Types.BadServerResponse(response);
@@ -1006,6 +1106,25 @@ public class VBD extends XenAPIObject {
     /**
      * Hotplug the specified VBD, dynamically attaching it to the running VM
      *
+     * @return Task
+     */
+    public Task plugAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VBD.plug";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Hotplug the specified VBD, dynamically attaching it to the running VM
+     *
      */
     public void plug(Connection c) throws
        Types.BadServerResponse,
@@ -1017,6 +1136,35 @@ public class VBD extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Hot-unplug the specified VBD, dynamically unattaching it from the running VM
+     *
+     * @return Task
+     */
+    public Task unplugAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.DeviceDetachRejected,
+       Types.DeviceAlreadyDetached {
+        String method_call = "Async.VBD.unplug";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("DEVICE_DETACH_REJECTED")) {
+                throw new Types.DeviceDetachRejected((String) error[1], (String) error[2], (String) error[3]);
+            }
+            if(error[0].equals("DEVICE_ALREADY_DETACHED")) {
+                throw new Types.DeviceAlreadyDetached((String) error[1]);
+            }
         }
         throw new Types.BadServerResponse(response);
     }
@@ -1052,6 +1200,25 @@ public class VBD extends XenAPIObject {
     /**
      * Forcibly unplug the specified VBD
      *
+     * @return Task
+     */
+    public Task unplugForceAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VBD.unplug_force";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Forcibly unplug the specified VBD
+     *
      */
     public void unplugForce(Connection c) throws
        Types.BadServerResponse,
@@ -1063,6 +1230,25 @@ public class VBD extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Throws an error if this VBD could not be attached to this VM if the VM were running. Intended for debugging.
+     *
+     * @return Task
+     */
+    public Task assertAttachableAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VBD.assert_attachable";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }

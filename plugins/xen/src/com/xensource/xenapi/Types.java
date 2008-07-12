@@ -25,6 +25,9 @@ import java.util.Set;
 import java.util.HashSet;
 import java.io.IOException;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 /**
  * This class holds vital marshalling functions,
  * enum types and exceptions.
@@ -67,6 +70,47 @@ public class Types {
                 return super.toString()+" "+this.response.toString();
             }
         }
+    }
+
+    public static class BadAsyncResult extends XenAPIException {
+        public final String result;
+        public BadAsyncResult(String result) {
+            this.result=result;
+        }
+        public String toString(){
+            return result;
+        }
+    }
+
+     /*
+      * A call has been made which should not be made against this version of host.
+      * Probably the host is out of date and cannot handle this call, or is
+      * unable to comply with the details of the call. For instance SR.create
+      * on "Miami" hosts takes an smConfig parameter, which must be an empty map 
+      * when making this call on "Rio" hosts.
+      */
+     public static class VersionException extends XenAPIException {
+         public final String result;
+         public VersionException(String result) {
+             this.result=result;
+         }
+         public String toString(){
+             return result;
+         }
+     }
+
+    private static String parseResult (String result) throws BadAsyncResult 
+    {
+        Pattern pattern = Pattern.compile("<value>(.*)</value>");
+        Matcher matcher = pattern.matcher(result);
+        matcher.find();
+
+        if(matcher.groupCount()!=1)
+        {
+            throw new Types.BadAsyncResult("Can't interpret: "+result);
+        }
+
+        return matcher.group(1);
     }
 
     public enum ConsoleProtocol {
@@ -743,6 +787,30 @@ public class Types {
 
 
     /**
+     * The patch precheck stage failed with an unknown error.  See attached info for more details.
+     */
+    public static class PatchPrecheckFailedUnknownError extends XenAPIException {
+        public final String patch;
+        public final String info;
+
+        /**
+         * Create a new PatchPrecheckFailedUnknownError
+         *
+         * @param patch
+         * @param info
+         */
+        public PatchPrecheckFailedUnknownError(String patch, String info) {
+            super();
+            this.patch = patch;
+            this.info = info;
+        }
+
+        public String toString() {
+            return "The patch precheck stage failed with an unknown error.  See attached info for more details.";
+        }
+    }
+
+    /**
      * The specified object no longer exists.
      */
     public static class ObjectNolongerExists extends XenAPIException {
@@ -819,6 +887,27 @@ public class Types {
 
         public String toString() {
             return "The uploaded patch file already exists";
+        }
+    }
+
+    /**
+     * The requested update could to be obtained from the master.
+     */
+    public static class CannotFetchPatch extends XenAPIException {
+        public final String uuid;
+
+        /**
+         * Create a new CannotFetchPatch
+         *
+         * @param uuid
+         */
+        public CannotFetchPatch(String uuid) {
+            super();
+            this.uuid = uuid;
+        }
+
+        public String toString() {
+            return "The requested update could to be obtained from the master.";
         }
     }
 
@@ -1044,6 +1133,30 @@ public class Types {
     }
 
     /**
+     * A VDI with the specified location already exists within the SR
+     */
+    public static class LocationNotUnique extends XenAPIException {
+        public final String SR;
+        public final String location;
+
+        /**
+         * Create a new LocationNotUnique
+         *
+         * @param SR
+         * @param location
+         */
+        public LocationNotUnique(String SR, String location) {
+            super();
+            this.SR = SR;
+            this.location = location;
+        }
+
+        public String toString() {
+            return "A VDI with the specified location already exists within the SR";
+        }
+    }
+
+    /**
      * This message has been deprecated.
      */
     public static class MessageDeprecated extends XenAPIException {
@@ -1137,6 +1250,23 @@ public class Types {
     }
 
     /**
+     * The restore could not be performed because the restore script failed.  Is the file corrupt?
+     */
+    public static class RestoreScriptFailed extends XenAPIException {
+
+        /**
+         * Create a new RestoreScriptFailed
+         */
+        public RestoreScriptFailed() {
+            super();
+        }
+
+        public String toString() {
+            return "The restore could not be performed because the restore script failed.  Is the file corrupt?";
+        }
+    }
+
+    /**
      * PIF is the management interface.
      */
     public static class PifIsManagementInterface extends XenAPIException {
@@ -1179,6 +1309,27 @@ public class Types {
     }
 
     /**
+     * The patch apply failed.  Please see attached output.
+     */
+    public static class PatchApplyFailed extends XenAPIException {
+        public final String output;
+
+        /**
+         * Create a new PatchApplyFailed
+         *
+         * @param output
+         */
+        public PatchApplyFailed(String output) {
+            super();
+            this.output = output;
+        }
+
+        public String toString() {
+            return "The patch apply failed.  Please see attached output.";
+        }
+    }
+
+    /**
      * The host joining the pool cannot have any running or suspended VMs.
      */
     public static class JoiningHostCannotHaveRunningOrSuspendedVms extends XenAPIException {
@@ -1209,6 +1360,33 @@ public class Types {
 
         public String toString() {
             return "There were no hosts available to complete the specified operation.";
+        }
+    }
+
+    /**
+     * The patch precheck stage failed: the server is of an incorrect version.
+     */
+    public static class PatchPrecheckFailedWrongServerVersion extends XenAPIException {
+        public final String patch;
+        public final String foundVersion;
+        public final String requiredVersion;
+
+        /**
+         * Create a new PatchPrecheckFailedWrongServerVersion
+         *
+         * @param patch
+         * @param foundVersion
+         * @param requiredVersion
+         */
+        public PatchPrecheckFailedWrongServerVersion(String patch, String foundVersion, String requiredVersion) {
+            super();
+            this.patch = patch;
+            this.foundVersion = foundVersion;
+            this.requiredVersion = requiredVersion;
+        }
+
+        public String toString() {
+            return "The patch precheck stage failed: the server is of an incorrect version.";
         }
     }
 
@@ -1271,6 +1449,23 @@ public class Types {
 
         public String toString() {
             return "The default SR reference does not point to a valid SR";
+        }
+    }
+
+    /**
+     * The restore could not be performed because the host's current management interface is not in the backup. The interfaces mentioned in the backup are:
+     */
+    public static class RestoreTargetMgmtIfNotInBackup extends XenAPIException {
+
+        /**
+         * Create a new RestoreTargetMgmtIfNotInBackup
+         */
+        public RestoreTargetMgmtIfNotInBackup() {
+            super();
+        }
+
+        public String toString() {
+            return "The restore could not be performed because the host's current management interface is not in the backup. The interfaces mentioned in the backup are:";
         }
     }
 
@@ -1478,6 +1673,23 @@ public class Types {
     }
 
     /**
+     * PIF has no IP configuration (mode curently set to 'none')
+     */
+    public static class PifHasNoNetworkConfiguration extends XenAPIException {
+
+        /**
+         * Create a new PifHasNoNetworkConfiguration
+         */
+        public PifHasNoNetworkConfiguration() {
+            super();
+        }
+
+        public String toString() {
+            return "PIF has no IP configuration (mode curently set to 'none')";
+        }
+    }
+
+    /**
      * You tried to destroy a PIF, but it represents an aspect of the physical host configuration, and so cannot be destroyed.  The parameter echoes the PIF handle you gave.
      */
     public static class PifIsPhysical extends XenAPIException {
@@ -1502,16 +1714,22 @@ public class Types {
      * There was an SR backend failure.
      */
     public static class SrBackendFailure extends XenAPIException {
-        public final String sr;
+        public final String status;
+        public final String stdout;
+        public final String stderr;
 
         /**
          * Create a new SrBackendFailure
          *
-         * @param sr
+         * @param status
+         * @param stdout
+         * @param stderr
          */
-        public SrBackendFailure(String sr) {
+        public SrBackendFailure(String status, String stdout, String stderr) {
             super();
-            this.sr = sr;
+            this.status = status;
+            this.stdout = stdout;
+            this.stderr = stderr;
         }
 
         public String toString() {
@@ -1702,6 +1920,30 @@ public class Types {
     }
 
     /**
+     * This operation cannot be performed because the specified VDI could not be found in the specified SR
+     */
+    public static class VdiLocationMissing extends XenAPIException {
+        public final String sr;
+        public final String location;
+
+        /**
+         * Create a new VdiLocationMissing
+         *
+         * @param sr
+         * @param location
+         */
+        public VdiLocationMissing(String sr, String location) {
+            super();
+            this.sr = sr;
+            this.location = location;
+        }
+
+        public String toString() {
+            return "This operation cannot be performed because the specified VDI could not be found in the specified SR";
+        }
+    }
+
+    /**
      * You gave an invalid session reference.  It may have been invalidated by a server restart, or timed out.  You should get a new session handle, using one of the session.login_ calls.  This error does not invalidate the current connection.  The handle parameter echoes the bad value given.
      */
     public static class SessionInvalid extends XenAPIException {
@@ -1882,6 +2124,54 @@ public class Types {
     }
 
     /**
+     * The patch precheck stage failed: prerequisite patches are missing.
+     */
+    public static class PatchPrecheckFailedPrerequisiteMissing extends XenAPIException {
+        public final String patch;
+        public final String prerequisitePatchUuidList;
+
+        /**
+         * Create a new PatchPrecheckFailedPrerequisiteMissing
+         *
+         * @param patch
+         * @param prerequisitePatchUuidList
+         */
+        public PatchPrecheckFailedPrerequisiteMissing(String patch, String prerequisitePatchUuidList) {
+            super();
+            this.patch = patch;
+            this.prerequisitePatchUuidList = prerequisitePatchUuidList;
+        }
+
+        public String toString() {
+            return "The patch precheck stage failed: prerequisite patches are missing.";
+        }
+    }
+
+    /**
+     * This operation cannot be performed because the specified VDI could not be found on the storage substrate
+     */
+    public static class VdiMissing extends XenAPIException {
+        public final String sr;
+        public final String vdi;
+
+        /**
+         * Create a new VdiMissing
+         *
+         * @param sr
+         * @param vdi
+         */
+        public VdiMissing(String sr, String vdi) {
+            super();
+            this.sr = sr;
+            this.vdi = vdi;
+        }
+
+        public String toString() {
+            return "This operation cannot be performed because the specified VDI could not be found on the storage substrate";
+        }
+    }
+
+    /**
      * You attempted an operation which involves a host which could not be contacted.
      */
     public static class HostOffline extends XenAPIException {
@@ -2010,6 +2300,30 @@ public class Types {
     }
 
     /**
+     * Host cannot attach network (in the case of NIC bonding, this may be because attaching the network on this host would require other networks [that are currently active] to be taken down).
+     */
+    public static class HostCannotAttachNetwork extends XenAPIException {
+        public final String host;
+        public final String network;
+
+        /**
+         * Create a new HostCannotAttachNetwork
+         *
+         * @param host
+         * @param network
+         */
+        public HostCannotAttachNetwork(String host, String network) {
+            super();
+            this.host = host;
+            this.network = network;
+        }
+
+        public String toString() {
+            return "Host cannot attach network (in the case of NIC bonding, this may be because attaching the network on this host would require other networks [that are currently active] to be taken down).";
+        }
+    }
+
+    /**
      * This VM does not have a crashdump SR specified.
      */
     public static class VmNoCrashdumpSr extends XenAPIException {
@@ -2121,7 +2435,7 @@ public class Types {
     }
 
     /**
-     * You cannot create a bond of an interface which is a member of an existing bond.
+     * This operation cannot be performed because the pif is bonded.
      */
     public static class PifAlreadyBonded extends XenAPIException {
         public final String PIF;
@@ -2137,7 +2451,7 @@ public class Types {
         }
 
         public String toString() {
-            return "You cannot create a bond of an interface which is a member of an existing bond.";
+            return "This operation cannot be performed because the pif is bonded.";
         }
     }
 
@@ -2155,6 +2469,23 @@ public class Types {
 
         public String toString() {
             return "The operation could not be performed because HA is enabled on the Pool";
+        }
+    }
+
+    /**
+     * The specified patch is applied and cannot be destroyed.
+     */
+    public static class PatchIsApplied extends XenAPIException {
+
+        /**
+         * Create a new PatchIsApplied
+         */
+        public PatchIsApplied() {
+            super();
+        }
+
+        public String toString() {
+            return "The specified patch is applied and cannot be destroyed.";
         }
     }
 
@@ -2256,27 +2587,6 @@ public class Types {
     }
 
     /**
-     * The network contains active VIFs and cannot be deleted.
-     */
-    public static class NetworkContainsVif extends XenAPIException {
-        public final String vifs;
-
-        /**
-         * Create a new NetworkContainsVif
-         *
-         * @param vifs
-         */
-        public NetworkContainsVif(String vifs) {
-            super();
-            this.vifs = vifs;
-        }
-
-        public String toString() {
-            return "The network contains active VIFs and cannot be deleted.";
-        }
-    }
-
-    /**
      * The specified interface cannot be used because it has no IP address
      */
     public static class InterfaceHasNoIp extends XenAPIException {
@@ -2294,6 +2604,27 @@ public class Types {
 
         public String toString() {
             return "The specified interface cannot be used because it has no IP address";
+        }
+    }
+
+    /**
+     * The network contains active VIFs and cannot be deleted.
+     */
+    public static class NetworkContainsVif extends XenAPIException {
+        public final String vifs;
+
+        /**
+         * Create a new NetworkContainsVif
+         *
+         * @param vifs
+         */
+        public NetworkContainsVif(String vifs) {
+            super();
+            this.vifs = vifs;
+        }
+
+        public String toString() {
+            return "The network contains active VIFs and cannot be deleted.";
         }
     }
 
@@ -2443,6 +2774,27 @@ public class Types {
     }
 
     /**
+     * The patch precheck stage failed: there are one or more VMs still running on the server.  All VMs must be suspended before the patch can be applied.
+     */
+    public static class PatchPrecheckFailedVmRunning extends XenAPIException {
+        public final String patch;
+
+        /**
+         * Create a new PatchPrecheckFailedVmRunning
+         *
+         * @param patch
+         */
+        public PatchPrecheckFailedVmRunning(String patch) {
+            super();
+            this.patch = patch;
+        }
+
+        public String toString() {
+            return "The patch precheck stage failed: there are one or more VMs still running on the server.  All VMs must be suspended before the patch can be applied.";
+        }
+    }
+
+    /**
      * The bootloader returned an error
      */
     public static class BootloaderFailed extends XenAPIException {
@@ -2463,6 +2815,23 @@ public class Types {
 
         public String toString() {
             return "The bootloader returned an error";
+        }
+    }
+
+    /**
+     * This operation is not supported during an upgrade
+     */
+    public static class NotSupportedDuringUpgrade extends XenAPIException {
+
+        /**
+         * Create a new NotSupportedDuringUpgrade
+         */
+        public NotSupportedDuringUpgrade() {
+            super();
+        }
+
+        public String toString() {
+            return "This operation is not supported during an upgrade";
         }
     }
 
@@ -2488,19 +2857,23 @@ public class Types {
     }
 
     /**
-     * This operation is not supported during an upgrade
+     * Cannot plug VIF
      */
-    public static class NotSupportedDuringUpgrade extends XenAPIException {
+    public static class CannotPlugVif extends XenAPIException {
+        public final String VIF;
 
         /**
-         * Create a new NotSupportedDuringUpgrade
+         * Create a new CannotPlugVif
+         *
+         * @param VIF
          */
-        public NotSupportedDuringUpgrade() {
+        public CannotPlugVif(String VIF) {
             super();
+            this.VIF = VIF;
         }
 
         public String toString() {
-            return "This operation is not supported during an upgrade";
+            return "Cannot plug VIF";
         }
     }
 
@@ -2590,23 +2963,6 @@ public class Types {
     }
 
     /**
-     * The restore could not be performed because the host is not in recovery mode
-     */
-    public static class HostNotInRecoveryMode extends XenAPIException {
-
-        /**
-         * Create a new HostNotInRecoveryMode
-         */
-        public HostNotInRecoveryMode() {
-            super();
-        }
-
-        public String toString() {
-            return "The restore could not be performed because the host is not in recovery mode";
-        }
-    }
-
-    /**
      * The operation could not be performed because HA is not enabled on the Pool
      */
     public static class HaNotEnabled extends XenAPIException {
@@ -2641,6 +2997,23 @@ public class Types {
 
         public String toString() {
             return "This session is not registered to receive events.  You must call event.register before event.next.  The session handle you are using is echoed.";
+        }
+    }
+
+    /**
+     * You must use tar output to retrieve system status from an OEM host.
+     */
+    public static class SystemStatusMustUseTarOnOem extends XenAPIException {
+
+        /**
+         * Create a new SystemStatusMustUseTarOnOem
+         */
+        public SystemStatusMustUseTarOnOem() {
+            super();
+        }
+
+        public String toString() {
+            return "You must use tar output to retrieve system status from an OEM host.";
         }
     }
 
@@ -2811,7 +3184,7 @@ public class Types {
     }
 
     /**
-     * The specifed device was not found.
+     * The specified device was not found.
      */
     public static class PifDeviceNotFound extends XenAPIException {
 
@@ -2823,7 +3196,7 @@ public class Types {
         }
 
         public String toString() {
-            return "The specifed device was not found.";
+            return "The specified device was not found.";
         }
     }
 
@@ -2845,6 +3218,23 @@ public class Types {
 
         public String toString() {
             return "The operation could not be performed because the HA software is not installed on this host.";
+        }
+    }
+
+    /**
+     * The request was rejected because the server is too busy.
+     */
+    public static class TooBusy extends XenAPIException {
+
+        /**
+         * Create a new TooBusy
+         */
+        public TooBusy() {
+            super();
+        }
+
+        public String toString() {
+            return "The request was rejected because the server is too busy.";
         }
     }
 
@@ -2959,6 +3349,27 @@ public class Types {
     }
 
     /**
+     * A required parameter contained an invalid IP address
+     */
+    public static class InvalidIpAddressSpecified extends XenAPIException {
+        public final String parameter;
+
+        /**
+         * Create a new InvalidIpAddressSpecified
+         *
+         * @param parameter
+         */
+        public InvalidIpAddressSpecified(String parameter) {
+            super();
+            this.parameter = parameter;
+        }
+
+        public String toString() {
+            return "A required parameter contained an invalid IP address";
+        }
+    }
+
+    /**
      * There was an error processing your license.  Please contact your support representative.
      */
     public static class LicenseProcessingError extends XenAPIException {
@@ -3040,6 +3451,27 @@ public class Types {
 
         public String toString() {
             return "You attempted an operation which would have resulted in duplicate keys in the database.";
+        }
+    }
+
+    /**
+     * Caller not allowed to perform this operation.
+     */
+    public static class PermissionDenied extends XenAPIException {
+        public final String message;
+
+        /**
+         * Create a new PermissionDenied
+         *
+         * @param message
+         */
+        public PermissionDenied(String message) {
+            super();
+            this.message = message;
+        }
+
+        public String toString() {
+            return "Caller not allowed to perform this operation.";
         }
     }
 
@@ -3144,7 +3576,45 @@ public class Types {
     }
 
     /**
-     * The restore could not be performed because the state partition could not be found
+     * The requested update could not be found.  This can occur when you designate a new master or xe patch-clean.  Please upload the update again
+     */
+    public static class CannotFindPatch extends XenAPIException {
+
+        /**
+         * Create a new CannotFindPatch
+         */
+        public CannotFindPatch() {
+            super();
+        }
+
+        public String toString() {
+            return "The requested update could not be found.  This can occur when you designate a new master or xe patch-clean.  Please upload the update again";
+        }
+    }
+
+    /**
+     * The uploaded patch file is invalid.  See attached log for more details.
+     */
+    public static class InvalidPatchWithLog extends XenAPIException {
+        public final String log;
+
+        /**
+         * Create a new InvalidPatchWithLog
+         *
+         * @param log
+         */
+        public InvalidPatchWithLog(String log) {
+            super();
+            this.log = log;
+        }
+
+        public String toString() {
+            return "The uploaded patch file is invalid.  See attached log for more details.";
+        }
+    }
+
+    /**
+     * This operation could not be performed because the state partition could not be found
      */
     public static class CannotFindStatePartition extends XenAPIException {
 
@@ -3156,7 +3626,7 @@ public class Types {
         }
 
         public String toString() {
-            return "The restore could not be performed because the state partition could not be found";
+            return "This operation could not be performed because the state partition could not be found";
         }
     }
 
@@ -3181,6 +3651,27 @@ public class Types {
 
         public String toString() {
             return "A timeout happened while attempting to detach a device from a VM.";
+        }
+    }
+
+    /**
+     * This host cannot be evacuated.
+     */
+    public static class CannotEvacuateHost extends XenAPIException {
+        public final String errors;
+
+        /**
+         * Create a new CannotEvacuateHost
+         *
+         * @param errors
+         */
+        public CannotEvacuateHost(String errors) {
+            super();
+            this.errors = errors;
+        }
+
+        public String toString() {
+            return "This host cannot be evacuated.";
         }
     }
 
@@ -3628,6 +4119,27 @@ public class Types {
     }
 
     /**
+     * This VM has locked the DVD drive tray, so the disk cannot be ejected
+     */
+    public static class VbdTrayLocked extends XenAPIException {
+        public final String vbd;
+
+        /**
+         * Create a new VbdTrayLocked
+         *
+         * @param vbd
+         */
+        public VbdTrayLocked(String vbd) {
+            super();
+            this.vbd = vbd;
+        }
+
+        public String toString() {
+            return "This VM has locked the DVD drive tray, so the disk cannot be ejected";
+        }
+    }
+
+    /**
      * Operation cannot proceed while a VLAN exists on this interface.
      */
     public static class PifVlanStillExists extends XenAPIException {
@@ -3742,6 +4254,23 @@ public class Types {
     }
 
     /**
+     * The backup could not be performed because the backup script failed.
+     */
+    public static class BackupScriptFailed extends XenAPIException {
+
+        /**
+         * Create a new BackupScriptFailed
+         */
+        public BackupScriptFailed() {
+            super();
+        }
+
+        public String toString() {
+            return "The backup could not be performed because the backup script failed.";
+        }
+    }
+
+    /**
      * Drive could not be hot-unplugged because it is not marked as unpluggable
      */
     public static class VbdNotUnpluggable extends XenAPIException {
@@ -3759,6 +4288,27 @@ public class Types {
 
         public String toString() {
             return "Drive could not be hot-unplugged because it is not marked as unpluggable";
+        }
+    }
+
+    /**
+     * The restore could not be performed because a network interface is missing
+     */
+    public static class RestoreTargetMissingDevice extends XenAPIException {
+        public final String device;
+
+        /**
+         * Create a new RestoreTargetMissingDevice
+         *
+         * @param device
+         */
+        public RestoreTargetMissingDevice(String device) {
+            super();
+            this.device = device;
+        }
+
+        public String toString() {
+            return "The restore could not be performed because a network interface is missing";
         }
     }
 
@@ -3819,1481 +4369,2074 @@ public class Types {
 
 
     public static String toString(Object object) {
-        return (String) object;
+        try {
+            return (String) object;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Long toLong(Object object) {
-        return Long.valueOf((String) object);
+        try {
+            return Long.valueOf((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Double toDouble(Object object) {
-        return (Double) object;
+        try {
+            return (Double) object;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Boolean toBoolean(Object object) {
-        return (Boolean) object;
+        try {
+            return (Boolean) object;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Date toDate(Object object) {
-        try{
+        try {
+            try{
                 return (Date) object;
-        } catch (ClassCastException e){
-                //Occasionally the date comes back as an ocaml float rather than 
-                //in the xmlrpc format! Catch this and convert. 
-                return (new Date((long) (1000*Double.parseDouble((String) object))));
+            } catch (ClassCastException e){
+                    //Occasionally the date comes back as an ocaml float rather than 
+                    //in the xmlrpc format! Catch this and convert. 
+                    return (new Date((long) (1000*Double.parseDouble((String) object))));
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.XenAPIObjects toXenAPIObjects(Object object) {
         try {
-            return XenAPIObjects.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return XenAPIObjects.UNRECOGNIZED;
+            try {
+                return XenAPIObjects.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return XenAPIObjects.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.AfterApplyGuidance toAfterApplyGuidance(Object object) {
         try {
-            return AfterApplyGuidance.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return AfterApplyGuidance.UNRECOGNIZED;
+            try {
+                return AfterApplyGuidance.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return AfterApplyGuidance.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.ConsoleProtocol toConsoleProtocol(Object object) {
         try {
-            return ConsoleProtocol.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return ConsoleProtocol.UNRECOGNIZED;
+            try {
+                return ConsoleProtocol.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return ConsoleProtocol.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.EventOperation toEventOperation(Object object) {
         try {
-            return EventOperation.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return EventOperation.UNRECOGNIZED;
+            try {
+                return EventOperation.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return EventOperation.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.HostAllowedOperations toHostAllowedOperations(Object object) {
         try {
-            return HostAllowedOperations.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return HostAllowedOperations.UNRECOGNIZED;
+            try {
+                return HostAllowedOperations.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return HostAllowedOperations.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.IpConfigurationMode toIpConfigurationMode(Object object) {
         try {
-            return IpConfigurationMode.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return IpConfigurationMode.UNRECOGNIZED;
+            try {
+                return IpConfigurationMode.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return IpConfigurationMode.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.NetworkOperations toNetworkOperations(Object object) {
         try {
-            return NetworkOperations.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return NetworkOperations.UNRECOGNIZED;
+            try {
+                return NetworkOperations.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return NetworkOperations.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.OnCrashBehaviour toOnCrashBehaviour(Object object) {
         try {
-            return OnCrashBehaviour.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return OnCrashBehaviour.UNRECOGNIZED;
+            try {
+                return OnCrashBehaviour.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return OnCrashBehaviour.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.OnNormalExit toOnNormalExit(Object object) {
         try {
-            return OnNormalExit.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return OnNormalExit.UNRECOGNIZED;
+            try {
+                return OnNormalExit.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return OnNormalExit.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.StorageOperations toStorageOperations(Object object) {
         try {
-            return StorageOperations.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return StorageOperations.UNRECOGNIZED;
+            try {
+                return StorageOperations.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return StorageOperations.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.TaskAllowedOperations toTaskAllowedOperations(Object object) {
         try {
-            return TaskAllowedOperations.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return TaskAllowedOperations.UNRECOGNIZED;
+            try {
+                return TaskAllowedOperations.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return TaskAllowedOperations.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.TaskStatusType toTaskStatusType(Object object) {
         try {
-            return TaskStatusType.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return TaskStatusType.UNRECOGNIZED;
+            try {
+                return TaskStatusType.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return TaskStatusType.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.VbdMode toVbdMode(Object object) {
         try {
-            return VbdMode.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return VbdMode.UNRECOGNIZED;
+            try {
+                return VbdMode.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return VbdMode.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.VbdOperations toVbdOperations(Object object) {
         try {
-            return VbdOperations.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return VbdOperations.UNRECOGNIZED;
+            try {
+                return VbdOperations.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return VbdOperations.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.VbdType toVbdType(Object object) {
         try {
-            return VbdType.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return VbdType.UNRECOGNIZED;
+            try {
+                return VbdType.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return VbdType.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.VdiOperations toVdiOperations(Object object) {
         try {
-            return VdiOperations.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return VdiOperations.UNRECOGNIZED;
+            try {
+                return VdiOperations.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return VdiOperations.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.VdiType toVdiType(Object object) {
         try {
-            return VdiType.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return VdiType.UNRECOGNIZED;
+            try {
+                return VdiType.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return VdiType.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.VifOperations toVifOperations(Object object) {
         try {
-            return VifOperations.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return VifOperations.UNRECOGNIZED;
+            try {
+                return VifOperations.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return VifOperations.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.VmOperations toVmOperations(Object object) {
         try {
-            return VmOperations.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return VmOperations.UNRECOGNIZED;
+            try {
+                return VmOperations.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return VmOperations.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Types.VmPowerState toVmPowerState(Object object) {
         try {
-            return VmPowerState.valueOf(((String) object).toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return VmPowerState.UNRECOGNIZED;
+            try {
+                return VmPowerState.valueOf(((String) object).toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return VmPowerState.UNRECOGNIZED;
+            }
+        } catch (NullPointerException e){
+            return null;
         }
     }
 
     public static Set<String> toSetOfString(Object object) {
-        Object[] items = (Object[]) object;
-        Set<String> result = new HashSet<String>();
-        for(Object item: items) {
-            String typed = toString(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<String> result = new HashSet<String>();
+            for(Object item: items) {
+                String typed = toString(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Types.AfterApplyGuidance> toSetOfAfterApplyGuidance(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Types.AfterApplyGuidance> result = new HashSet<Types.AfterApplyGuidance>();
-        for(Object item: items) {
-            Types.AfterApplyGuidance typed = toAfterApplyGuidance(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Types.AfterApplyGuidance> result = new HashSet<Types.AfterApplyGuidance>();
+            for(Object item: items) {
+                Types.AfterApplyGuidance typed = toAfterApplyGuidance(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Types.HostAllowedOperations> toSetOfHostAllowedOperations(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Types.HostAllowedOperations> result = new HashSet<Types.HostAllowedOperations>();
-        for(Object item: items) {
-            Types.HostAllowedOperations typed = toHostAllowedOperations(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Types.HostAllowedOperations> result = new HashSet<Types.HostAllowedOperations>();
+            for(Object item: items) {
+                Types.HostAllowedOperations typed = toHostAllowedOperations(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Types.NetworkOperations> toSetOfNetworkOperations(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Types.NetworkOperations> result = new HashSet<Types.NetworkOperations>();
-        for(Object item: items) {
-            Types.NetworkOperations typed = toNetworkOperations(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Types.NetworkOperations> result = new HashSet<Types.NetworkOperations>();
+            for(Object item: items) {
+                Types.NetworkOperations typed = toNetworkOperations(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Types.StorageOperations> toSetOfStorageOperations(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Types.StorageOperations> result = new HashSet<Types.StorageOperations>();
-        for(Object item: items) {
-            Types.StorageOperations typed = toStorageOperations(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Types.StorageOperations> result = new HashSet<Types.StorageOperations>();
+            for(Object item: items) {
+                Types.StorageOperations typed = toStorageOperations(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Types.TaskAllowedOperations> toSetOfTaskAllowedOperations(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Types.TaskAllowedOperations> result = new HashSet<Types.TaskAllowedOperations>();
-        for(Object item: items) {
-            Types.TaskAllowedOperations typed = toTaskAllowedOperations(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Types.TaskAllowedOperations> result = new HashSet<Types.TaskAllowedOperations>();
+            for(Object item: items) {
+                Types.TaskAllowedOperations typed = toTaskAllowedOperations(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Types.VbdOperations> toSetOfVbdOperations(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Types.VbdOperations> result = new HashSet<Types.VbdOperations>();
-        for(Object item: items) {
-            Types.VbdOperations typed = toVbdOperations(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Types.VbdOperations> result = new HashSet<Types.VbdOperations>();
+            for(Object item: items) {
+                Types.VbdOperations typed = toVbdOperations(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Types.VdiOperations> toSetOfVdiOperations(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Types.VdiOperations> result = new HashSet<Types.VdiOperations>();
-        for(Object item: items) {
-            Types.VdiOperations typed = toVdiOperations(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Types.VdiOperations> result = new HashSet<Types.VdiOperations>();
+            for(Object item: items) {
+                Types.VdiOperations typed = toVdiOperations(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Types.VifOperations> toSetOfVifOperations(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Types.VifOperations> result = new HashSet<Types.VifOperations>();
-        for(Object item: items) {
-            Types.VifOperations typed = toVifOperations(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Types.VifOperations> result = new HashSet<Types.VifOperations>();
+            for(Object item: items) {
+                Types.VifOperations typed = toVifOperations(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Types.VmOperations> toSetOfVmOperations(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Types.VmOperations> result = new HashSet<Types.VmOperations>();
-        for(Object item: items) {
-            Types.VmOperations typed = toVmOperations(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Types.VmOperations> result = new HashSet<Types.VmOperations>();
+            for(Object item: items) {
+                Types.VmOperations typed = toVmOperations(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Bond> toSetOfBond(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Bond> result = new HashSet<Bond>();
-        for(Object item: items) {
-            Bond typed = toBond(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Bond> result = new HashSet<Bond>();
+            for(Object item: items) {
+                Bond typed = toBond(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<PBD> toSetOfPBD(Object object) {
-        Object[] items = (Object[]) object;
-        Set<PBD> result = new HashSet<PBD>();
-        for(Object item: items) {
-            PBD typed = toPBD(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<PBD> result = new HashSet<PBD>();
+            for(Object item: items) {
+                PBD typed = toPBD(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<PIF> toSetOfPIF(Object object) {
-        Object[] items = (Object[]) object;
-        Set<PIF> result = new HashSet<PIF>();
-        for(Object item: items) {
-            PIF typed = toPIF(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<PIF> result = new HashSet<PIF>();
+            for(Object item: items) {
+                PIF typed = toPIF(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<PIFMetrics> toSetOfPIFMetrics(Object object) {
-        Object[] items = (Object[]) object;
-        Set<PIFMetrics> result = new HashSet<PIFMetrics>();
-        for(Object item: items) {
-            PIFMetrics typed = toPIFMetrics(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<PIFMetrics> result = new HashSet<PIFMetrics>();
+            for(Object item: items) {
+                PIFMetrics typed = toPIFMetrics(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<SM> toSetOfSM(Object object) {
-        Object[] items = (Object[]) object;
-        Set<SM> result = new HashSet<SM>();
-        for(Object item: items) {
-            SM typed = toSM(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<SM> result = new HashSet<SM>();
+            for(Object item: items) {
+                SM typed = toSM(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<SR> toSetOfSR(Object object) {
-        Object[] items = (Object[]) object;
-        Set<SR> result = new HashSet<SR>();
-        for(Object item: items) {
-            SR typed = toSR(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<SR> result = new HashSet<SR>();
+            for(Object item: items) {
+                SR typed = toSR(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<VBD> toSetOfVBD(Object object) {
-        Object[] items = (Object[]) object;
-        Set<VBD> result = new HashSet<VBD>();
-        for(Object item: items) {
-            VBD typed = toVBD(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<VBD> result = new HashSet<VBD>();
+            for(Object item: items) {
+                VBD typed = toVBD(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<VBDMetrics> toSetOfVBDMetrics(Object object) {
-        Object[] items = (Object[]) object;
-        Set<VBDMetrics> result = new HashSet<VBDMetrics>();
-        for(Object item: items) {
-            VBDMetrics typed = toVBDMetrics(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<VBDMetrics> result = new HashSet<VBDMetrics>();
+            for(Object item: items) {
+                VBDMetrics typed = toVBDMetrics(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<VDI> toSetOfVDI(Object object) {
-        Object[] items = (Object[]) object;
-        Set<VDI> result = new HashSet<VDI>();
-        for(Object item: items) {
-            VDI typed = toVDI(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<VDI> result = new HashSet<VDI>();
+            for(Object item: items) {
+                VDI typed = toVDI(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<VIF> toSetOfVIF(Object object) {
-        Object[] items = (Object[]) object;
-        Set<VIF> result = new HashSet<VIF>();
-        for(Object item: items) {
-            VIF typed = toVIF(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<VIF> result = new HashSet<VIF>();
+            for(Object item: items) {
+                VIF typed = toVIF(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<VIFMetrics> toSetOfVIFMetrics(Object object) {
-        Object[] items = (Object[]) object;
-        Set<VIFMetrics> result = new HashSet<VIFMetrics>();
-        for(Object item: items) {
-            VIFMetrics typed = toVIFMetrics(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<VIFMetrics> result = new HashSet<VIFMetrics>();
+            for(Object item: items) {
+                VIFMetrics typed = toVIFMetrics(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<VLAN> toSetOfVLAN(Object object) {
-        Object[] items = (Object[]) object;
-        Set<VLAN> result = new HashSet<VLAN>();
-        for(Object item: items) {
-            VLAN typed = toVLAN(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<VLAN> result = new HashSet<VLAN>();
+            for(Object item: items) {
+                VLAN typed = toVLAN(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<VM> toSetOfVM(Object object) {
-        Object[] items = (Object[]) object;
-        Set<VM> result = new HashSet<VM>();
-        for(Object item: items) {
-            VM typed = toVM(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<VM> result = new HashSet<VM>();
+            for(Object item: items) {
+                VM typed = toVM(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<VMGuestMetrics> toSetOfVMGuestMetrics(Object object) {
-        Object[] items = (Object[]) object;
-        Set<VMGuestMetrics> result = new HashSet<VMGuestMetrics>();
-        for(Object item: items) {
-            VMGuestMetrics typed = toVMGuestMetrics(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<VMGuestMetrics> result = new HashSet<VMGuestMetrics>();
+            for(Object item: items) {
+                VMGuestMetrics typed = toVMGuestMetrics(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<VMMetrics> toSetOfVMMetrics(Object object) {
-        Object[] items = (Object[]) object;
-        Set<VMMetrics> result = new HashSet<VMMetrics>();
-        for(Object item: items) {
-            VMMetrics typed = toVMMetrics(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<VMMetrics> result = new HashSet<VMMetrics>();
+            for(Object item: items) {
+                VMMetrics typed = toVMMetrics(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<VTPM> toSetOfVTPM(Object object) {
-        Object[] items = (Object[]) object;
-        Set<VTPM> result = new HashSet<VTPM>();
-        for(Object item: items) {
-            VTPM typed = toVTPM(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<VTPM> result = new HashSet<VTPM>();
+            for(Object item: items) {
+                VTPM typed = toVTPM(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Console> toSetOfConsole(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Console> result = new HashSet<Console>();
-        for(Object item: items) {
-            Console typed = toConsole(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Console> result = new HashSet<Console>();
+            for(Object item: items) {
+                Console typed = toConsole(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Crashdump> toSetOfCrashdump(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Crashdump> result = new HashSet<Crashdump>();
-        for(Object item: items) {
-            Crashdump typed = toCrashdump(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Crashdump> result = new HashSet<Crashdump>();
+            for(Object item: items) {
+                Crashdump typed = toCrashdump(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Host> toSetOfHost(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Host> result = new HashSet<Host>();
-        for(Object item: items) {
-            Host typed = toHost(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Host> result = new HashSet<Host>();
+            for(Object item: items) {
+                Host typed = toHost(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<HostCpu> toSetOfHostCpu(Object object) {
-        Object[] items = (Object[]) object;
-        Set<HostCpu> result = new HashSet<HostCpu>();
-        for(Object item: items) {
-            HostCpu typed = toHostCpu(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<HostCpu> result = new HashSet<HostCpu>();
+            for(Object item: items) {
+                HostCpu typed = toHostCpu(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<HostCrashdump> toSetOfHostCrashdump(Object object) {
-        Object[] items = (Object[]) object;
-        Set<HostCrashdump> result = new HashSet<HostCrashdump>();
-        for(Object item: items) {
-            HostCrashdump typed = toHostCrashdump(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<HostCrashdump> result = new HashSet<HostCrashdump>();
+            for(Object item: items) {
+                HostCrashdump typed = toHostCrashdump(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<HostMetrics> toSetOfHostMetrics(Object object) {
-        Object[] items = (Object[]) object;
-        Set<HostMetrics> result = new HashSet<HostMetrics>();
-        for(Object item: items) {
-            HostMetrics typed = toHostMetrics(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<HostMetrics> result = new HashSet<HostMetrics>();
+            for(Object item: items) {
+                HostMetrics typed = toHostMetrics(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<HostPatch> toSetOfHostPatch(Object object) {
-        Object[] items = (Object[]) object;
-        Set<HostPatch> result = new HashSet<HostPatch>();
-        for(Object item: items) {
-            HostPatch typed = toHostPatch(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<HostPatch> result = new HashSet<HostPatch>();
+            for(Object item: items) {
+                HostPatch typed = toHostPatch(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Network> toSetOfNetwork(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Network> result = new HashSet<Network>();
-        for(Object item: items) {
-            Network typed = toNetwork(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Network> result = new HashSet<Network>();
+            for(Object item: items) {
+                Network typed = toNetwork(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Pool> toSetOfPool(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Pool> result = new HashSet<Pool>();
-        for(Object item: items) {
-            Pool typed = toPool(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Pool> result = new HashSet<Pool>();
+            for(Object item: items) {
+                Pool typed = toPool(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<PoolPatch> toSetOfPoolPatch(Object object) {
-        Object[] items = (Object[]) object;
-        Set<PoolPatch> result = new HashSet<PoolPatch>();
-        for(Object item: items) {
-            PoolPatch typed = toPoolPatch(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<PoolPatch> result = new HashSet<PoolPatch>();
+            for(Object item: items) {
+                PoolPatch typed = toPoolPatch(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Task> toSetOfTask(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Task> result = new HashSet<Task>();
-        for(Object item: items) {
-            Task typed = toTask(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Task> result = new HashSet<Task>();
+            for(Object item: items) {
+                Task typed = toTask(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Set<Event.Record> toSetOfEventRecord(Object object) {
-        Object[] items = (Object[]) object;
-        Set<Event.Record> result = new HashSet<Event.Record>();
-        for(Object item: items) {
-            Event.Record typed = toEventRecord(item);
-            result.add(typed);
+        try {
+            Object[] items = (Object[]) object;
+            Set<Event.Record> result = new HashSet<Event.Record>();
+            for(Object item: items) {
+                Event.Record typed = toEventRecord(item);
+                result.add(typed);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<String, String> toMapOfStringString(Object object) {
-        Map map = (Map) object;
-        Map<String,String> result = new HashMap<String,String>();
-        if (map == null) return result; //XXX e.g. using 4.1 api against 4.0, no xenDataStore
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            String key = toString(entry.getKey());
-            String value = toString(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<String,String> result = new HashMap<String,String>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                String key = toString(entry.getKey());
+                String value = toString(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<String, Types.HostAllowedOperations> toMapOfStringHostAllowedOperations(Object object) {
-        Map map = (Map) object;
-        Map<String,Types.HostAllowedOperations> result = new HashMap<String,Types.HostAllowedOperations>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            String key = toString(entry.getKey());
-            Types.HostAllowedOperations value = toHostAllowedOperations(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<String,Types.HostAllowedOperations> result = new HashMap<String,Types.HostAllowedOperations>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                String key = toString(entry.getKey());
+                Types.HostAllowedOperations value = toHostAllowedOperations(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<String, Types.NetworkOperations> toMapOfStringNetworkOperations(Object object) {
-        Map map = (Map) object;
-        Map<String,Types.NetworkOperations> result = new HashMap<String,Types.NetworkOperations>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            String key = toString(entry.getKey());
-            Types.NetworkOperations value = toNetworkOperations(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<String,Types.NetworkOperations> result = new HashMap<String,Types.NetworkOperations>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                String key = toString(entry.getKey());
+                Types.NetworkOperations value = toNetworkOperations(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<String, Types.StorageOperations> toMapOfStringStorageOperations(Object object) {
-        Map map = (Map) object;
-        Map<String,Types.StorageOperations> result = new HashMap<String,Types.StorageOperations>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            String key = toString(entry.getKey());
-            Types.StorageOperations value = toStorageOperations(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<String,Types.StorageOperations> result = new HashMap<String,Types.StorageOperations>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                String key = toString(entry.getKey());
+                Types.StorageOperations value = toStorageOperations(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<String, Types.TaskAllowedOperations> toMapOfStringTaskAllowedOperations(Object object) {
-        Map map = (Map) object;
-        Map<String,Types.TaskAllowedOperations> result = new HashMap<String,Types.TaskAllowedOperations>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            String key = toString(entry.getKey());
-            Types.TaskAllowedOperations value = toTaskAllowedOperations(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<String,Types.TaskAllowedOperations> result = new HashMap<String,Types.TaskAllowedOperations>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                String key = toString(entry.getKey());
+                Types.TaskAllowedOperations value = toTaskAllowedOperations(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<String, Types.VbdOperations> toMapOfStringVbdOperations(Object object) {
-        Map map = (Map) object;
-        Map<String,Types.VbdOperations> result = new HashMap<String,Types.VbdOperations>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            String key = toString(entry.getKey());
-            Types.VbdOperations value = toVbdOperations(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<String,Types.VbdOperations> result = new HashMap<String,Types.VbdOperations>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                String key = toString(entry.getKey());
+                Types.VbdOperations value = toVbdOperations(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<String, Types.VdiOperations> toMapOfStringVdiOperations(Object object) {
-        Map map = (Map) object;
-        Map<String,Types.VdiOperations> result = new HashMap<String,Types.VdiOperations>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            String key = toString(entry.getKey());
-            Types.VdiOperations value = toVdiOperations(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<String,Types.VdiOperations> result = new HashMap<String,Types.VdiOperations>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                String key = toString(entry.getKey());
+                Types.VdiOperations value = toVdiOperations(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<String, Types.VifOperations> toMapOfStringVifOperations(Object object) {
-        Map map = (Map) object;
-        Map<String,Types.VifOperations> result = new HashMap<String,Types.VifOperations>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            String key = toString(entry.getKey());
-            Types.VifOperations value = toVifOperations(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<String,Types.VifOperations> result = new HashMap<String,Types.VifOperations>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                String key = toString(entry.getKey());
+                Types.VifOperations value = toVifOperations(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<String, Types.VmOperations> toMapOfStringVmOperations(Object object) {
-        Map map = (Map) object;
-        Map<String,Types.VmOperations> result = new HashMap<String,Types.VmOperations>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            String key = toString(entry.getKey());
-            Types.VmOperations value = toVmOperations(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<String,Types.VmOperations> result = new HashMap<String,Types.VmOperations>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                String key = toString(entry.getKey());
+                Types.VmOperations value = toVmOperations(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<Long, Long> toMapOfLongLong(Object object) {
-        Map map = (Map) object;
-        Map<Long,Long> result = new HashMap<Long,Long>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            Long key = toLong(entry.getKey());
-            Long value = toLong(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<Long,Long> result = new HashMap<Long,Long>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                Long key = toLong(entry.getKey());
+                Long value = toLong(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<Long, Double> toMapOfLongDouble(Object object) {
-        Map map = (Map) object;
-        Map<Long,Double> result = new HashMap<Long,Double>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            Long key = toLong(entry.getKey());
-            Double value = toDouble(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<Long,Double> result = new HashMap<Long,Double>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                Long key = toLong(entry.getKey());
+                Double value = toDouble(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<Long, Set<String>> toMapOfLongSetOfString(Object object) {
-        Map map = (Map) object;
-        Map<Long,Set<String>> result = new HashMap<Long,Set<String>>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            Long key = toLong(entry.getKey());
-            Set<String> value = toSetOfString(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<Long,Set<String>> result = new HashMap<Long,Set<String>>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                Long key = toLong(entry.getKey());
+                Set<String> value = toSetOfString(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<Bond, Bond.Record> toMapOfBondBondRecord(Object object) {
-        Map map = (Map) object;
-        Map<Bond,Bond.Record> result = new HashMap<Bond,Bond.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            Bond key = toBond(entry.getKey());
-            Bond.Record value = toBondRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<Bond,Bond.Record> result = new HashMap<Bond,Bond.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                Bond key = toBond(entry.getKey());
+                Bond.Record value = toBondRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<PBD, PBD.Record> toMapOfPBDPBDRecord(Object object) {
-        Map map = (Map) object;
-        Map<PBD,PBD.Record> result = new HashMap<PBD,PBD.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            PBD key = toPBD(entry.getKey());
-            PBD.Record value = toPBDRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<PBD,PBD.Record> result = new HashMap<PBD,PBD.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                PBD key = toPBD(entry.getKey());
+                PBD.Record value = toPBDRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<PIF, PIF.Record> toMapOfPIFPIFRecord(Object object) {
-        Map map = (Map) object;
-        Map<PIF,PIF.Record> result = new HashMap<PIF,PIF.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            PIF key = toPIF(entry.getKey());
-            PIF.Record value = toPIFRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<PIF,PIF.Record> result = new HashMap<PIF,PIF.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                PIF key = toPIF(entry.getKey());
+                PIF.Record value = toPIFRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<PIFMetrics, PIFMetrics.Record> toMapOfPIFMetricsPIFMetricsRecord(Object object) {
-        Map map = (Map) object;
-        Map<PIFMetrics,PIFMetrics.Record> result = new HashMap<PIFMetrics,PIFMetrics.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            PIFMetrics key = toPIFMetrics(entry.getKey());
-            PIFMetrics.Record value = toPIFMetricsRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<PIFMetrics,PIFMetrics.Record> result = new HashMap<PIFMetrics,PIFMetrics.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                PIFMetrics key = toPIFMetrics(entry.getKey());
+                PIFMetrics.Record value = toPIFMetricsRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<SM, SM.Record> toMapOfSMSMRecord(Object object) {
-        Map map = (Map) object;
-        Map<SM,SM.Record> result = new HashMap<SM,SM.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            SM key = toSM(entry.getKey());
-            SM.Record value = toSMRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<SM,SM.Record> result = new HashMap<SM,SM.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                SM key = toSM(entry.getKey());
+                SM.Record value = toSMRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<SR, SR.Record> toMapOfSRSRRecord(Object object) {
-        Map map = (Map) object;
-        Map<SR,SR.Record> result = new HashMap<SR,SR.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            SR key = toSR(entry.getKey());
-            SR.Record value = toSRRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<SR,SR.Record> result = new HashMap<SR,SR.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                SR key = toSR(entry.getKey());
+                SR.Record value = toSRRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<VBD, VBD.Record> toMapOfVBDVBDRecord(Object object) {
-        Map map = (Map) object;
-        Map<VBD,VBD.Record> result = new HashMap<VBD,VBD.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            VBD key = toVBD(entry.getKey());
-            VBD.Record value = toVBDRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<VBD,VBD.Record> result = new HashMap<VBD,VBD.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                VBD key = toVBD(entry.getKey());
+                VBD.Record value = toVBDRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<VBDMetrics, VBDMetrics.Record> toMapOfVBDMetricsVBDMetricsRecord(Object object) {
-        Map map = (Map) object;
-        Map<VBDMetrics,VBDMetrics.Record> result = new HashMap<VBDMetrics,VBDMetrics.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            VBDMetrics key = toVBDMetrics(entry.getKey());
-            VBDMetrics.Record value = toVBDMetricsRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<VBDMetrics,VBDMetrics.Record> result = new HashMap<VBDMetrics,VBDMetrics.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                VBDMetrics key = toVBDMetrics(entry.getKey());
+                VBDMetrics.Record value = toVBDMetricsRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<VDI, VDI.Record> toMapOfVDIVDIRecord(Object object) {
-        Map map = (Map) object;
-        Map<VDI,VDI.Record> result = new HashMap<VDI,VDI.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            VDI key = toVDI(entry.getKey());
-            VDI.Record value = toVDIRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<VDI,VDI.Record> result = new HashMap<VDI,VDI.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                VDI key = toVDI(entry.getKey());
+                VDI.Record value = toVDIRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<VIF, VIF.Record> toMapOfVIFVIFRecord(Object object) {
-        Map map = (Map) object;
-        Map<VIF,VIF.Record> result = new HashMap<VIF,VIF.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            VIF key = toVIF(entry.getKey());
-            VIF.Record value = toVIFRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<VIF,VIF.Record> result = new HashMap<VIF,VIF.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                VIF key = toVIF(entry.getKey());
+                VIF.Record value = toVIFRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<VIFMetrics, VIFMetrics.Record> toMapOfVIFMetricsVIFMetricsRecord(Object object) {
-        Map map = (Map) object;
-        Map<VIFMetrics,VIFMetrics.Record> result = new HashMap<VIFMetrics,VIFMetrics.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            VIFMetrics key = toVIFMetrics(entry.getKey());
-            VIFMetrics.Record value = toVIFMetricsRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<VIFMetrics,VIFMetrics.Record> result = new HashMap<VIFMetrics,VIFMetrics.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                VIFMetrics key = toVIFMetrics(entry.getKey());
+                VIFMetrics.Record value = toVIFMetricsRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<VLAN, VLAN.Record> toMapOfVLANVLANRecord(Object object) {
-        Map map = (Map) object;
-        Map<VLAN,VLAN.Record> result = new HashMap<VLAN,VLAN.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            VLAN key = toVLAN(entry.getKey());
-            VLAN.Record value = toVLANRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<VLAN,VLAN.Record> result = new HashMap<VLAN,VLAN.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                VLAN key = toVLAN(entry.getKey());
+                VLAN.Record value = toVLANRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<VM, VM.Record> toMapOfVMVMRecord(Object object) {
-        Map map = (Map) object;
-        Map<VM,VM.Record> result = new HashMap<VM,VM.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            VM key = toVM(entry.getKey());
-            VM.Record value = toVMRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<VM,VM.Record> result = new HashMap<VM,VM.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                VM key = toVM(entry.getKey());
+                VM.Record value = toVMRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<VMGuestMetrics, VMGuestMetrics.Record> toMapOfVMGuestMetricsVMGuestMetricsRecord(Object object) {
-        Map map = (Map) object;
-        Map<VMGuestMetrics,VMGuestMetrics.Record> result = new HashMap<VMGuestMetrics,VMGuestMetrics.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            VMGuestMetrics key = toVMGuestMetrics(entry.getKey());
-            VMGuestMetrics.Record value = toVMGuestMetricsRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<VMGuestMetrics,VMGuestMetrics.Record> result = new HashMap<VMGuestMetrics,VMGuestMetrics.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                VMGuestMetrics key = toVMGuestMetrics(entry.getKey());
+                VMGuestMetrics.Record value = toVMGuestMetricsRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<VMMetrics, VMMetrics.Record> toMapOfVMMetricsVMMetricsRecord(Object object) {
-        Map map = (Map) object;
-        Map<VMMetrics,VMMetrics.Record> result = new HashMap<VMMetrics,VMMetrics.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            VMMetrics key = toVMMetrics(entry.getKey());
-            VMMetrics.Record value = toVMMetricsRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<VMMetrics,VMMetrics.Record> result = new HashMap<VMMetrics,VMMetrics.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                VMMetrics key = toVMMetrics(entry.getKey());
+                VMMetrics.Record value = toVMMetricsRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<Console, Console.Record> toMapOfConsoleConsoleRecord(Object object) {
-        Map map = (Map) object;
-        Map<Console,Console.Record> result = new HashMap<Console,Console.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            Console key = toConsole(entry.getKey());
-            Console.Record value = toConsoleRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<Console,Console.Record> result = new HashMap<Console,Console.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                Console key = toConsole(entry.getKey());
+                Console.Record value = toConsoleRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<Crashdump, Crashdump.Record> toMapOfCrashdumpCrashdumpRecord(Object object) {
-        Map map = (Map) object;
-        Map<Crashdump,Crashdump.Record> result = new HashMap<Crashdump,Crashdump.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            Crashdump key = toCrashdump(entry.getKey());
-            Crashdump.Record value = toCrashdumpRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<Crashdump,Crashdump.Record> result = new HashMap<Crashdump,Crashdump.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                Crashdump key = toCrashdump(entry.getKey());
+                Crashdump.Record value = toCrashdumpRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<Host, Host.Record> toMapOfHostHostRecord(Object object) {
-        Map map = (Map) object;
-        Map<Host,Host.Record> result = new HashMap<Host,Host.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            Host key = toHost(entry.getKey());
-            Host.Record value = toHostRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<Host,Host.Record> result = new HashMap<Host,Host.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                Host key = toHost(entry.getKey());
+                Host.Record value = toHostRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<HostCpu, HostCpu.Record> toMapOfHostCpuHostCpuRecord(Object object) {
-        Map map = (Map) object;
-        Map<HostCpu,HostCpu.Record> result = new HashMap<HostCpu,HostCpu.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            HostCpu key = toHostCpu(entry.getKey());
-            HostCpu.Record value = toHostCpuRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<HostCpu,HostCpu.Record> result = new HashMap<HostCpu,HostCpu.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                HostCpu key = toHostCpu(entry.getKey());
+                HostCpu.Record value = toHostCpuRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<HostCrashdump, HostCrashdump.Record> toMapOfHostCrashdumpHostCrashdumpRecord(Object object) {
-        Map map = (Map) object;
-        Map<HostCrashdump,HostCrashdump.Record> result = new HashMap<HostCrashdump,HostCrashdump.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            HostCrashdump key = toHostCrashdump(entry.getKey());
-            HostCrashdump.Record value = toHostCrashdumpRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<HostCrashdump,HostCrashdump.Record> result = new HashMap<HostCrashdump,HostCrashdump.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                HostCrashdump key = toHostCrashdump(entry.getKey());
+                HostCrashdump.Record value = toHostCrashdumpRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<HostMetrics, HostMetrics.Record> toMapOfHostMetricsHostMetricsRecord(Object object) {
-        Map map = (Map) object;
-        Map<HostMetrics,HostMetrics.Record> result = new HashMap<HostMetrics,HostMetrics.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            HostMetrics key = toHostMetrics(entry.getKey());
-            HostMetrics.Record value = toHostMetricsRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<HostMetrics,HostMetrics.Record> result = new HashMap<HostMetrics,HostMetrics.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                HostMetrics key = toHostMetrics(entry.getKey());
+                HostMetrics.Record value = toHostMetricsRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<HostPatch, HostPatch.Record> toMapOfHostPatchHostPatchRecord(Object object) {
-        Map map = (Map) object;
-        Map<HostPatch,HostPatch.Record> result = new HashMap<HostPatch,HostPatch.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            HostPatch key = toHostPatch(entry.getKey());
-            HostPatch.Record value = toHostPatchRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<HostPatch,HostPatch.Record> result = new HashMap<HostPatch,HostPatch.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                HostPatch key = toHostPatch(entry.getKey());
+                HostPatch.Record value = toHostPatchRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<Network, Network.Record> toMapOfNetworkNetworkRecord(Object object) {
-        Map map = (Map) object;
-        Map<Network,Network.Record> result = new HashMap<Network,Network.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            Network key = toNetwork(entry.getKey());
-            Network.Record value = toNetworkRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<Network,Network.Record> result = new HashMap<Network,Network.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                Network key = toNetwork(entry.getKey());
+                Network.Record value = toNetworkRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<Pool, Pool.Record> toMapOfPoolPoolRecord(Object object) {
-        Map map = (Map) object;
-        Map<Pool,Pool.Record> result = new HashMap<Pool,Pool.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            Pool key = toPool(entry.getKey());
-            Pool.Record value = toPoolRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<Pool,Pool.Record> result = new HashMap<Pool,Pool.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                Pool key = toPool(entry.getKey());
+                Pool.Record value = toPoolRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<PoolPatch, PoolPatch.Record> toMapOfPoolPatchPoolPatchRecord(Object object) {
-        Map map = (Map) object;
-        Map<PoolPatch,PoolPatch.Record> result = new HashMap<PoolPatch,PoolPatch.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            PoolPatch key = toPoolPatch(entry.getKey());
-            PoolPatch.Record value = toPoolPatchRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<PoolPatch,PoolPatch.Record> result = new HashMap<PoolPatch,PoolPatch.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                PoolPatch key = toPoolPatch(entry.getKey());
+                PoolPatch.Record value = toPoolPatchRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Map<Task, Task.Record> toMapOfTaskTaskRecord(Object object) {
-        Map map = (Map) object;
-        Map<Task,Task.Record> result = new HashMap<Task,Task.Record>();
-        Set<Map.Entry> entries = map.entrySet();
-        for(Map.Entry entry: entries) {
-            Task key = toTask(entry.getKey());
-            Task.Record value = toTaskRecord(entry.getValue());
-            result.put(key, value);
+        try {
+            Map map = (Map) object;
+            Map<Task,Task.Record> result = new HashMap<Task,Task.Record>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry: entries) {
+                Task key = toTask(entry.getKey());
+                Task.Record value = toTaskRecord(entry.getValue());
+                result.put(key, value);
+            }
+            return result;
+        } catch (NullPointerException e){
+            return null;
         }
-        return result;
     }
 
     public static Bond toBond(Object object) {
-        return Bond.getInstFromRef((String) object);
+        try {
+            return Bond.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static PBD toPBD(Object object) {
-        return PBD.getInstFromRef((String) object);
+        try {
+            return PBD.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static PIF toPIF(Object object) {
-        return PIF.getInstFromRef((String) object);
+        try {
+            return PIF.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static PIFMetrics toPIFMetrics(Object object) {
-        return PIFMetrics.getInstFromRef((String) object);
+        try {
+            return PIFMetrics.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static SM toSM(Object object) {
-        return SM.getInstFromRef((String) object);
+        try {
+            return SM.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static SR toSR(Object object) {
-        return SR.getInstFromRef((String) object);
+        try {
+            return SR.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VBD toVBD(Object object) {
-        return VBD.getInstFromRef((String) object);
+        try {
+            return VBD.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VBDMetrics toVBDMetrics(Object object) {
-        return VBDMetrics.getInstFromRef((String) object);
+        try {
+            return VBDMetrics.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VDI toVDI(Object object) {
-        return VDI.getInstFromRef((String) object);
+        try {
+            return VDI.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VIF toVIF(Object object) {
-        return VIF.getInstFromRef((String) object);
+        try {
+            return VIF.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VIFMetrics toVIFMetrics(Object object) {
-        return VIFMetrics.getInstFromRef((String) object);
+        try {
+            return VIFMetrics.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VLAN toVLAN(Object object) {
-        return VLAN.getInstFromRef((String) object);
+        try {
+            return VLAN.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VM toVM(Object object) {
-        return VM.getInstFromRef((String) object);
+        try {
+            return VM.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VMGuestMetrics toVMGuestMetrics(Object object) {
-        return VMGuestMetrics.getInstFromRef((String) object);
+        try {
+            return VMGuestMetrics.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VMMetrics toVMMetrics(Object object) {
-        return VMMetrics.getInstFromRef((String) object);
+        try {
+            return VMMetrics.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VTPM toVTPM(Object object) {
-        return VTPM.getInstFromRef((String) object);
+        try {
+            return VTPM.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Console toConsole(Object object) {
-        return Console.getInstFromRef((String) object);
+        try {
+            return Console.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Crashdump toCrashdump(Object object) {
-        return Crashdump.getInstFromRef((String) object);
+        try {
+            return Crashdump.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Host toHost(Object object) {
-        return Host.getInstFromRef((String) object);
+        try {
+            return Host.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static HostCpu toHostCpu(Object object) {
-        return HostCpu.getInstFromRef((String) object);
+        try {
+            return HostCpu.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static HostCrashdump toHostCrashdump(Object object) {
-        return HostCrashdump.getInstFromRef((String) object);
+        try {
+            return HostCrashdump.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static HostMetrics toHostMetrics(Object object) {
-        return HostMetrics.getInstFromRef((String) object);
+        try {
+            return HostMetrics.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static HostPatch toHostPatch(Object object) {
-        return HostPatch.getInstFromRef((String) object);
+        try {
+            return HostPatch.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Network toNetwork(Object object) {
-        return Network.getInstFromRef((String) object);
+        try {
+            return Network.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Pool toPool(Object object) {
-        return Pool.getInstFromRef((String) object);
+        try {
+            return Pool.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static PoolPatch toPoolPatch(Object object) {
-        return PoolPatch.getInstFromRef((String) object);
+        try {
+            return PoolPatch.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Session toSession(Object object) {
-        return Session.getInstFromRef((String) object);
+        try {
+            return Session.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Task toTask(Object object) {
-        return Task.getInstFromRef((String) object);
+        try {
+            return Task.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static User toUser(Object object) {
-        return User.getInstFromRef((String) object);
+        try {
+            return User.getInstFromRef((String) object);
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Bond.Record toBondRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        Bond.Record record = new Bond.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.master = toPIF(map.get("master"));
-        record.slaves = toSetOfPIF(map.get("slaves"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            Bond.Record record = new Bond.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.master = toPIF(map.get("master"));
+            record.slaves = toSetOfPIF(map.get("slaves"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static PBD.Record toPBDRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        PBD.Record record = new PBD.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.host = toHost(map.get("host"));
-        record.SR = toSR(map.get("SR"));
-        record.deviceConfig = toMapOfStringString(map.get("device_config"));
-        record.currentlyAttached = toBoolean(map.get("currently_attached"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            PBD.Record record = new PBD.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.host = toHost(map.get("host"));
+            record.SR = toSR(map.get("SR"));
+            record.deviceConfig = toMapOfStringString(map.get("device_config"));
+            record.currentlyAttached = toBoolean(map.get("currently_attached"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static PIF.Record toPIFRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        PIF.Record record = new PIF.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.device = toString(map.get("device"));
-        record.network = toNetwork(map.get("network"));
-        record.host = toHost(map.get("host"));
-        record.MAC = toString(map.get("MAC"));
-        record.MTU = toLong(map.get("MTU"));
-        record.VLAN = toLong(map.get("VLAN"));
-        record.metrics = toPIFMetrics(map.get("metrics"));
-        record.physical = toBoolean(map.get("physical"));
-        record.currentlyAttached = toBoolean(map.get("currently_attached"));
-        record.ipConfigurationMode = toIpConfigurationMode(map.get("ip_configuration_mode"));
-        record.IP = toString(map.get("IP"));
-        record.netmask = toString(map.get("netmask"));
-        record.gateway = toString(map.get("gateway"));
-        record.DNS = toString(map.get("DNS"));
-        record.bondSlaveOf = toBond(map.get("bond_slave_of"));
-        record.bondMasterOf = toSetOfBond(map.get("bond_master_of"));
-        record.VLANMasterOf = toVLAN(map.get("VLAN_master_of"));
-        record.VLANSlaveOf = toSetOfVLAN(map.get("VLAN_slave_of"));
-        record.management = toBoolean(map.get("management"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            PIF.Record record = new PIF.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.device = toString(map.get("device"));
+            record.network = toNetwork(map.get("network"));
+            record.host = toHost(map.get("host"));
+            record.MAC = toString(map.get("MAC"));
+            record.MTU = toLong(map.get("MTU"));
+            record.VLAN = toLong(map.get("VLAN"));
+            record.metrics = toPIFMetrics(map.get("metrics"));
+            record.physical = toBoolean(map.get("physical"));
+            record.currentlyAttached = toBoolean(map.get("currently_attached"));
+            record.ipConfigurationMode = toIpConfigurationMode(map.get("ip_configuration_mode"));
+            record.IP = toString(map.get("IP"));
+            record.netmask = toString(map.get("netmask"));
+            record.gateway = toString(map.get("gateway"));
+            record.DNS = toString(map.get("DNS"));
+            record.bondSlaveOf = toBond(map.get("bond_slave_of"));
+            record.bondMasterOf = toSetOfBond(map.get("bond_master_of"));
+            record.VLANMasterOf = toVLAN(map.get("VLAN_master_of"));
+            record.VLANSlaveOf = toSetOfVLAN(map.get("VLAN_slave_of"));
+            record.management = toBoolean(map.get("management"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static PIFMetrics.Record toPIFMetricsRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        PIFMetrics.Record record = new PIFMetrics.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.ioReadKbs = toDouble(map.get("io_read_kbs"));
-        record.ioWriteKbs = toDouble(map.get("io_write_kbs"));
-        record.carrier = toBoolean(map.get("carrier"));
-        record.vendorId = toString(map.get("vendor_id"));
-        record.vendorName = toString(map.get("vendor_name"));
-        record.deviceId = toString(map.get("device_id"));
-        record.deviceName = toString(map.get("device_name"));
-        record.speed = toLong(map.get("speed"));
-        record.duplex = toBoolean(map.get("duplex"));
-        record.pciBusPath = toString(map.get("pci_bus_path"));
-        record.lastUpdated = toDate(map.get("last_updated"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            PIFMetrics.Record record = new PIFMetrics.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.ioReadKbs = toDouble(map.get("io_read_kbs"));
+            record.ioWriteKbs = toDouble(map.get("io_write_kbs"));
+            record.carrier = toBoolean(map.get("carrier"));
+            record.vendorId = toString(map.get("vendor_id"));
+            record.vendorName = toString(map.get("vendor_name"));
+            record.deviceId = toString(map.get("device_id"));
+            record.deviceName = toString(map.get("device_name"));
+            record.speed = toLong(map.get("speed"));
+            record.duplex = toBoolean(map.get("duplex"));
+            record.pciBusPath = toString(map.get("pci_bus_path"));
+            record.lastUpdated = toDate(map.get("last_updated"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static SM.Record toSMRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        SM.Record record = new SM.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.nameLabel = toString(map.get("name_label"));
-        record.nameDescription = toString(map.get("name_description"));
-        record.type = toString(map.get("type"));
-        record.vendor = toString(map.get("vendor"));
-        record.copyright = toString(map.get("copyright"));
-        record.version = toString(map.get("version"));
-        record.requiredApiVersion = toString(map.get("required_api_version"));
-        record.configuration = toMapOfStringString(map.get("configuration"));
-        record.capabilities = toSetOfString(map.get("capabilities"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            SM.Record record = new SM.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.nameLabel = toString(map.get("name_label"));
+            record.nameDescription = toString(map.get("name_description"));
+            record.type = toString(map.get("type"));
+            record.vendor = toString(map.get("vendor"));
+            record.copyright = toString(map.get("copyright"));
+            record.version = toString(map.get("version"));
+            record.requiredApiVersion = toString(map.get("required_api_version"));
+            record.configuration = toMapOfStringString(map.get("configuration"));
+            record.capabilities = toSetOfString(map.get("capabilities"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static SR.Record toSRRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        SR.Record record = new SR.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.nameLabel = toString(map.get("name_label"));
-        record.nameDescription = toString(map.get("name_description"));
-        record.allowedOperations = toSetOfStorageOperations(map.get("allowed_operations"));
-        record.currentOperations = toMapOfStringStorageOperations(map.get("current_operations"));
-        record.VDIs = toSetOfVDI(map.get("VDIs"));
-        record.PBDs = toSetOfPBD(map.get("PBDs"));
-        record.virtualAllocation = toLong(map.get("virtual_allocation"));
-        record.physicalUtilisation = toLong(map.get("physical_utilisation"));
-        record.physicalSize = toLong(map.get("physical_size"));
-        record.type = toString(map.get("type"));
-        record.contentType = toString(map.get("content_type"));
-        record.shared = toBoolean(map.get("shared"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        record.smConfig = toMapOfStringString(map.get("sm_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            SR.Record record = new SR.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.nameLabel = toString(map.get("name_label"));
+            record.nameDescription = toString(map.get("name_description"));
+            record.allowedOperations = toSetOfStorageOperations(map.get("allowed_operations"));
+            record.currentOperations = toMapOfStringStorageOperations(map.get("current_operations"));
+            record.VDIs = toSetOfVDI(map.get("VDIs"));
+            record.PBDs = toSetOfPBD(map.get("PBDs"));
+            record.virtualAllocation = toLong(map.get("virtual_allocation"));
+            record.physicalUtilisation = toLong(map.get("physical_utilisation"));
+            record.physicalSize = toLong(map.get("physical_size"));
+            record.type = toString(map.get("type"));
+            record.contentType = toString(map.get("content_type"));
+            record.shared = toBoolean(map.get("shared"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            record.smConfig = toMapOfStringString(map.get("sm_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VBD.Record toVBDRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        VBD.Record record = new VBD.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.allowedOperations = toSetOfVbdOperations(map.get("allowed_operations"));
-        record.currentOperations = toMapOfStringVbdOperations(map.get("current_operations"));
-        record.VM = toVM(map.get("VM"));
-        record.VDI = toVDI(map.get("VDI"));
-        record.device = toString(map.get("device"));
-        record.userdevice = toString(map.get("userdevice"));
-        record.bootable = toBoolean(map.get("bootable"));
-        record.mode = toVbdMode(map.get("mode"));
-        record.type = toVbdType(map.get("type"));
-        record.unpluggable = toBoolean(map.get("unpluggable"));
-        record.storageLock = toBoolean(map.get("storage_lock"));
-        record.empty = toBoolean(map.get("empty"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        record.currentlyAttached = toBoolean(map.get("currently_attached"));
-        record.statusCode = toLong(map.get("status_code"));
-        record.statusDetail = toString(map.get("status_detail"));
-        record.runtimeProperties = toMapOfStringString(map.get("runtime_properties"));
-        record.qosAlgorithmType = toString(map.get("qos_algorithm_type"));
-        record.qosAlgorithmParams = toMapOfStringString(map.get("qos_algorithm_params"));
-        record.qosSupportedAlgorithms = toSetOfString(map.get("qos_supported_algorithms"));
-        record.metrics = toVBDMetrics(map.get("metrics"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            VBD.Record record = new VBD.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.allowedOperations = toSetOfVbdOperations(map.get("allowed_operations"));
+            record.currentOperations = toMapOfStringVbdOperations(map.get("current_operations"));
+            record.VM = toVM(map.get("VM"));
+            record.VDI = toVDI(map.get("VDI"));
+            record.device = toString(map.get("device"));
+            record.userdevice = toString(map.get("userdevice"));
+            record.bootable = toBoolean(map.get("bootable"));
+            record.mode = toVbdMode(map.get("mode"));
+            record.type = toVbdType(map.get("type"));
+            record.unpluggable = toBoolean(map.get("unpluggable"));
+            record.storageLock = toBoolean(map.get("storage_lock"));
+            record.empty = toBoolean(map.get("empty"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            record.currentlyAttached = toBoolean(map.get("currently_attached"));
+            record.statusCode = toLong(map.get("status_code"));
+            record.statusDetail = toString(map.get("status_detail"));
+            record.runtimeProperties = toMapOfStringString(map.get("runtime_properties"));
+            record.qosAlgorithmType = toString(map.get("qos_algorithm_type"));
+            record.qosAlgorithmParams = toMapOfStringString(map.get("qos_algorithm_params"));
+            record.qosSupportedAlgorithms = toSetOfString(map.get("qos_supported_algorithms"));
+            record.metrics = toVBDMetrics(map.get("metrics"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VBDMetrics.Record toVBDMetricsRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        VBDMetrics.Record record = new VBDMetrics.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.ioReadKbs = toDouble(map.get("io_read_kbs"));
-        record.ioWriteKbs = toDouble(map.get("io_write_kbs"));
-        record.lastUpdated = toDate(map.get("last_updated"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            VBDMetrics.Record record = new VBDMetrics.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.ioReadKbs = toDouble(map.get("io_read_kbs"));
+            record.ioWriteKbs = toDouble(map.get("io_write_kbs"));
+            record.lastUpdated = toDate(map.get("last_updated"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VDI.Record toVDIRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        VDI.Record record = new VDI.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.nameLabel = toString(map.get("name_label"));
-        record.nameDescription = toString(map.get("name_description"));
-        record.allowedOperations = toSetOfVdiOperations(map.get("allowed_operations"));
-        record.currentOperations = toMapOfStringVdiOperations(map.get("current_operations"));
-        record.SR = toSR(map.get("SR"));
-        record.VBDs = toSetOfVBD(map.get("VBDs"));
-        record.crashDumps = toSetOfCrashdump(map.get("crash_dumps"));
-        record.virtualSize = toLong(map.get("virtual_size"));
-        record.physicalUtilisation = toLong(map.get("physical_utilisation"));
-        record.type = toVdiType(map.get("type"));
-        record.sharable = toBoolean(map.get("sharable"));
-        record.readOnly = toBoolean(map.get("read_only"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        record.storageLock = toBoolean(map.get("storage_lock"));
-        record.location = toString(map.get("location"));
-        record.managed = toBoolean(map.get("managed"));
-        record.missing = toBoolean(map.get("missing"));
-        record.parent = toVDI(map.get("parent"));
-        record.xenstoreData = toMapOfStringString(map.get("xenstore_data"));
-        record.smConfig = toMapOfStringString(map.get("sm_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            VDI.Record record = new VDI.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.nameLabel = toString(map.get("name_label"));
+            record.nameDescription = toString(map.get("name_description"));
+            record.allowedOperations = toSetOfVdiOperations(map.get("allowed_operations"));
+            record.currentOperations = toMapOfStringVdiOperations(map.get("current_operations"));
+            record.SR = toSR(map.get("SR"));
+            record.VBDs = toSetOfVBD(map.get("VBDs"));
+            record.crashDumps = toSetOfCrashdump(map.get("crash_dumps"));
+            record.virtualSize = toLong(map.get("virtual_size"));
+            record.physicalUtilisation = toLong(map.get("physical_utilisation"));
+            record.type = toVdiType(map.get("type"));
+            record.sharable = toBoolean(map.get("sharable"));
+            record.readOnly = toBoolean(map.get("read_only"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            record.storageLock = toBoolean(map.get("storage_lock"));
+            record.location = toString(map.get("location"));
+            record.managed = toBoolean(map.get("managed"));
+            record.missing = toBoolean(map.get("missing"));
+            record.parent = toVDI(map.get("parent"));
+            record.xenstoreData = toMapOfStringString(map.get("xenstore_data"));
+            record.smConfig = toMapOfStringString(map.get("sm_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VIF.Record toVIFRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        VIF.Record record = new VIF.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.allowedOperations = toSetOfVifOperations(map.get("allowed_operations"));
-        record.currentOperations = toMapOfStringVifOperations(map.get("current_operations"));
-        record.device = toString(map.get("device"));
-        record.network = toNetwork(map.get("network"));
-        record.VM = toVM(map.get("VM"));
-        record.MAC = toString(map.get("MAC"));
-        record.MTU = toLong(map.get("MTU"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        record.currentlyAttached = toBoolean(map.get("currently_attached"));
-        record.statusCode = toLong(map.get("status_code"));
-        record.statusDetail = toString(map.get("status_detail"));
-        record.runtimeProperties = toMapOfStringString(map.get("runtime_properties"));
-        record.qosAlgorithmType = toString(map.get("qos_algorithm_type"));
-        record.qosAlgorithmParams = toMapOfStringString(map.get("qos_algorithm_params"));
-        record.qosSupportedAlgorithms = toSetOfString(map.get("qos_supported_algorithms"));
-        record.metrics = toVIFMetrics(map.get("metrics"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            VIF.Record record = new VIF.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.allowedOperations = toSetOfVifOperations(map.get("allowed_operations"));
+            record.currentOperations = toMapOfStringVifOperations(map.get("current_operations"));
+            record.device = toString(map.get("device"));
+            record.network = toNetwork(map.get("network"));
+            record.VM = toVM(map.get("VM"));
+            record.MAC = toString(map.get("MAC"));
+            record.MTU = toLong(map.get("MTU"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            record.currentlyAttached = toBoolean(map.get("currently_attached"));
+            record.statusCode = toLong(map.get("status_code"));
+            record.statusDetail = toString(map.get("status_detail"));
+            record.runtimeProperties = toMapOfStringString(map.get("runtime_properties"));
+            record.qosAlgorithmType = toString(map.get("qos_algorithm_type"));
+            record.qosAlgorithmParams = toMapOfStringString(map.get("qos_algorithm_params"));
+            record.qosSupportedAlgorithms = toSetOfString(map.get("qos_supported_algorithms"));
+            record.metrics = toVIFMetrics(map.get("metrics"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VIFMetrics.Record toVIFMetricsRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        VIFMetrics.Record record = new VIFMetrics.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.ioReadKbs = toDouble(map.get("io_read_kbs"));
-        record.ioWriteKbs = toDouble(map.get("io_write_kbs"));
-        record.lastUpdated = toDate(map.get("last_updated"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            VIFMetrics.Record record = new VIFMetrics.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.ioReadKbs = toDouble(map.get("io_read_kbs"));
+            record.ioWriteKbs = toDouble(map.get("io_write_kbs"));
+            record.lastUpdated = toDate(map.get("last_updated"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VLAN.Record toVLANRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        VLAN.Record record = new VLAN.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.taggedPIF = toPIF(map.get("tagged_PIF"));
-        record.untaggedPIF = toPIF(map.get("untagged_PIF"));
-        record.tag = toLong(map.get("tag"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            VLAN.Record record = new VLAN.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.taggedPIF = toPIF(map.get("tagged_PIF"));
+            record.untaggedPIF = toPIF(map.get("untagged_PIF"));
+            record.tag = toLong(map.get("tag"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VM.Record toVMRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        VM.Record record = new VM.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.allowedOperations = toSetOfVmOperations(map.get("allowed_operations"));
-        record.currentOperations = toMapOfStringVmOperations(map.get("current_operations"));
-        record.powerState = toVmPowerState(map.get("power_state"));
-        record.nameLabel = toString(map.get("name_label"));
-        record.nameDescription = toString(map.get("name_description"));
-        record.userVersion = toLong(map.get("user_version"));
-        record.isATemplate = toBoolean(map.get("is_a_template"));
-        record.suspendVDI = toVDI(map.get("suspend_VDI"));
-        record.residentOn = toHost(map.get("resident_on"));
-        record.affinity = toHost(map.get("affinity"));
-        record.memoryStaticMax = toLong(map.get("memory_static_max"));
-        record.memoryDynamicMax = toLong(map.get("memory_dynamic_max"));
-        record.memoryDynamicMin = toLong(map.get("memory_dynamic_min"));
-        record.memoryStaticMin = toLong(map.get("memory_static_min"));
-        record.VCPUsParams = toMapOfStringString(map.get("VCPUs_params"));
-        record.VCPUsMax = toLong(map.get("VCPUs_max"));
-        record.VCPUsAtStartup = toLong(map.get("VCPUs_at_startup"));
-        record.actionsAfterShutdown = toOnNormalExit(map.get("actions_after_shutdown"));
-        record.actionsAfterReboot = toOnNormalExit(map.get("actions_after_reboot"));
-        record.actionsAfterCrash = toOnCrashBehaviour(map.get("actions_after_crash"));
-        record.consoles = toSetOfConsole(map.get("consoles"));
-        record.VIFs = toSetOfVIF(map.get("VIFs"));
-        record.VBDs = toSetOfVBD(map.get("VBDs"));
-        record.crashDumps = toSetOfCrashdump(map.get("crash_dumps"));
-        record.VTPMs = toSetOfVTPM(map.get("VTPMs"));
-        record.PVBootloader = toString(map.get("PV_bootloader"));
-        record.PVKernel = toString(map.get("PV_kernel"));
-        record.PVRamdisk = toString(map.get("PV_ramdisk"));
-        record.PVArgs = toString(map.get("PV_args"));
-        record.PVBootloaderArgs = toString(map.get("PV_bootloader_args"));
-        record.PVLegacyArgs = toString(map.get("PV_legacy_args"));
-        record.HVMBootPolicy = toString(map.get("HVM_boot_policy"));
-        record.HVMBootParams = toMapOfStringString(map.get("HVM_boot_params"));
-        record.HVMShadowMultiplier = toDouble(map.get("HVM_shadow_multiplier"));
-        record.platform = toMapOfStringString(map.get("platform"));
-        record.PCIBus = toString(map.get("PCI_bus"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        record.domid = toLong(map.get("domid"));
-        record.domarch = toString(map.get("domarch"));
-        record.lastBootCPUFlags = toMapOfStringString(map.get("last_boot_CPU_flags"));
-        record.isControlDomain = toBoolean(map.get("is_control_domain"));
-        record.metrics = toVMMetrics(map.get("metrics"));
-        record.guestMetrics = toVMGuestMetrics(map.get("guest_metrics"));
-        record.recommendations = toString(map.get("recommendations"));
-        record.xenstoreData = toMapOfStringString(map.get("xenstore_data"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            VM.Record record = new VM.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.allowedOperations = toSetOfVmOperations(map.get("allowed_operations"));
+            record.currentOperations = toMapOfStringVmOperations(map.get("current_operations"));
+            record.powerState = toVmPowerState(map.get("power_state"));
+            record.nameLabel = toString(map.get("name_label"));
+            record.nameDescription = toString(map.get("name_description"));
+            record.userVersion = toLong(map.get("user_version"));
+            record.isATemplate = toBoolean(map.get("is_a_template"));
+            record.suspendVDI = toVDI(map.get("suspend_VDI"));
+            record.residentOn = toHost(map.get("resident_on"));
+            record.affinity = toHost(map.get("affinity"));
+            record.memoryStaticMax = toLong(map.get("memory_static_max"));
+            record.memoryDynamicMax = toLong(map.get("memory_dynamic_max"));
+            record.memoryDynamicMin = toLong(map.get("memory_dynamic_min"));
+            record.memoryStaticMin = toLong(map.get("memory_static_min"));
+            record.VCPUsParams = toMapOfStringString(map.get("VCPUs_params"));
+            record.VCPUsMax = toLong(map.get("VCPUs_max"));
+            record.VCPUsAtStartup = toLong(map.get("VCPUs_at_startup"));
+            record.actionsAfterShutdown = toOnNormalExit(map.get("actions_after_shutdown"));
+            record.actionsAfterReboot = toOnNormalExit(map.get("actions_after_reboot"));
+            record.actionsAfterCrash = toOnCrashBehaviour(map.get("actions_after_crash"));
+            record.consoles = toSetOfConsole(map.get("consoles"));
+            record.VIFs = toSetOfVIF(map.get("VIFs"));
+            record.VBDs = toSetOfVBD(map.get("VBDs"));
+            record.crashDumps = toSetOfCrashdump(map.get("crash_dumps"));
+            record.VTPMs = toSetOfVTPM(map.get("VTPMs"));
+            record.PVBootloader = toString(map.get("PV_bootloader"));
+            record.PVKernel = toString(map.get("PV_kernel"));
+            record.PVRamdisk = toString(map.get("PV_ramdisk"));
+            record.PVArgs = toString(map.get("PV_args"));
+            record.PVBootloaderArgs = toString(map.get("PV_bootloader_args"));
+            record.PVLegacyArgs = toString(map.get("PV_legacy_args"));
+            record.HVMBootPolicy = toString(map.get("HVM_boot_policy"));
+            record.HVMBootParams = toMapOfStringString(map.get("HVM_boot_params"));
+            record.HVMShadowMultiplier = toDouble(map.get("HVM_shadow_multiplier"));
+            record.platform = toMapOfStringString(map.get("platform"));
+            record.PCIBus = toString(map.get("PCI_bus"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            record.domid = toLong(map.get("domid"));
+            record.domarch = toString(map.get("domarch"));
+            record.lastBootCPUFlags = toMapOfStringString(map.get("last_boot_CPU_flags"));
+            record.isControlDomain = toBoolean(map.get("is_control_domain"));
+            record.metrics = toVMMetrics(map.get("metrics"));
+            record.guestMetrics = toVMGuestMetrics(map.get("guest_metrics"));
+            record.lastBootedRecord = toString(map.get("last_booted_record"));
+            record.recommendations = toString(map.get("recommendations"));
+            record.xenstoreData = toMapOfStringString(map.get("xenstore_data"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VMGuestMetrics.Record toVMGuestMetricsRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        VMGuestMetrics.Record record = new VMGuestMetrics.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.osVersion = toMapOfStringString(map.get("os_version"));
-        record.PVDriversVersion = toMapOfStringString(map.get("PV_drivers_version"));
-        record.PVDriversUpToDate = toBoolean(map.get("PV_drivers_up_to_date"));
-        record.memory = toMapOfStringString(map.get("memory"));
-        record.disks = toMapOfStringString(map.get("disks"));
-        record.networks = toMapOfStringString(map.get("networks"));
-        record.other = toMapOfStringString(map.get("other"));
-        record.lastUpdated = toDate(map.get("last_updated"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            VMGuestMetrics.Record record = new VMGuestMetrics.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.osVersion = toMapOfStringString(map.get("os_version"));
+            record.PVDriversVersion = toMapOfStringString(map.get("PV_drivers_version"));
+            record.PVDriversUpToDate = toBoolean(map.get("PV_drivers_up_to_date"));
+            record.memory = toMapOfStringString(map.get("memory"));
+            record.disks = toMapOfStringString(map.get("disks"));
+            record.networks = toMapOfStringString(map.get("networks"));
+            record.other = toMapOfStringString(map.get("other"));
+            record.lastUpdated = toDate(map.get("last_updated"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VMMetrics.Record toVMMetricsRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        VMMetrics.Record record = new VMMetrics.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.memoryActual = toLong(map.get("memory_actual"));
-        record.VCPUsNumber = toLong(map.get("VCPUs_number"));
-        record.VCPUsUtilisation = toMapOfLongDouble(map.get("VCPUs_utilisation"));
-        record.VCPUsCPU = toMapOfLongLong(map.get("VCPUs_CPU"));
-        record.VCPUsParams = toMapOfStringString(map.get("VCPUs_params"));
-        record.VCPUsFlags = toMapOfLongSetOfString(map.get("VCPUs_flags"));
-        record.state = toSetOfString(map.get("state"));
-        record.startTime = toDate(map.get("start_time"));
-        record.installTime = toDate(map.get("install_time"));
-        record.lastUpdated = toDate(map.get("last_updated"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            VMMetrics.Record record = new VMMetrics.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.memoryActual = toLong(map.get("memory_actual"));
+            record.VCPUsNumber = toLong(map.get("VCPUs_number"));
+            record.VCPUsUtilisation = toMapOfLongDouble(map.get("VCPUs_utilisation"));
+            record.VCPUsCPU = toMapOfLongLong(map.get("VCPUs_CPU"));
+            record.VCPUsParams = toMapOfStringString(map.get("VCPUs_params"));
+            record.VCPUsFlags = toMapOfLongSetOfString(map.get("VCPUs_flags"));
+            record.state = toSetOfString(map.get("state"));
+            record.startTime = toDate(map.get("start_time"));
+            record.installTime = toDate(map.get("install_time"));
+            record.lastUpdated = toDate(map.get("last_updated"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static VTPM.Record toVTPMRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        VTPM.Record record = new VTPM.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.VM = toVM(map.get("VM"));
-        record.backend = toVM(map.get("backend"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            VTPM.Record record = new VTPM.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.VM = toVM(map.get("VM"));
+            record.backend = toVM(map.get("backend"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Console.Record toConsoleRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        Console.Record record = new Console.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.protocol = toConsoleProtocol(map.get("protocol"));
-        record.location = toString(map.get("location"));
-        record.VM = toVM(map.get("VM"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            Console.Record record = new Console.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.protocol = toConsoleProtocol(map.get("protocol"));
+            record.location = toString(map.get("location"));
+            record.VM = toVM(map.get("VM"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Crashdump.Record toCrashdumpRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        Crashdump.Record record = new Crashdump.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.VM = toVM(map.get("VM"));
-        record.VDI = toVDI(map.get("VDI"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            Crashdump.Record record = new Crashdump.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.VM = toVM(map.get("VM"));
+            record.VDI = toVDI(map.get("VDI"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Event.Record toEventRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        Event.Record record = new Event.Record();
-        record.id = toLong(map.get("id"));
-        record.timestamp = toDate(map.get("timestamp"));
-        record.clazz = toString(map.get("class"));
-        record.operation = toEventOperation(map.get("operation"));
-        record.ref = toString(map.get("ref"));
-        record.objUuid = toString(map.get("obj_uuid"));
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            Event.Record record = new Event.Record();
+            record.id = toLong(map.get("id"));
+            record.timestamp = toDate(map.get("timestamp"));
+            record.clazz = toString(map.get("class"));
+            record.operation = toEventOperation(map.get("operation"));
+            record.ref = toString(map.get("ref"));
+            record.objUuid = toString(map.get("obj_uuid"));
 
 
         Object a,b;
@@ -5333,183 +6476,347 @@ public class Types {
                 default: throw new RuntimeException("Internal error in auto-generated code whilst unmarshalling event snapshot");
         }
         record.snapshot = b;
-        return record;
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Host.Record toHostRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        Host.Record record = new Host.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.nameLabel = toString(map.get("name_label"));
-        record.nameDescription = toString(map.get("name_description"));
-        record.allowedOperations = toSetOfHostAllowedOperations(map.get("allowed_operations"));
-        record.currentOperations = toMapOfStringHostAllowedOperations(map.get("current_operations"));
-        record.APIVersionMajor = toLong(map.get("API_version_major"));
-        record.APIVersionMinor = toLong(map.get("API_version_minor"));
-        record.APIVersionVendor = toString(map.get("API_version_vendor"));
-        record.APIVersionVendorImplementation = toMapOfStringString(map.get("API_version_vendor_implementation"));
-        record.enabled = toBoolean(map.get("enabled"));
-        record.softwareVersion = toMapOfStringString(map.get("software_version"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        record.capabilities = toSetOfString(map.get("capabilities"));
-        record.cpuConfiguration = toMapOfStringString(map.get("cpu_configuration"));
-        record.schedPolicy = toString(map.get("sched_policy"));
-        record.supportedBootloaders = toSetOfString(map.get("supported_bootloaders"));
-        record.residentVMs = toSetOfVM(map.get("resident_VMs"));
-        record.logging = toMapOfStringString(map.get("logging"));
-        record.PIFs = toSetOfPIF(map.get("PIFs"));
-        record.suspendImageSr = toSR(map.get("suspend_image_sr"));
-        record.crashDumpSr = toSR(map.get("crash_dump_sr"));
-        record.crashdumps = toSetOfHostCrashdump(map.get("crashdumps"));
-        record.patches = toSetOfHostPatch(map.get("patches"));
-        record.PBDs = toSetOfPBD(map.get("PBDs"));
-        record.hostCPUs = toSetOfHostCpu(map.get("host_CPUs"));
-        record.hostname = toString(map.get("hostname"));
-        record.address = toString(map.get("address"));
-        record.metrics = toHostMetrics(map.get("metrics"));
-        record.licenseParams = toMapOfStringString(map.get("license_params"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            Host.Record record = new Host.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.nameLabel = toString(map.get("name_label"));
+            record.nameDescription = toString(map.get("name_description"));
+            record.allowedOperations = toSetOfHostAllowedOperations(map.get("allowed_operations"));
+            record.currentOperations = toMapOfStringHostAllowedOperations(map.get("current_operations"));
+            record.APIVersionMajor = toLong(map.get("API_version_major"));
+            record.APIVersionMinor = toLong(map.get("API_version_minor"));
+            record.APIVersionVendor = toString(map.get("API_version_vendor"));
+            record.APIVersionVendorImplementation = toMapOfStringString(map.get("API_version_vendor_implementation"));
+            record.enabled = toBoolean(map.get("enabled"));
+            record.softwareVersion = toMapOfStringString(map.get("software_version"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            record.capabilities = toSetOfString(map.get("capabilities"));
+            record.cpuConfiguration = toMapOfStringString(map.get("cpu_configuration"));
+            record.schedPolicy = toString(map.get("sched_policy"));
+            record.supportedBootloaders = toSetOfString(map.get("supported_bootloaders"));
+            record.residentVMs = toSetOfVM(map.get("resident_VMs"));
+            record.logging = toMapOfStringString(map.get("logging"));
+            record.PIFs = toSetOfPIF(map.get("PIFs"));
+            record.suspendImageSr = toSR(map.get("suspend_image_sr"));
+            record.crashDumpSr = toSR(map.get("crash_dump_sr"));
+            record.crashdumps = toSetOfHostCrashdump(map.get("crashdumps"));
+            record.patches = toSetOfHostPatch(map.get("patches"));
+            record.PBDs = toSetOfPBD(map.get("PBDs"));
+            record.hostCPUs = toSetOfHostCpu(map.get("host_CPUs"));
+            record.hostname = toString(map.get("hostname"));
+            record.address = toString(map.get("address"));
+            record.metrics = toHostMetrics(map.get("metrics"));
+            record.licenseParams = toMapOfStringString(map.get("license_params"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static HostCpu.Record toHostCpuRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        HostCpu.Record record = new HostCpu.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.host = toHost(map.get("host"));
-        record.number = toLong(map.get("number"));
-        record.vendor = toString(map.get("vendor"));
-        record.speed = toLong(map.get("speed"));
-        record.modelname = toString(map.get("modelname"));
-        record.family = toLong(map.get("family"));
-        record.model = toLong(map.get("model"));
-        record.stepping = toString(map.get("stepping"));
-        record.flags = toString(map.get("flags"));
-        record.features = toString(map.get("features"));
-        record.utilisation = toDouble(map.get("utilisation"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            HostCpu.Record record = new HostCpu.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.host = toHost(map.get("host"));
+            record.number = toLong(map.get("number"));
+            record.vendor = toString(map.get("vendor"));
+            record.speed = toLong(map.get("speed"));
+            record.modelname = toString(map.get("modelname"));
+            record.family = toLong(map.get("family"));
+            record.model = toLong(map.get("model"));
+            record.stepping = toString(map.get("stepping"));
+            record.flags = toString(map.get("flags"));
+            record.features = toString(map.get("features"));
+            record.utilisation = toDouble(map.get("utilisation"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static HostCrashdump.Record toHostCrashdumpRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        HostCrashdump.Record record = new HostCrashdump.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.host = toHost(map.get("host"));
-        record.timestamp = toDate(map.get("timestamp"));
-        record.size = toLong(map.get("size"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            HostCrashdump.Record record = new HostCrashdump.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.host = toHost(map.get("host"));
+            record.timestamp = toDate(map.get("timestamp"));
+            record.size = toLong(map.get("size"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static HostMetrics.Record toHostMetricsRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        HostMetrics.Record record = new HostMetrics.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.memoryTotal = toLong(map.get("memory_total"));
-        record.memoryFree = toLong(map.get("memory_free"));
-        record.live = toBoolean(map.get("live"));
-        record.lastUpdated = toDate(map.get("last_updated"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            HostMetrics.Record record = new HostMetrics.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.memoryTotal = toLong(map.get("memory_total"));
+            record.memoryFree = toLong(map.get("memory_free"));
+            record.live = toBoolean(map.get("live"));
+            record.lastUpdated = toDate(map.get("last_updated"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static HostPatch.Record toHostPatchRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        HostPatch.Record record = new HostPatch.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.nameLabel = toString(map.get("name_label"));
-        record.nameDescription = toString(map.get("name_description"));
-        record.version = toString(map.get("version"));
-        record.host = toHost(map.get("host"));
-        record.applied = toBoolean(map.get("applied"));
-        record.timestampApplied = toDate(map.get("timestamp_applied"));
-        record.size = toLong(map.get("size"));
-        record.poolPatch = toPoolPatch(map.get("pool_patch"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            HostPatch.Record record = new HostPatch.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.nameLabel = toString(map.get("name_label"));
+            record.nameDescription = toString(map.get("name_description"));
+            record.version = toString(map.get("version"));
+            record.host = toHost(map.get("host"));
+            record.applied = toBoolean(map.get("applied"));
+            record.timestampApplied = toDate(map.get("timestamp_applied"));
+            record.size = toLong(map.get("size"));
+            record.poolPatch = toPoolPatch(map.get("pool_patch"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Network.Record toNetworkRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        Network.Record record = new Network.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.nameLabel = toString(map.get("name_label"));
-        record.nameDescription = toString(map.get("name_description"));
-        record.allowedOperations = toSetOfNetworkOperations(map.get("allowed_operations"));
-        record.currentOperations = toMapOfStringNetworkOperations(map.get("current_operations"));
-        record.VIFs = toSetOfVIF(map.get("VIFs"));
-        record.PIFs = toSetOfPIF(map.get("PIFs"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        record.bridge = toString(map.get("bridge"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            Network.Record record = new Network.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.nameLabel = toString(map.get("name_label"));
+            record.nameDescription = toString(map.get("name_description"));
+            record.allowedOperations = toSetOfNetworkOperations(map.get("allowed_operations"));
+            record.currentOperations = toMapOfStringNetworkOperations(map.get("current_operations"));
+            record.VIFs = toSetOfVIF(map.get("VIFs"));
+            record.PIFs = toSetOfPIF(map.get("PIFs"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            record.bridge = toString(map.get("bridge"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Pool.Record toPoolRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        Pool.Record record = new Pool.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.nameLabel = toString(map.get("name_label"));
-        record.nameDescription = toString(map.get("name_description"));
-        record.master = toHost(map.get("master"));
-        record.defaultSR = toSR(map.get("default_SR"));
-        record.suspendImageSR = toSR(map.get("suspend_image_SR"));
-        record.crashDumpSR = toSR(map.get("crash_dump_SR"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            Pool.Record record = new Pool.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.nameLabel = toString(map.get("name_label"));
+            record.nameDescription = toString(map.get("name_description"));
+            record.master = toHost(map.get("master"));
+            record.defaultSR = toSR(map.get("default_SR"));
+            record.suspendImageSR = toSR(map.get("suspend_image_SR"));
+            record.crashDumpSR = toSR(map.get("crash_dump_SR"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static PoolPatch.Record toPoolPatchRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        PoolPatch.Record record = new PoolPatch.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.nameLabel = toString(map.get("name_label"));
-        record.nameDescription = toString(map.get("name_description"));
-        record.version = toString(map.get("version"));
-        record.size = toLong(map.get("size"));
-        record.poolApplied = toBoolean(map.get("pool_applied"));
-        record.hostPatches = toSetOfHostPatch(map.get("host_patches"));
-        record.afterApplyGuidance = toSetOfAfterApplyGuidance(map.get("after_apply_guidance"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            PoolPatch.Record record = new PoolPatch.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.nameLabel = toString(map.get("name_label"));
+            record.nameDescription = toString(map.get("name_description"));
+            record.version = toString(map.get("version"));
+            record.size = toLong(map.get("size"));
+            record.poolApplied = toBoolean(map.get("pool_applied"));
+            record.hostPatches = toSetOfHostPatch(map.get("host_patches"));
+            record.afterApplyGuidance = toSetOfAfterApplyGuidance(map.get("after_apply_guidance"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Session.Record toSessionRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        Session.Record record = new Session.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.thisHost = toHost(map.get("this_host"));
-        record.thisUser = toUser(map.get("this_user"));
-        record.lastActive = toDate(map.get("last_active"));
-        record.pool = toBoolean(map.get("pool"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            Session.Record record = new Session.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.thisHost = toHost(map.get("this_host"));
+            record.thisUser = toUser(map.get("this_user"));
+            record.lastActive = toDate(map.get("last_active"));
+            record.pool = toBoolean(map.get("pool"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static Task.Record toTaskRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        Task.Record record = new Task.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.nameLabel = toString(map.get("name_label"));
-        record.nameDescription = toString(map.get("name_description"));
-        record.allowedOperations = toSetOfTaskAllowedOperations(map.get("allowed_operations"));
-        record.currentOperations = toMapOfStringTaskAllowedOperations(map.get("current_operations"));
-        record.created = toDate(map.get("created"));
-        record.finished = toDate(map.get("finished"));
-        record.status = toTaskStatusType(map.get("status"));
-        record.residentOn = toHost(map.get("resident_on"));
-        record.progress = toDouble(map.get("progress"));
-        record.type = toString(map.get("type"));
-        record.result = toString(map.get("result"));
-        record.errorInfo = toSetOfString(map.get("error_info"));
-        record.otherConfig = toMapOfStringString(map.get("other_config"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            Task.Record record = new Task.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.nameLabel = toString(map.get("name_label"));
+            record.nameDescription = toString(map.get("name_description"));
+            record.allowedOperations = toSetOfTaskAllowedOperations(map.get("allowed_operations"));
+            record.currentOperations = toMapOfStringTaskAllowedOperations(map.get("current_operations"));
+            record.created = toDate(map.get("created"));
+            record.finished = toDate(map.get("finished"));
+            record.status = toTaskStatusType(map.get("status"));
+            record.residentOn = toHost(map.get("resident_on"));
+            record.progress = toDouble(map.get("progress"));
+            record.type = toString(map.get("type"));
+            record.result = toString(map.get("result"));
+            record.errorInfo = toSetOfString(map.get("error_info"));
+            record.otherConfig = toMapOfStringString(map.get("other_config"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
     }
 
     public static User.Record toUserRecord(Object object) {
-        Map<String,Object> map = (Map<String,Object>) object;
-        User.Record record = new User.Record();
-        record.uuid = toString(map.get("uuid"));
-        record.shortName = toString(map.get("short_name"));
-        record.fullname = toString(map.get("fullname"));
-        return record;
+        try {
+            Map<String,Object> map = (Map<String,Object>) object;
+            User.Record record = new User.Record();
+            record.uuid = toString(map.get("uuid"));
+            record.shortName = toString(map.get("short_name"));
+            record.fullname = toString(map.get("fullname"));
+            return record;
+        } catch (NullPointerException e){
+            return null;
+        }
+    }
+
+
+   public static Bond toBond(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toBond(parseResult(task.getResult(connection)));
+    }
+
+   public static PBD toPBD(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toPBD(parseResult(task.getResult(connection)));
+    }
+
+   public static PIF toPIF(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toPIF(parseResult(task.getResult(connection)));
+    }
+
+   public static PIFMetrics toPIFMetrics(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toPIFMetrics(parseResult(task.getResult(connection)));
+    }
+
+   public static SM toSM(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toSM(parseResult(task.getResult(connection)));
+    }
+
+   public static SR toSR(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toSR(parseResult(task.getResult(connection)));
+    }
+
+   public static VBD toVBD(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toVBD(parseResult(task.getResult(connection)));
+    }
+
+   public static VBDMetrics toVBDMetrics(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toVBDMetrics(parseResult(task.getResult(connection)));
+    }
+
+   public static VDI toVDI(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toVDI(parseResult(task.getResult(connection)));
+    }
+
+   public static VIF toVIF(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toVIF(parseResult(task.getResult(connection)));
+    }
+
+   public static VIFMetrics toVIFMetrics(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toVIFMetrics(parseResult(task.getResult(connection)));
+    }
+
+   public static VLAN toVLAN(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toVLAN(parseResult(task.getResult(connection)));
+    }
+
+   public static VM toVM(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toVM(parseResult(task.getResult(connection)));
+    }
+
+   public static VMGuestMetrics toVMGuestMetrics(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toVMGuestMetrics(parseResult(task.getResult(connection)));
+    }
+
+   public static VMMetrics toVMMetrics(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toVMMetrics(parseResult(task.getResult(connection)));
+    }
+
+   public static VTPM toVTPM(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toVTPM(parseResult(task.getResult(connection)));
+    }
+
+   public static Console toConsole(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toConsole(parseResult(task.getResult(connection)));
+    }
+
+   public static Crashdump toCrashdump(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toCrashdump(parseResult(task.getResult(connection)));
+    }
+
+   public static Host toHost(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toHost(parseResult(task.getResult(connection)));
+    }
+
+   public static HostCpu toHostCpu(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toHostCpu(parseResult(task.getResult(connection)));
+    }
+
+   public static HostCrashdump toHostCrashdump(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toHostCrashdump(parseResult(task.getResult(connection)));
+    }
+
+   public static HostMetrics toHostMetrics(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toHostMetrics(parseResult(task.getResult(connection)));
+    }
+
+   public static HostPatch toHostPatch(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toHostPatch(parseResult(task.getResult(connection)));
+    }
+
+   public static Network toNetwork(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toNetwork(parseResult(task.getResult(connection)));
+    }
+
+   public static Pool toPool(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toPool(parseResult(task.getResult(connection)));
+    }
+
+   public static PoolPatch toPoolPatch(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toPoolPatch(parseResult(task.getResult(connection)));
+    }
+
+   public static Session toSession(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toSession(parseResult(task.getResult(connection)));
+    }
+
+   public static Task toTask(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toTask(parseResult(task.getResult(connection)));
+    }
+
+   public static User toUser(Task task, Connection connection) throws BadServerResponse, org.apache.xmlrpc.XmlRpcException, BadAsyncResult{
+               return Types.toUser(parseResult(task.getResult(connection)));
     }
 
 }

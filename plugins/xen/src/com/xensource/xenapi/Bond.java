@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -87,10 +88,10 @@ public class Bond extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("master", this.master);
-            map.put("slaves", this.slaves);
-            map.put("other_config", this.otherConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("master", this.master == null ? com.xensource.xenapi.PIF.getInstFromRef("OpaqueRef:NULL") : this.master);
+            map.put("slaves", this.slaves == null ? new HashSet<PIF>() : this.slaves);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
             return map;
         }
 
@@ -290,18 +291,60 @@ public class Bond extends XenAPIObject {
      *
      * @param network Network to add the bonded PIF to
      * @param members PIFs to add to this bond
+     * @param MAC The MAC address to use on the bond itself. If this parameter is the empty string then the bond will inherit its MAC address from the first of the specified 'members'
+     * @return Task
+     */
+    public static Task createAsync(Connection c, Network network, Set<PIF> members, String MAC) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.Bond.create";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(network), Marshalling.toXMLRPC(members), Marshalling.toXMLRPC(MAC)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create an interface bond
+     *
+     * @param network Network to add the bonded PIF to
+     * @param members PIFs to add to this bond
+     * @param MAC The MAC address to use on the bond itself. If this parameter is the empty string then the bond will inherit its MAC address from the first of the specified 'members'
      * @return The reference of the created Bond object
      */
-    public static Bond create(Connection c, Network network, Set<PIF> members) throws
+    public static Bond create(Connection c, Network network, Set<PIF> members, String MAC) throws
        Types.BadServerResponse,
        XmlRpcException {
         String method_call = "Bond.create";
         String session = c.getSessionReference();
-        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(network), Marshalling.toXMLRPC(members)};
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(network), Marshalling.toXMLRPC(members), Marshalling.toXMLRPC(MAC)};
         Map response = c.dispatch(method_call, method_params);
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toBond(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy an interface bond
+     *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.Bond.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }

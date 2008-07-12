@@ -33,11 +33,11 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 public class Connection {
-  /**
-   * The magic value that shall be used as the "version" parameter to
-   * Session.loginWithPassword().
-   */
-	public static final String ApiVersion = "1.2";
+
+        /**
+         * true if the connection is to the Rio edition of XenServer. Certain function calls are not allowed.
+         */
+        public Boolean rioConnection=false;
 	
 	private String sessionReference;    //  the opaque reference to the session used by this connection
 	private final XmlRpcClient client;  //  as seen by the xmlrpc library. From our point of view it's a server
@@ -45,12 +45,37 @@ public class Connection {
 	/**
 	 * Create a connection to a particular server using a given username and password. This object
 	 * can then be passed in to any other API calls.
+         *
+         * To login to a miami box we call login_with_password(username, password, "1.2")
+         * on rio this call fails and we should use login_with_password(username,password) instead, and note that we are talking to a rio host
+         * so that we can refuse to make certain miami-specific calls
 	 */
 	public Connection (String client, String username, String password) 
 		throws java.net.MalformedURLException, org.apache.xmlrpc.XmlRpcException, Types.BadServerResponse, Types.SessionAuthenticationFailed
 	{
+	        final String ApiVersion = "1.2";
 		this.client = getClientFromURL(client);
-		this.sessionReference = loginWithPassword(this.client, username, password);
+                try{
+                    //first try to login the modern way
+		    this.sessionReference = loginWithPassword(this.client, username, password, ApiVersion);
+                } catch (Types.BadServerResponse e) {
+                    //oops, something went wrong
+                    Object[] errDesc = (Object[]) e.response.get("ErrorDescription");
+                    //was the problem that the host was running rio? If so it will have complained that it got three parameters
+                    //instead of two. Let us carefully verify the details of this complaint
+                    if (   (0 == ((String) errDesc[0]).compareTo("MESSAGE_PARAMETER_COUNT_MISMATCH"))
+                        && (0 == ((String) errDesc[1]).compareTo("session.login_with_password"))
+                        && (0 == ((String) errDesc[2]).compareTo("2"))
+                        && (0 == ((String) errDesc[3]).compareTo("3")) ) {
+                        //and if so, we can have another go, using the older login method, and see how that goes.
+                        this.sessionReference = loginWithPassword(this.client, username, password);       
+                        //success!. Note that we are talking to an old host on this connection
+                        this.rioConnection=true;
+                    } else {
+                        //Hmm... Can't solve this here. Let upstairs know about the problem.
+                        throw e;
+                    }
+                }
 	}
   
   protected void finalize()
@@ -76,16 +101,34 @@ public class Connection {
   		throw new Types.BadServerResponse(response);
   	}
   }
-  
+   
 	private static String loginWithPassword(XmlRpcClient client, String username, String password) throws
 		Types.BadServerResponse,
 		XmlRpcException,
 		Types.SessionAuthenticationFailed
 	{
 		String method_call = "session.login_with_password";
-		//XXX 4.0.1 server throws MESSAGE_PARAMETER_COUNT_MISMATCH
-		//Object[] method_params = {Marshalling.toXMLRPC(username), Marshalling.toXMLRPC(password), Marshalling.toXMLRPC(ApiVersion)};
 		Object[] method_params = {Marshalling.toXMLRPC(username), Marshalling.toXMLRPC(password)};
+		Map response = (Map) client.execute(method_call, method_params);
+    if(response.get("Status").equals("Success")) {
+			return (String) response.get("Value");
+		} else if(response.get("Status").equals("Failure")) {
+			Object[] error = (Object[]) response.get("ErrorDescription");
+			if(error[0].equals("SESSION_AUTHENTICATION_FAILED")) {
+				throw new Types.SessionAuthenticationFailed();
+			}
+		}
+		throw new Types.BadServerResponse(response);
+	}
+
+ 
+	private static String loginWithPassword(XmlRpcClient client, String username, String password, String ApiVersion) throws
+		Types.BadServerResponse,
+		XmlRpcException,
+		Types.SessionAuthenticationFailed
+	{
+		String method_call = "session.login_with_password";
+		Object[] method_params = {Marshalling.toXMLRPC(username), Marshalling.toXMLRPC(password), Marshalling.toXMLRPC(ApiVersion)};
 		Map response = (Map) client.execute(method_call, method_params);
     if(response.get("Status").equals("Success")) {
 			return (String) response.get("Value");

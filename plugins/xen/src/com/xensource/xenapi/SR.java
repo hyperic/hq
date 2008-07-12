@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -98,21 +99,21 @@ public class SR extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("name_label", this.nameLabel);
-            map.put("name_description", this.nameDescription);
-            map.put("allowed_operations", this.allowedOperations);
-            map.put("current_operations", this.currentOperations);
-            map.put("VDIs", this.VDIs);
-            map.put("PBDs", this.PBDs);
-            map.put("virtual_allocation", this.virtualAllocation);
-            map.put("physical_utilisation", this.physicalUtilisation);
-            map.put("physical_size", this.physicalSize);
-            map.put("type", this.type);
-            map.put("content_type", this.contentType);
-            map.put("shared", this.shared);
-            map.put("other_config", this.otherConfig);
-            map.put("sm_config", this.smConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("name_label", this.nameLabel == null ? "" : this.nameLabel);
+            map.put("name_description", this.nameDescription == null ? "" : this.nameDescription);
+            map.put("allowed_operations", this.allowedOperations == null ? new HashSet<Types.StorageOperations>() : this.allowedOperations);
+            map.put("current_operations", this.currentOperations == null ? new HashMap<String, Types.StorageOperations>() : this.currentOperations);
+            map.put("VDIs", this.VDIs == null ? new HashSet<VDI>() : this.VDIs);
+            map.put("PBDs", this.PBDs == null ? new HashSet<PBD>() : this.PBDs);
+            map.put("virtual_allocation", this.virtualAllocation == null ? 0 : this.virtualAllocation);
+            map.put("physical_utilisation", this.physicalUtilisation == null ? 0 : this.physicalUtilisation);
+            map.put("physical_size", this.physicalSize == null ? 0 : this.physicalSize);
+            map.put("type", this.type == null ? "" : this.type);
+            map.put("content_type", this.contentType == null ? "" : this.contentType);
+            map.put("shared", this.shared == null ? false : this.shared);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
+            map.put("sm_config", this.smConfig == null ? new HashMap<String, String>() : this.smConfig);
             return map;
         }
 
@@ -688,9 +689,121 @@ public class SR extends XenAPIObject {
      * @param contentType The type of the new SRs content, if required (e.g. ISOs)
      * @param shared True if the SR (is capable of) being shared by multiple hosts
      * @param smConfig Storage backend specific configuration options
+     * @return Task
+     */
+    public static Task createAsync(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType, Boolean shared, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       Types.VersionException,
+       XmlRpcException,
+       Types.SrUnknownDriver {
+
+        if(c.rioConnection){
+            if (smConfig.isEmpty()){
+                return rioCreateAsync(c, host, deviceConfig, physicalSize, nameLabel, nameDescription, type, contentType, shared);
+            } else {
+                throw new Types.VersionException("smConfig parameter must be empty map for Rio (legacy XenServer) host");
+            }
+        } else {
+            return miamiCreateAsync(c, host, deviceConfig, physicalSize, nameLabel, nameDescription, type, contentType, shared, smConfig);
+        }
+    }
+
+
+
+    private static Task rioCreateAsync(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType, Boolean shared) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.SrUnknownDriver {
+        String method_call = "Async.SR.create";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(deviceConfig), Marshalling.toXMLRPC(physicalSize), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(contentType), Marshalling.toXMLRPC(shared)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("SR_UNKNOWN_DRIVER")) {
+                throw new Types.SrUnknownDriver((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    private static Task miamiCreateAsync(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType, Boolean shared, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.SrUnknownDriver {
+        String method_call = "Async.SR.create";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(deviceConfig), Marshalling.toXMLRPC(physicalSize), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(contentType), Marshalling.toXMLRPC(shared), Marshalling.toXMLRPC(smConfig)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("SR_UNKNOWN_DRIVER")) {
+                throw new Types.SrUnknownDriver((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a new Storage Repository and introduce it into the managed system, creating both SR record and PBD record to attach it to current host (with specified device_config parameters)
+     *
+     * @param host The host to create/make the SR on
+     * @param deviceConfig The device config string that will be passed to backend SR driver
+     * @param physicalSize The physical size of the new storage repository
+     * @param nameLabel The name of the new storage repository
+     * @param nameDescription The description of the new storage repository
+     * @param type The type of the SR; used to specify the SR backend driver to use
+     * @param contentType The type of the new SRs content, if required (e.g. ISOs)
+     * @param shared True if the SR (is capable of) being shared by multiple hosts
+     * @param smConfig Storage backend specific configuration options
      * @return The reference of the newly created Storage Repository.
      */
     public static SR create(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType, Boolean shared, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       Types.VersionException,
+       XmlRpcException,
+       Types.SrUnknownDriver {
+
+        if(c.rioConnection){
+            if (smConfig.isEmpty()){
+                return rioCreate(c, host, deviceConfig, physicalSize, nameLabel, nameDescription, type, contentType, shared);
+            } else {
+                throw new Types.VersionException("smConfig parameter must be empty map for Rio (legacy XenServer) host");
+            }
+        } else {
+            return miamiCreate(c, host, deviceConfig, physicalSize, nameLabel, nameDescription, type, contentType, shared, smConfig);
+        }
+    }
+
+
+
+    private static SR rioCreate(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType, Boolean shared) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.SrUnknownDriver {
+        String method_call = "SR.create";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(deviceConfig), Marshalling.toXMLRPC(physicalSize), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(contentType), Marshalling.toXMLRPC(shared)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toSR(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("SR_UNKNOWN_DRIVER")) {
+                throw new Types.SrUnknownDriver((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    private static SR miamiCreate(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType, Boolean shared, Map<String, String> smConfig) throws
        Types.BadServerResponse,
        XmlRpcException,
        Types.SrUnknownDriver {
@@ -720,9 +833,99 @@ public class SR extends XenAPIObject {
      * @param contentType The type of the new SRs content, if required (e.g. ISOs)
      * @param shared True if the SR (is capable of) being shared by multiple hosts
      * @param smConfig Storage backend specific configuration options
+     * @return Task
+     */
+    public static Task introduceAsync(Connection c, String uuid, String nameLabel, String nameDescription, String type, String contentType, Boolean shared, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       Types.VersionException,
+       XmlRpcException {
+
+        if(c.rioConnection){
+            if (smConfig.isEmpty()){
+                return rioIntroduceAsync(c, uuid, nameLabel, nameDescription, type, contentType, shared);
+            } else {
+                throw new Types.VersionException("smConfig parameter must be empty map for Rio (legacy XenServer) host");
+            }
+        } else {
+            return miamiIntroduceAsync(c, uuid, nameLabel, nameDescription, type, contentType, shared, smConfig);
+        }
+    }
+
+
+
+    private static Task rioIntroduceAsync(Connection c, String uuid, String nameLabel, String nameDescription, String type, String contentType, Boolean shared) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.SR.introduce";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(uuid), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(contentType), Marshalling.toXMLRPC(shared)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    private static Task miamiIntroduceAsync(Connection c, String uuid, String nameLabel, String nameDescription, String type, String contentType, Boolean shared, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.SR.introduce";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(uuid), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(contentType), Marshalling.toXMLRPC(shared), Marshalling.toXMLRPC(smConfig)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Introduce a new Storage Repository into the managed system
+     *
+     * @param uuid The uuid assigned to the introduced SR
+     * @param nameLabel The name of the new storage repository
+     * @param nameDescription The description of the new storage repository
+     * @param type The type of the SR; used to specify the SR backend driver to use
+     * @param contentType The type of the new SRs content, if required (e.g. ISOs)
+     * @param shared True if the SR (is capable of) being shared by multiple hosts
+     * @param smConfig Storage backend specific configuration options
      * @return The reference of the newly introduced Storage Repository.
      */
     public static SR introduce(Connection c, String uuid, String nameLabel, String nameDescription, String type, String contentType, Boolean shared, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       Types.VersionException,
+       XmlRpcException {
+
+        if(c.rioConnection){
+            if (smConfig.isEmpty()){
+                return rioIntroduce(c, uuid, nameLabel, nameDescription, type, contentType, shared);
+            } else {
+                throw new Types.VersionException("smConfig parameter must be empty map for Rio (legacy XenServer) host");
+            }
+        } else {
+            return miamiIntroduce(c, uuid, nameLabel, nameDescription, type, contentType, shared, smConfig);
+        }
+    }
+
+
+
+    private static SR rioIntroduce(Connection c, String uuid, String nameLabel, String nameDescription, String type, String contentType, Boolean shared) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "SR.introduce";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(uuid), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(contentType), Marshalling.toXMLRPC(shared)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toSR(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    private static SR miamiIntroduce(Connection c, String uuid, String nameLabel, String nameDescription, String type, String contentType, Boolean shared, Map<String, String> smConfig) throws
        Types.BadServerResponse,
        XmlRpcException {
         String method_call = "SR.introduce";
@@ -748,9 +951,101 @@ public class SR extends XenAPIObject {
      * @param type The type of the SR; used to specify the SR backend driver to use
      * @param contentType The type of the new SRs content, if required (e.g. ISOs)
      * @param smConfig Storage backend specific configuration options
+     * @return Task
+     */
+   @Deprecated public static Task makeAsync(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       Types.VersionException,
+       XmlRpcException {
+
+        if(c.rioConnection){
+            if (smConfig.isEmpty()){
+                return rioMakeAsync(c, host, deviceConfig, physicalSize, nameLabel, nameDescription, type, contentType);
+            } else {
+                throw new Types.VersionException("smConfig parameter must be empty map for Rio (legacy XenServer) host");
+            }
+        } else {
+            return miamiMakeAsync(c, host, deviceConfig, physicalSize, nameLabel, nameDescription, type, contentType, smConfig);
+        }
+    }
+
+
+
+   @Deprecated private static Task rioMakeAsync(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.SR.make";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(deviceConfig), Marshalling.toXMLRPC(physicalSize), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(contentType)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+   @Deprecated private static Task miamiMakeAsync(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.SR.make";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(deviceConfig), Marshalling.toXMLRPC(physicalSize), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(contentType), Marshalling.toXMLRPC(smConfig)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a new Storage Repository on disk
+     * @deprecated
+     *
+     * @param host The host to create/make the SR on
+     * @param deviceConfig The device config string that will be passed to backend SR driver
+     * @param physicalSize The physical size of the new storage repository
+     * @param nameLabel The name of the new storage repository
+     * @param nameDescription The description of the new storage repository
+     * @param type The type of the SR; used to specify the SR backend driver to use
+     * @param contentType The type of the new SRs content, if required (e.g. ISOs)
+     * @param smConfig Storage backend specific configuration options
      * @return The uuid of the newly created Storage Repository.
      */
    @Deprecated public static String make(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       Types.VersionException,
+       XmlRpcException {
+
+        if(c.rioConnection){
+            if (smConfig.isEmpty()){
+                return rioMake(c, host, deviceConfig, physicalSize, nameLabel, nameDescription, type, contentType);
+            } else {
+                throw new Types.VersionException("smConfig parameter must be empty map for Rio (legacy XenServer) host");
+            }
+        } else {
+            return miamiMake(c, host, deviceConfig, physicalSize, nameLabel, nameDescription, type, contentType, smConfig);
+        }
+    }
+
+
+
+   @Deprecated private static String rioMake(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "SR.make";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(deviceConfig), Marshalling.toXMLRPC(physicalSize), Marshalling.toXMLRPC(nameLabel), Marshalling.toXMLRPC(nameDescription), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(contentType)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toString(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+   @Deprecated private static String miamiMake(Connection c, Host host, Map<String, String> deviceConfig, Long physicalSize, String nameLabel, String nameDescription, String type, String contentType, Map<String, String> smConfig) throws
        Types.BadServerResponse,
        XmlRpcException {
         String method_call = "SR.make";
@@ -767,10 +1062,36 @@ public class SR extends XenAPIObject {
     /**
      * Destroy specified SR, removing SR-record from database and remove SR from disk. (In order to affect this operation the appropriate device_config is read from the specified SR's PBD on current host)
      *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.SrHasPbd {
+        String method_call = "Async.SR.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("SR_HAS_PBD")) {
+                throw new Types.SrHasPbd((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy specified SR, removing SR-record from database and remove SR from disk. (In order to affect this operation the appropriate device_config is read from the specified SR's PBD on current host)
+     *
      */
     public void destroy(Connection c) throws
        Types.BadServerResponse,
-       XmlRpcException {
+       XmlRpcException,
+       Types.SrHasPbd {
         String method_call = "SR.destroy";
         String session = c.getSessionReference();
         Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
@@ -778,6 +1099,36 @@ public class SR extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("SR_HAS_PBD")) {
+                throw new Types.SrHasPbd((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Removing specified SR-record from database, without attempting to remove SR from disk
+     *
+     * @return Task
+     */
+    public Task forgetAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.SrHasPbd {
+        String method_call = "Async.SR.forget";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("SR_HAS_PBD")) {
+                throw new Types.SrHasPbd((String) error[1]);
+            }
         }
         throw new Types.BadServerResponse(response);
     }
@@ -828,6 +1179,25 @@ public class SR extends XenAPIObject {
     /**
      * Refreshes the list of VDIs associated with an SR
      *
+     * @return Task
+     */
+    public Task scanAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.SR.scan";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Refreshes the list of VDIs associated with an SR
+     *
      */
     public void scan(Connection c) throws
        Types.BadServerResponse,
@@ -839,6 +1209,29 @@ public class SR extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Perform a backend-specific scan, using the given device_config.  If the device_config is complete, then this will return a list of the SRs present of this type on the device, if any.  If the device_config is partial, then a backend-specific scan will be performed, returning results that will guide the user in improving the device_config.
+     *
+     * @param host The host to create/make the SR on
+     * @param deviceConfig The device config string that will be passed to backend SR driver
+     * @param type The type of the SR; used to specify the SR backend driver to use
+     * @param smConfig Storage backend specific configuration options
+     * @return Task
+     */
+    public static Task probeAsync(Connection c, Host host, Map<String, String> deviceConfig, String type, Map<String, String> smConfig) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.SR.probe";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(host), Marshalling.toXMLRPC(deviceConfig), Marshalling.toXMLRPC(type), Marshalling.toXMLRPC(smConfig)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -870,11 +1263,148 @@ public class SR extends XenAPIObject {
      * Sets the shared flag on the SR
      *
      * @param value True if the SR is shared
+     * @return Task
+     */
+    public Task setSharedAsync(Connection c, Boolean value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.SR.set_shared";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the shared flag on the SR
+     *
+     * @param value True if the SR is shared
      */
     public void setShared(Connection c, Boolean value) throws
        Types.BadServerResponse,
        XmlRpcException {
         String method_call = "SR.set_shared";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the SR's physical_size field
+     *
+     * @param value The new value of the SR's physical_size
+     * @return Task
+     */
+    public Task setPhysicalSizeAsync(Connection c, Long value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.SR.set_physical_size";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the SR's physical_size field
+     *
+     * @param value The new value of the SR's physical_size
+     */
+    public void setPhysicalSize(Connection c, Long value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "SR.set_physical_size";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the SR's virtual_allocation field
+     *
+     * @param value The new value of the SR's virtual_allocation
+     * @return Task
+     */
+    public Task setVirtualAllocationAsync(Connection c, Long value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.SR.set_virtual_allocation";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the SR's virtual_allocation field
+     *
+     * @param value The new value of the SR's virtual_allocation
+     */
+    public void setVirtualAllocation(Connection c, Long value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "SR.set_virtual_allocation";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the SR's physical_utilisation field
+     *
+     * @param value The new value of the SR's physical utilisation
+     * @return Task
+     */
+    public Task setPhysicalUtilisationAsync(Connection c, Long value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.SR.set_physical_utilisation";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the SR's physical_utilisation field
+     *
+     * @param value The new value of the SR's physical utilisation
+     */
+    public void setPhysicalUtilisation(Connection c, Long value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "SR.set_physical_utilisation";
         String session = c.getSessionReference();
         Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
         Map response = c.dispatch(method_call, method_params);

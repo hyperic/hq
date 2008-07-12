@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -88,11 +89,11 @@ public class VLAN extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("tagged_PIF", this.taggedPIF);
-            map.put("untagged_PIF", this.untaggedPIF);
-            map.put("tag", this.tag);
-            map.put("other_config", this.otherConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("tagged_PIF", this.taggedPIF == null ? com.xensource.xenapi.PIF.getInstFromRef("OpaqueRef:NULL") : this.taggedPIF);
+            map.put("untagged_PIF", this.untaggedPIF == null ? com.xensource.xenapi.PIF.getInstFromRef("OpaqueRef:NULL") : this.untaggedPIF);
+            map.put("tag", this.tag == null ? 0 : this.tag);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
             return map;
         }
 
@@ -316,6 +317,28 @@ public class VLAN extends XenAPIObject {
      * @param taggedPIF PIF which receives the tagged traffic
      * @param tag VLAN tag in use
      * @param network Network to receive the untagged traffic
+     * @return Task
+     */
+    public static Task createAsync(Connection c, PIF taggedPIF, Long tag, Network network) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VLAN.create";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(taggedPIF), Marshalling.toXMLRPC(tag), Marshalling.toXMLRPC(network)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a VLAN mux/demuxer
+     *
+     * @param taggedPIF PIF which receives the tagged traffic
+     * @param tag VLAN tag in use
+     * @param network Network to receive the untagged traffic
      * @return The reference of the created VLAN object
      */
     public static VLAN create(Connection c, PIF taggedPIF, Long tag, Network network) throws
@@ -328,6 +351,25 @@ public class VLAN extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toVLAN(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy a VLAN mux/demuxer
+     *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VLAN.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }

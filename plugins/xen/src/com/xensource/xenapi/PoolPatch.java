@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -92,15 +93,15 @@ public class PoolPatch extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("name_label", this.nameLabel);
-            map.put("name_description", this.nameDescription);
-            map.put("version", this.version);
-            map.put("size", this.size);
-            map.put("pool_applied", this.poolApplied);
-            map.put("host_patches", this.hostPatches);
-            map.put("after_apply_guidance", this.afterApplyGuidance);
-            map.put("other_config", this.otherConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("name_label", this.nameLabel == null ? "" : this.nameLabel);
+            map.put("name_description", this.nameDescription == null ? "" : this.nameDescription);
+            map.put("version", this.version == null ? "" : this.version);
+            map.put("size", this.size == null ? 0 : this.size);
+            map.put("pool_applied", this.poolApplied == null ? false : this.poolApplied);
+            map.put("host_patches", this.hostPatches == null ? new HashSet<HostPatch>() : this.hostPatches);
+            map.put("after_apply_guidance", this.afterApplyGuidance == null ? new HashSet<Types.AfterApplyGuidance>() : this.afterApplyGuidance);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
             return map;
         }
 
@@ -434,6 +435,26 @@ public class PoolPatch extends XenAPIObject {
      * Apply the selected patch to a host and return its output
      *
      * @param host The host to apply the patch too
+     * @return Task
+     */
+    public Task applyAsync(Connection c, Host host) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool_patch.apply";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(host)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Apply the selected patch to a host and return its output
+     *
+     * @param host The host to apply the patch too
      * @return the output of the patch application process
      */
     public String apply(Connection c, Host host) throws
@@ -446,6 +467,25 @@ public class PoolPatch extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toString(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Apply the selected patch to all hosts in the pool and return a map of host_ref -> patch output
+     *
+     * @return Task
+     */
+    public Task poolApplyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool_patch.pool_apply";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -469,6 +509,65 @@ public class PoolPatch extends XenAPIObject {
     }
 
     /**
+     * Execute the precheck stage of the selected patch on a host and return its output
+     *
+     * @param host The host to run the prechecks on
+     * @return Task
+     */
+    public Task precheckAsync(Connection c, Host host) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool_patch.precheck";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(host)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Execute the precheck stage of the selected patch on a host and return its output
+     *
+     * @param host The host to run the prechecks on
+     * @return the output of the patch prechecks
+     */
+    public String precheck(Connection c, Host host) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "pool_patch.precheck";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(host)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toString(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Removes the patch's files from all hosts in the pool, but does not remove the database entries
+     *
+     * @return Task
+     */
+    public Task cleanAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool_patch.clean";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
      * Removes the patch's files from all hosts in the pool, but does not remove the database entries
      *
      */
@@ -476,6 +575,43 @@ public class PoolPatch extends XenAPIObject {
        Types.BadServerResponse,
        XmlRpcException {
         String method_call = "pool_patch.clean";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Removes the patch's files from all hosts in the pool, and removes the database entries.  Only works on unapplied patches.
+     *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.pool_patch.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Removes the patch's files from all hosts in the pool, and removes the database entries.  Only works on unapplied patches.
+     *
+     */
+    public void destroy(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "pool_patch.destroy";
         String session = c.getSessionReference();
         Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
         Map response = c.dispatch(method_call, method_params);

@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -86,9 +87,9 @@ public class User extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("short_name", this.shortName);
-            map.put("fullname", this.fullname);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("short_name", this.shortName == null ? "" : this.shortName);
+            map.put("fullname", this.fullname == null ? "" : this.fullname);
             return map;
         }
 
@@ -149,6 +150,27 @@ public class User extends XenAPIObject {
      * Create a new user instance, and return its handle.
      *
      * @param record All constructor arguments
+     * @return Task
+     */
+    public static Task createAsync(Connection c, User.Record record) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.user.create";
+        String session = c.getSessionReference();
+        Map<String, Object> record_map = record.toMap();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(record_map)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a new user instance, and return its handle.
+     *
+     * @param record All constructor arguments
      * @return reference to the newly created object
      */
     public static User create(Connection c, User.Record record) throws
@@ -162,6 +184,25 @@ public class User extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toUser(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy the specified user instance.
+     *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.user.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }

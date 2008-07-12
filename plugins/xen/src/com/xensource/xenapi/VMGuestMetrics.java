@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -92,15 +93,15 @@ public class VMGuestMetrics extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("os_version", this.osVersion);
-            map.put("PV_drivers_version", this.PVDriversVersion);
-            map.put("PV_drivers_up_to_date", this.PVDriversUpToDate);
-            map.put("memory", this.memory);
-            map.put("disks", this.disks);
-            map.put("networks", this.networks);
-            map.put("other", this.other);
-            map.put("last_updated", this.lastUpdated);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("os_version", this.osVersion == null ? new HashMap<String, String>() : this.osVersion);
+            map.put("PV_drivers_version", this.PVDriversVersion == null ? new HashMap<String, String>() : this.PVDriversVersion);
+            map.put("PV_drivers_up_to_date", this.PVDriversUpToDate == null ? false : this.PVDriversUpToDate);
+            map.put("memory", this.memory == null ? new HashMap<String, String>() : this.memory);
+            map.put("disks", this.disks == null ? new HashMap<String, String>() : this.disks);
+            map.put("networks", this.networks == null ? new HashMap<String, String>() : this.networks);
+            map.put("other", this.other == null ? new HashMap<String, String>() : this.other);
+            map.put("last_updated", this.lastUpdated == null ? new Date(0) : this.lastUpdated);
             return map;
         }
 

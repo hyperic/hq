@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -89,12 +90,12 @@ public class PBD extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("host", this.host);
-            map.put("SR", this.SR);
-            map.put("device_config", this.deviceConfig);
-            map.put("currently_attached", this.currentlyAttached);
-            map.put("other_config", this.otherConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("host", this.host == null ? com.xensource.xenapi.Host.getInstFromRef("OpaqueRef:NULL") : this.host);
+            map.put("SR", this.SR == null ? com.xensource.xenapi.SR.getInstFromRef("OpaqueRef:NULL") : this.SR);
+            map.put("device_config", this.deviceConfig == null ? new HashMap<String, String>() : this.deviceConfig);
+            map.put("currently_attached", this.currentlyAttached == null ? false : this.currentlyAttached);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
             return map;
         }
 
@@ -167,6 +168,27 @@ public class PBD extends XenAPIObject {
      * Create a new PBD instance, and return its handle.
      *
      * @param record All constructor arguments
+     * @return Task
+     */
+    public static Task createAsync(Connection c, PBD.Record record) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.PBD.create";
+        String session = c.getSessionReference();
+        Map<String, Object> record_map = record.toMap();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(record_map)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a new PBD instance, and return its handle.
+     *
+     * @param record All constructor arguments
      * @return reference to the newly created object
      */
     public static PBD create(Connection c, PBD.Record record) throws
@@ -180,6 +202,25 @@ public class PBD extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toPBD(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy the specified PBD instance.
+     *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.PBD.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -377,6 +418,31 @@ public class PBD extends XenAPIObject {
     /**
      * Activate the specified PBD, causing the referenced SR to be attached and scanned
      *
+     * @return Task
+     */
+    public Task plugAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.SrUnknownDriver {
+        String method_call = "Async.PBD.plug";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("SR_UNKNOWN_DRIVER")) {
+                throw new Types.SrUnknownDriver((String) error[1]);
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Activate the specified PBD, causing the referenced SR to be attached and scanned
+     *
      */
     public void plug(Connection c) throws
        Types.BadServerResponse,
@@ -401,6 +467,25 @@ public class PBD extends XenAPIObject {
     /**
      * Deactivate the specified PBD, causing the referenced SR to be detached and nolonger scanned
      *
+     * @return Task
+     */
+    public Task unplugAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.PBD.unplug";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Deactivate the specified PBD, causing the referenced SR to be detached and nolonger scanned
+     *
      */
     public void unplug(Connection c) throws
        Types.BadServerResponse,
@@ -408,6 +493,45 @@ public class PBD extends XenAPIObject {
         String method_call = "PBD.unplug";
         String session = c.getSessionReference();
         Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the PBD's device_config field
+     *
+     * @param value The new value of the PBD's device_config
+     * @return Task
+     */
+    public Task setDeviceConfigAsync(Connection c, Map<String, String> value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.PBD.set_device_config";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the PBD's device_config field
+     *
+     * @param value The new value of the PBD's device_config
+     */
+    public void setDeviceConfig(Connection c, Map<String, String> value) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "PBD.set_device_config";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(value)};
         Map response = c.dispatch(method_call, method_params);
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");

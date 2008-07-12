@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -90,12 +91,12 @@ public class Event extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("id", this.id);
-            map.put("timestamp", this.timestamp);
-            map.put("class", this.clazz);
-            map.put("operation", this.operation);
-            map.put("ref", this.ref);
-            map.put("obj_uuid", this.objUuid);
+            map.put("id", this.id == null ? 0 : this.id);
+            map.put("timestamp", this.timestamp == null ? new Date(0) : this.timestamp);
+            map.put("class", this.clazz == null ? "" : this.clazz);
+            map.put("operation", this.operation == null ? Types.EventOperation.UNRECOGNIZED : this.operation);
+            map.put("ref", this.ref == null ? "" : this.ref);
+            map.put("obj_uuid", this.objUuid == null ? "" : this.objUuid);
             map.put("snapshot", this.snapshot);
             return map;
         }
@@ -135,6 +136,26 @@ public class Event extends XenAPIObject {
      * Registers this session with the event system.  Specifying the empty list will register for all classes.
      *
      * @param classes register for events for the indicated classes
+     * @return Task
+     */
+    public static Task registerAsync(Connection c, Set<String> classes) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.event.register";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(classes)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Registers this session with the event system.  Specifying the empty list will register for all classes.
+     *
+     * @param classes register for events for the indicated classes
      */
     public static void register(Connection c, Set<String> classes) throws
        Types.BadServerResponse,
@@ -146,6 +167,26 @@ public class Event extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Unregisters this session with the event system
+     *
+     * @param classes remove this session's registration for the indicated classes
+     * @return Task
+     */
+    public static Task unregisterAsync(Connection c, Set<String> classes) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.event.unregister";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(classes)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -177,7 +218,8 @@ public class Event extends XenAPIObject {
     public static Set<Event.Record> next(Connection c) throws
        Types.BadServerResponse,
        XmlRpcException,
-       Types.SessionNotRegistered {
+       Types.SessionNotRegistered,
+       Types.EventsLost {
         String method_call = "event.next";
         String session = c.getSessionReference();
         Object[] method_params = {Marshalling.toXMLRPC(session)};
@@ -189,6 +231,9 @@ public class Event extends XenAPIObject {
             Object[] error = (Object[]) response.get("ErrorDescription");
             if(error[0].equals("SESSION_NOT_REGISTERED")) {
                 throw new Types.SessionNotRegistered((String) error[1]);
+            }
+            if(error[0].equals("EVENTS_LOST")) {
+                throw new Types.EventsLost();
             }
         }
         throw new Types.BadServerResponse(response);

@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -94,17 +95,17 @@ public class SM extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("name_label", this.nameLabel);
-            map.put("name_description", this.nameDescription);
-            map.put("type", this.type);
-            map.put("vendor", this.vendor);
-            map.put("copyright", this.copyright);
-            map.put("version", this.version);
-            map.put("required_api_version", this.requiredApiVersion);
-            map.put("configuration", this.configuration);
-            map.put("capabilities", this.capabilities);
-            map.put("other_config", this.otherConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("name_label", this.nameLabel == null ? "" : this.nameLabel);
+            map.put("name_description", this.nameDescription == null ? "" : this.nameDescription);
+            map.put("type", this.type == null ? "" : this.type);
+            map.put("vendor", this.vendor == null ? "" : this.vendor);
+            map.put("copyright", this.copyright == null ? "" : this.copyright);
+            map.put("version", this.version == null ? "" : this.version);
+            map.put("required_api_version", this.requiredApiVersion == null ? "" : this.requiredApiVersion);
+            map.put("configuration", this.configuration == null ? new HashMap<String, String>() : this.configuration);
+            map.put("capabilities", this.capabilities == null ? new HashSet<String>() : this.capabilities);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
             return map;
         }
 

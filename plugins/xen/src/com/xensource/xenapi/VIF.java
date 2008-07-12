@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -100,23 +101,23 @@ public class VIF extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("allowed_operations", this.allowedOperations);
-            map.put("current_operations", this.currentOperations);
-            map.put("device", this.device);
-            map.put("network", this.network);
-            map.put("VM", this.VM);
-            map.put("MAC", this.MAC);
-            map.put("MTU", this.MTU);
-            map.put("other_config", this.otherConfig);
-            map.put("currently_attached", this.currentlyAttached);
-            map.put("status_code", this.statusCode);
-            map.put("status_detail", this.statusDetail);
-            map.put("runtime_properties", this.runtimeProperties);
-            map.put("qos_algorithm_type", this.qosAlgorithmType);
-            map.put("qos_algorithm_params", this.qosAlgorithmParams);
-            map.put("qos_supported_algorithms", this.qosSupportedAlgorithms);
-            map.put("metrics", this.metrics);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("allowed_operations", this.allowedOperations == null ? new HashSet<Types.VifOperations>() : this.allowedOperations);
+            map.put("current_operations", this.currentOperations == null ? new HashMap<String, Types.VifOperations>() : this.currentOperations);
+            map.put("device", this.device == null ? "" : this.device);
+            map.put("network", this.network == null ? com.xensource.xenapi.Network.getInstFromRef("OpaqueRef:NULL") : this.network);
+            map.put("VM", this.VM == null ? com.xensource.xenapi.VM.getInstFromRef("OpaqueRef:NULL") : this.VM);
+            map.put("MAC", this.MAC == null ? "" : this.MAC);
+            map.put("MTU", this.MTU == null ? 0 : this.MTU);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
+            map.put("currently_attached", this.currentlyAttached == null ? false : this.currentlyAttached);
+            map.put("status_code", this.statusCode == null ? 0 : this.statusCode);
+            map.put("status_detail", this.statusDetail == null ? "" : this.statusDetail);
+            map.put("runtime_properties", this.runtimeProperties == null ? new HashMap<String, String>() : this.runtimeProperties);
+            map.put("qos_algorithm_type", this.qosAlgorithmType == null ? "" : this.qosAlgorithmType);
+            map.put("qos_algorithm_params", this.qosAlgorithmParams == null ? new HashMap<String, String>() : this.qosAlgorithmParams);
+            map.put("qos_supported_algorithms", this.qosSupportedAlgorithms == null ? new HashSet<String>() : this.qosSupportedAlgorithms);
+            map.put("metrics", this.metrics == null ? com.xensource.xenapi.VIFMetrics.getInstFromRef("OpaqueRef:NULL") : this.metrics);
             return map;
         }
 
@@ -233,6 +234,27 @@ public class VIF extends XenAPIObject {
      * Create a new VIF instance, and return its handle.
      *
      * @param record All constructor arguments
+     * @return Task
+     */
+    public static Task createAsync(Connection c, VIF.Record record) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VIF.create";
+        String session = c.getSessionReference();
+        Map<String, Object> record_map = record.toMap();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(record_map)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a new VIF instance, and return its handle.
+     *
+     * @param record All constructor arguments
      * @return reference to the newly created object
      */
     public static VIF create(Connection c, VIF.Record record) throws
@@ -246,6 +268,25 @@ public class VIF extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toVIF(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy the specified VIF instance.
+     *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VIF.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -729,6 +770,25 @@ public class VIF extends XenAPIObject {
     /**
      * Hotplug the specified VIF, dynamically attaching it to the running VM
      *
+     * @return Task
+     */
+    public Task plugAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VIF.plug";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Hotplug the specified VIF, dynamically attaching it to the running VM
+     *
      */
     public void plug(Connection c) throws
        Types.BadServerResponse,
@@ -740,6 +800,25 @@ public class VIF extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Hot-unplug the specified VIF, dynamically unattaching it from the running VM
+     *
+     * @return Task
+     */
+    public Task unplugAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.VIF.unplug";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }

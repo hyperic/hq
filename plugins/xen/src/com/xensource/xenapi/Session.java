@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -89,12 +90,12 @@ public class Session extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("this_host", this.thisHost);
-            map.put("this_user", this.thisUser);
-            map.put("last_active", this.lastActive);
-            map.put("pool", this.pool);
-            map.put("other_config", this.otherConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("this_host", this.thisHost == null ? com.xensource.xenapi.Host.getInstFromRef("OpaqueRef:NULL") : this.thisHost);
+            map.put("this_user", this.thisUser == null ? com.xensource.xenapi.User.getInstFromRef("OpaqueRef:NULL") : this.thisUser);
+            map.put("last_active", this.lastActive == null ? new Date(0) : this.lastActive);
+            map.put("pool", this.pool == null ? false : this.pool);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
             return map;
         }
 
@@ -381,7 +382,7 @@ public class Session extends XenAPIObject {
     }
 
     /**
-     * Change the account password
+     * Change the account password; if your session is authenticated with root priviledges then the old_pwd is validated and the new_pwd is set regardless
      *
      * @param oldPwd Old password for account
      * @param newPwd New password for account

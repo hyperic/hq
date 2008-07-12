@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -93,16 +94,16 @@ public class HostPatch extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("name_label", this.nameLabel);
-            map.put("name_description", this.nameDescription);
-            map.put("version", this.version);
-            map.put("host", this.host);
-            map.put("applied", this.applied);
-            map.put("timestamp_applied", this.timestampApplied);
-            map.put("size", this.size);
-            map.put("pool_patch", this.poolPatch);
-            map.put("other_config", this.otherConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("name_label", this.nameLabel == null ? "" : this.nameLabel);
+            map.put("name_description", this.nameDescription == null ? "" : this.nameDescription);
+            map.put("version", this.version == null ? "" : this.version);
+            map.put("host", this.host == null ? com.xensource.xenapi.Host.getInstFromRef("OpaqueRef:NULL") : this.host);
+            map.put("applied", this.applied == null ? false : this.applied);
+            map.put("timestamp_applied", this.timestampApplied == null ? new Date(0) : this.timestampApplied);
+            map.put("size", this.size == null ? 0 : this.size);
+            map.put("pool_patch", this.poolPatch == null ? com.xensource.xenapi.PoolPatch.getInstFromRef("OpaqueRef:NULL") : this.poolPatch);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
             return map;
         }
 
@@ -459,6 +460,26 @@ public class HostPatch extends XenAPIObject {
      * Destroy the specified host patch, removing it from the disk. This does NOT reverse the patch
      * @deprecated
      *
+     * @return Task
+     */
+   @Deprecated public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host_patch.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy the specified host patch, removing it from the disk. This does NOT reverse the patch
+     * @deprecated
+     *
      */
    @Deprecated public void destroy(Connection c) throws
        Types.BadServerResponse,
@@ -470,6 +491,26 @@ public class HostPatch extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Apply the selected patch and return its output
+     * @deprecated
+     *
+     * @return Task
+     */
+   @Deprecated public Task applyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host_patch.apply";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }

@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -112,35 +113,35 @@ public class Host extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("name_label", this.nameLabel);
-            map.put("name_description", this.nameDescription);
-            map.put("allowed_operations", this.allowedOperations);
-            map.put("current_operations", this.currentOperations);
-            map.put("API_version_major", this.APIVersionMajor);
-            map.put("API_version_minor", this.APIVersionMinor);
-            map.put("API_version_vendor", this.APIVersionVendor);
-            map.put("API_version_vendor_implementation", this.APIVersionVendorImplementation);
-            map.put("enabled", this.enabled);
-            map.put("software_version", this.softwareVersion);
-            map.put("other_config", this.otherConfig);
-            map.put("capabilities", this.capabilities);
-            map.put("cpu_configuration", this.cpuConfiguration);
-            map.put("sched_policy", this.schedPolicy);
-            map.put("supported_bootloaders", this.supportedBootloaders);
-            map.put("resident_VMs", this.residentVMs);
-            map.put("logging", this.logging);
-            map.put("PIFs", this.PIFs);
-            map.put("suspend_image_sr", this.suspendImageSr);
-            map.put("crash_dump_sr", this.crashDumpSr);
-            map.put("crashdumps", this.crashdumps);
-            map.put("patches", this.patches);
-            map.put("PBDs", this.PBDs);
-            map.put("host_CPUs", this.hostCPUs);
-            map.put("hostname", this.hostname);
-            map.put("address", this.address);
-            map.put("metrics", this.metrics);
-            map.put("license_params", this.licenseParams);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("name_label", this.nameLabel == null ? "" : this.nameLabel);
+            map.put("name_description", this.nameDescription == null ? "" : this.nameDescription);
+            map.put("allowed_operations", this.allowedOperations == null ? new HashSet<Types.HostAllowedOperations>() : this.allowedOperations);
+            map.put("current_operations", this.currentOperations == null ? new HashMap<String, Types.HostAllowedOperations>() : this.currentOperations);
+            map.put("API_version_major", this.APIVersionMajor == null ? 0 : this.APIVersionMajor);
+            map.put("API_version_minor", this.APIVersionMinor == null ? 0 : this.APIVersionMinor);
+            map.put("API_version_vendor", this.APIVersionVendor == null ? "" : this.APIVersionVendor);
+            map.put("API_version_vendor_implementation", this.APIVersionVendorImplementation == null ? new HashMap<String, String>() : this.APIVersionVendorImplementation);
+            map.put("enabled", this.enabled == null ? false : this.enabled);
+            map.put("software_version", this.softwareVersion == null ? new HashMap<String, String>() : this.softwareVersion);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
+            map.put("capabilities", this.capabilities == null ? new HashSet<String>() : this.capabilities);
+            map.put("cpu_configuration", this.cpuConfiguration == null ? new HashMap<String, String>() : this.cpuConfiguration);
+            map.put("sched_policy", this.schedPolicy == null ? "" : this.schedPolicy);
+            map.put("supported_bootloaders", this.supportedBootloaders == null ? new HashSet<String>() : this.supportedBootloaders);
+            map.put("resident_VMs", this.residentVMs == null ? new HashSet<VM>() : this.residentVMs);
+            map.put("logging", this.logging == null ? new HashMap<String, String>() : this.logging);
+            map.put("PIFs", this.PIFs == null ? new HashSet<PIF>() : this.PIFs);
+            map.put("suspend_image_sr", this.suspendImageSr == null ? com.xensource.xenapi.SR.getInstFromRef("OpaqueRef:NULL") : this.suspendImageSr);
+            map.put("crash_dump_sr", this.crashDumpSr == null ? com.xensource.xenapi.SR.getInstFromRef("OpaqueRef:NULL") : this.crashDumpSr);
+            map.put("crashdumps", this.crashdumps == null ? new HashSet<HostCrashdump>() : this.crashdumps);
+            map.put("patches", this.patches == null ? new HashSet<HostPatch>() : this.patches);
+            map.put("PBDs", this.PBDs == null ? new HashSet<PBD>() : this.PBDs);
+            map.put("host_CPUs", this.hostCPUs == null ? new HashSet<HostCpu>() : this.hostCPUs);
+            map.put("hostname", this.hostname == null ? "" : this.hostname);
+            map.put("address", this.address == null ? "" : this.address);
+            map.put("metrics", this.metrics == null ? com.xensource.xenapi.HostMetrics.getInstFromRef("OpaqueRef:NULL") : this.metrics);
+            map.put("license_params", this.licenseParams == null ? new HashMap<String, String>() : this.licenseParams);
             return map;
         }
 
@@ -1105,6 +1106,25 @@ public class Host extends XenAPIObject {
     /**
      * Puts the host into a state in which no new VMs can be started. Currently active VMs on the host continue to execute.
      *
+     * @return Task
+     */
+    public Task disableAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.disable";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Puts the host into a state in which no new VMs can be started. Currently active VMs on the host continue to execute.
+     *
      */
     public void disable(Connection c) throws
        Types.BadServerResponse,
@@ -1116,6 +1136,25 @@ public class Host extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Puts the host into a state in which new VMs can be started.
+     *
+     * @return Task
+     */
+    public Task enableAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.enable";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -1141,6 +1180,25 @@ public class Host extends XenAPIObject {
     /**
      * Shutdown the host. (This function can only be called if there are no currently running VMs on the host and it is disabled.)
      *
+     * @return Task
+     */
+    public Task shutdownAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.shutdown";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Shutdown the host. (This function can only be called if there are no currently running VMs on the host and it is disabled.)
+     *
      */
     public void shutdown(Connection c) throws
        Types.BadServerResponse,
@@ -1159,6 +1217,25 @@ public class Host extends XenAPIObject {
     /**
      * Reboot the host. (This function can only be called if there are no currently running VMs on the host and it is disabled.)
      *
+     * @return Task
+     */
+    public Task rebootAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.reboot";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Reboot the host. (This function can only be called if there are no currently running VMs on the host and it is disabled.)
+     *
      */
     public void reboot(Connection c) throws
        Types.BadServerResponse,
@@ -1170,6 +1247,25 @@ public class Host extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Get the host xen dmesg.
+     *
+     * @return Task
+     */
+    public Task dmesgAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.dmesg";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -1196,6 +1292,25 @@ public class Host extends XenAPIObject {
     /**
      * Get the host xen dmesg, and clear the buffer.
      *
+     * @return Task
+     */
+    public Task dmesgClearAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.dmesg_clear";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Get the host xen dmesg, and clear the buffer.
+     *
      * @return dmesg string
      */
     public String dmesgClear(Connection c) throws
@@ -1208,6 +1323,25 @@ public class Host extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toString(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Get the host's log file
+     *
+     * @return Task
+     */
+    public Task getLogAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.get_log";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -1235,6 +1369,26 @@ public class Host extends XenAPIObject {
      * Inject the given string as debugging keys into Xen
      *
      * @param keys The keys to send
+     * @return Task
+     */
+    public Task sendDebugKeysAsync(Connection c, String keys) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.send_debug_keys";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(keys)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Inject the given string as debugging keys into Xen
+     *
+     * @param keys The keys to send
      */
     public void sendDebugKeys(Connection c, String keys) throws
        Types.BadServerResponse,
@@ -1246,6 +1400,27 @@ public class Host extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Run xen-bugtool --yestoall and upload the output to Citrix support
+     *
+     * @param url The URL to upload to
+     * @param options Extra configuration operations
+     * @return Task
+     */
+    public Task bugreportUploadAsync(Connection c, String url, Map<String, String> options) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.bugreport_upload";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(url), Marshalling.toXMLRPC(options)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -1293,6 +1468,32 @@ public class Host extends XenAPIObject {
      * Apply a new license to a host
      *
      * @param contents The contents of the license file, base64 encoded
+     * @return Task
+     */
+    public Task licenseApplyAsync(Connection c, String contents) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.LicenseProcessingError {
+        String method_call = "Async.host.license_apply";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(contents)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("LICENSE_PROCESSING_ERROR")) {
+                throw new Types.LicenseProcessingError();
+            }
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Apply a new license to a host
+     *
+     * @param contents The contents of the license file, base64 encoded
      */
     public void licenseApply(Connection c, String contents) throws
        Types.BadServerResponse,
@@ -1317,6 +1518,25 @@ public class Host extends XenAPIObject {
     /**
      * Destroy specified host record in database
      *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy specified host record in database
+     *
      */
     public void destroy(Connection c) throws
        Types.BadServerResponse,
@@ -1328,6 +1548,62 @@ public class Host extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Check this host can be evacuated.
+     *
+     * @return Task
+     */
+    public Task assertCanEvacuateAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.assert_can_evacuate";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Check this host can be evacuated.
+     *
+     */
+    public void assertCanEvacuate(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "host.assert_can_evacuate";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Disable the host and Migrate all VMs off of it, where possible.
+     *
+     * @return Task
+     */
+    public Task evacuateAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.evacuate";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -1353,6 +1629,25 @@ public class Host extends XenAPIObject {
     /**
      * Re-configure syslog logging
      *
+     * @return Task
+     */
+    public Task syslogReconfigureAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.syslog_reconfigure";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Re-configure syslog logging
+     *
      */
     public void syslogReconfigure(Connection c) throws
        Types.BadServerResponse,
@@ -1364,6 +1659,26 @@ public class Host extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Reconfigure the management network interface
+     *
+     * @param pif reference to a PIF object corresponding to the management interface
+     * @return Task
+     */
+    public static Task managementReconfigureAsync(Connection c, PIF pif) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host.management_reconfigure";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(pif)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }
@@ -1439,6 +1754,25 @@ public class Host extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return Types.toString(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Sets the host name to the specified string.  Both the API and lower-level system hostname are changed immediately.
+     *
+     * @param hostname The new host name
+     */
+    public void setHostnameLive(Connection c, String hostname) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "host.set_hostname_live";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(hostname)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
         }
         throw new Types.BadServerResponse(response);
     }

@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -88,11 +89,11 @@ public class HostCrashdump extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("host", this.host);
-            map.put("timestamp", this.timestamp);
-            map.put("size", this.size);
-            map.put("other_config", this.otherConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("host", this.host == null ? com.xensource.xenapi.Host.getInstFromRef("OpaqueRef:NULL") : this.host);
+            map.put("timestamp", this.timestamp == null ? new Date(0) : this.timestamp);
+            map.put("size", this.size == null ? 0 : this.size);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
             return map;
         }
 
@@ -313,6 +314,25 @@ public class HostCrashdump extends XenAPIObject {
     /**
      * Destroy specified host crash dump, removing it from the disk.
      *
+     * @return Task
+     */
+    public Task destroyAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host_crashdump.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy specified host crash dump, removing it from the disk.
+     *
      */
     public void destroy(Connection c) throws
        Types.BadServerResponse,
@@ -324,6 +344,27 @@ public class HostCrashdump extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Upload the specified host crash dump to a specified URL
+     *
+     * @param url The URL to upload to
+     * @param options Extra configuration operations
+     * @return Task
+     */
+    public Task uploadAsync(Connection c, String url, Map<String, String> options) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "Async.host_crashdump.upload";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref), Marshalling.toXMLRPC(url), Marshalling.toXMLRPC(options)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
         }
         throw new Types.BadServerResponse(response);
     }

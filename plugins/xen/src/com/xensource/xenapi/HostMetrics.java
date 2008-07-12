@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -88,11 +89,11 @@ public class HostMetrics extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("memory_total", this.memoryTotal);
-            map.put("memory_free", this.memoryFree);
-            map.put("live", this.live);
-            map.put("last_updated", this.lastUpdated);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("memory_total", this.memoryTotal == null ? 0 : this.memoryTotal);
+            map.put("memory_free", this.memoryFree == null ? 0 : this.memoryFree);
+            map.put("live", this.live == null ? false : this.live);
+            map.put("last_updated", this.lastUpdated == null ? new Date(0) : this.lastUpdated);
             return map;
         }
 

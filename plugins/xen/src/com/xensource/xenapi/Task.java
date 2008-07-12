@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Date;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.xmlrpc.XmlRpcException;
@@ -97,20 +98,20 @@ public class Task extends XenAPIObject {
          */
         public Map<String,Object> toMap() {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("uuid", this.uuid);
-            map.put("name_label", this.nameLabel);
-            map.put("name_description", this.nameDescription);
-            map.put("allowed_operations", this.allowedOperations);
-            map.put("current_operations", this.currentOperations);
-            map.put("created", this.created);
-            map.put("finished", this.finished);
-            map.put("status", this.status);
-            map.put("resident_on", this.residentOn);
-            map.put("progress", this.progress);
-            map.put("type", this.type);
-            map.put("result", this.result);
-            map.put("error_info", this.errorInfo);
-            map.put("other_config", this.otherConfig);
+            map.put("uuid", this.uuid == null ? "" : this.uuid);
+            map.put("name_label", this.nameLabel == null ? "" : this.nameLabel);
+            map.put("name_description", this.nameDescription == null ? "" : this.nameDescription);
+            map.put("allowed_operations", this.allowedOperations == null ? new HashSet<Types.TaskAllowedOperations>() : this.allowedOperations);
+            map.put("current_operations", this.currentOperations == null ? new HashMap<String, Types.TaskAllowedOperations>() : this.currentOperations);
+            map.put("created", this.created == null ? new Date(0) : this.created);
+            map.put("finished", this.finished == null ? new Date(0) : this.finished);
+            map.put("status", this.status == null ? Types.TaskStatusType.UNRECOGNIZED : this.status);
+            map.put("resident_on", this.residentOn == null ? com.xensource.xenapi.Host.getInstFromRef("OpaqueRef:NULL") : this.residentOn);
+            map.put("progress", this.progress == null ? 0.0 : this.progress);
+            map.put("type", this.type == null ? "" : this.type);
+            map.put("result", this.result == null ? "" : this.result);
+            map.put("error_info", this.errorInfo == null ? new HashSet<String>() : this.errorInfo);
+            map.put("other_config", this.otherConfig == null ? new HashMap<String, String>() : this.otherConfig);
             return map;
         }
 
@@ -551,6 +552,70 @@ public class Task extends XenAPIObject {
         if(response.get("Status").equals("Success")) {
             Object result = response.get("Value");
             return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Create a new task object which must be manually destroyed.
+     *
+     * @param label short label for the new task
+     * @param description longer description for the new task
+     * @return The reference of the created task object
+     */
+    public static Task create(Connection c, String label, String description) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "task.create";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(label), Marshalling.toXMLRPC(description)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Destroy the task object
+     *
+     */
+    public void destroy(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException {
+        String method_call = "task.destroy";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return;
+        }
+        throw new Types.BadServerResponse(response);
+    }
+
+    /**
+     * Request that a task be cancelled. Note that a task may fail to be cancelled and may complete or fail normally and note that, even when a task does cancel, it might take an arbitrary amount of time.
+     *
+     * @return Task
+     */
+    public Task cancelAsync(Connection c) throws
+       Types.BadServerResponse,
+       XmlRpcException,
+       Types.OperationNotAllowed {
+        String method_call = "Async.task.cancel";
+        String session = c.getSessionReference();
+        Object[] method_params = {Marshalling.toXMLRPC(session), Marshalling.toXMLRPC(this.ref)};
+        Map response = c.dispatch(method_call, method_params);
+        if(response.get("Status").equals("Success")) {
+            Object result = response.get("Value");
+            return Types.toTask(result);
+        } else if(response.get("Status").equals("Failure")) {
+            Object[] error = (Object[]) response.get("ErrorDescription");
+            if(error[0].equals("OPERATION_NOT_ALLOWED")) {
+                throw new Types.OperationNotAllowed((String) error[1]);
+            }
         }
         throw new Types.BadServerResponse(response);
     }
