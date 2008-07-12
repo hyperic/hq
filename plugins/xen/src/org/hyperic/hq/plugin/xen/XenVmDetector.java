@@ -89,8 +89,13 @@ public class XenVmDetector
                 String name = vm.getNameLabel(conn);
 
                 VMGuestMetrics gmetrics = vm.getGuestMetrics(conn);
-                Map<String,String> os = gmetrics.getOsVersion(conn);
-                setValue(cprops, "os", os.get("name"));
+                try {
+                    Map<String,String> os = gmetrics.getOsVersion(conn);
+                    setValue(cprops, "os", os.get("name"));
+                } catch (Exception e) {
+                    //XXX
+                    getLog().warn("getOsVersion(" + uuid + ") failed: " + e);
+                }
 
                 String type = getTypeInfo().getName();
 
