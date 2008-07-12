@@ -40,13 +40,6 @@ public final class CommandsAPIInfo
     public static final String NOTIFY_SERVER_SET = 
         CommandsAPIInfo.class.getName() + ".camServerSet";
 
-    /* 
-     * The port which the AgentClient defines where the CommandsServer
-     * can connect to notify it of a successful startup
-     */
-    public static final String PROP_UP_PORT =
-        CommandsAPIInfo.class.getName() + ".camUpPort";
-
     // XXX -- still need to have this naming provider here
     //        so tests will pass
     public static final String PROP_NAMING_PROVIDER =
@@ -57,6 +50,15 @@ public final class CommandsAPIInfo
 
     public static final String PROP_AGENT_TOKEN = 
         "covalent.CAMAgentToken";
+        
+    public static final String PROP_IS_NEW_TRANSPORT = 
+        "covalent.CAMIsNewTransport";
+    
+    public static final String PROP_UNIDIRECTIONAL = 
+        "covalent.CAMUnidirectional";
+    
+    public static final String PROP_UNIDIRECTIONAL_PORT = 
+        "covalent.CAMUndirectionalPort";
 
     public static final String[] propSet = {
     };
@@ -97,8 +99,22 @@ public final class CommandsAPIInfo
            agentToken      == null)
         {
             return null;
-        } 
-        return new ProviderInfo(providerAddress, agentToken);
+        }
+        
+        ProviderInfo provider = new ProviderInfo(providerAddress, agentToken);
+        
+        boolean isNewTransport = 
+            Boolean.valueOf(storage.getValue(PROP_IS_NEW_TRANSPORT)).booleanValue();
+        
+        if (isNewTransport) {
+            boolean unidirectional = 
+                Boolean.valueOf(storage.getValue(PROP_UNIDIRECTIONAL)).booleanValue();
+            int unidirectionalPort = 
+                Integer.valueOf(storage.getValue(PROP_UNIDIRECTIONAL_PORT)).intValue();
+            provider.setNewTransport(unidirectional, unidirectionalPort);
+        }
+        
+        return provider;
     }
 
     public static void setProvider(AgentStorageProvider storage,
@@ -107,9 +123,23 @@ public final class CommandsAPIInfo
         if(provider != null){
             storage.setValue(PROP_PROVIDER_URL, provider.getProviderAddress());
             storage.setValue(PROP_AGENT_TOKEN, provider.getAgentToken());
+            storage.setValue(PROP_IS_NEW_TRANSPORT, String.valueOf(provider.isNewTransport()));
+            
+            if (provider.isNewTransport()) {
+                storage.setValue(PROP_UNIDIRECTIONAL, 
+                                 String.valueOf(provider.isUnidirectional()));
+                storage.setValue(PROP_UNIDIRECTIONAL_PORT, 
+                                 String.valueOf(provider.getUnidirectionalPort()));
+            } else {
+                storage.setValue(PROP_UNIDIRECTIONAL, null);
+                storage.setValue(PROP_UNIDIRECTIONAL_PORT, null);
+            }            
         } else {
             storage.setValue(PROP_PROVIDER_URL, null);
             storage.setValue(PROP_AGENT_TOKEN, null);
+            storage.setValue(PROP_IS_NEW_TRANSPORT, null);
+            storage.setValue(PROP_UNIDIRECTIONAL, null);
+            storage.setValue(PROP_UNIDIRECTIONAL_PORT, null);
         }
     }
 }
