@@ -36,7 +36,7 @@ class RoleHelper extends BaseHelper {
      * @param id The role id to search for.
      * @return The Role with the given id, or null if that role does not exist.
      */
-    public Role findRoleById(int id) {
-        roleMan.findRoleById(id)
+    public Role getRoleById(int id) {
+        roleMan.getRoleById(id)
     }
 }
