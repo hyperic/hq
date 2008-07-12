@@ -598,7 +598,16 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
              fromLocals(roleLocal.getResourceGroups(),
                         ResourceGroupValue.class);
      }
-     
+
+    /**
+     * Get a Role by id
+     *
+     * @ejb:interface-method
+     */
+    public Role getRoleById(int id) {
+        return getRoleDAO().get(new Integer(id));
+    }
+
     /**
      * @ejb:interface-method
      */
