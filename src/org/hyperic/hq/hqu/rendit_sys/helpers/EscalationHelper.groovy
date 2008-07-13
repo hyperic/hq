@@ -5,6 +5,7 @@ import java.util.Collection
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl as EscMan
 import org.hyperic.hq.escalation.server.session.Escalation
+import org.hyperic.hq.events.ActionInterface
 
 class EscalationHelper extends BaseHelper {
     private escMan = EscMan.one
@@ -67,5 +68,19 @@ class EscalationHelper extends BaseHelper {
                                  boolean repeat) {
         escMan.updateEscalation(user, esc, name, description, pauseAllowed,
                                 maxWaitTime, notifyAll, repeat)
+    }
+    
+    /**
+     * Delete an action for a specific escalation
+     */
+     def deleteAction(Escalation esc, Integer actionId) {
+         escMan.removeAction(esc, actionId)
+     }
+    
+    /**
+     * Add an action to a specific escalation
+     */
+     def addAction(Escalation esc, ActionInterface action, long wait) {
+        escMan.addAction(esc, action, wait)
     }
 }
