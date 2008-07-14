@@ -39,7 +39,7 @@
 <c:if test="${not hideTools}">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="ToolbarContent">
   <tr>
-    <td style="padding-top:3px;padding-right:5px;padding-left:5px;padding-bottom:5px;" valign="top"><html:image page="/images/arrow_branch.gif" border="0"/></td>
+    <td></td>
     <td style="padding-top:3px;padding-bottom:5px;font-size:10px;"><fmt:message key="inform.resource.common.monitor.visibility.SelectResources"/></td>
     <td nowrap style="font-size:10px" width="90">
     <tiles:insert page="/common/components/ActionButton.jsp">

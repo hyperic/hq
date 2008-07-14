@@ -90,7 +90,7 @@ function reviewAction(option) {
   <input type="hidden" name="ctype" value="<c:out value="${ctype}"/>">
 </c:if>
 
-<table width="680" cellpadding="2" cellspacing="0" border="0">
+<table cellpadding="2" cellspacing="0" border="0">
   <tr>
     <td class="ListHeaderInactive" nowrap="true"><fmt:message key="resource.common.monitor.visibility.IndicatorCharts"/></td>
     <td class="ListHeaderInactive" valign="middle" align="right" width="100%">

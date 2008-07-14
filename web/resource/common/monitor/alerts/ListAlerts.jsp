@@ -276,7 +276,7 @@
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>
 
-<table width="100%"><tr>
+<table width="100%" style="background-color:#fff;border-left:1px solid gray;border-right:1px solid gray"><tr>
 <td><a href="javascript:previousDay()"><html:img page="/images/schedule_left.gif" border="0"/></a></td>
 <td nowrap="true" class="BoldText"><hq:dateFormatter value="${date}" showTime="false"/></td>
 <td><a href="javascript:nextDay()"><html:img page="/images/schedule_right.gif" border="0"/></a></td>
