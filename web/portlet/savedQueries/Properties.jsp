@@ -53,7 +53,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tr class="PageTitle"> 
     <td rowspan="99"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
-    <td width="67%" class="PageTitle" nowrap><fmt:message key="dash.home.SavedQueries.Title"/></td>
+    <td width="67%" class="PortletTitle" nowrap><fmt:message key="dash.home.SavedQueries.Title"/></td>
     <td width="32%"><html:img page="/images/spacer.gif" width="202" height="32" alt="" border="0"/></td>
     <td width="1%"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
   </tr>
@@ -64,10 +64,11 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tr valign="top"> 
     <td colspan='2'>
       <html:form action="/dashboard/ModifySavedQueries.do" onsubmit="SavedQueriesForm.order.value=Sortable.serialize('qryOrd')">
+      <div id="narrowlist_false">
       <tiles:insert definition=".header.tab">
         <tiles:put name="tabKey" value="dash.settings.SelectedCharts"/>
       </tiles:insert>
-           
+           </div>
       <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr class="tableRowHeader">
           <th width="100%" class="tableRowSorted">

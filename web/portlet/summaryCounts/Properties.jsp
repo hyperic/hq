@@ -45,7 +45,7 @@
   <tr class="PageTitle"> 
     <td rowspan="99"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
-    <td width="67%" class="PageTitle" nowrap><fmt:message key="dash.home.SummaryCounts.Title"/></td>
+    <td width="67%" class="PortletTitle" nowrap><fmt:message key="dash.home.SummaryCounts.Title"/></td>
     <td width="32%"><html:img page="/images/spacer.gif" width="202" height="32" alt="" border="0"/></td>
     <td width="1%"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link></td>
   </tr>
@@ -56,12 +56,12 @@
   <tr valign="top"> 
     <td colspan='2'>
     <html:form action="/dashboard/ModifySummaryCounts.do">
-
+<div id="narrowlist_false">
     <!-- Content Block Title: Display Settings -->
     <tiles:insert definition=".header.tab">
       <tiles:put name="tabKey" value="dash.settings.DisplaySettings"/>
     </tiles:insert>
-
+</div>
     <tiles:insert definition=".dashContent.admin.generalSettings">
       <tiles:put name="portletName" beanName="portletName" />
     </tiles:insert>

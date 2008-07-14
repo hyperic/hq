@@ -50,7 +50,7 @@ var help = '<hq:help/>';
   <tr class="PageTitle"> 
     <td rowspan="99"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
-    <td width="67%" class="PageTitle" nowrap><fmt:message key="dash.home.ResourceHealth.Settings.Title"/></td>
+    <td width="67%" class="PortletTitle" nowrap><fmt:message key="dash.home.ResourceHealth.Settings.Title"/></td>
     <td width="32%"><html:img page="/images/spacer.gif" width="2" height="32" alt="" border="0"/></td>
     <td width="1%"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
   </tr>
@@ -61,11 +61,11 @@ var help = '<hq:help/>';
   <tr valign="top"> 
     <td colspan="2">
       <html:form action="/dashboard/ModifyEscalation.do" onsubmit="ResourceHealthForm.order.value=Sortable.serialize('resOrd')">
-
+<div id="narrowlist_false">
       <tiles:insert definition=".header.tab">
         <tiles:put name="tabKey" value="dash.settings.SelectedResources"/>
       </tiles:insert>
-
+</div>
     <table class="table" class="table" width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr class="tableRowHeader">
     <th width="1%" class="ListHeaderCheckbox"><input type="checkbox" onclick="ToggleAll(this, widgetProperties, true)" name="listToggleAll"></th>
