@@ -44,6 +44,7 @@ import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.RawMeasurement;
+import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.measurement.ext.MonitorInterface;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
@@ -238,16 +239,10 @@ public class RawMeasurementManagerEJBImpl
         throws LiveMeasurementException, PermissionException 
     {
         try {
-            MonitorInterface monitor;
-            AgentValue aconn;
-    
-            aconn   = this.getAgentConnection(entity);
-            monitor = 
-                MonitorFactory.newInstance(aconn.getAgentType().getName());
-    
+            AgentMonitor monitor = new AgentMonitor();
+            AgentValue aconn  = this.getAgentConnection(entity);
+
             return monitor.getLiveValues(aconn, dsns);
-        } catch(MonitorCreateException e){
-            throw new LiveMeasurementException(e.getMessage(), e);
         } catch(MonitorAgentException e){
             throw new LiveMeasurementException(e.getMessage(), e);
         }

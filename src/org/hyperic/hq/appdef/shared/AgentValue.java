@@ -255,6 +255,10 @@ public class AgentValue
 	  this.AgentType = AgentType;
 	  AgentTypeHasBeenSet = true;
    }
+   
+   public String connectionString() {
+       return getAddress()+":"+getPort();
+   }
 
    public String toString()
    {

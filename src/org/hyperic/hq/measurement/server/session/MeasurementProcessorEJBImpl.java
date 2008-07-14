@@ -37,6 +37,8 @@ import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -48,6 +50,7 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.RawMeasurement;
+import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.measurement.ext.MonitorInterface;
@@ -94,12 +97,8 @@ public class MeasurementProcessorEJBImpl
      * Ping the agent to make sure it's up
      * @ejb:interface-method
      */
-    public boolean ping(AgentValue aconn)
-        throws PermissionException, MonitorCreateException {
-        // Schedule RawMeasurements with a monitor
-        MonitorInterface monitor =
-            MonitorFactory.newInstance(aconn.getAgentType().getName());
-        
+    public boolean ping(AgentValue aconn) {
+        AgentMonitor monitor = new AgentMonitor();
         return monitor.ping(aconn);
     }
 
@@ -207,40 +206,32 @@ public class MeasurementProcessorEJBImpl
             throw new MeasurementScheduleException(e);
         } catch (PermissionException e) {
             throw new MonitorAgentException(e);
-        } catch (MonitorCreateException e) {
-            throw new MonitorAgentException(e);
         }
         
         logTime("schedule",scheduleTime);
     }
 
     private void unschedule(AgentValue aconn, AppdefEntityID[] entIds)
-        throws MeasurementUnscheduleException, MonitorAgentException {
-        try {
-            // Create SRNs from the measurements
-            UnscheduleMetricInfo[] schedule =
-                new UnscheduleMetricInfo[entIds.length];
-            
-            SRNManagerLocal srnManager = getSRNManager();
-            for (int i = 0; i < schedule.length; i++) {
-                schedule[i] = new UnscheduleMetricInfo(entIds[i]);
-                try {
-                    srnManager.removeSrn(entIds[i]);
-                } catch (ObjectNotFoundException e) {
-                    // Ok to ignore, this is the first time scheduling metrics
-                    // for this resource.
-                }
+        throws MonitorAgentException {
+
+        // Create SRNs from the measurements
+        UnscheduleMetricInfo[] schedule =
+            new UnscheduleMetricInfo[entIds.length];
+        
+        SRNManagerLocal srnManager = getSRNManager();
+        for (int i = 0; i < schedule.length; i++) {
+            schedule[i] = new UnscheduleMetricInfo(entIds[i]);
+            try {
+                srnManager.removeSrn(entIds[i]);
+            } catch (ObjectNotFoundException e) {
+                // Ok to ignore, this is the first time scheduling metrics
+                // for this resource.
             }
-
-            // Get the monitor for the agent type
-            MonitorInterface monitor =
-                MonitorFactory.newInstance(aconn.getAgentType().getName());
-
-            monitor.unschedule(aconn, schedule);
-        } catch (MonitorCreateException e) {
-            throw new MeasurementUnscheduleException(
-                "Could not create monitor", aconn.getId(), e);
         }
+
+        // Get the monitor for the agent type
+        AgentMonitor monitor = new AgentMonitor();
+        monitor.unschedule(aconn, schedule);
     }
     
     /** Unschedule metrics of multiple appdef entities
@@ -366,17 +357,13 @@ public class MeasurementProcessorEJBImpl
 
     private void scheduleRawMeasurements(AppdefEntityID entId,
                                          Map measurements, int srnVer)
-        throws PermissionException, MonitorCreateException,
-               MonitorAgentException 
+        throws PermissionException, MonitorAgentException 
     {
         // Get the agent IP and Port from server ID
         AgentValue aconn = getAgentConnection(entId);
         SRN srn = new SRN(entId, srnVer);
             
         // Schedule RawMeasurements with a monitor
-        MonitorInterface monitor =
-            MonitorFactory.newInstance(aconn.getAgentType().getName());
-            
         long talk2AgentStart = System.currentTimeMillis();
         
         ArrayList schedule = new ArrayList();
@@ -394,6 +381,9 @@ public class MeasurementProcessorEJBImpl
 
         ScheduleMetricInfo[] aSched = (ScheduleMetricInfo[])
             schedule.toArray(new ScheduleMetricInfo[0]);
+
+        // Then schedule
+        AgentMonitor monitor = new AgentMonitor();
 
         // Then schedule
         monitor.schedule(aconn, srn, aSched);

@@ -32,8 +32,8 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
-import org.hyperic.hq.livedata.agent.client.LiveDataClient;
-import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
+import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
+import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClientFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -52,6 +52,7 @@ import org.hyperic.hq.livedata.shared.LiveDataManagerUtil;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -229,13 +230,18 @@ public class LiveDataManagerEJBImpl implements SessionBean {
         }
 
         AppdefEntityID id = cmd.getAppdefEntityID();
-        AgentConnection conn = AgentConnectionUtil.getClient(id);
-        LiveDataClient client = new LiveDataClient(conn);
+        
+        LiveDataCommandsClient client = 
+            LiveDataCommandsClientFactory.getInstance().getClient(id);
 
         ConfigResponse config = getConfig(subject, cmd);
         String type = getType(subject, cmd);
-
-        res = client.getData(id, type, cmd.getCommand(), config);
+        
+        try {
+            res = client.getData(id, type, cmd.getCommand(), config);
+        } catch (AgentRemoteException e) {
+            res = new LiveDataResult(id, e, e.getMessage());
+        }
 
         if (cacheTimeout != NO_CACHE) {
             putElement(cmd, res);
@@ -283,7 +289,6 @@ public class LiveDataManagerEJBImpl implements SessionBean {
         for (int i = 0; i < commands.length; i++) {
             LiveDataCommand cmd = commands[i];
             AppdefEntityID id = cmd.getAppdefEntityID();
-            AgentConnection conn = AgentConnectionUtil.getClient(id);
 
             ConfigResponse config = getConfig(subject, cmd);
             String type = getType(subject, cmd);
@@ -291,11 +296,11 @@ public class LiveDataManagerEJBImpl implements SessionBean {
             LiveDataExecutorCommand exec =
                 new LiveDataExecutorCommand(id, type, cmd.getCommand(), config);
 
-            List queue = (List)buckets.get(conn);
+            List queue = (List)buckets.get(id);
             if (queue == null) {
                 queue = new ArrayList();
                 queue.add(exec);
-                buckets.put(conn, queue);
+                buckets.put(id, queue);
             } else {
                 queue.add(exec);
             }
@@ -303,9 +308,13 @@ public class LiveDataManagerEJBImpl implements SessionBean {
 
         LiveDataExecutor executor = new LiveDataExecutor();
         for (Iterator i = buckets.keySet().iterator(); i.hasNext(); ) {
-            AgentConnection conn = (AgentConnection)i.next();
-            List cmds = (List)buckets.get(conn);
-            executor.getData(new LiveDataClient(conn), cmds);
+            AppdefEntityID id = (AppdefEntityID)i.next();
+            List cmds = (List)buckets.get(id);
+            
+            LiveDataCommandsClient client = 
+                LiveDataCommandsClientFactory.getInstance().getClient(id);
+            
+            executor.getData(client, cmds);
         }
 
         executor.shutdown();

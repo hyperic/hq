@@ -25,15 +25,13 @@
 
 package org.hyperic.hq.measurement.agent.client;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.shared.AgentValue;
-import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
-import org.hyperic.hq.measurement.server.session.SRN;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
@@ -43,11 +41,11 @@ import org.hyperic.hq.measurement.ext.ScheduleMetricInfo;
 import org.hyperic.hq.measurement.ext.UnscheduleMetricInfo;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.RawMeasurement;
+import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.collection.ExpireMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /** 
  * The MoniteringInterface implementation that communicates with
@@ -72,10 +70,6 @@ public class AgentMonitor implements MonitorInterface
      * @return true if the agent is up, false otherwise
      */
     public boolean ping(AgentValue agent) {
-        SecureAgentConnection conn;
-
-        conn = new SecureAgentConnection(agent);
-
         AgentCommandsClient client =
             AgentCommandsClientFactory.
             getInstance().getClient(agent);
@@ -107,10 +101,6 @@ public class AgentMonitor implements MonitorInterface
                          ScheduleMetricInfo[] schedule)
         throws MonitorAgentException
     {
-        SecureAgentConnection conn;
-
-        conn = new SecureAgentConnection(agent);
-
         try {
             ScheduleMeasurements_args args = new ScheduleMeasurements_args();
             MeasurementCommandsClient client = 
@@ -135,12 +125,12 @@ public class AgentMonitor implements MonitorInterface
 
             client.scheduleMeasurements(args);
         } catch (AgentConnectionException e) {
-            final String emsg = ERR_REMOTE + conn + ": " + e.getMessage();
+            final String emsg = ERR_REMOTE + agent.connectionString() + ": " + e.getMessage();
 
             this.log.warn(emsg);
             throw new MonitorAgentException(e.getMessage(), e);
         } catch (AgentRemoteException e) {
-            final String emsg = ERR_REMOTE + conn + ": " + e.getMessage();
+            final String emsg = ERR_REMOTE + agent.connectionString() + ": " + e.getMessage();
 
             this.log.warn(emsg);
             throw new MonitorAgentException(emsg, e);
@@ -156,13 +146,9 @@ public class AgentMonitor implements MonitorInterface
     public void unschedule(AgentValue agent, UnscheduleMetricInfo[] schedule)
         throws MonitorAgentException 
     {
-        SecureAgentConnection conn;
-
         // If the agent's bad in the last 60 seconds, let's not worry about it
         if (badAgents.containsKey(agent.getAddress()))
             return;
-        
-        conn = new SecureAgentConnection(agent);
 
         try {
             MeasurementCommandsClient client = 
@@ -177,14 +163,14 @@ public class AgentMonitor implements MonitorInterface
 
             client.unscheduleMeasurements(args);
         } catch (AgentConnectionException e) {
-            this.log.warn(ERR_REMOTE + conn + ": " + e.getMessage());
+            this.log.warn(ERR_REMOTE + agent.connectionString() + ": " + e.getMessage());
             
             // Track bad agent
             badAgents.put(agent.getAddress(), agent, BAD_AGENT_EXPIRE);
             
             throw new MonitorAgentException(e.getMessage(), e);
         } catch (AgentRemoteException e) {
-            String emsg = ERR_REMOTE + conn + ": " + e.getMessage();
+            String emsg = ERR_REMOTE + agent.connectionString() + ": " + e.getMessage();
             this.log.warn(emsg);
             
             // Track bad agent
@@ -201,10 +187,6 @@ public class AgentMonitor implements MonitorInterface
     public MetricValue[] getLiveValues(AgentValue agent, String[] dsns)
         throws MonitorAgentException, LiveMeasurementException 
     {
-        SecureAgentConnection conn;
-
-        conn   = new SecureAgentConnection(agent);
-
         try {
             MeasurementCommandsClient client;
             GetMeasurements_result result;
@@ -229,12 +211,12 @@ public class AgentMonitor implements MonitorInterface
             }
             return res;
         } catch (AgentConnectionException e) {
-            final String emsg = ERR_REMOTE + conn + ": " + e.getMessage();
+            final String emsg = ERR_REMOTE + agent.connectionString() + ": " + e.getMessage();
                         
             this.log.warn(emsg);
             throw new MonitorAgentException(e.getMessage(), e);
         } catch (AgentRemoteException e) {
-            final String emsg = ERR_REMOTE + conn + ": " + e.getMessage();
+            final String emsg = ERR_REMOTE + agent.connectionString() + ": " + e.getMessage();
             
             this.log.warn(emsg);
             throw new MonitorAgentException(emsg, e);

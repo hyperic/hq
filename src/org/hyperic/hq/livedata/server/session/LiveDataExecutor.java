@@ -25,17 +25,19 @@
 
 package org.hyperic.hq.livedata.server.session;
 
-import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
-import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
-import org.hyperic.hq.livedata.agent.client.LiveDataClient;
-import org.hyperic.hq.livedata.shared.LiveDataResult;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
+import org.hyperic.hq.livedata.shared.LiveDataResult;
+
+import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
+import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
+import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 public class LiveDataExecutor extends ThreadPoolExecutor {
 
@@ -53,7 +55,7 @@ public class LiveDataExecutor extends ThreadPoolExecutor {
         _results = new ArrayList();
     }
 
-    public void getData(LiveDataClient client, List commands) {
+    public void getData(LiveDataCommandsClient client, List commands) {
         execute(new LiveDataGatherer(client, commands));
     }
 
@@ -70,10 +72,10 @@ public class LiveDataExecutor extends ThreadPoolExecutor {
         
     private class LiveDataGatherer implements Runnable {
 
-        private LiveDataClient _client;
+        private LiveDataCommandsClient _client;
         private List _commands;
 
-        LiveDataGatherer(LiveDataClient client, List commands) {
+        LiveDataGatherer(LiveDataCommandsClient client, List commands) {
             _client = client;
             _commands = commands;
         }
@@ -84,10 +86,16 @@ public class LiveDataExecutor extends ThreadPoolExecutor {
                 LiveDataExecutorCommand cmd = (LiveDataExecutorCommand)i.next();
                 _log.debug("Running cmd '" + cmd + "' in thread " +
                            Thread.currentThread().getName());
-                LiveDataResult res = _client.getData(cmd.getAppdefEntityID(),
-                                                     cmd.getType(),
-                                                     cmd.getCommand(),
-                                                     cmd.getConfig());
+                LiveDataResult res;
+                try {
+                    res = _client.getData(cmd.getAppdefEntityID(),
+                                                         cmd.getType(),
+                                                         cmd.getCommand(),
+                                                         cmd.getConfig());
+                } catch (AgentRemoteException e) {
+                    res = new LiveDataResult(cmd.getAppdefEntityID(), e, e.getMessage());
+                }
+                
                 _results.add(res);
             }
         }
