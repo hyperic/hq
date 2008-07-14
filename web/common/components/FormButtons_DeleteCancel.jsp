@@ -39,7 +39,7 @@
   }
 </script>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="buttonTable">
   <tr>
     <td colspan="2"><html:img page="/images/spacer.gif" width="1" height="10" border="0"/></td>
   </tr>

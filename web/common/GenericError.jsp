@@ -37,12 +37,13 @@
 <head>
 <title><fmt:message key="error.Error.Title"/></title>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
+<link rel=stylesheet href="<html:rewrite page="HQ_40.css"/>" type="text/css">
 <script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
 <script  type="text/javascript">
   var help = "<hq:help/>";
 </script>
 </head>
-<body>
+<body class="exception" style="background-color:#EEEEEE">
 <br>
 <br>
 <br>
@@ -53,10 +54,10 @@
 <table width="400" border="0" cellspacing="0" cellpadding="0">
   <tr>
     <td>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="errorTitle">
         <tr>
           <td class="BlockTitle" width="100%"><fmt:message key="error.Error.Tab"/></td>
-          <td class="BlockTitle" align="right"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/tt_help.gif" width="16" height="16" border="0"/></html:link></td>
+          <td class="BlockTitle" align="right"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/4.0/icons/help.gif" width="16" height="16" border="0"/></html:link></td>
         </tr>
       </table>	
     </td>
@@ -74,6 +75,7 @@
       <html:link href="javascript:history.back(1)"><fmt:message key="error.Error.PreviousPageLink"/></html:link> 
       <html:link page="/Dashboard.do"><fmt:message key="error.Error.DashboardLink"/></html:link> 
       <html:link page="/ResourceHub.do"><fmt:message key="error.Error.ResourceHubLink"/></html:link> 
+      <fmt:message key="error.Error.Page"/>
       </p>
     </td>
   </tr>

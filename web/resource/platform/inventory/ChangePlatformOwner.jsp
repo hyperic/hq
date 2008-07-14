@@ -37,13 +37,15 @@
   <tiles:put name="titleName" beanName="Resource" beanProperty="name"/>
 </tiles:insert>
 
+<div class="editResourceOwner">
 <tiles:insert definition=".resource.common.inventory.changeResourceOwner">
   <tiles:put name="users" beanName="AllUsers"/>
   <tiles:put name="userCount" beanName="NumUsers"/>
   <tiles:put name="formName" value="ChangeResourceOwnerForm"/>
   <tiles:put name="selfUrl" beanName="selfUrl"/>
 </tiles:insert>
-      &nbsp;<br>
+</div>
+&nbsp;<br>
 
 <tiles:insert definition=".form.buttons">
   <tiles:put name="cancelOnly" value="true"/>
