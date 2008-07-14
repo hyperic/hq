@@ -334,15 +334,15 @@ hyperic.widget.Menu = function(kwArgs) {
         if(kwArgs.menuNode) {
             this.node = kwArgs.menuNode;
             this.node.style.display='none';
-            dojo.connect(this.node, 'onmouseenter', that, 'onHover');
-            dojo.connect(this.node, 'onmouseleave', that, 'onUnHover');
+            dojo11.connect(this.node, 'onmouseenter', that, 'onHover');
+            dojo11.connect(this.node, 'onmouseleave', that, 'onUnHover');
         }
         if(kwArgs.toggleNode) {
             if(kwArgs.subMenu){
                 this._isSubMenu = true;
-                dojo.connect(kwArgs.toggleNode, 'onmouseover', that, 'onclick');
+                dojo11.connect(kwArgs.toggleNode, 'onmouseover', that, 'onclick');
             }else{
-                dojo.connect(kwArgs.toggleNode, 'onclick', that, 'onclick');
+                dojo11.connect(kwArgs.toggleNode, 'onclick', that, 'onclick');
             }
         }
         
