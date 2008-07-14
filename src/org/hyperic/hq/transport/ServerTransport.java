@@ -147,7 +147,7 @@ public class ServerTransport implements ShutdownCallback {
         
         return (PollerServer)constructor.newInstance(
                 new Object[]{pollerServerBindAddr.getHostName(), 
-                             Integer.valueOf(pollerServerBindAddr.getPort())});
+                             new Integer(pollerServerBindAddr.getPort())});
     }
         
     /**
