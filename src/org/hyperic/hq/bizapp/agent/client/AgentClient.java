@@ -505,7 +505,7 @@ public class AgentClient {
         String provider, host, user, pword, agentIP, 
             agentToken, response;
         Properties bootP;
-        int agentPort;
+        int agentPort = -1;
         boolean isNewTransportAgent = false;
         boolean unidirectional = false;
         int unidirectionalPort = -1;
@@ -645,7 +645,7 @@ public class AgentClient {
             }
         } 
 
-        // Get info about server connecting to the agent
+        // Get info about server connecting to the agent        
         while(true){
             agentIP = this.askQuestion("What IP should " + PRODUCT +
                                        " use to contact the agent",
@@ -662,18 +662,21 @@ public class AgentClient {
             }
         } 
 
-        while(true){
-            agentPort = this.askIntQuestion("What port should " + PRODUCT +
-                                            " use to contact the agent",
-                                            this.config.getListenPort(),
-                                            QPROP_AGENTPORT);
-            if(agentPort < 1 || agentPort > 65535){
-                SYSTEM_ERR.println("- Invalid port");
-            } else {
-                break;
-            }
+        
+        if (!unidirectional) {
+            while(true){
+                agentPort = this.askIntQuestion("What port should " + PRODUCT +
+                                                " use to contact the agent",
+                                                this.config.getListenPort(),
+                                                QPROP_AGENTPORT);
+                if(agentPort < 1 || agentPort > 65535){
+                    SYSTEM_ERR.println("- Invalid port");
+                } else {
+                    break;
+                }
+            }    
         }
-
+        
         // The old agent token may be needed if re-registering an existing agent                                                             
         // but changing from non-unidirectional to unidirectional transport.                                                                 
         // In this case, the agent port will change, so we will need to lookup                                                               
