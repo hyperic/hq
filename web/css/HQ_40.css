@@ -21,9 +21,9 @@ a:visited,a:hover,a {
 /* HEADER */
 
 #headerLogo {
-    background: url('/images/4.0/logos/hqlogo.png') no-repeat 10% 99%;
+    background: url('/images/4.0/logos/hqlogo.jpg') no-repeat 10% 99%;
     width: 352px;
-    padding: 33px 0 0 10px;
+    padding: 50px 0 0 10px;
     cursor: pointer;
     float: left
 }
@@ -46,7 +46,7 @@ a:visited,a:hover,a {
 #headerLinks {
     position: absolute;
     top: 0;
-    right: 55px;
+    right: 68px;
     width: 292px;
     height: 20px;
     text-align: right;
@@ -72,11 +72,11 @@ a:visited,a:hover,a {
     position: absolute;
     top: 0;
     right: 0;
-    width: 50px;
-    height: 17px;
-    background-color: #F96115;
+    width: 65px;
+    height: 13px;
+    background:#F96115 url(/images/4.0/icons/search.gif) no-repeat scroll 1% 50%;
     color: #FFF;
-    padding: 3px 8px 3px 0px;
+    padding:2px 8px 3px 0px;
     text-align: right;
     cursor: pointer;
     font-weight: bold
@@ -221,7 +221,8 @@ a:visited,a:hover,a {
     padding: 0;
     text-decoration: none;
     cursor: pointer;
-    font-weight: normal
+    font-weight: normal;
+    _margin-left: -1px;
 }
 
 #navTabContainer a span {
@@ -230,7 +231,7 @@ a:visited,a:hover,a {
     display: block;
     float: left;
     font-family: Verdana;
-    font-size: 0.9em;
+    font-size: 1em;
     margin-right: 3px;
     padding: 4px 18px 6px
 }
@@ -238,7 +239,8 @@ a:visited,a:hover,a {
 #navTabContainer .active a {
     background: url('/images/4.0/tabs/tab_cap_active.png') no-repeat right top;
     border-width: 0;
-    margin-top: -6px
+    margin-top: -6px;
+    _margin-left: -1px;
 }
 
 #navTabContainer .active a span {
@@ -338,8 +340,8 @@ a:visited,a:hover,a {
 
 input[type=password],input[type=text] {
     border: 1px solid gray;
-    width: 200px;
-    padding: 2px
+    width: 150px;
+    padding: 3px
 }
 
 fieldset {
@@ -716,18 +718,19 @@ body .dijitPopup {
     font-weight: bold
 }
 
-.filterBox input[type="password"], input[type="text"] {
+.filterBox input[type="password"], .filterBox input[type="text"] {
     border: 1px solid gray;
     padding: 3px;
-    width: 200px
+    width: 180px
 }
 
 .filterBox select {
     border: 1px solid gray;
-    padding: 2px
+    padding: 2px;
+    width:130px;
 }
 
-.filterBox input[type="radio"], input[type="checkbox"] {
+.filterBox input[type="radio"], .filterBox input[type="checkbox"] {
     margin-left: 10px
 }
 
@@ -789,15 +792,39 @@ body .dijitPopup {
     cursor:pointer;
     margin:3px 4px;
     padding:1px 1px 1px 20px;
+    width:150px
 }
 
 .mainMenuItem:hover{
-    background-color: #E2F5FF;
-
+    background-color: #E2F5FF
 }
 
 .ajaxLoading{
     position:absolute;
     top:40px;
     right:5px;
+}
+textarea {
+    border:1px solid gray;
+    padding:2px
+}
+.dialog input[type="password"], .dialoginput[type="text"]{
+    width:auto;
+}
+.dialog select{
+    padding:2px;
+    border:1px solid gray;
+}
+select {
+	padding:2px;
+}
+.loginPanel input[type="password"], .loginPanel input[type="text"]{
+    width:200px
+}
+
+.ToolbarContent td{
+	background-color:#fff
+}
+.dojoTabPaneWrapper{
+	background-color:#fff
 }
