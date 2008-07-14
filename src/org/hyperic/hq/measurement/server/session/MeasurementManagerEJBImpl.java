@@ -44,18 +44,19 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -79,11 +80,10 @@ import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
-import org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer;
-import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
@@ -534,8 +534,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             Integer resId = (Integer)entry.getKey();
             List templs = (List)entry.getValue();
             Integer[] tids = (Integer[])templs.toArray(new Integer[0]);
-            // TODO need to add permission checking for resource
             Resource resource = rMan.findResourcePojoById(resId);
+            AppdefEntityID appId = new AppdefEntityID(resource);
+            checkModifyPermission(subject.getId(), appId);
             Integer resTypeId = resource.getResourceType().getId();
             if (resTypeId.equals(AuthzConstants.authzGroup)) {
                 ResourceGroup grp = gMan.findResourceGroupById(
@@ -641,6 +642,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     
     /**
      * Look up a list of Measurements for a category
+     * XXX: Why is this method called findMeasurements() but only returns
+     * enabled measurements if cat == null??
      *
      * @return a List of Measurement objects.
      * @ejb:interface-method
@@ -878,6 +881,74 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             sendAgentSchedule(aeids[i]);
         }
     } 
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void enableMeasurement(AuthzSubject subject, Integer mId,
+                                  long interval)
+        throws PermissionException
+    {
+        List mids = new ArrayList();
+        mids.add(mId);
+        Measurement meas = getMeasurementDAO().get(mId);
+        if (meas.isEnabled()) {
+            return;
+        }
+        Resource resource = meas.getResource();
+        AppdefEntityID appId = new AppdefEntityID(resource);
+        checkModifyPermission(subject.getId(), appId);
+        MeasurementDAO dao = getMeasurementDAO();
+        dao.updateInterval(mids, interval);
+        sendAgentSchedule(appId);
+    }
+    
+    /**
+     * @param subject
+     * @param mId
+     * @throws MeasurementUnscheduleException 
+     * @throws PermissionException 
+     * @ejb:interface-method
+     */
+    public void disableMeasurement(AuthzSubject subject, Integer mId)
+        throws PermissionException, MeasurementUnscheduleException
+    {
+        Integer[] mids = new Integer[1];
+        mids[0] = mId;
+        Measurement meas = getMeasurementDAO().get(mId);
+        if (!meas.isEnabled()) {
+            return;
+        }
+        Resource resource = meas.getResource();
+        meas.setEnabled(false);
+        AppdefEntityID appId = new AppdefEntityID(resource);
+        checkModifyPermission(subject.getId(), appId);
+        removeMeasurementsFromCache(mids);
+        enqueueZeventsForMeasScheduleCollectionDisabled(mids);
+        AppdefEntityID[] ids = new AppdefEntityID[1];
+        ids[0] = appId;
+        // Unscheduling of all metrics for a resource could indicate that
+        // the resource is getting removed.  Send the unschedule synchronously
+        // so that all the necessary plumbing is in place.
+        MeasurementProcessorEJBImpl.getOne().unschedule(appId);
+    }
+
+    /**
+     * @throws PermissionException 
+     * @ejb:interface-method
+     */
+    public void updateMeasurementInterval(AuthzSubject subject, Integer mId,
+                                          long interval)
+        throws PermissionException
+    {
+        Measurement meas = getMeasurementDAO().get(mId);
+        meas.setEnabled((interval != 0));
+        meas.setInterval(interval);
+        Resource resource = meas.getResource();
+        AppdefEntityID appId = new AppdefEntityID(resource);
+        checkModifyPermission(subject.getId(), appId);
+        enqueueZeventForMeasScheduleChange(meas, interval);
+    }
 
     /**
      * Disable all measurements for the given resources.
@@ -954,6 +1025,15 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         } catch (MeasurementUnscheduleException e) {
             log.error("Unable to disable measurements", e);
         }
+    }
+    
+    /**
+     * XXX: not sure why all the findMeasurements require an authz if they
+     * do not check the viewPermissions??
+     * @ejb:interface-method
+     */
+    public List findMeasurements(AuthzSubject subject, Resource res) {
+        return getMeasurementDAO().findByResource(res);
     }
 
     /**
