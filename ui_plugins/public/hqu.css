@@ -331,6 +331,7 @@ table border on left side - do not remove */
     float: left;
     display: inline;
     height: 400px;
+    background-color:#FFF
 }
 
 .downTableContainer {
@@ -340,6 +341,7 @@ table border on left side - do not remove */
     float: right;
     display: inline;
     width: 75%;
+    background-color:#FFF;
     height: 442px
 }
 
@@ -347,11 +349,10 @@ table border on left side - do not remove */
     padding: 3px;
     height: 398px;
     overflow-x: hidden;
-    overflow-y:
-
-auto;
-    /* IE issue left filter box different height due to box model - do not remove */
-    *height: 400px;
+    overflow-y: auto;
+    background-color:#FFF;
+    /* IE issu  e left filter box different height due to box model - do not remove */
+    _height: 400px;
 }
 
 .boxLinks {
@@ -992,3 +993,5 @@ p a {
     font-size: .9em;
     font-weight: bold
 }
+
+/*GConsole*/
