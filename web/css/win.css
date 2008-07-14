@@ -132,7 +132,6 @@ input.compactbuttoninactive {
 }
 
 .blockbottomline {
-    background-color: #D5D8DE;
     height: 1px;
     padding: 0
 }
@@ -179,8 +178,8 @@ a.listheaderlink:hover {
 }
 
 .listheader,.tablecellheader {
-    border-bottom: solid #D5D8DE;
-    border-top: solid #ABB1C7;
+    border-bottom:1px solid #D5D8DE;
+    border-top:1px solid #ABB1C7;
     border-width: 1px;
     color: #004680;
     font-weight: 700;
@@ -202,6 +201,10 @@ a.listheaderlink:hover {
 	color:#FFF
 }
 
+.tableRowHeader td{
+	color:#fff
+}
+
 .listheadercheckbox {
     border-bottom: solid #D5D8DE;
     border-top: solid #ABB1C7;
@@ -221,8 +224,8 @@ a.listheaderlink:hover {
 }
 
 .listheaderinactive,.tablerowinactive {
-    border-bottom: solid #C6CFE5;
-    border-top: solid #ABB1C7;
+    border-bottom:1px solid #D5D8DE;
+    border-top:1px solid #ABB1C7;
     border-width: 1px;
     font-weight: 700;
     padding: 3px
@@ -559,14 +562,18 @@ a.guidelink:hover {
 }
 
 .tabcell {
-    border-bottom: solid #DE6329;
-    border-width: 2px
+    border-bottom: 1px solid gray
 }
 
 .subtabcell {
-    background-color: #FFF
+    background-color: #FFF;
+    border-left: 1px solid gray
 }
 
+#SubTabTarget.subtabcell{
+    border-left: 0px solid gray;
+    border-right: 1px solid gray
+}
 .dashtabs {
     margin-bottom: 4px
 }
@@ -1463,14 +1470,26 @@ ul.eventDetails li {
 }
 
 .accordiontabtitlebar {
-    border-bottom-color: #666;
+    background:#fff url(/images/4.0/backgrounds/panel_gray.jpg) repeat-x scroll 0% 50%;
+	border-bottom-color: #666;
     border-style: solid none;
     border-top-color: #DDD;
     border-width: 1px 0;
-    font-size: 12px;
-    padding: 4px 6px
+    font-size: 13px;
+    padding: 0 6px;
+    color:fff;
+    font-weight:bold
 }
+#panelContent{
 
+}
+#panelHeader{
+	
+}
+#propertiesAccordion{
+	border-left: 1px solid gray;
+    border-right: 1px solid gray;
+}
 .resource {
     border-bottom: 1px solid #D5D8DE;
     padding-bottom: 3px;
@@ -1580,6 +1599,10 @@ ul.eventDetails li {
     margin: 0;
     padding: 0;
     width: 100%
+}
+
+#viewEscalationUL li{
+	background-color:#fff
 }
 
 #addescalationul {
@@ -2047,4 +2070,47 @@ a.black:link,a.black:visited {
 
 .right{
     float:right;
+}
+
+/*Exception Page*/
+.exception table{
+	border: 1px solid #2D6EBE;
+	background-color: #FFF;
+	
+}
+.errorTitle{
+	background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 25%;
+	color:#FFF;
+	height:21px
+}
+.exception table p {
+	padding:4px;
+}
+
+.exception td {
+	color:#fff;
+}
+
+.exception a:visited,a:hover,a {
+    color: #88C7FC;
+    text-decoration: none
+}
+/*Change Resource Owner tile*/
+
+.editResourceOwner .BlockTitle{
+	   background:transparent url(/images/4.0/backgrounds/panel_gray.jpg) repeat-x scroll 0% 50%;
+}
+
+.select{
+}
+
+.PortletTitle{
+    color:#444444;
+    font-family:arial,sans-serif;
+    font-size:1.1em;
+    font-weight:700;
+}
+.buttonTable{
+	background-color:#fff;
+	margin-top:-14px;
 }
