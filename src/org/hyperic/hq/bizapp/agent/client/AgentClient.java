@@ -206,6 +206,11 @@ public class AgentClient {
             else
                 SYSTEM_OUT.print("Server port:       ");
             SYSTEM_OUT.println(url.getPort());
+            
+            if (pInfo.isNewTransport()) {
+                SYSTEM_OUT.println("Using new transport; unidirectional="+
+                                  pInfo.isUnidirectional());
+            }
         } catch(Exception exc){
             SYSTEM_OUT.println("Unable to parse provider info (" + 
                                address + "): " + exc.getMessage());
@@ -213,6 +218,12 @@ public class AgentClient {
         
         SYSTEM_OUT.println("Agent listen port: " + 
                            this.config.getListenPort());
+        
+        if (this.config.isProxyServerSet()) {
+            SYSTEM_OUT.println("Proxy server IP address: "+this.config.getProxyIp());
+            SYSTEM_OUT.println("Proxy server port: "+this.config.getProxyPort());
+        }
+        
         return 0;
     }
 
