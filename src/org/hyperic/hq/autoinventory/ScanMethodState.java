@@ -32,6 +32,8 @@ import org.hyperic.util.StringifiedException;
 
 public class ScanMethodState implements Serializable {
 
+    private static final long serialVersionUID = -8762869412017148433L;
+
     private String methodClass;
     private StringifiedException[] exceptions;
     private AIServerValue[] servers; 
