@@ -45,10 +45,24 @@ public abstract class BaseService implements IEngineService {
     public static final String PARAM_METRIC_TEMPLATE_ID = "mtid";
 
     public static final String PARAM_SERVICE_ID = "s_id";
+    
+    public static final String PARAM_TIME_RANGE = "tr";
+    
+    public static final String PARAM_CONFIG = "config";
 
+    /**
+     * Service IDs
+     */
     public static final String SERVICE_ID_CHART_WIDGET = "chart";
     
     public static final String SERVICE_ID_ALERT_SUM_WIDGET = "alert_summary";
+    
+    /**
+     * Error Codes
+     */
+    public static final String ERROR_GENERIC = "{error:true}";
+    
+    public static final String EMPTY_RESPONSE = "{}";
     
     public abstract ILink getLink(boolean arg0, Object arg1);
 
