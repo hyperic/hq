@@ -182,7 +182,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
                                    agentToken, 
                                    unidirectional, 
                                    pollingFrequency, 
-                                   2);
+                                   1);
         } else {
             _log.info("Setting up bidirectional transport");
             // TODO need to implement bidirectional transport and return 
