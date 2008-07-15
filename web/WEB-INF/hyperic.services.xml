@@ -13,11 +13,24 @@
     </invoke-factory>
 </service-point>
 
+<service-point id="RESTService" interface="org.apache.tapestry.engine.IEngineService">
+    <invoke-factory>
+        <construct class="RESTService">
+            <set-object property="request" value="service:tapestry.globals.HttpServletRequest"/>
+            <set-object property="response" value="service:tapestry.globals.HttpServletResponse"/>
+            <set-object property="linkFactory" value="infrastructure:linkFactory"/>
+            <set-object property="servletContext" value="service:tapestry.globals.ServletContext"/>
+        </construct>
+    </invoke-factory>
+</service-point>
+
 <contribution configuration-id="tapestry.Infrastructure">
+    <property name="api" object="service:RESTService"/>
     <property name="searchService" object="service:SearchService"/>
 </contribution>
 
 <contribution configuration-id="tapestry.services.ApplicationServices">
+    <service name="api" object="service:RESTService"/>
     <service name="search" object="service:SearchService"/>
 </contribution>
 
