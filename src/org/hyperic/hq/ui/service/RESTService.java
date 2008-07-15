@@ -79,7 +79,10 @@ public class RESTService extends BaseService {
      * @throws IOException
      */
     private String serviceChartWidget(IRequestCycle cycle) throws IOException {
-        Integer rid = Integer.valueOf((String)(cycle.getParameter(PARAM_RESOURCE_ID)));
+        Integer rid = null;
+        if(cycle.getParameter(PARAM_RESOURCE_ID) != null){
+            rid = Integer.valueOf((String)(cycle.getParameter(PARAM_RESOURCE_ID)));
+        }
         String mtid = cycle.getParameter(PARAM_METRIC_TEMPLATE_ID);
         
         WebUser user = (WebUser) _request.getSession().getAttribute(
@@ -132,7 +135,7 @@ public class RESTService extends BaseService {
             // get the configuration for the current dashboard and lookup the widget props
             res = c.getValue(".dashContent.charts");
             if(res == null)
-                res = "";
+                res = "{}"; //no saved charts
         }
         return res;
     }
