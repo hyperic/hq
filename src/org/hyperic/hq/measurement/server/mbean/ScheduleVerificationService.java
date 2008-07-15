@@ -160,11 +160,6 @@ public class ScheduleVerificationService
             } catch (PermissionException e) {
                 _log.debug("Measurement Schedule Verification: " +
                            "No permission to look up " + entId);
-            } catch (MonitorCreateException e) {
-                _log.debug("Measurement Schedule Verification: " +
-                           "Could not create a monitor to connect to agent " +
-                          agentVal);
-                downAgents.add(agentVal);
             } catch (MonitorAgentException e) {
                 _log.debug("Measurement Schedule Verification: " +
                            "Could not connect to agent " + agentVal);
