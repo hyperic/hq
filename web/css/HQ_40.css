@@ -828,3 +828,109 @@ select {
 .dojoTabPaneWrapper{
 	background-color:#fff
 }
+
+.widget {
+    width: 98%;
+    height: 350px;
+    background: #000 url('/images/widget_bg.jpg') repeat-x;
+    padding: 10px;
+    position: relative;
+    color: #FFF;
+    font-family: Helvetica, sans-serif;
+    font-size: 80%;
+}
+.widget h2, .widget h3 {
+    margin: 0px;
+}
+
+.widget .config_btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+.widget .expand_btn {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}
+
+.widget .pause_btn {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+}
+
+.widget .play_btn {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+}
+
+.widget .content select, .widget input {
+    width: 120px;
+    margin: 10px 0px;
+}
+
+.widget .content {
+    display: block;
+/*        visibility: visible;*/
+}
+
+.widget .config {
+    display: none;
+    opacity: 0;
+/*        visibility: hidden;*/
+}
+
+.widget .config form fieldset {
+    margin-bottom: 10px;
+}
+
+.widget .config form legend {
+  padding: 0 2px;
+  font-weight: bold;
+}
+.widget .config form label {
+  display: inline-block;
+  width: 120px; /* Width of labels */
+
+   /* firefox 2 fix */
+  display: -moz-inline-box;
+    -moz-box-orient: vertical
+}
+
+/* fix for IE inline-block problem */
+<!--[if IE]><!-->
+.widget .config form label {
+    zoom: 1;
+    display: inline;
+}
+<!--<![endif]-->
+
+.widget .config form ol {
+  margin: 0;
+  padding: 0;
+}
+
+.widget .config form li {
+  list-style: none;
+  padding: 5px;
+  margin: 0;
+}
+
+/* chart widget stuff */
+.widget #chart_container {
+    position: absolute;
+    top: 45px;
+    right: 10px;
+    width: 300px;
+    height: 250px;
+    float: right;
+}
+
+.widget #widget_chart {
+    width: 300px;
+    height: 250px;
+    border: 1px solid #DDD;
+}
