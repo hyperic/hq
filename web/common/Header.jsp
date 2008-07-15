@@ -78,9 +78,6 @@
         dojo11.subscribe('enter', searchWidget, "search");
         dojo.event.topic.subscribe('search', searchWidget, "toggleSearchBox");
         dojo.event.topic.subscribe('escape', searchWidget, "toggleSearchBox");
-        document.menu1 = new hyperic.widget.Menu();
-        document.menu2 = new hyperic.widget.Menu();
-        document.menu3 = new hyperic.widget.Menu();
         
     });
     
