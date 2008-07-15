@@ -40,16 +40,10 @@ import org.json.JSONObject;
  * The default behavior is to return the 1st page containing
  * at most 10 results
  */
-public class SearchService implements IEngineService {
+public class SearchService extends BaseService {
     static Log log = LogFactory.getLog(SearchService.class);
 
     public static final String SERVICE_NAME = "search";
-
-    public static final String SEARCH_PARAM = "q";
-
-    public static final String PAGE_SIZE_PARAM = "n";
-
-    public static final String PAGE_NUM_PARAM = "p";
 
     public static final int DEFAULT_PAGE_SIZE = 10;
 
@@ -73,6 +67,9 @@ public class SearchService implements IEngineService {
         return _linkFactory.constructLink(this, post, parameters, true);
     }
 
+    /**
+     * Supports service version 1.0+
+     */
     public void service(IRequestCycle cycle) throws IOException {
         String query = cycle.getParameter(SEARCH_PARAM);
         String pageSize = cycle.getParameter(PAGE_SIZE_PARAM);
@@ -129,19 +126,4 @@ public class SearchService implements IEngineService {
         return SERVICE_NAME;
     }
     
-    public void setRequest(HttpServletRequest request) {
-        _request = request;
-    }
-
-    public void setResponse(HttpServletResponse response) {
-        _response = response;
-    }
-
-    public void setLinkFactory(LinkFactory linkFactory) {
-        _linkFactory = linkFactory;
-    }
-
-    public void setServletContext(ServletContext context) {
-        _servletContext = context;
-    }
 }
