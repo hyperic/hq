@@ -118,7 +118,6 @@
             <li id="dashTab" class=""><a href="/Dashboard.do"><span><fmt:message key="header.dashboard"/></span></a></li>
             <li id="resTab" class=""><a><span id="resource" onclick="document.menu1.onclick(this)"><fmt:message key="header.resources"/></span></a></li>
             <li id="analyzeTab" class=""><a><span id="analyze" onclick="document.menu2.onclick(this)"><fmt:message key="header.analyze"/></span></a></li>
-            <li id="setTab" class=""><a href="/Settings.html"><span><fmt:message key="header.settings"/></span></a></li>
             <li id="adminTab" class=""><a href="/Admin.do"><span><fmt:message key="header.admin"/></span></a></li>
         </ul>
     </div>
