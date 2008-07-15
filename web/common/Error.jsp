@@ -178,16 +178,14 @@ function displayStackTrace<%= randomNum %>() {
 	"            <b>"+ errorText<%= randomNum %> +"</b>\n" + 
 	"        </td>\n" + 
 	"    </tr>\n" + 
-	"		 <tr><td class=\"BlockBottomLine\"><img src=\"<html:rewrite page="/images/"/>spacer.gif\" width=\"1\" height=\"1\" border=\"0\"></td></tr>\n"
-	);
+	"		 <tr><td class=\"BlockBottomLine\"><img src=\"<html:rewrite page="/images/"/>spacer.gif\" width=\"1\" height=\"1\" border=\"0\"></td></tr>\n");
 	}
 
 	errorPopup.document.write(
 	"</table>\n" + 
 	"</div>\n" +
 	"<br><br><br><a href=\"javascript:window.close()\">close window</a>\n" + 
-	"</body>\n</html>"
-	);
+	"</body>\n</html>");
 	
 	errorPopup.document.close(); 
 }
