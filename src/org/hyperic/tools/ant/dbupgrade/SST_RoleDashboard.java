@@ -62,6 +62,8 @@ public class SST_RoleDashboard extends CrispoTask {
     	
     	props.setValue(".dashContent.recentlyApproved.range", "24");
     	
+    	props.setValue(".dashContent.charts.range", "1d");
+    	
     	props.setValue(".dashContent.criticalalerts.numberOfAlerts", "5");
     	props.setValue(".dashContent.criticalalerts.past", "86400000");
     	props.setValue(".dashContent.criticalalerts.priority", "2");
