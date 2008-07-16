@@ -51,6 +51,7 @@ import org.hyperic.hq.product.CollectorExecutor;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.ControlPluginManager;
+import org.hyperic.hq.product.LiveDataPluginManager;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.MeasurementPlugin;
@@ -91,6 +92,7 @@ public class PluginDumper {
     protected ProductPluginManager ppm;
     protected MeasurementPluginManager mpm;
     protected ControlPluginManager cpm;
+    protected LiveDataPluginManager ldpm;
     protected LogTrackPluginManager ltpm;
     protected ConfigTrackPluginManager ctpm;
     AutoinventoryPluginManager apm;
@@ -118,6 +120,7 @@ public class PluginDumper {
 
     static final String METHOD_METRIC   = "metric";
     static final String METHOD_CONTROL  = "control";
+    static final String METHOD_LIVEDATA = "livedata";
     static final String METHOD_DISCOVER = "discover";
     static final String METHOD_GENERATE = "generate";
     static final String METHOD_TRACK    = "track";
@@ -260,10 +263,6 @@ public class PluginDumper {
             if (pluginProperties != null) {
                 load(pluginProperties);
             }
-
-            if (this.type != null) {
-                this.type = TypeInfo.formatName(this.type);
-            }
         }
     }
 
@@ -348,6 +347,8 @@ public class PluginDumper {
 
         this.cpm = this.ppm.getControlPluginManager();
 
+        this.ldpm = this.ppm.getLiveDataPluginManager();
+
         this.apm = this.ppm.getAutoinventoryPluginManager();
 
         this.ctpm = this.ppm.getConfigTrackPluginManager();
@@ -431,6 +432,17 @@ public class PluginDumper {
                 help("No plugin specified");
                 return;
             }
+        }
+        else if (method.equals(METHOD_LIVEDATA)) {
+            if (this.config.type == null) {
+                help("-t required");
+                return;
+            }
+            if (this.config.action == null) {
+                help("-a required");
+                return;
+            }
+            testLiveData();
         }
         else if (method.equals(METHOD_TRACK)) {
             if (this.config.plugin != null) {
@@ -812,10 +824,8 @@ public class PluginDumper {
                 }
             }
 
-            //e.g. -Dtype=iplanet-4.1
-            if ((metricPlugin != null) &&
-                !metricPlugin.equals(type.getFormattedName()))
-            {
+            //e.g. -Dtype=HTTP
+            if (!type.getName().equals(metricPlugin)) {
                 continue;
             }
 
@@ -859,9 +869,7 @@ public class PluginDumper {
                 continue;  //aint gonna happen
             }
 
-            String resourceName = type.getFormattedName();
-
-            boolean wantedPlugin = resourceName.equals(runPlugin);
+            boolean wantedPlugin = typeName.equals(runPlugin);
 
             if ((runPlugin != null) && !wantedPlugin) {
                 //if type not specified, will just try create
@@ -873,6 +881,9 @@ public class PluginDumper {
             System.out.println(typeName + " control plugin");
 
             System.out.println("   actions=" + actions);
+
+            String resourceName =
+                type.getType() + ":" + typeName.hashCode() + ":" + typeName;
 
             try {
                 this.cpm.createControlPlugin(resourceName,
@@ -939,6 +950,20 @@ public class PluginDumper {
                 continue;
             }
         }
+    }
+
+    public void testLiveData()
+        throws PluginException {
+
+        ConfigResponse config =
+            new ConfigResponse(this.config.props);
+
+        String data =
+            this.ldpm.getData(this.config.type,
+                              this.config.action,
+                              config);
+        
+        System.out.println(data);
     }
 
     private void flushEvents(LinkedList events, String name)
@@ -1016,7 +1041,7 @@ public class PluginDumper {
             String typeName = type.getName();
             boolean hasLogTrack=false, hasConfigTrack=false;
             boolean wantedPlugin =
-                type.getFormattedName().equals(runPlugin);
+                type.getName().equals(runPlugin);
 
             if ((runPlugin != null) && !wantedPlugin) {
                 continue; //filter for -t arg
@@ -1112,7 +1137,7 @@ public class PluginDumper {
 
             String name = types[i].getName();
             if (this.config.type != null) {
-                if (types[i].getFormattedName().equals(this.config.type)) {
+                if (types[i].getName().equals(this.config.type)) {
                     discoverer.add(name);        
                 }
             }
