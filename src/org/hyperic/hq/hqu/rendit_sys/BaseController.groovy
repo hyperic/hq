@@ -95,6 +95,15 @@ abstract class BaseController {
         xmlMethods = meths
     }
 
+    /**
+     * Controllers can use this method to force rendering to not occur.  This
+     * is useful for controller methods that don't necessiarly want to send
+     * data to the client.
+     */
+    protected void setRendered(boolean isRendered) {
+        rendered = isRendered
+    }
+
     protected boolean getDumpScripts() {
         false
     }
