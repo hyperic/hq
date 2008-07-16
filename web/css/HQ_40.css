@@ -86,7 +86,7 @@ a:visited,a:hover,a {
     color: #88C7FC
 }
 
-#headerSearch a,a:visited {
+#headerSearch a, #headerSearch a:visited {
     color: #FFF
 }
 
@@ -130,7 +130,7 @@ a:visited,a:hover,a {
     padding: 2px
 }
 
-#headerSearchResults a, a:visited, a:hover {
+#headerSearchResults a, #headerSearchResults a:visited, #headerSearchResults a:hover {
     color: #88C7FC
 }
 
@@ -677,7 +677,7 @@ body .dijitPopup {
     padding-top: 7px;
 }
 
-#migContainer a:visited, a:hover, a {
+#migContainer a:visited, #migContainer a:hover, #migContainer a {
     color: #3179D4
 }
 
@@ -749,7 +749,7 @@ body .dijitPopup {
     
 }
 
-.hubContainer a:visited,a:hover,a {
+.hubContainer a:visited,.hubContainer a:hover, .hubContainer a {
     color: #3179D4
 }
 
