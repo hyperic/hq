@@ -119,6 +119,8 @@ public class RESTService extends BaseService {
         //Get the service parameters
         String metricTemplIdParam = cycle.getParameter(PARAM_METRIC_TEMPLATE_ID);
         String timeRangeParam     = cycle.getParameter(PARAM_TIME_RANGE);
+        String rotationParam      = cycle.getParameter(PARAM_ROTATION);
+        String intervalParam      = cycle.getParameter(PARAM_INTERVAL);
         String configParam        = cycle.getParameter(PARAM_CONFIG);
         String rpTemp             = cycle.getParameter(PARAM_RESOURCE_ID);
         
@@ -189,23 +191,48 @@ public class RESTService extends BaseService {
                 return ERROR_GENERIC;
             }
         } else if (configParam != null) {
+            boolean update = false;
             if (timeRangeParam != null) {
-                config.setValue(KeyConstants.USER_DASHBOARD_CHART_RANGE, timeRangeParam);
+                config.setValue(KeyConstants.USER_DASHBOARD_CHART_RANGE,
+                                timeRangeParam);
+                update = true;
+            }
+            
+            if (rotationParam != null) {
+                config.setValue(KeyConstants.USER_DASHBOARD_CHART_ROTATION,
+                                rotationParam);
+                update = true;
+            }
+            
+            if (intervalParam != null) {
+                config.setValue(KeyConstants.USER_DASHBOARD_CHART_INTERVAL,
+                                intervalParam);
+                update = true;
+            }
+            
+            if (update) {
                 //update the crispo
                 try {
-                    ConfigurationProxy.getInstance().setDashboardPreferences(_request.getSession(), user, boss, config);
+                    ConfigurationProxy.getInstance()
+                        .setDashboardPreferences(_request.getSession(), user,
+                                                 boss, config);
                 } catch (Exception e) {
                     log.debug(e.getLocalizedMessage());
                     res = ERROR_GENERIC;
                 }
-                res = EMPTY_RESPONSE;
-            } else {
-                try {
-                    res = new JSONObject().put("tr", config.getValue(KeyConstants.USER_DASHBOARD_CHART_RANGE)).toString();
-                } catch (JSONException e) {
-                    log.debug(e.getLocalizedMessage());
-                    res = ERROR_GENERIC;
-                }
+            }
+            try {
+                res = new JSONObject()
+                    .put(PARAM_TIME_RANGE,
+                         config.getValue(KeyConstants.USER_DASHBOARD_CHART_RANGE))
+                    .put(PARAM_ROTATION,
+                         config.getValue(KeyConstants.USER_DASHBOARD_CHART_ROTATION))
+                    .put(PARAM_INTERVAL,
+                         config.getValue(KeyConstants.USER_DASHBOARD_CHART_INTERVAL))
+                    .toString();
+            } catch (JSONException e) {
+                log.debug(e.getLocalizedMessage());
+                res = ERROR_GENERIC;
             }
         } else {
             // Get the list of saved charts for this dashboard

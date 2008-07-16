@@ -40,6 +40,10 @@ public abstract class BaseService implements IEngineService {
     
     public static final String PARAM_REGEX_FILTER = "reg";
 
+    public static final String PARAM_ROTATION = "rot";
+    
+    public static final String PARAM_INTERVAL = "ivl";
+    
     /**
      * Service IDs
      */

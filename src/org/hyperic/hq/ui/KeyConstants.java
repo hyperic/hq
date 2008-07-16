@@ -68,6 +68,16 @@ public interface KeyConstants {
     public static final String USER_DASHBOARD_CHART_RANGE = ".dashContent.charts.range";
     
     /**
+     * The key that holds the user's charts rotation setting
+     */
+    public static final String USER_DASHBOARD_CHART_ROTATION = ".dashContent.charts.rotation";
+    
+    /**
+     * The key that holds the user's charts display interval
+     */
+    public static final String USER_DASHBOARD_CHART_INTERVAL = ".dashContent.charts.interval";
+    
+    /**
      * The json object that contains the rids and mtids
      */
     public static final String USER_DASHBOARD_JSON = ".dashContent.chars.json";
