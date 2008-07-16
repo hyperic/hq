@@ -11,34 +11,22 @@ import org.apache.tapestry.engine.IEngineService;
 import org.apache.tapestry.engine.ILink;
 import org.apache.tapestry.services.LinkFactory;
 
-/**
- * 
- * 
- */
 public abstract class BaseService implements IEngineService {
 
     public static String SERVICE_NAME = "base_service";
 
-    public static double SERVICE_VERSION_1_0 = 1.0;
-
-    protected  HttpServletRequest _request;
-
-    protected HttpServletResponse _response;
-
-    protected ServletContext _servletContext;
-
-    protected LinkFactory _linkFactory;
+    public static final double SERVICE_VERSION_1_0 = 1.0;
 
     /**
      * All Service Parameters
      */
-    public static final String SEARCH_PARAM = "q";
+    public static final String PARAM_SEARCH_QUERY = "q";
 
-    public static final String PAGE_SIZE_PARAM = "n";
+    public static final String PARAM_PAGE_SIZE = "n";
 
-    public static final String PAGE_NUM_PARAM = "p";
+    public static final String PARAM_PAGE_NUM = "p";
     
-    public static final String SERVICE_VERSION_PARAM = "v";
+    public static final String PARAM_SERVICE_VERSION = "v";
 
     public static final String PARAM_RESOURCE_ID = "rid";
 
@@ -49,6 +37,8 @@ public abstract class BaseService implements IEngineService {
     public static final String PARAM_TIME_RANGE = "tr";
     
     public static final String PARAM_CONFIG = "config";
+    
+    public static final String PARAM_REGEX_FILTER = "reg";
 
     /**
      * Service IDs
@@ -63,7 +53,16 @@ public abstract class BaseService implements IEngineService {
     public static final String ERROR_GENERIC = "{error:true}";
     
     public static final String EMPTY_RESPONSE = "{}";
-    
+
+
+    protected  HttpServletRequest _request;
+
+    protected HttpServletResponse _response;
+
+    protected ServletContext _servletContext;
+
+    protected LinkFactory _linkFactory;
+
     public abstract ILink getLink(boolean arg0, Object arg1);
 
     public abstract String getName();
