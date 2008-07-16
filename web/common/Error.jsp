@@ -102,24 +102,25 @@ if (exDiv!=null) {
 	exDiv.style.display = "none";
 	var exText<%= randomNum %> = exDiv.innerHTML;
 }
-else
+else{
 	var exText<%= randomNum %> = "";
-
+}
 var rootDiv = document.getElementById("root<%= randomNum %>");
 if (rootDiv!=null) {
 	rootDiv.style.display = "none";
 	var rootText<%= randomNum %> = rootDiv.innerHTML;
 }
-else
+else{
 	var rootText<%= randomNum %> = "";
-
+}
 var errorDiv = document.getElementById("errorMessage<%= randomNum %>");
 if (errorDiv!=null) {
 	errorDiv.style.display = "none";
 	var errorText<%= randomNum %> = errorDiv.innerHTML;
 }
-else
+else{
 	var errorText<%= randomNum %> = "";
+}
 /*--- end declaration/initialization ---*/
 
 document.write(
@@ -131,8 +132,7 @@ document.write(
 "	</tr>\n" +
 "</table>\n" + 
 "</td>\n" + 
-"<tr>\n"
-);
+"<tr>\n");
 
 
 function displayStackTrace<%= randomNum %>() {
