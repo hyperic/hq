@@ -34,7 +34,15 @@ import org.hyperic.util.StringUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
+
+import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.Map;
 import java.util.Iterator;
@@ -52,11 +60,91 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
 
     private static final String CMD_GET    = "get";
     private static final String CMD_INVOKE = "invoke";
+    private static final String CMD_QUERY  = "query";
 
     private static final String[] _COMMANDS = {
         CMD_GET,
-        CMD_INVOKE
+        CMD_INVOKE,
+        CMD_QUERY
     };
+
+    //MBeanServer.queryMBeans() returning:
+    //Matched ObjectNames
+    //Attribute names + values
+    //Operation names + values
+    private Object queryMBeans(String pattern, Properties props)
+        throws PluginException {
+
+        MBeanServerConnection mServer;
+        try { 
+            mServer = MxUtil.getMBeanServer(props);
+        } catch (Exception e) {
+            throw new PluginException("getMBeanServer(" +
+                                      props.getProperty(MxUtil.PROP_JMX_URL) +
+                                      "): " + e, e);
+        }
+        ObjectName query;
+        try {
+            query = new ObjectName(pattern);
+        } catch (Exception e) {
+            throw new PluginException("Invalid query '" +
+                                      pattern + "': " + e);
+        }
+        Map res = new HashMap();
+        try {
+            Iterator beans = mServer.queryNames(query, null).iterator();
+            while (beans.hasNext()) {
+                ObjectName obj = (ObjectName)beans.next();
+                Map bean = new HashMap();
+                Map attrs = new LinkedHashMap();
+                Map methods = new LinkedHashMap();
+                bean.put(PROP_ATTRIBUTE+"s", attrs);
+                bean.put(PROP_METHOD+"s", methods);
+                res.put(obj.toString(), bean);
+
+                MBeanInfo info = mServer.getMBeanInfo(obj);
+                MBeanAttributeInfo[] attrInfo = info.getAttributes();
+                for (int i = 0; i < attrInfo.length; i++) {
+                    MBeanAttributeInfo mia = attrInfo[i];
+                    String name = mia.getName();
+                    Object val;
+                    try {
+                        val = mServer.getAttribute(obj, name);
+                    } catch (Exception e) {
+                        continue; //XXX
+                    }
+                        
+                    //XXX leave filtering to server-side?
+                    if ((val == null) ||
+                        val.getClass().isArray() ||
+                        (val.getClass() == String.class))
+                    {
+                        continue;
+                    }
+                    if (Number.class.isAssignableFrom(val.getClass())) {
+                        attrs.put(name, val);
+                    }
+                }
+
+                MBeanOperationInfo[] ops = info.getOperations();
+
+                for (int i=0; i<ops.length; i++) {
+                    MBeanParameterInfo[] params = ops[i].getSignature();
+                    if (params.length == 0) {
+                        methods.put(ops[i].getName(), "-");
+                    }
+                    else {
+                        //XXX
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new PluginException("Error in query '" +
+                                      pattern + "': " + e, e);
+        }
+
+        return res;
+    }
 
     public Object getData(String command, ConfigResponse config)
         throws PluginException
@@ -87,6 +175,8 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
                 }
 
                 res = MxUtil.getValue(props, oName, attribute);
+            } else if (command.equals(CMD_QUERY)) { 
+                res = queryMBeans(oName, props);
             } else {
                 throw new PluginException("Unknown command " + command);
             }
