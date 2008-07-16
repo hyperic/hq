@@ -118,6 +118,13 @@ class ResourceCategory {
         dman.findEnabledMeasurements(null, r.entityId, null)
     }
 
+    /**
+     * Get the availability Measurement for a Resource.
+     */
+    static getAvailabilityMeasurement(Resource r) {
+        dman.getAvailabilityMeasurement(r)
+    }
+    
     static List getAlertDefinitions(Resource r, AuthzSubject user) {
         defMan.findAlertDefinitions(user, r.entityId)
     }
