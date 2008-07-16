@@ -5,16 +5,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tapestry.IRequestCycle;
-import org.apache.tapestry.engine.IEngineService;
 import org.apache.tapestry.engine.ILink;
-import org.apache.tapestry.services.LinkFactory;
 import org.apache.tapestry.services.ServiceConstants;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
@@ -47,13 +41,9 @@ public class SearchService extends BaseService {
 
     public static final int DEFAULT_PAGE_SIZE = 10;
 
-    private HttpServletRequest _request;
-
-    private HttpServletResponse _response;
-
-    private ServletContext _servletContext;
-
-    private LinkFactory _linkFactory;
+    public String getName() {
+        return SERVICE_NAME;
+    }
 
     public ILink getLink(boolean post, Object parameter) {
 
@@ -71,9 +61,9 @@ public class SearchService extends BaseService {
      * Supports service version 1.0+
      */
     public void service(IRequestCycle cycle) throws IOException {
-        String query = cycle.getParameter(SEARCH_PARAM);
-        String pageSize = cycle.getParameter(PAGE_SIZE_PARAM);
-        String pageNum = cycle.getParameter(PAGE_NUM_PARAM);
+        String query = cycle.getParameter(PARAM_SEARCH_QUERY);
+        String pageSize = cycle.getParameter(PARAM_PAGE_SIZE);
+        String pageNum = cycle.getParameter(PARAM_PAGE_NUM);
 
         // Holds the page size and page number
         PageControl page;
@@ -88,11 +78,9 @@ public class SearchService extends BaseService {
             page = new PageControl(0, Integer.parseInt(pageSize));
 
         else
-            page = new PageControl(Integer.parseInt(pageNum), Integer
-                    .parseInt(pageSize));
+            page = new PageControl(Integer.parseInt(pageNum), Integer.parseInt(pageSize));
 
-        WebUser user = (WebUser) _request.getSession().getAttribute(
-                Constants.WEBUSER_SES_ATTR);
+        WebUser user = (WebUser) _request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(_servletContext);
 
         PageList res;
@@ -114,16 +102,11 @@ public class SearchService extends BaseService {
             try {
                 jObject.put(Integer.toString(key), r.toJson());
             } catch (JSONException e) {
-                log.warn("Cannot create search result list"
-                      + e.getStackTrace());
+                log.warn("Cannot create search result list" + e.getStackTrace());
             }
             key++;
         }
         return jObject.toString();
     }
 
-    public String getName() {
-        return SERVICE_NAME;
-    }
-    
 }
