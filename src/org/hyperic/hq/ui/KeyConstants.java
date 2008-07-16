@@ -61,11 +61,16 @@ public interface KeyConstants {
      * The key that holds the user's chart queries
      */
     public static final String USER_DASHBOARD_CHARTS = ".dashContent.charts";
+    
     /**
      * The key that holds the user's charts time range
      */
     public static final String USER_DASHBOARD_CHART_RANGE = ".dashContent.charts.range";
     
+    /**
+     * The json object that contains the rids and mtids
+     */
+    public static final String USER_DASHBOARD_JSON = ".dashContent.chars.json";
 
     /**
      * the the user preferences key that holds the users portal  second column choices.
