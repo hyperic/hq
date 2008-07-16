@@ -70,7 +70,7 @@ dojo.addOnLoad( function(){
               <span><strong>${l.Show}:</strong></span>
               <div>
               <input type="radio" id="notFixed" name="show" value="notfixed" onchange="refreshAlertTables()">${l.NotFixed}
-              <input type="radio" id="escOnly" name="show" value="inescalation" onchange="refreshAlertTables()">${l.InEscalation}
+              <input type="radio" id="escOnly" name="show" value="inescalation" onchange="refreshAlertTables()">${l.InEscalation}<br>
               <input type="radio" id="all" name="show" value="all" checked="checked" onchange="refreshAlertTables()">${l.All}
               </div>          
             </div>
