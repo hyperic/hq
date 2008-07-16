@@ -253,8 +253,8 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
     return this;
 };
 
-function loadSearchData(response, ioArgs) {
-    if(response){
+function loadSearchData(type, response, evt) {
+    if(type == 'load'){
         var resURL = resourceURL+"?eid=";
         var template = "<li><a href='link' class='type'>text<\/a><\/li>";
         var count = 0;
