@@ -54,6 +54,8 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * View a chart for a metric.
@@ -95,8 +97,15 @@ public class ViewChartAction extends MetricDisplayRangeAction {
             ActionForward success = returnRedraw(request, mapping, forwardParams);
 
             // build the chart URL
+            JSONObject obj = new JSONObject();
             HashMap chartParams = new HashMap();
             chartParams.put("m", chartForm.getM());
+            Integer[] mtids = chartForm.getM();
+            JSONArray mtid = new JSONArray();
+            for(int i = 0; i < mtids.length; i++){
+                mtid.put(mtids[i]);
+            }
+            obj.put("mtid", mtid);
             chartParams.put("showPeak", new Boolean(chartForm.getShowPeak()));
             chartParams.put("showValues", new Boolean(chartForm.getShowValues()));
             chartParams.put("showAverage", new Boolean(chartForm.getShowAverage()));
@@ -106,6 +115,7 @@ public class ViewChartAction extends MetricDisplayRangeAction {
             if(adeId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP){
                 chartParams.put( "mode", chartForm.getMode() );                
                 chartParams.put( "r", chartForm.getResourceIds() );
+                obj.put("rid", chartForm.getResourceIds());
             }
             
             if (chartForm.getCtype() != null &&
@@ -115,7 +125,8 @@ public class ViewChartAction extends MetricDisplayRangeAction {
             }
             
             String url = ActionUtils.changeUrl(success.getPath(), chartParams);
-            _saveUserChart(url, chartForm.getChartName(), request);
+            obj.put("name",chartForm.getChartName());
+            _saveUserChart(url, chartForm.getChartName(), request, obj);
 
             if ( log.isDebugEnabled() ) {
                 log.debug("Saving chart to dashboard ...\n\tchartName="+chartForm.getChartName()+"\n\turl="+url);
@@ -248,7 +259,7 @@ public class ViewChartAction extends MetricDisplayRangeAction {
     }
 
     protected void _saveUserChart(String url, String name,
-                                HttpServletRequest request) 
+                                HttpServletRequest request, JSONObject jsonObj) 
         throws Exception {
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
@@ -286,10 +297,22 @@ public class ViewChartAction extends MetricDisplayRangeAction {
             // Hard-code name to be a number in parenthesis to differentiate
             chartname = origname + " (" + i + ")";
         }
-        
+        /**
+         * TODO set the json here
+         */
         // If chart already exists, don't add it again
         charts += Constants.DASHBOARD_DELIMITER + chartname + "," + url;
 
+        String json = dashPrefs.getValue(Constants.USER_DASHBOARD_JSON, "");
+        JSONArray jsonArray;
+        if(!json.equalsIgnoreCase("")){
+            //No value in the db, create one
+            jsonArray = new JSONArray().put(jsonObj);
+        }else{
+            //Value in the db, append to it
+            jsonArray = new JSONArray(json).put(jsonObj);
+        }
+        dashPrefs.setValue(Constants.USER_DASHBOARD_JSON, jsonArray.toString());
         dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, charts);
         log.debug("ViewChartAction - saving chart: " + charts);
         ConfigurationProxy.getInstance().setUserDashboardPreferences(dashPrefs, boss, user );
