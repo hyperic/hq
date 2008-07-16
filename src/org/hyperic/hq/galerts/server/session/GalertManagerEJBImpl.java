@@ -421,7 +421,8 @@ public class GalertManagerEJBImpl
      * @param timeRange the amount of milliseconds prior to current that the
      *                  alerts will be contained in.  e.g. the beginning of the  
      *                  time range will be (current - timeRante)
-     * @param includes  A list of entity IDs to include in the result
+     * @param includes  A list of entity IDs to include in the result.  If null
+     * then ignore and return all.
      * 
      * @return a list of {@link GalertLog}s
      * @ejb:interface-method
