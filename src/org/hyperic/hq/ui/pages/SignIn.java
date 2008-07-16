@@ -151,21 +151,23 @@ public abstract class SignIn extends BasePage {
 
     private void loadDashboard(ServletContext ctx, WebUser webUser) {
         try {
-            DashboardManagerLocal dashManager = DashboardManagerEJBImpl
-                    .getOne();
-            ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
-                    .getAttribute(Constants.DEF_USER_DASH_PREFS);
+            DashboardManagerLocal dashManager =
+                DashboardManagerEJBImpl.getOne();
+            ConfigResponse defaultUserDashPrefs =
+                (ConfigResponse) ctx.getAttribute(Constants.DEF_USER_DASH_PREFS);
             AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
                     .findSubjectById(webUser.getSubject().getId());
-            UserDashboardConfig userDashboard = dashManager.getUserDashboard(
-                    me, me);
+            UserDashboardConfig userDashboard =
+                dashManager.getUserDashboard(me, me);
             if (userDashboard == null) {
-                userDashboard = dashManager.createUserDashboard(me, me, webUser
-                        .getName());
-                ConfigResponse userDashobardConfig = userDashboard.getConfig();
-                userDashobardConfig.merge(defaultUserDashPrefs, false);
+                userDashboard =
+                    dashManager.createUserDashboard(me, me, webUser.getName());
+            }
+            
+            ConfigResponse userDashobardConfig = userDashboard.getConfig();
+            if (userDashobardConfig.merge(defaultUserDashPrefs, false)) {
                 dashManager.configureDashboard(me, userDashboard,
-                        userDashobardConfig);
+                                               userDashobardConfig);
             }
         } catch (PermissionException e) {
             e.printStackTrace();
@@ -173,9 +175,9 @@ public abstract class SignIn extends BasePage {
     }
 
     public static WebUser loginUser(ServletContext ctx, String username,
-            String password) throws RemoteException, SecurityException,
-            LoginException, ApplicationException, ConfigPropertyException,
-            FinderException {
+                                    String password)
+        throws RemoteException, SecurityException, LoginException,
+               ApplicationException, ConfigPropertyException, FinderException {
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
         AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
         boolean needsRegistration = false;
@@ -202,8 +204,8 @@ public abstract class SignIn extends BasePage {
         }
 
         // figure out if the user has a principal
-        boolean hasPrincipal = authBoss.isUser(sessionId.intValue(), subject
-                .getName());
+        boolean hasPrincipal =
+            authBoss.isUser(sessionId.intValue(), subject.getName());
 
         ConfigResponse preferences = new ConfigResponse();
         if (!needsRegistration) {
@@ -219,8 +221,8 @@ public abstract class SignIn extends BasePage {
     }
 
     public static Map loadUserPermissions(Integer sessionId, AuthzBoss authzBoss)
-            throws FinderException, PermissionException,
-            SessionTimeoutException, SessionNotFoundException, RemoteException {
+        throws FinderException, PermissionException, SessionTimeoutException,
+               SessionNotFoundException, RemoteException {
         // look up the user's permissions
         HashMap userOpsMap = new HashMap();
         List userOps = authzBoss.getAllOperations(sessionId);
