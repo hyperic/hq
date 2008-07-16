@@ -69,8 +69,9 @@ dojo.addOnLoad( function(){
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.Show}:</strong></span>
               <div>
-              <input type="radio" id="escOnly" name="inEscalation" value="true" onchange="refreshAlertTables()">${l.InEscalation}
-              <input type="radio" id="all" name="inEscalation" value="false" checked="checked" onchange="refreshAlertTables()">${l.All}
+              <input type="radio" id="notFixed" name="show" value="notfixed" onchange="refreshAlertTables()">${l.NotFixed}
+              <input type="radio" id="escOnly" name="show" value="inescalation" onchange="refreshAlertTables()">${l.InEscalation}
+              <input type="radio" id="all" name="show" value="all" checked="checked" onchange="refreshAlertTables()">${l.All}
               </div>          
             </div>
 
@@ -101,7 +102,15 @@ dojo.addOnLoad( function(){
                               onchange:'refreshAlertTables();'], null) %>
                               
               </div>
-            </div>          
+            </div>
+            <div class="fieldSetStacked" style="margin-bottom:8px;">
+              <span><strong>${l.GroupFilter}</strong></span>
+              <div><%= selectList(groups, 
+                             [id:'alertGroupSelect',
+                              onchange:'refreshAlertTables();']) %>
+                              
+              </div>
+            </div>
             </div>
         </div>
       </div>
@@ -193,15 +202,18 @@ dojo.addOnLoad( function(){
         var res = {};
         var sevSelect  = dojo.byId('alertSevSelect');
         var timeSelect = dojo.byId('alertTimeSelect');
+        var groupSelect = dojo.byId('alertGroupSelect');
         res['minPriority'] = sevSelect.options[sevSelect.selectedIndex].value;
         res['alertTime']   = timeSelect.options[timeSelect.selectedIndex].value;
+        res['group']   = groupSelect.options[groupSelect.selectedIndex].value;
 
         var escOnly    = dojo.byId('escOnly');
+        var notFixed   = dojo.byId('notFixed');
         if (escOnly.checked) {
-          res['escOnly'] = 'true'
+          res['show'] = escOnly.value;
         }
-        else {
-          res['escOnly'] = 'false'
+        else if (notFixed.checked) {
+          res['show'] = notFixed.value;
         }
         else {
           res['show'] = 'all';
