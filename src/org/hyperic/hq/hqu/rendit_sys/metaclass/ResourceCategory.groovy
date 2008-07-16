@@ -122,7 +122,7 @@ class ResourceCategory {
      * Get the availability Measurement for a Resource.
      */
     static getAvailabilityMeasurement(Resource r) {
-        dman.getAvailabilityMeasurement(r)
+        dman.getAvailabilityMeasurement(null, r.entityId)
     }
     
     static List getAlertDefinitions(Resource r, AuthzSubject user) {
