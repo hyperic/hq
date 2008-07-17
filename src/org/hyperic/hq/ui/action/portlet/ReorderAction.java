@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet;
 
-import java.util.StringTokenizer;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -59,34 +57,33 @@ public class ReorderAction extends BaseAction {
         WebUser user = SessionUtils.getWebUser(session);
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-        String narrowPortlets =
-            request.getParameter("narrowList_true[]");
-        String widePortlets =
-            request.getParameter("narrowList_false[]");
+        String[] narrowPortlets =
+            request.getParameterValues("narrowList_true[]");
+        String[] widePortlets =
+            request.getParameterValues( "narrowList_false[]" );
 
         String columnKey;
         StringBuffer ordPortlets = new StringBuffer();
-        StringTokenizer st;
+        String[] portlets;
         if (narrowPortlets != null) {
             columnKey = Constants.USER_PORTLETS_FIRST;
-            st = new StringTokenizer(narrowPortlets, "&=");
+            portlets = narrowPortlets;
         }
         else if (widePortlets != null) {
             columnKey = Constants.USER_PORTLETS_SECOND;
-            st = new StringTokenizer(widePortlets, "&=");
+            portlets = widePortlets;
         }
         else {
             return mapping.findForward(Constants.AJAX_URL);
         }
 
-        while (st.hasMoreTokens()) {
-            String token = st.nextToken();
-            if (token.startsWith("narrowList_") ||
-                token.startsWith(".dashContent.addContent"))
+        for (String portlet : portlets) {
+            if (portlet.startsWith("narrowList_") ||
+                portlet.startsWith(".dashContent.addContent"))
                 continue;
             
             ordPortlets.append(Constants.DASHBOARD_DELIMITER);
-            ordPortlets.append(token);
+            ordPortlets.append(portlet);
         }
         DashboardConfig dashConfig = DashboardUtils.findDashboard((
         		Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
