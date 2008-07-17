@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.engine.ILink;
 import org.apache.tapestry.services.ServiceConstants;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -203,6 +204,18 @@ public class RESTService extends BaseService {
                 res = arr.toString();
             } else {
                 // get alert data
+                List<Integer> gids = new ArrayList<Integer>(groupsList.size());
+                for (Iterator<String> it = groupsList.iterator(); it.hasNext();)
+                {
+                    gids.add(Integer.valueOf(it.next())); 
+                }
+                
+                PageInfo pi = PageInfo.create(PageControl.PAGE_ALL, null);
+                
+                DashboardPortletBossLocal dashBoss =
+                    DashboardPortletBossEJBImpl.getOne();
+
+                res = dashBoss.getAlertCounts(me, gids, pi).toString();
             }
         } catch (Exception e) {
             log.debug(e.getLocalizedMessage());
@@ -233,10 +246,10 @@ public class RESTService extends BaseService {
             resourceIdParam = Integer.valueOf(rpTemp);
         }
 
-        //Get the AuthzSubject
-        WebUser user    = (WebUser) _request.getSession()
-            .getAttribute(Constants.WEBUSER_SES_ATTR);
-        AuthzBoss boss  = ContextUtils.getAuthzBoss(_servletContext);
+        // Get the AuthzSubject
+        WebUser user = (WebUser) _request.getSession()
+                .getAttribute(Constants.WEBUSER_SES_ATTR);
+        AuthzBoss boss = ContextUtils.getAuthzBoss(_servletContext);
         AuthzSubject me = getAuthzSubject(user, boss);
         if (me == null)
             return ERROR_GENERIC;
@@ -271,9 +284,11 @@ public class RESTService extends BaseService {
                 for (int i = 0; i < mtidArray.length(); i++) {
                     mtids.add(Integer.valueOf((String) mtidArray.get(i)));
                 }
-                Map<Integer, List<Integer>> map = new HashMap<Integer, List<Integer>>();
+                Map<Integer, List<Integer>> map =
+                    new HashMap<Integer, List<Integer>>();
                 map.put(resourceIdParam, mtids);
-                DashboardPortletBossLocal dashBoss = DashboardPortletBossEJBImpl.getOne();
+                DashboardPortletBossLocal dashBoss =
+                    DashboardPortletBossEJBImpl.getOne();
                 res = dashBoss.getMeasurementData(me, map, start, end).toString();
             } catch (Exception e) {
                 log.debug(e.getLocalizedMessage());
@@ -360,13 +375,14 @@ public class RESTService extends BaseService {
                             
                             // Extract the resource ID
                             Integer resId = 0;
-                            String aeidRegex = ".*&eid=(\\d+:\\d+).*";
+                            String aeidRegex = ".*&type=(\\d+).*&rid=(\\d+).*";
                             pattern = Pattern.compile(mtidRegex,
                                                       Pattern.CASE_INSENSITIVE);
                             matcher = pattern.matcher(chart.get(1));
                             if (matcher.matches()) {
                                 AppdefEntityID aeid =
-                                    new AppdefEntityID(matcher.group(1));
+                                    new AppdefEntityID(matcher.group(1) + ':' +
+                                                       matcher.group(2));
                                 Resource resource = resMan.findResource(aeid);
                                 resId = resource.getId();
                             }
