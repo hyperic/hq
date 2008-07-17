@@ -78,7 +78,7 @@ class RoleHelper extends BaseHelper {
     /**
      * Delete a Role
      */
-    public void deleteRole(int roldId) {
-        roleMan.removeRole(user, new Integer(roleId))
+    public void deleteRole(int id) {
+        roleMan.removeRole(user, new Integer(id))
     }
 }
