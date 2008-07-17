@@ -58,6 +58,13 @@ public class RESTService extends BaseService {
 
     public static final String SERVICE_NAME = "api";
 
+    private static final Pattern AEID_PATTERN =
+        Pattern.compile(".*&type=(\\d+).*&rid=(\\d+).*",
+                        Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern MTID_PATTERN =
+        Pattern.compile(".*&m=(\\d+).*", Pattern.CASE_INSENSITIVE);
+
     public String getName() {
         return SERVICE_NAME;
     }
@@ -355,19 +362,15 @@ public class RESTService extends BaseService {
                         ResourceManagerLocal resMan =
                             ResourceManagerEJBImpl.getOne();
                         
+
+                        Matcher matcher;
                         for (Iterator<String> i = chartList.iterator();
                              i.hasNext();)
                         {
                             List<String> chart =
                                 StringUtil.explode(i.next(), ",");
                             
-                            // Extract the mtid
-                            String mtidRegex = ".*&m=(\\d+).*";
-                            Pattern pattern =
-                                Pattern.compile(mtidRegex,
-                                                Pattern.CASE_INSENSITIVE);
-                            Matcher matcher = pattern.matcher(chart.get(1));
-
+                            matcher = MTID_PATTERN.matcher(chart.get(1));
                             JSONArray mtid = new JSONArray();
                             if (matcher.matches()) {
                                 mtid.put(Integer.valueOf(matcher.group(1)));
@@ -375,16 +378,19 @@ public class RESTService extends BaseService {
                             
                             // Extract the resource ID
                             Integer resId = 0;
-                            String aeidRegex = ".*&type=(\\d+).*&rid=(\\d+).*";
-                            pattern = Pattern.compile(mtidRegex,
-                                                      Pattern.CASE_INSENSITIVE);
-                            matcher = pattern.matcher(chart.get(1));
+                            matcher = AEID_PATTERN.matcher(chart.get(1));
                             if (matcher.matches()) {
                                 AppdefEntityID aeid =
                                     new AppdefEntityID(matcher.group(1) + ':' +
                                                        matcher.group(2));
-                                Resource resource = resMan.findResource(aeid);
-                                resId = resource.getId();
+                                try {
+                                    Resource resource =
+                                        resMan.findResource(aeid);
+                                    resId = resource.getId();
+                                } catch (Exception e) {
+                                    // Resource removed
+                                    continue;
+                                }
                             }
                                 
                             arr.put(new JSONObject().put("name", chart.get(0))
