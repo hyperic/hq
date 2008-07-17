@@ -2,6 +2,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 import java.util.List
 
+import org.hyperic.hq.bizapp.server.session.AuthzBossEJBImpl as AuthzBoss
 import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl as AuthMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubjectMan
@@ -11,6 +12,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue
  * The UserHelper can be used to find Users in the HQ system.
  */
 class UserHelper extends BaseHelper {
+    private authzBoss = AuthzBoss.one
     private subjectMan = SubjectMan.one
     private authMan = AuthMan.one
     private AuthzSubjectValue userValue
@@ -104,6 +106,6 @@ class UserHelper extends BaseHelper {
      * Remove a user from database
      */
     public void removeUser(Integer id) {
-        subjectMan.removeSubject(userValue, id)
+        authzBoss.removeSubject(sessionId, [id] as Integer[])
     }
  }
