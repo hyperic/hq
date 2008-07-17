@@ -84,13 +84,13 @@ public interface KeyConstants {
      * The key that holds the user's selected groups for alert summary
      */
     public static final String USER_DASHBOARD_ALERT_SUMMARY_GROUPS =
-        "dashContent.alertSummary.groups";
+        ".dashContent.alertSummary.groups";
     
     /**
      * The key that holds the user's selected time range for alert summary
      */
     public static final String USER_DASHBOARD_ALERT_SUMMARY_RANGE =
-        "dashContent.alertSummary.range";
+        ".dashContent.alertSummary.range";
     
     /**
      * The json object that contains the rids and mtids
