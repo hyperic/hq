@@ -53,10 +53,20 @@ import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBossLocal;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBossUtil;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.server.session.EscalationState;
+import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.AlertInterface;
+import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertActionLog;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.galerts.server.session.GalertDef;
+import org.hyperic.hq.galerts.server.session.GalertDefSortField;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
@@ -82,11 +92,22 @@ public class DashboardPortletBossEJBImpl
     extends MetricSessionEJB
     implements SessionBean {
 
+    private GalertManagerLocal _gaMan;
+    private ResourceGroupManagerLocal _rgMan;
+    private AlertDefinitionManagerLocal _adMan;
+    private EscalationManagerLocal _escMan;
     private AlertManagerLocal _alMan = AlertManagerEJBImpl.getOne();
     private static final String ALERT_CRITICAL = "red",
                                 ALERT_WARN     = "yellow",
                                 ALERT_UNKNOWN  = "gray",
                                 ALERT_OK       = "green";
+    
+    public DashboardPortletBossEJBImpl() {
+        _rgMan = ResourceGroupManagerEJBImpl.getOne();
+        _gaMan = GalertManagerEJBImpl.getOne();
+        _adMan = AlertDefinitionManagerEJBImpl.getOne();
+        _escMan = EscalationManagerEJBImpl.getOne();
+    }
 
     private final Log _log =
         LogFactory.getLog(DashboardPortletBossEJBImpl.class);
@@ -147,7 +168,6 @@ public class DashboardPortletBossEJBImpl
         throws PermissionException, JSONException
     {
         JSONObject rtn = new JSONObject();
-        ResourceGroupManagerLocal _rgMan = ResourceGroupManagerEJBImpl.getOne();
         Collection groups = _rgMan.getAllResourceGroups(subj, true);
         for (Iterator i=groups.iterator(); i.hasNext(); ) {
             ResourceGroup group = (ResourceGroup)i.next();
@@ -166,11 +186,11 @@ public class DashboardPortletBossEJBImpl
         throws PermissionException, JSONException
     {
         JSONObject rtn = new JSONObject();
-        ResourceGroupManagerLocal _rgMan = ResourceGroupManagerEJBImpl.getOne();
         _rgMan = ResourceGroupManagerEJBImpl.getOne();
+        final int maxRecords = pageInfo.getStartRow() + pageInfo.getPageSize();
         int i=0;
         for (Iterator it=groupIds.iterator(); it.hasNext(); i++) {
-            if ( i > (pageInfo.getStartRow() + pageInfo.getPageSize()) ) {
+            if ( maxRecords != 0 && i > maxRecords ) {
                 break;
             }
             if (i < pageInfo.getStartRow()) {
@@ -180,29 +200,29 @@ public class DashboardPortletBossEJBImpl
             ResourceGroup group = _rgMan.findResourceGroupById(subj, gId);
             JSONArray array = new JSONArray();
             array.put(getResourceStatus(subj, group));
-            array.put(getGroupStatus(group));
+            array.put(getGroupStatus(subj, group));
             rtn.put(group.getId().toString(), array);
         }
         return rtn;
     }
 
-    /**
-     * XXX: not sure if this is working
-     */
-    private String getGroupStatus(ResourceGroup group) {
-        GalertManagerLocal _gaMan = GalertManagerEJBImpl.getOne();
-        List galerts = _gaMan.findAlertLogs(group);
+    private String getGroupStatus(AuthzSubject subj, ResourceGroup group)
+        throws PermissionException
+    {
+        // TODO: Need to add permission checking
+        List galertDefs = _gaMan.findAlertDefs(group, PageControl.PAGE_ALL);
         String rtn = ALERT_OK;
-        if (galerts.size() == 0) {
+        if (galertDefs.size() == 0) {
             return ALERT_UNKNOWN;
         }
+        List galerts = _gaMan.findAlertLogs(group);
         for (Iterator i=galerts.iterator(); i.hasNext(); ) {
             GalertLog galert = (GalertLog)i.next();
             if (galert.isFixed()) {
                 continue;
             }
             if (isAckd(galert)) {
-                rtn = ALERT_CRITICAL;
+                rtn = ALERT_WARN;
             } else {
                 return ALERT_CRITICAL;
             }
@@ -213,20 +233,25 @@ public class DashboardPortletBossEJBImpl
     private String getResourceStatus(AuthzSubject subj, ResourceGroup group)
         throws PermissionException
     {
-        String rtn = ALERT_OK;
-        ResourceGroupManagerLocal _rgMan = ResourceGroupManagerEJBImpl.getOne();
-        _rgMan = ResourceGroupManagerEJBImpl.getOne();
+        String rtn = ALERT_UNKNOWN;
+        boolean isSet = false;
         Collection resources = _rgMan.getMembers(group);
         PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED);
         for (Iterator i=resources.iterator(); i.hasNext(); ) {
             Resource r = (Resource)i.next();
             AppdefEntityID aId = new AppdefEntityID(r);
-            List alerts = _alMan.findAlerts(subj, aId, pc);
-            if (alerts.size() == 0) {
-                return ALERT_UNKNOWN;
+            List alertDefs = _adMan.findAlertDefinitions(
+                subj, new AppdefEntityID(r), PageControl.PAGE_ALL);
+            if (alertDefs.size() == 0) {
+                continue;
             }
+            if (!isSet) {
+                rtn = ALERT_OK;
+            }
+            isSet = true;
+            List alerts = _alMan.findAlerts(subj, aId, pc);
             for (Iterator it=alerts.iterator(); it.hasNext(); ) {
-                Alert alert = (Alert)it.next();
+                AlertValue alert = (AlertValue)it.next();
                 if (alert.isFixed()) {
                     continue;
                 }
@@ -240,12 +265,28 @@ public class DashboardPortletBossEJBImpl
         return rtn;
     }
     
-    /**
-     * TODO finish this method
-     */
-    private boolean isAckd(AlertInterface def) {
-        Random rand = new Random(1);
-        return (rand.nextInt() == 1) ? true : false;
+    private boolean isAckd(GalertLog alert) {
+        if (!alert.isAcknowledgeable()) {
+            return false;
+        }
+        EscalationState state =
+            _escMan.findEscalationState(_gaMan.findById(alert.getId()));
+        if (state.getAcknowledgedBy() == null) {
+            return false;
+        }
+        return true;
+    }
+    
+    private boolean isAckd(AlertValue alert) {
+        if (!alert.isAcknowledgeable()) {
+            return false;
+        }
+        EscalationState state = _escMan.findEscalationState(
+            _alMan.findAlertById(alert.getId()).getAlertDefinition());
+        if (state == null || state.getAcknowledgedBy() == null) {
+            return false;
+        }
+        return true;
     }
 
     public static DashboardPortletBossLocal getOne() {
