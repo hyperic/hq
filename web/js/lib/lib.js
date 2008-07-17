@@ -717,8 +717,7 @@ hyperic.widget = hyperic.widget || {};
 };
 
 // set up the dashboard widget namespace
-var hyperic = hyperic || {}; 
-
+hyperic = hyperic || {}; 
 /** 
  * @namespace
  */
@@ -807,7 +806,7 @@ hyperic.dashboard.widget = {
      * @param {function} onEnd
      */
     swapSheets: function(from,to,onEnd) {
-        c = dojo11.fx.chain([
+        var c = dojo11.fx.chain([
             dojo11.fadeOut({
                 node : from, 
                 onEnd: function() { 
@@ -842,9 +841,9 @@ hyperic.dashboard.widget = {
             function(opt)
             {
                 // if(opt.text.match(exp))
-                if(opt.text.toLowerCase().indexOf(text.toLowerCase()) != -1)
+                if(opt.text.toLowerCase().indexOf(text.toLowerCase()) !== -1)
                 {
-                    if(opt.disabled == true)
+                    if(opt.disabled === true)
                     {
                         opt.disabled = false;
                         opt.style.display = '';
@@ -852,7 +851,7 @@ hyperic.dashboard.widget = {
                 }
                 else
                 {
-                    if(opt.disabled == false)
+                    if(opt.disabled === false)
                     {
                         opt.disabled = true;
                         opt.style.display = 'none';
@@ -873,13 +872,12 @@ hyperic.dashboard.widget = {
         var newLocation = null;
         if(select.options.length > 0)
         {
-            optionsLoop:
-            for(i = 0,j = select.options.length; i < j; i++)
+            for(var i = 0,j = select.options.length; i < j; i++)
             {
                 if(select.options[i].text > option.text)
                 {
                     newLocation = i;
-                    break optionsLoop;
+                    break;
                 }
             }
         }
@@ -904,7 +902,7 @@ hyperic.dashboard.widget = {
             }
         }
     }
-}
+};
 
 /**
  * chartWidget is a widget that displays a chart slideshow
@@ -933,7 +931,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     that.config = {
         portletName: portletName,
         portletLabel: portletLabel
-    }
+    };
 
     /**
      * pause the chart playback before showing the config layer 
@@ -950,14 +948,14 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         hyperic.dashboard.widget.click_config_btn.apply(this);
         that.showing = 'config';
         
-        input_rotation = dojo11.byId('chart_rotation');
-        input_interval = dojo11.byId('chart_interval');
-        input_range = dojo11.byId('chart_range');
-        if(that.config.rotation == 'on')
+        var input_rotation = dojo11.byId('chart_rotation');
+        var input_interval = dojo11.byId('chart_interval');
+        var input_range = dojo11.byId('chart_range');
+        if(that.config.rotation == 'true')
         {
             input_rotation.checked = true;
         }
-        for(i = 0; i < input_interval.options.length; i++)
+        for(var i = 0; i < input_interval.options.length; i++)
         {
             if(input_interval.options[i].value == that.config.interval)
             {
@@ -965,15 +963,15 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 break;
             }
         }
-        for(i = 0; i < input_range.options.length; i++)
+        for(var j = 0; j < input_range.options.length; j++)
         {
-            if(input_range.options[i].value == that.config.range)
+            if(input_range.options[j].value == that.config.range)
             {
-                input_range.selectedIndex = i;
+                input_range.selectedIndex = j;
                 break;
             }
         }
-    }
+    };
 
     /**
      * sets the config values from the config form
@@ -989,17 +987,18 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     this.click_save_btn = function(e)
     {
-        that.config.interval = parseInt(dojo11.byId('chart_interval').value);
+        that.config.interval = parseInt(dojo11.byId('chart_interval').value,10);
         that.config.range = dojo11.byId('chart_range').value;
-        that.config.rotation = dojo11.byId('chart_rotation').checked ? 'on' : 'off';
+        that.config.rotation = dojo11.byId('chart_rotation').checked ? 'true' : 'false';
 
         dojo11.xhrGet( {
-            url: "/api.shtml?v=1.0&s_id=chart&config=true&tr=" + that.config.range + "&ivl=" + that.config.interval + "&rot=" + (that.config.rotation == 'on' ? 'true' : 'false'),
-            // load: function(data){
-            //     that.config.interval = parseInt(data.ivl) || that.config.interval;
-            //     that.config.range = data.tr || that.config.range;
-            //     that.config.rotation = data.rot || that.config.rotation;
-            // },
+            url: "/api.shtml?v=1.0&s_id=chart&config=true&tr=" + that.config.range + "&ivl=" + that.config.interval + "&rot=" + that.config.rotation,
+            handleAs: 'json',
+            load: function(data){
+                that.config.interval = parseInt(data.ivl,10) || that.config.interval;
+                that.config.range = data.tr || that.config.range;
+                that.config.rotation = data.rot || that.config.rotation;
+            },
             error: function(data){
                 console.debug("An error occurred saving charts config... ", data);
             },
@@ -1010,15 +1009,17 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         that.swapSheets(that.configSheet,that.contentSheet,
             function()
             {
-                that.showing = 'content'
+                that.showing = 'content';
                 if(that.needsResize)
                 {
                     that.chartResize();
                 }
-                if(that.config.rotation == 'on')
+                if(that.config.rotation == 'true')
+                {
                     that.playCharts();
+                }
             });
-    }
+    };
 
     /**
      * extends parent's behaviour to restart chart slideshow playback
@@ -1037,16 +1038,18 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 e,
                 function()
                 {
-                    that.showing = 'content'
+                    that.showing = 'content';
                     if(that.needsResize)
                     {
                         that.chartResize();
                     }
-                    if(that.config.rotation == 'on')
+                    if(that.config.rotation == 'true')
+                    {
                         that.playCharts();
+                    }
                 }
             ]);
-    }
+    };
 
     /**
      * a play button click handler to start playback, 
@@ -1058,7 +1061,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     that.click_play_btn = function(e) {
         that.playCharts();
-    }
+    };
     
     /**
      * a pause button click handler to stop playback, 
@@ -1070,7 +1073,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     that.click_pause_btn = function(e) {
         that.pauseCharts();
-    }
+    };
     
     /**
      * extends parent's behaviour to pause the chart playback 
@@ -1086,7 +1089,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         that.pauseCharts();
         that.chart.cleanup();
         hyperic.dashboard.widget.click_remove_btn.apply(that);
-    }
+    };
 
     /**
      * an event handler to handle onKeyUp events on a search textbox.
@@ -1098,7 +1101,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     that.search = function(e)
     {
         that.searchSelectBox(that.chartselect,e.target.value);
-    }
+    };
     
     /**
      * an event handler to handle the onfocus event on the search textbox.
@@ -1112,7 +1115,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         {
             e.target.value = '';
         }
-    }
+    };
     
     /**
      * an event handler to handle the onblur event on the search textbox.
@@ -1126,7 +1129,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         {
             e.target.value = '[ Live Search ]';
         }
-    }
+    };
     
     /**
      * an event handler to handle the onclick event on the chart selectbox.
@@ -1148,7 +1151,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
 
             that.currentChartId = e.target.value;
         }
-    }
+    };
     
     /**
      * swaps a chart for the next chart in the list. 
@@ -1161,22 +1164,28 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     that.cycleCharts = function()
     {
-        for(i = 0; i < that.charts.length; i++)
+        var next = 0;
+        if(that.chart !== null && that.chartselect.selectedIndex != that.chartselect.options.length-1)
         {
-            if(that.charts[i].name == that.chart.name)
-            {
-                next = (i == that.charts.length-1) ? 0 : parseInt(i)+1;
-                break;
-            }
+            next = that.chartselect.selectedIndex+1;
+            that.chart.cleanup();
         }
-    
-        that.chart.cleanup();
-        that.chart = new hyperic.widget.Chart('chart_container', that.charts[next]);
+
+        if(!that.charts[next].data)
+        {
+            that.fetchChartData(next).addCallback(function(){
+               that.chart = new hyperic.widget.Chart('chart_container', that.charts[next]);
+           });
+        }
+        else
+        {
+            that.chart = new hyperic.widget.Chart('chart_container', that.charts[next]);
+        }
         // chart.update(charts[next]);
         
         that.chartselect.selectedIndex = next;
         that.currentChartId = next;
-    }
+    };
     
     /**
      * display the first chart if no chart is showing, 
@@ -1186,21 +1195,17 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      * @see #cycleCharts
      */
     that.playCharts = function() {
-        if(that.chart == null)
-        {
-            that.chart = new hyperic.widget.Chart('chart_container', that.charts[0]);
-            that.chartselect.selectedIndex = 0;
-            that.currentChartId = 0;
-        }
+        console.log('starting to play');
+        that.cycleCharts();
         if(that.cycleId == null) {
-            that.cycleId = setInterval(that.cycleCharts, parseInt(that.config.interval)*1000);
+            that.cycleId = setInterval(that.cycleCharts, parseInt(that.config.interval,10)*1000);
 
             // display pause button when playing
-            that.play_btn.src = '/images/control_pause.png'
+            that.play_btn.src = '/images/control_pause.png';
             that.play_btn.className = 'pause_btn';
             that.play_btn.alt = 'pause slideshow';
         }
-    }
+    };
     
     /**
      * if charts are playing, clear the interval to pause the playback 
@@ -1214,54 +1219,49 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             that.cycleId = null;
             
             // display play button when pausing
-            that.play_btn.src = '/images/control_play.png'
+            that.play_btn.src = '/images/control_play.png';
             that.play_btn.className = 'play_btn';
             that.play_btn.alt = 'play slideshow';
         }
-    }
+    };
 
     /**
-     * fetch the alert group status from server for currently selected alert groups
-     * the server should return a json object of the following form:
-     * { 
-     *    "id" : ['resouce alert status','group alert status'],
-     *    ...
-     * }
-     * the status is a letter code ('r' for red,'g' for green,'y' for yellow, or 'd' for data unavailable);
+     * fetch the chart data from server for a given chart
      */
-    that.fetchCharts = function()
+    that.fetchAndPlayCharts = function()
     {
-        // dojo11.xhrGet( {
-        //         url: "http://localhost:7080/api.shtml?v=1.0&s_id=chart",
-        //         load: function(data){
-        //             that.charts = data;
-        //         },
-        //         error: function(data){
-        //             // that.swapSheets(this.configSheet,this.contentSheet);
-        //             console.debug("An error occurred fetching charts: ", data);
-        //         },
-        //         timeout: 2000
-        // });
-
-        that.charts = [
-            {
-                name:"Chart name 1", 
-                rid:10706, 
-                mtid: [11104]
+        console.log('fetching charts');
+        
+        dojo11.xhrGet( {
+            url: "/api.shtml?v=1.0&s_id=chart",
+            handleAs: 'json',
+            load: function(data){
+                that.charts = data;
+                that.populateChartSelect();
+                that.playCharts();
             },
-            {
-                name: "S3 EU Moderate IO Get Throughput Per Second", 
-                rid:10701, 
-                mtid: [11105]
-            }
-            ];
-    }
+            error: function(data){
+                console.debug("An error occurred fetching charts: ", data);
+            },
+            timeout: 2000
+        });
+    };
 
-    that.fetchChartsData = function()
+    that.fetchChartData = function(chart)
     {
-        that.charts[0].data = {'2008-06-25T13:16:00-0700': [463.0],'2008-06-25T16:04:00-0700': [438.7],'2008-06-25T18:52:00-0700': [479.2],'2008-06-25T21:40:00-0700': [508.0],'2008-06-26T00:28:00-0700': [499.2],'2008-06-26T03:16:00-0700': [512.1],'2008-06-26T06:04:00-0700': [522.7],'2008-06-26T08:52:00-0700': [546.3],'2008-06-26T11:40:00-0700': [426.6],'2008-06-26T14:28:00-0700': [522.3],'2008-06-26T17:16:00-0700': [496.0],'2008-06-26T20:04:00-0700': [583.8],'2008-06-26T22:52:00-0700': [609.8],'2008-06-27T01:40:00-0700': [614.4],'2008-06-27T04:28:00-0700': [571.1],'2008-06-27T07:16:00-0700': [494.3],'2008-06-27T10:04:00-0700': [520.1],'2008-06-27T12:52:00-0700': [504.9],'2008-06-27T15:40:00-0700': [509.4],'2008-06-27T18:28:00-0700': [552.3],'2008-06-27T21:16:00-0700': [554.9],'2008-06-28T00:04:00-0700': [559.4],'2008-06-28T02:52:00-0700': [601.3],'2008-06-28T05:40:00-0700': [530.0],'2008-06-28T08:28:00-0700': [546.8],'2008-06-28T11:16:00-0700': [559.1],'2008-06-28T14:04:00-0700': [553.5],'2008-06-28T16:52:00-0700': [528.3],'2008-06-28T19:40:00-0700': [590.4],'2008-06-28T22:28:00-0700': [595.3],'2008-06-29T01:16:00-0700': [605.6],'2008-06-29T04:04:00-0700': [624.7],'2008-06-29T06:52:00-0700': [588.8],'2008-06-29T09:40:00-0700': [557.9],'2008-06-29T12:28:00-0700': [434.6],'2008-06-29T15:16:00-0700': [561.3],'2008-06-29T18:04:00-0700': [568.9],'2008-06-29T20:52:00-0700': [701.9],'2008-06-29T23:40:00-0700': [621.5],'2008-06-30T02:28:00-0700': [632.2],'2008-06-30T05:16:00-0700': [604.8],'2008-06-30T08:04:00-0700': [539.5],'2008-06-30T10:52:00-0700': [546.5],'2008-06-30T13:40:00-0700': [577.3],'2008-06-30T16:28:00-0700': [535.1],'2008-06-30T19:16:00-0700': [609.7],'2008-06-30T22:04:00-0700': [589.0],'2008-07-01T00:52:00-0700': [610.7],'2008-07-01T03:40:00-0700': [666.3],'2008-07-01T06:28:00-0700': [649.0],'2008-07-01T09:16:00-0700': [527.1],'2008-07-01T12:04:00-0700': [528.1],'2008-07-01T14:52:00-0700': [654.8],'2008-07-01T17:40:00-0700': [688.0],'2008-07-01T20:28:00-0700': [668.1],'2008-07-01T23:16:00-0700': [639.4],'2008-07-02T02:04:00-0700': [641.9],'2008-07-02T04:52:00-0700': [588.3],'2008-07-02T07:40:00-0700': [577.7],'2008-07-02T10:08:07-0700': [637.2]};
-        that.charts[1].data = {'2008-06-25T13:16:00-0700': [307.87],'2008-06-25T16:04:00-0700': [311.40],'2008-06-25T18:52:00-0700': [311.43],'2008-06-25T21:40:00-0700': [313.34],'2008-06-26T00:28:00-0700': [314.99],'2008-06-26T03:16:00-0700': [315.60],'2008-06-26T06:04:00-0700': [313.15],'2008-06-26T08:52:00-0700': [312.65],'2008-06-26T11:40:00-0700': [296.77],'2008-06-26T14:28:00-0700': [316.11],'2008-06-26T17:16:00-0700': [313.68],'2008-06-26T20:04:00-0700': [323.49],'2008-06-26T22:52:00-0700': [321.48],'2008-06-27T01:40:00-0700': [322.34],'2008-06-27T04:28:00-0700': [321.39],'2008-06-27T07:16:00-0700': [311.11],'2008-06-27T10:04:00-0700': [313.69],'2008-06-27T12:52:00-0700': [315.04],'2008-06-27T15:40:00-0700': [313.20],'2008-06-27T18:28:00-0700': [320.21],'2008-06-27T21:16:00-0700': [323.92],'2008-06-28T00:04:00-0700': [322.82],'2008-06-28T02:52:00-0700': [324.74],'2008-06-28T05:40:00-0700': [319.42],'2008-06-28T08:28:00-0700': [315.62],'2008-06-28T11:16:00-0700': [320.38],'2008-06-28T14:04:00-0700': [317.75],'2008-06-28T16:52:00-0700': [312.71],'2008-06-28T19:40:00-0700': [321.57],'2008-06-28T22:28:00-0700': [317.57],'2008-06-29T01:16:00-0700': [316.58],'2008-06-29T04:04:00-0700': [323.16],'2008-06-29T06:52:00-0700': [319.95],'2008-06-29T09:40:00-0700': [313.51],'2008-06-29T12:28:00-0700': [289.85],'2008-06-29T15:16:00-0700': [316.08],'2008-06-29T18:04:00-0700': [319.11],'2008-06-29T20:52:00-0700': [323.05],'2008-06-29T23:40:00-0700': [323.30],'2008-06-30T02:28:00-0700': [325.14],'2008-06-30T05:16:00-0700': [322.71],'2008-06-30T08:04:00-0700': [317.28],'2008-06-30T10:52:00-0700': [308.47],'2008-06-30T13:40:00-0700': [312.84],'2008-06-30T16:28:00-0700': [319.98],'2008-06-30T19:16:00-0700': [321.58],'2008-06-30T22:04:00-0700': [318.17],'2008-07-01T00:52:00-0700': [321.63],'2008-07-01T03:40:00-0700': [324.20],'2008-07-01T06:28:00-0700': [320.84],'2008-07-01T09:16:00-0700': [303.70],'2008-07-01T12:04:00-0700': [309.85],'2008-07-01T14:52:00-0700': [322.40],'2008-07-01T17:40:00-0700': [324.38],'2008-07-01T20:28:00-0700': [321.71],'2008-07-01T23:16:00-0700': [325.96],'2008-07-02T02:04:00-0700': [324.56],'2008-07-02T04:52:00-0700': [317.66],'2008-07-02T07:40:00-0700': [319.35],'2008-07-02T10:08:07-0700': [320.33]};
-    }
+        console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]");
+        return dojo11.xhrGet( {
+            url: "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]",
+            handleAs: 'json',
+            load: function(data){
+                that.charts[chart].data = data;
+            },
+            error: function(data){
+                console.debug("An error occurred fetching charts config ", data);
+            },
+            timeout: 2000
+        });
+    };
 
     /**
      * fetch the stored config for the chart dashboard widget
@@ -1271,13 +1271,13 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         // preset defaults
         that.config.interval = 60;
         that.config.range = '1h';
-        that.config.rotation = 'on';
+        that.config.rotation = 'true';
 
         dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=chart&config=true",
+            handleAs: 'json',
             load: function(data){
-                console.log(data);
-                that.config.interval = parseInt(data.ivl) || that.config.interval;
+                that.config.interval = parseInt(data.ivl,10) || that.config.interval;
                 that.config.range = data.tr || that.config.range;
                 that.config.rotation = data.rot || that.config.rotation;
             },
@@ -1286,23 +1286,20 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             },
             timeout: 2000
         });
-    }
+    };
 
     /**
      * populate the available and selected alert selectboxes
      * 
-     * @param {Object} hash of available alerts, in form { id: name, ... } 
-     * @param {Array} array of the id's of the enabled alerts, in form [ id, ... ]
      * @see hyperic.dashboard.widget#addOptionToSelect
      */
     that.populateChartSelect = function()
     {
-        for(i = 0; i < that.charts.length; i++)
+        for(var i = 0; i < that.charts.length; i++)
         {
-            chartOption = new Option(that.charts[i].name,i);
-            that.addOptionToSelect(that.chartselect, chartOption);
+            that.addOptionToSelect(that.chartselect, new Option(that.charts[i].name,i));
         }
-    }
+    };
     
     /**
      * destroy the old chart, resize the chart container, and re-create the chart
@@ -1321,7 +1318,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         {
             that.needsResize = true;
         }
-    }
+    };
 
     if(that.chartsearch && that.chartselect)
     {
@@ -1340,47 +1337,31 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         // handle resizing of the window
         dojo11.connect(window,'onresize',dojo11.hitch(that, that.chartResize));
 
-        that.fetchConfig();
-        that.fetchCharts();
-        that.populateChartSelect();
-        that.fetchChartsData();
-
         dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 130;
         // dojo11.query('#widget_chart',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 130;
-        
-        if(that.config.rotation == 'on')
+
+        that.fetchConfig();
+        that.fetchAndPlayCharts();
+
+        // while(true)
+        // {
+        //     if(undefined !typeof this.charts[0].data)
+        //     {
+        //         this.playCharts();
+        //         break;
+        //     }
+        // }
+
+        if(that.config.rotation == 'false')
         {
-            this.playCharts();
+            this.pauseCharts();
         }
     }
-}
+};
 
 // set the hyperic.dashboard.widget as the ancestor of the chartWidget class.
 hyperic.dashboard.chartWidget.prototype = hyperic.dashboard.widget;
 
-var charts = [
-  {
-    chartName: "S3 EU High IO Get Throughput Per Second", 
-	data: {'2008-06-25T13:16:00-0700': [463.0],'2008-06-25T16:04:00-0700': [438.7],'2008-06-25T18:52:00-0700': [479.2],'2008-06-25T21:40:00-0700': [508.0],'2008-06-26T00:28:00-0700': [499.2],'2008-06-26T03:16:00-0700': [512.1],'2008-06-26T06:04:00-0700': [522.7],'2008-06-26T08:52:00-0700': [546.3],'2008-06-26T11:40:00-0700': [426.6],'2008-06-26T14:28:00-0700': [522.3],'2008-06-26T17:16:00-0700': [496.0],'2008-06-26T20:04:00-0700': [583.8],'2008-06-26T22:52:00-0700': [609.8],'2008-06-27T01:40:00-0700': [614.4],'2008-06-27T04:28:00-0700': [571.1],'2008-06-27T07:16:00-0700': [494.3],'2008-06-27T10:04:00-0700': [520.1],'2008-06-27T12:52:00-0700': [504.9],'2008-06-27T15:40:00-0700': [509.4],'2008-06-27T18:28:00-0700': [552.3],'2008-06-27T21:16:00-0700': [554.9],'2008-06-28T00:04:00-0700': [559.4],'2008-06-28T02:52:00-0700': [601.3],'2008-06-28T05:40:00-0700': [530.0],'2008-06-28T08:28:00-0700': [546.8],'2008-06-28T11:16:00-0700': [559.1],'2008-06-28T14:04:00-0700': [553.5],'2008-06-28T16:52:00-0700': [528.3],'2008-06-28T19:40:00-0700': [590.4],'2008-06-28T22:28:00-0700': [595.3],'2008-06-29T01:16:00-0700': [605.6],'2008-06-29T04:04:00-0700': [624.7],'2008-06-29T06:52:00-0700': [588.8],'2008-06-29T09:40:00-0700': [557.9],'2008-06-29T12:28:00-0700': [434.6],'2008-06-29T15:16:00-0700': [561.3],'2008-06-29T18:04:00-0700': [568.9],'2008-06-29T20:52:00-0700': [701.9],'2008-06-29T23:40:00-0700': [621.5],'2008-06-30T02:28:00-0700': [632.2],'2008-06-30T05:16:00-0700': [604.8],'2008-06-30T08:04:00-0700': [539.5],'2008-06-30T10:52:00-0700': [546.5],'2008-06-30T13:40:00-0700': [577.3],'2008-06-30T16:28:00-0700': [535.1],'2008-06-30T19:16:00-0700': [609.7],'2008-06-30T22:04:00-0700': [589.0],'2008-07-01T00:52:00-0700': [610.7],'2008-07-01T03:40:00-0700': [666.3],'2008-07-01T06:28:00-0700': [649.0],'2008-07-01T09:16:00-0700': [527.1],'2008-07-01T12:04:00-0700': [528.1],'2008-07-01T14:52:00-0700': [654.8],'2008-07-01T17:40:00-0700': [688.0],'2008-07-01T20:28:00-0700': [668.1],'2008-07-01T23:16:00-0700': [639.4],'2008-07-02T02:04:00-0700': [641.9],'2008-07-02T04:52:00-0700': [588.3],'2008-07-02T07:40:00-0700': [577.7],'2008-07-02T10:08:07-0700': [637.2]}},
-  {
-    chartName: "S3 EU Moderate IO Get Throughput Per Second", 
-	data: {'2008-06-25T13:16:00-0700': [307.87],'2008-06-25T16:04:00-0700': [311.40],'2008-06-25T18:52:00-0700': [311.43],'2008-06-25T21:40:00-0700': [313.34],'2008-06-26T00:28:00-0700': [314.99],'2008-06-26T03:16:00-0700': [315.60],'2008-06-26T06:04:00-0700': [313.15],'2008-06-26T08:52:00-0700': [312.65],'2008-06-26T11:40:00-0700': [296.77],'2008-06-26T14:28:00-0700': [316.11],'2008-06-26T17:16:00-0700': [313.68],'2008-06-26T20:04:00-0700': [323.49],'2008-06-26T22:52:00-0700': [321.48],'2008-06-27T01:40:00-0700': [322.34],'2008-06-27T04:28:00-0700': [321.39],'2008-06-27T07:16:00-0700': [311.11],'2008-06-27T10:04:00-0700': [313.69],'2008-06-27T12:52:00-0700': [315.04],'2008-06-27T15:40:00-0700': [313.20],'2008-06-27T18:28:00-0700': [320.21],'2008-06-27T21:16:00-0700': [323.92],'2008-06-28T00:04:00-0700': [322.82],'2008-06-28T02:52:00-0700': [324.74],'2008-06-28T05:40:00-0700': [319.42],'2008-06-28T08:28:00-0700': [315.62],'2008-06-28T11:16:00-0700': [320.38],'2008-06-28T14:04:00-0700': [317.75],'2008-06-28T16:52:00-0700': [312.71],'2008-06-28T19:40:00-0700': [321.57],'2008-06-28T22:28:00-0700': [317.57],'2008-06-29T01:16:00-0700': [316.58],'2008-06-29T04:04:00-0700': [323.16],'2008-06-29T06:52:00-0700': [319.95],'2008-06-29T09:40:00-0700': [313.51],'2008-06-29T12:28:00-0700': [289.85],'2008-06-29T15:16:00-0700': [316.08],'2008-06-29T18:04:00-0700': [319.11],'2008-06-29T20:52:00-0700': [323.05],'2008-06-29T23:40:00-0700': [323.30],'2008-06-30T02:28:00-0700': [325.14],'2008-06-30T05:16:00-0700': [322.71],'2008-06-30T08:04:00-0700': [317.28],'2008-06-30T10:52:00-0700': [308.47],'2008-06-30T13:40:00-0700': [312.84],'2008-06-30T16:28:00-0700': [319.98],'2008-06-30T19:16:00-0700': [321.58],'2008-06-30T22:04:00-0700': [318.17],'2008-07-01T00:52:00-0700': [321.63],'2008-07-01T03:40:00-0700': [324.20],'2008-07-01T06:28:00-0700': [320.84],'2008-07-01T09:16:00-0700': [303.70],'2008-07-01T12:04:00-0700': [309.85],'2008-07-01T14:52:00-0700': [322.40],'2008-07-01T17:40:00-0700': [324.38],'2008-07-01T20:28:00-0700': [321.71],'2008-07-01T23:16:00-0700': [325.96],'2008-07-02T02:04:00-0700': [324.56],'2008-07-02T04:52:00-0700': [317.66],'2008-07-02T07:40:00-0700': [319.35],'2008-07-02T10:08:07-0700': [320.33]}}, 
-  {
-    chartName: "S3 US High IO Get Throughput Per Second", 
-	data: {'2008-06-25T13:16:00-0700': [9.321],'2008-06-25T16:04:00-0700': [10.521],'2008-06-25T18:52:00-0700': [10.662],'2008-06-25T21:40:00-0700': [11.070],'2008-06-26T00:28:00-0700': [11.079],'2008-06-26T03:16:00-0700': [11.218],'2008-06-26T06:04:00-0700': [10.820],'2008-06-26T08:52:00-0700': [11.375],'2008-06-26T11:40:00-0700': [9.921],'2008-06-26T14:28:00-0700': [10.477],'2008-06-26T17:16:00-0700': [9.782],'2008-06-26T20:04:00-0700': [11.408],'2008-06-26T22:52:00-0700': [11.281],'2008-06-27T01:40:00-0700': [11.550],'2008-06-27T04:28:00-0700': [10.724],'2008-06-27T07:16:00-0700': [10.290],'2008-06-27T10:04:00-0700': [11.319],'2008-06-27T12:52:00-0700': [10.431],'2008-06-27T15:40:00-0700': [11.362],'2008-06-27T18:28:00-0700': [10.880],'2008-06-27T21:16:00-0700': [11.470],'2008-06-28T00:04:00-0700': [11.194],'2008-06-28T02:52:00-0700': [11.205],'2008-06-28T05:40:00-0700': [10.937],'2008-06-28T08:28:00-0700': [10.554],'2008-06-28T11:16:00-0700': [11.198],'2008-06-28T14:04:00-0700': [11.432],'2008-06-28T16:52:00-0700': [9.809],'2008-06-28T19:40:00-0700': [10.185],'2008-06-28T22:28:00-0700': [11.702],'2008-06-29T01:16:00-0700': [12.103],'2008-06-29T04:04:00-0700': [12.175],'2008-06-29T06:52:00-0700': [12.128],'2008-06-29T09:40:00-0700': [11.803],'2008-06-29T12:28:00-0700': [11.648],'2008-06-29T15:16:00-0700': [11.486],'2008-06-29T18:04:00-0700': [11.909],'2008-06-29T20:52:00-0700': [11.782],'2008-06-29T23:40:00-0700': [11.801],'2008-06-30T02:28:00-0700': [12.218],'2008-06-30T05:16:00-0700': [11.879],'2008-06-30T08:04:00-0700': [12.352],'2008-06-30T10:52:00-0700': [11.685],'2008-06-30T13:40:00-0700': [12.043],'2008-06-30T16:28:00-0700': [11.951],'2008-06-30T19:16:00-0700': [11.029],'2008-06-30T22:04:00-0700': [11.277],'2008-07-01T00:52:00-0700': [11.195],'2008-07-01T03:40:00-0700': [11.259],'2008-07-01T06:28:00-0700': [11.849],'2008-07-01T09:16:00-0700': [8.909],'2008-07-01T12:04:00-0700': [8.940],'2008-07-01T14:52:00-0700': [10.224],'2008-07-01T17:40:00-0700': [9.797],'2008-07-01T20:28:00-0700': [10.980],'2008-07-01T23:16:00-0700': [11.718],'2008-07-02T02:04:00-0700': [12.355],'2008-07-02T04:52:00-0700': [12.093],'2008-07-02T07:40:00-0700': [11.696],'2008-07-02T10:08:07-0700': [13.246]}}, 
-  {
-    chartName: "S3 US Moderate IO Get Throughput Per Second", 
-	data: {'2008-06-25T13:15:00-0700': [3.2366],'2008-06-25T16:03:00-0700': [3.4674],'2008-06-25T18:51:00-0700': [3.3226],'2008-06-25T21:39:00-0700': [3.4360],'2008-06-26T00:27:00-0700': [3.3048],'2008-06-26T03:15:00-0700': [3.4479],'2008-06-26T06:03:00-0700': [3.4362],'2008-06-26T08:51:00-0700': [3.2583],'2008-06-26T11:39:00-0700': [3.1096],'2008-06-26T14:27:00-0700': [3.2285],'2008-06-26T17:15:00-0700': [3.2154],'2008-06-26T20:03:00-0700': [3.2051],'2008-06-26T22:51:00-0700': [3.0810],'2008-06-27T01:39:00-0700': [3.3491],'2008-06-27T04:27:00-0700': [3.0773],'2008-06-27T07:15:00-0700': [3.0559],'2008-06-27T10:03:00-0700': [3.3752],'2008-06-27T12:51:00-0700': [3.2596],'2008-06-27T15:39:00-0700': [3.3189],'2008-06-27T18:27:00-0700': [3.2981],'2008-06-27T21:15:00-0700': [3.5980],'2008-06-28T00:03:00-0700': [3.3808],'2008-06-28T02:51:00-0700': [3.3776],'2008-06-28T05:39:00-0700': [3.3918],'2008-06-28T08:27:00-0700': [3.3366],'2008-06-28T11:15:00-0700': [3.3031],'2008-06-28T14:03:00-0700': [3.3490],'2008-06-28T16:51:00-0700': [3.4500],'2008-06-28T19:39:00-0700': [3.4207],'2008-06-28T22:27:00-0700': [3.4302],'2008-06-29T01:15:00-0700': [3.4571],'2008-06-29T04:03:00-0700': [3.6402],'2008-06-29T06:51:00-0700': [3.4169],'2008-06-29T09:39:00-0700': [3.2860],'2008-06-29T12:27:00-0700': [3.2834],'2008-06-29T15:15:00-0700': [3.2747],'2008-06-29T18:03:00-0700': [3.4419],'2008-06-29T20:51:00-0700': [3.4268],'2008-06-29T23:39:00-0700': [3.3875],'2008-06-30T02:27:00-0700': [3.2595],'2008-06-30T05:15:00-0700': [3.4185],'2008-06-30T08:03:00-0700': [3.5244],'2008-06-30T10:51:00-0700': [3.2269],'2008-06-30T13:39:00-0700': [3.3159],'2008-06-30T16:27:00-0700': [3.4720],'2008-06-30T19:15:00-0700': [3.3769],'2008-06-30T22:03:00-0700': [3.6486],'2008-07-01T00:51:00-0700': [3.4856],'2008-07-01T03:39:00-0700': [3.5470],'2008-07-01T06:27:00-0700': [3.1511],'2008-07-01T09:15:00-0700': [3.4540],'2008-07-01T12:03:00-0700': [3.2615],'2008-07-01T14:51:00-0700': [3.3773],'2008-07-01T17:39:00-0700': [3.0402],'2008-07-01T20:27:00-0700': [3.3389],'2008-07-01T23:15:00-0700': [3.4136],'2008-07-02T02:03:00-0700': [3.6106],'2008-07-02T04:51:00-0700': [3.0420],'2008-07-02T07:39:00-0700': [3.4434],'2008-07-02T10:07:07-0700': [2.9928]}}
-  ];
-
-
-/**
- * summaryWidget is a widget that displays alert summaries
- * 
- * @author Anton Stroganov <anton@hyperic.com>
- * @base hyperic.dashboard.widget
- * @constructor
- */
 hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     var that = this;
 
@@ -1396,12 +1377,12 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     that.tables = {
         lcol: dojo11.query('.lcol table tbody',node)[0],
         rcol: dojo11.query('.rcol table tbody',node)[0]
-    }
+    };
 
     that.config = {
         portletName: portletName,
         portletLabel: portletLabel
-    }
+    };
 
     /**
      * an event handler to handle onKeyUp events on the search textbox.
@@ -1414,7 +1395,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     {
         that.searchSelectBox(that.available_alert_groups, e.target.value);
         that.searchSelectBox(that.enabled_alert_groups, e.target.value);
-    }
+    };
     
     /**
      * an event handler to handle the onfocus event on the search textbox.
@@ -1428,7 +1409,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         {
             e.target.value = '';
         }
-    }
+    };
     
     /**
      * an event handler to handle the onblur event on the search textbox.
@@ -1442,7 +1423,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         {
             e.target.value = '[ Group Search ]';
         }
-    }
+    };
 
     /**
      * an event handler to handle the onclick event on the enable alert button.
@@ -1460,7 +1441,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         //     that.selected_alert_groups.push(that.available_alert_groups.options[that.available_alert_groups.selectedIndex].value);
         // }
         that.moveAlert(that.available_alert_groups,that.enabled_alert_groups);
-    }
+    };
     
     /**
      * an event handler to handle the onclick event on the disable alert button.
@@ -1486,7 +1467,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         //     );
         // }
         that.moveAlert(that.enabled_alert_groups,that.available_alert_groups);
-    }
+    };
 
     /**
      * save button handler
@@ -1512,11 +1493,11 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         // });
 
         that.selected_alert_groups = [];
-        for(i = 0, j = that.enabled_alert_groups.options.length; i < j; i++)
+        for(var i = 0, j = that.enabled_alert_groups.options.length; i < j; i++)
         {
             if(that.enabled_alert_groups.options[i])
             {
-                console.log(that.enabled_alert_groups.options[i]);
+                // console.log(that.enabled_alert_groups.options[i]);
                 that.selected_alert_groups.push(that.enabled_alert_groups.options[i].value);
             }
         }
@@ -1524,7 +1505,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         that.fetchAlertGroupStatus();
         that.repaintAlertGroups();
         that.swapSheets(this.configSheet,this.contentSheet);
-    }
+    };
 
     /**
      * an event handler to handle the onclick event on the disable alert button.
@@ -1544,7 +1525,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             that.addOptionToSelect(to, from.options[from.selectedIndex]);
             from.remove(from.selectedIndex);
         }
-    }
+    };
 
     /**
      * populate the available and selected alert selectboxes
@@ -1555,11 +1536,11 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      */
     that.populateAlertGroups = function(alerts, selected_alert_groups)
     {
-        for(i in alerts)
+        for(var i in alerts)
         {
-            to = null;
-            alertOption = new Option(alerts[i],i);
-            for(j = 0; j < selected_alert_groups.length; j++)
+            var to = null;
+            var alertOption = new Option(alerts[i],i);
+            for(var j = 0; j < selected_alert_groups.length; j++)
             {
                 if(selected_alert_groups[j] == i-1)
                 {
@@ -1571,7 +1552,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             
             that.addOptionToSelect(to,alertOption);
         }
-    }
+    };
 
     /**
      * utility function to sort alert data by alert group name
@@ -1579,50 +1560,51 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     that.by_name = function(a,b)
     {
         return that.alert_groups.data[a] > that.alert_groups.data[b];
-    }
+    };
 
     /**
      * destroy current alert tables, and call #paintAlertGroups() to re-paint them
      */
     that.repaintAlertGroups = function() 
     {
-        for(i in that.tables)
+        for(var i in that.tables)
         {
             while(that.tables[i].lastChild) {
               that.tables[i].removeChild(that.tables[i].lastChild);
             }
         }
         that.paintAlertGroups();
-    }
+    };
 
     /**
      * populate the html tables with the alerts based on the data in the #alert_group_status array
      */
     that.paintAlertGroups = function()
     {
-        groups = that.selected_alert_groups.sort(that.by_name);
-        half = Math.ceil(groups.length/2);
+        var groups = that.selected_alert_groups.sort(that.by_name);
+        var half = Math.ceil(groups.length/2);
         
-        status = {
+        var status = {
             'r' : 'Failure',
             'g' : 'OK',
             'y' : 'Warning',
             'd' : 'No Data'
-        }
-        for(i = 0; i < groups.length; i++)
+        };
+
+        for(var i = 0; i < groups.length; i++)
         {
-            table = (i < half) ? that.tables.lcol : that.tables.rcol;
-            row = table.insertRow(-1);
+            var table = (i < half) ? that.tables.lcol : that.tables.rcol;
+            var row = table.insertRow(-1);
             
             row.className = ((i < half ? i : i - half) % 2 == 0) ? 'even' : 'odd';
 
             row.id = 'alertGroup:' + groups[i];
-            data = that.alert_group_status[groups[i]] || ['d','d'];
-            name = that.alert_groups.data[groups[i]];
+            var data = that.alert_group_status[groups[i]] || ['d','d'];
+            var name = that.alert_groups.data[groups[i]];
             row.innerHTML = '<th scope="row">'+ name +'</th><td><img src="/images/'+data[0]+'.png" alt="'+ status[data[0]] +'"></td><td><img src="/images/'+data[1]+'.png"alt="'+ status[data[1]]+'"></td>';
             data = name = null;
         }
-    }
+    };
 
     /**
      * fetch all available alert groups from server
@@ -1657,8 +1639,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                     10 : "SuSE Boxes"
                 },
                 count: 10
-            }
-    }
+            };
+    };
 
     /**
      * fetch the alert group status from server for currently selected alert groups
@@ -1682,8 +1664,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             '8': ['g','g'],
             '9': ['g','g'],
             '10': ['g','g']
-        }
-    }
+        };
+    };
 
     /**
      * fetch the stored selected alert groups for the dashboard widget
@@ -1696,7 +1678,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     that.fetchConfig = function()
     {
         that.selected_alert_groups = ['1','2','3','4','5','6','7'];
-    }
+    };
 
     if(that.available_alert_groups && that.enabled_alert_groups)
     {
@@ -1715,10 +1697,11 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         that.populateAlertGroups(that.alert_groups.data, that.selected_alert_groups);
         that.paintAlertGroups();
     }
-}
+};
 
 // set the hyperic.dashboard.widget as the ancestor of the chartWidget class.
 hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
+
 
 /* timeplot charts.dev.js */
 //INIT
