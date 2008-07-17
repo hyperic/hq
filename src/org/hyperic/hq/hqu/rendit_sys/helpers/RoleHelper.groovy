@@ -5,6 +5,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Role
 import org.hyperic.hq.authz.shared.RoleValue
 import org.hyperic.hq.authz.server.session.Operation
+import org.hyperic.hq.authz.shared.OperationValue
 
 class RoleHelper extends BaseHelper {
 
@@ -48,7 +49,7 @@ class RoleHelper extends BaseHelper {
     private Map makeOpNameToOpMap() {
         def res = [:]
         roleMan.findAllOperations().each {op ->
-            res[op.name] = op
+            res[op.name] = op.operationValue
         }
         res
     }
@@ -70,7 +71,7 @@ class RoleHelper extends BaseHelper {
             ops += allOps[operation]
         }
 
-        Integer roleId = roleMan.createOwnedRole(user, role, ops as Operation[],
+        Integer roleId = roleMan.createOwnedRole(userValue, role, ops as OperationValue[],
                                                  subjectIds, groupIds)
         getRoleById(roleId)
     }
@@ -79,6 +80,6 @@ class RoleHelper extends BaseHelper {
      * Delete a Role
      */
     public void deleteRole(int roldId) {
-        roleMan.removeRole(user, new Integer(roleId))
+        roleMan.removeRole(userValue, new Integer(roleId))
     }
 }
