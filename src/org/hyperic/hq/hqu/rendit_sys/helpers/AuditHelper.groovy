@@ -9,8 +9,8 @@ import org.hyperic.hq.common.server.session.AuditImportance
 class AuditHelper extends BaseHelper {
     private auditMan = AuditManagerEJBImpl.one
     
-    AuditHelper(AuthzSubject user) {
-        super(user)
+    AuditHelper(AuthzSubject user, int sessionId) {
+        super(user, sessionId)
     }
 
     def findAudits(long startTime, long endTime, AuditImportance minImportance,

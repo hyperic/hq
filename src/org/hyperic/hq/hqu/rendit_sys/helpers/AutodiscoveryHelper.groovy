@@ -16,8 +16,8 @@ class AutodiscoveryHelper extends BaseHelper {
     private aiqMan = AIQMan.one
     private AuthzSubjectValue userValue
 
-    AutodiscoveryHelper(AuthzSubject user) {
-        super(user)
+    AutodiscoveryHelper(AuthzSubject user, int sessionId) {
+        super(user, sessionId)
         userValue = user.valueObject
     }
 

@@ -40,6 +40,7 @@ public class RequestInvocationBindings {
     private String              _servletPath;
     private String              _queryStr;
     private AuthzSubject        _user;
+    private int                 _sessionId;
     private HttpServletRequest  _request;
     private HttpServletResponse _response;
     private ServletContext      _context;
@@ -47,6 +48,7 @@ public class RequestInvocationBindings {
     public RequestInvocationBindings(String requestURI, String ctxPath, 
                                      String pathInfo, String servletPath, 
                                      String queryStr, AuthzSubject user,
+                                     int sessionId,
                                      HttpServletRequest request,  
                                      HttpServletResponse response, 
                                      ServletContext ctx)
@@ -57,6 +59,7 @@ public class RequestInvocationBindings {
         _servletPath = servletPath;
         _queryStr    = queryStr;
         _user        = user;
+        _sessionId   = sessionId;
         _request     = request;
         _response    = response;
         _context     = ctx;
@@ -84,6 +87,10 @@ public class RequestInvocationBindings {
     
     public AuthzSubject getUser() {
         return _user;
+    }
+
+    public int getSessionId() {
+        return _sessionId;
     }
 
     public HttpServletRequest getRequest() {

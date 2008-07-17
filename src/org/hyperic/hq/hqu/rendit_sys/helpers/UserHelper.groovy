@@ -15,8 +15,8 @@ class UserHelper extends BaseHelper {
     private authMan = AuthMan.one
     private AuthzSubjectValue userValue
 
-    UserHelper(AuthzSubject user) {
-        super(user)
+    UserHelper(AuthzSubject user, int sessionId) {
+        super(user, sessionId)
         userValue = user.valueObject
     }
 

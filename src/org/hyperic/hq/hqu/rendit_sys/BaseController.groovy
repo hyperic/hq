@@ -351,37 +351,45 @@ abstract class BaseController {
     protected AuthzSubject getUser() {
         invokeArgs.user 
     }
-    
+
+    protected int getSessionId() {
+        invokeArgs.sessionId
+    }
+
     protected AgentHelper getAgentHelper() {
-        new AgentHelper(user)
+        new AgentHelper(user, sessionId)
     }
     
     protected AlertHelper getAlertHelper() {
-        new AlertHelper(user)
+        new AlertHelper(user, sessionId)
     }
 
     protected AuditHelper getAuditHelper() {
-        new AuditHelper(user)
+        new AuditHelper(user, sessionId)
     }
 
     protected ResourceHelper getResourceHelper() {
-        new ResourceHelper(user)
+        new ResourceHelper(user, sessionId)
     }
     
     protected MetricHelper getMetricHelper() {
-        new MetricHelper(user)
+        new MetricHelper(user, sessionId)
     }
 
     protected UserHelper getUserHelper() {
-        new UserHelper(user)
+        new UserHelper(user, sessionId)
+    }
+    
+    protected EscalationHelper getEscalationHelper() {
+        new EscalationHelper(user, sessionId)
     }
 
     protected AutodiscoveryHelper getAutodiscoveryHelper() {
-        new AutodiscoveryHelper(user)
+        new AutodiscoveryHelper(user, sessionId)
     }
 
     protected RoleHelper getRoleHelper() {
-        new RoleHelper(user)
+        new RoleHelper(user, sessionId)
     }
 
     /**

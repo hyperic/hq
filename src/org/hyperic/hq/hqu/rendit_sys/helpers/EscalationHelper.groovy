@@ -10,8 +10,8 @@ import org.hyperic.hq.events.ActionInterface
 class EscalationHelper extends BaseHelper {
     private escMan = EscMan.one
 
-    EscalationHelper(AuthzSubject user) {
-        super(user)
+    EscalationHelper(AuthzSubject user, int sessionId) {
+        super(user, sessionId)
     }
 
     /**
