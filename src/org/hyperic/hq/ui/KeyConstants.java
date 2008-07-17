@@ -65,17 +65,32 @@ public interface KeyConstants {
     /**
      * The key that holds the user's charts time range
      */
-    public static final String USER_DASHBOARD_CHART_RANGE = ".dashContent.charts.range";
+    public static final String USER_DASHBOARD_CHART_RANGE =
+        ".dashContent.slideshow.range";
     
     /**
      * The key that holds the user's charts rotation setting
      */
-    public static final String USER_DASHBOARD_CHART_ROTATION = ".dashContent.charts.rotation";
+    public static final String USER_DASHBOARD_CHART_ROTATION =
+        ".dashContent.slideshow.rotation";
     
     /**
      * The key that holds the user's charts display interval
      */
-    public static final String USER_DASHBOARD_CHART_INTERVAL = ".dashContent.charts.interval";
+    public static final String USER_DASHBOARD_CHART_INTERVAL =
+        ".dashContent.slideshow.interval";
+    
+    /**
+     * The key that holds the user's selected groups for alert summary
+     */
+    public static final String USER_DASHBOARD_ALERT_SUMMARY_GROUPS =
+        "dashContent.alertSummary.groups";
+    
+    /**
+     * The key that holds the user's selected time range for alert summary
+     */
+    public static final String USER_DASHBOARD_ALERT_SUMMARY_RANGE =
+        "dashContent.alertSummary.range";
     
     /**
      * The json object that contains the rids and mtids
