@@ -123,6 +123,13 @@ public class EscalationManagerEJBImpl
         _esclDAO.save(res);
         return res;
     }
+    
+    /**
+     * @ejb:interface-method  
+     */
+    public EscalationState findEscalationState(PerformsEscalations def) {
+        return _stateDAO.find(def);
+    }
 
     /**
      * Update an escalation chain
