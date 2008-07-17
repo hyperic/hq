@@ -5,8 +5,8 @@ import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.authz.server.session.AuthzSubject
 
 class AgentHelper extends BaseHelper {
-    AgentHelper(AuthzSubject user) {
-        super(user)
+    AgentHelper(AuthzSubject user, int sessionId) {
+        super(user, sessionId)
     }
 
     /**

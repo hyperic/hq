@@ -13,8 +13,8 @@ class UserHelper extends BaseHelper {
     private subjectMan = SubjectMan.one
     private authMan = AuthMan.one
 
-    UserHelper(AuthzSubject user) {
-        super(user)
+    UserHelper(AuthzSubject user, int sessionId) {
+        super(user, sessionId)
     }
 
     /**

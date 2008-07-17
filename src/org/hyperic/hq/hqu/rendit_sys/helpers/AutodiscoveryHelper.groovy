@@ -13,8 +13,8 @@ import org.hyperic.util.pager.PageControl
 class AutodiscoveryHelper extends BaseHelper {
 
     private aiqMan = AIQMan.one
-    AutodiscoveryHelper(AuthzSubject user) {
-        super(user)
+    AutodiscoveryHelper(AuthzSubject user, int sessionId) {
+        super(user, sessionId)
     }
 
     /**
