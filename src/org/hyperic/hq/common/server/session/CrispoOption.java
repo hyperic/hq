@@ -41,7 +41,8 @@ public class CrispoOption
     private static final String[] ARRAY_DESCRIMINATORS = {".resources",
                                                           ".portlets.",
                                                           ".indicator.views",
-                                                          ".charts"};
+                                                          ".charts",
+                                                          ".groups"};
     private static final String ARRAY_DELIMITER = "|";
     
     private Crispo _crispo;
