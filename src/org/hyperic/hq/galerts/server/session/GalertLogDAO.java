@@ -115,12 +115,14 @@ class GalertLogDAO
     }
 
     List findByCreateTime(long startTime, long endTime, int count) {
-        return createCriteria()
+        Criteria criteria = createCriteria()
             .add(Expression.between("timestamp", new Long(startTime), 
                                     new Long(endTime)))
-            .addOrder(Order.desc("timestamp"))
-            .setMaxResults(count)
-            .list();
+            .addOrder(Order.desc("timestamp"));
+        if (count >= 0) {
+            criteria.setMaxResults(count);
+        }
+        return criteria.list();
     }
     
     List findByCreateTimeAndPriority(Integer subjectId, long begin, long end, 
