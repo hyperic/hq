@@ -4,8 +4,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Role
 import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl as RoleMan
 import org.hyperic.hq.authz.shared.OperationValue
-import org.hyperic.hq.authz.shared.AuthzSubjectValue
-import org.hyperic.hq.authz.shared.ResourceGroupValue
 
 class RoleCategory {
     private static roleMan = RoleMan.one
@@ -30,6 +28,9 @@ class RoleCategory {
                               (ops.collect { it.valueObject }) as OperationValue[])
     }
 
+    /**
+     * Remove a Role.
+     */
     static void remove(Role role, AuthzSubject user) {
         roleMan.removeRole(user.valueObject, role.id)
     }

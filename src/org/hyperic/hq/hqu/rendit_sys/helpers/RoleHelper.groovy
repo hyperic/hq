@@ -78,13 +78,6 @@ class RoleHelper extends BaseHelper {
     }
 
     /**
-     * Delete a Role
-     */
-    public void deleteRole(int id) {
-        roleMan.removeRole(userValue, new Integer(id))
-    }
-
-    /**
      * Update a Role
      *
      * @param role The role to update
