@@ -128,7 +128,7 @@ public class RESTService extends BaseService {
         String groups =
             config.getValue(Constants.USER_DASHBOARD_ALERT_SUMMARY_GROUPS);
 
-        List groupsList =
+        List<String> groupsList =
             StringUtil.explode(groups, Constants.DASHBOARD_DELIMITER);
 
         try {
@@ -201,9 +201,9 @@ public class RESTService extends BaseService {
                 ResourceGroupManagerLocal rgman = 
                     ResourceGroupManagerEJBImpl.getOne();
                 JSONArray arr = new JSONArray();
-                for (Iterator<String> it = groupsList.iterator(); it.hasNext();)
+                for (String group : groupsList)
                 {
-                    Integer gid = Integer.valueOf(it.next()); 
+                    Integer gid = Integer.valueOf(group); 
                     ResourceGroup rg = rgman.findResourceGroupById(gid);
                     arr.put(new JSONObject().put("id", gid)
                             .put("name", rg.getName()));
@@ -212,9 +212,9 @@ public class RESTService extends BaseService {
             } else {
                 // get alert data
                 List<Integer> gids = new ArrayList<Integer>(groupsList.size());
-                for (Iterator<String> it = groupsList.iterator(); it.hasNext();)
+                for (String group : groupsList)
                 {
-                    gids.add(Integer.valueOf(it.next())); 
+                    gids.add(Integer.valueOf(group)); 
                 }
                 
                 PageInfo pi = PageInfo.create(PageControl.PAGE_ALL, null);
@@ -289,7 +289,7 @@ public class RESTService extends BaseService {
                 ArrayList<Integer> mtids = new ArrayList<Integer>();
                 JSONArray mtidArray = new JSONArray(metricTemplIdParam);
                 for (int i = 0; i < mtidArray.length(); i++) {
-                    mtids.add(Integer.valueOf((String) mtidArray.get(i)));
+                    mtids.add((Integer) mtidArray.get(i));
                 }
                 Map<Integer, List<Integer>> map =
                     new HashMap<Integer, List<Integer>>();
@@ -364,11 +364,10 @@ public class RESTService extends BaseService {
                         
 
                         Matcher matcher;
-                        for (Iterator<String> i = chartList.iterator();
-                             i.hasNext();)
+                        for (String chartCfg : chartList)
                         {
                             List<String> chart =
-                                StringUtil.explode(i.next(), ",");
+                                StringUtil.explode(chartCfg, ",");
                             
                             matcher = MTID_PATTERN.matcher(chart.get(1));
                             JSONArray mtid = new JSONArray();
