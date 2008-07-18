@@ -27,6 +27,7 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,6 +35,12 @@ import javax.ejb.CreateException;
 import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 import junit.framework.Assert;
 
@@ -46,6 +53,7 @@ import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManager_testLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManager_testUtil;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.product.server.MBeanUtil;
 
 /**
  * The session bean implementing the in-container unit tests for the 
@@ -68,6 +76,8 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
     private static final String AVAIL_TAB = "HQ_AVAIL_DATA_RLE";
     private static final Integer MEAS_ID = new Integer(10100);
     private final List _list = new ArrayList();
+    private static final String BACKFILLER_SERVICE =
+        "hyperic.jmx:type=Service,name=AvailabilityCheck";
     
     /**
      * @ejb:interface-method
@@ -82,6 +92,20 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         testCatchup();
         stressTest1();
         stressTest2();
+    }
+    
+    private void invokeBackfiller(Date date)
+        throws InstanceNotFoundException,
+               MBeanException,
+               ReflectionException,
+               MalformedObjectNameException,
+               NullPointerException {
+        MBeanServer server = MBeanUtil.getMBeanServer();
+        
+        ObjectName objName = new ObjectName(BACKFILLER_SERVICE);
+        Object[] obj = {date};
+        String[] str = {"java.util.Date"};
+        server.invoke(objName, "hit", obj, str);
     }
     
     private void stressTest2() throws Exception {
