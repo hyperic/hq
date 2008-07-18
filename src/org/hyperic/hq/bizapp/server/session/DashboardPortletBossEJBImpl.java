@@ -147,7 +147,13 @@ public class DashboardPortletBossEJBImpl
                 for (Iterator it=data.iterator(); it.hasNext(); ) {
                     JSONArray array = new JSONArray();
                     HighLowMetricValue pt = (HighLowMetricValue)it.next();
-                    array.put(pt.getValue());
+                    double val = pt.getValue();
+                    if (val == Double.NaN
+                        || val == Double.POSITIVE_INFINITY
+                        || val == Double.NEGATIVE_INFINITY) {
+                        continue;
+                    }
+                    array.put(val);
                     Date date = new Date(pt.getTimestamp());
                     dataObj.put(dateFmt.format(date), array);
                 }
