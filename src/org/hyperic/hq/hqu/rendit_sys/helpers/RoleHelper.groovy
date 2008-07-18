@@ -95,20 +95,4 @@ class RoleHelper extends BaseHelper {
         // Save role
         roleMan.saveRole(userValue, rv)
     }
-    
-    /**
-     * Set the operations for a Role
-     */
-    public void setOperations(Role role, String[] operations)
-    {
-        RoleValue rv = role.getRoleValue()
-
-        def allOps = operationMap
-        def ops = []
-        operations.each {operation ->
-            ops += allOps[operation]
-        }
-
-        roleMan.setOperations(userValue, rv, ops as OperationValue[])
-    }
 }
