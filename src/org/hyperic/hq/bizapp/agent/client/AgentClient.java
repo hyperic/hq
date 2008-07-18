@@ -618,8 +618,14 @@ public class AgentClient {
                 
         if (unidirectional) {
             // workaround to uniquely identify an agent based on host and port combination
+            // we set the agent port to the hashcode of the FQDN if specified 
             // note that this is not actually a valid port number but rather used as an identifier
-            agentPort = bootP.getProperty(PROP_FQDN).hashCode();
+            // during agent registration to support multiple unidirectional agents on same host
+            String fqdn = bootP.getProperty(PROP_FQDN);
+            if (fqdn != null) {
+                agentPort = fqdn.hashCode();
+            }
+            
             if (secure) {
                 unidirectionalPort = port;                
             } else {
