@@ -22,8 +22,8 @@ class ResourceHelper extends BaseHelper {
     private rman = ResourceManagerEJBImpl.one
     private groupMan = GroupMan.one
     
-    ResourceHelper(AuthzSubject user, int sessionId) {
-        super(user, sessionId)
+    ResourceHelper(AuthzSubject user) {
+        super(user)
     }
 
     /**

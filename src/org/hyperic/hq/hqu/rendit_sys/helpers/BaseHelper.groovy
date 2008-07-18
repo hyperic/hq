@@ -7,13 +7,11 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue
 abstract class BaseHelper {
     private AuthzSubject overlord = AuthzSubjectManagerEJBImpl.one.overlordPojo 
     AuthzSubject      user
-    AuthzSubjectValue userValue
-    int               sessionId
+	AuthzSubjectValue userValue    
 	
-    BaseHelper(AuthzSubject user, int sessionId) {
+    BaseHelper(AuthzSubject user) {
         this.user      = user
         this.userValue = user.authzSubjectValue
-        this.sessionId = sessionId
     }
     
     protected AuthzSubject getOverlord() {

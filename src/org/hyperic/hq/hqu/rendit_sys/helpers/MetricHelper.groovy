@@ -12,8 +12,8 @@ import org.hyperic.util.pager.PageControl
 class MetricHelper extends BaseHelper {
     private tmplMan = TemplateManagerEJBImpl.one
     private measMan = MeasurementManagerEJBImpl.one
-    MetricHelper(AuthzSubject user, int sessionId) {
-        super(user, sessionId)
+    MetricHelper(AuthzSubject user) {
+        super(user)
     }
 
     /**
