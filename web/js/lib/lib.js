@@ -1141,18 +1141,13 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     that.select = function(e)
     {
         that.pauseCharts();
-
+    
         if(that.currentChartId != e.target.value)
         {
-            that.chart.cleanup();
-            that.chart = new hyperic.widget.Chart('chart_container', that.charts[e.target.value]);
-
-            // that.chart.update(charts[e.target.value-1]);
-
-            that.currentChartId = e.target.value;
+            that.cycleCharts(e.target.value);
         }
     };
-    
+
     /**
      * swaps a chart for the next chart in the list. 
      * NB: use 'that.' rather than 'this.' keyword here, because when
@@ -1162,29 +1157,61 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      * @see #playCharts
      * @see #pauseCharts
      */
-    that.cycleCharts = function()
+    that.cycleCharts = function(chartId)
     {
+        // console.info('argument: ' + chartId);
+        // console.info('next defined by default, 0');
         var next = 0;
-        if(that.chart !== null && that.chartselect.selectedIndex != that.chartselect.options.length-1)
+        if(!chartId || chartId < 0 || chartId >= that.chartselect.options.length)
         {
-            next = that.chartselect.selectedIndex+1;
-            that.chart.cleanup();
-        }
-
-        if(!that.charts[next].data)
-        {
-            that.fetchChartData(next).addCallback(function(){
-               that.chart = new hyperic.widget.Chart('chart_container', that.charts[next]);
-           });
+            if(that.chartselect.selectedIndex !== -1 && that.chartselect.selectedIndex != that.chartselect.options.length-1)
+            {
+                // console.info('next defined by next element from select box selected index ' + that.chartselect.selectedIndex + ' + 1');
+                next = that.chartselect.selectedIndex+1;
+            }
         }
         else
         {
-            that.chart = new hyperic.widget.Chart('chart_container', that.charts[next]);
+            // console.info('next defined by passing in argument ' + chartId);
+            next = chartId;
         }
-        // chart.update(charts[next]);
-        
-        that.chartselect.selectedIndex = next;
-        that.currentChartId = next;
+
+        if(that.chart !== null)
+        {
+            that.chart.cleanup();
+        }
+
+        // console.log('next is' + next);
+
+        if(that.charts[next].data)
+        {
+            that.chart = new hyperic.widget.Chart('chart_container', that.charts[next]);
+            that.chartselect.selectedIndex = next;
+            that.currentChartId = next;
+            chartId = null;
+        }
+        else
+        {
+            that.fetchChartData(next).addCallback(
+                function()
+                {
+                    // add a callback to refresh the chart data in a minute
+                    that.charts[next].interval = setInterval(that.fetchChartData(next),3600);
+
+                    // console.log('fetched data; next chart id is ' + next);
+                    if(that.charts[next].data)
+                    {
+                        that.chart = new hyperic.widget.Chart('chart_container', that.charts[next]);
+                    }
+                    else
+                    {
+                        that.chart = new hyperic.widget.Chart('chart_container', {data: {'0': [0]}, name: that.charts[next].name});
+                    }
+                    that.chartselect.selectedIndex = next;
+                    that.currentChartId = next;
+                    chartId = null;
+                });
+        }
     };
     
     /**
@@ -1201,7 +1228,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             that.cycleId = setInterval(that.cycleCharts, parseInt(that.config.interval,10)*1000);
 
             // display pause button when playing
-            that.play_btn.src = '/images/control_pause.png';
+            that.play_btn.src = '/images/4.0/icons/control_pause.png';
             that.play_btn.className = 'pause_btn';
             that.play_btn.alt = 'pause slideshow';
         }
@@ -1219,7 +1246,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             that.cycleId = null;
             
             // display play button when pausing
-            that.play_btn.src = '/images/control_play.png';
+            that.play_btn.src = '/images/4.0/icons/control_play.png';
             that.play_btn.className = 'play_btn';
             that.play_btn.alt = 'play slideshow';
         }
@@ -1254,7 +1281,16 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             url: "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]",
             handleAs: 'json',
             load: function(data){
-                that.charts[chart].data = data;
+                // that.charts[chart].data = data;
+                if(!data.error && data.length > 0)
+                {
+                    console.log('data fetched ('+data.length+' elements found)');
+                    that.charts[chart].data = data[0].data;
+                }
+                else
+                {
+                    console.log('dataset empty');
+                }
             },
             error: function(data){
                 console.debug("An error occurred fetching charts config ", data);
@@ -8336,6 +8372,7 @@ Timeplot.DefaultEventSource.prototype.loadText = function(text, separator, url, 
 Timeplot.DefaultEventSource.prototype.loadJSON = function(data, format) {
 	format = format || 'iso8601';
     var parseDateTimeFunction = this._events.getUnit().getParser(format);
+    var added = false;
 
 	if(data) {
 		this._events.maxValues = [];
