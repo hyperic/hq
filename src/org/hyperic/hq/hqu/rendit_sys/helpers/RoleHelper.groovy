@@ -46,7 +46,7 @@ class RoleHelper extends BaseHelper {
     /**
      * Return a map of Operation name to Operation
      */
-    private Map makeOpNameToOpMap() {
+    public Map getOperationMap() {
         def res = [:]
         roleMan.findAllOperations().each {op ->
             res[op.name] = op
@@ -65,7 +65,7 @@ class RoleHelper extends BaseHelper {
                     description: roleDescription,
                     system: false] as RoleValue
 
-        def allOps = makeOpNameToOpMap()
+        def allOps = operationMap
         def ops = []
         operations.each {operation ->
             ops += allOps[operation]
@@ -102,7 +102,7 @@ class RoleHelper extends BaseHelper {
     {
         RoleValue rv = role.getRoleValue()
 
-        def allOps = makeOpNameToOpMap()
+        def allOps = operationMap
         def ops = []
         operations.each {operation ->
             ops += allOps[operation]
