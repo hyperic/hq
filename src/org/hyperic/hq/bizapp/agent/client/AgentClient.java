@@ -100,7 +100,8 @@ public class AgentClient {
 
     private static final String PROP_LOGFILE    = "agent.logFile";
     private static final String PROP_STARTUP_TIMEOUT = "agent.startupTimeOut";
-
+    private static final String PROP_FQDN = "platform.fqdn";
+    
     private static final String AGENT_CLASS   = 
         "org.hyperic.hq.agent.server.AgentDaemon";
 
@@ -616,6 +617,9 @@ public class AgentClient {
         }
                 
         if (unidirectional) {
+            // workaround to uniquely identify an agent based on host and port combination
+            // note that this is not actually a valid port number but rather used as an identifier
+            agentPort = bootP.getProperty(PROP_FQDN).hashCode();
             if (secure) {
                 unidirectionalPort = port;                
             } else {
