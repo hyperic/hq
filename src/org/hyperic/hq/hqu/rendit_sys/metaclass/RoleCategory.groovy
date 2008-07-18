@@ -21,7 +21,10 @@ class RoleCategory {
         roleMan.addResourceGroups(user, role.roleValue,
                                   (groups.collect {it.id}) as Integer[])
     }
-    
+
+    /**
+     * Set the operations for a Role.
+     */
     static void setOperations(Role role, AuthzSubject user, Collection ops) {
         roleMan.removeAllOperations(user, role.roleValue)
         roleMan.addOperations(user, role.roleValue, ops as Operation[])
