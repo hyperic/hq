@@ -4,6 +4,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Role
 import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl as RoleMan
 import org.hyperic.hq.authz.shared.OperationValue
+import org.hyperic.hq.authz.shared.RoleValue
 
 class RoleCategory {
     private static roleMan = RoleMan.one
@@ -22,6 +23,23 @@ class RoleCategory {
                                   (groups.collect {it.id}) as Integer[])
     }
    
+    /**
+     * Update a Role
+     */
+    static void update(Role role, AuthzSubject user,
+                       String name, String description) {
+
+        RoleValue rv = role.getRoleValue()
+        if (name) {
+            rv.setName(name)
+        }
+        if (description) {
+            rv.setDescription(description)
+        }
+
+        roleMan.saveRole(user.authzSubjectValue, rv)
+    }
+
     /**
      * Set the operations for a Role.
      */

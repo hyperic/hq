@@ -76,23 +76,4 @@ class RoleHelper extends BaseHelper {
                                                  subjectIds, groupIds)
         getRoleById(roleId)
     }
-
-    /**
-     * Update a Role
-     *
-     * @param role The role to update
-     * @param name The new name for the role.  If null, the name will not
-     * be set.
-     * @param description The new description for the role.  If null,
-     * the description will not be set.
-     */
-    public void updateRole(Role role, String name, String description) {
-
-        RoleValue rv = role.getRoleValue()
-        rv.setName(name)
-        rv.setDescription(description)
-
-        // Save role
-        roleMan.saveRole(userValue, rv)
-    }
 }
