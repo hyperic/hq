@@ -109,15 +109,15 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @throws AuthzDuplicateNameException
      */
     private void validateRole(RoleValue aRole)
-        throws AuthzDuplicateNameException {
-        try {
-            Role role = getRoleDAO().findByName(aRole.getName());
-            if (role != null)
-                throw new AuthzDuplicateNameException("A role named: " +
-                    aRole.getName() + " already exists");
-        } catch (ObjectNotFoundException e) {
-            // no problem
-        }        
+        throws AuthzDuplicateNameException 
+    {
+         Role role = getRoleDAO().findByName(aRole.getName());
+         if (role != null) {
+             throw new AuthzDuplicateNameException("A role named: " +
+                                                   aRole.getName() +
+                                                   " already exists");
+         }
+
     }
     
     private Role lookupRole(RoleValue role) {
@@ -731,22 +731,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         value.setMemberCount(numSubjects);
 
         return value;
-    }
-
-    /**
-     * Gives you a value-object with updated attributes.
-     * With many of the methods actions are performed which update the
-     * entity but not the associated value-object. Use this method
-     * to sync up your value-object.
-     * @param old Your current value-object.
-     * @return A new Role value-object.
-     * @throws FinderException Unable to find a given or dependent entities.
-     * @ejb:interface-method
-     */
-    public RoleValue updateRoleValue(RoleValue old) throws FinderException {
-        Role role = getRoleDAO().findById(old.getId());
-        RoleValue newValue = role.getRoleValue();
-        return newValue;
     }
 
     /**
