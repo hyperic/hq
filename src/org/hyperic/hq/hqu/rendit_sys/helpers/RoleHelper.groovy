@@ -2,13 +2,14 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl as RoleMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubMan
 import org.hyperic.hq.authz.server.session.Role
 import org.hyperic.hq.authz.shared.RoleValue
 import org.hyperic.hq.authz.server.session.Operation
 import org.hyperic.hq.authz.shared.OperationValue
 
 class RoleHelper extends BaseHelper {
-
+    def subMan = SubMan.one
     def roleMan = RoleMan.one
 
     RoleHelper(AuthzSubject user, int sessionId) {
@@ -81,5 +82,40 @@ class RoleHelper extends BaseHelper {
      */
     public void deleteRole(int id) {
         roleMan.removeRole(userValue, new Integer(id))
+    }
+
+    /**
+     * Update a Role
+     *
+     * @param role The role to update
+     * @param name The new name for the role.  If null, the name will not
+     * be set.
+     * @param description The new description for the role.  If null,
+     * the description will not be set.
+     */
+    public void updateRole(Role role, String name, String description) {
+
+        RoleValue rv = role.getRoleValue()
+        rv.setName(name)
+        rv.setDescription(description)
+
+        // Save role
+        roleMan.saveRole(userValue, rv)
+    }
+    
+    /**
+     * Set the operations for a Role
+     */
+    public void setOperations(Role role, String[] operations)
+    {
+        RoleValue rv = role.getRoleValue()
+
+        def allOps = makeOpNameToOpMap()
+        def ops = []
+        operations.each {operation ->
+            ops += allOps[operation]
+        }
+
+        roleMan.setOperations(userValue, rv, ops as OperationValue[])
     }
 }
