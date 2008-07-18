@@ -3,8 +3,6 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Role
 import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl as RoleMan
-import org.hyperic.hq.authz.shared.AuthzSubjectValue
-import org.hyperic.hq.authz.shared.ResourceGroupValue
 
 class RoleCategory {
     private static roleMan = RoleMan.one
@@ -28,6 +26,9 @@ class RoleCategory {
         roleMan.addOperations(user.valueObject, role.valueObject, ops)
     }
 
+    /**
+     * Remove a Role.
+     */
     static void remove(Role role, AuthzSubject user) {
         roleMan.removeRole(user, role.id)
     }
