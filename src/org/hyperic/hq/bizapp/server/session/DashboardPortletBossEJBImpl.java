@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 
 import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
@@ -56,17 +55,11 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
-import org.hyperic.hq.events.AlertInterface;
-import org.hyperic.hq.events.AlertSeverity;
-import org.hyperic.hq.events.server.session.Alert;
-import org.hyperic.hq.events.server.session.AlertActionLog;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertValue;
-import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.hq.galerts.server.session.GalertDefSortField;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
@@ -148,9 +141,7 @@ public class DashboardPortletBossEJBImpl
                     JSONArray array = new JSONArray();
                     HighLowMetricValue pt = (HighLowMetricValue)it.next();
                     double val = pt.getValue();
-                    if (val == Double.NaN
-                        || val == Double.POSITIVE_INFINITY
-                        || val == Double.NEGATIVE_INFINITY) {
+                    if (Double.isNaN(val) || Double.isInfinite(val)) {
                         continue;
                     }
                     array.put(val);
