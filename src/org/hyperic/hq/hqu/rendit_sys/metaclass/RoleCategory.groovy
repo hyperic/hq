@@ -21,17 +21,20 @@ class RoleCategory {
         roleMan.addResourceGroups(user.authzSubjectValue,  role.roleValue,
                                   (groups.collect {it.id}) as Integer[])
     }
-    
+   
+    /**
+     * Set the operations for a Role.
+     */
     static void setOperations(Role role, AuthzSubject user, Collection ops) {
         roleMan.removeAllOperations(user.authzSubjectValue, role.roleValue)
         roleMan.addOperations(user.authzSubjectValue, role.roleValue,
-                              (ops.collect { it.valueObject }) as OperationValue[])
+                              ops as OperationValue[])
     }
 
     /**
      * Remove a Role.
      */
     static void remove(Role role, AuthzSubject user) {
-        roleMan.removeRole(user.valueObject, role.id)
+        roleMan.removeRole(user.authzSubjectValue, role.id)
     }
 }
