@@ -536,7 +536,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             Integer[] tids = (Integer[])templs.toArray(new Integer[0]);
             Resource resource = rMan.findResourcePojoById(resId);
             AppdefEntityID appId = new AppdefEntityID(resource);
-            checkModifyPermission(subject.getId(), appId);
+            // checkModifyPermission(subject.getId(), appId);
             Integer resTypeId = resource.getResourceType().getId();
             if (resTypeId.equals(AuthzConstants.authzGroup)) {
                 ResourceGroup grp = gMan.findResourceGroupById(
