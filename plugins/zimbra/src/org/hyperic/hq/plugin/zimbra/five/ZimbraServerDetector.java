@@ -11,7 +11,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.Log4JLogTrackPlugin;
+import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
@@ -20,7 +23,7 @@ import org.hyperic.util.config.ConfigResponse;
 
 public class ZimbraServerDetector extends ServerDetector implements AutoServerDetector {
 
-	private static final String PROCESS_NAME = "zmmailboxdmgr" ;
+	private static final String PROCESS_NAME = "zmmailboxdmgr";
 	private static final String PROCESS_DIR = "/libexec";
 	private static final String ZMSTATS_DIR = "zmstat";
 	private static final String PTQL_QUERY = "State.Name.eq={0}";
@@ -33,7 +36,7 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 	public List getServerResources(ConfigResponse platformConfig) throws PluginException {
 		log.debug("getServerResources(" + platformConfig + ")");
 
-		String args[]={PROCESS_NAME};
+		String args[] = { PROCESS_NAME };
 		long[] pids = getPids(MessageFormat.format(PTQL_QUERY, args));
 		List list_servers = new ArrayList();
 		for (int n = 0; n < pids.length; n++) {
@@ -50,28 +53,36 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 					server.setType(this);
 					server.setName(getPlatformName() + " " + this.getName());
 					server.setInstallPath(path);
+					server.setIdentifier("zimbra " + path);
 
 					// server.setProductConfig(productConfig);
 					setProductConfig(server, productConfig);
 
-					server.setMeasurementConfig(new ConfigResponse());
-					server.setControlConfig(new ConfigResponse());
-					server.setIdentifier("zimbra " + path);
-
+					ConfigResponse metricConfig = new ConfigResponse();
+					metricConfig.setValue("server.log_track.enable", true);
+					metricConfig.setValue("server.log_track.files", path+"/log/mailbox.log");
+					metricConfig.setValue("log_track.level",LogTrackPlugin.LOGLEVEL_DEBUG_LABEL);
+					server.setMeasurementConfig(metricConfig);
+					
+					ConfigResponse controlConfig = new ConfigResponse();
+					controlConfig.setValue(ServerControlPlugin.PROP_PROGRAMPREFIX, "/usr/bin/sudo -u zimbra");  // RHEL 5.0
+					controlConfig.setValue(ServerControlPlugin.PROP_TIMEOUT, "300");
+					server.setControlConfig(controlConfig);
+					
 					list_servers.add(server);
 				}
 			} catch (SigarException e) {
 				e.printStackTrace();
 			}
 		}
-
+ 
 		return list_servers;
 	}
 
-	private final static String[][] SERVICES = { { "MySQL", "/db/mysql.pid" }, { "Postfix", "/data/postfix/spool/pid/master.pid" }, { "Log Watch", "/log/logswatch.pid" }, { "Logger MySQL", "/logger/db/mysql.pid" }, { "OpenLDAP", "/openldap/var/run/slapd.pid" }, { "Swatch", "/log/swatch.pid" }, { "MTA Config", "/log/zmmtaconfig.pid" }, { "memcached", "/log/memcached.pid" }, { "ClamAV", "/log/clamd.pid" }, { "Convertd Monitor", "/log/zmconvertdmon.pid" }, { "Jetty Process", "/log/zmmailboxd_java.pid" } };
-	private final static String[][] MULTI_SERVICES = { { "AMaViS", "/log/amavisd.pid" }, { "HTTPD", "/log/httpd.pid" }, { "NGINX", "/log/nginx.pid" }, { "Cyrus SASL", "/cyrus-sasl/state/saslauthd.pid" } };
+	private final static String[][] SERVICES = { { "MySQL", "/db/mysql.pid" }, { "Postfix", "/data/postfix/spool/pid/master.pid" }, { "Log Watch", "/log/logswatch.pid" }, { "Logger MySQL", "/logger/db/mysql.pid" }, { "OpenLDAP", "/openldap/var/run/slapd.pid" }, { "Swatch", "/log/swatch.pid" }, { "MTA Config", "/log/zmmtaconfig.pid" }, { "memcached", "/log/memcached.pid" }, { "ClamAV", "/log/clamd.pid","/log/clamd.log" }, { "Convertd Monitor", "/log/zmconvertdmon.pid","/log/zmconvertd.log" }, { "Jetty Process", "/log/zmmailboxd_java.pid" } };
+	private final static String[][] MULTI_SERVICES = { { "AMaViS", "/log/amavisd.pid" }, { "HTTPD", "/log/httpd.pid" }, { "NGINX", "/log/nginx.pid","/log/nginx.log" }, { "Cyrus SASL", "/cyrus-sasl/state/saslauthd.pid" } };
 	private final static String[][] OTHER_SERVICES = { { "MTAQueue Stats", "/zmstat/mtaqueue.csv" }, { "VM Stats", "/zmstat/vm.csv" } };
-
+ 
 	protected List discoverServices(ConfigResponse config) throws PluginException {
 		log.debug("discoverServices(" + config + ")");
 		List services = new ArrayList();
@@ -88,7 +99,13 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 				ConfigResponse props = new ConfigResponse();
 				setProductConfig(service, props);
 
-				service.setMeasurementConfig(new ConfigResponse());
+				ConfigResponse metricConfig = new ConfigResponse();
+				if (serviceSata.length > 2) {
+					metricConfig.setValue("service.log_track.enable", true);
+					metricConfig.setValue("service.log_track.files", config.getValue("installpath")+File.separator+serviceSata[2]);
+					metricConfig.setValue("log_track.level",LogTrackPlugin.LOGLEVEL_DEBUG_LABEL);
+				}
+				service.setMeasurementConfig(metricConfig);
 				service.setCustomProperties(new ConfigResponse());
 
 				services.add(service);
@@ -111,7 +128,13 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 				props.setValue("process.query", MessageFormat.format(PROCESS_PID_QUERY, args));
 				setProductConfig(service, props);
 
-				service.setMeasurementConfig(new ConfigResponse());
+				ConfigResponse metricConfig = new ConfigResponse();
+				if (serviceSata.length > 2) {
+					metricConfig.setValue("service.log_track.enable", true);
+					metricConfig.setValue("service.log_track.files", config.getValue("installpath")+File.separator+serviceSata[2]);
+					metricConfig.setValue("log_track.level",LogTrackPlugin.LOGLEVEL_DEBUG_LABEL);
+				}
+				service.setMeasurementConfig(metricConfig);
 				service.setCustomProperties(new ConfigResponse());
 
 				services.add(service);
@@ -159,7 +182,10 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 			ConfigResponse props = new ConfigResponse();
 			setProductConfig(service, props);
 
-			service.setMeasurementConfig(new ConfigResponse());
+			ConfigResponse metricConfig = new ConfigResponse();
+			metricConfig.setValue("service.log_track.enable", true);
+			metricConfig.setValue("service.log_track.files", config.getValue("installpath")+File.separator+"/log/convertd.log");
+			service.setMeasurementConfig(metricConfig);
 			service.setCustomProperties(new ConfigResponse());
 
 			services.add(service);

@@ -34,6 +34,7 @@ USA.
     
     <server name="Zimbra">
         <service name="ClamAV">
+            <plugin type="log_track" class="org.hyperic.hq.product.LogFileTailPlugin"/>
             <config>
                 <option name="process.query" default="Pid.PidFile.eq=%installpath%/log/clamd.pid" description="PTQL for Zimbra Clam Anti-Virus Daemon"/>
             </config>
@@ -48,7 +49,7 @@ USA.
             <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
             &process-metrics;
         </service>
-		
+        
         <service name="OpenLDAP">
             <config>
                 <option name="process.query" default="Pid.PidFile.eq=%installpath%/openldap/var/run/slapd.pid" description="PTQL for Zimbra OpenLDAP"/>
@@ -56,7 +57,7 @@ USA.
             <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
             &process-metrics;
         </service>
-		
+        
         <service name="Swatch">
             <config>
                 <option name="process.query" default="Pid.PidFile.eq=%installpath%/log/swatch.pid" description="PTQL for Zimbra Swatch"/>
@@ -64,7 +65,7 @@ USA.
             <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
             &process-metrics;
         </service>
-		
+        
         <service name="Postfix">
             <config>
                 <option name="process.query" default="Pid.PidFile.eq=%installpath%/postfix/spool/pid/master.pid" description="PTQL for Zimbra Apache Httpd"/>
@@ -72,7 +73,7 @@ USA.
             <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
             &process-metrics;
         </service>
-		
+        
         <service name="Log Watch">
             <config>
                 <option name="process.query" default="Pid.PidFile.eq=%installpath%/log/logswatch.pid" description="PTQL for Zimbra logswatch"/>
@@ -80,7 +81,7 @@ USA.
             <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
             &process-metrics;
         </service>
-		
+        
         <service name="Logger MySQL">
             <config>
                 <option name="process.query" default="Pid.PidFile.eq=%installpath%/logger/db/mysql.pid" description="PTQL for Zimbra Logger MySQLd"/>
@@ -95,6 +96,8 @@ USA.
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.zimbra.five.ZimbraServerDetector"/>
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
         <plugin type="collector" class="org.hyperic.hq.plugin.zimbra.five.ZimbraCollector"/>
+        <plugin type="log_track" class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+        <plugin type="control" class="org.hyperic.hq.plugin.zimbra.five.ZimbraControl"/>
         <config>
             <option name="installpath" default="/opt/zimbra" description="Zimbra Install Path"/>
             <option name="zimbra-ptql" default="Pid.PidFile.eq=%installpath%/log/zmmailboxd_manager.pid" description="Sigar PTQL Process Query"/>
@@ -122,9 +125,10 @@ USA.
             <metric name="Thread" category="THROUGHPUT" alias="Thread" interval="60000" indicator="false"/>
             <metric name="other" category="THROUGHPUT" alias="other" interval="60000" indicator="false"/>
             <metric name="total" category="THROUGHPUT" alias="total" interval="60000" indicator="false"/>
-         </service>
+        </service>
         
         <service name="Convertd Monitor">
+            <plugin type="log_track" class="org.hyperic.hq.product.LogFileTailPlugin"/>
             <config>
                 <option name="process.query" default="Pid.PidFile.eq=%installpath%/log/zmconvertdmon.pid" description="Sigar PTQL Process Query"/>
             </config>
@@ -412,6 +416,7 @@ USA.
         
         <!--  NGINX  -->
         <service name="NGINX">
+            <plugin type="log_track" class="org.hyperic.hq.product.LogFileTailPlugin"/>
             <config>
                 <option name="process.query" description="Sigar PTQL Process Query"/>
             </config>
@@ -436,9 +441,10 @@ USA.
             &multi-process-metrics;
         </service>
         <!-- -->
-
+        
         <!--  convertd  -->
         <service name="Convertd">
+            <plugin type="log_track" class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
             <config>
                 <option name="process.query" default="State.Name.eq=java,Args.*.eq=com.zimbra.cs.convertd.TransformationServer" description="Sigar PTQL Process Query"/>
             </config>
