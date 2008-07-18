@@ -377,6 +377,10 @@ abstract class BaseController {
         new UserHelper(user)
     }
 
+    protected EscalationHelper getEscalationHelper() {
+        new EscalationHelper(user)
+    }
+
     protected AutodiscoveryHelper getAutodiscoveryHelper() {
         new AutodiscoveryHelper(user)
     }
