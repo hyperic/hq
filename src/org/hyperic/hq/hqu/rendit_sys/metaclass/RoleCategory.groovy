@@ -9,7 +9,7 @@ class RoleCategory {
     private static roleMan = RoleMan.one
 
     static void setSubjects(Role role, AuthzSubject user, Collection subjects) {
-        roleMan.removeSubjects(user, role.valueObject,
+        roleMan.removeSubjects(user, role.getRoleValue(),
                             (role.subjects.collect {it.id}) as Integer[])
         roleMan.addSubjects(user, role.valueObject, 
                             (subjects.collect {it.id}) as Integer[])
@@ -23,8 +23,8 @@ class RoleCategory {
     }
     
     static void setOperations(Role role, AuthzSubject user, Collection ops) {
-        roleMan.removeAllOperations(user, role.valueObject)
-        roleMan.addOperations(user, role.valueObject, ops as Operation[])
+        roleMan.removeAllOperations(user, role.getRoleValue())
+        roleMan.addOperations(user, role.getRoleValue(), ops as Operation[])
     }
 
     /**
