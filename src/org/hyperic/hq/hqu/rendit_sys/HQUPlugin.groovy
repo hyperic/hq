@@ -4,7 +4,6 @@ package org.hyperic.hq.hqu.rendit
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
-import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
@@ -216,10 +215,7 @@ class HQUPlugin implements IHQUPlugin {
             }
         } 
 
-        def user = getOverlord()
-        // XXX: This is not exactly ideal.
-        def sessionId = SessionManager.instance.put(user)
-        def rHelper = new ResourceHelper(user, sessionId)
+        def rHelper = new ResourceHelper(getOverlord())
         if (p.resourceType) {
             for (typeName in p.resourceType) {
                 def type = rHelper.findResourcePrototype(typeName)

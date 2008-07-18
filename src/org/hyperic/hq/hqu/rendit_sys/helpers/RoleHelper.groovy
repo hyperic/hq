@@ -12,8 +12,8 @@ class RoleHelper extends BaseHelper {
     def subMan = SubMan.one
     def roleMan = RoleMan.one
 
-    RoleHelper(AuthzSubject user, int sessionId) {
-        super(user, sessionId)
+    RoleHelper(AuthzSubject user) {
+        super(user)
     }
 
     /**

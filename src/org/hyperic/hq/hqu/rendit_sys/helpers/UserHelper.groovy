@@ -2,6 +2,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 import java.util.List
 
+import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.bizapp.server.session.AuthzBossEJBImpl as AuthzBoss
 import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl as AuthMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
@@ -17,8 +18,8 @@ class UserHelper extends BaseHelper {
     private authMan = AuthMan.one
     private AuthzSubjectValue userValue
 
-    UserHelper(AuthzSubject user, int sessionId) {
-        super(user, sessionId)
+    UserHelper(AuthzSubject user) {
+        super(user)
         userValue = user.valueObject
     }
 
@@ -106,6 +107,7 @@ class UserHelper extends BaseHelper {
      * Remove a user from database
      */
     public void removeUser(Integer id) {
+        int sessionId = SessionManager.instance.put(user)
         authzBoss.removeSubject(sessionId, [id] as Integer[])
     }
  }

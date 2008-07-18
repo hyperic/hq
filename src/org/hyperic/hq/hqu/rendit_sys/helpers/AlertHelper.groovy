@@ -14,8 +14,8 @@ class AlertHelper extends BaseHelper {
     private galertMan = GalertManagerEJBImpl.one
     private defMan    = AlertDefinitionManagerEJBImpl.one
     
-    AlertHelper(AuthzSubject user, int sessionId) {
-        super(user, sessionId)
+    AlertHelper(AuthzSubject user) {
+        super(user)
     }
 
     /**

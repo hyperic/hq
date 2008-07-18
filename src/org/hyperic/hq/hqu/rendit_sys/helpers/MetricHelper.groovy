@@ -19,8 +19,8 @@ class MetricHelper extends BaseHelper {
     private tmplMan = TemplateManagerEJBImpl.one
     private measMan = DerivedMeasurementManagerEJBImpl.one
     
-    MetricHelper(AuthzSubject user, int sessionId) {
-        super(user, sessionId)
+    MetricHelper(AuthzSubject user) {
+        super(user)
     }
 
     /**

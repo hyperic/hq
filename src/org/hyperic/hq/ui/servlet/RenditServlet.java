@@ -187,8 +187,7 @@ public class RenditServlet
         RequestInvocationBindings b = 
             new RequestInvocationBindings(reqUri, ctxPath, pathInfo,
                                           servletPath, queryStr, user,
-                                          sessId, req, resp,
-                                          getServletContext());
+                                          req, resp, getServletContext());
         long start = System.currentTimeMillis();
         try {
             RenditServer.getInstance().handleRequest(plugin, b); 
