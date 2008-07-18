@@ -273,15 +273,15 @@ public class RESTService extends BaseService {
             long end = System.currentTimeMillis();
             long start;
             if (timeRange.equalsIgnoreCase("1h")) {
-                start = 3600000l; //1h
+                start = end - 3600000l; //1h
             } else if (timeRange.equalsIgnoreCase("6h")) {
-                start = 21600000l; //6h
+                start = end - 21600000l; //6h
             } else if (timeRange.equalsIgnoreCase("1d")) {
-                start = 86400000l; //1d
+                start = end - 86400000l; //1d
             } else if (timeRange.equalsIgnoreCase("1w")) {
-                start = 604800000l; //1w
+                start = end - 604800000l; //1w
             } else {
-                start = 86400000l; //default to 1d
+                start = end - 86400000l; //default to 1d
             }
 
             // Get chart metric data, given the RID and MTIDs
