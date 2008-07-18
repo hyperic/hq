@@ -682,7 +682,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
         return value;
     }
-se
+
     /**
      * Get the Resource entity associated with this Role.
      * @param role This role.
