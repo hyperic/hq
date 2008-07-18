@@ -23,10 +23,10 @@ class EscalationHelper extends BaseHelper {
      */
     Escalation getEscalation(int id, String name) {
         if (id) {
-            return escMan.findById(id)
+            return escMan.findById(user, id)
         }
         else {
-            return escMan.findByName(name)
+            return escMan.findByName(user, name)
         }
     }
 
