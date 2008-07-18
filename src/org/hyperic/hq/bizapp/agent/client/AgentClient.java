@@ -789,7 +789,7 @@ public class AgentClient {
         }
         tokenRes = this.camCommands.createToken(new CreateToken_args());
         
-        SYSTEM_OUT.println("- Received tempaorary auth token from agent");
+        SYSTEM_OUT.println("- Received temporary auth token from agent");
 
         // Ask server to verify agent
         SYSTEM_OUT.println("- Registering agent with " + PRODUCT);
