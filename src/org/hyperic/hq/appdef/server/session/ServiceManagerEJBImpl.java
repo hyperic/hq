@@ -1251,64 +1251,45 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         HashMap serverTypes = new HashMap();
 
-        ServiceTypeDAO stLHome = getServiceTypeDAO();
+        ServiceTypeDAO stDao = getServiceTypeDAO();
         ResourceGroupManagerLocal resGroupMan = 
             ResourceGroupManagerEJBImpl.getOne();
         ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
         
         try {
-            Collection curServices = stLHome.findByPlugin(plugin);
+            Collection curServices = stDao.findByPlugin(plugin);
             ServerTypeDAO stHome = getServerTypeDAO();
             
             for (Iterator i = curServices.iterator(); i.hasNext();) {
-                ServiceType stlocal = (ServiceType) i.next();
+                ServiceType serviceType = (ServiceType) i.next();
 
                 if (log.isDebugEnabled()) {
                     log.debug("Begin updating ServiceTypeLocal: " +
-                              stlocal.getName());
+                              serviceType.getName());
                 }
 
                 ServiceTypeInfo sinfo =
-                    (ServiceTypeInfo) infoMap.remove(stlocal.getName());
+                    (ServiceTypeInfo) infoMap.remove(serviceType.getName());
 
                 // See if this exists
                 if (sinfo == null) {
-                    Integer typeId = AuthzConstants.authzServiceProto;
-                    Resource proto = 
-                        resMan.findResourcePojoByInstanceId(typeId,
-                                                            stlocal.getId());
-                    
-                    try {
-                        // Delete compatible groups of this type.
-                        resGroupMan.removeGroupsCompatibleWith(proto);
-                    
-                        // Remove all services
-                        for (Iterator svcIt = stlocal.getServices().iterator();
-                             svcIt.hasNext(); ) {
-                            Service svcLocal = (Service) svcIt.next();
-                            removeService(overlord, svcLocal);
-                        }           
-                    } catch (PermissionException e) {
-                        assert false :
-                            "Overlord should not run into PermissionException";
-                    }
-
-                    stLHome.remove(stlocal);
+                    deleteServiceType(serviceType, overlord, resGroupMan,
+                                      resMan);
                 } else {
                     // Just update it
                     // XXX TODO MOVE THIS INTO THE ENTITY
-                    if (!sinfo.getName().equals(stlocal.getName()))
-                        stlocal.setName(sinfo.getName());
+                    if (!sinfo.getName().equals(serviceType.getName()))
+                        serviceType.setName(sinfo.getName());
                         
                     if (!sinfo.getDescription().equals(
-                        stlocal.getDescription()))
-                        stlocal.setDescription(sinfo.getDescription());
+                        serviceType.getDescription()))
+                        serviceType.setDescription(sinfo.getDescription());
                     
-                    if (sinfo.getInternal() !=  stlocal.isIsInternal())
-                        stlocal.setIsInternal(sinfo.getInternal());
+                    if (sinfo.getInternal() !=  serviceType.isIsInternal())
+                        serviceType.setIsInternal(sinfo.getInternal());
 
                     // Could be null if servertype was deleted/updated by plugin
-                    ServerType svrtype = stlocal.getServerType();
+                    ServerType svrtype = serviceType.getServerType();
 
                     // Check server type
                     if (svrtype == null ||
@@ -1324,12 +1305,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                     "Unable to find server " +
                                     sinfo.getServerName() +
                                     " on which service '" +
-                                    stlocal.getName() +
+                                    serviceType.getName() +
                                     "' relies");
                             }
                             serverTypes.put(svrtype.getName(), svrtype);
                         }
-                        stlocal.setServerType(svrtype);
+                        serviceType.setServerType(svrtype);
                     }
                 }
             }
@@ -1341,7 +1322,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             for (Iterator i = infoMap.values().iterator(); i.hasNext();) {
                 ServiceTypeInfo sinfo = (ServiceTypeInfo) i.next();
 
-                ServiceType stype = stLHome.create(sinfo.getName(), plugin, 
+                ServiceType stype = stDao.create(sinfo.getName(), plugin, 
                                                    sinfo.getDescription(),
                                                    sinfo.getInternal());
                 
@@ -1360,8 +1341,39 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                     null); 
             }
         } finally {
-            stLHome.getSession().flush();
+            stDao.getSession().flush();
         }
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void deleteServiceType(ServiceType serviceType,
+                                  AuthzSubject overlord,
+                                  ResourceGroupManagerLocal resGroupMan,
+                                  ResourceManagerLocal resMan)
+        throws VetoException, RemoveException {
+        Resource proto = 
+            resMan.findResourcePojoByInstanceId(AuthzConstants.authzServiceProto,
+                                                serviceType.getId());
+        
+        try {
+            // Delete compatible groups of this type.
+            resGroupMan.removeGroupsCompatibleWith(proto);
+        
+            // Remove all services
+            for (Iterator svcIt = serviceType.getServices().iterator();
+                 svcIt.hasNext(); ) {
+                Service svcLocal = (Service) svcIt.next();
+                removeService(overlord, svcLocal);
+            }           
+        } catch (PermissionException e) {
+            assert false :
+                "Overlord should not run into PermissionException";
+        }
+
+        ServiceTypeDAO dao = new ServiceTypeDAO(DAOFactory.getDAOFactory());
+        dao.remove(serviceType);
     }
 
     /**
@@ -1383,8 +1395,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void removeService(AuthzSubject subject, Service service)
-        throws RemoveException, FinderException, PermissionException, 
-               VetoException  
+        throws RemoveException, PermissionException, VetoException  
     {
         AppdefEntityID aeid = service.getEntityId();
 

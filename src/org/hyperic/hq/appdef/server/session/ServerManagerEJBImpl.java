@@ -51,6 +51,7 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -317,8 +318,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
 
             deleteCustomProperties(aeid);
-        } catch (FinderException e) {
-            throw new ServerNotFoundException(aeid.getId(), e);
         } finally {
             if (pushed) {
                 AuditManagerEJBImpl.getOne().popContainer(true);
@@ -1191,8 +1190,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
         }
 
-        ServerTypeDAO stLHome = getServerTypeDAO();
-        Collection curServers = stLHome.findByPlugin(plugin);
+        ServerTypeDAO stDao = getServerTypeDAO();
+        Collection curServers = stDao.findByPlugin(plugin);
 
         AuthzSubject overlord = 
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
@@ -1201,42 +1200,16 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
         
         for (Iterator i = curServers.iterator(); i.hasNext();) {
-            ServerType stlocal = (ServerType) i.next();
-            String serverName = stlocal.getName();
+            ServerType serverType = (ServerType) i.next();
+            String serverName = serverType.getName();
             ServerTypeInfo sinfo =
                 (ServerTypeInfo) infoMap.remove(serverName);
 
             if (sinfo == null) {
-                log.debug("Removing ServerType: " + serverName);
-                Integer typeId = AuthzConstants.authzServerProto;
-                Resource proto = 
-                    resMan.findResourcePojoByInstanceId(typeId,
-                                                        stlocal.getId());
-                
-                try {
-                    resGroupMan.removeGroupsCompatibleWith(proto);
-                
-                    // Remove all services
-                    for (Iterator svrIt = stlocal.getServers().iterator();
-                         svrIt.hasNext(); ) {
-                        Server svrLocal = (Server) svrIt.next();
-                        try {
-                            removeServer(overlord, svrLocal);
-                        } catch (ServerNotFoundException e) {
-                            assert false :
-                                "Delete based on a server should not " +
-                                "result in ServerNotFoundException";
-                        }
-                    }
-                } catch (PermissionException e) {
-                    assert false :
-                        "Overlord should not run into PermissionException";
-                }
-
-                stLHome.remove(stlocal);
+                deleteServerType(serverType, overlord, resGroupMan, resMan);
             } else {
-                String curDesc = stlocal.getDescription();
-                Collection curPlats = stlocal.getPlatformTypes();
+                String curDesc = serverType.getDescription();
+                Collection curPlats = serverType.getPlatformTypes();
                 String newDesc = sinfo.getDescription();
                 String[] newPlats = sinfo.getValidPlatformTypes();
                 boolean  updatePlats;
@@ -1244,7 +1217,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 log.debug("Updating ServerType: " + serverName);
                         
                 if (!newDesc.equals(curDesc))
-                    stlocal.setDescription(newDesc);
+                    serverType.setDescription(newDesc);
 
                 // See if we need to update the supported platforms
                 updatePlats = newPlats.length != curPlats.size();
@@ -1266,7 +1239,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 }
 
                 if(updatePlats == true){
-                    findAndSetPlatformType(newPlats, stlocal);
+                    findAndSetPlatformType(newPlats, serverType);
                 }
             }
         }
@@ -1287,11 +1260,56 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             String newPlats[] = sinfo.getValidPlatformTypes();
             findAndSetPlatformType(newPlats, stype);
             
-            stype = stLHome.create(stype);
+            stype = stDao.create(stype);
             createAuthzResource(overlord, getServerPrototypeResourceType(),
                                 prototype, stype.getId(), stype.getName(),
                                 null);  // No parent
         }
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void deleteServerType(ServerType serverType, AuthzSubject overlord,
+                                 ResourceGroupManagerLocal resGroupMan,
+                                 ResourceManagerLocal resMan)
+        throws VetoException, RemoveException {
+        log.debug("Removing ServerType: " + serverType.getName());
+        Integer typeId = AuthzConstants.authzServerProto;
+        Resource proto = 
+            resMan.findResourcePojoByInstanceId(typeId,
+                                                serverType.getId());
+        
+        try {
+            resGroupMan.removeGroupsCompatibleWith(proto);
+        
+            // Remove all servers
+            for (Iterator svrIt = serverType.getServers().iterator();
+                 svrIt.hasNext(); ) {
+                Server svrLocal = (Server) svrIt.next();
+                try {
+                    removeServer(overlord, svrLocal);
+                } catch (ServerNotFoundException e) {
+                    assert false :
+                        "Delete based on a server should not " +
+                        "result in ServerNotFoundException";
+                }
+            }
+        } catch (PermissionException e) {
+            assert false :
+                "Overlord should not run into PermissionException";
+        }
+        
+        // Need to remove all service types
+        ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
+        for (Iterator it = serverType.getServiceTypes().iterator();
+             it.hasNext(); ) {
+            ServiceType st = (ServiceType) it.next();
+            svcMan.deleteServiceType(st, overlord, resGroupMan, resMan);
+        }
+
+        ServerTypeDAO dao = new ServerTypeDAO(DAOFactory.getDAOFactory());
+        dao.remove(serverType);
     }
 
     /**

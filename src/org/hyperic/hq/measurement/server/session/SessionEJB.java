@@ -226,6 +226,9 @@ public abstract class SessionEJB {
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 opName = AuthzConstants.serviceOpModifyService;
                 break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                opName = AuthzConstants.groupOpModifyResourceGroup;
+                break;
             default:
                 throw new InvalidAppdefTypeException("Unknown type: " +
                                                      id.getType());

@@ -1252,6 +1252,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         } catch (PermissionException e) {
             assert false : "Overlord should not run into PermissionException";
         }
+        
+        // Need to remove all server types, too
+        ServerManagerLocal svrMan = ServerManagerEJBImpl.getOne();
+        for (Iterator it = pt.getServerTypes().iterator(); it.hasNext(); ) {
+            ServerType st = (ServerType) it.next();
+            svrMan.deleteServerType(st, overlord, resGroupMan, resMan);
+        }
 
         // TODO:  Need to remove the Resource prototype associated with this
         //        platform.
