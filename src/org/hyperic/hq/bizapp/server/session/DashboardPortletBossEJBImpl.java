@@ -187,7 +187,7 @@ public class DashboardPortletBossEJBImpl
         final int maxRecords = pageInfo.getStartRow() + pageInfo.getPageSize();
         int i=0;
         for (Iterator it=groupIds.iterator(); it.hasNext(); i++) {
-            if ( maxRecords != 0 && i > maxRecords ) {
+            if ( maxRecords > 0 && i > maxRecords ) {
                 break;
             }
             if (i < pageInfo.getStartRow()) {
