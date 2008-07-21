@@ -47,11 +47,13 @@ import junit.framework.Assert;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManager_testLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManager_testUtil;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.server.MBeanUtil;
 
@@ -74,7 +76,8 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         AvailabilityManager_testEJBImpl.class.getName();
     private final Log _log = LogFactory.getLog(_logCtx);
     private static final String AVAIL_TAB = "HQ_AVAIL_DATA_RLE";
-    private static final Integer MEAS_ID = new Integer(10100);
+    private static final Integer PLAT_MEAS_ID = new Integer(10100);
+    private static final Integer SERVICE_MEAS_ID = new Integer(13678);
     private final List _list = new ArrayList();
     private static final String BACKFILLER_SERVICE =
         "hyperic.jmx:type=Service,name=AvailabilityCheck";
@@ -88,20 +91,31 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         testPrepend();
         testPrependWithDupValue();
         testNonOneorZeroDupPtInsertAtBegin();
-        // test backfill + catchup
-        testCatchup();
         stressTest1();
         stressTest2();
     }
     
-    private void invokeBackfiller(Date date)
+    /**
+     * @ejb:interface-method
+     */
+    public void testCatchup() throws Exception {
+        // need to invoke backfiller once so that its initial time is set
+        // so that it can start when invoked the next time
+        invokeBackfiller(1l);
+        testCatchup(PLAT_MEAS_ID);
+        testCatchup(SERVICE_MEAS_ID);
+    }
+    
+    private void invokeBackfiller(long timestamp)
         throws InstanceNotFoundException,
                MBeanException,
                ReflectionException,
                MalformedObjectNameException,
                NullPointerException {
+        Date date = new Date(timestamp);
         MBeanServer server = MBeanUtil.getMBeanServer();
         
+        _log.info("Invoking Backfiller with date " + date);
         ObjectName objName = new ObjectName(BACKFILLER_SERVICE);
         Object[] obj = {date};
         String[] str = {"java.util.Date"};
@@ -121,15 +135,17 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
             if ((i%5) == 0) {
                 val = .5;
             }
-            list.add(new DataPoint(MEAS_ID.intValue(), val, tmpTime+=incrTime));
+            list.add(
+                new DataPoint(PLAT_MEAS_ID.intValue(), val, tmpTime+=incrTime));
         }
         avail.addData(list);
         list.clear();
         for (int i=0; i<1000; i++) {
-            list.add(new DataPoint(MEAS_ID.intValue(), 0.0, tmpTime+=incrTime));
+            list.add(
+                new DataPoint(PLAT_MEAS_ID.intValue(), 0.0, tmpTime+=incrTime));
         }
-        DataPoint pt = addData(new MetricValue(1.0, tmpTime));
-        Assert.assertTrue(isAvailDataRLEValid(pt));
+        DataPoint pt = addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime));
+        Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
 
     private void stressTest1() throws Exception {
@@ -137,18 +153,73 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         long now = System.currentTimeMillis();
         long baseTime = TimingVoodoo.roundDownTime(now, 60000);
         long incrTime = 60000;
-        testCatchup(baseTime, incrTime);
-        DataPoint pt = testCatchup((baseTime+120000), incrTime);
-        Assert.assertTrue(isAvailDataRLEValid(pt));
+        testCatchup(PLAT_MEAS_ID, baseTime, incrTime);
+        DataPoint pt = testCatchup(PLAT_MEAS_ID, (baseTime+120000), incrTime);
+        Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
     
-    private void testCatchup() throws Exception {
+    private void testCatchup(Integer measId) throws Exception {
         setupAvailabilityTable();
-        DataPoint pt = testCatchup(System.currentTimeMillis(), 60000);
-        Assert.assertTrue(isAvailDataRLEValid(pt));
+        AvailabilityManagerLocal avail = AvailabilityManagerEJBImpl.getOne();
+        MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+        Measurement meas = mMan.getMeasurement(measId);
+
+        long interval = meas.getInterval();
+        long now = System.currentTimeMillis();
+        long baseTime = TimingVoodoo.roundDownTime(now, 600000);
+        DataPoint pt;
+        invokeBackfiller(baseTime);
+
+        List list = new ArrayList();
+        pt = new DataPoint(measId, new MetricValue(1.0, baseTime));
+        list.add(pt);
+        pt = new DataPoint(measId, new MetricValue(1.0, baseTime+interval));
+        list.add(pt);
+        avail.addData(list);
+        // want to invoke backfiller slightly offset from the regular interval
+        invokeBackfiller(baseTime+(interval*5)-5000);
+        List avails = avail.getHistoricalAvailData(meas.getResource(), baseTime,
+                                                   baseTime+(interval*100));
+        if (avails.size() != 2) {
+            dumpAvailsToLogger(avails);
+        }
+        Assert.assertTrue(avails.size() == 2);
+        // all points should be green in db after this
+        for (int i=0; i<10; i++) {
+            pt = new DataPoint(
+                measId, new MetricValue(1.0, baseTime+(interval*i)));
+            list.add(pt);
+        }
+        avail.addData(list);
+        Assert.assertTrue(isAvailDataRLEValid(measId, pt));
+        avails = avail.getHistoricalAvailData(meas.getResource(), baseTime,
+                                              baseTime+(interval*10));
+        if (avails.size() != 1) {
+            dumpAvailsToLogger(avails);
+        }
+        Assert.assertTrue(avails.size() == 1);
+    }
+    
+    private void dumpAvailsToLogger(List avails) {
+        Integer id = null;
+        for (Iterator i=avails.iterator(); i.hasNext(); ) {
+            AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
+            id = avail.getMeasurement().getId();
+            String msg = id + ", " + avail.getStartime() +
+                ", " + avail.getEndtime() + ", " + avail.getAvailVal();
+            _log.error(msg);
+        }
+        AvailabilityCache cache = AvailabilityCache.getInstance();
+        if (id == null) {
+            return;
+        }
+        synchronized(cache) {
+            _log.error("Cache info -> " + cache.get(id).getTimestamp() + ", " +
+                cache.get(id).getValue());
+        }
     }
 
-    private DataPoint testCatchup(long baseTime, long incrTime)
+    private DataPoint testCatchup(Integer measId, long baseTime, long incrTime)
         throws Exception {
         baseTime = TimingVoodoo.roundDownTime(baseTime, 60000);
 
@@ -157,22 +228,22 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         long tmpTime = baseTime;
         DataPoint pt;
 
-        pt = new DataPoint(MEAS_ID, new MetricValue(1.0, baseTime));
+        pt = new DataPoint(measId, new MetricValue(1.0, baseTime));
         list.add(pt);
-        pt = new DataPoint(MEAS_ID, new MetricValue(1.0, baseTime+incrTime*2));
+        pt = new DataPoint(measId, new MetricValue(1.0, baseTime+incrTime*2));
         list.add(pt);
         for (int i=0; i<5; i++) {
             double val = 1.0;
             if ((i%2) == 0) {
                 val = 0.0;
             }
-            pt = new DataPoint(MEAS_ID, new MetricValue(val, tmpTime+=incrTime));
+            pt = new DataPoint(measId, new MetricValue(val, tmpTime+=incrTime));
             list.add(pt);
         }
         avail.addData(list);
 
         list.clear();
-        pt = new DataPoint(MEAS_ID, new MetricValue(1.0, tmpTime));
+        pt = new DataPoint(measId, new MetricValue(1.0, tmpTime));
         list.add(pt);
         avail.addData(list);
         return pt;
@@ -199,14 +270,14 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         long tmpTime = baseTime;
 
         DataPoint pt;
-        addData(new MetricValue(0.0, tmpTime+=INCRTIME));
-        addData(new MetricValue(1.0, tmpTime+=INCRTIME));
-        addData(new MetricValue(0.0, tmpTime+=INCRTIME));
-        pt = addData(new MetricValue(1.0, tmpTime+=INCRTIME));
+        addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=INCRTIME));
+        addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=INCRTIME));
+        addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=INCRTIME));
+        pt = addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=INCRTIME));
 
         // overwrite first val
-        addData(new MetricValue(0.5, baseTime+INCRTIME));
-        Assert.assertTrue(isAvailDataRLEValid(pt));
+        addData(PLAT_MEAS_ID, new MetricValue(0.5, baseTime+INCRTIME));
+        Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
     
     /*
@@ -225,15 +296,15 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         long tmpTime = baseTime;
 
         DataPoint pt;
-        addData(new MetricValue(1.0, tmpTime+=120000));
-        addData(new MetricValue(0.0, tmpTime+=60000));
-        addData(new MetricValue(1.0, tmpTime+=60000));
-        pt = addData(new MetricValue(0.0, tmpTime+=60000));
+        addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=120000));
+        addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=60000));
+        addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=60000));
+        pt = addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=60000));
 
         // prepend state on to the beginning
-        addData(new MetricValue(1.0, baseTime+60000));
+        addData(PLAT_MEAS_ID, new MetricValue(1.0, baseTime+60000));
 
-        Assert.assertTrue(isAvailDataRLEValid(pt));
+        Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
 
     /*
@@ -252,15 +323,15 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         long tmpTime = baseTime;
 
         DataPoint pt;
-        addData(new MetricValue(0.0, tmpTime+=120000));
-        addData(new MetricValue(1.0, tmpTime+=60000));
-        addData(new MetricValue(0.0, tmpTime+=60000));
-        pt = addData(new MetricValue(1.0, tmpTime+=60000));
+        addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=120000));
+        addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=60000));
+        addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=60000));
+        pt = addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=60000));
 
         // prepend state on to the beginning
-        addData(new MetricValue(1.0, baseTime+60000));
+        addData(PLAT_MEAS_ID, new MetricValue(1.0, baseTime+60000));
 
-        Assert.assertTrue(isAvailDataRLEValid(pt));
+        Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
 
     /*
@@ -281,37 +352,34 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         baseTime = TimingVoodoo.roundDownTime(baseTime, 60000);
         long tmpTime = baseTime;
 
-        List list = new ArrayList();
-
-        addData(new MetricValue(0.0, tmpTime+=INCRTIME));
-        addData(new MetricValue(1.0, tmpTime+=INCRTIME));
-        addData(new MetricValue(0.0, tmpTime+=INCRTIME));
-        addData(new MetricValue(1.0, tmpTime+=INCRTIME));
+        addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=INCRTIME));
+        addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=INCRTIME));
+        addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=INCRTIME));
+        addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=INCRTIME));
 
         // insert into the middle
-        list.clear();
         long middleTime = baseTime+(INCRTIME*3)+(INCRTIME/2);
-        DataPoint pt = addData(new MetricValue(1.0, middleTime));
+        DataPoint pt = addData(PLAT_MEAS_ID, new MetricValue(1.0, middleTime));
 
-        Assert.assertTrue(isAvailDataRLEValid(pt));
+        Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
     
-    private DataPoint addData(MetricValue mVal) {
+    private DataPoint addData(Integer measId, MetricValue mVal) {
         AvailabilityManagerLocal avail = AvailabilityManagerEJBImpl.getOne();
         _list.clear();
-        DataPoint pt = new DataPoint(MEAS_ID, mVal);
+        DataPoint pt = new DataPoint(measId, mVal);
         _list.add(pt);
         avail.addData(_list);
         return pt;
     }
     
-    private boolean isAvailDataRLEValid(DataPoint lastPt) {
+    private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt) {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         boolean descending = false;
         long start = 0l;
         long end = AvailabilityDataRLE.getLastTimestamp();
         Integer[] mids = new Integer[1];
-        mids[0] = MEAS_ID;
+        mids[0] = measId;
         List avails = dao.getHistoricalAvails(mids, start, end, descending);
         AvailabilityDataRLE last = null;
         for (Iterator it=avails.iterator(); it.hasNext(); ) {
@@ -325,11 +393,12 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
                 return false;
             } else if (last.getEndtime() != avail.getStartime()) {
                 _log.error("there are gaps in the availability table");
+                return false;
             }
             last = avail;
         }
         AvailabilityCache cache = AvailabilityCache.getInstance();
-        if (((DataPoint)cache.get(MEAS_ID)).getValue() != lastPt.getValue()) {
+        if (((DataPoint)cache.get(measId)).getValue() != lastPt.getValue()) {
             _log.error("last avail data point does not match cache");
             return false;
         }
@@ -344,14 +413,14 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         long start = 0l;
         long end = AvailabilityDataRLE.getLastTimestamp();
         Integer[] mids = new Integer[1];
-        mids[0] = MEAS_ID;
+        mids[0] = PLAT_MEAS_ID;
         List avails = dao.getHistoricalAvails(mids, start, end, descending);
         for (Iterator it=avails.iterator(); it.hasNext(); ) {
             AvailabilityDataRLE avail = (AvailabilityDataRLE)it.next();
             dao.remove(avail);
         }
         _log.info("deleted " + avails.size() + " rows from " + AVAIL_TAB +
-                  " with measurement Id = " + MEAS_ID);
+                  " with measurement Id = " + PLAT_MEAS_ID);
     }
 
     private AvailabilityDataDAO getAvailabilityDataDAO() {

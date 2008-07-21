@@ -55,6 +55,15 @@ public class AvailabilityManager_test extends BaseServerTestCase {
         undeployHQ();
     }
     
+    public void testBackfill() throws Exception {
+        AvailabilityManager_testLocal aTest =
+            (AvailabilityManager_testLocal)
+                _registry.getLocalInterface(
+                    AvailabilityManager_testEJBImpl.class,
+                    AvailabilityManager_testLocal.class);
+        aTest.testCatchup();
+    }
+    
     public void testRLE() throws Exception {
         AvailabilityManager_testLocal aTest =
             (AvailabilityManager_testLocal)
