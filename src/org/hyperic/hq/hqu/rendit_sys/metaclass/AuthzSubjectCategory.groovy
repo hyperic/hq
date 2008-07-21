@@ -38,7 +38,10 @@ class AuthzSubjectCategory {
         cr.setValue(key, val)
         subMan.setUserPrefs(subject, subject.id, cr)
     }
-    
+
+    /**
+     * Get the hashed password for a user.
+     */
     static getPassword(AuthzSubject subject) {
         def principal = authMan.getPrincipal(subject)
         principal?.password
