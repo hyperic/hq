@@ -197,15 +197,15 @@ public class AvailabilityManagerEJBImpl
     }
     
     /**
-     * Get the list of RLE data for a resource
+     * Get the list of Raw RLE objects for a resource
+     * @return List<AvailabilityDataRLE>
      * @ejb:interface-method
      */
     public List getHistoricalAvailData(Resource res, long begin, long end) {
         return getAvailabilityDataDAO().getHistoricalAvails(res, begin, end);
     }
 
-    private Collection getDefaultHistoricalAvail(long timestamp)
-    {
+    private Collection getDefaultHistoricalAvail(long timestamp) {
         HighLowMetricValue[] rtn = new HighLowMetricValue[DEFAULT_INTERVAL];
         Arrays.fill(rtn, new HighLowMetricValue(AVAIL_UNKNOWN, timestamp));
         return Arrays.asList(rtn);
@@ -471,6 +471,8 @@ public class AvailabilityManagerEJBImpl
     }
 
     /**
+     * @param includes List<Integer> of mids.  If includes is null then all
+     * unavail entities will be returned.
      * @ejb:interface-method
      */
     public List getUnavailEntities(List includes) {
@@ -495,6 +497,7 @@ public class AvailabilityManagerEJBImpl
      * Add a single Availablility Data point.
      * @mid The Measurement id
      * @mval The MetricValue to store.
+     * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
     public void addData(Integer mid, MetricValue mval) {
@@ -508,6 +511,7 @@ public class AvailabilityManagerEJBImpl
      *
      * @param availPoints List of DataPoints
      * 
+     * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
     public void addData(List availPoints)
@@ -517,8 +521,8 @@ public class AvailabilityManagerEJBImpl
         }
         List updateList = new ArrayList(availPoints.size());
         List outOfOrderAvail = new ArrayList(availPoints.size());
-        AvailabilityCache avail = AvailabilityCache.getInstance();
-        synchronized (avail) {
+        AvailabilityCache cache = AvailabilityCache.getInstance();
+        synchronized (cache) {
             updateCache(availPoints, updateList, outOfOrderAvail);
             updateStates(updateList);
         }
@@ -580,7 +584,9 @@ public class AvailabilityManagerEJBImpl
                 if (before == null) {
                     dao.updateStartime(after, avail.getStartime());
                 }
+                // XXX this is wrong
                 else if (before.getAvailVal() == after.getAvailVal()) {
+                    dao.remove(avail);
                     dao.remove(before);
                     dao.updateStartime(after, before.getStartime());
                 }
@@ -742,6 +748,7 @@ public class AvailabilityManagerEJBImpl
         throws BadAvailStateException {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         AvailabilityDataRLE avail = getLastAvail(state, availMap);
+	    boolean debug = _log.isDebugEnabled();
 	    if (avail == null) {
 	        Measurement meas = getMeasurement(state.getMetricId().intValue());
 	        dao.create(meas,
@@ -755,11 +762,15 @@ public class AvailabilityManagerEJBImpl
 	        updateDup(state, avail);
 	        return true;
 	    } else if (state.getValue() == avail.getAvailVal()) {
-	        _log.debug("no update state == avail " + state + " == " + avail);
+	        if (debug) {
+	            _log.debug("no update state == avail " + state + " == " + avail);
+	        }
 	        return true;
 	    }
-	    _log.debug("updating endtime on avail -> " + avail +
-	        ", updating to state -> " + state);
+	    if (debug) {
+	        _log.debug("updating endtime on avail -> " + avail +
+	                   ", updating to state -> " + state);
+	    }
 	    dao.updateEndtime(avail, state.getTimestamp());
 	    dao.create(avail.getMeasurement(), state.getTimestamp(),
 	        state.getValue());
@@ -801,8 +812,10 @@ public class AvailabilityManagerEJBImpl
                     continue;
                 }
                 boolean updateCache = updateState(state, avMap);
-                _log.debug("state " + state + " was updated, cache updated: "
-                           + updateCache);
+                if (_log.isDebugEnabled()) {
+                    _log.debug("state " + state + 
+                               " was updated, cache updated: " + updateCache);
+                }
                 if (updateCache) {
                     cache.put(state.getMetricId(), state);
                 }
@@ -833,7 +846,7 @@ public class AvailabilityManagerEJBImpl
         if (availPoints.size() == 0) {
             return;
         }
-        AvailabilityCache avail = AvailabilityCache.getInstance();
+        AvailabilityCache cache = AvailabilityCache.getInstance();
         for (Iterator i=availPoints.iterator(); i.hasNext(); ) {
             DataPoint pt = (DataPoint)i.next();
 			int id = pt.getMetricId().intValue();
@@ -841,7 +854,7 @@ public class AvailabilityManagerEJBImpl
             double val = mval.getValue();
             long timestamp = mval.getTimestamp();
             DataPoint newState = new DataPoint(id, val, timestamp);
-            DataPoint oldState = avail.get(new Integer(id));
+            DataPoint oldState = cache.get(new Integer(id));
             // we do not want to update the state if it changes
             // instead change it when the db is changed in order
             // to ensure the state of memory to db
@@ -851,11 +864,15 @@ public class AvailabilityManagerEJBImpl
             } else if (oldState == null || oldState.getValue() == AVAIL_NULL ||
                     oldState.getValue() != val) {
                 updateList.add(newState);
-                _log.debug("value of state " + newState + " differs from" +
-                           " current value" + ((oldState == null) ?
-                           " old state does not exist" : oldState.toString()));
+                if (_log.isDebugEnabled()) {
+                    String msg = "value of state " + newState + 
+                                 " differs from" + " current value" +
+                                 ((oldState != null) ? oldState.toString() :
+                                     " old state does not exist");
+                    _log.debug(msg);
+                }
             } else {
-                avail.put(new Integer(id), newState);
+                cache.put(new Integer(id), newState);
 	        }
         }
     }
@@ -897,7 +914,7 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private static Measurement getMeasurement(int id) {
+    private Measurement getMeasurement(int id) {
         MeasurementManagerLocal derMan =
             MeasurementManagerEJBImpl.getOne();
         return derMan.getMeasurement(new Integer(id));

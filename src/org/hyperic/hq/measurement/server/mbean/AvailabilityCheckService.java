@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.AvailabilityCache;
@@ -66,50 +67,75 @@ public class AvailabilityCheckService
     public void hit(Date lDate) {
         super.hit(lDate);
     }
+    
+    // End is at least more than 1 interval away
+    private long getEndWindow(long current, Measurement meas) {
+	    return TimingVoodoo.roundDownTime(
+	        (current-meas.getInterval()), meas.getInterval());
+    }
+
+    private long getBeginWindow(long end, Measurement meas) {
+        final long interval = 0;
+        final long wait = 5 * MeasurementConstants.MINUTE;
+        long measInterval = meas.getInterval();
+
+        // We have to get at least the measurement interval
+        long maxInterval =
+            Math.max(Math.max(interval, wait), measInterval);
+    
+        // Begin is maximum of mbean interval or measurement create time
+        long begin = Math.max(end - maxInterval, meas.getMtime() + measInterval);
+        return TimingVoodoo.roundDownTime(begin, measInterval);
+    }
 
     private List getDownPlatforms(Date lDate) {
-        boolean debug = _log.isDebugEnabled();
-        long now = lDate.getTime();
-        AvailabilityCache avail = AvailabilityCache.getInstance();
+        final boolean debug = _log.isDebugEnabled();
+        AvailabilityCache cache = AvailabilityCache.getInstance();
         AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
         List platformResources = availMan.getPlatformResources();
+        final long now = lDate.getTime();
         List rtn = new ArrayList(platformResources.size());
-        synchronized (avail) {
+        synchronized (cache) {
             for (Iterator i = platformResources.iterator(); i.hasNext();) {
                 Measurement meas = (Measurement)i.next();
                 long interval = meas.getInterval();
-                DataPoint last = avail.get(meas.getId(),
-                    new DataPoint(meas.getId().intValue(), AVAIL_NULL, now));
+                long end = getEndWindow(now, meas);
+                long begin = getBeginWindow(end, meas);
+                DataPoint defaultPt =
+                    new DataPoint(meas.getId().intValue(), AVAIL_NULL, end);
+                DataPoint last = cache.get(meas.getId(), defaultPt);
+                long lastTimestamp = last.getTimestamp();
                 if (debug) {
-                    long t = last.getTimestamp();
                     String msg = "Checking availability for " + last +
-                        ", " + TimeUtil.toString(t) +
+                        ", " + TimeUtil.toString(lastTimestamp) +
                         " vs. " + TimeUtil.toString(now) + " (checktime)";
                     _log.debug(msg);
                 }
-                if (last.getValue() != AVAIL_DOWN &&
-                    (now - last.getTimestamp()) >= interval*2) {
-                    DataPoint point =  new DataPoint(meas.getId(),
-                        new MetricValue(AVAIL_DOWN,
-                                        last.getTimestamp()+ interval * 2));
-                    ResourceDataPoint rdp =
-                        new ResourceDataPoint(meas.getResource(), point);
-                    rtn.add(rdp);
+                if (begin > end) {
+                    // this represents the scenario where the measurement mtime
+                    // was modified recently and therefore we need to wait
+                    // another interval
+                    continue;
+                }
+                if (last.getValue() == AVAIL_DOWN ||
+                    (now - lastTimestamp) >= interval*2)
+                {
+                    long t =  lastTimestamp + interval;
+                    MetricValue val = new MetricValue(AVAIL_DOWN, t);
+                    DataPoint point =  new DataPoint(meas.getId(), val);
+                    rtn.add(new ResourceDataPoint(meas.getResource(), point));
                 }
             }
         }
         return rtn;
     }
     
-    private class ResourceDataPoint {
+    private class ResourceDataPoint extends DataPoint {
         private Resource _resource;
-        private DataPoint _point;
         public ResourceDataPoint(Resource resource, DataPoint point) {
+            super(point.getMetricId().intValue(), point.getValue(),
+                point.getTimestamp());
             _resource = resource;
-            _point = point;
-        }
-        public DataPoint getDataPoint() {
-            return _point;
         }
         public Resource getResource() {
             return _resource;
@@ -124,38 +150,50 @@ public class AvailabilityCheckService
         long current = lDate.getTime();
         // Don't start backfilling immediately
         if (!canStart(current)) {
+            _log.debug("not starting availability check");
             return;
         }
         AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
-        List downPlatforms = getDownPlatforms(lDate);
-        List backfillList = new ArrayList();
-        for (Iterator i=downPlatforms.iterator(); i.hasNext(); ) {
-            ResourceDataPoint rdp = (ResourceDataPoint)i.next();
-            Resource platform = rdp.getResource();
-            DataPoint point = rdp.getDataPoint();
-            if (debug) {
-                _log.debug("platform measurement id " + point.getMetricId() +
-                           " is being marked down");
-            }
-            backfillList.add(point);
-            List associatedResources =
-                availMan.getAvailMeasurementChildren(platform);
-            if (debug) {
-                _log.debug("platform id " + platform.getId() + " has " +
-                    associatedResources.size() + " associated resources");
-            }
-            for (Iterator j=associatedResources.iterator(); j.hasNext(); ) {
-                Measurement meas = (Measurement)j.next();
+        AvailabilityCache cache = AvailabilityCache.getInstance();
+        synchronized (cache) {
+            List downPlatforms = getDownPlatforms(lDate);
+            List backfillList = new ArrayList();
+            for (Iterator i=downPlatforms.iterator(); i.hasNext(); ) {
+                ResourceDataPoint rdp = (ResourceDataPoint)i.next();
+                Resource platform = rdp.getResource();
                 if (debug) {
-                    _log.debug("measurement id " + meas.getId() + " is " +
-                               "being marked down");
+                    _log.debug("platform measurement id " + rdp.getMetricId() +
+                               " is being marked down");
                 }
-                point = new DataPoint(meas.getId(),
-                    new MetricValue(AVAIL_DOWN, current));
-                backfillList.add(point);
+                backfillList.add(rdp);
+                List associatedResources =
+                    availMan.getAvailMeasurementChildren(platform);
+                if (debug) {
+                    _log.debug("platform id " + platform.getId() + " has " +
+                        associatedResources.size() + " associated resources");
+                }
+                for (Iterator j=associatedResources.iterator(); j.hasNext(); ) {
+                    Measurement meas = (Measurement)j.next();
+                    if (!meas.isEnabled()) {
+                        continue;
+                    }
+                    long end = getEndWindow(current, meas);
+                    DataPoint defaultPt =
+                        new DataPoint(meas.getId().intValue(), AVAIL_NULL, end);
+                    DataPoint lastPt = cache.get(meas.getId(), defaultPt);
+                    long backfillTime =
+                        lastPt.getTimestamp() + meas.getInterval();
+                    if (debug) {
+                        _log.debug("measurement id " + meas.getId() + " is " +
+                                   "being marked down, time=" + backfillTime);
+                    }
+                    MetricValue val = new MetricValue(AVAIL_DOWN, backfillTime);
+                    DataPoint point = new DataPoint(meas.getId(), val);
+                    backfillList.add(point);
+                }
             }
+            availMan.addData(backfillList);
         }
-        availMan.addData(backfillList);
     }
 
     private boolean canStart(long now) {
