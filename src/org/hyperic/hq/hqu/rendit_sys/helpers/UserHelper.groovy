@@ -2,18 +2,15 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 import java.util.List
 
-import org.hyperic.hq.auth.shared.SessionManager
-import org.hyperic.hq.bizapp.server.session.AuthzBossEJBImpl as AuthzBoss
 import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl as AuthMan
-import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubjectMan
 import org.hyperic.hq.authz.shared.AuthzSubjectValue
+import org.hyperic.hq.authz.server.session.AuthzSubject
 
 /**
  * The UserHelper can be used to find Users in the HQ system.
  */
 class UserHelper extends BaseHelper {
-    private authzBoss = AuthzBoss.one
     private subjectMan = SubjectMan.one
     private authMan = AuthMan.one
     private AuthzSubjectValue userValue
@@ -87,27 +84,4 @@ class UserHelper extends BaseHelper {
         subjectMan.updateSubject(user, found, active, dsn, dept, email, first,
                                  last, phone, sms, html)
     }
-     
-    /**
-     * Update a user's password hash.
-     */
-    public void updateUserPassword(String subject, String hash) {
-        authMan.changePasswordHash(userValue, subject.name, hash)
-    }
-
-    /**
-     * Change the password for a user
-     * @param subject The {@link AuthzSubject} to change the password for
-     */
-    public void changeUserPassword(subject, String password) {
-        authMan.changePassword(userValue, subject.name, password)
-    }
-
-    /**
-     * Remove a user from database
-     */
-    public void removeUser(Integer id) {
-        int sessionId = SessionManager.instance.put(user)
-        authzBoss.removeSubject(sessionId, [id] as Integer[])
-    }
- }
+}
