@@ -20,7 +20,10 @@ class AuthzSubjectCategory {
     static boolean isSuperUser(AuthzSubject subject) {
         PermissionManagerFactory.getInstance().hasAdminPermission(subject.id)
     }
-    
+
+    /**
+     * Get the hashed password for a user.
+     */
     static getPassword(AuthzSubject subject) {
         def principal = authMan.getPrincipal(subject)
         principal?.password
