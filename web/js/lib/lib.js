@@ -987,6 +987,17 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     this.click_save_btn = function(e)
     {
+        // if the time range has changed, reset the chart data and chart refresh cycle
+        if(that.config.range && that.config.range != dojo11.byId('chart_range').value)
+        {
+            for(var i = 0; i < that.charts.length; i++)
+            {
+                clearInterval(that.charts[i].interval);
+                that.charts[i].data = null;
+                that.charts[i].interval = null;
+            }
+        }
+
         that.config.interval = parseInt(dojo11.byId('chart_interval').value,10);
         that.config.range = dojo11.byId('chart_range').value;
         that.config.rotation = dojo11.byId('chart_rotation').checked ? 'true' : 'false';
