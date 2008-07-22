@@ -24,18 +24,20 @@ hyperic.html = {
 
 hyperic.form = {
     fieldFocus : function(/*DOMNode*/elem) {
-        if (!elem.getAttribute('readonly')) {
-            if (elem.parentNode.className == "fieldRow hint")
+        if(!elem.getAttribute('readonly')) {
+            if(elem.parentNode.className == "fieldRow hint") {
                 elem.parentNode.className = "fieldRow hint active";
-            else
+            } else {
                 elem.parentNode.className = "fieldRow active";
+            }
         }
     },
     fieldBlur : function(elem) {
-        if (elem.parentNode.className == "fieldRow hint active")
+        if(elem.parentNode.className == "fieldRow hint active") {
             elem.parentNode.className = "fieldRow hint";
-        else
+        } else {
             elem.parentNode.className = "fieldRow";
+        }
     }
 };
 
@@ -44,25 +46,23 @@ hyperic.form = {
  */
 hyperic.utils.key = {
     enterKeyHandler : function(evt) {
-        if (evt){}
-        else
-            evt = window.event;
-        if (window.event) {
+        if(!evt) { evt = window.event; }
+        if(window.event) {
             evt.cancelBubble = true;
             evt.returnValue = false;
         } else {
             evt.preventDefault();
             evt.stopPropagation();            
         }
-        if (evt.keyCode == 13) {
+        if(evt.keyCode == 13) {
             dojo.event.topic.publish('enter', [evt]);
         }
     },
     registerListener : function(/*DOMNode*/node, /*fp*/handler){
-        if (handler && node) {
+        if(handler && node) {
             dojo.event.connect(node, 'onkeyup', handler);
             /*
-            if (dojo.isIE) {
+            if(dojo.isIE) {
                 node.attachEvent("keyup", handler);
             } else {
                 node.addEventListener("keyup", handler, false);
@@ -76,10 +76,7 @@ hyperic.utils.key = {
  * Get an DOM Id that is unique to this document
  */
 hyperic.utils.getUniqueId = function(/*String*/ prefix){
-    if(prefix)
-        return prefix + hyperic.config.uniqueIndex++ +"";
-    else
-        return "unique" + hyperic.config.uniqueIndex++ +"";
+    return (('undefined' !== typeof(prefix)) ? prefix : "unique" ) + hyperic.config.uniqueIndex++ +"";
 };
 
 /**
@@ -101,7 +98,7 @@ hyperic.utils.addKeyListener = function(/*Node*/node, /*Object*/ keyComb, /*Stri
     this.keyListener = function(e){
         if(e && e.keyCode == this.keyComb.keyCode && !this.canceled){
             if(this.keyComb.ctrl || this.keyComb.alt || this.keyComb.shift){
-                if (e.ctrlKey || e.altKey || e.shiftKey){
+                if(e.ctrlKey || e.altKey || e.shiftKey){
                     this.publish(e);
                 }else{
                     return;
@@ -132,8 +129,7 @@ hyperic.utils.addKeyListener = function(/*Node*/node, /*Object*/ keyComb, /*Stri
 };
 
 hyperic.utils.addUrlXtraCallback = function(plugin_id, fn) {
-    if(!urlXtraVar[plugin_id])
-        urlXtraVar[plugin_id] = [];
+    urlXtraVar[plugin_id] = urlXtraVar[plugin_id] || [];
     urlXtraVar[plugin_id].push(fn);
 };
 
@@ -159,21 +155,21 @@ hyperic.utils.passwd = {
         var score   = 0;
 
         //if password bigger than 6 give 1 point
-        if (password.length > 6) score++;
+        if(password.length > 6) { score++; }
 
         //if password has both lower and uppercase characters give 1 point      
-        if ( ( password.match(/[a-z]/) ) && ( password.match(/[A-Z]/) ) ) score++;
+        if( password.match(/[a-z]/) && password.match(/[A-Z]/) ) { score++; }
 
         //if password has at least one number give 1 point
-        if (password.match(/\d+/)) score++;
+        if(password.match(/\d+/)) { score++; }
 
         //if password has at least one special caracther give 1 point
-        if ( password.match(/.[!,@,#,$,%,^,&,*,?,_,~,-,(,)]/) ) score++;
+        if( password.match(/.[!,@,#,$,%,\^,&,*,?,_,~,-,(,)]/) ) { score++; }
 
         //if password bigger than 12 give another 1 point
-        if (password.length > 12) score++;
-         document.getElementById("passwordDescription").innerHTML = desc[score];
-         document.getElementById("passwordStrength").className = "strength" + score;
+        if(password.length > 12) { score++; }
+        document.getElementById("passwordDescription").innerHTML = desc[score];
+        document.getElementById("passwordStrength").className = "strength" + score;
     }
 };
 
@@ -185,6 +181,7 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
     this.resourceURL= urls.resource;
     this.searchURL  = urls.search;
     this.keyCode    = keyCode;
+    this.listeners  = [];
     /**
      * Connect all the events up and grab the nodes that we are going to need
      */
@@ -195,9 +192,9 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
         this.nodeCancel         = dojo.byId('searchClose');
         this.nodeSearchButton   = dojo.byId("headerSearch");
         //Set up the key listeners for the search feature
-        new hyperic.utils.addKeyListener(window, this.keyCode, 'search');
-        new hyperic.utils.addKeyListener(this.searchContainer, {keyCode: 13}, 'enter');
-        new hyperic.utils.addKeyListener(dojo.byId('header'), {keyCode: 27}, 'escape');
+        this.listeners.push( new hyperic.utils.addKeyListener(window, this.keyCode, 'search') );
+        this.listeners.push( new hyperic.utils.addKeyListener(this.searchContainer, {keyCode: 13}, 'enter') );
+        this.listeners.push( new hyperic.utils.addKeyListener(dojo.byId('header'), {keyCode: 27}, 'escape') );
     };
     this.search = function(e){
         var string = e.target.value;
@@ -300,12 +297,13 @@ hyperic.widget.Menu = function(kwArgs) {
                 x=node.offsetLeft;
                 y=node.clientHeight+node.offsetTop;
             }
-            this.node.style['top'] = y+'px';
-            this.node.style['left'] = x+'px';
+            this.node.style.top = y+'px';
+            this.node.style.left = x+'px';
             this.node.style.display = 'block';
             this._isVisible = true;
-            if(this._isSubMuenu)
+            if(this._isSubMuenu) {
                 this.isFocused = true;
+            }
         }
     };
     this.onUnHover = function() {
@@ -515,7 +513,7 @@ hyperic.hq.reporting.manager = {
                     submit = true && submit;                        
                 }
             }else if(this.currentReportOptions[i].getState){
-                if(this.currentReportOptions[i].getValue() == "" && !this.currentReportOptions[i]._isValidOption()){
+                if(this.currentReportOptions[i].getValue() === '' && !this.currentReportOptions[i]._isValidOption()){
                     this.currentReportOptions[i].fieldWrapper.className += ' error';
                     this.currentReportOptions[i].validationMessage.innerHTML = "&nbsp;-&nbsp;this field is required ";
                     submit = false && submit;  
@@ -525,7 +523,7 @@ hyperic.hq.reporting.manager = {
                     submit = true && submit;
                 }
             }else if(this.currentReportOptions[i].getValue && !this.currentReportOptions[i].getState){
-                if(this.currentReportOptions[i].textbox.value == ''){
+                if(this.currentReportOptions[i].textbox.value === ''){
                     this.currentReportOptions[i].fieldWrapper.className += ' error';
                     this.currentReportOptions[i].validationMessage.innerHTML = "&nbsp;-&nbsp;this field is required ";
                     submit = false && submit;                       
@@ -585,9 +583,9 @@ function createInputFieldsFromJSON(jsonArray){
     var i = 0;
     while(i < descriptor.length){
         // var type = descriptor[key].type;
-        var type = descriptor[i]["descriptor"].type;
+        var type = descriptor[i].descriptor.type;
         if(type !== undefined){
-            var o = descriptor[i]['descriptor'];
+            var o = descriptor[i].descriptor;
             if(type.indexOf("String") != -1){
                 hyperic.hq.dom.createTextBox(o.name);
             }else if(type.indexOf("Date") != -1){
@@ -601,23 +599,25 @@ function createInputFieldsFromJSON(jsonArray){
 }
 
 
-
 /**
  * @deprecated used only for the struts header
  */
 function activateHeaderTab(){
     var l = document.location;
     l = l+""; // force string cast
-    if(l.indexOf("Dash")!=-1)
+    if(l.indexOf("Dash")!=-1) {
         dojo.byId("dashTab").className = "active";
-    if(l.indexOf("Resou")!=-1)
+    }
+    if(l.indexOf("Resou")!=-1){
         dojo.byId("resTab").className = "active";
-    if(l.indexOf("rep")!=-1 || l.indexOf("Rep")!=-1 || l.indexOf("masth")!=-1)
+    }
+    if(l.indexOf("rep")!=-1 || l.indexOf("Rep")!=-1 || l.indexOf("masth")!=-1){
         dojo.byId("analyzeTab").className = "active";
-    if(l.indexOf("admin")!=-1 || l.indexOf("Adm")!=-1)
+    }
+    if(l.indexOf("admin")!=-1 || l.indexOf("Adm")!=-1){
         dojo.byId("adminTab").className = "active";
+    }
 }
-
 
 hyperic.widget = hyperic.widget || {};
 
