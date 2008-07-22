@@ -301,7 +301,7 @@ class ResourceCategory {
     }
     
     static Resource getPlatform(Resource r, AuthzSubject subject) {
-        def aeid = new AppdefEntityID(r.resourceValue)
+        def aeid = new AppdefEntityID(r)
         def aeval = new AppdefEntityValue(aeid, subject)
         def plats = aeval.getAssociatedPlatforms(PageControl.PAGE_ALL);
         def plat = plats[0]
