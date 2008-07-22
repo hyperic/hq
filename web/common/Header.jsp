@@ -44,13 +44,12 @@
     document.menu2 = new hyperic.widget.Menu(
         {
             toggleNode : dojo.byId('analyze'),
-            menuNode   : dojo.byId('analyze_1'),
-            
+            menuNode   : dojo.byId('analyze_1')
         });
     document.menu1 = new hyperic.widget.Menu(
         { 
             toggleNode : dojo.byId('resource'),
-            menuNode   : dojo.byId('resource_1'),
+            menuNode   : dojo.byId('resource_1')
             /*child      : document.menu3*/
         });
     });
