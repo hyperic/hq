@@ -38,7 +38,7 @@ function timeLineOnLoad() {
              null,
              false,
              "<fmt:message key="resource.common.monitor.label.elc"/>",
-             "Description " + "<c:out value="${count}"/>"
+             "Events(<c:out value="${count}"/>) details not yet loaded..."
             );
         eventSource.add(evt);
       </c:if>
