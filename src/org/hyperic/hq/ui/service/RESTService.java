@@ -143,6 +143,7 @@ public class RESTService extends BaseService {
 
                 if (resourceIdParam != null) {
                     // set the resource configuration property
+                    // XXX (astroganov): doesn't work when rid list passed in is empty
                     String ids = "";
                     try {
                         JSONArray arr = new JSONArray(resourceIdParam);
