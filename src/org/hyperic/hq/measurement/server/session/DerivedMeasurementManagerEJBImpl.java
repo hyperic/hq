@@ -66,6 +66,7 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -446,6 +447,26 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                         intervals, props);
         sendAgentSchedule(id);
         return dmList;
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void enableMeasurement(AuthzSubject subject, Integer mId,
+                                  long interval)
+        throws PermissionException
+    {
+        List mids = new ArrayList();
+        mids.add(mId);
+        DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
+        DerivedMeasurement meas = dao.get(mId);
+        if (meas.isEnabled()) {
+            return;
+        }
+        AppdefEntityID appId = meas.getEntityId();
+        checkModifyPermission(subject.getId(), appId);
+        dao.updateInterval(mids, interval);
+        sendAgentSchedule(appId);
     }
 
     /**
@@ -1238,6 +1259,23 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 throw new MeasurementNotFoundException("Template not found", e);
             }
         }
+    }
+    
+    /**
+     * @throws PermissionException 
+     * @ejb:interface-method
+     */
+    public void updateMeasurementInterval(AuthzSubject subject, Integer mId,
+                                          long interval)
+        throws PermissionException
+    {
+        DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
+        DerivedMeasurement meas = dao.get(mId);
+        meas.setEnabled((interval != 0));
+        meas.setInterval(interval);
+        AppdefEntityID appId = meas.getEntityId();
+        checkModifyPermission(subject.getId(), appId);
+        enqueueZeventForMeasScheduleChange(meas, interval);
     }
 
     /**
