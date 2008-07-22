@@ -1195,8 +1195,12 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             that.fetchChartData(next).addCallback(
                 function()
                 {
+                    console.log(that.charts);
+                    console.info("next chart to display is " + next);
                     // add a callback to refresh the chart data in a minute
-                    that.charts[next].interval = setInterval(that.fetchChartData(next),3600);
+                    
+                    // FIXME
+                    // that.charts[next].interval = setInterval(that.fetchChartData(next),3600);
 
                     // console.log('fetched data; next chart id is ' + next);
                     if(that.charts[next].data)
@@ -1398,13 +1402,22 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
 // set the hyperic.dashboard.widget as the ancestor of the chartWidget class.
 hyperic.dashboard.chartWidget.prototype = hyperic.dashboard.widget;
 
+/**
+ * summaryWidget is a widget that displays alert summaries
+ * $
+ * @author Anton Stroganov <anton@hyperic.com>
+ * @base hyperic.dashboard.widget
+ * @constructor
+ */
 hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     var that = this;
 
     that.configSheet = dojo11.query('.config',node)[0];
     that.contentSheet = dojo11.query('.content',node)[0];
     
+    that.alert_groups = {"data": {}, "count": 0};
     that.selected_alert_groups = [];
+    that.alert_group_status = {};
 
     that.available_alert_groups = dojo11.byId('available_alert_groups');
     that.enabled_alert_groups = dojo11.byId('enabled_alert_groups');
@@ -1514,33 +1527,34 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      */
     that.click_save_btn = function(e)
     {
-        // dojo11.xhrGet( {
-        //         url: "save.php",
-        //         load: function(data){
-        //             this.swapSheets(this.configSheet,this.contentSheet);
-        //         },
-        //         error: function(data){
-        //             this.swapSheets(this.configSheet,this.contentSheet);
-        //             console.debug("An error occurred: ", data);
-        //             // dojo11.query('.save_btn', config_form)[0].disabled = true;
-        //         },
-        //         timeout: 2000,
-        //         form: dojo11.query('form', this.configSheet)[0]
-        // });
-
         that.selected_alert_groups = [];
         for(var i = 0, j = that.enabled_alert_groups.options.length; i < j; i++)
         {
             if(that.enabled_alert_groups.options[i])
             {
-                // console.log(that.enabled_alert_groups.options[i]);
                 that.selected_alert_groups.push(that.enabled_alert_groups.options[i].value);
             }
         }
 
-        that.fetchAlertGroupStatus();
-        that.repaintAlertGroups();
-        that.swapSheets(this.configSheet,this.contentSheet);
+        dojo11.xhrGet( {
+            url: "/api.shtml?v=1.0&s_id=alert_summary&config=true&rid=[" + that.selected_alert_groups + "]",
+            handleAs: 'json',
+            load: function(data){
+                that.selected_alert_groups = data.rid || that.selected_alert_groups;
+                that.alert_groups.data = data.avail || that.alert_groups.data;
+                that.alert_groups.count = data.count || that.alert_groups.count;
+
+                that.fetchAlertGroupStatus().addCallback(function(){
+                    that.repaintAlertGroups();
+                    that.swapSheets(that.configSheet,that.contentSheet);
+                });
+            },
+            error: function(data){
+                console.debug("An error occurred saving alerts config... " + data);
+                that.swapSheets(that.configSheet,that.contentSheet);
+            },
+            timeout: 2000
+        });
     };
 
     /**
@@ -1566,19 +1580,17 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     /**
      * populate the available and selected alert selectboxes
      * 
-     * @param {Object} hash of available alerts, in form { id: name, ... } 
-     * @param {Array} array of the id's of the enabled alerts, in form [ id, ... ]
      * @see hyperic.dashboard.widget#addOptionToSelect
      */
-    that.populateAlertGroups = function(alerts, selected_alert_groups)
+    that.populateAlertGroups = function()
     {
-        for(var i in alerts)
+        for(var i in that.alert_groups.data)
         {
             var to = null;
-            var alertOption = new Option(alerts[i],i);
-            for(var j = 0; j < selected_alert_groups.length; j++)
+            var alertOption = new Option(that.alert_groups.data[i],i);
+            for(var j = 0; j < that.selected_alert_groups.length; j++)
             {
-                if(selected_alert_groups[j] == i-1)
+                if(that.selected_alert_groups[j] == i)
                 {
                     to = that.enabled_alert_groups;
                     break;
@@ -1621,10 +1633,10 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         var half = Math.ceil(groups.length/2);
         
         var status = {
-            'r' : 'Failure',
-            'g' : 'OK',
-            'y' : 'Warning',
-            'd' : 'No Data'
+            'red'    : 'Failure',
+            'green'  : 'OK',
+            'yellow' : 'Warning',
+            'gray'   : 'No Data'
         };
 
         for(var i = 0; i < groups.length; i++)
@@ -1635,9 +1647,9 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             row.className = ((i < half ? i : i - half) % 2 == 0) ? 'even' : 'odd';
 
             row.id = 'alertGroup:' + groups[i];
-            var data = that.alert_group_status[groups[i]] || ['d','d'];
+            var data = that.alert_group_status[groups[i]] || ['gray','gray'];
             var name = that.alert_groups.data[groups[i]];
-            row.innerHTML = '<th scope="row">'+ name +'</th><td><img src="/images/'+data[0]+'.png" alt="'+ status[data[0]] +'"></td><td><img src="/images/'+data[1]+'.png"alt="'+ status[data[1]]+'"></td>';
+            row.innerHTML = '<th scope="row">'+ name +'</th><td><img src="/images/4.0/icons/'+data[0]+'.png" alt="'+ status[data[0]] +'"></td><td><img src="/images/4.0/icons/'+data[1]+'.png"alt="'+ status[data[1]]+'"></td>';
             data = name = null;
         }
     };
@@ -1658,25 +1670,39 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      * @param {Number} page number
      * @param {String} string to search alerts for
      */
-    that.fetchAlertGroups = function(page, searchString)
-    {
-        // offset = offset || 0;
-        that.alert_groups = { 
-                data: { 
-                    1 : "Apache VHosts",
-                    2 : "HTTP Serivces",
-                    3 : "Linux Boxes",
-                    4 : "REST API",
-                    5 : "SF Data Center",
-                    6 : "Storage 1",
-                    7 : "WS API",
-                    8 : "Applications",
-                    9 : "CentOS Boxes",
-                    10 : "SuSE Boxes"
-                },
-                count: 10
-            };
-    };
+    // that.fetchAlertGroups = function(page, searchString)
+    // {
+    //     dojo11.xhrGet( {
+    //         url: "/api.shtml?v=1.0&s_id=alert_summary&config=true",
+    //         handleAs: 'json',
+    //         load: function(data){
+    //             that.alert_groups.data = data.avail || that.alert_groups.data;
+    //             that.alert_groups.count = data.count || that.alert_groups.count;
+    //             that.fetchAlertGroupStatus();
+    //         },
+    //         error: function(data){
+    //             console.debug("An error occurred fetching alert groups... ", data);
+    //         },
+    //         timeout: 2000
+    //     });
+    // 
+    //     // // offset = offset || 0;
+    //     // that.alert_groups = { 
+    //     //         data: { 
+    //     //             1 : "Apache VHosts",
+    //     //             2 : "HTTP Serivces",
+    //     //             3 : "Linux Boxes",
+    //     //             4 : "REST API",
+    //     //             5 : "SF Data Center",
+    //     //             6 : "Storage 1",
+    //     //             7 : "WS API",
+    //     //             8 : "Applications",
+    //     //             9 : "CentOS Boxes",
+    //     //             10 : "SuSE Boxes"
+    //     //         },
+    //     //         count: 10
+    //     //     };
+    // };
 
     /**
      * fetch the alert group status from server for currently selected alert groups
@@ -1689,18 +1715,30 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      */
     that.fetchAlertGroupStatus = function()
     {
-        that.alert_group_status = {
-            '1': ['r','g'],
-            '2': ['g','y'],
-            '3': ['g','g'],
-            '4': ['g','r'],
-            '5': ['g','y'],
-            // '6': ['g','g'],
-            '7': ['g','g'],
-            '8': ['g','g'],
-            '9': ['g','g'],
-            '10': ['g','g']
-        };
+        return dojo11.xhrGet( {
+            url: "/api.shtml?v=1.0&s_id=alert_summary",
+            handleAs: 'json',
+            load: function(data){
+                that.alert_group_status = data;
+            },
+            error: function(data){
+                console.debug("An error occurred fetching alert groups status... ", data);
+            },
+            timeout: 2000
+        });
+        
+        // that.alert_group_status = {
+        //     '1': ['r','g'],
+        //     '2': ['g','y'],
+        //     '3': ['g','g'],
+        //     '4': ['g','r'],
+        //     '5': ['g','y'],
+        //     // '6': ['g','g'],
+        //     '7': ['g','g'],
+        //     '8': ['g','g'],
+        //     '9': ['g','g'],
+        //     '10': ['g','g']
+        // };
     };
 
     /**
@@ -1713,7 +1751,20 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      */
     that.fetchConfig = function()
     {
-        that.selected_alert_groups = ['1','2','3','4','5','6','7'];
+        return dojo11.xhrGet( {
+            url: "/api.shtml?v=1.0&s_id=alert_summary&config=true",
+            handleAs: 'json',
+            load: function(data){
+                that.selected_alert_groups = data.rid || [];
+                that.alert_groups.data = data.data || that.alert_groups.data;
+                // that.alert_groups.count = data.count || that.alert_groups.count;
+            },
+            error: function(data){
+                console.debug("An error occurred fetching alert group config... ", data);
+            },
+            timeout: 2000
+        });
+        // that.selected_alert_groups = ['1','2','3','4','5','6','7'];
     };
 
     if(that.available_alert_groups && that.enabled_alert_groups)
@@ -1727,11 +1778,14 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         dojo11.connect(that.groupsearch,'onblur', that.resetSearch);
         dojo11.connect(that.groupsearch,'onkeyup',that.search);
         
-        that.fetchConfig();
-        that.fetchAlertGroups();
-        that.fetchAlertGroupStatus();
-        that.populateAlertGroups(that.alert_groups.data, that.selected_alert_groups);
-        that.paintAlertGroups();
+        that.fetchConfig().addCallback(
+            function() {
+                that.fetchAlertGroupStatus().addCallback(
+                    function() {
+                        that.populateAlertGroups();
+                        that.paintAlertGroups();
+                    });
+            });
     }
 };
 
