@@ -89,7 +89,38 @@ class MetricHelper extends BaseHelper {
          tmplMan.getTemplate(id)
      }
 
+     def setDefaultInterval(int id, long interval) {
+         Integer[] tmpls = new Integer[1]
+         tmpls[0] = id
+         tmplMan.updateTemplateDefaultInterval(user, tmpls, interval)
+     }
+
+     def setDefaultIndicator(int id, boolean on) {
+         def tmpl = findTemplateById(id)
+         tmplMan.setDesignated(tmpl, on)
+     }
+
+     def setDefaultOn(int id, boolean on) {
+         Integer[] tmpls = new Integer[1]
+         tmpls[0] = id
+         tmplMan.setTemplateEnabledByDefault(user, tmpls, on)
+     }
+
      def findMeasurementById(int id) {
          measMan.getMeasurement(id)
+     }
+
+     def disableMeasurement(Integer mId) {
+        Integer[] mids = new Integer[1]
+        mids[0] = mId
+        measMan.disableMeasurements(user, mId);
+     }
+
+     def enableMeasurement(Integer mId, Long interval) {
+        measMan.enableMeasurement(user, mId, interval);
+     }
+
+     def updateMeasurementInterval(Integer mId, Long interval) {
+        measMan.updateMeasurementInterval(user, mId, interval);
      }
 }
