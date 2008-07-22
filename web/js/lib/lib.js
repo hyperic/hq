@@ -992,9 +992,12 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         {
             for(var i = 0; i < that.charts.length; i++)
             {
-                clearInterval(that.charts[i].interval);
+                if(that.charts[i].interval)
+                {
+                    clearInterval(that.charts[i].interval);
+                    that.charts[i].interval = null;
+                }
                 that.charts[i].data = null;
-                that.charts[i].interval = null;
             }
         }
 
