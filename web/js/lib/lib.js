@@ -1195,14 +1195,13 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             that.fetchChartData(next).addCallback(
                 function()
                 {
-                    console.log(that.charts);
-                    console.info("next chart to display is " + next);
+                    // console.log(that.charts);
+                    // console.info("next chart to display is " + next);
                     // add a callback to refresh the chart data in a minute
-                    
-                    // FIXME
-                    // that.charts[next].interval = setInterval(that.fetchChartData(next),3600);
 
-                    // console.log('fetched data; next chart id is ' + next);
+                    that.charts[next].interval = setInterval(function(){that.fetchChartData(next)},36000);
+
+                    console.log('fetched data; next chart id is ' + next);
                     if(that.charts[next].data)
                     {
                         that.chart = new hyperic.widget.Chart('chart_container', that.charts[next]);
