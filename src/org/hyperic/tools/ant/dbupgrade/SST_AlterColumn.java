@@ -219,10 +219,6 @@ public class SST_AlterColumn extends SchemaSpecTask {
             alterSql += " DEFAULT '" + _defval + "'";
         }
 
-        if ( _precision != null ) {
-            alterSql += " (" + _precision + ")";
-        }
-
         if (_nullable != null) {
             alterSql += " " + _nullable;
         }
