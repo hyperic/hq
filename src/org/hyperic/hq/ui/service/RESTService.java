@@ -183,19 +183,18 @@ public class RESTService extends BaseService {
                             AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC},
                             false, false, false, PageControl.PAGE_ALL);
                 
-                JSONArray avails = new JSONArray();
+                JSONObject avails = new JSONObject();
                 for (Iterator<AppdefResourceValue> it = resources.iterator();
                      it.hasNext(); ) {
                     AppdefResourceValue resource = it.next();
-                    avails.put(new JSONObject().put("id", resource.getId())
-                                               .put("name",resource.getName()));
+                    avails.put(resource.getId().toString(),resource.getName());
                 }
                 
                 res = new JSONObject()
                     .put(PARAM_RESOURCE_ID, arr)
                     .put(PARAM_TIME_RANGE,
                          config.getValue(Constants.USER_DASHBOARD_ALERT_SUMMARY_RANGE))
-                    .put("avail", avails)
+                    .put("data", avails)
                     .toString();
             } else if (resourceIdParam != null) {
                 ResourceGroupManagerLocal rgman = 
