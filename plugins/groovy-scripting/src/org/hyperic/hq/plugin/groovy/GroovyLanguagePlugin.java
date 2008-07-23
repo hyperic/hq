@@ -79,6 +79,11 @@ public class GroovyLanguagePlugin
         adjustClassPath(cl);
 
         try {
+            // Also add the directory which contain the groovy script.  This
+            // allows us to add .groovy scripts in scripts/ which are not
+            // called directly via this function (i.e. only imported by
+            // groovy scripts, plugin support)
+            cl.addURL(file.getParentFile().toURL());
             return cl.parseClass(file);
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
