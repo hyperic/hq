@@ -286,11 +286,9 @@ hyperic.widget.Menu = function(kwArgs) {
     };
     that.onclick = function(evt) {
         if(!this._isVisible) {
-            var x,y;
-            if(evt === undefined){
-                evt = window.event;
-            }
-            var node = evt.target;
+            var x,y,node;
+            if(window.event) { node = window.event.srcElement; alert(node); }
+            else { node = evt.target; }
             if(this._isSubMenu) {
                 //put it on the right
                 x=node.offsetLeft+node.clientWidth+12;
@@ -300,13 +298,12 @@ hyperic.widget.Menu = function(kwArgs) {
                 x=node.offsetLeft;
                 y=node.clientHeight+node.offsetTop;
             }
-            this.node.style.top = y+'px';
-            this.node.style.left = x+'px';
+            this.node.style['top'] = y+'px';
+            this.node.style['left'] = x+'px';
             this.node.style.display = 'block';
             this._isVisible = true;
-            if(this._isSubMuenu) {
+            if(this._isSubMuenu)
                 this.isFocused = true;
-            }
         }
     };
     this.onUnHover = function() {
