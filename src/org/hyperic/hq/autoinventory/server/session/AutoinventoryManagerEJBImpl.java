@@ -37,7 +37,6 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,7 +48,6 @@ import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
-import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -57,22 +55,12 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
-import org.hyperic.hq.appdef.shared.CPropManagerLocalHome;
-import org.hyperic.hq.appdef.shared.CPropManagerUtil;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocalHome;
-import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocalHome;
-import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
-import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
@@ -93,11 +81,9 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
@@ -116,8 +102,6 @@ import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ServerConfigManagerLocalHome;
-import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.ProductPlugin;
@@ -436,8 +420,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             // For now, this works.
             authzChecker.checkAIScanPermission(subject, aid);
 
-            ConfigResponse config =
-                getConfigManagerLocalHome().create().
+            ConfigResponse config = _configMan.
                     getMergedConfigResponse(subject, 
                                             ProductPlugin.TYPE_MEASUREMENT, 
                                             aid, false);
@@ -551,9 +534,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="REQUIRED"
      */
     public ScanStateCore getScanStatus(AuthzSubject subject, AppdefEntityID aid)
-        throws AgentNotFoundException, 
-               AgentConnectionException, AgentRemoteException,
-               AutoinventoryException {
+        throws AgentNotFoundException, AgentConnectionException,
+               AgentRemoteException, AutoinventoryException {
         
         _log.info("AutoinventoryManager.getScanStatus called");
         ScanStateCore core;
@@ -571,8 +553,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         } catch (AutoinventoryException ae) {
             throw ae;
         } catch (Exception e) {
-            throw new SystemException("Error getting scan status " +
-                                      "for agent: " + e, e);
+            throw new SystemException("Error getting scan status for agent: " +
+                                      e, e);
         }
         return core;
     }
@@ -619,9 +601,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="REQUIRED"
      */
     public void updateAIHistory(Integer jobId, long endTime,
-                                String status, String message)
-        throws FinderException, CreateException, NamingException
-    {
+                                String status, String message) {
         AIHistory local = getHistoryDAO().findById(jobId);
 
         local.setEndTime(endTime);
@@ -632,7 +612,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     protected AIHistoryDAO getHistoryDAO()
     {
-        return DAOFactory.getDAOFactory().getAIHistoryDAO();
+        return new AIHistoryDAO(DAOFactory.getDAOFactory());
     }
 
     /**
@@ -720,7 +700,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         // agent is reporting itself to the server for the first time.
         // In that case, we'd have to act as admin and be careful about 
         // what we allow that codepath to do.
-        AuthzSubject subject = getOverlord();
+        AuthzSubject subject = getHQAdmin();
 
         AIPlatformValue aiPlatform = state.getPlatform();
         aiPlatform.setAgentToken(agentToken);
@@ -730,15 +710,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
         
         if (stateCore.getAreServersIncluded()) {
-            ServerManagerLocal serverLocal;
-            try {
-                serverLocal = getServerManagerLocalHome().create();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            }
-
             Set serverSet = state.getAllServers(_log);
 
             Iterator aiservers = serverSet.iterator();
@@ -747,11 +718,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
                 // Ensure the server reported has a valid appdef type
                 try {
-                    serverLocal.
+                    _serverMan.
                         findServerTypeByName(aiServer.getServerTypeName());
                 } catch (FinderException e) {
-                    this._log.error("Ignoring non-existent server type: " +
-                                   aiServer.getServerTypeName(), e);
+                    _log.error("Ignoring non-existent server type: " +
+                               aiServer.getServerTypeName(), e);
                     continue;
                 }
 
@@ -866,7 +837,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                          CompositeRuntimeResourceReport crrr)
         throws ApplicationException, AutoinventoryException
     {
-        AuthzSubject subject = getOverlord();
+        AuthzSubject subject = getHQAdmin();
 
         RuntimeReportProcessor rrp = new RuntimeReportProcessor();
         try {
@@ -884,9 +855,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="REQUIRESNEW"
      */
     public void mergeServices(List mergeInfos)
-        throws CreateException, PermissionException, ApplicationException,
-               FinderException
-    {
+        throws PermissionException, ApplicationException, FinderException {
         for (Iterator i=mergeInfos.iterator(); i.hasNext(); ) {
             ServiceMergeInfo sInfo = (ServiceMergeInfo)i.next();
             
@@ -895,9 +864,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     }
     
     private void mergeService(ServiceMergeInfo sInfo) 
-        throws CreateException, PermissionException, ApplicationException,
-               FinderException
-    {
+        throws PermissionException, ApplicationException, FinderException {
         AIServiceValue aiservice = sInfo.aiservice;
         Server server = _serverMan.getServerById(sInfo.serverId);
 
@@ -1130,20 +1097,20 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         try {
             ProductManagerLocal productManager = 
                 ProductManagerUtil.getLocalHome().create();
-            this.aiPluginManager = 
-                (AutoinventoryPluginManager)productManager.
+            aiPluginManager = 
+                (AutoinventoryPluginManager) productManager.
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
 
         } catch (Exception e) {
-            this._log.error("Unable to initialize session beans: " +
+            _log.error("Unable to initialize session beans: " +
                            e.getMessage());
         }
         // Get a reference to the control scheduler ejb
         try {
-            this.aiScheduleManager =
+            aiScheduleManager =
                 AIScheduleManagerUtil.getLocalHome().create();
         } catch (Exception e) {
-            this._log.error("Unable to get autoinventory schedule manager: " +
+            _log.error("Unable to get autoinventory schedule manager: " +
                            e.getMessage());
         }
     }
@@ -1151,9 +1118,10 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     public void ejbActivate() { }
     public void ejbPassivate() { }
     
-    private AuthzSubject getOverlord () throws AutoinventoryException {
+    private AuthzSubject getHQAdmin() throws AutoinventoryException {
         try {
-             return AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+             return AuthzSubjectManagerEJBImpl.getOne()
+                 .getSubjectById(AuthzConstants.rootSubjectId);
         } catch ( Exception e ) {
             throw new AutoinventoryException("Error looking up subject", e);
         }
@@ -1164,81 +1132,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * ought to be placed in a superclass, kinda like appdef has the
      * AppdefSessionEJB as a base class for all other appdef session EJBs.
      */
-    protected PlatformManagerLocalHome getPlatformManagerLocalHome() 
-        throws NamingException {
-        if(pmanagerLHome == null) {
-            pmanagerLHome = PlatformManagerUtil.getLocalHome();
-        }
-        return pmanagerLHome;
+    protected AIQueueManagerLocal getAIQueueManagerLocal() {
+        return AIQueueManagerEJBImpl.getOne();
     }
-    protected PlatformManagerLocalHome pmanagerLHome;
-
-    /**
-     * If we ever have more than this single session EJB, this method
-     * ought to be placed in a superclass, kinda like appdef has the
-     * AppdefSessionEJB as a base class for all other appdef session EJBs.
-     */
-    protected AIQueueManagerLocal getAIQueueManagerLocal() 
-        throws NamingException, CreateException {
-        if(aiqLocal == null) {
-            aiqLocal = AIQueueManagerUtil.getLocalHome().create();
-        }
-        return aiqLocal;
-    }
-    protected AIQueueManagerLocal aiqLocal;
-
-    protected ServerConfigManagerLocalHome getServerConfigManagerLocalHome() 
-        throws NamingException {
-        if(serverConfigLHome == null) {
-           serverConfigLHome = ServerConfigManagerUtil.getLocalHome();
-        }
-        return serverConfigLHome;
-    }
-    protected ServerConfigManagerLocalHome serverConfigLHome;
-
-    protected ServerManagerLocalHome getServerManagerLocalHome() 
-        throws NamingException {
-        if(serverManagerLHome == null) {
-           serverManagerLHome = ServerManagerUtil.getLocalHome();
-        }
-        return serverManagerLHome;
-    }
-    protected ServerManagerLocalHome serverManagerLHome;
-
-    protected ServiceManagerLocalHome getServiceManagerLocalHome() 
-        throws NamingException {
-        if(serviceManagerLHome == null) {
-           serviceManagerLHome = ServiceManagerUtil.getLocalHome();
-        }
-        return serviceManagerLHome;
-    }
-    protected ServiceManagerLocalHome serviceManagerLHome;
-
-
-    protected ConfigManagerLocalHome getConfigManagerLocalHome() 
-        throws NamingException {
-        if(configManagerLHome == null) {
-           configManagerLHome = ConfigManagerUtil.getLocalHome();
-        }
-        return configManagerLHome;
-    }
-    protected ConfigManagerLocalHome configManagerLHome;
-
-    protected CPropManagerLocalHome getCPropManagerLocalHome() 
-        throws NamingException {
-        if(cpropManagerLHome == null) {
-            cpropManagerLHome = CPropManagerUtil.getLocalHome();
-        }
-        return cpropManagerLHome;
-    }
-    protected CPropManagerLocalHome cpropManagerLHome;
-
-    protected AuthzSubjectManagerLocalHome getAuthzSubjectManagerLocalHome() 
-        throws NamingException {
-        if(authzSubjectManagerLHome == null) {
-           authzSubjectManagerLHome = AuthzSubjectManagerUtil.getLocalHome();
-        }
-        return authzSubjectManagerLHome;
-    }
-    protected AuthzSubjectManagerLocalHome authzSubjectManagerLHome;
 }
