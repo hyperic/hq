@@ -267,12 +267,12 @@ public abstract class Collector implements Runnable {
         return this.result.message;
     }
 
-    private String composeMessage(String msg, Exception e) {
-        return msg + ": " + e.getMessage();
+    private String composeMessage(String msg, Throwable t) {
+        return msg + ": " + t.getMessage();
     }
     
-    protected void setMessage(String msg, Exception e) {
-        setMessage(composeMessage(msg, e));
+    protected void setMessage(String msg, Throwable t) {
+        setMessage(composeMessage(msg, t));
     }
     
     protected void setErrorMessage(String msg) {
@@ -295,20 +295,20 @@ public abstract class Collector implements Runnable {
         setMessage(msg);
     }
     
-    protected void setErrorMessage(String msg, Exception e) {
-        setErrorMessage(composeMessage(msg, e));
+    protected void setErrorMessage(String msg, Throwable t) {
+        setErrorMessage(composeMessage(msg, t));
     }
 
-    protected void setWarningMessage(String msg, Exception e) {
-        setWarningMessage(composeMessage(msg, e));
+    protected void setWarningMessage(String msg, Throwable t) {
+        setWarningMessage(composeMessage(msg, t));
     }
 
-    protected void setInfoMessage(String msg, Exception e) {
-        setInfoMessage(composeMessage(msg, e));
+    protected void setInfoMessage(String msg, Throwable t) {
+        setInfoMessage(composeMessage(msg, t));
     }
     
-    protected void setDebugMessage(String msg, Exception e) {
-        setDebugMessage(composeMessage(msg, e));
+    protected void setDebugMessage(String msg, Throwable t) {
+        setDebugMessage(composeMessage(msg, t));
     }
 
     protected void setValue(String key, String val) {
@@ -558,14 +558,11 @@ public abstract class Collector implements Runnable {
 
         try {
             collect();
-        } catch (Exception e) {
+        } catch (Throwable t) {
             log.error("Error running " + this.plugin.getName() +
-                      " collector: " + e, e);
-            return;
-        } catch (NoClassDefFoundError e) {
-            log.error("Error running " + this.plugin.getName() +
-                      " collector: " + e, e);
-            return;
+                      " collector: " + t, t);
+            setErrorMessage("Error: " + t.getMessage(), t);
+            setAvailability(false);
         } finally {
             if (setClassLoader) {
                 PluginLoader.resetClassLoader(this);
