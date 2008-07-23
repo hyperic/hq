@@ -936,6 +936,12 @@ public class ProductPluginManager extends PluginManager {
                     ProductPlugin.getPluginClass(PluginLoader.getClassLoader(),
                                                  data, implName, jarName);
             }
+            
+            if (pluginClass == null) {
+                throw new PluginException("Class [" + implName + "] not found "+
+                                          "via classloader=[" + 
+                                          PluginLoader.getClassLoader());
+            }
 
             plugin = (ProductPlugin)pluginClass.newInstance();
             plugin.data = data;
