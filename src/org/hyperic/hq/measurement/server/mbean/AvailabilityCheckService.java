@@ -183,6 +183,9 @@ public class AvailabilityCheckService
                     DataPoint lastPt = cache.get(meas.getId(), defaultPt);
                     long backfillTime =
                         lastPt.getTimestamp() + meas.getInterval();
+                    if (backfillTime > current) {
+                        continue;
+                    }
                     if (debug) {
                         _log.debug("measurement id " + meas.getId() + " is " +
                                    "being marked down, time=" + backfillTime);
