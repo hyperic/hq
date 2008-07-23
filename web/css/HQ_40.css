@@ -740,9 +740,28 @@ body .dijitPopup {
 
 .toolsMenu {
     clear: both;
-    height: 30px
+    height: 20px;
+    cursor: pointer;
 }
-
+.toolsMenuStacked{
+	height: 17px;
+	float:left;
+	margin-top:6px;
+	cursor: pointer;
+}
+.navMap {
+	float:left;
+	height:14px;
+	margin:2px 10px 0 0;
+	background-color: #EDF0F8;
+	border: 1px solid;
+	border-color:#BDCEF0 #477DDF #477DDF #BDCEF0;
+	width:42px;
+	padding:2px 2px 2px 4px;
+	color:#039;
+	font-weight:bold;
+	cursor: pointer
+}
 /* chart css */
 .chart {
     cursor:default;

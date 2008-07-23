@@ -33,13 +33,11 @@
 <hq:navMapSupported var="navMapSupported"/>
 <c:if test="${navMapSupported}">
 
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
-  <tr valign="top"> 
    <c:choose>
       <c:when test="${xlib}">
-    <td class="PageTitleSmallText" colspan="2" style="padding-top: 6px;">
 <script src="<html:rewrite page="/js/"/>effects.js" type="text/javascript"></script>
 <c:set var="imageWidth" value="800"/>
+<div class="navMap" onclick="toggleMenu('diagramDiv');">
 <hq:navMap areasVar="mapAreas" areasSizeVar="mapAreasSize" imageWidth="${imageWidth}"/>
 
 <map name="diagram">
@@ -72,24 +70,18 @@
 </c:forEach>
 </map>
 
-      <span onclick="toggleDiagram('diagramDiv');"><html:img imageName="navMapIcon" border="0" alt="" page="/images/icon_navmap.png"/></span>
+      <span>Map<img border="0" id="toolMenuSpan" src="/images/arrow_dropdown.gif"/></span>
       <div style="clear: all"></div>
       <div id="diagramDiv" style="position: absolute; display: none;">
         <span>
           <html:img imageName="navMapImage" page="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}" alt="" border="0" usemap="#diagram" />
         </span>
       </div>
-    </td>
       </c:when>
       <c:otherwise>
-    <td class="ErrorBlock" colspan="2">
       <fmt:message key="error.NoXLibInstalled"/>
-    </td>
       </c:otherwise>
     </c:choose>
-    <td class="PageTitleSmallText">&nbsp;</td>
-  </tr>
-</table>
-
+</div>
 </c:if>
 
