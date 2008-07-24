@@ -222,7 +222,7 @@ public class PlatformDAO extends HibernateDAO {
             .uniqueResult();
     }
     
-    public Collection findByType(Integer pid)
+    public List findByType(Integer pid)
     {
         String sql = "select distinct p from Platform p "+
                      "where p.platformType.id=?";

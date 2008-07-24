@@ -60,7 +60,7 @@ public class AppdefEntityValue {
     private ServiceManagerLocal     serviceManagerLocal;
 
     private Application             application = null;
-    private Platform                platform    = null;
+    private Platform                _platform    = null;
     private Server                  server      = null;
     private Service                 service     = null;
     private AppdefGroupValue        group       = null;
@@ -71,6 +71,11 @@ public class AppdefEntityValue {
     public AppdefEntityValue(AppdefEntityID id, AuthzSubject subject) {
         _id      = id;
         _subject = subject;
+    }
+    
+    public AppdefEntityValue(AuthzSubject subject, Platform platform) {
+        this(platform.getEntityId(), subject);
+        _platform = platform;
     }
     
     public AppdefEntityID getID() {
@@ -111,17 +116,17 @@ public class AppdefEntityValue {
 
     private Platform getPlatform(boolean permCheck)
         throws AppdefEntityNotFoundException, PermissionException {
-        if (platform == null) {
+        if (_platform == null) {
             if (permCheck) {
-                platform = getPlatformManager().getPlatformById(getSubject(),
+                _platform = getPlatformManager().getPlatformById(getSubject(),
                                                                 _id.getId());
             }
             else {
-                platform = getPlatformManager().findPlatformById(_id.getId());
+                _platform = getPlatformManager().findPlatformById(_id.getId());
             }
         }
         
-        return platform;
+        return _platform;
     }
     
     private Application getApplication()

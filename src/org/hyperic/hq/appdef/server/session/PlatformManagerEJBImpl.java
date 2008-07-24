@@ -935,7 +935,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public PageList getPlatformsByType(AuthzSubject subject, String type)
+    public List getPlatformsByType(AuthzSubject subject, String type)
         throws PermissionException, InvalidAppdefTypeException {
         try {
             PlatformType ptype = getPlatformTypeDAO().findByName(type);
@@ -943,24 +943,24 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 return new PageList();
             }
 
-            Collection platforms = getPlatformDAO().findByType(ptype.getId());
+            List platforms = getPlatformDAO().findByType(ptype.getId());
             if (platforms.size() == 0) {
                 // There are no viewable platforms
-                return new PageList();
+                return platforms;
             }
             // now get the list of PKs
             Collection viewable = super.getViewablePlatformPKs(subject);
             // and iterate over the ejbList to remove any item not in the
             // viewable list
-            for(Iterator i = platforms.iterator(); i.hasNext();) {
-                Platform aEJB = (Platform)i.next();
-                if(!viewable.contains(aEJB.getId())) {
-                    // remove the item, user cant see it
-                    i.remove();
+            for (Iterator it = platforms.iterator(); it.hasNext();) {
+                Platform aEJB = (Platform) it.next();
+                if (!viewable.contains(aEJB.getId())) {
+                    // remove the item, user can't see it
+                    it.remove();
                 }
             }
-        
-            return valuePager.seek(platforms, PageControl.PAGE_ALL);
+
+            return platforms;
         } catch (FinderException e) {
             // There are no viewable platforms
             return new PageList();

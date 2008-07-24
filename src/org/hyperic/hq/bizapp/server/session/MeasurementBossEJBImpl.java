@@ -51,6 +51,7 @@ import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
@@ -2268,13 +2269,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                PermissionException {
         AuthzSubject subject = manager.getSubject(sessionId);
     
-        PageList siblings = new PageList();
-        // siblings.addAll(GroupUtil.getGroupMembers(subject, entId, null));
         List members = GroupUtil.getGroupMembers(subject, entId, null);
-        for (Iterator it = members.iterator(); it.hasNext(); ) {
-            AppdefEntityID eid = (AppdefEntityID) it.next();
-            siblings.add(new AppdefEntityValue(eid, subject));
-        }
+        PageList siblings = new PageList(members, members.size());
     
         return getResourcesCurrentHealth(subject, siblings);
     }
@@ -2340,14 +2336,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             Object o = it.next();
             
             AppdefEntityValue rv;
-            AppdefResourceValue resource = null;
             AppdefEntityID aeid;
             if (o instanceof AppdefEntityValue) {
                 rv = (AppdefEntityValue) o;
                 aeid = rv.getID();
             }
+            else if (o instanceof AppdefEntityID) {
+                aeid = (AppdefEntityID) o;
+                rv = new AppdefEntityValue(aeid, subject);
+            }
             else {
-                resource = (AppdefResourceValue) o;
+                AppdefResourceValue resource = (AppdefResourceValue) o;
                 aeid = resource.getEntityId();
                 rv = new AppdefEntityValue(aeid, subject);
             }
@@ -2516,10 +2515,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
         StopWatch timer = new StopWatch();
 
-        PageList resources = new PageList();
-        for (int i = 0; i < entIds.length; i++) {
-            resources.add(new AppdefEntityValue(entIds[i], subject));
-        }
+        PageList resources = new PageList(Arrays.asList(entIds),
+                                          entIds.length);
         timingLog.trace("findResourceCurrentHealth(2) - timing [" +
                         timer.toString()+"]");
 
@@ -2624,10 +2621,16 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubject subject = manager.getSubject(sessionId);
         PlatformManagerLocal platMan = getPlatformManager();
         PlatformType pt = platMan.findPlatformType(platTypeId);
-        PageList platforms = platMan.getPlatformsByType(subject, pt.getName());
+        List platforms = platMan.getPlatformsByType(subject, pt.getName());
+        
+        // Need list of AppdefEntityValues
+        PageList aevs = new PageList();
+        for (Iterator it = platforms.iterator(); it.hasNext(); ) {
+            aevs.add(new AppdefEntityValue(subject, ((Platform) it.next())));
+        }
         
         // Return a paged list of current health
-        return getResourcesCurrentHealth(subject, platforms);
+        return getResourcesCurrentHealth(subject, aevs);
     }
 
     /**
