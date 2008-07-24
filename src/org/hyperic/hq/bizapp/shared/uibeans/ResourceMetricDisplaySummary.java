@@ -27,7 +27,7 @@ package org.hyperic.hq.bizapp.shared.uibeans;
 
 import java.io.Serializable;
 
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.authz.server.session.Resource;
 
 /**
  * This bean used when resources are selected to have their metrics compared
@@ -35,7 +35,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 public class ResourceMetricDisplaySummary extends MetricDisplaySummary
     implements Serializable {
 
-    private AppdefResourceValue resource;
+    private Resource _resource;
     
     /**
      * Constructor for ResourceMetricDisplaySummary.
@@ -50,49 +50,49 @@ public class ResourceMetricDisplaySummary extends MetricDisplaySummary
     }
 
     public ResourceMetricDisplaySummary(MetricDisplaySummary mds,
-                                        AppdefResourceValue resource) {
+                                        Resource resource) {
         super();
         init(mds);
-        this.resource = resource;
+        _resource = resource;
     }
 
     private void init(MetricDisplaySummary mds) {
-        this.setBeginTimeFrame(mds.getBeginTimeFrame());
-        this.setCollectionType(mds.getCollectionType());
-        this.setAvailUp(mds.getAvailUp());
-        this.setDisplayUnits(mds.getDisplayUnits());
-        this.setEndTimeFrame(mds.getEndTimeFrame());
-        this.setLabel(mds.getLabel());
-        this.setMetricSource(mds.getMetricSource());
-        this.setShowNumberCollecting(mds.getShowNumberCollecting());
-        this.setTemplateCat(mds.getTemplateCat());
-        this.setTemplateId(mds.getTemplateId());
-        this.setAvailUnknown(mds.getAvailUnknown());
-        this.setAvailDown(mds.getAvailDown());
-        this.setUnits(mds.getUnits());
-        this.setMetrics(mds.getMetrics());
-        this.setDesignated(mds.getDesignated());        
+        setBeginTimeFrame(mds.getBeginTimeFrame());
+        setCollectionType(mds.getCollectionType());
+        setAvailUp(mds.getAvailUp());
+        setDisplayUnits(mds.getDisplayUnits());
+        setEndTimeFrame(mds.getEndTimeFrame());
+        setLabel(mds.getLabel());
+        setMetricSource(mds.getMetricSource());
+        setShowNumberCollecting(mds.getShowNumberCollecting());
+        setTemplateCat(mds.getTemplateCat());
+        setTemplateId(mds.getTemplateId());
+        setAvailUnknown(mds.getAvailUnknown());
+        setAvailDown(mds.getAvailDown());
+        setUnits(mds.getUnits());
+        setMetrics(mds.getMetrics());
+        setDesignated(mds.getDesignated());        
     }
 
     /**
      * Returns the resource.
      * @return AppdefResourceValue
      */
-    public AppdefResourceValue getResource() {
-        return resource;
+    public Resource getResource() {
+        return _resource;
     }
 
     /**
      * Sets the resource.
      * @param resource The resource to set
      */
-    public void setResource(AppdefResourceValue resource) {
-        this.resource = resource;
+    public void setResource(Resource resource) {
+        _resource = resource;
     }
 
     public String toString() {
-        StringBuffer sb = new StringBuffer(this.getClass().getName());
-        sb.append("(resource=").append(resource);
+        StringBuffer sb = new StringBuffer(getClass().getName());
+        sb.append("(resource=").append(_resource);
         sb.append(",super(").append(super.toString());
         sb.append("))");
         return sb.toString();

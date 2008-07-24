@@ -75,7 +75,9 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
 import org.hyperic.hq.bizapp.shared.uibeans.AutogroupDisplaySummary;
@@ -1693,6 +1695,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         HashMap seen = new HashMap();      
         
         // Now, iterate through each AppdefEntityID
+        ResourceManagerLocal resMan = getResourceManager();
         for (int i = 0; i < entIds.length; i++) {            
             Integer[] eid = new Integer[] { entIds[i].getId() };
             // Now get the aggregate data, keyed by template ID's
@@ -1716,13 +1719,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 // Get the data
                 double[] data = (double[]) entry.getValue(); 
                     
-                AppdefResourceValue v;
+                Resource v;
                 rv = new AppdefEntityValue(entIds[i], subject);
     
                 if (seen.containsKey(entIds[i])) {
-                    v = (AppdefResourceValue)seen.get(entIds[i]);
+                    v = (Resource) seen.get(entIds[i]);
                 } else {
-                    v = rv.getResourceValue();
+                    v = resMan.findResource(entIds[i]);
                     seen.put(entIds[i], v);  // keep track of what we've seen
                 }
                     
