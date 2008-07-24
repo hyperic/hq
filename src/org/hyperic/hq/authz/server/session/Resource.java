@@ -25,16 +25,15 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import java.util.Collection;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 
-import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.ResourceValue;
 
-public class Resource extends AuthzNamedBean {
+public class Resource extends AuthzNamedBean implements Comparable {
     public static final Log _log = LogFactory.getLog(Resource.class);
 
     private ResourceType _resourceType;
@@ -213,4 +212,12 @@ public class Resource extends AuthzNamedBean {
 
         return result;
     }
+    
+    public int compareTo(Object arg0) {
+        if (!(arg0 instanceof Resource))
+            return -1;
+            
+        return getName().compareTo(((Resource) arg0).getName());
+    }
+
 }
