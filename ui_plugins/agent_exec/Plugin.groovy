@@ -32,6 +32,6 @@ class Plugin extends HQUPlugin {
                 controller:   AgentController,
                 action:       'index',
                 toRoot:       true,
-                showAttachmentIf: {a, r, u -> attachmentIsShown(a, r, u)})        
+                showAttachmentIf: {a, r, u -> attachmentIsShown(a, r, u)})
     }
 }

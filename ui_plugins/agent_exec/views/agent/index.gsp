@@ -73,14 +73,33 @@ function processResult(result) {
 }
 
 function runCommand() {
-  var cmdSelect = dojo.byId('commandSelect');
+  var cmdSelect = dojo.byId('commandSelect');  
   if (cmdSelect.selectedIndex == 0)
     return;
-    
   var cmd = cmdSelect.options[cmdSelect.selectedIndex].value;
-  var url = '<%= urlFor(action:'invoke') %>' + 
+
+  var bundleSelect = dojo.byId('bundleSelect');
+  var bundle;
+  if (bundleSelect != null) {
+    if (bundleSelect.selectedIndex >= 0)
+      bundle = bundleSelect.options[bundleSelect.selectedIndex].value;
+    else
+      return;
+  }
+  
+  var url;
+  if (bundle == null) {
+    url = '<%= urlFor(action:'invoke') %>' + 
             '?cmd=' + cmd + 
+            '&eid=<%= eid %>';  
+  } 
+  else {
+    url = '<%= urlFor(action:'invoke') %>' + 
+            '?cmd=' + cmd + 
+            '&bundle=' + bundle + 
             '&eid=<%= eid %>';
+  }
+  
   var fmtSelect = dojo.byId('fmt_' + cmd);
   if (fmtSelect.selectedIndex != -1) {
     var fmt = fmtSelect.options[fmtSelect.selectedIndex].value;
@@ -130,6 +149,7 @@ function hideErrorPanel() {
 var legends = {};
 legends['restart'] = '${l.restart}';
 legends['ping'] = '${l.ping}';
+legends['upgrade'] = '${l.upgrade}';
 
 function updateLegend(select){
     var legendDiv = dojo.byId("legend");
@@ -138,6 +158,68 @@ function updateLegend(select){
         return;
     }
     legendDiv.innerHTML = legends[select.options[select.selectedIndex].value];
+}
+
+function updateCmdOptions(select){
+    var options = dojo.byId("cmdOptions");
+
+      var bundleSelect = dojo.byId("bundleSelect");
+      if (bundleSelect != null)
+        options.removeChild(bundleSelect);
+      var bundleLbl = dojo.byId("bundleLbl");
+      if (bundleLbl != null)
+        options.removeChild(bundleLbl);
+      var execute = dojo.byId("execute");
+      if (execute != null)
+        options.removeChild(execute);
+        
+   if(select.selectedIndex <= 0) {
+       return;
+   }
+   else if (select.options[select.selectedIndex].value == 'upgrade') {
+      var bundleLbl = document.createElement('div');
+      bundleLbl.setAttribute("id", "bundleLbl");
+      bundleLbl.setAttribute("class", "instruction1");
+      bundleLbl.innerHTML="Select upgradeable agent bundle:";
+      options.appendChild(bundleLbl);
+      
+      var bundleSelect = document.createElement('select');
+      bundleSelect.setAttribute("id", "bundleSelect");
+      bundleSelect.setAttribute("style", "margin-bottom:5px;");
+      var option;
+        <% for (b in bundles) { %>
+           option = document.createElement('option');
+           option.setAttribute("value", "${b}");
+           option.innerHTML="${h b}";
+           bundleSelect.appendChild(option);
+        <% } %>
+     options.appendChild(bundleSelect);
+     
+        <% if (bundles != []) { %>
+            var execBtn = document.createElement('input');
+            execBtn.setAttribute("type", "button");
+            execBtn.setAttribute("id", "execBtn");
+            execBtn.setAttribute("value", "Execute");
+            execBtn.setAttribute("onClick", "runCommand()");
+            
+            var execute = document.createElement('div');
+            execute.setAttribute("id", "execute");
+            execute.appendChild(execBtn);
+            options.appendChild(execute);
+        <% } %>
+    }
+    else  {
+            var execBtn = document.createElement('input');
+            execBtn.setAttribute("type", "button");
+            execBtn.setAttribute("id", "execBtn");
+            execBtn.setAttribute("value", "Execute");
+            execBtn.setAttribute("onClick", "runCommand()");
+            
+            var execute = document.createElement('div');
+            execute.setAttribute("id", "execute");
+            execute.appendChild(execBtn);
+            options.appendChild(execute);
+    }
 }
 
 dojo.addOnLoad(function(){
@@ -161,13 +243,14 @@ dojo.addOnLoad(function(){
 
         <div style="padding-left:5px;">
             <div class="instruction1">Please select a query to run:</div>
-        <select id="commandSelect" onchange="runCommand();updateLegend(this);" style="margin-bottom:5px;">
+        <select id="commandSelect" onchange="updateLegend(this);updateCmdOptions(this);" style="margin-bottom:5px;">
         <% for (c in commands) { %>
           <option value="${c}">${h c}</option>
         <% } %>
       </select>
       </div>
       <div id="legend" style="padding: 1px 5px 5px 2px; font-style: italic;"></div>
+      <div id="cmdOptions" style="padding: 1px 5px 5px 2px; font-style: italic;"></div>
       <% if (isGroup) { %>
         <div class="grpmembertext">Group Members</div>
         <div id="groupMembers" class="pendingData">
