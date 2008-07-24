@@ -818,22 +818,43 @@ public class AppdefBossEJBImpl
         AuthzSubject subject = manager.getSubject(sessionId);
         List appdefList = new ArrayList();
 
+        // cheaper to find the resource first
+        ResourceManagerLocal resMan = getResourceManager();
         for (int i = 0; i < entities.length; i++) {
-            try {
-                appdefList.add(findById(subject, entities[i]));
-            } catch (AppdefEntityNotFoundException e) {
-                log.debug("Entity not found: " + entities[i]);
+            if (pc != null) {
+                appdefList.add(resMan.findResource(entities[i]));
+            }
+            else {
+                try {
+                    appdefList.add(findById(subject, entities[i]));
+                } catch (AppdefEntityNotFoundException e) {
+                    log.debug("Entity not found: " + entities[i]);
+                }
             }
         }
         
-        if (pc != null) {
-            Collections.sort(appdefList);            
-            if (pc.getSortorder() == PageControl.SORT_DESC)
-                Collections.reverse(appdefList);
-            
-            return Pager.getDefaultPager().seek(appdefList, pc);
+        if (pc == null) {
+            return new PageList(appdefList, appdefList.size());
         }
-        return new PageList(appdefList, appdefList.size());
+        
+        Collections.sort(appdefList);            
+        if (pc.getSortorder() == PageControl.SORT_DESC)
+            Collections.reverse(appdefList);
+        
+        PageList pl = Pager.getDefaultPager().seek(appdefList, pc);
+        
+        // Replace the list objects with AppdefResourceValue
+        appdefList.clear();
+        for (Iterator it = pl.iterator(); it.hasNext(); ) {
+            Resource res = (Resource) it.next();
+            try {
+                appdefList.add(findById(subject, new AppdefEntityID(res)));
+            } catch (AppdefEntityNotFoundException e) {
+                log.error("Resource not found in Appdef: " + res.getId());
+            }
+        }
+        
+        return new PageList(appdefList, pl.getTotalSize());
     }
 
     /**
