@@ -177,25 +177,26 @@ function updateCmdOptions(select){
        return;
    }
    else if (select.options[select.selectedIndex].value == 'upgrade') {
-      var bundleLbl = document.createElement('div');
-      bundleLbl.setAttribute("id", "bundleLbl");
-      bundleLbl.setAttribute("class", "instruction1");
-      bundleLbl.innerHTML="Select upgradeable agent bundle:";
-      options.appendChild(bundleLbl);
-      
-      var bundleSelect = document.createElement('select');
-      bundleSelect.setAttribute("id", "bundleSelect");
-      bundleSelect.setAttribute("style", "margin-bottom:5px;");
-      var option;
-        <% for (b in bundles) { %>
-           option = document.createElement('option');
-           option.setAttribute("value", "${b}");
-           option.innerHTML="${h b}";
-           bundleSelect.appendChild(option);
-        <% } %>
-     options.appendChild(bundleSelect);
      
         <% if (bundles != []) { %>
+            var bundleLbl = document.createElement('div');
+            bundleLbl.setAttribute("id", "bundleLbl");
+            bundleLbl.setAttribute("class", "instruction1");
+            bundleLbl.innerHTML="Select upgradeable agent bundle:";
+            options.appendChild(bundleLbl);
+            
+            var bundleSelect = document.createElement('select');
+            bundleSelect.setAttribute("id", "bundleSelect");
+            bundleSelect.setAttribute("style", "margin-bottom:5px;");
+            var option;
+            <% for (b in bundles) { %>
+                 option = document.createElement('option');
+                 option.setAttribute("value", "${b}");
+                 option.innerHTML="${h b}";
+                 bundleSelect.appendChild(option);
+            <% } %>
+           options.appendChild(bundleSelect);
+     
             var execBtn = document.createElement('input');
             execBtn.setAttribute("type", "button");
             execBtn.setAttribute("id", "execBtn");
@@ -206,7 +207,13 @@ function updateCmdOptions(select){
             execute.setAttribute("id", "execute");
             execute.appendChild(execBtn);
             options.appendChild(execute);
-        <% } %>
+        <% } else { %>
+            var bundleLbl = document.createElement('div');
+            bundleLbl.setAttribute("id", "bundleLbl");
+            bundleLbl.setAttribute("class", "instruction1");
+            bundleLbl.innerHTML="There are no agent bundles available for upgrade.";
+            options.appendChild(bundleLbl);
+         <% } %>
     }
     else  {
             var execBtn = document.createElement('input');
