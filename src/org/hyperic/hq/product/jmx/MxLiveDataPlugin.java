@@ -130,12 +130,7 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
 
                 for (int i=0; i<ops.length; i++) {
                     MBeanParameterInfo[] params = ops[i].getSignature();
-                    if (params.length == 0) {
-                        methods.put(ops[i].getName(), "-");
-                    }
-                    else {
-                        //XXX
-                    }
+                    methods.put(ops[i].getName(), new Integer(params.length));
                 }
             }
         } catch (Exception e) {
