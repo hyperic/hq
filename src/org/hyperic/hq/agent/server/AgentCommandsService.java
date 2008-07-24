@@ -319,6 +319,19 @@ public class AgentCommandsService implements AgentCommandsClient {
                         "Failed to decompress " + bundle + " at destination " + workDir);
             }
 
+            final File extractedBundleDir = new File(workDir,  bundleHome);
+            // verify that top level dir exists
+            if (!extractedBundleDir.isDirectory()) {
+                throw new AgentRemoteException(
+                        "Invalid agent bundle file detected; missing top-level "
+                                + bundleDir + " directory");
+            }
+            // if everything went well, move extracted files to destination
+            if (!extractedBundleDir.renameTo(bundleDir)) {
+                throw new AgentRemoteException(
+                        "Failed to copy agent bundle from " + extractedBundleDir + " to " + bundleDir);
+            }
+            
             // update the wrapper configuration for next JVM restart
             boolean success = false;
             try {
@@ -334,19 +347,6 @@ public class AgentCommandsService implements AgentCommandsClient {
                             "Failed to write new bundle home " + bundleHome
                             + " into rollback properties");
                 }
-            }
-
-            final File extractedBundleDir = new File(workDir,  bundleHome);
-            // verify that top level dir exists
-            if (!extractedBundleDir.isDirectory()) {
-                throw new AgentRemoteException(
-                        "Invalid agent bundle file detected; missing top-level "
-                                + bundleDir + " directory");
-            }
-         // if everything went well, move extracted files to destination
-            if (!extractedBundleDir.renameTo(bundleDir)) {
-                throw new AgentRemoteException(
-                        "Failed to copy agent bundle from " + extractedBundleDir + " to " + bundleDir);
             }
             _log.info("Successfully upgraded to new agent bundle");
         }
