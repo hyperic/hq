@@ -287,7 +287,7 @@ hyperic.widget.Menu = function(kwArgs) {
     that.onclick = function(evt) {
         if(!this._isVisible) {
             var x,y,node;
-            if(window.event) { node = window.event.srcElement; alert(node); }
+            if(window.event) { node = window.event.srcElement; /* alert(node); */ }
             else { node = evt.target; }
             if(this._isSubMenu) {
                 //put it on the right
