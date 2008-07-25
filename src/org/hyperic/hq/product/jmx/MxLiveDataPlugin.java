@@ -114,16 +114,10 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
                         continue; //XXX
                     }
                         
-                    //XXX leave filtering to server-side?
-                    if ((val == null) ||
-                        val.getClass().isArray() ||
-                        (val.getClass() == String.class))
-                    {
+                    if (val == null) {
                         continue;
                     }
-                    if (Number.class.isAssignableFrom(val.getClass())) {
-                        attrs.put(name, val);
-                    }
+                    attrs.put(name, val);
                 }
 
                 MBeanOperationInfo[] ops = info.getOperations();
