@@ -25,6 +25,7 @@ import org.hyperic.hq.hqu.rendit.metaclass.ResourceCategory
 import org.hyperic.hq.hqu.rendit.metaclass.ResourceGroupCategory
 import org.hyperic.hq.hqu.rendit.metaclass.RoleCategory
 import org.hyperic.hq.hqu.rendit.metaclass.StringCategory
+import org.hyperic.hq.hqu.rendit.metaclass.AgentCategory
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -45,7 +46,7 @@ class Dispatcher implements IDispatcher {
                                 DownCategory, EscalationCategory, MapCategory,
                                 MetricCategory, ResourceCategory,
                                 ResourceGroupCategory, RoleCategory,
-                                StringCategory]   
+                                StringCategory, AgentCategory]
     
     private Log log = LogFactory.getLog(Dispatcher.class);
 

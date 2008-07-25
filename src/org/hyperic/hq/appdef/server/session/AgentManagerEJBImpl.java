@@ -564,6 +564,15 @@ public class AgentManagerEJBImpl
     }
 
     /**
+     * Get an Agent by id.
+     *
+     * @ejb:interface-method
+     */
+    public Agent getAgent(Integer id) {
+        return getAgentDAO().get(id);
+    }
+
+    /**
      * Find an agent which can service the given entity ID
      * @return An agent which is set to manage the specified ID
      *
@@ -800,7 +809,21 @@ public class AgentManagerEJBImpl
                 .getClient(aid);
         client.restart();
     }
-    
+
+    /**
+     * Pings the specified agent.
+     * @ejb:interface-method
+     * @see org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl#pingAgent(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.Agent)
+     */
+    public long pingAgent(AuthzSubject subject, AppdefEntityID id)
+        throws AgentNotFoundException, PermissionException,
+               AgentConnectionException, IOException, ConfigPropertyException,
+               AgentRemoteException
+    {
+        Agent a = getAgent(id);
+        return pingAgent(subject, a);
+    }
+
     /**
      * Pings the specified agent.
      * 
@@ -820,22 +843,17 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
-    public long pingAgent(AuthzSubject subject,
-                                    AppdefEntityID aid) 
-        throws PermissionException, 
-               AgentNotFoundException, 
-               AgentConnectionException, 
-               AgentRemoteException,
-               FileNotFoundException, 
-               IOException, 
-               ConfigPropertyException {
-
-        log.info("Pinging agent " + aid.getID());
+    public long pingAgent(AuthzSubject subject, Agent agent)
+        throws PermissionException, AgentNotFoundException,
+               AgentConnectionException, AgentRemoteException,
+               IOException, ConfigPropertyException
+    {
+        log.info("Pinging agent " + agent.getAddress());
 
         checkCreatePlatformPermission(subject);
 
-        AgentCommandsClient client = AgentCommandsClientFactory.getInstance()
-                .getClient(aid);
+        AgentCommandsClient client =
+            AgentCommandsClientFactory.getInstance().getClient(agent);
         return client.ping();
     }
     

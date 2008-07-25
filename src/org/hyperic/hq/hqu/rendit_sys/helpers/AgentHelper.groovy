@@ -1,10 +1,13 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl as AgentMan
-import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.appdef.shared.AgentNotFoundException
 
 class AgentHelper extends BaseHelper {
+
+    private aMan = AgentMan.one
+
     AgentHelper(AuthzSubject user) {
         super(user)
     }
@@ -27,8 +30,28 @@ class AgentHelper extends BaseHelper {
             return AgentMan.one.agentCount
             
         if (args['withPaging']) 
-            return AgentMan.one.findAgents(args['withPaging'])
+            return aMan.findAgents(args['withPaging'])
             
         throw new IllegalArgumentException('Unknown arguments passed to find()')
+    }
+
+    /**
+     * Get an agent based on Ip (or hostname) and port.  If the given agent
+     * could not be found null is returned.
+     */
+    def getAgent(String ip, int port) {
+        try {
+            aMan.getAgent(ip, port)
+        } catch (AgentNotFoundException e) {
+            return null
+        }
+    }
+
+    /**
+     * Get an agent by id.  If the given agent could not be found, null is
+     * returned.
+     */
+    def getAgent(Integer id) {
+        aMan.getAgent(id)
     }
 }
