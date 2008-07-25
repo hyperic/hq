@@ -35,6 +35,10 @@ class AgentHelper extends BaseHelper {
         throw new IllegalArgumentException('Unknown arguments passed to find()')
     }
 
+    def getAllAgents() {
+        aMan.getAgents()
+    }
+
     /**
      * Get an agent based on Ip (or hostname) and port.  If the given agent
      * could not be found null is returned.
