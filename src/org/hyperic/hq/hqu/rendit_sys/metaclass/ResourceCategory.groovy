@@ -297,7 +297,7 @@ class ResourceCategory {
     
     static Resource getPlatform(Resource r, AuthzSubject subject) {
         def aeid = new AppdefEntityID(r.resourceValue)
-        def aeval = new AppdefEntityValue(aeid, subject)
+        def aeval = new AppdefEntityValue(aeid, authzMan.overlordPojo)
         def plats = aeval.getAssociatedPlatforms(PageControl.PAGE_ALL);
         def plat = plats[0]
         return ResMan.one.findResource(plat.entityId)
