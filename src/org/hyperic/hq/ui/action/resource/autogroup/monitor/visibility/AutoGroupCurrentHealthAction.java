@@ -39,9 +39,9 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -121,7 +121,7 @@ public class AutoGroupCurrentHealthAction extends CurrentHealthAction {
             throw e1;
         }
         
-        AppdefResourceTypeValue selectedType =
+        AppdefResourceType selectedType =
             helper.getChildResourceType(request, ctx, childTypeId);
         request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR, selectedType);
         

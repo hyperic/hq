@@ -38,9 +38,9 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
@@ -115,10 +115,9 @@ public class ListChildrenAction extends TilesAction {
             throw e1;
         }
         
-        AppdefResourceTypeValue selectedType =
+        AppdefResourceType selectedType =
             helper.getChildResourceType(request, ctx, childTypeId);
-        request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR,
-                             selectedType);
+        request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR, selectedType);
             
         // get the resource healths
         StopWatch watch = new StopWatch();

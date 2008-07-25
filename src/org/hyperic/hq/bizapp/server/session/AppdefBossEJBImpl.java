@@ -62,9 +62,12 @@ import org.hyperic.hq.appdef.server.session.Cprop;
 import org.hyperic.hq.appdef.server.session.DownResSortField;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
@@ -99,12 +102,10 @@ import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -153,7 +154,6 @@ import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterTranslator;
-import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.critters.AvailabilityCritterType;
 import org.hyperic.hq.grouping.critters.CompatGroupTypeCritterType;
 import org.hyperic.hq.grouping.critters.GroupMembershipCritterType;
@@ -1081,17 +1081,22 @@ public class AppdefBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException 
     {
         try {
+            AppdefResourceType type = null;
             switch(id.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    return findPlatformTypeById(sessionID, id.getId());
+                    type = findPlatformTypeById(sessionID, id.getId());
+                    break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    return findServerTypeById(sessionID, id.getId());
+                    type = findServerTypeById(sessionID, id.getId());
+                    break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    return findServiceTypeById(sessionID, id.getId());
+                    type = findServiceTypeById(sessionID, id.getId());
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown appdef type: "
                                                        + id);
             }
+            return type.getAppdefResourceTypeValue();
         } catch (Exception e) {
             throw new SystemException(e);
         }
@@ -1100,12 +1105,12 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public PlatformTypeValue findPlatformTypeById(int sessionID, Integer id)
+    public PlatformType findPlatformTypeById(int sessionID, Integer id)
         throws PlatformNotFoundException,
                SessionTimeoutException, SessionNotFoundException
     {
         manager.authenticate(sessionID);
-        return getPlatformManager().findPlatformType(id).getPlatformTypeValue();
+        return getPlatformManager().findPlatformType(id);
     }
 
     /**
@@ -1123,11 +1128,11 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public ServiceTypeValue findServiceTypeById(int sessionID, Integer id)
+    public ServiceType findServiceTypeById(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException 
     {
         manager.authenticate(sessionID);
-        return getServiceManager().findServiceTypeById(id);
+        return getServiceManager().findServiceType(id);
     }
 
     /**
@@ -1145,11 +1150,11 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public ServerTypeValue findServerTypeById(int sessionID,  Integer id)
+    public ServerType findServerTypeById(int sessionID,  Integer id)
         throws SessionTimeoutException, SessionNotFoundException 
     {
         manager.authenticate(sessionID);
-        return getServerManager().findServerTypeById(id);
+        return getServerManager().findServerType(id);
     }
 
     /**

@@ -319,16 +319,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     
     
     /**
-     * Find ServiceTypeValue by Id.
-     * @deprecated Use findServiceType instead.
-     * @ejb:interface-method
-     */
-    public ServiceTypeValue findServiceTypeById(Integer id) 
-        throws ObjectNotFoundException {
-        return findServiceType(id).getServiceTypeValue();
-    }
-
-    /**
      * Find a ServiceType by id
      * @ejb:interface-method
      */

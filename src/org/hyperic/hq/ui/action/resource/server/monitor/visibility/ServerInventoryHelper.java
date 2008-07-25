@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -30,17 +30,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.FinderException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -93,10 +91,9 @@ public class ServerInventoryHelper extends InventoryHelper {
      * @param ctx the servlet context
      * @param id the id of the service type
      */
-    public AppdefResourceTypeValue
-    getChildResourceType(HttpServletRequest request,
-                         ServletContext ctx,
-                         AppdefEntityTypeID id)
+    public AppdefResourceType getChildResourceType(HttpServletRequest request,
+                                                   ServletContext ctx,
+                                                   AppdefEntityTypeID id)
         throws PermissionException, AppdefEntityNotFoundException,
         RemoteException, SessionNotFoundException, SessionTimeoutException,
         ServletException {

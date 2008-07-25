@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,27 +25,11 @@
 
 package org.hyperic.hq.ui.action.resource.autogroup.monitor.config;
 
-import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction;
-import org.hyperic.hq.ui.action.resource.common.monitor.config.MonitoringConfigForm;
-import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
-import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.RootInventoryHelper;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageControl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,6 +37,19 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction;
+import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
+import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.RootInventoryHelper;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
 
 /**
  * This populates the AutoGroupConfigMetrics/Update metrics pages' request
@@ -108,10 +105,9 @@ public class AutoGroupConfigMetricsFormPrepareAction
             throw e1;
         }
         
-        AppdefResourceTypeValue selectedType =
+        AppdefResourceType selectedType =
             helper.getChildResourceType(request, ctx, childTypeId);
-        request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR,
-                             selectedType);
+        request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR, selectedType);
 
         AppdefEntityID appdefId = RequestUtils.getEntityId(request);
                 

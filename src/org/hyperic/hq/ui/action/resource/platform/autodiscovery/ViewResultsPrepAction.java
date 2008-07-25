@@ -41,12 +41,12 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
@@ -108,7 +108,7 @@ public class ViewResultsPrepAction extends WorkflowPrepareAction {
         if (aForm.getServerTypeFilter() != null &&
             aForm.getServerTypeFilter().intValue() != -1)
         {                
-            ServerTypeValue sTypeVal =
+            ServerType sTypeVal =
                 appdefBoss.findServerTypeById(sessionId.intValue(), 
                                               aForm.getServerTypeFilter());
             name = sTypeVal.getName();                                                                 

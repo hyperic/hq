@@ -494,18 +494,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Find a server type by id
-     * @param id - The ID of the server
-     * @return ServerTypeValue
-     * @deprecated Use findServerType instead.
-     * @ejb:interface-method
-     */
-    public ServerTypeValue findServerTypeById(Integer id)
-        throws ObjectNotFoundException {
-        return findServerType(id).getServerTypeValue();
-    }
-
-    /**
      * Find a ServerType by id
      * @ejb:interface-method
      */

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -35,9 +35,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -48,9 +50,6 @@ import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelp
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * A class that provides an implementation of some auto-group
@@ -100,9 +99,9 @@ public class RootInventoryHelper extends InventoryHelper {
      * @param ctx the servlet context
      * @param id the id of the server type
      */
-    public AppdefResourceTypeValue getChildResourceType(HttpServletRequest request,
-                                                        ServletContext ctx,
-                                                        AppdefEntityTypeID id)
+    public AppdefResourceType getChildResourceType(HttpServletRequest request,
+                                                   ServletContext ctx,
+                                                   AppdefEntityTypeID id)
         throws PermissionException, AppdefEntityNotFoundException,
                RemoteException, SessionNotFoundException,
                SessionTimeoutException, ServletException

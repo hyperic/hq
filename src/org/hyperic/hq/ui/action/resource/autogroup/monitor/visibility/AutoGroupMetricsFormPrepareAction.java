@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -123,10 +124,9 @@ public class AutoGroupMetricsFormPrepareAction
             throw e1;
         }
         
-        AppdefResourceTypeValue selectedType =
+        AppdefResourceType selectedType =
             helper.getChildResourceType(request, ctx, childTypeID);
-        request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR,
-                             selectedType);
+        request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR, selectedType);
 
         // get the "metric range" user pref
         WebUser user = RequestUtils.getWebUser(request);
@@ -140,7 +140,9 @@ public class AutoGroupMetricsFormPrepareAction
             displayForm.setRid( typeHolder.getId() );
             displayForm.setType( new Integer( typeHolder.getType() ) );
         }
-        displayForm.setCtype(selectedType.getAppdefTypeKey());
+        displayForm.setCtype(new AppdefEntityTypeID(selectedType.getAppdefType(),
+                                                    selectedType.getId())
+                            .getAppdefKey());
 
         return super.execute(mapping, form, request, response, begin, end);
     }
