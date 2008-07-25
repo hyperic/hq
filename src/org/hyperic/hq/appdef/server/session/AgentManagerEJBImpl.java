@@ -404,6 +404,15 @@ public class AgentManagerEJBImpl
     }
 
     /**
+     * Get an Agent by id.
+     *
+     * @ejb:interface-method
+     */
+     public Agent getAgent(Integer id) {
+         return getAgentDAO().get(id);
+     }
+
+    /**
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
@@ -490,6 +499,18 @@ public class AgentManagerEJBImpl
         }                
 
         return client.agentSendFileData(id, data, streams);
+    }
+
+
+    public long pingAgent(AuthzSubject subject, Agent agent)
+        throws PermissionException, AgentNotFoundException,
+               AgentConnectionException, AgentRemoteException
+    {
+        log.info("Pinging agent " + agent.getAddress());
+
+        AgentCommandsClient client =
+            new AgentCommandsClient(AgentConnectionUtil.getClient(agent.getAgentToken()));
+        return client.ping();
     }
 
     public static AgentManagerLocal getOne() {

@@ -49,6 +49,10 @@ public class AgentDAO extends HibernateDAO
         super.remove(entity);
     }
 
+    public Agent get(Integer id) {
+        return (Agent)super.get(id);
+    }
+
     public Agent findById(Integer id) {
         return (Agent)super.findById(id);
     }
