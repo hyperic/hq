@@ -41,7 +41,7 @@ class AgentHelper extends BaseHelper {
      */
     def getAgent(String ip, int port) {
         try {
-            aMan.getAgent(ip, port)
+            return aMan.getAgent(ip, port)
         } catch (AgentNotFoundException e) {
             return null
         }
