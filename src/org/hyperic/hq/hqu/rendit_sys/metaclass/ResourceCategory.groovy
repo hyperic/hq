@@ -300,9 +300,9 @@ class ResourceCategory {
         return r.resourceType.id == AuthzConstants.authzServiceProto
     }
     
-    static Resource getPlatform(Resource r, AuthzSubject subject) {
+    static Resource getPlatform(Resource r) {
         def aeid = new AppdefEntityID(r)
-        def aeval = new AppdefEntityValue(aeid, subject)
+        def aeval = new AppdefEntityValue(aeid, authzMan.overlordPojo)
         def plats = aeval.getAssociatedPlatforms(PageControl.PAGE_ALL);
         def plat = plats[0]
         return ResMan.one.findResource(plat.entityId)
