@@ -36,8 +36,6 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
@@ -97,9 +95,7 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
                 ObjectName obj = (ObjectName)beans.next();
                 Map bean = new HashMap();
                 Map attrs = new LinkedHashMap();
-                Map methods = new LinkedHashMap();
                 bean.put(PROP_ATTRIBUTE+"s", attrs);
-                bean.put(PROP_METHOD+"s", methods);
                 res.put(obj.toString(), bean);
 
                 MBeanInfo info = mServer.getMBeanInfo(obj);
@@ -115,17 +111,12 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
                     }
                         
                     if (val == null) {
-                        continue;
+                        val = "-";
                     }
                     attrs.put(name, val);
                 }
 
-                MBeanOperationInfo[] ops = info.getOperations();
-
-                for (int i=0; i<ops.length; i++) {
-                    MBeanParameterInfo[] params = ops[i].getSignature();
-                    methods.put(ops[i].getName(), new Integer(params.length));
-                }
+                bean.put(PROP_METHOD+"s", info.getOperations());
             }
         } catch (Exception e) {
             throw new PluginException("Error in query '" +
