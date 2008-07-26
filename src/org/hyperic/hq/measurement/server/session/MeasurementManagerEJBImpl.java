@@ -731,6 +731,13 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public List getAvailabilityMeasurements(Collection resources) {
+        return getMeasurementDAO().findAvailMeasurements(resources);
+    }
+
+    /**
      * Look up a list of Measurement objects by category
      *
      * @ejb:interface-method
