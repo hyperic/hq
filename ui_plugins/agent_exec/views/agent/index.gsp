@@ -78,26 +78,32 @@ function runCommand() {
     return;
   var cmd = cmdSelect.options[cmdSelect.selectedIndex].value;
 
-  var bundleSelect = dojo.byId('bundleSelect');
-  var bundle;
-  if (bundleSelect != null) {
-    if (bundleSelect.selectedIndex >= 0)
-      bundle = bundleSelect.options[bundleSelect.selectedIndex].value;
+  var paramSelect = dojo.byId('paramSelect');
+  var param;
+  if (paramSelect != null) {
+    if (paramSelect.selectedIndex >= 0)
+      param = paramSelect.options[paramSelect.selectedIndex].value;
     else
       return;
   }
   
   var url;
-  if (bundle == null) {
+  if (cmd == 'upgrade') {
     url = '<%= urlFor(action:'invoke') %>' + 
             '?cmd=' + cmd + 
-            '&eid=<%= eid %>';  
+            '&bundle=' + param + 
+            '&eid=<%= eid %>';
   } 
+  else if (cmd == 'push plugin') {
+    url = '<%= urlFor(action:'invoke') %>' + 
+            '?cmd=' + cmd + 
+            '&plugin=' + param + 
+            '&eid=<%= eid %>';
+  }   
   else {
     url = '<%= urlFor(action:'invoke') %>' + 
             '?cmd=' + cmd + 
-            '&bundle=' + bundle + 
-            '&eid=<%= eid %>';
+            '&eid=<%= eid %>';  
   }
   
   var fmtSelect = dojo.byId('fmt_' + cmd);
@@ -150,6 +156,7 @@ var legends = {};
 legends['restart'] = '${l.restart}';
 legends['ping'] = '${l.ping}';
 legends['upgrade'] = '${l.upgrade}';
+legends['push plugin'] = '${l.push_plugin}';
 
 function updateLegend(select){
     var legendDiv = dojo.byId("legend");
@@ -163,12 +170,12 @@ function updateLegend(select){
 function updateCmdOptions(select){
     var options = dojo.byId("cmdOptions");
 
-      var bundleSelect = dojo.byId("bundleSelect");
-      if (bundleSelect != null)
-        options.removeChild(bundleSelect);
-      var bundleLbl = dojo.byId("bundleLbl");
-      if (bundleLbl != null)
-        options.removeChild(bundleLbl);
+      var paramSelect = dojo.byId("paramSelect");
+      if (paramSelect != null)
+        options.removeChild(paramSelect);
+      var paramLbl = dojo.byId("paramLbl");
+      if (paramLbl != null)
+        options.removeChild(paramLbl);
       var execute = dojo.byId("execute");
       if (execute != null)
         options.removeChild(execute);
@@ -179,23 +186,23 @@ function updateCmdOptions(select){
    else if (select.options[select.selectedIndex].value == 'upgrade') {
      
         <% if (bundles != []) { %>
-            var bundleLbl = document.createElement('div');
-            bundleLbl.setAttribute("id", "bundleLbl");
-            bundleLbl.setAttribute("class", "instruction1");
-            bundleLbl.innerHTML="Select upgradeable agent bundle:";
-            options.appendChild(bundleLbl);
+            var paramLbl = document.createElement('div');
+            paramLbl.setAttribute("id", "paramLbl");
+            paramLbl.setAttribute("class", "instruction1");
+            paramLbl.innerHTML="Select upgradeable agent bundle:";
+            options.appendChild(paramLbl);
             
-            var bundleSelect = document.createElement('select');
-            bundleSelect.setAttribute("id", "bundleSelect");
-            bundleSelect.setAttribute("style", "margin-bottom:5px;");
+            var paramSelect = document.createElement('select');
+            paramSelect.setAttribute("id", "paramSelect");
+            paramSelect.setAttribute("style", "margin-bottom:5px;");
             var option;
             <% for (b in bundles) { %>
                  option = document.createElement('option');
                  option.setAttribute("value", "${b}");
                  option.innerHTML="${h b}";
-                 bundleSelect.appendChild(option);
+                 paramSelect.appendChild(option);
             <% } %>
-           options.appendChild(bundleSelect);
+           options.appendChild(paramSelect);
      
             var execBtn = document.createElement('input');
             execBtn.setAttribute("type", "button");
@@ -208,13 +215,52 @@ function updateCmdOptions(select){
             execute.appendChild(execBtn);
             options.appendChild(execute);
         <% } else { %>
-            var bundleLbl = document.createElement('div');
-            bundleLbl.setAttribute("id", "bundleLbl");
-            bundleLbl.setAttribute("class", "instruction1");
-            bundleLbl.innerHTML="There are no agent bundles available for upgrade.";
-            options.appendChild(bundleLbl);
+            var paramLbl = document.createElement('div');
+            paramLbl.setAttribute("id", "paramLbl");
+            paramLbl.setAttribute("class", "instruction1");
+            paramLbl.innerHTML="There are no agent bundles available for upgrade.";
+            options.appendChild(paramLbl);
          <% } %>
     }
+   else if (select.options[select.selectedIndex].value == 'push plugin') {
+     
+        <% if (plugins != []) { %>
+            var paramLbl = document.createElement('div');
+            paramLbl.setAttribute("id", "paramLbl");
+            paramLbl.setAttribute("class", "instruction1");
+            paramLbl.innerHTML="Select server plugin to push to agent:";
+            options.appendChild(paramLbl);
+            
+            var paramSelect = document.createElement('select');
+            paramSelect.setAttribute("id", "paramSelect");
+            paramSelect.setAttribute("style", "margin-bottom:5px;");
+            var option;
+            <% for (p in plugins) { %>
+                 option = document.createElement('option');
+                 option.setAttribute("value", "${p}");
+                 option.innerHTML="${h p}";
+                 paramSelect.appendChild(option);
+            <% } %>
+           options.appendChild(paramSelect);
+     
+            var execBtn = document.createElement('input');
+            execBtn.setAttribute("type", "button");
+            execBtn.setAttribute("id", "execBtn");
+            execBtn.setAttribute("value", "Execute");
+            execBtn.setAttribute("onClick", "runCommand()");
+            
+            var execute = document.createElement('div');
+            execute.setAttribute("id", "execute");
+            execute.appendChild(execBtn);
+            options.appendChild(execute);
+        <% } else { %>
+            var paramLbl = document.createElement('div');
+            paramLbl.setAttribute("id", "paramLbl");
+            paramLbl.setAttribute("class", "instruction1");
+            paramLbl.innerHTML="There are no server plugins available to push.";
+            options.appendChild(paramLbl);
+         <% } %>
+    }    
     else  {
             var execBtn = document.createElement('input');
             execBtn.setAttribute("type", "button");
@@ -249,7 +295,7 @@ dojo.addOnLoad(function(){
       <div class="fivepad">
 
         <div style="padding-left:5px;">
-            <div class="instruction1">Please select a query to run:</div>
+            <div class="instruction1">Please select an agent operation to run:</div>
         <select id="commandSelect" onchange="updateLegend(this);updateCmdOptions(this);" style="margin-bottom:5px;">
         <% for (c in commands) { %>
           <option value="${c}">${h c}</option>

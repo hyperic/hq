@@ -6,7 +6,7 @@ import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl as agentMan
 import static org.hyperic.hq.plugin.hqagent.AgentProductPlugin.FULL_SERVER_NAME as HQ_AGENT_SERVER_NAME
 
 class AgentController 
-	extends BaseController
+    extends BaseController
 {
                          
     def AgentController() {
@@ -38,8 +38,25 @@ class AgentController
     }
     
     private getCommands() {
-		['restart', 'ping', 'upgrade'] 
+        ['restart', 'ping', 'upgrade', 'push plugin'] 
     }
+    
+    private getServerPlugins() {
+        def jbossHome = System.properties["jboss.server.home.dir"]
+        def plugins = []
+        File dir = new File("${jbossHome}/deploy/hq.ear/hq-plugins");
+        String[] children = dir.list();
+        if (children == null) {
+            // Either dir does not exist or is not a directory
+        } else {
+            for (int i=0; i<children.length; i++) {
+                // Get filename of file or directory
+                if (children[i].endsWith(".jar"))
+                    plugins.add(children[i])
+            }
+        }
+        return plugins
+    }    
     
     private getAgentBundles() {
         def jbossHome = System.properties["jboss.server.home.dir"]
@@ -70,9 +87,9 @@ class AgentController
         
         def isGroup = viewedResource.isGroup()
         def members = viewedMembers
-    	render(locals:[ commands:cmds, bundles:agentBundles, eid:viewedResource.entityId,
-    	                cmdFmt:cmdFmt, formatters:formatters,
-    	                isGroup:isGroup, groupMembers:members])
+        render(locals:[ commands:cmds, bundles:agentBundles, plugins:serverPlugins, eid:viewedResource.entityId,
+                        cmdFmt:cmdFmt, formatters:formatters,
+                        isGroup:isGroup, groupMembers:members])
     }
     
     def pollAgent(overlord, aeid, timeout) {
@@ -105,6 +122,7 @@ class AgentController
         JSONArray res = new JSONArray()
         def cmd   = params.getOne('cmd')
         def bundle = params.getOne('bundle')
+        def plugin = params.getOne('plugin')
         def overlord = subMan.one.overlordPojo
         // iterate through all the group members, restarting 4.0 agents
         for (resource in viewedMembers) {
@@ -124,6 +142,11 @@ class AgentController
                     agentMan.one.upgradeAgentBundle(overlord, aeid, bundle)
                     log.info "Restarting agent with id ${aeid}"
                     agentMan.one.restartAgent(overlord, aeid)
+                } else if (cmd == "push plugin") {
+                    log.info "Pushing plugin ${plugin} bundle to agent with id ${aeid}"
+                    agentMan.one.transferAgentPlugin(overlord, aeid, plugin)
+                    log.info "Restarting agent with id ${aeid}"
+                    agentMan.one.restartAgent(overlord, aeid)
                 }
                 rsltDescription = "Successfully executed ${cmd} command in agent with id ${aeid}"
                 log.info "Successfully executed ${cmd} command in agent with id ${aeid}"
@@ -131,13 +154,13 @@ class AgentController
                 rsltDescription = "Failed to execute ${cmd} command in agent with id ${aeid}. Reason: ${e.message}"
                 log.error("Failed to execute ${cmd} command in agent with id ${aeid}", e)
             }
-           	def val = [rid: aeid.toString(), result: rsltDescription] as JSONObject
-           	res.put(val)
+            def val = [rid: aeid.toString(), result: rsltDescription] as JSONObject
+            res.put(val)
         }
         JSONObject jsres = new JSONObject()
         jsres.put('results', res)
         jsres.put('command', cmd)
         render(inline:"/* ${jsres} */", 
-    	       contentType:'json-comment-filtered')
+               contentType:'json-comment-filtered')
     }
 }
