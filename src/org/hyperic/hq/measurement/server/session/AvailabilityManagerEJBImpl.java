@@ -330,6 +330,12 @@ public class AvailabilityManagerEJBImpl
 	}
 
     /**
+     * @return Map<Measurement, double[]> Array is comprised of 5 elements
+     * [IND_MIN]
+     * [IND_AVG]
+     * [IND_MAX]
+     * [IND_CFG_COUNT]
+     * [IND_LAST_TIME]
      * @ejb:interface-method
      */
     public Map getAggregateData(Integer[] mids, long begin, long end)
@@ -340,6 +346,12 @@ public class AvailabilityManagerEJBImpl
     }
 
     /**
+     * @return Map<Integer, double[]> Array is comprised of 5 elements
+     * [IND_MIN]
+     * [IND_AVG]
+     * [IND_MAX]
+     * [IND_CFG_COUNT]
+     * [IND_LAST_TIME]
      * @ejb:interface-method
      */
     public Map getAggregateData(Integer[] tids, Integer[] iids,
@@ -419,6 +431,7 @@ public class AvailabilityManagerEJBImpl
     }
 
     /**
+     * @return Map<Integer, MetricValue> Integer is the measurementId
      * @ejb:interface-method
      */
     public Map getLastAvail(Integer[] mids) {
@@ -426,6 +439,7 @@ public class AvailabilityManagerEJBImpl
     }
 
     /**
+     * @return Map<Integer, MetricValue> Integer is the measurementId
      * @ejb:interface-method
      */
     public Map getLastAvail(Integer[] mids, long after) {
