@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -223,6 +224,17 @@ public class ResourceGroupDAO extends HibernateDAO
         return createQuery("select g.resource from GroupMember g " +
                            "where g.group = :group")
             .setParameter("group", g)
+            .list();
+    }
+    
+    /**
+     * @param List<Integer> resourceGroupIds
+     * @return List<Resource> {@link Resource}s
+     */
+    List getMembers(List groupIds) {
+        return createQuery("select g.resource from GroupMember g " +
+                           "where g.group in (:groups)")
+            .setParameterList("group", groupIds, new IntegerType())
             .list();
     }
 
