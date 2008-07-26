@@ -952,6 +952,18 @@ public class AlertDefinitionManagerEJBImpl
         return getAlertDefDAO().findByAppdefEntity(id.getType(), id.getID());
     }
     
+    /**
+     * Get a list of all alert definitions for the resource and its descendents
+     * @param subj the caller
+     * @param res the root resource
+     * @return a list of alert definitions
+     * @ejb:interface-method
+     */
+    public List findRelatedAlertDefinitions(AuthzSubject subj, Resource res) {
+        List defs = getAlertDefDAO().findByRootResource(subj, res);
+        return defs;
+    }
+    
     /** 
      * Get list of children alert definition for a parent alert definition
      * @ejb:interface-method

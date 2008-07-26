@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,8 +36,10 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.dao.HibernateDAOFactory;
@@ -191,7 +194,26 @@ public class AlertDefinitionDAO extends HibernateDAO {
     public List findByAppdefEntityType(AppdefEntityID id, boolean asc) {
         return findByAppdefEntityType(id, "name", asc);
     }
+
+    /**
+     * Return all alert definitions for the given resource and its descendants
+     * @param res the root resource
+     * @return
+     */
+    public List findByRootResource(AuthzSubject subject, Resource r) {
+        EdgePermCheck wherePermCheck = 
+            getPermissionManager().makePermCheckHql("rez");
+        String hql = "select ad from AlertDefinition ad " + 
+            "join ad.resource rez " +
+            wherePermCheck; 
         
+        Query q = createQuery(hql);
+
+        return wherePermCheck
+            .addQueryParameters(q, subject, r, 0,
+                                Arrays.asList(MANAGE_ALERTS_OPS)).list();
+    }
+    
     private List findByAppdefEntityType(AppdefEntityID id, String sort,
                                         boolean asc) {
         String sql = "from AlertDefinition a where a.appdefType = :aType " +
