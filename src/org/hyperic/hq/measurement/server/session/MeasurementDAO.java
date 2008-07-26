@@ -38,7 +38,6 @@ import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
@@ -398,7 +397,7 @@ public class MeasurementDAO extends HibernateDAO {
      * @return List of all measurement ids for availability, ordered
      */
     List findAllAvailIds() {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
             .append("select m.id from Measurement m ")
             .append("join m.template t ")
             .append("where ")
@@ -413,7 +412,7 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     Measurement findAvailMeasurement(Resource resource) {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
             .append("select distinct m from Measurement m ")
             .append("join m.template t ")
             .append("where m.resource = :res AND ")
@@ -425,9 +424,22 @@ public class MeasurementDAO extends HibernateDAO {
             .uniqueResult();
     }
 
+    List findAvailMeasurements(Collection resources) {
+        String sql = new StringBuilder()
+            .append("select m from Measurement m ")
+            .append("join m.template t ")
+            .append("where m.resource in (:resources) AND ")
+            .append(ALIAS_CLAUSE).toString();
+        return getSession().createQuery(sql)
+            .setParameterList("resources", resources)
+            .setCacheable(true)
+            .setCacheRegion("Measurement.findAvailMeasurements")
+            .list();
+    }
+
     List findAvailMeasurementsByInstances(int type, Integer[] ids) {
         boolean checkIds = (ids != null && ids.length > 0);
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
             .append("select m from Measurement m ")
             .append("join m.template t ")
             .append("join t.monitorableType mt ")
@@ -445,29 +457,6 @@ public class MeasurementDAO extends HibernateDAO {
         q.setCacheable(true);
         q.setCacheRegion("Measurement.findAvailMeasurementsByInstances");
         return q.list();
-    }
-
-    /**
-     * param List of resourceIds return List of Availability Measurements which
-     * are children of the resourceIds
-     *
-     * XXX: This is broken.
-     */
-    List findAvailMeasurements(List resourceIds) {
-        String sql = new StringBuffer()
-            .append("select m from Measurement m ")
-            .append("join m.resource.toEdges e ")
-            .append("join m.template t ")
-            .append("where m.resource is not null ")
-            .append("and e.distance > 0 ")
-            .append("and e.from in (:ids) and ")
-            .append(ALIAS_CLAUSE).toString();
-        return getSession()
-            .createQuery(sql)
-            .setParameterList("ids", resourceIds, new IntegerType())
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findAvailMeasurements")
-            .list();
     }
 
     List findMetricsCountMismatch(String plugin) {
