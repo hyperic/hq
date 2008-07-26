@@ -29,9 +29,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.CreateException;
@@ -554,6 +556,28 @@ public class ResourceGroupManagerEJBImpl
      */
     public Collection getMembers(ResourceGroup g) {
         return getResourceGroupDAO().getMembers(g);
+    }
+
+    /**
+     * @return Map<Integer, Resource> Integer is the groupId and Resource is the
+     * associated Resource to the ResourceGroupId
+     * @ejb:interface-method
+     */
+    public Map getMembers(List groupIds) {
+        Map rtn = new HashMap();
+        List groups = getResourceGroupDAO().getMembers(groupIds);
+        List tmp;
+        for (Iterator i=groups.iterator(); i.hasNext(); ) {
+            GroupMember mem = (GroupMember)i.next();
+            Resource res = mem.getResource();
+            Integer gId = mem.getGroup().getId();
+            if (null == (tmp = (List)rtn.get(gId))) {
+                tmp = new ArrayList();
+                rtn.put(gId, tmp);
+            }
+            tmp.add(res);
+        }
+        return rtn;
     }
     
     /**
