@@ -40,6 +40,7 @@ import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.transport.util.RemoteInputStream;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.file.FileWriter;
 import org.hyperic.util.math.MathUtil;
@@ -50,6 +51,8 @@ import org.tanukisoftware.wrapper.WrapperManager;
  */
 public class AgentCommandsService implements AgentCommandsClient {
     
+    private static final String AGENT_BUNDLE_HOME = "agent.bundle.home";
+
     private static final Log _log = LogFactory.getLog(AgentCommandsService.class);
 
     private final AgentDaemon _agent;
@@ -100,6 +103,17 @@ public class AgentCommandsService implements AgentCommandsClient {
         readFilesFromStream(destFiles, inStream);        
     }
     
+    // replaces tokenized agent.bundle.home property from path
+    private String resolveAgentBundleHomePath(String path) throws AgentRemoteException {
+        String agentBundleHome = System.getProperty(AGENT_BUNDLE_HOME);
+        // this should never happen
+        if (agentBundleHome == null) {
+                throw new AgentRemoteException(
+                    "Could not resolve system property " + AGENT_BUNDLE_HOME);
+        }
+        return StringUtil.replace(path, "${" + AGENT_BUNDLE_HOME + "}", agentBundleHome);
+    }
+    
     private void readFilesFromStream(FileData[] destFiles, InputStream inStream) 
         throws AgentRemoteException {
 
@@ -112,10 +126,13 @@ public class AgentCommandsService implements AgentCommandsClient {
             FileWriter writer;
             FileData data = destFiles[i];
 
+            // replace agent bundle home environment property from path
+            String destFile = resolveAgentBundleHomePath(data.getDestFile());
+
             _log.info("Preparing to write " + data.getSize() +
-                    " bytes to " + data.getDestFile() +
+                    " bytes to " + destFile +
                     " (type=" + data.getWriteType() + ")");
-            writer = new FileWriter(new File(data.getDestFile()), 
+            writer = new FileWriter(new File(destFile), 
                     inStream, data.getSize());
 
             writer.setVerifyMD5CheckSumOnWrite(data.getMD5CheckSum());

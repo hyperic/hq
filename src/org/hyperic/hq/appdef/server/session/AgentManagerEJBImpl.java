@@ -91,6 +91,8 @@ public class AgentManagerEJBImpl
     // XXX: These should go elsewhere.
     private final String CAM_AGENT_TYPE = "covalent-eam";
     private final String HQ_AGENT_REMOTING_TYPE = "hyperic-hq-remoting";
+    private static final String JBOSS_SERVER_HOME_DIR_PROP = "jboss.server.home.dir";
+    private static final String HQ_PLUGINS_DIR ="/deploy/hq.ear/hq-plugins";
     
     private Log log = LogFactory.getLog(AgentManagerEJBImpl.class.getName());
 
@@ -723,6 +725,60 @@ public class AgentManagerEJBImpl
         files[0][0] = src.getPath();
         
         File dest = new File(HQConstants.AgentBundleDropDir, bundleFileName);
+        
+        files[0][1] = dest.getPath();
+        
+        int[] modes = {FileData.WRITETYPE_CREATEOROVERWRITE};        
+        
+        log.info("Transferring agent bundle from local repository at "+files[0][0]+
+                 " to agent "+aid.getID()+" at "+files[0][1]);
+                
+        agentSendFileData(subject, aid, files, modes);
+    }
+    
+    /**
+     * Transfer an agent plugin residing on the HQ server to an agent.
+     * 
+     * @param subject The subject issuing the request.
+     * @param aid The agent id.
+     * @param plugin The plugin name.
+     * @throws PermissionException if the subject does not have proper permissions 
+     *                             to issue an agent bundle transfer.
+     * @throws FileNotFoundException if the plugin is not found on the HQ server.
+     * @throws IOException if an I/O error occurs, such as failing to calculate 
+     *                     the file MD5 checksum.
+     * @throws AgentRemoteException if an exception occurs on the remote agent side.
+     * @throws AgentConnectionException  if the connection to the agent fails.
+     * @throws AgentNotFoundException if no agent exists with the given agent id.
+     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public void transferAgentPlugin(AuthzSubject subject,
+                                    AppdefEntityID aid,  
+                                    String plugin) 
+        throws PermissionException, 
+               AgentNotFoundException, 
+               AgentConnectionException, 
+               AgentRemoteException,
+               FileNotFoundException, 
+               IOException, 
+               ConfigPropertyException {
+        
+        String[][] files = new String[1][2];
+        
+        String jbossHome = System.getProperty(JBOSS_SERVER_HOME_DIR_PROP);
+        // this should never happen, but catch it just in case
+        if (jbossHome == null) {
+            log.error("Could not resolve System property " + JBOSS_SERVER_HOME_DIR_PROP);
+            throw new FileNotFoundException("Could not resolve System property " + JBOSS_SERVER_HOME_DIR_PROP);
+        }
+        File src = new File(jbossHome + HQ_PLUGINS_DIR, plugin);   
+        
+        files[0][0] = src.getPath();
+        
+        // tokenize agent.bundle.home since this can only be resolved at the agent
+        File dest = new File("${agent.bundle.home}/pdk/plugins", plugin);
         
         files[0][1] = dest.getPath();
         
