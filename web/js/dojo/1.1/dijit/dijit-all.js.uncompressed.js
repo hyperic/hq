@@ -8933,6 +8933,7 @@ dojo.declare(
 			//		waiting for the next blur event.
 
 			var filteredValue = this.filter(value);
+
 			if((((typeof filteredValue == typeof value) && (value !== undefined/*#5317*/)) || (value === null/*#5329*/)) && (formattedValue == null || formattedValue == undefined)){
 				formattedValue = this.format(filteredValue, this.constraints);
 			}
