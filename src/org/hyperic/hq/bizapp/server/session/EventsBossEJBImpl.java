@@ -46,7 +46,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
-import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -55,11 +54,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
-import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
-import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
-import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -67,9 +61,9 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
-import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
@@ -1130,50 +1124,13 @@ public class EventsBossEJBImpl
 			   AppdefEntityNotFoundException, PermissionException 
     {
     	AuthzSubject subject = manager.getSubject(sessionID);
-    	// first get the tree 
         // bomb if this isnt a platform
         if(!id.isPlatform()) {
             throw new IllegalArgumentException(id + " is not a platform");
         }
         
-        ResourceTree tree =
-            getApplicationManager().getResourceTree(subject,
-                                                    new AppdefEntityID[] { id },
-                                                    ResourceTreeGenerator.
-                                                    TRAVERSE_UP);
-        List resourceIds = new ArrayList();
-        resourceIds.add(id);
-        // First add all the regular servers and services.
-    	for (Iterator p = tree.getPlatformIterator(); p.hasNext();) {
-            PlatformNode pn = (PlatformNode) p.next();
-            for (Iterator s = pn.getServerIterator(); s.hasNext();) {
-                ServerNode sn = (ServerNode) s.next();
-                resourceIds.add(sn.getServer().getEntityId());
-                for (Iterator sv = sn.getServiceIterator(); sv.hasNext();) {
-                    ServiceNode svn = (ServiceNode) sv.next();
-                    resourceIds.add(svn.getService().getEntityId());
-                }
-            }
-        }
-
-        // Add any platform services
-    	AppdefEntityValue aeval = new AppdefEntityValue(id, subject);
-        List platformServices =
-            aeval.getAssociatedServices(PageControl.PAGE_ALL);
-        
-        for(int i = 0; i< platformServices.size(); i++) {
-            ServiceValue platformService = 
-                (ServiceValue)platformServices.get(i);
-            resourceIds.add(platformService.getEntityId());
-        }
-
-        AlertDefinitionManagerLocal adm = getADM();
-        List alertDefs = new ArrayList();
-        for(int i = 0; i < resourceIds.size(); i++) {
-            AppdefEntityID anId = (AppdefEntityID)resourceIds.get(i);
-            alertDefs.addAll(adm.findAlertDefinitions(subject, anId));
-        }
-        return alertDefs;
+        Resource res = getResourceManager().findResource(id);
+        return getADM().findRelatedAlertDefinitions(subject, res);
     }
     
     /**
