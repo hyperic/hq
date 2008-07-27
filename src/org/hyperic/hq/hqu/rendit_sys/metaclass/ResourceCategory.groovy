@@ -444,15 +444,7 @@ class ResourceCategory {
         def boss = AppdefBoss.one
         def mgr = SessionManager.instance
         def sessionId = mgr.put(user)
-        if (r.isPlatform()) {
-            boss.removePlatform(sessionId, r.instanceId)
-        }
-        else if (r.isServer()) {
-            boss.removeServer(sessionId, r.instanceId)
-        }
-        else if (r.isService()) {
-            boss.removeService(sessionId, r.instanceId)
-        }
+        boss.removeAppdefEntity(sessionId, r.entityId)
     }
 
     private static getOverlord() {

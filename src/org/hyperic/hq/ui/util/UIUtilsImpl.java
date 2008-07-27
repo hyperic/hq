@@ -12,6 +12,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.pager.PageControl;
 
 public class UIUtilsImpl {
     public static List<AppdefResourceValue> getFavoriteResources(ServletContext ctx, WebUser user) {
@@ -44,6 +45,7 @@ public class UIUtilsImpl {
         Collections.reverse(entityIds); // Most recent on top
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
         arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
-        return boss.findByIds(user.getSessionId().intValue(), arrayIds);
+        return boss.findByIds(user.getSessionId().intValue(), arrayIds,
+                              PageControl.PAGE_ALL);
     }
 }

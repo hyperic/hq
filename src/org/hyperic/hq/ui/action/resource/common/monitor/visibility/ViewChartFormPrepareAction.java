@@ -286,7 +286,8 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                 grpVal.getAppdefGroupEntries().toArray(grpMembers);
 
             AppdefBoss ab = ContextUtils.getAppdefBoss(ctx);
-            List memVals = ab.findByIds(sessionId, grpMembers);
+            List memVals = ab.findByIds(sessionId, grpMembers,
+                                        PageControl.PAGE_ALL);
             resources = new AppdefResourceValue[memVals.size()];
             resources = (AppdefResourceValue[]) memVals.toArray(resources);
         } else {

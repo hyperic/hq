@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -95,7 +95,8 @@ public class RemoveServiceAction extends BaseAction {
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
         for (int i = 0; i < resources.length; i++) {
-            boss.removeService(sessionId.intValue(), resources[i]);
+            boss.removeAppdefEntity(sessionId.intValue(),
+                                    AppdefEntityID.newServiceID(resources[i]));
         }
 
         return returnSuccess(request, mapping, params);        

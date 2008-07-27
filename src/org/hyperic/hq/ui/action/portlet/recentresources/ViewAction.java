@@ -49,6 +49,7 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 
 /**
@@ -102,6 +103,7 @@ public class ViewAction extends TilesAction {
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
         arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
 
-        return boss.findByIds(user.getSessionId().intValue(), arrayIds);
+        return boss.findByIds(user.getSessionId().intValue(), arrayIds,
+                              PageControl.PAGE_ALL);
     }
 }

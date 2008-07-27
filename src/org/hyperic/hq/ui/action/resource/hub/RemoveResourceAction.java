@@ -112,79 +112,18 @@ public class RemoveResourceAction extends BaseAction {
             // if something actually, um, was
             for (Iterator i = entities.iterator(); i.hasNext();) {
                 AppdefEntityID resourceId = (AppdefEntityID) i.next();
-                switch (resourceId.getType()) {
-                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM :
-                        try {
-                            boss.removePlatform(sessionId.intValue(), 
-                                                resourceId.getId());
-                            deleted++;
-                        } catch (AppdefEntityNotFoundException e) {
-                            log.error("Removing resource " + resourceId +
-                                       "failed.");
-                        }
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                        try {
-                            boss.removeServer(sessionId.intValue(), 
-                                              resourceId.getId());
-                            deleted++;
-                        } catch (AppdefEntityNotFoundException e) {
-                            log.error("Removing resource  " + resourceId +
-                                      " failed");
-                        }
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
-                        try {
-                            boss.removeService(sessionId.intValue(), 
-                                               resourceId.getId());
-                            deleted++;
-                        } catch (AppdefEntityNotFoundException e) {
-                            log.trace("Removing resource  " + resourceId +
-                                      " failed");
-                        }
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
-                        try {
-                            boss.removeApplication(sessionId.intValue(), 
-                                                   resourceId.getId());
-                            deleted++;
-                        } catch (AppdefEntityNotFoundException e) {
-                            log.trace("Removing resource  " + resourceId +
-                                      " failed");
-                        }
-                        break;
-        
-                    case AppdefEntityConstants.APPDEF_TYPE_GROUP :
-                        try {
-                            boss.deleteGroup(sessionId.intValue(), 
-                                             resourceId.getId());
-                            deleted++;
-                       } catch (FinderException e) {
-                           log.trace("Removing resource  " + resourceId +
-                                     " failed");
-                       } catch (PermissionException e) {
-                           throw e;
-                       } catch (Exception e) {
-                           // Still referenced by an application.  Application
-                           // throws VetoException when in same web application.
-                           // However, it's JBossTransactionRollbackException
-                           // through the remote interface.
-                           if (resourceId.isGroup()) {
-                               RequestUtils.setError(request,
-                                   "resource.group.remove.ReferencedByApp");
-                           }
-                       }
-                        break;
-                    default :
-                        log.trace("Resource  " + resourceId +
-                                  " isn't something I know how to delete");
-                        break;
+                try {
+                    boss.removeAppdefEntity(sessionId.intValue(), resourceId);
+                    deleted++;
+                } catch (AppdefEntityNotFoundException e) {
+                    log.error("Removing resource " + resourceId +
+                               "failed.");
                 }
             }
             if (deleted > 0) {
                 RequestUtils
                     .setConfirmation(request,
-                                 "resource.common.confirm.ResourcesRemoved");
+                                    "resource.common.confirm.ResourcesRemoved");
             }        
         }
     }

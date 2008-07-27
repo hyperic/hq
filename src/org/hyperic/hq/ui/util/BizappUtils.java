@@ -51,6 +51,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.util.LabelValueBean;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -63,7 +65,6 @@ import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
-import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -178,20 +179,6 @@ public class BizappUtils {
         }
     
         return full.toString();
-    }
-
-    public static PlatformTypeValue getPlatformTypeName(ServletContext ctx,
-                                                        HttpServletRequest request,
-                                                        String name)
-        throws Exception {
-    
-        PlatformTypeValue ptValue;
-
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        int sessionId = RequestUtils.getSessionIdInt(request);
-        ptValue = appdefBoss.findPlatformTypeByName(sessionId, name); 
-
-        return ptValue;
     }
 
     /**
@@ -319,7 +306,7 @@ public class BizappUtils {
         int sessionId = RequestUtils.getSessionIdInt(request);
 
         // Build support ai server types
-        PlatformTypeValue ptv =
+        PlatformType ptv =
             appdefBoss.findPlatformTypeByName(sessionId, platType);
         List serverTypes =
             appdefBoss.findServerTypesByPlatformType(sessionId,
@@ -520,7 +507,7 @@ public class BizappUtils {
         if (entities == null)
             return new ArrayList();
         
-        return boss.findByIds(sessionId, entities);            
+        return boss.findByIds(sessionId, entities, PageControl.PAGE_ALL);            
     }
     
     /**
@@ -570,12 +557,8 @@ public class BizappUtils {
     public static List buildAppdefEntityIds(List entityIds)
     {
         List entities = new ArrayList();
-        Iterator rIterator = entityIds.iterator();
-        while (rIterator.hasNext())
-        {
-            AppdefEntityID entityId = new AppdefEntityID(
-                        (String)rIterator.next());
-            entities.add(entityId);
+        for (Iterator rIterator = entityIds.iterator(); rIterator.hasNext(); ) {
+            entities.add(new AppdefEntityID((String) rIterator.next()));
         }
                     
         return entities;

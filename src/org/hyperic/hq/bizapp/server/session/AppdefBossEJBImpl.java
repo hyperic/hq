@@ -98,7 +98,6 @@ import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
@@ -787,22 +786,6 @@ public class AppdefBossEJBImpl
     /**
      * Looks up and returns a list of value objects corresponding
      * to the list of appdef entity represented by the instance ids
-     * passed in. The method does not require
-     * the caller to know the instance-id's corresponding type. Similarly,
-     * the return value is upcasted.
-     * @return list of appdefResourceValue
-     * @ejb:interface-method
-     */
-    public PageList findByIds (int sessionId, AppdefEntityID[] entities)
-        throws SessionTimeoutException, SessionNotFoundException,
-               AppdefEntityNotFoundException, PermissionException 
-    {
-        return findByIds(sessionId, entities, null);
-    }
-
-    /**
-     * Looks up and returns a list of value objects corresponding
-     * to the list of appdef entity represented by the instance ids
      * passed in. The method does not require the caller to know
      * the instance-id's corresponding type. Similarly,
      * the return value is upcasted.
@@ -1116,13 +1099,12 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public PlatformTypeValue findPlatformTypeByName(int sessionID, String name)
+    public PlatformType findPlatformTypeByName(int sessionID, String name)
         throws PlatformNotFoundException,
                SessionTimeoutException, SessionNotFoundException 
     {
         manager.authenticate(sessionID);
-        return getPlatformManager().findPlatformTypeByName(name)
-            .getPlatformTypeValue();
+        return getPlatformManager().findPlatformTypeByName(name);
     }
 
     /**
@@ -1312,13 +1294,28 @@ public class AppdefBossEJBImpl
             throw new SystemException("Unable to find new service");
         }
     }
-
+    
     /**
-     * Remove a platform.
-     *
+     * Remove an appdef entity
      * @ejb:interface-method
      */
-    public void removePlatform(int sessionId, Integer platformId)
+    public void removeAppdefEntity(int sessionId, AppdefEntityID aeid)
+        throws SessionNotFoundException, SessionTimeoutException,
+               ApplicationException, VetoException {
+        if (aeid.isPlatform()) {
+            removePlatform(sessionId, aeid.getId());
+        } else if (aeid.isServer()) {
+            removeServer(sessionId, aeid.getId());
+        } else if (aeid.isService()) {
+            removeService(sessionId, aeid.getId());
+        } else if (aeid.isGroup()) {
+            removeGroup(sessionId, aeid.getId());
+        } else if (aeid.isApplication()) {
+            removeApplication(sessionId, aeid.getId());
+        }
+    }
+
+    private void removePlatform(int sessionId, Integer platformId)
         throws SessionNotFoundException, SessionTimeoutException,
                ApplicationException, VetoException 
     {
@@ -1407,6 +1404,139 @@ public class AppdefBossEJBImpl
             log.error("Caught PermissionException while removing platform: " +
                       platformId,e);
             throw e;
+        }
+    }
+
+    private void removeServer(int sessionId, Integer serverId)
+        throws PermissionException, ServerNotFoundException,
+               SessionException, VetoException
+    {
+        AuthzSubject subject = manager.getSubject(sessionId);
+    
+        try {
+            ServerManagerLocal smLoc = getServerManager();
+    
+            // Lookup the server (make sure someone else hasn't deleted it)
+            ServerValue serverRes = smLoc.getServerById(subject,serverId);
+    
+            // Add it to the list
+            List unscheduleList = new ArrayList();
+            unscheduleList.add(serverRes);
+    
+            // Unschedule service metrics.
+            // XXX: Use POJO to lookup services.
+            ServiceManagerLocal svcMgrLoc = getServiceManager();
+            unscheduleList.addAll(
+                svcMgrLoc.getServicesByServer(subject, serverId,
+                                              PageControl.PAGE_ALL));
+    
+            MeasurementBossLocal measBoss = getMeasurementBoss();
+    
+            AppdefEntityID[] toUnschedule =
+                new AppdefEntityID[unscheduleList.size()];
+            Iterator it = unscheduleList.iterator();
+            for (int i = 0; it.hasNext(); i++) {
+                AppdefEntityID thisId =
+                    ((AppdefResourceValue)it.next()).getEntityId();
+    
+                toUnschedule[i] = thisId;
+                // remove any log or config track plugins
+                measBoss.removeTrackers(sessionId, thisId);
+            }
+    
+            // now remove the measurements
+            measBoss.disableMeasurements(sessionId, serverRes.getEntityId(),
+                                         toUnschedule);
+    
+            try {
+                AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
+                aiManager.toggleRuntimeScan(getOverlord(),
+                                            serverRes.getEntityId(),
+                                            false);
+            } catch (Exception e) {
+                log.error("Error turning off RuntimeScan for: " + serverRes, 
+                          e);
+            }
+    
+            // finally, remove the server
+            getServerManager().removeServer(subject, serverId);
+        } catch (RemoveException e) {
+            rollback();
+            throw new SystemException(e);
+        } catch (AppdefEntityNotFoundException e) {
+            rollback();
+            String msg = "Caught not found exception [server: "+serverId+"]";
+            log.error(msg,e);
+            throw new ServerNotFoundException(msg,e);
+        } catch (PermissionException e) {
+            rollback();
+            log.error("Caught permission exception: [server:"+serverId+"]");
+            throw e;
+        }
+    }
+
+    private void removeService(int sessionId, Integer serviceId)
+        throws ApplicationException, VetoException 
+    {
+        try {
+            AuthzSubject subject = manager.getSubject(sessionId);
+    
+            AppdefEntityID id = AppdefEntityID.newServiceID(serviceId);
+    
+            // now remove any measurements associated with the service
+            MeasurementBossLocal measBoss = getMeasurementBoss();
+            measBoss.disableMeasurements(sessionId, id);
+    
+            // remove any log or config track plugins
+            measBoss.removeTrackers(sessionId, id);
+            
+            getServiceManager().removeService(subject, serviceId);
+        } catch (SessionTimeoutException e) {
+            rollback();
+            throw e;
+        } catch (SessionNotFoundException e) {
+            rollback();
+            throw e;
+        } catch (PermissionException e) {
+            rollback();
+            throw e;
+        } catch (FinderException e) {
+            rollback();
+            throw new ApplicationException(e);
+        } catch (RemoveException e) {
+            rollback();
+            throw new ApplicationException(e);
+        }
+    }
+
+    private void removeGroup(int sessionId, Integer groupId)
+        throws SessionException, PermissionException, VetoException
+    {
+        AuthzSubject subject = manager.getSubject(sessionId);
+        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        ResourceGroup group = groupMan.findResourceGroupById(subject, groupId);
+        groupMan.removeResourceGroup(subject, group);
+    }
+
+    private void removeApplication(int sessionId, Integer appId)
+        throws ApplicationException, PermissionException, 
+               SessionException, VetoException
+    {
+        try {
+            AuthzSubject caller = manager.getSubject(sessionId);
+            getApplicationManager().removeApplication(caller, appId);
+        } catch (SessionNotFoundException e) {
+            rollback();
+            throw e;
+        } catch (SessionTimeoutException e) {
+            rollback();
+            throw e;
+        } catch (PermissionException e) {
+            rollback();
+            throw e;
+        } catch (RemoveException e) {
+            rollback();
+            throw new ApplicationException(e);
         }
     }
 
@@ -1692,143 +1822,6 @@ public class AppdefBossEJBImpl
         } catch (Exception e) {
             rollback();
             throw new SystemException(e);
-        }
-    }
-
-    /**
-     * Remove a Server from the inventory.
-     *
-     * @ejb:interface-method
-     */
-    public void removeServer(int sessionId, Integer serverId)
-        throws PermissionException, ServerNotFoundException,
-               SessionException, VetoException
-    {
-        AuthzSubject subject = manager.getSubject(sessionId);
-
-        try {
-            ServerManagerLocal smLoc = getServerManager();
-
-            // Lookup the server (make sure someone else hasn't deleted it)
-            ServerValue serverRes = smLoc.getServerById(subject,serverId);
-
-            // Add it to the list
-            List unscheduleList = new ArrayList();
-            unscheduleList.add(serverRes);
-
-            // Unschedule service metrics.
-            // XXX: Use POJO to lookup services.
-            ServiceManagerLocal svcMgrLoc = getServiceManager();
-            unscheduleList.addAll(
-                svcMgrLoc.getServicesByServer(subject, serverId,
-                                              PageControl.PAGE_ALL));
-
-            MeasurementBossLocal measBoss = getMeasurementBoss();
-
-            AppdefEntityID[] toUnschedule =
-                new AppdefEntityID[unscheduleList.size()];
-            Iterator it = unscheduleList.iterator();
-            for (int i = 0; it.hasNext(); i++) {
-                AppdefEntityID thisId =
-                    ((AppdefResourceValue)it.next()).getEntityId();
-
-                toUnschedule[i] = thisId;
-                // remove any log or config track plugins
-                measBoss.removeTrackers(sessionId, thisId);
-            }
-
-            // now remove the measurements
-            measBoss.disableMeasurements(sessionId, serverRes.getEntityId(),
-                                         toUnschedule);
-
-            try {
-                AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
-                aiManager.toggleRuntimeScan(getOverlord(),
-                                            serverRes.getEntityId(),
-                                            false);
-            } catch (Exception e) {
-                log.error("Error turning off RuntimeScan for: " + serverRes, 
-                          e);
-            }
-
-            // finally, remove the server
-            getServerManager().removeServer(subject, serverId);
-        } catch (RemoveException e) {
-            rollback();
-            throw new SystemException(e);
-        } catch (AppdefEntityNotFoundException e) {
-            rollback();
-            String msg = "Caught not found exception [server: "+serverId+"]";
-            log.error(msg,e);
-            throw new ServerNotFoundException(msg,e);
-        } catch (PermissionException e) {
-            rollback();
-            log.error("Caught permission exception: [server:"+serverId+"]");
-            throw e;
-        }
-    }
-
-    /**
-     * Remove a Service from the inventory.
-     *  
-     * @ejb:interface-method
-     */
-    public void removeService(int sessionId, Integer serviceId)
-        throws ApplicationException, VetoException 
-    {
-        try {
-            AuthzSubject subject = manager.getSubject(sessionId);
-
-            AppdefEntityID id = AppdefEntityID.newServiceID(serviceId);
-
-            // now remove any measurements associated with the service
-            MeasurementBossLocal measBoss = getMeasurementBoss();
-            measBoss.disableMeasurements(sessionId, id);
-
-            // remove any log or config track plugins
-            measBoss.removeTrackers(sessionId, id);
-            
-            getServiceManager().removeService(subject, serviceId);
-        } catch (SessionTimeoutException e) {
-            rollback();
-            throw e;
-        } catch (SessionNotFoundException e) {
-            rollback();
-            throw e;
-        } catch (PermissionException e) {
-            rollback();
-            throw e;
-        } catch (FinderException e) {
-            rollback();
-            throw new ApplicationException(e);
-        } catch (RemoveException e) {
-            rollback();
-            throw new ApplicationException(e);
-        }
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public void removeApplication(int sessionId, Integer appId)
-        throws ApplicationException, PermissionException, 
-               SessionException, VetoException
-    {
-        try {
-            AuthzSubject caller = manager.getSubject(sessionId);
-            getApplicationManager().removeApplication(caller, appId);
-        } catch (SessionNotFoundException e) {
-            rollback();
-            throw e;
-        } catch (SessionTimeoutException e) {
-            rollback();
-            throw e;
-        } catch (PermissionException e) {
-            rollback();
-            throw e;
-        } catch (RemoveException e) {
-            rollback();
-            throw new ApplicationException(e);
         }
     }
 
@@ -2895,20 +2888,6 @@ public class AppdefBossEJBImpl
         }
         return pager.seekAll(coll,pc.getPagenum(), pc.getPagesize(),
                              filterArr);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public void deleteGroup(int sessionId, Integer groupId)
-        throws SessionException, PermissionException, VetoException,
-               FinderException
-    {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
-        ResourceGroup group = groupMan.findResourceGroupById(subject, groupId); 
-            
-        groupMan.removeResourceGroup(subject, group);
     }
 
     /**
