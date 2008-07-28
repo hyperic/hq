@@ -28,11 +28,17 @@ public abstract class BaseService implements IEngineService {
     
     public static final String PARAM_SERVICE_VERSION = "v";
 
+    public static final String PARAM_GROUP_ID = "gid";
+    
     public static final String PARAM_RESOURCE_ID = "rid";
 
     public static final String PARAM_METRIC_TEMPLATE_ID = "mtid";
 
     public static final String PARAM_SERVICE_ID = "s_id";
+    
+    public static final String PARAM_START_TIME = "st";
+    
+    public static final String PARAM_END_TIME = "et";
     
     public static final String PARAM_TIME_RANGE = "tr";
     
@@ -44,12 +50,16 @@ public abstract class BaseService implements IEngineService {
     
     public static final String PARAM_INTERVAL = "ivl";
     
+    public static final String PARAM_SCHEDULE = "sched";
+    
     /**
      * Service IDs
      */
     public static final String SERVICE_ID_CHART_WIDGET = "chart";
     
     public static final String SERVICE_ID_ALERT_SUM_WIDGET = "alert_summary";
+    
+    public static final String SERVICE_ID_MAINTENANCE_WINDOW_WIDGET = "maint_win";
     
     /**
      * Error Codes

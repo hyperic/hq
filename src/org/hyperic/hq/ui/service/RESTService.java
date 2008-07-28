@@ -29,7 +29,9 @@ import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl;
 import org.hyperic.hq.bizapp.server.session.DashboardPortletBossEJBImpl;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBossLocal;
+import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
@@ -93,10 +95,12 @@ public class RESTService extends BaseService {
                 _response.getWriter().write(serviceChartWidget(cycle));
             } else if (servicePointId.equalsIgnoreCase(SERVICE_ID_ALERT_SUM_WIDGET)) {
                 _response.getWriter().write(serviceAlertSummaryWidget(cycle));
+            } else if (servicePointId.equalsIgnoreCase(SERVICE_ID_MAINTENANCE_WINDOW_WIDGET)) {
+            	_response.getWriter().write(serviceMaintenanceWindowWidget(cycle));
             }
         }
     }
-
+    
     /**
      * Service for the AlertSummary Widget
      * 
@@ -407,6 +411,72 @@ public class RESTService extends BaseService {
         return res;
     }
 
+    /**
+     * Service for the Maintenance Window Widget
+     * 
+     * @param cycle the service parameters
+     * @return the service JSON response
+     */
+    private String serviceMaintenanceWindowWidget(IRequestCycle cycle) {
+    	String groupIdParam  = cycle.getParameter(PARAM_GROUP_ID);
+        String startTimeParam = cycle.getParameter(PARAM_START_TIME);
+        String endTimeParam = cycle.getParameter(PARAM_END_TIME);
+        String scheduleParam = cycle.getParameter(PARAM_SCHEDULE);
+
+        String res = EMPTY_RESPONSE; // default to an empty response
+
+        // Get the AuthzSubject
+        WebUser user = (WebUser) _request.getSession()
+                .getAttribute(Constants.WEBUSER_SES_ATTR);
+        AuthzBoss boss = ContextUtils.getAuthzBoss(_servletContext);
+        AuthzSubject me = getAuthzSubject(user, boss);
+        if (me == null)
+            return ERROR_GENERIC;
+
+        ConfigResponse config = loadDashboardConfig(me);
+        if (config == null)
+            return ERROR_GENERIC;
+
+        try {
+            EventsBoss eb = ContextUtils.getEventsBoss(_servletContext);
+            MaintenanceEvent event = null;
+
+            if ((scheduleParam == null) || (scheduleParam.trim().length() == 0)) {
+            	// Get Scheduled Maintenance Event              
+            	event = eb.getMaintenanceEvent(
+            						user.getSessionId(), 
+            						Integer.parseInt(groupIdParam));            	
+            } else {
+            	event = new MaintenanceEvent();
+            	event.setGroupId(Integer.parseInt(groupIdParam));
+            	
+            	if (Boolean.valueOf(scheduleParam).booleanValue()) {
+            		// Reschedule Maintenance Event
+                	event.setStartTime(Long.parseLong(startTimeParam));
+                	event.setEndTime(Long.parseLong(endTimeParam));
+            		event = eb.scheduleMaintenanceEvent(user.getSessionId(), event);
+            	} else {
+            		// Unschedule Maintenance Event
+            		eb.unscheduleMaintenanceEvent(user.getSessionId(), event);
+            	}		
+            }
+            
+            if (event != null) {
+            	res = new JSONObject()
+								.put(PARAM_GROUP_ID, Integer.toString(event.getGroupId()))
+								.put(PARAM_START_TIME, Long.toString(event.getStartTime()))
+								.put(PARAM_END_TIME, Long.toString(event.getEndTime()))
+								.toString();            	
+            }
+     
+        } catch (Exception e) {
+            log.debug(e.getLocalizedMessage());
+            res = ERROR_GENERIC;
+        }
+        
+        return res;
+    }
+    
     private AuthzSubject getAuthzSubject(WebUser user, AuthzBoss boss) {
         try {
             return boss.findSubjectById(user.getSessionId(),

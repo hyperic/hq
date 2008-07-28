@@ -92,6 +92,7 @@ import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.server.session.Action;
@@ -99,6 +100,7 @@ import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
+import org.hyperic.hq.events.server.session.MaintenanceEventManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -107,6 +109,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.events.shared.MaintenanceEventManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
@@ -129,6 +132,7 @@ import org.hyperic.util.pager.SortAttribute;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.quartz.SchedulerException;
 
 /** 
  * The BizApp's interface to the Events Subsystem
@@ -172,6 +176,10 @@ public class EventsBossEJBImpl
 
     private ActionManagerLocal getActMan() {
         return ActionManagerEJBImpl.getOne();
+    }
+    
+    private MaintenanceEventManagerLocal getMaintEvtMgr() {
+    	return MaintenanceEventManagerEJBImpl.getOne();
     }
 
     private RegisteredTriggerValue convertToTriggerValue(
@@ -1758,6 +1766,45 @@ public class EventsBossEJBImpl
         getADM().setAlertsAllowed(allowed);
     }
 
+    /**
+     * Get a maintenance event by group id
+     *
+     * @ejb:interface-method
+     */
+    public MaintenanceEvent getMaintenanceEvent(int sessionId, int groupId)
+        throws SessionNotFoundException, SessionTimeoutException, 
+               PermissionException, SchedulerException 
+    {
+    	manager.authenticate(sessionId);
+    	return getMaintEvtMgr().getMaintenanceEvent(groupId);
+    }
+
+    /**
+     * Schedule a maintenance event
+     *
+     * @ejb:interface-method
+     */
+    public MaintenanceEvent scheduleMaintenanceEvent(int sessionId, MaintenanceEvent event)
+        throws SessionNotFoundException, SessionTimeoutException, 
+               PermissionException, SchedulerException 
+    {
+    	manager.authenticate(sessionId);
+    	return getMaintEvtMgr().schedule(event);
+    }
+
+    /**
+     * Schedule a maintenance event
+     *
+     * @ejb:interface-method
+     */
+    public void unscheduleMaintenanceEvent(int sessionId, MaintenanceEvent event)
+        throws SessionNotFoundException, SessionTimeoutException, 
+               PermissionException, SchedulerException 
+    {
+    	manager.authenticate(sessionId);
+    	getMaintEvtMgr().unschedule(event);
+    }
+    
     /**
      * @ejb:interface-method
      */
