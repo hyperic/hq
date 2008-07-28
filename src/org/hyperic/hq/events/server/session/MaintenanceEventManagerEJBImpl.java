@@ -37,6 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.MaintenanceEvent;
+import org.hyperic.hq.events.MaintenanceEventJob;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerLocal;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerUtil;
 import org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl;
