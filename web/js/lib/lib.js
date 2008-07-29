@@ -1804,3 +1804,245 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 
 // set the hyperic.dashboard.widget as the ancestor of the chartWidget class.
 hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
+
+hyperic.maintenance_schedule = function(group_id) {
+    var that = this;
+    that.existing_schedule = {};
+    that.group_id = group_id;
+    that.dialog = null;
+	that.buttons = {};
+	that.inputs = {};
+    that.selected_from_time = that.selected_to_time = new Date();
+    
+    that.init = function() {
+	    if(!that.dialog){
+			var pane = dojo11.byId('maintenance' + that.group_id);
+			pane.style.width = "450px";
+			that.dialog = new dijit11.Dialog({
+				id: "maintenance_schedule_dialog_" + that.group_id,
+				refocus: true,
+				autofocus: false,
+				title: "Schedule Downtime",
+			},pane);
+		}
+
+		var curdate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+
+        if(that.existing_schedule.from_time)
+        {
+            that.selected_from_time = new Date(that.existing_schedule.from_time * 1000);
+            that.selected_to_time = new Date(that.existing_schedule.to_time * 1000);
+        }
+        
+        that.inputs.from_date = new dijit11.form.DateTextBox({
+    			name: "from_date",
+    			value: that.selected_from_time,
+    			constraints: {
+                    min: curdate,
+                    datePattern: 'MM/dd/y'},
+    			lang: "en-us",
+    			promptMessage: "mm/dd/yyyy",
+    			rangeMessage: "The downtime start date cannot be later than end date.",
+    			invalidMessage: "Invalid date. Use mm/dd/yyyy format.",
+    			required: true
+    		}, "from_date");
+
+        that.inputs.to_date = new dijit11.form.DateTextBox({
+    			name: "to_date",
+    			value: that.selected_to_time,
+    			constraints: {
+                    min: curdate,
+                    datePattern: 'MM/dd/y'},
+    			lang: "en-us",
+    			promptMessage: "mm/dd/yyyy",
+    			rangeMessage: "The downtime end date cannot be earlier than start date.",
+    			invalidMessage: "Invalid date. Use mm/dd/yyyy format.",
+    			required: true
+    		}, "to_date");
+
+        that.inputs.from_time = new dijit11.form.TimeTextBox({
+    			name: "from_time",
+    			value: that.selected_from_time,
+    			lang: "en-us",
+                rangeMessage: "The downtime start time cannot be later than end time.",
+    			required: true
+    		}, "from_time");
+
+        that.inputs.to_time = new dijit11.form.TimeTextBox({
+    			name: "to_time",
+    			value: that.selected_to_time,
+    			lang: "en-us",
+                rangeMessage: "The downtime end time cannot be earlier than start time.",
+    			required: true
+    		}, "to_time");
+
+    	that.inputs.from_date.onChange = function() {
+            that.inputs.to_date.constraints.min = this.getValue();
+            that.inputs.to_date.validate();
+            that.inputs.from_time.onChange();
+            that.inputs.to_time.onChange();
+        }
+
+    	that.inputs.to_date.onChange = function() {
+            that.inputs.from_date.constraints.max = this.getValue();
+            that.inputs.from_date.validate();
+            that.inputs.from_time.onChange();
+            that.inputs.to_time.onChange();
+        }
+        
+        that.inputs.from_time.onChange = function() {
+            if(that.inputs.from_date.getValue().getTime() == that.inputs.to_date.getValue().getTime()) {
+                that.inputs.to_time.constraints.min = this.getValue();
+            } else {
+                delete that.inputs.to_time.constraints.min;
+            }
+            this.validate();
+            that.inputs.to_time.validate();
+        }
+
+        that.inputs.to_time.onChange = function() {
+            if(that.inputs.from_date.getValue().getTime() == that.inputs.to_date.getValue().getTime()) {
+                that.inputs.from_time.constraints.max = this.getValue();
+            } else {
+                delete that.inputs.from_time.constraints.max;
+            }
+            this.validate();
+            that.inputs.from_time.validate();
+        }
+
+		that.buttons.schedule_btn = new dijit11.form.Button({
+			label: "Schedule",
+			name: "schedule_btn",
+			id: "schedule_btn",
+			type: 'submit',
+            // onClick: function() { return that.dialog.isValid(); }
+		}, "schedule_btn");
+
+        // dojo.hitch(that,function() { dojo11.connect(schedule_btn, 'onClick', this.dialog.onCancel);} );
+        dojo11.connect(that.buttons.schedule_btn, 'onClick', that.schedule_action);
+
+		that.buttons.cancel_btn = new dijit11.form.Button({
+			label: "Cancel",
+			name: "cancel_btn",
+			id: "cancel_btn",
+			type: 'cancel',
+		}, "cancel_btn");
+		dojo11.connect(that.buttons.cancel_btn, 'onClick', that.dialog.onCancel);
+
+		that.buttons.clear_schedule_btn = new dijit11.form.Button({
+			label: "Clear schedule",
+			name: "clear_schedule_btn",
+			id: "clear_schedule_btn",
+			type: 'submit',
+		}, "clear_schedule_btn");
+        dojo11.connect(that.buttons.clear_schedule_btn, 'onClick', that.clear_schedule_action);
+
+		that.buttons.clear_schedule_btn.domNode.hide();
+
+        if(that.existing_schedule.from_time)
+        {
+            that.buttons.schedule_btn.setLabel('Reschedule');
+        }
+    }
+
+    that.schedule_action = function() {
+        arguments = that.dialog.getValues();
+
+	    // create unix epoch datetime in GMT timezone
+        from_datetime = (arguments.from_date.getTime() + arguments.from_time.getTime() - arguments.from_time.getTimezoneOffset() * 60000)/1000;
+         // - arguments.from_date.getTimezoneOffset() * 60000 - arguments.from_time.getTimezoneOffset() * 60000;
+
+        to_datetime = (arguments.to_date.getTime() + arguments.to_time.getTime() - arguments.to_time.getTimezoneOffset() * 60000)/1000;
+         // - arguments.to_date.getTimezoneOffset() * 60000 - arguments.to_time.getTimezoneOffset() * 60000;
+
+        return dojo11.xhrGet( {
+            url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id + '&sched=true&st=' + from_datetime + '&et=' + to_datetime,
+            handleAs: 'json',
+            load: function(data){
+                // that.charts[chart].data = data;
+				that.dialog.hide();
+                if(!data.error && (parseInt(data.st,10) != 0 && parseInt(data.et,10) != 0))
+                {
+                    that.existing_schedule.from_time = parseInt(data.st,10);
+                    that.existing_schedule.to_time = parseInt(data.et,10);
+
+                    that.selected_from_time = new Date(that.existing_schedule.from_time * 1000);
+                    that.selected_to_time = new Date(that.existing_schedule.to_time * 1000);
+
+					that.inputs.from_date.setValue(that.selected_from_time);
+					that.inputs.from_time.setValue(that.selected_from_time);
+					that.inputs.to_date.setValue(that.selected_to_time);
+					that.inputs.to_time.setValue(that.selected_to_time);
+
+                    dojo11.byId('existing_downtime_' + that.group_id).innerHTML = 'Currently scheduled downtime window:';
+
+		            that.buttons.schedule_btn.setLabel('Reschedule');
+		    		that.buttons.clear_schedule_btn.domNode.show();
+                }
+            },
+            error: function(data){
+                console.debug("An error occurred setting maintenance schedule for group " + that.group_id, data);
+            },
+            timeout: 2000
+        });
+        // console.log(from_datetime,to_datetime);
+    }
+
+    that.clear_schedule_action = function() {
+        return dojo11.xhrGet( {
+            url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id + '&sched=false',
+            handleAs: 'json',
+            load: function(data){
+                // that.charts[chart].data = data;
+				that.dialog.hide();
+                if(!data.error)
+                {
+                    that.existing_schedule = {};
+				    that.selected_from_time = that.selected_to_time = new Date();
+
+					that.inputs.from_date.setValue(that.selected_from_time);
+					that.inputs.from_time.setValue(that.selected_from_time);
+					that.inputs.to_date.setValue(that.selected_to_time);
+					that.inputs.to_time.setValue(that.selected_to_time);
+
+		            that.buttons.schedule_btn.setLabel('Schedule');
+		    		that.buttons.clear_schedule_btn.domNode.hide();
+
+                    dojo11.byId('existing_downtime_' + that.group_id).innerHTML = '';
+				}
+            },
+            error: function(data){
+                console.debug("An error occurred clearing maintenance schedule for group " + that.group_id, data);
+            },
+            timeout: 2000
+        });
+    }
+    
+    that.getSchedule = function() {
+        console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id);
+        return dojo11.xhrGet( {
+            url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id,
+            handleAs: 'json',
+            load: function(data){
+                // that.charts[chart].data = data;
+                if(!data.error && (parseInt(data.st,10) != 0 && parseInt(data.et,10) != 0))
+                {
+                    that.existing_schedule.from_time = parseInt(data.st,10);
+                    that.existing_schedule.to_time = parseInt(data.et,10);
+
+                    that.selected_from_time = new Date(that.existing_schedule.from_time * 1000);
+                    that.selected_to_time = new Date(that.existing_schedule.to_time * 1000);
+                    
+                    dojo11.byId('existing_downtime_' + that.group_id).innerHTML = 'Currently scheduled downtime window:';
+                }
+                that.init();
+            },
+            error: function(data){
+                console.debug("An error occurred fetching maintenance schedule for group " + that.group_id, data);
+            },
+            timeout: 2000
+        });
+    }
+
+	that.getSchedule();
+}
