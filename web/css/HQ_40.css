@@ -1310,17 +1310,17 @@ select {
 }
 
 /* schedule maintenance downtime dialog styling */
-.maintenance_dialog fieldset {
+.dijitDialog fieldset {
     border: 1px solid gray;
     padding: 4pt;
     margin: 5pt 0pt;
 }
 
-.maintenance_dialog legend {
+.dijitDialog legend {
     font-weight: bold;
 }
 
-.maintenance_dialog label {
+.dijitDialog label {
     display: inline-block;
     width: 40px; /* Width of labels */
     margin-left: 4pt;
