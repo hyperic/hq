@@ -25,7 +25,10 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -35,14 +38,29 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.MaintenanceEventJob;
+import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerLocal;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerUtil;
+import org.hyperic.hq.galerts.server.session.GalertDef;
+import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
+import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
+import org.hyperic.util.pager.PageControl;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
@@ -140,7 +158,7 @@ public class MaintenanceEventManagerEJBImpl
     	}
     	
     	//
-    	// TO DO: Check for valid resource group for scheduling
+    	// TO DO: Check for valid resource group before scheduling
     	//
     	
         SchedulerLocal scheduler = SchedulerEJBImpl.getOne();
@@ -215,6 +233,66 @@ public class MaintenanceEventManagerEJBImpl
     	
     	return event;
     }
+
+    /**
+     * Disable or enable alerts for the group and its resources.
+     * 
+     * @ejb:interface-method 
+     */        
+    public void manageAlerts(AuthzSubject admin, int groupId, boolean activate) 
+		throws PermissionException
+	{   	
+		log.info((activate ? "ACTIVATING" : "DEACTIVATING") + " ALERTS FOR GROUP " + groupId);
+		
+		GalertManagerLocal gam = GalertManagerEJBImpl.getOne();
+		AlertDefinitionManagerLocal adm = AlertDefinitionManagerEJBImpl.getOne();
+		ResourceGroupManagerLocal rgm = ResourceGroupManagerEJBImpl.getOne();   	    	
+		ResourceGroup group = rgm.findResourceGroupById(Integer.valueOf(groupId));
+		
+		Collection resources = rgm.getMembers(group);
+		Resource resource = null;
+		Object definition = null;
+		Collection alertDefinitions = new ArrayList();
+		Iterator adIter = null;
+		
+		// Get the alerts for the group
+	    alertDefinitions.addAll(gam.findAlertDefs(group, PageControl.PAGE_ALL));
+	
+		// Get the alerts for the resources of the group
+		for (Iterator rIter = resources.iterator(); rIter.hasNext(); ) {
+			resource = (Resource) rIter.next();
+			log.info("---> Resource Name ---> " + resource.getName());
+			
+			alertDefinitions.addAll(adm.findRelatedAlertDefinitions(admin, resource));    		
+		}
+		
+	    if (!alertDefinitions.isEmpty()) {
+	    	// Get Hibernate session
+	    	Session session = new AlertDefinitionDAO(DAOFactory.getDAOFactory())
+	    							.getNewSession();
+	    	
+	    	try {
+	    		// Update alerts
+	    		for (adIter = alertDefinitions.iterator(); adIter.hasNext(); ) {
+	    			definition = adIter.next();
+	        	
+	    			if (definition instanceof GalertDef) {
+	    				log.info("------> Group Alert ---> " + definition);
+	    				gam.enable((GalertDef) definition, activate);
+	    			} else if (definition instanceof AlertDefinition) {
+	    				log.info("------> Resource Alert --->" + definition);
+	    				adm.updateAlertDefinitionInternalEnable(
+	    							admin,
+	    							(AlertDefinition) definition, 
+	    							activate);            		
+	    			}
+	    		}
+	    		session.flush();
+	    	} finally {
+	    		session.close();
+	    	}
+	    }
+	}
     
     /*
      * Create a JobDetail object from a MaintenanceEvent
