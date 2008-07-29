@@ -35,6 +35,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.MaintenanceEventJob;
@@ -98,13 +99,34 @@ public class MaintenanceEventManagerEJBImpl
      * @ejb:interface-method 
      */
     public void unschedule(MaintenanceEvent event) throws SchedulerException {
-    	if (event == null) {
-    		throw new IllegalArgumentException();
-    	}
+        SchedulerLocal scheduler = SchedulerEJBImpl.getOne();
     	
-    	SchedulerEJBImpl.getOne().deleteJob(
-    									getJobName(event.getGroupId()), 
-    									JOB_GROUP);	
+        try {
+        	synchronized (SCHEDULER_LOCK) {
+        		// Get the latest info from the scheduler
+        		event = getMaintenanceEvent(event.getGroupId());
+        		Trigger[] triggers = scheduler.getTriggersOfJob(
+        											getJobName(event.getGroupId()), 
+        											JOB_GROUP);
+    
+        		if ((triggers.length > 0) 
+        				&& (triggers[0].getNextFireTime().getTime() == event.getEndTime())) {
+        			// Maintenance window is already in progress
+        			// so reschedule the last trigger to end now
+        			event.setEndTime(System.currentTimeMillis());
+        			schedule(event);
+        		} else {
+        			// Otherwise, delete the job
+        			scheduler.deleteJob(getJobName(event.getGroupId()), JOB_GROUP);
+        		
+        			_log.info(event + " : job has been deleted.");        		
+        		}
+        	}
+        } catch (NullPointerException npe) {
+        	if (event == null) {
+        		throw new IllegalArgumentException("No event to unschedule.");
+        	}
+        }
     }
 
     /**
@@ -114,9 +136,13 @@ public class MaintenanceEventManagerEJBImpl
      */    
     public MaintenanceEvent schedule(MaintenanceEvent event) throws SchedulerException {        
     	if (event == null) {
-        	throw new IllegalArgumentException();
-        }            		
-       
+        	throw new IllegalArgumentException("No event to schedule.");
+    	}
+    	
+    	//
+    	// TO DO: Check for valid resource group for scheduling
+    	//
+    	
         SchedulerLocal scheduler = SchedulerEJBImpl.getOne();
 
         synchronized (SCHEDULER_LOCK) {
@@ -138,16 +164,16 @@ public class MaintenanceEventManagerEJBImpl
         		Trigger existingTrigger = triggers[0];
 
         		// update existing job
-            	MaintenanceEvent currentEvent = buildMaintenanceEvent(
+            	MaintenanceEvent existingEvent = buildMaintenanceEvent(
             										scheduler.getJobDetail(
             														getJobName(event.getGroupId()),
             														JOB_GROUP));
             	
-            	if (existingTrigger.getPreviousFireTime() != null) {
-            		// if the first trigger has already fired,
-            		// then only the end time can be updated
-            		currentEvent.setEndTime(event.getEndTime()); 
-            		event = currentEvent;
+        		// if the maintenance event has already started,
+        		// then only the end time can be updated
+            	if (existingTrigger.getNextFireTime().getTime() == existingEvent.getEndTime()) {
+            		existingEvent.setEndTime(event.getEndTime()); 
+            		event = existingEvent;
             	}
             	
             	jobDetail = buildJobDetail(event);
@@ -156,7 +182,7 @@ public class MaintenanceEventManagerEJBImpl
         		// update existing trigger
         		newTrigger = buildTrigger(
         						event, 
-        						(existingTrigger.getPreviousFireTime() == null));
+        						(existingTrigger.getNextFireTime().getTime() == existingEvent.getStartTime()));
         		
         		newTrigger.setJobName(existingTrigger.getJobName());
         		newTrigger.setJobGroup(existingTrigger.getJobGroup());
@@ -227,7 +253,8 @@ public class MaintenanceEventManagerEJBImpl
 										TRIGGER_GROUP);
         
         if (deactivateAndActivate) {
-        	// set an additional trigger to re-activate the alerts
+        	// First trigger is to deactivate the alerts
+        	// Second trigger is to re-activate the alerts
         	trigger.setStartTime(new Date(event.getStartTime()));
         	trigger.setRepeatCount(1);
         	trigger.setRepeatInterval(event.getEndTime() - event.getStartTime());
