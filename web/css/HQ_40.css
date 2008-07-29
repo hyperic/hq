@@ -1122,7 +1122,7 @@ select {
 /* dashboard widget css */
 
 .widget {
-    width: 450px;
+/*    width: 450px;*/
     height: 350px;
     background: #000 url('/images/widget_bg.jpg') repeat-x;
     padding: 10px;
