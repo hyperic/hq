@@ -1678,6 +1678,10 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             row.id = 'alertGroup:' + groups[i];
             var data = that.alert_group_status[groups[i]] || ['gray','gray'];
             var name = that.alert_groups.data[groups[i]];
+            if(that.alert_groups.data[groups[i]].length > 20)
+            {
+                name = '<abbr title="' + name + '">' + name.substring(0,20) + '&hellip;</abbr>';
+            }
             row.innerHTML = '<th scope="row"><a href="/Resource.do?eid=5:' + groups[i] + '">' + name +'</a></th><td><img src="/images/4.0/icons/'+data[0]+'.png" alt="'+ status[data[0]] +'"></td><td><a href="/alerts/Alerts.do?mode=list&eid=5:' + groups[i] + '"><img src="/images/4.0/icons/'+data[1]+'.png" alt="'+ status[data[1]]+'" border="0"></a></td>';
             data = name = null;
         }
