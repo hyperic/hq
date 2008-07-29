@@ -29,6 +29,9 @@
 <link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
+<link rel="stylesheet" href="<html:rewrite page="/js/dojo/1.1/dojo/resources/dojo.css"/>" type="text/css"/>
+<link rel="stylesheet" href="<html:rewrite page="/js/dojo/1.1/dijit/themes/tundra/tundra.css"/>" type="text/css"/>
+
 <script type="text/javascript">
 djConfig = { isDebug: false }
 </script>
