@@ -1425,6 +1425,8 @@ hyperic.dashboard.chartWidget.prototype = hyperic.dashboard.widget;
 hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     var that = this;
 
+	that.max_alerts = 20;
+
     that.configSheet = dojo11.query('.config',node)[0];
     that.contentSheet = dojo11.query('.content',node)[0];
     
@@ -1502,7 +1504,15 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         // {
         //     that.selected_alert_groups.push(that.available_alert_groups.options[that.available_alert_groups.selectedIndex].value);
         // }
-        that.moveAlert(that.available_alert_groups,that.enabled_alert_groups);
+		if(that.enabled_alert_groups.options.length < that.max_alerts)
+		{
+	        that.moveAlert(that.available_alert_groups,that.enabled_alert_groups);
+
+			if(that.enabled_alert_groups.options.length == that.max_alerts)
+			{
+				e.target.disabled = true;
+			}
+		}
     };
     
     /**
@@ -1529,6 +1539,12 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         //     );
         // }
         that.moveAlert(that.enabled_alert_groups,that.available_alert_groups);
+
+		enable_alert_btn = dojo11.query('.enable_alert_btn',that.configSheet)[0];
+		if(enable_alert_btn.disabled == true)
+		{
+			enable_alert_btn.disabled = false;
+		}
     };
 
     /**
