@@ -1801,3 +1801,6 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             });
     }
 };
+
+// set the hyperic.dashboard.widget as the ancestor of the chartWidget class.
+hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
