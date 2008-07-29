@@ -87,7 +87,8 @@ public class RESTService extends BaseService {
      * The Service method. Supports services of version 1.0+
      */
     public void service(IRequestCycle cycle) throws IOException {
-        Double serviceVersion = Double.parseDouble(cycle.getParameter(PARAM_SERVICE_VERSION));
+        Double serviceVersion =
+            Double.parseDouble(cycle.getParameter(PARAM_SERVICE_VERSION));
         String servicePointId = cycle.getParameter(PARAM_SERVICE_ID);
 
         if (SERVICE_VERSION_1_0 == serviceVersion) {
@@ -433,19 +434,15 @@ public class RESTService extends BaseService {
         if (me == null)
             return ERROR_GENERIC;
 
-        ConfigResponse config = loadDashboardConfig(me);
-        if (config == null)
-            return ERROR_GENERIC;
-
         try {
             EventsBoss eb = ContextUtils.getEventsBoss(_servletContext);
             MaintenanceEvent event = null;
 
-            if ((scheduleParam == null) || (scheduleParam.trim().length() == 0)) {
+            if ((scheduleParam == null) || (scheduleParam.trim().length() == 0))
+            {
             	// Get Scheduled Maintenance Event              
-            	event = eb.getMaintenanceEvent(
-            						user.getSessionId(), 
-            						Integer.parseInt(groupIdParam));            	
+            	event = eb.getMaintenanceEvent(user.getSessionId(), 
+            	                               Integer.parseInt(groupIdParam));            	
             } else {
             	event = new MaintenanceEvent();
             	event.setGroupId(Integer.parseInt(groupIdParam));
@@ -454,7 +451,8 @@ public class RESTService extends BaseService {
             		// Reschedule Maintenance Event
                 	event.setStartTime(Long.parseLong(startTimeParam));
                 	event.setEndTime(Long.parseLong(endTimeParam));
-            		event = eb.scheduleMaintenanceEvent(user.getSessionId(), event);
+            		event = eb.scheduleMaintenanceEvent(user.getSessionId(),
+            		                                    event);
             	} else {
             		// Unschedule Maintenance Event
             		eb.unscheduleMaintenanceEvent(user.getSessionId(), event);
@@ -463,9 +461,9 @@ public class RESTService extends BaseService {
             
             if (event != null) {
             	res = new JSONObject()
-								.put(PARAM_GROUP_ID, Integer.toString(event.getGroupId()))
-								.put(PARAM_START_TIME, Long.toString(event.getStartTime()))
-								.put(PARAM_END_TIME, Long.toString(event.getEndTime()))
+								.put(PARAM_GROUP_ID, event.getGroupId())
+								.put(PARAM_START_TIME, event.getStartTime())
+								.put(PARAM_END_TIME, event.getEndTime())
 								.toString();            	
             }
      
