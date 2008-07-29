@@ -882,7 +882,7 @@ hyperic.dashboard.widget = {
             }
         }
         try {  // standards compliant; doesn't work in IE
-            if(newLocation)
+            if(null !== newLocation)
             {
                 select.add(option, select.options[newLocation]);
             }
@@ -892,7 +892,7 @@ hyperic.dashboard.widget = {
             }
         }
         catch(ex) { // IE only
-            if(newLocation)
+            if(null !== newLocation)
             {
                 select.add(option,newLocation); // IE only
             }
