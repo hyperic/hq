@@ -124,13 +124,13 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="Measurement.findAvailMeasurement"
-         maxElementsInMemory="10000"
+   <cache name="Measurement.findAvailMeasurements"
+         maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-   <cache name="Measurement.findAvailMeasurements"
+   <cache name="Measurement.findRelatedAvailMeasurements"
          maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"

@@ -151,7 +151,7 @@ public class AvailabilityManagerEJBImpl
     public List getAvailMeasurementChildren(Resource resource) {
         List list = new ArrayList();
         list.add(resource.getId());
-        return getMeasurementDAO().findAvailMeasurements(list);
+        return getMeasurementDAO().findRelatedAvailMeasurements(list);
     }
     
     /**
