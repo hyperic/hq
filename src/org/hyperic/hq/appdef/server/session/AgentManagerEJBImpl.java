@@ -43,6 +43,7 @@ import javax.ejb.SessionContext;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
@@ -70,6 +71,7 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.MD5;
 
 import org.apache.commons.logging.Log;
@@ -93,6 +95,7 @@ public class AgentManagerEJBImpl
     private final String HQ_AGENT_REMOTING_TYPE = "hyperic-hq-remoting";
     private static final String JBOSS_SERVER_HOME_DIR_PROP = "jboss.server.home.dir";
     private static final String HQ_PLUGINS_DIR ="/deploy/hq.ear/hq-plugins";
+    private static final String PLUGINS_EXTENSION = "-plugin";
     
     private Log log = LogFactory.getLog(AgentManagerEJBImpl.class.getName());
 
@@ -777,8 +780,14 @@ public class AgentManagerEJBImpl
         
         files[0][0] = src.getPath();
         
+        if (plugin.indexOf(PLUGINS_EXTENSION) < 0) {
+            throw new AgentRemoteException("Invalid plugin name for plugin " + plugin);
+        }
+        String updatePlugin = StringUtil.replace(plugin, PLUGINS_EXTENSION,
+                PLUGINS_EXTENSION + AgentUpgradeManager.UPDATED_PLUGIN_EXTENSION);
+        
         // tokenize agent.bundle.home since this can only be resolved at the agent
-        File dest = new File("${agent.bundle.home}/pdk/plugins", plugin);
+        File dest = new File("${agent.bundle.home}/tmp", updatePlugin);
         
         files[0][1] = dest.getPath();
         

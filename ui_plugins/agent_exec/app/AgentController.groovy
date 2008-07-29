@@ -46,12 +46,10 @@ class AgentController
         def plugins = []
         File dir = new File("${jbossHome}/deploy/hq.ear/hq-plugins");
         String[] children = dir.list();
-        if (children == null) {
-            // Either dir does not exist or is not a directory
-        } else {
+        if (children != null) {
             for (int i=0; i<children.length; i++) {
                 // Get filename of file or directory
-                if (children[i].endsWith(".jar"))
+                if (children[i].indexOf("-plugin.")>0)
                     plugins.add(children[i])
             }
         }
@@ -63,9 +61,7 @@ class AgentController
         def bundles = []
         File dir = new File("${jbossHome}/deploy/hq.ear/hq-agent-bundles");
         String[] children = dir.list();
-        if (children == null) {
-            // Either dir does not exist or is not a directory
-        } else {
+        if (children != null) {
             for (int i=0; i<children.length; i++) {
                 // Get filename of file or directory
                 if (children[i].endsWith(".tar.gz") || children[i].endsWith(".tgz") || children[i].endsWith(".zip"))

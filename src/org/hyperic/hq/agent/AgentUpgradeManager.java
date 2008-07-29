@@ -29,12 +29,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.file.FileUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
 
 public class AgentUpgradeManager {
+    
+    public static final String UPDATED_PLUGIN_EXTENSION = "-update";
     
     /**
      * Request a JVM restart if in Java Service Wrapper mode
@@ -145,6 +150,38 @@ public class AgentUpgradeManager {
         finally {
             tempPropFile.delete();
         }
+    }
+    
+    
+    /**
+     * 
+     * @param bootProps the configuration properties for this agent
+     * @return a List of updated plugins or an empty list if no plugins were updated
+     * @throws IOException if failed to update a plugin
+     */
+    public static List updatePlugins(Properties bootProps) throws IOException {
+        List updatedPlugins = new ArrayList();
+        String tmpDir = bootProps.getProperty(AgentConfig.PROP_TMPDIR[0]);
+        String pluginsDir = bootProps.getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
+        String[] children = new File(tmpDir).list();
+        if (children != null) {
+            for (int i=0; i<children.length; i++) {
+                // only update plugins marked for update
+                if (children[i].indexOf(UPDATED_PLUGIN_EXTENSION) > 0) {
+                    String fileName = StringUtil.remove(children[i], UPDATED_PLUGIN_EXTENSION);
+                    File tmpJar = new File(tmpDir + "/" + children[i]);
+                    File targetJar = new File(pluginsDir + "/" + fileName);
+                    boolean rslt = FileUtil.safeFileMove(tmpJar, targetJar);
+                    if (!rslt) {
+                        throw new IOException("Failed to update plugin: " + fileName);
+                    } 
+                    else {
+                        updatedPlugins.add(fileName);
+                    }
+                }
+            }
+        }
+        return updatedPlugins;
     }
     
 }

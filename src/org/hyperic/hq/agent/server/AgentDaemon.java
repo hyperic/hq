@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.jar.JarFile;
@@ -57,6 +58,7 @@ import org.hyperic.hq.product.PluginExistsException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.util.PluginLoader;
+import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.security.SecurityUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
 
@@ -753,7 +755,7 @@ public class AgentDaemon
             System.setErr(stream);    
         }
     }
-
+    
     /**
      * Start the Agent's listening process.  This routine blocks for the
      * entire execution of the Agent.  
@@ -775,6 +777,16 @@ public class AgentDaemon
             Properties bootProps = this.bootConfig.getBootProperties();
             String tmpDir = bootProps.getProperty(AgentConfig.PROP_TMPDIR[0]);
             if (tmpDir != null) {
+                try {
+                    // update plugins residing in tmp directory prior to cleaning it up
+                    List updatedPlugins = AgentUpgradeManager.updatePlugins(bootProps);
+                    if (!updatedPlugins.isEmpty()) {
+                        logger.info("Successfully updated plugins: " + updatedPlugins);
+                    }
+                }
+                catch (IOException e) {
+                    logger.error("Failed to update plugins", e);
+                }
                 //this should always be the case.
                 cleanTmpDir(tmpDir);
                 System.setProperty("java.io.tmpdir", tmpDir);
