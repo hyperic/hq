@@ -41,7 +41,7 @@
     <a href="#" onclick="javascript:maintenance_<c:out value='${resource.id}'/>.dialog.show();">Schedule Maintenance</a>
 </table>
 
-<div class="maintenance_dialog" id="maintenance<c:out value='${resource.id}'/>">
+<div id="maintenance<c:out value='${resource.id}'/>">
     <span id="existing_downtime_<c:out value='${resource.id}'/>"></span>
     <fieldset><legend>From:</legend>
         <label for="from_date">Date: </label>
@@ -55,6 +55,7 @@
         <label for="to_time">Time: </label>
         <input type="text" name="to_time" id="to_time">
     </fieldset>
+    <span id="cancel_btn"></span>
     <span id="clear_schedule_btn"></span>
     <span id="schedule_btn"></span>
 </div>
