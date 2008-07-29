@@ -1263,8 +1263,14 @@ select {
     font-weight: normal;
     margin: 0px;
     text-align: right;
-    color: #FFF;
+    color: #FFFFFF;
 }
+
+#summaryWidget .content th a {
+	color: #FFFFFF;
+	font-weight: normal;
+}
+
 #summaryWidget .content thead th {
     width: 30%;
     text-align: center;
