@@ -707,7 +707,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         
         List servers;
         // first, if they specified a server type, then filter on it
-        if(servTypeId != APPDEF_RES_TYPE_UNDEFINED) {
+        if(!servTypeId.equals(APPDEF_RES_TYPE_UNDEFINED)) {
             if(!excludeVirtual) {
                 servers = getServerDAO()
                     .findByPlatformAndType_orderName(platId, servTypeId);
