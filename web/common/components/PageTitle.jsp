@@ -196,6 +196,10 @@
             </tiles:insert>
         </div>
     </div>
+    <div style="clear:both;"></div>
+</c:if>
+<c:if test="${empty linkUrl}">
+<div style="clear:both;"></div>
 </c:if>
 <!-- END TOOLS -->
         </td></tr>
