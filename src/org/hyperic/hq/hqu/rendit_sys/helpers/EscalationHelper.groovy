@@ -62,10 +62,10 @@ class EscalationHelper extends BaseHelper {
     /**
      * Update an Escalation
      */
-     Escalation updateEscalation(Escalation esc, String name,
-                                 String description, boolean pauseAllowed,
-                                 long maxWaitTime, boolean notifyAll,
-                                 boolean repeat) {
+     def updateEscalation(Escalation esc, String name,
+                          String description, boolean pauseAllowed,
+                          long maxWaitTime, boolean notifyAll,
+                          boolean repeat) {
         escMan.updateEscalation(user, esc, name, description, pauseAllowed,
                                 maxWaitTime, notifyAll, repeat)
     }
