@@ -2,8 +2,6 @@ package org.hyperic.hq.hqu.rendit
 
 import java.text.SimpleDateFormat
 
-import org.hyperic.hq.common.server.session.TransactionManagerEJBImpl as TxMan
-
 import org.hyperic.hq.hqu.rendit.RequestInvocationBindings
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
@@ -25,8 +23,6 @@ import org.hyperic.hq.hqu.rendit.render.RenderFrame
 import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.apache.commons.fileupload.FileItemIterator
 import org.apache.commons.fileupload.FileItemStream
-
-import org.hyperic.util.Runnee
 
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl
 import org.hyperic.hq.hqu.server.session.Attachment

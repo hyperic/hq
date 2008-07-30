@@ -1,8 +1,5 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
-import java.util.HashMap;
-import java.util.Locale;
-
 import org.hyperic.hq.product.MetricValue
 import org.hyperic.hq.measurement.UnitsConvert
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl

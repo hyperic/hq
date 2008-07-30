@@ -12,7 +12,6 @@ import org.hyperic.hq.hqu.rendit.IDispatcher
 import org.hyperic.hq.hqu.rendit.IHQUPlugin
 import org.hyperic.hq.hqu.rendit.InvokeMethodInvocationBindings
 import org.hyperic.hq.hqu.rendit.RequestInvocationBindings
-import org.hyperic.hq.hqu.rendit.PluginLoadException
 import org.hyperic.hq.hqu.rendit.metaclass.AuthzSubjectCategory
 import org.hyperic.hq.hqu.rendit.metaclass.AlertCategory
 import org.hyperic.hq.hqu.rendit.metaclass.AlertDefinitionCategory

@@ -5,14 +5,8 @@ import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImp
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField
 
-import org.hyperic.hq.authz.shared.PermissionException
-import org.hyperic.hibernate.SortField
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
-import org.hyperic.hq.authz.server.session.ResourceSortField
-import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.HasAuthzOperations
 import org.hyperic.util.pager.PageControl
 
 class MetricHelper extends BaseHelper {
