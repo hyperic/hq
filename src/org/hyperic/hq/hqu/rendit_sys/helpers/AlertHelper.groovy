@@ -116,7 +116,10 @@ class AlertHelper extends BaseHelper {
     def findTypeBasedDefinitions(Boolean enabled, PageInfo pInfo) { 
         defMan.findTypeBasedDefinitions(user, enabled, pInfo) 
     }
-     
+
+    /**
+     * Find all type based alert definitions.
+     */
     def findTypeBasedDefinitions() {
         defMan.findTypeBasedDefinitions(user, null, 
                                         PageInfo.getAll(AlertDefSortField.NAME,
@@ -138,6 +141,10 @@ class AlertHelper extends BaseHelper {
         galertMan.findAlertDefs(user, minSeverity, enabled, pInfo)
     }
 
+    /**
+     * Delete an Alert Definition.
+     * @deprecated This needs to be moved into the AlertDefinitionCategory.
+     */
     def deleteDefinition(AlertDefinition definition) {
         defMan.deleteAlertDefinitions(user, [ definition.id ] as Integer[])
     }
