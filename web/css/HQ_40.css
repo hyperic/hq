@@ -1399,3 +1399,191 @@ select {
     height: 22px;
     padding: 6px 0 5px 6px
 }
+
+
+/*GroupManager*/
+.panelContainer {
+    margin: 15px 0 0 15px
+}
+
+.panel {
+    height: 800px;
+    float: left;
+    border: 1px solid #8E8E8E;
+    background-color: #fff;
+}
+
+.rhLeftPanel {
+    width: 270px;
+}
+
+.rhRightPanel {
+    width: 700px;
+    margin-left: -1px
+}
+
+.clearBoth {
+    clear: both;
+}
+
+.panelTitleGray {
+    background: url('/images/4.0/titlebarbg.png') repeat-x;
+    padding: 4px 0 4px 4px;
+    border-bottom: 1px solid #8E8E8E
+}
+
+.panelTitleText {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.panel .filterBox input {
+    width: 205px;
+    margin-left: 5px;
+    border: 0px solid white;
+}
+
+.panel .listFilter {
+    padding: 7px 0 6px 4px;
+    background: url(/images/4.0/filterboxbg.png) repeat-x;
+    border-bottom: 1px solid #8E8E8E
+}
+
+.panel .actionBox {
+    padding: 3px 0 0px 6px;
+    background: url(/images/4.0/filterboxbg.png) repeat-x;
+    border-bottom: 1px solid #8E8E8E;
+    border-top: 1px solid #8E8E8E;
+    height: 28px
+}
+
+.panel .listContainer {
+    overflow: auto;
+    width: 270px;
+    height: 709px;
+}
+
+.panel ol {
+    -moz-user-select: none;
+    padding: 0 3px;
+    margin: 2px 0 0 0;
+    list-style: none;
+    cursor: pointer;
+}
+
+.panel li {
+    padding: 2px 2px 2px 26px;
+    white-space: nowrap;
+    cursor: pointer
+    margin:2px 0;
+}
+
+.panel li:hover {
+    border: 1px dotted gray;
+    padding: 1px 2px 1px 25px;
+}
+
+.panel .active {
+    padding: 1px 2px 1px 25px;
+    border: 1px dotted gray;
+    background-color: #E2F5FF;
+    font-weight: bold;
+}
+
+ol .groupIcon {
+    background: transparent url(/images/4.0/icons/group.png) no-repeat scroll 5px 2px;
+}
+
+ol .groupIcon:hover {
+    background: transparent url(/images/4.0/icons/group.png) no-repeat scroll 4px 1px;
+}
+
+ol .active.groupIcon {
+    background: #E2F5FF url(/images/4.0/icons/group.png) no-repeat scroll 4px 1px;
+}
+
+
+.viewContainer {
+    border: 1px solid #E78B28;
+    margin: 3px;
+    -moz-border-radius-topleft: 6px;
+    -moz-border-radius-topright: 6px;
+    -webkit-border-radius: 6px;
+    height: 792px;
+}
+
+.viewTitle {
+    font-weight: bold;
+    font-size: 1.4em;
+    padding: 6px;
+}
+
+.viewActions {
+    background: url(/images/4.0/actionbarbg.png);
+    border-top: 1px solid #E78B28;
+    border-bottom: 1px solid #E78B28;
+    height: 35px;
+    clear: both;
+}
+
+.viewMainContent {
+    height:687px;
+}
+
+.viewBottomContent {    
+    padding:10px 0 0 40%;
+    border-top: 1px solid #E78B28;
+    height: 35px;
+    clear: both;
+
+}
+.viewBottomContent div{
+    float:left;
+    height:16px;
+}
+
+.action {
+    float: left;
+    cursor:pointer;
+}
+
+.btnAdd {
+    background: url(/images/4.0/buttons.png) no-repeat;
+    width: 32px;
+    height: 26px;
+}
+
+.btnModify {
+    background: transparent url(/images/4.0/buttons.png) no-repeat scroll -32px 0px;
+    width: 32px;
+    height: 26px;
+}
+
+.btnDelete {
+    background: transparent url(/images/4.0/buttons.png) no-repeat scroll -65px 0px;
+    width: 37px;
+    height: 26px;
+    margin-left: 6px;
+}
+.iconAction {
+    height:16px;
+    width:16px;
+    cursor:pointer;
+    margin-left:10px;
+}
+
+.btnNextAll{
+    background: url(/images/4.0/icons/resultset_last.png)
+}
+
+.btnNext{
+    background: url(/images/4.0/icons/resultset_next.png)
+}
+
+.btnBackAll{
+    background: url(/images/4.0/icons/resultset_first.png)
+}
+
+.btnBack{
+    background: url(/images/4.0/icons/resultset_previous.png)
+}
