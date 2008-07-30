@@ -25,8 +25,11 @@
 
 package org.hyperic.hq.events;
 
+/**
+ * Value object for scheduled maintenance events
+ */
 public class MaintenanceEvent {
-    private int _groupId;
+    private Integer _groupId;
     private long _startTime;
     private long _endTime;
     private long _modifiedTime;
@@ -34,11 +37,15 @@ public class MaintenanceEvent {
     public MaintenanceEvent() {
     }
     
-    public int getGroupId() {
+    public MaintenanceEvent(Integer groupId) {
+    	setGroupId(groupId);
+    }
+    
+    public Integer getGroupId() {
     	return _groupId;
     }
     
-    public void setGroupId(int groupId) {
+    public void setGroupId(Integer groupId) {
     	_groupId = groupId;
     }
         
