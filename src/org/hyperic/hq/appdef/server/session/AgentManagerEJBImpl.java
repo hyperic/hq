@@ -645,6 +645,95 @@ public class AgentManagerEJBImpl
     }
     
     /**
+     * Upgrade an agent asynchronously including agent restart. 
+     * This operation blocks long enough only to do some basic failure condition 
+     * checking (permissions, agent existence, file existence, config property 
+     * existence) then delegates the actual file transfer to the Zevent subsystem.
+     * 
+     * @param subject The subject issuing the request.
+     * @param aid The agent id.
+     * @param bundleFileName The agent bundle name.
+     * @throws PermissionException if the subject does not have proper permissions 
+     *                             to issue an agent bundle transfer.
+     * @throws FileNotFoundException if the agent bundle is not found on the HQ server.
+     * @throws AgentNotFoundException if no agent exists with the given agent id.
+     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
+     * @throws InterruptedException if enqueuing the Zevent is interrupted.
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public void upgradeAgentAsync(AuthzSubject subject,
+                                         AppdefEntityID aid,  
+                                         String bundleFileName) 
+        throws PermissionException, 
+               AgentNotFoundException, 
+               AgentConnectionException, 
+               AgentRemoteException,
+               FileNotFoundException, 
+               ConfigPropertyException, 
+               IOException, 
+               InterruptedException {
+        
+        // check permissions
+        checkCreatePlatformPermission(subject);
+        
+        // check agent existence
+        getAgent(aid);    
+        
+        // check bundle file existence        
+        File src = resolveAgentBundleFile(bundleFileName);
+        
+        if (!src.exists()) {
+            throw new FileNotFoundException("file does not exist: "+src);
+        }
+        
+        log.info("Enqueuing Zevent to upgrade agent " + aid.getID()
+                + " to bundle " + bundleFileName);
+        
+        ZeventManager.getInstance()
+            .enqueueEvent(new UpgradeAgentZevent(bundleFileName, aid));
+    }
+    
+    /**
+     * Upgrade an agent synchronously including agent restart. This operation is composed 
+     * of transferring the agent bundle, upgrading the agent, and restarting the agent,
+     * in that order.
+     * 
+     * @param subject The subject issuing the request.
+     * @param aid The agent id.
+     * @param bundleFileName The agent bundle name.
+     * @throws PermissionException if the subject does not have proper permissions 
+     *                             to issue an agent bundle transfer.
+     * @throws FileNotFoundException if the agent bundle is not found on the HQ server.
+     * @throws AgentNotFoundException if no agent exists with the given agent id.
+     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
+     * @throws InterruptedException if enqueuing the Zevent is interrupted.
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public void upgradeAgent(AuthzSubject subject,
+                                         AppdefEntityID aid,  
+                                         String bundleFileName) 
+        throws PermissionException, 
+               AgentNotFoundException, 
+               AgentConnectionException, 
+               AgentRemoteException,
+               FileNotFoundException, 
+               ConfigPropertyException, 
+               IOException, 
+               InterruptedException {
+        
+        log.info("Upgrading agent " + aid.getID()  + " to bundle ");
+        
+        // check permissions
+        checkCreatePlatformPermission(subject);
+        
+        transferAgentBundle(subject, aid, bundleFileName);
+        upgradeAgentBundle(subject, aid, bundleFileName);
+        restartAgent(subject, aid);
+    }
+    
+    /**
      * Transfer asynchronously an agent bundle residing on the HQ server to an agent. 
      * This operation blocks long enough only to do some basic failure condition 
      * checking (permissions, agent existence, file existence, config property 
@@ -675,7 +764,7 @@ public class AgentManagerEJBImpl
         checkCreatePlatformPermission(subject);
         
         // check agent existence
-        AgentManagerEJBImpl.getOne().getAgent(aid);    
+        getAgent(aid);    
         
         // check bundle file existence        
         File src = resolveAgentBundleFile(bundleFileName);
@@ -690,7 +779,7 @@ public class AgentManagerEJBImpl
         ZeventManager.getInstance()
             .enqueueEvent(new TransferAgentBundleZevent(bundleFileName, aid));
         
-    }    
+    }
     
     /**
      * Transfer an agent bundle residing on the HQ server to an agent.
@@ -721,10 +810,17 @@ public class AgentManagerEJBImpl
                IOException, 
                ConfigPropertyException {
         
-        String[][] files = new String[1][2];
+        log.info("Transferring agent bundle  " + bundleFileName + " to agent "
+                + aid.getID());
+        
+        checkCreatePlatformPermission(subject);
         
         File src = resolveAgentBundleFile(bundleFileName);   
+        if (!src.exists()) {
+            throw new FileNotFoundException("file does not exist: "+src);
+        }
         
+        String[][] files = new String[1][2];
         files[0][0] = src.getPath();
         
         File dest = new File(HQConstants.AgentBundleDropDir, bundleFileName);
@@ -768,13 +864,21 @@ public class AgentManagerEJBImpl
                IOException, 
                ConfigPropertyException {
         
+        log.info("Transferring server plugin  " + plugin + " to agent "
+                + aid.getID());
+        
+        checkCreatePlatformPermission(subject);
+        
         String[][] files = new String[1][2];
         
         String jbossHome = System.getProperty(JBOSS_SERVER_HOME_DIR_PROP);
         // this should never happen, but catch it just in case
         if (jbossHome == null) {
-            log.error("Could not resolve System property " + JBOSS_SERVER_HOME_DIR_PROP);
-            throw new FileNotFoundException("Could not resolve System property " + JBOSS_SERVER_HOME_DIR_PROP);
+            log.error("Could not resolve System property "
+                    + JBOSS_SERVER_HOME_DIR_PROP);
+            throw new FileNotFoundException(
+                    "Could not resolve System property "
+                            + JBOSS_SERVER_HOME_DIR_PROP);
         }
         File src = new File(jbossHome + HQ_PLUGINS_DIR, plugin);   
         
@@ -797,6 +901,63 @@ public class AgentManagerEJBImpl
                  " to agent "+aid.getID()+" at "+files[0][1]);
                 
         agentSendFileData(subject, aid, files, modes);
+    }
+    
+    /**
+     * Transfer an agent plugin residing on the HQ server to an agent. The transfer 
+     * is performed asynchronously by placing on the Zevent queue and results in an agent
+     * restart.
+     * 
+     * @param subject The subject issuing the request.
+     * @param aid The agent id.
+     * @param plugin The plugin name.
+     * @throws PermissionException if the subject does not have proper permissions 
+     *                             to issue an agent bundle transfer.
+     * @throws FileNotFoundException if the plugin is not found on the HQ server.
+     * @throws IOException if an I/O error occurs, such as failing to calculate 
+     *                     the file MD5 checksum.
+     * @throws AgentRemoteException if an exception occurs on the remote agent side.
+     * @throws AgentConnectionException  if the connection to the agent fails.
+     * @throws AgentNotFoundException if no agent exists with the given agent id.
+     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public void transferAgentPluginAsync(AuthzSubject subject,
+                                    AppdefEntityID aid,  
+                                    String plugin) 
+        throws PermissionException, 
+               AgentNotFoundException, 
+               AgentConnectionException, 
+               AgentRemoteException,
+               FileNotFoundException, 
+               IOException, 
+               ConfigPropertyException,
+               InterruptedException {
+        
+        // check permissions
+        checkCreatePlatformPermission(subject);
+        
+        // perform some basic error checking before enqueueing.
+        String jbossHome = System.getProperty(JBOSS_SERVER_HOME_DIR_PROP);
+        // this should never happen, but catch it just in case
+        if (jbossHome == null) {
+            log.error("Could not resolve System property "
+                    + JBOSS_SERVER_HOME_DIR_PROP);
+            throw new FileNotFoundException(
+                    "Could not resolve System property "
+                            + JBOSS_SERVER_HOME_DIR_PROP);
+        }
+        
+        if (plugin.indexOf(PLUGINS_EXTENSION) < 0) {
+            throw new AgentRemoteException("Invalid plugin name for plugin " + plugin);
+        }
+        
+        log.info("Enqueuing Zevent to transfer server plugin " + plugin +
+                " to agent "+aid.getID());
+       
+       ZeventManager.getInstance()
+           .enqueueEvent(new TransferAgentPluginZevent(plugin, aid));
     }
     
     /**

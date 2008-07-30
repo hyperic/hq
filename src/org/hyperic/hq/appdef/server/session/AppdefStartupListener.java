@@ -79,6 +79,8 @@ public class AppdefStartupListener
         ApplicationManagerEJBImpl.getOne().startup();
         
         registerTransferAgentBundleZeventListener();
+        registerTransferAgentPluginZeventListener();
+        registerUpgradeAgentZeventListener();
     }
     
     static ClusterDeleteCallback getClusterDeleteCallback() {
@@ -98,5 +100,17 @@ public class AppdefStartupListener
         .addBufferedListener(TransferAgentBundleZevent.class,
                              new TransferAgentBundleZeventListener());
     }
-
+    
+    private void registerTransferAgentPluginZeventListener() {
+        ZeventManager.getInstance()
+        .addBufferedListener(TransferAgentPluginZevent.class,
+                             new TransferAgentPluginZeventListener());
+    }
+    
+    private void registerUpgradeAgentZeventListener() {
+        ZeventManager.getInstance()
+        .addBufferedListener(UpgradeAgentZevent.class,
+                             new UpgradeAgentZeventListener());
+    }
+    
 }
