@@ -1850,8 +1850,8 @@ hyperic.maintenance_schedule = function(group_id) {
 
         if(that.existing_schedule.from_time)
         {
-            that.selected_from_time = new Date(that.existing_schedule.from_time * 1000);
-            that.selected_to_time = new Date(that.existing_schedule.to_time * 1000);
+            that.selected_from_time = new Date(that.existing_schedule.from_time);
+            that.selected_to_time = new Date(that.existing_schedule.to_time);
         }
         
         that.inputs.from_date = new dijit11.form.DateTextBox({
@@ -1969,10 +1969,10 @@ hyperic.maintenance_schedule = function(group_id) {
         arguments = that.dialog.getValues();
 
 	    // create unix epoch datetime in GMT timezone
-        from_datetime = (arguments.from_date.getTime() + arguments.from_time.getTime() - arguments.from_time.getTimezoneOffset() * 60000)/1000;
+        from_datetime = (arguments.from_date.getTime() + arguments.from_time.getTime() - arguments.from_time.getTimezoneOffset() * 60000);
          // - arguments.from_date.getTimezoneOffset() * 60000 - arguments.from_time.getTimezoneOffset() * 60000;
 
-        to_datetime = (arguments.to_date.getTime() + arguments.to_time.getTime() - arguments.to_time.getTimezoneOffset() * 60000)/1000;
+        to_datetime = (arguments.to_date.getTime() + arguments.to_time.getTime() - arguments.to_time.getTimezoneOffset() * 60000);
          // - arguments.to_date.getTimezoneOffset() * 60000 - arguments.to_time.getTimezoneOffset() * 60000;
 
         return dojo11.xhrGet( {
@@ -1986,8 +1986,8 @@ hyperic.maintenance_schedule = function(group_id) {
                     that.existing_schedule.from_time = parseInt(data.st,10);
                     that.existing_schedule.to_time = parseInt(data.et,10);
 
-                    that.selected_from_time = new Date(that.existing_schedule.from_time * 1000);
-                    that.selected_to_time = new Date(that.existing_schedule.to_time * 1000);
+                    that.selected_from_time = new Date(that.existing_schedule.from_time);
+                    that.selected_to_time = new Date(that.existing_schedule.to_time);
 
 					that.inputs.from_date.setValue(that.selected_from_time);
 					that.inputs.from_time.setValue(that.selected_from_time);
@@ -2050,8 +2050,8 @@ hyperic.maintenance_schedule = function(group_id) {
                     that.existing_schedule.from_time = parseInt(data.st,10);
                     that.existing_schedule.to_time = parseInt(data.et,10);
 
-                    that.selected_from_time = new Date(that.existing_schedule.from_time * 1000);
-                    that.selected_to_time = new Date(that.existing_schedule.to_time * 1000);
+                    that.selected_from_time = new Date(that.existing_schedule.from_time);
+                    that.selected_to_time = new Date(that.existing_schedule.to_time);
                     
                     dojo11.byId('existing_downtime_' + that.group_id).innerHTML = 'Currently scheduled downtime window:';
                 }
