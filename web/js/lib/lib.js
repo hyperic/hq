@@ -2066,3 +2066,46 @@ hyperic.maintenance_schedule = function(group_id) {
 
 	that.getSchedule();
 }
+
+
+var activeItem;
+function listItemClicked(node){
+    if(activeItem){
+        
+        activeItem.className=activeItem.getAttribute('oldClassName');
+    }
+    
+    node.setAttribute('oldClassName', node.className);
+    node.className="active "+node.getAttribute('oldClassName');
+    activeItem = node;
+}
+
+document.onResize = function(e){
+    var newSize = document.body.offsetWidth - 35 - 270 +'px';
+    var node = dojo.byId("rightPanel");
+    node.style.width = newSize;
+
+}
+
+function toggleDialog(){
+    alert('open dialog');
+}
+dojo.event.connect(window, "onresize", document, 'onResize');
+dojo.addOnLoad(function(){
+//document.onResize();
+});
+/**
+*/
+function filterList(nodes,searchText) {
+    var opt;
+    for(var i in nodes.childNodes){ 
+        opt = nodes.childNodes[i];  
+        if(opt.nodeType == 1 && opt.tagName.toLowerCase() == "li"){
+            if(opt.childNodes[0].nodeValue.toLowerCase().indexOf(searchText.toLowerCase()) !== -1){
+                opt.style.display = '';
+            }else {
+                opt.style.display = 'none';
+            }
+        }
+    }
+}
