@@ -103,6 +103,7 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
                 for (int i = 0; i < attrInfo.length; i++) {
                     MBeanAttributeInfo mia = attrInfo[i];
                     String name = mia.getName();
+                    Map attr = new HashMap();
                     Object val;
                     try {
                         val = mServer.getAttribute(obj, name);
@@ -113,7 +114,10 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
                     if (val == null) {
                         val = "-";
                     }
-                    attrs.put(name, val);
+                    attr.put("Value", val);
+                    attr.put("Description", mia.getDescription());
+                    attr.put("isWritable", new Boolean(mia.isWritable()));
+                    attrs.put(name, attr);
                 }
 
                 bean.put(PROP_METHOD+"s", info.getOperations());
