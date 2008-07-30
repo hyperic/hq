@@ -14,12 +14,6 @@
     <put name="titleImg" value="title_group.gif"/>
   </definition>  
     
-  <definition name=".page.title.resource.group.full"
-              extends=".page.title.resource.group">
-    <put name="linkUrl"
-         value="/resource/group/control/GroupLinks.jsp"/>
-  </definition>
-  
   <definition name=".page.title.resource.group.new"
               extends=".page.title">
     <put name="titleKey" value="resource.group.inventory.NewGroupPageTitle"/>

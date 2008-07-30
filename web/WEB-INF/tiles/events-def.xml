@@ -76,13 +76,6 @@
       <put name="titleBgStyle" value="PageTitleApplicationBg"/>
   </definition>
   
-  <definition name=".page.title.events.list.group"
-      extends=".page.title">
-      <put name="linkUrl" 
-          value="/resource/group/inventory/GroupLinks.jsp"/>
-      <put name="titleBgStyle" value="PageTitleGroupBg"/>
-  </definition>
-  
   <!-- view -->
   <definition name=".events.alert.view.nav"
         path="/resource/common/monitor/alerts/ViewAlertNavigation.jsp"/>

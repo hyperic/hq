@@ -47,4 +47,10 @@
      </putList>     
     </definition>
 
+  <definition name=".page.title.resource.group.full"
+              extends=".page.title.resource.group">
+    <put name="linkUrl"
+         value="/resource/group/inventory/GroupLinks.jsp"/>
+  </definition>
+  
 </tiles-definitions>

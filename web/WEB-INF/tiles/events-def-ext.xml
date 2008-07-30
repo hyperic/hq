@@ -10,6 +10,13 @@
         path="/resource/common/monitor/alerts/config/ListDefinitionsLayout.jsp"
         controllerUrl="/alerts/ListDefinitions.do"/>
 
+  <definition name=".page.title.events.list.group"
+      extends=".page.title">
+      <put name="linkUrl" 
+          value="/resource/group/inventory/GroupLinks.jsp"/>
+      <put name="titleBgStyle" value="PageTitleGroupBg"/>
+  </definition>
+  
   <definition name=".events.config.view.notifications"
     path="/resource/common/monitor/alerts/config/ViewDefinitionNotifications.jsp"/>
 
