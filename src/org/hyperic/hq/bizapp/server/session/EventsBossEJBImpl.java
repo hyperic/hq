@@ -1771,7 +1771,7 @@ public class EventsBossEJBImpl
      *
      * @ejb:interface-method
      */
-    public MaintenanceEvent getMaintenanceEvent(int sessionId, int groupId)
+    public MaintenanceEvent getMaintenanceEvent(int sessionId, Integer groupId)
         throws SessionNotFoundException, SessionTimeoutException, 
                PermissionException, SchedulerException 
     {
@@ -1788,8 +1788,9 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException, 
                PermissionException, SchedulerException 
     {
-    	manager.authenticate(sessionId);
-    	return getMaintEvtMgr().schedule(event);
+    	AuthzSubject subject = manager.getSubject(sessionId);
+    	
+    	return getMaintEvtMgr().schedule(subject, event);
     }
 
     /**
@@ -1801,8 +1802,9 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException, 
                PermissionException, SchedulerException 
     {
-    	manager.authenticate(sessionId);
-    	getMaintEvtMgr().unschedule(event);
+    	AuthzSubject subject = manager.getSubject(sessionId);
+
+    	getMaintEvtMgr().unschedule(subject, event);
     }
     
     /**

@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -38,8 +37,6 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Session;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -50,7 +47,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.MaintenanceEventJob;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerLocal;
@@ -95,15 +91,14 @@ public class MaintenanceEventManagerEJBImpl
      * 
      * @ejb:interface-method 
      */
-    public MaintenanceEvent getMaintenanceEvent(int groupId) throws SchedulerException {
+    public MaintenanceEvent getMaintenanceEvent(Integer groupId) throws SchedulerException {
     	MaintenanceEvent event = null;
     	JobDetail jobDetail = SchedulerEJBImpl.getOne().getJobDetail(
         													getJobName(groupId),
         													JOB_GROUP);
         
         if (jobDetail == null) {
-        	event = new MaintenanceEvent();
-        	event.setGroupId(groupId);
+        	event = new MaintenanceEvent(groupId);
         } else {
         	event = buildMaintenanceEvent(jobDetail);
         }
@@ -116,35 +111,33 @@ public class MaintenanceEventManagerEJBImpl
      * 
      * @ejb:interface-method 
      */
-    public void unschedule(MaintenanceEvent event) throws SchedulerException {
+    public void unschedule(AuthzSubject subject, MaintenanceEvent event)
+    	throws PermissionException, SchedulerException
+    {	
+    	checkPermission(subject, event);
+        
         SchedulerLocal scheduler = SchedulerEJBImpl.getOne();
     	
-        try {
-        	synchronized (SCHEDULER_LOCK) {
-        		// Get the latest info from the scheduler
-        		event = getMaintenanceEvent(event.getGroupId());
-        		Trigger[] triggers = scheduler.getTriggersOfJob(
-        											getJobName(event.getGroupId()), 
-        											JOB_GROUP);
-    
-        		if ((triggers.length > 0) 
-        				&& (triggers[0].getNextFireTime().getTime() == event.getEndTime())) {
-        			// Maintenance window is already in progress
-        			// so reschedule the last trigger to end now
-        			event.setEndTime(System.currentTimeMillis());
-        			schedule(event);
-        		} else {
-        			// Otherwise, delete the job
-        			scheduler.deleteJob(getJobName(event.getGroupId()), JOB_GROUP);
-        		
-        			_log.info(event + " : job has been deleted.");        		
-        		}
-        	}
-        } catch (NullPointerException npe) {
-        	if (event == null) {
-        		throw new IllegalArgumentException("No event to unschedule.");
-        	}
-        }
+    	synchronized (SCHEDULER_LOCK) {
+    		// Get the latest info from the scheduler
+    		event = getMaintenanceEvent(event.getGroupId());
+    		Trigger[] triggers = scheduler.getTriggersOfJob(
+    											getJobName(event.getGroupId()), 
+    											JOB_GROUP);
+
+    		if ((triggers.length > 0) 
+    				&& (triggers[0].getNextFireTime().getTime() == event.getEndTime())) {
+    			// Maintenance window is already in progress
+    			// so reschedule the last trigger to end now
+    			event.setEndTime(System.currentTimeMillis());
+    			schedule(subject, event);
+    		} else {
+    			// Otherwise, delete the job
+    			scheduler.deleteJob(getJobName(event.getGroupId()), JOB_GROUP);
+    		
+    			_log.info(event + " : job has been deleted.");        		
+    		}
+    	}
     }
 
     /**
@@ -152,14 +145,10 @@ public class MaintenanceEventManagerEJBImpl
      * 
      * @ejb:interface-method 
      */    
-    public MaintenanceEvent schedule(MaintenanceEvent event) throws SchedulerException {        
-    	if (event == null) {
-        	throw new IllegalArgumentException("No event to schedule.");
-    	}
-    	
-    	//
-    	// TO DO: Check for valid resource group before scheduling
-    	//
+    public MaintenanceEvent schedule(AuthzSubject subject, MaintenanceEvent event) 
+    	throws PermissionException, SchedulerException 
+    {	
+    	checkPermission(subject, event);
     	
         SchedulerLocal scheduler = SchedulerEJBImpl.getOne();
 
@@ -216,7 +205,54 @@ public class MaintenanceEventManagerEJBImpl
         }
         return event;
     }
-     
+
+    /**
+     * Disable or enable alerts for the group and its resources.
+     * 
+     * @ejb:interface-method 
+     */        
+    public void manageAlerts(AuthzSubject admin, MaintenanceEvent event, boolean activate) 
+		throws PermissionException
+	{		
+		GalertManagerLocal gam = GalertManagerEJBImpl.getOne();
+		AlertDefinitionManagerLocal adm = AlertDefinitionManagerEJBImpl.getOne();
+		ResourceGroupManagerLocal rgm = ResourceGroupManagerEJBImpl.getOne();   	    	
+		ResourceGroup group = rgm.findResourceGroupById(event.getGroupId());
+		
+		Collection resources = rgm.getMembers(group);
+		Resource resource = null;
+    	GalertDef galertDef = null;
+		AlertDefinition alertDef = null;
+		Collection alertDefinitions = null;
+		Iterator adIter = null;
+		String status = (activate ? "enabled" : "disabled") + " for " + event;
+		
+    	// Get the alerts for the group
+        alertDefinitions = gam.findAlertDefs(group, PageControl.PAGE_ALL);
+
+        for (adIter = alertDefinitions.iterator(); adIter.hasNext(); ) {
+        	galertDef = (GalertDef) adIter.next();	
+        	gam.enable(galertDef, activate);
+			_log.info("Group Alert [" + galertDef + "] " + status);
+        }	    
+	    
+		// Get the alerts for the resources of the group
+		for (Iterator rIter = resources.iterator(); rIter.hasNext(); ) {
+			resource = (Resource) rIter.next();
+			alertDefinitions = adm.findRelatedAlertDefinitions(admin, resource);
+			    		
+    		for (adIter = alertDefinitions.iterator(); adIter.hasNext(); ) {
+    			alertDef = (AlertDefinition) adIter.next();
+    			    			
+				// Disable and re-enable only the active alerts
+				if (alertDef.isActive()) {
+					adm.updateAlertDefinitionInternalEnable(admin, alertDef, activate);
+    				log.info("Resource Alert [" + alertDef + "] " + status);
+				}
+    		}
+		}
+	}
+    
     /**
      * Create a MaintenanceEvent object from a JobDetail
      * 
@@ -226,92 +262,23 @@ public class MaintenanceEventManagerEJBImpl
     	MaintenanceEvent event = new MaintenanceEvent();
         JobDataMap jdMap = jobDetail.getJobDataMap();
         
-        event.setGroupId(jdMap.getIntFromString(MaintenanceEventJob.GROUP_ID));
+        event.setGroupId(jdMap.getIntegerFromString(MaintenanceEventJob.GROUP_ID));
         event.setStartTime(jdMap.getLongValue(MaintenanceEventJob.START_TIME));
         event.setEndTime(jdMap.getLongValue(MaintenanceEventJob.END_TIME));
         event.setModifiedTime(jdMap.getLongValue(MaintenanceEventJob.MODIFIED_TIME));
     	
     	return event;
     }
-
-    /**
-     * Disable or enable alerts for the group and its resources.
-     * 
-     * @ejb:interface-method 
-     */        
-    public void manageAlerts(AuthzSubject admin, int groupId, boolean activate) 
-		throws PermissionException
-	{   	
-		log.info((activate ? "ACTIVATING" : "DEACTIVATING") + " ALERTS FOR GROUP " + groupId);
-		
-		GalertManagerLocal gam = GalertManagerEJBImpl.getOne();
-		AlertDefinitionManagerLocal adm = AlertDefinitionManagerEJBImpl.getOne();
-		ResourceGroupManagerLocal rgm = ResourceGroupManagerEJBImpl.getOne();   	    	
-		ResourceGroup group = rgm.findResourceGroupById(Integer.valueOf(groupId));
-		
-		Collection resources = rgm.getMembers(group);
-		Resource resource = null;
-		Object definition = null;
-		AlertDefinition alertDefinition = null;
-		Collection alertDefinitions = new ArrayList();
-		Iterator adIter = null;
-		
-		// Get the alerts for the group
-	    alertDefinitions.addAll(gam.findAlertDefs(group, PageControl.PAGE_ALL));
-	
-		// Get the alerts for the resources of the group
-		for (Iterator rIter = resources.iterator(); rIter.hasNext(); ) {
-			resource = (Resource) rIter.next();
-			log.info("---> Resource Name ---> " + resource.getName());
-			
-			alertDefinitions.addAll(adm.findRelatedAlertDefinitions(admin, resource));    		
-		}
-		
-	    if (!alertDefinitions.isEmpty()) {
-	    	// Get Hibernate session
-	    	Session session = new AlertDefinitionDAO(DAOFactory.getDAOFactory())
-	    							.getNewSession();
-	    	
-	    	try {
-	    		// Update alerts
-	    		for (adIter = alertDefinitions.iterator(); adIter.hasNext(); ) {
-	    			definition = adIter.next();
-	        	
-	    			if (definition instanceof GalertDef) {
-	    				log.info("------> Updating Group Alert ---> " + definition);
-	    				gam.enable((GalertDef) definition, activate);
-	    			} else if (definition instanceof AlertDefinition) {
-	    				alertDefinition = (AlertDefinition) definition;
-	    				
-	    				// Disable all alerts
-	    				// Re-enable only the active alerts
-	    				if (!activate || (activate && alertDefinition.isActive())) {
-		    				log.info("------> Updating Resource Alert --->" + definition);
-	    					adm.updateAlertDefinitionInternalEnable(
-	    								admin,
-	    								alertDefinition, 
-	    								activate);
-	    				}
-	    			}
-	    		}
-	    		session.flush();
-	    	} finally {
-	    		session.close();
-	    	}
-	    }
-	}
     
-    /*
+    /**
      * Create a JobDetail object from a MaintenanceEvent
-     * 
      */
     private JobDetail buildJobDetail(MaintenanceEvent event) {
     	long currentTime = System.currentTimeMillis();
     	event.setModifiedTime(currentTime);
     	
     	if (event.getEndTime() <= event.getStartTime()) {
-        	throw new IllegalArgumentException(event 
-        							+ " : End time cannot be before the start time.");
+        	throw new IllegalArgumentException("End time cannot be before the start time.");
         }
 
     	JobDetail jobDetail = new JobDetail(
@@ -329,7 +296,23 @@ public class MaintenanceEventManagerEJBImpl
     	return jobDetail;
     }
 
-    /*
+    /**
+     * Perform permission and group check
+     */
+    private void checkPermission(AuthzSubject subject, MaintenanceEvent event) 
+    	throws PermissionException
+    {
+    	// Check to see if user has access to the group
+        ResourceGroup group = ResourceGroupManagerEJBImpl.getOne()
+        							.findResourceGroupById(subject, event.getGroupId());
+        
+        if (group == null) {
+        	throw new IllegalArgumentException("Resource group cannot be found.");
+        }
+    	
+    }
+    
+    /**
      * Create trigger to deactivate and/or activate alerts
      */
     private Trigger buildTrigger(MaintenanceEvent event, boolean deactivateAndActivate) {
@@ -350,20 +333,23 @@ public class MaintenanceEventManagerEJBImpl
 		return trigger;
     }
     
-    /*
+    /**
      * Create new job name with the groupId
      */
-    private String getJobName(int groupId) {
+    private String getJobName(Integer groupId) {
     	return JOB_NAME_PREFIX + "." + groupId + ".Job";
     }
     
-    /*
+    /**
      * Create new trigger name with the groupId
      */
-    private String getTriggerName(int groupId) {
+    private String getTriggerName(Integer groupId) {
     	return JOB_NAME_PREFIX + "." + groupId + ".Trigger";
     } 
 
+    /**
+     * Get local home object
+     */
     public static MaintenanceEventManagerLocal getOne() {
         try {
             return MaintenanceEventManagerUtil.getLocalHome().create();
