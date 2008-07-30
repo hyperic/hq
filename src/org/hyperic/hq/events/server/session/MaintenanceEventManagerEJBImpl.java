@@ -252,6 +252,7 @@ public class MaintenanceEventManagerEJBImpl
 		Collection resources = rgm.getMembers(group);
 		Resource resource = null;
 		Object definition = null;
+		AlertDefinition alertDefinition = null;
 		Collection alertDefinitions = new ArrayList();
 		Iterator adIter = null;
 		
@@ -277,14 +278,20 @@ public class MaintenanceEventManagerEJBImpl
 	    			definition = adIter.next();
 	        	
 	    			if (definition instanceof GalertDef) {
-	    				log.info("------> Group Alert ---> " + definition);
+	    				log.info("------> Updating Group Alert ---> " + definition);
 	    				gam.enable((GalertDef) definition, activate);
 	    			} else if (definition instanceof AlertDefinition) {
-	    				log.info("------> Resource Alert --->" + definition);
-	    				adm.updateAlertDefinitionInternalEnable(
-	    							admin,
-	    							(AlertDefinition) definition, 
-	    							activate);            		
+	    				alertDefinition = (AlertDefinition) definition;
+	    				
+	    				// Disable all alerts
+	    				// Re-enable only the active alerts
+	    				if (!activate || (activate && alertDefinition.isActive())) {
+		    				log.info("------> Updating Resource Alert --->" + definition);
+	    					adm.updateAlertDefinitionInternalEnable(
+	    								admin,
+	    								alertDefinition, 
+	    								activate);
+	    				}
 	    			}
 	    		}
 	    		session.flush();
