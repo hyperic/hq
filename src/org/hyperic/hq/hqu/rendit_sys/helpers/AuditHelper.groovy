@@ -13,6 +13,9 @@ class AuditHelper extends BaseHelper {
         super(user)
     }
 
+    /**
+     * Find all Audits in the system with the given criteria.
+     */
     def findAudits(long startTime, long endTime, AuditImportance minImportance,
                    AuditPurpose purpose, AuthzSubject target, String klazz,
                    PageInfo pInfo) 
