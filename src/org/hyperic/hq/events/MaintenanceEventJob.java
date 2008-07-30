@@ -66,7 +66,7 @@ public class MaintenanceEventJob implements Job {
         	// Re-activate the alerts if this is the last job trigger
         	maintMgr.manageAlerts(
         				AuthzSubjectManagerEJBImpl.getOne().findSubjectByName("hqadmin"),
-        				event.getGroupId(),
+        				event,
         				(trigger.getNextFireTime() == null));
         } catch (PermissionException pe) {
         	throw new JobExecutionException(pe);
