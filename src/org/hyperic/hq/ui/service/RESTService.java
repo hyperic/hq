@@ -442,10 +442,9 @@ public class RESTService extends BaseService {
             {
             	// Get Scheduled Maintenance Event              
             	event = eb.getMaintenanceEvent(user.getSessionId(), 
-            	                               Integer.parseInt(groupIdParam));            	
+            	                               Integer.valueOf(groupIdParam));            	
             } else {
-            	event = new MaintenanceEvent();
-            	event.setGroupId(Integer.parseInt(groupIdParam));
+            	event = new MaintenanceEvent(Integer.valueOf(groupIdParam));
             	
             	if (Boolean.valueOf(scheduleParam).booleanValue()) {
             		// Reschedule Maintenance Event
@@ -469,7 +468,15 @@ public class RESTService extends BaseService {
      
         } catch (Exception e) {
             log.debug(e.getLocalizedMessage());
-            res = ERROR_GENERIC;
+            
+            try {
+            	res = new JSONObject()
+            				.put("error", "true")
+            				.put("message", e.getLocalizedMessage())
+            				.toString();
+            } catch (Exception e2) {
+            	res = ERROR_GENERIC;
+            }
         }
         
         return res;
