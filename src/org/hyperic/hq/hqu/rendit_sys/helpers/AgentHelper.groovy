@@ -35,6 +35,9 @@ class AgentHelper extends BaseHelper {
         throw new IllegalArgumentException('Unknown arguments passed to find()')
     }
 
+    /**
+     * Get a List of all agents.
+     */
     def getAllAgents() {
         aMan.getAgents()
     }
