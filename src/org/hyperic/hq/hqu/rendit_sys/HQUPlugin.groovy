@@ -17,7 +17,6 @@ import org.hyperic.hq.hqu.SimpleAttachmentDescriptor
 import org.hyperic.hq.hqu.ViewDescriptor
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl as PluginMan 
 import org.hyperic.hq.hqu.server.session.AttachType
-import org.hyperic.hq.hqu.server.session.View
 import org.hyperic.hq.hqu.server.session.ViewAdmin
 import org.hyperic.hq.hqu.server.session.ViewResource
 import org.hyperic.hq.hqu.server.session.ViewMasthead

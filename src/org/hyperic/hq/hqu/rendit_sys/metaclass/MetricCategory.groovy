@@ -1,9 +1,9 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
+import org.hyperic.hq.product.MetricValue
 import org.hyperic.hq.measurement.UnitsConvert
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl
 import org.hyperic.hq.measurement.server.session.Measurement
-import org.hyperic.hq.product.MetricValue
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.util.units.UnitNumber

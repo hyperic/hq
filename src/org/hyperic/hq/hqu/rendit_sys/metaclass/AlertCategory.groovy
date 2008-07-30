@@ -1,13 +1,9 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
-import java.util.Calendar
-import java.util.Date
-import java.util.GregorianCalendar
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl
 import org.hyperic.hq.events.server.session.Alert
-import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.galerts.server.session.GalertDef
 import org.hyperic.hq.galerts.server.session.GalertLog
 
