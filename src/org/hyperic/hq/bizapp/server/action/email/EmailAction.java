@@ -110,6 +110,7 @@ public class EmailAction extends EmailActionConfig
         params.put("alertDef", alertdef);
         params.put("alert", alert);
         params.put("status", status);
+        params.put("isSms", new Boolean(isSms()));
 
         return renderTemplate("subject.gsp", params);
     }
