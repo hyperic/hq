@@ -476,7 +476,7 @@ public class EscalationManagerEJBImpl
         //        we allow this to proceed
         _log.debug("Executing state[" + s.getId() + "]");
         if (actionIdx >= e.getActions().size()) {
-            if (e.isRepeat()) {
+            if (e.isRepeat() && e.getActions().size() > 0) {
                 actionIdx = 0;          // Loop back
             }
             else {
