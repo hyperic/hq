@@ -1828,6 +1828,16 @@ public class AppdefBossEJBImpl
             throw new SystemException(e);
         }
     }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void removeServer(AuthzSubject subj, Integer serverId)
+        throws ServerNotFoundException, SessionNotFoundException,
+               SessionTimeoutException, PermissionException,
+               SessionException, VetoException {
+        removeServer(manager.getIdFromUsername(subj.getName()), serverId);
+    }
 
     /**
      * Remove an application service.
