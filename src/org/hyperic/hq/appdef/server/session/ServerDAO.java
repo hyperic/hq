@@ -66,6 +66,10 @@ public class ServerDAO extends HibernateDAO
         super.remove(entity);
     }
 
+    public void create(Server s) {
+        save(s);
+    }
+
     public Server create(ServerValue sv, Platform p)
     {
         ConfigResponseDB configResponse = DAOFactory.getDAOFactory()
