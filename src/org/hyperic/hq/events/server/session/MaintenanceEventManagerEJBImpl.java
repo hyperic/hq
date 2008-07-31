@@ -44,6 +44,8 @@ import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.MaintenanceEventJob;
 import org.hyperic.hq.events.server.session.AlertDefinition;
@@ -91,7 +93,8 @@ public class MaintenanceEventManagerEJBImpl
      * 
      * @ejb:interface-method 
      */
-    public MaintenanceEvent getMaintenanceEvent(Integer groupId) throws SchedulerException {
+    public MaintenanceEvent getMaintenanceEvent(Integer groupId)
+        throws SchedulerException {
     	MaintenanceEvent event = null;
     	JobDetail jobDetail = SchedulerEJBImpl.getOne().getJobDetail(
         													getJobName(groupId),
@@ -211,7 +214,8 @@ public class MaintenanceEventManagerEJBImpl
      * 
      * @ejb:interface-method 
      */        
-    public void manageAlerts(AuthzSubject admin, MaintenanceEvent event, boolean activate) 
+    public void manageAlerts(AuthzSubject admin, MaintenanceEvent event,
+                             boolean activate) 
 		throws PermissionException
 	{		
 		GalertManagerLocal gam = GalertManagerEJBImpl.getOne();
@@ -251,6 +255,11 @@ public class MaintenanceEventManagerEJBImpl
 				}
     		}
 		}
+
+		event.setMaintenanceWindowMessage(activate ? "maintenance.window.ends" :
+		                                           "maintenance.window.begins");
+		Messenger sender = new Messenger();
+        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
 	}
     
     /**
@@ -259,10 +268,9 @@ public class MaintenanceEventManagerEJBImpl
      * @ejb:interface-method 
      */    
     public MaintenanceEvent buildMaintenanceEvent(JobDetail jobDetail) {
-    	MaintenanceEvent event = new MaintenanceEvent();
         JobDataMap jdMap = jobDetail.getJobDataMap();
-        
-        event.setGroupId(jdMap.getIntegerFromString(MaintenanceEventJob.GROUP_ID));
+    	MaintenanceEvent event = new MaintenanceEvent(
+            jdMap.getIntegerFromString(MaintenanceEventJob.GROUP_ID));
         event.setStartTime(jdMap.getLongValue(MaintenanceEventJob.START_TIME));
         event.setEndTime(jdMap.getLongValue(MaintenanceEventJob.END_TIME));
         event.setModifiedTime(jdMap.getLongValue(MaintenanceEventJob.MODIFIED_TIME));
