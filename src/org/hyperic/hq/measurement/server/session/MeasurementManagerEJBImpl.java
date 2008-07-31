@@ -736,7 +736,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     public List getAvailabilityMeasurements(Collection resources) {
         return getMeasurementDAO().findAvailMeasurements(resources);
     }
-
+    
     /**
      * Look up a list of Measurement objects by category
      *
@@ -910,6 +910,24 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         sendAgentSchedule(appId);
     }
     
+    /**
+     * Enable the default on metrics for a given resource
+     * @ejb:interface-method
+     */
+    public void enableDefaultMeasurements(AuthzSubject subj, Resource r)
+        throws PermissionException {
+        AppdefEntityID appId = new AppdefEntityID(r);
+        checkModifyPermission(subj.getId(), appId);
+
+        List metrics = getMeasurementDAO().findDefaultsByResource(r);
+        for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+            Measurement dm = (Measurement)it.next();
+            dm.setEnabled(true);
+        }
+
+        sendAgentSchedule(appId);
+    }
+
     /**
      * @param subject
      * @param mId

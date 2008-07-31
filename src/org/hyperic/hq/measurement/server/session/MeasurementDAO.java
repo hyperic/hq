@@ -301,6 +301,14 @@ public class MeasurementDAO extends HibernateDAO {
             .setCacheable(true)
             .setCacheRegion("Measurement.findEnabledByResource").list();
     }
+    
+    List findDefaultsByResource(Resource resource) {
+        return getSession()
+            .createQuery("from Measurement m join m.template t " +
+                         "where t.defaultOn = true and m.resource = ?")
+            .setParameter(0, resource)
+            .list();
+    }
 
     List findByInstanceForCategory(int type, int id, String cat) {
         String sql =
