@@ -58,6 +58,7 @@ public class EventLogDAO extends HibernateDAO {
             AuthzConstants.platformOpViewPlatform,
             AuthzConstants.serverOpViewServer,
             AuthzConstants.serviceOpViewService,
+            AuthzConstants.groupOpViewResourceGroup,
         });
 
     public EventLogDAO(DAOFactory f) {
@@ -106,12 +107,6 @@ public class EventLogDAO extends HibernateDAO {
                   EventLogStatus maxStatus, String typeClass, 
                   Collection inGroups)
     {
-        String[] OPS = {
-            AuthzConstants.platformOpViewPlatform,
-            AuthzConstants.serverOpViewServer,
-            AuthzConstants.serviceOpViewService,
-        };
-        
         EventLogSortField sort = (EventLogSortField)pInfo.getSort();
         boolean doGroupFilter = false;
         String groupFilterSql;
@@ -165,7 +160,7 @@ public class EventLogDAO extends HibernateDAO {
             .setLong("begin", begin)
             .setLong("end", end)
             .setInteger("maxStatus", maxStatus.getCode());
-        roleSql.bindParams(q, subject, Arrays.asList(OPS));
+        roleSql.bindParams(q, subject, VIEW_PERMISSIONS);
         
         if (typeClass != null) {
             q.setString("type", typeClass);

@@ -40,6 +40,7 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
@@ -180,6 +181,9 @@ public class ResourceGroupManagerEJBImpl
         
         ResourceGroup res = getResourceGroupDAO().create(whoami, cInfo,
                                                          resources, roles);
+        ResourceEdgeDAO eDAO = new ResourceEdgeDAO(DAOFactory.getDAOFactory());
+        eDAO.create(res.getResource(), res.getResource(), 0,
+                    getContainmentRelation());  // Self-edge
 
         GroupingStartupListener.getCallbackObj().postGroupCreate(res);
         return res;
@@ -350,6 +354,10 @@ public class ResourceGroupManagerEJBImpl
                  AuthzConstants.authzGroup, resGrp.getId(),
                  AuthzConstants.perm_removeResourceGroup);
 
+        ResourceEdgeDAO edgeDao =
+            new ResourceEdgeDAO(DAOFactory.getDAOFactory());
+        edgeDao.deleteEdges(resGrp.getResource());
+        
         GroupingStartupListener.getCallbackObj().preGroupDelete(resGrp);
         dao.remove(resGrp);
 

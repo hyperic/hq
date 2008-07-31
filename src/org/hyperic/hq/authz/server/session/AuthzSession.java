@@ -64,6 +64,8 @@ public abstract class AuthzSession {
 
     protected SessionContext ctx;
 
+    private static final Integer RELATION_CONTAINMENT_ID = new Integer(1);
+
     protected ResourceTypeDAO getResourceTypeDAO() {
         return DAOFactory.getDAOFactory().getResourceTypeDAO();
     }
@@ -288,5 +290,11 @@ public abstract class AuthzSession {
     
     protected SessionContext getSessionContext() {
         return this.ctx;
+    }
+
+    protected ResourceRelation getContainmentRelation() {
+        ResourceRelationDAO rDAO = 
+            new ResourceRelationDAO(DAOFactory.getDAOFactory());
+        return rDAO.findById(RELATION_CONTAINMENT_ID); 
     }
 }

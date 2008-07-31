@@ -82,8 +82,6 @@ import org.hyperic.util.pager.SortAttribute;
  */
 public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 {
-    private static final Integer RELATION_CONTAINMENT_ID = new Integer(1); 
-    
     private Pager resourcePager = null;
     private Pager resourceTypePager = null;
     
@@ -283,12 +281,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         return res;
     }
         
-    private ResourceRelation getContainmentRelation() {
-        ResourceRelationDAO rDAO = 
-            new ResourceRelationDAO(DAOFactory.getDAOFactory());
-        return rDAO.findById(RELATION_CONTAINMENT_ID); 
-    }
-    
     /**
      * Get the Resource entity associated with this ResourceType.
      * @param type This ResourceType.

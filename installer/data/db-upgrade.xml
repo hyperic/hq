@@ -9060,6 +9060,14 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 	
+  <schemaSpec version="3.122">
+    <schema-directSQL>
+      <statement fail="false" desc="Insert resource groups into edge table">
+        insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance) select 20000 - id, 0, resource_id, resource_id, 1, 0 from EAM_RESOURCE_GROUP;
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
