@@ -805,11 +805,15 @@ public class AppdefBossEJBImpl
         ResourceManagerLocal resMan = getResourceManager();
         for (int i = 0; i < entities.length; i++) {
             if (pc != null) {
-                appdefList.add(resMan.findResource(entities[i]));
+                Resource res = resMan.findResource(entities[i]);
+                if (res != null)
+                    appdefList.add(res);
             }
             else {
                 try {
-                    appdefList.add(findById(subject, entities[i]));
+                    AppdefResourceValue res = findById(subject, entities[i]);
+                    if (res != null)
+                        appdefList.add(res);
                 } catch (AppdefEntityNotFoundException e) {
                     log.debug("Entity not found: " + entities[i]);
                 }
