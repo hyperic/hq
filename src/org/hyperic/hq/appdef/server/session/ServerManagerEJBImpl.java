@@ -42,10 +42,12 @@ import javax.ejb.SessionBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
@@ -120,6 +122,39 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * special constraint required to succesfully add a server instance
      * to a platform
      */
+    private void validateNewServer(Platform p, Server server)
+        throws ValidationException
+    {
+        // ensure the server value has a server type
+        String msg = null;
+        if(server.getServerType() == null) {
+            msg = "Server has no ServiceType";
+        } else if(server.getId() != null) {
+            msg = "This server is not new, it has ID:" + server.getId();
+        }
+        if(msg == null) {
+            Integer id = server.getServerType().getId();
+            Collection stypes = p.getPlatformType().getServerTypes();
+            for (Iterator i = stypes.iterator(); i.hasNext();) {
+                ServerType sVal = (ServerType)i.next();
+                if(sVal.getId().equals(id))
+                    return;
+            }
+            msg = "Servers of type '" + server.getServerType().getName() +
+                "' cannot be created on platforms of type '" +
+                p.getPlatformType().getName() +"'";
+        }
+        if (msg != null) {
+            throw new ValidationException(msg);
+        }
+    }
+
+    /**
+     * Validate a server value object which is to be created on this
+     * platform. This method will check IP conflicts and any other
+     * special constraint required to succesfully add a server instance
+     * to a platform
+     */
     private void validateNewServer(Platform p, ServerValue sv)
         throws ValidationException
     {
@@ -145,6 +180,67 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         if (msg != null) {
             throw new ValidationException(msg);
         }
+    }
+    
+    /**
+     * @throws FinderException 
+     * @ejb:interface-method
+     */
+    public Server cloneServer(AuthzSubject subject, Platform targetPlatform,
+                              Server serverToClone)
+        throws CreateException, ValidationException, PermissionException,
+               PlatformNotFoundException, AppdefDuplicateNameException,
+               FinderException  {
+        serverToClone.isWasAutodiscovered();
+        serverToClone.isRuntimeAutodiscovery();
+        ConfigResponseDB cr = serverToClone.getConfigResponse();
+        byte[] productResponse = cr.getProductResponse();
+        byte[] measResponse = cr.getMeasurementResponse();
+        byte[] controlResponse = cr.getControlResponse();
+        byte[] rtResponse = cr.getResponseTimeResponse();
+        ConfigManagerLocal cMan = ConfigManagerEJBImpl.getOne();
+        ConfigResponseDB configResponse = cMan.createConfigResponse(
+            productResponse, measResponse, controlResponse, rtResponse);
+        Server s = new Server();
+        s.setName(serverToClone.getName());
+        s.setDescription(serverToClone.getDescription());
+        s.setInstallPath(serverToClone.getInstallPath());
+        String aiid = serverToClone.getAutoinventoryIdentifier();
+        if (aiid != null) {
+            s.setAutoinventoryIdentifier(serverToClone.getAutoinventoryIdentifier());
+        } else {
+            // Server was created by hand, use a generated AIID. (This matches
+            // the behaviour in 2.7 and prior)
+            aiid = serverToClone.getInstallPath() + "_" + System.currentTimeMillis() +
+                "_" + serverToClone.getName();
+            s.setAutoinventoryIdentifier(aiid);
+        }
+
+        s.setServicesAutomanaged(serverToClone.getServicesAutomanaged());
+        s.setRuntimeAutodiscovery(serverToClone.getRuntimeAutodiscovery());
+        s.setWasAutodiscovered(serverToClone.getWasAutodiscovered());
+        s.setAutodiscoveryZombie(false);
+        s.setLocation(serverToClone.getLocation());
+        s.setModifiedBy(serverToClone.getModifiedBy());
+        s.setConfigResponse(configResponse);
+        s.setPlatform(targetPlatform);
+
+        Integer stid = serverToClone.getServerType().getId();
+        ServerType st;
+        st = DAOFactory.getDAOFactory().getServerTypeDAO().findById(stid);
+        s.setServerType(st);
+        validateNewServer(targetPlatform, s);
+        getServerDAO().create(s);
+        // Add server to parent collection
+        targetPlatform.getServers().add(s);
+
+        createAuthzServer(subject, s);
+
+        // Send resource create event
+        ResourceCreatedZevent zevent =
+            new ResourceCreatedZevent(subject, s.getEntityId());
+        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+        return s;
     }
 
     /**
@@ -255,7 +351,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
         removeServer(subject, server);
     }
-
+    
     /**
      * A removeServer method that takes a ServerLocal.  Used by
      * PlatformManager.removePlatform when cascading removal to servers.
@@ -382,6 +478,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                ServerNotFoundException {    
         return getServerTypesByPlatform(subject, platId, true, pc);
     }
+
     /**
      * Find viewable server types for a platform
      * @return list of serverTypeValues
@@ -875,10 +972,27 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      *
      * @param subject The subject trying to list servers.
+     * @param platId platform id.
+     * @return An array of Integer[] which represent the ServerIds
+     * specified platform that the subject is allowed to view.
+     */
+    public Integer[] getServerIdsByPlatform(AuthzSubject subject,
+                                            Integer platId)
+        throws ServerNotFoundException, PlatformNotFoundException, 
+               PermissionException 
+    {
+        return getServerIdsByPlatform(
+            subject, platId, APPDEF_RES_TYPE_UNDEFINED, true);
+    }
+    
+    /**
+     * Get non-virtual server IDs by server type and platform.
+     * @ejb:interface-method
+     *
+     * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
      * @param platId platform id.
-     * @return A PageList of ServerValue objects representing servers on the
-     * specified platform that the subject is allowed to view.
+     * @return An array of Integer[] which represent the ServerIds
      */
     public Integer[] getServerIdsByPlatform(AuthzSubject subject,
                                             Integer platId, Integer servTypeId)
