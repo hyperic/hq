@@ -37,6 +37,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -56,6 +57,8 @@ import org.hyperic.hq.events.shared.MaintenanceEventManagerUtil;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.util.pager.PageControl;
@@ -66,9 +69,8 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 
 /**
- * <p> Stores Events to and deletes Events from storage
+ * The MaintenanceEventManager provides APIs to manage maintenance events.
  *
- * </p>
  * @ejb:bean name="MaintenanceEventManager"
  *      jndi-name="ejb/events/MaintenanceEventManager"
  *      local-jndi-name="LocalMaintenanceEventManager"
@@ -210,22 +212,24 @@ public class MaintenanceEventManagerEJBImpl
     }
 
     /**
-     * Disable or enable alerts for the group and its resources.
+     * Disable or enable monitors (alerts, measurements) for the group
+     * and its resources during the maintenance event.
      * 
      * @ejb:interface-method 
      */        
-    public void manageAlerts(AuthzSubject admin, MaintenanceEvent event,
+    public void manageMonitors(AuthzSubject admin, MaintenanceEvent event,
                              boolean activate) 
 		throws PermissionException
 	{		
 		GalertManagerLocal gam = GalertManagerEJBImpl.getOne();
 		AlertDefinitionManagerLocal adm = AlertDefinitionManagerEJBImpl.getOne();
+		MeasurementManagerLocal mm = MeasurementManagerEJBImpl.getOne();
 		ResourceGroupManagerLocal rgm = ResourceGroupManagerEJBImpl.getOne();   	    	
 		ResourceGroup group = rgm.findResourceGroupById(event.getGroupId());
 		
 		Collection resources = rgm.getMembers(group);
 		Resource resource = null;
-    	GalertDef galertDef = null;
+		GalertDef galertDef = null;
 		AlertDefinition alertDef = null;
 		Collection alertDefinitions = null;
 		Iterator adIter = null;
@@ -240,9 +244,11 @@ public class MaintenanceEventManagerEJBImpl
 			_log.info("Group Alert [" + galertDef + "] " + status);
         }	    
 	    
-		// Get the alerts for the resources of the group
+		// Get the resources of the group
 		for (Iterator rIter = resources.iterator(); rIter.hasNext(); ) {
 			resource = (Resource) rIter.next();
+			
+			// Get the alerts for the resource
 			alertDefinitions = adm.findRelatedAlertDefinitions(admin, resource);
 			    		
     		for (adIter = alertDefinitions.iterator(); adIter.hasNext(); ) {
@@ -251,9 +257,20 @@ public class MaintenanceEventManagerEJBImpl
 				// Disable and re-enable only the active alerts
 				if (alertDef.isActive()) {
 					adm.updateAlertDefinitionInternalEnable(admin, alertDef, activate);
-    				log.info("Resource Alert [" + alertDef + "] " + status);
+					_log.info("Resource Alert [" + alertDef + "] " + status);
 				}
     		}
+
+    		// Disable or re-enable the measurements
+    		if (activate) {
+    			mm.enableDefaultMeasurements(admin, resource);
+    			_log.info("Enabled the default measurements for Resource[" 
+						+ resource.getName() + "] for " + event);
+    		} else {
+    			mm.disableMeasurements(admin, new AppdefEntityID(resource));
+    			_log.info("Disabled measurements for Resource[" 
+						+ resource.getName() + "] for " + event);
+    		}    		
 		}
 
 		event.setMaintenanceWindowMessage(activate ? "maintenance.window.ends" :
@@ -329,8 +346,8 @@ public class MaintenanceEventManagerEJBImpl
 										TRIGGER_GROUP);
         
         if (deactivateAndActivate) {
-        	// First trigger is to deactivate the alerts
-        	// Second trigger is to re-activate the alerts
+        	// First trigger is to disable the services
+        	// Second and last trigger is to enable the services
         	trigger.setStartTime(new Date(event.getStartTime()));
         	trigger.setRepeatCount(1);
         	trigger.setRepeatInterval(event.getEndTime() - event.getStartTime());

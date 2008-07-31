@@ -62,9 +62,9 @@ public class MaintenanceEventJob implements Job {
         MaintenanceEvent event = maintMgr.buildMaintenanceEvent(context.getJobDetail());
                 
         try {
-        	// De-activate the alerts if this is the first job trigger
-        	// Re-activate the alerts if this is the last job trigger
-        	maintMgr.manageAlerts(
+        	// Disable the monitors if this is the first job trigger
+        	// Enable the monitors if this is the last job trigger
+        	maintMgr.manageMonitors(
         				AuthzSubjectManagerEJBImpl.getOne().findSubjectByName("hqadmin"),
         				event,
         				(trigger.getNextFireTime() == null));
