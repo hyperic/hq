@@ -93,6 +93,21 @@ public class ConfigManagerEJBImpl
     private ServiceManagerLocal getServiceManagerLocal(){
         return ServiceManagerEJBImpl.getOne();
     }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public ConfigResponseDB createConfigResponse(byte[] productResponse,
+                                                 byte[] measResponse,
+                                                 byte[] controlResponse,
+                                                 byte[] rtResponse) {
+        ConfigResponseDB cr = getConfigResponseDAO().create();
+        cr.setProductResponse(productResponse);
+        cr.setMeasurementResponse(measResponse);
+        cr.setControlResponse(controlResponse);
+        cr.setResponseTimeResponse(rtResponse);
+        return cr;
+    }
 
     /**
      *
