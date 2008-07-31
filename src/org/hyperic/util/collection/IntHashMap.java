@@ -430,9 +430,13 @@ public class IntHashMap {
      */
     public int[] getKeys() {
         Entry tab[] = table;
-        int[] keys = new int[tab.length];
+        int[] keys = new int[count];
+        int i=0;
         for (int index = tab.length; --index >= 0;) {
-            keys[index] = tab[index].key;
+            if (tab[index] == null) {
+                continue;
+            }
+            keys[i++] = tab[index].key;
         }
         return keys;
     }
