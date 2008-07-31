@@ -31,16 +31,23 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.EdgePermCheck;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.AgentDAO;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -220,6 +227,21 @@ public class PlatformDAO extends HibernateDAO {
             .createQuery(sql)
             .setString(0, name.toUpperCase())
             .uniqueResult();
+    }
+    
+    public List findByTypeAndRegEx(Integer pType, String regex) {
+        HQDialect dialect = Util.getHQDialect();
+        String fqdnEx = dialect.getRegExSQL("p.fqdn", regex, true, false);
+        String nameEx = dialect.getRegExSQL("rez.sortname", regex, true, false);
+        String sql = "select {p.*} from EAM_PLATFORM p" +
+                     " JOIN EAM_RESOURCE rez on p.resource_id = r.id" +
+                     " WHERE p.platform_type_id = :id" +
+                     " AND (" + fqdnEx + " OR " + nameEx + ")";
+        return getSession()
+            .createSQLQuery(sql)
+            .addEntity("p", Platform.class)
+            .setInteger("id", pType.intValue())
+            .list();
     }
     
     public List findByType(Integer pid)
