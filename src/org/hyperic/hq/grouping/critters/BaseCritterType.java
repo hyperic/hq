@@ -27,6 +27,7 @@ package org.hyperic.hq.grouping.critters;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -132,6 +133,10 @@ public abstract class BaseCritterType
             new EnumCritterPropDescription(propId, propName,
                                            propPurpose, enumClass, required);
         _propDescs.put(propId, d); 
+    }
+    
+    public Collection getPropTypes() {
+        return Collections.unmodifiableCollection(_propDescs.values());
     }
 
     private String getPropPurpose(String propId) {
