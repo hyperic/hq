@@ -984,6 +984,20 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         }
         return valuePager.seek(platforms, pc);
     }
+    
+    /**
+     * @param subj
+     * @param pType platform type
+     * @param nameRegEx regex which matches either the platform fqdn or the
+     * resource sortname
+     * XXX scottmf need to add permission checking
+     * @ejb:interface-method
+     */
+    public List findPlatformPojosByTypeAndName(AuthzSubject subj,
+                                               Integer pType,
+                                               String regEx) {
+        return getPlatformDAO().findByTypeAndRegEx(pType, regEx);
+    }
 
     /**
      * Get the platforms that have an IP with the specified address.
