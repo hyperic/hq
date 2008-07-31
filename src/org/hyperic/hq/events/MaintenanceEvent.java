@@ -25,30 +25,38 @@
 
 package org.hyperic.hq.events;
 
+import java.util.ResourceBundle;
+
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.measurement.shared.ResourceLogEvent;
+import org.hyperic.hq.product.LogTrackPlugin;
+import org.hyperic.hq.product.TrackEvent;
+
 /**
  * Value object for scheduled maintenance events
  */
-public class MaintenanceEvent {
-    private Integer _groupId;
+public class MaintenanceEvent extends ResourceLogEvent
+    implements LoggableInterface 
+{
+    private static final String BUNDLE = "org.hyperic.hq.events.Resources";
+
     private long _startTime;
     private long _endTime;
     private long _modifiedTime;
     
-    public MaintenanceEvent() {
-    }
-    
     public MaintenanceEvent(Integer groupId) {
-    	setGroupId(groupId);
+        super(new TrackEvent(AppdefEntityID.newGroupID(groupId),
+                             System.currentTimeMillis(),
+                             LogTrackPlugin.LOGLEVEL_INFO, "", ""));
+
+        ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE);
+        setSource(bundle.getString("maintenance.window"));
     }
     
     public Integer getGroupId() {
-    	return _groupId;
+    	return getResource().getId();
     }
     
-    public void setGroupId(Integer groupId) {
-    	_groupId = groupId;
-    }
-        
     public long getStartTime() {
     	return _startTime;
     }
@@ -73,9 +81,14 @@ public class MaintenanceEvent {
     	_modifiedTime = modifiedTime;
     }
     
+    public void setMaintenanceWindowMessage(String key) {
+        ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE);
+        setMessage(bundle.getString(key));
+    }
+    
     public String toString() {
     	return new StringBuffer("MaintenanceEvent")
-    					.append("[groupId=" + _groupId)
+    					.append("[groupId=" + getGroupId())
     					.append(",startTime=" + _startTime)
     					.append(",endTime=" + _endTime)
     					.append(",modifiedTime=" + _modifiedTime)
