@@ -64,7 +64,7 @@ public class ProviderInfo {
     }
     
     public boolean isUnidirectional() {
-        if (!isNewTransport()) {
+        if (this.unidirectional && !isNewTransport()) {
             throw new IllegalStateException("not a new transport");
         }
         
