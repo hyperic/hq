@@ -28,10 +28,8 @@ package org.hyperic.hq.events.server.session;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
@@ -42,15 +40,15 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.MaintenanceEventJob;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerLocal;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerUtil;
@@ -224,7 +222,9 @@ public class MaintenanceEventManagerEJBImpl
 		GalertManagerLocal gam = GalertManagerEJBImpl.getOne();
 		AlertDefinitionManagerLocal adm = AlertDefinitionManagerEJBImpl.getOne();
 		MeasurementManagerLocal mm = MeasurementManagerEJBImpl.getOne();
-		ResourceGroupManagerLocal rgm = ResourceGroupManagerEJBImpl.getOne();   	    	
+		ResourceGroupManagerLocal rgm = ResourceGroupManagerEJBImpl.getOne();
+		ResourceManagerLocal rm = ResourceManagerEJBImpl.getOne();
+		
 		ResourceGroup group = rgm.findResourceGroupById(event.getGroupId());
 		
 		Collection resources = rgm.getMembers(group);
@@ -241,7 +241,8 @@ public class MaintenanceEventManagerEJBImpl
         for (adIter = alertDefinitions.iterator(); adIter.hasNext(); ) {
         	galertDef = (GalertDef) adIter.next();	
         	gam.enable(galertDef, activate);
-			_log.info("Group Alert [" + galertDef + "] " + status);
+        	if (_log.isDebugEnabled())
+        	    _log.debug("Group Alert [" + galertDef + "] " + status);
         }	    
 	    
 		// Get the resources of the group
@@ -256,21 +257,31 @@ public class MaintenanceEventManagerEJBImpl
     			    			
 				// Disable and re-enable only the active alerts
 				if (alertDef.isActive()) {
-					adm.updateAlertDefinitionInternalEnable(admin, alertDef, activate);
-					_log.info("Resource Alert [" + alertDef + "] " + status);
+					adm.updateAlertDefinitionInternalEnable(admin, alertDef,
+					                                        activate);
+					if (_log.isDebugEnabled())
+					    _log.debug("Resource Alert [" + alertDef + "] " +
+					               status);
 				}
     		}
 
     		// Disable or re-enable the measurements
-    		if (activate) {
-    			mm.enableDefaultMeasurements(admin, resource);
-    			_log.info("Enabled the default measurements for Resource[" 
-						+ resource.getName() + "] for " + event);
-    		} else {
-    			mm.disableMeasurements(admin, new AppdefEntityID(resource));
-    			_log.info("Disabled measurements for Resource[" 
-						+ resource.getName() + "] for " + event);
-    		}    		
+    		List children = rm.findResourcesByParent(admin, resource);
+    		for (Iterator cit = children.iterator(); cit.hasNext(); ) {
+    		    Resource child = (Resource) cit.next();
+    		    if (activate) {
+    		        mm.enableDefaultMeasurements(admin, child);
+    		        if (_log.isDebugEnabled())
+        		        _log.debug("Enabled the default measurements for " +
+        		                   "Resource[" + child.getName() + "] for " +
+        		                   event);
+    		    } else {
+    		        mm.disableMeasurements(admin, new AppdefEntityID(child));
+    		        if (_log.isDebugEnabled())
+        		        _log.debug("Disabled measurements for Resource[" +
+        		                   child.getName() + "] for " + event);
+    		    }           
+    		}
 		}
 
 		event.setMaintenanceWindowMessage(activate ? "maintenance.window.ends" :
