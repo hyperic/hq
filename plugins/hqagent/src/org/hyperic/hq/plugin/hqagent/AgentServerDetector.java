@@ -42,6 +42,12 @@ public class AgentServerDetector
     extends ServerDetector
     implements AutoServerDetector
 {
+    
+    
+    private static final String UNAVAILABLE = "N/A";
+    private static final String AGENT_BUNDLE_HOME = "agent.bundle.home";
+    private static final String BUNDLES_DIR = "bundles/";
+
     public AgentServerDetector(){
         super();
     }
@@ -99,13 +105,13 @@ public class AgentServerDetector
     }
     
     private String getAgentBundleVersion() {
-        String home = System.getProperty("agent.bundle.home");
+        String home = System.getProperty(AGENT_BUNDLE_HOME);
         if (home == null) {
-            return "N/A";
+            return UNAVAILABLE;
         }
-        int index = home.indexOf("bundles/") + "bundles/".length();
-        if (index <0) {
-            return "N/A";
+        int index = home.indexOf(BUNDLES_DIR) + BUNDLES_DIR.length();
+        if (index < 0) {
+            return UNAVAILABLE;
         }
         return home.substring(index);
     }
