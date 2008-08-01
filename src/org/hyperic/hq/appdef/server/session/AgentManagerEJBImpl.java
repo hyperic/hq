@@ -540,7 +540,7 @@ public class AgentManagerEJBImpl
      * @param agentToken the agent token to look for
      * @return An Agent representing the agent that has the given token.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public Agent getAgent(String agentToken)
         throws AgentNotFoundException 
@@ -627,7 +627,7 @@ public class AgentManagerEJBImpl
      * @throws AgentRemoteException if an exception occurs on the remote agent side.
      * @throws AgentConnectionException  if the connection to the agent fails.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public String getCurrentAgentBundle(AuthzSubject subject, AppdefEntityID aid) 
         throws PermissionException, 
@@ -660,7 +660,7 @@ public class AgentManagerEJBImpl
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public void upgradeAgentAsync(AuthzSubject subject,
                                          AppdefEntityID aid,  
@@ -709,7 +709,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public void upgradeAgent(AuthzSubject subject,
                                          AppdefEntityID aid,  
@@ -748,7 +748,7 @@ public class AgentManagerEJBImpl
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public void transferAgentBundleAsync(AuthzSubject subject,
                                          AppdefEntityID aid,  
@@ -796,7 +796,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public void transferAgentBundle(AuthzSubject subject,
                                     AppdefEntityID aid,  
@@ -849,7 +849,7 @@ public class AgentManagerEJBImpl
      * @throws AgentConnectionException  if the connection to the agent fails.
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public void transferAgentPlugin(AuthzSubject subject,
                                     AppdefEntityID aid,  
@@ -915,7 +915,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public void transferAgentPluginAsync(AuthzSubject subject,
                                     AppdefEntityID aid,  
@@ -967,7 +967,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public void upgradeAgentBundle(AuthzSubject subject,
                                     AppdefEntityID aid,  
@@ -1006,7 +1006,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public void restartAgent(AuthzSubject subject,
                                     AppdefEntityID aid) 
@@ -1058,7 +1058,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public long pingAgent(AuthzSubject subject, Agent agent)
         throws PermissionException, AgentNotFoundException,
