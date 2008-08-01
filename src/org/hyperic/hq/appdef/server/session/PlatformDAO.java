@@ -231,16 +231,17 @@ public class PlatformDAO extends HibernateDAO {
     
     public List findByTypeAndRegEx(Integer pType, String regex) {
         HQDialect dialect = Util.getHQDialect();
-        String fqdnEx = dialect.getRegExSQL("p.fqdn", regex, true, false);
-        String nameEx = dialect.getRegExSQL("rez.sortname", regex, true, false);
+        String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
+        String nameEx = dialect.getRegExSQL("rez.sort_name", ":regex", true, false);
         String sql = "select {p.*} from EAM_PLATFORM p" +
-                     " JOIN EAM_RESOURCE rez on p.resource_id = r.id" +
+                     " JOIN EAM_RESOURCE rez on p.resource_id = rez.id" +
                      " WHERE p.platform_type_id = :id" +
                      " AND (" + fqdnEx + " OR " + nameEx + ")";
         return getSession()
             .createSQLQuery(sql)
             .addEntity("p", Platform.class)
             .setInteger("id", pType.intValue())
+            .setString("regex", regex)
             .list();
     }
     

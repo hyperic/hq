@@ -53,10 +53,13 @@ public interface HQDialect
      */
     public boolean supportsMultiInsertStmt();
     
+
     /*
      * Returns a db specific SQL syntax for a POSIX style Regular Expression.
      * @param column - the column to match against
-     * @param regex - the POSIX style regex
+     * @param regex - the POSIX style regex.  The param passed in allows for
+     * prepared statement type syntax.  If that is not desired put quotes around
+     * the value to ensure the SQL will not fail.
      * @param ignoreCase - similar to grep -i
      * @param invertMatch - similar to grep -v
      */
