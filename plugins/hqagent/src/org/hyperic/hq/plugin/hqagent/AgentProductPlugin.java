@@ -74,6 +74,10 @@ public class AgentProductPlugin
         opt = new StringConfigOption("SigarNativeVersion",
                                      "Sigar Native Version");
         schema.addOption(opt);
+        
+        opt = new StringConfigOption("AgentBundleVersion",
+        "Agent Bundle Version");
+        schema.addOption(opt);        
 
         return schema;
     }

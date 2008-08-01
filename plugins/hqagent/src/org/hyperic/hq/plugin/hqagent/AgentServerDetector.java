@@ -89,11 +89,24 @@ public class AgentServerDetector
         cprop.setValue("UserHome", System.getProperty("user.home"));
         cprop.setValue("SigarVersion", Sigar.VERSION_STRING);
         cprop.setValue("SigarNativeVersion", Sigar.NATIVE_VERSION_STRING);
+        cprop.setValue("AgentBundleVersion", getAgentBundleVersion());
 
         res.setCustomProperties(cprop);
 
         res.setProductConfig();
         res.setMeasurementConfig();
         return res;
+    }
+    
+    private String getAgentBundleVersion() {
+        String home = System.getProperty("agent.bundle.home");
+        if (home == null) {
+            return "N/A";
+        }
+        int index = home.indexOf("bundles/") + "bundles/".length();
+        if (index <0) {
+            return "N/A";
+        }
+        return home.substring(index);
     }
 }
