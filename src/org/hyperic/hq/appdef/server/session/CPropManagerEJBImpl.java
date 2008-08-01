@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -223,6 +224,8 @@ public class CPropManagerEJBImpl
      *        for the resource's associated type
      * @throw AppdefEntityNotFoundException if id for 'aVal' specifies
      *        a resource which does not exist
+     * XXX: scottmf, we should move this over to hql at some point rather than
+     * trying to manage the transaction via jdbc within this container
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
@@ -231,67 +234,67 @@ public class CPropManagerEJBImpl
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException,
                PermissionException
     {
-        PreparedStatement selStmt, delStmt, addStmt;
+        Statement stmt = null;
+        PreparedStatement pstmt = null;
         CpropKey propKey;
         Connection conn = null;
         ResultSet rs = null;
+        StringBuilder sql;
         
         propKey = getKey(aID, typeId, key);
 
-        selStmt = null;
-        delStmt = null;
-        addStmt = null;
         try {
             Integer pk = propKey.getId();
             final int keyId = pk.intValue();
 
             conn = Util.getConnection();
+            stmt = conn.createStatement();
                                     
-            // Lock the rows we want to trash
-            selStmt = conn.prepareStatement("SELECT PROPVALUE FROM " +
-                                            CPROP_TABLE +
-                                            " WHERE KEYID=? AND APPDEF_ID=? " +
-                                            "FOR UPDATE");
-            selStmt.setInt(1, keyId);
-            selStmt.setInt(2, aID.getID());
-            rs = selStmt.executeQuery();
-            
+            // no need to grab the for update since we are in a transaction
+            // and therefore automatically get a shared lock
+            sql = new StringBuilder()
+                .append("SELECT PROPVALUE FROM ").append(CPROP_TABLE)
+                .append(" WHERE KEYID=").append(keyId)
+                .append(" AND APPDEF_ID=").append(aID.getID());
+            rs = stmt.executeQuery(sql.toString());
             String oldval = null;
             if (rs.next()) {
-                // See if value has changed
-                oldval = rs.getString(1);
-                if (oldval.equals(val))
+                // vals are the same, no update
+                if ((oldval = rs.getString(1)).equals(val)) {
                     return;
+                }
             }
 
+            DBUtil.closeStatement(this, stmt);
             if (oldval != null) {
-                // Nuke the old values
-                delStmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE + 
-                                                " WHERE KEYID=? AND APPDEF_ID=?");
-                delStmt.setInt(1, keyId);
-                delStmt.setInt(2, aID.getID());
-                delStmt.executeUpdate();
+                stmt = conn.createStatement();
+                sql = new StringBuilder()
+                    .append("DELETE FROM ").append(CPROP_TABLE)
+                    .append(" WHERE KEYID=").append(keyId)
+                    .append(" AND APPDEF_ID=").append(aID.getID());
+                stmt.executeUpdate(sql.toString());
             }
             
             // Optionally add new values
-            if(val != null){
+            if (val != null){
                 String[] chunks = chunk(val, CHUNKSIZE);
-                StringBuffer sql = new StringBuffer("INSERT INTO " + 
-                                                    CPROP_TABLE);
+                sql = new StringBuilder()
+                    .append("INSERT INTO ").append(CPROP_TABLE);
 
                 Cprop nprop = new Cprop();
                 sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES (")
                    .append(Util.generateId("org.hyperic.hq.appdef.server.session.Cprop", nprop))
                    .append(", ?, ?, ?, ?)");
                 
-                addStmt = conn.prepareStatement(sql.toString());
-                addStmt.setInt(1, keyId);
-                addStmt.setInt(2, aID.getID());
+                pstmt = conn.prepareStatement(sql.toString());
+                pstmt.setInt(1, keyId);
+                pstmt.setInt(2, aID.getID());
                 for(int i=0; i<chunks.length; i++){
-                    addStmt.setInt(3, i);
-                    addStmt.setString(4, chunks[i]);
-                    addStmt.executeUpdate();
+                    pstmt.setInt(3, i);
+                    pstmt.setString(4, chunks[i]);
+                    pstmt.addBatch();
                 }
+                pstmt.executeBatch();
             }
 
             if (log.isDebugEnabled())
@@ -310,9 +313,11 @@ public class CPropManagerEJBImpl
             throw new SystemException(exc);
         } finally {
             DBUtil.closeResultSet(this, rs);
-            DBUtil.closeStatement(this, selStmt);
-            DBUtil.closeStatement(this, delStmt);
-            DBUtil.closeStatement(this, addStmt);
+            DBUtil.closeStatement(this, stmt);
+            DBUtil.closeStatement(this, pstmt);
+            // XXX scottmf, this is probably not the right thing to do since
+            // it will commit the transaction which is already container
+            // managed
             Util.endConnection();
         }
     }
