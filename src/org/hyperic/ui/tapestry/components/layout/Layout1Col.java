@@ -87,10 +87,10 @@ public abstract class Layout1Col extends BaseLayout{
     public List<IAsset> getStyleSheetList(){
         List<IAsset> list = new ArrayList<IAsset>();
         list.add(getHQ40Theme());
-        list.addAll(getDojoTundraThemeSheets());
+        /*mlist.addAll(getDojoTundraThemeSheets());
         list.addAll(getDojoGridTundraThemeSheets());
         list.addAll(getDojoSheets());
-        list.addAll(getDijitSheets());
+        list.addAll(getDijitSheets());*/
         List<IAsset> optional = getStyleSheets();
         if(optional != null)
             list.addAll(optional);
