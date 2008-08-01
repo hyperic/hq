@@ -1,6 +1,6 @@
 body {
     font: 76% Arial,Helvetica,sans-serif;
-    background: #D8D8D8;
+    background: #ECECEC;
     border: 0;
     margin: 0;
     min-width:990px
@@ -297,7 +297,7 @@ a:visited,a:hover,a {
     margin-bottom: 9px;
     background-color: #FFF;
     background: url('/images/4.0/icons/exclamation.png') no-repeat 6px 40%;
-    padding: 10px 2px 5px 28px
+    padding: 5px 2px 5px 28px
 }
 
 .msgError {
@@ -1427,7 +1427,7 @@ select {
 }
 
 .panelTitleGray {
-    background: url('/images/4.0/titlebarbg.png') repeat-x;
+    background: url('/images/4.0/backgrounds/titlebar_bg.png') repeat-x;
     padding: 4px 0 4px 4px;
     border-bottom: 1px solid #8E8E8E
 }
@@ -1437,14 +1437,14 @@ select {
     font-weight: bold;
 }
 
-.panel .filterBox input {
+.panel .listFilter input {
     width: 205px;
     margin-left: 5px;
     border: 0px solid white;
 }
 
 .panel .listFilter {
-    padding: 7px 0 6px 4px;
+    padding: 5px 0 4px 4px;
     background: url(/images/4.0/filterboxbg.png) repeat-x;
     border-bottom: 1px solid #8E8E8E
 }
@@ -1586,4 +1586,21 @@ ol .active.groupIcon {
 
 .btnBack{
     background: url(/images/4.0/icons/resultset_previous.png)
+}
+
+#wrapper .pageTitle{
+   color:#444444;
+font-size:1.8em;
+font-weight:bold;
+margin:16px 0 0 16px;
+}
+
+#wrapper table th{
+	border:1px solid #ccc;
+	font-weight:bold;
+	padding:2px 3px 2px 5px;
+	background: url(/images/4.0/backgrounds/table_header.png);
+}
+#wrapper table tr{
+	border:1px solid #ccc;
 }
