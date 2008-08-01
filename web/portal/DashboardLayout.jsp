@@ -228,6 +228,9 @@ dojo.require("dojo.widget.Dialog");
         </div>
         <div id="dashboardSelectDialog" class="hidden">
 		    <div class="dojoDialog">
+		        <div class="dojoDialogTitle">
+		          <fmt:message key="dash.home.DashboardSelectionDialog"></fmt:message>
+		        </div>
 		        <div class="dojoDialogBody">
 		            <c:if test="${requestScope.isDashRemoved}">
 		              <div class="dojoDialogMessage"><fmt:message key="dash.home.DefalutDashboardRemoved"/></div>
@@ -237,8 +240,8 @@ dojo.require("dojo.widget.Dialog");
 		                <span class="ErrorBlock"><fmt:message key="dash.home.DashboardSelectionDialogError"/></span>            
 		            </div>
 		            <div class="fieldSetStacked" style="margin-bottom:8px;">
-		                <span class="DashboardSelectBoxLabel"><strong><fmt:message key="dash.home.DashboardSelectBoxLabel"/></strong></span>
-		                <html:select property="defaultDashboard" name="defaultDashboard" value="defaultDashboard" size="9" style="width:288px;" styleId="defaultDash">
+		                <span class="DashboardSelectBoxLabel"><fmt:message key="dash.home.DashboardSelectBoxLabel"/></span>
+		                <html:select property="defaultDashboard" name="defaultDashboard" value="defaultDashboard" size="9" style="width: 268px;border:1px solid #aaa" styleId="defaultDash">
                             <html:optionsCollection property="dashboards" value="id" label="name"></html:optionsCollection>
                         </html:select>
 		            </div>
