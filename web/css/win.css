@@ -13,9 +13,10 @@ body,p,td,th,option,input,textarea,select {
     font-size: 11px
 }
 
-select{
+select {
     border: 1px solid gray
 }
+
 a:hover {
     color: #039;
     font-weight: 700;
@@ -91,7 +92,6 @@ input.compactbuttoninactive {
 }
 
 .pagetitle,.pagetitlebar,.pagetitlebar td {
-    
     color: #CCC;
     font-family: arial, sans-serif;
     font-size: 12px;
@@ -119,7 +119,7 @@ input.compactbuttoninactive {
 }
 
 .listtitle,.blocktitle {
-    background:transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 0%;
+    background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 0%;
     color: #fff;
     font-size: 12px;
     font-weight: 700;
@@ -178,16 +178,17 @@ a.listheaderlink:hover {
 }
 
 .listheader,.tablecellheader {
-    border-bottom:1px solid #D5D8DE;
-    border-top:1px solid #ABB1C7;
+    border-bottom: 1px solid #D5D8DE;
+    border-top: 1px solid #ABB1C7;
     border-width: 1px;
     color: #004680;
     font-weight: 700;
     padding: 3px;
     text-align: left
 }
-.tablerowheader{
-	background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 25%;
+
+.tablerowheader {
+    background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 25%;
     border-bottom: solid #D5D8DE;
     border-top: solid #ABB1C7;
     border-width: 1px;
@@ -197,12 +198,12 @@ a.listheaderlink:hover {
     text-align: left
 }
 
-.tablerowheader th{
-	color:#FFF
+.tablerowheader th {
+    color: #FFF
 }
 
-.tableRowHeader td{
-	color:#fff
+.tableRowHeader td {
+    color: #fff
 }
 
 .listheadercheckbox {
@@ -224,8 +225,8 @@ a.listheaderlink:hover {
 }
 
 .listheaderinactive,.tablerowinactive {
-    border-bottom:1px solid #D5D8DE;
-    border-top:1px solid #ABB1C7;
+    border-bottom: 1px solid #D5D8DE;
+    border-top: 1px solid #ABB1C7;
     border-width: 1px;
     font-weight: 700;
     padding: 3px
@@ -265,8 +266,8 @@ a.listheaderlink:hover {
     background-color: #F8F9FE;
 }
 
-.tableroweven{
-	background-color:#FFF
+.tableroweven {
+    background-color: #FFF
 }
 
 .listrowselected,.tablerowaction {
@@ -274,9 +275,9 @@ a.listheaderlink:hover {
     text-align: left
 }
 
-.tablerowodd{
-	background-color:#F4FAFA
-	}
+.tablerowodd {
+    background-color: #F4FAFA
+}
 
 .listcell,.listcellselected,.tablecell,.redtablecell {
     border-bottom: solid #D5D8DE;
@@ -570,10 +571,11 @@ a.guidelink:hover {
     border-left: 1px solid gray
 }
 
-#SubTabTarget.subtabcell{
+#SubTabTarget.subtabcell {
     border-left: 0px solid gray;
     border-right: 1px solid gray
 }
+
 .dashtabs {
     margin-bottom: 4px
 }
@@ -657,7 +659,6 @@ a.guidelink:hover {
     float: left;
     padding-top: 5px;
     width: 80px;
-
 }
 
 #recentalerts {
@@ -778,7 +779,6 @@ a.dashlink:hover {
 }
 
 .filterimage {
-
     padding-left: 1px;
     padding-right: 1px
 }
@@ -806,11 +806,10 @@ a.displaylink:hover {
 
 .monitorblockcontainer {
     background-color: #FFF;
-    border-left:1px solid gray;
-    border-right:1px solid gray;
-    border-bottom:1px solid gray;
+    border-left: 1px solid gray;
+    border-right: 1px solid gray;
+    border-bottom: 1px solid gray;
     padding-top: 10px;
-    
 }
 
 .monitorblocktopline {
@@ -943,7 +942,7 @@ a.displaylink:hover {
 }
 
 .resourcehubblocktitle {
-    border-bottom:1px solid gray;
+    border-bottom: 1px solid gray;
     color: #F35E0C;
     font-size: 12px;
     font-weight: 700;
@@ -1438,20 +1437,22 @@ ul.eventDetails li {
     position: absolute;
     z-index: 300
 }
-.dialog table .PageTitle{
-	background-color:#fff; 
+
+.dialog table .PageTitle {
+    background-color: #fff;
 }
+
 .dialog table .displaylabel {
-	background-color:#fff
+    background-color: #fff
 }
 
 .dialog table .displaysubhead {
-    background-color:#fff
+    background-color: #fff
 }
 
 .dialog table .displaycontent {
-    background-color:#fff
-}   
+    background-color: #fff
+}
 
 .dialog table.table_window {
     border-collapse: collapse;
@@ -1470,26 +1471,30 @@ ul.eventDetails li {
 }
 
 .accordiontabtitlebar {
-    background:#fff url(/images/4.0/backgrounds/panel_gray.jpg) repeat-x scroll 0% 50%;
-	border-bottom-color: #666;
+    background: #fff url(/images/4.0/backgrounds/panel_gray.jpg) repeat-x scroll 0% 50%;
+    border-bottom-color: #666;
     border-style: solid none;
     border-top-color: #DDD;
     border-width: 1px 0;
     font-size: 13px;
     padding: 0 6px;
-    color:fff;
-    font-weight:bold
+    color: fff;
+    font-weight: bold
 }
-#panelContent{
 
+#panelContent {
+    
 }
-#panelHeader{
-	
+
+#panelHeader {
+    
 }
-#propertiesAccordion{
-	border-left: 1px solid gray;
+
+#propertiesAccordion {
+    border-left: 1px solid gray;
     border-right: 1px solid gray;
 }
+
 .resource {
     border-bottom: 1px solid #D5D8DE;
     padding-bottom: 3px;
@@ -1601,8 +1606,8 @@ ul.eventDetails li {
     width: 100%
 }
 
-#viewEscalationUL li{
-	background-color:#fff
+#viewEscalationUL li {
+    background-color: #fff
 }
 
 #addescalationul {
@@ -1731,11 +1736,15 @@ ul.eventDetails li {
 }
 
 .pagetitlebar,.pagetitlebar td {
-    /*background-color: #ff7214;*/
-    /*background-image: url(/images/bg_PageTitle2.gif);*/
-    background-repeat:repeat-x;
-	color:#444444;
-	font-size:17px;
+    /*b
+
+ackground-color: #ff7214;*/
+    /*b
+
+ackground-image: url(/images/bg_PageTitle2.gif);*/
+    background-repeat: repeat-x;
+    color: #444444;
+    font-size: 17px;
 }
 
 blk,.black,#usersconfigwindow .blockcontent,#rolesconfigwindow .blockcontent {
@@ -1757,11 +1766,12 @@ a.notbold:link,.dropdown a:link,a.notbold:visited,.dropdown a:visited {
     color: #999
 }
 
-.pagetitlegroupbg,.pagetitlerolebg,.pagetitleuserbg{
+.pagetitlegroupbg,.pagetitlerolebg,.pagetitleuserbg {
     background-color: #E5E5E5
 }
+
 .toolbarcontent {
-    height:30px;
+    height: 30px;
 }
 
 .pagetitlesmalltext,a.listcellpopup5:link,a.listcellpopup5:visited {
@@ -1956,33 +1966,37 @@ a.black:link,a.black:visited {
 #alertcenter #alertGroupSelect {
     width: 150;
 }
+
 /*IE 6 OVERRIDES*/
+
 #recentAlerts {
-   _padding-left:0px;
+    _padding-left: 0px;
 }
 
 .headTopNav {
-    _height:42px;
+    _height: 42px;
 }
 
 .dojoMenuBar2 {
+    
 }
 
 .dojoMenuBar2 .dojoMenuItem2 {
-    _padding:3px 15px 3px; 15px;
+    _padding: 3px 15px 3px;
+15px;
 }
 
 .headUsrName {
-    _font-size:10px;
-    _z-index:10;
+    _font-size: 10px;
+    _z-index: 10;
 }
 
 #loading {
-    _margin-bottom:-1px;
+    _margin-bottom: -1px;
 }
 
 #hb {
-    _margin-bottom:-1px;
+    _margin-bottom: -1px;
 }
 
 /*MIG*/
@@ -1992,15 +2006,28 @@ a.black:link,a.black:visited {
     margin-bottom: 9px;
     background-color: #FFFD99;
 }
-.messageWarning{
-    border:1px solid #FFCC33;background-color:#FFFFCC;padding:5px;margin:10px;font-size:13px;
-}
-.messageInfo {
-    border:1px solid #004BD6;background-color:#DCF9FF;padding:9px;margin:10px 0px 10px 10px;font-size:13px;
+
+.messageWarning {
+    border: 1px solid #FFCC33;
+    background-color: #FFFFCC;
+    padding: 5px;
+    margin: 10px;
+    font-size: 13px;
 }
 
-.infoIcon{
-    height:32px;width:32px;background:url("/images/icon_info_small.gif") no-repeat;float:left;
+.messageInfo {
+    border: 1px solid #004BD6;
+    background-color: #DCF9FF;
+    padding: 9px;
+    margin: 10px 0px 10px 10px;
+    font-size: 13px;
+}
+
+.infoIcon {
+    height: 32px;
+    width: 32px;
+    background: url("/images/icon_info_small.gif") no-repeat;
+    float: left;
 }
 
 .dashboard {
@@ -2028,89 +2055,102 @@ a.black:link,a.black:visited {
     display: none;
 }
 
-.dojoDialog{
-    background-color:#FFF;
-    width:300px;
-    height:240px;
+.dojoDialog {
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    background-color: #FFFFFF;
+    border: 1px solid #AAAAAA;
+    height: 240px;
+    width: 300px;
 }
 
-.dojoDialogBody{
-    padding-left:6px;
-    padding-right:6px;
+.dojoDialogTitle {
+    background: transparent url(/images/4.0/backgrounds/titlebar_bg.png) repeat-x scroll 0 0;
+    padding: 4px;
+    font-size:1.2em;
+    font-weight:bold
+}
+
+.dojoDialogBody {
+    padding-left: 15px;
 }
 
 .DashboardSelectBoxLabel {
-    vertical-align:top;
-    display:block;
-    padding:3px;
+    vertical-align: top;
+    display: block;
+    padding: 3px;
 }
 
-.dojoDialogFooter{
-    height:26px;
-    background-color:#efefef;
-    bottom:0;
-    position:absolute;
-    width:294px;
-    padding:5px 3px 0;
+.dojoDialogFooter {
+    height: 26px;
+    bottom: 0;
+    position: absolute;
+    width: 294px;
+    padding: 5px 3px 0;
 }
 
-.dojoDialogHeader{
-    background-color:#60A5EA;
-    color:#FFF;
-    font-size:12px;
-    font-weight:700;
-    padding:3px;
+.dojoDialogHeader {
+    background-color: #60A5EA;
+    color: #FFF;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px;
 }
 
-.dojoDialogMessage{
-    background:#EFEFEF none repeat scroll 0;
-    color:red;
-    padding:7px;
+.dojoDialogMessage {
+    background: #EFEFEF none repeat scroll 0;
+    color: red;
+    padding: 7px;
 }
 
-.right{
-    float:right;
+.right {
+    float: right;
 }
 
 /*Exception Page*/
-.exception table{
-	border: 1px solid #2D6EBE;
-	background-color: #FFF;
-	
+
+.exception table {
+    border: 1px solid #2D6EBE;
+    background-color: #FFF;
 }
-.errorTitle{
-	background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 25%;
-	color:#FFF;
-	height:21px
+
+.errorTitle {
+    background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 25%;
+    color: #FFF;
+    height: 21px
 }
+
 .exception table p {
-	padding:4px;
+    padding: 4px;
 }
 
 .exception td {
-	color:#fff;
+    color: #fff;
 }
 
 .exception a:visited,a:hover,a {
     color: #88C7FC;
     text-decoration: none
 }
+
 /*Change Resource Owner tile*/
 
-.editResourceOwner .BlockTitle{
-	   background:transparent url(/images/4.0/backgrounds/panel_gray.jpg) repeat-x scroll 0% 50%;
+.editResourceOwner .BlockTitle {
+    background: transparent url(/images/4.0/backgrounds/panel_gray.jpg) repeat-x scroll 0% 50%;
 }
 
-.select{
+.select {
+    
 }
 
-.PortletTitle{
-    color:#444444;
-    font-family:arial,sans-serif;
-    font-size:1.1em;
-    font-weight:700;
+.PortletTitle {
+    color: #444444;
+    font-family: arial,sans-serif;
+    font-size: 1.1em;
+    font-weight: 700;
 }
-.buttonTable{
-	background-color:#fff;
-	margin-top:-14px;
+
+.buttonTable {
+    background-color: #fff;
+    margin-top: -14px;
 }
