@@ -1,17 +1,24 @@
-<shell jwcid="@Shell" title="ognl:pageTitle + ' - ' + staticTitle" stylesheets='ognl:styleSheetList' 
-       delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.remainingHead)"
-       ajaxDelegate="ognl:ajaxDelegate">
-<block jwcid="remainingHead@Block">
+<shell jwcid="@PageShell" title="ognl:pageTitle + ' - ' + staticTitle" stylesheets='ognl:styleSheetList' 
+       delegate="ognl:new org.apache.tapestry.components.BlockRenderer(components.beforeDelegate)"
+       afterDelegate="ognl: new org.apache.tapestry.components.BlockRenderer(components.afterDelegate)"
+       parseWidgets="true" debugEnabled="true" preventBackButtonFix="true">
+<block jwcid="beforeDelegate@Block">
 <link rel="icon" href="/images/4.0/icons/favicon.ico"/>
-<script language="JavaScript" type="text/javascript" src="/js/lib/lib.js"></script>
+</block>
+<block jwcid="afterDelegate@Block">
 <script type="text/javascript">
-    djConfig= {isDebug: false, parseOnLoad: true}
+djConfig.parseOnLoad = true;
+djConfig.baseUrl = '/js/dojo/1.1/dojo/';
+djConfig.scopeMap = [
+        ["dojo", "dojo11"],
+        ["dijit", "dijit11"],
+        ["dojox", "dojox11"]
+    ];
 </script>
+<script src="/js/dojo/1.1/dojo/dojo.js.uncompressed.js" type="text/javascript"></script>
+<script type="text/javascript" src="/js/lib/lib.js"></script>
 </block>
 <body jwcid="@Body" class="ognl:'white '+@org.hyperic.ui.tapestry.components.BaseLayout@DOJO_THEME">
-
-<div id="wrapper">
-        
 <span jwcid="@Header" statusElement="ognl:statusElement" navigationMenu="ognl:navigationMenu"/>
 
 <div id="wrapper">
@@ -26,7 +33,6 @@
             </div>
 	    </div>
 	</div>
-</div>
 </div>
 </body>
 </shell>
