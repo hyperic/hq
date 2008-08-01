@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,9 +16,12 @@ import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.engine.ILink;
 import org.apache.tapestry.services.ServiceConstants;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.server.session.CloningBossEJBImpl;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.CloningBossLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -92,12 +96,14 @@ public class RESTService extends BaseService {
         String servicePointId = cycle.getParameter(PARAM_SERVICE_ID);
 
         if (SERVICE_VERSION_1_0 == serviceVersion) {
-            if (servicePointId.equalsIgnoreCase(SERVICE_ID_CHART_WIDGET)) {
+            if (SERVICE_ID_CHART_WIDGET.equalsIgnoreCase(servicePointId)) {
                 _response.getWriter().write(serviceChartWidget(cycle));
-            } else if (servicePointId.equalsIgnoreCase(SERVICE_ID_ALERT_SUM_WIDGET)) {
+            } else if (SERVICE_ID_ALERT_SUM_WIDGET.equalsIgnoreCase(servicePointId)) {
                 _response.getWriter().write(serviceAlertSummaryWidget(cycle));
-            } else if (servicePointId.equalsIgnoreCase(SERVICE_ID_MAINTENANCE_WINDOW_WIDGET)) {
+            } else if (SERVICE_ID_MAINTENANCE_WINDOW_WIDGET.equalsIgnoreCase(servicePointId)) {
             	_response.getWriter().write(serviceMaintenanceWindowWidget(cycle));
+            } else if (SERVICE_ID_CLONE_PLATFORM_WIDGET.equalsIgnoreCase(servicePointId)) {
+            	_response.getWriter().write(serviceClonePlatformWidget(cycle));
             }
         }
     }
@@ -411,7 +417,7 @@ public class RESTService extends BaseService {
         }
         return res;
     }
-
+    
     /**
      * Service for the Maintenance Window Widget
      * 
@@ -466,6 +472,85 @@ public class RESTService extends BaseService {
 								.toString();            	
             }
      
+        } catch (Exception e) {
+            log.debug(e.getLocalizedMessage());
+            
+            try {
+            	res = new JSONObject()
+            				.put("error", "true")
+            				.put("message", e.getLocalizedMessage())
+            				.toString();
+            } catch (Exception e2) {
+            	res = ERROR_GENERIC;
+            }
+        }
+        
+        return res;
+    }
+
+    /**
+     * Service for the Clone Platform Widget
+     * 
+     * @param cycle the service parameters
+     * @return the service JSON response
+     */
+    private String serviceClonePlatformWidget(IRequestCycle cycle) {
+        String query = cycle.getParameter(PARAM_SEARCH_QUERY);
+        String platformId = cycle.getParameter(PARAM_PLATFORM_ID);
+        String platformTypeId = cycle.getParameter(PARAM_PLATFORM_TYPE_ID);
+        String cloneTargetId = cycle.getParameter(PARAM_CLONE_TARGET_ID);
+        String performClone = cycle.getParameter(PARAM_CLONE);
+       
+    	String res = EMPTY_RESPONSE; // default to an empty response
+
+        // Get the AuthzSubject
+        WebUser user = (WebUser) _request.getSession()
+                .getAttribute(Constants.WEBUSER_SES_ATTR);
+        AuthzBoss boss = ContextUtils.getAuthzBoss(_servletContext);
+        AuthzSubject me = getAuthzSubject(user, boss);
+        if (me == null)
+            return ERROR_GENERIC;
+
+        try {
+        	CloningBossLocal cloningBoss = CloningBossEJBImpl.getOne();
+
+        	if ((performClone != null) 
+        			&& (Boolean.valueOf(performClone).booleanValue()))
+        	{
+        		// Clone platform
+        		List cloneTargetIdList = new ArrayList();
+        		StringTokenizer st = new StringTokenizer(cloneTargetId);
+        		
+        		while (st.hasMoreTokens()) {
+        			cloneTargetIdList.add(Integer.valueOf(st.nextToken()));
+        		}
+        		
+        		cloningBoss.clonePlatform(
+        							me,
+        							Integer.valueOf(platformId),
+        							cloneTargetIdList);
+        		
+        	} else if (query != null ) {
+	        	// Search for platforms
+        		List platforms = cloningBoss.findPlatformsByTypeAndName(
+	        										me, 
+	        										Integer.valueOf(platformTypeId), 
+	        										query);
+	        	
+	            Platform platform =  null;
+	        	JSONArray jArray = new JSONArray();
+	
+	            for (Iterator<Platform> it = platforms.iterator(); it.hasNext();) {
+	                platform = it.next();
+	            
+	        		jArray.put(new JSONObject()
+	            						.put("id", platform.getId())
+	            						.put("name", platform.getName()));
+	            }
+	            
+	        	res = jArray.toString();
+        	}
+                    	
         } catch (Exception e) {
             log.debug(e.getLocalizedMessage());
             

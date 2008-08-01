@@ -30,7 +30,13 @@ public abstract class BaseService implements IEngineService {
 
     public static final String PARAM_GROUP_ID = "gid";
     
+    public static final String PARAM_PLATFORM_ID = "pid";
+    
+    public static final String PARAM_PLATFORM_TYPE_ID = "ptid";
+    
     public static final String PARAM_RESOURCE_ID = "rid";
+    
+    public static final String PARAM_CLONE_TARGET_ID = "ctid";
 
     public static final String PARAM_METRIC_TEMPLATE_ID = "mtid";
 
@@ -52,6 +58,8 @@ public abstract class BaseService implements IEngineService {
     
     public static final String PARAM_SCHEDULE = "sched";
     
+    public static final String PARAM_CLONE = "clone";
+    
     /**
      * Service IDs
      */
@@ -60,6 +68,8 @@ public abstract class BaseService implements IEngineService {
     public static final String SERVICE_ID_ALERT_SUM_WIDGET = "alert_summary";
     
     public static final String SERVICE_ID_MAINTENANCE_WINDOW_WIDGET = "maint_win";
+    
+    public static final String SERVICE_ID_CLONE_PLATFORM_WIDGET = "clone_platform";
     
     /**
      * Error Codes
