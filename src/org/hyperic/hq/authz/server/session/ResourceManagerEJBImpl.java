@@ -562,6 +562,14 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
       
         return resourceMap;
     }
+    
+    /**
+     * Find all the resources which are descendents of the given resource
+     * @ejb:interface-method
+     */
+    public List findResourcesByParent(AuthzSubject subject, Resource res) {
+        return getResourceDAO().findByResource(subject, res);
+    }
 
     /**
      * Find all the resources of an authz resource type

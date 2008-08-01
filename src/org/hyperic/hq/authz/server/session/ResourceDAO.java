@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -32,9 +33,11 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
+import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class ResourceDAO 
@@ -129,7 +132,7 @@ public class ResourceDAO
                                              .setInteger("typeId", typeId))
                     .list();
     }
-    
+
     public Resource findByInstanceId(Integer typeId, Integer id) {            
         String sql = "from Resource where resourceType.id = ? " +
                      "and instanceId = ?";
@@ -140,7 +143,7 @@ public class ResourceDAO
             .setCacheRegion("Resource.findByInstanceId")
             .uniqueResult();
     }
-        
+
     /**
      * Find a Resource by type Id and instance Id, allowing for the query to 
      * return a stale copy of the resource (for efficiency reasons).
@@ -166,15 +169,31 @@ public class ResourceDAO
             this.getSession().setFlushMode(oldFlushMode);
         }
     }
-    
-    
+
+    public List findByResource(AuthzSubject subject, Resource r) {
+        final String[] VIEW_APPDEFS = new String[] { 
+            AuthzConstants.platformOpViewPlatform,
+            AuthzConstants.serverOpViewServer,
+            AuthzConstants.serviceOpViewService,
+        };
+
+        EdgePermCheck wherePermCheck = 
+            getPermissionManager().makePermCheckHql("rez");
+        String hql = "select rez from Resource rez " + wherePermCheck; 
+        
+        Query q = createQuery(hql);
+        return wherePermCheck
+            .addQueryParameters(q, subject, r, 0, Arrays.asList(VIEW_APPDEFS))
+            .list();
+    }
+
     public Collection findByOwner(AuthzSubject owner) {
         String sql = "from Resource where owner.id = ?";
         return getSession().createQuery(sql)
                 .setInteger(0, owner.getId().intValue())
                 .list();
     }
-    
+
     public Collection findByOwnerAndType(AuthzSubject owner,
                                          ResourceType type ) {
         String sql = "from Resource where owner.id = ? and resourceType.id = ?";
