@@ -2090,10 +2090,9 @@ document.onResize = function(e){
 function toggleDialog(){
     alert('open dialog');
 }
-dojo.event.connect(window, "onresize", document, 'onResize');
-dojo.addOnLoad(function(){
-//document.onResize();
-});
+
+
+
 /**
 */
 function filterList(nodes,searchText) {
