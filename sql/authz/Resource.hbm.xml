@@ -45,6 +45,10 @@
       <column name="FSYSTEM" not-null="false"/>
     </property>
 
+    <property name="mtime" type="long">
+      <column name="MTIME" default="0"/>
+    </property>
+
     <bag name="groupBag" table="EAM_RES_GRP_RES_MAP" inverse="true">
       <cache usage="read-write"/>
       <key column="RESOURCE_ID"/>

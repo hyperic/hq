@@ -9068,6 +9068,18 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.123">
+    <schema-addColumn table="EAM_RESOURCE"
+                      column="MTIME"
+                      columnType="LONG"/>
+    <groovy>
+      SQL.execute("update EAM_RESOURCE set MTIME = ${System.currentTimeMillis()}")
+    </groovy> 
+    <schema-alterColumn table="EAM_RESOURCE"
+                        column="MTIME"
+                        nullable="NOT NULL"/>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

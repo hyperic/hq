@@ -54,6 +54,8 @@ public class ResourceGroupDAO extends HibernateDAO
 {
     private static final Log _log
         = LogFactory.getLog(ResourceGroupDAO.class.getName());
+    private static final Integer rootResourceGroupId =
+        AuthzConstants.rootResourceGroupId;
     
     public ResourceGroupDAO(DAOFactory f) {
         super(ResourceGroup.class, f);
@@ -140,7 +142,14 @@ public class ResourceGroupDAO extends HibernateDAO
     }
     
     void removeAllMembers(ResourceGroup group) {
-        group.markDirty();
+        // Don't want to mark the Root Resource Group dirty to avoid optimistic
+        // locking issues.  Since the root group is associated with all
+        // resources, transactions which involve creating/deleting resources
+        // are not self-contained and therefore any changes to this object
+        // would make these types of transactions potentially fail.
+        if (!group.getId().equals(rootResourceGroupId)) {
+            group.markDirty();
+        }
         createQuery("delete from GroupMember g " + 
                     "where g.group = :group")
             .setParameter("group", group)
@@ -159,7 +168,14 @@ public class ResourceGroupDAO extends HibernateDAO
     }
 
     void removeMembers(ResourceGroup group, Collection members) {
-        group.markDirty();
+        // Don't want to mark the Root Resource Group dirty to avoid optimistic
+        // locking issues.  Since the root group is associated with all
+        // resources, transactions which involve creating/deleting resources
+        // are not self-contained and therefore any changes to this object
+        // would make these types of transactions potentially fail.
+        if (!group.getId().equals(rootResourceGroupId)) {
+            group.markDirty();
+        }
         
         List memberIds = new ArrayList(members.size());
         
@@ -188,7 +204,14 @@ public class ResourceGroupDAO extends HibernateDAO
     void addMembers(ResourceGroup group, Collection resources) {
         Session sess = getSession();
         
-        group.markDirty();
+        // Don't want to mark the Root Resource Group dirty to avoid optimistic
+        // locking issues.  Since the root group is associated with all
+        // resources, transactions which involve creating/deleting resources
+        // are not self-contained and therefore any changes to this object
+        // would make these types of transactions potentially fail.
+        if (!group.getId().equals(rootResourceGroupId)) {
+            group.markDirty();
+        }
         for (Iterator i=resources.iterator(); i.hasNext(); ) {
             Resource r = (Resource)i.next();
             GroupMember m = new GroupMember(group, r);

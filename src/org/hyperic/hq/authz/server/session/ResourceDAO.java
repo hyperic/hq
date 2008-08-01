@@ -27,7 +27,6 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -84,19 +83,13 @@ public class ResourceDAO
 
     public void remove(Resource entity) {
 
-        ResourceGroupDAO gDao = getFactory().getResourceGroupDAO();
-        // Is this really necessary?  We should technically always make sure
-        // the group is optimistically updated even when resources are removed.
-        for (Iterator i = gDao.getGroups(entity).iterator(); i.hasNext(); ) {
-            ResourceGroup group = (ResourceGroup)i.next();   
-            group.markDirty();
-        }
-        
+        // need this to ensure that the optimistic locking doesn't fail
+        entity.markDirty();
+
         String sql = "delete GroupMember g where g.resource = :resource";
         getSession().createQuery(sql)
             .setParameter("resource", entity)
             .executeUpdate();
-
         getSession().flush();
         super.remove(entity);
     }

@@ -40,6 +40,7 @@ public class Resource extends AuthzNamedBean implements Comparable {
     private Resource     _prototype;
     private Integer      _instanceId;
     private AuthzSubject _owner;
+    private long         _mtime = System.currentTimeMillis();
     private boolean      _system = false;
     private Collection   _virtuals = new ArrayList();
     private Collection   _fromEdges = new ArrayList();
@@ -111,6 +112,18 @@ public class Resource extends AuthzNamedBean implements Comparable {
      */
     public boolean isRoot() {
         return getId().equals(AuthzConstants.rootResourceId);
+    }
+    
+    public void markDirty() {
+        _mtime = System.currentTimeMillis();
+    }
+    
+    public void setMtime(long mtime) {
+        _mtime = mtime;
+    }
+
+    public long getMtime() {
+        return _mtime;
     }
 
     protected void setSystem(boolean fsystem) {
