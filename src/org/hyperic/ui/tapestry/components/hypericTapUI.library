@@ -39,7 +39,9 @@
     <component-type type="Button" specification-path="form/Button.jwc"/>
     <component-type type="ComboButton" specification-path="form/ComboButton.jwc"/>
     <component-type type="FieldSet" specification-path="form/FieldSet.jwc"/>
-    
+
+    <component-type type="PageShell" specification-path="general/Shell.jwc"/>  
+    <component-type type="JSONWriter" specification-path="general/JSONWriter.jwc"/>
     
     <component-type type="Attachment" specification-path="hqu/Attachment.jwc"/>
     
