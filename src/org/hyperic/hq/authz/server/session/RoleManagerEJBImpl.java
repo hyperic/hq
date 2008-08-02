@@ -512,8 +512,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                  roleLocal.getId(), AuthzConstants.roleOpModifyRole);
 
         for (Iterator it = sLocals.iterator(); it.hasNext(); ) {
-            ResourceGroup group = (ResourceGroup) it.next();
-            group.removeRole(roleLocal);
+            roleLocal.removeResourceGroup((ResourceGroup) it.next());
         }
     }
 
@@ -538,8 +537,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                  roleLocal.getId(), AuthzConstants.roleOpModifyRole);
 
         for (int i=0; i<ids.length; i++) {
-            ResourceGroup group = lookupGroup(ids[i]);
-            group.removeRole(roleLocal);
+            roleLocal.removeResourceGroup(lookupGroup(ids[i]));
         }
     }
 
@@ -556,20 +554,19 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      */
     public void removeResourceGroupRoles(AuthzSubjectValue whoami,
                                          Integer gid, Integer[] ids)
-        throws PermissionException {
+        throws PermissionException {        
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+            
         ResourceGroup group = lookupGroup(gid);
-        
         for (int i = 0; i < ids.length; i++) {
             Role roleLocal = lookupRole(ids[i]);
 
-            PermissionManager pm = PermissionManagerFactory.getInstance();
-            
             pm.check(whoami.getId(),
                      roleLocal.getResource().getResourceType(),
                      roleLocal.getId(),
                      AuthzConstants.roleOpModifyRole);
 
-            group.removeRole(roleLocal);
+            roleLocal.removeResourceGroup(group);
         }
     }
 
@@ -583,20 +580,12 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * modifyRole on this role.
      * @ejb:interface-method
      */
-    public void removeAllResourceGroups(AuthzSubjectValue whoami,
-                                        RoleValue role)
+    public void removeAllResourceGroups(AuthzSubjectValue whoami, Role role)
         throws PermissionException {
-        Role roleLocal = lookupRole(role);
-
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-                 roleLocal.getId(), AuthzConstants.roleOpModifyRole);
-
-        for (Iterator it = roleLocal.getResourceGroups().iterator();
-             it.hasNext(); ) {
-            ResourceGroup group = (ResourceGroup) it.next();
-            group.removeRole(roleLocal);
-        }
+        pm.check(whoami.getId(), role.getResource().getResourceType(),
+                 role.getId(), AuthzConstants.roleOpModifyRole);
+        role.clearResourceGroups();
     }
 
     /**

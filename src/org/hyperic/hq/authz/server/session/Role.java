@@ -92,10 +92,14 @@ public class Role extends AuthzNamedBean {
         return _resourceGroups;
     }
     
+    void removeResourceGroup(ResourceGroup group) {
+        group.removeRole(this);
+        getResourceGroups().remove(group);
+    }
+    
     void clearResourceGroups() {
         for (Iterator i=getResourceGroups().iterator(); i.hasNext(); ) {
             ResourceGroup grp = (ResourceGroup)i.next();
-            
             grp.removeRole(this);
         }
         getResourceGroups().clear();
