@@ -32,6 +32,7 @@ import java.util.Properties;
 import javax.xml.rpc.ServiceException;
 
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.util.config.ConfigResponse;
 
 import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.InventoryNavigator;
@@ -71,7 +72,13 @@ public class VimUtil extends ServiceInstance {
 
     }
 
-    public InventoryNavigator getNavigator() throws Exception {
+    public static VimUtil getInstance(ConfigResponse config)
+        throws PluginException {
+    
+        return getInstance(config.toProperties());
+    }
+
+    public InventoryNavigator getNavigator() {
         if (_nav == null) {
             _nav = new InventoryNavigator(getRootFolder());
         }
@@ -79,19 +86,27 @@ public class VimUtil extends ServiceInstance {
     }
 
     public ManagedEntity find(String type, String name)
-        throws Exception {
+        throws PluginException {
 
-        ManagedEntity obj =
-            getNavigator().searchManagedEntity(type, name);
+        ManagedEntity obj;
+        try {
+            obj = getNavigator().searchManagedEntity(type, name);
+        } catch (Exception e) {
+            throw new PluginException(type + "/" + name + ": " + e, e);
+        }
         if (obj == null) {
             throw new PluginException(type + "/" + name + ": not found");
         }
         return obj;
     }
 
-    public ManagedEntity[] find(String type) throws Exception {
-        ManagedEntity[] obj =
-            getNavigator().searchManagedEntities(type);
+    public ManagedEntity[] find(String type) throws PluginException {
+        ManagedEntity[] obj;
+        try {
+            obj = getNavigator().searchManagedEntities(type);
+        } catch (Exception e) {
+            throw new PluginException(type + ": " + e, e);
+        }
         if (obj == null) {
             throw new PluginException(type + ": not found");
         }
