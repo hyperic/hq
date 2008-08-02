@@ -1,7 +1,12 @@
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as MM
 import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as PB
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as subMan
+import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl as cpropMan
+import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl
+import org.hyperic.hq.appdef.shared.AppdefEntityID
+import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.server.session.AgentSortField
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.util.PrintfFormat
@@ -62,6 +67,10 @@ class HealthController
                 [field: AgentSortField.VERSION,
                  width: '10%',
                  label: {it.agent.version}],
+                [field: [getValue: {localeBundle.bundleVersion},
+                          description:'bundleVersion', sortable:false],
+                  width: '10%',
+                  label: {it.bundleVersion}],                 
                 [field: AgentSortField.CTIME,
                  width: '18%',
                  label: {it.creationTime}],
@@ -89,6 +98,19 @@ class HealthController
         }
         
         res
+    }
+    
+    private getAgentBundleVersion(Agent a, Server s) {
+        def overlord = subMan.one.overlordPojo
+        def aev = new AppdefEntityValue(new AppdefEntityID(s.resource), overlord)
+        def bundleVersion = "N/A"
+        try {
+            bundleVersion = cpropMan.one.getValue(aev, "AgentBundleVersion")
+        } catch (Exception e) {
+            // do nothing, since it could be an older agent 
+            // without an agent bundle version cprop
+        }
+        bundleVersion
     }
     
     private getLicenseCount(Agent a) {
@@ -123,6 +145,7 @@ class HealthController
                             serverHtml:linkTo(a.address, [resource:d[2].resource]),
                             offset:metricVal,
                             offsetHtml:linkTo(metricVal, [resource:d[3]]), 
+                            bundleVersion:getAgentBundleVersion(a, d[2]),
                             numMetrics:numMetrics,
                             creationTime:df.format(a.creationTime),
                             licenseCount:getLicenseCount(a)]
