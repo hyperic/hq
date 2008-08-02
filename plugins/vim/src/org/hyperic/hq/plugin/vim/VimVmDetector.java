@@ -95,6 +95,7 @@ public class VimVmDetector
         String state = runtime.getPowerState().getValue();
         if (state.equals("poweredOn")) {
             server.setMeasurementConfig();
+            server.setControlConfig();
             String name;
             if ((name = guest.getHostName()) != null) {
                 cprops.setValue("hostName", name);
