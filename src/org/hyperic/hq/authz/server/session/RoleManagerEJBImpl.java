@@ -41,6 +41,7 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
+import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -492,8 +493,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                  roleLocal.getId(), AuthzConstants.roleOpModifyRole);
 
         for (Iterator it = sLocals.iterator(); it.hasNext(); ) {
-            ResourceGroup group = (ResourceGroup) it.next();
-            group.removeRole(roleLocal);
+            roleLocal.removeResourceGroup((ResourceGroup) it.next());
         }
     }
 
@@ -517,8 +517,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                  roleLocal.getId(), AuthzConstants.roleOpModifyRole);
 
         for (int i=0; i<ids.length; i++) {
-            ResourceGroup group = lookupGroup(ids[i]);
-            group.removeRole(roleLocal);
+            roleLocal.removeResourceGroup(lookupGroup(ids[i]));
         }
     }
 
@@ -534,21 +533,38 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      */
     public void removeResourceGroupRoles(AuthzSubject whoami,
                                          Integer gid, Integer[] ids)
-        throws PermissionException {
+        throws PermissionException {        
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+            
         ResourceGroup group = lookupGroup(gid);
-        
         for (int i = 0; i < ids.length; i++) {
             Role roleLocal = lookupRole(ids[i]);
 
-            PermissionManager pm = PermissionManagerFactory.getInstance();
-            
             pm.check(whoami.getId(),
                      roleLocal.getResource().getResourceType(),
                      roleLocal.getId(),
                      AuthzConstants.roleOpModifyRole);
 
-            group.removeRole(roleLocal);
+            roleLocal.removeResourceGroup(group);
         }
+    }
+
+    /**
+     * Disassociate all ResourceGroups of this role from this role.
+     * @param whoami The current running user.
+     * @param role This role.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NamingException   
+     * @throws PermissionException whoami is not allowed to perform
+     * modifyRole on this role.
+     * @ejb:interface-method
+     */
+    public void removeAllResourceGroups(AuthzSubjectValue whoami, Role role)
+        throws PermissionException {
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+        pm.check(whoami.getId(), role.getResource().getResourceType(),
+                 role.getId(), AuthzConstants.roleOpModifyRole);
+        role.clearResourceGroups();
     }
 
     /**
