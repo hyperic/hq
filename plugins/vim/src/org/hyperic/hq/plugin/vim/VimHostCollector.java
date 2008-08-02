@@ -33,6 +33,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.collection.IntHashMap;
 
 import com.vmware.vim.ManagedObjectReference;
@@ -101,6 +102,21 @@ public class VimHostCollector extends VimCollector {
         System.out.println("    <metric name=\"" + name + "\"");
         System.out.println("            alias=\"" + key + "\"");
         System.out.println("            units=\"" + units + "\"/>\n");
+    }
+
+    protected void init() throws PluginException {
+        super.init();
+        VimUtil vim = new VimUtil();
+
+        try {
+            vim.init(getProperties());
+            //validate config
+            getManagedObjectReference(vim);
+        } catch (Exception e) {
+            throw new PluginException(e.getMessage(), e);
+        } finally {
+            vim.dispose();
+        }
     }
 
     protected void collect(VimUtil vim)
