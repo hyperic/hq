@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.events;
 
+import java.util.Date;
 import java.util.ResourceBundle;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -87,12 +88,8 @@ public class MaintenanceEvent extends ResourceLogEvent
     }
     
     public String toString() {
-    	return new StringBuffer("MaintenanceEvent")
-    					.append("[groupId=" + getGroupId())
-    					.append(",startTime=" + _startTime)
-    					.append(",endTime=" + _endTime)
-    					.append(",modifiedTime=" + _modifiedTime)
-    					.append("]")
+    	return new StringBuffer("Starts: " + new Date(_startTime))
+    					.append(" Ends: " + new Date(_endTime))
     					.toString();
     }
 }
