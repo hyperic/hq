@@ -114,6 +114,7 @@ public class VimVmDetector
         }
         else {
             _log.info(info.getName() + " powerState=" + state);
+            return null;
         }
 
         server.setCustomProperties(cprops);
@@ -135,7 +136,8 @@ public class VimVmDetector
 
             for (int i=0; i<vms.length; i++) {
                 if (! (vms[i] instanceof VirtualMachine)) {
-                    _log.info("bzzt: " + vms[i].getMOR().getType());
+                    _log.debug(vms[i] + " not a VirtualMachine, type=" +
+                               vms[i].getMOR().getType());
                     continue;
                 }
                 VirtualMachine vm = (VirtualMachine)vms[i];
