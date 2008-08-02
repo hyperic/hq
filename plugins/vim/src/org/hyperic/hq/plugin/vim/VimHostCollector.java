@@ -36,18 +36,19 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.collection.IntHashMap;
 
-import com.vmware.vim.ManagedObjectReference;
-import com.vmware.vim.PerfCounterInfo;
-import com.vmware.vim.PerfEntityMetric;
-import com.vmware.vim.PerfEntityMetricBase;
-import com.vmware.vim.PerfMetricId;
-import com.vmware.vim.PerfMetricIntSeries;
-import com.vmware.vim.PerfMetricSeries;
-import com.vmware.vim.PerfQuerySpec;
+import com.vmware.vim25.PerfCounterInfo;
+import com.vmware.vim25.PerfEntityMetric;
+import com.vmware.vim25.PerfEntityMetricBase;
+import com.vmware.vim25.PerfMetricId;
+import com.vmware.vim25.PerfMetricIntSeries;
+import com.vmware.vim25.PerfMetricSeries;
+import com.vmware.vim25.PerfQuerySpec;
+import com.vmware.vim25.mo.ManagedEntity;
+import com.vmware.vim25.mo.PerformanceManager;
 
 public class VimHostCollector extends VimCollector {
 
-    static final String TYPE = "HostSystem";
+    static final String TYPE = VimUtil.HOST_SYSTEM;
 
     private static final Log _log =
         LogFactory.getLog(VimHostCollector.class.getName());
@@ -66,10 +67,6 @@ public class VimHostCollector extends VimCollector {
         for (int i=0; i<UNITS_ALIAS.length; i++) {
             UNITS_MAP.put(UNITS_ALIAS[i][0], UNITS_ALIAS[i][1]);
         }
-    }
-
-    protected ManagedObjectReference getRoot() {
-        return null;
     }
 
     protected String getType() {
@@ -106,16 +103,16 @@ public class VimHostCollector extends VimCollector {
 
     protected void init() throws PluginException {
         super.init();
-        VimUtil vim = new VimUtil();
+        VimUtil vim = null;
 
         try {
-            vim.init(getProperties());
+            vim = VimUtil.getInstance(getProperties());
             //validate config
-            getManagedObjectReference(vim);
+            getManagedEntity(vim);
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
         } finally {
-            vim.dispose();
+            VimUtil.dispose(vim);
         }
     }
 
@@ -124,20 +121,21 @@ public class VimHostCollector extends VimCollector {
 
         final boolean printMetric =
             "true".equals(System.getProperty("vim.xml"));
-        ManagedObjectReference mor = getManagedObjectReference(vim);
-        ManagedObjectReference perfManager = vim.getPerfManager();
-        IntHashMap counters = getCounterInfo(vim, perfManager);
-        PerfMetricId[] ids = getPerfMetricIds(vim, perfManager, mor);
+        ManagedEntity mor = getManagedEntity(vim);
+        PerformanceManager perfManager = vim.getPerformanceManager();
+        IntHashMap counters = getCounterInfo(perfManager);
+        PerfMetricId[] ids = getPerfMetricIds(perfManager, mor);
 
         PerfQuerySpec spec = new PerfQuerySpec();
-        spec.setEntity(mor);
+        spec.setEntity(mor.getMOR());
         spec.setMetricId(ids);
         spec.setMaxSample(new Integer(1));
         spec.setIntervalId(new Integer(20));
        
         PerfQuerySpec[] query = new PerfQuerySpec[] { spec };      
         PerfEntityMetricBase[] values =
-            vim.getConn().getService().queryPerf(perfManager, query);
+            perfManager.queryPerf(query);
+
         if (values == null) {
             _log.error("No performance metrics available for: " +
                        getName() + " " + getType());

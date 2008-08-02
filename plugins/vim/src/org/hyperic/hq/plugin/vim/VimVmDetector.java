@@ -36,14 +36,17 @@ import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
 
-import com.vmware.vim.GuestInfo;
-import com.vmware.vim.GuestNicInfo;
-import com.vmware.vim.ManagedObjectReference;
-import com.vmware.vim.ToolsConfigInfo;
-import com.vmware.vim.VirtualHardware;
-import com.vmware.vim.VirtualMachineConfigInfo;
-import com.vmware.vim.VirtualMachineFileInfo;
-import com.vmware.vim.VirtualMachineRuntimeInfo;
+import com.vmware.vim25.GuestInfo;
+import com.vmware.vim25.GuestNicInfo;
+import com.vmware.vim25.ToolsConfigInfo;
+import com.vmware.vim25.VirtualHardware;
+import com.vmware.vim25.VirtualMachineConfigInfo;
+import com.vmware.vim25.VirtualMachineFileInfo;
+import com.vmware.vim25.VirtualMachineRuntimeInfo;
+import com.vmware.vim25.mo.ManagedEntity;
+import com.vmware.vim25.mo.ResourcePool;
+import com.vmware.vim25.mo.ServiceInstance;
+import com.vmware.vim25.mo.VirtualMachine;
 
 public class VimVmDetector
     extends ServerDetector
@@ -52,21 +55,16 @@ public class VimVmDetector
     private static final Log _log =
         LogFactory.getLog(VimVmDetector.class.getName());
 
-    private ServerResource discoverVM(VimUtil vim,
-                                      ManagedObjectReference vm)
+    private ServerResource discoverVM(ServiceInstance vim,
+                                      VirtualMachine vm)
         throws Exception {
 
-        VirtualMachineRuntimeInfo runtime =
-            (VirtualMachineRuntimeInfo)vim.getUtil().getDynamicProperty(vm, "runtime");
+        VirtualMachineRuntimeInfo runtime = vm.getRuntime();
 
-        VirtualMachineConfigInfo info =
-            (VirtualMachineConfigInfo)vim.getUtil().getDynamicProperty(vm, "config");
+        VirtualMachineConfigInfo info = vm.getConfig();
 
-        GuestInfo guest =
-            (GuestInfo)vim.getUtil().getDynamicProperty(vm, "guest");
-
-        ManagedObjectReference pool =
-            (ManagedObjectReference)vim.getUtil().getDynamicProperty(vm, "resourcePool");
+        GuestInfo guest = vm.getGuest();
+        ResourcePool pool = vm.getResourcePool();
 
         ServerResource server = createServerResource("/");
         VirtualMachineFileInfo files = info.getFiles();
@@ -92,8 +90,7 @@ public class VimVmDetector
             cprops.setValue("toolsVersion", toolsVersion.toString());
         }
         //PoolInfo
-        cprops.setValue("pool",
-                        (String)vim.getUtil().getDynamicProperty(pool, "name"));
+        cprops.setValue("pool", (String)pool.getPropertyByPath("name"));                        
 
         String state = runtime.getPowerState().getValue();
         if (state.equals("poweredOn")) {
@@ -130,18 +127,21 @@ public class VimVmDetector
         if (hostname == null) {
             return null;
         }
-
-        VimUtil vim = new VimUtil();
+        VimUtil vim = null;
         List servers = new ArrayList();
         try {
-            vim.init(platformConfig.toProperties());
-            ManagedObjectReference mor = vim.getHost(hostname);
-            ArrayList vms =
-                vim.getUtil().getDecendentMoRefs(mor, VimVmCollector.TYPE, null);
-            for (int i=0; i<vms.size(); i++) {
+            vim = VimUtil.getInstance(platformConfig.toProperties());
+            ManagedEntity[] vms = vim.find(VimUtil.VM);
+
+            for (int i=0; i<vms.length; i++) {
+                if (! (vms[i] instanceof VirtualMachine)) {
+                    _log.info("bzzt: " + vms[i].getMOR().getType());
+                    continue;
+                }
+                VirtualMachine vm = (VirtualMachine)vms[i];
+
                 try {
-                    ServerResource server =
-                        discoverVM(vim, (ManagedObjectReference)vms.get(i));
+                    ServerResource server = discoverVM(vim, vm);
                     if (server != null) {
                         servers.add(server);
                     }
@@ -152,7 +152,7 @@ public class VimVmDetector
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
         } finally {
-            vim.dispose();
+            VimUtil.dispose(vim);
         }
 
         return servers;

@@ -25,26 +25,20 @@
 
 package org.hyperic.hq.plugin.vim;
 
-import com.vmware.vim.ManagedObjectReference;
-
 public class VimVmCollector extends VimHostCollector {
 
-    static final String TYPE = "VirtualMachine";
+    static final String TYPE = VimUtil.VM;
     static final String PROP_VM = "vm";
 
     protected String getName() {
         return getProperties().getProperty(PROP_VM);
     }
 
-    protected ManagedObjectReference getRoot() {
-        return null;
-    }
-
     protected String getType() {
         return TYPE;
     }
 
-    protected void collect(VimUtil vim) throws Exception {
-        super.collect(vim);
+    protected void collect(VimUtil mo) throws Exception {
+        super.collect(mo);
     }
 }

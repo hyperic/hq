@@ -33,9 +33,10 @@ import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.collection.IntHashMap;
 
-import com.vmware.vim.ManagedObjectReference;
-import com.vmware.vim.PerfCounterInfo;
-import com.vmware.vim.PerfMetricId;
+import com.vmware.vim25.PerfCounterInfo;
+import com.vmware.vim25.PerfMetricId;
+import com.vmware.vim25.mo.ManagedEntity;
+import com.vmware.vim25.mo.PerformanceManager;
 
 public abstract class VimCollector extends Collector {
 
@@ -47,8 +48,6 @@ public abstract class VimCollector extends Collector {
 
     protected abstract void collect(VimUtil vim)
         throws Exception;
-
-    protected abstract ManagedObjectReference getRoot();
 
     protected abstract String getType();
 
@@ -74,38 +73,30 @@ public abstract class VimCollector extends Collector {
     //interval that summarizes statistics for five minute intervals, the ID is 300
     private static final Integer PERF_INTERVAL_ID = new Integer(300);
 
-    protected PerfMetricId[] getPerfMetricIds(VimUtil vim,
-                                              ManagedObjectReference perfManager,
-                                              ManagedObjectReference entity)
+    protected PerfMetricId[] getPerfMetricIds(PerformanceManager perfManager,
+                                              ManagedEntity entity)
         throws Exception {
 
         PerfMetricId[] ids =
-            vim.getConn().getService().queryAvailablePerfMetric(perfManager, 
-                                                                entity, 
-                                                                null, 
-                                                                null, 
-                                                                PERF_INTERVAL_ID);
+            perfManager.queryAvailablePerfMetric(entity,
+                                                 null,
+                                                 null,
+                                                 PERF_INTERVAL_ID);
         return ids;
     }    
 
-    protected ManagedObjectReference getManagedObjectReference(VimUtil vim) 
+    protected ManagedEntity getManagedEntity(VimUtil mo) 
         throws Exception {
 
-        ManagedObjectReference obj =
-            vim.getUtil().getDecendentMoRef(getRoot(), getType(), getName());
-        if (obj == null) {
-            throw new PluginException(getType() + "/" + getName() + ": not found");
-        }
-        return obj;
+        return mo.find(getType(), getName());
     }
 
-    protected IntHashMap getCounterInfo(VimUtil vim,
-                                        ManagedObjectReference perfManager)
+    protected IntHashMap getCounterInfo(PerformanceManager perfManager)
         throws Exception {
 
         PerfCounterInfo[] counters =
-            (PerfCounterInfo[])vim.getUtil().getDynamicProperty(perfManager,
-                                                                "perfCounter");
+            perfManager.getPerfCounter();
+
         IntHashMap info = new IntHashMap(counters.length);
         for (int i=0; i<counters.length; i++) {
             info.put(counters[i].getKey(), counters[i]);
@@ -114,18 +105,18 @@ public abstract class VimCollector extends Collector {
     }
 
     public void collect() {
-        VimUtil vim = new VimUtil();
+        VimUtil vim = null;
 
         try {
-            vim.init(getProperties());
-            setAvailability(vim.getConn().isConnected());
+            vim = VimUtil.getInstance(getProperties());
+            setAvailability(true);
             collect(vim);
         } catch (Exception e) {
             setAvailability(false);
             setErrorMessage(e.getMessage(), e);
             _log.error(e.getMessage(), e);
         } finally {
-            vim.dispose();
+            VimUtil.dispose(vim);
         }
     }
 }

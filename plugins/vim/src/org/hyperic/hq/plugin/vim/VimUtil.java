@@ -25,83 +25,90 @@
 
 package org.hyperic.hq.plugin.vim;
 
+import java.net.URL;
+import java.rmi.RemoteException;
 import java.util.Properties;
+
+import javax.xml.rpc.ServiceException;
 
 import org.hyperic.hq.product.PluginException;
 
-import com.vmware.vim.ManagedObjectReference;
+import com.vmware.vim25.mo.HostSystem;
+import com.vmware.vim25.mo.InventoryNavigator;
+import com.vmware.vim25.mo.ManagedEntity;
+import com.vmware.vim25.mo.ServiceInstance;
 
-public class VimUtil {
+public class VimUtil extends ServiceInstance {
+
+    static final String HOST_SYSTEM = "HostSystem";
+    static final String VM = "VirtualMachine";
 
     static final String PROP_URL = VimCollector.PROP_URL;
     static final String PROP_HOSTNAME = VimCollector.PROP_HOSTNAME;
     static final String PROP_USERNAME = VimCollector.PROP_USERNAME;
     static final String PROP_PASSWORD = VimCollector.PROP_PASSWORD;
 
-    VimServiceConnection _conn;
-    VimServiceUtil _util;
+    private InventoryNavigator _nav;
 
-    public VimUtil() {
-        _conn = new VimServiceConnection();
-        _util = new VimServiceUtil(_conn);
+    public VimUtil(URL url, String username, String password, boolean ignoreCert)
+        throws ServiceException, RemoteException {
+        super(url, username, password, ignoreCert);
     }
 
-    public void init(Properties props) throws Exception {
-        initServiceConnection(_conn, props);
-    }
+    public static VimUtil getInstance(Properties props)
+        throws PluginException {
 
-    public void dispose() {
-        if (_conn != null) {
-            try {
-                _conn.disconnect();
-            } catch (Exception e) {}
+        String url = getURL(props);
+        String username = props.getProperty(VimCollector.PROP_USERNAME);
+        String password = props.getProperty(VimCollector.PROP_PASSWORD); 
+
+        try {
+            return new VimUtil(new URL(url), username, password, true);
+        } catch (Exception e) {
+            throw new PluginException("ServiceInstance(" + url + ", " +
+                                      username + "): " + e, e);
         }
-        _conn = null;
-        _util = null;
+
     }
 
-    public VimServiceConnection getConn() {
-        return _conn;
+    public InventoryNavigator getNavigator() throws Exception {
+        if (_nav == null) {
+            _nav = new InventoryNavigator(getRootFolder());
+        }
+        return _nav;
     }
 
-    public VimServiceUtil getUtil() {
-        return _util;
+    public ManagedEntity find(String type, String name)
+        throws Exception {
+
+        ManagedEntity obj =
+            getNavigator().searchManagedEntity(type, name);
+        if (obj == null) {
+            throw new PluginException(type + "/" + name + ": not found");
+        }
+        return obj;
+    }
+
+    public ManagedEntity[] find(String type) throws Exception {
+        ManagedEntity[] obj =
+            getNavigator().searchManagedEntities(type);
+        if (obj == null) {
+            throw new PluginException(type + ": not found");
+        }
+        return obj;
+    }
+
+    public HostSystem getHost(String host) throws Exception {
+        return (HostSystem)find(HOST_SYSTEM, host);
     }
 
     public static String getURL(Properties props) {
         return props.getProperty(VimCollector.PROP_URL);
     }
 
-    private static void initServiceConnection(VimServiceConnection conn,
-                                              Properties props)
-        throws Exception {
-
-        String url = getURL(props);
-        String username = props.getProperty(VimCollector.PROP_USERNAME);
-        String password = props.getProperty(VimCollector.PROP_PASSWORD);        
-        conn.connect(url, username, password);
-    }
-
-    public static VimServiceConnection getServiceConnection(Properties props)
-        throws Exception {
-
-        VimServiceConnection conn = new VimServiceConnection();
-        initServiceConnection(conn, props);
-        return conn;
-    }
-
-    public ManagedObjectReference getPerfManager() {
-        return getConn().getServiceContent().getPerfManager();
-    }
-
-    public ManagedObjectReference getHost(String name)
-        throws Exception {
-
-        ManagedObjectReference obj =
-            getUtil().getDecendentMoRef(null, VimHostCollector.TYPE, name);
-        if (obj == null) {
-            throw new PluginException(name + ": not found");
+    public static void dispose(VimUtil vim) {
+        if (vim != null) {
+            vim.getServerConnection().logout();
         }
-        return obj;
     }
 }

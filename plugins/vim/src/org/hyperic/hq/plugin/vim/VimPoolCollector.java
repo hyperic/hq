@@ -25,18 +25,12 @@
 
 package org.hyperic.hq.plugin.vim;
 
-import com.vmware.vim.ManagedObjectReference;
-
 public class VimPoolCollector extends VimHostCollector {
 
     static final String TYPE = "ResourcePool";
 
     protected String getName() {
         return getProperties().getProperty("pool");
-    }
-
-    protected ManagedObjectReference getRoot() {
-        return null;
     }
 
     protected String getType() {

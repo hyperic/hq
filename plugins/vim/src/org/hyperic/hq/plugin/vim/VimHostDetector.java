@@ -35,9 +35,9 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.util.config.ConfigResponse;
 
-import com.vmware.vim.AboutInfo;
-import com.vmware.vim.HostConfigInfo;
-import com.vmware.vim.ManagedObjectReference;
+import com.vmware.vim25.AboutInfo;
+import com.vmware.vim25.HostConfigInfo;
+import com.vmware.vim25.mo.HostSystem;
 
 public class VimHostDetector extends PlatformDetector {
 
@@ -78,13 +78,13 @@ public class VimHostDetector extends PlatformDetector {
             return platform;
         }
 
-        VimUtil vim = new VimUtil();
+        VimUtil vim = null;
         ConfigResponse cprops = new ConfigResponse();
         try {
-            vim.init(config.toProperties());
-            ManagedObjectReference mor = vim.getHost(hostname);
-            HostConfigInfo info =
-                (HostConfigInfo)vim.getUtil().getDynamicProperty(mor, "config");
+            vim = VimUtil.getInstance(config.toProperties());
+            HostSystem host = vim.getHost(hostname);
+            HostConfigInfo info = host.getConfig();
+
             AboutInfo about = info.getProduct();
             platform.setDescription(about.getFullName());
 
@@ -95,7 +95,7 @@ public class VimHostDetector extends PlatformDetector {
         } catch (Exception e) {
             _log.error(e);
         } finally {
-            vim.dispose();
+            VimUtil.dispose(vim);
         }
 
         return platform;
