@@ -113,7 +113,7 @@ public class VimUtil extends ServiceInstance {
         return obj;
     }
 
-    public HostSystem getHost(String host) throws Exception {
+    public HostSystem getHost(String host) throws PluginException {
         return (HostSystem)find(HOST_SYSTEM, host);
     }
 
