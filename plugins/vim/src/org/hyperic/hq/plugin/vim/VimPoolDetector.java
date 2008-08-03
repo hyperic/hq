@@ -49,11 +49,14 @@ public class VimPoolDetector
     private ServerResource discoverPool(VimUtil vim, ResourcePool pool)
         throws Exception {
 
+        String name = pool.getName();
         ServerResource server = createServerResource("/");
-        server.setIdentifier(pool.getName());
+        server.setIdentifier(name);
+        server.setName(name);
         ConfigResponse config = new ConfigResponse();
-        config.setValue(VimPoolCollector.PROP_POOL, pool.getName());
+        config.setValue(VimPoolCollector.PROP_POOL, name);
         server.setProductConfig(config);
+        server.setMeasurementConfig();
 
         return server;
     }
