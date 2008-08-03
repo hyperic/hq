@@ -105,18 +105,18 @@ public abstract class VimCollector extends Collector {
     }
 
     public void collect() {
-        VimUtil vim = null;
+        VimConnection conn;
 
         try {
-            vim = VimUtil.getInstance(getProperties());
+            conn = VimConnection.getInstance(getProperties());
             setAvailability(true);
-            collect(vim);
+            synchronized (conn.LOCK) {
+                collect(conn.vim);
+            }
         } catch (Exception e) {
             setAvailability(false);
             setErrorMessage(e.getMessage(), e);
             _log.error(e.getMessage(), e);
-        } finally {
-            VimUtil.dispose(vim);
         }
     }
 }
