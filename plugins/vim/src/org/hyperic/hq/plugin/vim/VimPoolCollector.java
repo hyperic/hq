@@ -27,10 +27,12 @@ package org.hyperic.hq.plugin.vim;
 
 public class VimPoolCollector extends VimHostCollector {
 
-    static final String TYPE = "ResourcePool";
+    static final String PROP_POOL = "pool";
+    
+    static final String TYPE = VimUtil.POOL;
 
     protected String getName() {
-        return getProperties().getProperty("pool");
+        return getProperties().getProperty(PROP_POOL);
     }
 
     protected String getType() {

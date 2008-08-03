@@ -42,6 +42,7 @@ import com.vmware.vim25.mo.ServiceInstance;
 public class VimUtil extends ServiceInstance {
 
     static final String HOST_SYSTEM = "HostSystem";
+    static final String POOL = "ResourcePool";
     static final String VM = "VirtualMachine";
 
     static final String PROP_URL = VimCollector.PROP_URL;

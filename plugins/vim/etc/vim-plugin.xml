@@ -167,6 +167,7 @@
             units="KB"/>
 
     <server name="VMware VI3 Resource Pool">
+      <plugin type="autoinventory" class="org.hyperic.hq.plugin.vim.VimPoolDetector"/>
       <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
       <plugin type="collector" class="org.hyperic.hq.plugin.vim.VimPoolCollector"/>
 
