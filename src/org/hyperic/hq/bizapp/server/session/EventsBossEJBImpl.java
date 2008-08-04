@@ -65,6 +65,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger;
@@ -100,7 +101,6 @@ import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
-import org.hyperic.hq.events.server.session.MaintenanceEventManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -109,7 +109,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertValue;
-import org.hyperic.hq.events.shared.MaintenanceEventManagerLocal;
+import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
@@ -178,8 +178,9 @@ public class EventsBossEJBImpl
         return ActionManagerEJBImpl.getOne();
     }
     
-    private MaintenanceEventManagerLocal getMaintEvtMgr() {
-    	return MaintenanceEventManagerEJBImpl.getOne();
+    private MaintenanceEventManagerInterface getMaintEvtMgr() {
+    	return PermissionManagerFactory.getInstance()
+    	        .getMaintenanceEventManager();
     }
 
     private RegisteredTriggerValue convertToTriggerValue(

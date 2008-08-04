@@ -29,15 +29,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.events.MaintenanceEvent;
-import org.hyperic.hq.events.server.session.MaintenanceEventManagerEJBImpl;
-import org.hyperic.hq.events.shared.MaintenanceEventManagerLocal;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.quartz.Job;
-import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Trigger;
-
 
 /**
  * A job to disable and enable alerts for the member resources
@@ -58,8 +55,10 @@ public class MaintenanceEventJob implements Job {
         throws JobExecutionException
     {
         Trigger trigger = context.getTrigger();
-        MaintenanceEventManagerLocal maintMgr = MaintenanceEventManagerEJBImpl.getOne();
-        MaintenanceEvent event = maintMgr.buildMaintenanceEvent(context.getJobDetail());
+        MaintenanceEventManagerInterface maintMgr =
+            PermissionManagerFactory.getInstance().getMaintenanceEventManager();
+        MaintenanceEvent event =
+            maintMgr.buildMaintenanceEvent(context.getJobDetail());
                 
         try {
         	// Disable the monitors if this is the first job trigger

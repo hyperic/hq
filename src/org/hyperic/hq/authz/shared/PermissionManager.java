@@ -35,6 +35,7 @@ import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -296,5 +297,10 @@ public abstract class PermissionManager extends AuthzSession {
     public abstract EdgePermCheck
         makePermCheckHql(String subjectParam, 
                          String resourceVar, String resourceParam,
-                         String distanceParam, String opsParam); 
+                         String distanceParam, String opsParam);
+    
+    /**
+     * Return the MaintenanceEventManager implementation
+     */
+    public abstract MaintenanceEventManagerInterface getMaintenanceEventManager();
 }

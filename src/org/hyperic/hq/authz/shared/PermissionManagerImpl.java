@@ -49,6 +49,8 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.events.server.session.MaintenanceEventManagerEJBImpl;
+import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
@@ -486,5 +488,9 @@ public class PermissionManagerImpl
 
     public String getSQLWhere(Integer subjectId) {
         return "";
+    }
+
+    public MaintenanceEventManagerInterface getMaintenanceEventManager() {
+        return MaintenanceEventManagerEJBImpl.getOne();
     }
 }
