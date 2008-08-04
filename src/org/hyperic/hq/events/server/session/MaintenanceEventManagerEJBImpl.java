@@ -60,7 +60,10 @@ public class MaintenanceEventManagerEJBImpl
      * @ejb:interface-method 
      */
     public MaintenanceEvent getMaintenanceEvent(Integer groupId)
-        throws SchedulerException { return null; }
+        throws SchedulerException 
+    {
+        throw new UnsupportedOperationException();
+    }
         
     /**
      * Unschedule a maintenance event
@@ -68,7 +71,10 @@ public class MaintenanceEventManagerEJBImpl
      * @ejb:interface-method 
      */
     public void unschedule(AuthzSubject subject, MaintenanceEvent event)
-    	throws PermissionException, SchedulerException {}
+    	throws PermissionException, SchedulerException
+    {
+        throw new UnsupportedOperationException();    	
+    }
 
     /**
      * Schedule or reschedule a maintenance event
@@ -76,7 +82,10 @@ public class MaintenanceEventManagerEJBImpl
      * @ejb:interface-method 
      */    
     public MaintenanceEvent schedule(AuthzSubject subject, MaintenanceEvent event) 
-    	throws PermissionException, SchedulerException { return null; }
+    	throws PermissionException, SchedulerException
+    {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Disable or enable monitors (alerts, measurements) for the group
@@ -86,7 +95,10 @@ public class MaintenanceEventManagerEJBImpl
      */        
     public void manageMonitors(AuthzSubject admin, MaintenanceEvent event,
                              boolean activate) 
-		throws PermissionException {}
+		throws PermissionException
+	{
+        throw new UnsupportedOperationException();    	
+	}
     
     /**
      * Create a MaintenanceEvent object from a JobDetail
@@ -94,7 +106,9 @@ public class MaintenanceEventManagerEJBImpl
      * @ejb:interface-method 
      */    
     public MaintenanceEvent buildMaintenanceEvent(JobDetail jobDetail)
-    { return null; }
+    { 
+        throw new UnsupportedOperationException();
+    }
     
     /**
      * Get local home object
