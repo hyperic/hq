@@ -32,6 +32,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.MaintenanceEvent;
+import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerLocal;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerUtil;
 import org.quartz.JobDetail;
@@ -45,13 +46,13 @@ import org.quartz.SchedulerException;
  *      local-jndi-name="LocalMaintenanceEventManager"
  *      view-type="local"
  *      type="Stateless"
- * @ejb:interface local-extends="org.hyperic.hq.events.shared.MaintenanceEventManagerInterface"
+ * @ejb:interface local-extends="MaintenanceEventManagerInterface, javax.ejb.EJBLocalObject"
  * @ejb:transaction type="REQUIRED"
  *
  */
 public class MaintenanceEventManagerEJBImpl 
     extends SessionBase
-    implements SessionBean
+    implements MaintenanceEventManagerInterface, SessionBean
 {
 	/**
      * Get the maintenance event for the group

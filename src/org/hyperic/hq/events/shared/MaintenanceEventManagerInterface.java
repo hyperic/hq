@@ -31,8 +31,7 @@ import org.hyperic.hq.events.MaintenanceEvent;
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
 
-public interface MaintenanceEventManagerInterface
-    extends javax.ejb.EJBLocalObject {
+public interface MaintenanceEventManagerInterface {
     /**
      * Create a MaintenanceEvent object from a JobDetail
      */
