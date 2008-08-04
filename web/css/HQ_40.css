@@ -3,7 +3,7 @@ body {
     background: #ECECEC;
     border: 0;
     margin: 0;
-    min-width:990px
+    min-width: 990px
 }
 
 .white {
@@ -75,9 +75,9 @@ a:visited,a:hover,a {
     right: 0;
     width: 65px;
     height: 13px;
-    background:#F96115 url(/images/4.0/icons/search.gif) no-repeat scroll 1% 50%;
+    background: #F96115 url(/images/4.0/icons/search.gif) no-repeat scroll 1% 50%;
     color: #FFF;
-    padding:2px 8px 3px 0px;
+    padding: 2px 8px 3px 0px;
     text-align: right;
     cursor: pointer;
     font-weight: bold
@@ -175,23 +175,23 @@ a:visited,a:hover,a {
 }
 
 .platform {
-    background: #FFF url('/images/4.0/icons/platform.png') no-repeat 0% 50%;
+    background: transparent url('/images/4.0/icons/platform.png') no-repeat 0% 50%;
 }
 
 .server {
-    background: #FFF url('/images/4.0/icons/server.png') no-repeat 0% 50%;
+    background: transparent url('/images/4.0/icons/server.png') no-repeat 0% 50%;
 }
 
 .service {
-    background: #FFF url('/images/4.0/icons/service.png') no-repeat 0% 50%;
+    background: transparent url('/images/4.0/icons/service.png') no-repeat 0% 50%;
 }
 
 .application {
-    background: #FFF url('/images/4.0/icons/application.png') no-repeat 0% 50%;
+    background: transparent url('/images/4.0/icons/application.png') no-repeat 0% 50%;
 }
 
 .group {
-    background: #FFF url('/images/4.0/icons/group.png') no-repeat 0% 50%;
+    background: transparent url('/images/4.0/icons/group.png') no-repeat 0% 50%;
 }
 
 /* Navigation Tabs */
@@ -354,7 +354,9 @@ fieldset {
     border: 1px solid #8EAFD6;
     background: #fff;
     margin: 150px auto 0;
-    padding: 12px
+    padding: 16px 16px 10px;
+    -moz-border-radius:8px;
+    -webkit-border-radius: 8px;
 }
 
 .fieldsetTitle {
@@ -547,8 +549,12 @@ body .dijitMenuItemIcon {
 }
 
 body .dijitMenuItemDisabled * {
-    /* for a disabled menu item, just set it to mostly transparent */
-    /*opacity:0.3;*/
+    /* 
+
+for a disabled menu item, just set it to mostly transparent */
+    /*o
+
+pacity:0.3;*/
     cursor: default
 }
 
@@ -727,7 +733,7 @@ body .dijitPopup {
 .filterBox select {
     border: 1px solid gray;
     padding: 2px;
-    width:130px;
+    width: 130px;
 }
 
 .filterBox input[type="radio"], .filterBox input[type="checkbox"] {
@@ -743,294 +749,347 @@ body .dijitPopup {
     height: 20px;
     cursor: pointer;
 }
-.toolsMenuStacked{
-	height: 17px;
-	float:left;
-	margin-top:6px;
-	cursor: pointer;
+
+.toolsMenuStacked {
+    height: 17px;
+    float: left;
+    margin-top: 6px;
+    cursor: pointer;
 }
+
 .navMap {
-	float:left;
-	height:14px;
-	margin:2px 10px 0 0;
-	background-color: #EDF0F8;
-	border: 1px solid;
-	border-color:#BDCEF0 #477DDF #477DDF #BDCEF0;
-	width:42px;
-	padding:2px 2px 2px 4px;
-	color:#039;
-	font-weight:bold;
-	cursor: pointer
+    float: left;
+    height: 14px;
+    margin: 2px 10px 0 0;
+    background-color: #EDF0F8;
+    border: 1px solid;
+    border-color: #BDCEF0 #477DDF #477DDF #BDCEF0;
+    width: 42px;
+    padding: 2px 2px 2px 4px;
+    color: #039;
+    font-weight: bold;
+    cursor: pointer
 }
+
 /* chart css */
+
 .chart {
-    cursor:default;
-    height:250px;
-    width:300px;
+    cursor: default;
+    height: 250px;
+    width: 300px;
 }
+
 .chartW {
-    cursor:default;
-    height:250px;
-    width:700px;
+    cursor: default;
+    height: 250px;
+    width: 700px;
 }
 
 .xlegend {
-    text-align:right;
+    text-align: right;
 }
+
 .ylegend {
-    float:left;
-    width:2px;
+    float: left;
+    width: 2px;
 }
+
 div.timeplot-container {
-    border:0pt none;
+    border: 0pt none;
 }
+
 canvas {
+    
 }
+
 div.timeplot-valueflag, div.timeplot-timeflag {
-    background-color:#73D2F7;
-    border:1px solid #2813F1;
+    background-color: #73D2F7;
+    border: 1px solid #2813F1;
 }
+
 div.timeplot-valueflag-pole {
-    border-left:1px solid #2813F1;
+    border-left: 1px solid #2813F1;
 }
+
 .none, img.timeplot-copyright {
-    display:none;
+    display: none;
 }
-
-
 
 .timeline-ether-marker-bottom {
-border-left:1px solid #AAAAAA;
-color:#AAAAAA;
-height:1.5em;
-padding-left:2px;
-width:5em;
+    border-left: 1px solid #AAAAAA;
+    color: #AAAAAA;
+    height: 1.5em;
+    padding-left: 2px;
+    width: 5em;
 }
+
 .timeline-ether-marker-bottom-emphasized {
-border-left:1px solid #AAAAAA;
-color:black;
-height:2em;
-padding-left:2px;
-width:5em;
+    border-left: 1px solid #AAAAAA;
+    color: black;
+    height: 2em;
+    padding-left: 2px;
+    width: 5em;
 }
+
 .timeline-ether-marker-top {
-border-left:1px solid #AAAAAA;
-color:#AAAAAA;
-height:1.5em;
-padding-left:2px;
-width:5em;
+    border-left: 1px solid #AAAAAA;
+    color: #AAAAAA;
+    height: 1.5em;
+    padding-left: 2px;
+    width: 5em;
 }
+
 .timeline-ether-marker-top-emphasized {
-border-left:1px solid #AAAAAA;
-color:black;
-height:2em;
-padding-left:2px;
-width:5em;
+    border-left: 1px solid #AAAAAA;
+    color: black;
+    height: 2em;
+    padding-left: 2px;
+    width: 5em;
 }
+
 .timeline-ether-marker-right {
-border-top:1px solid #AAAAAA;
-color:#AAAAAA;
-height:1.5em;
-padding-top:2px;
-width:5em;
+    border-top: 1px solid #AAAAAA;
+    color: #AAAAAA;
+    height: 1.5em;
+    padding-top: 2px;
+    width: 5em;
 }
+
 .timeline-ether-marker-right-emphasized {
-border-top:1px solid #AAAAAA;
-color:black;
-height:1.5em;
-padding-top:2px;
-width:7em;
+    border-top: 1px solid #AAAAAA;
+    color: black;
+    height: 1.5em;
+    padding-top: 2px;
+    width: 7em;
 }
+
 .timeline-ether-marker-left {
-border-top:1px solid #AAAAAA;
-color:#AAAAAA;
-height:1.5em;
-padding-top:2px;
-width:5em;
+    border-top: 1px solid #AAAAAA;
+    color: #AAAAAA;
+    height: 1.5em;
+    padding-top: 2px;
+    width: 5em;
 }
+
 .timeline-ether-marker-left-emphasized {
-border-top:1px solid #AAAAAA;
-color:black;
-height:1.5em;
-padding-top:2px;
-width:7em;
+    border-top: 1px solid #AAAAAA;
+    color: black;
+    height: 1.5em;
+    padding-top: 2px;
+    width: 7em;
 }
+
 .timeline-duration-event {
-border:1px solid blue;
-overflow:hidden;
-position:absolute;
+    border: 1px solid blue;
+    overflow: hidden;
+    position: absolute;
 }
+
 .timeline-instant-event2 {
-border-left:1px solid blue;
-overflow:hidden;
-padding-left:2px;
-position:absolute;
+    border-left: 1px solid blue;
+    overflow: hidden;
+    padding-left: 2px;
+    position: absolute;
 }
+
 .timeline-instant-event {
-overflow:hidden;
-position:absolute;
+    overflow: hidden;
+    position: absolute;
 }
+
 .timeline-event-bubble-title {
-border-bottom:1px solid #888888;
-font-weight:bold;
-margin-bottom:0.5em;
+    border-bottom: 1px solid #888888;
+    font-weight: bold;
+    margin-bottom: 0.5em;
 }
+
 .timeline-event-bubble-wiki {
-color:#A0A040;
-margin:0.5em;
-text-align:right;
+    color: #A0A040;
+    margin: 0.5em;
+    text-align: right;
 }
+
 .timeline-event-bubble-wiki a {
-color:#A0A040;
+    color: #A0A040;
 }
+
 .timeline-event-bubble-time {
-color:#AAAAAA;
+    color: #AAAAAA;
 }
+
 .timeline-event-bubble-image {
-float:right;
-padding-bottom:5px;
-padding-left:5px;
+    float: right;
+    padding-bottom: 5px;
+    padding-left: 5px;
 }
+
 .timeline-container {
-overflow:hidden;
-position:relative;
+    overflow: hidden;
+    position: relative;
 }
+
 .timeline-copyright {
-bottom:0pt;
-cursor:pointer;
-left:0pt;
-position:absolute;
-z-index:1000;
+    bottom: 0pt;
+    cursor: pointer;
+    left: 0pt;
+    position: absolute;
+    z-index: 1000;
 }
+
 .timeline-message-container {
-display:none;
-left:35%;
-position:absolute;
-right:35%;
-top:30%;
-z-index:1000;
+    display: none;
+    left: 35%;
+    position: absolute;
+    right: 35%;
+    top: 30%;
+    z-index: 1000;
 }
+
 .timeline-message {
-font-size:120%;
-font-weight:bold;
-text-align:center;
+    font-size: 120%;
+    font-weight: bold;
+    text-align: center;
 }
+
 .timeline-message img {
-vertical-align:middle;
+    vertical-align: middle;
 }
+
 .timeline-band {
-background:#EEEEEE none repeat scroll 0% 0%;
-position:absolute;
-z-index:10;
+    background: #EEEEEE none repeat scroll 0% 0%;
+    position: absolute;
+    z-index: 10;
 }
+
 .timeline-band-inner {
-height:100%;
-position:relative;
-width:100%;
+    height: 100%;
+    position: relative;
+    width: 100%;
 }
+
 .timeline-band-input {
-height:1em;
-overflow:hidden;
-position:absolute;
-width:1em;
-z-index:0;
+    height: 1em;
+    overflow: hidden;
+    position: absolute;
+    width: 1em;
+    z-index: 0;
 }
+
 .timeline-band-input input {
-width:0pt;
+    width: 0pt;
 }
+
 .timeline-band-layer {
-height:100%;
-position:absolute;
-width:100%;
+    height: 100%;
+    position: absolute;
+    width: 100%;
 }
+
 .timeline-band-layer-inner {
-height:100%;
-position:relative;
-width:100%;
+    height: 100%;
+    position: relative;
+    width: 100%;
 }
+
 .timeplot-container {
-border:1px solid #CCCCCC;
-height:200px;
-overflow:hidden;
-/*padding:12px 14px;*/
-position:relative;
+    border: 1px solid #CCCCCC;
+    height: 200px;
+    overflow: hi
+
+dden;
+    /*padding:12px 14px;*/
+position: relative;
 }
+
 .timeplot-copyright {
-cursor:pointer;
-left:0pt;
-position:absolute;
-top:0pt;
-z-index:1000;
+    cursor: pointer;
+    left: 0pt;
+    position: absolute;
+    top: 0pt;
+    z-index: 1000;
 }
+
 .timeplot-message-container {
-display:none;
-left:35%;
-max-width:400px;
-position:absolute;
-right:35%;
-top:30%;
-z-index:1000;
+    display: none;
+    left: 35%;
+    max-width: 400px;
+    position: absolute;
+    right: 35%;
+    top: 30%;
+    z-index: 1000;
 }
+
 .timeplot-message {
-font-size:120%;
-font-weight:bold;
-text-align:center;
+    font-size: 120%;
+    font-weight: bold;
+    text-align: center;
 }
+
 .timeplot-message img {
-vertical-align:middle;
+    vertical-align: middle;
 }
+
 .timeplot-div {
-position:absolute;
+    position: absolute;
 }
+
 .timeplot-grid-label {
-font-size:9px;
-color: #FFF !important;
+    font-size: 9px;
+    color: #FFF !important;
 }
+
 .timeplot-event-box {
-cursor:pointer;
+    cursor: pointer;
 }
+
 .timeplot-event-box-highlight {
-border:1px solid #FFB03B;
+    border: 1px solid #FFB03B;
 }
+
 .timeplot-valueflag {
-background-color:#FFE57F;
-border:1px solid #FFB02D;
-display:none;
-font-weight:bold;
-padding:2px 4px;
-text-align:center;
-z-index:1000;
+    background-color: #FFE57F;
+    border: 1px solid #FFB02D;
+    display: none;
+    font-weight: bold;
+    padding: 2px 4px;
+    text-align: center;
+    z-index: 1000;
 }
+
 .timeplot-valueflag-line {
-display:none;
-height:14px;
-width:14px;
-z-index:1000;
+    display: none;
+    height: 14px;
+    width: 14px;
+    z-index: 1000;
 }
+
 .timeplot-timeflag {
-background-color:#FFE57F;
-border:1px solid #FFB02D;
-display:none;
-font-weight:bold;
-padding:2px 4px;
-text-align:center;
-z-index:1000;
+    background-color: #FFE57F;
+    border: 1px solid #FFB02D;
+    display: none;
+    font-weight: bold;
+    padding: 2px 4px;
+    text-align: center;
+    z-index: 1000;
 }
+
 .timeplot-timeflag-triangle {
-display:none;
-height:6px;
-width:11px;
-z-index:1001;
+    display: none;
+    height: 6px;
+    width: 11px;
+    z-index: 1001;
 }
+
 .timeplot-valueflag-pole {
-border-left:1px solid #FFB02D;
-display:none;
-z-index:999;
+    border-left: 1px solid #FFB02D;
+    display: none;
+    z-index: 999;
 }
+
 .timeplot-lens {
-border:1px solid #FFB02D;
-display:none;
-z-index:998;
+    border: 1px solid #FFB02D;
+    display: none;
+    z-index: 998;
 }
 
 /*Resource Hub*/
@@ -1056,72 +1115,84 @@ z-index:998;
     background-color: #FFF
 }
 
-.mainMenu{
+.mainMenu {
     border: 1px solid #2D6EBE;
-    font:12px Verdana;
-    color:#88C7FC;
-    background-color:#FFF;
-    width:160px;
-    position:absolute;
-    z-index:999;
+    font: 12px Verdana;
+    color: #88C7FC;
+    background-color: #FFF;
+    width: 160px;
+    position: absolute;
+    z-index: 999;
 }
 
-.mainMenu ul{
-    margin:0px;
-    padding:0px;
-}
-.mainMenu li{
-    list-style:none;
+.mainMenu ul {
+    margin: 0px;
+    padding: 0px;
 }
 
-.subMenu{
-    background:transparent url(/images/4.0/icons/menuRight.gif) no-repeat scroll 100% 50%
+.mainMenu li {
+    list-style: none;
 }
 
-.mainMenuItem{
-    cursor:pointer;
-    margin:3px 4px;
-    padding:1px 1px 1px 20px;
-    width:150px
+.subMenu {
+    background: transparent url(/images/4.0/icons/menuRight.gif) no-repeat scroll 100% 50%
 }
 
-.mainMenuItem:hover{
+.mainMenuItem {
+    cursor: pointer;
+    margin: 3px 4px;
+    padding: 1px 1px 1px 20px;
+    width: 150px
+}
+
+.mainMenuItem:hover {
     background-color: #E2F5FF
 }
 
-.ajaxLoading{
-    position:absolute;
-    top:40px;
-    right:5px;
-}
-textarea {
-    border:1px solid gray;
-    padding:2px
-}
-.dialog input[type="password"], .dialoginput[type="text"]{
-    width:auto;
-}
-.dialog select{
-    padding:2px;
-    border:1px solid gray;
-}
-select {
-	padding:2px;
-}
-.loginPanel input[type="password"], .loginPanel input[type="text"]{
-    width:200px
+.ajaxLoading {
+    position: absolute;
+    top: 40px;
+    right: 5px;
 }
 
-.ToolbarContent td{
-	background-color:#fff
+textarea {
+    border: 1px solid gray;
+    padding: 2px
 }
-.dojoTabPaneWrapper{
-	background-color:#fff
+
+.dialog input[type="password"], .dialoginput[type="text"] {
+    width: auto;
+}
+
+.dialog select {
+    padding: 2px;
+    border: 1px solid gray;
+}
+
+select {
+    padding: 2px;
+}
+
+.loginPanel input[type="password"], .loginPanel input[type="text"] {
+    width: 200px
+}
+
+.ToolbarContent td {
+    background-color: #fff;
+    border-left:1px solid #D5D8DE;
+    border-right:1px solid #D5D8DE;
+    border-right:1px solid #D5D8DE;
+}
+
+.dojoTabPaneWrapper {
+    background-color: #fff
 }
 
 /* dashboard widget css */
 
 .widget {
+
+
 /*    width: 450px;*/
     height: 350px;
     background: #000 url('/images/widget_bg.jpg') repeat-x;
@@ -1130,6 +1201,7 @@ select {
     color: #FFF;
     font-family: Helvetica, sans-serif;
 }
+
 .widget h2, .widget h3 {
     margin: 0px;
     font-size: 12px;
@@ -1137,8 +1209,8 @@ select {
 }
 
 .widgetTitle {
-    background: transparent url('/images/4.0/backgrounds/panel_gray.jpg') repeat-x scroll top left; 
-    margin: -10px; 
+    background: transparent url('/images/4.0/backgrounds/panel_gray.jpg') repeat-x scroll top left;
+    margin: -10px;
     padding: 6px 10px;
     cursor: move;
 }
@@ -1181,15 +1253,20 @@ select {
 }
 
 .widget .content {
+
+
 /*  display: none;*/
     display: block;
+
 /*        visibility: visible;*/
 }
 
 .widget .config {
     display: none;
     opacity: 0;
-/*        visibility: hidden;*/
+/*    
+
+visibility: hidden;*/
 }
 
 .widget .config form fieldset {
@@ -1197,48 +1274,61 @@ select {
 }
 
 .widget .config form legend {
-  padding: 0 2px;
-  font-weight: bold;
+    padding: 0 2px;
+    font-weight: bold;
 }
-.widget .config form label {
-  display: inline-block;
-  width: 120px; /* Width of labels */
 
-   /* firefox 2 fix */
+.widget .config form label {
+    display: inline-block;
+    width: 120px;
+    /
+
+* Width of labels */
+
+   /
+
+* firefox 2 fix */
   display: -moz-inline-box;
     -moz-box-orient: vertical
 }
 
 /* fix for IE inline-block problem */
+
 <!--[if IE]><!-->
 .widget .config form label {
     zoom: 1;
     display: inline;
 }
+
 <!--<![endif]-->
 
 .widget .config form ol {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .widget .config form li {
-  list-style: none;
-  padding: 5px;
-  margin: 0;
+    list-style: none;
+    padding: 5px;
+    margin: 0;
 }
 
 /* chart widget stuff */
+
 .widget #chart_container {
-	position: absolute;
-	top: 45px;
-	right: 10px;
+    position: absolute;
+    top: 45px;
+    right: 10px;
+
+
 /*  width: 300px;*/
-	height: 250px;
-	float: right;
+    height: 250px;
+    float: right;
 }
 
 .widget #widget_chart {
+
+
 /*    width: 300px;*/
     height: 250px;
     border: 1px solid #DDD;
@@ -1247,7 +1337,7 @@ select {
 /* summary widget stuff */
 
 #alert_summary fieldset {
-  padding-bottom: 2em;
+    padding-bottom: 2em;
 }
 
 #summaryWidget .content table {
@@ -1258,6 +1348,7 @@ select {
     font-size: 90%;
     width: 100%;
 }
+
 #summaryWidget .content th {
     width: 40%;
     font-weight: normal;
@@ -1267,21 +1358,24 @@ select {
 }
 
 #summaryWidget .content th a {
-	color: #FFFFFF;
-	font-weight: normal;
+    color: #FFFFFF;
+    font-weight: normal;
 }
 
 #summaryWidget .content thead th {
     width: 30%;
     text-align: center;
 }
+
 #summaryWidget .content td {
     text-align: center;
     padding: 4px;
 }
+
 #summaryWidget .content tr.even {
     background-color: #4F4F4F;
 }
+
 #summaryWidget .content tr.odd {
     background-color: transparent;
 }
@@ -1298,24 +1392,23 @@ select {
     vertical-align: top;
 }
 
-#summaryWidget .config .container
-{
+#summaryWidget .config .container {
     width: 426px;
     display: block;
     padding-left: 50%;
     margin-left: -213px;
 }
 
-#summaryWidget .config .container label
-{
+#summaryWidget .config .container label {
     display: inline;
 }
- 
+
 #summaryWidget .config select {
     width: 140px;
 }
 
 /* schedule maintenance downtime dialog styling */
+
 .dijitDialog fieldset {
     border: 1px solid gray;
     padding: 4pt;
@@ -1328,27 +1421,31 @@ select {
 
 .dijitDialog label {
     display: inline-block;
-    width: 40px; /* Width of labels */
+    width: 40px;
+    /* Wi
+
+dth of labels */
     margin-left: 4pt;
     margin-bottom: 2px;
+    /* firefox 2 
 
-     /* firefox 2 fix */
+fix */
     display: -moz-inline-box;
-      -moz-box-orient: vertical
+    -moz-box-orient: vertical
 }
 
 /*Reporting contianer*/
 
 #reportingContainer {
     background: #FFF;
-    border:1px solid gray;
+    border: 1px solid gray;
     margin: 0 20px;
     padding: 10px
 }
 
-.reportingTableContainer{
+.reportingTableContainer {
     background: #EEEEEE;
-    font-size:1.2em
+    font-size: 1.2em
 }
 
 #reportingContainer fieldset {
@@ -1367,19 +1464,19 @@ select {
     padding: 3px;
     color: white;
     background: #60A5EA;
-    font-weight:bold;
+    font-weight: bold;
 }
 
 #reportingContainer .fieldRow {
     margin-bottom: 10px;
     vertical-align: center;
-    clear:both;
+    clear: both;
 }
 
-#reportingContainer .fieldValue{
+#reportingContainer .fieldValue {
     float: left;
     margin-bottom: 3px;
-    margin-right:15px;
+    margin-right: 15px;
 }
 
 #reportingContainer .fieldLabel {
@@ -1400,8 +1497,8 @@ select {
     padding: 6px 0 5px 6px
 }
 
-
 /*GroupManager*/
+
 .panelContainer {
     margin: 15px 0 0 15px
 }
@@ -1438,14 +1535,19 @@ select {
 }
 
 .panel .listFilter input {
-    width: 205px;
-    margin-left: 5px;
-    border: 0px solid white;
+	border:1px solid #D5D5D5;
+	color:#B0B0B0;
+	margin-left:13px;
+	padding:2px;
+	width:188px;
+}
+
+.gray {
+	color:gray
 }
 
 .panel .listFilter {
-    padding: 5px 0 4px 4px;
-    background: url(/images/4.0/filterboxbg.png) repeat-x;
+    padding: 5px 0 2px 4px;
     border-bottom: 1px solid #8E8E8E
 }
 
@@ -1453,7 +1555,6 @@ select {
     padding: 3px 0 0px 6px;
     background: url(/images/4.0/filterboxbg.png) repeat-x;
     border-bottom: 1px solid #8E8E8E;
-    border-top: 1px solid #8E8E8E;
     height: 28px
 }
 
@@ -1465,6 +1566,7 @@ select {
 
 .panel ol {
     -moz-user-select: none;
+    -webkit-user-select: none;
     padding: 0 3px;
     margin: 2px 0 0 0;
     list-style: none;
@@ -1474,7 +1576,7 @@ select {
 .panel li {
     padding: 2px 2px 2px 26px;
     white-space: nowrap;
-    cursor: pointer
+    cursor: pointer;
     margin:2px 0;
 }
 
@@ -1502,7 +1604,6 @@ ol .active.groupIcon {
     background: #E2F5FF url(/images/4.0/icons/group.png) no-repeat scroll 4px 1px;
 }
 
-
 .viewContainer {
     border: 1px solid #E78B28;
     margin: 3px;
@@ -1515,7 +1616,7 @@ ol .active.groupIcon {
 .viewTitle {
     font-weight: bold;
     font-size: 1.4em;
-    padding: 6px;
+    padding: 6px 6px 24px;
 }
 
 .viewActions {
@@ -1527,24 +1628,27 @@ ol .active.groupIcon {
 }
 
 .viewMainContent {
-    height:687px;
+    height: 687px;
+    overflow-x:hidden;
+    overflow-y:scroll;
 }
 
-.viewBottomContent {    
-    padding:10px 0 0 40%;
-    border-top: 1px solid #E78B28;
-    height: 35px;
-    clear: both;
-
+.viewBottomContent {
+	background:#FFFFFF none repeat scroll 0 0;
+	border-top:1px solid #E78B28;
+	clear:both;
+	height:27px;
+	padding:10px 0 0 40%;
 }
-.viewBottomContent div{
-    float:left;
-    height:16px;
+
+.viewBottomContent div {
+    float: left;
+    height: 16px;
 }
 
 .action {
     float: left;
-    cursor:pointer;
+    cursor: pointer;
 }
 
 .btnAdd {
@@ -1565,42 +1669,105 @@ ol .active.groupIcon {
     height: 26px;
     margin-left: 6px;
 }
+
 .iconAction {
-    height:16px;
-    width:16px;
-    cursor:pointer;
-    margin-left:10px;
+    height: 16px;
+    width: 16px;
+    cursor: pointer;
+    margin-left: 10px;
 }
 
-.btnNextAll{
+.btnNextAll {
     background: url(/images/4.0/icons/resultset_last.png)
 }
 
-.btnNext{
+.btnNext {
     background: url(/images/4.0/icons/resultset_next.png)
 }
 
-.btnBackAll{
+.btnBackAll {
     background: url(/images/4.0/icons/resultset_first.png)
 }
 
-.btnBack{
+.btnBack {
     background: url(/images/4.0/icons/resultset_previous.png)
 }
 
-#wrapper .pageTitle{
-   color:#444444;
-font-size:1.8em;
-font-weight:bold;
-margin:16px 0 0 16px;
+#wrapper .pageTitle {
+    color: #444444;
+    font-size: 1.8em;
+    font-weight: bold;
+    margin: 16px 0 0 16px;
 }
 
-#wrapper table th{
-	border:1px solid #ccc;
-	font-weight:bold;
-	padding:2px 3px 2px 5px;
-	background: url(/images/4.0/backgrounds/table_header.png);
+#wrapper table {
+    border: 1px solid #ccc;
 }
-#wrapper table tr{
-	border:1px solid #ccc;
+
+#wrapper table tbody {
+	color:#4F4F4F;
+	cursor:default;
+}
+
+#wrapper table th {
+    border-color: #DCDCDC;
+    border-style: solid;
+    border-width: 1px 1px 0 0;
+    font-weight: bold;
+    padding: 2px 3px 2px 5px;
+    background: url(/images/4.0/backgrounds/table_header.png);
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+#wrapper table tr {
+    border: 1px solid #ccc;
+}
+
+#wrapper table td {
+    border-color: #DCDCDC;
+    border-style: solid;
+    border-width: 1px 1px 0 0;
+    padding: 1px 3px;
+    vertical-align: middle;
+    height: 23px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+#wrapper table tr:hover {
+    background: #E2F5FF
+}
+
+#wrapper table .alternate {
+	background: #F3FFF3
+}
+
+.textCenter{
+	text-align:center;
+}
+
+.ajaxBlue {
+    background: transparent url(/images/4.0/icons/ajax-loader-gray.gif) no-repeat scroll 0 0;
+    padding: 0px 14px 0 0;
+}
+
+.labelIcon{
+	padding-left: 21px;
+}
+
+.availGreen{
+    background: transparent url(/images/4.0/icons/green.png) no-repeat scroll 0 0;
+}
+
+.availYellow{
+    background: transparent url(/images/4.0/icons/yellow.png) no-repeat scroll 0 0;
+}
+
+.availGray{
+    background: transparent url(/images/4.0/icons/gray.png) no-repeat scroll 0 0;
+}
+
+.availRed{
+    background: transparent url(/images/4.0/icons/red.png) no-repeat scroll 0 0;
 }
