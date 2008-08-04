@@ -34,11 +34,14 @@ import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
 
+import com.vmware.vim25.Description;
 import com.vmware.vim25.GuestInfo;
 import com.vmware.vim25.GuestNicInfo;
 import com.vmware.vim25.ToolsConfigInfo;
+import com.vmware.vim25.VirtualDevice;
 import com.vmware.vim25.VirtualHardware;
 import com.vmware.vim25.VirtualMachineConfigInfo;
 import com.vmware.vim25.VirtualMachineFileInfo;
@@ -54,6 +57,8 @@ public class VimVmDetector
 
     private static final Log _log =
         LogFactory.getLog(VimVmDetector.class.getName());
+
+    static final String PROP_INSTANCE = "instance";
 
     private ServerResource discoverVM(ServiceInstance vim,
                                       VirtualMachine vm)
@@ -123,7 +128,7 @@ public class VimVmDetector
     }
 
     public List getServerResources(ConfigResponse platformConfig)
-            throws PluginException {
+        throws PluginException {
 
         String hostname = platformConfig.getValue(VimUtil.PROP_HOSTNAME);
         if (hostname == null) {
@@ -152,6 +157,8 @@ public class VimVmDetector
                     _log.error(e.getMessage(), e);
                 }
             }
+        } catch (PluginException e) {
+            throw e;
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
         } finally {
@@ -159,5 +166,64 @@ public class VimVmDetector
         }
 
         return servers;
+    }
+
+    private ServiceResource createServiceResource(String type, String instance) {
+        ServiceResource service = super.createServiceResource(type);
+        ConfigResponse config = new ConfigResponse();
+        config.setValue(PROP_INSTANCE, instance);
+        service.setProductConfig(config);
+        service.setMeasurementConfig();
+        service.setServiceName(type + " " + instance);
+        return service;
+    }
+
+    private ServiceResource discoverCPU(int num) {
+        ServiceResource service =
+            createServiceResource("CPU", String.valueOf(num));
+        return service;
+    }
+
+    private ServiceResource discoverNIC(VirtualDevice device) {
+        ServiceResource service =
+            createServiceResource("NIC", String.valueOf(device.getKey()));
+        Description info = device.getDeviceInfo();
+        service.setServiceName(info.getLabel());
+        service.setDescription(info.getSummary());
+        return service;
+    }
+
+    protected List discoverServices(ConfigResponse config) throws PluginException {
+        List services = new ArrayList();
+        VimUtil vim = null;
+        String name = config.getValue(VimVmCollector.PROP_VM);
+        try {
+            vim = VimUtil.getInstance(config.toProperties());
+            VirtualMachine vm =
+                (VirtualMachine)vim.find(VimUtil.VM, name);
+
+            VirtualHardware hw = vm.getConfig().getHardware();
+            for (int i=0; i<hw.getNumCPU(); i++) {
+                services.add(discoverCPU(i));
+            }
+
+            VirtualDevice[] devices = hw.getDevice();
+            for (int i=0; i<devices.length; i++) {
+                VirtualDevice device = devices[i];
+                Description info = device.getDeviceInfo();
+
+                if (info.getLabel().startsWith("Network Adapter")) {
+                    services.add(discoverNIC(device));
+                }
+            }
+        } catch (PluginException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PluginException(e.getMessage(), e);
+        } finally {
+            VimUtil.dispose(vim);
+        }
+
+        return services;
     }
 }

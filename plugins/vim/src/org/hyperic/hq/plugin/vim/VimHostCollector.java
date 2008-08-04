@@ -33,6 +33,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.collection.IntHashMap;
 
@@ -157,14 +158,21 @@ public class VimHostCollector extends VimCollector {
             }
             PerfMetricIntSeries series = (PerfMetricIntSeries)vals[i];
             String key = getCounterKey(info);
+            long val = series.getValue()[0];
             String instance = series.getId().getInstance();
             if (instance.length() != 0) {
-                continue;
+                //CPU,NIC,Disk
+                instance = instance.replaceAll(":", "_");
+                key += "." + instance;
+                setValue(Metric.ATTR_AVAIL + "." + instance, Metric.AVAIL_UP); //XXX
             }
-            long val = series.getValue()[0];
+
             if (info.getStatsType().getValue().equals("absolute")) {
                 setValue(key, val);
                 if (printMetric) printXml(info, key);
+            }
+            else if (instance.length() != 0) {
+                setValue(key, val);
             }
         }
     }

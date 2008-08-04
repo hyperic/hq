@@ -359,6 +359,96 @@
               indicator="true"
               alias="mem.consumed.average"
               units="KB"/>
+
+      <filter name="template" value="${vi.template},${vm.config}:${alias}.%instance%"/>
+
+      <service name="NIC">
+        <config>
+          <option name="instance"
+                  description="Device key"
+                  default="4000"/>
+        </config>
+
+        <properties>
+          <property name="mac" description="MAC"/>
+          <property name="mtu" description="MTU"/>
+        </properties>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="collector"
+                class="org.hyperic.hq.plugin.vim.VimVmCollector"/>
+
+        <metric name="Availability"
+                indicator="true"/>
+
+        <metric name="Bytes Sent per Second"
+                alias="net.transmitted.average"
+                indicator="true"
+                units="KB"/>
+
+        <metric name="Bytes Received per Second"
+                alias="net.received.average"
+                indicator="true"
+                units="KB"/>
+
+        <metric name="Packets Sent"
+                alias="net.packetsTx.summation"/>
+
+        <metric name="Packets Received"
+                alias="net.packetsRx.summation"/>
+      </service>
+
+      <service name="CPU">
+        <config>
+          <option name="instance"
+                  description="CPU number"
+                  default="0"/>
+        </config>
+
+        <properties>
+        </properties>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="collector"
+                class="org.hyperic.hq.plugin.vim.VimVmCollector"/>
+
+        <metric name="Availability"
+                indicator="true"/>
+
+        <metric name="CPU Used"
+                alias="cpu.used.summation"
+                indicator="true"
+                units="ms"/>
+
+        <metric name="CPU Guaranteed"
+                alias="cpu.guaranteed.latest"
+                units="ms"/>
+
+        <metric name="CPU Extra"
+                alias="cpu.extra.summation"
+                units="ms"/>
+
+        <metric name="CPU Ready"
+                alias="cpu.ready.summation"
+                indicator="true"
+                units="ms"/>
+
+        <metric name="CPU System"
+                alias="cpu.system.summation"
+                units="ms"/>
+
+        <!-- in MHz (Average) -->
+        <metric name="CPU Usage"
+                alias="cpu.usagemhz.average"/>
+
+        <metric name="CPU Wait"
+                alias="cpu.wait.summation"
+                units="ms"/>
+      </service>
     </server>
   </platform>
 </plugin>
