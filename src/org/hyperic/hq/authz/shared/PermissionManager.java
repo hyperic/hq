@@ -31,6 +31,7 @@ import java.util.List;
 import javax.ejb.FinderException;
 
 import org.hibernate.Query;
+import org.hyperic.hq.appdef.shared.CloningBossInterface;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
@@ -303,4 +304,10 @@ public abstract class PermissionManager extends AuthzSession {
      * Return the MaintenanceEventManager implementation
      */
     public abstract MaintenanceEventManagerInterface getMaintenanceEventManager();
+    
+    /**
+     * Return the CloningBoss implementation
+     */
+    public abstract CloningBossInterface getCloningBoss();
+    
 }

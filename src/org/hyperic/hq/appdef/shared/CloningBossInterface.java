@@ -23,40 +23,22 @@
  * USA.
  */
 
-package org.hyperic.hq.appdef.server.session;
+package org.hyperic.hq.appdef.shared;
 
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.rmi.RemoteException;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
 import javax.ejb.FinderException;
-import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.server.session.AppdefSessionEJB;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
-import org.hyperic.hq.appdef.shared.CloningBossInterface;
-import org.hyperic.hq.appdef.shared.CloningBossUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -64,67 +46,41 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl;
-import org.hyperic.hq.bizapp.shared.AIBossLocal;
-import org.hyperic.hq.bizapp.shared.AIBossUtil;
-import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.config.EncodingException;
 
 /**
- * @ejb:bean name="CloningBoss"
- *      jndi-name="ejb/appdef/CloningBoss" 
- *      local-jndi-name="LocalCloningBoss"
- *      view-type="both"
- *      type="Stateless"
- * 
- * @ejb:interface extends="CloningBossInterface, javax.ejb.EJBObject"
- * 		local-extends="CloningBossInterface, javax.ejb.EJBLocalObject"
- * 
- * @ejb:transaction type="REQUIRED"
+ * Business interface for the CloningBoss EJB
  */
-public class CloningBossEJBImpl extends AppdefSessionEJB
-    implements CloningBossInterface, SessionBean {
-    
-    private final Log _log = LogFactory.getLog(CloningBossEJBImpl.class);
-
-    public CloningBossEJBImpl() {
-    }
+public interface CloningBossInterface {
     
     /**
      * @param subj
      * @param pType platform type
      * @param nameRegEx regex which matches either the platform fqdn or the
      * resource sortname
-     * @ejb:interface-method
      */
     public List findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
-                                           String nameRegEx) {
-        throw new UnsupportedOperationException();
-    }
+                                           String nameRegEx)
+    	throws RemoteException;
     
     /**
      * @param subj Method ensures that the master platform has viewable
      * permissions and the clone targets have modifiable permissions.
      * @param platformId master platform id
      * @param cloneTaretIds List<Integer> List of Platform Ids to be cloned
-     * @ejb:interface-method
      */
     public void clonePlatform(AuthzSubject subj, Integer platformId,
                               List cloneTargetIds)
         throws SessionNotFoundException, SessionTimeoutException,
-               SessionException, PermissionException, PlatformNotFoundException
-    {
-        throw new UnsupportedOperationException();
-    }
+               SessionException, PermissionException, PlatformNotFoundException,
+               RemoteException;
 
     /**
-     * @ejb:transaction type="RequiresNew"
-     * @ejb:interface-method
+     * 
      */
     public void clonePlatform(AuthzSubject subj, Platform master,
                               Platform clone)
@@ -133,22 +89,7 @@ public class CloningBossEJBImpl extends AppdefSessionEJB
                NamingException, SessionNotFoundException,
                SessionTimeoutException, SessionException, VetoException,
                AppdefDuplicateNameException, ValidationException,
-               GroupNotCompatibleException, UpdateException, EncodingException {
-        throw new UnsupportedOperationException();
-    }
-    
-    public static CloningBossInterface getOne() {
-        try {
-        	return CloningBossUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
-    }
-    
-    /** @ejb:create-method */
-    public void ejbCreate() throws CreateException {}
-    public void ejbActivate() throws EJBException, RemoteException {}
-    public void ejbPassivate() throws EJBException, RemoteException {}
-    public void ejbRemove() throws EJBException, RemoteException {}
+               GroupNotCompatibleException, UpdateException, EncodingException,
+               RemoteException;
     
 }

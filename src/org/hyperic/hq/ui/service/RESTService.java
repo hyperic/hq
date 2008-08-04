@@ -16,18 +16,18 @@ import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.engine.ILink;
 import org.apache.tapestry.services.ServiceConstants;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.server.session.CloningBossEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.CloningBossLocal;
+import org.hyperic.hq.appdef.shared.CloningBossInterface;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl;
@@ -512,7 +512,9 @@ public class RESTService extends BaseService {
             return ERROR_GENERIC;
 
         try {
-        	CloningBossLocal cloningBoss = CloningBossEJBImpl.getOne();
+        	CloningBossInterface cloningBoss = PermissionManagerFactory
+        											.getInstance()
+        											.getCloningBoss();
 
         	if ((performClone != null) 
         			&& (Boolean.valueOf(performClone).booleanValue()))
