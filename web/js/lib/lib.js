@@ -826,100 +826,100 @@ hyperic.dashboard.widget = {
             dojo11.connect(c,'onEnd',onEnd);
         }
         c.play();
-    },
-
-    /**
-     * filter a selectbox to show only the options
-     * with names that match the text given.
-     *
-     * @param {Node} selectbox node
-     * @param {Text} search text
-     */
-    searchSelectBox: function(node,text) {
-        dojo11.forEach(
-            node.options,
-            function(opt)
-            {
-                // if(opt.text.match(exp))
-                if(opt.text.toLowerCase().indexOf(text.toLowerCase()) !== -1)
-                {
-                    if(opt.disabled === true)
-                    {
-                        opt.disabled = false;
-                        opt.style.display = '';
-                    }
-                }
-                else
-                {
-                    if(opt.disabled === false)
-                    {
-                        opt.disabled = true;
-                        opt.style.display = 'none';
-                    }
-                }
-            });
-    },
-
-    /**
-     * add an option to a selectbox in a correct position.
-     * to keep the box alphabetically sorted.
-     *
-     * @param {Node} selectbox node to add option to
-     * @param {Node} new option to add do the selectbox
-     */
-    addOptionToSelect: function(select,option)
-    {
-        var newLocation = null;
-        if(select.options.length > 0)
-        {
-            for(var i = 0,j = select.options.length; i < j; i++)
-            {
-                if(select.options[i].text > option.text)
-                {
-                    newLocation = i;
-                    break;
-                }
-            }
-        }
-        try {  // standards compliant; doesn't work in IE
-            if(null !== newLocation)
-            {
-                select.add(option, select.options[newLocation]);
-            }
-            else
-            {
-                select.add(option, null); // standards compliant; doesn't work in IE
-            }
-        }
-        catch(ex) { // IE only
-            if(null !== newLocation)
-            {
-                select.add(option,newLocation); // IE only
-            }
-            else
-            {
-                select.add(option); // IE only
-            }
-        }
-    },
-    
-
-    /**
-     * moves the selected option from one select box to another
-     * 
-     * @param {Node} from: selectbox node to move option from 
-     * @param {Node} to: selectbox node to move option to 
-     * @see #addOptionToSelect
-     */
-    moveOption: function(from,to)
-    {
-        if(from.selectedIndex != -1)
-        {
-            that.addOptionToSelect(to, from.options[from.selectedIndex]);
-            from.remove(from.selectedIndex);
-        }
     }
 };
+
+
+/**
+ * moves the selected option from one select box to another
+ * 
+ * @param {Node} from: selectbox node to move option from 
+ * @param {Node} to: selectbox node to move option to 
+ * @see #addOptionToSelect
+ */
+function moveOption(from,to)
+{
+    if(from.selectedIndex != -1)
+    {
+        addOptionToSelect(to, from.options[from.selectedIndex]);
+        from.remove(from.selectedIndex);
+    }
+}
+
+/**
+ * add an option to a selectbox in a correct position.
+ * to keep the box alphabetically sorted.
+ *
+ * @param {Node} selectbox node to add option to
+ * @param {Node} new option to add do the selectbox
+ */
+function addOptionToSelect(select,option)
+{
+    var newLocation = null;
+    if(select.options.length > 0)
+    {
+        for(var i = 0,j = select.options.length; i < j; i++)
+        {
+            if(select.options[i].text > option.text)
+            {
+                newLocation = i;
+                break;
+            }
+        }
+    }
+    try {  // standards compliant; doesn't work in IE
+        if(null !== newLocation)
+        {
+            select.add(option, select.options[newLocation]);
+        }
+        else
+        {
+            select.add(option, null); // standards compliant; doesn't work in IE
+        }
+    }
+    catch(ex) { // IE only
+        if(null !== newLocation)
+        {
+            select.add(option,newLocation); // IE only
+        }
+        else
+        {
+            select.add(option); // IE only
+        }
+    }
+}
+
+/**
+ * filter a selectbox to show only the options
+ * with names that match the text given.
+ *
+ * @param {Node} selectbox node
+ * @param {Text} search text
+ */
+function searchSelectBox(node,text) {
+    dojo11.forEach(
+        node.options,
+        function(opt)
+        {
+            // if(opt.text.match(exp))
+            if(opt.text.toLowerCase().indexOf(text.toLowerCase()) !== -1)
+            {
+                if(opt.disabled === true)
+                {
+                    opt.disabled = false;
+                    opt.style.display = '';
+                }
+            }
+            else
+            {
+                if(opt.disabled === false)
+                {
+                    opt.disabled = true;
+                    opt.style.display = 'none';
+                }
+            }
+        });
+}
 
 /**
  * chartWidget is a widget that displays a chart slideshow
@@ -1131,7 +1131,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     that.search = function(e)
     {
-        that.searchSelectBox(that.chartselect,e.target.value);
+        searchSelectBox(that.chartselect,e.target.value);
     };
     
     /**
@@ -1367,7 +1367,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     {
         for(var i = 0; i < that.charts.length; i++)
         {
-            that.addOptionToSelect(that.chartselect, new Option(that.charts[i].name,i));
+            addOptionToSelect(that.chartselect, new Option(that.charts[i].name,i));
         }
     };
     
@@ -1474,8 +1474,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      */
     that.search = function(e)
     {
-        that.searchSelectBox(that.available_alert_groups, e.target.value);
-        that.searchSelectBox(that.enabled_alert_groups, e.target.value);
+        searchSelectBox(that.available_alert_groups, e.target.value);
+        searchSelectBox(that.enabled_alert_groups, e.target.value);
     };
     
     /**
@@ -1512,7 +1512,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      * enabled alerts selectbox.
      * 
      * @param {Event} e
-     * @see hyperic.dashboard.widget#moveOption
+     * @see #moveOption
      * @see #disableAlert
      */
     that.click_enable_alert_btn = function(e)
@@ -1523,7 +1523,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         // }
 		if(that.enabled_alert_groups.options.length < that.max_alerts)
 		{
-	        that.moveOption(that.available_alert_groups,that.enabled_alert_groups);
+	        moveOption(that.available_alert_groups,that.enabled_alert_groups);
 
 			if(that.enabled_alert_groups.options.length == that.max_alerts)
 			{
@@ -1538,7 +1538,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      * available alerts selet.
      * 
      * @param {Event} e
-     * @see hyperic.dashboard.widget#moveOption
+     * @see #moveOption
      * @see #enableAlert
      */
     that.click_disable_alert_btn = function(e)
@@ -1555,7 +1555,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         //         1
         //     );
         // }
-        that.moveOption(that.enabled_alert_groups,that.available_alert_groups);
+        moveOption(that.enabled_alert_groups,that.available_alert_groups);
 
 		enable_alert_btn = dojo11.query('.enable_alert_btn',that.configSheet)[0];
 		if(enable_alert_btn.disabled == true)
@@ -1606,7 +1606,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     /**
      * populate the available and selected alert selectboxes
      * 
-     * @see hyperic.dashboard.widget#addOptionToSelect
+     * @see #addOptionToSelect
      */
     that.populateAlertGroups = function()
     {
@@ -1624,7 +1624,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             }
             to = to || that.available_alert_groups;
             
-            that.addOptionToSelect(to,alertOption);
+            addOptionToSelect(to,alertOption);
         }
     };
 
@@ -2075,11 +2075,6 @@ hyperic.clone_resource_dialog = function(platform_id) {
     
     that.searchbox = dojo11.byId('cln_search');
 
-	// borrow utility methods
-	that.addOptionToSelect = hyperic.dashboard.widget.addOptionToSelect;
-	that.moveOption = hyperic.dashboard.widget.moveOption;
-	that.searchSelectBox = hyperic.dashboard.widget.searchSelectBox;
-
     that.init = function() {
 	    if(!that.dialog){
 			var pane = dojo11.byId('clone_resource_dialog');
@@ -2099,7 +2094,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
 			type: 'submit',
             // onClick: function() { return that.dialog.isValid(); }
 		}, "clone_btn");
-        dojo11.connect(that.buttons.create_btn, 'onClick', that.clone_action);
+        dojo11.connect(that.buttons.create_btn, 'onclick', that.clone_action);
 
 		that.buttons.cancel_btn = new dijit11.form.Button({
 			label: "Cancel",
@@ -2107,15 +2102,15 @@ hyperic.clone_resource_dialog = function(platform_id) {
 			id: "create_cancel_btn",
 			type: 'cancel',
 		}, "clone_cancel_btn");
-		dojo11.connect(that.buttons.cancel_btn, 'onClick', that.dialog.onCancel);
+		dojo11.connect(that.buttons.cancel_btn, 'onclick', that.dialog.onCancel);
 
-		dojo11.connect(dojo11.byId('add_clone_btn'), 'onClick', function(e) { that.moveOption(that.available_clone_targets,that.selected_clone_targets);});
-		dojo11.connect(dojo11.byId('remove_clone_btn'), 'onClick', function(e) { that.moveOption(that.selected_clone_targets,that.available_clone_targets);});
+		dojo11.connect(dojo11.byId('add_clone_btn'), 'onclick', function(e) { moveOption(that.available_clone_targets,that.selected_clone_targets);});
+		dojo11.connect(dojo11.byId('remove_clone_btn'), 'onclick', function(e) { moveOption(that.selected_clone_targets,that.available_clone_targets);});
 
         // search box connections
         dojo11.connect(that.searchbox,'onfocus', function(e) {if(e.target.value == '[ Resources ]') { e.target.value = ''; }});
         dojo11.connect(that.searchbox,'onblur', function(e) {if(e.target.value == '') { e.target.value = '[ Resources ]'; }});
-        dojo11.connect(that.searchbox,'onkeyup',function(e) { that.searchSelectBox(that.searchbox,e.target.value);});
+        dojo11.connect(that.searchbox,'onkeyup',function(e) { searchSelectBox(that.searchbox,e.target.value);});
 
 		that.populateCloneTargets();
     };
@@ -2132,7 +2127,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
                     {
                         if(i != that.platform_id)
                         {
-                            that.addOptionToSelect(that.available_clone_targets,new Option(data[i],i));
+                            addOptionToSelect(that.available_clone_targets,new Option(data[i],i));
                         }
                     }
                 }
