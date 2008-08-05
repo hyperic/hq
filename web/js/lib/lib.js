@@ -2094,7 +2094,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
 			type: 'submit',
             // onClick: function() { return that.dialog.isValid(); }
 		}, "clone_btn");
-        dojo11.connect(that.buttons.create_btn, 'onclick', that.clone_action);
+        dojo11.connect(that.buttons.create_btn, 'onClick', that.clone_action);
 
 		that.buttons.cancel_btn = new dijit11.form.Button({
 			label: "Cancel",
@@ -2102,7 +2102,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
 			id: "create_cancel_btn",
 			type: 'cancel',
 		}, "clone_cancel_btn");
-		dojo11.connect(that.buttons.cancel_btn, 'onclick', that.dialog.onCancel);
+		dojo11.connect(that.buttons.cancel_btn, 'onClick', that.dialog.onCancel);
 
 		dojo11.connect(dojo11.byId('add_clone_btn'), 'onclick', function(e) { moveOption(that.available_clone_targets,that.selected_clone_targets);});
 		dojo11.connect(dojo11.byId('remove_clone_btn'), 'onclick', function(e) { moveOption(that.selected_clone_targets,that.available_clone_targets);});
