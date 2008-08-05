@@ -72,8 +72,43 @@
     <tiles:insert definition=".resource.common.quickFavorites">
       <tiles:put name="resource" beanName="resource"/>
     </tiles:insert>
-
+    <br>
+    <a href="javascript:clone_platform.dialog.show();">Clone Platform</a>
 </td></tr></table>
 
-</c:if>
+<div id ="clone_resource_dialog" style="display:none;">
+    <form action="" id="clone_resource_dialog_form" onsubmit="javascript: return false;">
+        <fieldset style="width: 450px; text-align: center;">
+            <legend>Choose clone target resources</legend>
+            <label for="cln_search" style="width: 150px">Search resources:</label>
+            <input type="text" id="cln_search" name="cln_search" value="[ Resources ]">
+            <div style="width: 180px; float: left; text-align: right">
+                <label for="available_clone_targets" style="width: inherit">Available clone targets</label>
+                <select name="available_clone_targets" id="available_clone_targets" size="10" style="width: 120px"></select>
+            </div>
+            <div style="width: 66px; height: 100px; float: left; text-align: center; padding-top: 3em">
+                <button id="add_clone_btn">&rArr;</button><br />
+                <button id="remove_clone_btn">&lArr;</button>
+            </div>
+            <div style="width: 180px; float: left; text-align: left">
+                <label for="selected_clone_targets" style="width: inherit">Selected clone targets</label>
+                <select name="selected_clone_targets" id="selected_clone_targets" size="10" style="width: 120px"></select>
+            </div>
+        </fieldset>
+        <div style="text-align: right;">
+            <span id="clone_cancel_btn"></span>
+            <span id="clone_btn"></span>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
 
+    dojo11.require("dijit.dijit");
+    dojo11.require("dijit.form.Button");
+    dojo11.require("dijit.form.DateTextBox");
+    dojo11.require("dijit.form.TimeTextBox");
+    dojo11.require("dijit.Dialog");
+
+    clone_platform = new hyperic.clone_resource_dialog('<c:out value="${resource.id}"/>');
+</script>
+</c:if>

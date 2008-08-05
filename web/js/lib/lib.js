@@ -2067,6 +2067,127 @@ hyperic.maintenance_schedule = function(group_id) {
 	that.getSchedule();
 }
 
+hyperic.clone_resource_dialog = function(platform_id) {
+    var that = this;
+    that.dialog = null;
+	that.buttons = {};
+	that.platform_id = platform_id || null;
+
+    that.available_clone_targets = dojo11.byId('available_clone_targets');
+    that.selected_clone_targets = dojo11.byId('selected_clone_targets');
+    
+    that.searchbox = dojo11.byId('cln_search');
+
+	// borrow utility methods
+	that.addOptionToSelect = hyperic.dashboard.widget.addOptionToSelect;
+	that.searchSelectBox = hyperic.dashboard.widget.searchSelectBox;
+
+    that.init = function() {
+	    if(!that.dialog){
+			var pane = dojo11.byId('clone_resource_dialog');
+			pane.style.width = "450px";
+			that.dialog = new dijit11.Dialog({
+				id: "clone_resource_dialog",
+				refocus: true,
+				autofocus: false,
+				title: "Clone Server",
+			},pane);
+		}
+
+		that.buttons.create_btn = new dijit11.form.Button({
+			label: "Queue for Cloning",
+			name: "clone_btn",
+			id: "clone_btn",
+			type: 'submit',
+            // onClick: function() { return that.dialog.isValid(); }
+		}, "clone_btn");
+        dojo11.connect(that.buttons.create_btn, 'onClick', that.clone_action);
+
+		that.buttons.cancel_btn = new dijit11.form.Button({
+			label: "Cancel",
+			name: "create_cancel_btn",
+			id: "create_cancel_btn",
+			type: 'cancel',
+		}, "clone_cancel_btn");
+		dojo11.connect(that.buttons.cancel_btn, 'onClick', that.dialog.onCancel);
+
+		dojo11.connect(dojo11.byId('add_clone_btn'), 'onClick', function(e) { that.moveOption(that.available_clone_targets,that.selected_clone_targets);});
+		dojo11.connect(dojo11.byId('remove_clone_btn'), 'onClick', function(e) { that.moveOption(that.selected_clone_targets,that.available_clone_targets);});
+
+        // search box connections
+        dojo11.connect(that.searchbox,'onfocus', function(e) {if(e.target.value == '[ Resources ]') { e.target.value = ''; }});
+        dojo11.connect(that.searchbox,'onblur', function(e) {if(e.target.value == '') { e.target.value = '[ Resources ]'; }});
+        dojo11.connect(that.searchbox,'onkeyup',function(e) { that.searchSelectBox(that.searchbox,e.target.value);});
+
+		that.populateCloneTargets();
+    };
+
+    that.moveOption = function(from,to)
+    {
+        if(from.selectedIndex != -1)
+        {
+            that.addOptionToSelect(to, from.options[from.selectedIndex]);
+            from.remove(from.selectedIndex);
+        }
+    };
+
+    that.populateCloneTargets = function()
+    {
+        dojo11.xhrGet( {
+            url: "/api.shtml?v=1.0&s_id=clone_platform&pid=" + that.platform_id,
+            handleAs: 'json',
+            load: function(data){
+                if(data && !data.error)
+                {
+                    for(var i in data)
+                    {
+                        if(i != that.platform_id)
+                        {
+                            that.addOptionToSelect(that.available_clone_targets,new Option(data[i],i));
+                        }
+                    }
+                }
+            },
+            error: function(data){
+                console.debug("An error occurred fetching alert groups status... ", data);
+            },
+            timeout: 2000
+        });
+    };
+
+    that.clone_action = function() {
+        
+        var clone_target_ids = [];
+        for(var i = 0, j = that.selected_clone_targets.options.length; i < j; i++)
+        {
+            clone_target_ids.push(that.selected_clone_targets.options[i].value);
+        }
+        if(clone_target_ids.length > 0)
+        {
+            dojo11.xhrPost( {
+                url: "/api.shtml?v=1.0&s_id=clone_platform&pid=" + that.platform_id + '&clone=true&ctid=[' + clone_target_ids.toString() + ']',
+                handleAs: 'json',
+                load: function(data){
+    				that.dialog.hide();
+                    // if(!data.error)
+                    // {
+    				// }
+                },
+                error: function(data){
+                    console.debug("An error occurred queueing platforms for cloning " + that.platform_id, data);
+                },
+                form: 'create_cbg_dialog_form',
+                timeout: 2000
+            });
+        }
+        else
+        {
+            that.dialog.onCancel();
+        }
+    };
+
+	that.init();
+}
 
 var activeItem;
 function listItemClicked(node){
