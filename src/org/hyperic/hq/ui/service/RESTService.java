@@ -545,7 +545,7 @@ public class RESTService extends BaseService {
         				platform.getPlatformType();
         		List platforms;
         		
-        		if (query == null ) {
+        		if ((query == null) || (query.trim().length() == 0)) {
             		// Get all platforms
                     platforms = platformMgr.getPlatformsByType(
 												me, 
@@ -555,15 +555,16 @@ public class RESTService extends BaseService {
         			platforms = cloningBoss.findPlatformsByTypeAndName(
 	        										me, 
 	        										platformType.getId(), 
-	        										query);
+	        										query.trim());
         		}
 	        	
 	        	JSONObject jPlatform = new JSONObject();
 	
 	            for (Iterator<Platform> it = platforms.iterator(); it.hasNext();) {
 	                platform = it.next();
-	            
-	                jPlatform.put(platform.getId().toString(), platform.getName());
+	                jPlatform.put(
+	                		platform.getId().toString(),
+	                		platform.getName());
 	            }
 	            
 	        	res = jPlatform.toString();
@@ -574,8 +575,8 @@ public class RESTService extends BaseService {
             
             try {
             	res = new JSONObject()
-            				.put("error", "true")
-            				.put("message", e.getLocalizedMessage())
+            				.put("error", true)
+            				.put("error_message", e.getLocalizedMessage())
             				.toString();
             } catch (Exception e2) {
             	res = ERROR_GENERIC;
