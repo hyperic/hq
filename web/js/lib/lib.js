@@ -901,6 +901,23 @@ hyperic.dashboard.widget = {
                 select.add(option); // IE only
             }
         }
+    },
+    
+
+    /**
+     * moves the selected option from one select box to another
+     * 
+     * @param {Node} from: selectbox node to move option from 
+     * @param {Node} to: selectbox node to move option to 
+     * @see #addOptionToSelect
+     */
+    moveOption: function(from,to)
+    {
+        if(from.selectedIndex != -1)
+        {
+            that.addOptionToSelect(to, from.options[from.selectedIndex]);
+            from.remove(from.selectedIndex);
+        }
     }
 };
 
@@ -1495,7 +1512,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      * enabled alerts selectbox.
      * 
      * @param {Event} e
-     * @see #moveAlert
+     * @see hyperic.dashboard.widget#moveOption
      * @see #disableAlert
      */
     that.click_enable_alert_btn = function(e)
@@ -1506,7 +1523,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         // }
 		if(that.enabled_alert_groups.options.length < that.max_alerts)
 		{
-	        that.moveAlert(that.available_alert_groups,that.enabled_alert_groups);
+	        that.moveOption(that.available_alert_groups,that.enabled_alert_groups);
 
 			if(that.enabled_alert_groups.options.length == that.max_alerts)
 			{
@@ -1521,7 +1538,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      * available alerts selet.
      * 
      * @param {Event} e
-     * @see #moveAlert
+     * @see hyperic.dashboard.widget#moveOption
      * @see #enableAlert
      */
     that.click_disable_alert_btn = function(e)
@@ -1538,7 +1555,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         //         1
         //     );
         // }
-        that.moveAlert(that.enabled_alert_groups,that.available_alert_groups);
+        that.moveOption(that.enabled_alert_groups,that.available_alert_groups);
 
 		enable_alert_btn = dojo11.query('.enable_alert_btn',that.configSheet)[0];
 		if(enable_alert_btn.disabled == true)
@@ -1584,26 +1601,6 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             },
             timeout: 2000
         });
-    };
-
-    /**
-     * an event handler to handle the onclick event on the disable alert button.
-     * moves the selected alert from the enabled alerts selectbox to the 
-     * available alerts selet.
-     * 
-     * @param {Node} from: selectbox node to move option from 
-     * @param {Node} to: selectbox node to move option to 
-     * @see #enableAlert
-     * @see #disableAlert
-     * @see hyperic.dashboard.widget#addOptionToSelect
-     */
-    that.moveAlert = function(from,to)
-    {
-        if(from.selectedIndex != -1)
-        {
-            that.addOptionToSelect(to, from.options[from.selectedIndex]);
-            from.remove(from.selectedIndex);
-        }
     };
 
     /**
@@ -2080,6 +2077,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
 
 	// borrow utility methods
 	that.addOptionToSelect = hyperic.dashboard.widget.addOptionToSelect;
+	that.moveOption = hyperic.dashboard.widget.moveOption;
 	that.searchSelectBox = hyperic.dashboard.widget.searchSelectBox;
 
     that.init = function() {
@@ -2120,15 +2118,6 @@ hyperic.clone_resource_dialog = function(platform_id) {
         dojo11.connect(that.searchbox,'onkeyup',function(e) { that.searchSelectBox(that.searchbox,e.target.value);});
 
 		that.populateCloneTargets();
-    };
-
-    that.moveOption = function(from,to)
-    {
-        if(from.selectedIndex != -1)
-        {
-            that.addOptionToSelect(to, from.options[from.selectedIndex]);
-            from.remove(from.selectedIndex);
-        }
     };
 
     that.populateCloneTargets = function()
