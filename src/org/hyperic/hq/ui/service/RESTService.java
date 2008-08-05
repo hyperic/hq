@@ -525,11 +525,11 @@ public class RESTService extends BaseService {
         	{
         		// Clone platform
         		List cloneTargetIdList = new ArrayList();
-        		StringTokenizer st = new StringTokenizer(cloneTargetId);
-        		
-        		while (st.hasMoreTokens()) {
-        			cloneTargetIdList.add(Integer.valueOf(st.nextToken()));
-        		}
+                JSONArray arr = new JSONArray(cloneTargetId);
+                
+                for (int i = 0; i < arr.length(); i++) {
+        			cloneTargetIdList.add(Integer.valueOf(arr.getString(i)));
+                }
         		
         		cloningBoss.clonePlatform(
         							me,
