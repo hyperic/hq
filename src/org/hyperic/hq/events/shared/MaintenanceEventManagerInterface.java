@@ -64,4 +64,10 @@ public interface MaintenanceEventManagerInterface {
     public void unschedule(AuthzSubject subject, MaintenanceEvent event)
         throws PermissionException, SchedulerException;
 
+    /**
+     * Perform group permission check
+     */
+    public void checkPermission(AuthzSubject subject, MaintenanceEvent event) 
+    	throws PermissionException;
+
 }

@@ -17,10 +17,13 @@ import org.apache.tapestry.engine.ILink;
 import org.apache.tapestry.services.ServiceConstants;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.CloningBossInterface;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -430,8 +433,6 @@ public class RESTService extends BaseService {
         String endTimeParam = cycle.getParameter(PARAM_END_TIME);
         String scheduleParam = cycle.getParameter(PARAM_SCHEDULE);
 
-        String res = EMPTY_RESPONSE; // default to an empty response
-
         // Get the AuthzSubject
         WebUser user = (WebUser) _request.getSession()
                 .getAttribute(Constants.WEBUSER_SES_ATTR);
@@ -440,6 +441,8 @@ public class RESTService extends BaseService {
         if (me == null)
             return ERROR_GENERIC;
 
+        JSONObject jRes = new JSONObject();
+        
         try {
             EventsBoss eb = ContextUtils.getEventsBoss(_servletContext);
             MaintenanceEvent event = null;
@@ -465,27 +468,29 @@ public class RESTService extends BaseService {
             }
             
             if (event != null) {
-            	res = new JSONObject()
-								.put(PARAM_GROUP_ID, event.getGroupId())
-								.put(PARAM_START_TIME, event.getStartTime())
-								.put(PARAM_END_TIME, event.getEndTime())
-								.toString();            	
+            	jRes.put(PARAM_GROUP_ID, event.getGroupId())
+					.put(PARAM_START_TIME, event.getStartTime())
+					.put(PARAM_END_TIME, event.getEndTime());
+            	
+            	try {
+            		// Get permissions
+            		PermissionManagerFactory.getInstance()
+            					.getMaintenanceEventManager()
+            					.checkPermission(me, event);
+            		jRes.put("permission", true);
+            	} catch (PermissionException pe) {}
             }
      
         } catch (Exception e) {
             log.debug(e.getLocalizedMessage());
             
             try {
-            	res = new JSONObject()
-            				.put("error", "true")
-            				.put("message", e.getLocalizedMessage())
-            				.toString();
-            } catch (Exception e2) {
-            	res = ERROR_GENERIC;
-            }
+            	jRes.put("error", true)
+            		.put("error_message", e.getLocalizedMessage());
+            } catch (Exception e2) {}
         }
         
-        return res;
+        return (jRes.length() > 0) ? jRes.toString() : ERROR_GENERIC;
     }
 
     /**
@@ -497,7 +502,6 @@ public class RESTService extends BaseService {
     private String serviceClonePlatformWidget(IRequestCycle cycle) {
         String query = cycle.getParameter(PARAM_SEARCH_QUERY);
         String platformId = cycle.getParameter(PARAM_PLATFORM_ID);
-        String platformTypeId = cycle.getParameter(PARAM_PLATFORM_TYPE_ID);
         String cloneTargetId = cycle.getParameter(PARAM_CLONE_TARGET_ID);
         String performClone = cycle.getParameter(PARAM_CLONE);
        
@@ -532,25 +536,37 @@ public class RESTService extends BaseService {
         							Integer.valueOf(platformId),
         							cloneTargetIdList);
         		
-        	} else if (query != null ) {
-	        	// Search for platforms
-        		List platforms = cloningBoss.findPlatformsByTypeAndName(
+        	} else {
+        		PlatformManagerLocal platformMgr = 
+        				PlatformManagerEJBImpl.getOne();		
+        		Platform platform = 
+        				platformMgr.findPlatformById(Integer.valueOf(platformId));
+        		PlatformType platformType = 
+        				platform.getPlatformType();
+        		List platforms;
+        		
+        		if (query == null ) {
+            		// Get all platforms
+                    platforms = platformMgr.getPlatformsByType(
+												me, 
+												platformType.getName());
+        		} else {
+        			// Search for platforms
+        			platforms = cloningBoss.findPlatformsByTypeAndName(
 	        										me, 
-	        										Integer.valueOf(platformTypeId), 
+	        										platformType.getId(), 
 	        										query);
+        		}
 	        	
-	            Platform platform =  null;
-	        	JSONArray jArray = new JSONArray();
+	        	JSONObject jPlatform = new JSONObject();
 	
 	            for (Iterator<Platform> it = platforms.iterator(); it.hasNext();) {
 	                platform = it.next();
 	            
-	        		jArray.put(new JSONObject()
-	            						.put("id", platform.getId())
-	            						.put("name", platform.getName()));
+	                jPlatform.put(platform.getId().toString(), platform.getName());
 	            }
 	            
-	        	res = jArray.toString();
+	        	res = jPlatform.toString();
         	}
                     	
         } catch (Exception e) {

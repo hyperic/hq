@@ -99,6 +99,17 @@ public class MaintenanceEventManagerEJBImpl
 	{
         throw new UnsupportedOperationException();    	
 	}
+
+    /**
+     * Perform group permission check
+     * 
+     * @ejb:interface-method 
+     */
+    public void checkPermission(AuthzSubject subject, MaintenanceEvent event) 
+    	throws PermissionException
+    {
+        throw new UnsupportedOperationException();    	
+    }
     
     /**
      * Create a MaintenanceEvent object from a JobDetail

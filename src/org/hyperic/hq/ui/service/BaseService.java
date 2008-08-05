@@ -31,9 +31,7 @@ public abstract class BaseService implements IEngineService {
     public static final String PARAM_GROUP_ID = "gid";
     
     public static final String PARAM_PLATFORM_ID = "pid";
-    
-    public static final String PARAM_PLATFORM_TYPE_ID = "ptid";
-    
+        
     public static final String PARAM_RESOURCE_ID = "rid";
     
     public static final String PARAM_CLONE_TARGET_ID = "ctid";
