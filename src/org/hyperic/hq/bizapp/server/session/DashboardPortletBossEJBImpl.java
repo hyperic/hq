@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -35,14 +34,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.ejb.EJBException;
+import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.server.session.AppdefSessionEJB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
+import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -52,12 +53,14 @@ import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBossLocal;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBossUtil;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.galerts.server.session.GalertLog;
@@ -82,7 +85,7 @@ import org.json.JSONObject;
  * @ejb:transaction type="REQUIRED"
  */
 public class DashboardPortletBossEJBImpl
-    extends MetricSessionEJB
+    extends AppdefSessionEJB
     implements SessionBean {
 
     private GalertManagerLocal _gaMan;
@@ -174,13 +177,11 @@ public class DashboardPortletBossEJBImpl
     }
     
     /**
-     * @throws PermissionException 
-     * @throws JSONException 
      * @ejb:interface-method
      */
     public JSONObject getAlertCounts(AuthzSubject subj, List groupIds,
                                      PageInfo pageInfo)
-        throws PermissionException, JSONException
+        throws PermissionException, JSONException, FinderException
     {
         JSONObject rtn = new JSONObject();
         _rgMan = ResourceGroupManagerEJBImpl.getOne();
@@ -206,7 +207,6 @@ public class DashboardPortletBossEJBImpl
     private String getGroupStatus(AuthzSubject subj, ResourceGroup group)
         throws PermissionException
     {
-        // TODO: Need to add permission checking
         List galertDefs = _gaMan.findAlertDefs(group, PageControl.PAGE_ALL);
         String rtn = ALERT_OK;
         if (galertDefs.size() == 0) {
@@ -215,10 +215,11 @@ public class DashboardPortletBossEJBImpl
         List galerts = _gaMan.findAlertLogs(group);
         for (Iterator i=galerts.iterator(); i.hasNext(); ) {
             GalertLog galert = (GalertLog)i.next();
+            checkAlertingPermission(subj, galert.getAlertDef().getAppdefID());
             if (galert.isFixed()) {
                 continue;
             }
-            if (isAckd(galert)) {
+            if (isAckd(subj, galert)) {
                 rtn = ALERT_WARN;
             } else {
                 return ALERT_CRITICAL;
@@ -228,7 +229,7 @@ public class DashboardPortletBossEJBImpl
     }
     
     private String getResourceStatus(AuthzSubject subj, ResourceGroup group)
-        throws PermissionException
+        throws PermissionException, FinderException
     {
         String rtn = ALERT_UNKNOWN;
         boolean isSet = false;
@@ -237,6 +238,7 @@ public class DashboardPortletBossEJBImpl
         for (Iterator i=resources.iterator(); i.hasNext(); ) {
             Resource r = (Resource)i.next();
             AppdefEntityID aId = new AppdefEntityID(r);
+            checkViewPermission(subj, aId);
             List alertDefs = _adMan.findAlertDefinitions(
                 subj, new AppdefEntityID(r), PageControl.PAGE_ALL);
             if (alertDefs.size() == 0) {
@@ -252,7 +254,7 @@ public class DashboardPortletBossEJBImpl
                 if (alert.isFixed()) {
                     continue;
                 }
-                if (isAckd(alert)) {
+                if (isAckd(subj, alert)) {
                     rtn = ALERT_WARN;
                 } else {
                     return ALERT_CRITICAL;
@@ -262,20 +264,27 @@ public class DashboardPortletBossEJBImpl
         return rtn;
     }
     
-    private boolean isAckd(GalertLog alert) {
-        if (!alert.isAcknowledgeable()) {
+    private boolean isAckd(AuthzSubject subj, GalertLog alert) {
+        Escalation esc = alert.getAlertDef().getEscalation();
+        if (esc.getMaxPauseTime() == 0) {
             return false;
         }
         EscalationState state =
-            _escMan.findEscalationState(_gaMan.findById(alert.getId()));
-        if (state.getAcknowledgedBy() == null) {
+            _escMan.findEscalationState(
+                _gaMan.findById(alert.getAlertDef().getId()));
+        if (state == null || state.getAcknowledgedBy() == null) {
             return false;
         }
         return true;
     }
     
-    private boolean isAckd(AlertValue alert) {
-        if (!alert.isAcknowledgeable()) {
+    private boolean isAckd(AuthzSubject subj, AlertValue alert)
+        throws PermissionException, FinderException
+    {
+        AlertDefinitionValue alertDef =
+            _adMan.getById(subj, alert.getAlertDefId());
+        Escalation esc = _escMan.findById(alertDef.getEscalationId());
+        if (esc.getMaxPauseTime() == 0) {
             return false;
         }
         EscalationState state = _escMan.findEscalationState(
@@ -297,16 +306,6 @@ public class DashboardPortletBossEJBImpl
     public void ejbCreate() {}
     public void ejbActivate() {}
     public void ejbPassivate() {}
-    public void ejbRemove() throws EJBException, RemoteException {
-        ctx = null;
-    }
+    public void ejbRemove() {}
 
-    public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
-        this.ctx = ctx;
-    }
-
-    public SessionContext getSessionContext() {
-        return ctx;
-    }
 }
