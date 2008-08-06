@@ -30,12 +30,16 @@ import java.util.LinkedList;
 /**
  * Maintains a list of {@link DataPoint}s which all lie within a specific
  * time range.  This class is useful for storing 'the last 30 minutes of data'
- * and rolling the oldest data points off. 
+ * and rolling the oldest data points off.
+ * 
+ * This class relies on datapoints being placed into the collector in
+ * time-sorted order.
  */
 public class TimeWindowCollector {
     private final LinkedList _dataPoints = new LinkedList();
     private final long _windowSize;
-
+    private boolean _hasRolled = false;
+    
     /**
      * @param windowSize The size of the window (in millis) that all the
      *                   encapsulated datapoints should be within.
@@ -61,6 +65,16 @@ public class TimeWindowCollector {
         }
     }
 
+    /**
+     * Returns true if data has been rolled off the back of the time-window.
+     * (i.e. removeOldPoints() has been invoked and removed something) 
+     */
+    public boolean hasRolled() {
+        synchronized (_dataPoints) {
+            return _hasRolled;
+        }
+    }
+    
     /**
      * Get a sum of all the encapsulated data points
      */
@@ -106,6 +120,9 @@ public class TimeWindowCollector {
                 
                 if (pt.getTime() < oldestTimeAllowed) {
                     i.remove();
+                    _hasRolled = true;
+                } else {
+                    break;
                 }
             }            
         }

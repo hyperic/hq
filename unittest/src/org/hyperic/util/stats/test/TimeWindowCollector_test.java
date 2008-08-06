@@ -39,6 +39,7 @@ public class TimeWindowCollector_test extends TestCase {
     public void testWindow() throws Exception {
         TimeWindowCollector c = new TimeWindowCollector(5);
         assertTrue(c.getSum() == 0.0);
+        assertFalse(c.hasRolled());
         c.addPoint(1, 10);
         assertTrue(c.getSum() == 10.0);
         c.addPoint(2, 11);
@@ -52,8 +53,11 @@ public class TimeWindowCollector_test extends TestCase {
         c.addPoint(6, 15);
         assertTrue(c.getSum() == 75.0);
         c.addPoint(7, 16);
+        assertFalse(c.hasRolled());
         assertTrue(c.getSum() == 91.0);
+        assertFalse(c.hasRolled());
         c.removeOldPoints();
         assertTrue(c.getSum() == 81.0);
+        assertTrue(c.hasRolled());
     }
 }
