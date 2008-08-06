@@ -43,6 +43,7 @@ import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
+import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -159,7 +160,12 @@ public abstract class SessionBase {
     protected void canManageAlerts(AuthzSubjectValue who, AppdefEntityID id)
         throws PermissionException {
         if (id instanceof AppdefEntityTypeID) {
-            return;             // Can't check resoure type alert permission
+            // Make sure the user is a super user
+            if (RoleManagerEJBImpl.getOne().isRootRoleMember(who))
+                return;
+            throw new PermissionException("User must be in Super User role " +
+                                          "to manage resource type alert " +
+                                          "definitions");
         }
 
         int type = id.getType();
