@@ -225,7 +225,7 @@ public class DashboardPortletBossEJBImpl
             }
             // a galert always has an associated escalation which may or may not
             // be acknowledged.
-            if (!galert.isAcknowledgeable()) {
+            if (galert.hasEscalationState() && galert.isAcknowledged()) {
                 rtn = ALERT_WARN;
             } else {
                 return ALERT_CRITICAL;

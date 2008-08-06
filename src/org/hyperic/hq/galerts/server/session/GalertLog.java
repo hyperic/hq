@@ -192,6 +192,14 @@ public class GalertLog
         return _stateId;
     }
     
+    public boolean isAcknowledged() {
+        return getAckedBy() != null;
+    }
+
+    public boolean hasEscalationState() {
+        return getStateId() != null;
+    }
+
     public boolean isAcknowledgeable() {
         return getStateId() != null && getAckedBy() == null;
     }
