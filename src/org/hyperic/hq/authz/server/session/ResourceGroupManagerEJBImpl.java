@@ -75,6 +75,8 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
+import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
@@ -349,6 +351,7 @@ public class ResourceGroupManagerEJBImpl
         ResourceGroupDAO dao = getResourceGroupDAO();
         ResourceGroup resGrp = dao.findById(group.getId());
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
+        EventLogManagerLocal logMan = EventLogManagerEJBImpl.getOne();
 
         pm.check(whoami.getId(),
                  AuthzConstants.authzGroup, resGrp.getId(),
@@ -358,6 +361,8 @@ public class ResourceGroupManagerEJBImpl
             new ResourceEdgeDAO(DAOFactory.getDAOFactory());
         edgeDao.deleteEdges(resGrp.getResource());
         
+        logMan.deleteLogs(group.getResource());
+
         GroupingStartupListener.getCallbackObj().preGroupDelete(resGrp);
         dao.remove(resGrp);
 
