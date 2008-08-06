@@ -60,7 +60,7 @@ var pageData = new Array();
 <c:set var="cname" value="${ChildResourceType.name}"/>
 <fmt:message var="ChildTH" key="resource.autogroup.monitor.visibility.ChildTH"><fmt:param value="${cname}"/></fmt:message>
 
-<c:set var="ctype" value="${ChildResourceType.appdefTypeKey}"/>
+<c:set var="ctype" value="${ChildResourceType.appdefResourceTypeValue.appdefTypeKey}"/>
 
 <c:choose>
   <c:when test="${not empty Resource.name}">
