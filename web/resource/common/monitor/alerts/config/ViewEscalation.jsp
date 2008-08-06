@@ -53,8 +53,7 @@ function showViewEscResponse() {
     var actions = tmp.escalation.actions;
     var allowPause = tmp.escalation.allowPause;
     var id = tmp.escalation.id;
-    var maxPauseTime = (tmp.escalation.maxWaitTime / 60000) +
-       " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
+    var maxPauseTime = formatWaitTime(null, tmp.escalation.maxWaitTime, '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>',  '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
 
     $('viewEscalation').style.display = "";
     if (document.EscalationSchemeForm != null) {
