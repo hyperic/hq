@@ -66,6 +66,7 @@ import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
@@ -212,14 +213,19 @@ public class DashboardPortletBossEJBImpl
         if (galertDefs.size() == 0) {
             return ALERT_UNKNOWN;
         }
-        List galerts = _gaMan.findAlertLogs(group);
+        long now = System.currentTimeMillis();
+        long begin = now-MeasurementConstants.HOUR*24*7;
+        PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED);
+        List galerts = _gaMan.findAlertLogsByTimeWindow(group, begin, now, pc);
         for (Iterator i=galerts.iterator(); i.hasNext(); ) {
             GalertLog galert = (GalertLog)i.next();
             checkAlertingPermission(subj, galert.getAlertDef().getAppdefID());
             if (galert.isFixed()) {
                 continue;
             }
-            if (isAckd(subj, galert)) {
+            // a galert always has an associated escalation which may or may not
+            // be acknowledged.
+            if (!galert.isAcknowledgeable()) {
                 rtn = ALERT_WARN;
             } else {
                 return ALERT_CRITICAL;
@@ -263,28 +269,19 @@ public class DashboardPortletBossEJBImpl
         }
         return rtn;
     }
-    
-    private boolean isAckd(AuthzSubject subj, GalertLog alert) {
-        Escalation esc = alert.getAlertDef().getEscalation();
-        if (esc.getMaxPauseTime() == 0) {
-            return false;
-        }
-        EscalationState state =
-            _escMan.findEscalationState(
-                _gaMan.findById(alert.getAlertDef().getId()));
-        if (state == null || state.getAcknowledgedBy() == null) {
-            return false;
-        }
-        return true;
-    }
-    
+
     private boolean isAckd(AuthzSubject subj, AlertValue alert)
         throws PermissionException, FinderException
     {
         AlertDefinitionValue alertDef =
             _adMan.getById(subj, alert.getAlertDefId());
-        Escalation esc = _escMan.findById(alertDef.getEscalationId());
-        if (esc.getMaxPauseTime() == 0) {
+        // a resource alert may not have an associated escalation
+        Integer escId = alertDef.getEscalationId();
+        if (escId == null) {
+            return false;
+        }
+        Escalation esc = _escMan.findById(escId);
+        if (esc == null || esc.getMaxPauseTime() == 0) {
             return false;
         }
         EscalationState state = _escMan.findEscalationState(
