@@ -168,7 +168,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
         throws PermissionException {
-        canManageAlerts(subj.getId(), id);
+        canManageAlerts(subj, id);
         return getAlertDAO().deleteByEntity(id);
     }
 
@@ -283,7 +283,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public PageList findAlerts(AuthzSubject subj, AppdefEntityID id,
                                PageControl pc)
         throws PermissionException {
-        canManageAlerts(subj.getId(), id);
+        canManageAlerts(subj, id);
         List alerts;
 
         if (pc.getSortattribute() == SortAttribute.NAME) {
@@ -308,7 +308,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                long begin, long end, PageControl pc)
         throws PermissionException 
     {
-        canManageAlerts(subj.getId(), id);
+        canManageAlerts(subj, id);
         List alerts = getAlertDAO().findByAppdefEntityInRange(id, begin, end,
                                pc.getSortattribute() == SortAttribute.NAME,
                                pc.isAscending());

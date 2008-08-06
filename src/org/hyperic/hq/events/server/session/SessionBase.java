@@ -44,6 +44,7 @@ import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
+import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -101,6 +102,9 @@ public abstract class SessionBase {
     }
 
     protected AppdefEntityID getAppdefEntityID(AlertDefinition ad) {
+        if (ad.getParent() != null &&
+            EventConstants.TYPE_ALERT_DEF_ID.equals(ad.getParent().getId()))
+            return new AppdefEntityTypeID(ad.getAppdefType(), ad.getAppdefId());
         return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
     }
 
@@ -147,16 +151,21 @@ public abstract class SessionBase {
         Integer parentId = ad.getParent() != null ? ad.getParent().getId()
                 : null;
         if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId))
-            canManageAlerts(who.getId(), getAppdefEntityID(ad));
+            canManageAlerts(who, getAppdefEntityID(ad));
     }
 
     /**
      * Check for manage alerts permission for a given resource
      */
-    protected void canManageAlerts(Integer subjectId, AppdefEntityID id)
+    protected void canManageAlerts(AuthzSubject who, AppdefEntityID id)
         throws PermissionException {
         if (id instanceof AppdefEntityTypeID) {
-            return;             // Can't check resoure type alert permission
+            // Make sure the user is a super user
+            if (RoleManagerEJBImpl.getOne().isRootRoleMember(who))
+                return;
+            throw new PermissionException("User must be in Super User role " +
+                                          "to manage resource type alert " +
+                                          "definitions");
         }
 
         int type = id.getType();
@@ -188,7 +197,7 @@ public abstract class SessionBase {
         }
 
         // now check
-        checkPermission(subjectId, rtName, id.getId(), opName);
+        checkPermission(who.getId(), rtName, id.getId(), opName);
     }
     
     private static void checkEscalation(Integer subjectId,
