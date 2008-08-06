@@ -101,6 +101,9 @@ public abstract class SessionBase {
     }
 
     protected AppdefEntityID getAppdefEntityID(AlertDefinition ad) {
+        if (ad.getParent() != null &&
+            EventConstants.TYPE_ALERT_DEF_ID.equals(ad.getParent().getId()))
+            return new AppdefEntityTypeID(ad.getAppdefType(), ad.getAppdefId());
         return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
     }
 
@@ -147,13 +150,13 @@ public abstract class SessionBase {
         Integer parentId = ad.getParent() != null ? ad.getParent().getId()
                 : null;
         if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId))
-            canManageAlerts(who.getId(), getAppdefEntityID(ad));
+            canManageAlerts(who, getAppdefEntityID(ad));
     }
 
     /**
      * Check for manage alerts permission for a given resource
      */
-    protected void canManageAlerts(Integer subjectId, AppdefEntityID id)
+    protected void canManageAlerts(AuthzSubjectValue who, AppdefEntityID id)
         throws PermissionException {
         if (id instanceof AppdefEntityTypeID) {
             return;             // Can't check resoure type alert permission
@@ -188,7 +191,7 @@ public abstract class SessionBase {
         }
 
         // now check
-        checkPermission(subjectId, rtName, id.getId(), opName);
+        checkPermission(who.getId(), rtName, id.getId(), opName);
     }
     
     private static void checkEscalation(Integer subjectId,
