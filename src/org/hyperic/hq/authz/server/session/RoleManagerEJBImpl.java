@@ -128,7 +128,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         return getRoleDAO().findById(id);
     }
 
-    private boolean isRootRoleMember(AuthzSubjectValue subject)  {
+    /**
+     * @ejb:interface-method
+     */
+    public boolean isRootRoleMember(AuthzSubjectValue subject)  {
         return getRootRoleIfMember(subject) != null;
     }
 
