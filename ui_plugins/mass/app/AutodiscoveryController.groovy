@@ -63,13 +63,17 @@ class AutodiscoveryController extends BaseController {
 
         def res = new StringBuffer()
         for (plat in matching) {
-            List imported = processPlatform(user, aiMan, plat)
-            def numPlats = imported.findAll { it instanceof Platform }.size();
-            def numServers = imported.findAll { it instanceof Server }.size();
-            res.append("Processed platform '")
-            .append(plat.fqdn).append("' imported ")
-            .append(numPlats).append(" platforms")
-            .append(", ").append(numServers).append(" servers.\n")
+            try {
+                List imported = processPlatform(user, aiMan, plat)
+                def numPlats = imported.findAll { it instanceof Platform }.size();
+                def numServers = imported.findAll { it instanceof Server }.size();
+                res.append("Processed platform '")
+                   .append(plat.fqdn).append("' imported ")
+                   .append(numPlats).append(" platforms")
+                   .append(", ").append(numServers).append(" servers.\n")
+            } catch (Exception e) {
+                res.append("${e.message} while importing ${plat.name}\n")
+            }
         }
         render(inline : res.toString())
     }
