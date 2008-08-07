@@ -121,7 +121,6 @@ hyperic.utils.addKeyListener = function(/*Node*/node, /*Object*/ keyComb, /*Stri
     this.cancel = function(){
         this.canceled = true;
         dojo.event.disconnect(node, "onkeyup", this, this.keyListener);
-        delete this;
     };
     //dojo.connect(node, "onkeyup", this, this.keyListener);
     dojo.event.connect(node, "onkeyup", this, this.keyListener);
@@ -298,12 +297,14 @@ hyperic.widget.Menu = function(kwArgs) {
                 x=node.offsetLeft;
                 y=node.clientHeight+node.offsetTop;
             }
-            this.node.style['top'] = y+'px';
-            this.node.style['left'] = x+'px';
+            this.node.style.top = y+'px';
+            this.node.style.left = x+'px';
             this.node.style.display = 'block';
             this._isVisible = true;
             if(this._isSubMuenu)
+            {
                 this.isFocused = true;
+            }
         }
     };
     this.onUnHover = function() {
@@ -852,7 +853,7 @@ function moveOption(from,to)
     {
         for(var opt = 0; opt < from.options.length; opt++)
         {
-            if(from.options[opt].selected == true) {
+            if(from.options[opt].selected === true) {
                 addOptionToSelect(to, new Option(from.options[opt].text,from.options[opt].value));
                 from.remove(opt);
                 // call moveOption recursively, because remove() reset the options indices in the 
@@ -1176,7 +1177,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     that.resetSearch = function(e) 
     {
-        if(e.target.value == '')
+        if(e.target.value === '')
         {
             e.target.value = '[ Live Search ]';
         }
@@ -1250,7 +1251,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                     // console.info("next chart to display is " + next);
                     // add a callback to refresh the chart data in a minute
 
-                    that.charts[next].interval = setInterval(function(){that.fetchChartData(next)},36000);
+                    that.charts[next].interval = setInterval(function(){that.fetchChartData(next);},36000);
 
                     // console.log('fetched data; next chart id is ' + next);
                     if(that.charts[next].data)
@@ -1278,7 +1279,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     that.playCharts = function() {
         console.log('starting to play');
         that.cycleCharts();
-        if(that.cycleId == null) {
+        if(that.cycleId === null) {
             that.cycleId = setInterval(that.cycleCharts, parseInt(that.config.interval,10)*1000);
 
             // display pause button when playing
@@ -1295,7 +1296,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      * @see #cycleCharts
      */
     that.pauseCharts = function() {
-        if(that.cycleId != null) {
+        if(that.cycleId !== null) {
             clearInterval(that.cycleId);
             that.cycleId = null;
             
@@ -1315,7 +1316,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             url: "/api.shtml?v=1.0&s_id=chart",
             handleAs: 'json',
             load: function(data){
-                that.charts = data.sort(function(a,b) {return a.name > b.name});
+                that.charts = data.sort(function(a,b) {return a.name > b.name;});
                 that.populateChartSelect();
                 that.playCharts();
             },
@@ -1513,7 +1514,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      */
     that.resetSearch = function(e) 
     {
-        if(e.target.value == '')
+        if(e.target.value === '')
         {
             e.target.value = '[ Group Search ]';
         }
@@ -1571,7 +1572,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         moveOption(that.enabled_alert_groups,that.available_alert_groups);
 
 		enable_alert_btn = dojo11.query('.enable_alert_btn',that.configSheet)[0];
-		if(enable_alert_btn.disabled == true)
+		if(enable_alert_btn.disabled === true)
 		{
 			enable_alert_btn.disabled = false;
 		}
@@ -1852,7 +1853,7 @@ hyperic.maintenance_schedule = function(group_id) {
 				id: "maintenance_schedule_dialog_" + that.group_id,
 				refocus: true,
 				autofocus: false,
-				title: "Schedule Downtime",
+				title: "Schedule Downtime"
 			},pane);
 		}
 
@@ -1911,14 +1912,14 @@ hyperic.maintenance_schedule = function(group_id) {
             that.inputs.to_date.validate();
             that.inputs.from_time.onChange();
             that.inputs.to_time.onChange();
-        }
+        };
 
     	that.inputs.to_date.onChange = function() {
             that.inputs.from_date.constraints.max = this.getValue();
             that.inputs.from_date.validate();
             that.inputs.from_time.onChange();
             that.inputs.to_time.onChange();
-        }
+        };
         
         that.inputs.from_time.onChange = function() {
             if(that.inputs.from_date.getValue().getTime() == that.inputs.to_date.getValue().getTime()) {
@@ -1928,7 +1929,7 @@ hyperic.maintenance_schedule = function(group_id) {
             }
             this.validate();
             that.inputs.to_time.validate();
-        }
+        };
 
         that.inputs.to_time.onChange = function() {
             if(that.inputs.from_date.getValue().getTime() == that.inputs.to_date.getValue().getTime()) {
@@ -1938,24 +1939,22 @@ hyperic.maintenance_schedule = function(group_id) {
             }
             this.validate();
             that.inputs.from_time.validate();
-        }
+        };
 
 		that.buttons.schedule_btn = new dijit11.form.Button({
 			label: "Schedule",
 			name: "schedule_btn",
 			id: "schedule_btn",
-			type: 'submit',
-            // onClick: function() { return that.dialog.isValid(); }
+			type: 'submit'
 		}, "schedule_btn");
 
-        // dojo.hitch(that,function() { dojo11.connect(schedule_btn, 'onClick', this.dialog.onCancel);} );
         dojo11.connect(that.buttons.schedule_btn, 'onClick', that.schedule_action);
 
 		that.buttons.cancel_btn = new dijit11.form.Button({
 			label: "Cancel",
 			name: "cancel_btn",
 			id: "cancel_btn",
-			type: 'cancel',
+			type: 'cancel'
 		}, "cancel_btn");
 		dojo11.connect(that.buttons.cancel_btn, 'onClick', that.dialog.onCancel);
 
@@ -1963,7 +1962,7 @@ hyperic.maintenance_schedule = function(group_id) {
 			label: "Clear schedule",
 			name: "clear_schedule_btn",
 			id: "clear_schedule_btn",
-			type: 'submit',
+			type: 'submit'
 		}, "clear_schedule_btn");
         dojo11.connect(that.buttons.clear_schedule_btn, 'onClick', that.clear_schedule_action);
 
@@ -1973,17 +1972,17 @@ hyperic.maintenance_schedule = function(group_id) {
         {
             that.buttons.schedule_btn.setLabel('Reschedule');
         }
-    }
+    };
 
     that.schedule_action = function() {
-        arguments = that.dialog.getValues();
+        var args = that.dialog.getValues();
 
 	    // create unix epoch datetime in GMT timezone
-        from_datetime = (arguments.from_date.getTime() + arguments.from_time.getTime() - arguments.from_time.getTimezoneOffset() * 60000);
-         // - arguments.from_date.getTimezoneOffset() * 60000 - arguments.from_time.getTimezoneOffset() * 60000;
+        from_datetime = (args.from_date.getTime() + args.from_time.getTime() - args.from_time.getTimezoneOffset() * 60000);
+         // - args.from_date.getTimezoneOffset() * 60000 - args.from_time.getTimezoneOffset() * 60000;
 
-        to_datetime = (arguments.to_date.getTime() + arguments.to_time.getTime() - arguments.to_time.getTimezoneOffset() * 60000);
-         // - arguments.to_date.getTimezoneOffset() * 60000 - arguments.to_time.getTimezoneOffset() * 60000;
+        to_datetime = (args.to_date.getTime() + args.to_time.getTime() - args.to_time.getTimezoneOffset() * 60000);
+         // - args.to_date.getTimezoneOffset() * 60000 - args.to_time.getTimezoneOffset() * 60000;
 
         return dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id + '&sched=true&st=' + from_datetime + '&et=' + to_datetime,
@@ -1991,7 +1990,7 @@ hyperic.maintenance_schedule = function(group_id) {
             load: function(data){
                 // that.charts[chart].data = data;
 				that.dialog.hide();
-                if(!data.error && (parseInt(data.st,10) != 0 && parseInt(data.et,10) != 0))
+                if(!data.error && (parseInt(data.st,10) !== 0 && parseInt(data.et,10) !== 0))
                 {
                     that.existing_schedule.from_time = parseInt(data.st,10);
                     that.existing_schedule.to_time = parseInt(data.et,10);
@@ -2016,7 +2015,7 @@ hyperic.maintenance_schedule = function(group_id) {
             timeout: 2000
         });
         // console.log(from_datetime,to_datetime);
-    }
+    };
 
     that.clear_schedule_action = function() {
         return dojo11.xhrGet( {
@@ -2046,7 +2045,7 @@ hyperic.maintenance_schedule = function(group_id) {
             },
             timeout: 2000
         });
-    }
+    };
     
     that.getSchedule = function() {
         // console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id);
@@ -2055,7 +2054,7 @@ hyperic.maintenance_schedule = function(group_id) {
             handleAs: 'json',
             load: function(data){
                 // that.charts[chart].data = data;
-                if(!data.error && (parseInt(data.st,10) != 0 && parseInt(data.et,10) != 0))
+                if(!data.error && (parseInt(data.st,10) !== 0 && parseInt(data.et,10) !== 0))
                 {
                     that.existing_schedule.from_time = parseInt(data.st,10);
                     that.existing_schedule.to_time = parseInt(data.et,10);
@@ -2072,10 +2071,10 @@ hyperic.maintenance_schedule = function(group_id) {
             },
             timeout: 2000
         });
-    }
+    };
 
 	that.getSchedule();
-}
+};
 
 hyperic.clone_resource_dialog = function(platform_id) {
     var that = this;
@@ -2097,7 +2096,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
 				id: "clone_resource_dialog",
 				refocus: true,
 				autofocus: false,
-				title: "Clone Server",
+				title: "Clone Server"
 			},pane);
 		}
 
@@ -2105,8 +2104,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
 			label: "Queue for Cloning",
 			name: "clone_btn",
 			id: "clone_btn",
-			type: 'submit',
-            // onClick: function() { return that.dialog.isValid(); }
+			type: 'submit'
 		}, "clone_btn");
         dojo11.connect(that.buttons.create_btn, 'onClick', that.clone_action);
 
@@ -2114,7 +2112,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
 			label: "Cancel",
 			name: "create_cancel_btn",
 			id: "create_cancel_btn",
-			type: 'cancel',
+			type: 'cancel'
 		}, "clone_cancel_btn");
 		dojo11.connect(that.buttons.cancel_btn, 'onClick', that.cancel_action);
 
@@ -2207,7 +2205,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
     };
 
 	that.init();
-}
+};
 
 var activeItem;
 function listItemClicked(node){
@@ -2226,7 +2224,7 @@ document.onResize = function(e){
     var node = dojo.byId("rightPanel");
     node.style.width = newSize;
 
-}
+};
 
 function toggleDialog(){
     alert('open dialog');
