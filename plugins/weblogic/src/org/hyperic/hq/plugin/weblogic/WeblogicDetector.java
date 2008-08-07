@@ -287,6 +287,11 @@ public class WeblogicDetector
         }
 
         servers.add(server);
+        installpath = getInstallRoot(installpath);
+        if (installpath != null) {
+            //handle the case where agent is started before WLS
+            adjustClassPath(installpath);
+        }
 
         return servers;
     }
@@ -368,6 +373,23 @@ public class WeblogicDetector
         return servers;
     }
 
+    private static String getInstallRoot(String installpath) {
+        final String jar =
+            "server" + File.separator +
+            "lib" + File.separator +
+            "weblogic.jar";
+
+        File dir = new File(installpath);
+        while (dir != null) {
+            if (new File(dir, jar).exists()) {
+                return dir.getAbsolutePath();
+            }
+            dir = dir.getParentFile();
+        }
+
+        return null;
+    }
+
     public static String getRunningInstallPath() {
         String installpath = null;
         long[] pids = getPids(PTQL_QUERY);
@@ -398,21 +420,8 @@ public class WeblogicDetector
                     continue;
                 }
 
-                final String jar =
-                    "server" + File.separator +
-                    "lib" + File.separator +
-                    "weblogic.jar";
-
-                File dir = new File(arg);
-                while (dir != null) {
-                    if (new File(dir, jar).exists()) {
-                        break;
-                    }
-                    dir = dir.getParentFile();
-                }
-                       
-                if (dir != null) {
-                    installpath = dir.getAbsolutePath();
+                installpath = getInstallRoot(arg);
+                if (installpath != null) {
                     _log.debug(WeblogicProductPlugin.PROP_INSTALLPATH + "=" +
                                installpath + " (derived from " + args[j] + ")");
                     break;
