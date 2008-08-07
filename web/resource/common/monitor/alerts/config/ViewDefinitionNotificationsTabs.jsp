@@ -36,6 +36,7 @@
 <tiles:importAttribute name="viewRolesUrl" ignore="true"/>
 <tiles:importAttribute name="viewEscalationUrl"/>
 <tiles:importAttribute name="viewSnmpUrl" ignore="true"/>
+<tiles:importAttribute name="viewScriptUrl" ignore="true"/>
 <tiles:importAttribute name="viewOpenNMSUrl" ignore="true"/>
 
 <c:set var="mode" value="${param.mode}"/>
@@ -67,6 +68,9 @@
     </c:when>
     <c:when test="${tab.value == 'SNMP'}">
       <c:set var="tabUrl" value="${viewSnmpUrl}"/>
+    </c:when>
+    <c:when test="${tab.value == 'Script'}">
+      <c:set var="tabUrl" value="${viewScriptUrl}"/>
     </c:when>
     <c:when test="${tab.value == 'OpenNMS'}">
       <c:set var="tabUrl" value="${viewOpenNMSUrl}"/>
