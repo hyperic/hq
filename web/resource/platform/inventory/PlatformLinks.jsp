@@ -84,7 +84,7 @@
             <input type="text" id="cln_search" name="cln_search" value="[ Resources ]">
             <div style="width: 180px; float: left; text-align: right">
                 <label for="available_clone_targets" style="width: inherit">Available clone targets</label>
-                <select name="available_clone_targets" id="available_clone_targets" size="10" style="width: 120px"></select>
+                <select name="available_clone_targets" id="available_clone_targets" size="10" style="width: 120px" multiple="multiple"></select>
             </div>
             <div style="width: 66px; height: 100px; float: left; text-align: center; padding-top: 3em">
                 <button id="add_clone_btn">&rArr;</button><br />
@@ -92,7 +92,7 @@
             </div>
             <div style="width: 180px; float: left; text-align: left">
                 <label for="selected_clone_targets" style="width: inherit">Selected clone targets</label>
-                <select name="selected_clone_targets" id="selected_clone_targets" size="10" style="width: 120px"></select>
+                <select name="selected_clone_targets" id="selected_clone_targets" size="10" style="width: 120px" multiple="multiple"></select>
             </div>
         </fieldset>
         <div style="text-align: right;">
