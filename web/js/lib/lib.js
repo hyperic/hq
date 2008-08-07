@@ -1338,13 +1338,11 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     that.fetchAndPlayCharts = function()
     {
-        console.log('fetching charts');
-        
         dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=chart",
             handleAs: 'json',
             load: function(data){
-                that.charts = data;
+                that.charts = data.sort(function(a,b) {return a.name > b.name});
                 that.populateChartSelect();
                 that.playCharts();
             },
