@@ -13,7 +13,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -80,24 +80,32 @@
       <input type=checkbox name="pause" value="true"/>
       <fmt:message key="alert.escalation.pause"/>
       <select name="pauseTime">
-        <option value="300000">5</option>
+        <option value="300000">5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
         <c:if test="${escalation.maxPauseTime >= 600000}">
-        <option value="600000">10</option>
+        <option value="600000">10 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
         <c:if test="${escalation.maxPauseTime >= 900000}">
-        <option value="900000">15</option>
+        <option value="900000">15 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
         <c:if test="${escalation.maxPauseTime >= 1200000}">
-        <option value="1200000">20</option>
+        <option value="1200000">20 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
         <c:if test="${escalation.maxPauseTime >= 1800000}">
-        <option value="1800000">30</option>
+        <option value="1800000">30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
         <c:if test="${escalation.maxPauseTime >= 3600000}">
-        <option value="3600000">60</option>
+        <option value="3600000">60 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
+        <c:if test="${escalation.maxPauseTime >= 86400000}">
+        <option value="86400000">24 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
+        <c:if test="${escalation.maxPauseTime >= 172800000}">
+        <option value="172800000">48 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
+        <c:if test="${escalation.maxPauseTime >= 259200000}">
+        <option value="259200000">72 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
+        </c:if>
+        </c:if>
+        </c:if>
         </c:if>
         </c:if>
         </c:if>
         </c:if>
         </c:if>
       </select>
-      <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
   </c:if>&nbsp;
     </td>
     <td rowspan="2" width="60%" class="BlockLabel" style="border-top: solid #D5D8DE 1px;">

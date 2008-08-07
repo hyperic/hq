@@ -87,8 +87,7 @@ function showViewEscResponse(originalRequest) {
         var escName = tmp.escalation.name;
         var description = tmp.escalation.description;
         var id = tmp.escalation.id;
-        var maxWaitTime = (tmp.escalation.maxWaitTime / 60000) +
-                          " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
+	    var maxWaitTime = formatWaitTime(null, tmp.escalation.maxWaitTime, '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>',  '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
     
         dojo.byId('viewEscalation').style.display = "";
     
@@ -1402,6 +1401,18 @@ function saveAddEscalation() {
                             <option value="3600000">60
                                 <fmt:message
                                         key="alert.config.props.CB.Enable.TimeUnit.1"/>
+                            </option>
+                            <option value="86400000">24
+                                <fmt:message
+                                        key="alert.config.props.CB.Enable.TimeUnit.2"/>
+                            </option>
+                            <option value="172800000">48
+                                <fmt:message
+                                        key="alert.config.props.CB.Enable.TimeUnit.2"/>
+                            </option>
+                            <option value="259200000">72
+                                <fmt:message
+                                        key="alert.config.props.CB.Enable.TimeUnit.2"/>
                             </option>
                         </select></td>
                 </tr>

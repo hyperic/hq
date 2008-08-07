@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
 
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
 
   HQ is free software; you can redistribute it and/or modify
@@ -53,8 +53,7 @@ function showViewEscResponse() {
     var actions = tmp.escalation.actions;
     var allowPause = tmp.escalation.allowPause;
     var id = tmp.escalation.id;
-    var maxPauseTime = (tmp.escalation.maxWaitTime / 60000) +
-       " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
+    var maxPauseTime = formatWaitTime(null, tmp.escalation.maxWaitTime, '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>',  '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
 
     dojo.byId('viewEscalation').style.display = "";
     if (document.EscalationSchemeForm != null) {
