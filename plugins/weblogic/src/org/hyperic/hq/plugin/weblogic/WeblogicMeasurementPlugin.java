@@ -96,24 +96,8 @@ public class WeblogicMeasurementPlugin
         return props;
     }
 
-    public MetricValue getValue(Metric metric)
-        throws PluginException, MetricNotFoundException,
-        MetricUnreachableException {
-
-        if (useJAAS) {
-            return getValueAs(metric);
-        }
-        else {
-            return getWeblogicValue(metric);
-        }
-    }
-
-    private MetricValue getWeblogicValue(Metric metric)
-        throws PluginException, MetricNotFoundException,
-        MetricUnreachableException {
-
+    private boolean isAvail(Metric metric) {
         String attr = metric.getAttributeName();
-
         //XXX this is ugly.
         boolean isAvail =
             attr.equals(SERVER_AVAIL_ATTR) ||
@@ -123,18 +107,21 @@ public class WeblogicMeasurementPlugin
             attr.equals(APP_AVAIL_ATTR) ||
             attr.equals(JDBC_CONN_AVAIL_ATTR) ||
             attr.equals(EXQ_AVAIL_ATTR);
+        return isAvail;
+    }
 
-        Double val = null;
+    public MetricValue getValue(Metric metric)
+        throws PluginException, MetricNotFoundException,
+        MetricUnreachableException {
+
+        boolean isAvail = isAvail(metric);
 
         try {
-            Object obj = WeblogicUtil.getRemoteMBeanValue(metric);
-
-            if (isAvail) {
-                val = new Double(WeblogicUtil.convertStateVal(obj));
+            if (useJAAS) {
+                return getValueAs(metric);
             }
             else {
-                //XXX: when we have the flag, we can mark NumberFormatException
-                val = new Double(obj.toString());
+                return getWeblogicValue(metric);
             }
         } catch (MetricUnreachableException e) {
             if (!isAvail) {
@@ -144,12 +131,30 @@ public class WeblogicMeasurementPlugin
             if (!isAvail) {
                 throw e;
             }
-        } catch (PluginException e) {
-            throw new PluginException(e.getMessage(), e);
+        } catch (Exception e) {
+            if (!isAvail) {
+                throw new PluginException(e.getMessage(), e);
+            }
         }
 
-        if (isAvail && (val == null)) {
-            return new MetricValue(Metric.AVAIL_DOWN);
+        return new MetricValue(Metric.AVAIL_DOWN);
+    }
+
+    private MetricValue getWeblogicValue(Metric metric)
+        throws PluginException, MetricNotFoundException,
+        MetricUnreachableException {
+
+        Double val = null;
+        boolean isAvail = isAvail(metric);
+
+        Object obj = WeblogicUtil.getRemoteMBeanValue(metric);
+
+        if (isAvail) {
+            val = new Double(WeblogicUtil.convertStateVal(obj));
+        }
+        else {
+            //XXX: when we have the flag, we can mark NumberFormatException
+            val = new Double(obj.toString());
         }
 
         return new MetricValue(val, System.currentTimeMillis()); 
