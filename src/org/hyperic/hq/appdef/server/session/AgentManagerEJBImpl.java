@@ -822,9 +822,7 @@ public class AgentManagerEJBImpl
         String[][] files = new String[1][2];
         files[0][0] = src.getPath();
         
-        File dest = new File(HQConstants.AgentBundleDropDir, bundleFileName);
-        
-        files[0][1] = dest.getPath();
+        files[0][1] = HQConstants.AgentBundleDropDir + "/" + bundleFileName;
         
         int[] modes = {FileData.WRITETYPE_CREATEOROVERWRITE};        
         
@@ -889,9 +887,7 @@ public class AgentManagerEJBImpl
                 PLUGINS_EXTENSION + AgentUpgradeManager.UPDATED_PLUGIN_EXTENSION);
         
         // tokenize agent.bundle.home since this can only be resolved at the agent
-        File dest = new File("${agent.bundle.home}/tmp", updatePlugin);
-        
-        files[0][1] = dest.getPath();
+        files[0][1] = "${agent.bundle.home}/tmp/"  + updatePlugin;
         
         int[] modes = {FileData.WRITETYPE_CREATEOROVERWRITE};        
         
@@ -987,8 +983,8 @@ public class AgentManagerEJBImpl
 
         AgentCommandsClient client = AgentCommandsClientFactory.getInstance()
                 .getClient(aid);
-        File bundleFile = new File(HQConstants.AgentBundleDropDir, bundleFileName);
-        client.upgrade(bundleFile.getPath(), HQConstants.AgentBundleDropDir);
+        String bundleFilePath = HQConstants.AgentBundleDropDir + "/" + bundleFileName;
+        client.upgrade(bundleFilePath, HQConstants.AgentBundleDropDir);
     }
     
     /**
