@@ -708,33 +708,6 @@ hyperic.widget = hyperic.widget || {};
         // }
     };
 
-    // this.update = function(kwArgs) {
-    //   console.log('trying to update chart view');
-    //   that.name = kwArgs.name;
-    //   that.url = kwArgs.url;
-    // 
-    //   var titleHeader = dojo11.query('.cTitle', that.node)[0];
-    //   while(titleHeader.lastChild) {
-    //     titleHeader.removeChild(titleHeader.lastChild);
-    //   }
-    //   titleHeader.appendChild(document.createTextNode(that.name));
-    //   titleHeader = null;
-    //   
-    //   console.log(that.chart);
-    //   // that.chart.dataSource = new Timeplot.ColumnSource(es, 1)
-    //   // var es = new Timeplot.DefaultEventSource();
-    //   console.log(that.dataSource);
-    // 
-    //   that.dataSource._clear();
-    //   that.chart.loadText(that.url, ",", that.dataSource);
-    //   
-    //   // console.log(that.chart._plots[0]);
-    //   // that.chart._plots[0].hideValues();
-    //   // that.chart.update();
-    //   that.chart.repaint();
-    //   // console.log(that.chart._plots[0]._dataSource);
-    // };
-
     this.cleanup = function(){
         // dojo11.unsubscribe(that.subscriptions[0]);
         
@@ -1355,7 +1328,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
 
     that.fetchChartData = function(chart)
     {
-        console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]");
+        // console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]");
         return dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]",
             handleAs: 'json',
@@ -1363,12 +1336,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 // that.charts[chart].data = data;
                 if(!data.error && data.length > 0)
                 {
-                    console.log('data fetched ('+data.length+' elements found)');
                     that.charts[chart].data = data[0].data;
-                }
-                else
-                {
-                    console.log('dataset empty');
                 }
             },
             error: function(data){
@@ -2081,7 +2049,7 @@ hyperic.maintenance_schedule = function(group_id) {
     }
     
     that.getSchedule = function() {
-        console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id);
+        // console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id);
         return dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id,
             handleAs: 'json',
