@@ -2078,6 +2078,7 @@ hyperic.maintenance_schedule = function(group_id) {
 hyperic.clone_resource_dialog = function(platform_id) {
     var that = this;
     that.dialog = null;
+    that.data = {};
 	that.buttons = {};
 	that.platform_id = platform_id || null;
 
@@ -2113,7 +2114,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
 			id: "create_cancel_btn",
 			type: 'cancel',
 		}, "clone_cancel_btn");
-		dojo11.connect(that.buttons.cancel_btn, 'onClick', that.dialog.onCancel);
+		dojo11.connect(that.buttons.cancel_btn, 'onClick', that.cancel_action);
 
 		dojo11.connect(dojo11.byId('add_clone_btn'), 'onclick', function(e) { moveOption(that.available_clone_targets,that.selected_clone_targets);});
 		dojo11.connect(dojo11.byId('remove_clone_btn'), 'onclick', function(e) { moveOption(that.selected_clone_targets,that.available_clone_targets);});
@@ -2124,24 +2125,18 @@ hyperic.clone_resource_dialog = function(platform_id) {
         dojo11.connect(that.searchbox,'onkeyup',function(e) { searchSelectBox(that.available_clone_targets,e.target.value);});
         dojo11.connect(that.searchbox,'onkeyup',function(e) { searchSelectBox(that.selected_clone_targets,e.target.value);});
 
-		that.populateCloneTargets();
+		that.fetchData();
     };
 
-    that.populateCloneTargets = function()
-    {
+    that.fetchData = function() {
         dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=clone_platform&pid=" + that.platform_id,
             handleAs: 'json',
             load: function(data){
                 if(data && !data.error)
                 {
-                    for(var i in data)
-                    {
-                        if(i != that.platform_id)
-                        {
-                            addOptionToSelect(that.available_clone_targets,new Option(data[i],i));
-                        }
-                    }
+                    that.data = data;
+                    that.populateCloneTargets();
                 }
             },
             error: function(data){
@@ -2149,6 +2144,33 @@ hyperic.clone_resource_dialog = function(platform_id) {
             },
             timeout: 2000
         });
+    };
+
+    that.populateCloneTargets = function()
+    {
+        for(var i in that.data)
+        {
+            if(i != that.platform_id)
+            {
+                addOptionToSelect(that.available_clone_targets,new Option(that.data[i],i));
+            }
+        }
+    };
+
+    that.cancel_action = function() {
+        // hide the dialog
+        that.dialog.onCancel();
+
+        // reset the select boxes
+        while(that.selected_clone_targets.options.length > 0)
+        {
+            that.selected_clone_targets.remove(0);
+        }
+        while(that.available_clone_targets.options.length > 0)
+        {
+            that.available_clone_targets.remove(0);
+        }
+        that.populateCloneTargets();
     };
 
     that.clone_action = function() {
