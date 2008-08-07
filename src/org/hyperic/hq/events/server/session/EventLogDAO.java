@@ -234,7 +234,7 @@ public class EventLogDAO extends HibernateDAO {
     List findByGroup(Resource g, long begin, long end, Collection eventTypes) {
         String hql = "select l from EventLog l join l.resource res " +
         		     "join res.groupBag gb join gb.group g " +
-        		     "where g.resource = :r " +
+        		     "where (l.resource = :r or g.resource = :r) " +
         		     "and l.timestamp between :begin and :end ";
         
         if (!eventTypes.isEmpty())

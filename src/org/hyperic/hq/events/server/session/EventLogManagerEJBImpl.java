@@ -180,11 +180,10 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         else
             eTypes = Arrays.asList(eventTypes);
         
-        /* Look for events for all resource types using the same API
         if (r.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
             return eDAO.findByGroup(r, begin, end, eTypes);
         }
-        else */{
+        else {
             return eDAO.findByEntity(user, r, begin, end, eTypes);
         }
     }
