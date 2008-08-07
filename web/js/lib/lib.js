@@ -2110,7 +2110,8 @@ hyperic.clone_resource_dialog = function(platform_id) {
         // search box connections
         dojo11.connect(that.searchbox,'onfocus', function(e) {if(e.target.value == '[ Resources ]') { e.target.value = ''; }});
         dojo11.connect(that.searchbox,'onblur', function(e) {if(e.target.value == '') { e.target.value = '[ Resources ]'; }});
-        dojo11.connect(that.searchbox,'onkeyup',function(e) { searchSelectBox(that.searchbox,e.target.value);});
+        dojo11.connect(that.searchbox,'onkeyup',function(e) { searchSelectBox(that.available_clone_targets,e.target.value);});
+        dojo11.connect(that.searchbox,'onkeyup',function(e) { searchSelectBox(that.selected_clone_targets,e.target.value);});
 
 		that.populateCloneTargets();
     };
