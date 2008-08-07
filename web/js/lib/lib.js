@@ -841,8 +841,19 @@ function moveOption(from,to)
 {
     if(from.selectedIndex != -1)
     {
-        addOptionToSelect(to, from.options[from.selectedIndex]);
-        from.remove(from.selectedIndex);
+        for(var opt = 0; opt < from.options.length; opt++)
+        {
+            if(from.options[opt].selected == true) {
+                addOptionToSelect(to, new Option(from.options[opt].text,from.options[opt].value));
+                from.remove(opt);
+                // call moveOption recursively, because remove() reset the options indices in the 
+                // source selectbox,
+                // so if multiple options are selected, once the first one is moved, the 
+                // rest are offset by 1, so we can't move them in the same for loop.
+                moveOption(from,to);
+                break;
+            }
+        }
     }
 }
 
