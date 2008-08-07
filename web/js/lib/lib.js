@@ -1252,7 +1252,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
 
                     that.charts[next].interval = setInterval(function(){that.fetchChartData(next)},36000);
 
-                    console.log('fetched data; next chart id is ' + next);
+                    // console.log('fetched data; next chart id is ' + next);
                     if(that.charts[next].data)
                     {
                         that.chart = new hyperic.widget.Chart('chart_container', that.charts[next]);
