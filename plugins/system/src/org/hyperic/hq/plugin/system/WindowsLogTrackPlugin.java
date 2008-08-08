@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.system;
 
+import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.TypeInfo;
@@ -57,6 +58,9 @@ public class WindowsLogTrackPlugin
             this.whoTracker = new WhoLogTrackPlugin(this);
             getManager().addRunnableTracker(this.whoTracker);
         }
+        //XXX getManager().setDefaultPlatformPlugin(this)
+        final String prop = LogTrackPluginManager.DEFAULT_PLATFORM_PLUGIN;
+        getManager().getProperties().setProperty(prop, getName());
     }
 
     public void shutdown() throws PluginException {

@@ -10,6 +10,7 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.LogTrackPlugin;
+import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.snmp.SNMPClient;
 
 import org.snmp4j.CommandResponder;
@@ -49,13 +50,18 @@ public class SNMPTrapReceiver
     private Address _listenAddress;
     private ThreadPool _threadPool;
     private Map _plugins = new HashMap();
+    LogTrackPluginManager _manager;
 
     private int _received = 0;
+
+    static boolean hasInstance() {
+        return instance != null;
+    }
 
     public static SNMPTrapReceiver getInstance(Properties props)
         throws IOException {
         
-        if (instance == null) {
+        if (!hasInstance()) {
             instance = new SNMPTrapReceiver();
             instance.init(props);
         }
@@ -70,7 +76,7 @@ public class SNMPTrapReceiver
     }
 
     public static void shutdown() throws IOException {
-        if (instance != null) {
+        if (hasInstance()) {
             log.debug("Shutdown instance");
             instance._threadPool.cancel();
             instance._snmp.close();
@@ -123,7 +129,7 @@ public class SNMPTrapReceiver
     }
 
     public static void remove(LogTrackPlugin plugin) {
-        if (instance == null) {
+        if (!hasInstance()) {
             return;
         }
         String key = getPluginKey(plugin);
@@ -207,6 +213,17 @@ public class SNMPTrapReceiver
         return msg.toString();
     }
 
+    private LogTrackPlugin getPlatformPlugin() {
+        //XXX return _manager.getDefaultPlatformPlugin()
+        final String prop = LogTrackPluginManager.DEFAULT_PLATFORM_PLUGIN;
+        String name = _manager.getProperty(prop);
+        return _manager.getLogTrackPlugin(name);
+    }
+
+    void setPluginManager(LogTrackPluginManager manager) {
+        _manager = manager;
+    }
+
     public void processPdu(CommandResponderEvent event) {
         _received++;
 
@@ -231,7 +248,16 @@ public class SNMPTrapReceiver
             new OctetString(event.getSecurityName()).toString();
 
         LogTrackPlugin plugin = getPlugin(address, community);
-
+        if (plugin == null) {
+            plugin = getPlatformPlugin();
+            if (plugin != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No plugin for " + address +
+                              ", routing to default platform: " +
+                              plugin.getName());
+                }
+            }
+        }
         if (plugin == null) {
             if (log.isDebugEnabled()) {
                 log.debug("No plugin for " + address +
