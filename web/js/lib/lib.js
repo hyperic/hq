@@ -1896,6 +1896,7 @@ hyperic.maintenance_schedule = function(group_id) {
     			value: that.selected_from_time,
     			lang: "en-us",
                 rangeMessage: "The downtime start time cannot be later than end time.",
+    			invalidMessage: "The downtime start time is required.",
     			required: true
     		}, "from_time");
 
@@ -1904,6 +1905,7 @@ hyperic.maintenance_schedule = function(group_id) {
     			value: that.selected_to_time,
     			lang: "en-us",
                 rangeMessage: "The downtime end time cannot be earlier than start time.",
+    			invalidMessage: "The downtime end time is required.",
     			required: true
     		}, "to_time");
 
