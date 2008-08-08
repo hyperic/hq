@@ -271,6 +271,7 @@ public class ResourceGroupManagerEJBImpl
                                                    existing);
             }
             group.setName(name);
+            group.getResource().setName(name);
         }
         
         if (description != null && !description.equals(group.getDescription())){
