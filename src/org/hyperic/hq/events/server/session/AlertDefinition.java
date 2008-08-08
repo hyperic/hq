@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
@@ -172,7 +173,14 @@ public class AlertDefinition
     }
 
     public Collection getChildren() {
-        return Collections.unmodifiableCollection(_children);
+        List children = new ArrayList();
+        for (Iterator it = _children.iterator(); it.hasNext(); ) {
+            AlertDefinition child = (AlertDefinition) it.next();
+            if (child.isDeleted() || child.getResource() == null)
+                continue;
+            children.add(child);
+        }
+        return Collections.unmodifiableCollection(children);
     }
     
     Collection getChildrenBag() {
