@@ -1966,7 +1966,7 @@ hyperic.maintenance_schedule = function(group_id) {
 		}, "clear_schedule_btn");
         dojo11.connect(that.buttons.clear_schedule_btn, 'onClick', that.clear_schedule_action);
 
-		that.buttons.clear_schedule_btn.domNode.hide();
+        that.buttons.clear_schedule_btn.domNode.style.display = 'none';
 
         if(that.existing_schedule.from_time)
         {
@@ -1975,6 +1975,8 @@ hyperic.maintenance_schedule = function(group_id) {
     };
 
     that.schedule_action = function() {
+        if(that.dialog.isValid())
+        {
         var args = that.dialog.getValues();
 
 	    // create unix epoch datetime in GMT timezone
@@ -2014,7 +2016,7 @@ hyperic.maintenance_schedule = function(group_id) {
             },
             timeout: 2000
         });
-        // console.log(from_datetime,to_datetime);
+        }
     };
 
     that.clear_schedule_action = function() {
