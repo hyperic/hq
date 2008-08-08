@@ -324,11 +324,16 @@ public class EscalationManagerEJBImpl
             
             try {
                 Escalatable alert = creator.createEscalatable();
-                EscalationState curState = new EscalationState(alert);
-                _stateDAO.save(curState);
-                _log.debug("Escalation started: state=" + curState.getId());
-                EscalationRuntime.getInstance().scheduleEscalation(curState);    
-                started = true;
+
+                // HQ-1348: Recovery alerts are automatically fixed
+                // so don't start escalation if the alert is fixed
+                if (!alert.getAlertInfo().isFixed()) {
+	                EscalationState curState = new EscalationState(alert);
+	                _stateDAO.save(curState);
+	                _log.debug("Escalation started: state=" + curState.getId());
+	                EscalationRuntime.getInstance().scheduleEscalation(curState);    
+	                started = true;
+                }
             } finally {
                 if (!started) {
                     EscalationRuntime.getInstance()
