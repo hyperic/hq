@@ -1977,45 +1977,45 @@ hyperic.maintenance_schedule = function(group_id) {
     that.schedule_action = function() {
         if(that.dialog.isValid())
         {
-        var args = that.dialog.getValues();
+            var args = that.dialog.getValues();
 
-	    // create unix epoch datetime in GMT timezone
-        from_datetime = (args.from_date.getTime() + args.from_time.getTime() - args.from_time.getTimezoneOffset() * 60000);
-         // - args.from_date.getTimezoneOffset() * 60000 - args.from_time.getTimezoneOffset() * 60000;
+    	    // create unix epoch datetime in GMT timezone
+            from_datetime = (args.from_date.getTime() + args.from_time.getTime() - args.from_time.getTimezoneOffset() * 60000);
+             // - args.from_date.getTimezoneOffset() * 60000 - args.from_time.getTimezoneOffset() * 60000;
 
-        to_datetime = (args.to_date.getTime() + args.to_time.getTime() - args.to_time.getTimezoneOffset() * 60000);
-         // - args.to_date.getTimezoneOffset() * 60000 - args.to_time.getTimezoneOffset() * 60000;
+            to_datetime = (args.to_date.getTime() + args.to_time.getTime() - args.to_time.getTimezoneOffset() * 60000);
+             // - args.to_date.getTimezoneOffset() * 60000 - args.to_time.getTimezoneOffset() * 60000;
 
-        return dojo11.xhrGet( {
-            url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id + '&sched=true&st=' + from_datetime + '&et=' + to_datetime,
-            handleAs: 'json',
-            load: function(data){
-                // that.charts[chart].data = data;
-				that.dialog.hide();
-                if(!data.error && (parseInt(data.st,10) !== 0 && parseInt(data.et,10) !== 0))
-                {
-                    that.existing_schedule.from_time = parseInt(data.st,10);
-                    that.existing_schedule.to_time = parseInt(data.et,10);
+            return dojo11.xhrGet( {
+                url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id + '&sched=true&st=' + from_datetime + '&et=' + to_datetime,
+                handleAs: 'json',
+                load: function(data){
+                    // that.charts[chart].data = data;
+    				that.dialog.hide();
+                    if(!data.error && (parseInt(data.st,10) !== 0 && parseInt(data.et,10) !== 0))
+                    {
+                        that.existing_schedule.from_time = parseInt(data.st,10);
+                        that.existing_schedule.to_time = parseInt(data.et,10);
 
-                    that.selected_from_time = new Date(that.existing_schedule.from_time);
-                    that.selected_to_time = new Date(that.existing_schedule.to_time);
+                        that.selected_from_time = new Date(that.existing_schedule.from_time);
+                        that.selected_to_time = new Date(that.existing_schedule.to_time);
 
-					that.inputs.from_date.setValue(that.selected_from_time);
-					that.inputs.from_time.setValue(that.selected_from_time);
-					that.inputs.to_date.setValue(that.selected_to_time);
-					that.inputs.to_time.setValue(that.selected_to_time);
+    					that.inputs.from_date.setValue(that.selected_from_time);
+    					that.inputs.from_time.setValue(that.selected_from_time);
+    					that.inputs.to_date.setValue(that.selected_to_time);
+    					that.inputs.to_time.setValue(that.selected_to_time);
 
-                    dojo11.byId('existing_downtime_' + that.group_id).innerHTML = 'Currently scheduled downtime window:';
+                        dojo11.byId('existing_downtime_' + that.group_id).innerHTML = 'Currently scheduled downtime window:';
 
-		            that.buttons.schedule_btn.setLabel('Reschedule');
-		    		that.buttons.clear_schedule_btn.domNode.show();
-                }
-            },
-            error: function(data){
-                console.debug("An error occurred setting maintenance schedule for group " + that.group_id, data);
-            },
-            timeout: 2000
-        });
+    		            that.buttons.schedule_btn.setLabel('Reschedule');
+    		    		that.buttons.clear_schedule_btn.domNode.show();
+                    }
+                },
+                error: function(data){
+                    console.debug("An error occurred setting maintenance schedule for group " + that.group_id, data);
+                },
+                timeout: 2000
+            });
         }
     };
 
