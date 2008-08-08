@@ -15,6 +15,7 @@ import org.codehaus.groovy.runtime.InvokerHelper;
 public class SST_Groovy extends SchemaSpecTask {
     private String _script;
     private String _targetDB;
+    private String _desc;
     
     public void execute()
         throws BuildException
@@ -31,6 +32,9 @@ public class SST_Groovy extends SchemaSpecTask {
         }
         
         log("Running script [" + _script + "]");
+        if (_desc != null) {
+            log(_desc);
+        }
         try {
             GroovyClassLoader loader = 
                 new GroovyClassLoader(Script.class.getClassLoader());
@@ -50,6 +54,14 @@ public class SST_Groovy extends SchemaSpecTask {
         } catch(Exception e) {
             throw new BuildException(e);
         }
+    }
+    
+    public void setDesc(String s) {
+        _desc = s;
+    }
+
+    public String getDesc() {
+        return _desc;
     }
 
     public void setTargetDB(String db) {

@@ -8386,11 +8386,38 @@ has already been defined.
         <statement desc="Drop unused cid column">
             ALTER TABLE EAM_MEASUREMENT DROP COLUMN cid
         </statement>
-        <!-- XXX: fail="false" here due to possible primary key re-org on
-                  oracle dump/restore -->
-        <statement targetDB="oracle" fail="false" desc="Drop discriminator column on EAM_MEASUREMENT">
-            ALTER TABLE EAM_MEASUREMENT DROP COLUMN measurement_class
-        </statement>
+      </schema-directSQL>
+      <groovy targetDB="oracle" desc="Drop discriminator column on EAM_MEASUREMENT">
+      <![CDATA[
+        // in short the oracle primary key depends on a constraint from MEASUREMENT_CLASS which was
+        // auto generated somehow.  Not sure exactly how this happened but in order to ensure that
+        // this occured on all HQ Oracle installations the hasConstraint var is used
+        def row = SQL.firstRow("SELECT constraint_name FROM user_constraints WHERE table_name = 'EAM_MEASUREMENT' and constraint_type = 'P' and index_name = 'MEAS_ID_CLASS'")
+        def stmt
+        def hasConstraint = (row != null && row.constraint_name != null)
+        if (hasConstraint) {
+            // SQL.execute("ALTER ...") does not work here for some odd reason
+            try {
+                stmt = CONN.createStatement()
+                def sql = "ALTER table EAM_MEASUREMENT DROP CONSTRAINT ${row.constraint_name} CASCADE"
+                println("${sql}")
+                stmt.execute(sql)
+           } finally {
+                stmt.close()
+           }
+        }
+        SQL.execute("ALTER table EAM_MEASUREMENT DROP COLUMN MEASUREMENT_CLASS")
+        // primary key is deleted as a result of dropping the MEAS_ID_CLASS constraint.
+        // also, since cascade was used we need to regenerate the foreign key references
+        // that were dropped as a result
+        if (hasConstraint) {
+            SQL.execute("ALTER table EAM_MEASUREMENT ADD PRIMARY KEY (ID)")
+            SQL.execute("ALTER table EAM_METRIC_AUX_LOGS ADD CONSTRAINT FKE7D70B0BA1FCB528 foreign key (METRIC_ID) references EAM_MEASUREMENT (ID)")
+            SQL.execute("ALTER table EAM_MEASUREMENT_BL ADD CONSTRAINT FK1877029BB6E3839C foreign key (MEASUREMENT_ID) references EAM_MEASUREMENT (ID) on delete cascade")
+        }
+      ]]>
+      </groovy>
+      <schema-directSQL>
         <statement targetDB="mysql" desc="Drop discriminator column on EAM_MEASUREMENT">
             ALTER TABLE EAM_MEASUREMENT DROP COLUMN measurement_class
         </statement>
