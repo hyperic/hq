@@ -32,7 +32,7 @@ package org.hyperic.hq.grouping.prop;
  * A CritterProp contains an id and type and basically looks like an
  * encapsulated method argument.
  * 
- * Critters are evaulated like: (pseudo code)
+ * Critters are evaluated like: (pseudo code)
  *    Critter1.evaluate(StringCritterProp resourceName, DateCritterProp since)
  *    
  * Where 'StringCritterProp' equates to something implementing this type
@@ -40,7 +40,7 @@ package org.hyperic.hq.grouping.prop;
  */
 public interface CritterProp {
     /**
-     * Get some id that uniqely defines this prop in the context of a 
+     * Get some id that uniquely defines this prop in the context of a 
      * critter prop list.
      * 
      * e.g.  resourceName, startDate, etc.
