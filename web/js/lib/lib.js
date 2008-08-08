@@ -1968,7 +1968,11 @@ hyperic.maintenance_schedule = function(group_id) {
 		}, "clear_schedule_btn");
         dojo11.connect(that.buttons.clear_schedule_btn, 'onClick', that.clear_schedule_action);
 
-        that.buttons.clear_schedule_btn.domNode.style.display = 'none';
+        // hide the clear schedule button unless a schedule is set.
+        if('undefined' == typeof(that.existing_schedule.from_time))
+        {
+            that.buttons.clear_schedule_btn.domNode.style.display = 'none';
+        }
 
         if(that.existing_schedule.from_time)
         {
