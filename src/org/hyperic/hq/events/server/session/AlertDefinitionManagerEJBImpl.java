@@ -172,7 +172,10 @@ public class AlertDefinitionManagerEJBImpl
         // Disassociate from parent
         // This must be at the very end since we use the parent to determine 
         // whether or not this is a resource type alert definition.
-        alertdef.setParent(null);
+        if (alertdef.getParent() != null) {
+            alertdef.getParent().removeChild(alertdef);
+            alertdef.setParent(null);
+        }
         
         watch.markTimeEnd("mark deleted");
         if (log.isDebugEnabled()) {
@@ -573,13 +576,7 @@ public class AlertDefinitionManagerEJBImpl
         List adefs = aDao.findByAppdefEntity(aeid.getType(), aeid.getID());
         
         for (Iterator i = adefs.iterator(); i.hasNext(); ) {
-            AlertDefinition adef = (AlertDefinition) i.next();
-            
-            // First check to see if need to remove from parent
-            if (adef.getParent() != null) {
-                adef.getParent().removeChild(adef);
-            }
-            
+            AlertDefinition adef = (AlertDefinition) i.next();            
             deleteAlertDefinition(subj, adef, true);
         }
     }
