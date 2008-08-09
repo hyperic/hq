@@ -79,6 +79,10 @@ public class VimUtil extends ServiceInstance {
         return getInstance(config.toProperties());
     }
 
+    public boolean isESX() {
+        return !"gsx".equals(getAboutInfo().getProductLineId());
+    }
+
     public InventoryNavigator getNavigator() {
         if (_nav == null) {
             _nav = new InventoryNavigator(getRootFolder());

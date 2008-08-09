@@ -72,6 +72,9 @@ public class VimPoolDetector
         List servers = new ArrayList();
         try {
             vim = VimUtil.getInstance(platformConfig.toProperties());
+            if (!vim.isESX()) {
+                return null; //no Pools in VMware server
+            }
             ManagedEntity[] pools = vim.find(VimUtil.POOL);
             for (int i=0; i<pools.length; i++) {
                 if (!(pools[i] instanceof ResourcePool)) {
