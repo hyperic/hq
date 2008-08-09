@@ -655,15 +655,15 @@ hyperic.widget = hyperic.widget || {};
         // if(arg == that.tabid){
             if (!that.isShowing) {
                 //create chart
-                var empty = true;
+                var count = true;
                 for(var i in that.data) {
                     if(undefined !== that.data[i] && typeof(that.data[i]) !== 'function')
                     {
-                        empty = false;
+                        count++;
                     }
                 }
                 
-                if(empty)
+                if(count > 1)
                 {
                     node_el = dojo11.byId(node);
                     var message = SimileAjax.Graphics.createMessageBubble(node_el.ownerDocument);
