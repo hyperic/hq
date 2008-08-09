@@ -214,13 +214,12 @@ public class Alert
         _alertVal.removeAllEscalationLogs();
         for (Iterator i=getActionLog().iterator(); i.hasNext(); ) {
             AlertActionLog l = (AlertActionLog)i.next();
-            AlertActionLog logVal = l;
-            _alertVal.addActionLog(logVal);
+            _alertVal.addActionLog(l);
             
             // No action or alert definition means escalation log
             if (l.getAction() == null ||
                 l.getAction().getAlertDefinition() == null) {
-                _alertVal.addEscalationLog(logVal);
+                _alertVal.addEscalationLog(l);
             }
         }
         _alertVal.cleanActionLog();
