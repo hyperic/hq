@@ -51,6 +51,27 @@
             units="sec"
             category="AVAILABILITY"/>
 
+    <metric name="CPU Usage (Average)"
+            indicator="true"
+            alias="cpu.usage.average"
+            units="percent"/>
+
+    <metric name="Disk Usage (Average)"
+            indicator="true"
+            alias="disk.usage.average"
+            units="KB"/>
+
+    <metric name="Memory Usage (Average)"
+            indicator="true"
+            alias="mem.usage.average"
+            units="percent"/>
+
+    <!-- units=KBps -->
+    <metric name="Network Usage (Average)"
+            defaultOn="true"
+            alias="net.usage.average"
+            units="KB"/>
+
     <!-- units=MHz -->
     <metric name="CPU Reserved Capacity"
             alias="cpu.reservedCapacity.average"/>
@@ -84,7 +105,6 @@
             units="percent"/>
 
     <metric name="CPU Active (5 min. Average)"
-            indicator="true"
             alias="rescpu.actav5.latest"
             units="percent"/>
 
@@ -105,17 +125,13 @@
             units="KB"/>
 
     <metric name="Memory Balloon"
-            indicator="true"
+            defaultOn="true"
             alias="mem.vmmemctl.average"
             units="KB"/>
 
     <metric name="Memory Unreserved"
             alias="mem.unreserved.average"
             units="KB"/>
-
-    <metric name="Memory Usage"
-            alias="mem.usage.average"
-            units="percent"/>
 
     <metric name="Memory Heap"
             alias="mem.heap.average"
@@ -138,12 +154,12 @@
             units="MB"/>
 
     <metric name="Memory Active"
-            indicator="true"
+            defaultOn="true"
             alias="mem.active.average"
             units="KB"/>
 
     <metric name="Memory Shared"
-            indicator="true"
+            defaultOn="true"
             alias="mem.shared.average"
             units="KB"/>
 
@@ -176,7 +192,7 @@
       <metric name="Availability" indicator="true"/>
 
       <!-- units=MHz -->
-      <metric name="CPU Usage"
+      <metric name="CPU Usage (Average)"
               indicator="true"
               alias="cpu.usagemhz.average"
               units="none"/>
@@ -269,6 +285,27 @@
               units="sec"
               category="AVAILABILITY"/>
 
+      <metric name="CPU Usage (Average)"
+              indicator="true"
+              alias="cpu.usage.average"
+              units="percent"/>
+
+      <metric name="Disk Usage (Average)"
+              indicator="true"
+              alias="disk.usage.average"
+              units="KB"/>
+
+      <metric name="Memory Usage (Average)"
+              indicator="true"
+              alias="mem.usage.average"
+              units="percent"/>
+
+      <!-- units=KBps -->
+      <metric name="Network Usage (Average)"
+              defaultOn="true"
+              alias="net.usage.average"
+              units="KB"/>
+
       <metric name="CPU Throttled (1 min. Average)"
               alias="rescpu.maxLimited1.latest"
               units="percent"/>
@@ -298,7 +335,6 @@
               units="percent"/>
   
       <metric name="CPU Active (5 min. Average)"
-              indicator="true"
               alias="rescpu.actav5.latest"
               units="percent"/>
   
@@ -322,16 +358,12 @@
               alias="mem.swapped.average"
               units="KB"/>
 
-      <metric name="Memory Usage"
-              alias="mem.usage.average"
-              units="percent"/>
-  
       <metric name="Memory Overhead"
               alias="mem.overhead.average"
               units="KB"/>
   
       <metric name="Memory Balloon"
-              indicator="true"
+              defaultOn="true"
               alias="mem.vmmemctl.average"
               units="KB"/>
   
@@ -356,7 +388,6 @@
               units="KB"/>
   
       <metric name="Memory Consumed"
-              indicator="true"
               alias="mem.consumed.average"
               units="KB"/>
 
@@ -421,7 +452,6 @@
 
         <metric name="CPU Used"
                 alias="cpu.used.summation"
-                indicator="true"
                 units="ms"/>
 
         <metric name="CPU Guaranteed"
@@ -442,8 +472,10 @@
                 units="ms"/>
 
         <!-- in MHz (Average) -->
-        <metric name="CPU Usage"
-                alias="cpu.usagemhz.average"/>
+        <metric name="CPU Usage (Average)"
+                indicator="true"
+                alias="cpu.usagemhz.average"
+                units="percent"/>
 
         <metric name="CPU Wait"
                 alias="cpu.wait.summation"

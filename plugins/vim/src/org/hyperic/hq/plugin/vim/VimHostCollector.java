@@ -167,7 +167,14 @@ public class VimHostCollector extends VimCollector {
                 setValue(Metric.ATTR_AVAIL + "." + instance, Metric.AVAIL_UP); //XXX
             }
 
-            if (info.getStatsType().getValue().equals("absolute")) {
+            if (info.getUnitInfo().getLabel().equals("Percent")) {
+                val /= 100;
+            }
+            String type = info.getStatsType().getValue();
+            if (type.equals("absolute") ||
+                (type.equals("rate") &&
+                 info.getRollupType().getValue().equals("average")))
+            {
                 setValue(key, val);
                 if (printMetric) printXml(info, key);
             }
