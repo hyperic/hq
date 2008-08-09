@@ -655,7 +655,7 @@ hyperic.widget = hyperic.widget || {};
         // if(arg == that.tabid){
             if (!that.isShowing) {
                 //create chart
-                var count = true;
+                var count = 0;
                 for(var i in that.data) {
                     if(undefined !== that.data[i] && typeof(that.data[i]) !== 'function')
                     {
@@ -706,6 +706,7 @@ hyperic.widget = hyperic.widget || {};
                 
                 that.isShowing = true;
             }
+            delete count;
         // }
     };
 
