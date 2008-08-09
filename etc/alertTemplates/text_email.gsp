@@ -11,7 +11,7 @@
   
   def indicatorStr = new StringBuffer()
   if (resource.supportsMonitoring) {
-      indicatorStr << "\nPrevious Indicator Metrics:  \n"
+      indicatorStr << "\nLast Indicator Metrics Collected: \n"
       def window = MeasurementConstants.ACCEPTABLE_LIVE_MILLIS
       for (i in resource.designatedMetrics.getLastDataPoints(window)) {
           if (i.value != null) {
