@@ -10,7 +10,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -26,7 +26,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
 
   <tr valign="top">
     <td width="20%" class="BlockLabel" valign="top"><fmt:message key="alert.current.detail.notify.CAM"/></td>

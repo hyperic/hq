@@ -2,6 +2,8 @@
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
+<%@ taglib uri="jstl-c" prefix="c" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -10,7 +12,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -27,10 +29,11 @@
   USA.
  --%>
 
-
+<c:if test="${listSize > 0}">
   <tr valign="top">
     <td width="20%" class="BlockLabel" valign="top"><fmt:message key="alert.current.detail.notify.OR"/></td>
     <tiles:insert definition=".events.alert.view.notifications.list">
       <tiles:put name="listObjectProperty" value="value"/>
     </tiles:insert>
   </tr>
+</c:if>

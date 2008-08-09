@@ -17,8 +17,7 @@ class RoleCategory {
     }
 
     static void setGroups(Role role, AuthzSubject user, Collection groups) {
-        roleMan.removeResourceGroups(user.authzSubjectValue, role.roleValue,
-                                     (role.resourceGroups.collect {it.id}) as Integer[])
+        roleMan.removeAllResourceGroups(user.authzSubjectValue, role)
         roleMan.addResourceGroups(user.authzSubjectValue,  role.roleValue,
                                   (groups.collect {it.id}) as Integer[])
     }
