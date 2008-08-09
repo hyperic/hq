@@ -64,6 +64,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
@@ -1821,9 +1822,9 @@ public class EventsBossEJBImpl
                     try {
                         _log.info("Inheriting type-based alert defs for " +ent);
                         EventsBossLocal eb = EventsBossEJBImpl.getOne();
-                        AuthzSubject overlord = AuthzSubjectManagerEJBImpl
-                            .getOne().getOverlordPojo();
-                        eb.inheritResourceTypeAlertDefinition(overlord, ent);
+                        AuthzSubject hqadmin = AuthzSubjectManagerEJBImpl
+                            .getOne().getSubjectById(AuthzConstants.rootSubjectId);
+                        eb.inheritResourceTypeAlertDefinition(hqadmin, ent);
                     } catch(Exception e) {
                         throw new SystemException(e);
                     }
