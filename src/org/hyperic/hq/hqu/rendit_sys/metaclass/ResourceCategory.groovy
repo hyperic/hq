@@ -20,8 +20,9 @@ import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as DMan
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as AlertMan
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as DefMan
+import org.hyperic.hq.events.server.session.AlertManagerEJBImpl as AlertMan
+import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl as EventMan
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
 import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.hq.livedata.shared.LiveDataResult
@@ -48,7 +49,10 @@ class ResourceCategory {
     private static dman     = DMan.one
     private static authzMan = AuthzMan.one
     private static groupMan = GroupMan.one
-    private static defMan   = AlertMan.one
+    private static defMan   = DefMan.one
+    private static alertMan = AlertMan.one
+    private static eventMan = EventMan.one
+
     /**
      * Creates a URL for the resource.  This should typically only be called
      * via HtmlUtil.linkTo (or from a controller).  
@@ -128,6 +132,21 @@ class ResourceCategory {
     
     static List getAlertDefinitions(Resource r, AuthzSubject user) {
         defMan.findAlertDefinitions(user, r.entityId)
+    }
+
+    /**
+     * Get the alerts for a Resource
+     */
+    static List getAlerts(Resource r, AuthzSubject user, long begin, long end) {
+        alertMan.findAlerts(user.authzSubjectValue, r.entityId, begin, end,
+                            PageControl.PAGE_ALL)   
+    }
+
+    /**
+     * Get the event logs for a Resource
+     */
+    static List getLogs(Resource r, AuthzSubject user, long begin, long end) {
+        eventMan.findLogs(r.entityId, user, (String[])null, begin, end)
     }
 
     static boolean isGroup(Resource r) {
