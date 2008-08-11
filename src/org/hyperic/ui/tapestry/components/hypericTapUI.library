@@ -40,6 +40,10 @@
     <component-type type="ComboButton" specification-path="form/ComboButton.jwc"/>
     <component-type type="FieldSet" specification-path="form/FieldSet.jwc"/>
 
+    <component-type type="CBGAddDialog" specification-path="dialog/CBGAddDialog.jwc"/>  
+    <component-type type="CBGDeleteDialog" specification-path="dialog/CBGDeleteDialog.jwc"/>
+    <component-type type="CBGModifyDialog" specification-path="dialog/CBGModifyDialog.jwc"/>
+
     <component-type type="PageShell" specification-path="general/Shell.jwc"/>  
     <component-type type="JSONWriter" specification-path="general/JSONWriter.jwc"/>
     
