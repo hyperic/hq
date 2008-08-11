@@ -2234,8 +2234,6 @@ function toggleDialog(){
     alert('open dialog');
 }
 
-
-
 /**
 */
 function filterList(nodes,searchText) {
@@ -2250,4 +2248,15 @@ function filterList(nodes,searchText) {
             }
         }
     }
+}
+
+function clearField(field, class){
+    field.value = '';
+    var appendClass = " "+ class;
+    field.className += appendClass;
+}
+
+function setField(field, value){
+    if(field.value =='')
+        field.value = value;
 }
