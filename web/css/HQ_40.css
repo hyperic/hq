@@ -377,7 +377,7 @@ fieldset {
 
 .button {
     float: right;
-    margin-top: 10px
+    margin: 10px 0px 0px 10px;
 }
 
 a.buttonGreen {
@@ -1539,7 +1539,7 @@ fix */
 	color:#B0B0B0;
 	margin-left:13px;
 	padding:2px;
-	width:188px;
+	width:185px;
 }
 
 .gray {
@@ -1770,4 +1770,45 @@ ol .active.groupIcon {
 
 .availRed{
     background: transparent url(/images/4.0/icons/red.png) no-repeat scroll 0 0;
+}
+
+.dijitDialogPaneContent label{
+	width:90px;
+}
+.dijitDialogPaneContent input[type=text]{
+	border:1px solid gray;
+	padding:3px;
+	width:150px;
+}
+
+.dialogButtonBox{
+	height:30px;
+    padding:10px;
+}
+
+.tapestry-palette select{
+	min-width:280px;
+	width:280px;
+}
+
+.available-header{
+	background: transparent url(/images/4.0/filterboxbg.png) repeat-x scroll 0px -2px;
+	height:23px;
+}
+
+.selected-header{
+	background: transparent url(/images/4.0/filterboxbg.png) repeat-x scroll 0px -2px;
+    height:23px;
+}
+.tapestry-palette option{
+	background:#F3FFF3 none repeat scroll 0 0;
+}
+.tapestry-palette option:active{
+    background:#E2F5FF none repeat scroll 0 0
+}
+.tapestry-palette option:hover{
+    background:#E2F5FF none repeat scroll 0 0
+}
+.modifyDialogInstructions{
+	width:635px
 }
