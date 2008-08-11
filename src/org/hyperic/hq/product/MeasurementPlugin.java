@@ -258,7 +258,9 @@ public class MeasurementPlugin extends GenericPlugin {
 
         TokenReplacer replacer = new TokenReplacer();
 
-        if (info.getVersion() != null) {
+        if ((info.getType() != TypeInfo.TYPE_PLATFORM) &&
+            (info.getVersion() != null))
+        {
             replacer.addFilter("product.version",
                                info.getVersion());
         }
