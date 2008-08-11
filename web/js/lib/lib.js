@@ -665,6 +665,21 @@ hyperic.widget = hyperic.widget || {};
                 
                 if(count > 1)
                 {
+                    that.dataSource = new Timeplot.DefaultEventSource();
+                    var pi = [Timeplot.createPlotInfo( {
+                        id : "plot1", dataSource : new Timeplot.ColumnSource(that.dataSource, 1), valueGeometry : new Timeplot.DefaultValueGeometry( {
+                            gridColor : "#000000", axisLabelsPlacement : "left" }
+                        ), timeGeometry : new Timeplot.DefaultTimeGeometry( {
+                            gridColor : new Timeplot.Color("#DDDDDD"), axisLabelsPlacement : "bottom" }
+                        ), showValues : true, lineColor : "#00EB08", roundValues:false, //00EB08 89EB0F
+                        fillColor : "#00B93A" //#E6FCCA
+                        }
+                    )];
+                    that.chart = Timeplot.create(dojo11.byId("widget_chart"), pi);
+                    // that.chart.loadText(that.url, ",", that.dataSource);
+                    that.chart.loadJSON(that.data, that.dataSource);                }
+                else
+                {
                     node_el = dojo11.byId(node);
                     var message = SimileAjax.Graphics.createMessageBubble(node_el.ownerDocument);
                     message.containerDiv.className = "timeline-message-container";
@@ -686,22 +701,6 @@ hyperic.widget = hyperic.widget || {};
                     )];
                     that.chart = Timeplot.create(dojo11.byId("widget_chart"), pi);
                     that.chart.loadJSON({"2008-08-04T01:08:51-0700":[0],"2008-08-04T01:09:51-0700":[0],"2008-08-04T01:10:51-0700":[0],"2008-08-04T01:11:51-0700":[0],"2008-08-04T01:12:51-0700":[0]}, that.dataSource);
-                }
-                else
-                {
-                    that.dataSource = new Timeplot.DefaultEventSource();
-                    var pi = [Timeplot.createPlotInfo( {
-                        id : "plot1", dataSource : new Timeplot.ColumnSource(that.dataSource, 1), valueGeometry : new Timeplot.DefaultValueGeometry( {
-                            gridColor : "#000000", axisLabelsPlacement : "left" }
-                        ), timeGeometry : new Timeplot.DefaultTimeGeometry( {
-                            gridColor : new Timeplot.Color("#DDDDDD"), axisLabelsPlacement : "bottom" }
-                        ), showValues : true, lineColor : "#00EB08", roundValues:false, //00EB08 89EB0F
-                        fillColor : "#00B93A" //#E6FCCA
-                        }
-                    )];
-                    that.chart = Timeplot.create(dojo11.byId("widget_chart"), pi);
-                    // that.chart.loadText(that.url, ",", that.dataSource);
-                    that.chart.loadJSON(that.data, that.dataSource);
                 }
                 
                 that.isShowing = true;
