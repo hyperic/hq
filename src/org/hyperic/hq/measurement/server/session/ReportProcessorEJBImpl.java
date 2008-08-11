@@ -168,6 +168,7 @@ public class ReportProcessorEJBImpl
         DSNList[] dsnLists = report.getClientIdList();
 
         List dataPoints = new ArrayList();
+        List availPoints = new ArrayList();
         
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
@@ -203,13 +204,17 @@ public class ReportProcessorEJBImpl
                             break;
                         }
                     }
+                    addData(availPoints, dm, dsnId, vals, current);
+                }
+                else {
+                    addData(dataPoints, dm, dsnId, vals, current);
                 }
                 
-                addData(dataPoints, dm, dsnId, vals, current);
             }
         }
 
         sendDataToDB(dataPoints);
+        sendDataToDB(availPoints);
         // Check the SRNs to make sure the agent is up-to-date
         SRNManagerLocal srnManager = getSRNManager();
         Collection nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
