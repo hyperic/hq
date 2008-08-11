@@ -24,6 +24,8 @@ import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as Def
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl as AlertMan
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl as EventMan
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as DMan
+
 import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.hyperic.util.config.ConfigResponse
