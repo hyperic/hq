@@ -63,6 +63,10 @@ public class ResourceTypeCritterType extends BaseCritterType {
         dump.setStringProp(((ResourceTypeCritter)c).getResourceTypeName());
     }
 
+    public boolean isUserVisible() {
+        return false;
+    }
+
     public boolean isSystem() {
         return true;
     }

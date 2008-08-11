@@ -74,6 +74,10 @@ public class OwnedCritterType
 
     public void decompose(Critter critter, CritterDump dump) {
     }
+
+    public boolean isUserVisible() {
+        return false;
+    }
     
     public boolean isSystem() {
         return false;

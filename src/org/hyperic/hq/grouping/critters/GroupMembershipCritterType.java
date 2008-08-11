@@ -64,6 +64,10 @@ public class GroupMembershipCritterType extends BaseCritterType {
         throw new GroupException("decompose not supported");
     }
 
+    public boolean isUserVisible() {
+        return false;
+    }
+
     public boolean isSystem() {
         return false;
     }

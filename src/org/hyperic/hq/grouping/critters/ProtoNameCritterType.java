@@ -75,6 +75,10 @@ public class ProtoNameCritterType extends BaseCritterType {
         dump.setStringProp(protoCritter.getNameRegex());
     }
 
+    public boolean isUserVisible() {
+        return true;
+    }
+
     public boolean isSystem() {
         return false;
     }

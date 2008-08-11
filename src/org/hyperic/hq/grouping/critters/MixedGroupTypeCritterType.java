@@ -75,6 +75,10 @@ public class MixedGroupTypeCritterType extends BaseCritterType {
         dump.setEnumProp(new Integer(c.getGroupType().getCode()));
     }
 
+    public boolean isUserVisible() {
+        return false;
+    }
+
     public boolean isSystem() {
         return true;
     }

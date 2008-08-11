@@ -88,16 +88,26 @@ public interface CritterType {
     
     
     /**
-     * Return true if the Critter is an internal one, used by the system.
+     * Return true if the Critter is an internal one and used by the system.
      * Critters with this set should not be persisted.
      * 
      * In addition, system-based criteria MUST be matched when processing
-     * the results.  (i.e. a CriterList may specify that 'any' may match,
-     * but if it contains a system critter, it MUST match)
+     * the results.
+     * 
+     * i.e. a CriterList may specify that 'any' may match, but if it contains
+     * a system critter, it MUST match.  Essentially this will SQL "and" this
+     * CritterType in the CritterList to the other members no matter the value
+     * of CritterList.isAny().
      *
      * Example uses:
      *   - Critters that specify a match for compatable groups
      *   - Critters that filter out system-related resources (virtual servers)
      */
     boolean isSystem();
+    
+    /**
+     * returns true if this critter should be visible to the UI for user-defined
+     * {@link org.hyperic.hq.groupingCritterList}s.
+     */
+    boolean isUserVisible();
 }

@@ -62,6 +62,10 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
         dump.setResourceProp(c.getPrototype());
     }
 
+    public boolean isUserVisible() {
+        return false;
+    }
+
     public boolean isSystem() {
         return false;
     }

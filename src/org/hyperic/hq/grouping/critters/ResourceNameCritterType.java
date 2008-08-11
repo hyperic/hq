@@ -85,6 +85,10 @@ public class ResourceNameCritterType
         dump.setStringProp(resourceCritter.getNameRegex());
     }
 
+    public boolean isUserVisible() {
+        return true;
+    }
+
     public boolean isSystem() {
         return false;
     }

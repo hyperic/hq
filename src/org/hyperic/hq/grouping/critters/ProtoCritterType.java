@@ -66,6 +66,10 @@ public class ProtoCritterType extends BaseCritterType {
         dump.setResourceProp(protoCritter.getProto());
     }
 
+    public boolean isUserVisible() {
+        return false;
+    }
+
     public boolean isSystem() {
         return false;
     }
