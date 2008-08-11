@@ -2190,19 +2190,15 @@ hyperic.clone_resource_dialog = function(platform_id) {
         }
         if(clone_target_ids.length > 0)
         {
-            dojo11.xhrPost( {
+            dojo11.xhrGet( {
                 url: "/api.shtml?v=1.0&s_id=clone_platform&pid=" + that.platform_id + '&clone=true&ctid=[' + clone_target_ids.toString() + ']',
                 handleAs: 'json',
                 load: function(data){
     				that.dialog.hide();
-                    // if(!data.error)
-                    // {
-    				// }
                 },
                 error: function(data){
                     console.debug("An error occurred queueing platforms for cloning " + that.platform_id, data);
                 },
-                form: 'create_cbg_dialog_form',
                 timeout: 2000
             });
         }
