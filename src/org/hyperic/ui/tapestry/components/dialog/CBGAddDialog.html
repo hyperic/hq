@@ -1,0 +1,45 @@
+<div id ="create_cbg_dialog" style="display:none;">
+    <form jwcid="cbgAddForm@Form" async="true" updateComponents="ongl:updateComponents" >
+	    <label for="group_name"><span key="groupName"/></label><input type="text" name="group_name" id="group_name">
+	    <fieldset><legend><span key="searchCriteria"/></legend>
+	        <span key="groupResources"/>&nbsp;
+	        <span jwcid="@RadioGroup" selected="ognl:isAny">
+	        <span jwcid="@Radio" value="ognl:isAny"/>
+	        <span key="any">
+	        <span jwcid="@Radio" value="ognl:!isAny"/>
+	        <span key="all"/></span>&nbsp;
+	        <span key="selectPost"/><br>
+	        <table id="criteria_dialog_table">
+	            <tbody>
+	               <span jwcid="@For" source="ognl:critterList" value="ognl:critter" index="ognl:critterIndex">
+	               <tr>
+	                   <select jwcid="critterType@PropertySelection" model="ognl:critterTypeList" value="ognl:critter.type"/>
+	               <td>
+	               </td>
+	                   is
+	               <td>
+	                   <input jwcid="@TextField" value="ognl:critter.value"/>
+	               </td>
+	               <td>
+	                   <if jwcid="@If" condition="critterIndex > 0">
+	                       <div jwcid="@LinkSubmit" listener="listener:deleteRow" 
+	                           parameter="ognl:critterIndex" updateComponents="cbgAddForm">+</div> 
+	                   </if>
+	               </td>
+	               <td>
+	                   <if jwcid="@If" condition="ognl:critterIndex == critterList.size()">
+	                       <div jwcid="@LinkSubmit" listener="listener:addRow" updateComponents="cbgAddForm">-</div>
+	                   </if>
+	               </td>
+	               </tr>
+	               </span>
+	            </tbody>
+	        </table>
+	    </fieldset>
+	    <a jwcid="createCancelButton@Button" listener="listener:onCancelListener" 
+	           type="@org.hyperic.ui.tapestry.components.form.Button@BUTTON_GRAY"
+               label="message:cancelButton" submitType="@org.hyperic.ui.tapestry.components.form.Button@SUBMIT_TYPE_CANCEL"/>
+	    <a jwcid="createButton@Button" listener="listener:onCreateListener" 
+               label="message:createButton" submitType="@org.hyperic.ui.tapestry.components.form.Button@SUBMIT_TYPE_CANCEL"/>
+    </form>
+</div>
