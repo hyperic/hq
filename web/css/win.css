@@ -199,7 +199,7 @@ a.listheaderlink:hover {
 }
 
 .tablerowheader th {
-    color: #FFF
+    color: #000
 }
 
 .tableRowHeader td {
@@ -207,12 +207,17 @@ a.listheaderlink:hover {
 }
 
 .listheadercheckbox {
+	background:transparent url(/images/4.0/backgrounds/table_header.png) repeat scroll 0 0;
     border-bottom: solid #D5D8DE;
     border-top: solid #ABB1C7;
     border-width: 1px;
     font-weight: 700;
     padding: 0;
     text-align: center
+}
+
+.listheadersorted{
+	background:transparent url(/images/4.0/backgrounds/table_header.png) repeat scroll 0 0;
 }
 
 .listheadersorted,.tablerowsorted {
@@ -224,6 +229,10 @@ a.listheaderlink:hover {
     padding: 3px
 }
 
+.listheaderinactive{
+     background:transparent url(/images/4.0/backgrounds/table_header.png) repeat scroll 0 0;
+}
+
 .listheaderinactive,.tablerowinactive {
     border-bottom: 1px solid #D5D8DE;
     border-top: 1px solid #ABB1C7;
@@ -233,7 +242,7 @@ a.listheaderlink:hover {
 }
 
 .listheaderinactivesorted {
-    background-color: #C6CFE5;
+    background:transparent url(/images/4.0/backgrounds/table_header.png) repeat scroll 0 0;
     border-bottom: solid #C6CFE5;
     border-top: solid #ABB1C7;
     border-width: 1px;
@@ -1694,7 +1703,7 @@ ul.eventDetails li {
 }
 
 #narrowlist_true .blockcontent {
-    background-color: #F8F9FE
+    background-color: #fff
 }
 
 #displayselaction {
@@ -1708,9 +1717,12 @@ ul.eventDetails li {
 }
 
 .modifieddate {
-    background-color: #E5E5E5;
+    background-color: #fff;
     padding: 3px;
-    text-align: right
+    text-align: right;
+    border-bottom:1px solid #D5D8DE;
+    border-left:1px solid #D5D8DE;
+    border-right:1px solid #D5D8DE;
 }
 
 .esctbl .blocktitle {
@@ -2031,13 +2043,16 @@ a.black:link,a.black:visited {
 }
 
 .dashboard {
-    border-top: 1px solid gray;
-    border-bottom: 1px solid gray;
-    background-color: #DBE3F5;
-    margin: 0px 0px 6px 0px;
-    font-size: 12px;
+	background:transparent url(/images/4.0/backgrounds/titlebar_bg.png) repeat scroll 0 0;
+	border:1px solid gray;
+	font-size:12px;
+	margin:0 0 6px;
+	padding:4px;
 }
-
+#DashboardForm select{
+	padding:1px;
+	border:1px solid #ddd;
+}
 .info {
     border: 1px solid red;
     background-color: #FFFD99;
