@@ -209,7 +209,7 @@ dojo.require("dojo.widget.Dialog");
   <c:choose>
   <c:when test="${DashboardForm.dashboardSelectable}">
   <html:form method="post" action="/SetDashboard.do" styleId="DashboardForm">
-        <div class="messagePanel dashboard">
+        <div class="dashboard">
 	        <span style="font-weight: bold; margin-right: 4px;"><fmt:message key="dash.home.SelectDashboard"/></span>
 	        <html:select property="selectedDashboardId" name="selectedDashboardId" value="selectedDashboardId" onchange="changeDashboard('DashboardForm');" styleId="dashSelect">
 	            <html:optionsCollection property="dashboards" value="id" label="name"></html:optionsCollection>
