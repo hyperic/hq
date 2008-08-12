@@ -820,8 +820,9 @@ public class ResourceGroupManagerEJBImpl
         for(int i = 0; i < groupIds.size(); i++) {
             ResourceGroup rgloc = dao.findById((Integer) groupIds.get(i));
             if (excludeRoot) {
-                if (!rgloc.getName()
-                        .equals(AuthzConstants.groupResourceTypeName))
+                String name = rgloc.getName();
+                if (!name.equals(AuthzConstants.groupResourceTypeName)
+                    && !name.equals(AuthzConstants.rootResourceGroupName))
                     groups.add(rgloc);
             } else {
                 groups.add(rgloc);
