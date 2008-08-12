@@ -490,7 +490,7 @@ a.buttonGreen:active span {
 }
 
 .arrow {
-    background: url('/images/4.0/icons/arrow_right.png') no-repeat 100% 50%
+    background: url('/images/4.0/icons/play.png') no-repeat 100% 50%
 }
 
 .position1 {
@@ -606,7 +606,7 @@ body .dijitMenuSeparator {
 }
 
 body .dijitMenuExpandEnabled {
-    background: transparent url('/images/4.0/icons/arrow_right.png') scroll 0%;
+    background: transparent url('/images/4.0/icons/play.png') scroll 0%;
     width: 16px;
     height: 16px;
     overflow: hidden;
@@ -628,7 +628,7 @@ body .dijitPopup {
 }
 
 .myIcon {
-    background: transparent url('/images/4.0/icons/arrow_right.png') scroll 0%;
+    background: transparent url('/images/4.0/icons/play.png') scroll 0%;
     width: 16px;
     height: 16px;
     overflow: hidden;
