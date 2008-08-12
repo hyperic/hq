@@ -1253,11 +1253,8 @@ select {
 }
 
 .widget .content {
-
-
 /*  display: none;*/
     display: block;
-
 /*        visibility: visible;*/
 }
 
@@ -1276,19 +1273,16 @@ visibility: hidden;*/
 .widget .config form legend {
     padding: 0 2px;
     font-weight: bold;
+    color: #FFF;
 }
 
 .widget .config form label {
     display: inline-block;
+    /* Width of labels */
     width: 120px;
-    /
 
-* Width of labels */
-
-   /
-
-* firefox 2 fix */
-  display: -moz-inline-box;
+    /* firefox 2 fix */
+    display: -moz-inline-box;
     -moz-box-orient: vertical
 }
 
@@ -1319,16 +1313,12 @@ visibility: hidden;*/
     position: absolute;
     top: 45px;
     right: 10px;
-
-
 /*  width: 300px;*/
     height: 250px;
     float: right;
 }
 
 .widget #widget_chart {
-
-
 /*    width: 300px;*/
     height: 250px;
     border: 1px solid #DDD;
@@ -1336,8 +1326,8 @@ visibility: hidden;*/
 
 /* summary widget stuff */
 
-#alert_summary fieldset {
-    padding-bottom: 2em;
+#summaryWidget fieldset {
+    padding: 1em;
 }
 
 #summaryWidget .content table {
@@ -1392,12 +1382,28 @@ visibility: hidden;*/
     vertical-align: top;
 }
 
+#summaryWidget .config table {
+    margin-top: 10px;
+    color: #FFF;
+    border: 0px;
+    border-spacing: 0px;
+    font-size: 100%;
+    width: 100%;
+}
+
 #summaryWidget .config label {
-    display: inline;
+/*    display: inline;*/
+    color: #FFF;
+    font-size: inherit;
 }
 
 #summaryWidget .config select {
     width: 130px;
+}
+
+#summaryWidget .config button {
+    background-color: transparent; 
+    border: 0px;
 }
 
 /* schedule maintenance downtime dialog styling */
@@ -1415,14 +1421,10 @@ visibility: hidden;*/
 .dijitDialog label {
     display: inline-block;
     width: 40px;
-    /* Wi
-
-dth of labels */
+    /* Width of labels */
     margin-left: 4pt;
     margin-bottom: 2px;
-    /* firefox 2 
-
-fix */
+    /* firefox 2 fix */
     display: -moz-inline-box;
     -moz-box-orient: vertical
 }
