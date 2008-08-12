@@ -1595,6 +1595,33 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     };
 
     /**
+     * cancel button handler
+     * reset the available/enabled alert group selectboxes
+     * and swap the config layer and show content layer again
+     */
+    this.click_cancel_btn = function(e)
+    {
+        hyperic.dashboard.widget.click_cancel_btn.apply(
+            this,
+            [
+                e,
+                function()
+                {
+                    var i = 0;
+                    for(i = that.enabled_alert_groups.options.length; i > 0; i--)
+                    {
+                        that.enabled_alert_groups.remove(i-1);
+                    }
+                    for(i = that.available_alert_groups.options.length; i > 0; i--)
+                    {
+                        that.available_alert_groups.remove(i-1);
+                    }
+                    that.populateAlertGroups();
+                }
+            ]);
+    };
+
+    /**
      * save button handler
      * store the data on server, then rebuild the selected_alert_groups local array
      * fetch the updated alert group status,
@@ -2284,6 +2311,8 @@ function clearField(field, className){
 }
 
 function setField(field, value){
-    if(field.value =='')
+    if(field.value == '')
+    {
         field.value = value;
+    }
 }
