@@ -44,8 +44,9 @@
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
 
 <script type="text/javascript">
-    <c:if test="${not empty escalationJSON}">
-    onloads.push(showViewEscResponse);
+<c:choose>
+<c:when test="${not empty escalationJSON}">
+onloads.push(showViewEscResponse);
 
 function showViewEscResponse() {
     var tmp = eval('( <c:out value="${escalationJSON}" escapeXml="false"/> )');
@@ -260,7 +261,16 @@ function showViewEscResponse() {
       }
    }    
 
-    </c:if>
+</c:when>
+<c:when test="${not empty primaryAlert}">
+	function disableEscForRecoveryAlert() {
+		dojo.byId('escIdSel').options[0].text = "<fmt:message key="alert.config.error.escalation.alert.recovery" />";
+		dojo.byId('escIdSel').disabled = true;
+	}
+
+	onloads.push(disableEscForRecoveryAlert);
+</c:when>
+</c:choose>
 	
     function addOption(sel, val, txt, selected) {
         var o = document.createElement('option');
@@ -374,9 +384,9 @@ function showViewEscResponse() {
   <tbody>
     <tr class="tableRowHeader">
       <td><fmt:message key="alert.config.escalation.scheme" />
-          <select id="escIdSel" name="escId" onchange="schemeChange(this)" class="selectWid">
-        <option value=""><fmt:message key="resource.common.inventory.props.SelectOption" /></option>
-      </select>
+		<select id="escIdSel" name="escId" onchange="schemeChange(this)" class="selectWid">
+       		<option value=""><fmt:message key="resource.common.inventory.props.SelectOption" /></option>
+		</select>
         <span id="noescalations" style="display: none;"><fmt:message key="common.label.None"/></span>
       </td>
       <td align="right">

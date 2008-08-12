@@ -79,6 +79,17 @@
   <tr>
     <td colspan="2" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
+<c:if test="${not empty primaryAlert}">
+  <tr valign="top">
+    <td width="20%" class="BlockLabel">
+      <fmt:message key="alert.config.props.CB.Recovery"/>
+    </td>
+    <td width="80%" class="BlockContent">
+      <fmt:message key="alert.config.props.CB.RecoveryFor"/>
+	  <c:out value="${primaryAlert.name}"/>
+     </td>
+  </tr>
+</c:if>
   <tr valign="top">
     <td width="20%" class="BlockLabel"><fmt:message key="alert.config.props.CB.Enable"/></td>
     <td width="80%" class="BlockContent">
