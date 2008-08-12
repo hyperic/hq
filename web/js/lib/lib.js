@@ -1711,7 +1711,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     {
         for(var i in that.tables)
         {
-            while(that.tables[i].lastChild) {
+            while(that.tables[i].rows.length > 1) {
               that.tables[i].removeChild(that.tables[i].lastChild);
             }
         }
@@ -1725,7 +1725,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     {
         var groups = that.selected_alert_groups.sort(that.by_name);
         var half = Math.ceil(groups.length/2);
-        
+
         var status = {
             'red'    : 'Failure',
             'green'  : 'OK',
@@ -1736,10 +1736,10 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         for(var i = 0; i < groups.length; i++)
         {
             var table = (i < half) ? that.tables.lcol : that.tables.rcol;
-            var row = table.insertRow(-1);
+            var row = table.rows[0].cloneNode(true);
             
             row.className = ((i < half ? i : i - half) % 2 == 0) ? 'even' : 'odd';
-
+            row.style.display = '';
             row.id = 'alertGroup:' + groups[i];
             var data = that.alert_group_status[groups[i]] || ['gray','gray'];
             var name = that.alert_groups.data[groups[i]];
@@ -1747,7 +1747,10 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             {
                 name = '<abbr title="' + name + '">' + name.substring(0,20) + '&hellip;</abbr>';
             }
-            row.innerHTML = '<th scope="row"><a href="/Resource.do?eid=5:' + groups[i] + '">' + name +'</a></th><td><img src="/images/4.0/icons/'+data[0]+'.png" alt="'+ status[data[0]] +'"></td><td><a href="/alerts/Alerts.do?mode=list&eid=5:' + groups[i] + '"><img src="/images/4.0/icons/'+data[1]+'.png" alt="'+ status[data[1]]+'" border="0"></a></td>';
+            row.childNodes[0].innerHTML = '<a href="/Resource.do?eid=5:' + groups[i] + '">' + name +'</a>';
+            row.childNodes[1].innerHTML = '<img src="/images/4.0/icons/'+data[0]+'.png" alt="'+ status[data[0]] +'">';
+            row.childNodes[2].innerHTML = '<a href="/alerts/Alerts.do?mode=list&eid=5:' + groups[i] + '"><img src="/images/4.0/icons/'+data[1]+'.png" alt="'+ status[data[1]]+'" border="0"></a>';
+            table.appendChild(row);
             data = name = null;
         }
     };
