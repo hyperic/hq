@@ -24,6 +24,8 @@ import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as Def
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl as AlertMan
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl as EventMan
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
+import org.hyperic.hq.control.server.session.ControlManagerEJBImpl as CMan
+import org.hyperic.hq.product.PluginNotFoundException
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as DMan
 
 import org.hyperic.hq.livedata.shared.LiveDataCommand
@@ -54,6 +56,7 @@ class ResourceCategory {
     private static defMan   = DefMan.one
     private static alertMan = AlertMan.one
     private static eventMan = EventMan.one
+    private static cMan     = CMan.one
 
     /**
      * Creates a URL for the resource.  This should typically only be called
@@ -151,6 +154,17 @@ class ResourceCategory {
         eventMan.findLogs(r.entityId, user, (String[])null, begin, end)
     }
 
+    /**
+     * Get the control actions for a Resource
+     */
+    static List getControlActions(Resource r, AuthzSubject user) {
+        try {
+            return cMan.getActions(user, r.entityId)
+        } catch (PluginNotFoundException e) {
+            return []
+        }
+    }
+
     static boolean isGroup(Resource r) {
         return r.resourceType.id == AuthzConstants.authzGroup
     }
@@ -169,7 +183,11 @@ class ResourceCategory {
      * commands available to the specified resource for the specified user
      */
     static Collection getLiveDataCommands(Resource r, AuthzSubject user) {
-        LiveDataManagerEJBImpl.one.getCommands(user, r.entityId) as List
+        try {
+            return LiveDataManagerEJBImpl.one.getCommands(user, r.entityId) as List
+        } catch (PluginNotFoundException e) {
+            return []
+        }
     }
 
     static LiveDataResult getLiveData(Resource r, AuthzSubject user, 
