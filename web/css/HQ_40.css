@@ -1392,19 +1392,12 @@ visibility: hidden;*/
     vertical-align: top;
 }
 
-#summaryWidget .config .container {
-    width: 426px;
-    display: block;
-    padding-left: 50%;
-    margin-left: -213px;
-}
-
-#summaryWidget .config .container label {
+#summaryWidget .config label {
     display: inline;
 }
 
 #summaryWidget .config select {
-    width: 140px;
+    width: 130px;
 }
 
 /* schedule maintenance downtime dialog styling */
