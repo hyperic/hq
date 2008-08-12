@@ -104,6 +104,12 @@ public abstract class VimCollector extends Collector {
         return info;
     }
 
+    //collect() only allows 1 connection per-host
+    //support isPoolable for concurrent connections to multiple hosts 
+    public boolean isPoolable() {
+        return true;
+    }
+
     public void collect() {
         VimConnection conn;
 
