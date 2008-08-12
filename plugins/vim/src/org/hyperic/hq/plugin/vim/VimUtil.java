@@ -61,6 +61,11 @@ public class VimUtil extends ServiceInstance {
         throws PluginException {
 
         String url = getURL(props);
+        if (url == null) {
+            throw new PluginException(VimCollector.PROP_URL +
+                                      " not configured");
+        }
+
         String username = props.getProperty(VimCollector.PROP_USERNAME);
         String password = props.getProperty(VimCollector.PROP_PASSWORD); 
 
