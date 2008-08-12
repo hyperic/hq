@@ -96,14 +96,16 @@ public class ViewDefinitionAction extends TilesAction {
         // if any of the conditions are EventConstants.TYPE_CHANGE, we
         // cannot edit them
         AlertConditionValue[] acvList = adv.getConditions();
+        int recoverId = 0;
         boolean canEditConditions = true;
         for (int i = 0; i < acvList.length; ++i) {
             switch (acvList[i].getType()) {
+            case EventConstants.TYPE_ALERT:
+                recoverId = acvList[i].getMeasurementId();
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
             case EventConstants.TYPE_CHANGE:
             case EventConstants.TYPE_CONTROL:
-            case EventConstants.TYPE_ALERT:
             case EventConstants.TYPE_CUST_PROP:
             case EventConstants.TYPE_LOG:
             case EventConstants.TYPE_CFG_CHG:
@@ -123,6 +125,11 @@ public class ViewDefinitionAction extends TilesAction {
                 EventConstants.TYPE_ALERT_DEF_ID.equals(adv.getParentId()));
         request.setAttribute("alertDefConditions", alertDefConditions);
         request.setAttribute("openNMSEnabled", OpenNMSAction.isLoaded());
+        if (recoverId > 0) {
+            AlertDefinitionValue primaryAdv = eb.getAlertDefinition(
+            		sessionID, Integer.valueOf(recoverId));        	
+        	request.setAttribute("primaryAlert", primaryAdv);
+        }
 
         // enablement
         AlertDefUtil.setEnablementRequestAttributes(request, adv);

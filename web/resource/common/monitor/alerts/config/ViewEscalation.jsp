@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
 
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
 
   HQ is free software; you can redistribute it and/or modify
@@ -44,8 +44,9 @@
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
 
 <script type="text/javascript">
-    <c:if test="${not empty escalationJSON}">
-    onloads.push(showViewEscResponse);
+<c:choose>
+<c:when test="${not empty escalationJSON}">
+onloads.push(showViewEscResponse);
 
 function showViewEscResponse() {
     var tmp = eval('( <c:out value="${escalationJSON}" escapeXml="false"/> )');
@@ -260,8 +261,17 @@ function showViewEscResponse() {
       }
    }    
 
-    </c:if>
-	
+</c:when>
+<c:when test="${not empty primaryAlert}">
+	function disableEscForRecoveryAlert() {
+		dojo.byId('escIdSel').options[0].text = "<fmt:message key="alert.config.error.escalation.alert.recovery" />";
+		dojo.byId('escIdSel').disabled = true;
+	}
+
+	onloads.push(disableEscForRecoveryAlert);
+</c:when>
+</c:choose>
+
     function addOption(sel, val, txt, selected) {
         var o = document.createElement('option');
         var t = document.createTextNode(txt);
