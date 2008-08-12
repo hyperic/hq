@@ -1,6 +1,7 @@
 <div id ="create_cbg_dialog" style="display:none;">
     <form jwcid="cbgAddForm@Form" async="true" updateComponents="cbgAddForm">
-	    <label for="group_name"><span key="groupName"/></label><input type="text" name="group_name" id="group_name">
+	    <label jwcid="@FieldLabel" field="groupName" displayName="message:groupName"/>
+	    <input jwcid="groupName@TextField" value="ognl:groupName">
 	    <fieldset><legend><span key="searchCriteria"/></legend>
 	        <span key="groupResources"/>&nbsp;
 	        <span jwcid="@RadioGroup" selected="ognl:isAny">
@@ -22,13 +23,13 @@
 	               </td>
 	               <td>
 	                   <if jwcid="@If" condition="critterIndex > 0">
-	                       <div jwcid="@LinkSubmit" listener="listener:onDeleteRow" 
+	                       <div jwcid="@LinkSubmit" listener="listener:onAddRow" 
 	                           parameter="ognl:critterIndex" updateComponents="cbgAddForm">+</div> 
 	                   </if>
 	               </td>
 	               <td>
 	                   <if jwcid="@If" condition="ognl:critterIndex == critterList.size()">
-	                       <div jwcid="@LinkSubmit" listener="listener:onAddRow" updateComponents="cbgAddForm">-</div>
+	                       <div jwcid="@LinkSubmit" listener="listener:onDeleteRow" updateComponents="cbgAddForm">-</div>
 	                   </if>
 	               </td>
 	               </tr>
