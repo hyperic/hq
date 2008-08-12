@@ -881,7 +881,7 @@ function addOptionToSelect(select,option)
     {
         for(var i = 0,j = select.options.length; i < j; i++)
         {
-            if(select.options[i].text > option.text)
+            if(select.options[i].text.toLowerCase() > option.text.toLowerCase())
             {
                 newLocation = i;
                 break;
@@ -1647,7 +1647,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      */
     that.by_name = function(a,b)
     {
-        return that.alert_groups.data[a] > that.alert_groups.data[b];
+        return that.alert_groups.data[a].toLowerCase() > that.alert_groups.data[b].toLowerCase();
     };
 
     /**
