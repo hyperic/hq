@@ -17,7 +17,7 @@ var cbgCreateDialog;
 dojo.addOnLoad(function(){
     cbgCreateDialog = dojo11.byId('create_cbg_dialog');
     cbgCreateDialog.style.width = "450px";
-    that.dialog = new dijit11.Dialog({
+    cbgCreateDialog.dialog = new dijit11.Dialog({
         id: "create_cbg_dialog",
         refocus: true,
         autofocus: false,

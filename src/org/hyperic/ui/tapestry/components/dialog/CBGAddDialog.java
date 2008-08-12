@@ -1,6 +1,7 @@
 package org.hyperic.ui.tapestry.components.dialog;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,6 @@ import org.apache.tapestry.TapestryUtils;
 import org.apache.tapestry.annotations.InjectScript;
 import org.apache.tapestry.annotations.Parameter;
 import org.apache.tapestry.form.IPropertySelectionModel;
-import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.ui.tapestry.components.BaseComponent;
 
 public abstract class CBGAddDialog extends BaseComponent {
@@ -22,8 +22,8 @@ public abstract class CBGAddDialog extends BaseComponent {
     public abstract Integer getCritterIndex();
     public abstract void setCritterIndex(Integer index);
 
-    public abstract CritterType getSelectedCritterType();
-    public abstract void setSelectedCritterType(CritterType type);
+    public abstract CritterCriteria getCritter();
+    public abstract void getCritter(CritterCriteria type);
     
     /**
      * @return Is this an Any or All condition
@@ -35,7 +35,7 @@ public abstract class CBGAddDialog extends BaseComponent {
     /**
      * @return The List of critters created
      */
-    @Parameter(name = "critterList", required = true)
+    @Parameter(name = "criteriaList", required = true)
     public abstract List getCritterList();
     public abstract void setCritterList(List critters);
 
@@ -46,9 +46,13 @@ public abstract class CBGAddDialog extends BaseComponent {
     public abstract IPropertySelectionModel getCritterTypeList();
     public abstract void setCritterTypeList(IPropertySelectionModel list);
 
-    @Parameter(name = "createListener")
+    @Parameter(name = "createListener", required = true)
     public abstract IActionListener getCreateListener();
     public abstract void setCreateListener(IActionListener listener);
+    
+    @Parameter(name = "updateComponents")
+    public abstract Collection getUpdateComponents();
+    public abstract void setUpdateComponents();
     
     @InjectScript("CBGAddDialog.script")
     public abstract IScript getScript();
@@ -75,7 +79,7 @@ public abstract class CBGAddDialog extends BaseComponent {
      * @param cycle
      */
     public void onCreateListener(IRequestCycle cycle) {
-
+        onCancelListener(cycle);
     }
 
     /**
@@ -84,7 +88,10 @@ public abstract class CBGAddDialog extends BaseComponent {
      */
     public void onCancelListener(IRequestCycle cycle) {
         //TODO clear out the current list
-        setCritterList(Collections.EMPTY_LIST);
+        List list = new ArrayList();
+        list.add(new CritterCriteria());
+        setCritterList(list);
+        
     }
     
     public void renderComponent(IMarkupWriter writer, IRequestCycle cycle) {
