@@ -1469,6 +1469,9 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     that.enabled_alert_groups = dojo11.byId('enabled_alert_groups');
     that.groupsearch = dojo11.byId('groupsearch');
 
+	that.enable_alert_btn = dojo11.query('.enable_alert_btn',that.configSheet)[0];
+	that.disable_alert_btn = dojo11.query('.disable_alert_btn',that.configSheet)[0];
+
     that.tables = {
         lcol: dojo11.query('.lcol table tbody',node)[0],
         rcol: dojo11.query('.rcol table tbody',node)[0]
@@ -1539,10 +1542,16 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 		{
 	        moveOption(that.available_alert_groups,that.enabled_alert_groups);
 
-			if(that.enabled_alert_groups.options.length == that.max_alerts)
+			if(that.enabled_alert_groups.options.length == that.max_alerts || that.available_alert_groups.options.length == 0)
 			{
-				e.target.disabled = true;
+			    that.enable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select_disabled.gif" alt="select">';
+				that.enable_alert_btn.disabled = true;
 			}
+			if(that.disable_alert_btn.disabled === true)
+    		{
+    		    that.disable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect.gif" alt="select">';
+    			that.disable_alert_btn.disabled = false;
+    		}
 		}
     };
     
@@ -1571,11 +1580,18 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         // }
         moveOption(that.enabled_alert_groups,that.available_alert_groups);
 
-		enable_alert_btn = dojo11.query('.enable_alert_btn',that.configSheet)[0];
-		if(enable_alert_btn.disabled === true)
+		if(that.enable_alert_btn.disabled === true)
 		{
-			enable_alert_btn.disabled = false;
+		    that.enable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select.gif" alt="select">';
+			that.enable_alert_btn.disabled = false;
 		}
+
+		if(that.enabled_alert_groups.options.length == 0)
+		{
+		    that.disable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect_disabled.gif" alt="select">';
+			that.disable_alert_btn.disabled = true;
+		}
+		
     };
 
     /**
@@ -1640,6 +1656,17 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             
             addOptionToSelect(to,alertOption);
         }
+
+        if(that.available_alert_groups.options.length == 0)
+		{
+		    that.enable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select_disabled.gif" alt="select">';
+			that.enable_alert_btn.disabled = true;
+		}
+        if(that.enabled_alert_groups.options.length == 0)
+		{
+		    that.disable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select_disabled.gif" alt="select">';
+			that.disable_alert_btn.disabled = true;
+		}
     };
 
     /**
