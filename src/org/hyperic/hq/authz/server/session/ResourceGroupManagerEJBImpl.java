@@ -352,7 +352,6 @@ public class ResourceGroupManagerEJBImpl
         ResourceGroupDAO dao = getResourceGroupDAO();
         ResourceGroup resGrp = dao.findById(group.getId());
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        EventLogManagerLocal logMan = EventLogManagerEJBImpl.getOne();
 
         pm.check(whoami.getId(),
                  AuthzConstants.authzGroup, resGrp.getId(),
@@ -362,6 +361,8 @@ public class ResourceGroupManagerEJBImpl
             new ResourceEdgeDAO(DAOFactory.getDAOFactory());
         edgeDao.deleteEdges(resGrp.getResource());
         
+        // TODO scottmf, this should be invoking a pre-transaction callback
+        EventLogManagerLocal logMan = EventLogManagerEJBImpl.getOne();
         logMan.deleteLogs(group.getResource());
 
         GroupingStartupListener.getCallbackObj().preGroupDelete(resGrp);
@@ -372,6 +373,21 @@ public class ResourceGroupManagerEJBImpl
             new ResourceDeletedZevent(whoami,
                                       AppdefEntityID.newGroupID(group.getId()));
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void addResources(AuthzSubject subj, ResourceGroup group,
+                             List resources)
+        throws PermissionException
+    {
+        PermissionManager pm = PermissionManagerFactory.getInstance(); 
+        pm.check(subj.getId(),
+                 AuthzConstants.authzGroup,
+                 group.getId(),
+                 AuthzConstants.perm_modifyResourceGroup);
+        addResources(group, resources);
     }
 
     /**
@@ -402,9 +418,12 @@ public class ResourceGroupManagerEJBImpl
             resourcePojos.add(resource);
         }
         
-        grpDao.addMembers(resGroup, resourcePojos);
-
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(resGroup);
+        addResources(resGroup, resourcePojos);
+    }
+    
+    private void addResources(ResourceGroup group, List resources) {
+        getResourceGroupDAO().addMembers(group, resources);
+        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
     }
 
     /**
