@@ -23,7 +23,7 @@ public abstract class CBGAddDialog extends BaseComponent {
     public abstract void setCritterIndex(Integer index);
 
     public abstract CritterCriteria getCritter();
-    public abstract void getCritter(CritterCriteria type);
+    public abstract void setCritter(CritterCriteria type);
     
     /**
      * @return Is this an Any or All condition
@@ -36,8 +36,8 @@ public abstract class CBGAddDialog extends BaseComponent {
      * @return The List of critters created
      */
     @Parameter(name = "criteriaList", required = true)
-    public abstract List getCritterList();
-    public abstract void setCritterList(List critters);
+    public abstract List<CritterCriteria> getCritterList();
+    public abstract void setCritterList(List<CritterCriteria> critters);
 
     /**
      * @return the selection model for the avail CritterPropTypes
@@ -46,13 +46,23 @@ public abstract class CBGAddDialog extends BaseComponent {
     public abstract IPropertySelectionModel getCritterTypeList();
     public abstract void setCritterTypeList(IPropertySelectionModel list);
 
+    /**
+     * @return binding for the onCreate listener
+     */
     @Parameter(name = "createListener", required = true)
     public abstract IActionListener getCreateListener();
     public abstract void setCreateListener(IActionListener listener);
     
+    /**
+     * @return the components to update after form submit
+     */
     @Parameter(name = "updateComponents")
-    public abstract Collection getUpdateComponents();
-    public abstract void setUpdateComponents();
+    public abstract Collection<String> getUpdateComponents();
+    public abstract void setUpdateComponents(Collection<String> components);
+    
+    @Parameter(name = "groupName")
+    public abstract String getGroupName();
+    public abstract void setGroupName(String name);
     
     @InjectScript("CBGAddDialog.script")
     public abstract IScript getScript();
@@ -67,11 +77,14 @@ public abstract class CBGAddDialog extends BaseComponent {
 
     /**
      * Add a row to the end of the List
-     * @param cycle
+     * @param cycle 
      */
     public void onAddRow(IRequestCycle cycle) {
         //add an item to the cbg list
-        getCritterList().add(null);
+        List<CritterCriteria> critterList = getCritterList();
+        critterList.add(new CritterCriteriaImpl());
+        setCritterList(critterList);
+        
     }
 
     /**
@@ -79,6 +92,7 @@ public abstract class CBGAddDialog extends BaseComponent {
      * @param cycle
      */
     public void onCreateListener(IRequestCycle cycle) {
+        //reset the list for the next group creates
         onCancelListener(cycle);
     }
 
@@ -89,7 +103,7 @@ public abstract class CBGAddDialog extends BaseComponent {
     public void onCancelListener(IRequestCycle cycle) {
         //TODO clear out the current list
         List list = new ArrayList();
-        list.add(new CritterCriteria());
+        list.add(new CritterCriteriaImpl());
         setCritterList(list);
         
     }

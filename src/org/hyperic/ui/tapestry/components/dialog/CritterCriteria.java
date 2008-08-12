@@ -1,27 +1,13 @@
 package org.hyperic.ui.tapestry.components.dialog;
 
-public class CritterCriteria {
+public interface CritterCriteria {
 
-    private Object _selectedType;
-    private String _stringValue;
+    public abstract Object getSelectedType();
 
-    public CritterCriteria() {
-    }
+    public abstract void setSelectedType(Object selectedType);
 
-    public Object getSelectedType() {
-        return _selectedType;
-    }
+    public abstract String getStringValue();
 
-    public void setSelectedType(Object selectedType) {
-        _selectedType = selectedType;
-    }
-
-    public String getStringValue() {
-        return _stringValue;
-    }
-
-    public void setStringValue(String stringValue) {
-        _stringValue = stringValue;
-    }
+    public abstract void setStringValue(String stringValue);
 
 }

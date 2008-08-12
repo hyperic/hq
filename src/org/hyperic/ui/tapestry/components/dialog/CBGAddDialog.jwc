@@ -8,5 +8,4 @@
                           class="org.hyperic.ui.tapestry.components.dialog.CBGAddDialog">
     <property name="critterIndex"/>
     <property name="critter"/>
-    <property name="selectedCritter"/>
 </component-specification>
