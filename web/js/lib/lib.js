@@ -2250,9 +2250,9 @@ function filterList(nodes,searchText) {
     }
 }
 
-function clearField(field, class){
+function clearField(field, className){
     field.value = '';
-    var appendClass = " "+ class;
+    var appendClass = " "+ className;
     field.className += appendClass;
 }
 
