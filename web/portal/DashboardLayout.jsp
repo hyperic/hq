@@ -43,7 +43,7 @@ autoLogout = false;
 
 function removePortlet(name, label) {
     dojo11.xhrGet({
-        url: '<html:rewrite page="/dashboard/RemovePortlet.do"/>',
+        url: '<html:rewrite page="/dashboard/RemovePortlet.do"/>' + '?portletName=' + name,
         load: function(){postRemovet(name,label)}
     });
 }
