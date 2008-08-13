@@ -48,6 +48,12 @@ import org.hyperic.hq.grouping.prop.ResourceCritterProp;
 public class ProtoCritterType extends BaseCritterType {
     
     private static final String PROP_NAME = "protoType";
+    private boolean _system = false;
+
+    public ProtoCritterType(boolean system) {
+        this();
+        _system = system;
+    }
 
     public ProtoCritterType() {
         super();
@@ -71,7 +77,7 @@ public class ProtoCritterType extends BaseCritterType {
     }
 
     public boolean isSystem() {
-        return false;
+        return _system;
     }
     
     public ProtoCritter newInstance(Resource name) { 
