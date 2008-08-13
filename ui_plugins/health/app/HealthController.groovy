@@ -277,7 +277,13 @@ class HealthController
                                           UnitsConstants.SCALE_NONE),
                            locale, null).toString()
     }
-    
+
+    private formatPercent(n, total) {
+        if (total == 0)
+           return 0
+        return (int)(n * 100 / total)
+    }
+
     def getSystemStats(params) {
         def s = Humidor.instance.sigar
         def loadAvgFmt = new PrintfFormat('%.2f')
@@ -335,22 +341,22 @@ class HealthController
                 totalMem:      formatBytes(sysMem.total),
                 usedMem:       formatBytes(used),
                 freeMem:       formatBytes(free),
-                percMem:       (int)(used * 100 / sysMem.total),
+                percMem:       formatPercent(used, sysMem.total),
                 totalSwap:     formatBytes(sysSwap.total),
                 usedSwap:      formatBytes(sysSwap.used),
                 freeSwap:      formatBytes(sysSwap.free),
-                percSwap:      (int)(sysSwap.used * 100 / sysSwap.total),
+                percSwap:      formatPercent(sysSwap.used, sysSwap.total),
                 pid:           pid,
                 procStartTime: dateFormat.format(procTime.startTime),
                 procOpenFds:   procFds,
                 procMemSize:   formatBytes(procMem.size),
                 procMemRes:    formatBytes(procMem.resident),
                 procMemShare:  formatBytes(procMem.share),
-                procCpu:       (int)(procCpu.percent * 100.0 / runtime.availableProcessors()),
+                procCpu:       formatPercent(procCpu.percent, runtime.availableProcessors()),
                 jvmTotalMem:   formatBytes(runtime.totalMemory()),
                 jvmFreeMem:    formatBytes(runtime.freeMemory()),
                 jvmMaxMem:     formatBytes(runtime.maxMemory()),
-                jvmPercMem:    (int)((runtime.maxMemory() - runtime.freeMemory()) * 100 / runtime.maxMemory()),
+                jvmPercMem:    formatPercent(runtime.maxMemory() - runtime.freeMemory(), runtime.maxMemory()),
         ]
     }
     
