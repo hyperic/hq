@@ -127,7 +127,7 @@ public class ViewDefinitionAction extends TilesAction {
         request.setAttribute("openNMSEnabled", OpenNMSAction.isLoaded());
         if (recoverId > 0) {
             AlertDefinitionValue primaryAdv = eb.getAlertDefinition(
-            		sessionID, Integer.valueOf(recoverId));        	
+            		sessionID, new Integer(recoverId));        	
         	request.setAttribute("primaryAlert", primaryAdv);
         }
 
