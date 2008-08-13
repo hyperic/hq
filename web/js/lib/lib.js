@@ -1879,6 +1879,12 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         dojo11.connect(that.groupsearch,'onblur', that.resetSearch);
         dojo11.connect(that.groupsearch,'onkeyup',that.search);
         
+        // preload 'disabled' view buttons
+        var disabled_select = new Image();
+        disabled_select.src = '/images/4.0/buttons/arrow_select_disabled.gif';
+        var disabled_deselect = new Image();
+        disabled_deselect.src = '/images/4.0/buttons/arrow_deselect_disabled.gif';
+        
         that.fetchConfig().addCallback(
             function() {
                 that.fetchAlertGroupStatus().addCallback(
