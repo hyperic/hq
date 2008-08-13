@@ -61,7 +61,7 @@ public abstract class MessagePanel extends BaseComponent {
     /**
      * The dom node ID. Specified to differentiate between panels
      */
-    @Parameter(name = "nodeID", defaultValue = "")
+    @Parameter(name = "nodeID", defaultValue = "messagePanel")
     public abstract String getNodeId();
     public abstract void setNodeId(String nodeId);
     
