@@ -1,7 +1,7 @@
 <div id ="create_cbg_dialog" style="display:none;">
     <form jwcid="cbgAddForm@Form" async="true" updateComponents="cbgAddForm">
-	    <label jwcid="@FieldLabel" field="groupName" displayName="message:groupName"/>
-	    <input jwcid="groupName@TextField" value="ognl:groupName">
+	    <label jwcid="@FieldLabel" field="component:groupNameField" displayName="message:groupName"/>
+	    <input jwcid="groupNameField@TextField" value="ognl:groupName"/>
 	    <fieldset><legend><span key="searchCriteria"/></legend>
 	        <span key="groupResources"/>&nbsp;
 	        <span jwcid="@RadioGroup" selected="ognl:isAny">

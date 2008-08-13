@@ -84,7 +84,7 @@ public abstract class CBGAddDialog extends BaseComponent {
         List<CritterCriteria> critterList = getCritterList();
         critterList.add(new CritterCriteriaImpl());
         setCritterList(critterList);
-        
+        cycle.getResponseBuilder().updateComponent("cbgAddForm");
     }
 
     /**
