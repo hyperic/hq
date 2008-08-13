@@ -40,6 +40,7 @@ import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertSeverity;
+import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
@@ -256,6 +257,19 @@ public class AlertDefinition
      */    
     public boolean isActive() {
         return _active;
+    }
+    
+    /**
+     * Check if the alert definition is a recovery alert
+     */
+    public boolean isRecoveryDefinition() {
+        for (Iterator it = getConditionsBag().iterator(); it.hasNext();) {
+            AlertCondition cond = (AlertCondition) it.next();
+            if (cond.getType() == EventConstants.TYPE_ALERT) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
