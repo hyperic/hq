@@ -12,18 +12,13 @@ import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.hqu.rendit.util.HQUtil
-import org.hyperic.sigar.cmd.Free
-import org.hyperic.sigar.Sigar
-import org.hyperic.sigar.CpuPerc
 import org.hyperic.hq.common.DiagnosticThread
 import org.hyperic.hq.common.Humidor
 import org.hyperic.util.jdbc.DBUtil
 import org.hyperic.hibernate.PageInfo
 
 import java.text.DateFormat;
-import java.sql.Connection
 import java.sql.Types
-import javax.sql.DataSource
 import javax.naming.InitialContext
 
 import groovy.sql.Sql
@@ -293,6 +288,18 @@ class HealthController
             //SigarNotImplementedException on Windows
         }
 
+        //e.g. Linux
+        def free;
+        def used;
+        if ((sysMem.free != sysMem.actualFree ||
+            (sysMem.used != sysMem.actualUsed))) {
+            free = sysMem.actualFree
+            used = sysMem.actualUsed
+        } else {
+            free = sysMem.free
+            used = sysMem.used
+        }
+
         return [sysUserCpu:    (int)(cpu.user * 100),
                 sysSysCpu:     (int)(cpu.sys * 100),
                 sysNiceCpu:    (int)(cpu.nice * 100),
@@ -303,9 +310,9 @@ class HealthController
                 loadAvg5:      loadAvg5,
                 loadAvg15:     loadAvg15,
                 totalMem:      formatBytes(sysMem.total),
-                usedMem:       formatBytes(sysMem.used),
-                freeMem:       formatBytes(sysMem.free),
-                percMem:       (int)(sysMem.used * 100 / sysMem.total),
+                usedMem:       formatBytes(used),
+                freeMem:       formatBytes(free),
+                percMem:       (int)(used * 100 / sysMem.total),
                 totalSwap:     formatBytes(sysSwap.total),
                 usedSwap:      formatBytes(sysSwap.used),
                 freeSwap:      formatBytes(sysSwap.free),
