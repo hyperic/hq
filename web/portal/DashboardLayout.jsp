@@ -197,7 +197,7 @@ dojo.require("dojo.widget.Dialog");
 </c:choose>
 
 
-<div class="effectsContainer ">
+<div class="effectsContainer">
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr>
     <td colspan="<c:out value="${headerColspan}"/>"><tiles:insert page="/portal/DashboardHeader.jsp"/></td>
