@@ -1196,7 +1196,6 @@ select {
 /*    width: 450px;*/
     height: 350px;
     background: #000 url('/images/widget_bg.jpg') repeat-x;
-    padding: 10px;
     position: relative;
     color: #FFF;
     font-family: Helvetica, sans-serif;
@@ -1210,7 +1209,6 @@ select {
 
 .widgetTitle {
     background: transparent url('/images/4.0/backgrounds/panel_gray.jpg') repeat-x scroll top left;
-    margin: -10px;
     padding: 6px 10px;
     cursor: move;
 }
@@ -1253,12 +1251,16 @@ select {
 }
 
 .widget .content {
+    padding: 0px 10px 10px 10px;
+    margin: 0px;
 /*  display: none;*/
     display: block;
 /*        visibility: visible;*/
 }
 
 .widget .config {
+    padding: 0px 10px 10px 10px;
+    margin: 0px;
     display: none;
     opacity: 0;
 /*    
