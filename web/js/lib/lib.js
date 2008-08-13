@@ -1691,7 +1691,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 		}
         if(that.enabled_alert_groups.options.length == 0)
 		{
-		    that.disable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select_disabled.gif" alt="select">';
+		    that.disable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect_disabled.gif" alt="select">';
 			that.disable_alert_btn.disabled = true;
 		}
     };
@@ -1748,8 +1748,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                 name = '<abbr title="' + name + '">' + name.substring(0,20) + '&hellip;</abbr>';
             }
             row.childNodes[0].innerHTML = '<a href="/Resource.do?eid=5:' + groups[i] + '">' + name +'</a>';
-            row.childNodes[1].innerHTML = '<img src="/images/4.0/icons/'+data[0]+'.png" alt="'+ status[data[0]] +'">';
-            row.childNodes[2].innerHTML = '<a href="/alerts/Alerts.do?mode=list&eid=5:' + groups[i] + '"><img src="/images/4.0/icons/'+data[1]+'.png" alt="'+ status[data[1]]+'" border="0"></a>';
+            row.childNodes[1].innerHTML = '<img src="/images/4.0/icons/'+data[0]+'.gif" alt="'+ status[data[0]] +'">';
+            row.childNodes[2].innerHTML = '<a href="/alerts/Alerts.do?mode=list&eid=5:' + groups[i] + '"><img src="/images/4.0/icons/'+data[1]+'.gif" alt="'+ status[data[1]]+'" border="0"></a>';
             table.appendChild(row);
             data = name = null;
         }
