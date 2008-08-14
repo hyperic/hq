@@ -2265,7 +2265,7 @@
         <forward name="editRange" path="/resource/common/monitor/Visibility.do?mode=editRange"/>
       </action>
 
-      <action path="/alerts/Resource"
+      <action path="/ResourceCurrentHealth"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsControlAction"
               name="AlertMetricsControlForm"
               validate="true"
