@@ -33,6 +33,11 @@ import java.util.Map;
 public interface HQDialect
 {
     /*
+     * Returns true if the database supports the merge statement
+     */
+    public boolean supportsMergeStmt();
+
+    /*
      * Returns the table optimize statement for
      * a particular database
      *

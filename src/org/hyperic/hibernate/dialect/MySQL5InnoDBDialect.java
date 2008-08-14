@@ -70,6 +70,10 @@ public class MySQL5InnoDBDialect
         registerColumnType(Types.VARBINARY, 255, "blob");
     }
 
+    public boolean supportsMergeStmt() {
+        return false;
+    }
+
     public boolean supportsIdentityColumns() {
         return false;
     }
