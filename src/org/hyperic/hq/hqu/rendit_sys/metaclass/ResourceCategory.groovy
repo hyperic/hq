@@ -64,14 +64,14 @@ class ResourceCategory {
      *
      * Resources have the following contexts:
      *  'alert' : Returns a link to the resource's alert definitions
-     *  'metric' : Returns a link to the resource's default page with pre-set metric settings
+     *  'currentHealth' : Returns a link to the resource's default page with pre-set metric settings
      *  - Otherwise, simply returns a link to the resource's default page.
      */
     static String urlFor(Resource r, String context) {
         if (context == 'alert') {
             return "/alerts/Config.do?mode=list&eid=${r.entityId}"
-        } else if (context == 'metric') {
-        	return "/alerts/Resource.do?eid=${r.entityId}"
+        } else if (context == 'currentHealth') {
+        	return "/ResourceCurrentHealth.do?eid=${r.entityId}"
         }
         return "/Resource.do?eid=${r.entityId}"
     }

@@ -11,7 +11,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -79,6 +79,9 @@ function reviewAction(option) {
     else if (option.value == 'update') {
         form.view.value = "<c:out value="${view}"/>";
     }
+    else if (option.value == 'now') {
+        window.location.href = "/ResourceCurrentHealth.do?eid=" + form.eid.value;
+    }
     dojo.byId('viewname').style.display = "none";
 }
 
@@ -121,6 +124,12 @@ function reviewAction(option) {
               <option value="go"><c:out value="${viewname}"/></option>
               </c:forEach>
               </c:if>
+              <option disabled="true">
+                <fmt:message key="resource.common.monitor.visibility.view.Separator"/>
+              </option>
+              <option value="now">
+                <fmt:message key="resource.common.monitor.visibility.view.Now"/>
+              </option>
             </html:select>
             <span id="viewname" style="display: none;">
             <fmt:message key="common.label.Name"/>

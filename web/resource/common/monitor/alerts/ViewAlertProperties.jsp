@@ -58,7 +58,7 @@
         <html:link action="/Resource" paramId="eid" paramName="Resource" paramProperty="entityId"><c:out value="${Resource.name}"/></html:link>
 		</c:when>
 		<c:otherwise>
-        <html:link action="/alerts/Resource" paramId="eid" paramName="Resource" paramProperty="entityId"><c:out value="${Resource.name}"/></html:link>
+        <html:link action="/ResourceCurrentHealth" paramId="eid" paramName="Resource" paramProperty="entityId"><c:out value="${Resource.name}"/></html:link>
 		</c:otherwise>
 		</c:choose>
       </c:if>
