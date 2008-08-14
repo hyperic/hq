@@ -228,6 +228,9 @@
         <form-bean name="MetricsControlForm"
                    type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsControlForm"/>
 
+        <form-bean name="AlertMetricsControlForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.AlertMetricsControlForm"/>
+
         <form-bean name="ViewChartForm"
                    type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartForm"/>
 
@@ -2260,6 +2263,16 @@
         <forward name="success" path="/Resource.do?mode=currentHealth"/>
         <forward name="failure" path="/Resource.do?mode=currentHealth"/>
         <forward name="editRange" path="/resource/common/monitor/Visibility.do?mode=editRange"/>
+      </action>
+
+      <action path="/alerts/Resource"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsControlAction"
+              name="AlertMetricsControlForm"
+              validate="true"
+              scope="request">
+        <set-property property="workflow" value="monitor/range"/>
+        <forward name="success" path="/Resource.do?mode=currentHealth"/>
+        <forward name="failure" path="/Resource.do?mode=currentHealth"/>
       </action>
 
       <action path="/resource/common/monitor/visibility/Timeline"
