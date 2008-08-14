@@ -102,7 +102,13 @@ function reviewAction(option) {
           <td>
             <fmt:message key="Filter.ViewLabel"/>
             <html:select property="action" onchange="reviewAction(this.options[this.selectedIndex]);">
-              <option value="update">
+              <option value="now">
+                <fmt:message key="resource.common.monitor.visibility.view.Now"/>
+              </option>
+              <option disabled="true">
+                <fmt:message key="resource.common.monitor.visibility.view.Separator"/>
+              </option>
+              <option value="update" selected="selected">
                 <fmt:message key="resource.common.monitor.visibility.view.Update"/>
                 <c:out value="${view}"/>
               </option>
@@ -124,12 +130,6 @@ function reviewAction(option) {
               <option value="go"><c:out value="${viewname}"/></option>
               </c:forEach>
               </c:if>
-              <option disabled="true">
-                <fmt:message key="resource.common.monitor.visibility.view.Separator"/>
-              </option>
-              <option value="now">
-                <fmt:message key="resource.common.monitor.visibility.view.Now"/>
-              </option>
             </html:select>
             <span id="viewname" style="display: none;">
             <fmt:message key="common.label.Name"/>
