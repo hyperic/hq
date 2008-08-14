@@ -102,7 +102,7 @@
   </tr>
   <tr>
     <td style="padding-left:10px;padding-top:10px;padding-bottom:10px;border-bottom:4px solid #A5D9EE;">
-      For additional detail about this resource, go to <a href="${HQUtil.baseURL + resource.urlFor('inventory')}">${HQUtil.baseURL + resource.urlFor('inventory')}</a><br><br>
+      For additional detail about this resource, go to <a href="${HQUtil.baseURL + resource.urlFor('metric')}">${HQUtil.baseURL + resource.urlFor('metric')}</a><br><br>
       For additional detail about this alert, go to <a href="${HQUtil.baseURL + alert.urlFor('alert')}">${HQUtil.baseURL + alert.urlFor('alert')}</a>
     </td>
   </tr>
