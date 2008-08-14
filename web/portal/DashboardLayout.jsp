@@ -319,16 +319,22 @@ dojo.require("dojo.widget.Dialog");
 	  </td></tr>
 	</table>
 	      <script type="text/javascript">
-	        Sortable.create("<c:out value="narrowList_${narrow}"/>",
-	          {dropOnEmpty: true,
-	           format: /^(.*)$/,
-	           containment: ["<c:out value="narrowList_${narrow}"/>"],
-	           onUpdate: function() {
-	                dojo11.xhrPost({
-	                    url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
-	                    load: function(){ }
-	                });},
-	           constraint: 'vertical'});
+	        // -----------
+	        // XXX:
+	        // Disabling dnd sorting for dashboard widgets temporarily - messes with presentation in IE
+	        // writing a new Sortable version using dojo 1.1 which will hopefully play better with IE
+	        // Anton Stroganov <anton@hyperic.com>
+	        // -----------
+            // Sortable.create("<c:out value="narrowList_${narrow}"/>",
+            //   {dropOnEmpty: true,
+            //    format: /^(.*)$/,
+            //    containment: ["<c:out value="narrowList_${narrow}"/>"],
+            //    onUpdate: function() {
+            //         dojo11.xhrPost({
+            //             url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
+            //             load: function(){ }
+            //         });},
+            //    constraint: 'vertical'});
 	      </script>
 	</c:if>      
 	      <c:choose >
