@@ -92,10 +92,8 @@ import org.hyperic.util.timer.StopWatch;
 public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final String logCtx = DataManagerEJBImpl.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
-    private final HQDialect _dialect;
     
     public DataManagerEJBImpl() {
-        _dialect = Util.getHQDialect();
     }
 
     // The boolean system property that makes all events interesting. This 
