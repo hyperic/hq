@@ -1194,9 +1194,9 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     {
         that.pauseCharts();
     
-        if(that.currentChartId != e.target.value)
+        if(that.currentChartId != e.target.index)
         {
-            that.cycleCharts(e.target.value);
+            that.cycleCharts(e.target.index);
         }
     };
 
@@ -1221,24 +1221,22 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 // console.info('next defined by next element from select box selected index ' + that.chartselect.selectedIndex + ' + 1');
                 next = that.chartselect.selectedIndex+1;
             }
+            that.chartselect.selectedIndex = next;
         }
         else
         {
             // console.info('next defined by passing in argument ' + chartId);
             next = chartId;
         }
-
+        
         if(that.chart !== null)
         {
             that.chart.cleanup();
         }
 
-        // console.log('next is' + next);
-
         if(that.charts[next].data)
         {
             that.chart = new hyperic.widget.Chart('chart_container', that.charts[next]);
-            that.chartselect.selectedIndex = next;
             that.currentChartId = next;
             chartId = null;
         }
@@ -1262,7 +1260,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                     {
                         that.chart = new hyperic.widget.Chart('chart_container', {data: {'0': [0]}, name: that.charts[next].name});
                     }
-                    that.chartselect.selectedIndex = next;
                     that.currentChartId = next;
                     chartId = null;
                 });
@@ -1316,7 +1313,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             url: "/api.shtml?v=1.0&s_id=chart",
             handleAs: 'json',
             load: function(data){
-                that.charts = data.sort(function(a,b) {return a.name > b.name;});
+                that.charts = data.sort(function(a,b) {return a.name.toLowerCase() > b.name.toLowerCase();});
                 that.populateChartSelect();
                 that.playCharts();
             },
@@ -1417,10 +1414,11 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
 
         // set up the event handler for the select box
         dojo11.connect(that.chartselect,'onclick',that.select);
-        
+
         // handle resizing of the window
         dojo11.connect(window,'onresize',dojo11.hitch(that, that.chartResize));
 
+        // set the initial size of the chart (widget width -20px for left and right padding -10px for center spacing -120px selectbox)
         dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 150;
 
         that.fetchConfig();
