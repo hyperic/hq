@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<filters>
+  <filter id="JVM Memory MBean">
+    <objectName>java.lang:type=Memory</objectName>
+    <attributeRegex>.*Usage</attributeRegex>
+    <operationRegex>.*</operationRegex>
+  </filter>
+  <filter id="JVM Platform MBeans">
+    <objectName>java.lang:*</objectName>
+    <attributeRegex>.*</attributeRegex>
+    <operationRegex>.*</operationRegex>
+  </filter>
+</filters>
