@@ -487,6 +487,12 @@ public class EscalationManagerEJBImpl
         action = eAction.getAction();
 
         Escalatable esc = getEscalatable(s);
+        
+        // HQ-1348: End escalation if alert is already fixed
+        if (esc.getAlertInfo().isFixed()){
+        	endEscalation(s);
+        	return;
+        }
 
         // Always make sure that we increase the state offset of the
         // escalation so we don't loop fo-eva 
