@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.util.StringUtil;
@@ -134,6 +135,30 @@ public class AppdefEntityID
 
     public AppdefEntityID(ResourceValue rv) {
         String rtName = rv.getResourceTypeValue().getName();
+        _entityID = rv.getInstanceId().intValue();
+        if(rtName.equals(AuthzConstants.platformResType)) {
+            _entityType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+        }
+        else if(rtName.equals(AuthzConstants.serverResType)) {
+            _entityType = AppdefEntityConstants.APPDEF_TYPE_SERVER;
+        }
+        else if(rtName.equals(AuthzConstants.serviceResType)) {
+            _entityType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+        }
+        else if(rtName.equals(AuthzConstants.applicationResType)) {
+            _entityType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
+        }
+        else if(rtName.equals(AuthzConstants.groupResType)) {
+            _entityType = AppdefEntityConstants.APPDEF_TYPE_GROUP;
+        } 
+        else {
+            throw new IllegalArgumentException(rtName + 
+                " is not a valid Appdef Resource Type");
+        }
+    }
+
+    public AppdefEntityID(Resource rv) {
+        String rtName = rv.getResourceType().getName();
         _entityID = rv.getInstanceId().intValue();
         if(rtName.equals(AuthzConstants.platformResType)) {
             _entityType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
