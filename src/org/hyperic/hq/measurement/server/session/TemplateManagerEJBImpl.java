@@ -76,6 +76,7 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -92,6 +93,7 @@ import org.hyperic.util.pager.Pager;
  * @ejb:transaction type="REQUIRED"
  */
 public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
+    private final String logCtx = TemplateManagerEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(TemplateManagerEJBImpl.class);
 
     protected final String VALUE_PROCESSOR =
@@ -606,6 +608,8 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             long current = System.currentTimeMillis();
+            tStmt = conn.prepareStatement(templatesql);
+            aStmt = conn.prepareStatement(argsql);
 
             // can assume this is called in a single thread
             // This is called at hq server startup
@@ -633,7 +637,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     Integer rawid = (Integer)tmplIdGenerator.
                         generate((SessionImpl)session, new MeasurementTemplate());
 
-                    tStmt = conn.prepareStatement(templatesql);
                     tStmt.setInt(col++, rawid.intValue());
                     tStmt.setString(col++, info.getName());
                     tStmt.setString(col++, info.getAlias());
@@ -648,15 +651,13 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     tStmt.setString(col++, pluginName);
                     tStmt.setLong(col++, current);
                     tStmt.setLong(col++, current);
-                    tStmt.execute();
-                    tStmt.close();
+                    tStmt.addBatch();
 
                     Integer derivedid = (Integer)tmplIdGenerator.
                         generate((SessionImpl)session, new MeasurementTemplate());
                     
                     // Next, create the derived measurement
                     col = 1;
-                    tStmt = conn.prepareStatement(templatesql);
                     tStmt.setInt(col++, derivedid.intValue());
                     tStmt.setString(col++, info.getName());
                     tStmt.setString(col++, info.getAlias());
@@ -671,15 +672,13 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     tStmt.setString(col++, pluginName);
                     tStmt.setLong(col++, current);
                     tStmt.setLong(col++, current);
-                    tStmt.execute();
-                    tStmt.close();
+                    tStmt.addBatch();
                 
                     Integer argid = (Integer)argIdGenerator.
                         generate((SessionImpl)session, new MeasurementArg());
 
                     // Lastly, create the line item
                     col = 1;
-                    aStmt = conn.prepareStatement(argsql);
                     aStmt.setInt(col++, argid.intValue());
                     aStmt.setInt(col++, derivedid.intValue());
                     aStmt.setInt(col++, rawid.intValue());
@@ -687,14 +686,17 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     aStmt.setInt(col++, 0);
                     aStmt.setFloat(col++, 0f);
                     aStmt.setInt(col++, 0);
-                    aStmt.execute();
-                    aStmt.close();
+                    aStmt.addBatch();
                 }
             }
+            tStmt.executeBatch();
+            aStmt.executeBatch();
         } catch (SQLException e) {
             this.log.error("Unable to add measurements for: " +
                            pluginName, e);
         } finally {
+            DBUtil.closeStatement(logCtx, aStmt);
+            DBUtil.closeStatement(logCtx, tStmt);
             session.disconnect();
         }
     }
