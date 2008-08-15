@@ -1394,7 +1394,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         if(that.showing == 'content')
         {
             that.chart.cleanup();
-            dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 130;
+            dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 150;
             that.chart = new hyperic.widget.Chart('chart_container', that.charts[that.currentChartId]);
             that.needsResize = false;
         }
@@ -1421,8 +1421,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         // handle resizing of the window
         dojo11.connect(window,'onresize',dojo11.hitch(that, that.chartResize));
 
-        dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 130;
-        // dojo11.query('#widget_chart',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 130;
+        dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 150;
 
         that.fetchConfig();
         that.fetchAndPlayCharts();
