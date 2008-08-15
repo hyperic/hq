@@ -479,7 +479,8 @@ public class JBossDetector
         String typeVersion = fullVersion.substring(0, 3);
 
         if (!getTypeInfo().getVersion().equals(typeVersion)) {
-            getLog().debug(configDir + " is not a " + getName());
+            getLog().debug(configDir + " (" + fullVersion + ")" +
+                           " is not a " + getName());
             return null;
         }
 

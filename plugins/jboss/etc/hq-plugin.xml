@@ -852,4 +852,9 @@
       </config>
     </service>
   </server>
+
+  <server name="JBoss"
+          version="4.3"
+          include="4.2">
+  </server>
 </plugin>
