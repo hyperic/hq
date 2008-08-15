@@ -1224,7 +1224,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         // console.info('argument: ' + chartId);
         // console.info('next defined by default, 0');
         var next = 0;
-        if(chartId === null || chartId < 0 || chartId >= that.chartselect.options.length)
+        if(typeof chartId == 'undefined' || chartId < 0 || chartId >= that.chartselect.options.length)
         {
             if(that.chartselect.selectedIndex !== -1 && that.chartselect.selectedIndex != that.chartselect.options.length-1)
             {
