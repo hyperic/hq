@@ -1313,7 +1313,12 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             url: "/api.shtml?v=1.0&s_id=chart",
             handleAs: 'json',
             load: function(data){
-                that.charts = data.sort(function(a,b) {return a.name.toLowerCase() > b.name.toLowerCase();});
+                that.charts = data.sort(
+                    function(a,b) { 
+                        a = a.name.toLowerCase(); 
+                        b = b.name.toLowerCase();
+                        return a > b ? 1 : (a < b ? -1 : 0);
+                    });
                 that.populateChartSelect();
                 that.playCharts();
             },
@@ -1694,14 +1699,6 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     };
 
     /**
-     * utility function to sort alert data by alert group name
-     */
-    that.by_name = function(a,b)
-    {
-        return that.alert_groups.data[a].toLowerCase() > that.alert_groups.data[b].toLowerCase();
-    };
-
-    /**
      * destroy current alert tables, and call #paintAlertGroups() to re-paint them
      */
     that.repaintAlertGroups = function() 
@@ -1720,7 +1717,13 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      */
     that.paintAlertGroups = function()
     {
-        var groups = that.selected_alert_groups.sort(that.by_name);
+        var groups = that.selected_alert_groups.sort(
+            function(a,b) {
+                a = that.alert_groups.data[a].toLowerCase();
+                b = that.alert_groups.data[b].toLowerCase();
+                return a > b ? 1 : (a < b ? -1 : 0);
+            });
+        
         var half = Math.ceil(groups.length/2);
 
         var status = {
