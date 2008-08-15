@@ -1193,10 +1193,20 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     that.select = function(e)
     {
         that.pauseCharts();
-    
-        if(that.currentChartId != e.target.index)
+        var chartId = null;
+        
+        // in firefox, the target will be the option
+        if(e.target.tagName.toLowerCase() == 'option')
         {
-            that.cycleCharts(e.target.index);
+            chartId = e.target.index;
+        }
+        else // in IE, the target is the selectbox
+        {
+            chartId = e.target.selectedIndex;
+        }
+        if(that.currentChartId != chartId)
+        {
+            that.cycleCharts(chartId);
         }
     };
 
@@ -1214,7 +1224,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         // console.info('argument: ' + chartId);
         // console.info('next defined by default, 0');
         var next = 0;
-        if(!chartId || chartId < 0 || chartId >= that.chartselect.options.length)
+        if(chartId === null || chartId < 0 || chartId >= that.chartselect.options.length)
         {
             if(that.chartselect.selectedIndex !== -1 && that.chartselect.selectedIndex != that.chartselect.options.length-1)
             {
@@ -1274,7 +1284,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      * @see #cycleCharts
      */
     that.playCharts = function() {
-        console.log('starting to play');
+        // console.log('starting to play');
         that.cycleCharts();
         if(that.cycleId === null) {
             that.cycleId = setInterval(that.cycleCharts, parseInt(that.config.interval,10)*1000);
