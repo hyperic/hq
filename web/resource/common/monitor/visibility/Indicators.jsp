@@ -79,9 +79,6 @@ function reviewAction(option) {
     else if (option.value == 'update') {
         form.view.value = "<c:out value="${view}"/>";
     }
-    else if (option.value == 'now') {
-        window.location.href = "/ResourceCurrentHealth.do?eid=" + form.eid.value;
-    }
     dojo.byId('viewname').style.display = "none";
 }
 
@@ -102,13 +99,7 @@ function reviewAction(option) {
           <td>
             <fmt:message key="Filter.ViewLabel"/>
             <html:select property="action" onchange="reviewAction(this.options[this.selectedIndex]);">
-              <option value="now">
-                <fmt:message key="resource.common.monitor.visibility.view.Now"/>
-              </option>
-              <option disabled="true">
-                <fmt:message key="resource.common.monitor.visibility.view.Separator"/>
-              </option>
-              <option value="update" selected="selected">
+              <option value="update">
                 <fmt:message key="resource.common.monitor.visibility.view.Update"/>
                 <c:out value="${view}"/>
               </option>
