@@ -102,6 +102,7 @@ public abstract class Collector implements Runnable {
     private GenericPlugin plugin;
     private Properties props;
 
+    private boolean isRunning = false;
     private int timeout = -1;
     private long startTime, endTime;
     //use a ref to Metric: ScheduleThread.unscheduleMetric unsets interval
@@ -543,6 +544,7 @@ public abstract class Collector implements Runnable {
     }
 
     public void run() {
+        this.isRunning = true;
         this.result.values.clear();
         this.result.level = -1;
         this.startTime = this.endTime = -1;
@@ -572,6 +574,7 @@ public abstract class Collector implements Runnable {
         }
 
         PluginContainer.setResult(this);
+        this.isRunning = false;
     }
 
     protected void parseResults(String message) {
@@ -655,6 +658,11 @@ public abstract class Collector implements Runnable {
             Collector collector = (Collector)pluginCollectors.get(i);
             long interval = collector.getInterval();
             long lastCollection = collector.lastCollection;
+
+            if (collector.isRunning) {
+                log.debug(collector + " is running: deferring");
+                continue;
+            }
 
             CollectorResult result =
                 (CollectorResult)container.results.get(collector.props);
