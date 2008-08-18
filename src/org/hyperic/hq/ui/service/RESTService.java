@@ -472,13 +472,10 @@ public class RESTService extends BaseService {
 					.put(PARAM_START_TIME, event.getStartTime())
 					.put(PARAM_END_TIME, event.getEndTime());
             	
-            	try {
-            		// Get permissions
-            		PermissionManagerFactory.getInstance()
-            					.getMaintenanceEventManager()
-            					.checkPermission(me, event);
-            		jRes.put("permission", true);
-            	} catch (PermissionException pe) {}
+            	boolean canSchedule = PermissionManagerFactory.getInstance()
+            									.getMaintenanceEventManager()
+            									.canSchedule(me, event);
+            	jRes.put("permission", canSchedule);
             }
      
         } catch (Exception e) {

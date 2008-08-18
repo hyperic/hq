@@ -1777,8 +1777,9 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException, 
                PermissionException, SchedulerException 
     {
-    	manager.authenticate(sessionId);
-    	return getMaintEvtMgr().getMaintenanceEvent(groupId);
+    	AuthzSubject subject = manager.getSubject(sessionId);
+
+    	return getMaintEvtMgr().getMaintenanceEvent(subject, groupId);
     }
 
     /**

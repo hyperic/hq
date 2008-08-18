@@ -59,8 +59,9 @@ public class MaintenanceEventManagerEJBImpl
      * 
      * @ejb:interface-method 
      */
-    public MaintenanceEvent getMaintenanceEvent(Integer groupId)
-        throws SchedulerException 
+    public MaintenanceEvent getMaintenanceEvent(AuthzSubject subject,
+    											Integer groupId)
+        throws PermissionException, SchedulerException 
     {
         throw new UnsupportedOperationException();
     }
@@ -105,8 +106,7 @@ public class MaintenanceEventManagerEJBImpl
      * 
      * @ejb:interface-method 
      */
-    public void checkPermission(AuthzSubject subject, MaintenanceEvent event) 
-    	throws PermissionException
+    public boolean canSchedule(AuthzSubject subject, MaintenanceEvent event) 
     {
         throw new UnsupportedOperationException();    	
     }

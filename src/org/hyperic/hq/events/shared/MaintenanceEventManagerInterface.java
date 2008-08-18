@@ -40,8 +40,9 @@ public interface MaintenanceEventManagerInterface {
     /**
      * Get the maintenance event for the group
      */
-    public MaintenanceEvent getMaintenanceEvent(Integer groupId)
-        throws SchedulerException;
+    public MaintenanceEvent getMaintenanceEvent(AuthzSubject subject,
+    											Integer groupId)
+        throws PermissionException, SchedulerException;
 
     /**
      * Disable or enable monitors (alerts, measurements) for the group and its
@@ -65,9 +66,8 @@ public interface MaintenanceEventManagerInterface {
         throws PermissionException, SchedulerException;
 
     /**
-     * Perform group permission check
+     * Check to see if user is authorized to schedule a maintenance event
      */
-    public void checkPermission(AuthzSubject subject, MaintenanceEvent event) 
-    	throws PermissionException;
+    public boolean canSchedule(AuthzSubject subject, MaintenanceEvent event);
 
 }
