@@ -21,7 +21,7 @@ class EscalationHelper extends BaseHelper {
      * @param name the name of the escalation (optional if searching by ID)
      * @return Escalation
      */
-    Escalation getEscalation(int id, String name) {
+    Escalation getEscalation(Integer id, String name) {
         if (id) {
             return escMan.findById(user, id)
         }
