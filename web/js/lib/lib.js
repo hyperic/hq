@@ -1918,7 +1918,14 @@ hyperic.maintenance_schedule = function(group_id) {
 	that.inputs = {};
 	that.canSchedule = true;
     that.selected_from_time = that.selected_to_time = new Date();
-    
+
+	that.messages = {
+		success : "Updated!",
+		validationError: "Please correct the highlighted errors below.", 
+		currentSchedule : "Currently scheduled downtime window:",
+		noSchedule : "No downtime window is currently scheduled.",
+	}
+
     that.init = function() {
 	    if(!that.dialog){
 			var pane = dojo11.byId('maintenance' + that.group_id);
@@ -2038,34 +2045,10 @@ hyperic.maintenance_schedule = function(group_id) {
 			label: "Clear schedule",
 			name: "clear_schedule_btn",
 			id: "clear_schedule_btn",
-			type: 'submit'
+			type: 'button'
 		}, "clear_schedule_btn");
         dojo11.connect(that.buttons.clear_schedule_btn, 'onClick', that.clear_schedule_action);
 
-        // hide the clear schedule button unless a schedule is set.
-        if('undefined' == typeof(that.existing_schedule.from_time))
-        {
-            that.buttons.clear_schedule_btn.domNode.style.display = 'none';
-        }
-
-        if(that.existing_schedule.from_time)
-        {
-            that.buttons.schedule_btn.setLabel('Reschedule');
-        }
-        
-        if(!that.canSchedule) {
-        	for(var inputName in that.inputs)
-        	{
-        		that.inputs[inputName].setAttribute('disabled', 'disabled');
-        	}
-        	for(var buttonName in that.buttons)
-        	{
-        		if(buttonName != 'cancel_btn')
-        		{
-        			that.buttons[buttonName].domNode.style.display = 'none';
-        		}
-        	}
-        }
     };
 
     that.schedule_action = function() {        
@@ -2084,8 +2067,7 @@ hyperic.maintenance_schedule = function(group_id) {
                 url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id + '&sched=true&st=' + from_datetime + '&et=' + to_datetime,
                 handleAs: 'json',
                 load: function(data){
-                    // that.charts[chart].data = data;
-    				that.dialog.hide();
+    				//that.dialog.hide();
                     if(!data.error && (parseInt(data.st,10) !== 0 && parseInt(data.et,10) !== 0))
                     {
                         that.existing_schedule.from_time = parseInt(data.st,10);
@@ -2099,7 +2081,7 @@ hyperic.maintenance_schedule = function(group_id) {
     					that.inputs.to_date.setValue(that.selected_to_time);
     					that.inputs.to_time.setValue(that.selected_to_time);
 
-                        dojo11.byId('existing_downtime_' + that.group_id).innerHTML = 'Currently scheduled downtime window:';
+                        dojo11.byId('existing_downtime_' + that.group_id).innerHTML = that.messages.success + " " + that.messages.currentSchedule;
 
     		            that.buttons.schedule_btn.setLabel('Reschedule');
     		    		that.buttons.clear_schedule_btn.domNode.show();
@@ -2111,6 +2093,10 @@ hyperic.maintenance_schedule = function(group_id) {
                 timeout: 2000
             });
         }
+    	else
+    	{
+            dojo11.byId('existing_downtime_' + that.group_id).innerHTML = that.messages.validationError;
+    	}
     };
 
     that.clear_schedule_action = function() {
@@ -2118,8 +2104,7 @@ hyperic.maintenance_schedule = function(group_id) {
             url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id + '&sched=false',
             handleAs: 'json',
             load: function(data){
-                // that.charts[chart].data = data;
-				that.dialog.hide();
+				//that.dialog.hide();
                 if(!data.error)
                 {
                     that.existing_schedule = {};
@@ -2133,7 +2118,7 @@ hyperic.maintenance_schedule = function(group_id) {
 		            that.buttons.schedule_btn.setLabel('Schedule');
 		    		that.buttons.clear_schedule_btn.domNode.hide();
 
-                    dojo11.byId('existing_downtime_' + that.group_id).innerHTML = '';
+                    dojo11.byId('existing_downtime_' + that.group_id).innerHTML = that.messages.success + " " + that.messages.noSchedule;
 				}
             },
             error: function(data){
@@ -2160,14 +2145,19 @@ hyperic.maintenance_schedule = function(group_id) {
 
                     	that.selected_from_time = new Date(that.existing_schedule.from_time);
                     	that.selected_to_time = new Date(that.existing_schedule.to_time);
-                    
-                    	dojo11.byId('existing_downtime_' + that.group_id).innerHTML = 'Currently scheduled downtime window:';
+                    	                    
+                    	dojo11.byId('existing_downtime_' + that.group_id).innerHTML = that.messages.currentSchedule;
                 	} 
-        			else if (!that.canSchedule) {
-                    	dojo11.byId('existing_downtime_' + that.group_id).innerHTML = 'No downtime window currently scheduled.';        			
+        			else
+        			{
+                        that.existing_schedule = {};
+    				    that.selected_from_time = that.selected_to_time = new Date();
+
+                    	dojo11.byId('existing_downtime_' + that.group_id).innerHTML = that.messages.noSchedule;        			
         			}
                 }
-                that.init();
+            	that.redraw();
+                that.dialog.show();
             },
             error: function(data){
                 console.debug("An error occurred fetching maintenance schedule for group " + that.group_id, data);
@@ -2176,7 +2166,39 @@ hyperic.maintenance_schedule = function(group_id) {
         });
     };
 
-	that.getSchedule();
+    that.redraw = function() {
+		that.inputs.from_date.setValue(that.selected_from_time);
+		that.inputs.from_time.setValue(that.selected_from_time);
+		that.inputs.to_date.setValue(that.selected_to_time);
+		that.inputs.to_time.setValue(that.selected_to_time);
+
+        // hide the clear schedule button unless a schedule is set.
+        if('undefined' == typeof(that.existing_schedule.from_time))
+        {
+            that.buttons.clear_schedule_btn.domNode.style.display = 'none';
+        }
+
+        if(that.existing_schedule.from_time)
+        {
+            that.buttons.schedule_btn.setLabel('Reschedule');
+        }
+        
+        if(!that.canSchedule) {
+        	for(var inputName in that.inputs)
+        	{
+        		that.inputs[inputName].setAttribute('disabled', 'disabled');
+        	}
+        	for(var buttonName in that.buttons)
+        	{
+        		if(buttonName != 'cancel_btn')
+        		{
+        			that.buttons[buttonName].domNode.style.display = 'none';
+        		}
+        	}
+        }		
+    };
+    
+	that.init();
 };
 
 hyperic.clone_resource_dialog = function(platform_id) {
