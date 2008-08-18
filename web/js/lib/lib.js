@@ -1916,6 +1916,7 @@ hyperic.maintenance_schedule = function(group_id) {
     that.dialog = null;
 	that.buttons = {};
 	that.inputs = {};
+	that.canSchedule = true;
     that.selected_from_time = that.selected_to_time = new Date();
     
     that.init = function() {
@@ -2020,7 +2021,7 @@ hyperic.maintenance_schedule = function(group_id) {
 			label: "Schedule",
 			name: "schedule_btn",
 			id: "schedule_btn",
-			type: 'submit'
+			type: 'button'
 		}, "schedule_btn");
 
         dojo11.connect(that.buttons.schedule_btn, 'onClick', that.schedule_action);
@@ -2051,10 +2052,24 @@ hyperic.maintenance_schedule = function(group_id) {
         {
             that.buttons.schedule_btn.setLabel('Reschedule');
         }
+        
+        if(!that.canSchedule) {
+        	for(var inputName in that.inputs)
+        	{
+        		that.inputs[inputName].setAttribute('disabled', 'disabled');
+        	}
+        	for(var buttonName in that.buttons)
+        	{
+        		if(buttonName != 'cancel_btn')
+        		{
+        			that.buttons[buttonName].domNode.style.display = 'none';
+        		}
+        	}
+        }
     };
 
-    that.schedule_action = function() {
-        if(that.dialog.isValid())
+    that.schedule_action = function() {        
+    	if(that.dialog.validate())
         {
             var args = that.dialog.getValues();
 
@@ -2134,16 +2149,23 @@ hyperic.maintenance_schedule = function(group_id) {
             url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id,
             handleAs: 'json',
             load: function(data){
-                // that.charts[chart].data = data;
-                if(!data.error && (parseInt(data.st,10) !== 0 && parseInt(data.et,10) !== 0))
+        		that.canSchedule = data.permission;
+        		
+                if(!data.error)
                 {
-                    that.existing_schedule.from_time = parseInt(data.st,10);
-                    that.existing_schedule.to_time = parseInt(data.et,10);
+                	if(parseInt(data.st,10) !== 0 && parseInt(data.et,10) !== 0)
+                	{
+                    	that.existing_schedule.from_time = parseInt(data.st,10);
+                    	that.existing_schedule.to_time = parseInt(data.et,10);
 
-                    that.selected_from_time = new Date(that.existing_schedule.from_time);
-                    that.selected_to_time = new Date(that.existing_schedule.to_time);
+                    	that.selected_from_time = new Date(that.existing_schedule.from_time);
+                    	that.selected_to_time = new Date(that.existing_schedule.to_time);
                     
-                    dojo11.byId('existing_downtime_' + that.group_id).innerHTML = 'Currently scheduled downtime window:';
+                    	dojo11.byId('existing_downtime_' + that.group_id).innerHTML = 'Currently scheduled downtime window:';
+                	} 
+        			else if (!that.canSchedule) {
+                    	dojo11.byId('existing_downtime_' + that.group_id).innerHTML = 'No downtime window currently scheduled.';        			
+        			}
                 }
                 that.init();
             },
