@@ -166,6 +166,17 @@ class ResourceCategory {
         }
     }
 
+    /**
+     * Run a control action on a Resource
+     * @throws PermissionException If the user does not have permission to
+     *         execute the action
+     * @throws PluginException If the resource does not support control.
+     */
+    static void runAction(Resource r, AuthzSubject user, String action,
+                          String arguments) {
+         cMan.doAction(user, r.entityId, action, arguments)
+    }
+
     static boolean isGroup(Resource r) {
         return r.resourceType.id == AuthzConstants.authzGroup
     }
