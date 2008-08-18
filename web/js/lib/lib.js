@@ -943,6 +943,133 @@ function searchSelectBox(node,text) {
 }
 
 /**
+ * wraps an html select box in an object to allow easy
+ * filtering of the selectbox
+ *
+ * @param {Node} selectbox node
+ * @param {Array} optional data to populate the select with. Can be 
+ *   an array of objects (needed to set the option "value" attributes to 
+ *   specific values):
+ *       [{text: "option 1", value:"0101"}, {text: "two", value:"bla"}, ...] 
+ *   or an array of option text's (if you don't care about the 'value' 
+ *   attributes)
+ *       ["option 1","option 2", ...]
+ */
+hyperic.selectBox = function(select, data) {
+    var that = this;
+    that.select = select;
+    that.length = 0;
+
+    that.data = {};
+
+    // if we have data passed in, populate the select and the data object
+    if(typeof data !== 'undefined')
+    {
+        // normalize data
+        if(data.length)
+        {
+            for(var i = 0; i < data.length; i++)
+            {
+                if(data[i].text && data[i].value)
+                {
+                    that.data[data[i].value] = {text: data[i].text, value: data[i].value};
+                }
+                else
+                {
+                    that.data[i] = {text: data[i], value: i};
+                }
+                that.length += 1;
+            }
+        }
+        else
+        {
+            for(var i in data)
+            {
+                if(typeof data[i] !== 'function' && data[i].text && data[i].value)
+                {
+                    that.data[data[i].value] = {text: data[i].text, value: data[i].value};
+                    that.length += 1;
+                }
+            }
+        }
+
+        // initial select population
+        for(i in that.data)
+        {
+            if(typeof that.data[i] !== 'function')
+            {
+                addOptionToSelect(that.select,new Option(that.data[i].text, that.data[i].value));
+                that.data[i].hidden = false;
+            }
+        }
+    }
+
+    /**
+     * remove option with given index from the select and from the data array
+     * 
+     * @param {Number} index
+     */
+    that.remove = function(index) {
+        delete that.data[that.select.options[index].value];
+        that.select.remove(index);
+        that.length -= 1;
+    };
+
+    /**
+     * add new option to the select and its data to the data array
+     * 
+     * @param {Option} option
+     */
+    that.add = function(option) {
+        if(typeof that.data[option.value] == 'undefined')
+        {
+            that.data[option.value] = {text: option.text, value: option.value, hidden: false};
+            addOptionToSelect(that.select,option);
+            that.length += 1;
+        }
+        else
+        {
+            console.log('option with value '+ option.value +' already exists, could not be added');
+        }
+    };
+
+    /**
+     * filter the selectbox for options that contain specified text
+     * 
+     * @param {String} text
+     */
+    that.search = function(text) {
+        text = text.toLowerCase();
+        // delete options that should no longer be shown
+        if(that.select.options.length > 0)
+        {
+            for(var i = 0; i < that.select.options.length; i++)
+            {
+                if(that.select.options[i].text.toLowerCase().indexOf(text) == -1)
+                {
+                    that.data[that.select.options[i].value].hidden = true;
+                    that.select.remove(i);
+                    that.search(text);
+                    return;
+                }
+            }
+        }
+        // re-add options that should be shown
+        for(i in that.data)
+        {
+            // if an option is hidden, but matches the search string
+            if(typeof that.data[i] !== 'function' && that.data[i].hidden && that.data[i].text.toLowerCase().indexOf(text) !== -1)
+            {
+                // add option to select
+                addOptionToSelect(that.select,new Option(that.data[i].text, that.data[i].value));
+                // mark it as not hidden
+                that.data[i].hidden = false;
+            }
+        }
+    };
+};
+
+/**
  * chartWidget is a widget that displays a chart slideshow
  * 
  * @author Anton Stroganov <anton@hyperic.com>
