@@ -1083,7 +1083,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     that.contentSheet = dojo11.query('.content',node)[0];
     
     that.chartsearch = dojo11.byId('chartsearch');
-    that.chartselect = dojo11.byId('chartselect');
+    that.chartselect = new hyperic.selectBox(dojo11.byId('chartselect'));
     
     that.play_btn = dojo11.query('.pause_btn',node)[0];
     
@@ -1279,7 +1279,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     that.search = function(e)
     {
-        searchSelectBox(that.chartselect,e.target.value);
+        that.chartselect.search(e.target.value);
     };
     
     /**
@@ -1325,11 +1325,11 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         // in firefox, the target will be the option
         if(e.target.tagName.toLowerCase() == 'option')
         {
-            chartId = e.target.index;
+            chartId = e.target.value;
         }
         else // in IE, the target is the selectbox
         {
-            chartId = e.target.selectedIndex;
+            chartId = e.target.options[e.target.selectedIndex].value;
         }
         if(that.currentChartId != chartId)
         {
@@ -1348,24 +1348,26 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     that.cycleCharts = function(chartId)
     {
-        // console.info('argument: ' + chartId);
-        // console.info('next defined by default, 0');
         var next = 0;
-        if(typeof chartId == 'undefined' || chartId < 0 || chartId >= that.chartselect.options.length)
+        if(typeof chartId == 'undefined' || chartId < 0 || chartId >= that.chartselect.length)
         {
-            if(that.chartselect.selectedIndex !== -1 && that.chartselect.selectedIndex != that.chartselect.options.length-1)
+            if(that.chartselect.select.selectedIndex !== -1 && that.chartselect.select.selectedIndex != that.chartselect.select.options.length-1)
             {
                 // console.info('next defined by next element from select box selected index ' + that.chartselect.selectedIndex + ' + 1');
-                next = that.chartselect.selectedIndex+1;
+                next = that.chartselect.select.options[that.chartselect.select.selectedIndex+1].value;
+                that.chartselect.select.selectedIndex = that.chartselect.select.selectedIndex+1;
             }
-            that.chartselect.selectedIndex = next;
+            else
+            {
+                that.chartselect.select.selectedIndex = 0;
+            }
         }
         else
         {
             // console.info('next defined by passing in argument ' + chartId);
             next = chartId;
         }
-        
+
         if(that.chart !== null)
         {
             that.chart.cleanup();
@@ -1520,7 +1522,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     {
         for(var i = 0; i < that.charts.length; i++)
         {
-            addOptionToSelect(that.chartselect, new Option(that.charts[i].name,i));
+            that.chartselect.add(new Option(that.charts[i].name,i));
         }
     };
     
@@ -1555,7 +1557,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         dojo11.connect(that.chartsearch,'onkeyup',that.search);
 
         // set up the event handler for the select box
-        dojo11.connect(that.chartselect,'onclick',that.select);
+        dojo11.connect(that.chartselect.select,'onclick',that.select);
 
         // handle resizing of the window
         dojo11.connect(window,'onresize',dojo11.hitch(that, that.chartResize));
