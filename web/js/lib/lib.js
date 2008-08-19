@@ -2052,8 +2052,8 @@ hyperic.maintenance_schedule = function(group_id) {
 		success : "Updated!",
 		validationError: "Please correct the highlighted errors below.", 
 		currentSchedule : "Currently scheduled downtime window:",
-		noSchedule : "No downtime window is currently scheduled.",
-	}
+		noSchedule : "No downtime window is currently scheduled."
+	};
 
     that.init = function() {
 	    if(!that.dialog){
