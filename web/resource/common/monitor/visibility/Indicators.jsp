@@ -97,6 +97,7 @@ function reviewAction(option) {
       <table cellspacing="2">
         <tr>
           <td>
+            <span style="padding-right:8px;"><a href='<html:rewrite page="/ResourceCurrentHealth.do"/>?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a></span>
             <fmt:message key="Filter.ViewLabel"/>
             <html:select property="action" onchange="reviewAction(this.options[this.selectedIndex]);">
               <option value="update">
