@@ -298,20 +298,17 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
      * @param other     Other ConfigResponse to merge data from
      * @param overWrite If true, values from the 'other' response will
      *                  overwrite values with the same name in the object.
-     * @return true if any entries are updated
      */
-    public boolean merge(ConfigResponse other, boolean overWrite) {
-        boolean updated = true;
+    //Do not change this method signature, else break plugin compat.
+    public void merge(ConfigResponse other, boolean overWrite) {
         Set entrySet = other.attributes.entrySet();
         for (Iterator i = entrySet.iterator(); i.hasNext();) {
             Entry entry = (Entry) i.next();
 
             if (overWrite || this.attributes.get(entry.getKey()) == null) {
-                attributes.put(entry.getKey(), entry.getValue());
-                updated = true;
+                this.attributes.put(entry.getKey(), entry.getValue());
             }
         }
-        return updated;
     }
 
     /**

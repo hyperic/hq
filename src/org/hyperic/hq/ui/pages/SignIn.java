@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.security.auth.login.LoginException;
 import javax.servlet.ServletContext;
@@ -149,6 +151,25 @@ public abstract class SignIn extends BasePage {
         throw new RedirectException(PageListing.DASHBOARD_URL);
     }
 
+    //clone ConfigResponse.merge - cannot change its method signature
+    private boolean mergeValues(ConfigResponse config,
+                                ConfigResponse other,
+                                boolean overWrite) {
+        boolean updated = true;
+        Set entrySet = other.toProperties().entrySet();
+        for (Iterator i = entrySet.iterator(); i.hasNext();) {
+            Entry entry = (Entry) i.next();
+            String key = (String)entry.getKey();
+            String value = (String)entry.getValue();
+
+            if (overWrite || config.getValue(key) == null) {
+                config.setValue(key, value);
+                updated = true;
+            }
+        }
+        return updated;
+    }
+
     private void loadDashboard(ServletContext ctx, WebUser webUser) {
         try {
             DashboardManagerLocal dashManager =
@@ -165,7 +186,7 @@ public abstract class SignIn extends BasePage {
             }
             
             ConfigResponse userDashobardConfig = userDashboard.getConfig();
-            if (userDashobardConfig.merge(defaultUserDashPrefs, false)) {
+            if (mergeValues(userDashobardConfig, defaultUserDashPrefs, false)) {
                 dashManager.configureDashboard(me, userDashboard,
                                                userDashobardConfig);
             }
