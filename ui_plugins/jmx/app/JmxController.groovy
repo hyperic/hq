@@ -151,7 +151,7 @@ class JmxController extends BaseController
                 filteredOps << op
             }
         }
-        filteredOps.toArray()
+        filteredOps
     }
     
     private getViewedMembers() {

@@ -140,14 +140,14 @@ input[type=text] {
      </table>
       <% } %>
 
-      <% if (bean.ops.length > 0) { %>
+      <% if (bean.ops.size > 0) { %>
          
 	<h4>Operations:</h4>
       <table width="95%" border="1">
 	<tr><td width="100%">
          <% for (op in bean.ops) { %>
             <% if (op.signature.length < 2) { %>
-                <% if (op.signature.length > 0 && bean.ops.length > 1) { %>
+                <% if (op.signature.length > 0 && bean.ops.size > 1) { %>
                    <br/>
                 <% } %>
                 <button style="font-size:10px"
