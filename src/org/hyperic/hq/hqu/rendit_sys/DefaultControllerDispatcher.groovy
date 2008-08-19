@@ -47,7 +47,7 @@ class DefaultControllerDispatcher {
             controller.setLocaleBundle(new BundleMapFacade(b))
         } catch(MissingResourceException e) {
             log.warn "Unable to find resource bundle for " + 
-                     "${pluginInfo.name}_i18n"
+                     "${p.name}_i18n"
         }
 
         def action = path[2][0..-5]  // Strip out the .hqu
