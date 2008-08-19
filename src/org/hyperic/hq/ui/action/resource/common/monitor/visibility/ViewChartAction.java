@@ -303,18 +303,6 @@ public class ViewChartAction extends MetricDisplayRangeAction {
         // If chart already exists, don't add it again
         charts += Constants.DASHBOARD_DELIMITER + chartname + "," + url;
 
-        /*
-        String json = dashPrefs.getValue(Constants.USER_DASHBOARD_JSON, "");
-        JSONArray jsonArray;
-        if(!json.equalsIgnoreCase("")){
-            //No value in the db, create one
-            jsonArray = new JSONArray().put(jsonObj);
-        }else{
-            //Value in the db, append to it
-            jsonArray = new JSONArray(json).put(jsonObj);
-        }
-        dashPrefs.setValue(Constants.USER_DASHBOARD_JSON, jsonArray.toString());
-        */
         dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, charts);
         log.debug("ViewChartAction - saving chart: " + charts);
         ConfigurationProxy.getInstance().setUserDashboardPreferences(dashPrefs, boss, user );
