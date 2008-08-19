@@ -69,28 +69,6 @@ class JmxController extends BaseController
         ])
     }
     
-    def escapeEntities(String text) {
-        final String LT = "&lt;"
-        final String GT = "&gt;"
-        final String QUOTE = "&quot;"
-            
-        if (!text) return text
-        def trim = text.trim()
-        char[] c    = trim.toCharArray()
-        StringBuffer buffer = new StringBuffer()
-        def i = -1
-            
-        while(++i < c.length) {
-            if (c[i]=='&') buffer.append(AMP)
-            else if (c[i]=='<') buffer.append(LT)
-            else if(c[i]=='>') buffer.append(GT)
-            else if(c[i]=='"') buffer.append(QUOTE)
-            else buffer.append(c[i]) 
-        }
-        return buffer.toString()
-    }
-
-    
     def listMBeans(params) {
         def eid = viewedResource.entityId
         def pattern = params.getOne('pattern')
@@ -258,7 +236,7 @@ class JmxController extends BaseController
 
     def prettify(attrNames, attrs) {
         for (attr in attrNames) {
-            attrs.get(attr)['Value']= escapeEntities(valueToString(attrs.get(attr)['Value']))
+            attrs.get(attr)['Value']= HtmlUtil.escapeHtml(valueToString(attrs.get(attr)['Value']))
         }
         attrs
     }
