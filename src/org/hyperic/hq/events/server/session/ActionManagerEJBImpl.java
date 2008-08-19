@@ -125,9 +125,24 @@ public class ActionManagerEJBImpl implements SessionBean {
         // First update the primary action
         Action action = _actDAO.findById(val.getId());
         
-        // Delete it if no configuration
+        // Delete it if no configuration or logs
         if (val.getConfig() == null) {
-            _actDAO.removeAction(action);
+            if (action.getLogEntriesBag().size() == 0) {
+                _actDAO.removeAction(action);
+            }
+            else {  // Disassociate from everything
+                if (action.getAlertDefinition() != null) {
+                    action.getAlertDefinition().getActionsBag().remove(action);
+                    action.setAlertDefinition(null);
+                }
+                
+                if (action.getParent() != null) {
+                    action.getParent().getChildrenBag().remove(action);
+                    action.setParent(null);
+                }
+
+                action.setDeleted(true);
+            }
             return null;
         }
             
