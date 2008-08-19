@@ -103,7 +103,11 @@ function showViewEscResponse(originalRequest) {
         }
     
         if (allowPause) {
-            dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
+            if (tmp.escalation.maxWaitTime == <%= Long.MAX_VALUE %>) {
+                dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause.indefinitely" />';
+            } else {
+            	dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
+            }
             dojo.byId('allowPauseTrue').checked = "true";
         }
         else {
@@ -1413,6 +1417,10 @@ function saveAddEscalation() {
                             <option value="259200000">72
                                 <fmt:message
                                         key="alert.config.props.CB.Enable.TimeUnit.2"/>
+                            </option>
+                            <option value="<%= Long.MAX_VALUE %>">
+                                <fmt:message
+                                        key="alert.config.props.CB.Enable.UntilFixed"/>
                             </option>
                         </select></td>
                 </tr>

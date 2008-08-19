@@ -209,8 +209,9 @@ public class PortalAction extends ResourceController {
         long pause = 0;
         try {
             RequestUtils.getStringParameter(request, "pause");
-            pause = RequestUtils.getIntParameter(request, 
-                                                 "pauseTime").longValue();
+            pause = Long.valueOf(
+            				RequestUtils.getStringParameter(request, "pauseTime"))
+            			.longValue();
         } catch(ParameterNotFoundException e) {
             // Don't need to pause
         }

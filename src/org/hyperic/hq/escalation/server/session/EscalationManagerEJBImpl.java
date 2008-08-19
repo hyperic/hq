@@ -598,16 +598,22 @@ public class EscalationManagerEJBImpl
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
         if (pause > 0) {
-            long nextTime = System.currentTimeMillis() + pause;
+        	long nextTime;
+        	if (pause == Long.MAX_VALUE) {
+        		nextTime = pause;
+                moreInfo = " and paused escalation until fixed";
+        	} else {
+        		nextTime = System.currentTimeMillis() + pause;
+                FormattedNumber fmtd =
+                    UnitsFormat.format(new UnitNumber(pause,
+                                                      UnitsConstants.UNIT_DURATION,
+                                                      UnitsConstants.SCALE_MILLI));
+                moreInfo = " and paused escalation for " + fmtd;
+        	}
             if (nextTime > state.getNextActionTime()) {
                 state.setNextActionTime(nextTime);
                 EscalationRuntime.getInstance().scheduleEscalation(state);
             }
-            FormattedNumber fmtd =
-                UnitsFormat.format(new UnitNumber(pause,
-                                                  UnitsConstants.UNIT_DURATION,
-                                                  UnitsConstants.SCALE_MILLI));
-            moreInfo = " and paused escalation for " + fmtd;
         }
         fixOrNotify(subject, esc, state, type, false, moreInfo);
     }

@@ -956,6 +956,8 @@ function editEscalation (row) {
                 key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
               <option value="259200000">72 <fmt:message
                 key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
+              <option value="<%= Long.MAX_VALUE %>"><fmt:message
+                key="alert.config.props.CB.Enable.UntilFixed" /></option>
             </select></td>
           </tr>
           <tr>
@@ -1098,6 +1100,8 @@ function editEscalation (row) {
                 key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
               <option value="259200000">72 <fmt:message
                 key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
+              <option value="<%= Long.MAX_VALUE %>"><fmt:message
+                key="alert.config.props.CB.Enable.UntilFixed" /></option>
             </select></div>
             </td>
           </tr>

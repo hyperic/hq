@@ -247,7 +247,11 @@ function showViewEscResponse() {
     }
 
       if (allowPause) {
-        dojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause" /> ' + maxPauseTime;
+          if (tmp.escalation.maxWaitTime == <%= Long.MAX_VALUE %>) {
+              dojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause.indefinitely" />';
+          } else {
+              dojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause" /> ' + maxPauseTime;
+          }
       }
       else {
         dojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.continue" />';
