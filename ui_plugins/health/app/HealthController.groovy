@@ -441,6 +441,9 @@ class HealthController
                     DBUtil.getBooleanValue(true, conn)+" and enabled="+
                     DBUtil.getBooleanValue(false, conn)+" and deleted="+
                     DBUtil.getBooleanValue(false, conn)}],
+          version: [ 
+              name: localeBundle['queryVersion'],     
+               query:  {conn -> getDatabaseVersionQuery(conn)}],
         ]
         
         def res = [:]
@@ -455,6 +458,14 @@ class HealthController
             }
         }
         res
+    }
+    
+    private getDatabaseVersionQuery(conn) {
+        if (DBUtil.isOracle(conn)) {
+            return "SELECT * FROM V$VERSION"
+        } else {
+            return "SELECT VERSION()"
+        }
     }
     
     private h(str) {
