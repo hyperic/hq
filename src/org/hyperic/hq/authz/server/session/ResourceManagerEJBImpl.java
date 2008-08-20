@@ -280,6 +280,23 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                      System.currentTimeMillis());
         return res;
     }
+    
+    
+    /**
+     * Get the # of resources within HQ inventory
+     * @ejb:interface-method
+     */
+    public Number getResourceCount() {
+        return new Integer(getResourceDAO().size());
+    }
+    
+    /**
+     * Get the # of resource types within HQ inventory
+     * @ejb:interface-method
+     */
+    public Number getResourceTypeCount() {
+        return new Integer(getResourceTypeDAO().size());
+    }
         
     /**
      * Get the Resource entity associated with this ResourceType.

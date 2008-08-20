@@ -618,6 +618,23 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                         ResourceGroupValue.class);
      }
 
+     /**
+      * Get the # of roles within HQ inventory
+      * @ejb:interface-method
+      */
+     public Number getRoleCount() {
+         return new Integer(getRoleDAO().size());
+     }
+     
+     /**
+      * Get the # of subjects within HQ inventory
+      * @ejb:interface-method
+      */
+     public Number getSubjectCount() {
+         AuthzSubjectDAO dao = new AuthzSubjectDAO(DAOFactory.getDAOFactory());
+         return new Integer(dao.size());
+     }
+     
     /**
      * Get a Role by id
      *

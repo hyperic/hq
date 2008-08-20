@@ -380,6 +380,13 @@ public class PlatformDAO extends HibernateDAO {
             .uniqueResult();
     }
     
+    public Number getCpuCount() {
+        Number rslt = 
+            (Number)getSession().createQuery("select sum(p.cpuCount) from Platform p")
+        .uniqueResult();
+        return (rslt == null) ? new Integer(0) : rslt;
+    }
+    
     void clearResource(Resource res) {
         createQuery("update Platform set resource = null where id = ?")
             .setParameter(0, res.getInstanceId())

@@ -1454,6 +1454,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public Number getPlatformCount() {
         return getPlatformDAO().getPlatformCount();
     }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public Number getCpuCount() {
+        return getPlatformDAO().getCpuCount();
+    }
 
     public static PlatformManagerLocal getOne() {
         try {

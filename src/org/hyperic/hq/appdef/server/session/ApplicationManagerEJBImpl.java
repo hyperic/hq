@@ -317,6 +317,15 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
+    
+    /**
+     * Get the # of applications within HQ inventory
+     * @ejb:interface-method
+     */
+    public Number getApplicationCount() {
+        return new Integer(getApplicationDAO().size());
+    }
+    
     /**
      * Set the dependency map for an application
      * @ejb:interface-method

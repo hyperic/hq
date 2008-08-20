@@ -855,6 +855,22 @@ public class EscalationManagerEJBImpl
     }
 
     /**
+     * Get the # of active escalations within HQ inventory
+     * @ejb:interface-method
+     */
+    public Number getActiveEscalationCount() {
+        return new Integer(_stateDAO.size());
+    }
+    
+    /**
+     * Get the # of escalations within HQ inventory
+     * @ejb:interface-method
+     */
+    public Number getEscalationCount() {
+        return new Integer(_esclDAO.size());
+    }
+    
+    /**
      * @ejb:interface-method  
      */
     public List getActiveEscalations(int maxEscalations) {

@@ -624,6 +624,14 @@ public class ResourceGroupManagerEJBImpl
     }
     
     /**
+     * Get the # of groups within HQ inventory
+     * @ejb:interface-method
+     */
+    public Number getGroupCount() {
+        return new Integer(getResourceGroupDAO().size());
+    }
+    
+    /**
      * Returns true if the passed resource is a member of the given group.
      * @ejb:interface-method
      */

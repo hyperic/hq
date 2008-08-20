@@ -242,6 +242,14 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
+     * Get the # of alerts within HQ inventory
+     * @ejb:interface-method
+     */
+    public Number getAlertCount() {
+        return new Integer(getAlertDAO().size());
+    }
+    
+    /**
      * Get the number of alerts for the given array of AppdefEntityID's
      * @ejb:interface-method
      */
