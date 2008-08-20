@@ -54,16 +54,20 @@ public class AlertMetricsControlForm extends MetricsControlForm {
 
         return s.toString();
     }
-    
+
+    protected void setDefaults() {
+    	setAlertDefaults(Boolean.FALSE);        
+    }
+
     public Boolean getAlertDefaults() {
     	return this.isAlertDefaults;
     }
     
     public void setAlertDefaults(Boolean isAlertDefaults) {
+		super.setDefaults();
 		this.isAlertDefaults = isAlertDefaults;
 		
     	if (isAlertDefaults.booleanValue()) {
-    		super.setDefaults();
     		setA(ACTION_LASTN);
     		setRn(MonitorUtils.DEFAULT_VALUE_RANGE_LASTN);
     		setRu(MonitorUtils.DEFAULT_VALUE_RANGE_UNIT);
