@@ -103,7 +103,11 @@ function showViewEscResponse(originalRequest) {
 	    }
 	
 	    if (allowPause) {
-	        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
+            if (tmp.escalation.maxWaitTime == <%= Long.MAX_VALUE %>) {
+                $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause.indefinitely" />';
+            } else {
+            	$('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
+            }
 	        $('allowPauseTrue').checked = "true";
 	    }
 	    else {
@@ -1415,6 +1419,10 @@ function saveAddEscalation() {
                             <option value="259200000">72
                                 <fmt:message
                                         key="alert.config.props.CB.Enable.TimeUnit.2"/>
+                            </option>
+                            <option value="<%= Long.MAX_VALUE %>">
+                                <fmt:message
+                                        key="alert.config.props.CB.Enable.UntilFixed"/>
                             </option>
                         </select></td>
                 </tr>

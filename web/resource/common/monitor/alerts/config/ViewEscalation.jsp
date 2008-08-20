@@ -247,7 +247,11 @@ function showViewEscResponse() {
     }
 
       if (allowPause) {
-        $('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause" /> ' + maxPauseTime;
+          if (tmp.escalation.maxWaitTime == <%= Long.MAX_VALUE %>) {
+              $('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause.indefinitely" />';
+          } else {
+              $('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause" /> ' + maxPauseTime;
+          }
       }
       else {
         $('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.continue" />';
