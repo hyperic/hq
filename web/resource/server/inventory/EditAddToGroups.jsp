@@ -41,6 +41,7 @@
 
 <tiles:insert definition=".resource.common.inventory.addResourceGroups">
   <tiles:put name="resource" beanName="Resource"/> 
+  <tiles:put name="resourceType" value="server"/> 
   <tiles:put name="availableGroups" beanName="AvailableResGrps"/>
   <tiles:put name="availableGroupsCount" beanName="NumAvailableResGrps"/>
   <tiles:put name="pendingGroups" beanName="PendingResGrps"/>
