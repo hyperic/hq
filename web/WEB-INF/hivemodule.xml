@@ -3,6 +3,8 @@
 
 <sub-module descriptor="hyperic.ajax.xml" />
 <sub-module descriptor="hyperic.services.xml" />
+<sub-module descriptor="hyperic.presenters.xml" />
+
 <!-- Application State Object(s) -->
 <contribution configuration-id="tapestry.state.ApplicationObjects">
     <state-object name="BaseSessionBean" scope="session">
