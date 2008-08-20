@@ -61,6 +61,8 @@ ${auxLogInfo}${indicatorStr}
 
 ------------------------------------------
 
+For additional detail about this resource, go to <%= HQUtil.baseURL + resource.urlFor('currentHealth') %>
+
 For additional detail about this alert, go to <%= HQUtil.baseURL + alert.urlFor('alert') %>
 
 ------------------------------------------

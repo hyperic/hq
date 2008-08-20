@@ -2133,7 +2133,7 @@
               scope="request"
               forward=".events.alerts.layout">
       </action>
-      
+
       <action path="/alerts/config/AddUsers*"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddUsers{1}Action"
               name="AddAlertUsersForm"
@@ -2266,7 +2266,7 @@
       </action>
 
       <action path="/ResourceCurrentHealth"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsControlAction"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.AlertMetricsControlAction"
               name="AlertMetricsControlForm"
               validate="true"
               scope="request">

@@ -42,15 +42,31 @@ import org.hyperic.hq.ui.util.MonitorUtils;
  */
 public class AlertMetricsControlForm extends MetricsControlForm {
 
-    public AlertMetricsControlForm() {
+	private Boolean isAlertDefaults = Boolean.FALSE;
+    
+	public AlertMetricsControlForm() {
         super();
-        setDefaults();
     }
     
-    protected void setDefaults() {
-        super.setDefaults();
-        setA(ACTION_LASTN);
-        setRn(MonitorUtils.DEFAULT_VALUE_RANGE_LASTN);
-        setRu(MonitorUtils.DEFAULT_VALUE_RANGE_UNIT);        
+    public String toString() {
+        StringBuffer s = new StringBuffer(super.toString());
+        s.append(" isAlertDefaults=").append(this.getAlertDefaults());
+
+        return s.toString();
     }
+    
+    public Boolean getAlertDefaults() {
+    	return this.isAlertDefaults;
+    }
+    
+    public void setAlertDefaults(Boolean isAlertDefaults) {
+		this.isAlertDefaults = isAlertDefaults;
+		
+    	if (isAlertDefaults.booleanValue()) {
+    		super.setDefaults();
+    		setA(ACTION_LASTN);
+    		setRn(MonitorUtils.DEFAULT_VALUE_RANGE_LASTN);
+    		setRu(MonitorUtils.DEFAULT_VALUE_RANGE_UNIT);
+    	}
+    }    
 }
