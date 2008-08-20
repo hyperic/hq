@@ -477,6 +477,10 @@
 
   <metrics name="FreeBSD" include="system-common-unix,tcp,nfs"/>
 
+  <metrics name="NetBSD" include="FreeBSD"/>
+
+  <metrics name="OpenBSD" include="FreeBSD"/>
+
   <metrics name="Win32" include="system-common,tcp">
     <metric name="Cpu Usage"
             alias="CpuUsage"
