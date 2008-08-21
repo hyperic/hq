@@ -128,11 +128,10 @@ public class AlertDefinitionManagerEJBImpl
         if (!force) {
             // If there are any children, delete them, too
             watch.markTimeBegin("delete children");
-            for (Iterator it = alertdef.getChildrenBag().iterator(); it.hasNext(); )
-            {
-                AlertDefinition child = (AlertDefinition) it.next();
+            List childBag = new ArrayList(alertdef.getChildrenBag());
+            for (int i=0; i<childBag.size(); i++) {
+                AlertDefinition child = (AlertDefinition)childBag.get(i);
                 deleteAlertDefinition(subj, child, force);
-                it.remove();
             }
             watch.markTimeEnd("delete children");
         }
