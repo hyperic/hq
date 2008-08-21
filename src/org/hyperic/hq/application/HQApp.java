@@ -547,7 +547,7 @@ public class HQApp {
         }
         
         private boolean methIsReadOnly(String methName) {
-            return methName.equals("resourcesExistOfType") | // masthead
+            return methName.equals("resourcesExistOfType") || // masthead
                    methName.startsWith("get") ||
                    methName.startsWith("find") ||
                    methName.startsWith("is") ||
