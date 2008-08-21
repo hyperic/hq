@@ -2352,8 +2352,8 @@ hyperic.clone_resource_dialog = function(platform_id) {
 	that.buttons = {};
 	that.platform_id = platform_id || null;
 
-    that.available_clone_targets = dojo11.byId('available_clone_targets');
-    that.selected_clone_targets = dojo11.byId('selected_clone_targets');
+    that.available_clone_targets = new hyperic.selectBox(dojo11.byId('available_clone_targets'));
+    that.selected_clone_targets = new hyperic.selectBox(dojo11.byId('selected_clone_targets'));
     
     that.searchbox = dojo11.byId('cln_search');
 
@@ -2385,14 +2385,52 @@ hyperic.clone_resource_dialog = function(platform_id) {
 		}, "clone_cancel_btn");
 		dojo11.connect(that.buttons.cancel_btn, 'onClick', that.cancel_action);
 
-		dojo11.connect(dojo11.byId('add_clone_btn'), 'onclick', function(e) { moveOption(that.available_clone_targets,that.selected_clone_targets);});
-		dojo11.connect(dojo11.byId('remove_clone_btn'), 'onclick', function(e) { moveOption(that.selected_clone_targets,that.available_clone_targets);});
+        that.buttons.add_clone_btn = dojo11.byId('add_clone_btn');
+        that.buttons.remove_clone_btn = dojo11.byId('remove_clone_btn');
+		dojo11.connect(
+		    that.buttons.add_clone_btn, 
+		    'onclick', 
+		    function(e) { 
+		        that.selected_clone_targets.steal(that.available_clone_targets);
+
+        		if(that.buttons.remove_clone_btn.disabled === true)
+        		{
+        		    that.buttons.remove_clone_btn.disabled.innerHTML = '<img src="/images/4.0/buttons/arrow_select.gif" alt="select">';
+        			that.buttons.remove_clone_btn.disabled.disabled = false;
+        		}
+
+        		if(that.available_clone_targets.length == 0)
+        		{
+        		    that.buttons.add_clone_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect_disabled.gif" alt="select">';
+        			that.buttons.add_clone_btn.disabled = true;
+        		}
+		    }
+		);
+		dojo11.connect(
+		    dojo11.byId('remove_clone_btn'), 
+		    'onclick', 
+		    function(e) { 
+		        that.available_clone_targets.steal(that.selected_clone_targets);
+
+        		if(that.buttons.add_clone_btn.disabled === true)
+        		{
+        		    that.buttons.add_clone_btn.disabled.innerHTML = '<img src="/images/4.0/buttons/arrow_select.gif" alt="select">';
+        			that.buttons.add_clone_btn.disabled.disabled = false;
+        		}
+
+        		if(that.selected_clone_targets.length == 0)
+        		{
+        		    that.buttons.remove_clone_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect_disabled.gif" alt="select">';
+        			that.buttons.remove_clone_btn.disabled = true;
+        		}
+		    }
+		);
 
         // search box connections
         dojo11.connect(that.searchbox,'onfocus', function(e) {if(e.target.value == '[ Resources ]') { e.target.value = ''; }});
         dojo11.connect(that.searchbox,'onblur', function(e) {if(e.target.value == '') { e.target.value = '[ Resources ]'; }});
-        dojo11.connect(that.searchbox,'onkeyup',function(e) { searchSelectBox(that.available_clone_targets,e.target.value);});
-        dojo11.connect(that.searchbox,'onkeyup',function(e) { searchSelectBox(that.selected_clone_targets,e.target.value);});
+        dojo11.connect(that.searchbox,'onkeyup',function(e) { that.available_clone_targets.search(e.target.value);});
+        dojo11.connect(that.searchbox,'onkeyup',function(e) { that.selected_clone_targets.search(e.target.value);});
 
 		that.fetchData();
     };
@@ -2421,7 +2459,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
         {
             if(i != that.platform_id)
             {
-                addOptionToSelect(that.available_clone_targets,new Option(that.data[i],i));
+                that.available_clone_targets.add(new Option(that.data[i],i));
             }
         }
     };
@@ -2431,14 +2469,8 @@ hyperic.clone_resource_dialog = function(platform_id) {
         that.dialog.onCancel();
 
         // reset the select boxes
-        while(that.selected_clone_targets.options.length > 0)
-        {
-            that.selected_clone_targets.remove(0);
-        }
-        while(that.available_clone_targets.options.length > 0)
-        {
-            that.available_clone_targets.remove(0);
-        }
+        that.selected_clone_targets.reset();
+        that.available_clone_targets.reset();
         that.populateCloneTargets();
     };
 
