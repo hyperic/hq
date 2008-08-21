@@ -130,7 +130,7 @@
         <tr>
           <td><html:image property="prevRange" page="/images/tbb_pageleft.gif" border="0"/></td>
           <td nowrap><fmt:message key="resource.common.monitor.visibility.metricsToolbar.DateRange"><fmt:param value="${rb}"/><fmt:param value="${re}"/></fmt:message></td>
-          <td width="100%" align="left"><html:image property="nextRange" page="/images/tbb_pageright.gif" border="0"/><a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;|&nbsp;<html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link> </td>
+          <td width="100%" align="left"><html:image property="nextRange" page="/images/tbb_pageright.gif" border="0"/><a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;|&nbsp;<html:link href="javascript:advanecdDialog.dialog.show();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link> </td>
         </tr>
       </table>
     </td>
@@ -159,7 +159,7 @@
           </td>
           <td><html:image property="range" page="/images/4.0/icons/accept.png" border="0"/></td>
           <td width="100%" style="padding-left: 5px;">
-            <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;|&nbsp;<html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), '-100px',null);showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
+            <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;|&nbsp;<html:link href="javascript:advanecdDialog.dialog.show();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
           </td>
         </tr>
       </table>
@@ -175,16 +175,31 @@
 </c:choose>
 </table>
   <div id="advancedAnchor" style="position: relative; visibility: hidden;"></div>
-  <div id="advancedDisplay" class="dialog" style="width:600px;height:160px; ">
+  <div id="advancedDisplay">
+    <div class="dialogbody">
     <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
       <c:if test="${not empty form}">
         <tiles:put name="form" beanName="form"/>
         <tiles:put name="formName" beanName="formName"/>
       </c:if>
     </tiles:insert>
+    </div>
   </div>
 <!--  /  -->
 <script type="text/javascript">
+dojo11.require("dijit.Dialog");
+var advanecdDialog;
+dojo.addOnLoad(function(){
+    advanecdDialog = dojo11.byId('advancedDisplay');
+    advanecdDialog.style.width = "600px";
+    advanecdDialog.dialog = new dijit11.Dialog({
+        id: "create_cbg_dialog",
+        refocus: true,
+        autofocus: false,
+        title: "<fmt:message key='resource.common.monitor.visibility.MetricDisplayRangeTab'/>",
+    },advanecdDialog);
+});
+
   function hideAdvanced() {
     var advancedDiv = dojo.byId('advancedDisplay');
     advancedDiv.style.display='none';
