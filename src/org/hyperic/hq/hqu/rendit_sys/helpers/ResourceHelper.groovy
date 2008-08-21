@@ -1,9 +1,15 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResMan
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
+import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl as AppMan
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl as EscMan
+import org.hyperic.hq.events.server.session.AlertManagerEJBImpl as AlertMan
+import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl as RoleMan
+
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hibernate.PageInfo
@@ -71,9 +77,19 @@ class ResourceHelper extends BaseHelper {
             case 'platforms': return PlatMan.one.platformCount
             case 'servers':   return ServerMan.one.serverCount
             case 'services':  return ServiceMan.one.serviceCount
+            case 'cpus': return PlatMan.one.cpuCount
+            case 'applications': return AppMan.one.applicationCount
+            case 'roles': return RoleMan.one.roleCount
+            case 'users': return RoleMan.one.subjectCount
+            case 'alerts': return AlertMan.one.alertCount
+            case 'resources': return ResMan.one.resourceCount
+            case 'resourceTypes': return ResMan.one.resourceTypeCount
+            case 'groups': return GroupMan.one.groupCount
+            case 'escalations': return EscMan.one.escalationCount
+            case 'activeEscalations': return EscMan.one.activeEscalationCount
             default:
-                throw new IllegalArgumentException('count must specify a ' + 
-                                                   'valid resource type')
+                throw new IllegalArgumentException("count ${args.count} must specify a " + 
+                                                   "valid resource type")
             }
         }
 

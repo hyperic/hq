@@ -26,8 +26,12 @@ class AgentHelper extends BaseHelper {
     def find(Map args) {
         ['count', 'withPaging'].each {args.get(it, null)}
 
-        if (args['count'] == 'agents')
+        if (args['count'] == 'agents') {
             return AgentMan.one.agentCount
+        }
+        else if (args['count'] == 'activeAgents') {
+            return AgentMan.one.agentCountUsed
+        }
             
         if (args['withPaging']) 
             return aMan.findAgents(args['withPaging'])

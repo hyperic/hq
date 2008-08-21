@@ -239,9 +239,24 @@ class HealthController
     	    agentSchema:       agentSchema,
     	    metricsPerMinute:  metricsPerMinute,
     	    numPlatforms:      resourceHelper.find(count:'platforms'),
+    	    numCpus:   resourceHelper.find(count:'cpus'),
+    	    
+            numAgents:         agentHelper.find(count:'agents'),
+            numActiveAgents: agentHelper.find(count:'activeAgents'),
+    	    
     	    numServers:        resourceHelper.find(count:'servers'),
     	    numServices:       resourceHelper.find(count:'services'),
-    	    numAgents:         agentHelper.find(count:'agents'),
+    	    numApplications:   resourceHelper.find(count:'applications'),
+    	    numRoles:   resourceHelper.find(count:'roles'),
+    	    numUsers:  resourceHelper.find(count:'users'),
+    	    numAlerts:  resourceHelper.find(count:'alerts'),
+    	    numResources:  resourceHelper.find(count:'resources'),
+    	    numResourceTypes:  resourceHelper.find(count:'resourceTypes'),
+    	    numGroups:  resourceHelper.find(count:'groups'),
+    	    
+    	    numEscalations:  resourceHelper.find(count:'escalations'),
+    	    numActiveEscalations:  resourceHelper.find(count:'activeEscalations'),
+    	   
     	    databaseQueries:   databaseQueries,
     	    jvmSupportsTraces: getJVMSupportsTraces() ])
     }

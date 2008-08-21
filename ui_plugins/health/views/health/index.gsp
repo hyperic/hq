@@ -239,9 +239,21 @@ getSystemStats();
     <% dojoTabPane(id:'loadTab', label:l.load) { %>
       ${l.metricsPerMinute}: ${metricsPerMinute}<br>
       ${l.numPlatforms}: ${numPlatforms}<br>
+      ${l.numCpus}: ${numCpus}<br>
+      ${l.numAgents}: ${numAgents}<br>
+      ${l.numActiveAgents}: ${numActiveAgents}<br>            
       ${l.numServers}: ${numServers}<br>
       ${l.numServices}: ${numServices}<br>
-      ${l.numAgents}: ${numAgents}<br>
+      
+      ${l.numApplications}: ${numApplications}<br>
+      ${l.numRoles}: ${numRoles}<br>
+      ${l.numUsers}: ${numUsers}<br>
+      ${l.numAlerts}: ${numAlerts}<br>
+      ${l.numResources}: ${numResources}<br>
+      ${l.numResourceTypes}: ${numResourceTypes}<br>
+      ${l.numGroups}: ${numGroups}<br>
+      ${l.numEscalations}: ${numEscalations}<br>
+      ${l.numActiveEscalations}: ${numActiveEscalations}<br>
     <% } %>
 
     <% dojoTabPane(id:'databaseTab', label:l.database) { %>
