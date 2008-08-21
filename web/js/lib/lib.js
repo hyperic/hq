@@ -1050,7 +1050,7 @@ hyperic.selectBox = function(select, data) {
                 }
             }
         }
-    }
+    };
 
     /**
      * filter the selectbox for options that contain specified text
@@ -1106,7 +1106,7 @@ hyperic.selectBox = function(select, data) {
             // remove takes an index, and our data array is zero-indexed.
             that.remove(that.length-1);
         }
-    }
+    };
 };
 
 /**
