@@ -1160,7 +1160,7 @@ textarea {
     padding: 2px
 }
 
-.dialog input[type="password"], .dialoginput[type="text"] {
+.dialogbody input[type="password"], .dialogbody input[type="text"] {
     width: auto;
 }
 
@@ -1179,9 +1179,8 @@ select {
 
 .ToolbarContent td {
     background-color: #fff;
-    border-left:1px solid #D5D8DE;
-    border-right:1px solid #D5D8DE;
-    border-right:1px solid #D5D8DE;
+/*    border-left:1px solid #D5D8DE;*/
+/*    border-right:1px solid #D5D8DE;*/
 }
 
 .dojoTabPaneWrapper {
@@ -1808,4 +1807,8 @@ ol .active.groupIcon {
 }
 .modifyDialogInstructions{
 	width:635px
+}
+
+.smallBox{
+    width:27px;
 }
