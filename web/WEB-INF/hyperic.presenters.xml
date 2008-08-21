@@ -3,7 +3,7 @@
 <module id="hyperic.exceptionPresenters" version="1.0.0" package="org.hyperic.ui.presenters">
 
     <!-- Exception Presenters -->
-
+    <!--
     <implementation service-id="tapestry.error.ExceptionPresenter">
         <invoke-factory>
             <construct
@@ -24,7 +24,8 @@
             </construct>
         </invoke-factory>
     </implementation>
-
+    -->
+    
     <implementation
         service-id="tapestry.error.StaleSessionExceptionPresenter">
         <invoke-factory>
@@ -48,7 +49,7 @@
     </implementation>
 
     <contribution configuration-id="tapestry.InfrastructureOverrides">
-        <property name="exceptionPageName" value="Error" />
+        <!-- <property name="exceptionPageName" value="Error" /> -->
         <property name="staleSessionPageName" value="SignIn" />
         <property name="staleLinkPageName" value="SignIn" />
 
