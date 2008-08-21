@@ -129,8 +129,8 @@
       <table width="100%" cellpadding="0" cellspacing="3" border="0">
         <tr>
           <td><html:image property="prevRange" page="/images/tbb_pageleft.gif" border="0"/></td>
-          <td nowrap><fmt:message key="resource.common.monitor.visibility.metricsToolbar.DateRange"><fmt:param value="${rb}"/><fmt:param value="${re}"/></fmt:message> <html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link></td>
-          <td width="100%" align="left"><html:image property="nextRange" page="/images/tbb_pageright.gif" border="0"/></td>
+          <td nowrap><fmt:message key="resource.common.monitor.visibility.metricsToolbar.DateRange"><fmt:param value="${rb}"/><fmt:param value="${re}"/></fmt:message></td>
+          <td width="100%" align="left"><html:image property="nextRange" page="/images/tbb_pageright.gif" border="0"/><a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;|&nbsp;<html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link> </td>
         </tr>
       </table>
     </td>
@@ -159,7 +159,7 @@
           </td>
           <td><html:image property="range" page="/images/dash-button_go-arrow.gif" border="0"/></td>
           <td width="100%" style="padding-left: 5px;">
-            <html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
+            <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;|<html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
           </td>
         </tr>
       </table>
