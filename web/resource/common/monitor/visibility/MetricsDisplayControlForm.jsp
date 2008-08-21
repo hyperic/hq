@@ -159,7 +159,7 @@
           </td>
           <td><html:image property="range" page="/images/dash-button_go-arrow.gif" border="0"/></td>
           <td width="100%" style="padding-left: 5px;">
-            <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;|<html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
+            <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;|<html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
           </td>
         </tr>
       </table>
