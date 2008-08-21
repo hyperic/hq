@@ -958,9 +958,9 @@ function searchSelectBox(node,text) {
 hyperic.selectBox = function(select, data) {
     var that = this;
     that.select = select;
-    that.length = 0;
 
     that.data = {};
+    that.length = 0;
 
     // if we have data passed in, populate the select and the data object
     if(typeof data !== 'undefined')
@@ -978,7 +978,6 @@ hyperic.selectBox = function(select, data) {
                 {
                     that.data[i] = {text: data[i], value: i};
                 }
-                that.length += 1;
             }
         }
         else
@@ -988,7 +987,6 @@ hyperic.selectBox = function(select, data) {
                 if(typeof data[i] !== 'function' && data[i].text && data[i].value)
                 {
                     that.data[data[i].value] = {text: data[i].text, value: data[i].value};
-                    that.length += 1;
                 }
             }
         }
@@ -1000,6 +998,7 @@ hyperic.selectBox = function(select, data) {
             {
                 addOptionToSelect(that.select,new Option(that.data[i].text, that.data[i].value));
                 that.data[i].hidden = false;
+                that.length += 1;
             }
         }
     }
@@ -1032,6 +1031,26 @@ hyperic.selectBox = function(select, data) {
             console.log('option with value '+ option.value +' already exists, could not be added');
         }
     };
+
+    that.steal = function(from)
+    {
+        if(from.select.selectedIndex != -1)
+        {
+            for(var opt = 0; opt < from.select.options.length; opt++)
+            {
+                if(from.select.options[opt].selected === true) {
+                    that.add(new Option(from.select.options[opt].text,from.select.options[opt].value));
+                    from.remove(opt);
+                    // call steal recursively, because remove() reset the options indices in the 
+                    // source selectbox,
+                    // so if multiple options are selected, once the first one is moved, the 
+                    // rest are offset by 1, so we can't move them in the same for loop.
+                    that.steal(from);
+                    break;
+                }
+            }
+        }
+    }
 
     /**
      * filter the selectbox for options that contain specified text
@@ -1067,6 +1086,27 @@ hyperic.selectBox = function(select, data) {
             }
         }
     };
+    
+    that.getAllValues = function() {
+        var vals = [];
+        for(i in that.data)
+        {
+            // get all values (even hidden ones, woo)
+            if(typeof that.data[i] !== 'function')
+            {
+                vals.push(that.data[i].value);
+            }
+        }
+        return vals;
+    };
+    
+    that.reset = function() {
+        while(that.length > 0)
+        {
+            // remove takes an index, and our data array is zero-indexed.
+            that.remove(that.length-1);
+        }
+    }
 };
 
 /**
@@ -1349,6 +1389,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     that.cycleCharts = function(chartId)
     {
         var next = 0;
+        // the last is to filter out the odd chartId's that get passed in in firefox when cycleChart is called from the playback timeout
         if(typeof chartId == 'undefined' || chartId < 0 || chartId >= that.chartselect.length)
         {
             if(that.chartselect.select.selectedIndex !== -1 && that.chartselect.select.selectedIndex != that.chartselect.select.options.length-1)
@@ -1359,6 +1400,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             }
             else
             {
+                next = that.chartselect.select.options[0].value;
                 that.chartselect.select.selectedIndex = 0;
             }
         }
@@ -1606,8 +1648,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     that.selected_alert_groups = [];
     that.alert_group_status = {};
 
-    that.available_alert_groups = dojo11.byId('available_alert_groups');
-    that.enabled_alert_groups = dojo11.byId('enabled_alert_groups');
+    that.available_alert_groups = new hyperic.selectBox(dojo11.byId('available_alert_groups'));
+    that.enabled_alert_groups = new hyperic.selectBox(dojo11.byId('enabled_alert_groups'));
     that.groupsearch = dojo11.byId('groupsearch');
 
 	that.enable_alert_btn = dojo11.query('.enable_alert_btn',that.configSheet)[0];
@@ -1632,8 +1674,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      */
     that.search = function(e)
     {
-        searchSelectBox(that.available_alert_groups, e.target.value);
-        searchSelectBox(that.enabled_alert_groups, e.target.value);
+        that.available_alert_groups.search(e.target.value);
+        that.enabled_alert_groups.search(e.target.value);
     };
     
     /**
@@ -1679,11 +1721,11 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         // {
         //     that.selected_alert_groups.push(that.available_alert_groups.options[that.available_alert_groups.selectedIndex].value);
         // }
-		if(that.enabled_alert_groups.options.length < that.max_alerts)
+		if(that.enabled_alert_groups.length < that.max_alerts)
 		{
-	        moveOption(that.available_alert_groups,that.enabled_alert_groups);
+	        that.enabled_alert_groups.steal(that.available_alert_groups);
 
-			if(that.enabled_alert_groups.options.length == that.max_alerts || that.available_alert_groups.options.length == 0)
+			if(that.enabled_alert_groups.length == that.max_alerts || that.available_alert_groups.length == 0)
 			{
 			    that.enable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select_disabled.gif" alt="select">';
 				that.enable_alert_btn.disabled = true;
@@ -1719,7 +1761,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         //         1
         //     );
         // }
-        moveOption(that.enabled_alert_groups,that.available_alert_groups);
+        that.available_alert_groups.steal(that.enabled_alert_groups);
 
 		if(that.enable_alert_btn.disabled === true)
 		{
@@ -1727,12 +1769,11 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 			that.enable_alert_btn.disabled = false;
 		}
 
-		if(that.enabled_alert_groups.options.length == 0)
+		if(that.enabled_alert_groups.length == 0)
 		{
 		    that.disable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect_disabled.gif" alt="select">';
 			that.disable_alert_btn.disabled = true;
 		}
-		
     };
 
     /**
@@ -1748,15 +1789,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                 e,
                 function()
                 {
-                    var i = 0;
-                    for(i = that.enabled_alert_groups.options.length; i > 0; i--)
-                    {
-                        that.enabled_alert_groups.remove(i-1);
-                    }
-                    for(i = that.available_alert_groups.options.length; i > 0; i--)
-                    {
-                        that.available_alert_groups.remove(i-1);
-                    }
+                    that.enabled_alert_groups.reset();
+                    that.available_alert_groups.reset();
                     that.populateAlertGroups();
                 }
             ]);
@@ -1771,14 +1805,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      */
     that.click_save_btn = function(e)
     {
-        that.selected_alert_groups = [];
-        for(var i = 0, j = that.enabled_alert_groups.options.length; i < j; i++)
-        {
-            if(that.enabled_alert_groups.options[i])
-            {
-                that.selected_alert_groups.push(that.enabled_alert_groups.options[i].value);
-            }
-        }
+        that.selected_alert_groups = that.enabled_alert_groups.getAllValues();
 
         dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=alert_summary&config=true&rid=[" + that.selected_alert_groups + "]",
@@ -1822,15 +1849,15 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             }
             to = to || that.available_alert_groups;
             
-            addOptionToSelect(to,alertOption);
+            to.add(alertOption);
         }
 
-        if(that.available_alert_groups.options.length == 0)
+        if(that.available_alert_groups.length == 0)
 		{
 		    that.enable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select_disabled.gif" alt="select">';
 			that.enable_alert_btn.disabled = true;
 		}
-        if(that.enabled_alert_groups.options.length == 0)
+        if(that.enabled_alert_groups.length == 0)
 		{
 		    that.disable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect_disabled.gif" alt="select">';
 			that.disable_alert_btn.disabled = true;
@@ -2035,7 +2062,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     }
 };
 
-// set the hyperic.dashboard.widget as the ancestor of the chartWidget class.
+// set the hyperic.dashboard.widget as the ancestor of the summaryWidget class.
 hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
 
 hyperic.maintenance_schedule = function(group_id) {
