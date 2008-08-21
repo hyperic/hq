@@ -1191,7 +1191,6 @@ select {
 
 .widget {
 
-
 /*    width: 450px;*/
     height: 350px;
     background: #000 url('/images/widget_bg.jpg') repeat-x;
@@ -1216,26 +1215,28 @@ select {
     position: absolute;
     right: 30px;
     top: 4px;
-    cursor: default;
+    cursor: pointer;
 }
 
 .widget .remove_btn {
     position: absolute;
     right: 10px;
     top: 4px;
-    cursor: default;
+    cursor: pointer;
 }
 
 .widget .expand_btn {
     position: absolute;
     right: 10px;
     bottom: 10px;
+    cursor: pointer;
 }
 
 .widget .pause_btn {
     position: absolute;
     left: 10px;
     bottom: 10px;
+    cursor: pointer;
 }
 
 .widget .play_btn {
