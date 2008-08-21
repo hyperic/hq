@@ -42,6 +42,7 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.json.JSONObject;
 
 
 /**
@@ -87,8 +88,9 @@ public class UpdateStatusAction extends BaseAction {
         if (cValue == null /* no current job */) {
             cValue = cBoss.getLastJob(sessionId, appId);
         }
-        
-        request.setAttribute(Constants.CONTROL_CURRENT_STATUS_ATTR, cValue);
+        JSONObject obj = new JSONObject();
+        obj.put("desc", cValue.getDescription());
+        request.setAttribute(Constants.CONTROL_CURRENT_STATUS_ATTR, obj);
         
         return returnSuccess(request, mapping);
     }

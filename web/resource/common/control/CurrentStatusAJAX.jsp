@@ -32,3 +32,5 @@
 <ajax-response>
   <response type="object" id="controlStatusUpdater"><controlStatus ctrlAction="<c:out value="${controlCurrentStatus.action}"/>" ctrlDesc="<c:out value="${controlCurrentStatus.description}"/>" ctrlStatus="<c:out value="${controlCurrentStatus.status}"/>" ctrlStart="<hq:dateFormatter value="${controlCurrentStatus.startTime}"/>" ctrlMessage="<c:out value="${controlCurrentStatus.message}"/>" ctrlSched="<hq:dateFormatter value="${controlCurrentStatus.dateScheduled}"/>" ctrlDuration="<hq:dateFormatter time="true" value="${controlCurrentStatus.duration}"/>"/></response>
 </ajax-response>
+
+<c:out value="${controlCurrentStatus}"/>
