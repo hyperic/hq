@@ -120,9 +120,13 @@ public class AvailabilityCheckService
                 if (last.getValue() == AVAIL_DOWN ||
                     (now - lastTimestamp) >= interval*2)
                 {
-                    long t =  lastTimestamp + interval;
-                    MetricValue val = new MetricValue(AVAIL_DOWN, t);
-                    DataPoint point =  new DataPoint(meas.getId(), val);
+                    long t = last.getValue() != AVAIL_DOWN ?
+                             lastTimestamp + interval :
+                             TimingVoodoo.roundDownTime(now - interval,
+                                                        interval);
+                    DataPoint point = new DataPoint(meas.getId(),
+                                                    new MetricValue(AVAIL_DOWN,
+                                                                    t));
                     rtn.add(new ResourceDataPoint(meas.getResource(), point));
                 }
             }
