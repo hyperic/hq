@@ -84,12 +84,18 @@ public class UpdateStatusAction extends BaseAction {
         } else {
             cValue = cBoss.getJobByJobId(sessionId, batchId);
         }
-        
+
         if (cValue == null /* no current job */) {
             cValue = cBoss.getLastJob(sessionId, appId);
         }
         JSONObject obj = new JSONObject();
-        obj.put("desc", cValue.getDescription());
+        obj.put("ctrlAction", cValue.getAction());
+        obj.put("ctrlDesc", cValue.getDescription());
+        obj.put("ctrlStatus", cValue.getStatus());
+        obj.put("ctrlStart", cValue.getStartTime());
+        obj.put("ctrlMessage", cValue.getMessage());
+        obj.put("ctrlSched", cValue.getDateScheduled());
+        obj.put("ctrlDuration", cValue.getDuration());
         request.setAttribute(Constants.CONTROL_CURRENT_STATUS_ATTR, obj);
         
         return returnSuccess(request, mapping);
