@@ -62,9 +62,13 @@ public class PagerProcessor_aiplatform implements PagerProcessorExt {
             // XXX scottmf, this needs to be refactored to not pass Objects 
             // around and hide the backend implementation of DAOs from the 
             // front end.  Unfortunately it won't be in 3.x, definitely 4.0
-            return AIQSynchronizer.getAIQPlatform(
-                new AIPlatformDAO(DAOFactory.getDAOFactory()), value)
-                .getAIPlatformValue();
+            aiplatform = AIQSynchronizer.getAIQPlatform(
+                new AIPlatformDAO(DAOFactory.getDAOFactory()), value);
+            if (aiplatform != null) {
+                return aiplatform.getAIPlatformValue();
+            } else {
+                return null;
+            }
         }
         return o;
     }
