@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<%@ page language="java" contentType="text/xml" %>
+<%@ page language="java" contentType="application/json" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 <%@ taglib uri="hq" prefix="hq" %>
 <% response.setHeader("Pragma","no-cache");%>
@@ -29,8 +28,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<ajax-response>
-  <response type="object" id="controlStatusUpdater"><controlStatus ctrlAction="<c:out value="${controlCurrentStatus.action}"/>" ctrlDesc="<c:out value="${controlCurrentStatus.description}"/>" ctrlStatus="<c:out value="${controlCurrentStatus.status}"/>" ctrlStart="<hq:dateFormatter value="${controlCurrentStatus.startTime}"/>" ctrlMessage="<c:out value="${controlCurrentStatus.message}"/>" ctrlSched="<hq:dateFormatter value="${controlCurrentStatus.dateScheduled}"/>" ctrlDuration="<hq:dateFormatter time="true" value="${controlCurrentStatus.duration}"/>"/></response>
-</ajax-response>
+<%--
+use prefixed json format: http://trac.dojotoolkit.org/ticket/6380 */
+--%>
 
-<c:out value="${controlCurrentStatus}"/>
+{}&& <c:out escapeXml="false" value="${controlCurrentStatus}"/>

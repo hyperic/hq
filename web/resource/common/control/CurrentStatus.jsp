@@ -79,50 +79,45 @@
    </c:url>
    <c:set var="statusMsg"><c:out value="${statusMsg}"/>&nbsp;<html:link href="${detailsLink}"><fmt:message key="resource.group.ControlStatus.Link.Details"/></html:link></c:set>
   </c:if>
-  <script language="JavaScript1.2">
+  <script type="text/javascript" language="JavaScript1.2">
 <!--
-    ControlStatusUpdater = Class.create();
+    hyperic.updateControlStatus = function (){
+      setTimeout( "hyperic.updateControlStatus()", 5000 );
 
-    ControlStatusUpdater.prototype = {
-      initialize: function(container, options) {},
+      updateUrl = '<html:rewrite page="/resource/common/control/UpdateStatus.do"/>?eid=<c:out value="${Resource.entityId}"/>';
+      <c:if test="${section eq 'group'}">
+        updateUrl += '&bid=<c:out value="${requestScope.bid}"/>';
+      </c:if>
 
-      ajaxUpdate: function(ajaxResponse) {
-        var statusNode = ajaxResponse.childNodes[0];
+      dojo11.xhrGet( {
+          url: updateUrl,
+          handleAs: 'json',
+          load: function(status){
+            console.log(status);
 
-        var status = statusNode.getAttribute("ctrlStatus");
+            if (status.ctrlStatus != 'In Progress') {
+              // XXX
+              // why do we do a page reload here?
+              window.location.reload()
+            }
+            else {
+              dojo11.byId('ctrlAction').innerHTML = status.ctrlAction;
+              dojo11.byId('ctrlDesc').innerHTML = status.ctrlDesc;
+              dojo11.byId('ctrlStart').innerHTML = new Date(status.ctrlStart).formatDate("MM/dd/yyyy hh:mm:ss t");
+              dojo11.byId('ctrlSched').innerHTML = new Date(status.ctrlSched).formatDate("MM/dd/yyyy hh:mm:ss t");
+              dojo11.byId('ctrlDuration').innerHTML = Math.round(status.ctrlDuration/10)/100 + 's';
+            }
+          },
+          error: function(data){
+              console.debug("An error occurred saving charts config... ", data);
+          },
+          timeout: 2000
+      });
+    };
 
-        if (status != 'In Progress') {
-          window.location.reload()
-        }
-        else {
-          dojo.byId('ctrlAction').innerHTML = statusNode.getAttribute("ctrlAction");
-          dojo.byId('ctrlDesc').innerHTML = statusNode.getAttribute("ctrlDesc");
-          dojo.byId('ctrlStart').innerHTML = statusNode.getAttribute("ctrlStart");
-          dojo.byId('ctrlSched').innerHTML = statusNode.getAttribute("ctrlSched");
-          dojo.byId('ctrlDuration').innerHTML = statusNode.getAttribute("ctrlDuration");
-        }
-      }
-    }
-
-    function initControlStatusUpdate() {
-      controlStatusUpdater = new ControlStatusUpdater();
-      ajaxEngine.registerRequest( 'getUpdatedControlStatus', '<html:rewrite page="/resource/common/control/UpdateStatus.do"/>');
-      ajaxEngine.registerAjaxObject( 'controlStatusUpdater', controlStatusUpdater  );
-      updateControlStatus();
-    }
-
-    function updateControlStatus() {
-      setTimeout( "updateControlStatus()", 5*1000 );
-
-      ajaxEngine.sendRequest( 'getUpdatedControlStatus',
-                              "eid=<c:out value="${Resource.entityId}"/>"
-                            <c:if test="${section eq 'group'}">
-                              ,"bid=<c:out value="${requestScope.bid}"/>"
-                            </c:if>
-                            );
-    }
-
-    onloads.push( initControlStatusUpdate );
+    dojo11.addOnLoad( function() {
+        hyperic.updateControlStatus();
+    });
   -->
   </script>
  </c:when>
