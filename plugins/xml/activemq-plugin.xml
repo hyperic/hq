@@ -42,6 +42,53 @@
   <filter name="template"
           value="${OBJECT_NAME}:${alias}"/>
 
+  <filter name="QUEUE_OBJECT_NAME"
+          value="${domain}:Type=Queue,BrokerName=*,Destination=*"/>
+
+  <filter name="TOPIC_OBJECT_NAME"
+                value="${domain}:Type=Topic,BrokerName=*,Destination=*"/>
+
+  <filter name="BROKER_OBJECT_NAME"
+                value="${domain}:Type=Broker,BrokerName=*"/>
+
+  <!-- special casing due to 5.x renaming:
+       MemoryPercentageUsed -> MemoryPercentUsage -->
+  <metrics name="ActiveMQ 4.0 Topic">
+    <metric name="Memory Percentage Used"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 4.0 Queue">
+    <metric name="Memory Percentage Used"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 4.0 Broker">
+    <metric name="Memory Percentage Used"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 5.x Topic">
+    <metric name="Memory Percent Usage"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 5.x Queue">
+    <metric name="Memory Percent Usage"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 5.x Broker">
+    <metric name="Memory Percent Usage"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
   <!-- both Queues and Topics are destinations -->
   <metrics name="destination">
     <metric name="Availability"
@@ -59,9 +106,6 @@
 
     <metric name="Queue Size"
             indicator="true"/>
-
-    <metric name="Memory Percentage Used"
-            units="percent"/>
   </metrics>
 
   <config name="destination">
@@ -147,8 +191,7 @@
     </service>
 
     <service name="Broker">
-      <property name="OBJECT_NAME"
-                value="${domain}:Type=Broker,BrokerName=*"/>
+      <property name="OBJECT_NAME" value="${BROKER_OBJECT_NAME}"/>
 
       <config>
         <option name="BrokerName"
@@ -194,8 +237,7 @@
     -->
 
     <service name="Queue">
-      <property name="OBJECT_NAME"
-                value="${domain}:Type=Queue,BrokerName=*,Destination=*"/>
+      <property name="OBJECT_NAME" value="${QUEUE_OBJECT_NAME}"/>
 
       <config include="destination"/>
 
@@ -211,8 +253,7 @@
 
     <!-- same as Queue except for Type=Topic -->
     <service name="Topic">
-      <property name="OBJECT_NAME"
-                value="${domain}:Type=Topic,BrokerName=*,Destination=*"/>
+      <property name="OBJECT_NAME" value="${TOPIC_OBJECT_NAME}"/>
 
       <config include="destination"/>
 
