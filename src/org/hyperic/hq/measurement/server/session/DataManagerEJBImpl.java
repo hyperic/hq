@@ -69,7 +69,6 @@ import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
-import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
@@ -93,9 +92,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final String logCtx = DataManagerEJBImpl.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
     
-    public DataManagerEJBImpl() {
-    }
-
     // The boolean system property that makes all events interesting. This 
     // property is provided as a testing hook so we can flood the event 
     // bus on demand.
@@ -608,12 +604,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     rowsToUpdate++;
                     values.append("(").append(val.getTimestamp()).append(", ")
                           .append(metricId.intValue()).append(", ")
-                          .append(getDecimalInRange(bigDec, metricId))
-                          .append("),");
+                          .append(getDecimalInRange(bigDec, metricId)+"),");
                 }
-                String sql = "INSERT INTO " + table +
-                             " (timestamp, measurement_id, value)" +
-                             " VALUES "+values.substring(0, values.length()-1);
+                String sql = "insert into "+table+" (timestamp, measurement_id, "+
+                             "value) values "+values.substring(0, values.length()-1);
                 stmt = conn.createStatement();
                 int rows = stmt.executeUpdate(sql);
                 if (_log.isDebugEnabled()) {
@@ -668,8 +662,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // If there is a SQLException, then none of the data points 
             // should be inserted. Roll back the txn.
             if (_log.isDebugEnabled()) {
-                _log.debug("Error while inserting data in batch (this is ok) " +
-                    e.getMessage());
+                _log.debug("Error while inserting data in batch (this is ok)" +
+                    e.getMessage() + " (this is ok)");
             }
             return false;
         }
@@ -719,14 +713,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                             List data, 
                             boolean continueOnSQLException) 
         throws SQLException {
+        PreparedStatement stmt = null;
         List left = new ArrayList();
         Map buckets = MeasRangeObj.getInstance().bucketData(data);
         HQDialect dialect = Util.getHQDialect();
         boolean supportsDupInsStmt = dialect.supportsDuplicateInsertStmt();
-        boolean supportsMergeStmt = dialect.supportsMergeStmt();
         
-        PreparedStatement pstmt = null;
-        Statement stmt = null;
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); )
         {
             Map.Entry entry = (Map.Entry) it.next();
@@ -735,71 +727,47 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
             try
             {
-                // For an unknown reason the Oracle Merge Stmt fails when
-                // using a prepared statement.  This occurred on Oracle 10.2.0.1.0
-                // I have seen docs which elude to a fix in 10.2.0.4 but not
-                // sure.  The exact Oracle error is 
-                // "Io exception: Connection reset"
-                // When this occurs all connections will eventually die
-                // as will the app
-                if (continueOnSQLException && supportsMergeStmt) {
-				    stmt = conn.createStatement();
-				    for (Iterator i=dpts.iterator(); i.hasNext(); )
-				    {
-				        DataPoint pt = (DataPoint)i.next();
-				        MetricValue val   = pt.getMetricValue();
-				        BigDecimal bigDec = new BigDecimal(val.getValue());
-				        stmt.addBatch(getMergeSQL(table, pt, val, bigDec));
-				    }
-				    stmt.executeBatch();
-				    int[] execInfo = stmt.executeBatch();
-				    left.addAll(getRemainingDataPoints(dpts, execInfo));
-				} else {
-                    if (supportsDupInsStmt) {
-                        String sql = new StringBuffer()
-                            .append("INSERT INTO ").append(table)
-                            .append(" (measurement_id, timestamp, value)")
-                            .append(" VALUES (?, ?, ?)")
-                            .append(" ON DUPLICATE KEY UPDATE value = ?")
-                            .toString();
-                        pstmt = conn.prepareStatement(sql);
-                    } else {
-                        String sql = new StringBuffer()
-                            .append("INSERT /*+ APPEND */ INTO ").append(table)
-                            .append(" (measurement_id, timestamp, value)")
-                            .append(" VALUES (?, ?, ?)")
-                            .toString();
-                        pstmt = conn.prepareStatement(sql);
-                    }
-
-                    for (Iterator i=dpts.iterator(); i.hasNext(); )
-                    {
-                        DataPoint pt = (DataPoint)i.next();
-                        Integer metricId  = pt.getMetricId();
-                        int metricID      = metricId.intValue();
-                        MetricValue val   = pt.getMetricValue();
-                        BigDecimal bigDec = new BigDecimal(val.getValue());
-                        pstmt.setInt(1, metricID);
-                        pstmt.setLong(2, val.getTimestamp());
-                        pstmt.setBigDecimal(
-                            3, getDecimalInRange(bigDec, metricId));
-                        if (supportsDupInsStmt) {
-                            pstmt.setBigDecimal(
-                                4, getDecimalInRange(bigDec, metricId));
-                        }
-                        pstmt.addBatch();
-                    }
-                    int[] execInfo = pstmt.executeBatch();
-                    left.addAll(getRemainingDataPoints(dpts, execInfo));
+                if (supportsDupInsStmt) {
+                    stmt = conn.prepareStatement(
+                        "INSERT /*+ APPEND */ INTO " + table + 
+                        " (measurement_id, timestamp, value) VALUES (?, ?, ?)" +
+                        " ON DUPLICATE KEY UPDATE value = ?");
                 }
+                else {
+                    stmt = conn.prepareStatement(
+                        "INSERT /*+ APPEND */ INTO " + table + 
+                        " (measurement_id, timestamp, value) VALUES (?, ?, ?)");
+                }
+
+                for (Iterator i=dpts.iterator(); i.hasNext(); )
+                {
+                    DataPoint pt = (DataPoint)i.next();
+                    Integer metricId  = pt.getMetricId();
+                    MetricValue val   = pt.getMetricValue();
+                    BigDecimal bigDec;
+                    bigDec = new BigDecimal(val.getValue());
+                    stmt.setInt(1, metricId.intValue());
+                    stmt.setLong(2, val.getTimestamp());
+                    stmt.setBigDecimal(3, getDecimalInRange(bigDec, metricId));
+
+                    if (supportsDupInsStmt)
+                        stmt.setBigDecimal(4, getDecimalInRange(bigDec,
+                                                                metricId));
+                    
+                    stmt.addBatch();
+                }
+
+                int[] execInfo = stmt.executeBatch();
+                left.addAll(getRemainingDataPoints(dpts, execInfo));
             }
             catch (BatchUpdateException e) {
                 if (!continueOnSQLException) {
                     throw e;
                 }
-                List remaining =
-                    getRemainingDataPointsAfterBatchFail(dpts, e.getUpdateCounts());
-                left.addAll(remaining);
+                
+                left.addAll(
+                    getRemainingDataPointsAfterBatchFail(dpts, 
+                                                         e.getUpdateCounts()));
             }
             catch (SQLException e) {
                 if (!continueOnSQLException) {
@@ -818,33 +786,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 }
             }
             finally {
-                DBUtil.closeStatement(logCtx, pstmt);
                 DBUtil.closeStatement(logCtx, stmt);
             }            
         }
 
         return left;
-    }
-    
-    private String getMergeSQL(String table, DataPoint pt, MetricValue val,
-                               BigDecimal bigDec) {
-        return new StringBuffer()
-            .append("MERGE /*+ APPEND */ INTO ").append(table)
-            .append(" USING dual")
-            .append(" ON")
-            .append(" (measurement_id = ").append(pt.getMetricId())
-            .append(" and timestamp = ").append(val.getTimestamp())
-            .append(")")
-            .append(" WHEN MATCHED")
-            .append(" THEN")
-            .append(" UPDATE set value = " + bigDec)
-            .append(" WHEN NOT MATCHED")
-            .append(" THEN")
-            .append(" INSERT (measurement_id, timestamp, value)")
-            .append(" VALUES (").append(pt.getMetricId()).append(", ")
-            .append(val.getTimestamp()).append(", ")
-            .append(bigDec).append(")")
-            .toString();
     }
 
     /**
@@ -950,6 +896,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private boolean usesMetricUnion(long begin, long end,
                                     boolean useAggressiveRollup)
     {
+        long now = System.currentTimeMillis();
         if (!useAggressiveRollup && usesMetricUnion(begin) ||
             (useAggressiveRollup && ((end-begin)/HOUR) < HOURS_PER_MEAS_TAB))
             return true;

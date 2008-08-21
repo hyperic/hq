@@ -69,10 +69,6 @@ public class Oracle9Dialect
                    " ESTIMATE STATISTICS SAMPLE "+tablePercent+" PERCENT");
     }
 
-    public boolean supportsMergeStmt() {
-        return true;
-    }
-
     public boolean supportsDuplicateInsertStmt() {
         return false;
     }
