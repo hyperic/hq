@@ -1099,7 +1099,7 @@ hyperic.selectBox = function(select, data) {
         }
         return vals;
     };
-    
+
     that.reset = function() {
         while(that.length > 0)
         {
@@ -1987,25 +1987,24 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             handleAs: 'json',
             load: function(data){
                 that.alert_group_status = data;
+                // that.alert_group_status = {
+                //                 '1': ['red','green'],
+                //                 '2': ['green','yellow'],
+                //                 '3': ['green','green'],
+                //                 '4': ['green','red'],
+                //                 '5': ['green','yellow'],
+                //                 // '6': ['g','g'],
+                //                 '7': ['green','green'],
+                //                 '8': ['green','green'],
+                //                 '9': ['green','green'],
+                //                 '10': ['green','green']
+                //             };
             },
             error: function(data){
                 console.debug("An error occurred fetching alert groups status... ", data);
             },
-            timeout: 2000
+            timeout: 20000
         });
-        
-        // that.alert_group_status = {
-        //     '1': ['r','g'],
-        //     '2': ['g','y'],
-        //     '3': ['g','g'],
-        //     '4': ['g','r'],
-        //     '5': ['g','y'],
-        //     // '6': ['g','g'],
-        //     '7': ['g','g'],
-        //     '8': ['g','g'],
-        //     '9': ['g','g'],
-        //     '10': ['g','g']
-        // };
     };
 
     /**
@@ -2024,14 +2023,29 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             load: function(data){
                 that.selected_alert_groups = data.rid || [];
                 that.alert_groups.data = data.data || that.alert_groups.data;
-                // that.alert_groups.count = data.count || that.alert_groups.count;
+                // that.selected_alert_groups = ['1','2','3','4','5','6','7'];
+                // that.alert_groups = { 
+                //         data: { 
+                //             '1': "Apache VHosts",
+                //             '2': "HTTP Serivces",
+                //             '3': "Linux Boxes",
+                //             '4': "REST API",
+                //             '5': "SF Data Center",
+                //             '6': "Storage 1",
+                //             '7': "WS API",
+                //             '8': "Applications",
+                //             '9': "CentOS Boxes",
+                //             '10' : "SuSE Boxes"
+                //         },
+                //         count: 10
+                //     };
+                // // that.alert_groups.count = data.count || that.alert_groups.count;
             },
             error: function(data){
                 console.debug("An error occurred fetching alert group config... ", data);
             },
             timeout: 2000
         });
-        // that.selected_alert_groups = ['1','2','3','4','5','6','7'];
     };
 
     if(that.available_alert_groups && that.enabled_alert_groups)
