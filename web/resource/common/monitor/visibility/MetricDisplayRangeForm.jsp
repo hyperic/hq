@@ -265,13 +265,6 @@
   function showAdvanced() {
     if (dojo.byId('advancedAnchor') != null) {
       dojo.byId('advancedDisplay').style.display = "";
-      /*new Rico.Effect.Position('advancedDisplay',
-                               null, // move across y axis
-                               dojo.byId('advancedAnchor').offsetTop - dojo.byId('advancedDisplay').offsetHeight,
-                               0,
-                               1, // 1 steps
-                               {}
-                             );*/
          new Effect.Grow(dojo.byId('advancedAnchor'))
     }
 
