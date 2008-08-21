@@ -33,6 +33,7 @@ import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.hqu.rendit.util.ResourceConfig
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.auth.shared.SessionManager
+import org.hyperic.hq.events.AlertSeverity
 
 /**
  * This class provides tonnes of abstractions over the Appdef layer.
@@ -142,10 +143,12 @@ class ResourceCategory {
 
     /**
      * Get the alerts for a Resource
-     */
-    static List getAlerts(Resource r, AuthzSubject user, long begin, long end) {
-        alertMan.findAlerts(user.authzSubjectValue, r.entityId, begin, end,
-                            PageControl.PAGE_ALL)   
+     */    
+    static List getAlerts(Resource r, AuthzSubject user, long begin, long end,
+                          int count, AlertSeverity priority) {
+        def includes = [r.entityId]
+        alertMan.findAlerts(user.authzSubjectValue, count, priority.code,
+                            end - begin, end, includes)
     }
 
     /**
