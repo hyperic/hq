@@ -4,11 +4,26 @@
 ${reportTime}
 ${userName} @ ${fqdn}
 
+${dbVersion}
 
 -- HQ Load --
-# agents:    ${numAgents}
-Metric load: ${metricsPerMinute}
-
+${l.metricsPerMinute}: ${metricsPerMinute}
+${l.numPlatforms}: ${numPlatforms}
+${l.numCpus}: ${numCpus}
+${l.numAgents}: ${numAgents}
+${l.numActiveAgents}: ${numActiveAgents}
+${l.numServers}: ${numServers}
+${l.numServices}: ${numServices}
+      
+${l.numApplications}: ${numApplications}
+${l.numRoles}: ${numRoles}
+${l.numUsers}: ${numUsers}
+${l.numAlerts}: ${numAlerts}
+${l.numResources}: ${numResources}
+${l.numResourceTypes}: ${numResourceTypes}
+${l.numGroups}: ${numGroups}
+${l.numEscalations}: ${numEscalations}
+${l.numActiveEscalations}: ${numActiveEscalations}
 
 -- System Vitals --
 System Load Average:

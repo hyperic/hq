@@ -386,9 +386,24 @@ class HealthController
             numCpu:           Runtime.runtime.availableProcessors(),
             fqdn:             s.getFQDN(),
             guid:             SCM.one.getGUID(),
+            dbVersion:    runQueryAsText('version'),
             reportTime:       dateFormat.format(System.currentTimeMillis()),
             userName:         user.fullName,
-            numAgents:        AgentManagerEJBImpl.one.agentCount,
+            numPlatforms:      resourceHelper.find(count:'platforms'),
+            numCpus:   resourceHelper.find(count:'cpus'),            
+            numAgents:         agentHelper.find(count:'agents'),
+            numActiveAgents: agentHelper.find(count:'activeAgents'),            
+            numServers:        resourceHelper.find(count:'servers'),
+            numServices:       resourceHelper.find(count:'services'),
+            numApplications:   resourceHelper.find(count:'applications'),
+            numRoles:   resourceHelper.find(count:'roles'),
+            numUsers:  resourceHelper.find(count:'users'),
+            numAlerts:  resourceHelper.find(count:'alerts'),
+            numResources:  resourceHelper.find(count:'resources'),
+            numResourceTypes:  resourceHelper.find(count:'resourceTypes'),
+            numGroups:  resourceHelper.find(count:'groups'),            
+            numEscalations:  resourceHelper.find(count:'escalations'),
+            numActiveEscalations:  resourceHelper.find(count:'activeEscalations'),           
             metricsPerMinute: metricsPerMinute,
             diagnostics:      diagnostics,
             hqVersion:        PB.one.version,
@@ -492,9 +507,16 @@ class HealthController
         ver != '1.3' && ver != '1.4' 
     }
     
+    def runQueryAsText(query) {
+        runQuery([query: [query]], false)
+    }    
+    
     def runQuery(params) {
+        runQuery(params, true)
+    }
+    
+    def runQuery(params, returnHtml) {
         def id    = params.getOne('query')
-        
         def query
         
         if (databaseQueries[id].query in Closure) {
@@ -512,6 +534,7 @@ class HealthController
         def res = withConnection() { conn ->
             def sql    = new Sql(conn)
             def output = new StringBuffer()
+            def txtOutput = new StringBuffer()
             def rowIdx = 0
             def md
 
@@ -519,9 +542,11 @@ class HealthController
             sql.eachRow(query) { rs ->
                 if (rowIdx++ == 0) {
                     output << "<table cellspadding=3 cellspacing=0 border=0 width=98%><thead><tr>"
+                    txtOutput << "${name}:\n"
                     md = rs.getMetaData()
                     for (i in 1..md.columnCount) {
                         output <<  "<td>${h md.getColumnLabel(i)}</td>"
+                        txtOutput << "${h md.getColumnLabel(i)}: "
                     }
                     output << "</tr></thead><tbody>"
                 }
@@ -537,6 +562,7 @@ class HealthController
                         } else {
                          output << "<td>"
                          output << trimmedCol
+                         txtOutput << "${trimmedCol}\n"
                          output << "</td>"
                        }
                     }
@@ -547,11 +573,21 @@ class HealthController
             if (!rowIdx) {
                 return localeBundle['noResultsFound']
             } else {
-                return output
+                if (returnHtml) {
+                    return output
+                }
+                else {
+                    return txtOutput
+                }
             }
         }
         
         def queryData = "${name} executed in ${now() - start} ms<br/><br/>"
-        [ queryData: queryData + res ]
+        if (returnHtml) {
+            return [ queryData: queryData + res ]
+        }
+        else {
+            return res
+        }
     }
 }
