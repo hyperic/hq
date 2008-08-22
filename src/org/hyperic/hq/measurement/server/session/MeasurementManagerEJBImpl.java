@@ -1233,7 +1233,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    private static final int SAMPLE_SIZE = 4;
+    // XXX scottmf, need to re-evalutate why SAMPLE_SIZE is used
+    private static final int SAMPLE_SIZE = 10;
     private String[] getTemplatesToCheck(AuthzSubject s,
                                          AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException
