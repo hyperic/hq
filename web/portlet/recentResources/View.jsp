@@ -35,10 +35,10 @@
 <c:choose>
   <c:when test="${not empty resources}">
   <c:forEach var="resource" items="${resources}">
-    <div class="mainMenuItem" onClick="location.href='<html:rewrite page="/Resource.do?eid=${resource.entityId}"/>'"><c:out value="${resource.name}"/></div>
+    <li class="mainMenuItem" onClick="location.href='<html:rewrite page="/Resource.do?eid=${resource.entityId}"/>'"><c:out value="${resource.name}"/></li>
   </c:forEach>
   </c:when>
   <c:otherwise>
-      <div class="mainMenuItem"><fmt:message key="common.label.None"/></div>
+    <li class="mainMenuItem"><fmt:message key="common.label.None"/></li>
   </c:otherwise>
 </c:choose>
