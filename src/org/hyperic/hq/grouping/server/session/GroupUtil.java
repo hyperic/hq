@@ -129,6 +129,6 @@ public class GroupUtil {
             ResourceGroupManagerEJBImpl.getOne();
 
         ResourceGroup group = groupMan.findResourceGroupById(entity.getId());
-        return groupMan.convertGroup(subject, group);
+        return groupMan.getGroupConvert(subject, group);
     }
 }

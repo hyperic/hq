@@ -550,6 +550,7 @@ public class HQApp {
             return methName.equals("fillAlertCount") || // recent alerts & indicators
                    methName.equals("resourcesExistOfType") || // masthead
                    methName.equals("logsExistPerInterval") || // indicators
+                   methName.equals("search") || 
                    methName.startsWith("get") ||
                    methName.startsWith("find") ||
                    methName.startsWith("is") ||

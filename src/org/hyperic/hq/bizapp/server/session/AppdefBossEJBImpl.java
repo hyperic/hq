@@ -2087,7 +2087,7 @@ public class AppdefBossEJBImpl
         AuthzSubject subject = manager.getSubject(sessionId);
         ResourceGroupManagerLocal groupMan = getResourceGroupManager();
         ResourceGroup group = groupMan.findResourceGroupById(subject, id);
-        return groupMan.convertGroup(subject, group);
+        return groupMan.getGroupConvert(subject, group);
     }
 
     /**
@@ -2156,7 +2156,7 @@ public class AppdefBossEJBImpl
         List appVals = new ArrayList(res.size());
         for (Iterator i=res.iterator(); i.hasNext(); ) {
             ResourceGroup g = (ResourceGroup)i.next();
-            appVals.add(groupMan.convertGroup(subject, g));
+            appVals.add(groupMan.getGroupConvert(subject, g));
         }
         
         return new PageList(appVals, res.getTotalSize());
@@ -2228,7 +2228,7 @@ public class AppdefBossEJBImpl
         List appVals = new ArrayList(res.size());
         for (Iterator i=res.iterator(); i.hasNext(); ) {
             ResourceGroup g = (ResourceGroup)i.next();
-            appVals.add(groupMan.convertGroup(subject, g));
+            appVals.add(groupMan.getGroupConvert(subject, g));
         }
         
         return new PageList(appVals, res.getTotalSize());

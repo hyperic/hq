@@ -654,7 +654,8 @@ public class ResourceGroupManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AppdefGroupValue convertGroup(AuthzSubject subj, ResourceGroup g) {
+    public AppdefGroupValue getGroupConvert(AuthzSubject subj, ResourceGroup g)
+    {
         AppdefGroupValue retVal = new AppdefGroupValue();
         Collection members = getMembers(g);
         

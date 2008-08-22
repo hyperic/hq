@@ -182,7 +182,7 @@ public class AppdefEntityValue {
         if (group == null) {
             ResourceGroupManagerLocal groupMan = 
                 ResourceGroupManagerEJBImpl.getOne();
-            group = groupMan.convertGroup(getSubject(), getGroup());
+            group = groupMan.getGroupConvert(getSubject(), getGroup());
         }
         return group;
     }

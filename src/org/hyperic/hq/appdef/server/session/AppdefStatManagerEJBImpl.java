@@ -1524,7 +1524,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             ResourceGroupManagerEJBImpl.getOne();
         
         ResourceGroup group = groupMan.findResourceGroupById(subject, groupId);
-        AppdefGroupValue groupVal = groupMan.convertGroup(subject, group);
+        AppdefGroupValue groupVal = groupMan.getGroupConvert(subject, group);
         try {
             return getNavMapDataForGroup(subject, groupVal);
         } catch (SQLException e) {
