@@ -52,6 +52,7 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.SortField;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
@@ -3179,14 +3180,24 @@ public class AppdefBossEJBImpl
             doSetAll(subject, allConfigs, doValidation, false);
             
             if (doValidation) {
-                getConfigManager().clearValidationError(subject, id);
+            	getConfigManager().clearValidationError(subject, id);
             }
             
             doRollback = false;
             
             // run an auto-scan for platforms
             if (id.isPlatform()) {
-                getAutoInventoryManager().startScan(subject, id, 
+                // HQ-1259: Use hqadmin as the subject to propagate platform  
+                // configuration changes to platform services if the user
+                // as insufficient permissions
+            	AuthzSubject aiSubject = subject;
+            	try {
+            		AIQueueManagerEJBImpl.getOne().checkAIScanPermission(subject, id);
+            	} catch (PermissionException pe) {
+            		aiSubject = getAuthzSubjectManager()
+            						.getSubjectById(AuthzConstants.rootSubjectId);
+            	}
+            	getAutoInventoryManager().startScan(aiSubject, id, 
                                                     new ScanConfigurationCore(),
                                                     null, null, null);
             }
@@ -3207,7 +3218,7 @@ public class AppdefBossEJBImpl
         throws EncodingException, FinderException, PermissionException,
                ConfigFetchException, PluginException, ApplicationException
     {
-        AppdefEntityID entityId = allConfigs.getResource().getEntityId();
+    	AppdefEntityID entityId = allConfigs.getResource().getEntityId();
         Set ids = new HashSet();
         try {
             if (entityId.isPlatform()) {
@@ -3322,10 +3333,29 @@ public class AppdefBossEJBImpl
             if (ids.size() > 0) {   // Actually updated
                 ZeventManager zmgr = ZeventManager.getInstance();
                 List events = new ArrayList(ids.size());
+                
+                AppdefEntityID ade;
+                AuthzSubject eventSubject;
+                AuthzSubject hqadmin = getAuthzSubjectManager()
+                				.getSubjectById(AuthzConstants.rootSubjectId);
+                
                 for (Iterator it = ids.iterator(); it.hasNext(); ) {
-                    events.add(
-                        new ResourceUpdatedZevent(subject,
-                                                  (AppdefEntityID)it.next(),
+                    eventSubject = subject;
+                	ade = (AppdefEntityID)it.next();
+                	
+                    // HQ-1259: Use hqadmin as the subject to propagate platform  
+                    // configuration changes to platform services if the user
+                    // as insufficient permissions
+                    if (entityId.isPlatform() && !ade.isPlatform()) {
+                    	try {
+                    		getPlatformManager().checkModifyPermission(subject, ade);
+                    	} catch (PermissionException pe) {
+                    		eventSubject = hqadmin;
+                    	}
+                    }
+                	events.add(
+                        new ResourceUpdatedZevent(eventSubject,
+                                                  ade,
                                                   allConfigs));
                 }
                 zmgr.enqueueEventsAfterCommit(events);

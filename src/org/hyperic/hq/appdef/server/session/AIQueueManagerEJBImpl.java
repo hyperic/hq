@@ -73,6 +73,7 @@ import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.dao.AIServerDAO;
+import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -784,6 +785,17 @@ public class AIQueueManagerEJBImpl
         throw new PlatformNotFoundException("platform not found for ai " +
                                             "platform: " +
                                             aipLocal.getId());
+    }
+
+    /**
+     * Check to see if the subject can perform an autoinventory scan
+     * on the specified resource. This is another hack to publicly expose
+     * this method in AppdefSessionEJB as an EJB interface method.
+     * @ejb:interface-method
+     */
+    public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id)
+    	throws PermissionException, GroupNotCompatibleException {
+    	super.checkAIScanPermission(subject, id);
     }
 
     public static AIQueueManagerLocal getOne() {
