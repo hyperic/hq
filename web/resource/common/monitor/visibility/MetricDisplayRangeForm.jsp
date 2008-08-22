@@ -80,7 +80,7 @@
 </logic:messagesNotPresent>
       <html:radio property="a" value="1"/>
       <fmt:message key="monitoring.baseline.BlockContent.Last"/>&nbsp;&nbsp;
-      <html:text property="rn" size="2" maxlength="3" class="smallBox" onfocus="toggleRadio('a', 0);"/> 
+      <html:text property="rn" size="2" maxlength="3" styleClass="smallBox" onfocus="toggleRadio('a', 0);"/> 
       <html:select property="ru" onchange="toggleRadio('a', 0);">
 <!--
         <html:option value="1" key="resource.common.monitor.visibility.metricsToolbar.CollectionPoints"/>
@@ -164,7 +164,7 @@
               <html:options property="yearOptions"/>
             </html:select>&nbsp;<!--<html:link href="#" onclick="toggleRadio('a', 1); calMonitor('startMonth', 'startDay', 'startYear'); return false;"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>-->
             &nbsp;@&nbsp;
-            <html:text property="startHour" class="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;:&nbsp;<html:text property="startMin" class="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;
+            <html:text property="startHour" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;:&nbsp;<html:text property="startMin" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;
             <html:select property="startAmPm" onchange="toggleRadio('a', 1);"> 
               <html:option value="am">AM</html:option>
               <html:option value="pm">PM</html:option>
@@ -226,7 +226,7 @@
               <html:options property="yearOptions"/>
             </html:select>&nbsp;<!--<html:link href="#" onclick="toggleRadio('a', 1); calMonitor('endMonth', 'endDay', 'endYear'); return false;"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>-->
             &nbsp;@&nbsp;
-            <html:text property="endHour" class="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;:&nbsp;<html:text property="endMin" class="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;
+            <html:text property="endHour" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;:&nbsp;<html:text property="endMin" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;
             <html:select property="endAmPm" onchange="toggleRadio('a', 1);">
               <html:option value="am">AM</html:option>
               <html:option value="pm">PM</html:option>
@@ -259,13 +259,6 @@
   function showAdvanced() {
     if (dojo.byId('advancedAnchor') != null) {
       dojo.byId('advancedDisplay').style.display = "";
-      /*new Rico.Effect.Position('advancedDisplay',
-                               null, // move across y axis
-                               dojo.byId('advancedAnchor').offsetTop - dojo.byId('advancedDisplay').offsetHeight,
-                               0,
-                               1, // 1 steps
-                               {}
-                             );*/
          new Effect.Grow(dojo.byId('advancedAnchor'))
     }
 
