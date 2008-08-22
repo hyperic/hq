@@ -117,67 +117,30 @@ sometimes we don't want any left side buttons or checkboxes at all
         <td align="right" nowrap>
         <script type="text/javascript">
         <!--
-          var liveUpdate = true;
-          var refreshInterval = 120;
-
-          function resetAll() {
-            dojo.byId('refresh60').innerHTML = '<a href="javascript:refresh60()"><fmt:message key="resource.common.monitor.visibility.MetricRefresh.60"/></a>';
-            dojo.byId('refresh120').innerHTML = '<a href="javascript:refresh120()"><fmt:message key="resource.common.monitor.visibility.MetricRefresh.120"/></a>';
-            dojo.byId('refresh300').innerHTML = '<a href="javascript:refresh300()"><fmt:message key="resource.common.monitor.visibility.MetricRefresh.300"/></a>';
-            dojo.byId('refreshOff').innerHTML  = '<a href="javascript:refreshOff()"><fmt:message key="OFF"/>';
-          }
-
-          function refresh60() {
-            resetAll();
-
-            liveUpdate = true;
-            refreshInterval = 60;
-            dojo.byId('refresh60').innerHTML = '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.60"/>';
-          }
-
-          function refresh120() {
-            resetAll();
-
-            liveUpdate = true;
-            refreshInterval = 120;
-            dojo.byId('refresh120').innerHTML = '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.120"/>';
-          }
-
-          function refresh300() {
-            resetAll();
-
-            liveUpdate = true;
-            refreshInterval = 300;
-            dojo.byId('refresh300').innerHTML = '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.300"/>';
-          }
-
-          function refreshOff() {
-            resetAll();
-
-            liveUpdate = null;
-            dojo.byId('refreshOff').innerHTML = "<fmt:message key="OFF"/>";
-          }
-
-          function initLiveMetrics() {
-            metricsUpdater = new MetricsUpdater();
-            //ajaxEngine.registerRequest( 'getLiveMetrics', '<html:rewrite page="/resource/common/monitor/visibility/CurrentMetricValues.do"/>');
-            ajaxEngine.registerAjaxObject( 'metricsUpdater', metricsUpdater );
-            setMetricsRefresh();
-          }
-
-          onloads.push( initLiveMetrics );
+          var metricsUpdater;
+          dojo11.addOnLoad( function() {
+            var ctype = null;
+            <c:if test="${not empty childResourceType}">
+              ctype = '<c:out value="${ctype}"/>';
+            </c:if>
+            
+            // arguments: eid, ctype, localized messages
+            // XXX TODO FIXME: messages should not be passed around, should be using dojo i18n lib instead.
+            metricsUpdater = new hyperic.MetricsUpdater('<c:out value="${eid}"/>',ctype,{
+              '0' : '<fmt:message key="OFF"/>',
+              '60' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.60"/>',
+              '120' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.120"/>',
+              '300' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.300"/>',
+              'LastUpdated': '<fmt:message key="resource.common.monitor.visibility.LastUpdated"/>'
+            });
+            metricsUpdater.update();
+          });
           -->
         </script>
         <span id="CurrentValuesLabel">
           <fmt:message key="resource.common.monitor.visibility.MetricRefreshLabel"/>
         </span>
-        <span id="refresh60"><a href="javascript:refresh60()">1 min</a></span>
-        |
-        <span id="refresh120">2 min</span>
-        |
-        <span id="refresh300"><a href="javascript:refresh300()">5 min</a></span>
-        |
-        <span id="refreshOff"><a href="javascript:refreshOff()"><fmt:message key="OFF"/></a></span>
+        <span id="refresh60"></span> | <span id="refresh120"></span> | <span id="refresh300"></span> | <span id="refresh0"></span>
         </td>
 </c:if>
       </tr>
