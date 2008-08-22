@@ -51,7 +51,7 @@
   <filter name="BROKER_OBJECT_NAME"
           value="${domain}:Type=Broker,BrokerName=*"/>
 
-  <!-- special casing due to 5.x renaming:
+  <!-- special casing due to 5.1 renaming:
        MemoryPercentageUsed -> MemoryPercentUsage -->
   <metrics name="ActiveMQ 4.0 Topic">
     <metric name="Availability"
@@ -138,7 +138,7 @@
             units="percent"/>
   </metrics>
 
-  <metrics name="ActiveMQ 5.x Topic">
+  <metrics name="ActiveMQ 5.1 Topic">
     <metric name="Availability"
             template="${TOPIC_OBJECT_NAME}:${alias}"
             indicator="true"/>
@@ -165,7 +165,7 @@
             units="percent"/>
   </metrics>
 
-  <metrics name="ActiveMQ 5.x Queue">
+  <metrics name="ActiveMQ 5.1 Queue">
     <metric name="Availability"
             template="${QUEUE_OBJECT_NAME}:${alias}"
             indicator="true"/>
@@ -192,7 +192,7 @@
             units="percent"/>
   </metrics>
 
-  <metrics name="ActiveMQ 5.x Broker">
+  <metrics name="ActiveMQ 5.1 Broker">
     <metric name="Availability"
             template="${BROKER_OBJECT_NAME}:${alias}"
             indicator="true"/>
@@ -360,10 +360,18 @@
   </server>
 
   <server name="ActiveMQ"
-          version="5.x"
+          version="5.0"
           include="4.0">
 
     <property name="VERSION_FILE"
-              value="lib/activemq-core-5.*.jar"/>
+              value="lib/activemq-core-5.0.*.jar"/>
+  </server>
+
+  <server name="ActiveMQ"
+          version="5.1"
+          include="5.0">
+
+    <property name="VERSION_FILE"
+              value="lib/activemq-core-5.1.*.jar"/>
   </server>
 </plugin>
