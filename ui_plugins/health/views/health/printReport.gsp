@@ -14,7 +14,6 @@ ${l.numAgents}: ${numAgents}
 ${l.numActiveAgents}: ${numActiveAgents}
 ${l.numServers}: ${numServers}
 ${l.numServices}: ${numServices}
-      
 ${l.numApplications}: ${numApplications}
 ${l.numRoles}: ${numRoles}
 ${l.numUsers}: ${numUsers}
