@@ -2,6 +2,7 @@ package org.hyperic.hq.ui.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -477,6 +478,7 @@ public class RESTService extends BaseService {
             									.canSchedule(me, event);
             	jRes.put("permission", canSchedule);
             }
+        	jRes.put("serverTime", new Date().getTime());
      
         } catch (Exception e) {
             log.debug(e.getLocalizedMessage());

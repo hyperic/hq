@@ -1431,6 +1431,12 @@ visibility: hidden;*/
     -moz-box-orient: vertical
 }
 
+.dijitDialog .statusMsg {
+	color: red;
+	font-weight: bold;
+	text-align: center	
+}
+
 /*Reporting contianer*/
 
 #reportingContainer {

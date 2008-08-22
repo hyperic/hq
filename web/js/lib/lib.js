@@ -2088,10 +2088,11 @@ hyperic.maintenance_schedule = function(group_id) {
 	that.inputs = {};
 	that.canSchedule = true;
     that.selected_from_time = that.selected_to_time = new Date();
+    that.server_time = new Date();
 
 	that.messages = {
-		success : "Updated!",
-		validationError: "Please correct the highlighted errors below.", 
+		success : "Updated successfully!",
+		serverError : "An error occurred processing your request.",
 		currentSchedule : "Currently scheduled downtime window:",
 		noSchedule : "No downtime window is currently scheduled."
 	};
@@ -2107,24 +2108,15 @@ hyperic.maintenance_schedule = function(group_id) {
 				title: "Schedule Downtime"
 			},pane);
 		}
-
-		var curdate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
-
-        if(that.existing_schedule.from_time)
-        {
-            that.selected_from_time = new Date(that.existing_schedule.from_time);
-            that.selected_to_time = new Date(that.existing_schedule.to_time);
-        }
         
         that.inputs.from_date = new dijit11.form.DateTextBox({
     			name: "from_date",
     			value: that.selected_from_time,
     			constraints: {
-                    min: curdate,
                     datePattern: 'MM/dd/y'},
     			lang: "en-us",
     			promptMessage: "mm/dd/yyyy",
-    			rangeMessage: "The downtime start date cannot be later than end date.",
+    			rangeMessage: "The downtime start date cannot be later than the end date.",
     			invalidMessage: "Invalid date. Use mm/dd/yyyy format.",
     			required: true
     		}, "from_date");
@@ -2133,11 +2125,10 @@ hyperic.maintenance_schedule = function(group_id) {
     			name: "to_date",
     			value: that.selected_to_time,
     			constraints: {
-                    min: curdate,
                     datePattern: 'MM/dd/y'},
     			lang: "en-us",
     			promptMessage: "mm/dd/yyyy",
-    			rangeMessage: "The downtime end date cannot be earlier than start date.",
+    			rangeMessage: "The downtime end date cannot be earlier than the start date.",
     			invalidMessage: "Invalid date. Use mm/dd/yyyy format.",
     			required: true
     		}, "to_date");
@@ -2146,7 +2137,7 @@ hyperic.maintenance_schedule = function(group_id) {
     			name: "from_time",
     			value: that.selected_from_time,
     			lang: "en-us",
-                rangeMessage: "The downtime start time cannot be later than end time.",
+                rangeMessage: "The downtime start time must be later than the current time.",
     			invalidMessage: "The downtime start time is required.",
     			required: true
     		}, "from_time");
@@ -2155,43 +2146,25 @@ hyperic.maintenance_schedule = function(group_id) {
     			name: "to_time",
     			value: that.selected_to_time,
     			lang: "en-us",
-                rangeMessage: "The downtime end time cannot be earlier than start time.",
+                rangeMessage: "The downtime end time must be later than the start time.",
     			invalidMessage: "The downtime end time is required.",
     			required: true
     		}, "to_time");
 
     	that.inputs.from_date.onChange = function() {
-            that.inputs.to_date.constraints.min = this.getValue();
-            that.inputs.to_date.validate();
-            that.inputs.from_time.onChange();
-            that.inputs.to_time.onChange();
+            this.validate();
         };
 
     	that.inputs.to_date.onChange = function() {
-            that.inputs.from_date.constraints.max = this.getValue();
-            that.inputs.from_date.validate();
-            that.inputs.from_time.onChange();
-            that.inputs.to_time.onChange();
+            this.validate();
         };
         
         that.inputs.from_time.onChange = function() {
-            if(that.inputs.from_date.getValue().getTime() == that.inputs.to_date.getValue().getTime()) {
-                that.inputs.to_time.constraints.min = this.getValue();
-            } else {
-                delete that.inputs.to_time.constraints.min;
-            }
             this.validate();
-            that.inputs.to_time.validate();
         };
 
         that.inputs.to_time.onChange = function() {
-            if(that.inputs.from_date.getValue().getTime() == that.inputs.to_date.getValue().getTime()) {
-                that.inputs.from_time.constraints.max = this.getValue();
-            } else {
-                delete that.inputs.from_time.constraints.max;
-            }
             this.validate();
-            that.inputs.from_time.validate();
         };
 
 		that.buttons.schedule_btn = new dijit11.form.Button({
@@ -2221,7 +2194,10 @@ hyperic.maintenance_schedule = function(group_id) {
 
     };
 
-    that.schedule_action = function() {        
+    that.schedule_action = function() {
+		that.updateConstraints();
+	
+    	// re-validate with updated constraints
     	if(that.dialog.validate())
         {
             var args = that.dialog.getValues();
@@ -2238,17 +2214,25 @@ hyperic.maintenance_schedule = function(group_id) {
                 handleAs: 'json',
                 load: function(data){
     				//that.dialog.hide();
-                    if(!data.error && (parseInt(data.st,10) !== 0 && parseInt(data.et,10) !== 0))
+                    if(data.error)
                     {
-                        that.existing_schedule.from_time = parseInt(data.st,10);
-                        that.existing_schedule.to_time = parseInt(data.et,10);
+                        dojo11.byId('maintenance_status_' + that.group_id).innerHTML = that.messages.serverError;
+                        console.debug(data.error);
+                    }
+                    else 
+                    {
+                		that.server_time = new Date(data.serverTime);
 
-                        that.selected_from_time = new Date(that.existing_schedule.from_time);
-                        that.selected_to_time = new Date(that.existing_schedule.to_time);
-
-                        that.redraw();
-
-                        dojo11.byId('existing_downtime_' + that.group_id).innerHTML = that.messages.success + " " + that.messages.currentSchedule;
+                    	if((parseInt(data.st,10) !== 0 && parseInt(data.et,10) !== 0))
+                    	{
+	                        that.existing_schedule.from_time = parseInt(data.st,10);
+	                        that.existing_schedule.to_time = parseInt(data.et,10);
+	
+	                        that.selected_from_time = new Date(that.existing_schedule.from_time);
+	                        that.selected_to_time = new Date(that.existing_schedule.to_time);
+	
+	                        that.redraw(false, that.messages.currentSchedule, that.messages.success);
+                    	}
                     }
                 },
                 error: function(data){
@@ -2257,12 +2241,8 @@ hyperic.maintenance_schedule = function(group_id) {
                 timeout: 2000
             });
         }
-    	else
-    	{
-            dojo11.byId('existing_downtime_' + that.group_id).innerHTML = that.messages.validationError;
-    	}
     };
-
+    
     that.clear_schedule_action = function() {
         return dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id + '&sched=false',
@@ -2271,12 +2251,9 @@ hyperic.maintenance_schedule = function(group_id) {
 				//that.dialog.hide();
                 if(!data.error)
                 {
-                    that.existing_schedule = {};
-				    that.selected_from_time = that.selected_to_time = new Date();
-
-					that.redraw();
-
-                    dojo11.byId('existing_downtime_' + that.group_id).innerHTML = that.messages.success + " " + that.messages.noSchedule;
+            		that.server_time = new Date(data.serverTime);
+                	that.resetSchedule();
+					that.redraw(false, that.messages.noSchedule, that.messages.success);
 				}
             },
             error: function(data){
@@ -2291,11 +2268,12 @@ hyperic.maintenance_schedule = function(group_id) {
         return dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=maint_win&gid=" + that.group_id,
             handleAs: 'json',
-            load: function(data){
-        		that.canSchedule = data.permission;
-        		
+            load: function(data){        		
                 if(!data.error)
                 {
+            		that.server_time = new Date(data.serverTime);
+            		that.canSchedule = data.permission;
+                	
                 	if(parseInt(data.st,10) !== 0 && parseInt(data.et,10) !== 0)
                 	{
                     	that.existing_schedule.from_time = parseInt(data.st,10);
@@ -2304,18 +2282,14 @@ hyperic.maintenance_schedule = function(group_id) {
                     	that.selected_from_time = new Date(that.existing_schedule.from_time);
                     	that.selected_to_time = new Date(that.existing_schedule.to_time);
                     	                    
-                    	dojo11.byId('existing_downtime_' + that.group_id).innerHTML = that.messages.currentSchedule;
+                    	that.redraw(true, that.messages.currentSchedule, "");
                 	} 
         			else
         			{
-                        that.existing_schedule = {};
-    				    that.selected_from_time = that.selected_to_time = new Date();
-
-                    	dojo11.byId('existing_downtime_' + that.group_id).innerHTML = that.messages.noSchedule;        			
+                        that.resetSchedule();
+                    	that.redraw(true, that.messages.noSchedule, "");        			
         			}
                 }
-            	that.redraw();
-                that.dialog.show();
             },
             error: function(data){
                 console.debug("An error occurred fetching maintenance schedule for group " + that.group_id, data);
@@ -2323,21 +2297,77 @@ hyperic.maintenance_schedule = function(group_id) {
             timeout: 2000
         });
     };
+    
+    that.resetSchedule = function() {
+		var curtime = new Date();
+    	that.existing_schedule = {};
+	    that.selected_from_time = new Date(curtime.getFullYear(), curtime.getMonth(), curtime.getDate(), curtime.getHours()+1);
+	    that.selected_to_time = new Date(that.selected_from_time.getTime() + (60*60000));
+	    that.deleteConstraints();
+    }
+    
+    that.deleteConstraints = function() {
+    	for(var inputName in that.inputs)
+    	{
+    		delete that.inputs[inputName].constraints.min;
+    		delete that.inputs[inputName].constraints.max;
+    	}
+    }
+    
+    that.updateConstraints = function() {
+    	that.deleteConstraints();
 
-    that.redraw = function() {
-		that.inputs.from_date.setValue(that.selected_from_time);
+    	var curtime = new Date();
+    	var curdate = new Date(curtime.getFullYear(), curtime.getMonth(), curtime.getDate());
+    	that.inputs.from_date.constraints.min = curdate;
+    	that.inputs.to_date.constraints.min = curdate;
+
+    	if(that.inputs.from_date.isValid() && that.inputs.to_date.isValid()
+    			&& that.inputs.from_time.isValid() && that.inputs.to_time.isValid())
+    	{
+    		that.inputs.to_date.constraints.min = that.inputs.from_date.getValue();
+    		    		
+    		if(that.inputs.from_date.getValue().getTime() == curdate.getTime())
+    		{
+    			if(that.existing_schedule.from_time)
+    			{
+    				// TO DO
+    			}
+    			else
+    			{
+    				that.inputs.from_time.constraints.min = new Date(curtime.getTime()-curdate.getTime()+that.inputs.from_time.getValue().getTimezoneOffset() * 60000);
+    			}
+    		}
+    		
+    		if(that.inputs.from_date.getValue().getTime() == that.inputs.to_date.getValue().getTime())
+    		{
+    			that.inputs.to_time.constraints.min = new Date(that.inputs.from_time.getValue().getTime() + 60000);
+    		}
+    	}
+    };
+    
+    that.redraw = function(show, message, status) {
+    	that.inputs.from_date.setValue(that.selected_from_time);
 		that.inputs.from_time.setValue(that.selected_from_time);
 		that.inputs.to_date.setValue(that.selected_to_time);
 		that.inputs.to_time.setValue(that.selected_to_time);
 
+    	that.updateConstraints();
+		
         if(that.existing_schedule.from_time)
         {
-    		that.buttons.clear_schedule_btn.domNode.show();
+        	that.buttons.clear_schedule_btn.domNode.show();
             that.buttons.schedule_btn.setLabel('Reschedule');
+            
+            if(that.selected_from_time.getTime() < that.server_time.getTime())
+            {
+            	that.inputs.from_date.setAttribute('disabled', 'disabled');
+            	that.inputs.from_time.setAttribute('disabled', 'disabled');
+            }
         }
         else
         {
-            that.buttons.clear_schedule_btn.domNode.hide();
+        	that.buttons.clear_schedule_btn.domNode.hide();
             that.buttons.schedule_btn.setLabel('Schedule');        	
         }
         
@@ -2353,7 +2383,19 @@ hyperic.maintenance_schedule = function(group_id) {
         			that.buttons[buttonName].domNode.hide();
         		}
         	}
-        }		
+        }
+
+    	dojo11.byId('maintenance_status_' + that.group_id).innerHTML = status;
+        dojo11.byId('existing_downtime_' + that.group_id).innerHTML = message;
+        
+        if (show) 
+        {
+            that.dialog.show();
+        }
+        else
+        {
+        	setTimeout('maintenance_' + that.group_id + '.dialog.hide()', 2000);
+        }
     };
     
 	that.init();
