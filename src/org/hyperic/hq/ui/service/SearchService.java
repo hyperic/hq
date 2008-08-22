@@ -17,8 +17,8 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * The User Interface's search service
@@ -95,18 +95,16 @@ public class SearchService extends BaseService {
 
     private String getJsonResutls(PageList res) {
         Iterator i = res.iterator();
-        int key = 0;
-        JSONObject jObject = new JSONObject();
+        JSONArray jsArray = new JSONArray();
         while (i.hasNext()) {
             SearchResult r = (SearchResult) i.next();
             try {
-                jObject.put(Integer.toString(key), r.toJson());
+                jsArray.put(r.toJson());
             } catch (JSONException e) {
-                log.warn("Cannot create search result list" + e.getStackTrace());
+                log.warn("Cannot create search result list. " + e.getStackTrace());
             }
-            key++;
         }
-        return jObject.toString();
+        return jsArray.toString();
     }
 
 }

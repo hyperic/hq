@@ -258,7 +258,7 @@ function loadSearchData(type, response, evt) {
         var relink = new RegExp("link", "g");
         var retext = new RegExp("text", "g");
         var retype = new RegExp("type", "g");
-        for(var i in response) {
+        for(var i = 0; i < response.length; i++) {
             var length = response[i].name.length;
             if(length >= 37){
                 response[i].name = response[i].name.substring(0,4) + "..." + response[i].name.substring(length-28, length);
