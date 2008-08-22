@@ -642,7 +642,7 @@
 
       <action path="/resource/common/control/*Status"
               type="org.hyperic.hq.ui.action.resource.common.control.{1}StatusAction"> 
-        <forward name="success" path="/resource/common/control/CurrentStatusAJAX.jsp"/>
+        <forward name="success" path="/common/JSONResponse.jsp"/>
       </action>
 
       <!-- resource platform actions -->      

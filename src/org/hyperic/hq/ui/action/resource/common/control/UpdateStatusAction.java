@@ -96,7 +96,7 @@ public class UpdateStatusAction extends BaseAction {
         obj.put("ctrlMessage", cValue.getMessage());
         obj.put("ctrlSched", cValue.getDateScheduled());
         obj.put("ctrlDuration", cValue.getDuration());
-        request.setAttribute(Constants.CONTROL_CURRENT_STATUS_ATTR, obj);
+        request.setAttribute(Constants.AJAX_JSON, obj);
         
         return returnSuccess(request, mapping);
     }

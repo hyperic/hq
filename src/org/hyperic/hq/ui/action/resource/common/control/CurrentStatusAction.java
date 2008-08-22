@@ -62,7 +62,8 @@ public class CurrentStatusAction extends TilesAction {
         throws Exception {
         ServletContext ctx = getServlet().getServletContext();
         Log log = LogFactory.getLog(CurrentStatusAction.class.getName());
-                
+        JSONObject obj = new JSONObject();
+
         log.trace("determining current status.");              
         int sessionId = RequestUtils.getSessionId(request).intValue(); 
         ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
@@ -90,21 +91,29 @@ public class CurrentStatusAction extends TilesAction {
         }
 
         if (cValue == null /* no last job */) {
-            request.setAttribute(Constants.CONTROL_STATUS_PARAM,
+/*            request.setAttribute(Constants.CONTROL_STATUS_PARAM,
                                  Constants.CONTROL_STATUS_NONE);
+*/
+            obj.put(Constants.CONTROL_STATUS_PARAM, Constants.CONTROL_STATUS_NONE);
         } else {
             // the default should end up being CONTROL_STATUS_INPROGRESS
-            request.setAttribute(Constants.CONTROL_STATUS_PARAM,
+/*            request.setAttribute(Constants.CONTROL_STATUS_PARAM,
                                  cValue.getStatus());
+*/
+            obj.put(Constants.CONTROL_STATUS_PARAM, cValue.getStatus());
             batchId = cValue.getId();
         }
 
         if (batchId != null) {
-            request.setAttribute(Constants.CONTROL_BATCH_ID_PARAM, batchId);
+/*            request.setAttribute(Constants.CONTROL_BATCH_ID_PARAM, batchId);*/
+            obj.put(Constants.CONTROL_BATCH_ID_PARAM, batchId);
         }
 
-        request.setAttribute(Constants.CONTROL_CURRENT_STATUS_ATTR, cValue);
+/*        request.setAttribute(Constants.CONTROL_CURRENT_STATUS_ATTR, cValue);*/
         
+        obj.put(Constants.CONTROL_CURRENT_STATUS_ATTR, cValue);
+        request.setAttribute(Constants.AJAX_JSON, obj);
+
         return null;
     }
 }
