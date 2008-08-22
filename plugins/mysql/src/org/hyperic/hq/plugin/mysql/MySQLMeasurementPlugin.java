@@ -135,36 +135,36 @@ public class MySQLMeasurementPlugin
                MetricInvalidException,
                MetricNotFoundException
     {
-        String objectName = metric.getObjectName(),
-               alias      = metric.getAttributeName();
-        if (alias.indexOf("NumberOfDatabases") == -1 &&
-            !alias.equalsIgnoreCase(AVAIL_ATTR))
+        String alias = metric.getAttributeName();
+        boolean isAvail = alias.equalsIgnoreCase(AVAIL_ATTR);
+        if (-1 == alias.toLowerCase().indexOf("numberofdatabases") && !isAvail) {
             return super.getValue(metric);
-
-        int value = 0;
+        }
         Statement stmt = null;
         ResultSet rs   = null;
-        try
-        {
+        try {
             Connection conn = getCachedConnection(metric);
             stmt = conn.createStatement();
             rs   = stmt.executeQuery(NUMDATABASES);
-
-            if (alias.equalsIgnoreCase(AVAIL_ATTR))
-                return new MetricValue(Metric.AVAIL_UP,
-                                       System.currentTimeMillis());
-
-            while (rs.next())
+            long now = System.currentTimeMillis();
+            if (isAvail) {
+                return new MetricValue(Metric.AVAIL_UP, now);
+            }
+            int value = 0;
+            while (rs.next()) {
                 value++;
-
+            }
             return new MetricValue(value, System.currentTimeMillis());
-        }
-        catch (SQLException e)
-        {
-            String msg = "Query failed for "+alias+": "+e.getMessage();
-            throw new MetricUnreachableException(msg, e);
-        }
-        finally {
+        } catch (SQLException e) {
+            long now = System.currentTimeMillis();
+            if (isAvail) {
+                return new MetricValue(Metric.AVAIL_DOWN, now);
+            } else {
+                String msg = "Query failed for " + alias +
+                    ": " + e.getMessage();
+                throw new MetricUnreachableException(msg, e);
+            }
+        } finally {
             DBUtil.closeJDBCObjects(getLog(), null, stmt, rs);
         }
     }
