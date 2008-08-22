@@ -52,6 +52,8 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 /**
  * An <code>Action</code> that retrieves data from the BizApp to
@@ -131,12 +133,12 @@ public class CurrentMetricValuesAction extends BaseAction {
                                        getResources(request));
 
             // Create an array list of map objects for the attributes
-            ArrayList objects = new ArrayList();
+            JSONArray objects = new JSONArray();
             for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
                 Collection metricList = (Collection) it.next();
                 for (Iterator m = metricList.iterator(); m.hasNext();) {
                     MetricDisplaySummary mds = (MetricDisplaySummary) m.next();
-                    HashMap values = new HashMap();
+                    JSONObject values = new JSONObject();
                     values.put("mid", mds.getTemplateId());
                     values.put("alertCount", new Integer(mds.getAlertCount()));
                     values.put("oobCount", new Integer(mds.getOobCount()));
@@ -144,12 +146,17 @@ public class CurrentMetricValuesAction extends BaseAction {
                     values.put("average", mds.getAvgMetric());
                     values.put("max", mds.getMaxMetric());
                     values.put("last", mds.getLastMetric());
-                    objects.add(values);
+                    objects.put(values);
                 }
             }
-            request.setAttribute("objects", objects);
-            request.setAttribute(Constants.AJAX_TYPE, Constants.AJAX_OBJECT);
-            request.setAttribute(Constants.AJAX_ID, "metricsUpdater");
+            JSONObject ajaxJson = new JSONObject();
+
+            ajaxJson.put("objects", objects);
+            ajaxJson.put(Constants.AJAX_TYPE, Constants.AJAX_OBJECT);
+            ajaxJson.put(Constants.AJAX_ID, "metricsUpdater");
+
+            request.setAttribute(Constants.AJAX_JSON, ajaxJson);
+
         } else {
             log.trace("no metrics were returned by getMetrics(...)");
         }
