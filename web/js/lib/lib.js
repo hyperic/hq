@@ -2575,8 +2575,8 @@ Date.prototype.formatDate = function(format)
     var date = this;
     var short_months = ['Jan','Feb','Mar','Apr','May','Jun', 'Jul','Aug','Sep','Oct','Nov','Dec'];
     var months = ['January','February','March','April','May','June', 'July','August','September','October','November','December'];
-    if (!format)
-      format="MM/dd/yyyy";               
+
+    format= format || "MM/dd/yyyy";               
  
     var month = date.getMonth() + 1;
     var year = date.getFullYear();    
@@ -2586,9 +2586,13 @@ Date.prototype.formatDate = function(format)
     format = format.replace("M",month.toString());
  
     if (format.indexOf("yyyy") > -1)
+    {
         format = format.replace("yyyy",year.toString());
+    }
     else if (format.indexOf("yy") > -1)
+    {
         format = format.replace("yy",year.toString().substr(2,2));
+    }
  
     format = format.replace("dd",date.getDate().toString().padL(2,"0"));
 
@@ -2604,20 +2608,153 @@ Date.prototype.formatDate = function(format)
     if (format.indexOf("t") > -1)
     {
        if (hours > 11)
-        format = format.replace("t","pm")
+       {
+           format = format.replace("t","pm");
+       }
        else
-        format = format.replace("t","am")
+       {
+           format = format.replace("t","am");
+       }
     }
     if (format.indexOf("HH") > -1)
+    {
         format = format.replace("HH",hours.toString().padL(2,"0"));
+    }
     if (format.indexOf("hh") > -1) {
-        if (hours > 12) hours -= 12;
-        if (hours == 0) hours = 12;
+        if (hours > 12) {hours -= 12;}
+        if (hours == 0) {hours = 12;}
         format = format.replace("hh",hours.toString().padL(2,"0"));        
     }
     if (format.indexOf("mm") > -1)
-       format = format.replace("mm",date.getMinutes().toString().padL(2,"0"));
+    {
+        format = format.replace("mm",date.getMinutes().toString().padL(2,"0"));
+    }
     if (format.indexOf("ss") > -1)
-       format = format.replace("ss",date.getSeconds().toString().padL(2,"0"));
+    {
+        format = format.replace("ss",date.getSeconds().toString().padL(2,"0"));
+    }
     return format;
-}
+};
+
+hyperic.MetricsUpdater = function(eid,ctype,messages) {
+    that = this;
+    that.attributes = ["min", "average", "max", "last", "avail"];
+    that.eid = eid || false;
+    that.ctype = ctype || false;
+    that.lastUpdate = 0;
+    that.liveUpdate = true;
+    that.refreshInterval = 0;
+    that.refreshTimeout = null;
+    that.refreshRates = {
+        0   : messages['0'],
+        60  : messages['60'],
+        120 : messages['120'],
+        300 : messages['300']
+        };
+
+    that.update = function() {
+        var now = new Date();
+        that.refreshTimeout = null;
+        if (that.liveUpdate && (that.lastUpdate == 0 || (now - that.lastUpdate) >= that.refreshInterval)) {
+            var url = '/resource/common/monitor/visibility/CurrentMetricValues.do?eid=' + that.eid;
+            if(that.ctype)
+            {
+                url += '&ctype=' + that.ctype;
+            }
+            dojo11.xhrGet( {
+                url: url,
+                handleAs: "json",
+                timeout: 5000,
+                load: function(data, ioArgs) {
+                    console.log(data);
+                    that.lastUpdate = now;
+                    that.refreshTimeout = setTimeout( that.update, parseInt(that.refreshInterval,10)*1000 );
+                    for (var i = 0; i < data.objects.length; i++) {
+                        that.setValues(data.objects[i]);
+                    }
+                    // Update the time
+                    if (dojo.byId('UpdatedTime') !== null) {
+                        dojo.byId('UpdatedTime').innerHTML = messages.LastUpdated + now.toLocaleString();
+                    }
+                },
+                error: function(data){
+                    console.debug("An error occurred refreshing metrics:");
+                    console.debug(data);
+                }
+            });
+        }
+    };
+
+    that.setValues = function(metricValues) {
+        for (var i = 0; i < that.attributes.length; i++) {
+            that.substitute(that.attributes[i], metricValues);
+        }
+    };
+
+    that.substitute = function( attribute, metricValues) {
+        var metric = metricValues.mid;
+        var lastSpan = dojo11.byId(attribute + metric);
+        console.log(lastSpan);
+        console.log(attribute + metric);
+        if (lastSpan !== null) {
+            var html;
+            if (attribute == "avail") {
+                var img;
+                switch(metricValues.last) {
+                    case '100.0%':
+                        img = 'green';
+                        break;
+                    case '0.0%':
+                        img = 'red';
+                        break;
+                    case '-1.0%':
+                        img = 'orange';
+                        break;
+                    default:
+                        img = 'yellow';
+                        break;
+                }
+                html = '<img src="/images/icon_available_'+img+'.gif" width="12" height="12" alt="" border="0" align="absmiddle">';
+            }
+            else {
+                html = metricValues[attribute];
+            }
+
+            if (lastSpan.innerHTML != html) {
+                var hl = new Effect.Highlight(lastSpan.parentNode);
+                lastSpan.innerHTML = html;
+                var p = new Effect.Pulsate(lastSpan);
+            }
+        }
+    };
+    
+    that.setRefresh = function(refresh) {
+        refresh = parseInt(refresh,10);
+        if(typeof that.refreshRates[refresh] != 'undefined')
+        {
+            that.liveUpdate = (refresh === 0) ? false : true;
+            that.refreshInterval = refresh;
+            for(var i in that.refreshRates)
+            {
+                if(typeof that.refreshRates[i] !== 'function')
+                {
+                    if(i == refresh)
+                    {
+                        dojo.byId('refresh' + i).innerHTML = that.refreshRates[i];
+                    }
+                    else
+                    {
+                        dojo.byId('refresh' + i).innerHTML = '<a href="javascript:" onclick="metricsUpdater.setRefresh('+ i +');">' + that.refreshRates[i] + '</a>';
+                    }
+                }
+            }
+            if(that.refreshTimeout === null && that.refreshInterval !== 0)
+            {
+                that.refreshTimeout = setTimeout( that.update, parseInt(that.refreshInterval,10)*1000 );
+            }
+        }
+    };
+
+    // set default refresh rate and initialize the refresh rate links.
+    that.setRefresh(120);
+};
