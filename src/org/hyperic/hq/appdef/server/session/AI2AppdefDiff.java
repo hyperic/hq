@@ -75,72 +75,26 @@ public class AI2AppdefDiff {
                                              CPropManagerLocal cpropMgr,
                                              AIPlatformValue aiplatform)
     {
-        Platform appdefPlatform;
         AIPlatformValue revisedAIplatform;
-        int i;
 
         // We know we'll at least need to copy all the platform-level attributes
-        revisedAIplatform = new AIPlatformValue();
-        revisedAIplatform.setId(aiplatform.getId());
-        revisedAIplatform.setPlatformTypeName(aiplatform.getPlatformTypeName());
-        revisedAIplatform.setIgnored(aiplatform.getIgnored());
-        revisedAIplatform.setCertdn(aiplatform.getCertdn());
-        revisedAIplatform.setFqdn(aiplatform.getFqdn());
-        revisedAIplatform.setDescription(aiplatform.getDescription());
-        revisedAIplatform.setName(aiplatform.getName());
-        revisedAIplatform.setCTime(aiplatform.getCTime());
-        revisedAIplatform.setMTime(aiplatform.getMTime());
-        revisedAIplatform.setLastApproved(aiplatform.getLastApproved());
-        revisedAIplatform.setAgentToken(aiplatform.getAgentToken());
-        revisedAIplatform.setCpuCount(aiplatform.getCpuCount());
-        revisedAIplatform.setCustomProperties(aiplatform.getCustomProperties());
-        revisedAIplatform.setProductConfig(aiplatform.getProductConfig());
-        revisedAIplatform.setMeasurementConfig(aiplatform.getMeasurementConfig());
-        revisedAIplatform.setControlConfig(aiplatform.getControlConfig());
+        revisedAIplatform = new AIPlatformValue(aiplatform);
 
         // Initially, set platform status to PLACEHOLDER
         revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_PLACEHOLDER);
         revisedAIplatform.setDiff(AIQueueConstants.Q_DIFF_NONE);
 
         // Get the appdef platform
+        Platform appdefPlatform;
         try {
             appdefPlatform = pmLH.getPlatformByAIPlatform(subject, aiplatform);
+            // If there was no appdef platform...
+            if (appdefPlatform == null) {
+                return getAiPlatformToAdd(aiplatform);
+            }
         } catch (PermissionException e) {
             _log.error("Error looking up platform", e);
             throw new SystemException(e);
-        }
-
-        // If there was no appdef platform...
-        if (appdefPlatform == null) {
-            // If the aiplatform has status "removed", then appdef model is
-            // correct and the platform has actually been removed.  In this
-            // case we return null, which notifies the caller of this condition.
-            if (aiplatform.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED) {
-                return null;
-            }
-
-            // Otherwise, recursively mark everything as new, copying 
-            // IPs and servers.
-            revisedAIplatform = aiplatform;
-            revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_ADDED);
-
-            // All scanned IPs must be new
-            AIIpValue[] newIps = aiplatform.getAIIpValues();
-            revisedAIplatform.removeAllAIIpValues();
-            for (i=0; i<newIps.length; i++) {
-                newIps[i].setQueueStatus(AIQueueConstants.Q_STATUS_ADDED);
-                revisedAIplatform.addAIIpValue(newIps[i]);
-            }
- 
-            // All scanned servers must be new
-            AIServerValue[] newServers = aiplatform.getAIServerValues();
-            revisedAIplatform.removeAllAIServerValues();
-            for (i=0; i<newServers.length; i++) {
-                newServers[i].setQueueStatus(AIQueueConstants.Q_STATUS_ADDED);
-                revisedAIplatform.addAIServerValue(newServers[i]);
-            }
-            
-            return revisedAIplatform;
         }
 
         //when scans are run for a device platform, only the fqdn and ipaddress
@@ -224,6 +178,35 @@ public class AI2AppdefDiff {
         return revisedAIplatform;
     }
 
+    
+    private AIPlatformValue getAiPlatformToAdd(AIPlatformValue aiplatform) {
+        // If the aiplatform has status "removed", then appdef model is
+        // correct and the platform has actually been removed.  In this
+        // case we return null, which notifies the caller of this condition.
+        if (aiplatform.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED) {
+            return null;
+        }
+        // Otherwise, recursively mark everything as new, copying 
+        // IPs and servers.
+        AIPlatformValue revisedAIplatform = aiplatform;
+        revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_ADDED);
+        // All scanned IPs must be new
+        AIIpValue[] newIps = aiplatform.getAIIpValues();
+        revisedAIplatform.removeAllAIIpValues();
+        for (int i=0; i<newIps.length; i++) {
+            newIps[i].setQueueStatus(AIQueueConstants.Q_STATUS_ADDED);
+            revisedAIplatform.addAIIpValue(newIps[i]);
+        }
+        // All scanned servers must be new
+        AIServerValue[] newServers = aiplatform.getAIServerValues();
+        revisedAIplatform.removeAllAIServerValues();
+        for (int i=0; i<newServers.length; i++) {
+            newServers[i].setQueueStatus(AIQueueConstants.Q_STATUS_ADDED);
+            revisedAIplatform.addAIServerValue(newServers[i]);
+        }
+        return revisedAIplatform;
+    }
+
     private void doIpDiffs(Platform appdefPlatform,
                            AIPlatformValue aiPlatform,
                            AIPlatformValue revisedAIplatform,
@@ -234,10 +217,8 @@ public class AI2AppdefDiff {
         // the appdef list as we find them.  In the end, the IPs that are
         // left in appdef but not in the AI data are the IPs that have been
         // removed from the platform.
-        List appdefIps  = new ArrayList();
-        appdefIps.addAll(appdefPlatform.getIps());
-        List scannedIps = new ArrayList();
-        scannedIps.addAll(Arrays.asList(aiPlatform.getAIIpValues()));
+        List appdefIps  = new ArrayList(appdefPlatform.getIps());
+        List scannedIps = Arrays.asList(aiPlatform.getAIIpValues());
         if (_log.isDebugEnabled())
             _log.debug("appdefIps=" + StringUtil.listToString(appdefIps) +
                        " scannedIps=" + StringUtil.listToString(scannedIps));

@@ -27,10 +27,15 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -91,6 +96,7 @@ import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.PlatformTypeInfo;
+import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -611,6 +617,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the Platform object based on an AIPlatformValue.
+     * Checks against FQDN, CertDN, then checks to see if all IP addresses
+     * match.  If all of these checks fail null is returned.
      * @ejb:interface-method
      */
     public Platform getPlatformByAIPlatform(AuthzSubjectValue subject,
@@ -620,21 +628,77 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         String certdn = aiPlatform.getCertdn();
         String fqdn = aiPlatform.getFqdn();
 
-        try {
-            try {
-                // First try to find by FQDN
-                return findPlatformByFqdn(subject, fqdn);
-            } catch (PlatformNotFoundException e) {
-                // Now try to find by certdn
-                return getPlatformByCertDN(subject, certdn);
-            } catch (Exception e) {
-                _log.info("Error finding platform by certdn: " + certdn);
-                throw new SystemException(e);
-            }
-        } catch (PlatformNotFoundException e) {
-            _log.info("Error finding platform by fqdn: " + fqdn);
-            return null;
+        // First try to find by FQDN
+        Platform p = getPlatformDAO().findByFQDN(fqdn);
+        if (p != null) {
+            checkViewPermission(subject, p.getEntityId());
+            return p;
         }
+        p = getPlatformDAO().findByCertDN(certdn);
+        if (p != null) {
+            checkViewPermission(subject, p.getEntityId());
+            return p;
+        }
+        List ips = Arrays.asList(aiPlatform.getAIIpValues());
+        int matches = 0;
+        Platform rtn = null;
+        // IPs from the aiPlatform must match all the appdef platform's
+        // in order to be 100% sure this is the same platform.  In the future
+        // we may want to reconsider this logic.
+        Set fqdnMatches = new HashSet();
+        for (Iterator it=ips.iterator(); it.hasNext(); ) {
+            AIIpValue ip = (AIIpValue)it.next();
+            // don't want to check LOOPBACK_ADDRESS since the query will
+            // return all platforms which is not desirable / useful
+            if (ip.getAddress().equals(NetFlags.LOOPBACK_ADDRESS)) {
+                continue;
+            }
+            Collection platforms = findPlatformPojosByIpAddr(ip.getAddress());
+            for (Iterator i=platforms.iterator(); i.hasNext(); ) {
+                rtn = (Platform)i.next();
+                if (!fqdnMatches.contains(rtn.getFqdn())
+                    && platformMatchesAllIps(rtn, ips)) {
+                    matches++;
+                    fqdnMatches.add(rtn.getFqdn());
+                }
+                if (matches > 1) {
+                    // XXX scottmf, need to figure out what to do here.
+                    // If matches > 1 it is probably not the biggest deal 
+                    // to return null because it is most definitely the 
+                    // agentporker
+                    // is checking the agent port is a good way to resolve?
+                    return null;
+                }
+            }
+        }
+        if (matches <= 0) {
+            // XXX scottmf, if it gets to this point should check against
+            // macaddrs as well
+            return null;
+        } else if (matches == 1) {
+            checkViewPermission(subject, rtn.getEntityId());
+            return rtn;
+        }
+        return null;
+    }
+
+    private boolean platformMatchesAllIps(Platform p, List ips) {
+        Collection platIps = p.getIps();
+        if (platIps.size() != ips.size()) {
+            return false;
+        }
+        Set ipSet = new HashSet();
+        for (Iterator it=ips.iterator(); it.hasNext(); ) {
+            AIIpValue ip = (AIIpValue)it.next();
+            ipSet.add(ip.getAddress());
+        }
+        for (Iterator it=platIps.iterator(); it.hasNext(); ) {
+            Ip ip = (Ip)it.next();
+            if (!ipSet.contains(ip.getAddress())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -1346,41 +1410,26 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param aiplatform the AI platform object to use for data
      * @ejb:interface-method
      */
-    public void updateWithAI(AIPlatformValue aiplatform, String owner)
+    public void updateWithAI(AIPlatformValue aiplatform, AuthzSubjectValue subj)
         throws PlatformNotFoundException, ApplicationException {
         
         String certdn = aiplatform.getCertdn();
         String fqdn = aiplatform.getFqdn();
-        PlatformDAO plh = getPlatformDAO();
-        // First try to find by fqdn
 
-        Platform pLocal;
-        try {
-            pLocal = plh.findByFQDN(fqdn);
-        } catch (NonUniqueResultException e) {
-            pLocal = null;
+        Platform platform = this.getPlatformByAIPlatform(subj, aiplatform);
+        if(platform == null) {
+            throw new PlatformNotFoundException(
+                "Platform not found with either FQDN: " + fqdn +
+                " nor CertDN: " + certdn);
         }
-        if(pLocal == null) {
-            // Now try to find by certdn
-            try {
-                pLocal = plh.findByCertDN(certdn);
-            } catch (NonUniqueResultException e) {
-                pLocal = null;
-            }
-            if(pLocal ==  null) {
-                throw new PlatformNotFoundException(
-                    "Platform not found with either FQDN: " + fqdn +
-                    " nor CertDN: " + certdn);
-            }
-        }
-        int prevCpuCount = pLocal.getCpuCount().intValue();
+        int prevCpuCount = platform.getCpuCount().intValue();
         Integer count = aiplatform.getCpuCount();
         if ((count != null) && (count.intValue() > prevCpuCount)) {
             counter.addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
         
-        pLocal.updateWithAI(aiplatform, owner,
-                            getAuthzResource(pLocal.getEntityId()));
+        platform.updateWithAI(
+            aiplatform, subj.getName(), getAuthzResource(platform.getEntityId()));
     }
 
     /**

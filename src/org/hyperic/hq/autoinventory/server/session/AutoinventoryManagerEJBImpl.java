@@ -46,6 +46,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
+import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
@@ -660,6 +661,15 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
         return ids;
     }
+    
+    private String getIps(Collection aiipValues) {
+        StringBuffer rtn = new StringBuffer();
+        for (Iterator it=aiipValues.iterator(); it.hasNext(); ) {
+            AIIpValue aiip = (AIIpValue)it.next();
+            rtn.append(aiip.getAddress()).append(',');
+        }
+        return rtn.substring(0, rtn.length()-1);
+    }
 
     /**
      * Called by agents to report platforms, servers, and services
@@ -677,22 +687,24 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
         ScanState state = new ScanState(stateCore);
 
-        _log.info("Received auto-inventory report from " +
-                 state.getPlatform().getFqdn() +
-                 " (" + state.getAllServers(_log).size() + 
-                 " servers)");
-
-        if (_log.isDebugEnabled()) {
-            _log.debug("AutoinventoryManager.reportAIData called, "
-                      + "scan state=" + state);
-            _log.debug("AISERVERS=" + state.getAllServers(_log));
-        }
+        AIPlatformValue aiPlatform = state.getPlatform();
 
         // This could happen if there was a serious error in the scan,
         // and not even the platform could be detected.
         if ( state.getPlatform() == null ) {
             _log.warn("ScanState did not even contain a platform, ignoring.");
             return;
+        }
+
+        _log.info("Received auto-inventory report from " + aiPlatform.getFqdn() +
+                 "; IPs -> " + getIps(aiPlatform.getAddedAIIpValues()) + 
+                 "; CertDN -> " + aiPlatform.getCertdn() +
+                 "; (" + state.getAllServers(_log).size() +  " servers)");
+
+        if (_log.isDebugEnabled()) {
+            _log.debug("AutoinventoryManager.reportAIData called, "
+                      + "scan state=" + state);
+            _log.debug("AISERVERS=" + state.getAllServers(_log));
         }
 
         // In the future we may want this method to act as
@@ -704,7 +716,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         // what we allow that codepath to do.
         AuthzSubjectValue subject = getOverlord();
 
-        AIPlatformValue aiPlatform = state.getPlatform();
         aiPlatform.setAgentToken(agentToken);
 
         if (_log.isDebugEnabled()) {
@@ -766,7 +777,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 buildAIResourceIds(aiPlatform.getAIIpValues());
             List servers =
                 buildAIResourceIds(aiPlatform.getAIServerValues());
-            
+
             try {
                 aiqLocal.processQueue(subject,
                                       platforms, servers, ips, 

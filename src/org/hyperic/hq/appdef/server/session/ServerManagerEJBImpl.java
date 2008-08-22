@@ -452,6 +452,16 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public Server findServerValueByAIID(AuthzSubjectValue subject,
+                                        Platform platform, String aiid)
+        throws PermissionException {
+        checkViewPermission(subject, platform.getEntityId());
+        return getServerDAO().findServerByAIID(platform, aiid);
+    }
+
+    /**
      * Find a Server by Id.
      * @ejb:interface-method
      */

@@ -569,9 +569,27 @@ public class AIQueueManagerEJBImpl
                         AICommandsClient client =
                             AIUtil.getClient(aiplatform.getAgentToken());
                         client.getScanStatus();
-                    } catch (Exception e) {
-                        throw new AIQApprovalException("Cannot approve platform: " +
-                                                       e.getMessage(), e);
+                    } catch (AgentNotFoundException e) {
+                        // XXX scottmf, in this case we may just want to
+                        // remove the AIPlatform from the AIQ since the
+                        // agent does not exist anyway
+                        throw new AIQApprovalException(
+                            "Cannot approve platform, agent not found in DB.  " +
+                            "Removing from AIQ.  To correct this issue " +
+                            " remove data dir and restart agent." +
+                            "Error Message -> " + e.getMessage(), e);
+                    } catch (AgentRemoteException e) {
+                        throw new AIQApprovalException(
+                            "Error invoking remote method on agent " +
+                            e.getMessage(), e);
+                    } catch (AgentConnectionException e) {
+                        throw new AIQApprovalException(
+                            "Error connecting or communicating with agent " +
+                            e.getMessage(), e);
+                    } catch (AutoinventoryException e) {
+                        throw new AIQApprovalException(
+                            "Error reading data from Remote Agent Value " +
+                            e.getMessage(), e);
                     }
                 }
 
@@ -770,7 +788,7 @@ public class AIQueueManagerEJBImpl
             // localhost doesn't give us any information.  Long
             // term, when we are trying to match all addresses,
             // this can go away.
-            if (address.equals("127.0.0.1") && i.hasNext()) {
+            if (address.equals(NetFlags.LOOPBACK_ADDRESS) && i.hasNext()) {
                 continue;
             }
                 

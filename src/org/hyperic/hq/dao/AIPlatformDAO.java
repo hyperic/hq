@@ -3,9 +3,11 @@ package org.hyperic.hq.dao;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -220,11 +222,9 @@ public class AIPlatformDAO extends HibernateDAO
 
     private void updateIpSet (AIPlatform p, AIPlatformValue aiplatform)
     {
-        List newIPs = new ArrayList();
-        newIPs.addAll(Arrays.asList(aiplatform.getAIIpValues()));
+        List newIPs = new ArrayList(Arrays.asList(aiplatform.getAIIpValues()));
         Collection ipSet = p.getAIIps();
-        Iterator i = ipSet.iterator();
-        while ( i.hasNext() ) {
+        for (Iterator i=ipSet.iterator(); i.hasNext(); ) {
             AIIp qip = (AIIp) i.next();
             AIIpValue aiip = findAndRemoveAIIp(newIPs, qip.getAddress());
             if ( aiip == null ) {
@@ -237,8 +237,7 @@ public class AIPlatformDAO extends HibernateDAO
         }
 
         // Add remaining IPs
-        i = newIPs.iterator();
-        while ( i.hasNext() ) {
+        for (Iterator i=newIPs.iterator(); i.hasNext(); ) {
             AIIpValue aiip = (AIIpValue) i.next();
             AIIp ip = new AIIp();
             ip.setAIIpValue(aiip);
@@ -252,54 +251,50 @@ public class AIPlatformDAO extends HibernateDAO
         for (int i=0; i<ips.size(); i++) {
             aiip = (AIIpValue) ips.get(i);
             if (aiip.getAddress().equals(addr)) {
-                ips.remove(i);
-                return aiip;
+                return (AIIpValue)ips.remove(i);
             }
         }
         return null;
     }
+    
+    private Map getServersMap(List servers) {
+        Map rtn = new HashMap();
+        for (Iterator it=servers.iterator(); it.hasNext(); ) {
+            AIServerValue server = (AIServerValue)it.next();
+            rtn.put(server.getAutoinventoryIdentifier(), server);
+        }
+        return rtn;
+    }
 
     private void updateServerSet(AIPlatform p, AIPlatformValue aiplatform)
     {
-        List newServers = new ArrayList();
-        newServers.addAll(Arrays.asList(aiplatform.getAIServerValues()));
+        Map newServers =
+            getServersMap(Arrays.asList(aiplatform.getAIServerValues()));
+        p.getAIServers();
         Collection serverSet = p.getAIServers();
         Iterator i = serverSet.iterator();
         while (i.hasNext()) {
             AIServer qserver = (AIServer) i.next();
-            AIServerValue aiserver
-                = findAndRemoveAIServer(newServers,
-                                        qserver.getAutoinventoryIdentifier());
+            String aiid = qserver.getAutoinventoryIdentifier();
+            AIServerValue aiserver = (AIServerValue)newServers.remove(aiid);
 
-            if ( aiserver == null ) {
+            if ( aiserver != null ) {
                 i.remove();
 
             } else {
                 // keep the user specified ignored value
                 boolean qIgnored = qserver.getIgnored();
-                qserver.setAIServerValue(aiserver);
+                qserver.setAIServerValue(qserver.getAIServerValue());
                 qserver.setIgnored(qIgnored);
             }
         }
 
-        i = newServers.iterator();
+        i = newServers.entrySet().iterator();
         while (i.hasNext()) {
             AIServerValue aiserver = (AIServerValue) i.next();
             AIServer ais = new AIServer();
             ais.setAIServerValue(aiserver);
             p.addAIServer(ais);
         }
-    }
-
-    private AIServerValue findAndRemoveAIServer (List servers, String aiid) {
-        AIServerValue aiserver;
-        for (int i=0; i<servers.size(); i++) {
-            aiserver = (AIServerValue) servers.get(i);
-            if ( aiserver.getAutoinventoryIdentifier().equals(aiid) ) {
-                servers.remove(i);
-                return aiserver;
-            }
-        }
-        return null;
     }
 }

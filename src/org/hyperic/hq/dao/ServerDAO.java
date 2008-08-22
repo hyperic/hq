@@ -117,6 +117,15 @@ public class ServerDAO extends HibernateDAO
             .setCacheRegion("Server.findAll_orderName")
             .list();
     }
+    
+    public Server findServerByAIID(Platform platform, String autoinventoryID) {
+        String sql = "from Server where autoinventoryIdentifier = :aiid" +
+                     " and platform = :platform";
+        return (Server)getSession().createQuery(sql)
+            .setEntity("platform", platform)
+            .setString("aiid", autoinventoryID)
+            .uniqueResult();
+    }
 
     public Collection findByType(Integer sTypeId)
     {
