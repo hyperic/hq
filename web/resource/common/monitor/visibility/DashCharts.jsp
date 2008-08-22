@@ -55,55 +55,78 @@
 <script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
 
 <script type="text/javascript">
   var baseUrl = "<html:rewrite page="/resource/common/monitor/visibility/IndicatorCharts.do"/>";
 
-  // Register the remove metric chart method
-  ajaxEngine.registerRequest( 'indicatorCharts', baseUrl );
-
   function removeMetric(metric) {
-    ajaxEngine.sendRequest(
-        'indicatorCharts',
-        'metric=' + metric,
-        'action=remove',
-        'eid=' + '<c:out value="${eid}"/>', 
-        <c:if test="${not empty ctype}">
-          'ctype=' + '<c:out value="${ctype}"/>',
-        </c:if>
-        'view=' + '<c:out value="${IndicatorViewsForm.view}"/>');
-    new Effect.Fade(metric);
+    url = baseUrl + '?metric=' + metric + '&action=remove' + '&eid=<c:out value="${eid}"/>' + '&view=<c:out value="${IndicatorViewsForm.view}"/>';
+    <c:if test="${not empty ctype}">
+      url += '&ctype=<c:out value="${ctype}"/>',
+    </c:if>
+    dojo.xhrGet({
+      url: url,
+      handleAs: "text",
+      timeout: 5000,
+      load: function(data, ioArgs) {
+        console.log(data);
+        console.log('removed metric');
+        new Effect.Fade(metric);
+      },
+      error: function(data){
+        console.debug("could not remove metric:");
+        console.debug(data);
+        new Effect.Pulsate($(metric));
+      }
+    });
   }
 
   function moveMetricUp(metric) {
-    ajaxEngine.sendRequest(
-        'indicatorCharts',
-        'metric=' + metric,
-        'action=moveUp',
-        'eid=' + '<c:out value="${eid}"/>', 
-        <c:if test="${not empty ctype}">
-          'ctype=' + '<c:out value="${ctype}"/>',
-        </c:if>
-        'view=' + '<c:out value="${IndicatorViewsForm.view}"/>');
-    var root = dojo.byId('root');
-    var elem = $(metric);
-    moveElementUp(elem, root);
+    url = baseUrl + '?metric=' + metric + '&action=moveUp' + '&eid=<c:out value="${eid}"/>' + '&view=<c:out value="${IndicatorViewsForm.view}"/>';
+    <c:if test="${not empty ctype}">
+      url += '&ctype=<c:out value="${ctype}"/>',
+    </c:if>
+    dojo.xhrGet({
+      url: url,
+      handleAs: "text",
+      timeout: 5000,
+      load: function(data, ioArgs) {
+        console.log(data);
+        console.log('moved metric up');
+        var root = dojo.byId('root');
+        var elem = $(metric);
+        moveElementUp(elem, root);
+      },
+      error: function(data){
+        console.debug("could not move metric up:");
+        console.debug(data);
+        new Effect.Pulsate($(metric));
+      }
+    });
   }
 
   function moveMetricDown(metric) {
-    ajaxEngine.sendRequest(
-        'indicatorCharts',
-        'metric=' + metric,
-        'action=moveDown',
-        'eid=' + '<c:out value="${eid}"/>', 
-        <c:if test="${not empty ctype}">
-          'ctype=' + '<c:out value="${ctype}"/>',
-        </c:if>
-        'view=' + '<c:out value="${IndicatorViewsForm.view}"/>');
-    var root = dojo.byId('root');
-    var elem = $(metric);
-    moveElementDown(elem, root);
+    url = baseUrl + '?metric=' + metric + '&action=moveDown' + '&eid=<c:out value="${eid}"/>' + '&view=<c:out value="${IndicatorViewsForm.view}"/>';
+    <c:if test="${not empty ctype}">
+      url += '&ctype=<c:out value="${ctype}"/>',
+    </c:if>
+    dojo.xhrGet({
+      url: url,
+      handleAs: "text",
+      timeout: 5000,
+      load: function(data, ioArgs) {
+        console.log(data);
+        console.log('moved metric down');
+        var root = dojo.byId('root');
+        var elem = $(metric);
+        moveElementDown(elem, root);
+      },
+      error: function(data){
+        console.debug("could not move metric down:");
+        console.debug(data);
+        new Effect.Pulsate($(metric));
+      }
+    });
   }
 
 </script>
