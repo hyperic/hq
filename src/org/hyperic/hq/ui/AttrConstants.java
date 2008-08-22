@@ -927,6 +927,8 @@ public interface AttrConstants {
     public static final String AJAX_ID   = "ajaxId";
     public static final String AJAX_HTML = "ajaxHTML";
     
+    public static final String AJAX_JSON = "ajaxJson";
+
     /**
      * XLib present
      */
