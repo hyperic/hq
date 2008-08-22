@@ -444,8 +444,65 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             log.error("Overlord does not have permission for resource " + aeid);
         }
         
+        // Get the alert definition's conditions
+        Collection clogs = alert.getConditionLog();
+        
+        StringBuffer text =
+            new StringBuffer(def.getName())
+                .append(" ")
+                .append(name)
+                .append(" ");
+        
+        DerivedMeasurementDAO dmDao =
+            new DerivedMeasurementDAO(DAOFactory.getDAOFactory());
+        DerivedMeasurement dm;
+
+        for (Iterator it = clogs.iterator(); it.hasNext(); ) {
+            AlertConditionLog log = (AlertConditionLog) it.next();
+            AlertCondition cond = log.getCondition();
+
+            switch (cond.getType()) {
+            case EventConstants.TYPE_THRESHOLD:
+            case EventConstants.TYPE_BASELINE:
+                dm = dmDao.findById(new Integer(cond.getMeasurementId()));
+                // Format the number
+                String actualValue =
+                    safeGetAlertConditionLogNumericValue(log, dm);
+
+                text.append(cond.getName())
+                    .append(" (").append(actualValue).append(") ");
+                break;
+            case EventConstants.TYPE_CONTROL:
+                text.append(cond.getName());
+                break;
+            case EventConstants.TYPE_CHANGE:
+                dm = dmDao.findById(new Integer(cond.getMeasurementId()));
+                text.append(cond.getName())
+                    .append(" (")
+                    .append(log.getValue())
+                    .append(") ");
+                break;
+            case EventConstants.TYPE_CUST_PROP:
+                text.append(cond.getName()).append(" (")
+                    .append(log.getValue()).append(") ");
+                break;
+            case EventConstants.TYPE_LOG:
+                text.append("Log (")
+                    .append(log.getValue())
+                    .append(") ");
+                break;
+            case EventConstants.TYPE_CFG_CHG:
+                text.append("Config changed (")
+                    .append(log.getValue())
+                    .append(") ");
+                break;
+            default:
+                break;
+            }
+        }
+
         // Get the short reason for the alert
-        return def.getName() + " " + name;
+        return text.toString();
     }
     
     /**
@@ -486,6 +543,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             clogs.toArray(new AlertConditionLog[clogs.size()]);
 
         StringBuffer text = new StringBuffer();
+        DerivedMeasurementDAO dmDao =
+            new DerivedMeasurementDAO(DAOFactory.getDAOFactory());
         for (int i = 0; i < logs.length; i++) {
             AlertCondition cond = logs[i].getCondition();
 
@@ -500,8 +559,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 //            TriggerFiredEvent event = (TriggerFiredEvent)
 //            eventMap.get( cond.getTriggerId() );
 
-            DerivedMeasurementDAO dmDao =
-                new DerivedMeasurementDAO(DAOFactory.getDAOFactory());
             DerivedMeasurement dm;
             
             switch (cond.getType()) {
