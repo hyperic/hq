@@ -83,7 +83,8 @@ public class ViewDesignatedChartAction extends MetricDisplayRangeAction {
             mtv = boss.getAvailabilityMetricTemplate(sessionId, aeid, ctype);
         } catch (ParameterNotFoundException e) {
             forwardParams.put(Constants.MODE_PARAM,
-                              Constants.MODE_MON_CHART_SMSR);
+                              aeid.isGroup() ? Constants.MODE_MON_CHART_SMMR :
+                                               Constants.MODE_MON_CHART_SMSR);
             // Now we have to look up the designated metric template ID
             mtv = boss.getAvailabilityMetricTemplate(sessionId, aeid);
         }
