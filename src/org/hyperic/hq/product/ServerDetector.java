@@ -300,6 +300,15 @@ public abstract class ServerDetector
         return this.manager;
     }
     
+    public String getTypeProperty(String type, String name) {
+        //check for agent.properties override
+        String value = this.ppm.getProperty(type + "." + name);
+        if (value != null) {
+            return value;
+        }
+        return super.getTypeProperty(type, name);
+    }
+
     /**
      * Helper for RegistryServerDetector implementors.
      * Gets the scan keys from hq-plugin.xml
