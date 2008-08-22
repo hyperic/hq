@@ -43,7 +43,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
+import org.json.JSONObject;
 
 /**
  * An Action that the current status of actions on a resource.
