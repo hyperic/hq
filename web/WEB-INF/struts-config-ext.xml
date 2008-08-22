@@ -78,7 +78,7 @@
 
       <action path="/resource/common/monitor/visibility/CurrentMetricValues"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentMetricValuesAction" >
-        <forward name="success" path="/common/AJAXResponse.jsp"/>
+        <forward name="success" path="/common/JSONResponse.jsp"/>
       </action>
 
       <action path="/resource/common/monitor/visibility/ViewChart"
