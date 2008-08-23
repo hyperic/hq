@@ -127,7 +127,7 @@
     <td class="ListHeaderCheckbox" width="3%"><input type="checkbox" onclick="ToggleAllGroup(this, widgetProperties, '<c:out value="${listMembersName}"/>')" name="<c:out value="${listMembersName}"/>All"></td>
     </c:if>
 
-    <td class="ListHeader" width="100%" colspan="2" align="left"><BLK><fmt:message key="${childResourcesHealthKey}"/><BLK></td>
+    <td class="ListHeader" width="100%" colspan="2" align="left"><fmt:message key="${childResourcesHealthKey}"/></td>
 
     <c:if test="${not empty summaries}">
     <!--<td class="ListHeaderInactive" width="20%" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.TotalNumTH"/></td>-->
@@ -227,8 +227,7 @@
     </c:choose>
     </td>
 
-    </td>
-  <td class="ListCellCheckbox" style="padding-right:2px;padding-top:2px;">
+    <td class="ListCellCheckbox" style="padding-right:2px;padding-top:2px;">
     <!--<a href="<c:out value="${url}"/>">-->
       <html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceType.name}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
     <!--</a>-->

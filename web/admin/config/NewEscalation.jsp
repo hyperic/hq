@@ -1034,8 +1034,8 @@ function editEscalation (row) {
 <ul class="boxy">
   <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
     <li class="ListRow"><input type="checkbox" name="users"
-      value="<c:out value="${user.id}"/>"> <BLK><c:out
-      value="${user.name}" /></BLK></input></li>
+      value="<c:out value="${user.id}"/>"> <c:out
+      value="${user.name}" /></input></li>
   </c:forEach>
 </ul>
 </div>
@@ -1046,8 +1046,8 @@ function editEscalation (row) {
   <ul class="boxy">
     <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
       <li class="ListRow"><input type="checkbox" name="roles"
-        value="<c:out value="${role.id}"/>"> <BLK><c:out
-        value="${role.name}" /></BLK></input></li>
+        value="<c:out value="${role.id}"/>"> <c:out
+        value="${role.name}" /></input></li>
     </c:forEach>
   </ul>
   </div>

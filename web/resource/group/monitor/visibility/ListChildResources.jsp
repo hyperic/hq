@@ -123,7 +123,7 @@
       <td class="ListHeaderCheckbox" width="3%"><input type="checkbox" onclick="ToggleAllGroup(this, widgetProperties, '<c:out value="${listMembersName}"/>')" name="<c:out value="${listMembersName}"/>All"></td>
       </c:if>
       <td class="ListHeaderInactive" width="1%"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-      <td class="ListHeader" width="100%" align="left"><BLK><fmt:message key="${childResourcesHealthKey}"/><BLK></td>
+      <td class="ListHeader" width="100%" align="left"><fmt:message key="${childResourcesHealthKey}"/></td>
       <td class="ListHeaderInactive" width="20%" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
       <td class="ListHeaderInactive" width="6%"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
     </tr>
@@ -180,7 +180,7 @@
   <c:when test="${not virtual}">
 <table width="100%" border="0" cellpadding="1" cellspacing="0" id="ResourceTable">
   <tr>
-    <td class="ListHeader" colspan="2" width="100%" align="left"><BLK><fmt:message key="resource.service.monitor.visibility.MembersTab"/><BLK></td>
+    <td class="ListHeader" colspan="2" width="100%" align="left"><fmt:message key="resource.service.monitor.visibility.MembersTab"/></td>
     </td>
   </tr>
 </table>

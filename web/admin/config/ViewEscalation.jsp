@@ -1531,10 +1531,8 @@ function saveAddEscalation() {
         <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
             <li class="BlockContent"><input type="checkbox" name="users"
                                             value="<c:out value="${user.id}"/>">
-                <BLK>
                     <c:out
                             value="${user.name}"/>
-                </BLK>
             </input></li>
         </c:forEach>
     </ul>
@@ -1546,10 +1544,8 @@ function saveAddEscalation() {
             <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
                 <li class="BlockContent"><input type="checkbox" name="roles"
                                                 value="<c:out value="${role.id}"/>">
-                    <BLK>
                         <c:out
                                 value="${role.name}"/>
-                    </BLK>
                 </input></li>
             </c:forEach>
         </ul>
