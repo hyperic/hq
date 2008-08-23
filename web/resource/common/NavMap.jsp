@@ -70,7 +70,7 @@
 </c:forEach>
 </map>
 
-      <span>Map<img border="0" id="toolMenuSpan" src="/images/arrow_dropdown.gif"/></span>
+      <span id="mapMenuSpan">Map<img border="0" src="/images/arrow_dropdown.gif"/></span>
       <div style="clear: all"></div>
       <div id="diagramDiv" style="position: absolute; display: none;">
         <span>
