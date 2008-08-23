@@ -109,7 +109,8 @@
             }
           },
           error: function(data){
-              console.debug("An error occurred saving charts config... ", data);
+              console.debug("An error occurred updating control status... ");
+              console.log(data);
           },
           timeout: 2000
       });
