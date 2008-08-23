@@ -138,10 +138,11 @@ public class VimHostCollector extends VimCollector {
             perfManager.queryPerf(query);
 
         if (values == null) {
-            _log.error("No performance metrics available for: " +
+            _log.debug("No performance metrics available for: " +
                        getName() + " " + getType());
             return;
         }
+        setAvailability(true);
         PerfEntityMetric metric = (PerfEntityMetric)values[0];
         PerfMetricSeries[] vals = metric.getValue();
 

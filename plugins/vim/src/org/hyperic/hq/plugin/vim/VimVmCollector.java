@@ -25,6 +25,11 @@
 
 package org.hyperic.hq.plugin.vim;
 
+import org.hyperic.hq.product.Metric;
+
+import com.vmware.vim25.VirtualMachinePowerState;
+import com.vmware.vim25.mo.VirtualMachine;
+
 public class VimVmCollector extends VimHostCollector {
 
     static final String TYPE = VimUtil.VM;
@@ -38,7 +43,30 @@ public class VimVmCollector extends VimHostCollector {
         return TYPE;
     }
 
-    protected void collect(VimUtil mo) throws Exception {
-        super.collect(mo);
+    protected void collect(VimUtil vim) throws Exception {
+        super.collect(vim);
+        try {
+            double avail;
+            VirtualMachine vm =
+                (VirtualMachine)vim.find(TYPE, getName());
+            VirtualMachinePowerState state =
+                vm.getRuntime().getPowerState();
+
+            if (state == VirtualMachinePowerState.poweredOn) {
+                avail = Metric.AVAIL_UP;
+            }
+            else if (state == VirtualMachinePowerState.poweredOff) {
+                avail = Metric.AVAIL_DOWN;
+            }
+            else if (state == VirtualMachinePowerState.suspended) {
+                avail = Metric.AVAIL_PAUSED;
+            }
+            else {
+                avail = Metric.AVAIL_UNKNOWN;
+            }
+            setValue(Metric.ATTR_AVAIL, avail);
+        } catch (Exception e) {
+            setAvailability(false);
+        }
     }
 }
