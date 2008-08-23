@@ -186,7 +186,7 @@
         <!-- TOOLS -->
 <c:if test="${not empty linkUrl}">
     <div class="toolsMenuStacked">
-        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan" border="0"/></a></span>
+        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><img src="/images/arrow_dropdown.gif" border="0" alt=""></span>
         <div style="clear: both"></div>
         <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;z-index:5">
             <tiles:insert attribute="linkUrl">
@@ -234,7 +234,7 @@
 <!-- TOOLS -->
 <c:if test="${not empty linkUrl}">
     <div class="toolsMenu">
-        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan" border="0"/></a></span>
+        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><img src="/images/arrow_dropdown.gif" border="0" alt=""></span>
         <div style="clear: both"></div>
         <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;z-index:5">
             <tiles:insert attribute="linkUrl">
