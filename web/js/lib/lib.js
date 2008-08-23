@@ -2451,13 +2451,13 @@ hyperic.clone_resource_dialog = function(platform_id) {
 
         		if(that.buttons.remove_clone_btn.disabled === true)
         		{
-        		    that.buttons.remove_clone_btn.disabled.innerHTML = '<img src="/images/4.0/buttons/arrow_select.gif" alt="select">';
-        			that.buttons.remove_clone_btn.disabled.disabled = false;
+        		    that.buttons.remove_clone_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect.gif" alt="select">';
+        			that.buttons.remove_clone_btn.disabled = false;
         		}
 
         		if(that.available_clone_targets.length == 0)
         		{
-        		    that.buttons.add_clone_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect_disabled.gif" alt="select">';
+        		    that.buttons.add_clone_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select_disabled.gif" alt="select">';
         			that.buttons.add_clone_btn.disabled = true;
         		}
 		    }
