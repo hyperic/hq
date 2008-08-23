@@ -109,6 +109,9 @@
     dojo11.require("dijit.form.TimeTextBox");
     dojo11.require("dijit.Dialog");
 
-    clone_platform = new hyperic.clone_resource_dialog('<c:out value="${resource.id}"/>');
+    var clone_platform_<c:out value="${resource.id}"/> = null;
+    dojo11.addOnLoad(function(){
+        clone_platform_<c:out value="${resource.id}"/> = new hyperic.clone_resource_dialog(<c:out value="${resource.id}"/>);
+    });
 </script>
 </c:if>
