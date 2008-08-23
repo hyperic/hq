@@ -53,7 +53,6 @@
     <td colspan="<c:out value="${count / 2}"/>" valign="top">
       <hq:dateFormatter value="${timeIntervals[0].time}"/>
       <div id="timePopup" class="timepopup" onmousedown="overlay.hideTimePopup()"></div>
-      <div style="height: 16px;"></b>
     </td>
     <td colspan="<c:out value="${count / 2}"/>" align="right" valign="top">
       <hq:dateFormatter value="${timeIntervals[count - 1].time}"/>

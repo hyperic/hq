@@ -131,10 +131,7 @@
       <td class="MiniTabEmpty" valign="bottom"><html:link href="${tabLink}"><html:img page="/images/MiniTab_${tab.icon}_off.gif" onmouseover="imageSwap(this, imagePath + 'MiniTab_${tab.icon}', '_over');" onmouseout="imageSwap(this, imagePath + 'MiniTab_${tab.icon}', '_off');" width="104" height="14" border="0" /></html:link></td>
     </c:otherwise>
   </c:choose>
-    
 </c:forEach>
-
-    </td>
     <td class="MiniTabEmpty" width="100%"><html:img page="/images/spacer.gif" height="1" width="100%" alt="" border="0"/></td>
   </tr>
 </table>
