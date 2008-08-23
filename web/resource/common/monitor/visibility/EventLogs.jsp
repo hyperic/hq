@@ -9,7 +9,8 @@
 </c:forEach>
 
 <c:if test="${eventsExist}">
-
+<tr>
+  <td>
 <script src="<html:rewrite page="/js"/>/timeline/api/timeline-api.js" type="text/javascript"></script>
 
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
@@ -90,12 +91,14 @@ function timeLineOnLoad() {
   }
 
 </script>
+  </td>
+</tr>
+<tr>
+  <td colspan="<c:out value="${count + 2}"/>" valign="top">
 
-  <tr>
-    <td colspan="<c:out value="${count + 2}"/>" valign="top">
       <div id="my-timeline" style="height: 20px; border: 1px solid #aaa"></div>
-    </td>
-    <td style="text-align: right"><fmt:message key="resource.common.monitor.label.elc"/></td>
-  </tr>
+  </td>
+  <td style="text-align: right"><fmt:message key="resource.common.monitor.label.elc"/></td>
+</tr>
 
 </c:if>
