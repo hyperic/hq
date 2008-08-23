@@ -73,7 +73,7 @@
       <tiles:put name="resource" beanName="resource"/>
     </tiles:insert>
     <br>
-    <a href="javascript:clone_platform.dialog.show();">Clone Platform</a>
+    <a href="javascript:clone_platform_<c:out value="${resource.id}"/>.dialog.show();">Clone Platform</a>
 </td></tr></table>
 
 <div id ="clone_resource_dialog" style="display:none;">
