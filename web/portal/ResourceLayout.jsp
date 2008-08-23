@@ -31,10 +31,11 @@
 
 <c:set var="first" value="true" />
 
+<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr>
 <!-- Content Block -->
 <c:forEach var="columnsList" items="${portal.portlets}" >  
   
-  <td valign="top" width='100%' >      
+  <td valign="top" width="100%">      
     <c:forEach var="portlet" items="${columnsList}" >        
     <table width="100%" border="0" cellspacing="0" cellpadding="0">          
       <c:choose>
@@ -67,4 +68,5 @@
   </td> 
 
 </c:forEach>
+</tr></table>
 <!-- /Content Block -->
