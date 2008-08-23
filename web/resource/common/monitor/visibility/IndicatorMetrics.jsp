@@ -111,7 +111,7 @@
   	      <li><div class="BoldText"><fmt:message key="resource.common.monitor.visibility.problemMetric.Began"/></div>
           <hq:dateFormatter value="${metric.earliest}"/></li>
         </c:if>
-        <hr>
+        <li><hr></li>
         <c:url var="chartLink" value="/resource/common/monitor/Visibility.do">
           <c:param name="m" value="${metric.templateId}"/>
           <c:choose>
@@ -138,7 +138,7 @@
         <a href="<c:out value="${scriptUrl}"/>"><fmt:message key="resource.common.monitor.visibility.problemMetric.ChartMetric"/></a>
   	    <html:link href="${chartLink}"><fmt:message key="resource.common.monitor.visibility.problemMetric.FullChart"/></html:link>
         </li>
-        <hr>
+        <li><hr></li>
   	    <li><html:link href="" onclick="window.open('${metadataLink}','_metricMetadata','width=800,height=${metadataPopupHeight},scrollbars=yes,toolbar=no,left=80,top=80,resizable=yes'); return false;">
           <fmt:message key="resource.common.monitor.visibility.problemMetric.MetricData"/></html:link></li>
       </ul>
