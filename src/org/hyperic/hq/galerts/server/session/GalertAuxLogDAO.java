@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.galerts.server.session;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.dao.DAOFactory;

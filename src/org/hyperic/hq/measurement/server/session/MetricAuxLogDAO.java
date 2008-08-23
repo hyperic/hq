@@ -36,6 +36,7 @@ import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
+import org.hyperic.hq.galerts.server.session.GalertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -102,6 +103,22 @@ public class MetricAuxLogDAO extends HibernateDAO {
             
         getSession().createQuery(sql)
                     .setParameter("def", def)
+                    .executeUpdate();
+    }
+
+    /**
+     * Resets the associated type between an aux log and other subsystems 
+     * (such as metrics, resource, etc.)
+     */
+    void resetAuxType(Collection mids) {
+        String hql = "update GalertAuxLog g set g.auxType = :type " +
+                     "where exists (select p.id from MetricAuxLogPojo p " +
+                                   "where p.auxLog = g and " +
+                                         "p.metric.id in (:metrics))";
+
+        getSession().createQuery(hql)
+                    .setInteger("type", GalertAuxLogProvider.INSTANCE.getCode())
+                    .setParameterList("metrics", mids)
                     .executeUpdate();
     }
 }

@@ -26,7 +26,6 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -37,12 +36,10 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
-import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
+import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocal;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerUtil;
-import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
 
 /**
  * @ejb:bean name="MetricAuxLogManager"
@@ -105,14 +102,7 @@ public class MetricAuxLogManagerEJBImpl
      */
     public void metricsDeleted(Collection mids) {
         MetricAuxLogDAO dao = getDAO();
-        Collection metAuxLogs = dao.find(mids);
-
-        GalertManagerLocal gam = GalertManagerEJBImpl.getOne();
-        for (Iterator i = metAuxLogs.iterator(); i.hasNext();) {
-            MetricAuxLogPojo p = (MetricAuxLogPojo) i.next();
-            gam.resetLogLink(p.getAuxLog());
-        }
-        
+        dao.resetAuxType(mids);
         dao.deleteByMetricIds(mids);
     }
 
