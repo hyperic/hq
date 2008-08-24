@@ -364,6 +364,10 @@ a.listheaderlink:hover {
     text-decoration: none
 }
 
+.linkbox {
+	white-space: nowrap
+}
+	
 .dropdown {
     border-color: #f7faff #99a #99a #f7faff;
     font-size: 11px;
