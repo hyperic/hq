@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -35,25 +35,20 @@ public class NetInterfaceData {
     private NetInterfaceConfig _config;
     private NetInterfaceStat _stat;
 
-    public NetInterfaceData() {}
-
-    public void populate(Sigar sigar, String name)
-        throws SigarException {
-
-        _config = sigar.getNetInterfaceConfig(name);
-
-        try {
-            _stat = sigar.getNetInterfaceStat(name);
-        } catch (SigarException e) {
-            
-        }
-    }
+    private NetInterfaceData() {}
 
     public static NetInterfaceData gather(Sigar sigar, String name)
         throws SigarException {
     
         NetInterfaceData data = new NetInterfaceData();
-        data.populate(sigar, name);
+        data._config = sigar.getNetInterfaceConfig(name);
+        
+        try {
+            data._stat = sigar.getNetInterfaceStat(name);
+        } catch (SigarException e) {
+            // _stat is null
+        }
+        
         return data;
     }
 
