@@ -2522,7 +2522,9 @@ hyperic.clone_resource_dialog = function(platform_id) {
 
     that.fetchData = function() {
         dojo11.xhrGet( {
-            url: "/api.shtml?v=1.0&s_id=clone_platform&pid=" + that.platform_id,
+            url: "/api.shtml",
+            content: {v: "1.0", s_id: "clone_platform", pid: that.platform_id},
+            preventCache: true,
             handleAs: 'json',
             load: function(data){
                 if(data && !data.error)
@@ -2562,23 +2564,23 @@ hyperic.clone_resource_dialog = function(platform_id) {
     that.clone_action = function() {
         
         var clone_target_ids = [];
-        for(var i = 0, j = that.selected_clone_targets.options.length; i < j; i++)
+        for(var i = 0, j = that.selected_clone_targets.length; i < j; i++)
         {
-            clone_target_ids.push(that.selected_clone_targets.options[i].value);
+            clone_target_ids.push(that.selected_clone_targets.select.options[i].value);
         }
         if(clone_target_ids.length > 0)
         {
-            dojo11.xhrGet( {
-                url: "/api.shtml?v=1.0&s_id=clone_platform&pid=" + that.platform_id + '&clone=true&ctid=[' + clone_target_ids.toString() + ']',
+            dojo11.xhrPost( {
+                url: "/api.shtml",
+                content: {v: "1.0", s_id: "clone_platform", pid: that.platform_id, clone: "true", ctid: "[" + clone_target_ids.toString() + "]"},
                 handleAs: 'json',
                 load: function(data){
-    				that.dialog.hide();
                 },
                 error: function(data){
                     console.debug("An error occurred queueing platforms for cloning " + that.platform_id, data);
-                },
-                timeout: 2000
+                }
             });
+			that.dialog.hide();
         }
         else
         {
