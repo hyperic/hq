@@ -35,7 +35,6 @@ import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerLocal;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerUtil;
-import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
 
 /**
@@ -94,8 +93,7 @@ public class MaintenanceEventManagerEJBImpl
      * 
      * @ejb:interface-method 
      */        
-    public void manageMonitors(AuthzSubject admin, MaintenanceEvent event,
-                             boolean activate) 
+    public void manageMonitors(AuthzSubject admin, MaintenanceEvent event) 
 		throws PermissionException
 	{
         throw new UnsupportedOperationException();    	
@@ -109,16 +107,6 @@ public class MaintenanceEventManagerEJBImpl
     public boolean canSchedule(AuthzSubject subject, MaintenanceEvent event) 
     {
         throw new UnsupportedOperationException();    	
-    }
-    
-    /**
-     * Create a MaintenanceEvent object from a JobDetail
-     * 
-     * @ejb:interface-method 
-     */    
-    public MaintenanceEvent buildMaintenanceEvent(JobDetail jobDetail)
-    { 
-        throw new UnsupportedOperationException();
     }
     
     /**

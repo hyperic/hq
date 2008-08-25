@@ -1792,6 +1792,7 @@ public class EventsBossEJBImpl
                PermissionException, SchedulerException 
     {
     	AuthzSubject subject = manager.getSubject(sessionId);
+    	event.setModifiedBy(subject.getName());
     	
     	return getMaintEvtMgr().schedule(subject, event);
     }
@@ -1806,6 +1807,7 @@ public class EventsBossEJBImpl
                PermissionException, SchedulerException 
     {
     	AuthzSubject subject = manager.getSubject(sessionId);
+    	event.setModifiedBy(subject.getName());
 
     	getMaintEvtMgr().unschedule(subject, event);
     }

@@ -33,17 +33,34 @@ import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.TrackEvent;
 
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+
 /**
  * Value object for scheduled maintenance events
  */
 public class MaintenanceEvent extends ResourceLogEvent
-    implements LoggableInterface 
 {
     private static final String BUNDLE = "org.hyperic.hq.events.Resources";
+    
+    // Constants for Quartz Job
+    public static final String GROUP_ID = "groupId";
+    public static final String STATE = "state";
+    public static final String START_TIME = "startTime";
+    public static final String END_TIME = "endTime";
+    public static final String MODIFIED_TIME = "modifiedTime";
+    public static final String MODIFIED_BY = "modifiedBy";
+    
+    // State constants
+    public static final String STATE_NEW = "new";
+    public static final String STATE_RUNNING = "running";
+    public static final String STATE_COMPLETE = "complete";
 
+    private String _state;
     private long _startTime;
     private long _endTime;
     private long _modifiedTime;
+    private String _authzName;
     
     public MaintenanceEvent(Integer groupId) {
         super(new TrackEvent(AppdefEntityID.newGroupID(groupId),
@@ -52,10 +69,19 @@ public class MaintenanceEvent extends ResourceLogEvent
 
         ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE);
         setSource(bundle.getString("maintenance.window"));
+        setState(STATE_NEW);
     }
     
     public Integer getGroupId() {
     	return getResource().getId();
+    }
+    
+    public String getState() {
+    	return _state;
+    }
+    
+    public void setState(String state) {
+    	_state = state;
     }
     
     public long getStartTime() {
@@ -82,14 +108,53 @@ public class MaintenanceEvent extends ResourceLogEvent
     	_modifiedTime = modifiedTime;
     }
     
-    public void setMaintenanceWindowMessage(String key) {
+    public String getModifiedBy() {
+    	return _authzName;
+    }
+    
+    public void setModifiedBy(String authzName) {
+    	_authzName = authzName;
+    }
+    
+    /**
+     * Create a MaintenanceEvent object from a JobDetail
+     *
+     */    
+    public static MaintenanceEvent build(JobDetail jobDetail) {
+        JobDataMap jdMap = jobDetail.getJobDataMap();
+    	MaintenanceEvent event = new MaintenanceEvent(
+            jdMap.getIntegerFromString(GROUP_ID));
+        event.setState(jdMap.getString(STATE));
+    	event.setStartTime(jdMap.getLongValue(START_TIME));
+        event.setEndTime(jdMap.getLongValue(END_TIME));
+        event.setModifiedTime(jdMap.getLongValue(MODIFIED_TIME));
+        event.setModifiedBy(jdMap.getString(MODIFIED_BY));
+    	
+    	return event;
+    }    
+    
+    public void setEventMessage(String key) {
         ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE);
         setMessage(bundle.getString(key));
     }
     
     public String toString() {
-    	return new StringBuffer("Starts: " + new Date(_startTime))
-    					.append(" Ends: " + new Date(_endTime))
-    					.toString();
+    	StringBuffer sb = new StringBuffer();
+    	
+    	if ((getMessage() != null) && (getMessage().length() > 0)) {
+    		sb.append(getMessage());
+    		sb.append(" Start Time: " + new Date(_startTime));
+			sb.append(" End Time: " + new Date(_endTime));
+    	} else {
+    		sb.append("MaintenanceEvent");
+			sb.append("[groupId=" + getGroupId());
+			sb.append(",state=" + _state);
+			sb.append(",startTime=" + new Date(_startTime));
+			sb.append(",endTime=" + new Date(_endTime));
+			sb.append(",modifiedTime=" + new Date(_modifiedTime));
+			sb.append(",modifiedBy=" + _authzName);
+			sb.append("]");
+    	}
+    	return sb.toString();
     }
 }

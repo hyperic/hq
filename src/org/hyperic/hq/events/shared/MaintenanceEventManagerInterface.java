@@ -28,15 +28,9 @@ package org.hyperic.hq.events.shared;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.events.MaintenanceEvent;
-import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
 
 public interface MaintenanceEventManagerInterface {
-    /**
-     * Create a MaintenanceEvent object from a JobDetail
-     */
-    public MaintenanceEvent buildMaintenanceEvent(JobDetail jobDetail);
-
     /**
      * Get the maintenance event for the group
      */
@@ -48,8 +42,7 @@ public interface MaintenanceEventManagerInterface {
      * Disable or enable monitors (alerts, measurements) for the group and its
      * resources during the maintenance event.
      */
-    public void manageMonitors(AuthzSubject admin, MaintenanceEvent event,
-                               boolean activate)
+    public void manageMonitors(AuthzSubject admin, MaintenanceEvent event)
         throws PermissionException;
 
     /**
