@@ -133,9 +133,8 @@ public class MaintenanceEvent extends ResourceLogEvent
     	return event;
     }    
     
-    public void setEventMessage(String key) {
-        ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE);
-        setMessage(bundle.getString(key));
+    public void setEventMessage(String msg) {
+        setMessage(msg);
     }
     
     public String toString() {
