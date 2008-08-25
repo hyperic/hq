@@ -143,8 +143,9 @@ public class MaintenanceEvent extends ResourceLogEvent
     	
     	if ((getMessage() != null) && (getMessage().length() > 0)) {
     		sb.append(getMessage());
-    		sb.append(" Start Time: " + new Date(_startTime));
-			sb.append(" End Time: " + new Date(_endTime));
+    		sb.append(" [Start Time: " + new Date(_startTime));
+			sb.append(", End Time: " + new Date(_endTime));
+			sb.append("]");
     	} else {
     		sb.append("MaintenanceEvent");
 			sb.append("[groupId=" + getGroupId());

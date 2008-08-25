@@ -2121,7 +2121,7 @@ hyperic.maintenance_schedule = function(group_id) {
                     datePattern: 'MM/dd/y'},
     			lang: "en-us",
     			promptMessage: "mm/dd/yyyy",
-    			rangeMessage: "The downtime start date cannot be later than the end date.",
+    			rangeMessage: "The downtime start date cannot be in the past.",
     			invalidMessage: "Invalid date. Use mm/dd/yyyy format.",
     			required: true
     		}, "from_date");
@@ -2312,8 +2312,8 @@ hyperic.maintenance_schedule = function(group_id) {
 		var curdatetime = new Date();
     	that.existing_schedule = {};
 	    that.selected_from_time = new Date(curdatetime.getFullYear(), curdatetime.getMonth(), curdatetime.getDate(), curdatetime.getHours()+1);
-	    that.selected_to_time = new Date(that.selected_from_time.getTime() + (60*60000));
-	    that.deleteConstraints();
+	    that.selected_to_time = new Date(that.selected_from_time.getTime() + (60*60000));    	
+	    that.deleteConstraints();    	
     }
     
     that.deleteConstraints = function() {
@@ -2335,12 +2335,20 @@ hyperic.maintenance_schedule = function(group_id) {
 	    	var curtime = new Date(curdatetime.getTime()-curdate.getTime()+that.inputs.from_time.getValue().getTimezoneOffset() * 60000);
 	    	that.inputs.from_date.constraints.min = curdate;
     		that.inputs.to_date.constraints.min = that.inputs.from_date.getValue();
+    		
+            if(that.existing_schedule.from_time)
+            {
+            	if(that.inputs.from_date.getValue().getTime() < curdate.getTime())
+            	{
+            		that.inputs.from_date.constraints.min = that.inputs.from_date.getValue();
+            	}
+            }
     		    		
     		if(that.inputs.from_date.getValue().getTime() == curdate.getTime())
     		{
     			if(that.existing_schedule.from_time)
     			{
-    				if(that.inputs.from_time.getValue().getTime() > curtime.getTime())
+    				if(that.selected_from_time.getTime() > curdatetime.getTime())
     				{
     					that.inputs.from_time.constraints.min = curtime;
     				}
