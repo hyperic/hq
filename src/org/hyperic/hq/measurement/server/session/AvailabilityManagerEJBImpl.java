@@ -369,10 +369,10 @@ public class AvailabilityManagerEJBImpl
             // Nothing to do, return an empty Map.
             return rtn;
         }
-        Map lastMap = new HashMap();
         for (Iterator it=avails.iterator(); it.hasNext(); ) {
             Object[] objs = (Object[])it.next();
-            if (begin > ((Long)objs[5]).longValue()) {
+            long endtime = Math.min(end, ((Long) objs[5]).longValue());
+            if (begin > endtime) {
                 continue;
             }
             double[] data;
@@ -384,34 +384,31 @@ public class AvailabilityManagerEJBImpl
             }
             if (null == (data = (double[])rtn.get(key))) {
                 data = new double[5];
+                data[IND_MIN] = Double.MAX_VALUE;
+                data[IND_MAX] = Double.MIN_VALUE;
             }
-            data[IND_MIN] += ((Double)objs[1]).doubleValue();
-            data[IND_AVG] += ((Double)objs[2]).doubleValue();
-            data[IND_MAX] += ((Double)objs[3]).doubleValue();
-            data[IND_CFG_COUNT] +=  ((Integer)objs[7]).doubleValue();
-            Long endtime = (Long)objs[5];
-            Double availVal = (Double)objs[6];
+
+            Double availVal = (Double) objs[2];
             MetricValue mval;
-            long lendtime = endtime.longValue();
-            mval = new MetricValue(availVal, lendtime);
-            MetricValue tmp = null;
-            if (null == (tmp = (MetricValue)lastMap.get(key))) {
-                lastMap.put(key, mval);
-            } else if (mval.getTimestamp() > tmp.getTimestamp()) {
-                lastMap.put(key, mval);
-            }
+            mval = new MetricValue(availVal, endtime);
+
+            data[IND_MIN] = Math.min(data[IND_MIN],
+                                     ((Double)objs[1]).doubleValue());
+            data[IND_MAX] += Math.max(data[IND_MAX],
+                                      ((Double)objs[3]).doubleValue());
+            
+            // Expect data to be sorted by end time, so that the last value
+            // returned is the final count and the last value
+            data[IND_CFG_COUNT] = ((Integer)objs[6]).doubleValue();
+            data[IND_LAST_TIME] = ((Double)objs[2]).doubleValue();
+            
+            // Calculate average
+            long begintime = Math.max(begin, ((Long) objs[4]).longValue());
+            
+            data[IND_AVG] += data[IND_LAST_TIME] *
+                             (endtime - begintime) / (end - begin);
+            
             rtn.put(key, data);
-        }
-        for (Iterator it=rtn.values().iterator(); it.hasNext(); ) {
-            double[] data = (double[])it.next();
-            data[IND_AVG] = data[IND_AVG]/data[IND_CFG_COUNT];
-        }
-        for (Iterator it=lastMap.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
-            Integer tid = (Integer)entry.getKey();
-            MetricValue lastVal = (MetricValue)entry.getValue();
-            double[] data = (double[])rtn.get(tid);
-            data[IND_LAST_TIME] = lastVal.getValue();
         }
         return rtn;
     }

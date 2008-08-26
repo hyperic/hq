@@ -281,7 +281,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of Object[].  [0] = measurement template id,
      *  [1] = min(availVal), [2] = avg(availVal), [3] max(availVal)
-     *  [4] = startime, [5] = endtime, [6] = availVal, [7] mid count
+     *  [4] = startime, [5] = endtime, [6] mid count
      */
     List findAggregateAvailability(Integer[] tids, Integer[] iids,
                                    long start, long end) {
@@ -292,8 +292,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
         String sql = new StringBuffer()
                     .append("SELECT m.template.id, min(rle.availVal),")
                     .append(" avg(rle.availVal), max(rle.availVal),")
-                    .append(" rle.availabilityDataId.startime, rle.endtime,")
-                    .append(" rle.availVal, count(m.id)")
+                    .append(" min(rle.availabilityDataId.startime), ")
+                    .append(" rle.endtime, count(m.id)")
                     .append(" FROM Measurement m")
                     .append(" JOIN m.availabilityData rle")
                     .append(" WHERE m.template in (:tids)")
@@ -302,9 +302,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     .append("   OR rle.endtime > :startime)")
                     .append(" AND (rle.availabilityDataId.startime < :endtime")
                     .append("   OR rle.endtime < :endtime)")
-                    .append(" GROUP BY m.template.id,")
-                    .append(" rle.availabilityDataId.startime, rle.availVal,")
-                    .append(" rle.endtime")
+                    .append(" GROUP BY m.template.id, rle.endtime")
                     .append(" ORDER BY rle.endtime").toString();
         return getSession()
             .createQuery(sql)
