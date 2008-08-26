@@ -64,7 +64,7 @@ a:visited,a:hover,a {
 
 #headerLinks a {
     color: #88C7FC;
-    text-decoration: none
+    text-decoration: none;
 }
 
 /* HEADER SEARCH */
@@ -198,67 +198,185 @@ a:visited,a:hover,a {
 
 #navTabContainer {
     float: left;
-    margin: 37px 0 0 20px
+    margin: 42px 0 0 20px;
+    position: relative;
+    width: 400px;
+    z-index: 20;
 }
 
-#navTabContainer ul {
-    list-style: none;
-    margin: 0;
-    padding: 5px 8px 0
+/* navigation menus */
+/* - - - ADxMenu: BASIC styles [ MANDATORY ] - - - */
+
+/* remove all list stylings */
+.mainMenu {
+  z-index: 1000;
+  position: relative;
+}
+.mainMenu, .mainMenu ul {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	list-style-type: none;
+	display: block;
 }
 
-#navTabContainer li {
-    display: inline;
-    margin: 0 10px;
-    padding: 0
+.mainMenu li {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	display: block;
+	float: left;	/* move all main list items into one row, by floating them */
+	position: relative;	/* position each LI, thus creating potential IE.win overlap problem */
+	z-index: 1005;		/* thus we need to apply explicit z-index here... */
 }
 
-#navTabContainer a {
-    background: url('/images/4.0/tabs/tab_cap.png') no-repeat right top;
-    border-bottom: 0 solid #fff;
-    float: left;
-    margin: 0 1px 0 0;
-    padding: 0;
-    text-decoration: none;
-    cursor: pointer;
-    font-weight: normal;
-    _margin-left: -1px;
+.mainMenu li:hover {
+	z-index: 10000;	/* ...and here. this makes sure active item is always above anything else in the menu */
+	white-space: normal;/* required to resolve IE7 :hover bug (z-index above is ignored if this is not present)
+							see http://www.tanfa.co.uk/css/articles/pure-css-popups-bug.asp for other stuff that work */
 }
 
-#navTabContainer a span {
-    background: url('/images/4.0/tabs/tab_main.png') no-repeat left top;
-    color: #333;
-    display: block;
-    float: left;
+.mainMenu li li {
+	float: none;/* items of the nested menus are kept on separate lines */
+}
+
+.mainMenu ul {
+	visibility: hidden;	/* initially hide all submenus. */
+	position: absolute;
+	z-index: 1010;
+	left: 0;	/* while hidden, always keep them at the top left corner, */
+	top: 0;		/* 		to avoid scrollbars as much as possible */
+}
+
+.mainMenu li:hover>ul {
+	visibility: visible;	/* display submenu them on hover */
+	top: 100%;	/* 1st level go below their parent item */
+}
+
+.mainMenu li li:hover>ul {	/* 2nd+ levels go on the right side of the parent item */
+	top: 0;
+	left: 100%;
+}
+
+/* -- float.clear --
+	force containment of floated LIs inside of UL */
+.mainMenu:after, .mainMenu ul:after {
+	content: ".";
+	height: 0;
+	display: block;
+	visibility: hidden;
+	overflow: hidden;
+	clear: both;
+}
+.mainMenu, .mainMenu ul {	/* IE7 float clear: */
+	min-height: 0;
+}
+/* -- float.clear.END --  */
+
+/* -- sticky.submenu --
+	it should not disappear when your mouse moves a bit outside the submenu
+	YOU SHOULD NOT STYLE the background of the ".mainMenu UL" or this feature may not work properly!
+	if you do it, make sure you 110% know what you do */
+.mainMenu ul {
+	background-image: url(empty.gif);	/* required for sticky to work in IE6 and IE7 - due to their (different) hover bugs */
+	padding: 10px 30px 30px 30px;
+	margin: -10px 0 0 -30px;
+	/*background: #f00;*/	/* uncomment this if you want to see the "safe" area.
+								you can also use to adjust the safe area to your requirement */
+}
+.mainMenu ul ul {
+	padding: 30px 30px 30px 10px;
+	margin: -30px 0 0 -10px;
+}
+/* -- sticky.submenu.END -- */
+
+
+
+
+
+
+/* - - - ADxMenu: DESIGN styles [ OPTIONAL, design your heart out :) ] - - - */
+
+.mainMenu, .mainMenu ul li {
+    color: #88C7FC;
     font-family: Verdana;
-    font-size: 1em;
-    margin-right: 3px;
-    padding: 4px 18px 6px
+    line-height: 1em;
+ }
+
+.mainMenu > li {
+    margin-right: 5px;
+    background: url('/images/4.0/tabs/tab_main.gif') no-repeat left top;
 }
 
-#navTabContainer .active a {
-    background: url('/images/4.0/tabs/tab_cap_active.png') no-repeat right top;
-    border-width: 0;
-    margin-top: -6px;
-    _margin-left: -1px;
+.mainMenu > li > a {
+    margin-right: -5px;
+    color: #333;
+    background: url('/images/4.0/tabs/tab_cap.gif') no-repeat right top;
 }
 
-#navTabContainer .active a span {
-    background: url('/images/4.0/tabs/tab_main_active.png') no-repeat left top;
-    color: #fff;
-    padding-bottom: 7px;
-    padding-top: 9px;
-    font-size: 1.2em;
-    line-height: .9em
+.mainMenu > li.activeTab {
+    margin-top: -5px;
+    background: url('/images/4.0/tabs/tab_main_active.gif') no-repeat left top;
 }
 
-#navTabContainer a:hover span {
-    color: #333
+.mainMenu > li.activeTab > a {
+    color: #FFF;
+    background: url('/images/4.0/tabs/tab_cap_active.gif') no-repeat right top;
 }
 
-#navTabContainer .active a:hover span {
-    color: #fff
+ .mainMenu ul {
+ 	width: 11em;
+ }
+
+ .mainMenu a, .mainMenu a:visited {
+ 	text-decoration: none;
+ 	color: #000;
+ 	padding: .4em 1em;
+ 	display: block;
+ 	position: relative;
+ }
+
+ .mainMenu a:hover, .mainMenu li:hover>a {
+ 	color: #C94304;
+ }
+
+ .mainMenu li li a:hover {
+ 	background-color: #E2F5FF;
+ }
+
+ .mainMenu .activeTab > a:hover {
+ 	color: #000;
+ }
+
+ .mainMenu li li {	/* create borders around each item */
+     border: 1px solid #2D6EBE;
+     font: 12px Verdana;
+     color: #88C7FC;
+     background-color: #FFF;
+     width: 150px;
+ }
+ .mainMenu ul>li + li {	/* and remove the top border on all but first item in the list */
+ 	border-top: 0;
+ }
+
+ .mainMenu li li:hover>ul {	/* inset 2nd+ submenus, to show off overlapping */
+ 	top: 5px;
+ 	left: 90%;
+ }
+
+ /* special colouring for "Main menu:", and for "xx submenu" items in ADxMenu
+ 	placed here to clarify the terminology I use when referencing submenus in posts */
+ .mainMenu>li:first-child>a, .mainMenu li + li + li li:first-child>a {
+/*  color: #567;*/
+ }
+
+/* Fix for IE5/Mac \*//*/
+.mainMenu a {
+	float: left;
 }
+/* End Fix */
+
+/*]]>*/
 
 #container {
     background: #FFF;
@@ -429,6 +547,10 @@ a.buttonGreen:active span {
 }
 
 #header, #footer {
+    position: relative;
+    /* setting z-index here to make sure that header stacks higher than the main body content
+    so that header menus drop down on TOP of the main content */
+    z-index: 2;  
     height: 65px;
     background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll
 }
@@ -549,12 +671,8 @@ body .dijitMenuItemIcon {
 }
 
 body .dijitMenuItemDisabled * {
-    /* 
-
-for a disabled menu item, just set it to mostly transparent */
-    /*o
-
-pacity:0.3;*/
+    /* for a disabled menu item, just set it to mostly transparent */
+    /* opacity:0.3;*/
     cursor: default
 }
 
@@ -993,11 +1111,9 @@ div.timeplot-valueflag-pole {
 .timeplot-container {
     border: 1px solid #CCCCCC;
     height: 200px;
-    overflow: hi
-
-dden;
+    overflow: hidden;
     /*padding:12px 14px;*/
-position: relative;
+    position: relative;
 }
 
 .timeplot-copyright {
@@ -1114,40 +1230,6 @@ position: relative;
     background-color: #FFF
 }
 
-.mainMenu {
-    border: 1px solid #2D6EBE;
-    font: 12px Verdana;
-    color: #88C7FC;
-    background-color: #FFF;
-    width: 160px;
-    position: absolute;
-    z-index: 999;
-}
-
-.mainMenu ul {
-    margin: 0px;
-    padding: 0px;
-}
-
-.mainMenu li {
-    list-style: none;
-}
-
-.subMenu {
-    background: transparent url(/images/4.0/icons/menuRight.gif) no-repeat scroll 100% 50%
-}
-
-.mainMenuItem {
-    cursor: pointer;
-    margin: 3px 4px;
-    padding: 1px 1px 1px 20px;
-    width: 150px
-}
-
-.mainMenuItem:hover {
-    background-color: #E2F5FF
-}
-
 .ajaxLoading {
     position: absolute;
     top: 40px;
@@ -1187,7 +1269,6 @@ select {
 }
 
 /* dashboard widget css */
-
 .widget {
 
 /*    width: 450px;*/

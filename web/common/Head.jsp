@@ -32,6 +32,11 @@
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
 
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="<html:rewrite page="/css/ie6.css"/>" type="text/css"/>
+<script type="text/javascript" src="/js/ADxMenu.js"></script>
+<![endif]-->
+
 <script type="text/javascript">
 djConfig = { isDebug: false }
 </script>
@@ -48,6 +53,7 @@ djConfig.scopeMap = [
 <script src="<html:rewrite page='/js/dojo/1.1/dojo/dojo.js.uncompressed.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
     var imagePath = "<html:rewrite page="/images/"/>";
+    dojo11.require('dojo.date');
 </script>
 <script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>

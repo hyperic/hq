@@ -33,26 +33,6 @@
  --%>
 
 <script type="text/javascript">
-    dojo.addOnLoad(function() {
-    /*document.menu3 = new hyperic.widget.Menu(
-        {
-            toggleNode : dojo.byId('submenu'),           
-            menuNode   : dojo.byId('submenu_1'),
-            subMenu    : true
-         });
-    */
-    document.menu2 = new hyperic.widget.Menu(
-        {
-            toggleNode : dojo.byId('analyze'),
-            menuNode   : dojo.byId('analyze_1')
-        });
-    document.menu1 = new hyperic.widget.Menu(
-        { 
-            toggleNode : dojo.byId('resource'),
-            menuNode   : dojo.byId('resource_1')
-            /*child      : document.menu3*/
-        });
-    });
     function getUpdateStatus(opt) {
         if (opt == "<fmt:message key="header.Acknowledge"/>") {
             var pars = "update=true";
@@ -113,32 +93,29 @@
     <div id="headerLogo" title="Home" onclick="location.href='/Dashboard.do'">&nbsp;</div>
     <div id="navTabContainer">
         <c:set var="pageURL" value="${requestURL}"/>
-        <ul>
-            <li id="dashTab" class=""><a href="/Dashboard.do"><span><fmt:message key="header.dashboard"/></span></a></li>
-            <li id="resTab" class=""><a><span id="resource" onclick="document.menu1.onclick(this)"><fmt:message key="header.resources"/></span></a></li>
-            <li id="analyzeTab" class=""><a><span id="analyze" onclick="document.menu2.onclick(this)"><fmt:message key="header.analyze"/></span></a></li>
-            <li id="adminTab" class=""><a href="/Admin.do"><span><fmt:message key="header.admin"/></span></a></li>
-        </ul>
-    </div>
-    <div class="mainMenu" id="resource_1" style="display:none">
-        <ul>
-        <li class="mainMenuItem resourceIcon" onClick="location.href='<html:rewrite page="/ResourceHub.do"/>'"><fmt:message key="header.Browse"/></li>
-        <tiles:insert definition=".header.optional.tabs">
-            <tiles:put name="location" value="resources"/>
-        </tiles:insert>
-        <li class="mainMenuItem recentIcon" id="submenu"><fmt:message key=".dashContent.recentResources"/></li>
-        </ul>
-    </div>
-    <div class="mainMenu" id="submenu_1" style="display:none;">
-        <ul>
-        <tiles:insert definition=".toolbar.recentResources"/>
-        </ul>
-    </div>
-    <div class="mainMenu" id="analyze_1" style="display:none;">
-        <ul>
-        <tiles:insert definition=".header.optional.tabs">
-            <tiles:put name="location" value="tracking"/>
-        </tiles:insert>
+        <ul class="adxm mainMenu" style="position: absolute; z-index: 10">
+            <li id="dashTab"><a href="/Dashboard.do"><fmt:message key="header.dashboard"/></a></li>
+            <li id="resTab"><a href=""><fmt:message key="header.resources"/></a>
+              <ul>
+                <li><a href="<html:rewrite page="/ResourceHub.do"/>"><fmt:message key="header.Browse"/></a></li>
+                <tiles:insert definition=".header.optional.tabs">
+                  <tiles:put name="location" value="resources"/>
+                </tiles:insert>
+                <li><a href=""><fmt:message key=".dashContent.recentResources"/></a>
+                  <ul>
+                    <tiles:insert definition=".toolbar.recentResources"/>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li id="analyzeTab"><a href=""><fmt:message key="header.analyze"/></a>
+              <ul>
+              <tiles:insert definition=".header.optional.tabs">
+                  <tiles:put name="location" value="tracking"/>
+              </tiles:insert>
+              </ul>
+            </li>
+            <li id="adminTab"><a href="/Admin.do"><fmt:message key="header.admin"/></a></li>
         </ul>
     </div>
     <div class="ajaxLoading" style="display:none;" id="loading">

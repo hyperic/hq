@@ -286,7 +286,7 @@ hyperic.widget.Menu = function(kwArgs) {
     that.onclick = function(evt) {
         if(!this._isVisible) {
             var x,y,node;
-            if(window.event) { node = window.event.srcElement; /* alert(node); */ }
+            if(window.event) { node = window.event.srcElement;  console.log(node);  }
             else { node = evt.target; }
             if(this._isSubMenu) {
                 //put it on the right
@@ -607,16 +607,16 @@ function activateHeaderTab(){
     var l = document.location;
     l = l+""; // force string cast
     if(l.indexOf("Dash")!=-1) {
-        dojo.byId("dashTab").className = "active";
+        dojo.byId("dashTab").className = "activeTab";
     }
     if(l.indexOf("Resou")!=-1){
-        dojo.byId("resTab").className = "active";
+        dojo.byId("resTab").className = "activeTab";
     }
     if(l.indexOf("rep")!=-1 || l.indexOf("Rep")!=-1 || l.indexOf("masth")!=-1){
-        dojo.byId("analyzeTab").className = "active";
+        dojo.byId("analyzeTab").className = "activeTab";
     }
     if(l.indexOf("admin")!=-1 || l.indexOf("Adm")!=-1){
-        dojo.byId("adminTab").className = "active";
+        dojo.byId("adminTab").className = "activeTab";
     }
 }
 
@@ -2683,7 +2683,7 @@ Date.prototype.formatDate = function(format)
 
     format = format.replace("B",months[date.getMonth()]);
 
-    format = format.replace("z",dojo.date.getTimezoneName(date));
+    format = format.replace("z",dojo11.date.getTimezoneName(date));
 
     var hours = date.getHours();       
     if (format.indexOf("t") > -1)

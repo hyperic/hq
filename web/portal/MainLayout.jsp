@@ -46,20 +46,20 @@
     <script type="text/javascript">
         var onloads = [];
          function initOnloads() {
-
+        
             if (arguments.callee.done) return;
             arguments.callee.done = true;
            if(typeof(_timer)!="undefined") clearInterval(_timer);
            for ( var i = 0 ; i < onloads.length ; i++ )
              onloads[i]();
-
+        
         };
-
+        
         /* for Mozilla/Opera9 */
         if (document.addEventListener) {
             document.addEventListener("DOMContentLoaded", initOnloads, false);
         }
-
+        
         /* for Internet Explorer */
         /*@cc_on @*/
         /*@if (@_win32)
@@ -71,7 +71,7 @@
                 }
             };
         /*@end @*/
-
+        
         /* for Safari */
         /*if (/WebKit/i.test(navigator.userAgent)) { // sniff
             var _timer = setInterval(function() {
@@ -80,13 +80,13 @@
                 }
             }, 10);
         }*/
-
+        
         /* for other browsers */
         window.onload = initOnloads;
 
     </script>
 </head>
-<body style="background-color: #FFFFFF;" class="tundra">
+<body style="background-color: #FFFFFF;" class="tundra" debug="true">
   <tiles:insert attribute="header" />
   <div id="migContainer">
   <tiles:insert attribute='body' />

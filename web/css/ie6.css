@@ -1,0 +1,107 @@
+/* - - - ADxMenu: IE6 BASIC styles [MANDATORY] - - - */
+
+/*
+	this rules improves accessibility - if Javascript is disabled, the entire menu will be visible
+	of course, that means that it might require different styling then.
+	in which case you can use adxie class - see: aplus.co.yu/adxmenu/examples/ie6-double-style/
+ */
+.mainMenu ul {
+	visibility: visible;
+	position: static;
+}
+
+.mainMenu, .mainMenu ul {	/* float.clear */
+	zoom: 1;
+}
+
+.mainMenu li.adxmhover {
+	z-index: 10000;
+}
+
+.mainMenu .adxmhoverUL {	/* li:hover>ul selector */
+	visibility: visible;
+}
+
+.mainMenu .adxmhoverUL {	/* 1st-level submenu go below their parent item */
+	top: 100%;
+	left: 0;
+}
+
+.mainMenu .adxmhoverUL .adxmhoverUL {	/* 2nd+ levels go on the right side of the parent item */
+	top: 0;
+	left: 100%;
+}
+
+/* - - - ADxMenu: DESIGN styles - - - */
+
+.mainMenu ul a {	/* fix clickability-area problem */
+	zoom: 1;
+}
+
+.mainMenu li li {	/* fix white gap problem */
+	float: left;
+	/* seems to break the width of the submenus in IE on hyperic pages. Might have to uncomment this if our code gets more valid and kicks IE into standards mode. */
+/* 	width: 100%; */
+}
+
+.mainMenu li li {	/* prevent double-line between items */
+	margin-top: -1px;
+}
+
+/* tab images */
+.mainMenu li {
+    line-height: 1em;
+    margin-right: 5px;
+    background: url('/images/4.0/tabs/tab_main.gif') no-repeat left top;
+}
+.mainMenu li a {
+    margin-right: -5px;
+    color: #333;
+    background: url('/images/4.0/tabs/tab_cap.gif') no-repeat right top;
+}
+.mainMenu li li {
+    margin-right: 0px;
+    background: #FFF;
+}
+.mainMenu li li a {
+    margin-right: 0px;
+    background: #FFF;
+}
+
+/* active tab images */
+
+.mainMenu li.activeTab {
+    background: url('/images/4.0/tabs/tab_main_active.gif') no-repeat left top;
+}
+
+.mainMenu li.activeTab a, .mainMenu li.activeTab a:visited {
+    color: #FFF;
+    margin-right: -5px;
+    background: url('/images/4.0/tabs/tab_cap_active.gif') no-repeat right top;
+}
+
+.mainMenu li.activeTab li a {
+    color: #000;
+    margin-right: 0px;
+    background: #FFF;
+    margin-bottom: 0px;
+}
+
+.mainMenu li.activeTab a:hover {
+	color: #000;
+}
+
+.mainMenu li.activeTab li a:hover {
+	color: #C94304;
+}
+
+/* end tab images */
+
+.mainMenu a:hover, .mainMenu .adxmhoverA {		/* li:hover>a selector */
+	color: #C94304;
+}
+
+.mainMenu .adxmhoverUL .adxmhoverUL {	/* inset 2nd+ submenus, to show off overlapping */
+	top: 5px;
+	left: 90%;
+}
