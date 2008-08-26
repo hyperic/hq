@@ -19,7 +19,7 @@
 }
 .mainMenu .adxmhoverUL {	/* 1st-level submenu go below their parent item */
 	top: 100%;
-	left: 0;
+	left: 30px; /* 30px to account for sticky div containing the ul */
 }
 .mainMenu .adxmhoverUL .adxmhoverUL {	/* 2nd+ levels go on the right side of the parent item */
 	top: 0;
@@ -34,13 +34,11 @@
 	/* seems to break the width of the submenus in IE on hyperic pages. Might have to uncomment this if our code gets more valid and kicks IE into standards mode. */
 /* 	width: 100%; */ 
 }
-.mainMenu li li {	/* prevent double-line between items */
-	margin-top: -1px;
-}
+
 .mainMenu a:hover, .mainMenu .adxmhoverA {		/* li:hover>a selector */
 	color: #C94304;
 }
 .mainMenu .adxmhoverUL .adxmhoverUL {	/* inset 2nd+ submenus, to show off overlapping */
-	top: 5px;
+	top: 35px; /* 30px to account for sticky div, 5 px to display it offset */
 	left: 90%;
 }

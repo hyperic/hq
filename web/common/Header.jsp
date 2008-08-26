@@ -96,24 +96,30 @@
         <ul class="adxm mainMenu" style="position: absolute; z-index: 10">
             <li id="dashTab"><a href="/Dashboard.do"><fmt:message key="header.dashboard"/></a></li>
             <li id="resTab"><a href=""><fmt:message key="header.resources"/></a>
+              <div>
               <ul>
                 <li><a href="<html:rewrite page="/ResourceHub.do"/>"><fmt:message key="header.Browse"/></a></li>
                 <tiles:insert definition=".header.optional.tabs">
                   <tiles:put name="location" value="resources"/>
                 </tiles:insert>
-                <li><a href=""><fmt:message key=".dashContent.recentResources"/></a>
+                <li class="hasSubmenu"><a href=""><fmt:message key=".dashContent.recentResources"/></a>
+                  <div>
                   <ul>
                     <tiles:insert definition=".toolbar.recentResources"/>
                   </ul>
+                  </div>
                 </li>
               </ul>
+              </div>
             </li>
             <li id="analyzeTab"><a href=""><fmt:message key="header.analyze"/></a>
+              <div>
               <ul>
               <tiles:insert definition=".header.optional.tabs">
                   <tiles:put name="location" value="tracking"/>
               </tiles:insert>
               </ul>
+              </div>
             </li>
             <li id="adminTab"><a href="/Admin.do"><fmt:message key="header.admin"/></a></li>
         </ul>
@@ -173,10 +179,8 @@
                 <li></li>
             </ul>
         </div>
-    </div>
-     
+    </div>     
 </div>
-<div id="headerBottom">&nbsp;</div>
 
 <c:if test="${not empty HQUpdateReport}">
 <div id="update" class="menu" style="z-index:15000000;border:1px solid black;padding-top:15px;padding-bottom:15px;font-weight:bold;font-size:12px;">

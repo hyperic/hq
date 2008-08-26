@@ -26,12 +26,7 @@ a:visited,a:hover,a {
     width: 352px;
     padding: 50px 0 0 10px;
     cursor: pointer;
-    float: left
-}
-
-#headerBottom {
-    height: 3px;
-    background: #2D6EBE none repeat scroll 0
+    float: left;
 }
 
 #headerAlerts {
@@ -206,12 +201,7 @@ a:visited,a:hover,a {
 
 /* navigation menus */
 /* - - - ADxMenu: BASIC styles [ MANDATORY ] - - - */
-
 /* remove all list stylings */
-.mainMenu {
-  z-index: 1000;
-  position: relative;
-}
 .mainMenu, .mainMenu ul {
 	margin: 0;
 	padding: 0;
@@ -219,7 +209,6 @@ a:visited,a:hover,a {
 	list-style-type: none;
 	display: block;
 }
-
 .mainMenu li {
 	margin: 0;
 	padding: 0;
@@ -227,40 +216,34 @@ a:visited,a:hover,a {
 	display: block;
 	float: left;	/* move all main list items into one row, by floating them */
 	position: relative;	/* position each LI, thus creating potential IE.win overlap problem */
-	z-index: 1005;		/* thus we need to apply explicit z-index here... */
+	z-index: 5;		/* thus we need to apply explicit z-index here... */
 }
-
 .mainMenu li:hover {
 	z-index: 10000;	/* ...and here. this makes sure active item is always above anything else in the menu */
 	white-space: normal;/* required to resolve IE7 :hover bug (z-index above is ignored if this is not present)
 							see http://www.tanfa.co.uk/css/articles/pure-css-popups-bug.asp for other stuff that work */
 }
-
 .mainMenu li li {
 	float: none;/* items of the nested menus are kept on separate lines */
 }
-
-.mainMenu ul {
+.mainMenu div {
 	visibility: hidden;	/* initially hide all submenus. */
 	position: absolute;
-	z-index: 1010;
+	z-index: 10;
 	left: 0;	/* while hidden, always keep them at the top left corner, */
 	top: 0;		/* 		to avoid scrollbars as much as possible */
 }
-
-.mainMenu li:hover>ul {
+.mainMenu li:hover>div {
 	visibility: visible;	/* display submenu them on hover */
 	top: 100%;	/* 1st level go below their parent item */
 }
-
-.mainMenu li li:hover>ul {	/* 2nd+ levels go on the right side of the parent item */
+.mainMenu li li:hover>div {	/* 2nd+ levels go on the right side of the parent item */
 	top: 0;
 	left: 100%;
 }
-
 /* -- float.clear --
 	force containment of floated LIs inside of UL */
-.mainMenu:after, .mainMenu ul:after {
+.mainMenu:after, .mainMenu div:after {
 	content: ".";
 	height: 0;
 	display: block;
@@ -272,111 +255,104 @@ a:visited,a:hover,a {
 	min-height: 0;
 }
 /* -- float.clear.END --  */
-
 /* -- sticky.submenu --
 	it should not disappear when your mouse moves a bit outside the submenu
 	YOU SHOULD NOT STYLE the background of the ".mainMenu UL" or this feature may not work properly!
 	if you do it, make sure you 110% know what you do */
-.mainMenu ul {
+.mainMenu div {
 	background-image: url(empty.gif);	/* required for sticky to work in IE6 and IE7 - due to their (different) hover bugs */
-	padding: 10px 30px 30px 30px;
+	padding: 8px 30px 30px 30px;
 	margin: -10px 0 0 -30px;
 	/*background: #f00;*/	/* uncomment this if you want to see the "safe" area.
 								you can also use to adjust the safe area to your requirement */
 }
-.mainMenu ul ul {
+.mainMenu div div {
 	padding: 30px 30px 30px 10px;
 	margin: -30px 0 0 -10px;
+/*  background: #f00;*/
 }
 /* -- sticky.submenu.END -- */
-
-
-
-
-
-
 /* - - - ADxMenu: DESIGN styles [ OPTIONAL, design your heart out :) ] - - - */
-
 .mainMenu, .mainMenu ul li {
     color: #88C7FC;
-    font-family: Verdana;
     line-height: 1em;
- }
-
+}
 .mainMenu > li {
-    margin-right: 5px;
+    margin-right: 6px;
     background: url('/images/4.0/tabs/tab_main.gif') no-repeat left top;
 }
-
 .mainMenu > li > a {
     margin-right: -5px;
-    color: #333;
     background: url('/images/4.0/tabs/tab_cap.gif') no-repeat right top;
 }
-
 .mainMenu > li.activeTab {
-    margin-top: -5px;
     background: url('/images/4.0/tabs/tab_main_active.gif') no-repeat left top;
+    margin-top: -4px;
 }
-
 .mainMenu > li.activeTab > a {
-    color: #FFF;
     background: url('/images/4.0/tabs/tab_cap_active.gif') no-repeat right top;
+    color: #FFF;
+}
+.mainMenu div {
+	width: 11em;
+}
+.mainMenu a, .mainMenu a:visited {
+    font-family: Helvetica, sans-serif;
+    font-size: 0.9em;
+	text-decoration: none;
+	color: #333;
+	padding: .4em 1em;
+	display: block;
+	position: relative;
+}
+.mainMenu ul a, .mainMenu ul a:visited {
+    color: #3179D4;
 }
 
- .mainMenu ul {
- 	width: 11em;
- }
+.mainMenu a:hover, .mainMenu li:hover>a {
+	color: #C94304;
+}
+.mainMenu .activeTab > a:hover {
+	color: #000;
+}
 
- .mainMenu a, .mainMenu a:visited {
- 	text-decoration: none;
- 	color: #000;
- 	padding: .4em 1em;
- 	display: block;
- 	position: relative;
- }
+.mainMenu li ul {	/* create borders around each submenu */
+    border: 1px solid #2D6EBE;
+    width: 150px;
+}
+.mainMenu li li {	/* create borders around each item */
+/*      border: 1px solid #2D6EBE;*/
+    font: 12px Verdana;
+    color: #88C7FC;
+    background-color: #FFF;
+}
 
- .mainMenu a:hover, .mainMenu li:hover>a {
- 	color: #C94304;
- }
+.mainMenu li li a:hover {
+	background-color: #E2F5FF;
+	color: #C94304;
+}
+.mainMenu ul>li + li {	/* and remove the top border on all but first item in the list */
+/*      border-top: 0;*/
+}
+.mainMenu li li:hover>div {	/* inset 2nd+ submenus, to show off overlapping */
+	top: 5px;
+	left: 90%;
+}
 
- .mainMenu li li a:hover {
- 	background-color: #E2F5FF;
- }
+.mainMenu .hasSubmenu {
+    background: #FFF url(/images/4.0/icons/menuRight.gif) no-repeat scroll 100% 50%
+}
 
- .mainMenu .activeTab > a:hover {
- 	color: #000;
- }
-
- .mainMenu li li {	/* create borders around each item */
-     border: 1px solid #2D6EBE;
-     font: 12px Verdana;
-     color: #88C7FC;
-     background-color: #FFF;
-     width: 150px;
- }
- .mainMenu ul>li + li {	/* and remove the top border on all but first item in the list */
- 	border-top: 0;
- }
-
- .mainMenu li li:hover>ul {	/* inset 2nd+ submenus, to show off overlapping */
- 	top: 5px;
- 	left: 90%;
- }
-
- /* special colouring for "Main menu:", and for "xx submenu" items in ADxMenu
- 	placed here to clarify the terminology I use when referencing submenus in posts */
- .mainMenu>li:first-child>a, .mainMenu li + li + li li:first-child>a {
+/* special colouring for "Main menu:", and for "xx submenu" items in ADxMenu
+	placed here to clarify the terminology I use when referencing submenus in posts */
+.mainMenu>li:first-child>a, .mainMenu li + li + li li:first-child>a {
 /*  color: #567;*/
- }
-
+}
 /* Fix for IE5/Mac \*//*/
 .mainMenu a {
 	float: left;
 }
 /* End Fix */
-
-/*]]>*/
 
 #container {
     background: #FFF;
@@ -544,6 +520,10 @@ a.buttonGreen:active span {
     height: 16px;
     width: 16px;
     cursor: pointer
+}
+
+#header {
+    border-bottom: 3px solid #2D6EBE;
 }
 
 #header, #footer {
