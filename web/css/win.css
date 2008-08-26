@@ -177,7 +177,7 @@ a.listheaderlink:hover {
     text-decoration: underline
 }
 
-.listheader,.tablecellheader {
+.tablecellheader {
     border-bottom: 1px solid #D5D8DE;
     border-top: 1px solid #ABB1C7;
     border-width: 1px;
@@ -187,8 +187,20 @@ a.listheaderlink:hover {
     text-align: left
 }
 
+.listheader{
+	background:transparent url(/images/4.0/backgrounds/table_header.png) repeat-x scroll 0 0;
+	border-bottom: 1px solid #D5D8DE;
+    border-top: 1px solid #ABB1C7;
+    border-width: 1px;
+    color: #004680;
+    font-weight: 700;
+    padding: 3px;
+    text-align: left
+}
+
 .tablerowheader {
-    background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 25%;
+    background: transparent url(/images/4.0/backgrounds/table_header.png) repeat scroll 0 0;
+    /*transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 25%;*/
     border-bottom: solid #D5D8DE;
     border-top: solid #ABB1C7;
     border-width: 1px;
@@ -230,7 +242,11 @@ a.listheaderlink:hover {
 }
 
 .listheaderinactive{
-     background:transparent url(/images/4.0/backgrounds/table_header.png) repeat scroll 0 0;
+     background:transparent url(/images/4.0/backgrounds/table_header.png) repeat-x scroll 0 0;
+}
+
+.metricTable{
+     background:#efefef;
 }
 
 .listheaderinactive,.tablerowinactive {
@@ -1813,6 +1829,10 @@ a.notbold:link,.dropdown a:link,a.notbold:visited,.dropdown a:visited {
     padding: 3px
 }
 
+.SmokeyContent input[type="text"]{
+	width:30px;
+}
+
 a.listheaderlink:link,a.listheaderlink:visited {
     color: #004680;
     text-decoration: none
@@ -2142,9 +2162,12 @@ a.black:link,a.black:visited {
 .exception table p {
     padding: 4px;
 }
+.errorTitle .exception td {
+    color: #FFF;
+}
 
 .exception td {
-    color: #fff;
+    color: #000;
 }
 
 .exception a:visited,a:hover,a {

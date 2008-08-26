@@ -159,7 +159,7 @@
           </td>
           <td><html:image property="range" page="/images/4.0/icons/accept.png" border="0"/></td>
           <td width="100%" style="padding-left: 5px;">
-            <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;|&nbsp;<html:link href="javascript:advanecdDialog.dialog.show();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
+            <c:if test="${form.rn != 8 && form.ru != 3}"><a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;|&nbsp;</c:if><html:link href="javascript:advanecdDialog.dialog.show();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
           </td>
         </tr>
       </table>
