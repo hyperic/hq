@@ -246,7 +246,10 @@ a.listheaderlink:hover {
 }
 
 .metricTable{
-     background:#efefef;
+    background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat-x scroll 0 0;
+    color: #FFF;
+    font-weight: 700;
+    height:29px
 }
 
 .listheaderinactive,.tablerowinactive {
