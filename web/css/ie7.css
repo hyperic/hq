@@ -1,0 +1,5 @@
+.mainMenu li a {
+    /* fix negative margin bug in IE7 */
+    zoom: 1;
+    position: relative;
+}

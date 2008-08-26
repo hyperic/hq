@@ -29,7 +29,7 @@
 <%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
-
+<!DOCTYPE html>
 <html>
 <head>
   <tiles:insert attribute="head" />
