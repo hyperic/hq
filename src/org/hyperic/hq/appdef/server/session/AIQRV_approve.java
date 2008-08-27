@@ -215,11 +215,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
     {
         Platform platform = getExistingPlatform(
             subject, platformMan, aiip.getAIPlatform().getAIPlatformValue());
-        if (platform == null) {
-            _log.error("Error finding platform from AIIp Object, AIIpId=" +
-                aiip.getId() + ", AIPlatformId=" + aiip.getAIPlatform().getId());
-            return;
-        }
         int qstat = aiip.getQueueStatus();
         switch (qstat) {
         case Q_STATUS_PLACEHOLDER:

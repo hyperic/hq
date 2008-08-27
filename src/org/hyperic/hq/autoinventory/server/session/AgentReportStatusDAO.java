@@ -31,31 +31,25 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.dao.HibernateDAO;
 
-public class AgentReportStatusDAO extends HibernateDAO {
-    public AgentReportStatusDAO(DAOFactory f) {
+class AgentReportStatusDAO extends HibernateDAO {
+    AgentReportStatusDAO(DAOFactory f) {
         super(AgentReportStatus.class, f);
-    }
-
-    public void remove(AgentReportStatus status) {
-        super.remove(status);
     }
 
     void save(AgentReportStatus status) {
         super.save(status);
     }
 
-    public AgentReportStatus getReportStatus(Agent a) {
-        String sql = "from AgentReportStatus where agent = :agent";
-        return (AgentReportStatus)getSession().createQuery(sql)
-            .setParameter("agent", a)
-            .uniqueResult();
-    }
-
     /**
      * Get or create a report status object for an associated agent.
      */
     AgentReportStatus getOrCreate(Agent a) {
-        AgentReportStatus res = getReportStatus(a);
+        String sql = "from AgentReportStatus where agent = :agent";
+        
+        AgentReportStatus res = (AgentReportStatus)getSession().createQuery(sql)
+            .setParameter("agent", a)
+            .uniqueResult();
+        
         if (res == null) {
             res = new AgentReportStatus();
             res.setAgent(a);

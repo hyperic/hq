@@ -49,11 +49,8 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -63,7 +60,6 @@ import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -82,11 +78,6 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
-import org.hyperic.hq.auth.shared.SessionManager;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -97,8 +88,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.bizapp.shared.AIBossLocal;
-import org.hyperic.hq.bizapp.shared.AIBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -108,14 +97,12 @@ import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.sigar.NetFlags;
-import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
-import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.NonUniqueObjectException;
@@ -1443,72 +1430,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         
         platform.updateWithAI(
             aiplatform, subj.getName(), getAuthzResource(platform.getEntityId()));
-        // need to check if IPs have changed, if so update Agent
-        List ips = Arrays.asList(aiplatform.getAIIpValues());
-        AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
-        Agent currAgent = platform.getAgent();
-        boolean removeCurrAgent = false;
-        for (Iterator it=ips.iterator(); it.hasNext(); ) {
-            AIIpValue ip = (AIIpValue)it.next();
-            if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_ADDED) {
-                try {
-                    Agent agent = aMan.getAgentPojo(aiplatform.getAgentToken());
-                    platform.setAgent(agent);
-                    addPostCommitRescheduler(subj, agent, platform);
-                } catch (AgentNotFoundException e) {
-                    throw new ApplicationException(e.getMessage(), e);
-                }
-            } else if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED
-                       && currAgent.getAddress().equals(ip.getAddress())) {
-                removeCurrAgent = true;
-            }
-        }
-        if (removeCurrAgent) {
-            aMan.removeAgent(currAgent);
-        }
-    }
-
-    private void addPostCommitRescheduler(final AuthzSubjectValue subj,
-                                          Agent agent,
-                                          final Platform platform) {
-/************** XXX scottmf, needs to be filled out.  Having trouble 
- * calling toggleRuntimeScan() from aiBoss since transaction is committed.
-        final Integer platformId = platform.getId();
-        final AIBossLocal aiBoss;
-        final int sessionid;
-        final Platform plat;
-        try {
-            aiBoss = AIBossUtil.getLocalHome().create();
-            sessionid = SessionManager.getInstance().getIdFromUsername(
-                subj.getName());
-            PlatformManagerLocal pMan = PlatformManagerEJBImpl.getOne();
-            plat = pMan.findPlatformById(platformId);
-        } catch (Throwable e) {
-            log.error(e.getMessage(), e);
-            return;
-        }
-        HQApp.getInstance().addTransactionListener(new TransactionListener() {
-            public void afterCommit(boolean success) {
-                if (!success) {
-                    return;
-                }
-                Collection servers = plat.getServers();
-                for (Iterator it=servers.iterator(); it.hasNext(); ) {
-                    try {
-                        Server s = (Server)it.next();
-                        aiBoss.toggleRuntimeScan(sessionid,
-                            s.getAppdefResourceValue().getEntityId(), true);
-                    } catch (Throwable e) {
-                        String msg = "Error rescheduling agent metrics after " +
-                            "AI Agent IP Change";
-                        log.error(msg, e);
-                    }
-                }
-            }
-            public void beforeCommit() {
-            }
-        }); 
-*****************/
     }
 
     /**

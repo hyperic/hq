@@ -53,7 +53,6 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
 import org.hyperic.hq.product.TypeInfo;
 
 import javax.ejb.FinderException;
@@ -110,10 +109,6 @@ public abstract class AppdefSessionUtil {
             aiqManagerLocal = AIQueueManagerEJBImpl.getOne();
         }
         return aiqManagerLocal;
-    }
-
-    protected AgentReportStatusDAO getAgentReportStatusDAO() {
-        return DAOFactory.getDAOFactory().getAgentReportStatusDAO();
     }
 
     protected AgentDAO getAgentDAO() {
