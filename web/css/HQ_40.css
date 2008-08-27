@@ -193,7 +193,7 @@ a:visited,a:hover,a {
 
 #navTabContainer {
     float: left;
-    margin: 42px 0 0 20px;
+    margin: 38px 0 0 20px;
     position: relative;
     width: 400px;
     z-index: 20;
@@ -287,7 +287,6 @@ a:visited,a:hover,a {
 }
 .mainMenu > li.activeTab {
     background: url('/images/4.0/tabs/tab_main_active.gif') no-repeat left top;
-    margin-top: -4px;
 }
 .mainMenu > li.activeTab > a {
     background: url('/images/4.0/tabs/tab_cap_active.gif') no-repeat right top;
@@ -305,6 +304,7 @@ a:visited,a:hover,a {
 	display: block;
 	position: relative;
 }
+
 .mainMenu ul a, .mainMenu ul a:visited {
     color: #3179D4;
 }
@@ -319,6 +319,7 @@ a:visited,a:hover,a {
 .mainMenu li ul {	/* create borders around each submenu */
     border: 1px solid #2D6EBE;
     width: 150px;
+    padding: 0px;
 }
 .mainMenu li li {	/* create borders around each item */
 /*      border: 1px solid #2D6EBE;*/

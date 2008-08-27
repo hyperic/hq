@@ -114,4 +114,3 @@ var ADxMenu = function() {
 }();
 //	load the setup function
 ADxMenu.Init();
-

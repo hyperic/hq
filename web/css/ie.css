@@ -1,6 +1,6 @@
-/* inch the whole tabs down by 3px to show up on top of the blue bar */
+/* inch the whole tabs up to show at the bottom of header exactly */
 .mainMenu {
-    margin-top: 3px;
+    margin-top: 8px;
 }
 
 /* tab images */
@@ -13,7 +13,7 @@
     margin-right: -5px;
     color: #333;
     background: url('/images/4.0/tabs/tab_cap.gif') no-repeat right top;
-    
+
     /* 
      * the next three styles are necessary to fix IE negative margin bug to
      * make the "a" element show up outside the parent element's box
@@ -36,12 +36,7 @@
 }
 /* active tab images */
 .mainMenu li.activeTab {
-    margin-top: -5px; /* pop the active tab up by 5px */
     background: url('/images/4.0/tabs/tab_main_active.gif') no-repeat left top;
-}
-
-.mainMenu li.activeTab a {
-   padding-bottom: 9px; /* stretch the active tab down to make sure it reaches the header bottom */
 }
 
 .mainMenu li.activeTab a, .mainMenu li.activeTab a:visited {
@@ -52,8 +47,8 @@
     color: #3179D4;
     margin-right: 0px;
     background: #FFF;
-  	 padding-bottom: .4em; /* reset padding */
 }
+
 .mainMenu li.activeTab a:hover {
 	color: #000;
 }
