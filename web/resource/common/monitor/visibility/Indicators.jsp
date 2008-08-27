@@ -92,11 +92,11 @@ function reviewAction(option) {
 
 <table cellpadding="2" cellspacing="0" border="0" width="685">
   <tr>
-    <td class="metricTable" nowrap="true" width="33%"><fmt:message key="resource.common.monitor.visibility.IndicatorCharts"/></td>
-    <td class="metricTable" valign="middle" align="center" width="33%">
-      <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>
+    <td class="tableHeaderLarge" nowrap="true" width="33%"><fmt:message key="resource.common.monitor.visibility.IndicatorCharts"/></td>
+    <td class="tableHeaderLarge" valign="middle" align="center" width="33%">
+      <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>
     </td>
-    <td class="metricTable" valign="middle" align="right" width="34%">
+    <td class="tableHeaderLarge" valign="middle" align="right" width="34%">
       <fmt:message key="Filter.ViewLabel"/>
       <html:select property="action" onchange="reviewAction(this.options[this.selectedIndex]);">
         <option value="update">
@@ -129,7 +129,6 @@ function reviewAction(option) {
       <!-- Use hidden input because IE doesn't pass value of of image -->
       <input type="hidden" name="update" value="<c:out value="${view}"/>">
       <input type="image" name="submit" src="<html:rewrite page="/images/4.0/icons/accept.png"/>" border="0" alt="Apply Chart View"/>
-    </td>
     </td>
   </tr>
   <c:if test="${not empty availabilityMetrics}">
