@@ -258,7 +258,9 @@ public class SystemPlugin extends ProductPlugin {
             }
         }
         else if (type.equals(ProductPlugin.TYPE_LIVE_DATA)) {
-            return new SystemLiveDataPlugin();
+            if (info.getType() == TypeInfo.TYPE_PLATFORM) {
+                return new SystemLiveDataPlugin();
+            }
         }
 
         return null;
