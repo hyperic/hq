@@ -1,6 +1,6 @@
 <%@ page language="java" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="struts-html" prefix="html" %>
+<%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%--
@@ -94,7 +94,7 @@ function reviewAction(option) {
   <tr>
     <td class="tableHeaderLarge" nowrap="true" width="33%"><fmt:message key="resource.common.monitor.visibility.IndicatorCharts"/></td>
     <td class="tableHeaderLarge" valign="middle" align="center" width="33%">
-      <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>
+      <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>
     </td>
     <td class="tableHeaderLarge" valign="middle" align="right" width="34%">
       <fmt:message key="Filter.ViewLabel"/>
