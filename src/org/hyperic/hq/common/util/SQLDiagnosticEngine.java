@@ -71,9 +71,10 @@ public class SQLDiagnosticEngine {
      * getErrorCount and getFixSql methods respectively.
      * 
      * @param diagnosticFactory the SQLDiagnosticsFactory used to iterate through
-     * the SQLDiagnostic objects.
+     * the list of test SQLs
+     * @throws SQLException 
      */
-    public void execute(SQLDiagnosticsFactory diagnosticFactory) {
+    public void execute(SQLDiagnosticsFactory diagnosticFactory) throws SQLException {
         errorCount = 0;
         fixSql = new ArrayList();
         List testSql = diagnosticFactory.getTestQueries();
