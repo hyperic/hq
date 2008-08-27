@@ -509,6 +509,11 @@ font-size:12px;
 #EventLogs {
     width: 100%;
     table-layout: fixed;
+    min-width:660px;
     *margin-left:1px
+}
+
+#EventLogs td {
+	overflow: hidden
 }
 
