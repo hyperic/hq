@@ -49,7 +49,9 @@
       <column name="AGENT_TYPE_ID" not-null="false"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="all" name="platforms" table="EAM_PLATFORM"> 
+    <!-- cascade must be set to "save-update" or else it will have the undesired affect of
+         deleting its platform when the agent is deleted -->
+    <bag inverse="true" cascade="save-update" name="platforms" table="EAM_PLATFORM"> 
       <key column="AGENT_ID"/>
       <one-to-many class="org.hyperic.hq.appdef.server.session.Platform"/>
     </bag>
