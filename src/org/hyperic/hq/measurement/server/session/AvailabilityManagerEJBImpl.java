@@ -84,6 +84,8 @@ public class AvailabilityManagerEJBImpl
     private static final int IND_MAX       = MeasurementConstants.IND_MAX;
     private static final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
     private static final int IND_LAST_TIME = MeasurementConstants.IND_LAST_TIME;
+    private static final int IND_UP_TIME   = IND_LAST_TIME + 1;
+    private static final int IND_TOTAL_TIME = IND_UP_TIME + 1;
     private static final long MAX_AVAIL_TIMESTAMP =
         AvailabilityDataRLE.getLastTimestamp();
     private static final String ALL_EVENTS_INTERESTING_PROP = 
@@ -370,11 +372,8 @@ public class AvailabilityManagerEJBImpl
             return rtn;
         }
         for (Iterator it=avails.iterator(); it.hasNext(); ) {
-            Object[] objs = (Object[])it.next();
-            long endtime = Math.min(end, ((Long) objs[5]).longValue());
-            if (begin > endtime) {
-                continue;
-            }
+            Object[] objs = (Object[]) it.next();
+
             double[] data;
             Integer key = null;
             if (useTidKey) {
@@ -383,14 +382,11 @@ public class AvailabilityManagerEJBImpl
                 key = ((Measurement)objs[0]).getId();
             }
             if (null == (data = (double[])rtn.get(key))) {
-                data = new double[5];
+                data = new double[IND_TOTAL_TIME + 1];
                 data[IND_MIN] = Double.MAX_VALUE;
                 data[IND_MAX] = Double.MIN_VALUE;
+                rtn.put(key, data);
             }
-
-            Double availVal = (Double) objs[2];
-            MetricValue mval;
-            mval = new MetricValue(availVal, endtime);
 
             data[IND_MIN] = Math.min(data[IND_MIN],
                                      ((Double)objs[1]).doubleValue());
@@ -399,16 +395,18 @@ public class AvailabilityManagerEJBImpl
             
             // Expect data to be sorted by end time, so that the last value
             // returned is the final count and the last value
-            data[IND_CFG_COUNT] = ((Integer)objs[6]).doubleValue();
+            data[IND_CFG_COUNT] = ((Integer)objs[4]).doubleValue();
             data[IND_LAST_TIME] = ((Double)objs[2]).doubleValue();
             
-            // Calculate average
-            long begintime = Math.max(begin, ((Long) objs[4]).longValue());
-            
-            data[IND_AVG] += data[IND_LAST_TIME] *
-                             (endtime - begintime) / (end - begin);
-            
-            rtn.put(key, data);
+            data[IND_UP_TIME]    += ((Double)objs[5]).doubleValue();
+            data[IND_TOTAL_TIME] += ((Long)objs[6]).doubleValue();
+        }
+        
+        // Now calculate the average value
+        for (Iterator it = rtn.values().iterator(); it.hasNext(); ) {
+            double[] data = (double[]) it.next();
+            data[IND_AVG] += data[IND_UP_TIME] / data[IND_TOTAL_TIME];
+
         }
         return rtn;
     }

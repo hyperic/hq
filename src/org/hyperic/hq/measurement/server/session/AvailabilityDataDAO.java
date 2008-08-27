@@ -46,6 +46,11 @@ public class AvailabilityDataDAO extends HibernateDAO {
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
     private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
     				MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
+    private static final String MAX_START =
+        "(rle.availabilityDataId.startime + :startime + " +
+        "abs(rle.availabilityDataId.startime - :startime)) / 2000";
+    private static final String MIN_END =
+        "(rle.endtime - abs(rle.endtime - :endtime) + :endtime) / 2000";
     
     public AvailabilityDataDAO(DAOFactory f) {
         super(AvailabilityDataDAO.class, f);
@@ -240,8 +245,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
 
     /**
      * @return List of Object[].  [0] = Measurement Obj
-     *  [1] = min(availVal), [2] = avg(availVal), [3] max(availVal)
-     *  [4] = startime, [5] = endtime, [6] = availVal, [7] mid count
+     *  [1] = min(availVal), [2] = max(availVal), [3] = avg(availVal)
+     *  [4] = mid count, [5] = total uptime, [6] = = total time
      */
     List findAggregateAvailability(Integer[] mids, long start, long end) {
         if (mids.length == 0) {
@@ -250,9 +255,19 @@ public class AvailabilityDataDAO extends HibernateDAO {
         }
         String sql = new StringBuffer()
                     .append("SELECT m, min(rle.availVal),")
-                    .append(" avg(rle.availVal), max(rle.availVal),")
-                    .append(" rle.availabilityDataId.startime, rle.endtime,")
-                    .append(" rle.availVal, count(m.id)")
+                    .append(" max(rle.availVal),")
+                    .append(" avg(rle.availVal),")
+                    .append(" count(distinct m.id), ")
+                    .append(" sum((")
+                    .append(MIN_END)
+                    .append("-")
+                    .append(MAX_START)
+                    .append(") * rle.availVal), ")
+                    .append(" sum(")
+                    .append(MIN_END)
+                    .append("-")
+                    .append(MAX_START)
+                    .append(") ")
                     .append(" FROM Measurement m")
                     .append(" JOIN m.availabilityData rle")
                     .append(" WHERE m in (:mids)")
@@ -264,10 +279,9 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     // there is an open bug on this for hibernate to
                     // automatically expand group by's
                     // http://opensource.atlassian.com/projects/hibernate/browse/HHH-2407
-                    .append(" GROUP BY m.id,m._version_,m.instanceId,")
-                    .append(" m.template,m.mtime,m.enabled,")
-                    .append(" m.interval,m.dsn,m.resource,")
-                    .append(" rle.availabilityDataId.startime, rle.availVal,")
+                    .append(" GROUP BY m.id, m._version_, m.instanceId,")
+                    .append(" m.template, m.mtime,m.enabled,")
+                    .append(" m.interval, m.dsn,m.resource,")
                     .append(" rle.endtime")
                     .append(" ORDER BY rle.endtime").toString();
         return getSession()
@@ -280,8 +294,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
 
     /**
      * @return List of Object[].  [0] = measurement template id,
-     *  [1] = min(availVal), [2] = avg(availVal), [3] max(availVal)
-     *  [4] = startime, [5] = endtime, [6] mid count
+     *  [1] = min(availVal), [2] = max(availVal), [3] = avg(availVal)
+     *  [4] = mid count, [5] = total uptime, [6] = = total time
      */
     List findAggregateAvailability(Integer[] tids, Integer[] iids,
                                    long start, long end) {
@@ -289,11 +303,22 @@ public class AvailabilityDataDAO extends HibernateDAO {
             // Nothing to do
             return new ArrayList(0);
         }
+        
         String sql = new StringBuffer()
                     .append("SELECT m.template.id, min(rle.availVal),")
-                    .append(" avg(rle.availVal), max(rle.availVal),")
-                    .append(" min(rle.availabilityDataId.startime), ")
-                    .append(" rle.endtime, count(m.id)")
+                    .append(" max(rle.availVal),")
+                    .append(" avg(rle.availVal),")
+                    .append(" count(distinct m.id), ")
+                    .append(" sum((")
+                    .append(MIN_END)
+                    .append("-")
+                    .append(MAX_START)
+                    .append(") * rle.availVal), ")
+                    .append(" sum(")
+                    .append(MIN_END)
+                    .append("-")
+                    .append(MAX_START)
+                    .append(") ")
                     .append(" FROM Measurement m")
                     .append(" JOIN m.availabilityData rle")
                     .append(" WHERE m.template in (:tids)")
