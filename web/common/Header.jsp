@@ -158,15 +158,18 @@
         </div>
     </div>
     <div id="headerSearchResults" style="display:none">
-        <a class="all left" href="/resource/Hub.html"><fmt:message key="header.SearchShowAll"/></a>
         <div id="searchClose" class="cancelButton right"></div>
+        <!--
+        <a class="all left" href="/resource/Hub.html"><fmt:message key="header.SearchShowAll"/></a>
         <div class="clear">&nbsp;</div>
+        -->
         <div class="resultsGroup">
             <div class="category"><fmt:message key="header.Resources"/> (<span id="resourceResultsCount"></span>)</div>
             <ul id="resourceResults">
                 <li></li>
             </ul>
         </div>
+        <!--
         <div class="resultsGroup">
             <div class="category"><fmt:message key="header.Alerts"/> (0)</div>
             <ul>
@@ -179,6 +182,7 @@
                 <li></li>
             </ul>
         </div>
+        -->
     </div>     
 </div>
 
