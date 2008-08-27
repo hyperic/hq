@@ -275,7 +275,6 @@ a:visited,a:hover,a {
 /* - - - ADxMenu: DESIGN styles [ OPTIONAL, design your heart out :) ] - - - */
 .mainMenu, .mainMenu ul li {
     color: #88C7FC;
-    line-height: 1em;
 }
 .mainMenu > li {
     margin-right: 6px;
@@ -297,12 +296,16 @@ a:visited,a:hover,a {
 }
 .mainMenu a, .mainMenu a:visited {
     font-family: Helvetica, sans-serif;
-    font-size: 0.9em;
+    font-size: 1em;
 	text-decoration: none;
 	color: #333;
 	padding: .4em 1em;
 	display: block;
 	position: relative;
+}
+
+.mainMenu ul a,.mainMenu ul a:visited,.mainMenu ul a:hover {
+    font-size: 0.9em;
 }
 
 .mainMenu ul a, .mainMenu ul a:visited {
