@@ -1404,10 +1404,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         
         // Need to remove all service types
         ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
-        for (Iterator it = serverType.getServiceTypes().iterator();
-             it.hasNext(); ) {
-            ServiceType st = (ServiceType) it.next();
-            svcMan.deleteServiceType(st, overlord, resGroupMan, resMan);
+        ServiceType[] types = (ServiceType[])
+            serverType.getServiceTypes().toArray(new ServiceType[0]);
+        for (int i = 0; i < types.length; i++) {
+            svcMan.deleteServiceType(types[i], overlord, resGroupMan, resMan);
         }
 
         ServerTypeDAO dao = new ServerTypeDAO(DAOFactory.getDAOFactory());
