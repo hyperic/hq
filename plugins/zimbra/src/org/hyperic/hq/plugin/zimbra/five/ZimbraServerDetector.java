@@ -11,14 +11,12 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.Log4JLogTrackPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 
 public class ZimbraServerDetector extends ServerDetector implements AutoServerDetector {
@@ -42,7 +40,7 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 		for (int n = 0; n < pids.length; n++) {
 			long pid = pids[n];
 			try {
-				String exe = getSigar().getProcExe(pid).getName();
+				String exe = getProcExe(pid);
 				String path = exe.substring(0, exe.length() - (PROCESS_DIR + File.separator + PROCESS_NAME).length());
 				log.debug("proc: (" + pid + ") " + exe + " (" + path + ")");
 				if (new File(path, ZMSTATS_DIR).exists()) {
@@ -71,8 +69,8 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 					
 					list_servers.add(server);
 				}
-			} catch (SigarException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+			    log.error(e.getMessage(), e);
 			}
 		}
  
@@ -151,7 +149,7 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 			long[] pids = getPids(MessageFormat.format(PROCESS_PID_QUERY, args));
 			if (pids.length > 0) {
 				long pid = pids[0];
-				String exec = ServerDetector.getProcExe(pid);
+				String exec = getProcExe(pid);
 				log.debug("'" + serviceSata[0] + "' exec='" + exec + "'");
 
 				ServiceResource service = new ServiceResource();
