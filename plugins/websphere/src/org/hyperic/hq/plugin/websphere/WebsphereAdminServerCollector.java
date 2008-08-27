@@ -42,7 +42,6 @@ public class WebsphereAdminServerCollector extends WebsphereCollector {
             newObjectNamePattern("name=JVM," +
                                  "type=JVM," +
                                  "node=" + getNodeName());
-        this.name = resolve(mServer, this.name);
 
         try {
             count(mServer);

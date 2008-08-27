@@ -70,7 +70,8 @@ public class WebsphereServerCollector extends WebsphereCollector {
         else if (module.equals("transactionModule")) {
             this.name =
                 newObjectNamePattern("type=TransactionService," +
-                                     "j2eeType=JTAResource");
+                                     "j2eeType=JTAResource," +
+                                     getServerAttributes());
 
             this.name = resolve(mServer, this.name);
             this.attrs = TX_ATTRS;
