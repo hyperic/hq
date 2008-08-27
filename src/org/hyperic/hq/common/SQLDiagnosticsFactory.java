@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.common;
 
-import java.util.Iterator;
+import java.util.List;
 
 public interface SQLDiagnosticsFactory {
 
@@ -37,10 +37,16 @@ public interface SQLDiagnosticsFactory {
     public String getName();
     
     /**
-     * Returns an iterator of SQLDiagnostic objects for the SQL test and fix queries.
+     * Returns a List of String objects for the SQL test queries.
      * 
-     * @return the Iterator of SQLDiagnostic objects
+     * @return the List of SQL test strings
      */
-    public Iterator getSQLDiagnostics();
+    public List getTestQueries();
     
+    /**
+     * Returns a List of String objects for the SQL fix queries.
+     * 
+     * @return the List of SQL fix strings
+     */
+    public List getFixQueries();
 }

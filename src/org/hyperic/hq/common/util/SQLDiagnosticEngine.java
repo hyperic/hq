@@ -35,7 +35,6 @@ import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.SQLDiagnostic;
 import org.hyperic.hq.common.SQLDiagnosticsFactory;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -77,14 +76,14 @@ public class SQLDiagnosticEngine {
     public void execute(SQLDiagnosticsFactory diagnosticFactory) {
         errorCount = 0;
         fixSql = new ArrayList();
+        List testSql = diagnosticFactory.getTestQueries();
         
-        for (Iterator it = diagnosticFactory.getSQLDiagnostics(); it.hasNext();) {
+        for (Iterator it = testSql.iterator(); it.hasNext();) {
             PreparedStatement stmt = null;
             ResultSet rs = null;
-            SQLDiagnostic diagnostic = (SQLDiagnostic) it.next();
+            String query = (String) it.next();
             
-            final String sql = SELECT_COUNT_SQL
-                    + diagnostic.getTestQuery()
+            final String sql = SELECT_COUNT_SQL + query
                     + SELECT_COUNT_ALIAS_SQL;
             try {
                 stmt = connection.prepareStatement(sql);
@@ -95,9 +94,6 @@ public class SQLDiagnosticEngine {
                 if (rs.next()) {
                     int count = rs.getInt(1);
                     errorCount += count;
-                    if (count > 0) {
-                        fixSql.add(diagnostic.getFixQuery());
-                    }
                 }
             }
             catch (SQLException e) {
@@ -119,16 +115,5 @@ public class SQLDiagnosticEngine {
     public int getMatchCount() {
         return errorCount;
     }
-    
-    /**
-     * Returns a List of strings corresponding to the SQL queries that fix the
-     * problems diagnosed by the last invocation of the execute method.
-     * 
-     * @return a List of strings corresponding to the SQL queries that fix the diagnosed
-     * problem
-     */
-    public List getFixSql() {
-        return new ArrayList(fixSql);
-    }
-    
+
 }

@@ -27,15 +27,15 @@ package org.hyperic.hq.authz.server.session;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.hyperic.hq.common.SQLDiagnostic;
 import org.hyperic.hq.common.SQLDiagnosticsFactory;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class OrphanedAlertdefSQLDiagnosticsFactory implements SQLDiagnosticsFactory {
 
-    private static final String SELECT_QUERY = "SELECT * ";
+    private static final String SELECT_QUERY = "SELECT * FROM EAM_ALERT_DEFINITION ";
     
     private static final String UPDATE_QUERY_POSTGRES = "UPDATE EAM_ALERT_DEFINITION " +
         "SET DELETED = TRUE, PARENT_ID = NULL ";
@@ -44,7 +44,6 @@ public class OrphanedAlertdefSQLDiagnosticsFactory implements SQLDiagnosticsFact
     "SET DELETED = 1, PARENT_ID = NULL ";
     
     private static final String ORPHANED_ALERTDEF_QUERY = 
-        "FROM EAM_ALERT_DEFINITION " +
         "WHERE RESOURCE_ID IS NULL " +
         "AND PARENT_ID IS NOT NULL " +
         "AND APPDEF_ID IS NOT NULL " +
@@ -64,42 +63,29 @@ public class OrphanedAlertdefSQLDiagnosticsFactory implements SQLDiagnosticsFact
         return "Orphaned Alert Definition Diagnostics";
     }
 
-    public Iterator getSQLDiagnostics() {
-        return new OprhanedAlertdefSQLDiagnostics();
+    public List getFixQueries() {
+        List fixes = new ArrayList(1);
+        boolean isPostgresSQL = true;
+        try {
+            isPostgresSQL = DBUtil.isPostgreSQL(connection);
+        }
+        catch (SQLException e) {
+            // swallow -- assume we are running postgres
+        }
+        String sqlFix;
+        if (isPostgresSQL) {
+            sqlFix = UPDATE_QUERY_POSTGRES + ORPHANED_ALERTDEF_QUERY;
+        }
+        else {
+            sqlFix = UPDATE_QUERY_MYSQL + ORPHANED_ALERTDEF_QUERY;
+        }
+        fixes.add(sqlFix);
+        return fixes;
     }
-    
-    private class OprhanedAlertdefSQLDiagnostics implements Iterator {
-        
-        private int pos = 0;
 
-        public boolean hasNext() {
-            return (pos <  1);
-        }
-
-        public Object next() {
-            String sqlQuery = SELECT_QUERY + ORPHANED_ALERTDEF_QUERY;
-            boolean isPostgresSQL = true;
-            try {
-                isPostgresSQL = DBUtil.isPostgreSQL(connection);
-            }
-            catch (SQLException e) {
-                // swallow -- assume we are running postgres
-            }
-            String sqlFix;
-            if (isPostgresSQL) {
-                sqlFix = UPDATE_QUERY_POSTGRES + ORPHANED_ALERTDEF_QUERY;
-            }
-            else {
-                sqlFix = UPDATE_QUERY_MYSQL + ORPHANED_ALERTDEF_QUERY;
-            }
-            pos++;
-            return new SQLDiagnostic(sqlQuery, sqlFix);
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException("Remove is not supported");
-            
-        }
-        
+    public List getTestQueries() {
+        List tests = new ArrayList(1);
+        tests.add(SELECT_QUERY + ORPHANED_ALERTDEF_QUERY);
+        return tests;
     }
 }

@@ -24,7 +24,6 @@ package org.hyperic.hq.authz.server.session;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -68,14 +67,14 @@ class ResourceDiagnostic implements DiagnosticObject {
      * @see org.hyperic.hq.common.DiagnosticObject#getName()
      */
     public String getName() {
-        return "Orphaned Resources";
+        return "Data Integrity";
     }
 
     /**
      * @see org.hyperic.hq.common.DiagnosticObject#getShortName()
      */
     public String getShortName() {
-        return "OrphanedResources";
+        return "DataIntegrity";
     }
 
     public String getStatus() {
@@ -102,13 +101,12 @@ class ResourceDiagnostic implements DiagnosticObject {
         
         engine.execute(factory);
         int count = engine.getMatchCount();
-        List fixSql = engine.getFixSql();
         StringBuffer fix = new StringBuffer();
-        if (fixSql.isEmpty()) {
+        if (count == 0) {
             fix.append("N/A\n");
         }
         else {
-            for (Iterator it = fixSql.iterator(); it.hasNext(); ) {
+            for (Iterator it = factory.getFixQueries().iterator(); it.hasNext(); ) {
                 fix.append((String)it.next() + ";\n");
             }
         }
