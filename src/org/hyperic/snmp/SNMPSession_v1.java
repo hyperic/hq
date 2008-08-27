@@ -202,7 +202,12 @@ class SNMPSession_v1 implements SNMPSession {
             throw new SNMPException("No response for " + name);
         }
 
-        return new SNMPValue(response.get(0));
+        VariableBinding var = response.get(0);
+        if (var.isException()) {
+            throw new MIBLookupException(name + ": " +  //e.g. noSuchObject
+                                         var.getVariable().toString());
+        }
+        return new SNMPValue(var);
     }
     
     public SNMPValue getSingleValue(String name)
