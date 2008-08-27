@@ -90,15 +90,16 @@ class ResourceDiagnostic implements DiagnosticObject {
             rslt.append(getDetailedStatus(orphanedAppdefFactory, conn, engine));
 
         } catch (SQLException e) {
-            _log.error("Failed to get database connection", e);
+            _log.error("Failed to get SQL diagnostics: ", e);
         } finally {
             DBUtil.closeConnection(logCtx, conn);
         }
         return rslt.toString();
     }
     
-    private String getDetailedStatus(SQLDiagnosticsFactory factory, Connection c, SQLDiagnosticEngine engine) {
-        
+    private String getDetailedStatus(SQLDiagnosticsFactory factory,
+            Connection c, SQLDiagnosticEngine engine) throws SQLException {
+
         engine.execute(factory);
         int count = engine.getMatchCount();
         StringBuffer fix = new StringBuffer();
@@ -106,16 +107,16 @@ class ResourceDiagnostic implements DiagnosticObject {
             fix.append("N/A\n");
         }
         else {
-            for (Iterator it = factory.getFixQueries().iterator(); it.hasNext(); ) {
-                fix.append((String)it.next() + ";\n");
+            for (Iterator it = factory.getFixQueries().iterator(); it.hasNext();) {
+                fix.append((String) it.next() + ";\n");
             }
         }
-        
+
         StringBuffer rslt = new StringBuffer();
-        rslt.append(factory.getName() + ":\n").
-        append(count + " resources matched the criteria.\n\n").
-        append("Suggested fix:\n" + fix.toString() + "\n");
-        
+        rslt.append(factory.getName() + ":\n").append(
+                count + " resources matched the criteria.\n\n").append(
+                "Suggested fix:\n" + fix.toString() + "\n");
+
         return rslt.toString();
     }
     

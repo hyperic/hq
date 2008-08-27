@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.common;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface SQLDiagnosticsFactory {
@@ -41,12 +42,12 @@ public interface SQLDiagnosticsFactory {
      * 
      * @return the List of SQL test strings
      */
-    public List getTestQueries();
+    public List getTestQueries() throws SQLException;
     
     /**
      * Returns a List of String objects for the SQL fix queries.
      * 
      * @return the List of SQL fix strings
      */
-    public List getFixQueries();
+    public List getFixQueries() throws SQLException;
 }

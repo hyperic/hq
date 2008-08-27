@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -389,7 +390,7 @@ public  class OrphanedResourceSQLDiagnosticsFactory implements SQLDiagnosticsFac
         return "Orphaned Resource Diagnostics";
     }
 
-    public List getFixQueries() {
+    public List getFixQueries() throws SQLException {
         List fixes = new ArrayList(ORPHANED_RESOURCE_FIX_QUERY.length);
         for (int i=0; i < ORPHANED_RESOURCE_FIX_QUERY.length; i++) {
             fixes.add(ORPHANED_RESOURCE_FIX_QUERY[i]);
@@ -397,7 +398,7 @@ public  class OrphanedResourceSQLDiagnosticsFactory implements SQLDiagnosticsFac
         return fixes;
     }
 
-    public List getTestQueries() {
+    public List getTestQueries() throws SQLException {
         List tests = new ArrayList(ORPHANED_RESOURCE_TEST_QUERY.length);
         for (int i=0; i < ORPHANED_RESOURCE_TEST_QUERY.length; i++) {
             tests.add(ORPHANED_RESOURCE_TEST_QUERY[i]);

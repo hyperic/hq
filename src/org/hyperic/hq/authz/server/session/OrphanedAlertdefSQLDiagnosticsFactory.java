@@ -63,15 +63,9 @@ public class OrphanedAlertdefSQLDiagnosticsFactory implements SQLDiagnosticsFact
         return "Orphaned Alert Definition Diagnostics";
     }
 
-    public List getFixQueries() {
+    public List getFixQueries() throws SQLException {
         List fixes = new ArrayList(1);
-        boolean isPostgresSQL = true;
-        try {
-            isPostgresSQL = DBUtil.isPostgreSQL(connection);
-        }
-        catch (SQLException e) {
-            // swallow -- assume we are running postgres
-        }
+        boolean isPostgresSQL = DBUtil.isPostgreSQL(connection);
         String sqlFix;
         if (isPostgresSQL) {
             sqlFix = UPDATE_QUERY_POSTGRES + ORPHANED_ALERTDEF_QUERY;
@@ -83,7 +77,7 @@ public class OrphanedAlertdefSQLDiagnosticsFactory implements SQLDiagnosticsFact
         return fixes;
     }
 
-    public List getTestQueries() {
+    public List getTestQueries() throws SQLException {
         List tests = new ArrayList(1);
         tests.add(SELECT_QUERY + ORPHANED_ALERTDEF_QUERY);
         return tests;
