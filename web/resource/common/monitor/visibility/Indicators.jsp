@@ -90,50 +90,55 @@ function reviewAction(option) {
   <input type="hidden" name="ctype" value="<c:out value="${ctype}"/>">
 </c:if>
 
-<table cellpadding="2" cellspacing="0" border="0" width="685">
+<table width="680" cellpadding="2" cellspacing="0" border="0">
   <tr>
-    <td class="tableHeaderLarge" nowrap="true" width="33%"><fmt:message key="resource.common.monitor.visibility.IndicatorCharts"/></td>
-    <td class="tableHeaderLarge" valign="middle" align="center" width="33%">
-      <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'><fmt:message key="resource.common.monitor.visibility.now"/></a>
-    </td>
-    <td class="tableHeaderLarge" valign="middle" align="right" width="34%">
-      <fmt:message key="Filter.ViewLabel"/>
-      <html:select property="action" onchange="reviewAction(this.options[this.selectedIndex]);">
-        <option value="update">
-          <fmt:message key="resource.common.monitor.visibility.view.Update"/>
-          <c:out value="${view}"/>
-        </option>
-        <option value="create">
-          <fmt:message key="resource.common.monitor.visibility.view.New"/>
-        </option>
-        <c:if test="${not empty IndicatorViewsForm.views[1]}">
-        <option value="delete">
-          <fmt:message key="resource.common.monitor.visibility.view.Delete"/>
-          <c:out value="${view}"/>
-        </option>
-        <option disabled="true">
-          <fmt:message key="resource.common.monitor.visibility.view.Separator"/>
-        </option>
-        <option disabled="true">
-          <fmt:message key="resource.common.monitor.visibility.view.Goto"/>
-        </option>
-        <c:forEach var="viewname" items="${IndicatorViewsForm.views}">
-        <option value="go"><c:out value="${viewname}"/></option>
-        </c:forEach>
-        </c:if>
-      </html:select>
-      <span id="viewname" style="display: none;">
-      <fmt:message key="common.label.Name"/>
-      <html:text size="20" property="view"/>
-      </span>
-      <!-- Use hidden input because IE doesn't pass value of of image -->
-      <input type="hidden" name="update" value="<c:out value="${view}"/>">
-      <input type="image" name="submit" src="<html:rewrite page="/images/4.0/icons/accept.png"/>" border="0" alt="Apply Chart View"/>
+    <td class="ListHeaderInactive" nowrap="true"><fmt:message key="resource.common.monitor.visibility.IndicatorCharts"/>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;<a href='<html:rewrite page="/ResourceCurrentHealth.do"/>?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>&alertDefaults=true'><fmt:message key="resource.common.monitor.visibility.now"/></a></td>
+    <td class="ListHeaderInactive" valign="middle" align="right" width="100%">
+      <table cellspacing="2">
+        <tr>
+          <td>
+            <fmt:message key="Filter.ViewLabel"/>
+            <html:select property="action" onchange="reviewAction(this.options[this.selectedIndex]);">
+              <option value="update">
+                <fmt:message key="resource.common.monitor.visibility.view.Update"/>
+                <c:out value="${view}"/>
+              </option>
+              <option value="create">
+                <fmt:message key="resource.common.monitor.visibility.view.New"/>
+              </option>
+              <c:if test="${not empty IndicatorViewsForm.views[1]}">
+              <option value="delete">
+                <fmt:message key="resource.common.monitor.visibility.view.Delete"/>
+                <c:out value="${view}"/>
+              </option>
+              <option disabled="true">
+                <fmt:message key="resource.common.monitor.visibility.view.Separator"/>
+              </option>
+              <option disabled="true">
+                <fmt:message key="resource.common.monitor.visibility.view.Goto"/>
+              </option>
+              <c:forEach var="viewname" items="${IndicatorViewsForm.views}">
+              <option value="go"><c:out value="${viewname}"/></option>
+              </c:forEach>
+              </c:if>
+            </html:select>
+            <span id="viewname" style="display: none;">
+            <fmt:message key="common.label.Name"/>
+            <html:text size="20" property="view"/>
+            </span>
+          </td>
+          <td align="right">
+            <!-- Use hidden input because IE doesn't pass value of of image -->
+            <input type="hidden" name="update" value="<c:out value="${view}"/>">
+            <input type="image" name="submit" src="<html:rewrite page="/images/dash-button_go-arrow.gif"/>" border="0" alt="Apply Chart View"/>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
   <c:if test="${not empty availabilityMetrics}">
   <tr>
-    <td colspan="3"> 
+    <td colspan="2"> 
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td width="8">
@@ -194,7 +199,7 @@ function reviewAction(option) {
   </tr>
   </c:if>
   <tr>
-    <td colspan="3"> 
+    <td colspan="2"> 
         <div id="charttop" style="padding-top: 1px; padding-bottom: 1px; z-index: 0;">
         <c:url var="chartUrl" value="/resource/common/monitor/visibility/IndicatorCharts.do">
           <c:param name="eid" value="${eid}" />
@@ -220,7 +225,7 @@ function reviewAction(option) {
     </td>
   </tr>
   <tr>
-    <td colspan="3">
+    <td colspan="2">
       <tiles:insert definition=".resource.common.monitor.visibility.timeline">
         <c:if test="${entityType eq 'autogroup'}">
           <tiles:put name="hideLogs" value="true"/>
