@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.LogTrackPlugin;
+import org.hyperic.hq.product.LogFileTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.ServerDetector;
@@ -57,10 +57,11 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 					setProductConfig(server, productConfig);
 
 					ConfigResponse metricConfig = new ConfigResponse();
-					metricConfig.setValue("server.log_track.enable", true);
-					metricConfig.setValue("server.log_track.files", path+"/log/mailbox.log");
-					metricConfig.setValue("log_track.level",LogTrackPlugin.LOGLEVEL_DEBUG_LABEL);
-					server.setMeasurementConfig(metricConfig);
+					metricConfig.setValue(LogFileTrackPlugin.PROP_FILES_SERVER,
+					                      "log/mailbox.log");
+					server.setMeasurementConfig(metricConfig,
+					                            LogFileTrackPlugin.LOGLEVEL_WARN,
+					                            false);
 					
 					ConfigResponse controlConfig = new ConfigResponse();
 					controlConfig.setValue(ServerControlPlugin.PROP_PROGRAMPREFIX, "/usr/bin/sudo -u zimbra");  // RHEL 5.0
@@ -77,8 +78,8 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 		return list_servers;
 	}
 
-	private final static String[][] SERVICES = { { "MySQL", "/db/mysql.pid" }, { "Postfix", "/data/postfix/spool/pid/master.pid" }, { "Log Watch", "/log/logswatch.pid" }, { "Logger MySQL", "/logger/db/mysql.pid" }, { "OpenLDAP", "/openldap/var/run/slapd.pid" }, { "Swatch", "/log/swatch.pid" }, { "MTA Config", "/log/zmmtaconfig.pid" }, { "memcached", "/log/memcached.pid" }, { "ClamAV", "/log/clamd.pid","/log/clamd.log" }, { "Convertd Monitor", "/log/zmconvertdmon.pid","/log/zmconvertd.log" }, { "Jetty Process", "/log/zmmailboxd_java.pid" } };
-	private final static String[][] MULTI_SERVICES = { { "AMaViS", "/log/amavisd.pid" }, { "HTTPD", "/log/httpd.pid" }, { "NGINX", "/log/nginx.pid","/log/nginx.log" }, { "Cyrus SASL", "/cyrus-sasl/state/saslauthd.pid" } };
+	private final static String[][] SERVICES = { { "MySQL", "/db/mysql.pid" }, { "Postfix", "/data/postfix/spool/pid/master.pid" }, { "Log Watch", "/log/logswatch.pid" }, { "Logger MySQL", "/logger/db/mysql.pid" }, { "OpenLDAP", "/openldap/var/run/slapd.pid" }, { "Swatch", "/log/swatch.pid" }, { "MTA Config", "/log/zmmtaconfig.pid" }, { "memcached", "/log/memcached.pid" }, { "ClamAV", "/log/clamd.pid","log/clamd.log" }, { "Convertd Monitor", "/log/zmconvertdmon.pid","log/zmconvertd.log" }, { "Jetty Process", "/log/zmmailboxd_java.pid" } };
+	private final static String[][] MULTI_SERVICES = { { "AMaViS", "/log/amavisd.pid" }, { "HTTPD", "/log/httpd.pid" }, { "NGINX", "/log/nginx.pid","log/nginx.log" }, { "Cyrus SASL", "/cyrus-sasl/state/saslauthd.pid" } };
 	private final static String[][] OTHER_SERVICES = { { "MTAQueue Stats", "/zmstat/mtaqueue.csv" }, { "VM Stats", "/zmstat/vm.csv" } };
  
 	protected List discoverServices(ConfigResponse config) throws PluginException {
@@ -99,9 +100,7 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 
 				ConfigResponse metricConfig = new ConfigResponse();
 				if (serviceSata.length > 2) {
-					metricConfig.setValue("service.log_track.enable", true);
-					metricConfig.setValue("service.log_track.files", config.getValue("installpath")+File.separator+serviceSata[2]);
-					metricConfig.setValue("log_track.level",LogTrackPlugin.LOGLEVEL_DEBUG_LABEL);
+				    metricConfig.setValue(LogFileTrackPlugin.PROP_FILES_SERVICE, serviceSata[2]);
 				}
 				service.setMeasurementConfig(metricConfig);
 				service.setCustomProperties(new ConfigResponse());
@@ -128,9 +127,7 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 
 				ConfigResponse metricConfig = new ConfigResponse();
 				if (serviceSata.length > 2) {
-					metricConfig.setValue("service.log_track.enable", true);
-					metricConfig.setValue("service.log_track.files", config.getValue("installpath")+File.separator+serviceSata[2]);
-					metricConfig.setValue("log_track.level",LogTrackPlugin.LOGLEVEL_DEBUG_LABEL);
+				    metricConfig.setValue(LogFileTrackPlugin.PROP_FILES_SERVICE, serviceSata[2]);
 				}
 				service.setMeasurementConfig(metricConfig);
 				service.setCustomProperties(new ConfigResponse());
@@ -181,8 +178,9 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 			setProductConfig(service, props);
 
 			ConfigResponse metricConfig = new ConfigResponse();
-			metricConfig.setValue("service.log_track.enable", true);
-			metricConfig.setValue("service.log_track.files", config.getValue("installpath")+File.separator+"/log/convertd.log");
+			metricConfig.setValue(LogFileTrackPlugin.PROP_FILES_SERVICE,
+			                      "log/convertd.log"); //relative to installpath
+
 			service.setMeasurementConfig(metricConfig);
 			service.setCustomProperties(new ConfigResponse());
 
