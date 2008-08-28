@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -128,34 +128,6 @@ public class ResourceGroup extends AuthzNamedBean
      */
     public boolean allowContainerManagedLastModifiedTime() {
         return true;
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.authz.server.session.AuthzNamedBean#getName()
-     */
-    public String getName() {
-        return _resource.getName();
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.authz.server.session.AuthzNamedBean#getSortName()
-     */
-    public String getSortName() {
-        return _resource.getSortName();
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.authz.server.session.AuthzNamedBean#setName(java.lang.String)
-     */
-    public void setName(String name) {
-        _resource.setName(name);
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.authz.server.session.AuthzNamedBean#setSortName(java.lang.String)
-     */
-    public void setSortName(String sortName) {
-        _resource.setSortName(sortName);
     }
 
     public String getDescription() {

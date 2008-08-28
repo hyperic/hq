@@ -673,7 +673,7 @@ public class ResourceGroupManagerEJBImpl
         retVal.setMTime(new Long(g.getMtime()));
         retVal.setCTime(new Long(g.getCtime()));
         retVal.setModifiedBy(g.getModifiedBy());
-        retVal.setOwner(subj.getName());
+        retVal.setOwner(g.getResource().getOwner().getName());
                 
         // Add the group members
         for (Iterator i = members.iterator(); i.hasNext();) {
