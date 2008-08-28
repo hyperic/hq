@@ -1495,10 +1495,28 @@ visibility: hidden;*/
     -moz-box-orient: vertical
 }
 
-.dijitDialog .statusMsg {
+.dijitDialog .warningPanel{
 	color: red;
-	font-weight: bold;
-	text-align: center	
+	text-align: left;	
+    padding: 3px 5px 3px 27px;
+	margin: 5px auto;
+    border: 1px solid red;
+	background-color: #FFF;
+	background-image: url('/images/4.0/icons/exclamation.png');
+	background-repeat: no-repeat;
+	background-position: 5px 45%;
+}
+
+.dijitDialog .confirmationPanel {
+    color: #000;
+    text-align:left;
+    padding: 3px 5px 3px 22px;
+	margin: 5px auto;
+    border: 1px solid #00AC3D;
+	background-color: #BFF1B5;
+	background-image: url('/images/tt_check.gif');
+	background-repeat: no-repeat;
+	background-position: 5px 45%;
 }
 
 /*Reporting contianer*/

@@ -2079,16 +2079,20 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 // set the hyperic.dashboard.widget as the ancestor of the summaryWidget class.
 hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
 
-hyperic.maintenance_schedule = function(group_id) {
+hyperic.maintenance_schedule = function(group_id, group_name) {
     var that = this;
     that.existing_schedule = {};
     that.group_id = group_id;
+    that.group_name = group_name;
+    that.title_name = that.group_name;
     that.dialog = null;
 	that.buttons = {};
 	that.inputs = {};
 	that.canSchedule = true;
     that.selected_from_time = that.selected_to_time = new Date();
-    that.server_time = new Date();
+    that.server_time = new Date(); // default
+    
+    //dojo11.date.getTimezoneName(new Date())
     
     that.message_area = {
     	request_status : dojo11.byId('maintenance_status_' + that.group_id),
@@ -2096,21 +2100,25 @@ hyperic.maintenance_schedule = function(group_id) {
     };
 
 	that.messages = {
-		success : "Updated successfully!",
+		success : "Updated successfully.",
 		serverError : "An error occurred processing your request.",
-		currentSchedule : "Currently scheduled downtime window:",
-		noSchedule : "No downtime window is currently scheduled."
+		currentSchedule : "The current downtime schedule for this group is:",
+		noSchedule : "No downtime is currently scheduled for this group.",
+		runningSchedule : "Downtime currently in progress..."
 	};
 
     that.init = function() {
 	    if(!that.dialog){
-			var pane = dojo11.byId('maintenance' + that.group_id);
+			if(that.title_name.length > 22) {
+				that.title_name = that.title_name.substring(0,22) + "...";
+			}
+	    	var pane = dojo11.byId('maintenance' + that.group_id);
 			pane.style.width = "450px";
 			that.dialog = new dijit11.Dialog({
 				id: "maintenance_schedule_dialog_" + that.group_id,
 				refocus: true,
 				autofocus: false,
-				title: "Schedule Downtime"
+				title: "Schedule Downtime - " + that.title_name
 			},pane);
 		}
         
@@ -2156,24 +2164,6 @@ hyperic.maintenance_schedule = function(group_id) {
     			required: true
     		}, "to_time");
 
-    	/*
-        that.inputs.from_date.onChange = function() {
-            this.validate();
-        };
-
-    	that.inputs.to_date.onChange = function() {
-            this.validate();
-        };
-        
-        that.inputs.from_time.onChange = function() {
-            this.validate();
-        };
-
-        that.inputs.to_time.onChange = function() {
-            this.validate();
-        };
-        */
-
 		that.buttons.schedule_btn = new dijit11.form.Button({
 			label: "Schedule",
 			name: "schedule_btn",
@@ -2211,30 +2201,22 @@ hyperic.maintenance_schedule = function(group_id) {
 
     	    // create unix epoch datetime in GMT timezone
             from_datetime = (args.from_date.getTime() + args.from_time.getTime() - args.from_time.getTimezoneOffset() * 60000);
-             // - args.from_date.getTimezoneOffset() * 60000 - args.from_time.getTimezoneOffset() * 60000;
 
             to_datetime = (args.to_date.getTime() + args.to_time.getTime() - args.to_time.getTimezoneOffset() * 60000);
-             // - args.to_date.getTimezoneOffset() * 60000 - args.to_time.getTimezoneOffset() * 60000;
 
             return dojo11.xhrPost( {
                 url: "/api.shtml",
-                content: {v: "1.0", s_id: "maint_win", gid: that.group_id, sched: "true", st: from_datetime, et: to_datetime},
+                content: {v: "1.0", s_id: "maint_win", groupId: that.group_id, sched: "true", startTime: from_datetime, endTime: to_datetime},
                 handleAs: 'json',
                 load: function(data){
-    				//that.dialog.hide();
-                    if(data.error)
-                    {
-                        dojo11.byId('maintenance_status_' + that.group_id).innerHTML = that.messages.serverError;
-                        console.debug(data.error);
-                    }
-                    else 
+                    if(data && !data.error) 
                     {
                 		that.server_time = new Date(data.serverTime);
 
-                    	if((parseInt(data.st,10) != 0 && parseInt(data.et,10) != 0))
+                    	if((parseInt(data.startTime,10) != 0 && parseInt(data.endTime,10) != 0))
                     	{
-	                        that.existing_schedule.from_time = parseInt(data.st,10);
-	                        that.existing_schedule.to_time = parseInt(data.et,10);
+	                        that.existing_schedule.from_time = parseInt(data.startTime,10);
+	                        that.existing_schedule.to_time = parseInt(data.endTime,10);
 	
 	                        that.selected_from_time = new Date(that.existing_schedule.from_time);
 	                        that.selected_to_time = new Date(that.existing_schedule.to_time);
@@ -2242,9 +2224,15 @@ hyperic.maintenance_schedule = function(group_id) {
 	                        that.redraw(false, that.messages.currentSchedule, that.messages.success);
                     	}
                     }
+                    else
+                    {
+                    	that.displayError(that.messages.serverError);
+                        console.debug(data.error);
+                    }                    	
                 },
                 error: function(data){
-                    console.debug("An error occurred setting maintenance schedule for group " + that.group_id, data);
+                	that.displayError(that.messages.serverError);
+                	console.debug("An error occurred setting maintenance schedule for group " + that.group_id, data);
                 },
                 timeout: 2000
             });
@@ -2254,19 +2242,23 @@ hyperic.maintenance_schedule = function(group_id) {
     that.clear_schedule_action = function() {
         return dojo11.xhrPost( {
             url: "/api.shtml",
-            content: {v: "1.0", s_id: "maint_win", gid: that.group_id, sched: "false"},
+            content: {v: "1.0", s_id: "maint_win", groupId: that.group_id, sched: "false"},
             handleAs: 'json',
             load: function(data){
-				//that.dialog.hide();
-                if(!data.error)
+                if(data && !data.error)
                 {
             		that.server_time = new Date(data.serverTime);
                 	that.resetSchedule();
 					that.redraw(false, that.messages.noSchedule, that.messages.success);
 				}
+                else
+                {
+                	that.displayError(that.messages.serverError);                	
+                }
             },
             error: function(data){
-                console.debug("An error occurred clearing maintenance schedule for group " + that.group_id, data);
+            	that.displayError(that.messages.serverError);
+            	console.debug("An error occurred clearing maintenance schedule for group " + that.group_id, data);
             },
             timeout: 2000
         });
@@ -2275,7 +2267,7 @@ hyperic.maintenance_schedule = function(group_id) {
     that.getSchedule = function() {
         return dojo11.xhrGet( {
             url: "/api.shtml",
-            content: {v: "1.0", s_id: "maint_win", gid: that.group_id},
+            content: {v: "1.0", s_id: "maint_win", groupId: that.group_id},
             handleAs: 'json',
             preventCache: true,
             load: function(data){
@@ -2284,15 +2276,20 @@ hyperic.maintenance_schedule = function(group_id) {
             		that.server_time = new Date(data.serverTime);
             		that.canSchedule = data.permission;
                 	                	
-            		if(parseInt(data.st,10) != 0 && parseInt(data.et,10) != 0)
+            		if(parseInt(data.startTime,10) != 0 && parseInt(data.endTime,10) != 0)
                 	{
-                    	that.existing_schedule.from_time = parseInt(data.st,10);
-                    	that.existing_schedule.to_time = parseInt(data.et,10);
+                    	that.existing_schedule.from_time = parseInt(data.startTime,10);
+                    	that.existing_schedule.to_time = parseInt(data.endTime,10);
 
                     	that.selected_from_time = new Date(that.existing_schedule.from_time);
                     	that.selected_to_time = new Date(that.existing_schedule.to_time);
                     	                    
                     	that.redraw(true, that.messages.currentSchedule);
+                    	
+                        if(data.state == 'running')
+                    	{
+                    		that.displayError(that.messages.runningSchedule);
+                    	}
                 	} 
         			else
         			{
@@ -2300,8 +2297,15 @@ hyperic.maintenance_schedule = function(group_id) {
                     	that.redraw(true, that.messages.noSchedule);        			
         			}
                 }
+                else
+                {
+                    that.resetSchedule();
+                	that.redraw(true, "&nbsp;");        			
+                	that.displayError(that.messages.serverError);
+                }
             },
             error: function(data){
+            	that.displayError(that.messages.serverError);
             	console.debug("An error occurred fetching maintenance schedule for group " + that.group_id, data);
             },
             timeout: 2000
@@ -2373,7 +2377,14 @@ hyperic.maintenance_schedule = function(group_id) {
     	}
     };
     
-    that.redraw = function(show, scheduleStatus, requestStatus)
+    that.displayError = function(msg)
+    {
+		that.message_area.request_status.className = 'warningPanel';
+		that.message_area.request_status.innerHTML = msg;
+		that.message_area.request_status.style.display = '';   	
+    }
+    
+    that.redraw = function(show, scheduleStatus, confirmationStatus)
     {    	
     	that.deleteConstraints();
     	
@@ -2415,9 +2426,10 @@ hyperic.maintenance_schedule = function(group_id) {
         
     	that.message_area.schedule_status.innerHTML = scheduleStatus;
 
-    	if (requestStatus)
+    	if (confirmationStatus)
     	{
-    		that.message_area.request_status.innerHTML = requestStatus;
+    		that.message_area.request_status.className = 'confirmationPanel';
+    		that.message_area.request_status.innerHTML = confirmationStatus;
     		that.message_area.request_status.style.display = '';
     	}
     	else
