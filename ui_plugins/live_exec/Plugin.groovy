@@ -17,7 +17,7 @@ class Plugin extends HQUPlugin {
         super.initialize(pluginDir)
         addView(description:  'LiveExec',
                 attachType:   'resource',
-                toRoot:       true,
+                toRoot:       false,
                 platforms:    'all',
                 byPlugin:     'system',
                 controller:   LiveController,
