@@ -37,7 +37,7 @@ class AlertController
     
     private final ALERT_TABLE_SCHEMA = [
         getData: {pageInfo, params -> 
-            def alertTime = params.getOne('alertTime', "${now}").toLong()
+            def alertTime = params.getOne('alertTime', "86400000").toLong()
             def show      = params.getOne('show', "all")
             def group     = params.getOne('group', "0")
             alertHelper.findAlerts(getPriority(params), alertTime, now,
@@ -80,7 +80,7 @@ class AlertController
     
     private final GALERT_TABLE_SCHEMA = [
         getData: {pageInfo, params -> 
-            def alertTime = params.getOne('alertTime', "${now}").toLong()
+            def alertTime = params.getOne('alertTime', "86400000").toLong()
             def show      = params.getOne('show', "all")
             def group     = params.getOne('group', "0")
             alertHelper.findGroupAlerts(getPriority(params), alertTime,
@@ -225,7 +225,7 @@ class AlertController
     ]
 
     private getLastDays() {
-        def res = [[code:System.currentTimeMillis(), value:localeBundle.AllTime]]
+        def res = []
 
         for (i in 1..7) {
             def val
@@ -238,6 +238,7 @@ class AlertController
             }
             res << [code:i * 24 * 60 * 60 * 1000, value:val]    
         }
+        res << [code:System.currentTimeMillis(), value:localeBundle.AllTime]
         res
     }
 
