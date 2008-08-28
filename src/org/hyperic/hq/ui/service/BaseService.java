@@ -27,8 +27,6 @@ public abstract class BaseService implements IEngineService {
     public static final String PARAM_PAGE_NUM = "p";
     
     public static final String PARAM_SERVICE_VERSION = "v";
-
-    public static final String PARAM_GROUP_ID = "gid";
     
     public static final String PARAM_PLATFORM_ID = "pid";
         
@@ -39,10 +37,6 @@ public abstract class BaseService implements IEngineService {
     public static final String PARAM_METRIC_TEMPLATE_ID = "mtid";
 
     public static final String PARAM_SERVICE_ID = "s_id";
-    
-    public static final String PARAM_START_TIME = "st";
-    
-    public static final String PARAM_END_TIME = "et";
     
     public static final String PARAM_TIME_RANGE = "tr";
     

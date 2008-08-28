@@ -29,10 +29,14 @@ import java.util.Date;
 import java.util.ResourceBundle;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.TrackEvent;
+import org.hyperic.util.json.JSON;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 
@@ -40,10 +44,12 @@ import org.quartz.JobDetail;
  * Value object for scheduled maintenance events
  */
 public class MaintenanceEvent extends ResourceLogEvent
+	implements JSON
 {
     private static final String BUNDLE = "org.hyperic.hq.events.Resources";
     
-    // Constants for Quartz Job
+    // Constants for REST Service and Quartz Job
+    private static final String OBJECT_NAME = "MaintenanceEvent";
     public static final String GROUP_ID = "groupId";
     public static final String STATE = "state";
     public static final String START_TIME = "startTime";
@@ -146,15 +152,32 @@ public class MaintenanceEvent extends ResourceLogEvent
 			sb.append(", End Time: " + new Date(_endTime));
 			sb.append("]");
     	} else {
-    		sb.append("MaintenanceEvent");
-			sb.append("[groupId=" + getGroupId());
-			sb.append(",state=" + _state);
-			sb.append(",startTime=" + new Date(_startTime));
-			sb.append(",endTime=" + new Date(_endTime));
-			sb.append(",modifiedTime=" + new Date(_modifiedTime));
-			sb.append(",modifiedBy=" + _authzName);
+    		sb.append(OBJECT_NAME);
+			sb.append("[" + GROUP_ID + "=" + getGroupId());
+			sb.append("," + STATE + "=" + _state);
+			sb.append("," + START_TIME + "=" + new Date(_startTime));
+			sb.append("," + END_TIME + "=" + new Date(_endTime));
+			sb.append("," + MODIFIED_TIME + "=" + new Date(_modifiedTime));
+			sb.append("," + MODIFIED_BY + "=" + _authzName);
 			sb.append("]");
     	}
     	return sb.toString();
+    }
+    
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();     
+    	try {
+    		json.put(GROUP_ID, getGroupId())
+            	.put(STATE, getState())
+            	.put(START_TIME, getStartTime())
+            	.put(END_TIME, getEndTime());  
+        } catch (JSONException e) {
+            throw new SystemException(e);
+        }
+        return json;
+    }
+
+    public String getJsonName() {
+    	return OBJECT_NAME;
     }
 }

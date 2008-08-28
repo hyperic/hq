@@ -429,9 +429,9 @@ public class RESTService extends BaseService {
      * @return the service JSON response
      */
     private String serviceMaintenanceWindowWidget(IRequestCycle cycle) {
-    	String groupIdParam  = cycle.getParameter(PARAM_GROUP_ID);
-        String startTimeParam = cycle.getParameter(PARAM_START_TIME);
-        String endTimeParam = cycle.getParameter(PARAM_END_TIME);
+    	String groupIdParam  = cycle.getParameter(MaintenanceEvent.GROUP_ID);
+        String startTimeParam = cycle.getParameter(MaintenanceEvent.START_TIME);
+        String endTimeParam = cycle.getParameter(MaintenanceEvent.END_TIME);
         String scheduleParam = cycle.getParameter(PARAM_SCHEDULE);
 
         // Get the AuthzSubject
@@ -469,9 +469,7 @@ public class RESTService extends BaseService {
             }
             
             if (event != null) {
-            	jRes.put(PARAM_GROUP_ID, event.getGroupId())
-					.put(PARAM_START_TIME, event.getStartTime())
-					.put(PARAM_END_TIME, event.getEndTime());
+            	jRes = event.toJSON();
             	
             	boolean canSchedule = PermissionManagerFactory.getInstance()
             									.getMaintenanceEventManager()
