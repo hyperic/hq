@@ -85,7 +85,7 @@ public class ViewAction extends TilesAction {
 	            DashboardUtils.verifyResources(key, ctx, userPrefs, user);
 	            list = getStuff(key, boss, user, userPrefs);
 	        }
-	
+	        
 	        context.putAttribute("resources", list);
         }else{
         	context.putAttribute("resources", new ArrayList());
@@ -103,7 +103,6 @@ public class ViewAction extends TilesAction {
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
         arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
 
-        return boss.findByIds(user.getSessionId().intValue(), arrayIds,
-                              PageControl.PAGE_ALL);
+        return boss.findByIds(user.getSessionId().intValue(), arrayIds, null);
     }
 }
