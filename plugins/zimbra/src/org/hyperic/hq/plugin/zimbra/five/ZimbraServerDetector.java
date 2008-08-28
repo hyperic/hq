@@ -49,7 +49,7 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 
 					ServerResource server = new ServerResource();
 					server.setType(this);
-					server.setName(getPlatformName() + " " + this.getName());
+					server.setName(getPlatformName() + " " + getTypeInfo().getName());
 					server.setInstallPath(path);
 					server.setIdentifier("zimbra " + path);
 
