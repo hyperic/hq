@@ -1304,7 +1304,9 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     this.click_remove_btn = function(e)
     {
         that.pauseCharts();
-        that.chart.cleanup();
+        if (that.chart != null) {
+            that.chart.cleanup();
+        }
         hyperic.dashboard.widget.click_remove_btn.apply(that);
     };
 
@@ -1408,7 +1410,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             next = chartId;
         }
 
-        if(that.chart !== null)
+        if(that.chart != null)
         {
             that.chart.cleanup();
         }
@@ -1574,7 +1576,9 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     {
         if(that.showing == 'content')
         {
-            that.chart.cleanup();
+            if (that.chart != null) {
+                that.chart.cleanup();
+            }
             dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 150;
             that.chart = new hyperic.widget.Chart('chart_container', that.charts[that.currentChartId]);
             that.needsResize = false;
