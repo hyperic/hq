@@ -97,14 +97,12 @@ hyperic.utils.addKeyListener = function(/*Node*/node, /*Object*/ keyComb, /*Stri
     this.canceled = false;
     this.keyListener = function(e){
         if(e && e.keyCode == this.keyComb.keyCode && !this.canceled){
-            if(this.keyComb.ctrl || this.keyComb.alt || this.keyComb.shift){
-                if(e.ctrlKey || e.altKey || e.shiftKey){
-                    this.publish(e);
-                }else{
-                    return;
-                }
+            if((this.keyComb.ctrl && e.ctrlKey)
+            		|| (this.keyComb.alt && e.altKey)
+            		|| (this.keyComb.shift && e.shiftKey)){
+            	this.publish(e);
             }else{
-                this.publish(e);
+            	return;
             }
         }
     };
@@ -2365,7 +2363,8 @@ hyperic.maintenance_schedule = function(group_id, group_name) {
     		
     		if(that.inputs.from_date.getValue().getTime() == that.inputs.to_date.getValue().getTime())
     		{
-				if(that.inputs.from_time.getValue().getTime() > curtime.getTime())
+				if((that.inputs.from_time.getValue().getTime() > curtime.getTime())
+						|| (that.inputs.from_date.getValue().getTime() > curdate.getTime()))
 				{
 					that.inputs.to_time.constraints.min = new Date(that.inputs.from_time.getValue().getTime() + 60000);
 				}
