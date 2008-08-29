@@ -99,7 +99,7 @@ a:visited,a:hover,a {
     cursor: pointer
 }
 
-#headerSearchBox input[type=text] {
+#headerSearchBox #searchBox {
     color: gray;
     padding: 1px 30px 1px 0px;
     width: 248px
