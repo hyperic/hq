@@ -91,19 +91,24 @@ hyperic.utils.getUniqueId = function(/*String*/ prefix){
  * which registers a 'ctrl-s' key listener on the window
  */
 hyperic.utils.addKeyListener = function(/*Node*/node, /*Object*/ keyComb, /*String*/topic){
-    this.node = node;
+	this.node = node;
     this.keyComb = keyComb;
     this.topic = topic;
     this.canceled = false;
     this.keyListener = function(e){
-        if(e && e.keyCode == this.keyComb.keyCode && !this.canceled){
-            if((this.keyComb.ctrl && e.ctrlKey)
-            		|| (this.keyComb.alt && e.altKey)
-            		|| (this.keyComb.shift && e.shiftKey)){
-            	this.publish(e);
+        if(!e) { e = window.event; }
+        if(e.keyCode == this.keyComb.keyCode && !this.canceled){
+            if(this.keyComb.ctrl || this.keyComb.alt || this.keyComb.shift){
+                if((this.keyComb.ctrl && e.ctrlKey)
+                		|| (this.keyComb.alt && e.altKey)
+                		|| (this.keyComb.shift && e.shiftKey)){
+                    this.publish(e);
+                }else{
+                    return;
+                }
             }else{
-            	return;
-            }
+                this.publish(e);
+            }            
         }
     };
     this.publish = function(e){
@@ -189,7 +194,7 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
         this.nodeCancel         = dojo.byId('searchClose');
         this.nodeSearchButton   = dojo.byId("headerSearch");
         //Set up the key listeners for the search feature
-        this.listeners.push( new hyperic.utils.addKeyListener(window, this.keyCode, 'search') );
+        this.listeners.push( new hyperic.utils.addKeyListener(window.document, this.keyCode, 'search') );
         this.listeners.push( new hyperic.utils.addKeyListener(this.searchContainer, {keyCode: 13}, 'enter') );
         this.listeners.push( new hyperic.utils.addKeyListener(dojo.byId('header'), {keyCode: 27}, 'escape') );
     };

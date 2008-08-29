@@ -57,7 +57,12 @@
         dojo11.subscribe('enter', searchWidget, "search");
         dojo.event.topic.subscribe('search', searchWidget, "toggleSearchBox");
         dojo.event.topic.subscribe('escape', searchWidget, "toggleSearchBox");
-        
+        // Render Search Tooltip
+        if (dojo.render.os.mac) {
+            dojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.mac"/>";
+        } else if (dojo.render.os.win) {
+            dojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.win"/>";
+        }
     });
     
       <!--
