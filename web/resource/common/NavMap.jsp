@@ -37,7 +37,7 @@
       <c:when test="${xlib}">
 <script src="<html:rewrite page="/js/"/>effects.js" type="text/javascript"></script>
 <c:set var="imageWidth" value="800"/>
-<div class="navMap" onclick="toggleMenu('diagramDiv');">
+<div class="navMap" onclick="toggleDiagram('diagramdiv');">
 <hq:navMap areasVar="mapAreas" areasSizeVar="mapAreasSize" imageWidth="${imageWidth}"/>
 
 <map name="diagram">
@@ -70,9 +70,9 @@
 </c:forEach>
 </map>
 
-      <span id="mapMenuSpan">Map<img border="0" src="/images/arrow_dropdown.gif"/></span>
+      <span id="mapMenuSpan"><fmt:message key="resource.navmap.linktext"/><img border="0" src="/images/arrow_dropdown.gif"/></span>
       <div style="clear: all"></div>
-      <div id="diagramDiv" style="position: absolute; display: none;">
+      <div id="diagramdiv">
         <span>
           <html:img imageName="navMapImage" page="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}" alt="" border="0" usemap="#diagram" />
         </span>
