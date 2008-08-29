@@ -315,16 +315,26 @@ public class MetricSessionEJB extends BizappSessionEJB {
             new CritterTranslationContext(subject);
         
         for (int i = 0; i < aids.length; i++) {
-            Resource r = rman.findResource(aids[i]);
-            List critters = new ArrayList(1);
-            critters.add(descType.newInstance(r, proto));
-            CritterList cList = new CritterList(critters, false);
-            
-            List children = trans.translate(ctx, cList).list();
-            for (Iterator j=children.iterator(); j.hasNext(); ) {
-                Resource child = (Resource)j.next();
-                
-                res.add(new AppdefEntityID(child));
+            if (aids[i].isApplication()) {
+                AppdefEntityValue rv = new AppdefEntityValue(aids[i], subject);
+                Collection services = rv.getAssociatedServices(ctype.getId(),
+                                                               PageControl.PAGE_ALL);
+                for (Iterator it = services.iterator(); it.hasNext();) {
+                    AppdefResourceValue r = (AppdefResourceValue) it.next();
+                    res.add(r.getEntityId());
+                }
+            }
+            else {
+                Resource r = rman.findResource(aids[i]);
+                List critters = new ArrayList(1);
+                critters.add(descType.newInstance(r, proto));
+                CritterList cList = new CritterList(critters, false);
+
+                List children = trans.translate(ctx, cList).list();
+                for (Iterator j=children.iterator(); j.hasNext(); ) {
+                    Resource child = (Resource)j.next();                
+                    res.add(new AppdefEntityID(child));
+                }
             }
         }
         return res;
