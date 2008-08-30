@@ -254,6 +254,9 @@
          <property name="guestOS"
                    description="Guest OS"/>
 
+         <property name="version"
+                   description="VM Version"/>
+
          <property name="ip"
                    description="IP Address"/>
 
