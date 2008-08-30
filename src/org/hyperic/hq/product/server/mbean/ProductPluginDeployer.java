@@ -26,6 +26,7 @@
 package org.hyperic.hq.product.server.mbean;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -39,6 +40,8 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -59,6 +62,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.server.session.SystemAudit;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.hqu.rendit.RenditServer;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
@@ -97,6 +101,7 @@ public class ProductPluginDeployer
     private static final String READY_ATTR = "Ready";
     private static final String PRODUCT = "HQ";
     private static final String PLUGIN_DIR = "hq-plugins";
+    private static final String HQU = "hqu";
 
     private static final HQApp _app = HQApp.getInstance();
 
@@ -108,7 +113,8 @@ public class ProductPluginDeployer
     private ObjectName           _readyMgrName;
     private ObjectName           _serverName;
     private String               _pluginDir = PLUGIN_DIR;
-    
+    private String               _hquDir;
+
     private NotificationBroadcasterSupport _broadcaster =
         new NotificationBroadcasterSupport();
 
@@ -147,15 +153,20 @@ public class ProductPluginDeployer
 
     public ProductPluginDeployer() {
         super();
-    
+
+        //XXX un-hardcode these paths.
+        String ear =
+            System.getProperty("jboss.server.home.dir") +
+            "/deploy/hq.ear";
+
         //native libraries are deployed into another directory
         //which is not next to sigar.jar, so we drop this hint
         //to find it.
         System.setProperty("org.hyperic.sigar.path",
-                           System.getProperty("jboss.server.home.dir") +
-                           //XXX un-hardcode this path.
-                           "/deploy/hq.ear/sigar_bin/lib");
+                           ear + "/sigar_bin/lib");
         
+        _hquDir = ear + "/hq.war/" + HQU;
+
         // Initialize database
         DatabaseInitializer.init();
         
@@ -743,6 +754,60 @@ public class ProductPluginDeployer
         _plugins.clear();
     }
 
+    private void unpackJar(URL url, File destDir, String prefix)
+        throws Exception {
+
+        JarFile jar = new JarFile(url.getFile());
+        try {
+            for (Enumeration e=jar.entries(); e.hasMoreElements();) {
+                JarEntry entry = (JarEntry)e.nextElement();
+                String name = entry.getName();
+
+                if (name.startsWith(prefix)) {
+                    name = name.substring(prefix.length());
+                    if (name.length() == 0) {
+                        continue;
+                    }
+                    File file = new File(destDir, name);
+                    if (entry.isDirectory()) {
+                        file.mkdirs();
+                    }
+                    else {
+                        FileUtil.copyStream(jar.getInputStream(entry),
+                                            new FileOutputStream(file));
+                    }
+                }
+            }
+        } finally {
+            jar.close();
+        }
+    }
+
+    private void deployHqu(String plugin, DeploymentInfo di)
+        throws Exception {
+
+        final String prefix = HQU + "/";
+        URL hqu = di.localCl.findResource(prefix);
+        if (hqu == null) {
+            return;
+        }
+        File destDir = new File(_hquDir, plugin);
+        boolean exists = destDir.exists();
+        _log.info("Deploying " + plugin + " " +
+                  HQU + " to: " + destDir);
+
+        unpackJar(di.url, destDir, prefix);
+
+        RenditServer rendit = RenditServer.getInstance();
+        if (rendit.getSysDir() != null) { //rendit.isReady() ?
+            if (exists) {
+                //update ourselves to avoid having to delete,sleep,unpack
+                rendit.removePluginDir(destDir.getName());
+                rendit.addPluginDir(destDir);
+            } //else Rendit watcher will deploy the new plugin
+        }        
+    }
+
     public void start(DeploymentInfo di)
         throws DeploymentException 
     {
@@ -767,6 +832,13 @@ public class ProductPluginDeployer
         }
         else {
             _plugins.add(plugin);
+        }
+
+        try {
+            deployHqu(plugin, di);
+        } catch (Exception e) {
+            throw new DeploymentException("Failed to deploy " +
+                                          plugin + " " + HQU + ": " + e, e);
         }
     }
 
