@@ -161,7 +161,8 @@ public class MySQLMeasurementPlugin
                 return new MetricValue(Metric.AVAIL_DOWN, now);
             } else {
                 String msg = "Query failed for " + alias +
-                    ": " + e.getMessage();
+                    ": " + e.getMessage() + " (hint: database may be down or " +
+                    " the user is not setup correctly)";
                 throw new MetricUnreachableException(msg, e);
             }
         } finally {
