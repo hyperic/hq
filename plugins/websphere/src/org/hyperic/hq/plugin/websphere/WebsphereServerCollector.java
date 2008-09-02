@@ -27,12 +27,16 @@ package org.hyperic.hq.plugin.websphere;
 
 import javax.management.j2ee.statistics.Stats;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
 
 import com.ibm.websphere.management.AdminClient;
 
 public class WebsphereServerCollector extends WebsphereCollector {
 
+    private static final Log _log =
+        LogFactory.getLog(WebsphereServerCollector.class.getName());
     private boolean isJVM;
     private String[][] attrs;
 
@@ -73,8 +77,15 @@ public class WebsphereServerCollector extends WebsphereCollector {
                                      "j2eeType=JTAResource," +
                                      getServerAttributes());
 
-            this.name = resolve(mServer, this.name);
-            this.attrs = TX_ATTRS;
+            try {
+                this.name = resolve(mServer, this.name);
+                this.attrs = TX_ATTRS;
+            } catch (PluginException e) {
+                //ok in the case of networkdeployer/nodeagent;
+                //where there is no TransactionService
+                _log.debug(this.name + ": " + e.getMessage());
+                this.name = null;
+            }
         }
         else if (module.equals("servletSessionsModule")) {
             this.name = null; //XXX
