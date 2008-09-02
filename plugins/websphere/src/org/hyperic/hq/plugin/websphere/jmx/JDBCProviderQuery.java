@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.plugin.websphere.jmx;
 
+import javax.management.ObjectName;
+
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
 
 public class JDBCProviderQuery extends WebSphereQuery {
@@ -47,5 +49,17 @@ public class JDBCProviderQuery extends WebSphereQuery {
         return new String[] {
             "implementationClassName"   
         };
+    }
+
+    //see comments in ConnectionPoolCollector
+    public boolean apply(ObjectName name) {
+        String server = name.getKeyProperty("Server");
+        String id = name.getKeyProperty("mbeanIdentifier");
+        if ((server == null) || (id == null)) {
+            return super.apply(name);
+        }
+        else {
+            return id.indexOf(server) != -1;
+        }
     }
 }

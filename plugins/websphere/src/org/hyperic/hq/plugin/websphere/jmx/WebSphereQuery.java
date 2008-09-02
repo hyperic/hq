@@ -74,6 +74,10 @@ public class WebSphereQuery {
         return query;
     }
 
+    public boolean apply(ObjectName name) {
+        return true;
+    }
+
     public String getResourceType() {
         return null;
     }

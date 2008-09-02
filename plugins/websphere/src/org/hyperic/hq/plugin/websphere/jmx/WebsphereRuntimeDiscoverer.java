@@ -103,6 +103,9 @@ public class WebsphereRuntimeDiscoverer {
              it.hasNext();) 
         {
             ObjectName obj = (ObjectName)it.next();
+            if (!query.apply(obj)) {
+                continue;
+            }
             WebSphereQuery type = query.cloneInstance();
             type.setName(obj.getKeyProperty("name"));
             type.setObjectName(obj);

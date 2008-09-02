@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.websphere;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.management.ObjectName;
@@ -63,7 +64,7 @@ public class ConnectionPoolCollector extends WebsphereCollector {
             throw new PluginException(msg, e);
         }
 
-        if ((beans.size() == 0) || (beans.size() > 2)) {
+        if (beans.size() == 0) {
             String msg =
                 name + " query returned " +
                 beans.size() + " results";
@@ -76,19 +77,21 @@ public class ConnectionPoolCollector extends WebsphereCollector {
             return fullName;
         }
         else {
-            //XXX seen in samples, two beans where all attributes are equal
-            //with the exception of mbeanIdentifier
-            String id = fullName.getKeyProperty("mbeanIdentifier");
-            if (id != null) {
-                if (id.indexOf(getServerName()) != -1) {
-                    return fullName;
-                }
-                else {
-                    return (ObjectName)beans.iterator().next();
+            for (Iterator it=beans.iterator(); it.hasNext();) {
+                //XXX seen in samples, two beans where all attributes are equal
+                //with the exception of mbeanIdentifier
+                String id = fullName.getKeyProperty("mbeanIdentifier");
+                if (id != null) {
+                    if (id.indexOf(getServerName()) != -1) {
+                        return fullName;
+                    }
                 }
             }
+            String msg =
+                name + " query returned " +
+                beans.size() + " results";
+            throw new PluginException(msg);
         }
-        throw new PluginException("Failed to resolve: " + name);
     }
 
     protected void init(AdminClient mServer) throws PluginException {
