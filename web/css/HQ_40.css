@@ -1496,7 +1496,7 @@ visibility: hidden;*/
     -moz-box-orient: vertical
 }
 
-.dijitDialog .warningPanel{
+.dijitDialog .errorPanel{
 	color: red;
 	text-align: left;	
     padding: 3px 5px 3px 27px;
@@ -1504,6 +1504,18 @@ visibility: hidden;*/
     border: 1px solid red;
 	background-color: #FFF;
 	background-image: url('/images/4.0/icons/exclamation.png');
+	background-repeat: no-repeat;
+	background-position: 5px 45%;
+}
+
+.dijitDialog .warningPanel{
+	color: red;
+	text-align: left;	
+    padding: 3px 5px 3px 27px;
+	margin: 5px auto;
+    border: 1px solid #F96115;
+	background-color: #FFF;
+	background-image: url('/images/tt_error.gif');
 	background-repeat: no-repeat;
 	background-position: 5px 45%;
 }
