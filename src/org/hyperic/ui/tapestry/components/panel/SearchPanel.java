@@ -30,7 +30,7 @@ public abstract class SearchPanel extends BaseComponent{
      * The JSON object that specifies 
      * @return the hotkey combination
      */
-    @Parameter(name = "hotKey", defaultValue = "literal:{keyCode: 83, ctrl: true}")
+    @Parameter(name = "hotKey", defaultValue = "literal: {keyCode: 83, ctrl: true, alt: true}")
     public abstract String getHotkey();
     public abstract void setHotkey(String hotKey);
 
