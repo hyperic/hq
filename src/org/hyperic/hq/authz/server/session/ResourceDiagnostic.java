@@ -83,12 +83,15 @@ class ResourceDiagnostic implements DiagnosticObject {
         try {
             conn = getConnection();
             SQLDiagnosticEngine engine = SQLDiagnosticEngine.getInstance(conn);
-            SQLDiagnosticsFactory orphanedResourcesFactory = OrphanedResourceSQLDiagnosticsFactory.getInstance(conn);
-            SQLDiagnosticsFactory orphanedAppdefFactory = OrphanedAlertdefSQLDiagnosticsFactory.getInstance(conn);
-            
-            rslt.append(getDetailedStatus(orphanedResourcesFactory, conn, engine));
-            rslt.append(getDetailedStatus(orphanedAppdefFactory, conn, engine));
-
+            rslt.append(getDetailedStatus(
+                OrphanedResourceSQLDiagnosticsFactory.getInstance(conn),
+                conn, engine));
+            rslt.append(getDetailedStatus(
+                OrphanedAlertdefSQLDiagnosticsFactory.getInstance(conn),
+                conn, engine));
+            rslt.append(getDetailedStatus(
+                TypeAlertdefTriggersSQLDiagnosticsFactory.getInstance(conn),
+                conn, engine));
         } catch (SQLException e) {
             _log.error("Failed to get SQL diagnostics: ", e);
         } finally {

@@ -471,6 +471,11 @@ class HealthController
                     DBUtil.getBooleanValue(true, conn)+" and enabled="+
                     DBUtil.getBooleanValue(false, conn)+" and deleted="+
                     DBUtil.getBooleanValue(false, conn)}],
+          resourceAlertDefsActiveButDisabled: [ 
+             name: localeBundle['queryResourceAlertDefsActiveButDisabled'], 
+             query: {conn -> "select id, name, description, resource_id " +
+                             "from EAM_ALERT_DEFINITION where " +
+                             "parent_id = 0 and act_on_trigger_id is not null"}],
           version: [ 
               name: localeBundle['queryVersion'],     
                query:  {conn -> getDatabaseVersionQuery(conn)}],
