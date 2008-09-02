@@ -36,262 +36,262 @@ public  class OrphanedResourceSQLDiagnosticsFactory implements SQLDiagnosticsFac
     
     private static final String[] ORPHANED_RESOURCE_FIX_QUERY =  {
         
-        "DELETE FROM eam_resource_group " +
-        "WHERE id NOT IN (SELECT resource_group_id " +
-        "FROM eam_res_grp_res_map)",
+        "DELETE FROM EAM_RESOURCE_GROUP " +
+        "WHERE ID NOT IN (SELECT RESOURCE_GROUP_ID " +
+        "FROM EAM_RES_GRP_RES_MAP)",
         
-        "DELETE FROM eam_res_grp_res_map " +
-        "WHERE resource_group_id NOT IN (SELECT id " +
-        "FROM eam_resource_group)",
+        "DELETE FROM EAM_RES_GRP_RES_MAP " +
+        "WHERE RESOURCE_GROUP_ID NOT IN (SELECT ID " +
+        "FROM EAM_RESOURCE_GROUP)",
         
-        "DELETE FROM eam_res_grp_res_map " +
-        "WHERE resource_id IN (SELECT id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service))",
+        "DELETE FROM EAM_RES_GRP_RES_MAP " +
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE))",
         
-        "DELETE FROM eam_service " +
-        "WHERE id NOT IN (SELECT instance_id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 305)",
+        "DELETE FROM EAM_SERVICE " +
+        "WHERE ID NOT IN (SELECT INSTANCE_ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305)",
         
         "DELETE FROM EAM_ROLE " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service))",
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE))",
         
         "DELETE FROM EAM_SUBJECT " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service))",
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE))",
         
         "DELETE FROM EAM_RESOURCE_TYPE " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service))",
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE))",
         
         "DELETE FROM EAM_RESOURCE_GROUP " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service))",
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE))",
         
         "DELETE FROM EAM_AUDIT " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service))",
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE))",
         
         "DELETE FROM EAM_ALERT_DEFINITION " +
-        "WHERE resource_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service))",
+        "WHERE RESOURCE_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE))",
         
         "DELETE FROM EAM_RESOURCE_EDGE " +
-        "WHERE from_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service))",
+        "WHERE FROM_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE))",
         
         "DELETE FROM EAM_RESOURCE_EDGE " +
-        "WHERE to_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service))",
+        "WHERE TO_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE))",
         
         "DELETE FROM EAM_MEASUREMENT " +
-        "WHERE resource_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service))",
+        "WHERE RESOURCE_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE))",
         
-        "DELETE FROM eam_resource " +
-        "WHERE resource_type_id = 305 " +
+        "DELETE FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305 " +
         "AND NOT NAME = (SELECT NAME " +
-        "FROM eam_service s " +
-        "WHERE s.id = instance_id)",
+        "FROM EAM_SERVICE S " +
+        "WHERE S.ID = INSTANCE_ID)",
         
-        "DELETE FROM eam_resource " +
-        "WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service)",
+        "DELETE FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE)",
         
-        "DELETE FROM eam_res_grp_res_map " +
-        "WHERE resource_id IN (SELECT id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server))",
+        "DELETE FROM EAM_RES_GRP_RES_MAP " +
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER))",
         
-        "DELETE FROM eam_server " +
-        "WHERE id NOT IN (SELECT instance_id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 303)",
+        "DELETE FROM EAM_SERVER " +
+        "WHERE ID NOT IN (SELECT INSTANCE_ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303)",
         
         "DELETE FROM EAM_ROLE " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server))",
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER))",
         
         "DELETE FROM EAM_SUBJECT " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server))",
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER))",
         
         "DELETE FROM EAM_RESOURCE_TYPE " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server))",
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER))",
         
         "DELETE FROM EAM_RESOURCE_GROUP " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server))",
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER))",
         
         "DELETE FROM EAM_AUDIT " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server))",
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER))",
         
         "DELETE FROM EAM_ALERT_DEFINITION " +
-        "WHERE resource_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server))",
+        "WHERE RESOURCE_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER))",
         
         "DELETE FROM EAM_RESOURCE_EDGE " +
-        "WHERE from_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server))",
+        "WHERE FROM_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER))",
         
         "DELETE FROM EAM_RESOURCE_EDGE " +
-        "WHERE to_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server))",
+        "WHERE TO_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER))",
         
         "DELETE FROM EAM_MEASUREMENT " +
-        "WHERE resource_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server))",
+        "WHERE RESOURCE_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER))",
         
-        "DELETE FROM eam_resource " +
-        "WHERE resource_type_id = 303 " +
+        "DELETE FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303 " +
         "AND NOT NAME = (SELECT NAME " +
-        "FROM eam_server s " +
-        "WHERE s.id = instance_id)",
+        "FROM EAM_SERVER S " +
+        "WHERE S.ID = INSTANCE_ID)",
         
-        "DELETE FROM eam_resource " +
-        "WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server)",
+        "DELETE FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER)",
         
-        "DELETE FROM eam_res_grp_res_map " +
-        "WHERE resource_id IN (SELECT id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_platform))",
+        "DELETE FROM EAM_RES_GRP_RES_MAP " +
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_PLATFORM))",
         
-        "DELETE FROM eam_platform " +
-        "WHERE id NOT IN (SELECT instance_id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 301)",
+        "DELETE FROM EAM_PLATFORM " +
+        "WHERE ID NOT IN (SELECT INSTANCE_ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301)",
         
         "DELETE FROM EAM_ROLE " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id " +
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
         "FROM EAM_PLATFORM))",
         
         "DELETE FROM EAM_SUBJECT " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id " +
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
         "FROM EAM_PLATFORM))",
         
         "DELETE FROM EAM_RESOURCE_TYPE " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id " +
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
         "FROM EAM_PLATFORM))",
         
         "DELETE FROM EAM_RESOURCE_GROUP " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id " +
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
         "FROM EAM_PLATFORM))",
         
         "DELETE FROM EAM_AUDIT " +
-        "WHERE resource_id in (SELECT id " +
-        "from EAM_RESOURCE " +
-        "WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id " +
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
         "FROM EAM_PLATFORM))",
         
         "DELETE FROM EAM_ALERT_DEFINITION " +
-        "WHERE resource_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id " +
+        "WHERE RESOURCE_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
         "FROM EAM_PLATFORM))",
         
         "DELETE FROM EAM_RESOURCE_EDGE " +
-        "WHERE from_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id " +
+        "WHERE FROM_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
         "FROM EAM_PLATFORM))",
         
         "DELETE FROM EAM_RESOURCE_EDGE " +
-        "WHERE to_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id " +
+        "WHERE TO_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
         "FROM EAM_PLATFORM))",
         
         "DELETE FROM EAM_MEASUREMENT " +
-        "WHERE resource_id in (SELECT id from " +
-        "EAM_RESOURCE WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id " +
+        "WHERE RESOURCE_ID IN (SELECT ID FROM " +
+        "EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
         "FROM EAM_PLATFORM))",
         
-        "DELETE FROM eam_resource " +
-        "WHERE resource_type_id = 301 " +
+        "DELETE FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301 " +
         "AND NOT NAME = (SELECT NAME " +
-        "FROM eam_platform p " +
-        "WHERE p.id = instance_id)",
+        "FROM EAM_PLATFORM P " +
+        "WHERE P.ID = INSTANCE_ID)",
         
-        "DELETE FROM eam_resource " +
-        "WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id "+
-        "FROM eam_platform)",
+        "DELETE FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID "+
+        "FROM EAM_PLATFORM)",
         
         "DELETE FROM EAM_RESOURCE_RELATION " +
-        "WHERE id not in (SELECT rel_id from " +
+        "WHERE ID NOT IN (SELECT REL_ID FROM " +
         "EAM_RESOURCE_EDGE)"
         
     };
@@ -299,80 +299,80 @@ public  class OrphanedResourceSQLDiagnosticsFactory implements SQLDiagnosticsFac
     private static final String[] ORPHANED_RESOURCE_TEST_QUERY =  {
         
         // platform checks
-        "SELECT * FROM eam_resource " +
-        "WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id "+
-        "FROM eam_platform)",
+        "SELECT * FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID "+
+        "FROM EAM_PLATFORM)",
         
-        "SELECT * FROM eam_resource " +
-        "WHERE resource_type_id = 301 " +
+        "SELECT * FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301 " +
         "AND NOT NAME = (SELECT NAME " +
-        "FROM eam_platform p " +
-        "WHERE p.id = instance_id)",
+        "FROM EAM_PLATFORM P " +
+        "WHERE P.ID = INSTANCE_ID)",
         
-        "SELECT * FROM eam_platform " +
-        "WHERE id NOT IN (SELECT instance_id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 301)",
+        "SELECT * FROM EAM_PLATFORM " +
+        "WHERE ID NOT IN (SELECT INSTANCE_ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301)",
         
-        "SELECT * FROM eam_res_grp_res_map " +
-        "WHERE resource_id IN (SELECT id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 301 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_platform))",
+        "SELECT * FROM EAM_RES_GRP_RES_MAP " +
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 301 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_PLATFORM))",
         
         // server checks
-        "SELECT * FROM eam_resource " +
-        "WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server)",
+        "SELECT * FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER)",
         
-        "SELECT * FROM eam_resource " +
-        "WHERE resource_type_id = 303 " +
+        "SELECT * FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303 " +
         "AND NOT NAME = (SELECT NAME " +
-        "FROM eam_server s " +
-        "WHERE s.id = instance_id)",
+        "FROM EAM_SERVER S " +
+        "WHERE S.ID = INSTANCE_ID)",
         
-        "SELECT * FROM eam_server " +
-        "WHERE id NOT IN (SELECT instance_id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 303)",
+        "SELECT * FROM EAM_SERVER " +
+        "WHERE ID NOT IN (SELECT INSTANCE_ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303)",
         
-        "SELECT * FROM eam_res_grp_res_map " +
-        "WHERE resource_id IN (SELECT id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 303 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_server))",
+        "SELECT * FROM EAM_RES_GRP_RES_MAP " +
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 303 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVER))",
         
         // service checks
-        "SELECT * FROM eam_resource " +
-        "WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service)",
+        "SELECT * FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE)",
         
-        "SELECT * FROM eam_resource " +
-        "WHERE resource_type_id = 305 " +
+        "SELECT * FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305 " +
         "AND NOT NAME = (SELECT NAME " +
-        "FROM eam_service s " +
-        "WHERE s.id = instance_id)",
+        "FROM EAM_SERVICE S " +
+        "WHERE S.ID = INSTANCE_ID)",
         
-        "SELECT * FROM eam_service " +
-        "WHERE id NOT IN (SELECT instance_id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 305)",
+        "SELECT * FROM EAM_SERVICE " +
+        "WHERE ID NOT IN (SELECT INSTANCE_ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305)",
         
-        "SELECT * FROM eam_res_grp_res_map " +
-        "WHERE resource_id IN (SELECT id " +
-        "FROM eam_resource " +
-        "WHERE resource_type_id = 305 " +
-        "AND instance_id NOT IN (SELECT id " +
-        "FROM eam_service))",
+        "SELECT * FROM EAM_RES_GRP_RES_MAP " +
+        "WHERE RESOURCE_ID IN (SELECT ID " +
+        "FROM EAM_RESOURCE " +
+        "WHERE RESOURCE_TYPE_ID = 305 " +
+        "AND INSTANCE_ID NOT IN (SELECT ID " +
+        "FROM EAM_SERVICE))",
         
-        "SELECT * FROM eam_res_grp_res_map " +
-        "WHERE resource_group_id NOT IN (SELECT id " +
-        "FROM eam_resource_group)",
+        "SELECT * FROM EAM_RES_GRP_RES_MAP " +
+        "WHERE RESOURCE_GROUP_ID NOT IN (SELECT ID " +
+        "FROM EAM_RESOURCE_GROUP)"
         
     };
     
