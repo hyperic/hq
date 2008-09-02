@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.hqagent;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +47,6 @@ public class AgentServerDetector
     
     private static final String UNAVAILABLE = "N/A";
     private static final String AGENT_BUNDLE_HOME = "agent.bundle.home";
-    private static final String BUNDLES_DIR = "bundles/";
 
     public AgentServerDetector(){
         super();
@@ -109,10 +109,12 @@ public class AgentServerDetector
         if (home == null) {
             return UNAVAILABLE;
         }
-        int index = home.indexOf(BUNDLES_DIR) + BUNDLES_DIR.length();
-        if (index < 0) {
+        File bundleDir = new File(home);
+        try {
+            return bundleDir.getCanonicalFile().getName();
+        }
+        catch (IOException e) {
             return UNAVAILABLE;
         }
-        return home.substring(index);
     }
 }
