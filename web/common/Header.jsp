@@ -100,7 +100,7 @@
         <c:set var="pageURL" value="${requestURL}"/>
         <ul class="adxm mainMenu" style="position: absolute; z-index: 10">
             <li id="dashTab"><a href="/Dashboard.do"><fmt:message key="header.dashboard"/></a></li>
-            <li id="resTab"><a href=""><fmt:message key="header.resources"/></a>
+            <li id="resTab"><a href="/ResourceHub.do"><fmt:message key="header.resources"/></a>
               <div>
               <ul>
                 <li><a href="<html:rewrite page="/ResourceHub.do"/>"><fmt:message key="header.Browse"/></a></li>
@@ -117,7 +117,7 @@
               </ul>
               </div>
             </li>
-            <li id="analyzeTab"><a href=""><fmt:message key="header.analyze"/></a>
+            <li id="analyzeTab"><a href="#"><fmt:message key="header.analyze"/></a>
               <div>
               <ul>
               <tiles:insert definition=".header.optional.tabs">
