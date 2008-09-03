@@ -59,14 +59,12 @@ public class ServerConfig extends BaseConfig {
     public static final String PN = PRODUCT;
 
     // database names that appear in the select list
-    public static final String DBC_ORA8    = "Oracle 8";
     public static final String DBC_ORA9    = "Oracle 9i/10g";
     public static final String DBC_PGSQL   = "PostgreSQL";
     public static final String DBC_BUILTIN = "HQ Built-in Database";
     public static final String DBC_MYSQL   = "MySQL 5.x";
     
     // database names we need to use internally
-    public static final String DB_ORA8  = "Oracle8";
     public static final String DB_ORA9  = "Oracle9i";
     public static final String DB_PGSQL = "PostgreSQL";
     public static final String DB_MYSQL = "MySQL";
@@ -301,13 +299,9 @@ public class ServerConfig extends BaseConfig {
 
         case 5:
             if (installMode.isOracle()) {
-                String defaultDB = DBC_ORA9;
-                String[] dbs = new String[] { DBC_ORA8, DBC_ORA9 };
                 schema.addOption(
-                    new EnumerationConfigOption("server.database.choice",
-                                                Q_DATABASE,
-                                                defaultDB,
-                                                dbs));
+                    new HiddenConfigOption("server.database.choice",
+                                           DBC_ORA9));
             } else if (installMode.isPostgres()) {
                 schema.addOption(
                     new HiddenConfigOption("server.database.choice",
@@ -323,9 +317,9 @@ public class ServerConfig extends BaseConfig {
             } else {
                 String defaultDB = haveBuiltinDB ? DBC_BUILTIN : DBC_ORA9;
                 String[] dbs = haveBuiltinDB
-                    ? new String[] { DBC_BUILTIN, DBC_ORA8, DBC_ORA9, 
+                    ? new String[] { DBC_BUILTIN, DBC_ORA9, 
                                      DBC_PGSQL, DBC_MYSQL }
-                    : new String[] { DBC_ORA8, DBC_ORA9, DBC_PGSQL, DBC_MYSQL };
+                    : new String[] { DBC_ORA9, DBC_PGSQL, DBC_MYSQL };
                 schema.addOption(
                     new EnumerationConfigOption("server.database.choice",
                                                 Q_DATABASE,
@@ -337,9 +331,7 @@ public class ServerConfig extends BaseConfig {
         case 6:
             // determine server.database from server.database.choice...
             dbChoiceStr = previous.getValue("server.database.choice");
-            if (dbChoiceStr.equals(DBC_ORA8))
-                dbChoice = DB_ORA8;
-            else if (dbChoiceStr.equals(DBC_ORA9))
+            if (dbChoiceStr.equals(DBC_ORA9))
                 dbChoice = DB_ORA9;
             else if (dbChoiceStr.startsWith(DBC_PGSQL))
                 dbChoice = DB_PGSQL;
@@ -356,7 +348,7 @@ public class ServerConfig extends BaseConfig {
             schema.addOption(new HiddenConfigOption("server.database",
                                                     dbChoice));
 
-            if (dbChoice.equals(DB_ORA8) || dbChoice.equals(DB_ORA9)) {
+            if (dbChoice.equals(DB_ORA9)) {
                 schema.addOption(new StringConfigOption("server.database-url",
                         StringUtil.replace(Q_JDBC_URL, "%%DBNAME%%",
                                            dbChoiceStr),
