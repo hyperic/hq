@@ -278,8 +278,10 @@
             </c:choose>
         
         
+          <c:if test="${ResourceHubForm.ff != GROUP}">
             <html:checkbox styleId="unavail" property="unavail" value="true"/>
             <label for="unavail"><fmt:message key="resource.hub.legend.unavailable"/></label>
+          </c:if>
             <html:checkbox styleId="own" property="own" value="true"/>
             <label for="own">
                 <fmt:message key="resource.hub.search.label.Owned">
