@@ -1032,7 +1032,7 @@ function checkEmail() {
     var emailTextArea = dojo.byId('emailinput');
     var userListCheck = dojo.byId('userListDisplay');
     var emailAdds = emailTextArea.value;
-    var illegalChars = /[\(\)\<\>\;\:\\\/\"\[\]]/;
+    var illegalChars = /[\(\)\<\>\;\:\\\/\"\'\[\]]/;
 
     if (selActionTypeEsc == "NoOp" || selActionTypeEsc == "Syslog" || selActionTypeEsc == "Select" || selActionTypeEsc == "SNMP") {
         return true;
