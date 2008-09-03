@@ -323,11 +323,11 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
         Iterator it = entries.iterator();
         while(it.hasNext()) {
             Entry entry = (Entry)it.next();
-            Object value = entry.getValue();
+            String value = (String) entry.getValue();
             if (value == null) {
                 continue;
             }
-            props.put(entry.getKey(), value);
+            props.setProperty((String) entry.getKey(), value.trim());
         }
         return props; 
     }

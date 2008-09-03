@@ -93,7 +93,7 @@ public class EmailActionConfig implements ActionConfigInterface {
     {
         ConfigResponse response = new ConfigResponse();
         response.setValue(CFG_TYPE, String.valueOf(getType()));
-        response.setValue(CFG_NAMES, getNames());
+        response.setValue(CFG_NAMES, getNames().trim());
         response.setValue(CFG_SMS, isSms());
         return response;
     }
