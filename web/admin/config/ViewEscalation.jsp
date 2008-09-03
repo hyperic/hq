@@ -47,16 +47,16 @@ document.toggleSubmit = function(e){
 }
 
 dojo.addOnLoad(function(){
-    dojo.event.connect(document, 'onkeypress', document, 'toggleSubmit');
-    dojo.event.connect(document.forms[0], 'onkeypress', document, 'toggleSubmit');
-    dojo.event.connect(document.forms[1], 'onkeypress', document, 'toggleSubmit');
+    dojo11.event.connect(document, 'onkeypress', document, 'toggleSubmit');
+    dojo11.event.connect(document.forms[0], 'onkeypress', document, 'toggleSubmit');
+    dojo11.event.connect(document.forms[1], 'onkeypress', document, 'toggleSubmit');
 });
 
 var selUserEsc;
 var selActionTypeEsc;
 
 function requestViewEscalation() {
-    var alertDefId = dojo.byId('alertDefId').value;
+    var alertDefId = dojo11.byId('alertDefId').value;
     var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
     url += escape('<c:out value="${param.escId}"/>');
     url += '.do';
@@ -67,15 +67,15 @@ function requestViewEscalation() {
 function showViewEscResponse(originalRequest) {
     var tmp = eval('(' + originalRequest.responseText + ')');
     if(tmp.error){
-        var escmsg = dojo.byId('errMsg');
+        var escmsg = dojo11.byId('errMsg');
         escmsg.innerHTML = tmp.error;
-        var example = dojo.byId('escError');
+        var example = dojo11.byId('escError');
         example.style.display= '';
     } else{
-         dojo.byId('escMsg').innerHTML = '';
-         dojo.byId('example').style.display= 'none';
-         dojo.byId('errMsg').innerHTML = '';
-         dojo.byId('escError').style.display= 'none';
+        dojo11.byId('escMsg').innerHTML = '';
+        dojo11.byId('example').style.display= 'none';
+        dojo11.byId('errMsg').innerHTML = '';
+        dojo11.byId('escError').style.display= 'none';
       
         var creationTime = tmp.escalation.creationTime;
         var notifyAll = tmp.escalation.notifyAll;
@@ -87,76 +87,76 @@ function showViewEscResponse(originalRequest) {
         var escName = tmp.escalation.name;
         var description = tmp.escalation.description;
         var id = tmp.escalation.id;
-	    var maxWaitTime = formatWaitTime(null, tmp.escalation.maxWaitTime, '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>',  '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
+	      var maxWaitTime = formatWaitTime(null, tmp.escalation.maxWaitTime, '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>',  '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
     
-        dojo.byId('viewEscalation').style.display = "";
+        dojo11.byId('viewEscalation').style.display = "";
     
-        dojo.byId('escId').value = id;
-        dojo.byId('id').value = id;
+        dojo11.byId('escId').value = id;
+        dojo11.byId('id').value = id;
     
-        dojo.byId('name').innerHTML = '<b>' + escName + '</b>';
-        dojo.byId('escName').value = escName;
+        dojo11.byId('name').innerHTML = '<b>' + escName + '</b>';
+        dojo11.byId('escName').value = escName;
     
-        dojo.byId('description').innerHTML = description + "&nbsp;";
+        dojo11.byId('description').innerHTML = description + "&nbsp;";
         if (description) {
-            dojo.byId('escDesc').value = description;
+            dojo11.byId('escDesc').value = description;
         }
     
         if (allowPause) {
             if (tmp.escalation.maxWaitTime == <%= Long.MAX_VALUE %>) {
-                dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause.indefinitely" />';
+                dojo11.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause.indefinitely" />';
             } else {
-            	dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
+            	dojo11.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
             }
-            dojo.byId('allowPauseTrue').checked = "true";
+            dojo11.byId('allowPauseTrue').checked = "true";
         }
         else {
-            dojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
-            dojo.byId('allowPauseFalse').checked = "true";
+            dojo11.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
+            dojo11.byId('allowPauseFalse').checked = "true";
         }
     
         if (notifyAll) {
-            dojo.byId('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.all" />';
-            dojo.byId('notifyAllTrue').checked = "true";
+            dojo11.byId('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.all" />';
+            dojo11.byId('notifyAllTrue').checked = "true";
     
         }
         else {
-            dojo.byId('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
-            dojo.byId('notifyAllFalse').checked = "true";
+            dojo11.byId('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
+            dojo11.byId('notifyAllFalse').checked = "true";
     
         }
 
         if (repeat) {
-            dojo.byId('ended').innerHTML = '<fmt:message key="alert.config.escalation.state.ended.repeat" />';
-            dojo.byId('repeatTrue').checked = "true";
+            dojo11.byId('ended').innerHTML = '<fmt:message key="alert.config.escalation.state.ended.repeat" />';
+            dojo11.byId('repeatTrue').checked = "true";
         }
         else {
-            dojo.byId('ended').innerHTML = '<fmt:message key="alert.config.escalation.state.ended.stop" />';
-            dojo.byId('repeatFalse').checked = "true";
+            dojo11.byId('ended').innerHTML = '<fmt:message key="alert.config.escalation.state.ended.stop" />';
+            dojo11.byId('repeatFalse').checked = "true";
         }
     
-        var escViewUL = dojo.byId('viewEscalationUL');
+        var escViewUL = dojo11.byId('viewEscalationUL');
     
         for (var i = escViewUL.childNodes.length - 1; i > -1; i--) {
             escViewUL.removeChild(escViewUL.childNodes[i]);
         }
     
         if (actions.length == 0) {
-            dojo.byId('step2create').style.display = '';
-            dojo.byId('noActions').style.display = "";
+            dojo11.byId('step2create').style.display = '';
+            dojo11.byId('noActions').style.display = "";
         }
         else {
-            dojo.byId('step2create').style.display = 'none';
-            dojo.byId('viewSection').style.display = "";
+            dojo11.byId('step2create').style.display = 'none';
+            dojo11.byId('viewSection').style.display = "";
         }
     
-        dojo.byId('creationTime').value = creationTime;
-        dojo.byId('notifyAll').value = notifyAll;
-        dojo.byId('_version_').value = _version_;
-        dojo.byId('modifiedTime').value = modifiedTime;
-        dojo.byId('allowPause').value = allowPause;
-        dojo.byId('id').value = id;
-        dojo.byId('repeat').value = repeat;
+        dojo11.byId('creationTime').value = creationTime;
+        dojo11.byId('notifyAll').value = notifyAll;
+        dojo11.byId('_version_').value = _version_;
+        dojo11.byId('modifiedTime').value = modifiedTime;
+        dojo11.byId('allowPause').value = allowPause;
+        dojo11.byId('id').value = id;
+        dojo11.byId('repeat').value = repeat;
 
         for (i = 0; i < actions.length; i++) {
             var actionConfig = actions[i].action.config;
@@ -209,8 +209,8 @@ function showViewEscResponse(originalRequest) {
     
             viewLi.setAttribute((document.all ? 'className' : 'class'), "BlockContent");
             viewLi.setAttribute('id', 'row_' + liID);
-            dojo.byId('row_' + liID).style.margin = "0px";
-            dojo.byId('row_' + liID).style.padding = "0px";
+            dojo11.byId('row_' + liID).style.margin = "0px";
+            dojo11.byId('row_' + liID).style.padding = "0px";
     
             viewLi.appendChild(escTable);
             escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
@@ -350,7 +350,7 @@ function showViewEscResponse(originalRequest) {
             usersEditDiv.setAttribute('id', 'usersEditDiv_' + liID);
             usersEditDiv.setAttribute('width', '40%');
             usersEditDiv.innerHTML = " ";
-            dojo.byId('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
+            dojo11.byId('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
     
         }
     
@@ -367,23 +367,23 @@ function showViewEscResponse(originalRequest) {
 }
 
 function editEscalation() {
-    dojo.byId('escPropertiesTable').style.display = 'none';
-    dojo.byId('editPropertiesTable').style.display = '';
+    dojo11.byId('escPropertiesTable').style.display = 'none';
+    dojo11.byId('editPropertiesTable').style.display = '';
 }
 
 function cancelEditEscalation() {
-    dojo.byId('escPropertiesTable').style.display = '';
-    dojo.byId('editPropertiesTable').style.display = 'none';
+    dojo11.byId('escPropertiesTable').style.display = '';
+    dojo11.byId('editPropertiesTable').style.display = 'none';
 }
 
 function saveEscalation() {
-    var escName = dojo.byId('escName').value;
+    var escName = dojo11.byId('escName').value;
     if (escName == "") {
         alert('<fmt:message key="alert.config.error.escalation.name.required"/>');
         return false;
     }
 
-    var escDesc = dojo.byId('escDesc').value;
+    var escDesc = dojo11.byId('escDesc').value;
     if (escName.match(/['"]/) || escDesc.match(/['"]/)) {
         alert('<fmt:message key="error.input.badquotes"/>');
         return false;
@@ -392,36 +392,36 @@ function saveEscalation() {
     var pars = Form.serialize('EscalationForm');
     var url = '<html:rewrite action="/escalation/updateEscalation"/>';
     new Ajax.Request(url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError});
-    dojo.byId('escPropertiesTable').style.display = '';
-    dojo.byId('editPropertiesTable').style.display = 'none';
+    dojo11.byId('escPropertiesTable').style.display = '';
+    dojo11.byId('editPropertiesTable').style.display = 'none';
 
 }
 
 function updateEscView(originalRequest) {
-    dojo.byId('example').setAttribute((document.all ? 'className' : 'class'), "ConfirmationBlock");
-    dojo.byId('example').style.display = '';
-    dojo.byId('okCheck').innerHTML = '<html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt="" />';
-    dojo.byId('escMsg').innerHTML = "The action has been added to the escalation. The escalation is complete. You can add additional actions as needed.";
+    dojo11.byId('example').setAttribute((document.all ? 'className' : 'class'), "ConfirmationBlock");
+    dojo11.byId('example').style.display = '';
+    dojo11.byId('okCheck').innerHTML = '<html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt="" />';
+    dojo11.byId('escMsg').innerHTML = "The action has been added to the escalation. The escalation is complete. You can add additional actions as needed.";
     cancelAddEscalation();
     setTimeout("requestViewEscalation()", 1200);
     //requestViewEscalation();
 }
 
 function hideAddEscButtons() {
-    dojo.byId('addEscButtons').style.display = "none";
-    dojo.byId('addRowButton').style.display = "";
+    dojo11.byId('addEscButtons').style.display = "none";
+    dojo11.byId('addRowButton').style.display = "";
 }
 
 function showAddEscButton() {
-    dojo.byId('addRowButton').style.display = "";
+    dojo11.byId('addRowButton').style.display = "";
 }
 
 function addRow() {
-    dojo.byId('addEscalationUL').style.display = "";
-    dojo.byId('addEscButtons').style.display = "";
-    dojo.byId('noActions').style.display = "none";
-    dojo.byId('addRowButton').style.display = "none";
-    var ni = dojo.byId('addEscalationUL');
+    dojo11.byId('addEscalationUL').style.display = "";
+    dojo11.byId('addEscButtons').style.display = "";
+    dojo11.byId('noActions').style.display = "none";
+    dojo11.byId('addRowButton').style.display = "none";
+    var ni = dojo11.byId('addEscalationUL');
     var numi = document.getElementById('theValue');
     var num = (document.getElementById('theValue').value - 1) + 2;
 
@@ -544,31 +544,31 @@ function addRow() {
     td4.appendChild(emailDiv);
     emailDiv.setAttribute('class', 'emailDiv');
     emailDiv.setAttribute('id', 'emailinputDiv');
-    dojo.byId('emailinputDiv').style.display = 'none';
-    dojo.byId('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onMouseOut=checkEmail();copyOthersEmail(this);></textarea>";
+    dojo11.byId('emailinputDiv').style.display = 'none';
+    dojo11.byId('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onMouseOut=checkEmail();copyOthersEmail(this);></textarea>";
 
     td4.appendChild(sysDiv);
     sysDiv.setAttribute('class', 'escInput');
     sysDiv.setAttribute('id', 'sysloginput');
-    dojo.byId('sysloginput').style.display = 'none';
-    dojo.byId('sysloginput').style.textAlign = 'left';
+    dojo11.byId('sysloginput').style.display = 'none';
+    dojo11.byId('sysloginput').style.textAlign = 'left';
     //sysDiv.setAttribute('width', '40%');
     sysDiv.innerHTML = "meta:<br> <input type=text name=meta id=metainput" + " size=30 onMouseOut=copyMeta(this);checkMeta();><br>" + "product:<br> <input type=text name=product id=productinput" + " size=30 onMouseOut=copyProduct(this);checkProduct();><br>" + "version:<br> <input type=text name=version id=versioninput" + " size=30 onMouseOut=copyVersion(this);checkVersion();><br>";
 
     td4.appendChild(snmpDiv);
     snmpDiv.setAttribute('class', 'escInput');
     snmpDiv.setAttribute('id', 'snmpinput');
-    dojo.byId('snmpinput').style.display = 'none';
-    dojo.byId('snmpinput').style.textAlign = 'left';
+    dojo11.byId('snmpinput').style.display = 'none';
+    dojo11.byId('snmpinput').style.textAlign = 'left';
     //sysDiv.setAttribute('width', '40%');
     snmpDiv.innerHTML = '<fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: <fmt:message key="inform.config.escalation.scheme.IPAddress"/><br> <input type=text name=snmpIP id=snmpIPinput' + " size=30 onMouseOut=copysnmpIP(this);checkIP(this);><br>" + '<fmt:message key="admin.settings.SNMPTrapOID"/> <fmt:message key="inform.config.escalation.scheme.OID"/><br> <input type=text name=snmpOID id=snmpOIDinput' + " size=30 onMouseOut=copysnmpOID(this);checkOID(this);><br>";
 
     td4.appendChild(usersDiv);
     usersDiv.setAttribute('id', 'usersDiv' + liID);
-    dojo.byId('usersDiv' + liID).style.display = 'none';
+    dojo11.byId('usersDiv' + liID).style.display = 'none';
 
-    if (dojo.byId('usersList')) {
-        usersDiv.innerHTML = dojo.byId('usersList').innerHTML;
+    if (dojo11.byId('usersList')) {
+        usersDiv.innerHTML = dojo11.byId('usersList').innerHTML;
         var usersInputList = usersDiv.getElementsByTagName('input');
         for (i = 0; i < usersInputList.length; i++) {
             var inputNamesArr = usersInputList[i];
@@ -578,10 +578,10 @@ function addRow() {
 
     td4.appendChild(rolesDiv);
     rolesDiv.setAttribute('id', 'rolesDiv' + liID);
-    dojo.byId('rolesDiv' + liID).style.display = 'none';
+    dojo11.byId('rolesDiv' + liID).style.display = 'none';
 
-    if (dojo.byId('rolesList')) {
-        rolesDiv.innerHTML = dojo.byId('rolesList').innerHTML;
+    if (dojo11.byId('rolesList')) {
+        rolesDiv.innerHTML = dojo11.byId('rolesList').innerHTML;
         var rolesInputList = rolesDiv.getElementsByTagName('input');
         for (i = 0; i < rolesInputList.length; i++) {
             var inputRolesArr = rolesInputList[i];
@@ -592,65 +592,65 @@ function addRow() {
 }
 
 function copyOthersEmail(el) {
-    var othersDisplay = dojo.byId('userListDisplay');
+    var othersDisplay = dojo11.byId('userListDisplay');
     othersDisplay.style.display = "";
     othersDisplay.innerHTML = 'Notify email addresses: ' + el.value;
 }
 
 function copyMeta(el) {
-    var metaDisplay = dojo.byId('metaText');
+    var metaDisplay = dojo11.byId('metaText');
     metaDisplay.style.display = "";
     metaDisplay.innerHTML = 'meta: ' + el.value;
 }
 
 function copyProduct(el) {
-    var productDisplay = dojo.byId('productText');
+    var productDisplay = dojo11.byId('productText');
     productDisplay.style.display = "";
     productDisplay.innerHTML = 'product: ' + el.value;
 }
 
 function copyVersion(el) {
-    var versionDisplay = dojo.byId('versionText');
+    var versionDisplay = dojo11.byId('versionText');
     versionDisplay.style.display = "";
     versionDisplay.innerHTML = 'version: ' + el.value;
 }
 
 function copysnmpOID(el) {
-    var OIDDisplay = dojo.byId('OIDText');
+    var OIDDisplay = dojo11.byId('OIDText');
     OIDDisplay.style.display = "";
     OIDDisplay.innerHTML = '<fmt:message key="admin.settings.SNMPTrapOID"/> ' + el.value;
 }
 
 function copysnmpIP(el) {
-    var IPDisplay = dojo.byId('IPText');
+    var IPDisplay = dojo11.byId('IPText');
     IPDisplay.style.display = "";
     IPDisplay.innerHTML = '<fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + el.value;
 }
 
 function clearDisplay() {
-    dojo.byId('userListDisplay').innerHTML = "";
-    dojo.byId('metaText').innerHTML = "";
-    dojo.byId('productText').innerHTML = "";
-    dojo.byId('versionText').innerHTML = "";
-    dojo.byId('time').innerHTML = "";
-    dojo.byId('IPText').innerHTML = "";
-    dojo.byId('OIDText').innerHTML = "";
+    dojo11.byId('userListDisplay').innerHTML = "";
+    dojo11.byId('metaText').innerHTML = "";
+    dojo11.byId('productText').innerHTML = "";
+    dojo11.byId('versionText').innerHTML = "";
+    dojo11.byId('time').innerHTML = "";
+    dojo11.byId('IPText').innerHTML = "";
+    dojo11.byId('OIDText').innerHTML = "";
 }
 
 function clearOthers() {
-    dojo.byId('emailinput').value = "";
-    dojo.byId('emailinputDiv').style.display = "none";
+    dojo11.byId('emailinput').value = "";
+    dojo11.byId('emailinputDiv').style.display = "none";
 }
 
 function onchange_handler(el) {
 
-    var writeAction = dojo.byId('actionName');
+    var writeAction = dojo11.byId('actionName');
     var index = el.options[el.selectedIndex].value
 
     clearDisplay();
-    dojo.byId('escMsg').innerHTML = '';
-    dojo.byId('example').style.display = 'none';
-    dojo.byId('userListDisplay').style.display = "";
+    dojo11.byId('escMsg').innerHTML = '';
+    dojo11.byId('example').style.display = 'none';
+    dojo11.byId('userListDisplay').style.display = "";
 
     if (index == "NoOp") {
         writeAction.innerHTML = '<fmt:message key="inform.config.escalation.scheme.NoOP"/>';
@@ -682,17 +682,17 @@ function onchange_handler(el) {
 
 function onchange_who(el) {
     clearOthers();
-    dojo.byId('escMsg').innerHTML = '';
-    dojo.byId('example').style.display = 'none';
-    dojo.byId('addEscButtons').style.display = "";
+    dojo11.byId('escMsg').innerHTML = '';
+    dojo11.byId('example').style.display = 'none';
+    dojo11.byId('addEscButtons').style.display = "";
 
 
     var index = el.options[el.selectedIndex].value
     var idStr = el.id;
     var getId = idStr.split('_');
-    var rolesDivIn = dojo.byId('rolesDiv' + getId[1]);
-    var usersDivIn = dojo.byId('usersDiv' + getId[1]);
-    var emailDivIn = dojo.byId('emailinputDiv');
+    var rolesDivIn = dojo11.byId('rolesDiv' + getId[1]);
+    var usersDivIn = dojo11.byId('usersDiv' + getId[1]);
+    var emailDivIn = dojo11.byId('emailinputDiv');
 
     if (index == "Roles") {
         emailDivIn.style.display = 'none';
@@ -703,7 +703,7 @@ function onchange_who(el) {
         //configureUsers(nodeId);
     } else if (index == "Others") {
         emailDivIn.style.display = '';
-        dojo.byId('emailinput').focus();
+        dojo11.byId('emailinput').focus();
         //configureOthers(nodeId);
     }
     selUserEsc = index;
@@ -712,47 +712,47 @@ function onchange_who(el) {
 function showWhoSelect(el) {
     var idStr = el.id;
     var getId = idStr.split('_');
-    var whoSelector = dojo.byId('who_' + getId[1]);
+    var whoSelector = dojo11.byId('who_' + getId[1]);
     whoSelector.style.display = '';
 }
 
 function hideWhoSelect(el) {
     var idStr = el.id;
     var getId = idStr.split('_');
-    var whoSelector = dojo.byId('who_' + getId[1]);
+    var whoSelector = dojo11.byId('who_' + getId[1]);
     whoSelector.style.display = 'none';
 }
 
 function showSyslogInput(el) {
 
-    var syslogDivIn = dojo.byId('sysloginput');
+    var syslogDivIn = dojo11.byId('sysloginput');
     syslogDivIn.style.display = '';
-    dojo.byId('metainput').focus();
+    dojo11.byId('metainput').focus();
 }
 
 function hideSyslogInput(el) {
 
-    var syslogDivIn = dojo.byId('sysloginput');
+    var syslogDivIn = dojo11.byId('sysloginput');
     syslogDivIn.style.display = 'none';
 }
 
 function showSnmpInput(el) {
 
-    var snmpDivIn = dojo.byId('snmpinput');
+    var snmpDivIn = dojo11.byId('snmpinput');
     snmpDivIn.style.display = '';
-    dojo.byId('snmpinput').focus();
+    dojo11.byId('snmpinput').focus();
 }
 
 function hideSnmpInput(el) {
 
-    var snmpDivIn = dojo.byId('snmpinput');
+    var snmpDivIn = dojo11.byId('snmpinput');
     snmpDivIn.style.display = 'none';
 }
 
 
 function onchange_time(el) {
 
-    var writeTime = dojo.byId('time');
+    var writeTime = dojo11.byId('time');
     writeTime.style.display = "";
     var index = el.options[el.selectedIndex].value;
     writeTime.innerHTML = 'Then wait: ' + formatWaitTime(el, null, '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>',  '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
@@ -783,22 +783,21 @@ function addOption(sel, val, txt, selected) {
     }
     sel.appendChild(o);
     o.appendChild(document.createTextNode(txt));
-
 }
 
 function showResponse(originalRequest) {
-    dojo.byId('escMsg').innerHTML = "Escalation Saved";
+    dojo11.byId('escMsg').innerHTML = "Escalation Saved";
 
 }
 
 function showResponseRemoved() {
-    dojo.byId('example').style.display = '';
-    dojo.byId('escMsg').innerHTML = "Action removed from this escalation";
+    dojo11.byId('example').style.display = '';
+    dojo11.byId('escMsg').innerHTML = "Action removed from this escalation";
 
-    if (dojo.byId('viewEscalationUL').firstChild) {
-        dojo.byId('noActions').style.display = "none";
+    if (dojo11.byId('viewEscalationUL').firstChild) {
+        dojo11.byId('noActions').style.display = "none";
     } else {
-        dojo.byId('noActions').style.display = "";
+        dojo11.byId('noActions').style.display = "";
     }
 }
 
@@ -807,14 +806,14 @@ function removeAction(id) {
         var urlEnd = '.do"/>';
     var url = urlBegin + id + urlEnd;
 
-    var id = dojo.byId('id').value;
+    var id = dojo11.byId('id').value;
     var pars = "EscId=" + id;
 
     new Ajax.Request(url, {method: 'post', parameters: pars, onComplete: showResponseRemoved, onFailure :reportError});
 }
 
 function configure(id) {
-    var sel = dojo.byId('who' + id);
+    var sel = dojo11.byId('who' + id);
     var selval = sel.options[sel.selectedIndex].value;
 
     if (selval == 'Users') {
@@ -834,7 +833,7 @@ function configure(id) {
 function configureOthers(el) {
     var idStr = el;
     var getId = idStr.split('_');
-    var othersDivIn = dojo.byId('othersDiv_' + getId[1]);
+    var othersDivIn = dojo11.byId('othersDiv_' + getId[1]);
 
     Dialog.confirm(othersDivIn.innerHTML,
     {windowParameters: {className:'dialog', width:305, height:200,
@@ -850,8 +849,8 @@ function configureOthers(el) {
 function configureUsers(el) {
     var idStr = el;
     var getId = idStr.split('_');
-    var usersDivIn = dojo.byId('usersDiv' + getId[1]);
-    var writeListUsers = dojo.byId('userListDisplay');
+    var usersDivIn = dojo11.byId('usersDiv' + getId[1]);
+    var writeListUsers = dojo11.byId('userListDisplay');
 
     Dialog.confirm('<div id="usersConfigWindow">' + usersDivIn.innerHTML +
                    '</div>',
@@ -862,7 +861,7 @@ function configureUsers(el) {
             var usersInputList =
                     usersDivIn.getElementsByTagName('input');
             var updatedInputList =
-                    dojo.byId('usersConfigWindow').getElementsByTagName('input');
+                    dojo11.byId('usersConfigWindow').getElementsByTagName('input');
 
             writeListUsers.appendChild(document.createTextNode('Notify: '));
 
@@ -892,8 +891,8 @@ function configureUsers(el) {
 function configureRoles(el) {
     var idStr = el;
     var getId = idStr.split('_');
-    var rolesDivIn = dojo.byId('rolesDiv' + getId[1]);
-    var writeListUsers = dojo.byId('userListDisplay');
+    var rolesDivIn = dojo11.byId('rolesDiv' + getId[1]);
+    var writeListUsers = dojo11.byId('userListDisplay');
 
     Dialog.confirm('<div id="rolesConfigWindow">' + rolesDivIn.innerHTML +
                    '</div>',
@@ -904,7 +903,7 @@ function configureRoles(el) {
             var rolesInputList =
                     rolesDivIn.getElementsByTagName('input');
             var updatedInputList =
-                    dojo.byId('rolesConfigWindow').getElementsByTagName('input');
+                    dojo11.byId('rolesConfigWindow').getElementsByTagName('input');
 
             writeListUsers.appendChild(document.createTextNode('Notify: '));
 
@@ -931,8 +930,7 @@ function configureRoles(el) {
 }
 
 function schemeChange(sel) {
-    document.EscalationSchemeForm.escId.value =
-    sel.options[sel.selectedIndex].value;
+    document.EscalationSchemeForm.escId.value = sel.options[sel.selectedIndex].value;
     document.EscalationSchemeForm.submit();
 }
 
@@ -942,22 +940,22 @@ function reportError(originalRequest) {
 
 
 function hideExample() {
-    dojo.byId('example').style.display = 'none';
+    dojo11.byId('example').style.display = 'none';
 }
 
 function cancelAddEscalation() {
-    dojo.byId('addEscalationUL').innerHTML = "";
-    dojo.byId('addEscButtons').style.display = "none";
-    dojo.byId('addRowButton').style.display = "";
+    dojo11.byId('addEscalationUL').innerHTML = "";
+    dojo11.byId('addEscButtons').style.display = "none";
+    dojo11.byId('addRowButton').style.display = "";
 }
 
 function checkMeta() {
 
-    var metaText = dojo.byId('metainput').value;
+    var metaText = dojo11.byId('metainput').value;
     if (metaText == '') {
         showErrorDisplay();
-        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noMetaInput"/>';
-        dojo.byId('metainput').focus();
+        dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noMetaInput"/>';
+        dojo11.byId('metainput').focus();
         return false;
 
     } else {
@@ -968,11 +966,11 @@ function checkMeta() {
 
 function checkProduct() {
 
-    var productText = dojo.byId('productinput').value;
+    var productText = dojo11.byId('productinput').value;
     if (productText == '') {
         showErrorDisplay();
-        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noProductInput"/>';
-        dojo.byId('productinput').focus();
+        dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noProductInput"/>';
+        dojo11.byId('productinput').focus();
         return false;
     } else {
         hideErrorDisplay();
@@ -982,11 +980,11 @@ function checkProduct() {
 
 function checkVersion() {
 
-    var versionText = dojo.byId('versioninput').value;
+    var versionText = dojo11.byId('versioninput').value;
     if (versionText == '') {
         showErrorDisplay();
-        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noVersionInput"/>';
-        dojo.byId('versioninput').focus();
+        dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noVersionInput"/>';
+        dojo11.byId('versioninput').focus();
         return false;
 
     } else {
@@ -997,11 +995,11 @@ function checkVersion() {
 
 function checkIP() {
 
-    var IPText = dojo.byId('snmpIPinput').value;
+    var IPText = dojo11.byId('snmpIPinput').value;
     if (IPText == '') {
         showErrorDisplay();
-        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPIPFormat"/>';
-        dojo.byId('snmpIPinput').focus();
+        dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPIPFormat"/>';
+        dojo11.byId('snmpIPinput').focus();
         return false;
 
     } else {
@@ -1012,12 +1010,12 @@ function checkIP() {
 
 
 function checkOID() {
-    var OIDText = dojo.byId('snmpOIDinput').value;
+    var OIDText = dojo11.byId('snmpOIDinput').value;
 
     if (OIDText == '') {
         showErrorDisplay();
-        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPTrapOIDFormat"/>';
-        dojo.byId('snmpOIDinput').focus();
+        dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPTrapOIDFormat"/>';
+        dojo11.byId('snmpOIDinput').focus();
         return false;
 
     } else {
@@ -1029,8 +1027,8 @@ function checkOID() {
 
 function checkEmail() {
 
-    var emailTextArea = dojo.byId('emailinput');
-    var userListCheck = dojo.byId('userListDisplay');
+    var emailTextArea = dojo11.byId('emailinput');
+    var userListCheck = dojo11.byId('userListDisplay');
     var emailAdds = emailTextArea.value;
     var illegalChars = /[\(\)\<\>\;\:\\\/\"\'\[\]]/;
 
@@ -1043,10 +1041,10 @@ function checkEmail() {
             for (i = 0; i < separatedEmails.length; i++) {
          
            if(!((separatedEmails[i].indexOf(".") > 2) && (separatedEmails[i].indexOf("@") > 0))) {
-            dojo.byId('example').style.display= '';
-            dojo.byId('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            dojo.byId('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
-            dojo.byId('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressFormat"/>';
+            dojo11.byId('example').style.display= '';
+            dojo11.byId('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            dojo11.byId('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+            dojo11.byId('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressFormat"/>';
             return false;
                 }
             }
@@ -1054,11 +1052,11 @@ function checkEmail() {
 
         if (selUserEsc == 'Others' && emailAdds == '') {
             showErrorDisplay();
-            dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
+            dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
             return false;
         } else if (emailAdds.match(illegalChars)) {
             showErrorDisplay();
-            dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
+            dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
             return false;
         } else {
             hideErrorDisplay();
@@ -1071,7 +1069,7 @@ function checkSMS() {
 
     if ((selActionTypeEsc == 'SMS') && selUserEsc == undefined) {
         showErrorDisplay();
-        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
+        dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
         return false;
     } else {
         hideErrorDisplay();
@@ -1084,7 +1082,7 @@ function textCounter(field, countfield, maxlimit) {
     {
         field.value = field.value.substring(0, maxlimit);
         showErrorDisplay();
-        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.250Char"/>';
+        dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.250Char"/>';
         return false;
     } else {
         hideErrorDisplay();
@@ -1093,21 +1091,21 @@ function textCounter(field, countfield, maxlimit) {
 }
 
 function showErrorDisplay() {
-    dojo.byId('example').style.display = '';
-    dojo.byId('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-    dojo.byId('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+    dojo11.byId('example').style.display = '';
+    dojo11.byId('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+    dojo11.byId('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
 }
 
 function hideErrorDisplay() {
-    dojo.byId('escMsg').innerHTML = '';
-    dojo.byId('example').style.display = 'none';
-    dojo.byId('addEscButtons').style.display = "";
+    dojo11.byId('escMsg').innerHTML = '';
+    dojo11.byId('example').style.display = 'none';
+    dojo11.byId('addEscButtons').style.display = "";
 }
 
 function ActionTypeNull() {
     if (selActionTypeEsc == undefined || selActionTypeEsc == 'Select') {
         showErrorDisplay();
-        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectEscMethod"/>';
+        dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectEscMethod"/>';
         return false;
     } else {
         return true;
@@ -1115,10 +1113,10 @@ function ActionTypeNull() {
 }
 
 function selUserEscNull() {
-    var  userList = dojo.byId('userListDisplay').innerHTML;
+    var  userList = dojo11.byId('userListDisplay').innerHTML;
     if ((selUserEsc == undefined || selUserEsc == 'Select' || userList=='') && (selActionTypeEsc != "Syslog" && selActionTypeEsc != "SNMP" && selActionTypeEsc != "NoOp")) {
         showErrorDisplay();
-        dojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
+        dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
         return false;
     } else {
         return true;
@@ -1168,14 +1166,14 @@ function saveAddEscalation() {
     }
 
 
-    var emailTextArea = dojo.byId('emailinput');
+    var emailTextArea = dojo11.byId('emailinput');
     var emailAdds = emailTextArea.value;
 
     emailTextArea.value = emailAdds.split(/[\s]/);
     emailTextArea.value = emailAdds.split(/,/);
 
 
-    var id = dojo.byId('id').value;
+    var id = dojo11.byId('id').value;
     var serialAddAction = Form.serialize('addEscalation');
     var pars = "EscId=" + id + "&" + serialAddAction;
     var url = '<html:rewrite action="/escalation/saveAction"/>';
@@ -1579,7 +1577,7 @@ function saveAddEscalation() {
                             </td>
                             <td align="right" style="padding-right:3px;">
                                 <html:img
-                                        page="/images/icon_info2-60A5EA.gif"
+                                        page="/images/icon_info.gif"
                                         onmouseover="menuLayers.show('actionsInfoPopup', event)"
                                         onmouseout="menuLayers.hide()" border="0"/>
                             </td>
