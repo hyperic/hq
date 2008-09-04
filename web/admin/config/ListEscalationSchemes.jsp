@@ -56,7 +56,11 @@
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                     <tr>
                         <td class="BlockTitle"><fmt:message key="common.header.EscalationName"/></td>
-                        <c:if test="${not empty param.escId && useroperations['createEscalation']}"><td class="BlockTitle" id="createButton" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td> </c:if>
+                      <c:if test="${not empty param.escId && useroperations['createEscalation']}">
+                        <td class="BlockTitle" id="createButton" style="text-align: right;">
+                          <html:link styleClass="buttonGreen" href="/admin/config/Config.do?mode=escalate"><span><fmt:message key="resource.common.button.new"></span></html:link>
+                        </td>
+                      </c:if>
                 </tr>
             </table>
         </td>
@@ -71,7 +75,7 @@
 <!-- Do the delete button here so that we don't have to try to duplicate it in javascript -->
 <span id="deleteBtn" style="display: none;">&nbsp;
 <c:if test="${useroperations['removeEscalation']}">
-<html:img page="/images/tbb_delete.gif" border="0" onmouseout="imageSwap(this, imagePath + 'tbb_delete', '');" onmousedown="imageSwap(this, imagePath + 'tbb_delete', '_gray')"/>
+<button name="delete" class="btnBlue" onclick="removeRow(this);"><span><fmt:message key="resource.common.button.delete"></span></button>
 </c:if>
 </span>
 

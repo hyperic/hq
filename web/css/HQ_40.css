@@ -1942,7 +1942,7 @@ ol .active.groupIcon {
 }
 
 /* NEW STRUTS BUTTONS */
-button{
+button {
     border: 0px none;
     color:white;
     padding:3px 4px;
@@ -1966,7 +1966,6 @@ button.btnGray span{
     background: transparent url(/images/4.0/buttons/button_gray_right.gif) no-repeat scroll 100% 0;
     margin-left:-3px
 }
-
 
 button.btnBlue span{
     padding:4px 10px 4px 5px;
