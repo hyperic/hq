@@ -36,36 +36,30 @@
 <tiles:importAttribute name="disabled" ignore="true"/>
 
 <table cellspacing="0" cellpadding="0">
-<tr><td>
-<html:img page="/images/button_left.gif"/>
+<tr><td class="buttonLeft">
 </td>
-<td class="Button" valign="middle" style="background-image: url(<html:rewrite page="/images/button_middle.gif"/>);">
+<td class="buttonRight " valign="middle" nowrap="true">
 <c:choose>
 <c:when test="${disabled}">
   <span class="InactiveText"><fmt:message key="${labelKey}"/></span>
 </c:when>
 <c:otherwise>
-  <a href="<c:out value="${buttonHref}" escapeXml="false"/>" onclick="<c:out value="${buttonClick}" escapeXml="false"/>"><fmt:message key="${labelKey}"/></a>
+  <span id="button"><a href="<c:out value="${buttonHref}" escapeXml="false"/>" onclick="<c:out value="${buttonClick}" escapeXml="false"/>"><fmt:message key="${labelKey}"/></a></span>
 </c:otherwise>
 </c:choose>
-</td>
 
 <c:if test="${not empty icon}">
-<td class="Button" valign="middle" style="background-image: url(<html:rewrite page="/images/button_middle.gif"/>); padding-left: 3px;">
-
 <c:if test="${disabled}">
   <span style="filter: alpha(opacity=50); opacity: 0.5;">
 </c:if>
-    <c:out value="${icon}" escapeXml="false"/>
+    <span style="padding-left: 3px;"><c:out value="${icon}" escapeXml="false"/></span>
 <c:if test="${disabled}">
   </span>
 </c:if>
 
-</td>
 </c:if>
+</td>
 
-<td>
-<html:img page="/images/button_right.gif"/>
-</td></tr>
+</tr>
 </table>
 

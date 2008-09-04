@@ -417,7 +417,7 @@ a:visited,a:hover,a {
     cursor: pointer;
     margin: 2px 0px 0px 4px;
     padding: 5px 10px 0 3px;
-    background: url(images/4.0/icons/help.png) no-repeat
+    background: url(/images/4.0/icons/help.png) no-repeat
 }
 
 .fieldRow input {
@@ -1949,34 +1949,49 @@ button{
     cursor:pointer
 }
 
+td.buttonLeft {
+    background: transparent url(/images/4.0/buttons/button_blue_left.gif) no-repeat;
+    padding:3px 2px;
+}
+
+td.buttonRight {
+    padding:4px 10px 4px 5px;
+    background: transparent url(/images/4.0/buttons/button_blue_right.gif) no-repeat scroll 100% 0;
+    margin-left:-3px
+}
+
+#button a:visited, #button a:hover, #button a {
+    color: #fff;
+}
+
 button.blue{
-    background: transparent url(buttontest/button_blue_left.gif) no-repeat;
+    background: transparent url(/images/4.0/buttons/button_blue_left.gif) no-repeat;
 }
 
 button.gray{
-    background: transparent url(buttontest/button_gray_left.gif) no-repeat;
+    background: transparent url(/images/4.0/buttons/button_gray_left.gif) no-repeat;
 }
 
 button.green{
-    background: transparent url(buttontest/button_green_left.gif) no-repeat;
+    background: transparent url(/images/4.0/buttons/button_green_left.gif) no-repeat;
 }
 
 button.gray span{
     padding:4px 10px 4px 5px;
-    background: transparent url(buttontest/button_gray_right.gif) no-repeat scroll 100% 0;
+    background: transparent url(/images/4.0/buttons/button_gray_right.gif) no-repeat scroll 100% 0;
     margin-left:-3px
 }
 
 
 button.blue span{
     padding:4px 10px 4px 5px;
-    background: transparent url(buttontest/button_blue_right.gif) no-repeat scroll 100% 0;
+    background: transparent url(/images/4.0/buttons/button_blue_right.gif) no-repeat scroll 100% 0;
     margin-left:-3px
 }
 
 button.green span{
     padding:4px 10px 4px 5px;
-    background: transparent url(buttontest/button_green_right.gif) no-repeat scroll 100% 0;
+    background: transparent url(/images/4.0/buttons/button_green_right.gif) no-repeat scroll 100% 0;
     margin-left:-3px
 }
 
