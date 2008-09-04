@@ -160,13 +160,10 @@ function skipResources() {
           <td colspan="5" class="ListCell" nowrap>
             <table cellpadding="0" cellspacing="0" border="0">
                 <tr>
-
                 <td style="padding-right:10px;">
-                <input type="submit" name="buttonAction" onclick="setImportCheckboxes(AIQueueForm);addInventory();" value="<fmt:message key="common.label.AddtoInventory"/>" class="CompactButton">
+                <button class="btnGreen" name="buttonAction" onclick="setImportCheckboxes(AIQueueForm);addInventory();"><span><fmt:message key="common.label.AddtoInventory"/></span></button>
                 &nbsp;&nbsp;
-                <input type="submit" name="buttonAction" onclick="skipResources(); AIQueueForm.submit(); return false;" value="<fmt:message key="common.label.SkipResources"/>" class="CompactButton">
-
-
+                <button class="btnBlue" name="buttonAction" onclick="skipResources(); AIQueueForm.submit(); return false;"><span><fmt:message key="common.label.SkipResources"/></span></button>
                </td>
             </tr>
            </table>

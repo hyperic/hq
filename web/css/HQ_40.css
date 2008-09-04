@@ -1946,7 +1946,12 @@ button {
     border: 0px none;
     color:white;
     padding:3px 4px;
-    cursor:pointer
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button.btnInactive{
+    background: transparent url(/images/4.0/buttons/button_inactive_left.gif) no-repeat;
 }
 
 button.btnBlue{
@@ -1959,6 +1964,13 @@ button.btnGray{
 
 button.btnGreen{
     background: transparent url(/images/4.0/buttons/button_green_left.gif) no-repeat;
+}
+
+button.btnInactive span{
+    padding:4px 10px 4px 5px;
+    background: transparent url(/images/4.0/buttons/button_inactive_right.gif) no-repeat scroll 100% 0;
+    margin-left:-3px;
+    color:#888;
 }
 
 button.btnGray span{
