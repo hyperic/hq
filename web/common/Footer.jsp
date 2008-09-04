@@ -30,7 +30,7 @@
 <script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/window.js"/>" type="text/javascript"></script>
 
-<img src="/images/spacer.gif" width="1" height="60" alt="" border="0" class="footerSpacer" style="clear: both;">
+<img src="/images/spacer.gif" width="1" height="60" alt="" border="0" class="footerSpacer" style="clear: both;" id="footerSpacer">
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
