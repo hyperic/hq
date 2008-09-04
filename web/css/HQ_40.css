@@ -1262,6 +1262,9 @@ select {
     position: relative;
     color: #FFF;
     font-family: Helvetica, sans-serif;
+    
+    /* IE magic to make stuff not disappear on drag-n-drop sorting */
+    zoom: 1;
 }
 
 .widget h2, .widget h3 {
@@ -1384,7 +1387,6 @@ visibility: hidden;*/
     right: 10px;
 /*  width: 300px;*/
     height: 250px;
-    float: right;
 }
 
 .widget #widget_chart {
