@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<module id="hyperic.exceptionPresenters" version="1.0.0" package="org.hyperic.ui.presenters">
+<module id="hyperic.exceptionPresenters" version="1.0.0" package="org.hyperic.hq.ui.presenters">
 
     <!-- Exception Presenters -->
     <!--
@@ -33,6 +33,10 @@
                 class="StaleExceptionPresenter">
                 <set-object property="responseRenderer"
                     value="infrastructure:responseRenderer" />
+                <set-object property="pageName"
+                    value="infrastructure:staleSessionPageName" />
+                <set-object property="request" 
+                    value="service:tapestry.globals.HttpServletRequest"/>    
             </construct>
         </invoke-factory>
     </implementation>
@@ -44,6 +48,10 @@
                 class="StaleExceptionPresenter">
                 <set-object property="responseRenderer"
                     value="infrastructure:responseRenderer" />
+                <set-object property="pageName"
+                    value="infrastructure:staleLinkPageName" />
+                <set-object property="request" 
+                    value="service:tapestry.globals.HttpServletRequest"/>
             </construct>
         </invoke-factory>
     </implementation>
