@@ -58,7 +58,7 @@
                         <td class="BlockTitle"><fmt:message key="common.header.EscalationName"/></td>
                       <c:if test="${not empty param.escId && useroperations['createEscalation']}">
                         <td class="BlockTitle" id="createButton" style="text-align: right;">
-                          <html:link styleClass="buttonGreen" href="/admin/config/Config.do?mode=escalate"><span><fmt:message key="resource.common.button.new"></span></html:link>
+                          <html:link styleClass="buttonGreen" href="/admin/config/Config.do?mode=escalate"><span><fmt:message key="resource.common.button.new"/></span></html:link>
                         </td>
                       </c:if>
                 </tr>

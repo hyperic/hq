@@ -70,7 +70,7 @@
     <c:if test="${!deleteOnly}">
     <%-- this is for formatting nazis (you know who you are): there is a good reason for "bad" formatting of the next line --%>
     <%-- for example, it fixes https://intranet.covalent.net/bugz/show_bug.cgi?id=6780.  so, suffer in silence.  vitaliy.--%>
-    <td width="40"><html:link styleClass="buttonGreen" href="${listNewUrl}"><span><fmt:message key="resource.common.button.new"></span></html:link></td>
+    <td width="40"><html:link styleClass="buttonGreen" href="${listNewUrl}"><span><fmt:message key="resource.common.button.new"/></span></html:link></td>
     </c:if>
     <c:if test="${!newOnly}">
       <c:if test="${includeGroup}">
