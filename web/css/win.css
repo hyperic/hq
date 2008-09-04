@@ -2008,7 +2008,12 @@ a.black:link,a.black:visited {
 /*IE 6 OVERRIDES*/
 
 #recentAlerts {
+    float:left;
     _padding-left: 0px;
+}
+.recentText {
+    float:left;
+    margin-right:6px;
 }
 
 .headTopNav {
@@ -2021,7 +2026,6 @@ a.black:link,a.black:visited {
 
 .dojoMenuBar2 .dojoMenuItem2 {
     _padding: 3px 15px 3px;
-15px;
 }
 
 .headUsrName {
