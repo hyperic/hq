@@ -33,8 +33,6 @@
 </c:if>
 
 <c:out value="${warning}" escapeXml="false"/>
-<td class="FooterBold" nowrap>
 <hq:dateFormatter value="${tmpTime}"/>
 &nbsp;&nbsp;
 <c:out value="${owner}"/>
-</td>
