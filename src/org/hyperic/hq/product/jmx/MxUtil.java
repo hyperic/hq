@@ -300,7 +300,7 @@ public class MxUtil {
                MetricUnreachableException,
                PluginException
     {
-        String objectName = metric.getObjectName();
+        String objectName = Metric.decode(metric.getObjectName());
         String attribute = metric.getAttributeName();
         Properties config = metric.getProperties();
 
@@ -309,7 +309,7 @@ public class MxUtil {
         } catch (MalformedURLException e) {
             throw invalidURL(metric.getProperties(), e);
         } catch (MalformedObjectNameException e) {
-            throw invalidObjectName(metric.getObjectName(), e);
+            throw invalidObjectName(objectName, e);
         } catch (IOException e) {
             removeMBeanConnector(config);
             if (metric.isAvail()) {
@@ -325,10 +325,10 @@ public class MxUtil {
             if (metric.isAvail()) {
                 return new Double(Metric.AVAIL_UP);
             }
-            throw attributeNotFound(metric.getObjectName(),
+            throw attributeNotFound(objectName,
                                     metric.getAttributeName(), e);
         } catch (InstanceNotFoundException e) {
-            throw objectNotFound(metric.getObjectName(), e);
+            throw objectNotFound(objectName, e);
         } catch (ReflectionException e) {
             throw error(metric.toString(), e);
 
