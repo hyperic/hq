@@ -130,7 +130,7 @@
           <td><html:image property="prevRange" page="/images/tbb_pageleft.gif" border="0"/></td>
           <td nowrap><fmt:message key="resource.common.monitor.visibility.metricsToolbar.DateRange"><fmt:param value="${rb}"/><fmt:param value="${re}"/></fmt:message></td>
           <td width="100%" align="left"><html:image property="nextRange" page="/images/tbb_pageright.gif" border="0"/><a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'>
-            <c:if test="${(rangeEnd - rangeBegin) > 172800000}">
+            <c:if test="${form.a != 1 || (rangeEnd - rangeBegin) > 172800000}">
               <fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
           </c:if>
           <html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), '-100px',null);showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link> </td>
@@ -163,7 +163,7 @@
           <td><html:image property="range" page="/images/4.0/icons/accept.png" border="0"/></td>
           <td width="100%" style="padding-left: 5px;">
             <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'>
-            <c:if test="${(rangeEnd - rangeBegin) > 172800000}">
+            <c:if test="${form.a != 1 || (rangeEnd - rangeBegin) > 172800000}">
               <fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
             </c:if>
 			<html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), '-100px',null);showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
