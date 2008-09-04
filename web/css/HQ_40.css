@@ -1940,3 +1940,46 @@ ol .active.groupIcon {
 .smallBox{
     width:27px;
 }
+
+/* NEW STRUTS BUTTONS */
+button{
+    border: 0px none;
+    color:white;
+    padding:3px 4px;
+    cursor:pointer
+}
+
+button.blue{
+    background: transparent url(buttontest/button_blue_left.gif) no-repeat;
+}
+
+button.gray{
+    background: transparent url(buttontest/button_gray_left.gif) no-repeat;
+}
+
+button.green{
+    background: transparent url(buttontest/button_green_left.gif) no-repeat;
+}
+
+button.gray span{
+    padding:4px 10px 4px 5px;
+    background: transparent url(buttontest/button_gray_right.gif) no-repeat scroll 100% 0;
+    margin-left:-3px
+}
+
+
+button.blue span{
+    padding:4px 10px 4px 5px;
+    background: transparent url(buttontest/button_blue_right.gif) no-repeat scroll 100% 0;
+    margin-left:-3px
+}
+
+button.green span{
+    padding:4px 10px 4px 5px;
+    background: transparent url(buttontest/button_green_right.gif) no-repeat scroll 100% 0;
+    margin-left:-3px
+}
+
+button:active{
+    margin:1px 0 0 0;
+}
