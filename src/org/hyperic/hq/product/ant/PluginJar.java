@@ -152,7 +152,7 @@ public class PluginJar extends Jar {
         setDestFile(destFile);
 
         String[] dirs = {
-            "etc", "mibs", "lib", "scripts"
+            "etc", "mibs", "lib", "scripts", "hqu"
         };
 
         //<fileset dir="plugins/${plugin.dirname}" includes="etc/**"/>
