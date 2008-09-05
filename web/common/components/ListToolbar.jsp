@@ -113,7 +113,7 @@
 </td>
 </c:if>
 <c:if test="${alerts}">
-    <td align="left" id="<c:out value="${widgetInstanceName}"/>FixedButtonTd"><div id="<c:out value="${widgetInstanceName}"/>FixedButtonDiv"><input type="submit" name="buttonAction" value="<fmt:message key="resource.common.alert.action.fixed.label"/>" class="CompactButtonInactive" disabled="true"></div></td>
+    <td align="left" id="<c:out value="${widgetInstanceName}"/>FixedButtonTd"><div id="<c:out value="${widgetInstanceName}"/>FixedButtonDiv"><input type="submit" name="buttonAction" value="<fmt:message key="resource.common.alert.action.fixed.label"/>" disabled="true"></div></td>
 </c:if>
 <c:choose>
   <c:when test="${not empty pageSizeAction}">
