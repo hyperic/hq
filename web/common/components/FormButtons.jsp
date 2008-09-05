@@ -73,15 +73,15 @@
       <table width="100%" cellpadding="0" cellspacing="7" border="0">
         <tr>
 <c:if test="${empty cancelOnly}">
-          <td><button class="btnGreen" name="ok.x" onclick="checkSubmit(); isButtonClicked=true;" title="<fmt:message key='FormButtons.ClickToOk'/>"><span><fmt:message key="button.ok"/></span></button></td>
+          <td><html:image page="/images/fb_ok.gif" border="0" titleKey="FormButtons.ClickToOk" property="ok" onmouseover="imageSwap(this, imagePath + 'fb_ok', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_ok', '');" onmousedown="imageSwap(this, imagePath +  'fb_ok', '_down')" onclick="checkSubmit(); isButtonClicked=true;"/></td>
 
 <c:if test="${empty noReset}">
           <td><html:img page="/images/spacer.gif" width="10" height="1" border="0"/></td>
-          <td><button class="btnGray" name="reset.x"  title="<fmt:message key='FormButtons.ClickToReset'/>"><span><fmt:message key="button.reset"/></span></button></td>
+          <td><html:image page="/images/fb_reset.gif" border="0" titleKey="FormButtons.ClickToReset" property="reset" onmouseover="imageSwap(this, imagePath + 'fb_reset', '_over');" onmouseout="imageSwap(this, imagePath + 'fb_reset', '');" onmousedown="imageSwap(this, imagePath + 'fb_reset', '_down')"/></td>
 </c:if>          
 </c:if>
 <c:if test="${empty noCancel}">
-          <td><button class="btnGray" name="cancel.x" title="<fmt:message key='FormButtons.ClickToCancel'/>"><span><fmt:message key="button.cancel"/></span></button></td>
+          <td><html:image page="/images/fb_cancel.gif" border="0" titleKey="FormButtons.ClickToCancel" property="cancel" onmouseover="imageSwap(this, imagePath + 'fb_cancel', '_over');" onmouseout="imageSwap(this, imagePath + 'fb_cancel', '');" onmousedown="imageSwap(this, imagePath + 'fb_cancel', '_down')"/></td>
 </c:if>
 		  <td width="100%"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
         </tr>

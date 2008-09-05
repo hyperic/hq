@@ -52,7 +52,7 @@
 
 <c:choose>
   <c:when test="${not empty newButtonKey}">
-          <td><html:button styleClass="green" property="create" titleKey="${newButtonKey}"><span><fmt:message key="resource.common.button.new"/></span></html:button></td>
+          <td><html:image page="/images/tbb_new.gif" border="0" property="create" titleKey="${newButtonKey}"/></td>
   </c:when>
   <c:otherwise>
           <td>&nbsp;</td>

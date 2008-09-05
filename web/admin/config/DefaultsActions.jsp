@@ -5,6 +5,4 @@
 <tiles:importAttribute name="typeName"/>
 <tiles:importAttribute name="aetid"/>
 
-<td class="ListCell" align="center">
-  <html:link styleClass="buttonGreen" href="/resource/${typeName}/monitor/Config.do?mode=configure&aetid=${aetid}"><span><fmt:message key="resource.common.button.editMetricTemplate"/></span></html:link>
-</td>
+<td class="ListCell" align="center"><html:link page="/resource/${typeName}/monitor/Config.do?mode=configure&aetid=${aetid}"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>

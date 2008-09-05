@@ -26,61 +26,93 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/window.js"/>" type="text/javascript"></script>
 
-<img src="/images/spacer.gif" width="1" height="60" alt="" border="0" class="footerSpacer" style="clear: both;">
+
+<script src="<html:rewrite page="/js/effects.js"/>"
+	type="text/javascript"></script>
+<script src="<html:rewrite page="/js/footer.js"/>"
+	type="text/javascript"></script>
+<script src="<html:rewrite page="/js/window.js"/>"
+	type="text/javascript"></script>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
-		<td class="FooterBold" style="padding-left: 30px;"><tiles:insert definition=".footer.current.time" /></td>
-		<td class="FooterRegular" nowrap="nowrap" align="center">
-			<div id="aboutAnchor">
-			  <a name="aboutLink" href="javascript:about('<html:rewrite page="/common/"/>')"><fmt:message key="footer.HQ" /> <fmt:message key="footer.version" /> <c:out value="${HQVersion}" /></a> <c:out value="${HQBuild}" />
-			</div>
+		<td rowspan="99" class="FooterTitle"><html:img
+			page="/images/spacer.gif" width="5" height="1" alt="" border="0" /></td>
+		<td colspan="2"><html:img page="/images/spacer.gif" width="1"
+			height="60" alt="" border="0" styleId="footerSpacer" /></td>
+	</tr>
+	<tr>
+		<td rowspan="99" class="FooterTitle" valign="top"></td>
+		<td width="100%"><html:img page="/images/spacer.gif" width="1"
+			height="8" alt="" border="0" /></td>
+	</tr>
+	<tr class="PageTitle">
+		<td>
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<!--<td class="FooterBold" nowrap>-->
+				<tiles:insert definition=".footer.current.time" />
+				<!--</td>  -->
+				<td class="FooterRegular" width="30">&nbsp;</td>
+				<td class="FooterRegular" nowrap>
+				<div id="aboutAnchor" style="position: relative;"><a
+					name="aboutLink"
+					href="javascript:about('<html:rewrite page="/common/"/>')"><fmt:message
+					key="footer.HQ" /> <fmt:message key="footer.version" /> <c:out
+					value="${HQVersion}" /></a> <c:out value="${HQBuild}" /></div>
+				</td>
+				<td class="FooterRegular" width="30"></td>
+				<td class="FooterSmall" nowrap></td>
+				<td class="FooterRegular" width="100%" align="right"><fmt:message
+					key="footer.Copyright" /></td>
+				<td class="FooterBold" nowrap><a href="http://www.hyperic.com"
+					target="_blank">www.hyperic.com</a></td>
+				<td class="FooterBold" width="15">&nbsp;</td>
+			</tr>
+		</table>
 		</td>
-		<td class="FooterRegular" align="right"><fmt:message key="footer.Copyright" /></td>
-		<td class="FooterBold" nowrap="nowrap" style="padding-right: 30px;"><a href="http://www.hyperic.com" target="_blank">www.hyperic.com</a></td>
 	</tr>
 </table>
 
-<div id="about" class="dialog" style="position: absolute; top: 0px; left: 0px; display: none;">
-  <table cellpadding="2" cellspacing="0" border="0" width="305">
-  	<tr class="PageTitleBar">
-  		<td width="1%" class="PageTitle"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
-  		<td width="66%" class="PageTitle"><fmt:message key="about.Title" /></td>
-  		<td class="PageTitle"></td>
-  	</tr>
-  	<tr>
-  		<td class="DisplayLabel" rowspan="3">&nbsp;</td>
-  		<td valign="top" class="DisplaySubhead" colspan="2"><html:img
-  			page="/images/spacer.gif" width="1" height="5" border="0" /><br />
-  		<fmt:message key="footer.version" /> <c:out value="${HQVersion}" /><br />
-  		&nbsp;</td>
-  	</tr>
-  	<tr>
-  		<td valign="top" class="DisplayContent" colspan="2"><span
-  			class="DisplayLabel"><fmt:message key="footer.Copyright" /></span><fmt:message
-  			key="about.Copyright.Content" /><br />
-  		<br />
-  		&nbsp;<br />
-  		</td>
-  	</tr>
-  	<tr>
-  		<td valign="top" class="DisplayContent" colspan="2"><fmt:message
-  			key="about.MoreInfo.Label" /><br />
-  		<html:link href="http://support.hyperic.com" target="about">
-  			<fmt:message key="about.MoreInfo.LinkSupport" />
-  		</html:link><br />
-  		<html:link href="http://forums.hyperic.org" target="about">
-  			<fmt:message key="about.MoreInfo.LinkForums" />
-  		</html:link><br />
-  		&nbsp;</td>
-  	</tr>
-  </table>
+<div id="about" class="dialog"
+	style="position: absolute; top: 0px; left: 0px; display: none;">
+<table cellpadding="2" cellspacing="0" border="0" width="305">
+	<tr class="PageTitleBar">
+		<td width="1%" class="PageTitle"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
+		<td width="66%" class="PageTitle"><fmt:message key="about.Title" /></td>
+		<td class="PageTitle"></td>
+	</tr>
+	<tr>
+		<td class="DisplayLabel" rowspan="3">&nbsp;</td>
+		<td valign="top" class="DisplaySubhead" colspan="2"><html:img
+			page="/images/spacer.gif" width="1" height="5" border="0" /><br />
+		<fmt:message key="footer.version" /> <c:out value="${HQVersion}" /><br />
+		&nbsp;</td>
+	</tr>
+	<tr>
+		<td valign="top" class="DisplayContent" colspan="2"><span
+			class="DisplayLabel"><fmt:message key="footer.Copyright" /></span><fmt:message
+			key="about.Copyright.Content" /><br />
+		<br />
+		&nbsp;<br />
+		</td>
+	</tr>
+	<tr>
+		<td valign="top" class="DisplayContent" colspan="2"><fmt:message
+			key="about.MoreInfo.Label" /><br />
+		<html:link href="http://support.hyperic.com" target="about">
+			<fmt:message key="about.MoreInfo.LinkSupport" />
+		</html:link><br />
+		<html:link href="http://forums.hyperic.org" target="about">
+			<fmt:message key="about.MoreInfo.LinkForums" />
+		</html:link><br />
+		&nbsp;</td>
+	</tr>
+</table>
 </div>
 
 <script type="text/javascript">
   setFoot();
 </script>
+

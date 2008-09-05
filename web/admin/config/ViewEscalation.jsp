@@ -234,7 +234,7 @@ function showViewEscResponse(originalRequest) {
             td8.setAttribute('vAlign', 'top');
             td8.setAttribute('rowSpan', '3');
             td8.setAttribute((document.all ? 'className' : 'class'), "remove");
-            td8.innerHTML = '<button name="delete" class="btnBlue" onclick="removeRow(this);removeAction(' + actionId + ');"><span><fmt:message key="resource.common.button.delete"></span></button>';
+            td8.innerHTML = '<a href="#" onclick="removeRow(this);removeAction(' + actionId + ');"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
         </c:if>
     
             escTr1.appendChild(td1);
