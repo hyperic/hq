@@ -1337,7 +1337,8 @@ b.r3 {
 }
 
 div.effectscontainer div.effectsportlet {
-    height: 100%
+    height: 100%;
+    position: relative;
 }
 
 div.eventblock {
