@@ -48,7 +48,6 @@
                     var td3 = document.createElement('td');
                     var td4 = document.createElement('td');
                     var td5 = document.createElement('td');
-                    var newanchor = document.createElement("a");
 
                     tbody.appendChild(tr);
 
@@ -63,9 +62,8 @@
                     td1.setAttribute("id", (mList[i].resource));
 
                     if (mList[i].resourceName) {
-                        td1.appendChild(newanchor);
-                        newanchor.appendChild(document.createTextNode(mList[i].resourceName));
-                        newanchor.setAttribute('href', (resUrl + mList[i].resourceType + urlColon + mList[i].resourceId));
+                        var short_name = (mList[i].resourceName.length > 20) ? mList[i].resourceName.substring(0,20) + '&hellip;' : mList[i].resourceName;
+                        td1.innerHTML = '<a href="' + resUrl + mList[i].resourceType + urlColon + mList[i].resourceId + '" title="'+ mList[i].resourceName +'">'+ short_name +'</a>';
                     }
 
                     tr.appendChild(td2);
@@ -208,7 +206,7 @@
                 td4.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlertLeft");
 
                 if (aList[i].resourceName) {
-                    td4.appendChild(document.createTextNode(aList[i].resourceName));
+                    td4.innerHTML = (aList[i].resourceName.length > 20) ? '<abbr title="' + aList[i].resourceName + '">' + aList[i].resourceName.substring(0,20) + '&hellip;</abbr>' : aList[i].resourceName;
                 }
                 tr.appendChild(td5);
                 td5.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
@@ -441,7 +439,6 @@
             th2.appendChild(document.createTextNode(resourceLoadTypeHeader));
 
             for (i = 0; i < metricValues.values.length; i++) {
-                var newanchor = document.createElement("a");
                 var tr = document.createElement('tr');
                 var td1 = document.createElement('td');
                 var td2 = document.createElement('td');
@@ -453,9 +450,8 @@
                 tr.appendChild(td1);
                 td1.setAttribute((document.all ? 'className' : 'class'), "resource");
                 if (metricValues.values[i].resourceName) {
-                    td1.appendChild(newanchor);
-                    newanchor.appendChild(document.createTextNode(metricValues.values[i].resourceName));
-                    newanchor.setAttribute('href', (resUrl + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId));
+                    var short_name = (metricValues.values[i].resourceName.length > 20) ? metricValues.values[i].resourceName.substring(0,20) + '&hellip;' : metricValues.values[i].resourceName;
+                    td1.innerHTML = '<a href="' + resUrl + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId + '" title="'+ metricValues.values[i].resourceName +'">'+ short_name +'</a>';
                 }
 
                 tr.appendChild(td2);
@@ -511,7 +507,6 @@
                     var td4 = document.createElement('td');
                     var td5 = document.createElement('td');
                     var td6 = document.createElement('td');
-                    var favAnchor = document.createElement("a");
                     var urlColon = ":"
                     var resUrl = $('viewResUrl').href;
 
@@ -528,10 +523,9 @@
                     td1.setAttribute((document.all ? 'className' : 'class'), "resourceName");
                     td1.setAttribute("id", (fList[i].resourceName));
 
-                    if (fList[i].resourceName && favAnchor && fList[i].resourceId && fList[i].resourceTypeId) {
-                        td1.appendChild(favAnchor);
-                        favAnchor.appendChild(document.createTextNode(fList[i].resourceName));
-                        favAnchor.setAttribute('href', (resUrl + fList[i].resourceTypeId + urlColon + fList[i].resourceId));
+                    if (fList[i].resourceName && fList[i].resourceId && fList[i].resourceTypeId) {
+                        var short_name = (fList[i].resourceName.length > 20) ? fList[i].resourceName.substring(0,20) + '&hellip;' : fList[i].resourceName;
+                        td1.innerHTML = '<a href="' + resUrl + fList[i].resourceTypeId + urlColon + fList[i].resourceId + '" title="'+ fList[i].resourceName +'">'+ short_name +'</a>';
                     } else {
                         td1.innerHTML = "&nbsp;";
                     }
