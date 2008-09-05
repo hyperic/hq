@@ -1584,7 +1584,13 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             if (that.chart != null) {
                 that.chart.cleanup();
             }
-            dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 150;
+            if(that.contentSheet.offsetWidth - 150 > 100) {
+                dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 150;
+            }
+            else
+            {
+                dojo11.query('#chart_container',that.contentSheet)[0].style.width = 100;
+            }
             that.chart = new hyperic.widget.Chart('chart_container', that.charts[that.currentChartId]);
             that.needsResize = false;
         }
