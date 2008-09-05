@@ -99,8 +99,7 @@ function bodyClicked(e) {
     hideDiagram('diagramDiv');
   }
 
-  if ( $('toolMenu') && (!target.id || target.id != 'toolMenuSpan') &&
-       $('toolMenu').shown ) {
+  if ( $('toolMenu') && $('toolMenu').shown && (!target.id || (target.id != 'toolMenuSpan' && target.id != 'toolMenuArrow')) ) {
     hide($('toolMenu'));
   }
 
