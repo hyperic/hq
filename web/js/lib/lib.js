@@ -618,7 +618,7 @@ function activateHeaderTab(){
     if(l.indexOf("rep")!=-1 || l.indexOf("Rep")!=-1 || l.indexOf("masth")!=-1){
         dojo.byId("analyzeTab").className = "activeTab";
     }
-    if(l.indexOf("admin")!=-1 || l.indexOf("Adm")!=-1){
+    if(l.indexOf("admin.do")!=-1 || l.indexOf("Admin.do")!=-1){
         dojo.byId("adminTab").className = "activeTab";
     }
 }
