@@ -248,7 +248,7 @@ dojo.require("dojo.widget.Dialog");
 		        </div>
 		        <div class="dojoDialogFooter">
 		           <div class="right">
-		            <html:image property="ok" styleId="selectDashboard" src="/images/fb_ok.gif" onmouseout="javscript:this.src='/images/fb_ok.gif'" onmouseover="javscript:this.src='/images/fb_ok_over.gif'" onmousedown="javascript:this.src='/images/fb_ok_down.gif'" onclick="javascript:selectDefaultDashboard('defaultDash', 'DashboardForm');"></html:image>
+		            <button name="ok.x" onclick="javascript:selectDefaultDashboard('defaultDash', 'DashboardForm');"><fmt:message key="button.ok"/></button>
 		           </div>
 		        </div>
 		    </div>
