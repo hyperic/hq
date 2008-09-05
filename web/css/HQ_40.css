@@ -1262,9 +1262,6 @@ select {
     position: relative;
     color: #FFF;
     font-family: Helvetica, sans-serif;
-    
-    /* IE magic to make stuff not disappear on drag-n-drop sorting */
-    zoom: 1;
 }
 
 .widget h2, .widget h3 {
@@ -1387,6 +1384,7 @@ visibility: hidden;*/
     right: 10px;
 /*  width: 300px;*/
     height: 250px;
+    float: right;
 }
 
 .widget #widget_chart {
@@ -1944,50 +1942,54 @@ ol .active.groupIcon {
 }
 
 /* NEW STRUTS BUTTONS */
-button {
+button{
     border: 0px none;
     color:white;
     padding:3px 4px;
-    cursor:pointer;
-    font-weight:bold;
+    cursor:pointer
 }
 
-button.btnInactive{
-    background: transparent url(/images/4.0/buttons/button_inactive_left.gif) no-repeat;
-}
-
-button.btnBlue{
+td.buttonLeft {
     background: transparent url(/images/4.0/buttons/button_blue_left.gif) no-repeat;
+    padding:3px 2px;
 }
 
-button.btnGray{
-    background: transparent url(/images/4.0/buttons/button_gray_left.gif) no-repeat;
-}
-
-button.btnGreen{
-    background: transparent url(/images/4.0/buttons/button_green_left.gif) no-repeat;
-}
-
-button.btnInactive span{
-    padding:4px 10px 4px 5px;
-    background: transparent url(/images/4.0/buttons/button_inactive_right.gif) no-repeat scroll 100% 0;
-    margin-left:-3px;
-    color:#888;
-}
-
-button.btnGray span{
-    padding:4px 10px 4px 5px;
-    background: transparent url(/images/4.0/buttons/button_gray_right.gif) no-repeat scroll 100% 0;
-    margin-left:-3px
-}
-
-button.btnBlue span{
+td.buttonRight {
     padding:4px 10px 4px 5px;
     background: transparent url(/images/4.0/buttons/button_blue_right.gif) no-repeat scroll 100% 0;
     margin-left:-3px
 }
 
-button.btnGreen span{
+#button a:visited, #button a:hover, #button a {
+    color: #fff;
+}
+
+button.blue{
+    background: transparent url(/images/4.0/buttons/button_blue_left.gif) no-repeat;
+}
+
+button.gray{
+    background: transparent url(/images/4.0/buttons/button_gray_left.gif) no-repeat;
+}
+
+button.green{
+    background: transparent url(/images/4.0/buttons/button_green_left.gif) no-repeat;
+}
+
+button.gray span{
+    padding:4px 10px 4px 5px;
+    background: transparent url(/images/4.0/buttons/button_gray_right.gif) no-repeat scroll 100% 0;
+    margin-left:-3px
+}
+
+
+button.blue span{
+    padding:4px 10px 4px 5px;
+    background: transparent url(/images/4.0/buttons/button_blue_right.gif) no-repeat scroll 100% 0;
+    margin-left:-3px
+}
+
+button.green span{
     padding:4px 10px 4px 5px;
     background: transparent url(/images/4.0/buttons/button_green_right.gif) no-repeat scroll 100% 0;
     margin-left:-3px
