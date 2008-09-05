@@ -161,9 +161,9 @@ function skipResources() {
             <table cellpadding="0" cellspacing="0" border="0">
                 <tr>
                 <td style="padding-right:10px;">
-                <button name="buttonAction" onclick="setImportCheckboxes(AIQueueForm);addInventory();"><fmt:message key="common.label.AddtoInventory"/></button>
+                <button class="btnGreen" name="buttonAction" onclick="setImportCheckboxes(AIQueueForm);addInventory();"><span><fmt:message key="common.label.AddtoInventory"/></span></button>
                 &nbsp;&nbsp;
-                <button name="buttonAction" onclick="skipResources(); AIQueueForm.submit(); return false;"><fmt:message key="common.label.SkipResources"/></button>
+                <button class="btnBlue" name="buttonAction" onclick="skipResources(); AIQueueForm.submit(); return false;"><span><fmt:message key="common.label.SkipResources"/></span></button>
                </td>
             </tr>
            </table>

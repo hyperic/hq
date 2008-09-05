@@ -400,7 +400,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 		<table width="100%" cellpadding="5" cellspacing="0" border="0" class="ToolbarContent">
 			<tr>
 				<td class="ListCellLineEmpty"><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
-				<td><html:img page="/images/tbb_new.gif" width="42" height="16" border="0"/></td>
+				<td><button name="delete" class="btnGray" disabled="disabled"><span><fmt:message key="resource.common.button.new"/></span></button></td>
 				
 				<!--  PAGINATION CONTROLS  -->
 				<td width="100%" align="right" valign="bottom">

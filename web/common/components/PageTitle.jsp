@@ -286,10 +286,9 @@
             <label for="own">
                 <fmt:message key="resource.hub.search.label.Owned">
                     <fmt:param>
+                        <c:out value="${sessionScope.webUser.name}"/>
                     </fmt:param>
                 </fmt:message>
-                <!-- fmt:message caches previous value some times, so take it out of tag -->
-                <c:out value="${sessionScope.webUser.firstName}"/>
             </label>
             <span><fmt:message key="resource.hub.search.label.Match"/></span>
             <html:radio styleId="anyRadio" property="any" value="true"/>

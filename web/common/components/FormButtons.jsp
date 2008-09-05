@@ -73,15 +73,15 @@
       <table width="100%" cellpadding="0" cellspacing="7" border="0">
         <tr>
 <c:if test="${empty cancelOnly}">
-          <td><button name="ok.x" onclick="checkSubmit(); isButtonClicked=true;" title="<fmt:message key='FormButtons.ClickToOk'/>"><fmt:message key="button.ok"/></button></td>
+          <td><button class="btnGreen" name="ok.x" onclick="checkSubmit(); isButtonClicked=true;" title="<fmt:message key='FormButtons.ClickToOk'/>"><span><fmt:message key="button.ok"/></span></button></td>
 
 <c:if test="${empty noReset}">
           <td><html:img page="/images/spacer.gif" width="10" height="1" border="0"/></td>
-          <td><button name="reset.x"  title="<fmt:message key='FormButtons.ClickToReset'/>"><fmt:message key="button.reset"/></button></td>
+          <td><button class="btnGray" name="reset.x"  title="<fmt:message key='FormButtons.ClickToReset'/>"><span><fmt:message key="button.reset"/></span></button></td>
 </c:if>          
 </c:if>
 <c:if test="${empty noCancel}">
-          <td><button name="cancel.x" title="<fmt:message key='FormButtons.ClickToCancel'/>"><fmt:message key="button.cancel"/></button></td>
+          <td><button class="btnGray" name="cancel.x" title="<fmt:message key='FormButtons.ClickToCancel'/>"><span><fmt:message key="button.cancel"/></span></button></td>
 </c:if>
 		  <td width="100%"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
         </tr>

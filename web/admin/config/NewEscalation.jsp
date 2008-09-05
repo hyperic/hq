@@ -304,7 +304,7 @@ function editEscalation (row) {
 	
 	    escLi.appendChild(remDiv);
 	    remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
-	    remDiv.innerHTML ='<a class="buttonBlue" href="#" onclick="removeRow(this);"><span><fmt:message key="resource.common.button.delete"/></span></a>';
+	    remDiv.innerHTML ='<button name="delete" class="btnBlue" onclick="removeRow(this);"><span><fmt:message key="resource.common.button.delete"></span></button>';
 	
 	escLi.appendChild(escTable);
 	escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
