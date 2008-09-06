@@ -55,6 +55,8 @@
     <table name="EAM_RESOURCE">
         <data ID="5"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
+              NAME="covalentAuthzResourceGroup"
+              SORT_NAME="COVALENTAUTHZRESOURCEGROUP"
               SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
     </table>
@@ -372,6 +374,8 @@
     <table name="EAM_RESOURCE">
         <data ID="7"
             RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
+            NAME="ROOT_RESOURCE_GROUP"
+            SORT_NAME="ROOT_RESOURCE_GROUP"
             SUBJECT_ID="%EAM_SUBJECT.ID:1" PROTO_ID="0"
             FSYSTEM="TRUE"/>
     </table>
