@@ -454,22 +454,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
-     * Set the owner of this Resource.
-     * @param whoami The current running user.
-     * @param res This Resource.
-     * @param newOwner The new owner.
-     * @throws PermissionException whoami does not own the resource.
-     * @ejb:interface-method
-     */
-    public void setResourceOwner(AuthzSubject whoami, ResourceValue res,
-                                 AuthzSubject newOwner)
-        throws PermissionException 
-    {
-        Resource resource = lookupResource(res);
-        setResourceOwner(whoami, resource, newOwner);
-    }
-    
-    /**
      * @ejb:interface-method
      */
     public void setResourceOwner(AuthzSubject whoami, Resource resource,
@@ -671,10 +655,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return Array of resources owned by the given subject.
      * @ejb:interface-method
      */
-    public ResourceValue[] findResourceByOwner(AuthzSubject owner) {
-        return (ResourceValue[]) this
-                .fromPojos(getResourceDAO().findByOwner(owner),
-                           org.hyperic.hq.authz.shared.ResourceValue.class);
+    public Collection findResourceByOwner(AuthzSubject owner) {
+        return getResourceDAO().findByOwner(owner);
     }
 
     /**

@@ -9107,6 +9107,31 @@ has already been defined.
                         nullable="NOT NULL"/>
   </schemaSpec>
 
+  <schemaSpec version="3.124">
+    <schema-directSQL>
+      <statement desc="Drop unused EAM_RESOURCE_GROUP column NAME." fail="false">
+        ALTER TABLE EAM_RESOURCE_GROUP DROP COLUMN NAME
+      </statement>
+      <statement desc="Drop unused EAM_RESOURCE_GROUP column SORT_NAME." fail="false">
+        ALTER TABLE EAM_RESOURCE_GROUP DROP COLUMN SORT_NAME
+      </statement>
+      <statement desc="Update covalentAuthzResourceGroup resource group name.">
+        UPDATE EAM_RESOURCE SET NAME = 'covalentAuthzResourceGroup',
+        SORT_NAME = 'COVALENTAUTHZRESOURCEGROUP' WHERE RESOURCE_TYPE_ID = 3 AND INSTANCE_ID = 0
+      </statement>
+      <statement desc="Update root resource group name.">
+        UPDATE EAM_RESOURCE SET NAME = 'ROOT_RESOURCE_GROUP',
+        SORT_NAME = 'ROOT_RESOURCE_GROUP' WHERE RESOURCE_TYPE_ID = 3 AND INSTANCE_ID = 1
+      </statement>
+      <statement desc="Drop unused EAM_APPLICATION  column NAME." fail="false">
+        ALTER TABLE EAM_APPLICATION DROP COLUMN NAME
+      </statement>
+      <statement desc="Drop unused EAM_APPLICATION  column SORT_NAME." fail="false">
+        ALTER TABLE EAM_APPLICATION DROP COLUMN SORT_NAME
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
+import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
@@ -41,7 +42,7 @@ import org.hyperic.hq.grouping.CritterRegistry;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 
-public class ResourceGroup extends AuthzNamedBean
+public class ResourceGroup extends PersistedObject
     implements ContainerManagedTimestampTrackable
 {
     private String _description;
@@ -99,7 +100,6 @@ public class ResourceGroup extends AuthzNamedBean
     }
 
     ResourceGroup(ResourceGroupCreateInfo cInfo, AuthzSubject creator) {
-        setName(cInfo.getName());
         _clusterId         = new Integer(cInfo.getClusterId());
         _description       = cInfo.getDescription();
         _location          = cInfo.getLocation();
@@ -130,11 +130,45 @@ public class ResourceGroup extends AuthzNamedBean
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.authz.server.session.AuthzNamedBean#getName()
+     */
+    public String getName() {
+        if (_resource != null)
+            return _resource.getName();
+        return "";
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.authz.server.session.AuthzNamedBean#setName(java.lang.String)
+     */
+    void setName(String name) {
+        if (_resource != null)
+            _resource.setName(name);
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.authz.server.session.AuthzNamedBean#getSortName()
+     */
+    public String getSortName() {
+        if (_resource != null)
+            return _resource.getSortName();
+        return "";
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.authz.server.session.AuthzNamedBean#setSortName(java.lang.String)
+     */
+    void setSortName(String sortName) {
+        if (_resource != null)
+            _resource.setSortName(sortName);
+    }
+
     public String getDescription() {
         return _description;
     }
 
-    protected void setDescription(String val) {
+    void setDescription(String val) {
         _description = val;
     }
 
@@ -142,7 +176,7 @@ public class ResourceGroup extends AuthzNamedBean
         return _location;
     }
 
-    protected void setLocation(String val) {
+    void setLocation(String val) {
         _location = val;
     }
 
@@ -150,7 +184,7 @@ public class ResourceGroup extends AuthzNamedBean
         return _system;
     }
 
-    protected void setSystem(boolean val) {
+    void setSystem(boolean val) {
         _system = val;
     }
 
@@ -158,7 +192,7 @@ public class ResourceGroup extends AuthzNamedBean
         return _groupType;
     }
 
-    protected void setGroupType(Integer val) {
+    void setGroupType(Integer val) {
         _groupType = val;
     }
 
@@ -202,7 +236,7 @@ public class ResourceGroup extends AuthzNamedBean
         return _clusterId;
     }
 
-    protected void setClusterId(Integer val) {
+    void setClusterId(Integer val) {
         _clusterId = val;
     }
     
@@ -210,7 +244,7 @@ public class ResourceGroup extends AuthzNamedBean
         return _orCriteria;
     }
 
-    protected void setOrCriteria(boolean val) {
+    void setOrCriteria(boolean val) {
         _orCriteria = val;
     }
     
@@ -218,7 +252,7 @@ public class ResourceGroup extends AuthzNamedBean
         return _ctime;
     }
 
-    protected void setCtime(Long val) {
+    void setCtime(Long val) {
         _ctime = val != null ? val.longValue() : 0;
     }
 
@@ -226,7 +260,7 @@ public class ResourceGroup extends AuthzNamedBean
         return _mtime;
     }
 
-    protected void setMtime(Long val) {
+    void setMtime(Long val) {
         _mtime = val != null ? val.longValue() : 0;
     }
 
@@ -234,7 +268,7 @@ public class ResourceGroup extends AuthzNamedBean
         return _modifiedBy;
     }
 
-    protected void setModifiedBy(String val) {
+    void setModifiedBy(String val) {
         _modifiedBy = val;
     }
 
@@ -242,11 +276,11 @@ public class ResourceGroup extends AuthzNamedBean
         return _memberBag;
     }
     
-    protected void setMemberBag(Collection b) {
+    void setMemberBag(Collection b) {
         _memberBag = b;
     }
     
-    protected void setResourcePrototype(Resource r) {
+    void setResourcePrototype(Resource r) {
         _resourcePrototype = r;
     }
 
@@ -272,7 +306,7 @@ public class ResourceGroup extends AuthzNamedBean
         return _resourcePrototype;
     }
 
-    protected void setResource(Resource r) {
+    void setResource(Resource r) {
         _resource = r;
     }
     
@@ -284,7 +318,7 @@ public class ResourceGroup extends AuthzNamedBean
         return _roles;
     }
 
-    protected void setRoles(Collection val) {
+    void setRoles(Collection val) {
         _roles = val;
     }
 
@@ -296,7 +330,7 @@ public class ResourceGroup extends AuthzNamedBean
 
     // hibernate setter method
     // ResourceGroupManager should call setCritterList instead 
-    protected void setCriteriaList(List val) {
+    void setCriteriaList(List val) {
         _criteria = val;
     }
     
@@ -320,7 +354,7 @@ public class ResourceGroup extends AuthzNamedBean
      // used by the ResourceManager to set the criteria list for a resource group
     // note that the ResourceManager should invoke this method rather than
     // the setCriteriaList  setter used by hibernate
-    protected void setCritterList(CritterList criteria) throws GroupException {
+    void setCritterList(CritterList criteria) throws GroupException {
         List dumps = new ArrayList();
         // iterate through all the critters in the critter list
         // and convert them to persisted critters
@@ -377,7 +411,7 @@ public class ResourceGroup extends AuthzNamedBean
      * operations.  Not all the properties here can be changed once a group is
      * created.
      */
-    protected void setResourceGroupValue(ResourceGroupValue val) {
+    void setResourceGroupValue(ResourceGroupValue val) {
         setClusterId(new Integer(val.getClusterId()));
         setCtime(val.getCTime());
         setDescription(val.getDescription());

@@ -36,7 +36,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -119,7 +118,7 @@ public class ResourceGroupDAO extends HibernateDAO
         assert resType != null;
         ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
         Resource proto = rDao.findById(AuthzConstants.rootResourceId);
-        Resource r = rDao.create(resType, proto, resGrp.getName(), creator,  
+        Resource r = rDao.create(resType, proto, cInfo.getName(), creator,  
                                  resGrp.getId(), cInfo.getSystem());
 
         resGrp.setResource(r);
@@ -299,7 +298,8 @@ public class ResourceGroupDAO extends HibernateDAO
     }
         
     public ResourceGroup findByName(String name) {            
-        String sql = "from ResourceGroup where lower(name) = lower(?)";
+        String sql =
+            "from ResourceGroup g where lower(g.resource.name) = lower(?)";
         return (ResourceGroup)getSession().createQuery(sql)
             .setString(0, name)
             .setCacheable(true)
@@ -308,11 +308,11 @@ public class ResourceGroupDAO extends HibernateDAO
     }
     
     public Collection findByRoleIdAndSystem_orderName(Integer roleId,
-                                                         boolean system,
-                                                         boolean asc) {            
+                                                      boolean system,
+                                                      boolean asc) {            
         String sql = "select g from ResourceGroup g join fetch g.roles r " +
-                     "where r.id = ? and g.system = ? order by g.sortName " +
-                     (asc ? "asc" : "desc");
+                     "where r.id = ? and g.system = ? " +
+                     "order by g.resource.sortName " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
             .setInteger(0, roleId.intValue())
             .setBoolean(1, system)
@@ -322,7 +322,7 @@ public class ResourceGroupDAO extends HibernateDAO
     public Collection findWithNoRoles_orderName(boolean asc) {            
         String sql = "from ResourceGroup g " +
                      "where g.roles.size = 0 and g.system = false " +
-                     "order by sortName " + (asc ? "asc" : "desc");
+                     "order by g.resource.sortName " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql).list();
     }
 
@@ -331,7 +331,7 @@ public class ResourceGroupDAO extends HibernateDAO
         return getSession()
             .createQuery("from ResourceGroup g " +
                          "where ? not in (select id from g.roles) and " +
-                         "g.system = false order by g.sortName " +
+                         "g.system = false order by g.resource.sortName " +
                          (asc ? "asc" : "desc"))
             .setInteger(0, roleId.intValue())
             .list();
@@ -346,7 +346,7 @@ public class ResourceGroupDAO extends HibernateDAO
                    "join rg.memberBag g " +
                    "join g.resource r " +
                    "where r.instanceId = ? and  r.resourceType.id = ? " +
-                   "order by rg.sortName " +
+                   "order by rg.resource.sortName " +
                    (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
             .setInteger(0, instanceId.intValue())
@@ -515,8 +515,9 @@ public class ResourceGroupDAO extends HibernateDAO
     
     public Collection findByGroupType_orderName(boolean isAscending,
                                                 int groupType) {
-        String sql = "from ResourceGroup groupType = :type" +
-                     " ORDER BY name " + ((isAscending) ? "asc" : "desc");
+        String sql = "from ResourceGroup g where g.groupType = :type" +
+                     " ORDER BY g.resource.name " +
+                     ((isAscending) ? "asc" : "desc");
         return getSession()
             .createQuery(sql)
             .setInteger("type", groupType)

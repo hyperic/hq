@@ -77,6 +77,44 @@ public class Application extends AppdefResource
         setId(id);
     }
 
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefResource#getName()
+     */
+    public String getName() {
+        if (_resource != null)
+            return _resource.getName();
+        return super.getName();
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefResource#setName(java.lang.String)
+     */
+    public void setName(String name) {
+        if (_resource != null)
+            _resource.setName(name);
+        else
+            super.setName(name);
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefResource#getSortName()
+     */
+    public String getSortName() {
+        if (_resource != null)
+            return _resource.getSortName();
+        return super.getSortName();
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefResource#setSortName(java.lang.String)
+     */
+    public void setSortName(String sortName) {
+        if (_resource != null)
+            _resource.setSortName(sortName);
+        else
+            super.setSortName(sortName);
+    }
+
     public AppdefEntityID getEntityId()
     {
         return AppdefEntityID.newAppID(getId());

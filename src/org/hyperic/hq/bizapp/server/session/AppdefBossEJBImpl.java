@@ -2944,12 +2944,12 @@ public class AppdefBossEJBImpl
         ResourceGroupManagerLocal groupMan = getResourceGroupManager();
         
         // first look up the appdef resources by owner
-        ResourceValue[] resources
+        Collection resources
             = getResourceManager().findResourceByOwner(currentOwner);
         AuthzSubject overlord = getAuthzSubjectManager().getOverlordPojo();
-        for(int i = 0; i < resources.length; i++) {
-            ResourceValue aRes = resources[i];
-            String resType = aRes.getResourceTypeValue().getName();
+        for(Iterator it = resources.iterator(); it.hasNext(); ) {
+            Resource aRes = (Resource) it.next();
+            String resType = aRes.getResourceType().getName();
             // platforms
             if(resType.equals(AuthzConstants.platformResType)) {
                 // change platform owner

@@ -40,7 +40,7 @@ public abstract class ResourceGroupSortField
         new ResourceGroupSortField(0, "Name", "resourceGroup.sortField.name") 
     {
         String getSortString(String group) {
-            return group + ".name";
+            return group + ".resource.name";
         }
 
         public boolean isSortable() {

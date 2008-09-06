@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -26,6 +26,7 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.CreateException;
@@ -43,6 +44,7 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -276,11 +278,11 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     private void resetResourceOwnership(int sessionId, AuthzSubject currentOwner) 
         throws FinderException, UpdateException, PermissionException {
         // first look up the resources by owner
-        ResourceValue[] resources
+        Collection resources
             = getResourceManager().findResourceByOwner(currentOwner);
-        for(int i = 0; i < resources.length; i++) {
-            ResourceValue aRes = resources[i];
-            String resType = aRes.getResourceTypeValue().getName();    
+        for(Iterator it = resources.iterator(); it.hasNext(); ) {
+            Resource aRes = (Resource) it.next();
+            String resType = aRes.getResourceType().getName();    
             if(resType.equals(AuthzConstants.roleResourceTypeName)) {
                 getResourceManager().setResourceOwner(getOverlord(), aRes,
                                                       getOverlord());

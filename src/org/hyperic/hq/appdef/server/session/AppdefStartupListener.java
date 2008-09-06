@@ -39,7 +39,6 @@ public class AppdefStartupListener
 {
     private static final Object LOCK = new Object();
     
-    private static ClusterDeleteCallback _clusterDelCallback;
     private static AgentCreateCallback   _agentCreateCallback;
     
     public void hqStarted() {
@@ -49,8 +48,6 @@ public class AppdefStartupListener
         HQApp app = HQApp.getInstance();
 
         synchronized (LOCK) {
-            _clusterDelCallback = (ClusterDeleteCallback)
-                app.registerCallbackCaller(ClusterDeleteCallback.class);
             _agentCreateCallback = (AgentCreateCallback)
                 app.registerCallbackCaller(AgentCreateCallback.class);
             app.registerCallbackListener(ResourceDeleteCallback.class,
@@ -81,12 +78,6 @@ public class AppdefStartupListener
         registerTransferAgentBundleZeventListener();
         registerTransferAgentPluginZeventListener();
         registerUpgradeAgentZeventListener();
-    }
-    
-    static ClusterDeleteCallback getClusterDeleteCallback() {
-        synchronized (LOCK) {
-            return _clusterDelCallback;
-        }
     }
     
     static AgentCreateCallback getAgentCreateCallback() {
