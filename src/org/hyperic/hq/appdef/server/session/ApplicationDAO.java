@@ -40,7 +40,6 @@ import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.dao.AppServiceDAO;
 import org.hyperic.hq.dao.AppSvcDependencyDAO;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -60,22 +59,22 @@ public class ApplicationDAO extends HibernateDAO
         return (Application)super.get(id);
     }
 
-    public void save(Application entity) {
+    void save(Application entity) {
         super.save(entity);
     }
 
-    public void remove(Application entity) {
+    void remove(Application entity) {
         super.remove(entity);
     }
 
-    public void addAppService(Application a, Integer added) {
+    void addAppService(Application a, Integer added) {
         AppServiceDAO adao = DAOFactory.getDAOFactory().getAppServiceDAO();
         AppService as = adao.findById(added);
         as.setApplication(a);
         a.getAppServices().add(as);
     }
 
-    public void removeAppService(Application a, Integer removed) {
+    void removeAppService(Application a, Integer removed) {
         AppServiceDAO adao = DAOFactory.getDAOFactory().getAppServiceDAO();
         AppService as = adao.findById(removed);
         a.getAppServices().remove(as);
@@ -112,11 +111,11 @@ public class ApplicationDAO extends HibernateDAO
         return aTree;
     }
 
-    public void setDependencyTree(Application a, DependencyTree newTree) {
+    void setDependencyTree(Application a, DependencyTree newTree) {
         log.debug("Setting dependency tree for application: " + a.getName());
         List nodes = newTree.getNodes();
         AppSvcDependencyDAO adao =
-            DAOFactory.getDAOFactory().getAppSvcDepencyDAO();
+            new AppSvcDependencyDAO(DAOFactory.getDAOFactory());
         AppServiceDAO asdao = DAOFactory.getDAOFactory().getAppServiceDAO();
 
         for (int i = 0; i < nodes.size(); i++) {
@@ -152,7 +151,7 @@ public class ApplicationDAO extends HibernateDAO
         }
     }
 
-    public void setApplicationValue(Application a, ApplicationValue appV) {
+    void setApplicationValue(Application a, ApplicationValue appV) {
         a.setName( appV.getName() );
         a.setSortName( appV.getName().toUpperCase() );
         a.setSortName( appV.getSortName() );

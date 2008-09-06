@@ -1,4 +1,4 @@
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -10,15 +10,12 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
 import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceDAO;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.dao.AppSvcDependencyDAO;
+import org.hyperic.hq.dao.HibernateDAO;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -243,16 +240,17 @@ public class AppServiceDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public AppService findByAppAndCluster(Integer appId, Integer svcClusterId)
+    public AppService findByAppAndCluster(Application app, ResourceGroup g)
     {
         String sql=
             "select distinct a from AppService a " +
-            "where a.application.id=? and a.resourceGroup.id=?";
+            "where a.application=? and a.resourceGroup=?";
         return (AppService)getSession().createQuery(sql)
-            .setInteger(0, appId.intValue())
-            .setInteger(1, svcClusterId.intValue())
+            .setParameter(0, app)
+            .setParameter(1, g)
             .uniqueResult();
     }
+
 
     public AppSvcDependency addDependentService(Integer appSvcPK,
                                                 Integer depPK)
