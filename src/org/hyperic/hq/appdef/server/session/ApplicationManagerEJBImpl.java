@@ -58,6 +58,7 @@ import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.GroupChangeCallback;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
@@ -74,7 +75,6 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.dao.AppServiceDAO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -757,32 +757,35 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         app.setResource(resource);
     }
 
-    private class GroupDeleteWatcher 
-        implements ClusterDeleteCallback
-    {
-        public void preDelete(ServiceCluster c) throws VetoException {
-            ResourceBundle b = 
-                ResourceBundle.getBundle("org.hyperic.hq.appdef.Resources");
-
-            Collection apps = getApplicationDAO().findUsingGroup(c.getGroup());
-            
-            if (apps.size() != 0) {
-                throw new VetoException(b.getString("cluster.inUse"));
-            } 
-        }
-
-        public void groupMembersChanged(ResourceGroup g) {
-        }
-    }
-    
     /**
      * @ejb:interface-method
      */
     public void startup() {
         log.info("Application manager starting up!");
         
-        HQApp.getInstance().registerCallbackListener(ClusterDeleteCallback.class,
-                                                     new GroupDeleteWatcher());
+        HQApp.getInstance().registerCallbackListener(GroupChangeCallback.class,
+                                                     new GroupChangeCallback() {
+            public void preGroupDelete(ResourceGroup g)
+                throws VetoException {
+                Collection apps = getApplicationDAO().findUsingGroup(g);
+                AppServiceDAO dao = getAppServiceDAO();
+                for (Iterator it = apps.iterator(); it.hasNext(); ) {
+                    Application app = (Application) it.next();
+                    // Find the app service and remove it
+                    try {
+                        AppService svc = dao.findByAppAndCluster(app, g);
+                        app.getAppServices().remove(svc);
+                        dao.remove(svc);
+                    } catch (ObjectNotFoundException e) {
+                        continue;
+                    }
+                }
+            }
+    
+            public void postGroupCreate(ResourceGroup g) {}
+    
+            public void groupMembersChanged(ResourceGroup g) {}
+        });
     }
     
     public static ApplicationManagerLocal getOne() {
