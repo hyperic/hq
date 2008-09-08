@@ -53,7 +53,7 @@
          and leave the rest of the suffixes contributed dynamically by registering deployers.
       -->
       <descriptors>
-         <value value="250:.rar,300:-ds.xml,400:.jar,500:.war,650:.ear,800:.bsh,900:.last"/>
+         <value value="250:.rar,300:-ds.xml,400:.jar,500:.war,650:.ear,900:.last"/>
       </descriptors>
    </attribute>
    <attribute access='read-write' setMethod='setTempDir' getMethod='getTempDir'>
