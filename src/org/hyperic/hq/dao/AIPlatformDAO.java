@@ -289,7 +289,7 @@ public class AIPlatformDAO extends HibernateDAO
             }
         }
 
-        i = newServers.entrySet().iterator();
+        i = newServers.values().iterator();
         while (i.hasNext()) {
             AIServerValue aiserver = (AIServerValue) i.next();
             AIServer ais = new AIServer();

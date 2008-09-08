@@ -34,6 +34,7 @@ import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.server.session.RoleDAO;
+import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
 import org.hyperic.hq.common.server.session.CrispoDAO;
 import org.hyperic.hq.common.server.session.CrispoOptionDAO;
 import org.hyperic.hq.control.server.session.ControlHistoryDAO;
@@ -84,6 +85,7 @@ public abstract class DAOFactory {
 
     // Appdef DAOs
     public abstract AgentDAO getAgentDAO();
+    public abstract AgentReportStatusDAO getAgentReportStatusDAO();
     public abstract AgentTypeDAO getAgentTypeDAO();
     public abstract ApplicationDAO getApplicationDAO();
     public abstract ApplicationTypeDAO getApplicationTypeDAO();

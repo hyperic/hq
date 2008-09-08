@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -49,8 +50,11 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
+import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -60,6 +64,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -78,6 +83,11 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.TransactionListener;
+import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -88,21 +98,33 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.bizapp.shared.AIBossLocal;
+import org.hyperic.hq.bizapp.shared.AIBossUtil;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.sigar.NetFlags;
+import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
+import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.NonUniqueObjectException;
@@ -1430,6 +1452,47 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         
         platform.updateWithAI(
             aiplatform, subj.getName(), getAuthzResource(platform.getEntityId()));
+        // need to check if IPs have changed, if so update Agent
+        List ips = Arrays.asList(aiplatform.getAIIpValues());
+        AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+        Agent currAgent = platform.getAgent();
+        boolean removeCurrAgent = false;
+        for (Iterator it=ips.iterator(); it.hasNext(); ) {
+            AIIpValue ip = (AIIpValue)it.next();
+            if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_ADDED) {
+                try {
+                    Agent agent = aMan.getAgentPojo(aiplatform.getAgentToken());
+                    platform.setAgent(agent);
+                    enableMeasurements(subj, platform);
+                } catch (AgentNotFoundException e) {
+                    throw new ApplicationException(e.getMessage(), e);
+                }
+            } else if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED
+                       && currAgent.getAddress().equals(ip.getAddress())) {
+                removeCurrAgent = true;
+            }
+        }
+        if (removeCurrAgent) {
+            aMan.removeAgent(currAgent);
+        }
+    }
+    
+    private void enableMeasurements(AuthzSubjectValue subj, Platform platform) {
+        AgentScheduleSyncZevent event =
+            new AgentScheduleSyncZevent(platform.getEntityId());
+        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        Collection servers = platform.getServers();
+        for (Iterator it=servers.iterator(); it.hasNext(); ) {
+            Server server = (Server)it.next();
+            event = new AgentScheduleSyncZevent(server.getEntityId());
+            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            Collection services = server.getServices();
+            for (Iterator xit=services.iterator(); xit.hasNext(); ) {
+                Service service = (Service)xit.next();
+                event = new AgentScheduleSyncZevent(service.getEntityId());
+                ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            }
+        }
     }
 
     /**
