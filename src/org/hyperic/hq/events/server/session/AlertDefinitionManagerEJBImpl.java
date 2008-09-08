@@ -54,6 +54,7 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
@@ -523,9 +524,12 @@ public class AlertDefinitionManagerEJBImpl
         AlertDefinition def = getAlertDefDAO().findById(defId);
         canManageAlerts(subj, def);
 
-        Escalation escl = 
-            EscalationManagerEJBImpl.getOne().findById(escId);
+    	EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
+        Escalation escl = escMan.findById(escId);
 
+        // End any escalation we were previously doing.
+        escMan.endEscalation(def);
+        
         def.setEscalation(escl);
         def.setMtime(System.currentTimeMillis());
     }

@@ -35,8 +35,10 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
+import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 
@@ -94,14 +96,21 @@ public final class ClassicEscalationAlertType
     
     protected void setEscalation(Integer defId, Escalation escalation) {
         try {
-            AlertDefinition def = getDefMan().getByIdNoCheck(defId);
-            def.setEscalation(escalation);
+        	EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
+        	AlertDefinition def = getDefMan().getByIdNoCheck(defId);
+            // End any escalation we were previously doing.
+            escMan.endEscalation(def);
+            
+        	def.setEscalation(escalation);
             long mtime = System.currentTimeMillis();
             def.setMtime(mtime);
-            
+
             Collection children = def.getChildren();
             for (Iterator it = children.iterator(); it.hasNext(); ) {
                 def = (AlertDefinition) it.next();
+                // End any escalation we were previously doing.
+                escMan.endEscalation(def);
+                
                 def.setEscalation(escalation);
                 def.setMtime(mtime);
             }
