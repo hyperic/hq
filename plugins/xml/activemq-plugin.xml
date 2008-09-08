@@ -42,25 +42,184 @@
   <filter name="template"
           value="${OBJECT_NAME}:${alias}"/>
 
-  <!-- both Queues and Topics are destinations -->
-  <metrics name="destination">
+  <filter name="QUEUE_OBJECT_NAME"
+          value="${domain}:Type=Queue,BrokerName=*,Destination=*"/>
+
+  <filter name="TOPIC_OBJECT_NAME"
+          value="${domain}:Type=Topic,BrokerName=*,Destination=*"/>
+
+  <filter name="BROKER_OBJECT_NAME"
+          value="${domain}:Type=Broker,BrokerName=*"/>
+
+  <!-- special casing due to 5.1 renaming:
+       MemoryPercentageUsed -> MemoryPercentUsage -->
+  <metrics name="ActiveMQ 4.0 Topic">
     <metric name="Availability"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
             indicator="true"/>
 
     <metric name="Enqueue Count"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
             indicator="true"
             collectionType="trendsup"/>
 
     <metric name="Dequeue Count"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
             indicator="true"
             collectionType="trendsup"/>
 
-    <metric name="Consumer Count"/>
+    <metric name="Consumer Count"
+            template="${TOPIC_OBJECT_NAME}:${alias}"/>
 
     <metric name="Queue Size"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
             indicator="true"/>
 
     <metric name="Memory Percentage Used"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 4.0 Queue">
+    <metric name="Availability"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Enqueue Count"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Dequeue Count"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Consumer Count"
+            template="${QUEUE_OBJECT_NAME}:${alias}"/>
+
+    <metric name="Queue Size"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Memory Percentage Used"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 4.0 Broker">
+    <metric name="Availability"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Total Consumer Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"/>
+
+    <metric name="Total Enqueue Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Total Dequeue Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            collectionType="trendsup"/>
+
+    <metric name="Total Message Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Memory Limit"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            units="B"/>
+
+    <metric name="Memory Percentage Used"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 5.1 Topic">
+    <metric name="Availability"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Enqueue Count"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Dequeue Count"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Consumer Count"
+            template="${TOPIC_OBJECT_NAME}:${alias}"/>
+
+    <metric name="Queue Size"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Memory Percent Usage"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 5.1 Queue">
+    <metric name="Availability"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Enqueue Count"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Dequeue Count"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Consumer Count"
+            template="${QUEUE_OBJECT_NAME}:${alias}"/>
+
+    <metric name="Queue Size"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Memory Percent Usage"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 5.1 Broker">
+    <metric name="Availability"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Total Consumer Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"/>
+
+    <metric name="Total Enqueue Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Total Dequeue Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            collectionType="trendsup"/>
+
+    <metric name="Total Message Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Memory Limit"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            units="B"/>
+
+    <metric name="Memory Percent Usage"
+            template="${BROKER_OBJECT_NAME}:${alias}"
             units="percent"/>
   </metrics>
 
@@ -86,6 +245,9 @@
 
     <property name="DEFAULT_LOG_FILE"
               value="var/activemq.log"/>
+
+    <property name="VERSION_FILE"
+              value="lib/activemq-core-4.*.jar"/>
 
     <config include="jmx">
       <option name="process.query"
@@ -144,8 +306,7 @@
     </service>
 
     <service name="Broker">
-      <property name="OBJECT_NAME"
-                value="${domain}:Type=Broker,BrokerName=*"/>
+      <property name="OBJECT_NAME" value="${BROKER_OBJECT_NAME}"/>
 
       <config>
         <option name="BrokerName"
@@ -159,29 +320,6 @@
               class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
 
       <actions include="start,stop,gc,removeTopic,removeQueue"/>
-
-      <metric name="Availability"
-              indicator="true"/>
-
-      <metric name="Total Consumer Count"/>
-
-      <metric name="Total Enqueue Count"
-              indicator="true"
-              collectionType="trendsup"/>
-
-      <metric name="Total Dequeue Count"
-              collectionType="trendsup"/>
-
-      <metric name="Total Message Count"
-              indicator="true"
-              collectionType="trendsup"/>
-
-      <metric name="Memory Percentage Used"
-              units="percent"/>
-
-      <metric name="Memory Limit"
-              units="B"/>
-
     </service>
 
     <!--
@@ -191,12 +329,9 @@
     -->
 
     <service name="Queue">
-      <property name="OBJECT_NAME"
-                value="${domain}:Type=Queue,BrokerName=*,Destination=*"/>
+      <property name="OBJECT_NAME" value="${QUEUE_OBJECT_NAME}"/>
 
       <config include="destination"/>
-
-      <metrics include="destination"/>
 
       <plugin type="autoinventory"/>
 
@@ -208,12 +343,9 @@
 
     <!-- same as Queue except for Type=Topic -->
     <service name="Topic">
-      <property name="OBJECT_NAME"
-                value="${domain}:Type=Topic,BrokerName=*,Destination=*"/>
+      <property name="OBJECT_NAME" value="${TOPIC_OBJECT_NAME}"/>
 
       <config include="destination"/>
-
-      <metrics include="destination"/>
 
       <plugin type="autoinventory"/>
 
@@ -225,5 +357,21 @@
 
     <!-- &sun-jvm-service; -->
 
+  </server>
+
+  <server name="ActiveMQ"
+          version="5.0"
+          include="4.0">
+
+    <property name="VERSION_FILE"
+              value="lib/activemq-core-5.0.*.jar"/>
+  </server>
+
+  <server name="ActiveMQ"
+          version="5.1"
+          include="5.0">
+
+    <property name="VERSION_FILE"
+              value="lib/activemq-core-5.1.*.jar"/>
   </server>
 </plugin>
