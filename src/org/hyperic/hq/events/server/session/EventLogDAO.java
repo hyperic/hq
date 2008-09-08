@@ -123,7 +123,11 @@ public class EventLogDAO extends HibernateDAO {
             groupFilterSql = " and exists ( " +
             "select rgm.resource_id from EAM_RES_GRP_RES_MAP rgm " + 
             " join EAM_RESOURCE_GROUP g on rgm.resource_group_id = g.id " + 
-            " where rgm.resource_id = r.id and g.id in (:inGroups) ) ";
+            " where rgm.resource_id = r.id and g.id in (:inGroups) " +
+            "union " +
+            " select g2.resource_id from EAM_RESOURCE_GROUP g2 " +
+            " where g2.resource_id = r.id and g2.id in (:inGroups) " +
+            ") ";
         }
         
         String sql = "select {e.*}, r.* " + 
