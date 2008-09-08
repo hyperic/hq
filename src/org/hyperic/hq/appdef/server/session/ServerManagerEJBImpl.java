@@ -1376,21 +1376,28 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                  ResourceGroupManagerLocal resGroupMan,
                                  ResourceManagerLocal resMan)
         throws VetoException, RemoveException {
+        // Need to remove all service types
+        ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
+        ServiceType[] types = (ServiceType[])
+            serverType.getServiceTypes().toArray(new ServiceType[0]);
+        for (int i = 0; i < types.length; i++) {
+            svcMan.deleteServiceType(types[i], overlord, resGroupMan, resMan);
+        }
+
         log.debug("Removing ServerType: " + serverType.getName());
         Integer typeId = AuthzConstants.authzServerProto;
         Resource proto = 
-            resMan.findResourcePojoByInstanceId(typeId,
-                                                serverType.getId());
+            resMan.findResourcePojoByInstanceId(typeId, serverType.getId());
         
         try {
             resGroupMan.removeGroupsCompatibleWith(proto);
         
             // Remove all servers
-            for (Iterator svrIt = serverType.getServers().iterator();
-                 svrIt.hasNext(); ) {
-                Server svrLocal = (Server) svrIt.next();
+            Server[] servers = (Server[])
+                serverType.getServers().toArray(new Server[0]);
+            for (int i = 0; i < servers.length; i++) {
                 try {
-                    removeServer(overlord, svrLocal);
+                    removeServer(overlord, servers[i]);
                 } catch (ServerNotFoundException e) {
                     assert false :
                         "Delete based on a server should not " +
@@ -1402,14 +1409,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 "Overlord should not run into PermissionException";
         }
         
-        // Need to remove all service types
-        ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
-        ServiceType[] types = (ServiceType[])
-            serverType.getServiceTypes().toArray(new ServiceType[0]);
-        for (int i = 0; i < types.length; i++) {
-            svcMan.deleteServiceType(types[i], overlord, resGroupMan, resMan);
-        }
-
         ServerTypeDAO dao = new ServerTypeDAO(DAOFactory.getDAOFactory());
         dao.remove(serverType);
     }
