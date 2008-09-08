@@ -2414,9 +2414,21 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
 		that.inputs.to_date.setValue(that.selected_to_time);
 		that.inputs.to_time.setValue(that.selected_to_time);
 		
-        var timezoneName = dojo11.date.getTimezoneName(new Date());
-		dojo11.byId('maintenance_from_time_timezone').innerHTML = ' (' + timezoneName + ')';
-		dojo11.byId('maintenance_to_time_timezone').innerHTML = ' (' + timezoneName + ')';
+        // temporary hack because dojo displays the full timezone name
+        // (pacific daylight time) in windows firefox
+		var timezoneName = dojo11.date.getTimezoneName(new Date());
+        var tzSplit = timezoneName.split(" ");        
+        if (tzSplit.length > 1) {            
+            // Take the first letter of each word in the split             
+            // May be 'pacific daylight time'            
+        	timezoneName = "";
+            for (var i=0; i<tzSplit.length; i++) {                
+            	timezoneName += tzSplit[i][0];
+            }
+            timezoneName = timezoneName.toUpperCase();
+        }       
+		dojo11.byId('maintenance_from_time_timezone').innerHTML = hyperic.data.maintenance_schedule.label.time + '&nbsp;(' + timezoneName + '):&nbsp;';
+		dojo11.byId('maintenance_to_time_timezone').innerHTML = hyperic.data.maintenance_schedule.label.time + '&nbsp;(' + timezoneName + '):&nbsp;';
 		
         if(that.existing_schedule.from_time)
         {
