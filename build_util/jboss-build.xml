@@ -170,6 +170,12 @@
     <!-- Remove jboss aop directory. Javaassist conflicts with tapestry's version 3.6.GA. -->
     <delete verbose="true" dir="${jboss.home}/server/default/deploy/jboss-aop.deployer"/>
 
+    <!-- Remove BSH deployer -->
+    <delete failonerror="false" file="${jboss-deploy-dir}/bsh-deployer.xml"/>
+    <!-- Update JBoss deployer with .bsh removed as a deployable file -->
+    <copy file="${hq.home}/installer/data/hq-engine/org.jboss.deployment.MainDeployer-xmbean.xml"
+          tofile="${jboss.home}/server/default/conf/xmdesc/org.jboss.deployment.MainDeployer-xmbean.xml" />
+
     <delete dir="${jboss-deploy-dir}/lather-jboss.sar" />
     <unzip src="${lather.lib}/lather-jboss.sar"
            dest="${jboss-deploy-dir}/lather-jboss.sar"
