@@ -201,12 +201,13 @@ public class ApplicationDAO extends HibernateDAO
     }
 
     public Collection findAll_orderName(boolean asc) {
-        String sql="from Application order by sortName "+(asc ? "asc" : "desc");
+        String sql = "from Application order by resource.sortName " +
+                     (asc ? "asc" : "desc");
         return getSession().createQuery(sql).list();
     }
 
     public Application findByName(String name) {
-        String sql="from Application where upper(name) = ?";
+        String sql="from Application where upper(resource.name) = ?";
         return (Application)getSession().createQuery(sql)
             .setString(0, name.toUpperCase())
             .uniqueResult();
@@ -216,7 +217,7 @@ public class ApplicationDAO extends HibernateDAO
         String sql="select a from Application a " +
                    " join fetch a.appServices s " +
                    "where s.service.id=? " +
-                   "order by a.sortName";
+                   "order by a.resource.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, serviceId.intValue())
             .setCacheable(true)
@@ -230,7 +231,7 @@ public class ApplicationDAO extends HibernateDAO
         String sql="select a from Application a " +
                    " join fetch a.appServices s " +
                    "where s.service.id=? or s.resourceGroup.id=?" +
-                   "order by a.sortName";
+                   "order by a.resource.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, serviceId.intValue())
             .setInteger(1, groupId.intValue())
@@ -242,7 +243,7 @@ public class ApplicationDAO extends HibernateDAO
                    " join fetch a.appServices asv " +
                    " join fetch asv.service s " +
                    "where s.server.id=? " +
-                   "order by a.sortName " + (asc ? "asc" : "desc");
+                   "order by a.resource.sortName " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
             .setInteger(0, serverId.intValue())
             .list();
@@ -254,7 +255,7 @@ public class ApplicationDAO extends HibernateDAO
                    " join fetch asv.service s " +
                    " join fetch s.server srv " +
                    "where srv.platform.id=? " +
-                   "order by a.sortName " + (asc ? "asc" : "desc");
+                   "order by a.resource.sortName " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
             .setInteger(0, pid.intValue())
             .list();
@@ -266,7 +267,7 @@ public class ApplicationDAO extends HibernateDAO
                    " join fetch a.appServices asv " +
                    "where asv.service.id=? " +
                    "order by a.owner " + (asc ? "asc" : "desc") +
-                   ", a.sortName";
+                   ", a.resource.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, serviceId.intValue())
             .list();
@@ -278,7 +279,7 @@ public class ApplicationDAO extends HibernateDAO
                    " join fetch asv.service s " +
                    "where s.server.id=? " +
                    "order by a.owner " + (asc ? "asc" : "desc") +
-                   ", a.sortName";
+                   ", a.resource.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, serverId.intValue())
             .list();
@@ -291,7 +292,7 @@ public class ApplicationDAO extends HibernateDAO
                    " join fetch s.server srv " +
                    "where srv.platform.id=? " +
                    "order by a.owner " + (asc ? "asc" : "desc") +
-                   ", a.sortName";
+                   ", a.resource.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, pid.intValue())
             .list();
