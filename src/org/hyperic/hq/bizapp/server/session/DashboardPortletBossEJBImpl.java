@@ -57,12 +57,13 @@ import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
-import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
@@ -184,6 +185,8 @@ public class DashboardPortletBossEJBImpl
                                      PageInfo pageInfo)
         throws PermissionException, JSONException, FinderException
     {
+        final long PORTLET_RANGE = MeasurementConstants.DAY * 3;
+        
         JSONObject rtn = new JSONObject();
         _rgMan = ResourceGroupManagerEJBImpl.getOne();
         final int maxRecords = pageInfo.getStartRow() + pageInfo.getPageSize();
@@ -199,15 +202,16 @@ public class DashboardPortletBossEJBImpl
             ResourceGroup group = _rgMan.findResourceGroupById(subj, gId);
             if (group != null) {
                 JSONArray array = new JSONArray()
-                    .put(getResourceStatus(subj, group))
-                    .put(getGroupStatus(subj, group));
+                    .put(getResourceStatus(subj, group, PORTLET_RANGE))
+                    .put(getGroupStatus(subj, group, PORTLET_RANGE));
                 rtn.put(group.getId().toString(), array);  
             }
         }
         return rtn;
     }
 
-    private String getGroupStatus(AuthzSubject subj, ResourceGroup group)
+    private String getGroupStatus(AuthzSubject subj, ResourceGroup group,
+                                  long range)
         throws PermissionException
     {
         List galertDefs = _gaMan.findAlertDefs(group, PageControl.PAGE_ALL);
@@ -216,7 +220,7 @@ public class DashboardPortletBossEJBImpl
             return ALERT_UNKNOWN;
         }
         long now = System.currentTimeMillis();
-        long begin = now-MeasurementConstants.HOUR*24*7;
+        long begin = now - range;
         PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED);
         List galerts = _gaMan.findAlertLogsByTimeWindow(group, begin, now, pc);
         for (Iterator i=galerts.iterator(); i.hasNext(); ) {
@@ -236,62 +240,58 @@ public class DashboardPortletBossEJBImpl
         return rtn;
     }
     
-    private String getResourceStatus(AuthzSubject subj, ResourceGroup group)
+    private String getResourceStatus(AuthzSubject subj, ResourceGroup group,
+                                     long range)
         throws PermissionException, FinderException
     {
-        String rtn = ALERT_UNKNOWN;
-        boolean isSet = false;
-        Collection resources = _rgMan.getMembers(group);
-        PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED);
-        for (Iterator i=resources.iterator(); i.hasNext(); ) {
-            Resource r = (Resource)i.next();
-            AppdefEntityID aId = new AppdefEntityID(r);
-            checkViewPermission(subj, aId);
-            List alertDefs = _adMan.findAlertDefinitions(
-                subj, new AppdefEntityID(r), PageControl.PAGE_ALL);
-            if (alertDefs.size() == 0) {
-                continue;
-            }
-            if (!isSet) {
-                rtn = ALERT_OK;
-            }
-            isSet = true;
-            List alerts = _alMan.findAlerts(subj, aId, pc);
-            for (Iterator it=alerts.iterator(); it.hasNext(); ) {
-                AlertValue alert = (AlertValue)it.next();
-                if (alert.isFixed()) {
-                    continue;
-                }
-                if (isAckd(subj, alert)) {
-                    rtn = ALERT_WARN;
-                } else {
+        long now = System.currentTimeMillis();
+        long begin = now - range;
+        List alerts = _alMan.findAlerts(subj.getId(), 0, begin, now, false,
+                                        true, group.getId(),
+                                        PageInfo.getAll(AlertSortField.FIXED,
+                                                        true));
+        // There are unfixed alerts
+        if (alerts.size() > 0) {
+            for (Iterator it = alerts.iterator(); it.hasNext(); ) {
+                Alert alert = (Alert) it.next();
+                if (!isAckd(subj, alert)) {
                     return ALERT_CRITICAL;
                 }
             }
+            return ALERT_WARN;
         }
-        return rtn;
+        else {
+            // Is it that there are no alerts or that there are no alert
+            // definitions?
+            Collection resources = _rgMan.getMembers(group);
+            PageControl pc = new PageControl(0, 1);
+            for (Iterator i = resources.iterator(); i.hasNext();) {
+                Resource r = (Resource) i.next();
+                AppdefEntityID aId = new AppdefEntityID(r);
+
+                checkViewPermission(subj, aId);
+                List alertDefs = _adMan
+                    .findAlertDefinitions(subj, new AppdefEntityID(r), pc);
+                if (alertDefs.size() > 0) {
+                    return ALERT_OK;
+                }
+            }
+            return ALERT_UNKNOWN;
+        }
     }
 
-    private boolean isAckd(AuthzSubject subj, AlertValue alert)
+    private boolean isAckd(AuthzSubject subj, Alert alert)
         throws PermissionException, FinderException
     {
-        AlertDefinitionValue alertDef =
-            _adMan.getById(subj, alert.getAlertDefId());
+        AlertDefinition alertDef = alert.getAlertDefinition();
         // a resource alert may not have an associated escalation
-        Integer escId = alertDef.getEscalationId();
-        if (escId == null) {
-            return false;
-        }
-        Escalation esc = _escMan.findById(escId);
+        Escalation esc = alertDef.getEscalation();
         if (esc == null || esc.getMaxPauseTime() == 0) {
             return false;
         }
         EscalationState state = _escMan.findEscalationState(
             _alMan.findAlertById(alert.getId()).getAlertDefinition());
-        if (state == null || state.getAcknowledgedBy() == null) {
-            return false;
-        }
-        return true;
+        return state != null && state.getAcknowledgedBy() != null;
     }
 
     public static DashboardPortletBossLocal getOne() {
