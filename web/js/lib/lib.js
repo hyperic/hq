@@ -38,6 +38,20 @@ hyperic.form = {
         } else {
             elem.parentNode.className = "fieldRow";
         }
+    },
+    /**
+     * An href representing a button calls this in conjunction with a 
+     * hidden form field to submit the encapsulating form.
+     *
+     * @param inputName the name to assign to the hidden input field
+     * @param inputValue  the value  to assign to the hidden input field
+     * @param inputNodeName the String ID of the hidden input field
+    */
+    mockLinkSubmit : function(inputName, inputValue, inputNodeName){
+        var hiddenInputObj = dojo.byId(inputNodeName)
+        hiddenInputObj.name=inputName;
+        hiddenInputObj.value=inputValue;
+        hiddenInputObj.form.submit();
     }
 };
 
@@ -618,7 +632,7 @@ function activateHeaderTab(){
     if(l.indexOf("rep")!=-1 || l.indexOf("Rep")!=-1 || l.indexOf("masth")!=-1){
         dojo.byId("analyzeTab").className = "activeTab";
     }
-    if(l.indexOf("admin")!=-1 || l.indexOf("Adm")!=-1){
+    if(l.indexOf("admin.do")!=-1 || l.indexOf("Admin.do")!=-1){
         dojo.byId("adminTab").className = "activeTab";
     }
 }
@@ -2765,6 +2779,53 @@ Date.prototype.formatDate = function(format)
     }
     return format;
 };
+
+Date.prototype.getTimezoneName = function(){
+	// similar to dojo.date.getTimezoneName, but fixes a bug
+	// with Windows FF that displays the long name of the timezone
+	var dateObject = this;
+	var str = dateObject.toString(); // Start looking in toString
+	var tz = ''; // The result -- return empty string if nothing found
+	var match;
+
+	// First look for something in parentheses -- fast lookup, no regex
+	var pos = str.indexOf('(');
+	if(pos > -1){
+		tz = str.substring(++pos, str.indexOf(')'));
+        var split = tz.split(" ");        
+        if (split.length > 1) {            
+            // Take the first letter of each word in the split             
+            // May be 'pacific daylight time'            
+            tz = "";
+            for (var i=0; i<split.length; i++) {                
+                tz += split[i][0];
+            }
+            tz = tz.toUpperCase();
+        }		
+	}else{
+		// If at first you don't succeed ...
+		// If IE knows about the TZ, it appears before the year
+		// Capital letters or slash before a 4-digit year 
+		// at the end of string
+		var pat = /([A-Z\/]+) \d{4}$/;
+		if((match = str.match(pat))){
+			tz = match[1];
+		}else{
+		// Some browsers (e.g. Safari) glue the TZ on the end
+		// of toLocaleString instead of putting it in toString
+			str = dateObject.toLocaleString();
+			// Capital letters or slash -- end of string, 
+			// after space
+			pat = / ([A-Z\/]+)$/;
+			if((match = str.match(pat))){
+				tz = match[1];
+			}
+		}
+	}
+
+	// Make sure it doesn't somehow end up return AM or PM
+	return (tz == 'AM' || tz == 'PM') ? '' : tz; // String
+}
 
 hyperic.MetricsUpdater = function(eid,ctype,messages) {
     that = this;

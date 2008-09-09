@@ -188,7 +188,7 @@ a.listheaderlink:hover {
 }
 
 .listheader{
-	background:transparent url(/images/4.0/backgrounds/table_header.png) repeat-x scroll 0 0;
+	background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat-x scroll 0 0;
 	border-bottom: 1px solid #D5D8DE;
     border-top: 1px solid #ABB1C7;
     border-width: 1px;
@@ -199,7 +199,7 @@ a.listheaderlink:hover {
 }
 
 .tablerowheader {
-    background: transparent url(/images/4.0/backgrounds/table_header.png) repeat scroll 0 0;
+    background: transparent url(/images/4.0/backgrounds/table_header_large.png) repeat scroll 0 0;
     /*transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 25%;*/
     border-bottom: solid #D5D8DE;
     border-top: solid #ABB1C7;
@@ -219,17 +219,17 @@ a.listheaderlink:hover {
 }
 
 .listheadercheckbox {
-	background:transparent url(/images/4.0/backgrounds/table_header.png) repeat scroll 0 0;
+	background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat scroll 0 0;
     border-bottom: solid #D5D8DE;
     border-top: solid #ABB1C7;
     border-width: 1px;
     font-weight: 700;
-    padding: 0;
+    padding: 2px 2px 0 3px;
     text-align: center
 }
 
 .listheadersorted{
-	background:transparent url(/images/4.0/backgrounds/table_header.png) repeat scroll 0 0;
+	background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat scroll 0 0;
 }
 
 .listheadersorted,.tablerowsorted {
@@ -242,7 +242,7 @@ a.listheaderlink:hover {
 }
 
 .listheaderinactive{
-     background:transparent url(/images/4.0/backgrounds/table_header.png) repeat-x scroll 0 0;
+     background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat-x scroll 0 0;
 }
 
 .tableHeaderLarge{
@@ -260,7 +260,7 @@ a.listheaderlink:hover {
 }
 
 .listheaderinactivesorted {
-    background:transparent url(/images/4.0/backgrounds/table_header.png) repeat scroll 0 0;
+    background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat scroll 0 0;
     border-bottom: solid #C6CFE5;
     border-top: solid #ABB1C7;
     border-width: 1px;
@@ -2192,7 +2192,7 @@ a.black:link,a.black:visited {
     
 }
 
-.PortletTitle {
+.pagetitle .pagetitle, .PortletTitle {
     color: #444444;
     font-family: arial,sans-serif;
     font-size: 1.1em;
@@ -2201,5 +2201,5 @@ a.black:link,a.black:visited {
 
 .buttonTable {
     background-color: #fff;
-    margin-top: -14px;
+    margin-top: -4px;
 }

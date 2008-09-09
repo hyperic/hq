@@ -159,15 +159,11 @@ function skipResources() {
         <tr class="ToolbarContent">
           <td colspan="5" class="ListCell" nowrap>
             <table cellpadding="0" cellspacing="0" border="0">
-                <tr>
-
+             <tr>
                 <td style="padding-right:10px;">
-                <input type="submit" name="buttonAction" onclick="setImportCheckboxes(AIQueueForm);addInventory();" value="<fmt:message key="common.label.AddtoInventory"/>" class="CompactButton">
-                &nbsp;&nbsp;
-                <input type="submit" name="buttonAction" onclick="skipResources(); AIQueueForm.submit(); return false;" value="<fmt:message key="common.label.SkipResources"/>" class="CompactButton">
-
-
-               </td>
+                <a class="buttonGreen" href="javascript:void(0);" onclick="setImportCheckboxes(AIQueueForm); addInventory(); AIQueueForm.submit();"><span><fmt:message key="common.label.AddtoInventory"/></span></a>
+                <a class="buttonGreen" href="javascript:void(0);" onclick="skipResources(); AIQueueForm.submit(); return false;"><span><fmt:message key="common.label.SkipResources"/></span></a>
+                </td>
             </tr>
            </table>
             </td>

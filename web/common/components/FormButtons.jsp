@@ -70,22 +70,16 @@
     <td width="80%">
   </c:otherwise>
 </c:choose>
-      <table width="100%" cellpadding="0" cellspacing="7" border="0">
-        <tr>
+          <input type="hidden" name="temp" value="temp" id="formButtonHiddenSubmitArea"/>
 <c:if test="${empty cancelOnly}">
-          <td><html:image page="/images/fb_ok.gif" border="0" titleKey="FormButtons.ClickToOk" property="ok" onmouseover="imageSwap(this, imagePath + 'fb_ok', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_ok', '');" onmousedown="imageSwap(this, imagePath +  'fb_ok', '_down')" onclick="checkSubmit(); isButtonClicked=true;"/></td>
-
+          <a class="buttonGreen" href="javascript:hyperic.form.mockLinkSubmit('ok.x', '1', 'formButtonHiddenSubmitArea');"><span><fmt:message key="button.ok"/></span></a>
 <c:if test="${empty noReset}">
-          <td><html:img page="/images/spacer.gif" width="10" height="1" border="0"/></td>
-          <td><html:image page="/images/fb_reset.gif" border="0" titleKey="FormButtons.ClickToReset" property="reset" onmouseover="imageSwap(this, imagePath + 'fb_reset', '_over');" onmouseout="imageSwap(this, imagePath + 'fb_reset', '');" onmousedown="imageSwap(this, imagePath + 'fb_reset', '_down')"/></td>
+          <a class="buttonGray" href="javascript:hyperic.form.mockLinkSubmit('reset.x', '1', 'formButtonHiddenSubmitArea');"><span><fmt:message key="button.reset"/></span></a>
 </c:if>          
 </c:if>
 <c:if test="${empty noCancel}">
-          <td><html:image page="/images/fb_cancel.gif" border="0" titleKey="FormButtons.ClickToCancel" property="cancel" onmouseover="imageSwap(this, imagePath + 'fb_cancel', '_over');" onmouseout="imageSwap(this, imagePath + 'fb_cancel', '');" onmousedown="imageSwap(this, imagePath + 'fb_cancel', '_down')"/></td>
+          <a class="buttonGray" href="javascript:hyperic.form.mockLinkSubmit('cancel.x', '1', 'formButtonHiddenSubmitArea');"><span><fmt:message key="button.cancel"/></span></a>
 </c:if>
-		  <td width="100%"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-        </tr>
-      </table>
     </td>
   </tr>
 </table>

@@ -193,7 +193,8 @@ a:visited,a:hover,a {
 
 #navTabContainer {
     float: left;
-    margin: 38px 0 0 20px;
+    margin: 36px 0 0 20px;
+    _margin: 33px 0 0 20px;
     position: relative;
     width: 400px;
     z-index: 20;
@@ -509,6 +510,108 @@ a.buttonGreen:active {
 
 a.buttonGreen:active span {
     background: transparent url('/images/4.0/buttons/button_green_left.gif') no-repeat;
+    background-position: bottom left;
+    padding: 6px 0 4px 18px
+}
+
+a.buttonGray {
+    background: transparent url('/images/4.0/buttons/button_gray_right.gif') no-repeat scroll top right;
+    color: #FFF;
+    display: block;
+    float: left;
+    font: 400 12px arial, sans-serif;
+    height: 24px;
+    margin-right: 6px;
+    padding-right: 18px;
+    text-decoration: none;
+    font-weight: 700
+}
+
+a.buttonGray span {
+    background: transparent url('/images/4.0/buttons/button_gray_left.gif') no-repeat;
+    display: block;
+    line-height: 14px;
+    color: #FFF;
+    padding: 5px 0 5px 18px
+}
+
+a.buttonGray:active {
+    background: transparent url('/images/4.0/buttons/button_gray_right.gif') no-repeat scroll top right;
+    background-position: bottom right;
+    color: #FFF;
+    outline: none
+}
+
+a.buttonGray:active span {
+    background: transparent url('/images/4.0/buttons/button_gray_left.gif') no-repeat;
+    background-position: bottom left;
+    padding: 6px 0 4px 18px
+}
+
+a.buttonBlue {
+    background: transparent url('/images/4.0/buttons/button_blue_right.gif') no-repeat scroll top right;
+    color: #FFF;
+    display: block;
+    float: left;
+    font: 400 12px arial, sans-serif;
+    height: 24px;
+    margin-right: 6px;
+    padding-right: 18px;
+    text-decoration: none;
+    font-weight: 700
+}
+
+a.buttonBlue span {
+    background: transparent url('/images/4.0/buttons/button_blue_left.gif') no-repeat;
+    display: block;
+    line-height: 14px;
+    color: #FFF;
+    padding: 5px 0 5px 18px
+}
+
+a.buttonBlue:active {
+    background: transparent url('/images/4.0/buttons/button_blue_right.gif') no-repeat scroll top right;
+    background-position: bottom right;
+    color: #FFF;
+    outline: none
+}
+
+a.buttonBlue:active span {
+    background: transparent url('/images/4.0/buttons/button_blue_left.gif') no-repeat;
+    background-position: bottom left;
+    padding: 6px 0 4px 18px
+}
+
+a.buttonInactive {
+    background: transparent url('/images/4.0/buttons/button_inactive_right.gif') no-repeat scroll top right;
+    color: #FFF;
+    display: block;
+    float: left;
+    font: 400 12px arial, sans-serif;
+    height: 24px;
+    margin-right: 6px;
+    padding-right: 18px;
+    text-decoration: none;
+    font-weight: 700
+}
+
+a.buttonInactive span {
+    background: transparent url('/images/4.0/buttons/button_inactive_left.gif') no-repeat;
+    display: block;
+    line-height: 14px;
+    color: #AAAok ;
+    padding: 5px 0 5px 18px
+}
+
+a.buttonInactive:active {
+    background: transparent url('/images/4.0/buttons/button_inactive_right.gif') no-repeat scroll top right;
+    background-position: bottom right;
+    color: #FFF;
+    outline: none
+}
+
+a.buttonInactive:active span {
+    background: transparent url('/images/4.0/buttons/button_inactive_left.gif') no-repeat;
     background-position: bottom left;
     padding: 6px 0 4px 18px
 }
@@ -1943,60 +2046,66 @@ ol .active.groupIcon {
     width:27px;
 }
 
-/* NEW STRUTS BUTTONS */
+/* NEW BUTTONS */
 button{
     border: 0px none;
     color:white;
+    /*4p 4p for ie 7*/
     padding:3px 4px;
-    cursor:pointer
+    cursor:pointer;
+    width:auto;
+    overflow:visible;
+    /* ie only */
+    margin: 0 3px;
+    white-space: nowrap;
 }
 
-td.buttonLeft {
-    background: transparent url(/images/4.0/buttons/button_blue_left.gif) no-repeat;
-    padding:3px 2px;
-}
-
-td.buttonRight {
-    padding:4px 10px 4px 5px;
-    background: transparent url(/images/4.0/buttons/button_blue_right.gif) no-repeat scroll 100% 0;
-    margin-left:-3px
-}
-
-#button a:visited, #button a:hover, #button a {
-    color: #fff;
-}
-
-button.blue{
+button.btnBlue{
+    /* 0 2px*/
     background: transparent url(/images/4.0/buttons/button_blue_left.gif) no-repeat;
 }
 
-button.gray{
+button.btnGray{
     background: transparent url(/images/4.0/buttons/button_gray_left.gif) no-repeat;
 }
 
-button.green{
+button.btnGreen{
     background: transparent url(/images/4.0/buttons/button_green_left.gif) no-repeat;
 }
 
-button.gray span{
-    padding:4px 10px 4px 5px;
-    background: transparent url(/images/4.0/buttons/button_gray_right.gif) no-repeat scroll 100% 0;
-    margin-left:-3px
+button.btnInactive{
+    background: transparent url(/images/4.0/buttons/button_inactive_left.gif) no-repeat;
+    cursor:default
 }
 
-
-button.blue span{
-    padding:4px 10px 4px 5px;
+button.btnBlue span{
     background: transparent url(/images/4.0/buttons/button_blue_right.gif) no-repeat scroll 100% 0;
-    margin-left:-3px
 }
 
-button.green span{
-    padding:4px 10px 4px 5px;
-    background: transparent url(/images/4.0/buttons/button_green_right.gif) no-repeat scroll 100% 0;
-    margin-left:-3px
+button.btnGray span{
+    background: transparent url(/images/4.0/buttons/button_gray_right.gif) no-repeat scroll 100% 0;
 }
+
+button.btnGreen span{
+    background: transparent url(/images/4.0/buttons/button_green_right.gif) no-repeat scroll 100% 0;
+}
+
+button.btnInactive span{
+    background: transparent url(/images/4.0/buttons/button_inactive_right.gif) no-repeat scroll 100% 0;
+    color:#AAA
+}
+
+button.inactive:active{
+    margin: 0 3px;
+}
+
 
 button:active{
-    margin:1px 0 0 0;
+    margin:1px 3px;
+}
+
+button span{
+    margin:-3px;
+    padding:4px 10px 4px 5px;
+    font-weight:bold;
 }
