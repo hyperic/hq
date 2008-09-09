@@ -98,7 +98,7 @@ function timeLineOnLoad() {
 
       <div id="my-timeline" style="height: 20px; border: 1px solid #aaa"></div>
   </td>
-  <td style="text-align: right"><fmt:message key="resource.common.monitor.label.elc"/></td>
+  <td style="padding-left: 4px;"><fmt:message key="resource.common.monitor.label.elc"/></td>
 </tr>
 
 </c:if>
