@@ -492,7 +492,13 @@ public abstract class ServerDetector
         String type = getTypeInfo().getName();
         server.setType(type);
         server.setName(getPlatformName() + " " + type);
-        server.setInstallPath(getCanonicalPath(installpath));
+        //dont canonicalize relative paths, else installpath
+        //will be made absolute relative to the agent's
+        //working directory
+        if (new File(installpath).isAbsolute()) {
+            installpath = getCanonicalPath(installpath);
+        }
+        server.setInstallPath(installpath);
         //allow hardcoded property to override discovered installpath
         installpath = getTypeProperty(INSTALLPATH);
         if (installpath != null) {
