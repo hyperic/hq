@@ -49,14 +49,14 @@ class AlertController
         defaultSortOrder: 0,  // descending
         styleClass: {it.fixed ? null : "alertHighlight"},
         columns: [
-            [field:AlertSortField.DATE, width:'12%',
+            [field:AlertSortField.DATE, width:'8%',
              label:{df.format(it.timestamp)}],
-            [field:AlertSortField.DEFINITION, width:'20%',
+            [field:AlertSortField.DEFINITION, width:'15%',
              label:{linkTo(it.alertDefinition.name, [resource:it]) }],
             [field:AlertSortField.RESOURCE, width:'30%',
              label:{linkTo(it.alertDefinition.resource.name,
                            [resource:it.alertDefinition.resource])}],
-            [field:AlertSortField.PLATFORM, width:'20%',
+            [field:AlertSortField.PLATFORM, width:'29%',
              label:{linkTo(it.alertDefinition.resource.platform.name,
                            [resource:it.alertDefinition.resource.platform])}],
             [field:AlertSortField.FIXED, width:'5%',

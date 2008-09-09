@@ -67,18 +67,18 @@ dojo.addOnLoad( function(){
           <div class="BlockTitle">${l.AlertFilter}</div>
           <div class="filterBox">
             <div class="fieldSetStacked" style="margin-bottom:8px;">
-              <span><strong>${l.Show}:</strong></span>
+              <span>${l.Show}:</span>
               <div>
-              <input type="radio" id="notFixed" name="show" value="notfixed" onchange="refreshAlertTables()">${l.NotFixed}
-              <input type="radio" id="escOnly" name="show" value="inescalation" onchange="refreshAlertTables()">${l.InEscalation}<br>
-              <input type="radio" id="all" name="show" value="all" checked="checked" onchange="refreshAlertTables()">${l.All}
+              <label><input type="radio" id="notFixed" name="show" value="notfixed" onchange="refreshAlertTables()"> ${l.NotFixed}</label><br>
+              <label><input type="radio" id="escOnly" name="show" value="inescalation" onchange="refreshAlertTables()"> ${l.InEscalation}</label><br>
+              <label><input type="radio" id="all" name="show" value="all" checked="checked" onchange="refreshAlertTables()"> ${l.All}</label>
               </div>          
             </div>
 
             <% if (isEE) { %>
             <div class="fieldSetStacked" style="margin-bottom:8px;">
-              <span><strong>${l.AlertType}:</strong></span>
-              <div><select id="alertSelect" 
+              <span><label for="alertSelect">${l.AlertType}</label>:</span>
+              <div><select id="alertSelect" name="alertSelect" 
                       onchange='selectAlertType(options[selectedIndex].value)'>
                 <option value='1'>${l.ClassicAlertsSelect}</option>
                 <option value='2'>${l.GroupAlertsSelect}</option>
@@ -88,25 +88,28 @@ dojo.addOnLoad( function(){
             <% } %>
           
             <div class="fieldSetStacked" style="margin-bottom:8px;">
-              <span><strong>${l.MinPriority}</strong></span>
+              <span><label for="alertSevSelect">${l.MinPriority}</label>:</span>
               <div><%= selectList(severities, 
                              [id:'alertSevSelect',
+                              name:'alertSevSelect',
                               onchange:'refreshAlertTables();'], null) %>
               </div>
             </div>          
 
             <div class="fieldSetStacked" style="margin-bottom:8px;">
-              <span><strong>${l.InTheLast}</strong></span>
+              <span><label for="alertTimeSelect">${l.InTheLast}</label>:</span>
               <div><%= selectList(lastDays, 
                              [id:'alertTimeSelect',
+                              name:'alertTimeSelect',
                               onchange:'refreshAlertTables();'], null) %>
                               
               </div>
             </div>
             <div class="fieldSetStacked" style="margin-bottom:8px;">
-              <span><strong>${l.GroupFilter}</strong></span>
+              <span><label for="alertGroupSelect">${l.GroupFilter}</label>:</span>
               <div><%= selectList(groups, 
                              [id:'alertGroupSelect',
+                              name:'alertGroupSelect',
                               onchange:'refreshAlertTables();']) %>
                               
               </div>
@@ -114,7 +117,7 @@ dojo.addOnLoad( function(){
             </div>
         </div>
       </div>
-      <div style="float:right;width:78%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" id="alertsCont">
+      <div style="float:right;width:81%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" id="alertsCont">
         <div id="alertsTable" style="display:none;">
           <%= dojoTable(id:'Alerts', title:l.ClassicAlertsTable,
                         refresh:60, url:urlFor(action:'data'),
@@ -138,8 +141,8 @@ dojo.addOnLoad( function(){
           <div class="filterBox">
             <% if (isEE) { %>
             <div class="fieldSetStacked" style="margin-bottom:8px;">
-              <span><strong>${l.DefType}:</strong></span>
-              <div><select id="defSelect"
+              <span><label for="defSelect">${l.DefType}</label>:</span>
+              <div><select id="defSelect" name="defSelect"
                       onchange='selectDefType(options[selectedIndex].value)'>
                 <option value='1'>${l.ClassicDefsSelect}</option>
                 <option value='3'>${l.GroupDefsSelect}</option>
@@ -152,23 +155,23 @@ dojo.addOnLoad( function(){
             
             <div id="excludeTypeBasedInput" class="fieldSetStacked" 
                  style="margin-bottom:8px;">
-              <input id="excludeTypeBox" type="checkbox" name="excludeTypeBased" 
+              <input id="excludeTypeBased" type="checkbox" name="excludeTypeBased" 
                      value="true"  onchange="Defs_refreshTable();"/>
-              <span><strong>${l.ExcludeTypeBased}</strong></span>
+              <label for="excludeTypeBased">${l.ExcludeTypeBased}</label>
             </div>
             <% } %>
 
-            <div id="onlyShowDisabled" class="fieldSetStacked" 
+            <div id="onlyShowDisabledInput" class="fieldSetStacked" 
                  style="margin-bottom:8px;">
-              <input id="onlyShowDisabledBox" type="checkbox" name="onlyShowDisabled" 
+              <input id="onlyShowDisabled" type="checkbox" name="onlyShowDisabled" 
                      value="true"  onchange="refreshDefTables();"/>
-              <span><strong>${l.OnlyShowDisabled}</strong></span>
+              <label for="onlyShowDisabled">${l.OnlyShowDisabled}</label>
             </div>
             
           </div>
         </div>
       </div>
-       <div style="float:right;display:inline;width:78%;height: 445px;overflow-x: hidden; overflow-y: auto;" id="defsCont">
+       <div style="float:right;display:inline;width:81%;height: 445px;overflow-x: hidden; overflow-y: auto;" id="defsCont">
         <div id="defsTable" style="display:none;">
           <%= dojoTable(id:'Defs', title:l.ClassicDefsTable,
                         url:urlFor(action:'defData'),
@@ -225,9 +228,9 @@ dojo.addOnLoad( function(){
     function getDefsUrlMap(id) {
         var res = {};
         <% if (isEE) { %>
-          res['excludeTypes']   = dojo.byId('excludeTypeBox').checked;
+          res['excludeTypes']   = dojo.byId('excludeTypeBased').checked;
         <% } %>
-        res['onlyShowDisabled'] = dojo.byId('onlyShowDisabledBox').checked;        
+        res['onlyShowDisabled'] = dojo.byId('onlyShowDisabled').checked;        
         return res;
     }
     
