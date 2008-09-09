@@ -182,12 +182,6 @@ public class RESTService extends BaseService {
                         .setDashboardPreferences(_request.getSession(), user,
                                                  boss, config);
                 }
-
-                JSONArray arr = new JSONArray();
-                for (Iterator<String> it = groupsList.iterator(); it.hasNext();)
-                {
-                    arr.put(Integer.valueOf(it.next()));
-                }
                 
                 int sessionId = RequestUtils.getSessionId(_request).intValue();
                 
@@ -199,11 +193,13 @@ public class RESTService extends BaseService {
                             AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC},
                             false, false, false, PageControl.PAGE_ALL);
                 
+                JSONArray arr = new JSONArray();
                 JSONObject avails = new JSONObject();
                 for (Iterator<AppdefResourceValue> it = resources.iterator();
                      it.hasNext(); ) {
                     AppdefResourceValue resource = it.next();
                     avails.put(resource.getId().toString(),resource.getName());
+                    arr.put(resource.getId().toString());
                 }
                 
                 res = new JSONObject()

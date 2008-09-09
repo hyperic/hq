@@ -197,10 +197,12 @@ public class DashboardPortletBossEJBImpl
             }
             Integer gId = (Integer)it.next();
             ResourceGroup group = _rgMan.findResourceGroupById(subj, gId);
-            JSONArray array = new JSONArray();
-            array.put(getResourceStatus(subj, group));
-            array.put(getGroupStatus(subj, group));
-            rtn.put(group.getId().toString(), array);
+            if (group != null) {
+                JSONArray array = new JSONArray()
+                    .put(getResourceStatus(subj, group))
+                    .put(getGroupStatus(subj, group));
+                rtn.put(group.getId().toString(), array);  
+            }
         }
         return rtn;
     }
