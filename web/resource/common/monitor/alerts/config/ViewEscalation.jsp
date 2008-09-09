@@ -387,13 +387,13 @@ function showViewEscResponse() {
 <table width="100%" cellpadding="4" cellspacing="0" border="0">
   <tbody>
     <tr class="tableRowHeader">
-      <td><fmt:message key="alert.config.escalation.scheme" />
-		<select id="escIdSel" name="escId" onchange="schemeChange(this)" class="selectWid">
+      <th><label for="escIdSel"><fmt:message key="alert.config.escalation.scheme" /></label>
+    		<select id="escIdSel" name="escId" onchange="schemeChange(this)" class="selectWid">
        		<option value=""><fmt:message key="resource.common.inventory.props.SelectOption" /></option>
-		</select>
+    		</select>
         <span id="noescalations" style="display: none;"><fmt:message key="common.label.None"/></span>
-      </td>
-      <td align="right">
+      </th>
+      <th align="right">
          <c:url var="adminUrl" value="/admin/config/Config.do?mode=escalate">
            <c:param name="aname" value="${alertDef.name}"/>
            <c:choose>
@@ -408,7 +408,7 @@ function showViewEscResponse() {
          <fmt:message key="admin.config.message.to.create">
            <fmt:param value="${adminUrl}"/>
          </fmt:message>
-      </td>
+      </th>
     </tr>
   </tbody>
 </table>
