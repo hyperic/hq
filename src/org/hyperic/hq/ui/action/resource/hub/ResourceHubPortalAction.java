@@ -323,7 +323,9 @@ public class ResourceHubPortalAction extends BaseAction {
         }
         
         // TODO: Pass groupSubType as int[]
-        resources = appdefBoss.search(sessionId, entityType, resourceName,
+        resources = appdefBoss.search(sessionId, entityType, 
+        							  org.hyperic.util.StringUtil
+        							  		.escapeForRegex(resourceName, true),
                                       aetid, gid, groupSubtype, 
                                       hubForm.isAny(), hubForm.isOwn(),
                                       hubForm.isUnavail(), pc);

@@ -28,7 +28,9 @@ package org.hyperic.util;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.CharacterIterator;
 import java.text.NumberFormat;
+import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -543,4 +545,61 @@ public class StringUtil {
         return (sub != null) && (sub.length() > 0) &&
                (source.toLowerCase().indexOf(sub.toLowerCase()) < 0);
     }
+    
+    /**
+     * Escapes a minimal set of metacharacters with their
+     * regular expression escape codes.
+     */
+    public static String escapeForRegex(String source, boolean wildcard) {
+        if (source == null) {
+        	return null;
+        }
+        
+    	StringBuilder result = new StringBuilder();
+        StringCharacterIterator iterator = new StringCharacterIterator(source);
+        char character =  iterator.current();
+        
+        while (character != CharacterIterator.DONE) {
+            // All literals need to have backslashes doubled.
+        	if (character == '.') {
+        		result.append("\\.");
+        	} else if (character == '\\') {
+        		result.append("\\\\");
+        	} else if (character == '?') {
+        		result.append("\\?");
+        	} else if (character == '+') {
+        		result.append("\\+");
+        	} else if (character == '{') {
+        		result.append("\\{");
+        	} else if (character == '}') {
+        		result.append("\\}");
+        	} else if (character == '[') {
+        		result.append("\\[");
+        	} else if (character == ']') {
+        		result.append("\\]");
+        	} else if (character == '(') {
+        		result.append("\\(");
+        	} else if (character == ')') {
+        		result.append("\\)");
+        	} else if (character == '^') {
+        		result.append("\\^");
+        	} else if (character == '$') {
+        		result.append("\\$");
+        	} else if (character == '|') {
+        		result.append("\\|");        		
+        	} else if (character == '*') {
+                if (wildcard) {        		
+                	result.append(".*");
+                } else {
+                	result.append("\\*");
+                }
+        	} else {
+        		//the char is not a special one
+        		//add it to the result as is
+        		result.append(character);
+        	}
+        	character = iterator.next();
+        }
+        return result.toString();        
+    }    
 }

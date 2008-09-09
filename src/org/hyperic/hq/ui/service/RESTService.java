@@ -546,9 +546,9 @@ public class RESTService extends BaseService {
         		} else {
         			// Search for platforms
         			platforms = cloningBoss.findPlatformsByTypeAndName(
-	        										me, 
-	        										platformType.getId(), 
-	        										query.trim());
+	        									me, 
+	        									platformType.getId(), 
+	        									StringUtil.escapeForRegex(query.trim(), true));
         		}
 	        	
 	        	JSONObject jPlatform = new JSONObject();
