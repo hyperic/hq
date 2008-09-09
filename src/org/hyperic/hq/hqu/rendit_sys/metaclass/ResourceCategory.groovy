@@ -131,6 +131,13 @@ class ResourceCategory {
     }
 
     /**
+     * Get all metrics for a resource
+     */
+    static Collection getMetrics(Resource r) {
+        dman.findMeasurements(null, r.entityId, null, PageControl.PAGE_ALL)
+    }
+
+    /**
      * Get the availability Measurement for a Resource.
      */
     static getAvailabilityMeasurement(Resource r) {
