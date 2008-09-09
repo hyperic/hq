@@ -64,7 +64,7 @@ public abstract class GalertDefSortField
         new GalertDefSortField(2, "Name", "galertDef.sortField.name")
     {
         String getSortString(String def, String group, String escalation) {
-            return group + ".name";
+            return group + ".resource.name";
         }
 
         public boolean isSortable() {
@@ -100,7 +100,7 @@ public abstract class GalertDefSortField
         new GalertDefSortField(5, "Group", "galertDef.sortField.group")
     {
         String getSortString(String def, String group, String escalation) {
-            return group + ".name";
+            return group + ".resource.name";
         }
 
         public boolean isSortable() {
