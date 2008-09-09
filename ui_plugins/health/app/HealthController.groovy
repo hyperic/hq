@@ -463,7 +463,34 @@ class HealthController
              query: "select * from EAM_AIQ_SERVER"],
           aiqIP: [ 
              name: localeBundle['queryAIQIP'], 
-             query: "select * from EAM_AIQ_IP"], 
+             query: "select * from EAM_AIQ_IP"],
+          orphanedGroupMapRows: [
+             name: localeBundle['queryOrphanedGroupMapRows'],
+             query: "SELECT COUNT(*) FROM EAM_RES_GRP_RES_MAP WHERE RESOURCE_ID IN " +
+                   "(SELECT ID FROM EAM_RESOURCE WHERE " +
+                   "RESOURCE_TYPE_ID = 301 AND INSTANCE_ID NOT IN " +
+                   "(SELECT ID FROM EAM_PLATFORM)) OR RESOURCE_ID IN " +
+                   "(SELECT ID FROM EAM_RESOURCE WHERE " +
+                   "RESOURCE_TYPE_ID = 303 AND INSTANCE_ID NOT IN " +
+                   "(SELECT ID FROM EAM_SERVER)) OR RESOURCE_ID IN " +
+                   "(SELECT ID FROM EAM_RESOURCE WHERE " +
+                   "RESOURCE_TYPE_ID = 305 AND INSTANCE_ID NOT IN " +
+                   "(SELECT ID FROM EAM_SERVICE))"],
+          orphanedResources: [
+             name: localeBundle['queryOrphanedResources'],
+             query: "SELECT COUNT(*) FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID IN " +
+                   "(301, 303, 305) AND NOT EXISTS (SELECT RESOURCE_GROUP_ID " +
+                   "FROM EAM_RES_GRP_RES_MAP WHERE RESOURCE_ID = ID)"],
+          orphanedAlertDefs: [
+             name: localeBundle['queryOrphanedAlertDefs'],
+             query: "SELECT COUNT(*) FROM EAM_ALERT_DEFINITION " +
+                   "WHERE RESOURCE_ID IS NULL AND PARENT_ID IS NOT NULL " +
+                   "AND APPDEF_ID IS NOT NULL AND NOT PARENT_ID=0"],
+          orphanedAuditRows: [
+             name: localeBundle['queryOrphanedAuditRows'],
+             query: "SELECT COUNT(*) FROM EAM_AUDIT WHERE NOT EXISTS " +
+                   "(SELECT RESOURCE_GROUP_ID FROM EAM_RES_GRP_RES_MAP " +
+                   "WHERE EAM_AUDIT.RESOURCE_ID = EAM_RES_GRP_RES_MAP.RESOURCE_ID)"],
           resourceAlertsActiveButDisabled: [ 
              name: localeBundle['queryResourceAlertDefsActiveButDisabled'], 
              query: {conn -> "select id, name, description, resource_id from EAM_ALERT_DEFINITION where "+
@@ -478,7 +505,7 @@ class HealthController
                              "parent_id = 0 and act_on_trigger_id is not null"}],
           version: [ 
               name: localeBundle['queryVersion'],     
-               query:  {conn -> getDatabaseVersionQuery(conn)}],
+              query:  {conn -> getDatabaseVersionQuery(conn)}],
         ]
         
         def res = [:]

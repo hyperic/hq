@@ -270,6 +270,20 @@ getSystemStats();
       </div>
     <% } %>
     
+    <% dojoTabPane(id:'databaseTab', label:l.database) { %>
+      <div id="querySelectControls">
+        <select id="querySelect" onchange='selectQuery(options[selectedIndex].value)'>
+          <option value='none'>-- ${l.selectQuery} --</option>
+        <% for (q in databaseQueries.entrySet().sort {a,b-> a.key <=> b.key}) { %>
+          <option value='${q.key}'>${h q.value.name}</option>
+        <% } %>
+        </select>
+        <img src="/images/arrow_refresh.png" onclick="loadQuery()"/>
+      </div>
+      <div id="queryData">
+      </div>
+    <% } %>
+    
     <% dojoTabPane(id:'agentTab', label:l.agents) { %>
       <%= dojoTable(id:'agentTable', title:l.agents,
                    refresh:600, url:urlFor(action:'agentData'),
