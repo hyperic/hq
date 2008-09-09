@@ -46,18 +46,22 @@ public class AvailabilityDataDAO extends HibernateDAO {
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
     private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
     				MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
-    private static final String MAX_START =
-        "(rle.availabilityDataId.startime + :startime + " +
-        "abs(rle.availabilityDataId.startime - :startime)) / 2000";
-    private static final String MIN_END =
-        "(rle.endtime - abs(rle.endtime - :endtime) + :endtime) / 2000";
+    // TOTAL_TIME and TOTAL_UPTIME are used to anchor the start and end values to
+    // the appropriate time range.  They avoid the situation where a query
+    // may result in Long.MAX_VALUE as the endtime and a startime which is <
+    // the user specified value
+    private static final String TOTAL_TIME =
+        "least(rle.endtime,:endtime) " +
+        "- greatest(rle.availabilityDataId.startime,:startime)";
+    private static final String TOTAL_UPTIME =
+        "(" + TOTAL_TIME + ") * rle.availVal";
     
     public AvailabilityDataDAO(DAOFactory f) {
         super(AvailabilityDataDAO.class, f);
     }
 
     List findLastAvail(List mids, long after) {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
                      .append("from AvailabilityDataRLE")
                      .append(" WHERE endtime > :endtime")
                      .append(" AND availabilityDataId.measurement in (:ids)")
@@ -70,7 +74,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     List findLastAvail(List mids) {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
 			         .append("from AvailabilityDataRLE")
                      .append(" WHERE endtime = :endtime")
                      .append(" AND availabilityDataId.measurement in (:ids)")
@@ -99,7 +103,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     AvailabilityDataRLE findAvail(DataPoint state) {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
                      .append("FROM AvailabilityDataRLE")
                      .append(" WHERE availabilityDataId.measurement = :meas")
                      .append(" AND availabilityDataId.startime = :startime")
@@ -116,7 +120,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
     
     List findAllAvailsAfter(DataPoint state) {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
                      .append("FROM AvailabilityDataRLE")
                      .append(" WHERE availabilityDataId.measurement = :meas")
                      .append(" AND availabilityDataId.startime > :startime")
@@ -128,7 +132,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     AvailabilityDataRLE findAvailAfter(DataPoint state) {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
                      .append("FROM AvailabilityDataRLE")
                      .append(" WHERE availabilityDataId.measurement = :meas")
                      .append(" AND availabilityDataId.startime > :startime")
@@ -150,7 +154,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     AvailabilityDataRLE findAvailBefore(DataPoint state) {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
                      .append("FROM AvailabilityDataRLE")
                      .append(" WHERE availabilityDataId.measurement = :meas")
                      .append(" AND availabilityDataId.startime < :startime")
@@ -179,7 +183,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
      */
     List getHistoricalAvails(Measurement m, long start,
                              long end, boolean descending) {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
                     .append("SELECT rle")
                     .append(" FROM AvailabilityDataRLE rle")
 				    .append(" JOIN rle.availabilityDataId.measurement m")
@@ -204,7 +208,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
      */
     List getHistoricalAvails(Integer[] mids, long start,
                              long end, boolean descending) {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
                     .append("SELECT rle")
                     .append(" FROM AvailabilityDataRLE rle")
                     .append(" JOIN rle.availabilityDataId.measurement m")
@@ -227,7 +231,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
      */
     List getHistoricalAvails(Resource res, long start,
                              long end) {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
                     .append("SELECT rle")
                     .append(" FROM AvailabilityDataRLE rle")
                     .append(" JOIN rle.availabilityDataId.measurement m")
@@ -253,21 +257,13 @@ public class AvailabilityDataDAO extends HibernateDAO {
             // Nothing to do
             return new ArrayList(0);
         }
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
                     .append("SELECT m, min(rle.availVal),")
                     .append(" max(rle.availVal),")
                     .append(" avg(rle.availVal),")
                     .append(" count(distinct m.id), ")
-                    .append(" sum((")
-                    .append(MIN_END)
-                    .append("-")
-                    .append(MAX_START)
-                    .append(") * rle.availVal), ")
-                    .append(" sum(")
-                    .append(MIN_END)
-                    .append("-")
-                    .append(MAX_START)
-                    .append(") ")
+                    .append(" sum(").append(TOTAL_UPTIME).append("), ")
+                    .append(" sum(").append(TOTAL_TIME).append(") ")
                     .append(" FROM Measurement m")
                     .append(" JOIN m.availabilityData rle")
                     .append(" WHERE m in (:mids)")
@@ -304,21 +300,13 @@ public class AvailabilityDataDAO extends HibernateDAO {
             return new ArrayList(0);
         }
         
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
                     .append("SELECT m.template.id, min(rle.availVal),")
                     .append(" max(rle.availVal),")
                     .append(" avg(rle.availVal),")
                     .append(" count(distinct m.id), ")
-                    .append(" sum((")
-                    .append(MIN_END)
-                    .append("-")
-                    .append(MAX_START)
-                    .append(") * rle.availVal), ")
-                    .append(" sum(")
-                    .append(MIN_END)
-                    .append("-")
-                    .append(MAX_START)
-                    .append(") ")
+                    .append(" sum(").append(TOTAL_UPTIME).append("), ")
+                    .append(" sum(").append(TOTAL_TIME).append(") ")
                     .append(" FROM Measurement m")
                     .append(" JOIN m.availabilityData rle")
                     .append(" WHERE m.template in (:tids)")
@@ -354,7 +342,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * @return List of down Measurements
      */
     List getDownMeasurements() {
-        String sql = new StringBuffer()
+        String sql = new StringBuilder()
                      .append("SELECT rle FROM AvailabilityDataRLE rle")
                      .append(" JOIN rle.availabilityDataId.measurement m")
 				     .append(" JOIN m.template t")
