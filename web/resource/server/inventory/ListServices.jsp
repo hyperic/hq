@@ -64,7 +64,6 @@
   <c:if test="${not empty param.scg}">
     <c:param name="scg" value="${param.scg}"/>
   </c:if>
-  <c:param name="accord" value="1"/>
 </c:url>
 
 <c:url var="ssAction" value="${selfAction}">
@@ -89,11 +88,9 @@
   <c:if test="${not empty param.scg}">
     <c:param name="scg" value="${param.scg}"/>
   </c:if>
-  <c:param name="accord" value="1"/>
 </c:url>
 
 <c:url var="pnAction" value="${selfAction}">
-  <c:param name="accord" value="1"/>
 </c:url>
 
 <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>

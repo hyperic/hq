@@ -134,7 +134,6 @@ var pageData = new Array();
 
 <html:hidden property="rid"/>
 <html:hidden property="type"/>
-<input type="hidden" name="accord" value="2"/>
 </html:form>
 
 </div>
@@ -224,8 +223,6 @@ var pageData = new Array();
 
 <script type="text/javascript">
   clearIfAnyChecked();
-
-  onloads.push( accord<c:out value="${param.accord}"/> );
 </script>
 
 <tiles:insert definition=".page.footer"/>

@@ -159,10 +159,6 @@
 </div>
 </div>
 
-<script type="text/javascript">
-  onloads.push( accord<c:out value="${param.accord}"/> );
-</script>
-
 <!-- FOOTER SECTION -->
 <tiles:insert definition=".page.footer"/>
 

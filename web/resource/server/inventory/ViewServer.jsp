@@ -119,7 +119,6 @@ var pageData = new Array();
 <html:form action="/resource/server/inventory/RemoveGroups">
 <input type="hidden" name="rid" value="<c:out value="${Resource.id}"/>"/>
 <input type="hidden" name="type" value="<c:out value="${entityId.type}"/>"/>
-<input type="hidden" name="accord" value="3"/>
 <tiles:insert definition=".resource.common.inventory.groups">
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="groups" beanName="AllResGrps"/>
@@ -148,9 +147,5 @@ var pageData = new Array();
 </div>
 </div>
 </div>
-
-<script type="text/javascript">
-  onloads.push( accord<c:out value="${param.accord}"/> );
-</script>
 
 <tiles:insert definition=".page.footer"/>
