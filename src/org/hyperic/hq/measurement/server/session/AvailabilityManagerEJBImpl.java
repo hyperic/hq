@@ -198,6 +198,22 @@ public class AvailabilityManagerEJBImpl
         return getPageList(availInfo, begin, end, interval, prependUnknowns);
     }
     
+    // XXX scottmf, not used right now.  Will be used in some fashion to calc
+    // the correct availability uptime percent
+    private double getUpTime(List availInfo, long begin, long end) {
+        long totalUptime = 0;
+        long totalTime = 0;
+        for (Iterator it=availInfo.iterator(); it.hasNext(); ) {
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
+            long endtime = rle.getEndtime();
+            long startime = rle.getStartime();
+            long total = Math.min(endtime, end) - Math.max(startime, begin);
+            totalUptime += total*rle.getAvailVal();
+            totalTime += total;
+        }
+        return (double)totalUptime/(double)totalTime*100;
+    }
+    
     /**
      * Get the list of Raw RLE objects for a resource
      * @return List<AvailabilityDataRLE>
@@ -399,7 +415,7 @@ public class AvailabilityManagerEJBImpl
             data[IND_LAST_TIME] = ((Double)objs[2]).doubleValue();
             
             data[IND_UP_TIME]    += ((Double)objs[5]).doubleValue();
-            data[IND_TOTAL_TIME] += ((Long)objs[6]).doubleValue();
+            data[IND_TOTAL_TIME] += ((Double)objs[6]).doubleValue();
         }
         
         // Now calculate the average value
