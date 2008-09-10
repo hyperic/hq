@@ -32,7 +32,6 @@
 
 <tiles:importAttribute name="resource"/>
 
-<font class="PageTitleSmallText">
 <c:choose>
   <c:when test="${isFavorite}">
     <html:link page="/resource/common/QuickFavorites.do?eid=${resource.entityId.appdefKey}&mode=remove"><fmt:message key="resource.common.quickFavorites.remove"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
@@ -43,4 +42,3 @@
     </html:link>
   </c:otherwise> 
 </c:choose>
-</font>

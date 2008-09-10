@@ -90,7 +90,7 @@
   <tr>
     <td colspan="4">
 
-<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 0px; padding-bottom: 10px;">
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 0px; margin-bottom: 10px;">
   <tr class="PageTitleBar"> 
     <td width="5"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td width="15"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
@@ -185,10 +185,10 @@
         </tiles:insert>
         <!-- TOOLS -->
 <c:if test="${not empty linkUrl}">
-    <div class="toolsMenuStacked">
-        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><img src="/images/arrow_dropdown.gif" border="0" alt="" id="toolMenuArrow"></span>
+    <div class="toolsMenuStacked LinkBox">
+        <span onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><img src="/images/arrow_dropdown.gif" border="0" alt="" id="toolMenuArrow"></span>
         <div style="clear: both"></div>
-        <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;z-index:5">
+        <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -7px; z-index:5">
             <tiles:insert attribute="linkUrl">
                 <c:if test="${not empty resource}">
                     <tiles:put name="resource" beanName="resource"/>

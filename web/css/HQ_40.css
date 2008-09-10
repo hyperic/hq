@@ -949,16 +949,22 @@ body .dijitPopup {
     margin-left: 10px;
 }
 
+/* container for the tools menu dropdown */
 .toolsMenu {
     clear: both;
     height: 20px;
     cursor: pointer;
 }
+ 
+#toolMenu table {
+    width: 200px;
+}
 
 .toolsMenuStacked {
-    height: 17px;
+    height: 14px;
     float: left;
-    margin-top: 6px;
+    margin: 2px 10px 0px 0px;
+    padding: 2px 2px 2px 4px;
     cursor: pointer;
 }
 
@@ -969,7 +975,6 @@ body .dijitPopup {
     background-color: #EDF0F8;
     border: 1px solid;
     border-color: #BDCEF0 #477DDF #477DDF #BDCEF0;
-    width: 42px;
     padding: 2px 2px 2px 4px;
     color: #039;
     font-weight: bold;
