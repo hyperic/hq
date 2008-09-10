@@ -70,7 +70,7 @@
 </c:forEach>
 </map>
 
-      <span id="mapMenuSpan"><fmt:message key="resource.navmap.linktext"/><img border="0" src="/images/arrow_dropdown.gif"/></span>
+      <span id="mapMenuSpan"><fmt:message key="resource.navmap.linktext"/><img border="0" src="/images/arrow_dropdown.gif" id="mapMenuIcon"></span>
       <div style="clear: all"></div>
       <div id="diagramdiv">
         <span>

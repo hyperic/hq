@@ -95,7 +95,9 @@ function bodyClicked(e) {
   }
 
   if ( diagShown && (!target || ('navMapIcon' != target.name &&
-                                 'navMapImage' != target.name)) ) {
+                                 'navMapImage' != target.name &&
+                                 'mapMenuIcon' != target.id &&
+                                 'mapMenuSpan' != target.id)) ) {
     hideDiagram('diagramDiv');
   }
 
