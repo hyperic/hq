@@ -481,6 +481,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         SRNManagerLocal srnMan = getSRNManager();
         long current = System.currentTimeMillis();
         
+        Map aeids = new HashMap();
         for (int i = 0; i < templIds.length; i++) {
             MeasurementTemplate template = tmpDao.findById(templIds[i]);
 
@@ -490,19 +491,36 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
                 DerivedMeasurement dm = (DerivedMeasurement)it.next();
 
-                if (dm.isEnabled() == on || dm.getInterval() == 0)
+                if (dm.isEnabled() == on)
                     continue;
 
                 dm.setEnabled(on);
                 dm.setMtime(current);
+                
+                if (dm.isEnabled() && dm.getInterval() == 0)
+                    dm.setInterval(template.getDefaultInterval());
 
-                AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
-                                                         dm.getInstanceId());
-                ScheduleRevNum srn = srnMan.get(aeid);
-                long minInterval = (srn == null) ? dm.getInterval() :
-                                                   srn.getMinInterval();
-                srnMan.incrementSrn(aeid, minInterval);
+                final AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
+                                             dm.getInstanceId());
+                
+                Long min = new Long(dm.getInterval());
+                if (aeids.containsKey(aeid)) {
+                    // Get the minimum interval
+                    min = new Long(Math.min(((Long) aeids.get(aeid)).longValue(),
+                                            min.longValue()));
+                }
+                aeids.put(aeid, min);
             }
+        }
+        
+        for (Iterator it = aeids.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry) it.next();
+            final AppdefEntityID aeid = (AppdefEntityID) entry.getKey();
+            ScheduleRevNum srn = srnMan.get(aeid);
+            srnMan.incrementSrn(aeid,
+                                (srn == null) ? ((Long) entry.getValue())
+                                                    .longValue() :
+                                                srn.getMinInterval());
         }
     }
     
