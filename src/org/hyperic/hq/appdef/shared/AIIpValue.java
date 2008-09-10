@@ -352,24 +352,8 @@ public class AIIpValue
 
    public int hashCode(){
 	  int result = 17;
-      result = 37*result + (int) queueStatus;
-
-      result = 37*result + (int)(diff^(diff>>>32));
-
-      result = 37*result + (ignored ? 0 : 1);
-
       result = 37*result + ((this.address != null) ? this.address.hashCode() : 0);
-
-      result = 37*result + ((this.mACAddress != null) ? this.mACAddress.hashCode() : 0);
-
-      result = 37*result + ((this.netmask != null) ? this.netmask.hashCode() : 0);
-
       result = 37*result + ((this.id != null) ? this.id.hashCode() : 0);
-
-      result = 37*result + ((this.mTime != null) ? this.mTime.hashCode() : 0);
-
-      result = 37*result + ((this.cTime != null) ? this.cTime.hashCode() : 0);
-
 	  return result;
    }
 

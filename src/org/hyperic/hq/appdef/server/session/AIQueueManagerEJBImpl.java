@@ -41,6 +41,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AIIpValue;
@@ -50,6 +52,7 @@ import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
@@ -66,6 +69,7 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
+import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.common.SystemException;
@@ -565,9 +569,28 @@ public class AIQueueManagerEJBImpl
                             AICommandsClientFactory.getInstance()
                                 .getClient(aiplatform.getAgentToken());
                         client.getScanStatus();
-                    } catch (Exception e) {
-                        throw new AIQApprovalException("Cannot approve platform: " +
-                                                       e.getMessage(), e);
+                    } catch (AgentNotFoundException e) {
+                        // XXX scottmf, in this case we may just want to
+                        // remove the AIPlatform from the AIQ since the
+                        // agent does not exist anyway
+                        // JIRA bug http://jira.hyperic.com/browse/HHQ-2394
+                        throw new AIQApprovalException(
+                            "Cannot approve platform, agent not found in DB. " +
+                            "Removing from AIQ.  To correct this issue " +
+                            " remove data dir and restart agent." +
+                            "Error Message -> " + e.getMessage(), e);
+                    } catch (AgentRemoteException e) {
+                        throw new AIQApprovalException(
+                            "Error invoking remote method on agent " +
+                            e.getMessage(), e);
+                    } catch (AgentConnectionException e) {
+                        throw new AIQApprovalException(
+                            "Error connecting or communicating with agent " +
+                            e.getMessage(), e);
+                    } catch (AutoinventoryException e) {
+                        throw new AIQApprovalException(
+                            "Error reading data from Remote Agent Value " +
+                            e.getMessage(), e);
                     }
                 }
 
@@ -764,7 +787,7 @@ public class AIQueueManagerEJBImpl
             // localhost doesn't give us any information.  Long
             // term, when we are trying to match all addresses,
             // this can go away.
-            if (address.equals("127.0.0.1") && i.hasNext()) {
+            if (address.equals(NetFlags.LOOPBACK_ADDRESS) && i.hasNext()) {
                 continue;
             }
                 

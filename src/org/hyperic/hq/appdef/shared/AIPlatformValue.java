@@ -473,7 +473,9 @@ public class AIPlatformValue
 
    public void addAIIpValue(org.hyperic.hq.appdef.shared.AIIpValue added)
    {
-	  this.AIIpValues.add(added);
+	  if ( ! this.AIIpValues.contains(added)) {
+	      this.AIIpValues.add(added);
+	  }
 	  if ( ! this.addedAIIpValues.contains(added))
 		 this.addedAIIpValues.add(added);
    }

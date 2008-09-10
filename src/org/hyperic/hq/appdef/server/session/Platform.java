@@ -196,12 +196,19 @@ public class Platform extends PlatformBase
     void updateWithAI(AIPlatformValue aiplatform, String owner,
                       Resource resource) {
         setResource(resource);
-        setFqdn(aiplatform.getFqdn());
-        setCertdn(aiplatform.getCertdn());
-        if (aiplatform.getName() != null &&
-            !aiplatform.getName().equals(getName())) {
+        if (aiplatform.getName() != null
+            && !aiplatform.getName().equals(getName())) {
             setName(aiplatform.getName());
+        // if the fqdn and the name are currently equal 
+        // but only fqdn is changing,
+        // then the name should change as well
+        } else if (!getFqdn().equals(aiplatform.getFqdn())
+                   && getName().equals(getFqdn())) {
+            setName(aiplatform.getFqdn());
+            resource.setName(aiplatform.getFqdn());
         }
+        setCertdn(aiplatform.getCertdn());
+        setFqdn(aiplatform.getFqdn());
         setModifiedBy(owner);
         // setLocation("");
         setCpuCount(aiplatform.getCpuCount());

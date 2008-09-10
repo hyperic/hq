@@ -242,31 +242,11 @@ public class RuntimeReportProcessor {
 
         _log.info("Merging platform into appdef: " + aiplatform.getFqdn());
 
-        // Does this platform exist (by fqdn) ?
-        PlatformValue appdefPlatform;
-        String fqdn = aiplatform.getFqdn();
-        try {
-            Platform p = _platformMgr.findPlatformByFqdn(subject, fqdn);
+        PlatformValue appdefPlatform = null;
+        // checks if platform exists by fqdn, certdn, then ipaddr(s)
+        Platform p = _platformMgr.getPlatformByAIPlatform(subject, aiplatform);
+        if (p != null) {
             appdefPlatform = p.getPlatformValue();
-        } catch (PlatformNotFoundException e) {
-            // Platform doesn't exist by fqdn, so let's try by IP address.
-            // This is needed for servers like weblogic, which report platforms 
-            // for node servers with an IP address, and not an FQDN.
-            PageList platforms = _platformMgr.findPlatformsByIpAddr(subject, 
-                                                                   fqdn, null);
-            if (platforms.size() == 1) {
-                appdefPlatform = (PlatformValue) platforms.get(0);
-
-            } else if (platforms.size() > 1) {
-                _log.warn("Multiple platforms have IP address " + fqdn +
-                         ", could not determine a definitive platform");
-                appdefPlatform = null;
-
-            } else {
-                _log.warn("Could not find a platform with FQDN or IP " +
-                         "address that matched: " + fqdn);
-                appdefPlatform = null;
-            }
         }
 
         if (appdefPlatform == null) {

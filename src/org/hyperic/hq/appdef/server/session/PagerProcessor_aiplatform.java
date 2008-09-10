@@ -28,10 +28,12 @@ package org.hyperic.hq.appdef.server.session;
 import org.hyperic.util.pager.PagerProcessorExt;
 import org.hyperic.util.pager.PagerEventHandler;
 
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.dao.AIPlatformDAO;
 
 public class PagerProcessor_aiplatform implements PagerProcessorExt {
 
@@ -51,20 +53,18 @@ public class PagerProcessor_aiplatform implements PagerProcessorExt {
     }
 
     public Object processElement (Object o) {
-
-        if (o == null) return null;
-        try {
-            if (o instanceof AIPlatform) {
-                // Resync to appdef
-                AIPlatform aiplatform = (AIPlatform) o;
-                AIPlatformValue value = aiplatform.getAIPlatformValue();
-                value = aiqManagerLocal.syncQueue(value, false);
-                return value;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new IllegalStateException("Error converting to " +
-                                            "AIPlatformValue: " + e);
+        if (o == null) {
+            return null;
+        }
+        if (o instanceof AIPlatform) {
+            AIPlatform aiplatform = (AIPlatform) o;
+            AIPlatformValue value = aiplatform.getAIPlatformValue();
+            // XXX scottmf, this needs to be refactored to not pass Objects 
+            // around and hide the backend implementation of DAOs from the 
+            // front end.  Unfortunately it won't be in 3.x, definitely 4.0
+            return AIQSynchronizer.getAIQPlatform(
+                new AIPlatformDAO(DAOFactory.getDAOFactory()), value)
+                .getAIPlatformValue();
         }
         return o;
     }

@@ -28,17 +28,19 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.util.jdbc.DBUtil;
 
 public class MetricAuxLogDAO extends HibernateDAO {
     private static Log _log = LogFactory.getLog(MetricAuxLogDAO.class);
@@ -64,11 +66,20 @@ public class MetricAuxLogDAO extends HibernateDAO {
             "delete from MetricAuxLogPojo where metric.id in (:ids)";
 
         Session session = getSession();
+        HQDialect dialect = Util.getHQDialect();
+        int maxExprs;
+        if (-1 == (maxExprs = dialect.getMaxExpressions())) {
+            return session.createQuery(hql)
+                .setParameterList("ids", ids)
+                .executeUpdate();
+        }
+
         int count = 0;
+        ArrayList subIds = new ArrayList(maxExprs);
         for (Iterator it = ids.iterator(); it.hasNext(); ) {
-            ArrayList subIds = new ArrayList();
+            subIds.clear();
             
-            for (int i = 0; i < DBUtil.IN_CHUNK_SIZE && it.hasNext(); i++) {
+            for (int i = 0; i < maxExprs && it.hasNext(); i++) {
                 subIds.add(it.next());
             }
             
@@ -91,11 +102,29 @@ public class MetricAuxLogDAO extends HibernateDAO {
     }
     
     Collection find(Collection mids) {
+        List rtn = new ArrayList();
+        HQDialect dialect = Util.getHQDialect();
         String sql = "from MetricAuxLogPojo p where p.metric.id in (:metrics)";
-        
-        return getSession().createQuery(sql) 
-                           .setParameterList("metrics", mids)
-                           .list();
+        int maxExprs;
+        if (-1 == (maxExprs = dialect.getMaxExpressions())) {
+            return getSession()
+                .createQuery(sql).setParameterList("metrics", mids).list();
+        }
+        int i=0;
+        ArrayList metrics = new ArrayList(maxExprs);
+        for (Iterator it=mids.iterator(); it.hasNext(); i++) {
+            if (i != 0 && (i % maxExprs) == 0) {
+                metrics.clear();
+                metrics.add(it.next());
+                rtn.addAll(getSession()
+                    .createQuery(sql)
+                    .setParameterList("metrics", metrics).list());
+            } else  {
+                metrics.add(it.next());
+                continue;
+            }
+        }
+        return rtn;
     }
     
     void removeAll(GalertDef def) {

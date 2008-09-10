@@ -537,6 +537,16 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public Server findServerByAIID(AuthzSubject subject,
+                                   Platform platform, String aiid)
+        throws PermissionException {
+        checkViewPermission(subject, platform.getEntityId());
+        return getServerDAO().findServerByAIID(platform, aiid);
+    }
+
+    /**
      * Find a Server by Id.
      * @ejb:interface-method
      */
@@ -600,6 +610,18 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
     
     /**
+     * @ejb:interface-method
+     */
+    public ServerType findServerTypePojoByName(String name)
+        throws FinderException {
+        ServerType type = getServerTypeDAO().findByName(name);
+        if (type == null) {
+            throw new FinderException("name not found: " + name);
+        }
+        return type;
+    }
+    
+    /**
      * Find a server type by name
      * @param name - the name of the server
      * @return ServerTypeValue
@@ -608,7 +630,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public ServerTypeValue findServerTypeByName(String name)
         throws FinderException {
 
-        ServerType ejb = getServerTypeDAO().findByName(name);
+        ServerType ejb = findServerTypePojoByName(name);
         if (ejb == null) {
             throw new FinderException("name not found: " + name);
         }

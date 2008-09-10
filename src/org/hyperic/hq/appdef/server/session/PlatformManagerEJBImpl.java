@@ -27,10 +27,16 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -45,13 +51,17 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
+import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -68,6 +78,11 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.TransactionListener;
+import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -80,19 +95,29 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.bizapp.shared.AIBossLocal;
+import org.hyperic.hq.bizapp.shared.AIBossUtil;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
+import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
+import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.product.PlatformTypeInfo;
+import org.hyperic.sigar.NetFlags;
+import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
+import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.NonUniqueObjectException;
@@ -584,6 +609,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the Platform object based on an AIPlatformValue.
+     * Checks against FQDN, CertDN, then checks to see if all IP addresses
+     * match.  If all of these checks fail null is returned.
      * @ejb:interface-method
      */
     public Platform getPlatformByAIPlatform(AuthzSubject subject,
@@ -593,21 +620,77 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         String certdn = aiPlatform.getCertdn();
         String fqdn = aiPlatform.getFqdn();
 
-        try {
-            try {
-                // First try to find by FQDN
-                return findPlatformByFqdn(subject, fqdn);
-            } catch (PlatformNotFoundException e) {
-                // Now try to find by certdn
-                return getPlatformByCertDN(subject, certdn);
-            } catch (Exception e) {
-                _log.info("Error finding platform by certdn: " + certdn);
-                throw new SystemException(e);
-            }
-        } catch (PlatformNotFoundException e) {
-            _log.info("Error finding platform by fqdn: " + fqdn);
-            return null;
+        // First try to find by FQDN
+        Platform p = getPlatformDAO().findByFQDN(fqdn);
+        if (p != null) {
+            checkViewPermission(subject, p.getEntityId());
+            return p;
         }
+        p = getPlatformDAO().findByCertDN(certdn);
+        if (p != null) {
+            checkViewPermission(subject, p.getEntityId());
+            return p;
+        }
+        List ips = Arrays.asList(aiPlatform.getAIIpValues());
+        int matches = 0;
+        Platform rtn = null;
+        // IPs from the aiPlatform must match all the appdef platform's
+        // in order to be 100% sure this is the same platform.  In the future
+        // we may want to reconsider this logic.
+        Set fqdnMatches = new HashSet();
+        for (Iterator it=ips.iterator(); it.hasNext(); ) {
+            AIIpValue ip = (AIIpValue)it.next();
+            // don't want to check LOOPBACK_ADDRESS since the query will
+            // return all platforms which is not desirable / useful
+            if (ip.getAddress().equals(NetFlags.LOOPBACK_ADDRESS)) {
+                continue;
+            }
+            Collection platforms = findPlatformPojosByIpAddr(ip.getAddress());
+            for (Iterator i=platforms.iterator(); i.hasNext(); ) {
+                rtn = (Platform)i.next();
+                if (!fqdnMatches.contains(rtn.getFqdn())
+                    && platformMatchesAllIps(rtn, ips)) {
+                    matches++;
+                    fqdnMatches.add(rtn.getFqdn());
+                }
+                if (matches > 1) {
+                    // XXX scottmf, need to figure out what to do here.
+                    // If matches > 1 it is probably not the biggest deal 
+                    // to return null because it is most definitely the 
+                    // agentporker
+                    // is checking the agent port is a good way to resolve?
+                    return null;
+                }
+            }
+        }
+        if (matches <= 0) {
+            // XXX scottmf, if it gets to this point should check against
+            // macaddrs as well
+            return null;
+        } else if (matches == 1) {
+            checkViewPermission(subject, rtn.getEntityId());
+            return rtn;
+        }
+        return null;
+    }
+
+    private boolean platformMatchesAllIps(Platform p, List ips) {
+        Collection platIps = p.getIps();
+        if (platIps.size() != ips.size()) {
+            return false;
+        }
+        Set ipSet = new HashSet();
+        for (Iterator it=ips.iterator(); it.hasNext(); ) {
+            AIIpValue ip = (AIIpValue)it.next();
+            ipSet.add(ip.getAddress());
+        }
+        for (Iterator it=platIps.iterator(); it.hasNext(); ) {
+            Ip ip = (Ip)it.next();
+            if (!ipSet.contains(ip.getAddress())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -1336,40 +1419,66 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param aiplatform the AI platform object to use for data
      * @ejb:interface-method
      */
-    public void updateWithAI(AIPlatformValue aiplatform, String owner)
+    public void updateWithAI(AIPlatformValue aiplatform, AuthzSubject subj)
         throws PlatformNotFoundException, ApplicationException {
         
         String certdn = aiplatform.getCertdn();
         String fqdn = aiplatform.getFqdn();
-        PlatformDAO plh = getPlatformDAO();
-        // First try to find by fqdn
 
-        Platform pLocal;
-        try {
-            pLocal = plh.findByFQDN(fqdn);
-        } catch (NonUniqueResultException e) {
-            pLocal = null;
+        Platform platform = this.getPlatformByAIPlatform(subj, aiplatform);
+        if(platform == null) {
+            throw new PlatformNotFoundException(
+                "Platform not found with either FQDN: " + fqdn +
+                " nor CertDN: " + certdn);
         }
-        if(pLocal == null) {
-            // Now try to find by certdn
-            try {
-                pLocal = plh.findByCertDN(certdn);
-            } catch (NonUniqueResultException e) {
-                pLocal = null;
-            }
-            if(pLocal ==  null) {
-                throw new PlatformNotFoundException(
-                    "Platform not found with either FQDN: " + fqdn +
-                    " nor CertDN: " + certdn);
-            }
-        }
-        int prevCpuCount = pLocal.getCpuCount().intValue();
+        int prevCpuCount = platform.getCpuCount().intValue();
         Integer count = aiplatform.getCpuCount();
         if ((count != null) && (count.intValue() > prevCpuCount)) {
             counter.addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
-        
-        pLocal.updateWithAI(aiplatform, owner, pLocal.getResource());
+        platform.updateWithAI(
+            aiplatform, subj.getName(), platform.getResource());
+        // need to check if IPs have changed, if so update Agent
+        List ips = Arrays.asList(aiplatform.getAIIpValues());
+        AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+        Agent currAgent = platform.getAgent();
+        boolean removeCurrAgent = false;
+        for (Iterator it=ips.iterator(); it.hasNext(); ) {
+            AIIpValue ip = (AIIpValue)it.next();
+            if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_ADDED) {
+                try {
+                    Agent agent = aMan.getAgent(aiplatform.getAgentToken());
+                    platform.setAgent(agent);
+                    enableMeasurements(subj, platform);
+                } catch (AgentNotFoundException e) {
+                    throw new ApplicationException(e.getMessage(), e);
+                }
+            } else if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED
+                       && currAgent.getAddress().equals(ip.getAddress())) {
+                removeCurrAgent = true;
+            }
+        }
+        if (removeCurrAgent) {
+            aMan.removeAgent(currAgent);
+        }
+    }
+    
+    private void enableMeasurements(AuthzSubject subj, Platform platform) {
+        AgentScheduleSyncZevent event =
+            new AgentScheduleSyncZevent(platform.getEntityId());
+        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        Collection servers = platform.getServers();
+        for (Iterator it=servers.iterator(); it.hasNext(); ) {
+            Server server = (Server)it.next();
+            event = new AgentScheduleSyncZevent(server.getEntityId());
+            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            Collection services = server.getServices();
+            for (Iterator xit=services.iterator(); xit.hasNext(); ) {
+                Service service = (Service)xit.next();
+                event = new AgentScheduleSyncZevent(service.getEntityId());
+                ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            }
+        }
     }
 
     /**

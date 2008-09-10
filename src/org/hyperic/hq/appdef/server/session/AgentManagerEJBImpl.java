@@ -64,6 +64,8 @@ import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.autoinventory.server.session.AgentReportStatus;
+import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
@@ -125,6 +127,19 @@ public class AgentManagerEJBImpl
                                              " not found");
         }
         return agent;
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void removeAgent(Agent agent) {
+        AgentReportStatusDAO aDAO = getAgentReportStatusDAO();
+        AgentReportStatus status = aDAO.getReportStatus(agent);
+        if (status != null) {
+            aDAO.remove(status);
+        }
+        getAgentDAO().remove(agent);
     }
 
     /**
