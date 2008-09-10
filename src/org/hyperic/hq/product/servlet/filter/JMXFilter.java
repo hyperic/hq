@@ -379,22 +379,25 @@ public final class JMXFilter implements Filter {
 
         // update per servlet data
         String key = hRequest.getServletPath();
-        ServletInfo servletData = (ServletInfo)servlets.get(key);
-        if(key != null && servletData == null) {
-            //System.out.println("NEW URL " + jmxFilterServlet );
+        ServletInfo servletData;
+        synchronized(servlets) {
+            servletData = (ServletInfo)servlets.get(key);
+            if(key != null && servletData == null) {
+                //System.out.println("NEW URL " + jmxFilterServlet );
 
-            // Only register servlet mbean if the response was 200
-            if (eResponse.getStatus() != 200)
-                return;
+                // Only register servlet mbean if the response was 200
+                if (eResponse.getStatus() != 200)
+                    return;
 
-            servletData = new ServletInfo();
-            // servletData.setName(key)
-            servlets.put(key, servletData);
-            if( jmxFilterServlet != null ) {
-                jmxFilterServlet.registerServletMBean(contextName, key, 
-                                                      servletData);
-            } else {
-                context.log("Can't register servlet " + key );
+                servletData = new ServletInfo();
+                // servletData.setName(key)
+                servlets.put(key, servletData);
+                if( jmxFilterServlet != null ) {
+                    jmxFilterServlet.registerServletMBean(contextName, key, 
+                                                          servletData);
+                } else {
+                    context.log("Can't register servlet " + key );
+                }
             }
         }
 
