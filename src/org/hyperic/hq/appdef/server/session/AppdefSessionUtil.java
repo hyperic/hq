@@ -103,7 +103,7 @@ public abstract class AppdefSessionUtil {
     }
 
     protected AgentReportStatusDAO getAgentReportStatusDAO() {
-        return DAOFactory.getDAOFactory().getAgentReportStatusDAO();
+        return new AgentReportStatusDAO(DAOFactory.getDAOFactory());
     }
 
     protected AgentDAO getAgentDAO() {

@@ -158,4 +158,8 @@ public class Oracle9Dialect
     public boolean useEamNumbers() {
         return true;
     }
+
+    public int getMaxExpressions() {
+        return -1;
+    }
 }

@@ -115,4 +115,6 @@ public interface HQDialect
      * uses the MultipleHiLoPerTableGenerator
      */
     public boolean usesSequenceGenerator();
+
+    public int getMaxExpressions();
 }
