@@ -275,17 +275,16 @@ public class ResourceGroupDAO extends HibernateDAO
     public void remove(ResourceGroup entity) {
         // remove all roles
         entity.getRoles().clear();
-        
         removeAllMembers(entity);
 
+        Resource res = entity.getResource();
+        
+        // remove this resourceGroup itself
         super.remove(entity);
         flushSession();
-        // remove this resourceGroup itself
+
         ResourceDAO dao = new ResourceDAO(DAOFactory.getDAOFactory());
-        Resource resource =
-            dao.findByInstanceId(AuthzConstants.authzGroup, entity.getId());
-        dao.remove(resource);
-        flushSession();
+        dao.remove(res);
     }
     
     public ResourceGroup findRootGroup() {
