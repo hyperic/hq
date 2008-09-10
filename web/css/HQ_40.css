@@ -325,16 +325,16 @@ a:visited,a:hover,a {
     min-width: 150px;
     padding: 0px;
     _width:175px;
-    background-color: #FFF
+    background-color: #FFF;
 }
 .mainMenu li li {	/* create borders around each item */
 /*      border: 1px solid #2D6EBE;*/
     font: 12px Verdana;
-    color: #88C7FC
+    color: #88C7FC;
 }
 
 .mainMenu li li a:hover {
-	/*background-color: #E2F5FF;*/
+    /*background-color: #E2F5FF;*/
 	color: #C94304;
 }
 .mainMenu ul>li + li {	/* and remove the top border on all but first item in the list */
@@ -345,8 +345,9 @@ a:visited,a:hover,a {
 	left: 90%;
 }
 
-.mainMenu .hasSubmenu {
-    background: #FFFFFF url(/images/4.0/icons/resultset_next.png) no-repeat scroll 98% 1px
+/* the links to submenus should have an arrow */
+.mainMenu .hasSubmenu>a {
+    background: #FFF url('/images/4.0/icons/resultset_next.gif') no-repeat scroll 98% 1px;
 }
 
 /* special colouring for "Main menu:", and for "xx submenu" items in ADxMenu

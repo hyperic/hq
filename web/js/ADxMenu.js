@@ -11,7 +11,7 @@
 if (typeof(WCH) == "undefined") WCH = null;
 
 //	hide submenus
-document.write('<style type="text/css" media="all">.mainMenu ul {visibility:hidden; position:absolute;}</style>');
+document.write('<style type="text/css" media="all">.mainMenu div {visibility:hidden; position:absolute;}</style>');
 
 var ADxMenu = function() {
 	var self = this;
@@ -31,24 +31,28 @@ var ADxMenu = function() {
 			aTmp2 = aTmp[i].getElementsByTagName("li");
 			for (j=0;j<aTmp2.length;j++) {
 				oLI = aTmp2[j];
+				aDIV = oLI.getElementsByTagName("div");
 				aUL = oLI.getElementsByTagName("ul");
 				//	if item has submenu, then make the item hoverable
 				if (aUL && aUL.length) {
 					oLI.UL = aUL[0];	//	direct submenu
+					oLI.DIV = aDIV[0];	//	direct submenu container
 					aA = oLI.getElementsByTagName("a");
 					if (aA && aA.length)
 						oLI.A = aA[0];	//	direct child link
 					//	li:hover
 					oLI.onmouseenter = function() {
 						this.className += " adxmhover";
-						this.UL.className += " adxmhoverUL";
+                        // this.UL.className += " adxmhoverUL";
+						this.DIV.className += " adxmhoverUL";
 						if (this.A) this.A.className += " adxmhoverA";
 						if (WCH) WCH.Apply( this.UL, this, true );
 					};
 					//	li:blur
 					oLI.onmouseleave = function() {
 						this.className = this.className.replace(/adxmhover/,"");
-						this.UL.className = this.UL.className.replace(/adxmhoverUL/,"");
+                        // this.UL.className = this.UL.className.replace(/adxmhoverUL/,"");
+						this.DIV.className = this.DIV.className.replace(/adxmhoverUL/,"");
 						if (this.A) this.A.className = this.A.className.replace(/adxmhoverA/,"");
 						if (WCH) WCH.Discard( this.UL, this );
 					};
