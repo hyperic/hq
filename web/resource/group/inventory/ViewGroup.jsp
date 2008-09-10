@@ -92,7 +92,6 @@
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>
 
-<div id="propertiesAccordion" style="visibility: hidden;">
 <div id="panel1">
 <div id="panelHeader" class="accordionTabTitleBar">
 <!--  GENERAL PROPERTIES TITLE -->
@@ -155,7 +154,6 @@
 </div>
 <div id="panelContent">
 <tiles:insert page="/resource/group/inventory/ListResources.jsp"/>
-</div>
 </div>
 </div>
 

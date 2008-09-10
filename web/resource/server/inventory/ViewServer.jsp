@@ -76,7 +76,6 @@ var pageData = new Array();
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>
 
-<div id="propertiesAccordion" style="visibility: hidden;">
 <div id="panel1">
 <div id="panelHeader" class="accordionTabTitleBar">
 <!--  GENERAL PROPERTIES TITLE -->
@@ -144,7 +143,6 @@ var pageData = new Array();
     <tiles:put name="controlConfigOptionsCount" beanName="controlConfigOptionsCount"/>
     <tiles:put name="autodiscoveryMessageServiceList" beanName="autodiscoveryMessageServiceList"/>
 </tiles:insert>
-</div>
 </div>
 </div>
 
