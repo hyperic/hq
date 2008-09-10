@@ -247,23 +247,15 @@ fi
 
 # Resolve the os
 DIST_OS=`uname -s | tr [:upper:] [:lower:] | tr -d [:blank:]`
-DIST_BITS="32"
 case "$DIST_OS" in
     'sunos')
         DIST_OS="solaris"
         ;;
-    'hp-ux')
+    'hp-ux' | 'hp-ux64')
         # HP-UX needs the XPG4 version of ps (for -o args)
         DIST_OS="hpux"
         UNIX95=""
-        export UNIX95
-        ;;
-    'hp-ux64')
-        # HP-UX needs the XPG4 version of ps (for -o args)
-        DIST_OS="hpux"
-        UNIX95=""
-        export UNIX95
-        DIST_BITS="64"
+        export UNIX95   
         ;;
     'darwin')
         DIST_OS="macosx"
@@ -288,22 +280,13 @@ else
     then
         DIST_ARCH=`uname -m 2>/dev/null | tr [:upper:] [:lower:] | tr -d [:blank:]`
     fi
-
     case "$DIST_ARCH" in
-        'athlon' | 'i386' | 'i486' | 'i586' | 'i686')
+        'amd64' | 'athlon' | 'i386' | 'i486' | 'i586' | 'i686' | 'x86_64')
             DIST_ARCH="x86"
             ;;
-        'amd64' | 'x86_64')
-            DIST_ARCH="x86"
-            DIST_BITS="64"
-            ;;            
-        'ia32')
+        'ia32' | 'ia64' | 'ia64n' | 'ia64w')
             DIST_ARCH="ia"
             ;;
-        'ia64' | 'ia64n' | 'ia64w')
-            DIST_ARCH="ia"
-            DIST_BITS="64"
-            ;;            
         'ip27')
             DIST_ARCH="mips"
             ;;
@@ -332,26 +315,28 @@ outputFile() {
 }
 
 # Decide on the wrapper binary to use.
-# First, try out the detected bit version
-# If not available, try 32 bits followed by 64 bits.
-if [ -x "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-$DIST_BITS" ]
+# If a 32-bit wrapper binary exists then it will work on 32 or 64 bit
+#  platforms, if the 64-bit binary exists then the distribution most
+#  likely wants to use long names.  Otherwise, look for the default.
+WRAPPER_TEST_CMD="$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32"
+if [ -x "$WRAPPER_TEST_CMD" ]
 then
-  WRAPPER_CMD="$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-$DIST_BITS"
-elif [ -x "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32" ]
-then
-  WRAPPER_CMD="$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32"
-elif [ -x "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-64" ]
-then
-  WRAPPER_CMD="$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-64"
+    WRAPPER_CMD="$WRAPPER_TEST_CMD"
 else
-  if [ ! -x "$WRAPPER_CMD" ]
+    WRAPPER_TEST_CMD="$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-64"
+    if [ -x "$WRAPPER_TEST_CMD" ]
     then
-      echo "Unable to locate any of the following binaries:"
-      outputFile "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32"
-      outputFile "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-64"
-      outputFile "$WRAPPER_CMD"
-      exit 1
-  fi
+        WRAPPER_CMD="$WRAPPER_TEST_CMD"
+    else
+        if [ ! -x "$WRAPPER_CMD" ]
+        then
+            echo "Unable to locate any of the following binaries:"
+            outputFile "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32"
+            outputFile "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-64"
+            outputFile "$WRAPPER_CMD"
+            exit 1
+        fi
+    fi
 fi
 
 # Build the nice clause
