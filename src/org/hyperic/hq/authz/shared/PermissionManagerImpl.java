@@ -399,7 +399,7 @@ public class PermissionManagerImpl
           "where " +
                 (groupId == null ? "" :
                     "exists (select rg from r.resourceGroups rg " +
-                             "where rg.id = " + groupId + ") and ") +
+                             "where rg.group.id = " + groupId + ") and ") +
                "a.ctime between :begin and :end and " +
                 (notFixed ? " a.fixed = false and " : "") +
                 "d.priority >= :priority " +
