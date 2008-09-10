@@ -330,6 +330,7 @@ dojo.require("dojo.widget.Dialog");
               {dropOnEmpty: true,
                format: /^(.*)$/,
                containment: ["<c:out value="narrowList_${narrow}"/>"],
+               handle: 'widgetHandle',
                onUpdate: function() {
                     dojo11.xhrPost({
                         url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),

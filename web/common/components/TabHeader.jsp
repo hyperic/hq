@@ -78,7 +78,7 @@
 
     <td class="BlockTitle" width="100%" valign="middle">
     <c:if test="${dragDrop}">
-        <div style="cursor: move;">
+        <div class="widgetHandle">
     </c:if>
 
 <c:choose>

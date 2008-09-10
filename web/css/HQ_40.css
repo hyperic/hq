@@ -925,7 +925,7 @@ body .dijitPopup {
     float: left
 }
 
-.filterBox span {
+.filterBox span, .filterBox label {
     font-weight: bold
 }
 
@@ -1379,7 +1379,6 @@ select {
 .widgetTitle {
     background: transparent url('/images/4.0/backgrounds/panel_gray.jpg') repeat-x scroll top left;
     padding: 6px 10px;
-    cursor: move;
 }
 
 .widget .config_btn {
@@ -2108,4 +2107,8 @@ button span{
     margin:-3px;
     padding:4px 10px 4px 5px;
     font-weight:bold;
+}
+
+.widgetHandle {
+    cursor: move;
 }
