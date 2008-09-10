@@ -161,8 +161,9 @@ function skipResources() {
             <table cellpadding="0" cellspacing="0" border="0">
              <tr>
                 <td style="padding-right:10px;">
-                <a class="buttonGreen" href="javascript:void(0);" onclick="setImportCheckboxes(AIQueueForm); addInventory(); AIQueueForm.submit();"><span><fmt:message key="common.label.AddtoInventory"/></span></a>
-                <a class="buttonGreen" href="javascript:void(0);" onclick="skipResources(); AIQueueForm.submit(); return false;"><span><fmt:message key="common.label.SkipResources"/></span></a>
+                <input type="hidden" name="temp" value="true" id="buttonActionHidden"/>
+                <a class="buttonGreen" href="javascript:setImportCheckboxes(AIQueueForm); addInventory(); hyperic.form.mockLinkSubmit('buttonAction','Add to Inventory','buttonActionHidden')"><span><fmt:message key="common.label.AddtoInventory"/></span></a>
+                <a class="buttonGreen" href="javascript:skipResources(); hyperic.form.mockLinkSubmit('buttonAction','Skip Checked Resources','buttonActionHidden');"><span><fmt:message key="common.label.SkipResources"/></span></a>
                 </td>
             </tr>
            </table>
