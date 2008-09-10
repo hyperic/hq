@@ -198,8 +198,10 @@ public class RESTService extends BaseService {
                 for (Iterator<AppdefResourceValue> it = resources.iterator();
                      it.hasNext(); ) {
                     AppdefResourceValue resource = it.next();
-                    avails.put(resource.getId().toString(),resource.getName());
-                    arr.put(resource.getId().toString());
+                    final String resourceId = resource.getId().toString();
+                    avails.put(resourceId, resource.getName());
+                    if (groupsList.contains(resourceId))
+                        arr.put(resourceId);
                 }
                 
                 res = new JSONObject()
