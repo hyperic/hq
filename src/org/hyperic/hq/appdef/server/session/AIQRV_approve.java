@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -26,37 +26,31 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.List;
-import java.util.Iterator;
 
 import javax.ejb.CreateException;
+import javax.ejb.FinderException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.autoinventory.AIPlatform;
-import org.hyperic.hq.autoinventory.AIIp;
-import org.hyperic.hq.autoinventory.AIServer;
-import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * The AIQueueConstants.Q_DECISION_APPROVE means to add the queued
@@ -115,6 +109,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                            aiplatform.getAIPlatformValue());
                 aid = platform.getEntityId();
                 setCustomProperties(aiplatform, platform, cpropMgr);
+                _log.info("Created platform " + platform.getName() + " id="
+                    + platform.getId());
                 createdResources.add(platform);
             } catch (PermissionException e) {
                 throw e;
@@ -132,13 +128,11 @@ public class AIQRV_approve implements AIQResourceVisitor {
             }
             
             try {
-                configMgr.
-                    configureResource(subject,
-                                      aid,
-                                      aiplatform.getProductConfig(),
-                                      aiplatform.getMeasurementConfig(),
-                                      aiplatform.getControlConfig(),
-                                      null, null, false, false);
+                configMgr.configureResource(subject, aid,
+                                            aiplatform.getProductConfig(),
+                                            aiplatform.getMeasurementConfig(),
+                                            aiplatform.getControlConfig(),
+                                            null, null, false, false);
             } catch (Exception e) {
                 _log.warn("Error configuring platform: " + e, e);
             }
@@ -285,10 +279,13 @@ public class AIQRV_approve implements AIQResourceVisitor {
     }
     
     private void handleStatusRemoved(AuthzSubjectValue subject,
-        Platform platform, AIPlatformValue aiplatformValue,
-        AIServer aiserver, ConfigManagerLocal configMgr,
-        CPropManagerLocal cpropMgr, List createdResources,
-        ServerManagerLocal smLocal)
+                                     Platform platform,
+                                     AIPlatformValue aiplatformValue,
+                                     AIServer aiserver,
+                                     ConfigManagerLocal configMgr,
+                                     CPropManagerLocal cpropMgr,
+                                     List createdResources,
+                                     ServerManagerLocal smLocal)
         throws PermissionException
     {
         // If the platform has already been removed, do nothing.
@@ -392,14 +389,15 @@ public class AIQRV_approve implements AIQResourceVisitor {
         // so add it to appdef.
         try {
             // Before we add it, make sure it's not already there...
-            Server server = smLocal.findServerValueByAIID(
-                subject, platform, aiserver.getAutoinventoryIdentifier());
+            Server server = getServer(subject, platform, aiserver, smLocal);
+
             // already added, throw exception
             if (server != null) {
                 throw new AIQApprovalException("Server id " +
                                                server.getId() +
                                                " already added");
             }
+
             AIServerValue aiserverValue = aiserver.getAIServerValue();
             ServerValue serverValue = AIConversionUtil.convertAIServerToServer(
                 aiserverValue, smLocal);
@@ -432,6 +430,33 @@ public class AIQRV_approve implements AIQResourceVisitor {
             throw new SystemException("Error creating platform from " +
                                       "AI data: " + e.getMessage(), e);
         }
+    }
+
+    private Server getServer(AuthzSubjectValue subject, Platform platform,
+                             AIServer aiserver, ServerManagerLocal smLocal)
+        throws PermissionException, FinderException {
+        Server server = smLocal.findServerValueByAIID(
+            subject, platform, aiserver.getAutoinventoryIdentifier());
+        if (server != null) {
+            return server;
+        }
+        ServerType serverType =
+            smLocal.findServerTypePojoByName(aiserver.getServerTypeName());
+        // if (virtual == true) for this server type that means that there may
+        // only be one server per platform of this type
+        if (false == serverType.isVirtual()) {
+            return null;
+        }
+        List servers = smLocal.findServersByType(platform, serverType);
+        // servers.size() > 1 must be false if
+        // serverType.isVirtual() == true
+        // Unfortunately this is not enforced anywhere so we should do something
+        // to handle it just in case
+        if (servers.size() > 1) {
+        } else if (servers.size() == 1) {
+            return (Server)servers.get(0);
+        }
+        return null;
     }
 
     private Platform getExistingPlatform(AuthzSubjectValue subject,

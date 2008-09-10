@@ -100,6 +100,9 @@ public class AIConversionUtil {
         throws FinderException {
 
         ServerTypeValue stValue;
+        // XXX scottmf, since serverTypeName is a varchar and not a serverTypeId
+        // which references a real serverType there may be an issue here 
+        // exec'ing findServerTypeByName()
         stValue = serverMgr.findServerTypeByName(aiserver.getServerTypeName());
 
         ServerValue server = new ServerValue();

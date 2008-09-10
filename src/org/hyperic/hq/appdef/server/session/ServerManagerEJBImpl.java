@@ -536,6 +536,19 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     {
         return getServerTypeDAO().findById(id); 
     }
+
+    
+    /**
+     * @ejb:interface-method
+     */
+    public ServerType findServerTypePojoByName(String name)
+        throws FinderException {
+        ServerType type = getServerTypeDAO().findByName(name);
+        if (type == null) {
+            throw new FinderException("name not found: " + name);
+        }
+        return type;
+    }
     
     /**
      * Find a server type by name
@@ -546,7 +559,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public ServerTypeValue findServerTypeByName(String name)
         throws FinderException {
 
-        ServerType ejb = getServerTypeDAO().findByName(name);
+        ServerType ejb = findServerTypePojoByName(name);
         if (ejb == null) {
             throw new FinderException("name not found: " + name);
         }
