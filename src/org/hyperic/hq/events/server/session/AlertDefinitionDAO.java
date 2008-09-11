@@ -104,6 +104,15 @@ public class AlertDefinitionDAO extends HibernateDAO {
             .list();
     }
     
+    public List findAllByResource(Resource r) {
+        String sql = "from AlertDefinition d WHERE " +
+        		"d.resource = ? AND (NOT d.parent.id = 0 OR d.parent IS NULL)";
+        
+        return getSession().createQuery(sql)
+            .setParameter(0, r)
+            .list();
+    }
+    
     /**
      * Find the alert def for a given appdef entity and is child of the parent
      * alert def passed in

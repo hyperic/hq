@@ -1363,6 +1363,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         ServiceTypeDAO dao = new ServiceTypeDAO(DAOFactory.getDAOFactory());
         dao.remove(serviceType);
+        
+        resMan.removeResource(overlord, proto);
     }
 
     /**

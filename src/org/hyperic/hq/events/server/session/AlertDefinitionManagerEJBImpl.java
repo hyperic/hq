@@ -590,7 +590,7 @@ public class AlertDefinitionManagerEJBImpl
      */
     public void disassociateResource(Resource r) {
         AlertDefinitionDAO aDao = getAlertDefDAO();
-        List adefs = aDao.findAllByEntity(new AppdefEntityID(r));
+        List adefs = aDao.findAllByResource(r);
 
         for (Iterator i = adefs.iterator(); i.hasNext(); ) {
             AlertDefinition alertdef = (AlertDefinition) i.next();

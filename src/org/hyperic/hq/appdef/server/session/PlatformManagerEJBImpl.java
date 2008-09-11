@@ -1414,6 +1414,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         // TODO:  Need to remove the Resource prototype associated with this
         //        platform.
         getPlatformTypeDAO().remove(pt);
+        
+        resMan.removeResource(overlord, proto);
     }
     
     /**

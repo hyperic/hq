@@ -1433,6 +1433,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         
         ServerTypeDAO dao = new ServerTypeDAO(DAOFactory.getDAOFactory());
         dao.remove(serverType);
+        
+        resMan.removeResource(overlord, proto);
     }
 
     /**

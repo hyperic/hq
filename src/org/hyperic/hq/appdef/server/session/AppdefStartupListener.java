@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.galerts.ResourceAuxLogProvider;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -55,20 +56,23 @@ public class AppdefStartupListener
 
                 public void preResourceDelete(Resource r)
                     throws VetoException {
-                    switch (r.getResourceType().getAppdefType()) {
-                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                        PlatformManagerEJBImpl.getOne().handleResourceDelete(r);
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                        ServerManagerEJBImpl.getOne().handleResourceDelete(r);
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                        ServiceManagerEJBImpl.getOne().handleResourceDelete(r);
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                        ApplicationManagerEJBImpl.getOne()
-                            .handleResourceDelete(r);
-                        break;
+                    try {
+                        AppdefEntityID aeid = new AppdefEntityID(r);
+                        if (aeid.isPlatform()) {
+                            PlatformManagerEJBImpl.getOne()
+                                .handleResourceDelete(r);
+                        } else if (aeid.isServer()) {
+                            ServerManagerEJBImpl.getOne()
+                                .handleResourceDelete(r);
+                        } else if (aeid.isService()) {
+                            ServiceManagerEJBImpl.getOne()
+                                .handleResourceDelete(r);
+                        } else if (aeid.isApplication()) {
+                            ApplicationManagerEJBImpl.getOne()
+                                .handleResourceDelete(r);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        // Not an appdef resource
                     }
                 }
             });
