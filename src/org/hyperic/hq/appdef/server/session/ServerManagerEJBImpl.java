@@ -70,6 +70,7 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -1242,6 +1243,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         AuthzSubjectValue overlordValue = overlord.getAuthzSubjectValue();
         AppdefGroupManagerLocal grpMgr = AppdefGroupManagerEJBImpl.getOne();
+        ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+        
         for (Iterator i = curServers.iterator(); i.hasNext();) {
             ServerType stlocal = (ServerType) i.next();
             String serverName = stlocal.getName();
@@ -1297,7 +1300,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                         "Overlord should not run into PermissionException";
                 }
 
+                Resource proto = resMan.findResourcePojoByInstanceId(
+                    AuthzConstants.authzServerProto, stlocal.getId());
+
                 stLHome.remove(stlocal);
+                resMan.removeResource(overlord, proto);
             } else {
                 String curDesc = stlocal.getDescription();
                 Collection curPlats = stlocal.getPlatformTypes();
@@ -1335,8 +1342,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
         }
             
-        Resource prototype = 
-            ResourceManagerEJBImpl.getOne().findRootResource();
+        Resource prototype = resMan.findRootResource();
         
         // Now create the left-overs
         for (Iterator i = infoMap.values().iterator(); i.hasNext(); ) {

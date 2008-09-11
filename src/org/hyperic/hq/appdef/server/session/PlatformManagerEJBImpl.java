@@ -1326,7 +1326,10 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         AuthzSubject overlord = 
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         AuthzSubjectValue overlordValue = overlord.getAuthzSubjectValue();
-        
+        ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+        Resource proto = 
+          resMan.findResourcePojoByInstanceId(AuthzConstants.authzPlatformProto,
+                                              pt.getId());
         try {
             _log.debug("Removing PlatformType: " + pt.getName());
 
@@ -1372,6 +1375,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         }
         
         getPlatformTypeDAO().remove(pt);
+        resMan.removeResource(overlord, proto);
     }
     
     /**

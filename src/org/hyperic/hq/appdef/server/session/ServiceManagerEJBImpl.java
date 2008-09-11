@@ -75,6 +75,7 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -1384,6 +1385,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         ServiceTypeDAO stLHome = getServiceTypeDAO();
         AppdefGroupManagerLocal grpMgr = AppdefGroupManagerEJBImpl.getOne();
+        ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+
         try {
             Collection curServices = stLHome.findByPlugin(plugin);
             ServerTypeDAO stHome = getServerTypeDAO();
@@ -1404,6 +1407,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     int groupEntType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
                     int groupEntResType = stlocal.getId().intValue();
                     
+                    Resource proto = resMan.findResourcePojoByInstanceId(
+                        AuthzConstants.authzServiceProto, stlocal.getId());
                     try {
                         // Delete compatible groups of this type. 
                         List groups = grpMgr
@@ -1443,6 +1448,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     }
 
                     stLHome.remove(stlocal);
+                    resMan.removeResource(overlord, proto);
                 } else {
                     // Just update it
                     // XXX TODO MOVE THIS INTO THE ENTITY
@@ -1483,8 +1489,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 }
             }
             
-            Resource prototype = 
-                ResourceManagerEJBImpl.getOne().findRootResource();
+            Resource prototype = resMan.findRootResource();
             
             // Now create the left-overs
             for (Iterator i = infoMap.values().iterator(); i.hasNext();) {
