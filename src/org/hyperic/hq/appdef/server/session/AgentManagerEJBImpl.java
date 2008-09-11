@@ -411,6 +411,14 @@ public class AgentManagerEJBImpl
     }
     
     /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public List findAgentsByIP(String ip) {
+        return getAgentDAO().findByIP(ip);
+    }
+    
+    /**
      * Update an existing agent's IP and port based on an agent token. The type 
      * of the agent that is updated is the 'hyperic-hq-remoting' agent. This type 
      * of agent may be configured to use either a bidirectional or unidirectional 

@@ -109,6 +109,7 @@ import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
+import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.config.EncodingException;
@@ -619,19 +620,34 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         
         String certdn = aiPlatform.getCertdn();
         String fqdn = aiPlatform.getFqdn();
+        String agentToken = aiPlatform.getAgentToken();
 
         // First try to find by FQDN
-        Platform p = getPlatformDAO().findByFQDN(fqdn);
-        if (p != null) {
+        Platform p;
+        if (null != (p = getPlatformDAO().findByFQDN(fqdn))) {
             checkViewPermission(subject, p.getEntityId());
             return p;
         }
-        p = getPlatformDAO().findByCertDN(certdn);
-        if (p != null) {
+        if (null != (p = getPlatformDAO().findByCertDN(certdn))) {
             checkViewPermission(subject, p.getEntityId());
             return p;
         }
         List ips = Arrays.asList(aiPlatform.getAIIpValues());
+        if (null != (p = getPlatformFromAgentToken(agentToken))) {
+            checkViewPermission(subject, p.getEntityId());
+            return p;
+        }
+        if (isAgentPorker(ips)) {
+            return null;
+        }
+        if (null != (p = getPlatformFromIPs(aiPlatform, ips))) {
+            checkViewPermission(subject, p.getEntityId());
+            return p;
+        }
+        return null;
+    }
+    
+    private Platform getPlatformFromIPs(AIPlatformValue aiPlatform, List ips) {
         int matches = 0;
         Platform rtn = null;
         // IPs from the aiPlatform must match all the appdef platform's
@@ -668,10 +684,48 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // macaddrs as well
             return null;
         } else if (matches == 1) {
-            checkViewPermission(subject, rtn.getEntityId());
             return rtn;
         }
         return null;
+    }
+
+    private Platform getPlatformFromAgentToken(String agentToken) {
+        try {
+            AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+            Agent agent = aMan.getAgent(agentToken);
+            Collection platforms = agent.getPlatforms();
+            for (Iterator it=platforms.iterator(); it.hasNext(); ) {
+                Platform platform = (Platform)it.next();
+                String platType = platform.getPlatformType().getName();
+                // need to check if the platform is not a platform device
+                if (PlatformDetector.isSupportedPlatform(platType)) {
+                    return platform;
+                }
+            }
+        } catch (AgentNotFoundException e) {
+            return null;
+        }
+        return null;
+    }
+    
+    private boolean isAgentPorker(List ips) {
+        // anytime a new agent comes in (ip / port being unique) it creates a 
+        // new object mapping in the db.  Therefore if the agent is found but 
+        // with no  associated platform, we need to check the ips in the 
+        // agent table. If there are more than one IPs match,
+        // then assume this is the Agent Porker
+        AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+        for (Iterator it=ips.iterator(); it.hasNext(); ) {
+            AIIpValue ip = (AIIpValue)it.next();
+            if (ip.getAddress().equals(NetFlags.LOOPBACK_ADDRESS)) {
+                continue;
+            }
+            List agents = aMan.findAgentsByIP(ip.getAddress());
+            if (agents.size() > 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean platformMatchesAllIps(Platform p, List ips) {

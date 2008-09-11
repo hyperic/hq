@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.CreateException;
@@ -385,11 +386,12 @@ public class AIQRV_approve implements AIQResourceVisitor {
         try {
             // Before we add it, make sure it's not already there...
             Server server = getServer(subject, platform, aiserver, smLocal);
-            // already added, throw exception
             if (server != null) {
-                throw new AIQApprovalException("Server id " +
-                                               server.getId() +
-                                               " already added");
+                // remove the server if it already exists.
+                // probably shouldn't get into the AIQ to begin with but
+                // we need to handle it if that is the case.
+                removeChild(aiserver.getAIPlatform(), aiserver);
+                return;
             }
             AIServerValue aiserverValue = aiserver.getAIServerValue();
             ServerValue serverValue = AIConversionUtil.convertAIServerToServer(
@@ -425,6 +427,15 @@ public class AIQRV_approve implements AIQResourceVisitor {
         }
     }
     
+    private void removeChild(AIPlatform aiPlatform, AIServer server) {
+        for (Iterator it=aiPlatform.getAIServers().iterator(); it.hasNext(); ) {
+            AIServer aiserver = (AIServer)it.next();
+            if (aiserver.getId().equals(server.getId())) {
+                it.remove();
+            }
+        }
+    }
+
     private Server getServer(AuthzSubject subject, Platform platform,
         AIServer aiserver, ServerManagerLocal smLocal)
         throws PermissionException, FinderException {
