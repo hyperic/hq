@@ -95,10 +95,7 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
             Portal.createPortal(TITLE_CURRENT_HEALTH,
                                 PORTLET_CURRENT_HEALTH);
         request.setAttribute(Constants.PORTAL_KEY, portal);
-        request.setAttribute(Constants.PAGE_TITLE_KEY,
-                             ((BaseActionMapping) mapping).getTitle() );
 
-        request.setAttribute(Constants.PAGE_TITLE_KEY, "Monitor.CurrentHealth");
         return null;
     }
 

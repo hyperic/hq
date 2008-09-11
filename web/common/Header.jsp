@@ -154,7 +154,7 @@
         </c:choose>
         <span><a href="<html:rewrite page='/Logout.do'/>"><fmt:message key="header.SignOut"/></a></span>
         <span><html:link href="javascript:void(0)" onclick="tutorialWin=window.open('http://www.hyperic.com/demo/screencasts.html','tutorials','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');tutorialWin.focus();return false;"><fmt:message key="header.Screencasts"/></html:link></span>
-        <span><a href="javascript:void(0)" onclick="helpWin=window.open('<hq:help/>','help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;"><fmt:message key="header.Help"/></a></span>
+        <span><a href="javascript:void(0)" onclick="helpWin=window.open((typeof help != 'undefined' ? help : '<hq:help/>'),'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;"><fmt:message key="header.Help"/></a></span>
     </div>
     <div id="headerSearch"><fmt:message key="header.Search"/></div>
         <div id="headerSearchBox" style="display:none">
