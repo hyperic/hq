@@ -36,13 +36,14 @@
   <c:when test="${recentAlertsSize > 0}">
     <ul class="boxy">
       <c:forEach var="alert" varStatus="status" items="${recentAlerts}">
+        <c:set var="datetime"><hq:dateFormatter value="${alert.ctime}" showDate="true"/></c:set>
         <c:url var="alertUrl" value="/alerts/Alerts.do">
           <c:param name="mode" value="viewAlert"/>
         </c:url>
-        <li class="MastheadContent" title="<fmt:message key="common.label.Resource"/> <c:out value="${alert.resourceName}"/>"><html:link href="${alertUrl}&amp;eid=${alert.type}:${alert.rid}&amp;a=${alert.id}" styleClass="MastheadLink"><hq:dateFormatter value="${alert.ctime}" showDate="false"/></html:link>
+        <li class="MastheadContent"><html:link href="${alertUrl}&amp;eid=${alert.type}:${alert.rid}&amp;a=${alert.id}" styleClass="MastheadLink" title="${datetime}"><hq:dateFormatter value="${alert.ctime}" showDate="false"/></html:link>
         <fmt:message key="common.label.Dash"/>
         <%--<c:out value="${alert.resourceName}"/><fmt:message key="common.label.Colon"/>--%>
-        <c:out value="${alert.name}"/></li>
+        <abbr title="<fmt:message key="common.label.Resource"/> <c:out value="${alert.resourceName}"/>; <fmt:message key="common.label.Alert"/> <c:out value="${alert.name}"/>"><c:out value="${alert.name}"/></abbr></li>
       </c:forEach>
     </ul>
   </c:when>

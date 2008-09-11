@@ -32,8 +32,8 @@ a:visited,a:hover,a {
 #headerAlerts {
     position: absolute;
     top: 0;
-    left: 320px;
-    width: 410px;
+    left: 310px;
+    width: 360px;
     height: 38px;
     font-size: 10px;
     color: #FFF;
@@ -43,7 +43,7 @@ a:visited,a:hover,a {
     position: absolute;
     top: 0;
     right: 68px;
-    width: 292px;
+    width: 250px;
     height: 20px;
     text-align: right;
     padding: 3px 8px 0 0;

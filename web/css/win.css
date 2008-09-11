@@ -654,11 +654,10 @@ a.guidelink:hover {
     color: #FFF;
     font-weight: 700;
     height: 38px;
-    left: 10px;
     overflow: hidden;
     position: absolute;
     top: 0;
-    width: 400px;
+    width: 360px;
     z-index: 1
 }
 
