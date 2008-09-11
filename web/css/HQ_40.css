@@ -1526,7 +1526,7 @@ visibility: hidden;*/
     color: #FFFFFF;
 }
 
-#summaryWidget .content th a {
+#summaryWidget .content th a,#summaryWidget .content th a:visited,#summaryWidget .content th a:hover {
     color: #FFFFFF;
     font-weight: normal;
 }
