@@ -54,6 +54,7 @@ public class DateFormatter extends VarSetterBaseTag {
      */
     private String _value = null;
     private Boolean _time = Boolean.FALSE;
+    private Boolean _showDate = Boolean.TRUE;
     private Boolean _showTime = Boolean.TRUE;
     private Boolean _approx = Boolean.FALSE;
     
@@ -81,8 +82,8 @@ public class DateFormatter extends VarSetterBaseTag {
     private String formatDate(Long date) {
         int unit;
         
-        if (_time.booleanValue()) {
-            if (_approx.booleanValue()) {
+        if (_time) {
+            if (_approx) {
                 unit = UnitsConstants.UNIT_APPROX_DUR;
             }
             else {
@@ -95,8 +96,11 @@ public class DateFormatter extends VarSetterBaseTag {
             
         String key = Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis";
         
-        if (!_showTime.booleanValue())
+        if (!_showTime)
             key += ".dateonly";
+        
+        if (!_showDate)
+            key += ".timeonly";
         
         String formatString =
             RequestUtils.message((HttpServletRequest) pageContext.getRequest(), 
@@ -162,6 +166,14 @@ public class DateFormatter extends VarSetterBaseTag {
         _approx = approx;
     }
 
+    public Boolean getShowDate() {
+        return _showDate;
+    }
+
+    public void setShowDate(Boolean showDate) {
+        _showDate = showDate;
+    }
+    
     public Boolean getShowTime() {
         return _showTime;
     }

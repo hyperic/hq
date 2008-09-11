@@ -521,6 +521,11 @@
       <rtexprvalue>false</rtexprvalue>
     </attribute>
     <attribute>
+      <name>showDate</name>
+      <required>false</required>
+      <rtexprvalue>false</rtexprvalue>
+    </attribute>
+    <attribute>
       <name>showTime</name>
       <required>false</required>
       <rtexprvalue>false</rtexprvalue>
