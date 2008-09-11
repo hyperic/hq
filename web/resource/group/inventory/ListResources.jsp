@@ -117,6 +117,8 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <!--  /  -->
 
 <tiles:insert definition=".toolbar.addToList">
+  <tiles:put name="showAddToListBtn"><c:out value="${not empty useroperations['modifyResourceGroup']}"/></tiles:put>
+  <tiles:put name="showRemoveBtn"><c:out value="${not empty useroperations['modifyResourceGroup']}"/></tiles:put>
   <tiles:put name="addToListUrl" beanName="addToListUrl"/>
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
   <tiles:put name="pageSizeAction" beanName="psAction" />
