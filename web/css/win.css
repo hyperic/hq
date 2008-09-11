@@ -731,10 +731,6 @@ a.guidelink:hover {
     padding: 3px
 }
 
-.dashboardpadding {
-    padding: 5px 10px 5px 5px
-}
-
 .dashboardcontrolactionscontainer {
     background-color: #EBEDF2;
     border-bottom: 1px solid #D5D8DE;
@@ -1727,6 +1723,10 @@ ul.eventDetails li {
 
 #narrowlist_true .blockcontent {
     background-color: #fff
+}
+
+#narrowlist_false li, #narrowlist_true li {
+    padding: 5px 0px;
 }
 
 #displayselaction {

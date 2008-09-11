@@ -289,7 +289,7 @@ dojo.require("dojo.widget.Dialog");
 	    </c:otherwise>
 	  </c:choose>
 	
-	  <td valign="top" name="specialTd" <c:out value="${width}" escapeXml="false"/>>      
+	  <td valign="top" style="padding: 0px 5px;" name="specialTd" <c:out value="${width}" escapeXml="false"/>>      
 	    <%= divStart %>
 	
 	<ul id="<c:out value="narrowList_${narrow}"/>" class="boxy">
@@ -297,11 +297,9 @@ dojo.require("dojo.widget.Dialog");
 	  <c:set var="isFirstPortlet" value="${portlet.isFirst}" scope="request"/>
 	  <c:set var="isLastPortlet"  value="${portlet.isLast}"  scope="request"/>
 	  <li id="<c:out value="${portlet.fullUrl}"/>">
-	    <div class="DashboardPadding">
 	    <tiles:insert beanProperty="url" beanName="portlet" flush="true">
 	      <tiles:put name="portlet" beanName="portlet"/>
 	    </tiles:insert>
-	    </div>
 	  </li>
 	  </c:forEach>
 	</ul>
