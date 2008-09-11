@@ -25,6 +25,10 @@
 
 package org.hyperic.util.units;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
+
 public class PercentFormatter extends PercentageFormatter {
 
     //example use-case from CISCO-PROCESS-MIB:
@@ -38,5 +42,22 @@ public class PercentFormatter extends PercentageFormatter {
 
     protected int getUnitType() {
         return UnitsConstants.UNIT_PERCENT;
+    }
+
+    //example use-case from CISCO-PROCESS-MIB:
+    //cpmCPUTotal5secRev OBJECT-TYPE
+    //SYNTAX          Gauge32 (0..100)
+    //UNITS           "percent"
+    
+    /* (non-Javadoc)
+     * @see org.hyperic.util.units.PercentageFormatter#parse(java.lang.String, java.util.Locale, org.hyperic.util.units.ParseSpecifics)
+     */
+    public UnitNumber parse(String val, Locale locale, ParseSpecifics specifics)
+        throws ParseException {
+        NumberFormat fmt;
+
+        fmt = NumberFormat.getNumberInstance(locale);
+        return new UnitNumber(fmt.parse(val).doubleValue(),
+                              this.getUnitType(), this.getUnitScale());
     }
 }
