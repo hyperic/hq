@@ -269,18 +269,20 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
 function loadSearchData(type, response, evt) {
     if(type == 'load'){
         var resURL = resourceURL+"?eid=";
-        var template = "<li class='type'><a href='link'>text<\/a><\/li>";
+        var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
         var count = 0;
         var res = "";
         var relink = new RegExp("link", "g");
         var retext = new RegExp("text", "g");
+        var refulltext = new RegExp("fullname", "g");
         var retype = new RegExp("type", "g");
         for(var i = 0; i < response.length; i++) {
             var length = response[i].name.length;
+            var fullname = response[i].name;
             if(length >= 37){
-                response[i].name = '<abbr title="'+response[i].name+'">'+response[i].name.substring(0,4) + "..." + response[i].name.substring(length-28, length)+'</abbr>';
+                response[i].name = response[i].name.substring(0,4) + "..." + response[i].name.substring(length-28, length);
             }
-            res += template.replace(relink, resURL+response[i].eId).replace(retext, response[i].name).replace(retype, response[i].resType);
+            res += template.replace(relink, resURL+response[i].eId).replace(retext, response[i].name).replace(retype, response[i].resType).replace(refulltext, fullname);
             count++;
         }
         dojo.byId("resourceResults").innerHTML = res;
