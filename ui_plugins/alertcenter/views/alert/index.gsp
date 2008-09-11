@@ -117,7 +117,7 @@ dojo.addOnLoad( function(){
             </div>
         </div>
       </div>
-      <div style="float:right;width:81%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" id="alertsCont">
+      <div style="float:right;width:78%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" id="alertsCont">
         <div id="alertsTable" style="display:none;">
           <%= dojoTable(id:'Alerts', title:l.ClassicAlertsTable,
                         refresh:60, url:urlFor(action:'data'),
@@ -171,7 +171,7 @@ dojo.addOnLoad( function(){
           </div>
         </div>
       </div>
-       <div style="float:right;display:inline;width:81%;height: 445px;overflow-x: hidden; overflow-y: auto;" id="defsCont">
+       <div style="float:right;display:inline;width:78%;height: 445px;overflow-x: hidden; overflow-y: auto;" id="defsCont">
         <div id="defsTable" style="display:none;">
           <%= dojoTable(id:'Defs', title:l.ClassicDefsTable,
                         url:urlFor(action:'defData'),
