@@ -44,11 +44,6 @@ public class PercentFormatter extends PercentageFormatter {
         return UnitsConstants.UNIT_PERCENT;
     }
 
-    //example use-case from CISCO-PROCESS-MIB:
-    //cpmCPUTotal5secRev OBJECT-TYPE
-    //SYNTAX          Gauge32 (0..100)
-    //UNITS           "percent"
-    
     /* (non-Javadoc)
      * @see org.hyperic.util.units.PercentageFormatter#parse(java.lang.String, java.util.Locale, org.hyperic.util.units.ParseSpecifics)
      */
