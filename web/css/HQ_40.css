@@ -136,9 +136,8 @@ a:visited,a:hover,a {
 
 #headerSearchResults li {
     margin: 2px 0px;
-    padding: 1px 0px;
-    width: 100%;
-    border: 1px solid #FFF
+    padding: 1px 0px 1px 22px; /* 22px to leave room for icons */
+    border: 1px solid #FFF;
 }
 
 #headerSearchResults li:hover {
@@ -152,7 +151,6 @@ a:visited,a:hover,a {
 }
 
 #headerSearchResults li a {
-    padding-left: 22px;
     color: #666;
     text-decoration: none
 }
@@ -169,23 +167,23 @@ a:visited,a:hover,a {
     background: #FFF
 }
 
-.platform {
+#headerSearchResults li.platform {
     background: transparent url('/images/4.0/icons/platform.png') no-repeat 0% 50%;
 }
 
-.server {
+#headerSearchResults li.server {
     background: transparent url('/images/4.0/icons/server.png') no-repeat 0% 50%;
 }
 
-.service {
+#headerSearchResults li.service {
     background: transparent url('/images/4.0/icons/service.png') no-repeat 0% 50%;
 }
 
-.application {
+#headerSearchResults li.application {
     background: transparent url('/images/4.0/icons/application.png') no-repeat 0% 50%;
 }
 
-.group {
+#headerSearchResults li.group {
     background: transparent url('/images/4.0/icons/group.png') no-repeat 0% 50%;
 }
 
