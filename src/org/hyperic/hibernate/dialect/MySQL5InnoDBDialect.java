@@ -411,8 +411,4 @@ public class MySQL5InnoDBDialect
     public boolean useEamNumbers() {
         return false;
     }
-
-    public int getMaxExpressions() {
-        return -1;
-    }
 }
