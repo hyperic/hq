@@ -1373,7 +1373,7 @@
           
       <action path="/resource/application/inventory/ViewApplication"
               type="org.hyperic.hq.ui.action.resource.application.inventory.ViewApplicationAction">
-        <set-property property="title" value="Monitor.CurrentHealth"/>
+        <set-property property="title" value="Inventory.Application"/>
       </action>
           
       <action path="/resource/application/inventory/NewApplicationFormPrepare"
