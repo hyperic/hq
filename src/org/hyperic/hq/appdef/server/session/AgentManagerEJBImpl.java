@@ -300,7 +300,15 @@ public class AgentManagerEJBImpl
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
         return agent.getAgentValue();
     }
-
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public List findAgentsByIP(String ip) {
+        return getAgentDAO().findByIP(ip);
+    }
+    
     /**
      * Update an existing agent.  The AgentToken is given, and the
      * rest of the data contained in the value object will be used

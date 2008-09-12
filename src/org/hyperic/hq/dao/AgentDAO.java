@@ -65,6 +65,14 @@ public class AgentDAO extends HibernateDAO
         save(ag);
         return ag;
     }
+    
+    public List findByIP(String ip) {
+        String hql = "from Agent where address=:address";
+        return getSession()
+            .createQuery(hql)
+            .setString("address", ip)
+            .list();
+    }
 
     public int countUsed() {
         return ((Number)getSession()
