@@ -227,22 +227,22 @@ function showViewEscResponse(originalRequest) {
             escTrHeader.appendChild(td6);
             td6.setAttribute('colSpan', '3');
             td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
-            td6.innerHTML = '<div style="cursor:move;width:100%;background:#cccccc;padding:2px; border:1px solid #aeb0b5;">Action Details</div>';
+            td6.innerHTML = '<div style="cursor:move;background:#cccccc;padding:2px; border:1px solid #aeb0b5;">Action Details</div>';
     
         <c:if test="${useroperations['modifyEscalation']}">
             escTrHeader.appendChild(td8);
             td8.setAttribute('vAlign', 'top');
             td8.setAttribute('rowSpan', '3');
+            td8.setAttribute('width', '15%');
             td8.setAttribute((document.all ? 'className' : 'class'), "remove");
             td8.innerHTML = '<a class="buttonBlue" href="#" onclick="removeRow(this);removeAction(' + actionId + ');"><span><fmt:message key="resource.common.button.delete"/></span></a>';
         </c:if>
     
             escTr1.appendChild(td1);
             td1.setAttribute((document.all ? 'className' : 'class'), "waitTd");
-            td1.setAttribute('colSpan', '2');
+            td1.setAttribute('colSpan', '3');
             td1.appendChild(waitDiv);
             waitDiv.setAttribute('id', 'wait_' + liID);
-            waitDiv.setAttribute('width', '100%');
             waitDiv.innerHTML = "Wait time before escalating: " + actionWaitTime + "<br>";
     
     
@@ -250,7 +250,6 @@ function showViewEscResponse(originalRequest) {
             editWaitDiv.setAttribute('id', 'editWait_' + liID);
     
             escTr2.appendChild(td2);
-            td2.setAttribute('width', '100%');
             td2.setAttribute('vAlign', 'top');
             td2.setAttribute((document.all ? 'className' : 'class'), "wrap");
             td2.appendChild(usersTextDiv);
@@ -336,7 +335,10 @@ function showViewEscResponse(originalRequest) {
             switch (configListType) {
                 case 1:
                     td3.innerHTML = emailInfo + "<br>";
-                    break;
+                break;
+                default:
+                    td3.innerHTML = '&nbsp;';
+                break;
             }
     
             td3.style.paddingTop = "5px";
