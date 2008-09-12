@@ -249,7 +249,7 @@ dojo.require("dojo.widget.Dialog");
 		        <div class="dojoDialogFooter">
 		           <div class="right">
                       <input type="hidden" name="temp" value="temp" id="dashboardSubmitButton"/>
-		              <a class="buttonGreen" href="javascript:hyperic.form.mockLinkSubmit('ok.x', '1', 'dashboardSubmitButton');"><span><fmt:message key="button.ok"/></span></a>
+		              <a class="buttonGreen" href="javascript:selectDefaultDashboard('defaultDash', 'DashboardForm'); hyperic.form.mockLinkSubmit('ok.x', '1', 'dashboardSubmitButton');"><span><fmt:message key="button.ok"/></span></a>
 		           </div>
 		        </div>
 		    </div>
