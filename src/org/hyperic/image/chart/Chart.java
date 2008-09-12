@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -898,6 +898,10 @@ public abstract class Chart extends WebImage
                           + this.floor + ")");
                 value = this.floor;
             } else if (value > this.ceiling) {
+                // Could be availability, where ceiling is 100% and unknown is 2
+                if (ceiling == 1 && value == 2)
+                    return null;
+                
                 // This is a problem, set value to the ceiling
                 log.error("Data point value (" + value +
                           ") higher than ceiling (" + this.ceiling + ")");
