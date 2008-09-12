@@ -248,7 +248,8 @@ dojo.require("dojo.widget.Dialog");
 		        </div>
 		        <div class="dojoDialogFooter">
 		           <div class="right">
-		            <button name="ok.x" onclick="javascript:selectDefaultDashboard('defaultDash', 'DashboardForm');"><fmt:message key="button.ok"/></button>
+                      <input type="hidden" name="temp" value="temp" id="dashboardSubmitButton"/>
+		              <a class="buttonGreen" href="javascript:hyperic.form.mockLinkSubmit('ok.x', '1', 'dashboardSubmitButton');"><span><fmt:message key="button.ok"/></span></a>
 		           </div>
 		        </div>
 		    </div>
