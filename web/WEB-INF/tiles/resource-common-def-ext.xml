@@ -79,6 +79,6 @@
               path="/resource/common/monitor/visibility/MetricsToolbar.jsp"/>
 
   <definition name=".resource.common.control.list.scheduled" 
-              path="/common/blank.html"/>
+              path="/common/blank.jsp"/>
   
 </tiles-definitions>

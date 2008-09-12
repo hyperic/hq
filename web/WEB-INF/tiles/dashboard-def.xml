@@ -60,7 +60,7 @@
 
   <!-- Deprecated -->
   <definition name=".dashContent.recentResources"
-              path="/common/blank.html">
+              path="/common/blank.jsp">
   </definition>  
 
   <definition name=".dashContent.recentlyApproved"
