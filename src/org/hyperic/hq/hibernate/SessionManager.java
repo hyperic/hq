@@ -100,7 +100,7 @@ public class SessionManager {
             }
             
             s = _factory.openSession(null, true, false, 
-                                     ConnectionReleaseMode.AFTER_STATEMENT);
+                                     ConnectionReleaseMode.AFTER_TRANSACTION);
             
             // Start out sessions as read-only.  They can be upgraded to
             // read-write if a transaction requires it
