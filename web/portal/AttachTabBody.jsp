@@ -34,7 +34,7 @@
 	</div>
 </c:when>
 <c:otherwise>
-	<div style="padding: 5px 0px 0px 59px; color: gray; font-size: 14px;">
+	<div class="viewSelectionNote">
 	<img src="<html:rewrite page="/images/arrow_up.png"/>"/><span>Please choose a view from the list above.</span>
 	</div>
 </c:otherwise>
