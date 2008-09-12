@@ -625,16 +625,20 @@ function createInputFieldsFromJSON(jsonArray){
 function activateHeaderTab(){
     var l = document.location;
     l = l+""; // force string cast
-    if(l.indexOf("Dash")!=-1) {
+    if ( l.indexOf("Dash")!=-1 || 
+         l.indexOf("dash")!=-1 ) {
         dojo.byId("dashTab").className = "activeTab";
-    }
-    if(l.indexOf("Resou")!=-1){
+    } else if( l.indexOf("Resou")!=-1 ||
+               l.indexOf("resource")!=-1 || 
+               l.indexOf("alerts/")!=-1 || 
+               l.indexOf("TabBodyAttach.do")!=-1 ) {
         dojo.byId("resTab").className = "activeTab";
-    }
-    if(l.indexOf("rep")!=-1 || l.indexOf("Rep")!=-1 || l.indexOf("masth")!=-1){
+    } else if( l.indexOf("rep")!=-1 || 
+               l.indexOf("Rep")!=-1 || 
+               l.indexOf("masth")!=-1 ) {
         dojo.byId("analyzeTab").className = "activeTab";
-    }
-    if(l.indexOf("admin.do")!=-1 || l.indexOf("Admin.do")!=-1){
+    } else if( l.indexOf("admin.do")!=-1 || 
+               l.indexOf("Admin.do")!=-1 ) {
         dojo.byId("adminTab").className = "activeTab";
     }
 }
