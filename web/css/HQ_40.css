@@ -598,7 +598,7 @@ a.buttonInactive span {
     background: transparent url('/images/4.0/buttons/button_inactive_left.gif') no-repeat;
     display: block;
     line-height: 14px;
-    color: #AAAok ;
+    color: #AAA;
     padding: 5px 0 5px 18px
 }
 
@@ -612,7 +612,7 @@ a.buttonInactive:active {
 a.buttonInactive:active span {
     background: transparent url('/images/4.0/buttons/button_inactive_left.gif') no-repeat;
     background-position: bottom left;
-    padding: 6px 0 4px 18px
+    padding: 5px 0 5px 18px
 }
 
 .goButton {
@@ -2117,3 +2117,21 @@ button span{
     cursor: move;
     width: 100%;
 }
+
+#attachPointContainer {
+    background-color: #fff;
+    border-left: 1px solid gray;
+    border-right: 1px solid gray;
+    border-bottom: 1px solid gray;
+}
+
+.viewSelectionNote {
+    padding: 5px 0px 45px 59px;
+    color: gray;
+    font-size: 14px;
+    background-color: #fff;
+    border-left: 1px solid gray;
+    border-right: 1px solid gray;
+    border-bottom: 1px solid gray;
+}
+    
