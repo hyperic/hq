@@ -70,7 +70,8 @@ public class EventLogDAO extends HibernateDAO {
     }
 
     EventLog create(EventLog res) {
-        save(res);
+        if (res.getResource() != null)
+            save(res);
         return res;
     }
 
@@ -372,7 +373,7 @@ public class EventLogDAO extends HibernateDAO {
             session.setCacheMode(CacheMode.IGNORE);
           
             for (int i = 0; i < eventLogs.length; i++) {
-                save(eventLogs[i]);
+                create(eventLogs[i]);
             }
             
             session.flush();
