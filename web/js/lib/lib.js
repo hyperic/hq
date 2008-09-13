@@ -1109,7 +1109,7 @@ hyperic.selectBox = function(select, data) {
             }
         }
     };
-    
+
     that.getAllValues = function() {
         var vals = [];
         for(i in that.data)
@@ -1142,9 +1142,11 @@ hyperic.selectBox = function(select, data) {
 hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     var that = this;
 
+    that.loadingSheet = dojo11.query('.loading',node)[0];
+    that.instructionsSheet = dojo11.query('.instructions',node)[0];
     that.configSheet = dojo11.query('.config',node)[0];
     that.contentSheet = dojo11.query('.content',node)[0];
-    
+
     that.chartsearch = dojo11.byId('chartsearch');
     that.chartselect = new hyperic.selectBox(dojo11.byId('chartselect'));
     
@@ -1153,6 +1155,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     that.chart = null;
     that.charts = [];
     that.cycleId = null;
+    that.fetchChartsCycleId = null;
     that.currentChartId = null;
     that.showing = 'content';
     that.needsResize = false;
@@ -1246,7 +1249,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             },
             timeout: 2000
         });
-
 
         that.swapSheets(that.configSheet,that.contentSheet,
             function()
@@ -1511,22 +1513,50 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     };
 
     /**
-     * fetch the chart data from server for a given chart
+     * fetch the chart list with chart names and id's from the server
      */
     that.fetchAndPlayCharts = function()
     {
+        if(that.fetchChartsCycleId !== null) {
+            clearInterval(that.fetchChartsCycleId);
+            that.fetchChartsCycleId = null;
+            that.swapSheets(that.instructionsSheet,that.loadingSheet,
+                function()
+                {
+                    that.showing = 'loading';
+                });
+        }
         dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=chart",
             handleAs: 'json',
             load: function(data){
-                that.charts = data.sort(
-                    function(a,b) { 
-                        a = a.name.toLowerCase(); 
-                        b = b.name.toLowerCase();
-                        return a > b ? 1 : (a < b ? -1 : 0);
-                    });
-                that.populateChartSelect();
-                that.playCharts();
+                if(typeof data.length != 'undefined' && data.length > 0)
+                {
+                    that.charts = data.sort(
+                        function(a,b) { 
+                            a = a.name.toLowerCase(); 
+                            b = b.name.toLowerCase();
+                            return a > b ? 1 : (a < b ? -1 : 0);
+                        });
+                    that.populateChartSelect();
+                    that.swapSheets(that.loadingSheet,that.contentSheet,
+                        function()
+                        {
+                            that.showing = 'content';
+                            that.chartContainerResize();
+                            that.playCharts();
+                        });
+                }
+                else
+                {
+                    that.swapSheets(that.loadingSheet,that.instructionsSheet,
+                        function()
+                        {
+                            that.showing = 'instructions';
+                            // try again after a minute.
+                            that.fetchChartsCycleId = setInterval(that.fetchAndPlayCharts, 60000);
+                        });
+                }
             },
             error: function(data){
                 console.debug("An error occurred fetching charts: ", data);
@@ -1604,13 +1634,21 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             if (that.chart != null) {
                 that.chart.cleanup();
             }
-            dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 150;
+            that.chartContainerResize();
             that.chart = new hyperic.widget.Chart('chart_container', that.charts[that.currentChartId]);
             that.needsResize = false;
         }
         else
         {
             that.needsResize = true;
+        }
+    };
+
+    that.chartContainerResize = function()
+    {
+        if(that.showing == 'content')
+        {
+            dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 150;
         }
     };
 
@@ -1668,9 +1706,13 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 
 	that.max_alerts = 20;
 
+    that.loadingSheet = dojo11.query('.loading',node)[0];
+    that.instructionsSheet = dojo11.query('.instructions',node)[0];
     that.configSheet = dojo11.query('.config',node)[0];
     that.contentSheet = dojo11.query('.content',node)[0];
-    
+
+    that.showing = 'loading';
+
     that.alert_groups = {"data": {}, "count": 0};
     that.selected_alert_groups = [];
     that.alert_group_status = {};
@@ -2097,7 +2139,18 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                 that.fetchAlertGroupStatus().addCallback(
                     function() {
                         that.populateAlertGroups();
-                        that.paintAlertGroups();
+                        if(that.selected_alert_groups.length > 0)
+                        {
+                            that.swapSheets(that.loadingSheet,that.contentSheet,
+                                function()
+                                {
+                                    that.paintAlertGroups();
+                                });
+                        }
+                        else
+                        {
+                            that.swapSheets(that.loadingSheet,that.instructionsSheet);
+                        }
                     });
             });
     }
