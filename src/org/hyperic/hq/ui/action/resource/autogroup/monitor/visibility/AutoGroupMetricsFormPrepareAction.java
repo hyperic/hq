@@ -207,12 +207,12 @@ public class AutoGroupMetricsFormPrepareAction
         int sessionId = RequestUtils.getSessionId(request).intValue();
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
-        AppdefResourceTypeValue childType = (AppdefResourceTypeValue)
+        AppdefResourceType childType = (AppdefResourceType)
             request.getAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR);
         Integer selectedId = childType.getId();
 
-        AppdefEntityTypeID atid = new AppdefEntityTypeID(
-                childType.getAppdefTypeKey());
+        AppdefEntityTypeID atid =
+            new AppdefEntityTypeID(childType.getAppdefType(), childType.getId());
 
         if (null == entityIds) {
             // auto-group of platforms
@@ -226,7 +226,7 @@ public class AutoGroupMetricsFormPrepareAction
         } else {
             if (log.isTraceEnabled())
                 log.trace("finding metric summaries for autogrouped servers " +
-                        "or services of type " + childType.getAppdefTypeKey() +
+                        "or services of type " + atid +
                         " for resources " + Arrays.asList(entityIds) +
                         " for range " + begin + ":" + end);
             return boss.findAGMetricsByType(sessionId, entityIds, atid,
