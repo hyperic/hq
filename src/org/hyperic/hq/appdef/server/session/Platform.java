@@ -223,31 +223,41 @@ public class Platform extends PlatformBase
     public boolean matchesValueObject(PlatformValue obj) {
         boolean matches;
 
-        matches = super.matchesValueObject(obj) &&
+        matches = super.matchesValueObject(obj) ;
+        matches &=
             (this.getName() != null ? this.getName().equals(obj.getName())
-                : (obj.getName() == null)) &&
+                : (obj.getName() == null)) ;
+        matches &=
             (this.getDescription() != null ?
                 this.getDescription().equals(obj.getDescription())
-                : (obj.getDescription() == null)) &&
+                : (obj.getDescription() == null)) ;
+        matches &=
             (this.getCertdn() != null ? this.getCertdn().equals(obj.getCertdn())
-                : (obj.getCertdn() == null)) &&
+                : (obj.getCertdn() == null)) ;
+        matches &=
             (this.getCommentText() != null ?
                 this.getCommentText().equals(obj.getCommentText())
-                : (obj.getCommentText() == null)) &&
+                : (obj.getCommentText() == null)) ;
+        matches &=
             (this.getCpuCount() != null ?
                 this.getCpuCount().equals(obj.getCpuCount())
-                : (obj.getCpuCount() == null)) &&
+                : (obj.getCpuCount() == null)) ;
+        matches &=
             (this.getFqdn() != null ? this.getFqdn().equals(obj.getFqdn())
-                : (obj.getFqdn() == null)) &&
+                : (obj.getFqdn() == null)) ;
+        matches &=
             (this.getLocation() != null ?
                 this.getLocation().equals(obj.getLocation())
-                : (obj.getLocation() == null)) &&
+                : (obj.getLocation() == null)) ;
         // now for the IP's
         // if there's any in the addedIp's collection, it was messed with
         // which means the match fails
-            (obj.getAddedIpValues().size() == 0) &&
-            (obj.getRemovedIpValues().size() == 0) &&
+        matches &=
+            (obj.getAddedIpValues().size() == 0) ;
+        matches &=
+            (obj.getRemovedIpValues().size() == 0) ;
         // check to see if we have changed the agent
+        matches &=
             (this.getAgent() != null ? this.getAgent().equals(obj.getAgent())
                 : (obj.getAgent() == null));
         return matches;

@@ -913,7 +913,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
                 
         // CONFIGURE SERVICE
-        _configMan.configureResource(sInfo.subject,
+        _configMan.configureResponse(sInfo.subject,
+                                     service.getConfigResponse(),
                                      service.getEntityId(),
                                      aiservice.getProductConfig(),
                                      aiservice.getMeasurementConfig(),

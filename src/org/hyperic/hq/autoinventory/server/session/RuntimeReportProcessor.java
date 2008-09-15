@@ -376,6 +376,7 @@ public class RuntimeReportProcessor {
 
         boolean update;
 
+        Server server;
         try {
             if (foundAppdefServer == null) {
                 if (isPlaceholder) {
@@ -408,10 +409,10 @@ public class RuntimeReportProcessor {
                 AuthzSubject serverOwner
                     = _subjectMgr.findSubjectByName(subject, serverOwnerName);
                 Integer platformPK = platform.getId();
-                Server server = _serverMgr.createServer(serverOwner,
-                                                       platformPK,
-                                                       serverTypePK,
-                                                       foundAppdefServer);
+                server = _serverMgr.createServer(serverOwner,
+                                                 platformPK,
+                                                 serverTypePK,
+                                                 foundAppdefServer);
 
                 _log.info("New server created: " + foundAppdefServer.getName() +
                          " (id=" + server.getId() + ")");
@@ -425,7 +426,7 @@ public class RuntimeReportProcessor {
                 foundAppdefServer
                     = AIConversionUtil.mergeAIServerIntoServer(aiserver,
                                                                foundAppdefServer);
-                _serverMgr.updateServer(subject, foundAppdefServer);
+                server = _serverMgr.updateServer(subject, foundAppdefServer);
             }
         } catch (ApplicationException e) {
             _log.error("Failed to merge server: " + aiserver, e);
@@ -446,7 +447,8 @@ public class RuntimeReportProcessor {
             try {
                 // Configure resource, telling the config manager to send
                 // an update event if this resource has been updated.
-                _configMgr.configureResource(subject,
+                _configMgr.configureResponse(subject,
+                                             server.getConfigResponse(),
                                              foundAppdefServer.getEntityId(),
                                              aiserver.getProductConfig(),
                                              aiserver.getMeasurementConfig(),

@@ -30,6 +30,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.AppServiceDAO;
 import org.hyperic.hq.appdef.server.session.ApplicationDAO;
+import org.hyperic.hq.appdef.server.session.ConfigResponseDAO;
 import org.hyperic.hq.appdef.server.session.PlatformDAO;
 import org.hyperic.hq.appdef.server.session.ServerDAO;
 import org.hyperic.hq.appdef.server.session.ServerTypeDAO;

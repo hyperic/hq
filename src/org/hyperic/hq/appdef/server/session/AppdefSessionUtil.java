@@ -27,7 +27,6 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.AgentTypeDAO;
 import org.hyperic.hq.dao.AgentDAO;

@@ -53,7 +53,6 @@ import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.zevents.ZeventManager;
 
@@ -121,7 +120,12 @@ public class ConfigManagerEJBImpl
         throws AppdefEntityNotFoundException {
 
         ConfigResponseDAO dao =
-            DAOFactory.getDAOFactory().getConfigResponseDAO();
+            new ConfigResponseDAO(DAOFactory.getDAOFactory());
+        return getConfigResponse(dao, id);
+    }
+
+    private ConfigResponseDB getConfigResponse(ConfigResponseDAO dao,
+                                               AppdefEntityID id) {
         ConfigResponseDB config;
 
         switch(id.getType()){
@@ -381,48 +385,6 @@ public class ConfigManagerEJBImpl
     }
 
     /**
-     * Update the validation error string for a config response
-     * @param validationError The error string that occured during validation.
-     * If this is null, that means that no error occurred and the config is
-     * valid. 
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public void setValidationError(AuthzSubject subject,
-                                   AppdefEntityID id,
-                                   String validationError) {
-        ConfigResponseDAO dao =
-            DAOFactory.getDAOFactory().getConfigResponseDAO();
-        ConfigResponseDB config;
-
-        switch(id.getType()){
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            config = dao.findByPlatformId(id.getId());
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            config = dao.findByServerId(id.getId());
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            config = dao.findByServiceId(id.getId());
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-        default:
-            throw new IllegalArgumentException("The passed entity type " +
-                                               "does not support config " +
-                                               "responses");
-        }
-
-        if (validationError != null) {
-            if (validationError.length() > MAX_VALIDATION_ERR_LEN) {
-                validationError =
-                    validationError.substring(0, MAX_VALIDATION_ERR_LEN-3) +
-                        "...";
-            }
-        }
-        config.setValidationError(validationError);
-    }
-
-    /**
      * Method to merge configs, maintaining any existing values that are not
      * present in the AI config (e.g. log/config track enablement)
      *
@@ -457,6 +419,48 @@ public class ConfigManagerEJBImpl
         }
     }
 
+
+    /**
+     * Update the validation error string for a config response
+     * @param validationError The error string that occured during validation.
+     * If this is null, that means that no error occurred and the config is
+     * valid. 
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void setValidationError(AuthzSubject subject,
+                                   AppdefEntityID id,
+                                   String validationError) {
+        ConfigResponseDAO dao =
+            new ConfigResponseDAO(DAOFactory.getDAOFactory());
+        ConfigResponseDB config;
+    
+        switch(id.getType()){
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            config = dao.findByPlatformId(id.getId());
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            config = dao.findByServerId(id.getId());
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            config = dao.findByServiceId(id.getId());
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+        default:
+            throw new IllegalArgumentException("The passed entity type " +
+                                               "does not support config " +
+                                               "responses");
+        }
+    
+        if (validationError != null) {
+            if (validationError.length() > MAX_VALIDATION_ERR_LEN) {
+                validationError =
+                    validationError.substring(0, MAX_VALIDATION_ERR_LEN-3) +
+                        "...";
+            }
+        }
+        dao.setValidationError(config, validationError);
+    }
 
     /**
      * Set the config response for an entity/type combination.
@@ -501,20 +505,21 @@ public class ConfigManagerEJBImpl
             throw new IllegalArgumentException("Unknown config type: " + type);
         }
 
-        return configureResource(subject, id, productBytes, measurementBytes,
-                                 controlBytes, rtBytes, null, sendConfigEvent,
-                                 false);
+        ConfigResponseDAO dao =
+            new ConfigResponseDAO(DAOFactory.getDAOFactory());
+        ConfigResponseDB existingConfig = getConfigResponse(dao, id);
+        return configureResponse(subject, existingConfig, id,
+                                 productBytes, measurementBytes,
+                                 controlBytes, rtBytes, null,
+                                 sendConfigEvent, false);
     }
         
     /**
-     * Set all configs for a resource at once.  If any of the config entities
-     * are updated and the sendConfigEvent flag is set to true, a
-     * ResourceUpdatedZevent will be sent out for this resource.
-     *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AppdefEntityID configureResource(AuthzSubject subject,
+    public AppdefEntityID configureResponse(AuthzSubject subject,
+                                            ConfigResponseDB existingConfig,
                                             AppdefEntityID appdefID,
                                             byte[] productConfig,
                                             byte[] measurementConfig,
@@ -522,16 +527,12 @@ public class ConfigManagerEJBImpl
                                             byte[] rtConfig,
                                             Boolean userManaged,
                                             boolean sendConfigEvent,
-                                            boolean force)
-        throws ConfigFetchException, AppdefEntityNotFoundException,
-               PermissionException, FinderException
-    {
+                                            boolean force) {
+        boolean wasUpdated = false;
         byte[] configBytes;
 
-        boolean wasUpdated = false;
-        ConfigResponseDB existingConfig = getConfigResponse(appdefID);
         boolean overwrite =
-            ((userManaged != null) && (userManaged.booleanValue() == true)) || //via UI or CLI
+            ((userManaged != null) && userManaged.booleanValue()) || //via UI or CLI
             !existingConfig.isUserManaged(); //via AI, dont overwrite changes made via UI or CLI
 
         configBytes = mergeConfig(existingConfig.getProductResponse(),
@@ -573,15 +574,6 @@ public class ConfigManagerEJBImpl
         }
 
         if (wasUpdated) {
-            // XXX, in some cases the configuration is not flushed when the
-            // zevent is dispatched after the commit.  Need to figure out why,
-            // in the meantime flush so that configuring servers by hand does
-            // not result in config errors.
-
-            ConfigResponseDAO dao =
-                DAOFactory.getDAOFactory().getConfigResponseDAO();
-            dao.getSession().flush();
-
             // XXX: Need to cascade and send events for each resource that may
             // have been affected by this config update.
             if (sendConfigEvent) {

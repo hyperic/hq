@@ -52,6 +52,7 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.SortField;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
@@ -1659,10 +1660,10 @@ public class AppdefBossEJBImpl
                AppdefDuplicateNameException, CPropKeyNotFoundException
     {
         try {
-            Service updated
-                = getServiceManager().updateService(subject, aService);
+            Service updated = getServiceManager().updateService(subject,
+                                                                aService);
 
-            if(cProps != null ) {
+            if (cProps != null) {
                 AppdefEntityID entityId = aService.getEntityId();
                 setCPropValues(subject, entityId, cProps);
             }
@@ -1709,15 +1710,16 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public PlatformValue updatePlatform(AuthzSubject subject, 
-                                        PlatformValue aPlatform)
+    public PlatformValue updatePlatform(AuthzSubject subject,
+                                   PlatformValue aPlatform)
         throws FinderException, ValidationException, PermissionException, 
                SessionTimeoutException, SessionNotFoundException,
                UpdateException, ApplicationException,
                AppdefDuplicateNameException, AppdefDuplicateFQDNException
     {
         try {
-            return getPlatformManager().updatePlatform(subject, aPlatform);
+            return getPlatformManager().updatePlatform(subject, aPlatform)
+                .getPlatformValue();
         } catch (Exception e) {
             log.error("Error updating platform: " + aPlatform.getId());
             // rollback();
@@ -3220,17 +3222,27 @@ public class AppdefBossEJBImpl
     {
     	AppdefEntityID entityId = allConfigs.getResource().getEntityId();
         Set ids = new HashSet();
+        ConfigResponseDB existingConfig;
+        Service svc = null;
         try {
             if (entityId.isPlatform()) {
-                updatePlatform(subject,
-                               (PlatformValue) allConfigs.getResource());
+                Platform plat = getPlatformManager()
+                    .updatePlatform(subject,
+                                    (PlatformValue) allConfigs.getResource());
+                existingConfig = plat.getConfigResponse();
             } else if (entityId.isService()) {
-                updateService(subject, (ServiceValue) allConfigs.getResource(),
-                              null);
+                svc =
+                    getServiceManager().updateService(subject,
+                                       (ServiceValue) allConfigs.getResource());
+                existingConfig = svc.getConfigResponse();
+            } else {
+                Server svr =
+                    getServerManager().findServerById(entityId.getId());
+                existingConfig = svr.getConfigResponse();
             }
             
-            if (getConfigManager().configureResource(
-                subject, entityId,
+            if (getConfigManager().configureResponse(
+                subject, existingConfig, entityId,
                 ConfigResponse.safeEncode(allConfigs.getProductConfig()),
                 ConfigResponse.safeEncode(allConfigs.getMetricConfig()),
                 ConfigResponse.safeEncode(allConfigs.getControlConfig()),
@@ -3254,10 +3266,7 @@ public class AppdefBossEJBImpl
 
                 // Need to set the flags on the service so that they
                 // can be looked up immediately and RtEnabler to work
-                if (entityId.isService()) {
-                    ServiceManagerLocal svcMan = getServiceManager();
-                    Service svc = svcMan.findServiceById(entityId.getId());
-
+                if (svc != null) {
                     // These flags
                     if (allConfigs.getEnableServiceRT() != svc.isServiceRt()
                         || allConfigs.getEnableEuRT() != svc.isEndUserRt())

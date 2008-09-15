@@ -104,8 +104,9 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                                existingPlatform.getId());
             }
             // Add the AI platform to appdef
+            Platform platform;
             try {
-                Platform platform =
+                platform =
                     pmLocal.createPlatform(subject,
                                            aiplatform.getAIPlatformValue());
                 aid = platform.getEntityId();
@@ -129,7 +130,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
             }
             
             try {
-                configMgr.configureResource(subject, aid,
+                configMgr.configureResponse(subject,
+                                            platform.getConfigResponse(), aid,
                                             aiplatform.getProductConfig(),
                                             aiplatform.getMeasurementConfig(),
                                             aiplatform.getControlConfig(),
@@ -160,7 +162,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
             if (aiplatformValue.isPlatformDevice()) {
                 try {
                     configMgr.
-                        configureResource(subject,
+                        configureResponse(subject,
+                                          existingPlatform.getConfigResponse(),
                                           existingPlatform.getEntityId(),
                                           aiplatform.getProductConfig(),
                                           aiplatform.getMeasurementConfig(),
@@ -346,7 +349,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 aiserverValue, serverValue);
             Server updated = smLocal.updateServer(subject, serverValue);
             try {
-                configMgr.configureResource(subject, serverValue.getEntityId(),
+                configMgr.configureResponse(subject, server.getConfigResponse(),
+                                            serverValue.getEntityId(),
                                             aiserver.getProductConfig(),
                                             aiserver.getMeasurementConfig(),
                                             aiserver.getControlConfig(),
@@ -404,7 +408,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                           serverTypePK, serverValue);
 
             try {
-                configMgr.configureResource(subject, server.getEntityId(),
+                configMgr.configureResponse(subject, server.getConfigResponse(),
+                                            server.getEntityId(),
                                             aiserver.getProductConfig(),
                                             aiserver.getMeasurementConfig(),
                                             aiserver.getControlConfig(),

@@ -23,10 +23,11 @@
  * USA. 
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -44,7 +45,7 @@ public class ConfigResponseDAO extends HibernateDAO
         return (ConfigResponseDB)super.get(id);
     }
 
-    public void save(ConfigResponseDB entity) {
+    void save(ConfigResponseDB entity) {
         super.save(entity);
     }
 
@@ -55,7 +56,7 @@ public class ConfigResponseDAO extends HibernateDAO
     /**
      * @return newly instantiated config response object
      */
-    public ConfigResponseDB create() {
+    ConfigResponseDB create() {
         ConfigResponseDB newConfig = new ConfigResponseDB();
         save(newConfig);
         return newConfig;
@@ -64,13 +65,12 @@ public class ConfigResponseDAO extends HibernateDAO
     /**
      * Initialize the config response for a new platform
      */
-    public ConfigResponseDB createPlatform() {
+    ConfigResponseDB createPlatform() {
         ConfigResponseDB cLocal = new ConfigResponseDB();
         try {
-            ConfigResponse metricCfg = new ConfigResponse();
-            ConfigResponse productCfg = new ConfigResponse();
-            cLocal.setProductResponse(productCfg.encode());
-            cLocal.setMeasurementResponse(metricCfg.encode());
+            ConfigResponse empty = new ConfigResponse();
+            cLocal.setProductResponse(empty.encode());
+            cLocal.setMeasurementResponse(empty.encode());
             save(cLocal);
         } catch (EncodingException e) {
             // will never happen, we're setting up an empty response
@@ -78,7 +78,7 @@ public class ConfigResponseDAO extends HibernateDAO
         return cLocal;
     }
 
-    public ConfigResponseDB findByPlatformId(Integer id) {
+    ConfigResponseDB findByPlatformId(Integer id) {
         String sql = "select c from ConfigResponseDB c, Platform p where " +
                      "c.id = p.configResponse.id and " +
                      "p.id = ?";
@@ -112,5 +112,21 @@ public class ConfigResponseDAO extends HibernateDAO
             .setCacheable(true)
             .setCacheRegion("ConfigReponseDB.findByServiceId")
             .uniqueResult();
+    }
+    
+    /**
+     * ValidationError setter so that the version isn't incremented.  The issue
+     * is that when measurements are being scheduled during a resource
+     * creation process, it's possible that an error will be registering
+     * at the same time that the ConfigResponseDB object is being used somewhere
+     * else.
+     */
+    void setValidationError(ConfigResponseDB resp, String error) {
+        String sql = "update ConfigResponseDB set validationError = ? " +
+        		     "where id = ?";
+        getSession().createQuery(sql)
+            .setString(0, error)
+            .setParameter(1, resp.getId())
+            .executeUpdate();
     }
 }

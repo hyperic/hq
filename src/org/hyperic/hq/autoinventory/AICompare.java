@@ -203,11 +203,11 @@ public class AICompare {
     }
 
     public static boolean configsEqual(byte[] c1, byte[] c2) {
-        if (c1 == c2) {
-            return true;
-        }
-        if ((c1 == null) || (c2 == null)) {
+        if ((c1 == null) != (c2 == null)) {
             return false;
+        }
+        if (c1 == c2 || Arrays.equals(c1, c2)) {
+            return true;
         }
         if (c1.length != c2.length) {
             return false;
@@ -215,11 +215,12 @@ public class AICompare {
         if ((c1.length == 0) && (c2.length == 0)) {
             return true; //both empty
         }
+        
         //can't use Arrays.equals(c1, c2), order may have changed.
         try {
             ConfigResponse cr1 = ConfigResponse.decode(c1); 
             ConfigResponse cr2 = ConfigResponse.decode(c2);
-            return cr1.toProperties().equals(cr2.toProperties());
+            return cr1.equals(cr2);
         } catch (EncodingException e) {
             throw new SystemException(e.getMessage());
         }

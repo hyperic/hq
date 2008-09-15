@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import java.util.Collection;
+
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -55,5 +57,12 @@ public class OperationDAO extends HibernateDAO {
             .setCacheable(true)
             .setCacheRegion("Operation.findByTypeAndName")
             .uniqueResult();
+    }
+    
+    public Collection findByRole(Integer roleId) {
+        String sql = "select o from Role r join r.operations o where r.id = ?";
+        return getSession().createQuery(sql)
+            .setParameter(0, roleId)
+            .list();
     }
 }
