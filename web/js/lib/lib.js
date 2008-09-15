@@ -48,7 +48,7 @@ hyperic.form = {
      * @param inputNodeName the String ID of the hidden input field
     */
     mockLinkSubmit : function(inputName, inputValue, inputNodeName){
-        var hiddenInputObj = dojo.byId(inputNodeName)
+        var hiddenInputObj = dojo.byId(inputNodeName);
         hiddenInputObj.name=inputName;
         hiddenInputObj.value=inputValue;
         hiddenInputObj.form.submit();
@@ -765,9 +765,8 @@ hyperic.dashboard = hyperic.dashboard || {};
  * @requires hyperic.dashboard.widget
  */
 hyperic.dashboard.widget = {
-    configSheet: null,
-    contentSheet: null,
     config: {},
+    sheets: {},
 
     /**
      * catches clicks on widget, and passes them on to the handler function 
@@ -794,7 +793,10 @@ hyperic.dashboard.widget = {
      */
     click_config_btn: function(e,onEnd)
     {
-        this.swapSheets(this.contentSheet,this.configSheet,onEnd);
+        if(this.currentSheet != 'config')
+        {
+            this.swapSheets('config',onEnd);
+        }
     },
 
     /**
@@ -806,7 +808,7 @@ hyperic.dashboard.widget = {
      */
     click_cancel_btn: function(e,onEnd)
     {
-        this.swapSheets(this.configSheet,this.contentSheet,onEnd);
+        this.swapSheets(this.previousSheet,onEnd);
     },
     
     /**
@@ -838,18 +840,20 @@ hyperic.dashboard.widget = {
      * @param {Node} to
      * @param {function} onEnd
      */
-    swapSheets: function(from,to,onEnd) {
+    swapSheets: function(to,onEnd) {
+        var fromSheet = this.sheets[this.currentSheet];
+        var toSheet = this.sheets[to];
         var c = dojo11.fx.chain([
             dojo11.fadeOut({
-                node : from, 
+                node : fromSheet, 
                 onEnd: function() { 
-                        dojo11.style(from,'display','none'); 
-                        dojo11.style(to,'display','block'); 
+                        dojo11.style(fromSheet,'display','none'); 
+                        dojo11.style(toSheet,'display','block'); 
                     } 
                 }
             ),
             dojo11.fadeIn({
-                node : to
+                node : toSheet
                 }
             )
             ]);
@@ -859,6 +863,8 @@ hyperic.dashboard.widget = {
             dojo11.connect(c,'onEnd',onEnd);
         }
         c.play();
+        this.previousSheet = this.currentSheet;
+        this.currentSheet = to;
     }
 };
 
@@ -1142,10 +1148,12 @@ hyperic.selectBox = function(select, data) {
 hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     var that = this;
 
-    that.loadingSheet = dojo11.query('.loading',node)[0];
-    that.instructionsSheet = dojo11.query('.instructions',node)[0];
-    that.configSheet = dojo11.query('.config',node)[0];
-    that.contentSheet = dojo11.query('.content',node)[0];
+    that.sheets = {};
+    that.sheets.loading = dojo11.query('.loading',node)[0];
+    that.sheets.instructions = dojo11.query('.instructions',node)[0];
+    that.sheets.config = dojo11.query('.config',node)[0];
+    that.sheets.content = dojo11.query('.content',node)[0];
+    that.currentSheet = 'loading';
 
     that.chartsearch = dojo11.byId('chartsearch');
     that.chartselect = new hyperic.selectBox(dojo11.byId('chartselect'));
@@ -1157,7 +1165,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     that.cycleId = null;
     that.fetchChartsCycleId = null;
     that.currentChartId = null;
-    that.showing = 'content';
     that.needsResize = false;
     that.config = {
         portletName: portletName,
@@ -1177,7 +1184,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     {
         that.pauseCharts();
         hyperic.dashboard.widget.click_config_btn.apply(this);
-        that.showing = 'config';
         
         var input_rotation = dojo11.byId('chart_rotation');
         var input_interval = dojo11.byId('chart_interval');
@@ -1250,19 +1256,25 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             timeout: 2000
         });
 
-        that.swapSheets(that.configSheet,that.contentSheet,
-            function()
-            {
-                that.showing = 'content';
-                if(that.needsResize)
+        if(that.charts.length > 0)
+        {
+            that.swapSheets('content',
+                function()
                 {
-                    that.chartResize();
-                }
-                if(that.config.rotation == 'true')
-                {
-                    that.playCharts();
-                }
-            });
+                    if(that.needsResize)
+                    {
+                        that.chartResize();
+                    }
+                    if(that.config.rotation == 'true')
+                    {
+                        that.playCharts();
+                    }
+                });
+        }
+        else
+        {
+            that.swapSheets('instructions');
+        }
     };
 
     /**
@@ -1276,13 +1288,11 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     this.click_cancel_btn = function(e)
     {
-        hyperic.dashboard.widget.click_cancel_btn.apply(
-            this,
-            [
-                e,
+        if(that.charts.length > 0)
+        {
+            that.swapSheets('content',
                 function()
                 {
-                    that.showing = 'content';
                     if(that.needsResize)
                     {
                         that.chartResize();
@@ -1291,8 +1301,12 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                     {
                         that.playCharts();
                     }
-                }
-            ]);
+                });
+        }
+        else
+        {
+            that.swapSheets('instructions');
+        }
     };
 
     /**
@@ -1520,11 +1534,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         if(that.fetchChartsCycleId !== null) {
             clearInterval(that.fetchChartsCycleId);
             that.fetchChartsCycleId = null;
-            that.swapSheets(that.instructionsSheet,that.loadingSheet,
-                function()
-                {
-                    that.showing = 'loading';
-                });
+            that.swapSheets('loading');
         }
         dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=chart",
@@ -1539,20 +1549,18 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                             return a > b ? 1 : (a < b ? -1 : 0);
                         });
                     that.populateChartSelect();
-                    that.swapSheets(that.loadingSheet,that.contentSheet,
+                    that.swapSheets('content',
                         function()
                         {
-                            that.showing = 'content';
                             that.chartContainerResize();
                             that.playCharts();
                         });
                 }
                 else
                 {
-                    that.swapSheets(that.loadingSheet,that.instructionsSheet,
+                    that.swapSheets('instructions',
                         function()
                         {
-                            that.showing = 'instructions';
                             // try again after a minute.
                             that.fetchChartsCycleId = setInterval(that.fetchAndPlayCharts, 60000);
                         });
@@ -1629,7 +1637,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     that.chartResize = function()
     {
-        if(that.showing == 'content')
+        if(that.currentSheet == 'content')
         {
             if (that.chart != null) {
                 that.chart.cleanup();
@@ -1646,9 +1654,9 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
 
     that.chartContainerResize = function()
     {
-        if(that.showing == 'content')
+        if(that.currentSheet == 'content')
         {
-            dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 150;
+            dojo11.query('#chart_container',that.sheets.content)[0].style.width = that.sheets.content.offsetWidth - 150;
         }
     };
 
@@ -1669,20 +1677,8 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         // handle resizing of the window
         dojo11.connect(window,'onresize',dojo11.hitch(that, that.chartResize));
 
-        // set the initial size of the chart (widget width -20px for left and right padding -10px for center spacing -120px selectbox)
-        dojo11.query('#chart_container',that.contentSheet)[0].style.width = that.contentSheet.offsetWidth - 150;
-
         that.fetchConfig();
         that.fetchAndPlayCharts();
-
-        // while(true)
-        // {
-        //     if(undefined !typeof this.charts[0].data)
-        //     {
-        //         this.playCharts();
-        //         break;
-        //     }
-        // }
 
         if(that.config.rotation == 'false')
         {
@@ -1706,12 +1702,12 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 
 	that.max_alerts = 20;
 
-    that.loadingSheet = dojo11.query('.loading',node)[0];
-    that.instructionsSheet = dojo11.query('.instructions',node)[0];
-    that.configSheet = dojo11.query('.config',node)[0];
-    that.contentSheet = dojo11.query('.content',node)[0];
-
-    that.showing = 'loading';
+    that.sheets = {};
+    that.sheets.loading = dojo11.query('.loading',node)[0];
+    that.sheets.instructions = dojo11.query('.instructions',node)[0];
+    that.sheets.config = dojo11.query('.config',node)[0];
+    that.sheets.content = dojo11.query('.content',node)[0];
+    that.currentSheet = 'loading';
 
     that.alert_groups = {"data": {}, "count": 0};
     that.selected_alert_groups = [];
@@ -1721,8 +1717,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     that.enabled_alert_groups = new hyperic.selectBox(dojo11.byId('enabled_alert_groups'));
     that.groupsearch = dojo11.byId('groupsearch');
 
-	that.enable_alert_btn = dojo11.query('.enable_alert_btn',that.configSheet)[0];
-	that.disable_alert_btn = dojo11.query('.disable_alert_btn',that.configSheet)[0];
+	that.enable_alert_btn = dojo11.query('.enable_alert_btn',that.sheets.config)[0];
+	that.disable_alert_btn = dojo11.query('.disable_alert_btn',that.sheets.config)[0];
 
     that.tables = {
         lcol: dojo11.query('.lcol table tbody',node)[0],
@@ -1746,7 +1742,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         that.available_alert_groups.search(e.target.value);
         that.enabled_alert_groups.search(e.target.value);
     };
-    
+
     /**
      * an event handler to handle the onfocus event on the search textbox.
      * It empties it to prepare it for user's input.
@@ -1886,17 +1882,43 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 
                 that.fetchAlertGroupStatus().addCallback(function(){
                     that.repaintAlertGroups();
-                    that.swapSheets(that.configSheet,that.contentSheet);
+                    if(that.selected_alert_groups.length > 0)
+                    {
+                        that.swapSheets('content');
+                    }
+                    else
+                    {
+                        that.swapSheets('instructions');
+                    }
                 });
             },
             error: function(data){
                 console.debug("An error occurred saving alerts config... " + data);
-                that.swapSheets(that.configSheet,that.contentSheet);
+                if(that.selected_alert_groups.length > 0)
+                {
+                    that.swapSheets('content');
+                }
+                else
+                {
+                    that.swapSheets('instructions');
+                }
             },
             timeout: 2000
         });
     };
 
+    that.click_cancel_btn = function(e)
+    {
+        if(that.selected_alert_groups.length > 0)
+        {
+            that.swapSheets('content');
+        }
+        else
+        {
+            that.swapSheets('instructions');
+        }
+    };
+    
     /**
      * populate the available and selected alert selectboxes
      * 
@@ -2141,7 +2163,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                         that.populateAlertGroups();
                         if(that.selected_alert_groups.length > 0)
                         {
-                            that.swapSheets(that.loadingSheet,that.contentSheet,
+                            that.swapSheets('content',
                                 function()
                                 {
                                     that.paintAlertGroups();
@@ -2149,7 +2171,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                         }
                         else
                         {
-                            that.swapSheets(that.loadingSheet,that.instructionsSheet);
+                            that.swapSheets('instructions');
                         }
                     });
             });
@@ -2396,7 +2418,7 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
 	    that.selected_from_time = new Date(curdatetime.getFullYear(), curdatetime.getMonth(), curdatetime.getDate(), curdatetime.getHours()+1);
 	    that.selected_to_time = new Date(that.selected_from_time.getTime() + (60*60000));    	
 	    that.deleteConstraints();    	
-    }
+    };
     
     that.deleteConstraints = function() {
     	for(var inputName in that.inputs)
@@ -2404,7 +2426,7 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
     		delete that.inputs[inputName].constraints.min;
     		delete that.inputs[inputName].constraints.max;
     	}
-    }
+    };
     
     that.updateConstraints = function() {
     	that.deleteConstraints();
@@ -2461,7 +2483,7 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
 		that.message_area.request_status.className = 'warningPanel';
 		that.message_area.request_status.innerHTML = msg;
 		that.message_area.request_status.style.display = '';   	
-    }
+    };
     
     that.displayError = function(msg)
     {
@@ -2476,7 +2498,7 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
     			that.buttons[buttonName].domNode.style.display = 'none';
     		}
     	}		
-    }
+    };
     
     that.redraw = function(show, scheduleStatus, confirmationStatus)
     {
@@ -2884,7 +2906,7 @@ Date.prototype.getTimezoneName = function(){
 
 	// Make sure it doesn't somehow end up return AM or PM
 	return (tz == 'AM' || tz == 'PM') ? '' : tz; // String
-}
+};
 
 hyperic.MetricsUpdater = function(eid,ctype,messages) {
     that = this;
