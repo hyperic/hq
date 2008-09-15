@@ -49,6 +49,13 @@ public interface HQDialect
     public boolean useEamNumbers();
 
     /*
+     * Returns -1 if Max Expressions supported in the db is unlimited.
+     * This applies mainly to SQL in statements e.g. where ids in (0, 1, 2,...)
+     * Or a sequence of SQL 'and' or 'or' statements in one statement
+     */
+    public int getMaxExpressions();
+
+    /*
      * Returns true if the database supports a multi insert stmt.
      */
     public boolean supportsMultiInsertStmt();
