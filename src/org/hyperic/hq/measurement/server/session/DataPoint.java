@@ -9,8 +9,8 @@ import org.hyperic.hq.product.MetricValue;
  * {@link DataManagerEJBImpl#addData(java.util.List, boolean)
  */
 public class DataPoint implements Serializable {
-    private Integer     _metricId;
-    private MetricValue _val;
+    private final Integer     _metricId;
+    private final MetricValue _val;
     
     public DataPoint(int metricId, double val, long timestamp) {
         _val = new MetricValue(val, timestamp);

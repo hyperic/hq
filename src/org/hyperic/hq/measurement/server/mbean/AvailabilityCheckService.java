@@ -39,6 +39,7 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.AvailabilityCache;
+import org.hyperic.hq.measurement.server.session.MeasDataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.product.MetricValue;
@@ -195,7 +196,8 @@ public class AvailabilityCheckService
                                    "being marked down, time=" + backfillTime);
                     }
                     MetricValue val = new MetricValue(AVAIL_DOWN, backfillTime);
-                    DataPoint point = new DataPoint(meas.getId(), val);
+                    MeasDataPoint point = new MeasDataPoint(
+                        meas.getId(), val, meas.getTemplate().isAvailability());
                     backfillList.add(point);
                 }
             }

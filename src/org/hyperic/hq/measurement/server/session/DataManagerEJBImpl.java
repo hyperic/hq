@@ -68,6 +68,7 @@ import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -215,11 +216,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param dp the new MetricValue
      * @throws NumberFormatException if the value from the
      *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
+     * @ejb:transaction-type="Required"
      * @ejb:interface-method
      */
-    public void addData(Integer mid, MetricValue dp, boolean overwrite) {
+    public void addData(Integer mid, MetricValue mv, boolean overwrite) {
         List pts = new ArrayList(1);
-        pts.add(new DataPoint(mid, dp));
+        MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+        Measurement meas = mMan.getMeasurement(mid);
+        pts.add(new MeasDataPoint(
+            meas.getId(), mv, meas.getTemplate().isAvailability()));
 
         addData(pts, overwrite);
     }
@@ -227,13 +232,34 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * Write metric data points to the DB with transaction
      * 
-     * @param data       a list of {@link DataPoint}s 
+     * @param data       a list of {@link MeasDataPoint}s 
      * @throws NumberFormatException if the value from the
      *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
      *
      * @ejb:interface-method
      */
     public boolean addData(List data) {
+        AvailabilityManagerLocal aMan = AvailabilityManagerEJBImpl.getOne();
+        List aPoints = new ArrayList(data.size());
+        List dPoints = new ArrayList(data.size());
+        for (Iterator it=data.iterator(); it.hasNext(); ) {
+            MeasDataPoint pt = (MeasDataPoint)it.next();
+            if (pt.isAvail()) {
+                aPoints.add(pt);
+            } else {
+                dPoints.add(pt);
+            }
+        }
+        // don't want to lose datapoints, so do this in a try/catch
+        try {
+            aMan.addData(aPoints);
+        } catch (Throwable t) {
+            _log.error(t.getMessage(), t);
+        }
+        return _addData(dPoints);
+    }
+
+    private boolean _addData(List data) {
         if (shouldAbortDataInsertion(data)) {
             return true;
         }
@@ -593,7 +619,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 String table = (String) entry.getKey();
                 List dpts = (List) entry.getValue();
 
-                StringBuffer values = new StringBuffer();
+                StringBuilder values = new StringBuilder();
                 int rowsToUpdate = 0;
                 for (Iterator i=dpts.iterator(); i.hasNext(); ) {
                     DataPoint pt = (DataPoint)i.next();
@@ -682,6 +708,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         
         try {
             // XXX:  Get a better connection here - directly from Hibernate
+            // XXX scottmf, may not make a difference transactionally since
+            // we use ConnectionReleaseMode.AFTER_STATEMENT
             conn = DBUtil.getConnByContext(getInitialContext(), 
                         DATASOURCE_NAME);              
         } catch (NamingException e) {
@@ -1006,7 +1034,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 // The index
                 int i = 1;
 
-                StringBuffer sqlBuf;
+                StringBuilder sqlBuf;
                 // Now get the page that user wants
                 boolean sizeLimit =
                     pc.getPagesize() != PageControl.SIZE_UNLIMITED;
@@ -1014,7 +1042,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 if (sizeLimit) {
                     // This query dynamically counts the number of rows to 
                     // return the correct paged ResultSet
-                    sqlBuf = new StringBuffer(
+                    sqlBuf = new StringBuilder(
                         "SELECT timestamp, value FROM " + table + " d1 " +
                         "WHERE timestamp BETWEEN ? AND ? AND" +
                              " measurement_id = ? AND" +
@@ -1026,7 +1054,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                         .append(pc.isAscending() ? "" : "DESC");
                 }
                 else {
-                    sqlBuf = new StringBuffer(
+                    sqlBuf = new StringBuilder(
                         "SELECT value, timestamp FROM " + table +
                         " WHERE timestamp BETWEEN ? AND ? AND" +
                               " measurement_id=? ORDER BY timestamp ")
@@ -1376,7 +1404,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     {
         String metricUnion = getDataTable(begin, end, measids),
                measInStmt = MeasTabManagerUtil.getMeasInStmt(measids, true);
-        StringBuffer sqlbuf = new StringBuffer()
+        StringBuilder sqlbuf = new StringBuilder()
             .append("SELECT begin AS timestamp, ")
             .append(selectType)
             .append(" FROM ")
@@ -1442,7 +1470,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             String metricUnion =
                 MeasTabManagerUtil.getUnionStatement(getPurgeRaw(),
                                                      m.getId().intValue());
-            StringBuffer sqlBuf = new StringBuffer(
+            StringBuilder sqlBuf = new StringBuilder(
                 "SELECT timestamp, value FROM " + metricUnion +
                     ", (SELECT MAX(timestamp) AS maxt" +
                     " FROM " + metricUnion + ") mt " +
@@ -1648,7 +1676,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ResultSet rs = null;
         try
         {
-            StringBuffer sqlBuf = getLastDataPointsSQL(length, timestamp, measIds);
+            StringBuilder sqlBuf = getLastDataPointsSQL(length, timestamp, measIds);
             if (_log.isTraceEnabled()) {
                 _log.trace("getLastDataPoints(): " + sqlBuf);
             }
@@ -1666,7 +1694,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    private StringBuffer getLastDataPointsSQL(int len, long timestamp,
+    private StringBuilder getLastDataPointsSQL(int len, long timestamp,
                                               Integer[] measIds)
     {
         String tables = (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED) ?
@@ -1674,7 +1702,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 timestamp, System.currentTimeMillis(), measIds)
             : MeasTabManagerUtil.getUnionStatement(getPurgeRaw(), measIds);
 
-        StringBuffer sqlBuf = new StringBuffer(
+        StringBuilder sqlBuf = new StringBuilder(
             "SELECT measurement_id, value, timestamp" +
             " FROM " + tables + ", " +
             "(SELECT measurement_id AS id, MAX(timestamp) AS maxt" +
@@ -1744,7 +1772,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
-            StringBuffer sqlBuf = new StringBuffer(
+            StringBuilder sqlBuf = new StringBuilder(
                 "SELECT MIN(value), AVG(value), MAX(value) FROM ")
                 .append(table)
                 .append(" WHERE timestamp BETWEEN ").append(begin)
@@ -1902,11 +1930,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 minMax = " MIN(minvalue), AVG(value), MAX(maxvalue), ";
             }
 
-            StringBuffer sqlBuf = new StringBuffer(
-                "SELECT " + minMax +
-                       "COUNT(DISTINCT(measurement_id)) FROM " + table +
-                " WHERE ")
-                .append("timestamp BETWEEN ? AND ? AND ")
+            StringBuffer sqlBuf = new StringBuffer()
+                .append("SELECT ")
+                .append(minMax)
+                .append(" COUNT(DISTINCT(measurement_id)) FROM ")
+                .append(table)
+                .append(" WHERE timestamp BETWEEN ? AND ? AND ")
                 .append(mconj);
 
             stmt = conn.prepareStatement(sqlBuf.toString());
@@ -1994,7 +2023,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             DBUtil.composeConjunctions("instance_id", iids.length));
 
         DBUtil.replacePlaceHolders(iconj, iids);
-        StringBuffer tconj = new StringBuffer(
+        StringBuilder tconj = new StringBuilder(
             DBUtil.composeConjunctions("template_id", tids.length));
 
         try
@@ -2225,7 +2254,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 .getMeasIdsFromTemplateIds(conn, tids);
             String table = getDataTable(begin, end, measids.toArray());
     
-            StringBuffer sqlBuf = new StringBuffer();
+            StringBuilder sqlBuf = new StringBuilder();
             sqlBuf.append("SELECT DISTINCT(instance_id)")
                   .append(" FROM ").append(TAB_MEAS).append(" m, ")
                   .append(table).append(" d")

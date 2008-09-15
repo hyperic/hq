@@ -43,7 +43,6 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
@@ -67,8 +66,6 @@ public class ReportProcessorEJBImpl
 {
     private final Log log = LogFactory.getLog(ReportProcessorEJBImpl.class);
 
-    private final AvailabilityManagerLocal _availMan =
-        AvailabilityManagerEJBImpl.getOne();
     private final MeasurementManagerLocal _dmMan =
         MeasurementManagerEJBImpl.getOne();
     private final MeasurementProcessorLocal _measurementProc =
@@ -82,7 +79,8 @@ public class ReportProcessorEJBImpl
                 //this is just to check if the metricvalue is valid
                 //will throw a NumberFormatException if there is a problem
                 new BigDecimal(vals[i].getValue());
-                DataPoint pt = new DataPoint(m.getId(), vals[i]);
+                MeasDataPoint pt = new MeasDataPoint(
+                    m.getId(), vals[i], m.getTemplate().isAvailability());
                 points.add(pt);
             } catch(NumberFormatException e) {
                 log.warn("Unable to insert: " + e.getMessage() +
@@ -162,8 +160,9 @@ public class ReportProcessorEJBImpl
             }
         }
 
-        sendAvailDataToDB(availPoints);
+        // want to batch availability points separate from data points
         sendMetricDataToDB(dataPoints);
+        sendMetricDataToDB(availPoints);
         // Check the SRNs to make sure the agent is up-to-date
         SRNManagerLocal srnManager = getSRNManager();
         Collection nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
@@ -179,10 +178,6 @@ public class ReportProcessorEJBImpl
                           StringUtil.arrayToString(entIds));
             }
         }
-    }
-
-    private void sendAvailDataToDB(List availPoints) {
-        _availMan.addData(availPoints);
     }
 
     /**
