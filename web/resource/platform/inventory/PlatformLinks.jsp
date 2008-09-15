@@ -87,8 +87,8 @@
                 <select name="available_clone_targets" id="available_clone_targets" size="10" style="width: 120px" multiple="multiple"></select>
             </div>
             <div style="width: 66px; height: 100px; float: left; text-align: center; padding-top: 3em">
-                <button id="add_clone_btn"><img src="/images/4.0/buttons/arrow_select.gif" alt="select"></button><br>
-                <button id="remove_clone_btn"><img src="/images/4.0/buttons/arrow_deselect.gif" alt="deselect"></button>
+                <button id="add_clone_btn" style="background: transparent"><img src="/images/arrow_right.gif" alt="select"></button><br>
+                <button id="remove_clone_btn" style="background: transparent"><img src="/images/arrow_left.gif" alt="deselect"></button>
             </div>
             <div style="width: 180px; float: left; text-align: left">
                 <label for="selected_clone_targets" style="width: inherit">Selected clone targets</label>

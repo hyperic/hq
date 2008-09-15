@@ -2624,6 +2624,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
 
         that.buttons.add_clone_btn = dojo11.byId('add_clone_btn');
         that.buttons.remove_clone_btn = dojo11.byId('remove_clone_btn');
+
 		dojo11.connect(
 		    that.buttons.add_clone_btn, 
 		    'onclick', 
@@ -2632,13 +2633,13 @@ hyperic.clone_resource_dialog = function(platform_id) {
 
         		if(that.buttons.remove_clone_btn.disabled === true)
         		{
-        		    that.buttons.remove_clone_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect.gif" alt="select">';
+        		    that.buttons.remove_clone_btn.innerHTML = '<img src="/images/arrow_left.gif" alt="deselect">';
         			that.buttons.remove_clone_btn.disabled = false;
         		}
 
         		if(that.available_clone_targets.length == 0)
         		{
-        		    that.buttons.add_clone_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select_disabled.gif" alt="select">';
+        		    that.buttons.add_clone_btn.innerHTML = '<img src="/images/arrow_right_disabled.gif" alt="select">';
         			that.buttons.add_clone_btn.disabled = true;
         		}
 		    }
@@ -2651,13 +2652,13 @@ hyperic.clone_resource_dialog = function(platform_id) {
 
         		if(that.buttons.add_clone_btn.disabled === true)
         		{
-        		    that.buttons.add_clone_btn.disabled.innerHTML = '<img src="/images/4.0/buttons/arrow_select.gif" alt="select">';
+        		    that.buttons.add_clone_btn.disabled.innerHTML = '<img src="/images/arrow_right.gif" alt="select">';
         			that.buttons.add_clone_btn.disabled.disabled = false;
         		}
 
         		if(that.selected_clone_targets.length == 0)
         		{
-        		    that.buttons.remove_clone_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect_disabled.gif" alt="select">';
+        		    that.buttons.remove_clone_btn.innerHTML = '<img src="/images/arrow_left_disabled.gif" alt="deselect">';
         			that.buttons.remove_clone_btn.disabled = true;
         		}
 		    }
@@ -2701,6 +2702,17 @@ hyperic.clone_resource_dialog = function(platform_id) {
                 that.available_clone_targets.add(new Option(that.data[i],i));
             }
         }
+        if(that.available_clone_targets.length == 0)
+		{
+		    that.buttons.add_clone_btn.innerHTML = '<img src="/images/arrow_right_disabled.gif" alt="select">';
+			that.buttons.add_clone_btn.disabled = true;
+		}
+
+		if(that.selected_clone_targets.length == 0)
+		{
+		    that.buttons.remove_clone_btn.innerHTML = '<img src="/images/arrow_left_disabled.gif" alt="deselect">';
+			that.buttons.remove_clone_btn.disabled = true;
+		}
     };
 
     that.cancel_action = function() {
