@@ -33,6 +33,7 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.win32.Win32;
 import org.hyperic.util.StringUtil;
@@ -110,10 +111,23 @@ public class ExecutableProcess extends Collector {
         return getCollectorProperty(PROP_ARGS);
     }
     
+    // helper method used to resolve the agent
+    // bundle directory for relative paths involving
+    // the pdk directory
+    private String resolveRelativeFile(String file) {
+        if (file.startsWith("pdk/")) {
+            String bundleHome = System.getProperty(AgentConfig.PROP_BUNDLEHOME[0]);
+            return bundleHome + "/" + file;
+        }
+        else {
+            return file;
+        }
+    }
+    
     protected void init() {
         String exec = getExecProperty();
-        String name = getFileProperty();
-
+        String name = resolveRelativeFile(getFileProperty());
+        
         ArrayList argv = new ArrayList();
 
         if (OperatingSystem.IS_WIN32 && (exec == null)) {
