@@ -250,7 +250,7 @@ class ResourceConfig {
         
         println "Changed fields for ${appdefHandler.targetForSet(resource)}"
         println "Fields = ${changedFields}"
-        if (!changedFields.empty) {
+        if (changedFields.size() > 0) {
             def targetForSet = appdefHandler.targetForSet(resource)
             changedFields.each { key, newVal ->
                 appdefHandler.fields[key]['set'](targetForSet, newVal)
@@ -267,7 +267,6 @@ class ResourceConfig {
         allConfigs.resource = appdefVal
         def allConfigsRoll  = new AllConfigResponses()
         allConfigsRoll.resource = appdefVal
-        def newResponses = [:]
         
         for (i in 0..<ProductPlugin.CONFIGURABLE_TYPES.length) {
             def type        = ProductPlugin.CONFIGURABLE_TYPES[i]
