@@ -33,6 +33,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.FileData;
@@ -51,7 +52,7 @@ import org.tanukisoftware.wrapper.WrapperManager;
  */
 public class AgentCommandsService implements AgentCommandsClient {
     
-    private static final String AGENT_BUNDLE_HOME = "agent.bundle.home";
+    private static final String AGENT_BUNDLE_HOME = AgentConfig.AGENT_BUNDLE_HOME;
 
     private static final Log _log = LogFactory.getLog(AgentCommandsService.class);
 

@@ -72,6 +72,7 @@ public class AgentConfig {
     public static final String PDK_LIB_DIR_KEY = "agent.pdkLibDir";
     public static final String PDK_PLUGIN_DIR_KEY = "agent.pdkPluginDir";
     public static final String PDK_WORK_DIR_KEY = "agent.pdkWorkDir";
+    public static final String AGENT_BUNDLE_HOME = "agent.bundle.home";
 
     // The following final objects are the properties which are usable
     // within the configuation object.  The first element in the array
@@ -89,7 +90,7 @@ public class AgentConfig {
     { "agent.install.home", System.getProperty("agent.install.home", System.getProperty("user.dir")) };
     // has no default since we want to throw an error when property is not set
     public static final String[] PROP_BUNDLEHOME =
-    { "agent.bundle.home", System.getProperty("agent.bundle.home") };    
+    { AGENT_BUNDLE_HOME, System.getProperty(AGENT_BUNDLE_HOME) };    
     public static final String[] PROP_TMPDIR =
     { "agent.tmpDir", System.getProperty("agent.tmpDir", PROP_BUNDLEHOME[1] + "/tmp") };
     public static final String[] PROP_LOGDIR =

@@ -43,7 +43,7 @@ import org.hyperic.util.exec.PumpStreamHandler;
 
 public class ExecutableProcess extends Collector {
     public static final String DOMAIN = "exec";
-
+    private static final String AGENT_BUNDLE_HOME = AgentConfig.AGENT_BUNDLE_HOME;
     public static final String PROP_EXEC = "exec";
     public static final String PROP_FILE = "file";
     public static final String PROP_ARGS = "args";
@@ -116,7 +116,7 @@ public class ExecutableProcess extends Collector {
     // the pdk directory
     private String resolveRelativeFile(String file) {
         if ((file != null) && file.startsWith("pdk/")) {
-            String bundleHome = System.getProperty(AgentConfig.PROP_BUNDLEHOME[0]);
+            String bundleHome = System.getProperty(AGENT_BUNDLE_HOME);
             return bundleHome + "/" + file;
         }
         else {

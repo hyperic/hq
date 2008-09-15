@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.AutoServerDetector;
@@ -46,7 +47,7 @@ public class AgentServerDetector
     
     
     private static final String UNAVAILABLE = "N/A";
-    private static final String AGENT_BUNDLE_HOME = "agent.bundle.home";
+    private static final String AGENT_BUNDLE_HOME = AgentConfig.AGENT_BUNDLE_HOME;
 
     public AgentServerDetector(){
         super();
