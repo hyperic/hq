@@ -437,8 +437,10 @@ class ResourceCategory {
         }
             
         platVal.name     = name
+        platVal.description = cfg.description
         platVal.fqdn     = cfg.fqdn
         platVal.cpuCount = 1  // XXX:  How can we better gauge?
+        platVal.location = cfg.location
 
         def plat  = platMan.createPlatform(subject, proto.instanceId,
                                            platVal, agent.id)
