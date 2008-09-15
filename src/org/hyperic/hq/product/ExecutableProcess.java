@@ -115,7 +115,7 @@ public class ExecutableProcess extends Collector {
     // bundle directory for relative paths involving
     // the pdk directory
     private String resolveRelativeFile(String file) {
-        if (file.startsWith("pdk/")) {
+        if ((file != null) && file.startsWith("pdk/")) {
             String bundleHome = System.getProperty(AgentConfig.PROP_BUNDLEHOME[0]);
             return bundleHome + "/" + file;
         }
