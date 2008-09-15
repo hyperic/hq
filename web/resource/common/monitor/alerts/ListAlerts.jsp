@@ -140,19 +140,6 @@
   </c:if>
 </c:url>
 
-<!-- FORM -->
-<html:form method="GET" action="/alerts/RemoveAlerts">
-<html:hidden property="eid" value="${Resource.entityId}"/>
-  <c:if test="${not empty param.year}">
-    <input type="hidden" name="year" value="<c:out value="${param.year}"/>"/>
-  </c:if>
-  <c:if test="${not empty param.month}">
-    <input type="hidden" name="month" value="<c:out value="${param.month}"/>"/>
-  </c:if>
-  <c:if test="${not empty param.day}">
-    <input type="hidden" name="day" value="<c:out value="${param.day}"/>"/>
-  </c:if>
-
 <c:if test="${ CONST_PLATFORM == entityId.type}">
 <c:set var="entityId" value="${Resource.entityId}"/>
 
@@ -272,6 +259,20 @@
              '<c:out value="${calAction}" escapeXml="false"/>');
   }
 </script>
+
+<!-- FORM -->
+<html:form method="GET" action="/alerts/RemoveAlerts">
+<html:hidden property="eid" value="${Resource.entityId}"/>
+  <c:if test="${not empty param.year}">
+    <input type="hidden" name="year" value="<c:out value="${param.year}"/>"/>
+  </c:if>
+  <c:if test="${not empty param.month}">
+    <input type="hidden" name="month" value="<c:out value="${param.month}"/>"/>
+  </c:if>
+  <c:if test="${not empty param.day}">
+    <input type="hidden" name="day" value="<c:out value="${param.day}"/>"/>
+  </c:if>
+
 
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>

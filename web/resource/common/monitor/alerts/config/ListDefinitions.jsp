@@ -113,10 +113,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </c:url>
 <c:set var="newAction" value="/alerts/Config.do?mode=new&eid=${entityId.appdefKey}"/>
 
-<!-- FORM -->
-<html:form action="/alerts/RemoveConfig">
-<html:hidden property="rid" value="${Resource.id}"/>
-<html:hidden property="type" value="${Resource.entityId.type}"/>
 
 <c:set var="entityId" value="${Resource.entityId}"/>
 
@@ -214,6 +210,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
         </c:otherwise>
     </c:choose>
 </c:if>
+
+<!-- FORM -->
+<html:form action="/alerts/RemoveConfig">
+<html:hidden property="rid" value="${Resource.id}"/>
+<html:hidden property="type" value="${Resource.entityId.type}"/>
+
 <tiles:insert definition=".portlet.confirm"/>
 <display:table cellspacing="0" cellpadding="0" width="100%"
                action="${sortAction}" items="${Definitions}" >
