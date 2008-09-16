@@ -67,6 +67,10 @@ class HealthController
                 [field: AgentSortField.VERSION,
                  width: '10%',
                  label: {it.agent.version}],
+                [field: [getValue: {localeBundle.build},
+                         description:'build', sortable:false],
+                 width: '5%',
+                 label: {it.build}],                 
                 [field: [getValue: {localeBundle.bundleVersion},
                           description:'bundleVersion', sortable:false],
                   width: '10%',
@@ -100,17 +104,16 @@ class HealthController
         res
     }
     
-    private getAgentBundleVersion(Agent a, Server s) {
+    private getAgentCProp(Agent a, Server s, String prop) {
         def overlord = subMan.one.overlordPojo
         def aev = new AppdefEntityValue(new AppdefEntityID(s.resource), overlord)
-        def bundleVersion = "N/A"
+        def cprop = "N/A"
         try {
-            bundleVersion = cpropMan.one.getValue(aev, "AgentBundleVersion")
+            cprop = cpropMan.one.getValue(aev, prop)
         } catch (Exception e) {
-            // do nothing, since it could be an older agent 
-            // without an agent bundle version cprop
+            // cannot recover
         }
-        bundleVersion
+        cprop
     }
     
     private getLicenseCount(Agent a) {
@@ -145,7 +148,8 @@ class HealthController
                             serverHtml:linkTo(a.address, [resource:d[2].resource]),
                             offset:metricVal,
                             offsetHtml:linkTo(metricVal, [resource:d[3]]), 
-                            bundleVersion:getAgentBundleVersion(a, d[2]),
+                            build:getAgentCProp(a, d[2], "build"),
+                            bundleVersion:getAgentCProp(a, d[2], "AgentBundleVersion"),
                             numMetrics:numMetrics,
                             creationTime:df.format(a.creationTime),
                             licenseCount:getLicenseCount(a)]
