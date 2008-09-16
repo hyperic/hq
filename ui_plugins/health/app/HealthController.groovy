@@ -62,6 +62,10 @@ class HealthController
                 [field: AgentSortField.VERSION,
                  width: '10%',
                  label: {it.agent.version}],
+                [field: [getValue: {localeBundle.build},
+                         description:'build', sortable:false],
+                 width: '5%',
+                 label: {it.build}],
                 [field: AgentSortField.CTIME,
                  width: '18%',
                  label: {it.creationTime}],
@@ -91,6 +95,18 @@ class HealthController
         res
     }
     
+    private getAgentCProp(Agent a, Server s, String prop) {
+        def overlord = subMan.one.overlordPojo
+        def aev = new AppdefEntityValue(new AppdefEntityID(s.resource), overlord)
+        def cprop = "N/A"
+        try {
+            cprop = cpropMan.one.getValue(aev, prop)
+        } catch (Exception e) {
+            // cannot recover
+        }
+        cprop
+    }
+
     private getLicenseCount(Agent a) {
         if (!HQUtil.isEnterpriseEdition())
             return ""
@@ -123,6 +139,7 @@ class HealthController
                             serverHtml:linkTo(a.address, [resource:d[2].resource]),
                             offset:metricVal,
                             offsetHtml:linkTo(metricVal, [resource:d[3]]), 
+                            build:getAgentCProp(a, d[2], "build"),
                             numMetrics:numMetrics,
                             creationTime:df.format(a.creationTime),
                             licenseCount:getLicenseCount(a)]
