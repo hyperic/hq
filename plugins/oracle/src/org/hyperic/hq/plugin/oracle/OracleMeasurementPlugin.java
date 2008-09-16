@@ -69,10 +69,14 @@ public class OracleMeasurementPlugin
     static final String PROP_TABLESPACE = "tablespace";
     static final String PROP_SEGMENT    = "segment";
 
+    private static final String READ_TIMEOUT_KEY = "oracle.jdbc.ReadTimeout";
+    private static final Integer READ_TIMEOUT_VALUE = new Integer(60000);
+    
     private static HashMap ora8Queries    = null;  // Oracle 8i only
     private static HashMap ora9Queries    = null;  // Oracle 9i only
     private static HashMap ora10Queries   = null;  // Oracle 10g only
     private static HashMap genericQueries = null;  // Any
+    private static HashMap tempTspaceQueries = null; // temp tablespace queries
 
     private static final String TABLESPACE_QUERY =
         "SELECT * FROM DBA_TABLESPACES WHERE TABLESPACE_NAME=";
@@ -88,7 +92,9 @@ public class OracleMeasurementPlugin
                                        String user,
                                        String password)
         throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+        Properties info = getJDBCConnectionProperties(user, password);
+        info.put(READ_TIMEOUT_KEY, READ_TIMEOUT_VALUE);
+        return DriverManager.getConnection(url, info);    
     }
 
     protected String getDefaultURL() {
@@ -124,6 +130,7 @@ public class OracleMeasurementPlugin
         ora9Queries = new HashMap();
         ora10Queries = new HashMap();
         genericQueries = new HashMap();
+        tempTspaceQueries = new HashMap();
 
         String baseQuery = "SELECT value FROM V$SYSSTAT WHERE name = ";
 
@@ -304,7 +311,7 @@ public class OracleMeasurementPlugin
                            "SELECT SUM(bytes) FROM SYS.DBA_SEGMENTS " +
                            "WHERE UPPER(owner) = UPPER('%user%')");
 
-        // Tablespace metrics
+        // non-temp Tablespace metrics
         genericQueries.put("TSFreeSpace",
                            "SELECT SUM(bytes) FROM DBA_FREE_SPACE " +
                            "WHERE TABLESPACE_NAME='%tablespace%'");
@@ -327,6 +334,30 @@ public class OracleMeasurementPlugin
                            " WHERE tablespace_name = '%tablespace%')"+
                            " AS percent_used" +
                            " FROM dual");
+        
+        // temp Tablespace metrics (MUST be defined after the genericQueries)
+        tempTspaceQueries.put("TSFreeSpace",
+                           "SELECT SUM(bytes_free) FROM V$temp_space_header " +
+                           "WHERE tablespace_name='%tablespace%'");
+        tempTspaceQueries.put("TSUsedDiskSpace",
+                           "SELECT SUM(bytes_used) FROM V$temp_space_header " +
+                           "WHERE tablespace_name='%tablespace%'");
+        tempTspaceQueries.put("TSFreeExtents",
+                        "SELECT SUM(bytes_free/initial_extent) " +
+                        "FROM DBA_TABLESPACES ts, V$temp_space_header fs " +
+                        "WHERE ts.tablespace_name = fs.tablespace_name " +
+                        "AND ts.tablespace_name='%tablespace%'");
+        tempTspaceQueries.put("TSNumDataFiles",
+                        "SELECT COUNT(*) FROM DBA_TEMP_FILES " +
+                        "WHERE TABLESPACE_NAME='%tablespace%''");
+        tempTspaceQueries.put("TSSpaceUsedPercent",
+                        "SELECT 1-(SELECT sum(bytes_free)/1024 " +
+                        "FROM V$temp_space_header " +
+                        "WHERE tablespace_name='%tablespace%') /" +
+                        " (SELECT sum(bytes/1024) from DBA_TEMP_FILES" +
+                        " WHERE tablespace_name = '%tablespace%')"+
+                        " AS percent_used" +
+                        " FROM dual");
 
         // Oracle 8i queries
         ora8Queries.put("SortsDisk", baseQuery + "'sorts (disk)'");
@@ -411,15 +442,6 @@ public class OracleMeasurementPlugin
         //XXX: Would have been nice to put the processed query to execute in the
         //     template to avoid this substituion on each collection.
 
-        // Do substituion on the user name in the SQL query
-        String user = metric.getObjectProperties().getProperty(PROP_USERNAME);
-        if (user == null) {
-            // Backwards compat
-            user = metric.getProperties().getProperty(PROP_USERNAME);
-        }
-        if (user != null) {
-            query = StringUtil.replace(query, "%user%", user);
-        }
 
         String tablespace = metric.getObjectProperties().
             getProperty(PROP_TABLESPACE);
@@ -429,9 +451,23 @@ public class OracleMeasurementPlugin
                            " is offline, will return 0 for all metrics.");
                 return "select 0 from dual";
             }
+            else if (tablespaceIsTemporary(tablespace, metric)) {
+                // replace generic query with temporary tablespace-specific query
+                query = (String)tempTspaceQueries.get(alias);
+            }
             query = StringUtil.replace(query, "%tablespace%", tablespace);
         }
 
+        // Do substituion on the user name in the SQL query
+        String user = metric.getObjectProperties().getProperty(PROP_USERNAME);
+        if (user == null) {
+            // Backwards compat
+            user = metric.getProperties().getProperty(PROP_USERNAME);
+        }
+        if (user != null) {
+            query = StringUtil.replace(query, "%user%", user);
+        }
+        
         // XXX: could cache this
         String url = metric.getProperties().getProperty(PROP_URL);
         String instance = url.substring(url.lastIndexOf(":") + 1,
@@ -441,6 +477,33 @@ public class OracleMeasurementPlugin
         return query;
     }
 
+    private boolean tablespaceIsTemporary(String tablespace, Metric metric) {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try
+        {
+            conn = getCachedConnection(metric);
+            stmt = conn.createStatement();
+            String sql = "select lower(contents) as contents" +
+                         " FROM dba_tablespaces " +
+                         " WHERE lower(tablespace_name) = " +
+                         "lower('"+tablespace+"')";
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                return (rs.getString("contents").equals("temporary")) ? true : false;
+            }
+        } catch (SQLException e) {
+            // not sure what we can do if this happens, so just log the error
+            _log.error(e.getMessage(), e);
+        } finally {
+            // don't close the conn, since it is shared
+            DBUtil.closeJDBCObjects(getLog(), null, stmt, rs);
+        }
+        // assume non-temporary tablespace in general
+        return false; 
+    }
+    
     private boolean tablespaceIsOffline(String tablespace, Metric metric)
     {
         Connection conn = null;

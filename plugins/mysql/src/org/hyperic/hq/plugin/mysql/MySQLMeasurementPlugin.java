@@ -61,6 +61,10 @@ public class MySQLMeasurementPlugin
     private static final String INDEXQUERY  = "SHOW INDEX FROM %table%";
     private static final String DBQUERY     = "SHOW TABLE STATUS";
     private static final String NUMDATABASES = "SHOW DATABASES";
+    private static final String CONNECT_TIMEOUT_KEY = "connectTimeout";
+    private static final String SOCKET_TIMEOUT_KEY = "socketTimeout";
+    private static final Integer TIMEOUT_VALUE = new Integer(60000);
+    
     private static HashMap columnMap = null;
 
     protected void getDriver()
@@ -72,7 +76,10 @@ public class MySQLMeasurementPlugin
                                        String user,
                                        String password)
         throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+        Properties info = getJDBCConnectionProperties(user, password);
+        info.put(CONNECT_TIMEOUT_KEY, TIMEOUT_VALUE);
+        info.put(SOCKET_TIMEOUT_KEY, TIMEOUT_VALUE);
+        return DriverManager.getConnection(url, info);
     }
 
     protected String getDefaultURL() {
