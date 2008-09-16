@@ -41,7 +41,12 @@ public class AIIp extends IpBase
 
     public AIIp(AIIpValue ipv) {
         super();
-        setAIIpValue(ipv);
+        setQueueStatus(new Integer(ipv.getQueueStatus()));
+        setDiff(ipv.getDiff());
+        setIgnored(ipv.getIgnored());
+        setAddress(ipv.getAddress());
+        setMacAddress(ipv.getMACAddress());
+        setNetmask(ipv.getNetmask());
     }
 
     public AIPlatform getAIPlatform() {
@@ -60,13 +65,6 @@ public class AIIp extends IpBase
         _queueStatus = queueStatus;
     }
 
-    /**
-     * @deprecated use setQueueStatus(Integer)
-     */
-    public void setQueueStatus(int queueStatus) {
-        setQueueStatus(new Integer(queueStatus));
-    }
-
     public long getDiff() {
         return _diff;
     }
@@ -79,46 +77,30 @@ public class AIIp extends IpBase
         return _ignored;
     }
 
-    /**
-     * @deprecated use isIgnored()
-     */
-    public boolean getIgnored() {
-        return isIgnored();
-    }
-
     public void setIgnored(boolean ignored) {
         _ignored = ignored;
     }
 
-    private AIIpValue aIIpValue = new AIIpValue();
+    private AIIpValue aIIpValue = null;
     /**
      * legacy EJB DTO pattern
      * @deprecated use (this) AIIp object instead
      */
     public AIIpValue getAIIpValue()
     {
+        if (aIIpValue == null) {
+            aIIpValue = new AIIpValue();
+            aIIpValue.setId(getId());
+            aIIpValue.setAddress(getAddress());
+            aIIpValue.setMACAddress(getMacAddress());
+            aIIpValue.setNetmask(getNetmask());
+            aIIpValue.setCTime(getCTime());
+        }
         aIIpValue.setQueueStatus(getQueueStatus());
         aIIpValue.setDiff(getDiff());
-        aIIpValue.setIgnored(getIgnored());
-        aIIpValue.setAddress(getAddress());
-        aIIpValue.setMACAddress(getMacAddress());
-        aIIpValue.setNetmask(getNetmask());
-        aIIpValue.setId(getId());
+        aIIpValue.setIgnored(isIgnored());
         aIIpValue.setMTime(getMTime());
-        aIIpValue.setCTime(getCTime());
         return aIIpValue;
-    }
-
-    /**
-     * @deprecated
-     */
-    public void setAIIpValue(AIIpValue valueHolder) {
-        setQueueStatus(valueHolder.getQueueStatus() );
-        setDiff(valueHolder.getDiff());
-        setIgnored(valueHolder.getIgnored());
-        setAddress(valueHolder.getAddress());
-        setMacAddress(valueHolder.getMACAddress());
-        setNetmask(valueHolder.getNetmask());
     }
 
     public boolean equals(Object obj) {

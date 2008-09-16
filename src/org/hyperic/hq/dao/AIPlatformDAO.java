@@ -230,8 +230,13 @@ public class AIPlatformDAO extends HibernateDAO
             if ( aiip == null ) {
                 i.remove();
             } else {
-                boolean qIgnored = qip.getIgnored();
-                qip.setAIIpValue(aiip);
+                boolean qIgnored = qip.isIgnored();
+                qip.setQueueStatus(new Integer(aiip.getQueueStatus()));
+                qip.setDiff(aiip.getDiff());
+                qip.setIgnored(aiip.getIgnored());
+                qip.setAddress(aiip.getAddress());
+                qip.setMacAddress(aiip.getMACAddress());
+                qip.setNetmask(aiip.getNetmask());
                 qip.setIgnored(qIgnored);
             }
         }
@@ -240,7 +245,12 @@ public class AIPlatformDAO extends HibernateDAO
         for (Iterator i=newIPs.iterator(); i.hasNext(); ) {
             AIIpValue aiip = (AIIpValue) i.next();
             AIIp ip = new AIIp();
-            ip.setAIIpValue(aiip);
+            ip.setQueueStatus(new Integer(aiip.getQueueStatus()));
+            ip.setDiff(aiip.getDiff());
+            ip.setIgnored(aiip.getIgnored());
+            ip.setAddress(aiip.getAddress());
+            ip.setMacAddress(aiip.getMACAddress());
+            ip.setNetmask(aiip.getNetmask());
             ip.setAIPlatform(p);
             ipSet.add(ip);
         }
@@ -273,17 +283,13 @@ public class AIPlatformDAO extends HibernateDAO
         // XXX, scottmf need to get Platform from AIPlatform
         // then find a way to correlate the old aiid with the new aiid for
         // each server
-        p.getAIServers();
         Collection serverSet = p.getAIServers();
         for (Iterator i = serverSet.iterator(); i.hasNext(); ) {
             AIServer qserver = (AIServer) i.next();
             String aiid = qserver.getAutoinventoryIdentifier();
             AIServerValue aiserver = (AIServerValue)newServers.remove(aiid);
 
-            if ( aiserver != null ) {
-                i.remove();
-
-            } else {
+            if ( aiserver == null ) {
                 // keep the user specified ignored value
                 boolean qIgnored = qserver.getIgnored();
                 qserver.setAIServerValue(qserver.getAIServerValue());

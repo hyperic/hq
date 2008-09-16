@@ -63,7 +63,7 @@ public class AIIpDAO extends HibernateDAO
         ip.setAddress(ipv.getAddress());
         ip.setNetmask(ipv.getNetmask());
         ip.setMacAddress(ipv.getMACAddress());
-        ip.setQueueStatus(ipv.getQueueStatus());
+        ip.setQueueStatus(new Integer(ipv.getQueueStatus()));
         ip.setDiff(ipv.getDiff());
         ip.setIgnored(ipv.getIgnored());
         save(ip);

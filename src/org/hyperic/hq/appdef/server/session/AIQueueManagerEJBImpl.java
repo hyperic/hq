@@ -181,17 +181,15 @@ public class AIQueueManagerEJBImpl
      *                   data that we are wanting to queue.
      * @param isApproval If true, the platform's servers will be updated as 
      *                   well.
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
-    public AIPlatformValue syncQueue(AIPlatformValue aiplatform, 
-                                     boolean isApproval) 
+    private AIPlatformValue syncQueue(AIPlatform aiplatform, boolean isApproval) 
     {
         // XXX: Fix this..
         AuthzSubject subject =
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
 
-        return queue(subject, aiplatform, true, isApproval, false);
+        return queue(subject, aiplatform.getAIPlatformValue(), true, isApproval,
+                     false);
     }
 
     /**
@@ -347,7 +345,7 @@ public class AIQueueManagerEJBImpl
             return null;
         }
 
-        return syncQueue(aiplatform.getAIPlatformValue(), false);
+        return syncQueue(aiplatform, false);
     }
 
     /**
@@ -380,7 +378,7 @@ public class AIQueueManagerEJBImpl
             return null;
         }
                         
-        aiplatformValue = syncQueue(aiplatformValue, false);
+        aiplatformValue = syncQueue(aiplatform, false);
         return aiplatformValue;
     }
 
@@ -695,7 +693,7 @@ public class AIQueueManagerEJBImpl
                 id = (Integer) iter.next();
                 aiplatform =
                     aiplatformLH.get(id);
-                syncQueue(aiplatform.getAIPlatformValue(), isApproveAction);
+                syncQueue(aiplatform, isApproveAction);
             }
             
             if (aiplatform != null) {
