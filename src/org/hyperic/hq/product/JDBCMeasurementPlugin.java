@@ -55,6 +55,9 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
 
     public static final String PROP_TABLE    = "table";
     public static final String PROP_INDEX    = "index";
+    
+    private static final String USER_KEY = "user";
+    private static final String PASSWORD_KEY = "password";
 
     private static HashMap connectionCache = new HashMap();
     
@@ -294,5 +297,22 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
         } finally {
             DBUtil.closeJDBCObjects(getLog(), null, ps, rs);
         }
+    }
+    
+    /**
+     * Utility method that returns an instance of Properties containing the given
+     * user and password keys. The Properties instance returned can be passed in 
+     * as the info argument to DriverManager.getConnection(url, info).
+     * 
+     * @param user the username for the JDBC connection
+     * @param password the password for the JDBC connection
+     * @return an instance of Properties containing the user and password 
+     * JDBC Connection properties
+     */
+    public static Properties getJDBCConnectionProperties(String user, String password) {
+        Properties info = new Properties();
+        info.put (USER_KEY, user);
+        info.put (PASSWORD_KEY, password);
+        return info;
     }
 }
