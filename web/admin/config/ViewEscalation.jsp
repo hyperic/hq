@@ -468,7 +468,7 @@ function addRow() {
     escTrHeader.appendChild(td6);
     td6.setAttribute('colSpan', '3');
     td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
-    td6.innerHTML = '<div style="width:100%;background:#cccccc;padding:2px; border:1px dotted #aeb0b5;">Create an Action for this escalation</div>';
+    td6.innerHTML = '<div style="width:100%;background:#cccccc;">Create an Action for this escalation</div>';
 
     escTrHeader.appendChild(td5);
     td5.setAttribute('vAlign', 'top');
@@ -547,7 +547,7 @@ function addRow() {
     emailDiv.setAttribute('class', 'emailDiv');
     emailDiv.setAttribute('id', 'emailinputDiv');
     dojo11.byId('emailinputDiv').style.display = 'none';
-    dojo11.byId('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onMouseOut=checkEmail();copyOthersEmail(this);></textarea>";
+    dojo11.byId('emailinputDiv').innerHTML = "email addresses (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onMouseOut=checkEmail();copyOthersEmail(this);></textarea>";
 
     td4.appendChild(sysDiv);
     sysDiv.setAttribute('class', 'escInput');
@@ -1219,7 +1219,7 @@ function saveAddEscalation() {
             <td style="padding-right:5px;" id="okCheck">
                 <html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
             </td>
-            <td width="100%">
+            <td width="98%">
                 <div id="escMsg"></div>
             </td>
         </tr>
