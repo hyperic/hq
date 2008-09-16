@@ -50,7 +50,8 @@ public class DataManager_testEJBImpl implements SessionBean {
         List data = new ArrayList();
         long ts = System.currentTimeMillis();
         for (int i = 0; i < 100; i++) {
-            DataPoint dp = new DataPoint(i, INSERT_VAL, ts);
+            MeasDataPoint dp =
+                new MeasDataPoint(new Integer(i), INSERT_VAL, ts, false);
             data.add(dp);
         }
 
@@ -58,7 +59,8 @@ public class DataManager_testEJBImpl implements SessionBean {
 
         data.clear();
         for (int i = 0; i < 100; i++) {
-            DataPoint dp = new DataPoint(i, UPDATE_VAL, ts);
+            MeasDataPoint dp =
+                new MeasDataPoint(new Integer(i), UPDATE_VAL, ts, false);
             data.add(dp);
         }
 
