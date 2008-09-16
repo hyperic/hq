@@ -1,4 +1,5 @@
 <script type="text/javascript">
+document.navTabCat = "Admin";
 function sendCode() {
   dojo.byId('timeStatus').innerHTML = '... executing';
    dojo.io.bind({

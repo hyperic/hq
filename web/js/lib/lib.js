@@ -624,6 +624,15 @@ function createInputFieldsFromJSON(jsonArray){
  */
 function activateHeaderTab(){
     var l = document.location;
+    if (document.navTabCat) {
+        //This is a plugin
+        if (document.navTabCat == "Resource") {
+             dojo.byId("resTab").className = "activeTab";
+        } else if(document.navTabCat == "Admin") {
+            dojo.byId("adminTab").className = "activeTab";
+        }
+        return;
+    }
     l = l+""; // force string cast
     if ( l.indexOf("Dash")!=-1 || 
          l.indexOf("dash")!=-1 ) {

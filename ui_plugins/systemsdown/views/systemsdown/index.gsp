@@ -1,4 +1,6 @@
 <script type="text/javascript">
+    document.navTabCat = "Resource";
+    
     getDojo();
     <%= ajaxAccordionFilter( refresh:60, updateURL:urlFor(action:'summary')+"?q=all", id:"SystemsDownFilter", filterTargetId:"SystemsDown") %>
     plugin.accordion.update = function(kwArgs) {

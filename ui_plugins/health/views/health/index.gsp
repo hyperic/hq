@@ -6,6 +6,7 @@
 <%= hquStylesheets() %>
 
 <script type="text/javascript">
+document.navTabCat = "Admin";
 function getSystemStats() {
   dojo.io.bind({
     url: '<%= urlFor(action:"getSystemStats") %>',
@@ -224,7 +225,7 @@ getSystemStats();
         <img src="/images/arrow_refresh.png" onclick="loadDiag()"/>
         <span>${l.diagWatchNotice}</span>
       </div>
-      <pre>
+      <pre style="background-color: #FFF; border: 0px none;">
         <div id="diagData">
         </div>
       </pre>
