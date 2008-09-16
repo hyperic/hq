@@ -791,8 +791,8 @@ public class MeasurementGtrigger
             if (derivedMeas.size() != _groupSize) {
                 _log.warn("Listening to different # measurement events ("+
                            derivedMeas.size()+") than resources ("+
-                          _groupSize+"). This probably means that not " +
-                          "everyone in the group is monitoring something");
+                          _groupSize+") for group " + _resourceGroup.getName() +
+                          ". Not all resources are collecting " + _metricName);
             }
             
             _metricName = tMan.getTemplate(_templateId).getName();
