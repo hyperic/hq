@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.Connection;
@@ -139,6 +140,21 @@ public class OracleServerDetector
         }
     }
 
+    //e.g. file = "orasql10.", matches: "orasql10.dll", "liborasql10.so", etc.
+    private boolean hasFile(File dir, final String file) {
+        String[] names = dir.list(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().indexOf(file) != -1;
+            }
+        });
+        if (names == null || names.length == 0) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
     //for use w/ -jar hq-product.jar or agent.properties
     private boolean configureProperties(ConfigResponse config) {
         boolean hasCreds = false;
@@ -182,7 +198,7 @@ public class OracleServerDetector
             if (hasExe(bin, "adrci")) {
                 found = version.equals(VERSION_11g);
             }
-            else if (hasExe(bin, "trcsess")) {
+            else if (hasExe(bin, "trcsess") || hasFile(bin, "orasql10.")) {
                 found = version.equals(VERSION_10g);
             }
             else if (hasExe(bin, "dgmgrl")) {
