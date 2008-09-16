@@ -886,6 +886,8 @@ body .dijitPopup {
 #migContainer {
     background-color: #EEE;
     padding-top: 7px;
+    position: relative;
+    z-index: 1;
 }
 
 #migContainer a:visited, #migContainer a:hover, #migContainer a {
