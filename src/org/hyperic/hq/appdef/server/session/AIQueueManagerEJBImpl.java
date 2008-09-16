@@ -488,6 +488,40 @@ public class AIQueueManagerEJBImpl
         throws FinderException, PermissionException, ValidationException,
                RemoveException, AIQApprovalException 
     {
+        return processQueue(subject, platformList, serverList, ipList, action, true);
+    } 
+    
+    /**
+     * Process resources in the AI queue (ONLY TO BE USED FOR UNIT TESTING PURPOSES). 
+     *  This can be used to approve resources for inclusion into appdef, to ignore 
+     *  or unignore resources in the queue, or to purge resources from the queue.
+     * @param platformList A List of aiplatform IDs.  This may be
+     * null, in which case it is ignored.
+     * @param ipList A List of aiip IDs.  This may be
+     * null, in which case it is ignored.
+     * @param serverList A List of aiserver IDs.  This may be
+     * null, in which case it is ignored.
+     * @param action One of the AIQueueConstants.Q_DECISION_XXX constants
+     * indicating what to do with the platforms, ips and servers.
+     * @param verifyLiveAgent Flag indicating whether to check for liveness of agent
+     * prior to processing platform. This flag is exposed for unit testing purposes, and
+     * should be set to true in regular operation.
+     *
+     * @return A List of AppdefResource's that were created as a result of
+     * processing the queue.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public List processQueue(AuthzSubject subject,
+                             List platformList,
+                             List serverList,
+                             List ipList,
+                             int action,
+                             boolean verifyLiveAgent)
+        throws FinderException, PermissionException, ValidationException,
+               RemoveException, AIQApprovalException 
+    {
         AuthzSubject s = 
             AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId());
         boolean approved = false;
@@ -499,7 +533,7 @@ public class AIQueueManagerEJBImpl
                                    .pushContainer(AIAudit.newImportAudit(s));
             }
             return _processQueue(subject, platformList, serverList, ipList,
-                                 action);
+                                 action, verifyLiveAgent);
         } finally {
             if (approved)
                 AuditManagerEJBImpl.getOne().popContainer(false);
@@ -510,7 +544,8 @@ public class AIQueueManagerEJBImpl
                                List platformList,
                                List serverList,
                                List ipList,
-                               int action)
+                               int action, 
+                               boolean verifyLiveAgent)
         throws FinderException, PermissionException, ValidationException,
                RemoveException, AIQApprovalException
     { 
@@ -563,7 +598,7 @@ public class AIQueueManagerEJBImpl
                 // Before processing platforms, ensure the agent is up since
                 // the approval process depends on being able to schedule runtime
                 // discovery and enable metrics.
-                if (isApproveAction) {
+                if (isApproveAction && verifyLiveAgent) {
                     try {
                         AICommandsClient client = 
                             AICommandsClientFactory.getInstance()
