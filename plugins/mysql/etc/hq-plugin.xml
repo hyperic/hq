@@ -1324,7 +1324,7 @@
           include="4.x">
 
     <!-- Registry scan for 5.0 -->
-    <scan registry="SOFTWARE\MySQL AB\MySQL Server 5.0">
+    <scan registry="SOFTWARE\MySQL AB\MySQL Server 5.*">
       <include name="Location"/>
     </scan>
   </server>
