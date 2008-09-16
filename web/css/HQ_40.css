@@ -939,7 +939,7 @@ body .dijitPopup {
 .filterBox select {
     border: 1px solid gray;
     padding: 2px;
-    width: 130px;
+    width: 145px;
 }
 
 .filterBox input[type="radio"], .filterBox input[type="checkbox"] {
