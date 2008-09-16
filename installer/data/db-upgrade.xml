@@ -8880,7 +8880,7 @@ has already been defined.
     <schema-addColumn table="EAM_APPLICATION" column="RESOURCE_ID" columnType="INTEGER">
       <initializer>
           UPDATE EAM_APPLICATION SET RESOURCE_ID =
-              (SELECT r.ID FROM EAM_RESOURCE r WHERE RESOURCE_TYPE_ID = 401 AND r.INSTANCE_ID = EAM_APPLICATION.ID)
+              (SELECT r.ID FROM EAM_RESOURCE r WHERE RESOURCE_TYPE_ID = 308 AND r.INSTANCE_ID = EAM_APPLICATION.ID)
       </initializer>
       <foreignKey constraintName="FK6C0C122FC176AE" references="EAM_RESOURCE(ID)"/>
     </schema-addColumn>
@@ -9128,6 +9128,15 @@ has already been defined.
       </statement>
       <statement desc="Drop unused EAM_APPLICATION  column SORT_NAME." fail="false">
         ALTER TABLE EAM_APPLICATION DROP COLUMN SORT_NAME
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="3.125">
+    <schema-directSQL>
+      <statement desc="Correct Application Resource IDs." fail="false">
+          UPDATE EAM_APPLICATION SET RESOURCE_ID =
+              (SELECT r.ID FROM EAM_RESOURCE r WHERE RESOURCE_TYPE_ID = 308 AND r.INSTANCE_ID = EAM_APPLICATION.ID)
       </statement>
     </schema-directSQL>
   </schemaSpec>
