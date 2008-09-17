@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -56,8 +56,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerValue;
@@ -68,7 +66,6 @@ import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
@@ -83,21 +80,27 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
 public class RuntimeReportProcessor {
-    private Log _log = LogFactory.getLog(RuntimeReportProcessor.class);
-    private AutoinventoryManagerLocal _aiMgr = 
-        AutoinventoryManagerEJBImpl.getOne();
-    private PlatformManagerLocal _platformMgr = 
-        PlatformManagerEJBImpl.getOne();
-    private ServerManagerLocal  _serverMgr = 
-        ServerManagerEJBImpl.getOne();
-    private ServiceManagerLocal  _serviceMgr = 
-        ServiceManagerEJBImpl.getOne();
-    private ConfigManagerLocal _configMgr = 
-        ConfigManagerEJBImpl.getOne();
-    private AuthzSubjectManagerLocal _subjectMgr =
-        AuthzSubjectManagerEJBImpl.getOne();
-    private CPropManagerLocal _cpropMgr =
-        CPropManagerEJBImpl.getOne();
+    private final Log _log = LogFactory.getLog(RuntimeReportProcessor.class);
+    private final AutoinventoryManagerLocal
+        _aiMgr = AutoinventoryManagerEJBImpl.getOne();
+    
+    private final PlatformManagerLocal
+        _platformMgr = PlatformManagerEJBImpl.getOne();
+    
+    private final ServerManagerLocal
+        _serverMgr = ServerManagerEJBImpl.getOne();
+    
+    private final ServiceManagerLocal
+        _serviceMgr = ServiceManagerEJBImpl.getOne();
+    
+    private final ConfigManagerLocal
+        _configMgr = ConfigManagerEJBImpl.getOne();
+    
+    private final AuthzSubjectManagerLocal
+        _subjectMgr = AuthzSubjectManagerEJBImpl.getOne();
+    
+    private final CPropManagerLocal
+        _cpropMgr = CPropManagerEJBImpl.getOne();
     
     private AuthzSubject _overlord;
     private List         _serviceMerges = new ArrayList();
@@ -105,12 +108,10 @@ public class RuntimeReportProcessor {
     
     public RuntimeReportProcessor () {}
 
-    public void processRuntimeReport(AuthzSubject subject,
-                                     String agentToken,
+    public void processRuntimeReport(AuthzSubject subject, String agentToken,
                                      CompositeRuntimeResourceReport crrr)
-        throws AutoinventoryException, CreateException, 
-               PermissionException, ValidationException, 
-               ApplicationException 
+        throws AutoinventoryException, CreateException,  PermissionException,
+               ValidationException, ApplicationException 
     {
         _overlord   = _subjectMgr.getOverlordPojo();
         _agentToken = agentToken;
@@ -132,9 +133,8 @@ public class RuntimeReportProcessor {
 
     private void _processRuntimeReport(AuthzSubject subject,
                                        CompositeRuntimeResourceReport crrr)
-        throws AutoinventoryException, CreateException, 
-               PermissionException, ValidationException, 
-               ApplicationException 
+        throws AutoinventoryException, CreateException, PermissionException,
+               ValidationException, ApplicationException 
     {
         long startTime = System.currentTimeMillis();
 
@@ -156,7 +156,7 @@ public class RuntimeReportProcessor {
 
         serverReports = crrr.getServerReports();
         appdefServers = new ServerValue[serverReports.length];
-        for (int i=0; i<serverReports.length; i++) {
+        for (int i = 0; i < serverReports.length; i++) {
 
             serverReport = serverReports[i];
 
@@ -184,19 +184,20 @@ public class RuntimeReportProcessor {
 
         // Now, for each server report that had a corresponding appdef server,
         // process that report.
-        _log.info("Merging server reports into appdef " +
-                 "(server count=" + appdefServers.length + ")");
-        for (int i=0; i<appdefServers.length; i++) {
+        _log.info("Merging server reports into appdef (server count=" +
+                  appdefServers.length + ")");
+        for (int i = 0; i < appdefServers.length; i++) {
 
-            if (appdefServers[i] == null) continue;
+            if (appdefServers[i] == null)
+                continue;
             serverReport = serverReports[i];
             aiplatforms = serverReport.getAIPlatforms();
-            if (aiplatforms == null) continue;
+            if (aiplatforms == null)
+                continue;
 
-            _log.info("Merging platforms " +
-                     "(platform count=" + aiplatforms.length +
-                     ", reported by serverId=" + appdefServers[i].getId() +
-                     ") into appdef...");
+            _log.info("Merging platforms (platform count=" + aiplatforms.length
+                      + ", reported by serverId=" + appdefServers[i].getId() +
+                      ") into appdef...");
             for (int j=0; j<aiplatforms.length; j++) {
                 if(aiplatforms[j] != null) {
                     if (aiplatforms[j].getAgentToken() == null) {
@@ -222,14 +223,15 @@ public class RuntimeReportProcessor {
                                                appdefServers[i]); 
                     Util.flushCurrentSession();
                 } else {
-                    _log.error("Runtime Report from server: " + appdefServers[i].getName() 
-                            + " contained null aiPlatform. Skipping.");
+                    _log.error("Runtime Report from server: " +
+                               appdefServers[i].getName() +
+                               " contained null aiPlatform. Skipping.");
                 }
             }
         }
         long endTime = System.currentTimeMillis() - startTime;
-        _log.info("Completed processing Runtime AI report in: " +
-                 endTime/1000 + " seconds.");
+        _log.info("Completed processing Runtime AI report in: " + endTime/1000 +
+                  " seconds.");
     }
 
     private void mergePlatformIntoInventory(AuthzSubject subject,
@@ -242,29 +244,25 @@ public class RuntimeReportProcessor {
 
         _log.info("Merging platform into appdef: " + aiplatform.getFqdn());
 
-        PlatformValue appdefPlatform = null;
+        Platform appdefPlatform = null;
         // checks if platform exists by fqdn, certdn, then ipaddr(s)
-        Platform p = _platformMgr.getPlatformByAIPlatform(subject, aiplatform);
-        if (p != null) {
-            appdefPlatform = p.getPlatformValue();
-        }
+        appdefPlatform =
+            _platformMgr.getPlatformByAIPlatform(subject, aiplatform);
 
         if (appdefPlatform == null) {
             // Add the platform
             _log.info("Creating new platform: " + aiplatform);
-            Platform platform =
-                _platformMgr.createPlatform(subject, aiplatform);
-            appdefPlatform = platform.getPlatformValue();
-        } else {
-            // Platform already exists, don't update it, only update servers
-            // that are within it.
+            appdefPlatform = _platformMgr.createPlatform(subject, aiplatform);
         }
+        // Else platform already exists, don't update it, only update servers
+        // that are within it.
 
         PageList appdefServerList =
             _serverMgr.getServersByPlatform(subject, appdefPlatform.getId(),
                                            false, PageControl.PAGE_ALL);
 
-        if (aiservers == null) return;
+        if (aiservers == null)
+            return;
 
         for (int i=0; i<aiservers.length; i++) {
             if(aiservers[i] != null) {
@@ -279,7 +277,7 @@ public class RuntimeReportProcessor {
 
         // any servers that we haven't handled, we should mark them
         // as AI-zombies.
-        for (int i=0; i<appdefServerList.size(); i++) {
+        for (int i = 0; i < appdefServerList.size(); i++) {
             ServerValue appdefServer = (ServerValue) appdefServerList.get(i);
 
             // Annoying - serverMgr doesn't support updateServer on 
@@ -293,8 +291,8 @@ public class RuntimeReportProcessor {
                     _serverMgr.updateServer(subject, serverValue);
                 }
             } catch (AppdefDuplicateNameException e) {
-                _log.warn("Error updating server: "
-                         + serverValue + ": " + e.getMessage());
+                _log.warn("Error updating server: " + serverValue + ": " +
+                          e.getMessage());
             } catch (UpdateException e) {
                 _log.error("Error updating server: " + serverValue, e);
             } catch (ServerNotFoundException e) {
@@ -314,14 +312,12 @@ public class RuntimeReportProcessor {
      * @param reportingServer The server that reported the aiserver.
      */
     private void mergeServerIntoInventory(AuthzSubject subject,
-                                          PlatformValue platform,
+                                          Platform platform,
                                           AIServerValue aiserver,
                                           List appdefServers,
                                           ServerValue reportingServer)
         throws CreateException, PermissionException, ValidationException
     {
-        ServerValue appdefServer;
-        ServerValue foundAppdefServer = null;
         Integer serverTypePK;
 
         // Does this server exist (by autoinventory identifier) ?
@@ -341,8 +337,10 @@ public class RuntimeReportProcessor {
                   " name=" + aiserver.getName() + "," +
                   " AIIdentifier=" + aiserver.getAutoinventoryIdentifier());
 
-        for (int i=0; i<appdefServers.size(); i++) {
-            appdefServer = (ServerValue) appdefServers.get(i);
+        Server server = null;
+
+        for (int i = 0; i < appdefServers.size(); i++) {
+            ServerValue appdefServer = (ServerValue) appdefServers.get(i);
 
             // We can match either on autoinventory identifier, or if
             // this is the reporting server, we can match on its appdef ID
@@ -351,23 +349,15 @@ public class RuntimeReportProcessor {
                 (aiserverId != null &&
                  aiserverId.equals(reportingServer.getId()) &&
                  aiserverId.equals(appdefServer.getId()))) {
-                try {
-                    foundAppdefServer
-                        = _serverMgr.getServerById(subject,
-                                                  appdefServer.getId());
-                    _log.info("Found existing server: " +
-                             foundAppdefServer.getName() + " as match for: " +
-                             aiserver.getAutoinventoryIdentifier());
-                    appdefServerAIID =
-                        foundAppdefServer.getAutoinventoryIdentifier();
-                    if (!appdefServerAIID.equals(aiServerAIID)) {
-                        _log.info("Setting AIID to existing=" +
-                                 appdefServerAIID);
-                        aiserver.setAutoinventoryIdentifier(appdefServerAIID);
-                    }
-                } catch (ServerNotFoundException e) {
-                    _log.error("Error finding server: " + appdefServer);
-                    throw new SystemException(e);
+                server = _serverMgr.getServerById(appdefServer.getId());
+                _log.info("Found existing server: " +
+                         server.getName() + " as match for: " +
+                         aiserver.getAutoinventoryIdentifier());
+                appdefServerAIID = server.getAutoinventoryIdentifier();
+                if (!appdefServerAIID.equals(aiServerAIID)) {
+                    _log.info("Setting AIID to existing=" +
+                             appdefServerAIID);
+                    aiserver.setAutoinventoryIdentifier(appdefServerAIID);
                 }
                 appdefServers.remove(i);
                 break;
@@ -376,16 +366,21 @@ public class RuntimeReportProcessor {
 
         boolean update;
 
-        Server server;
         try {
-            if (foundAppdefServer == null) {
+            if (update = (server != null)) {
+                // UPDATE SERVER
+                _log.info("Updating server: " + server.getName());
+
+                ServerValue foundAppdefServer = AIConversionUtil
+                    .mergeAIServerIntoServer(aiserver, server.getServerValue());
+                server = _serverMgr.updateServer(subject, foundAppdefServer);
+            } else {
                 if (isPlaceholder) {
                     _log.error("Placeholder serverId=" + aiserver.getId() +
                                " not found for platformId=" + platform.getId() +
                                ", fqdn=" + platform.getFqdn());
                     return;
                 }
-                update = false;
                 // CREATE the server
                 // replace %serverName% in aisever's name.
                 String newServerName =
@@ -396,7 +391,7 @@ public class RuntimeReportProcessor {
                 _log.info("Creating new server: name: " + aiserver.getName() +
                          "AIIdentifier: " +
                          aiserver.getAutoinventoryIdentifier());
-                foundAppdefServer
+                ServerValue foundAppdefServer
                     = AIConversionUtil.convertAIServerToServer(aiserver, 
                                                                _serverMgr);
             
@@ -405,9 +400,7 @@ public class RuntimeReportProcessor {
                 serverTypePK = foundAppdefServer.getServerType().getId();
                 
                 // The server will be owned by whomever owns the platform
-                String serverOwnerName = platform.getOwner();
-                AuthzSubject serverOwner
-                    = _subjectMgr.findSubjectByName(subject, serverOwnerName);
+                AuthzSubject serverOwner = platform.getResource().getOwner();
                 Integer platformPK = platform.getId();
                 server = _serverMgr.createServer(serverOwner,
                                                  platformPK,
@@ -415,18 +408,7 @@ public class RuntimeReportProcessor {
                                                  foundAppdefServer);
 
                 _log.info("New server created: " + foundAppdefServer.getName() +
-                         " (id=" + server.getId() + ")");
-                // Refresh the light value to include all attributes
-                foundAppdefServer = server.getServerValue();
-            } else {
-                update = true;
-                // UPDATE SERVER
-                _log.info("Updating server: " + foundAppdefServer.getName());
-
-                foundAppdefServer
-                    = AIConversionUtil.mergeAIServerIntoServer(aiserver,
-                                                               foundAppdefServer);
-                server = _serverMgr.updateServer(subject, foundAppdefServer);
+                          " (id=" + server.getId() + ")");
             }
         } catch (ApplicationException e) {
             _log.error("Failed to merge server: " + aiserver, e);
@@ -449,7 +431,7 @@ public class RuntimeReportProcessor {
                 // an update event if this resource has been updated.
                 _configMgr.configureResponse(subject,
                                              server.getConfigResponse(),
-                                             foundAppdefServer.getEntityId(),
+                                             server.getEntityId(),
                                              aiserver.getProductConfig(),
                                              aiserver.getMeasurementConfig(),
                                              aiserver.getControlConfig(),
@@ -458,8 +440,8 @@ public class RuntimeReportProcessor {
                                              update,
                                              false);
             } catch (Exception e) {
-                _log.error("Error configuring server: " 
-                          + foundAppdefServer.getId() + ": " + e, e);
+                _log.error("Error configuring server: " + server.getId() +
+                           ": " + e, e);
             }
         }
 
@@ -469,10 +451,8 @@ public class RuntimeReportProcessor {
         // runtime-ai
         try {
             // SET CUSTOM PROPERTIES FOR SERVER
-            int typeId =
-                foundAppdefServer.getServerType().getId().intValue();
-            _cpropMgr.setConfigResponse(foundAppdefServer.getEntityId(),
-                                       typeId,
+            int typeId = server.getServerType().getId().intValue();
+            _cpropMgr.setConfigResponse(server.getEntityId(), typeId,
                                        aiserver.getCustomProperties());
         } catch (Exception e) {
             _log.warn("Error setting server custom properties: " + e, e);
@@ -480,8 +460,7 @@ public class RuntimeReportProcessor {
 
         if (aiserverExt != null) {
 
-            _log.info("Updating services for server: " +
-                     foundAppdefServer.getName());
+            _log.info("Updating services for server: " + server.getName());
 
             List appdefServices;
 
@@ -489,22 +468,20 @@ public class RuntimeReportProcessor {
             // get the services explicitly from the ServiceManager.
             try {
                 appdefServices = 
-                    _serviceMgr.getServicesByServer(subject,
-                                                    foundAppdefServer.getId(),
+                    _serviceMgr.getServicesByServer(subject, server.getId(),
                                                     PageControl.PAGE_ALL);
             } catch (Exception e) {
                 appdefServices = new ArrayList();
             }
 
-            List aiServices = 
-                aiserverExt.getAIServiceValuesAsList();
+            List aiServices = aiserverExt.getAIServiceValuesAsList();
 
             // Change the service names if they require expansion. 
             for (Iterator i=aiServices.iterator(); i.hasNext(); ) {
                 AIServiceValue aiSvc = (AIServiceValue)i.next();
                 String newName = StringUtil.replace(aiSvc.getName(),
                                                     "%serverName%",
-                                                 foundAppdefServer.getName());
+                                                    server.getName());
                 aiSvc.setName(newName);
             }
             
@@ -531,11 +508,11 @@ public class RuntimeReportProcessor {
                 }
             }
             
-            for (Iterator i=aiServices.iterator(); i.hasNext(); ) {
+            for (Iterator i = aiServices.iterator(); i.hasNext();) {
                 AIServiceValue aiService = (AIServiceValue)i.next();
                 ServiceMergeInfo sInfo = new ServiceMergeInfo();
                 sInfo.subject         = subject;
-                sInfo.serverId        = foundAppdefServer.getId();
+                sInfo.serverId        = server.getId();
                 sInfo.aiservice       = aiService;
                 sInfo.agentToken      = _agentToken;
                 _serviceMerges.add(sInfo);
@@ -566,8 +543,8 @@ public class RuntimeReportProcessor {
             _aiMgr.turnOffRuntimeDiscovery(subject, aid, _agentToken);
             return true;
         } catch (Exception e) {
-            _log.error("Error turning off runtime scans for " +
-                      "server: " + serverId, e);
+            _log.error("Error turning off runtime scans for server: " +
+                       serverId, e);
             return false;
         }
     }
