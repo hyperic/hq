@@ -25,16 +25,37 @@
 
 package org.hyperic.hq.plugin.iis;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.xpath.XPathAPI;
 import org.hyperic.sigar.win32.MetaBase;
 import org.hyperic.sigar.win32.Win32Exception;
+import org.hyperic.util.exec.Execute;
+import org.hyperic.util.exec.ExecuteWatchdog;
+import org.hyperic.util.exec.PumpStreamHandler;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class IisMetaBase {
+    private static final Log _log =
+        LogFactory.getLog(IisMetaBase.class.getName());
     private static final String IIS_MKEY = "/LM/W3SVC";
     private static final int MD_SSL_ACCESS_PERM = 6030;
     private static final int MD_ACCESS_SSL = 0x00000008;
+    private static final String APPCMD =
+        "C:/Windows/System32/inetsrv/appcmd.exe";
 
     String id;
     String ip;
@@ -54,6 +75,141 @@ public class IisMetaBase {
     public static Map getWebSites()
         throws Win32Exception {
 
+        if (new File(APPCMD).exists()) {
+            try {
+                return getWebSitesViaAppCmd(); //IIS7
+            } catch (Exception e) {
+                _log.error(APPCMD + ": " + e, e);
+                throw new Win32Exception(e.getMessage());
+            }
+        }
+        else {
+            return getWebSitesViaMetaBase();
+        }
+    }
+
+    private static boolean parseBinding(IisMetaBase info, String entry){
+        if (entry == null) {
+            return false;
+        }
+        int ix = entry.indexOf(":");
+        if (ix == -1) {
+            return false;
+        }
+
+        //binding format:
+        //"listen ip:port:host header"
+        info.ip = entry.substring(0, ix);
+
+        entry = entry.substring(ix+1);
+        ix = entry.indexOf(":");
+        info.port = entry.substring(0, ix);
+
+        //if host header is defined, URLMetric
+        //will add Host: header with this value.
+        info.hostname = entry.substring(ix+1);
+        if ((info.hostname != null) &&
+             (info.hostname.length() == 0))
+        {
+            info.hostname = null;
+        }
+        
+        if ((info.ip == null) ||
+            (info.ip.length() == 0) ||
+            (info.ip.equals("*")))
+        {
+            //not bound to a specific ip
+            info.ip = "localhost";
+        }
+
+        return true;
+    }
+
+    //IIS7 does not use MetaBase
+    private static Map getWebSitesViaAppCmd()
+        throws Exception {
+
+        final String[] cmd = {
+            APPCMD, "list", "config",
+            "-section:system.applicationHost/sites"      
+        };
+
+        Map websites = new HashMap();
+
+        ByteArrayOutputStream output = 
+            new ByteArrayOutputStream();
+
+        ExecuteWatchdog wdog = 
+            new ExecuteWatchdog(5 * 1000);
+        Execute exec =
+            new Execute(new PumpStreamHandler(output), wdog);
+
+        exec.setCommandline(cmd);
+
+        try {
+            int exitStatus = exec.execute();
+            if (exitStatus != 0 || wdog.killedProcess()) {
+                _log.error(Arrays.asList(cmd) + ": " + output);
+                return websites;
+            }
+        } catch (Exception e) {
+            _log.error(Arrays.asList(cmd) + ": " + e);
+            return websites;
+        }
+
+        DocumentBuilderFactory dbf =
+            DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document config =
+            db.parse(new ByteArrayInputStream(output.toByteArray()));
+
+        NodeList sites =
+            XPathAPI.selectNodeList(config, "//sites/site");
+
+        for (int i=0; i<sites.getLength(); i++) {
+            Element site = (Element)sites.item(i);
+            String name = site.getAttribute("name");
+
+            IisMetaBase info = new IisMetaBase();
+            info.id = site.getAttribute("id");
+
+            String sitePath = "//site[@name=\"" + name + "\"]/";
+            String bindPath = sitePath + "bindings/binding[1]";
+            String docPath =
+                sitePath + "application[1]/virtualDirectory[1]/@physicalPath";
+
+            Element binding =
+                (Element)XPathAPI.selectSingleNode(site, bindPath);
+
+            if (binding == null) {
+                _log.debug("No bindings defined for: " + name);
+                continue;
+            }
+            String proto = binding.getAttribute("protocol");
+            if (proto != null) {
+                if ("https".equals(proto.toString().trim())) {
+                    info.requireSSL = true;
+                }
+            }
+            String bindInfo = binding.getAttribute("bindingInformation");
+            if (!parseBinding(info, bindInfo)) {
+                _log.debug("Failed to parse bindingInformation=" +
+                           bindInfo + " for: " + name);
+                continue;
+            }
+            Object docRoot = XPathAPI.eval(site, docPath);
+            if (docRoot != null) {
+                info.path = docRoot.toString();
+            }
+            _log.debug(name + "=" + info);
+            websites.put(name, info);
+        }
+
+        return websites;
+    }
+
+    private static Map getWebSitesViaMetaBase()
+        throws Win32Exception {
         String keys[];
         Map websites = new HashMap();
         MetaBase mb = new MetaBase();
@@ -104,42 +260,15 @@ public class IisMetaBase {
                     bindings =
                         srv.getMultiStringValue(MetaBase.MD_SERVER_BINDINGS);
                 }
+                info.id = key;
 
                 if (bindings.length == 0) {
                     continue;
                 }
 
-                String entry = bindings[0];
-                int ix = entry.indexOf(":");
-                if (ix == -1) {
+                if (!parseBinding(info, bindings[0])) {
                     continue;
                 }
-
-                info.id = key;
-                //binding format:
-                //"listen ip:port:host header"
-                info.ip = entry.substring(0, ix);
-
-                entry = entry.substring(ix+1);
-                ix = entry.indexOf(":");
-                info.port = entry.substring(0, ix);
-
-                //if host header is defined, URLMetric
-                //will add Host: header with this value.
-                info.hostname = entry.substring(ix+1);
-                if ((info.hostname != null) &&
-                     (info.hostname.length() == 0))
-                {
-                    info.hostname = null;
-                }
-                
-                if ((info.ip == null) ||
-                    (info.ip.length() == 0))
-                {
-                    //not bound to a specific ip
-                    info.ip = "localhost";
-                }
-
                 String name =
                     srv.getStringValue(MetaBase.MD_SERVER_COMMENT);
 
