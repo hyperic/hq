@@ -774,9 +774,6 @@ hyperic.dashboard = hyperic.dashboard || {};
  * @requires hyperic.dashboard.widget
  */
 hyperic.dashboard.widget = {
-    config: {},
-    sheets: {},
-
     /**
      * catches clicks on widget, and passes them on to the handler function 
      * determined by the button's class.
