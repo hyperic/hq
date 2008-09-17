@@ -158,7 +158,6 @@ public class RESTService extends BaseService {
 
                 if (resourceIdParam != null) {
                     // set the resource configuration property
-                    // XXX (astroganov): doesn't work when rid list passed in is empty
                     String ids = "";
                     try {
                         JSONArray arr = new JSONArray(resourceIdParam);
@@ -171,8 +170,12 @@ public class RESTService extends BaseService {
                     } catch (JSONException e) {
                         log.debug(e.getLocalizedMessage());
                     }
-                    config.setValue(Constants.USER_DASHBOARD_ALERT_SUMMARY_GROUPS,
-                                    ids);
+                    if (groupsList.isEmpty()) {
+                        config.unsetValue(Constants.USER_DASHBOARD_ALERT_SUMMARY_GROUPS);
+                    } else {
+                        config.setValue(Constants.USER_DASHBOARD_ALERT_SUMMARY_GROUPS,
+                                        ids);
+                    }
                     update = true;
                 }
 
