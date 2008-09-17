@@ -51,17 +51,14 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
-import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
@@ -71,13 +68,11 @@ import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 
 public class RuntimeReportProcessor {
     private final Log _log = LogFactory.getLog(RuntimeReportProcessor.class);
@@ -148,33 +143,29 @@ public class RuntimeReportProcessor {
         // reported by servers that shouldn't be doing runtime scans.
         // (we don't keep track of which server reports other platforms
         // and servers)
-        ServerValue[] appdefServers;
         RuntimeResourceReport[] serverReports;
         RuntimeResourceReport serverReport;
         AIPlatformValue[] aiplatforms;
         Integer serverId;
 
         serverReports = crrr.getServerReports();
-        appdefServers = new ServerValue[serverReports.length];
+        Server[] appdefServers = new Server[serverReports.length];
         for (int i = 0; i < serverReports.length; i++) {
 
             serverReport = serverReports[i];
 
             // Check that reporting server still exists.
             serverId = new Integer(serverReport.getServerId());
-            Server server = _serverMgr.getServerById(serverId);
-            if (server == null) {
+            appdefServers[i] = _serverMgr.getServerById(serverId);
+            if (appdefServers[i] == null) {
                 _log.error("Error finding existing server: " + serverId);
                 turnOffRuntimeDiscovery(subject, serverId);
-                appdefServers[i] = null;
                 continue;
-            } else {
-                appdefServers[i] = server.getServerValue();
             }
 
             // Even if it does exist, make sure runtime reporting is turned
             // on for the server
-            if (!appdefServers[i].getRuntimeAutodiscovery()) {
+            if (!appdefServers[i].isRuntimeAutodiscovery()) {
                 _log.warn("Server reported a runtime report, but " +
                          "autodiscovery should be off, turning off.");
                 turnOffRuntimeDiscovery(subject, serverId);
@@ -236,7 +227,7 @@ public class RuntimeReportProcessor {
 
     private void mergePlatformIntoInventory(AuthzSubject subject,
                                             AIPlatformValue aiplatform,
-                                            ServerValue reportingServer)
+                                            Server reportingServer)
         throws CreateException, PermissionException, ValidationException,
                ApplicationException {
 
@@ -254,20 +245,18 @@ public class RuntimeReportProcessor {
             _log.info("Creating new platform: " + aiplatform);
             appdefPlatform = _platformMgr.createPlatform(subject, aiplatform);
         }
+        
         // Else platform already exists, don't update it, only update servers
         // that are within it.
-
-        PageList appdefServerList =
-            _serverMgr.getServersByPlatform(subject, appdefPlatform.getId(),
-                                           false, PageControl.PAGE_ALL);
-
         if (aiservers == null)
             return;
 
-        for (int i=0; i<aiservers.length; i++) {
+        List appdefServers = new ArrayList(appdefPlatform.getServers());
+
+        for (int i = 0; i < aiservers.length; i++) {
             if(aiservers[i] != null) {
                 mergeServerIntoInventory(subject, appdefPlatform, aiservers[i],
-                                         appdefServerList, reportingServer);
+                                         appdefServers, reportingServer);
                 Util.flushCurrentSession();
             } else {
                 _log.error("Platform: " + appdefPlatform.getName() + 
@@ -277,28 +266,12 @@ public class RuntimeReportProcessor {
 
         // any servers that we haven't handled, we should mark them
         // as AI-zombies.
-        for (int i = 0; i < appdefServerList.size(); i++) {
-            ServerValue appdefServer = (ServerValue) appdefServerList.get(i);
-
-            // Annoying - serverMgr doesn't support updateServer on 
-            // ServerLightValue objects, so we lookup the full value object.
-            ServerValue serverValue = null;
-            try {
-                serverValue = _serverMgr.getServerById(subject,
-                                                      appdefServer.getId());
-                if (serverValue.getWasAutodiscovered()) {
-                    serverValue.setAutodiscoveryZombie(true);
-                    _serverMgr.updateServer(subject, serverValue);
-                }
-            } catch (AppdefDuplicateNameException e) {
-                _log.warn("Error updating server: " + serverValue + ": " +
-                          e.getMessage());
-            } catch (UpdateException e) {
-                _log.error("Error updating server: " + serverValue, e);
-            } catch (ServerNotFoundException e) {
-                _log.error("Error updating server: " + serverValue, e);
-            }
+        for (Iterator it = appdefServers.iterator(); it.hasNext(); ) {
+            Server server = (Server) it.next();
+            if (server.isWasAutodiscovered())
+                _serverMgr.setAutodiscoveryZombie(server, true);
         }
+        
         _log.info("Completed Merging platform into appdef: " +
                  aiplatform.getFqdn());
     }
@@ -315,7 +288,7 @@ public class RuntimeReportProcessor {
                                           Platform platform,
                                           AIServerValue aiserver,
                                           List appdefServers,
-                                          ServerValue reportingServer)
+                                          Server reportingServer)
         throws CreateException, PermissionException, ValidationException
     {
         Integer serverTypePK;
@@ -340,7 +313,7 @@ public class RuntimeReportProcessor {
         Server server = null;
 
         for (int i = 0; i < appdefServers.size(); i++) {
-            ServerValue appdefServer = (ServerValue) appdefServers.get(i);
+            Server appdefServer = (Server) appdefServers.get(i);
 
             // We can match either on autoinventory identifier, or if
             // this is the reporting server, we can match on its appdef ID
@@ -355,8 +328,7 @@ public class RuntimeReportProcessor {
                          aiserver.getAutoinventoryIdentifier());
                 appdefServerAIID = server.getAutoinventoryIdentifier();
                 if (!appdefServerAIID.equals(aiServerAIID)) {
-                    _log.info("Setting AIID to existing=" +
-                             appdefServerAIID);
+                    _log.info("Setting AIID to existing=" + appdefServerAIID);
                     aiserver.setAutoinventoryIdentifier(appdefServerAIID);
                 }
                 appdefServers.remove(i);
