@@ -1505,7 +1505,13 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         // console.log('starting to play');
         that.cycleCharts();
         if(that.cycleId === null) {
-            that.cycleId = setInterval(that.cycleCharts, parseInt(that.config.interval,10)*1000);
+            /* 
+             * in setInterval, we call an anonymous function instead of that.cycleCharts directly
+             * because setInterval passes the time elapsed into the function it calls, and that confuses
+             * the hell out of cycleCharts, which expects a chartId as an argument. By using an anonymous
+             * function we quietly discard the argument and call cycleCharts without an argument.  
+             */
+            that.cycleId = setInterval(function() { that.cycleCharts(); }, parseInt(that.config.interval,10)*1000, 0);
 
             // display pause button when playing
             that.play_btn.src = '/images/4.0/icons/control_pause.png';
