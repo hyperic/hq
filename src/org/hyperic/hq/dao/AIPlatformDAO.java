@@ -270,18 +270,16 @@ public class AIPlatformDAO extends HibernateDAO
     {
         Map newServers =
             getServersMap(Arrays.asList(aiplatform.getAIServerValues()));
-        p.getAIServers();
+        // XXX, scottmf need to get Platform from AIPlatform
+        // then find a way to correlate the old aiid with the new aiid for
+        // each server
         Collection serverSet = p.getAIServers();
-        Iterator i = serverSet.iterator();
-        while (i.hasNext()) {
+        for (Iterator i = serverSet.iterator(); i.hasNext(); ) {
             AIServer qserver = (AIServer) i.next();
             String aiid = qserver.getAutoinventoryIdentifier();
             AIServerValue aiserver = (AIServerValue)newServers.remove(aiid);
 
-            if ( aiserver != null ) {
-                i.remove();
-
-            } else {
+            if ( aiserver == null ) {
                 // keep the user specified ignored value
                 boolean qIgnored = qserver.getIgnored();
                 qserver.setAIServerValue(qserver.getAIServerValue());
@@ -289,8 +287,7 @@ public class AIPlatformDAO extends HibernateDAO
             }
         }
 
-        i = newServers.values().iterator();
-        while (i.hasNext()) {
+        for (Iterator i=newServers.values().iterator(); i.hasNext(); ) {
             AIServerValue aiserver = (AIServerValue) i.next();
             AIServer ais = new AIServer();
             ais.setAIServerValue(aiserver);

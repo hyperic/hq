@@ -222,6 +222,8 @@ public class AI2AppdefDiff {
         if (_log.isDebugEnabled())
             _log.debug("appdefIps=" + StringUtil.listToString(appdefIps) +
                        " scannedIps=" + StringUtil.listToString(scannedIps));
+        revisedAIplatform.removeAllAIIpValues();
+
         Ip appdefIp = null;
         AIIpValue scannedIp = null;
         Iterator i = scannedIps.iterator();
