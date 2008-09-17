@@ -1437,6 +1437,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public void setAutodiscoveryZombie(Server server, boolean zombie) {
+        server.setAutodiscoveryZombie(zombie);
+    }
+    
+    /**
      * Get a Set of PlatformTypeLocal objects which map to the names
      * as given by the argument.
      */
