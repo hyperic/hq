@@ -12,11 +12,11 @@ function sendCode() {
     },
     load: function(type, data, evt) {
       dojo.byId('result').innerHTML = data.result;
-      dojo.byId('hiberStats').innerHTML = responseObject.hiberStats;
-      dojo.byId('timeStatus').innerHTML = responseObject.timeStatus;
+      dojo.byId('hiberStats').innerHTML = data.hiberStats;
+      dojo.byId('timeStatus').innerHTML = data.timeStatus;
     },
-    error: function(err, msg) {
-      alert('error! ' + err);
+    error: function(type, data, evt) {
+      alert('error! ' + data);
     }
   });
 }
@@ -30,38 +30,49 @@ function chooseTemplate(t) {
     load: function(type, data, evt) {
       dojo.byId('code').value = data.result;
     },
-    error: function(err, msg) {
-      alert('error! ' + err);
+    error: function(type, data, evt) {
+      alert('error! ' + data);
     }
   });
 }
 
 </script>
-
-Templates: 
-<% for(t in templates) { %>
-  <a onclick="chooseTemplate('${t}')">${t}</a> |
-<% } %>
-<br/>
-
-<textarea id="code" cols="120", rows="30">
-</textarea>
-
-<br/>
-<button onclick="sendCode()">Execute</button>
-<input type="checkbox" id="hiberDebug">Hibernate Debugging</input>
-<br/>
-
-<div id='timeStatus'>
-  Status:  Idle
+<div class="gConsoleContainer">
+    <label>Available Templates</label>
+    <fieldset>
+    <% if(templates == null || templates.size == 0 ) { %>
+        There are no templates available.
+    <% } %>
+    <% for(t in templates) { %>
+      <a onclick="chooseTemplate('${t}')">${t}</a> |
+    <% } %>
+    </fieldset>
+    <br/>
+    <label for="code" style="display:block">Code</label>
+    <textarea id="code" rows="30"></textarea>
+    <br/><br/>
+    
+    <div>
+        <a class="buttonGreen" onclick="sendCode()" href="javascript:void(0)"><span>Execute</span></a>
+        <input type="checkbox" id="hiberDebug">Hibernate Debugging</input>
+    </div>
+    <br/>
+    
+    <div id='timeStatus'>
+      Status:  Idle
+    </div>
+    <br/>
+    
+    <label>Hibernate Details</label>
+    <fieldset>
+        <div id='hiberStats'><br/></div>
+    </fieldset>
+    <br/>
+    
+    <label>Result</label>
+    <fieldset>
+        <pre>
+          <div id='result'></div>
+        <pre>
+    </fieldset>
 </div>
-
-<br/>
-<div id='hiberStats'>
-</div>
-
-<h2>Result</h2>
-<pre>
-  <div id='result'>
-  </div>
-<pre>

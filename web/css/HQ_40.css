@@ -2157,4 +2157,33 @@ button span{
     border-right: 1px solid gray;
     border-bottom: 1px solid gray;
 }
-    
+
+/*GConsole*/
+
+.gConsoleContainer pre{
+    border:0px none;
+    background-color:#fff;
+}
+
+.gConsoleContainer fieldset {
+    border:1px solid gray;
+    background-color:#fff;
+    padding:2px 4px;
+    margin:0
+}
+
+.gConsoleContainer legend {
+    font-weight:bold;
+    font-size:1.2em;
+    color:#000
+}
+
+.gConsoleContainer label{
+    display:block;
+    font-size:1.2em;
+    font-weight:bold;
+}
+
+.gConsoleContainer textarea {
+    width:100%
+}
