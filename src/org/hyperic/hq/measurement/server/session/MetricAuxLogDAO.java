@@ -114,11 +114,11 @@ public class MetricAuxLogDAO extends HibernateDAO {
         ArrayList metrics = new ArrayList(maxExprs);
         for (Iterator it=mids.iterator(); it.hasNext(); i++) {
             if (i != 0 && (i % maxExprs) == 0) {
-                metrics.clear();
                 metrics.add(it.next());
                 rtn.addAll(getSession()
                     .createQuery(sql)
                     .setParameterList("metrics", metrics).list());
+                metrics.clear();
             } else  {
                 metrics.add(it.next());
                 continue;
@@ -145,9 +145,27 @@ public class MetricAuxLogDAO extends HibernateDAO {
                                    "where p.auxLog = g and " +
                                          "p.metric.id in (:metrics))";
 
-        getSession().createQuery(hql)
-                    .setInteger("type", GalertAuxLogProvider.INSTANCE.getCode())
-                    .setParameterList("metrics", mids)
-                    .executeUpdate();
+        HQDialect dialect = Util.getHQDialect();
+        int maxExprs;
+        if (-1 == (maxExprs = dialect.getMaxExpressions())) {
+            getSession().createQuery(hql)
+                .setInteger("type", GalertAuxLogProvider.INSTANCE.getCode())
+                .setParameterList("metrics", mids)
+                .executeUpdate();
+            return;
+        }
+        int i=0;
+        ArrayList metrics = new ArrayList(maxExprs);
+        for (Iterator it=mids.iterator(); it.hasNext(); i++) {
+            if (i != 0 && (i % maxExprs) == 0) {
+                metrics.add(it.next());
+                getSession()
+                    .createQuery(hql)
+                    .setParameterList("metrics", metrics).list();
+                metrics.clear();
+            } else {
+                metrics.add(it.next());
+            }
+        }
     }
 }
