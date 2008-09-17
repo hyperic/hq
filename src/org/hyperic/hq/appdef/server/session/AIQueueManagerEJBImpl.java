@@ -194,29 +194,6 @@ public class AIQueueManagerEJBImpl
 
     /**
      * Retrieve the contents of the AI queue.
-     * 
-     * @param showIgnored
-     *            If true, even resources in the AI queue that have the
-     *            'ignored' flag set will be returned. By default, resources
-     *            with the 'ignored' flag set are excluded when the queue is
-     *            retrieved.
-     * @param showPlaceholders
-     *            If true, even resources in the AI queue that are unchanged
-     *            with respect to appdef will be returned. By default, resources
-     *            that are unchanged with respect to appdef are excluded when
-     *            the queue is retrieved.
-     * @return A List of AIPlatformValue objects representing the contents of
-     *         the autoinventory queue.
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public PageList getQueue(AuthzSubject subject, boolean showIgnored,
-                             boolean showPlaceholders, PageControl pc) {
-        return getQueue(subject, showIgnored, showPlaceholders, false, pc);
-    }
-
-    /**
-     * Retrieve the contents of the AI queue.
      * @param showIgnored If true, even resources in the AI queue that have 
      * the 'ignored' flag set will be returned.  By default, resources with
      * the 'ignored' flag set are excluded when the queue is retrieved.
@@ -486,40 +463,6 @@ public class AIQueueManagerEJBImpl
         throws FinderException, PermissionException, ValidationException,
                RemoveException, AIQApprovalException 
     {
-        return processQueue(subject, platformList, serverList, ipList, action, true);
-    } 
-    
-    /**
-     * Process resources in the AI queue (ONLY TO BE USED FOR UNIT TESTING PURPOSES). 
-     *  This can be used to approve resources for inclusion into appdef, to ignore 
-     *  or unignore resources in the queue, or to purge resources from the queue.
-     * @param platformList A List of aiplatform IDs.  This may be
-     * null, in which case it is ignored.
-     * @param ipList A List of aiip IDs.  This may be
-     * null, in which case it is ignored.
-     * @param serverList A List of aiserver IDs.  This may be
-     * null, in which case it is ignored.
-     * @param action One of the AIQueueConstants.Q_DECISION_XXX constants
-     * indicating what to do with the platforms, ips and servers.
-     * @param verifyLiveAgent Flag indicating whether to check for liveness of agent
-     * prior to processing platform. This flag is exposed for unit testing purposes, and
-     * should be set to true in regular operation.
-     *
-     * @return A List of AppdefResource's that were created as a result of
-     * processing the queue.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public List processQueue(AuthzSubject subject,
-                             List platformList,
-                             List serverList,
-                             List ipList,
-                             int action,
-                             boolean verifyLiveAgent)
-        throws FinderException, PermissionException, ValidationException,
-               RemoveException, AIQApprovalException 
-    {
         AuthzSubject s = 
             AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId());
         boolean approved = false;
@@ -531,7 +474,7 @@ public class AIQueueManagerEJBImpl
                                    .pushContainer(AIAudit.newImportAudit(s));
             }
             return _processQueue(subject, platformList, serverList, ipList,
-                                 action, verifyLiveAgent);
+                                 action, true);
         } finally {
             if (approved)
                 AuditManagerEJBImpl.getOne().popContainer(false);

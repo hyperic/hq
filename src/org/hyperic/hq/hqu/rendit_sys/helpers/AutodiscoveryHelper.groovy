@@ -21,7 +21,7 @@ class AutodiscoveryHelper extends BaseHelper {
       * Return a List of {@link AIPlatformValue}s in the queue.
       */
     public List getQueue() {
-        aiqMan.getQueue(user, true, true, PageControl.PAGE_ALL)
+        aiqMan.getQueue(user, true, true, false, PageControl.PAGE_ALL)
     }
 
     /**
