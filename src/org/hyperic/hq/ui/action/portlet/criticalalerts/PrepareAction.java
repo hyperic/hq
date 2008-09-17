@@ -108,30 +108,18 @@ public class PrepareAction extends TilesAction {
 
         pForm.setTitle(dashPrefs.getValue(titleKey, ""));
         
-        try {
-            numberOfAlerts = new Integer(dashPrefs.getValue(countKey));
-        } catch (InvalidOptionException e) {
-            numberOfAlerts =
-                new Integer(dashPrefs.getValue(PropertiesForm.ALERT_NUMBER)); 
-        }
+        numberOfAlerts =
+            new Integer(dashPrefs.getValue(countKey,
+                              dashPrefs.getValue(PropertiesForm.ALERT_NUMBER)));
 
-        try {
-            past = Long.parseLong(dashPrefs.getValue(timeKey));
-        } catch (InvalidOptionException e) {
-            past = Long.parseLong(dashPrefs.getValue(PropertiesForm.PAST));
-        }
+        past = Long.parseLong(dashPrefs.getValue(timeKey,
+                              dashPrefs.getValue(PropertiesForm.PAST)));
 
-        try {
-            priority = dashPrefs.getValue(priorityKey);
-        } catch (InvalidOptionException e) {
-            priority = dashPrefs.getValue(PropertiesForm.PRIORITY);
-        }
+        priority = dashPrefs.getValue(priorityKey,
+                              dashPrefs.getValue(PropertiesForm.PRIORITY));
 
-        try {
-            selectedOrAll = dashPrefs.getValue(selOrAllKey);
-        } catch (InvalidOptionException e) {
-            selectedOrAll = dashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL);
-        }
+        selectedOrAll = dashPrefs.getValue(selOrAllKey,
+                            dashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL));
 
         DashboardUtils.verifyResources(resKey, ctx, dashPrefs, user);
 
