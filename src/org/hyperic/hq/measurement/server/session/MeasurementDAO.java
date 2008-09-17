@@ -448,6 +448,17 @@ public class MeasurementDAO extends HibernateDAO {
         return query.list();
     }
     
+    List findAvailMeasurements(Integer[] tids, Integer[] iids) {
+        String sql = new StringBuilder()
+            .append("select m from Measurement m ")
+            .append("join m.template t ")
+            .append("where m.instanceId in (:iids) AND t.id in (:tids) AND ")
+            .append(ALIAS_CLAUSE).toString();
+        return getSession().createQuery(sql)
+            .setParameterList("iids", iids)
+            .setParameterList("tids", tids).list();
+    }
+
     /**
      * @param List<Integer> of resourceIds return List of Availability 
      * Measurements which are children of the resourceIds

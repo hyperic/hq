@@ -33,6 +33,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1995,7 +1996,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                         boolean useAggressiveRollup) {
         Map rtn =
             getAggDataByMetric(tids, iids, begin, end, useAggressiveRollup);
-        rtn.putAll(getAvailMan().getAggregateData(tids, iids, begin, end));
+        Collection metrics =
+            getMeasurementDAO().findAvailMeasurements(tids, iids);
+        if (metrics.size() > 0) {
+            Integer[] mids = new Integer[metrics.size()];
+            Iterator it = metrics.iterator();
+            for (int i = 0; i < mids.length; i++) {
+                Measurement m = (Measurement) it.next();
+                mids[i] = m.getId();
+            }
+            rtn.putAll(getAvailMan().getAggregateData(mids, begin, end));
+        }
         return rtn;
     }
 
