@@ -2658,8 +2658,8 @@ hyperic.clone_resource_dialog = function(platform_id) {
 
         		if(that.buttons.add_clone_btn.disabled === true)
         		{
-        		    that.buttons.add_clone_btn.disabled.innerHTML = '<img src="/images/arrow_right.gif" alt="select">';
-        			that.buttons.add_clone_btn.disabled.disabled = false;
+        		    that.buttons.add_clone_btn.innerHTML = '<img src="/images/arrow_right.gif" alt="select">';
+        			that.buttons.add_clone_btn.disabled = false;
         		}
 
         		if(that.selected_clone_targets.length == 0)
