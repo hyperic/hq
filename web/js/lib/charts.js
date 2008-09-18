@@ -7824,7 +7824,7 @@ Timeplot.DefaultValueGeometry = function(params) {
     this._gridColor = ("gridColor" in params) ? ((typeof params.gridColor == "string") ? new Timeplot.Color(params.gridColor) : params.gridColor) : null,
     this._gridLineWidth = ("gridLineWidth" in params) ? params.gridLineWidth : 0.5;
     this._axisLabelsPlacement = ("axisLabelsPlacement" in params) ? params.axisLabelsPlacement : "right";
-    this._gridSpacing = ("gridSpacing" in params) ? params.gridStep : 50;
+    this._gridSpacing = ("gridSpacing" in params) ? params.gridSpacing : 50;
     this._gridType = ("gridType" in params) ? params.gridType : "short";
     this._gridShortSize = ("gridShortSize" in params) ? params.gridShortSize : 10;
     this._minValue = ("min" in params) ? params.min : null;
@@ -8207,6 +8207,7 @@ Timeplot.DefaultTimeGeometry = function(params) {
     this._axisLabelsPlacement = ("axisLabelsPlacement" in params) ? params.axisLabelsPlacement : "bottom";
     this._gridStep = ("gridStep" in params) ? params.gridStep : 100;
     this._gridStepRange = ("gridStepRange" in params) ? params.gridStepRange : 20;
+    this._gridSpacing = ("gridSpacing" in params) ? params.gridSpacing : 50;
     this._min = ("min" in params) ? params.min : null;
     this._max = ("max" in params) ? params.max : null;
     this._timeValuePosition =("timeValuePosition" in params) ? params.timeValuePosition : "bottom";
@@ -8408,6 +8409,19 @@ Timeplot.DefaultTimeGeometry.prototype = {
 
         var t = u.cloneValue(this._earliestDate);
 
+        /* horizontal scaling; figure out the multiplier for the grid lines. */
+        var offset = u.cloneValue(this._earliestDate);
+        var dx = 0;
+        var multiplier = 0;
+        while (dx < this._gridSpacing) {
+            multiplier += 1;
+            time.incrementByInterval(offset, unit, this._timeZone);
+            var dx = this.toScreen(u.toNumber(offset));
+        }
+        offset = null;
+        dx = null;
+        /* end horizontal scaling */
+
         do {
             time.roundDownToInterval(t, unit, this._timeZone, 1, 0);
             var x = this.toScreen(u.toNumber(t));
@@ -8437,12 +8451,15 @@ Timeplot.DefaultTimeGeometry.prototype = {
             if (x > 0) { 
                 grid.push({ x: x, label: l });
             }
-            time.incrementByInterval(t, unit, this._timeZone);
+            for(i = 0; i < multiplier; i++)
+            {
+                time.incrementByInterval(t, unit, this._timeZone);
+            }
         } while (t.getTime() < this._latestDate.getTime());
         
         return grid;
     },
-        
+
     /*
      * Update the values that are used by the paint function so that
      * we don't have to calculate them at every repaint.

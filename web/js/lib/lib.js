@@ -707,12 +707,18 @@ hyperic.widget = hyperic.widget || {};
                 {
                     that.dataSource = new Timeplot.DefaultEventSource();
                     var pi = [Timeplot.createPlotInfo( {
-                        id : "plot1", dataSource : new Timeplot.ColumnSource(that.dataSource, 1), valueGeometry : new Timeplot.DefaultValueGeometry( {
-                            gridColor : "#000000", axisLabelsPlacement : "left" }
-                        ), timeGeometry : new Timeplot.DefaultTimeGeometry( {
-                            gridColor : new Timeplot.Color("#DDDDDD"), axisLabelsPlacement : "bottom" }
-                        ), showValues : true, lineColor : "#00EB08", roundValues:false, //00EB08 89EB0F
-                        fillColor : "#00B93A" //#E6FCCA
+                        id : "plot1", 
+                        dataSource    : new Timeplot.ColumnSource(that.dataSource, 1), 
+                        valueGeometry : new Timeplot.DefaultValueGeometry( { 
+                                                gridColor : "#000000", 
+                                                axisLabelsPlacement : "left" }), 
+                        timeGeometry  : new Timeplot.DefaultTimeGeometry( { 
+                                                gridColor : new Timeplot.Color("#DDDDDD"), 
+                                                axisLabelsPlacement : "bottom"} ), 
+                        showValues    : true, 
+                        lineColor     : "#00EB08", 
+                        roundValues   : false, //00EB08 89EB0F
+                        fillColor     : "#00B93A" //#E6FCCA
                         }
                     )];
                     that.chart = Timeplot.create(dojo11.byId("widget_chart"), pi);
@@ -731,12 +737,18 @@ hyperic.widget = hyperic.widget || {};
 
                     that.dataSource = new Timeplot.DefaultEventSource();
                     var pi = [Timeplot.createPlotInfo( {
-                        id : "plot1", dataSource : new Timeplot.ColumnSource(that.dataSource, 1), valueGeometry : new Timeplot.DefaultValueGeometry( {
-                            gridColor : "#000000", axisLabelsPlacement : "left" }
-                        ), timeGeometry : new Timeplot.DefaultTimeGeometry( {
-                            gridColor : new Timeplot.Color("#DDDDDD"), axisLabelsPlacement : "bottom" }
-                        ), showValues : true, lineColor : "#00EB08", roundValues:false, //00EB08 89EB0F
-                        fillColor : "#00B93A" //#E6FCCA
+                        id            : "plot1", 
+                        dataSource    : new Timeplot.ColumnSource(that.dataSource, 1), 
+                        valueGeometry : new Timeplot.DefaultValueGeometry( {
+                                                gridColor : "#000000", 
+                                                axisLabelsPlacement : "left" } ), 
+                        timeGeometry  : new Timeplot.DefaultTimeGeometry( {
+                                                gridColor : new Timeplot.Color("#DDDDDD"), 
+                                                axisLabelsPlacement : "bottom"}), 
+                        showValues    : true, 
+                        lineColor     : "#00EB08", 
+                        roundValues   : false, //00EB08 89EB0F
+                        fillColor     : "#00B93A" //#E6FCCA
                         }
                     )];
                     that.chart = Timeplot.create(dojo11.byId("widget_chart"), pi);
