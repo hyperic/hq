@@ -665,8 +665,16 @@ hyperic.widget = hyperic.widget || {};
     var that = this;
     that.subscriptions=[];
     that.create = function(node, kwArgs) {
+
+        if(kwArgs.url)
+        {
+            var template = '<div class="chartCont"> <h3 class="cTitle"><a href="'+ kwArgs.url +'">' + kwArgs.name + '</a></h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
+        }
+        else
+        {
+            var template = '<div class="chartCont"> <h3 class="cTitle">' + kwArgs.name + '</h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
+        }
         
-        var template = '<div class="chartCont"> <h3 class="cTitle">' + kwArgs.name + '</h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
         that.template = template;
         // that.tabid = tabid;
         that.node = dojo11.byId(node);
