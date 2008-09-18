@@ -59,7 +59,7 @@ dojo.addOnLoad( function(){
 </script>
 
 <div dojoType="TabContainer" id="mainTabContainer" 
-     style="width: 100%; height:500px;">
+     style="width: 100%; height:500px; position: relative; z-index: 1;">
   <div dojoType="ContentPane" label="Alerts">
     <div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">
       <div style="float:left;width:18%;margin-right:10px;">
