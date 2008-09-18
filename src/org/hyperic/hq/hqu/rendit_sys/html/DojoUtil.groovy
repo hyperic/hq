@@ -520,14 +520,13 @@ class DojoUtil {
             setTimeout("${idVar}_autoRefresh()", ${params.refresh * 1000});
             """   
         }
-        
-        res << "</script>"
-        
-        res << """
-        <div class="pageCont">
-          <div class="tableTitleWrapper">
-            <div id="tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
-            ${titleHtml}
+	res << "</script>"
+	    
+	res << """
+	<div id="${id}_pageCont" class="pageCont">
+	  <div id="${id}_tableTitleWrapper" class="tableTitleWrapper">
+            <div id="${id}_tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
+            <span id="${id}_titleHtml">${titleHtml}</span>
           </div>
           <div id="${idVar}_noValues" style="float: left; padding-top:3px;padding-right:15px;font-weight:bold;font-size:12px;display:none;">There isn't any information currently</div>
           <div style="${pageControlStyle}">
