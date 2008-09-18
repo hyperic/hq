@@ -28,6 +28,8 @@
 
     <attribute name="Properties">
 
+      hq.plugins.responsetime.disable=true
+
       triggers = \
         org.hyperic.hq.bizapp.server.trigger.conditional.MeasurementThresholdTrigger, \
         org.hyperic.hq.bizapp.server.trigger.conditional.ControlEventTrigger, \
@@ -38,6 +40,7 @@
         org.hyperic.hq.bizapp.server.trigger.conditional.ConfigChangedTrigger
 
       actions =
+
     </attribute>
   </mbean>
 
