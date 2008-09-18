@@ -1164,6 +1164,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
 
     that.sheets = {};
     that.sheets.loading = dojo11.query('.loading',node)[0];
+    that.sheets.error_loading = dojo11.query('.error_loading',node)[0];
     that.sheets.instructions = dojo11.query('.instructions',node)[0];
     that.sheets.config = dojo11.query('.config',node)[0];
     that.sheets.content = dojo11.query('.content',node)[0];
@@ -1519,7 +1520,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
              * the hell out of cycleCharts, which expects a chartId as an argument. By using an anonymous
              * function we quietly discard the argument and call cycleCharts without an argument.  
              */
-            that.cycleId = setInterval(function() { that.cycleCharts(); }, parseInt(that.config.interval,10)*1000, 0);
+            that.cycleId = setInterval(function() { that.cycleCharts(); }, parseInt(that.config.interval,10)*1000);
 
             // display pause button when playing
             that.play_btn.src = '/images/4.0/icons/control_pause.png';
@@ -1587,9 +1588,15 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 }
             },
             error: function(data){
+                that.swapSheets('error_loading',
+                    function()
+                    {
+                        // try again after a minute.
+                        that.fetchChartsCycleId = setInterval(that.fetchAndPlayCharts, 60000);
+                    });
                 console.debug("An error occurred fetching charts: ", data);
             },
-            timeout: 2000
+            timeout: 30000
         });
     };
 
@@ -1609,7 +1616,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             error: function(data){
                 console.debug("An error occurred fetching charts config ", data);
             },
-            timeout: 2000
+            timeout: 30000
         });
     };
 
@@ -1634,7 +1641,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             error: function(data){
                 console.debug("An error occurred fetching charts config ", data);
             },
-            timeout: 2000
+            timeout: 20000
         });
     };
 
