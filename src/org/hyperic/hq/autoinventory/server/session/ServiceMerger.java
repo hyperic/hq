@@ -3,6 +3,7 @@ package org.hyperic.hq.autoinventory.server.session;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -31,6 +32,7 @@ class ServiceMerger implements ZeventListener {
     public static final int BATCH_SIZE = 30;
     
     private static final Log _log = LogFactory.getLog(ServiceMerger.class);
+    private static final Semaphore _sem = new Semaphore(4);
     
     /**
      * Mapping of (String)agentToken onto (Integer) of # of events in the
@@ -41,6 +43,18 @@ class ServiceMerger implements ZeventListener {
     
     
     public void processEvents(List events) {
+        try {
+            _sem.acquire();
+        } catch (InterruptedException e) {
+            _log.warn("Error while acquiring mergeServices Semaphore", e);
+        }
+        final boolean debug = _log.isDebugEnabled();
+        long started = -1;
+        if (debug) {
+            started = System.currentTimeMillis();
+            _log.debug("Starting zevent service merger for " + events.size() + 
+                       "events");
+        }
         AutoinventoryManagerLocal aiMan = AutoinventoryManagerEJBImpl.getOne();
         events = new ArrayList(events); // Copy, since it's immutable
         List batch = new ArrayList(BATCH_SIZE);
@@ -69,6 +83,12 @@ class ServiceMerger implements ZeventListener {
                 ServiceMergeInfo sInfo = (ServiceMergeInfo)i.next();
                 decrementWorkingCache(sInfo.agentToken);
             }
+        }
+        _sem.release();
+        if (debug) {
+            long now = System.currentTimeMillis();
+            _log.debug("zevent service merger took " + ((now - started)/1000) + 
+                       " seconds");
         }
     }
 
