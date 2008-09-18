@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
+import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
@@ -150,7 +151,7 @@ public class MetricAuxLogDAO extends HibernateDAO {
         if (-1 == (maxExprs = dialect.getMaxExpressions())) {
             getSession().createQuery(hql)
                 .setInteger("type", GalertAuxLogProvider.INSTANCE.getCode())
-                .setParameterList("metrics", mids)
+                .setParameterList("metrics", mids, new IntegerType())
                 .executeUpdate();
             return;
         }
@@ -159,9 +160,10 @@ public class MetricAuxLogDAO extends HibernateDAO {
         for (Iterator it=mids.iterator(); it.hasNext(); i++) {
             if (i != 0 && (i % maxExprs) == 0) {
                 metrics.add(it.next());
-                getSession()
-                    .createQuery(hql)
-                    .setParameterList("metrics", metrics).list();
+                getSession().createQuery(hql)
+                    .setInteger("type", GalertAuxLogProvider.INSTANCE.getCode())
+                    .setParameterList("metrics", metrics, new IntegerType())
+                    .executeUpdate();
                 metrics.clear();
             } else {
                 metrics.add(it.next());
