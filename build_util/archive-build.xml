@@ -15,22 +15,22 @@
     <!-- Roll platform specific tarballs -->
     <antcall target="roll-platform-agent-bundle">
       <param name="jre-file" value="amd64-linux-jre-1_5.tar.gz"/>
-      <param name="archive-suffix" value="amd64-linux"/>
+      <param name="archive-suffix" value="x86_64-linux"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
       <param name="jre-file" value="amd64-linux-jre-1_5.tar.gz"/>
-      <param name="archive-suffix" value="amd64-linux"/>
+      <param name="archive-suffix" value="x86_64-linux"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-agent-bundle">
       <param name="jre-file" value=""/>
-      <param name="archive-suffix" value="apple-darwin"/>
+      <param name="archive-suffix" value="apple-osx"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
       <param name="jre-file" value=""/>
-      <param name="archive-suffix" value="apple-darwin"/>
+      <param name="archive-suffix" value="apple-osx"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-agent-bundle">
