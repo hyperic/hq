@@ -21,7 +21,7 @@ class AutodiscoveryController extends BaseController {
         String fqdn = params.getOne('fqdn')
 
         def list = AIQMan.one.getQueue(user.valueObject, true, true, 
-                                       PageControl.PAGE_ALL)
+                                       false, PageControl.PAGE_ALL)
 
         List matching = getMatchingPlatforms(list, fqdn)
 
@@ -57,7 +57,7 @@ class AutodiscoveryController extends BaseController {
         AIQueueManagerLocal aiMan = AIQMan.one
 
         def list = aiMan.getQueue(user.valueObject, true, true, 
-                                  PageControl.PAGE_ALL)
+                                  false, PageControl.PAGE_ALL)
 
         List matching = getMatchingPlatforms(list, fqdn)
 
