@@ -62,7 +62,7 @@
                     td1.setAttribute("id", (mList[i].resource));
 
                     if (mList[i].resourceName) {
-                        var short_name = (mList[i].resourceName.length > 37) ? mList[i].resourceName.substring(0,37) + '&hellip;' : mList[i].resourceName;
+                        var short_name = (mList[i].resourceName.length > 20) ? mList[i].resourceName.substring(0,20) + '&hellip;' : mList[i].resourceName;
                         td1.innerHTML = '<a href="' + resUrl + mList[i].resourceType + urlColon + mList[i].resourceId + '" title="'+ mList[i].resourceName +'">'+ short_name +'</a>';
                     }
 
@@ -206,7 +206,7 @@
                 td4.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlertLeft");
 
                 if (aList[i].resourceName) {
-                    td4.innerHTML = (aList[i].resourceName.length > 37) ? '<abbr title="' + aList[i].resourceName + '">' + aList[i].resourceName.substring(0,37) + '&hellip;</abbr>' : aList[i].resourceName;
+                    td4.innerHTML = (aList[i].resourceName.length > 20) ? '<abbr title="' + aList[i].resourceName + '">' + aList[i].resourceName.substring(0,20) + '&hellip;</abbr>' : aList[i].resourceName;
                 }
                 tr.appendChild(td5);
                 td5.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
@@ -450,7 +450,7 @@
                 tr.appendChild(td1);
                 td1.setAttribute((document.all ? 'className' : 'class'), "resource");
                 if (metricValues.values[i].resourceName) {
-                    var short_name = (metricValues.values[i].resourceName.length > 37) ? metricValues.values[i].resourceName.substring(0,37) + '&hellip;' : metricValues.values[i].resourceName;
+                    var short_name = (metricValues.values[i].resourceName.length > 20) ? metricValues.values[i].resourceName.substring(0,20) + '&hellip;' : metricValues.values[i].resourceName;
                     td1.innerHTML = '<a href="' + resUrl + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId + '" title="'+ metricValues.values[i].resourceName +'">'+ short_name +'</a>';
                 }
 
@@ -524,7 +524,7 @@
                     td1.setAttribute("id", (fList[i].resourceName));
 
                     if (fList[i].resourceName && fList[i].resourceId && fList[i].resourceTypeId) {
-                        var short_name = (fList[i].resourceName.length > 37) ? fList[i].resourceName.substring(0,37) + '&hellip;' : fList[i].resourceName;
+                        var short_name = (fList[i].resourceName.length > 20) ? fList[i].resourceName.substring(0,20) + '&hellip;' : fList[i].resourceName;
                         td1.innerHTML = '<a href="' + resUrl + fList[i].resourceTypeId + urlColon + fList[i].resourceId + '" title="'+ fList[i].resourceName +'">'+ short_name +'</a>';
                     } else {
                         td1.innerHTML = "&nbsp;";
