@@ -69,9 +69,9 @@ dojo.addOnLoad( function(){
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span>${l.Show}:</span>
               <div>
-              <label><input type="radio" id="notFixed" name="show" value="notfixed" onchange="refreshAlertTables()"> ${l.NotFixed}</label><br>
-              <label><input type="radio" id="escOnly" name="show" value="inescalation" onchange="refreshAlertTables()"> ${l.InEscalation}</label><br>
-              <label><input type="radio" id="all" name="show" value="all" checked="checked" onchange="refreshAlertTables()"> ${l.All}</label>
+                <input type="radio" id="notFixed" name="show" value="notfixed" onclick="refreshAlertTables()"><label for="notFixed">${l.NotFixed}</label><br>
+                <input type="radio" id="escOnly" name="show" value="inescalation" onclick="refreshAlertTables()"><label for="escOnly">${l.InEscalation}</label><br>
+                <input type="radio" id="all" name="show" value="all" checked="checked" onclick="refreshAlertTables()"><label for="all">${l.All}</label>
               </div>          
             </div>
 
