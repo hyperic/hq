@@ -177,25 +177,11 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         return getMeasurementDAO().create(instanceId, mt, dsn, interval);
     }
 
-    private void sendAgentSchedule(final Serializable obj) {
+    private void sendAgentSchedule(AppdefEntityID appID) {
         // Sending of the agent schedule should only occur once the current
         // transaction is completed.
-        try {
-            HQApp.getInstance().addTransactionListener(new TransactionListener()
-            {
-                public void beforeCommit() {
-                }
-
-                public void afterCommit(boolean success) {
-                    if (obj != null) {
-                        Messenger sender = new Messenger();
-                        sender.sendMessage("queue/agentScheduleQueue", obj);
-                    }
-                }
-            });
-        } catch (Throwable t) {
-            log.error("Unable to send agent schedule post commit", t);
-        }
+        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(appID);
+        ZeventManager.getInstance().enqueueEventAfterCommit(event);
     }
 
     /**

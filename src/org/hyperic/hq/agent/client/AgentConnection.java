@@ -117,7 +117,7 @@ public class AgentConnection {
         AgentStreamPair sPair;
 
         // XXX: DEBUG: Print out commands made to agents
-        _log.info(_agentAddress + " -> " + cmdName);
+        _log.info(_agentAddress + ":" + _agentPort + " -> " + cmdName);
         sPair = this.sendCommandHeaders(cmdName, cmdVersion, arg);
         return this.getCommandResult(sPair);
     }

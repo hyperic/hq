@@ -106,6 +106,7 @@ public class SRNManagerEJBImpl extends SessionEJB
             Collection entities =
                 getScheduleRevNumDAO().getMinIntervals();
             _log.info("Fetched " + entities.size() + " intervals.");
+            final boolean debug = _log.isDebugEnabled();
             for (Iterator i = entities.iterator(); i.hasNext(); ) {
                 Object[] ent = (Object[])i.next();
                 SrnId id = new SrnId(((Integer)ent[0]).intValue(),
@@ -118,8 +119,10 @@ public class SRNManagerEJBImpl extends SessionEJB
                                 ((Integer)ent[1]).intValue());
                     cache.put(srn);
                 }
-                _log.debug("Setting min interval to " +
-                           ((Long)ent[2]).longValue() + " for ent " + id);
+                if (debug) {
+                    _log.debug("Setting min interval to " +
+                               ((Long)ent[2]).longValue() + " for ent " + id);
+                }
                 srn.setMinInterval(((Long)ent[2]).longValue());
             }
         }
@@ -166,10 +169,14 @@ public class SRNManagerEJBImpl extends SessionEJB
         
         SrnId id = new SrnId(aid.getType(), aid.getID());
         ScheduleRevNum srn = dao.get(id);
+        final boolean debug = _log.isDebugEnabled();
 
         // Create the SRN if it does not already exist.
         if (srn == null) {
             // Create it
+            if (debug) {
+                _log.debug("Creating SRN for appdef id=" + aid.getID());
+            }
             srn = dao.create(aid.getType(), aid.getID());
             cache.put(srn);
             return srn.getSrn();
@@ -178,6 +185,9 @@ public class SRNManagerEJBImpl extends SessionEJB
         // Update SRN
         synchronized(srn) {
             int newSrn = srn.getSrn() + 1;
+            if (debug) {
+                _log.debug("Updating SRN for "+ aid + " to " + newSrn);
+            }
             srn.setSrn(newSrn);
 
             if (newMin > 0 && newMin < srn.getMinInterval()) {
@@ -196,7 +206,6 @@ public class SRNManagerEJBImpl extends SessionEJB
 
             cache.put(srn);
         }
-        _log.debug("Updated SRN for "+ aid + " to " + srn.getSrn());
         return srn.getSrn();
     }
 
@@ -211,6 +220,7 @@ public class SRNManagerEJBImpl extends SessionEJB
     public Collection reportAgentSRNs(SRN[] srns) {
         SRNCache cache = SRNCache.getInstance();
         HashSet nonEntities = new HashSet();
+        final boolean debug = _log.isDebugEnabled();
 
         for (int i = 0; i < srns.length; i++) {
             ScheduleRevNum srn = cache.get(srns[i].getEntity());
@@ -231,18 +241,22 @@ public class SRNManagerEJBImpl extends SessionEJB
                         // If the last reported time is less than an
                         // interval ago it could be that we just rescheduled
                         // the agent, so let's not panic yet
-                        _log.debug("Ignore out-of-date SRN for grace " +
-                                   "period of " + srn.getMinInterval());
+                        if (debug) {
+                            _log.debug("Ignore out-of-date SRN for grace " +
+                                       "period of " + srn.getMinInterval());
+                        }
                         break;
                     }
 
                     // SRN out of date, reschedule the metrics for the
                     // given resource.
-                    _log.debug("SRN value for " + srns[i].getEntity() +
-                               " is out of date, agent reports " +
-                               srns[i].getRevisionNumber() +
-                               " but cached is " + srn.getSrn() +
-                               " rescheduling metrics..");
+                    if (debug) {
+                        _log.debug("SRN value for " + srns[i].getEntity() +
+                                   " is out of date, agent reports " +
+                                   srns[i].getRevisionNumber() +
+                                   " but cached is " + srn.getSrn() +
+                                   " rescheduling metrics..");
+                    }
                     AgentScheduleSynchronizer.scheduleBuffered(srns[i].getEntity());
                 } 
                 srn.setLastReported(current);
@@ -290,6 +304,7 @@ public class SRNManagerEJBImpl extends SessionEJB
         ArrayList toReschedule = new ArrayList();
 
         long current = System.currentTimeMillis();
+        final boolean debug = _log.isDebugEnabled();
         for (Iterator i = srnIds.iterator(); i.hasNext(); ) {
 
             SrnId id = (SrnId)i.next();
@@ -297,15 +312,17 @@ public class SRNManagerEJBImpl extends SessionEJB
 
             long maxInterval = intervals * srn.getMinInterval();
             long curInterval = current - srn.getLastReported();
-            if (_log.isDebugEnabled()) {
+            if (debug) {
                 _log.debug("Checking " + id.getAppdefType() + ":" +
                            id.getInstanceId() + ", last heard from " +
                            curInterval + "ms ago (max=" + maxInterval + ")");
             }
 
             if (curInterval > maxInterval) {
-                _log.debug("Reschedule " + id.getAppdefType() + ":" +
-                           id.getInstanceId());
+                if (debug) {
+                    _log.debug("Reschedule " + id.getAppdefType() + ":" +
+                               id.getInstanceId());
+                }
                 toReschedule.add(srn);
             }
         }

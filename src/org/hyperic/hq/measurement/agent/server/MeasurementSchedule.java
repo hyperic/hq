@@ -186,15 +186,18 @@ class MeasurementSchedule {
         boolean toWrite = false, found = false;
 
         synchronized(this.srnList){
+            final boolean debug = log.isDebugEnabled();
             for(Iterator i=this.srnList.iterator(); i.hasNext(); ){
                 SRN srn = (SRN) i.next();
 
                 if(found = srn.getEntity().equals(ent)){
                     if (toWrite =
                         srn.getRevisionNumber() != updSRN.getRevisionNumber()) {
-                        this.log.debug("Updating SRN for " + ent + 
-                                       " from " + srn.getRevisionNumber() +
-                                       " to " + updSRN.getRevisionNumber());
+                        if (debug) {
+                            log.debug("Updating SRN for " + ent + 
+                                      " from " + srn.getRevisionNumber() +
+                                      " to " + updSRN.getRevisionNumber());
+                        }
                         srn.setRevisionNumber(updSRN.getRevisionNumber());
                     }
                     break;
