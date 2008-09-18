@@ -1713,9 +1713,11 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     var that = this;
 
 	that.max_alerts = 20;
+	that.cycleId = null;
 
     that.sheets = {};
     that.sheets.loading = dojo11.query('.loading',node)[0];
+    that.sheets.error_loading = dojo11.query('.error_loading',node)[0];
     that.sheets.instructions = dojo11.query('.instructions',node)[0];
     that.sheets.config = dojo11.query('.config',node)[0];
     that.sheets.content = dojo11.query('.content',node)[0];
@@ -1887,6 +1889,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=alert_summary&config=true&rid=[" + that.selected_alert_groups + "]",
             handleAs: 'json',
+            preventCache: true,
             load: function(data){
                 that.selected_alert_groups = data.rid || that.selected_alert_groups;
                 that.alert_groups.data = data.avail || that.alert_groups.data;
@@ -2088,6 +2091,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         return dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=alert_summary",
             handleAs: 'json',
+            preventCache: true,
             load: function(data){
                 that.alert_group_status = data;
                 // that.alert_group_status = {
@@ -2104,12 +2108,32 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                 //             };
             },
             error: function(data){
+            	that.swapSheets('error_loading');
                 console.debug("An error occurred fetching alert groups status... ", data);
             },
-            timeout: 20000
+            timeout: 45000
         });
     };
 
+    that.fetchAlertGroupStatusCallback = function()
+    {    	
+    	if (that.currentSheet != 'error_loading') {
+	    	that.populateAlertGroups();
+	        if(that.selected_alert_groups.length > 0)
+	        {
+	            that.swapSheets('content',
+	                function()
+	                {
+	            		that.repaintAlertGroups();
+	                });
+	        }
+	        else
+	        {
+	            that.swapSheets('instructions');
+	        }
+    	}
+    }
+    
     /**
      * fetch the stored selected alert groups for the dashboard widget
      * the server should return a json array of the alert group id's
@@ -2123,6 +2147,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         return dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=alert_summary&config=true",
             handleAs: 'json',
+            preventCache: true,
             load: function(data){
                 that.selected_alert_groups = data.rid || [];
                 that.alert_groups.data = data.data || that.alert_groups.data;
@@ -2145,9 +2170,10 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                 // // that.alert_groups.count = data.count || that.alert_groups.count;
             },
             error: function(data){
+            	that.swapSheets('error_loading');
                 console.debug("An error occurred fetching alert group config... ", data);
             },
-            timeout: 2000
+            timeout: 45000
         });
     };
 
@@ -2170,22 +2196,25 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         
         that.fetchConfig().addCallback(
             function() {
-                that.fetchAlertGroupStatus().addCallback(
-                    function() {
-                        that.populateAlertGroups();
-                        if(that.selected_alert_groups.length > 0)
-                        {
-                            that.swapSheets('content',
-                                function()
-                                {
-                                    that.paintAlertGroups();
-                                });
-                        }
-                        else
-                        {
-                            that.swapSheets('instructions');
-                        }
-                    });
+                if (that.currentSheet != 'error_loading') {
+	            	that.fetchAlertGroupStatus().addCallback(
+	                    function() {
+		                    that.fetchAlertGroupStatusCallback();
+	                        // periodically refresh the status
+		                    that.cycleId = setInterval(
+	                        		function() {
+	        	                    	if (that.currentSheet == 'error_loading') {
+	        	                    		that.swapSheets('loading');
+	        	                    	}
+	                        			that.fetchAlertGroupStatus().addCallback(
+	                    	                    function() {
+	                    	                    	that.fetchAlertGroupStatusCallback();
+	                    	                    }
+	                    	            );
+	                        		}, 
+	                    	        60000);
+	                    });
+                }
             });
     }
 };
