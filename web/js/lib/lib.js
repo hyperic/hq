@@ -2638,18 +2638,24 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
 	that.init();
 };
 
-hyperic.clone_resource_dialog = function(platform_id) {
+hyperic.clone_resource_dialog = function(title_name, platform_id) {
     var that = this;
     that.dialog = null;
+    that.title_name = title_name;
     that.data = {};
 	that.buttons = {};
 	that.platform_id = platform_id || null;
+    that.sheets = {};
+    that.sheets.clone_instructions = dojo11.byId('clone_instructions');
+    that.sheets.clone_queue_status = dojo11.byId('clone_queue_status');
+    that.sheets.clone_error_status = dojo11.byId('clone_error_status');
+    that.currentSheet = 'clone_instructions';
 
     that.available_clone_targets = new hyperic.selectBox(dojo11.byId('available_clone_targets'));
     that.selected_clone_targets = new hyperic.selectBox(dojo11.byId('selected_clone_targets'));
     
     that.searchbox = dojo11.byId('cln_search');
-
+    
     that.init = function() {
 	    if(!that.dialog){
 			var pane = dojo11.byId('clone_resource_dialog');
@@ -2658,7 +2664,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
 				id: "clone_resource_dialog",
 				refocus: true,
 				autofocus: false,
-				title: "Clone Server"
+				title: that.title_name
 			},pane);
 		}
 
@@ -2779,6 +2785,11 @@ hyperic.clone_resource_dialog = function(platform_id) {
         that.selected_clone_targets.reset();
         that.available_clone_targets.reset();
         that.populateCloneTargets();
+        
+        // reset sheets
+        if (that.currentSheet == 'clone_error_status') {
+        	that.swapSheets('clone_instructions');
+        }
     };
 
     that.clone_action = function() {
@@ -2790,7 +2801,7 @@ hyperic.clone_resource_dialog = function(platform_id) {
         }
         if(clone_target_ids.length > 0)
         {
-            dojo11.xhrPost( {
+        	dojo11.xhrPost( {
                 url: "/api.shtml",
                 content: {v: "1.0", s_id: "clone_platform", pid: that.platform_id, clone: "true", ctid: "[" + clone_target_ids.toString() + "]"},
                 handleAs: 'json',
@@ -2800,14 +2811,26 @@ hyperic.clone_resource_dialog = function(platform_id) {
                     console.debug("An error occurred queueing platforms for cloning " + that.platform_id, data);
                 }
             });
-			that.dialog.hide();
+        	that.buttons.create_btn.disabled = true;
+        	that.swapSheets('clone_queue_status');
+        	setTimeout('clone_platform_' + that.platform_id + '.dialog.hide()', 5000);
         }
         else
         {
-            that.dialog.onCancel();
+            that.swapSheets('clone_error_status');
         }
     };
 
+    that.swapSheets = function(to) {
+        var fromSheet = that.sheets[that.currentSheet];
+        var toSheet = that.sheets[to];
+        
+        fromSheet.style.display = 'none'; 
+        toSheet.style.display = 'block'; 
+
+        that.currentSheet = to;
+    }
+    
 	that.init();
 };
 

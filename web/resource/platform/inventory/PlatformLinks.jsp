@@ -73,10 +73,19 @@
       <tiles:put name="resource" beanName="resource"/>
     </tiles:insert>
     <br>
-    <a href="javascript:clone_platform_<c:out value="${resource.id}"/>.dialog.show();">Clone Platform</a>
+    <a href="javascript:clone_platform_<c:out value="${resource.id}"/>.dialog.show();"><fmt:message key="resource.platform.clone.Title"/></a>
+	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
 </td></tr></table>
 
 <div id ="clone_resource_dialog" style="display:none;">
+	<div id="clone_instructions" style="display: none">
+	</div>
+    <div id="clone_queue_status" class="confirmationPanel" style="display: none">
+		<fmt:message key="resource.platform.clone.queue.status"/>
+	</div>
+    <div id="clone_error_status" class="errorPanel" style="display: none">
+		<fmt:message key="resource.platform.clone.error.resource.min"/>
+	</div>
     <form action="" id="clone_resource_dialog_form" onsubmit="javascript: return false;">
         <fieldset style="width: 450px; text-align: center;">
             <legend>Choose clone target resources</legend>
@@ -111,7 +120,7 @@
 
     var clone_platform_<c:out value="${resource.id}"/> = null;
     dojo11.addOnLoad(function(){
-        clone_platform_<c:out value="${resource.id}"/> = new hyperic.clone_resource_dialog(<c:out value="${resource.id}"/>);
+        clone_platform_<c:out value="${resource.id}"/> = new hyperic.clone_resource_dialog('<fmt:message key="resource.platform.clone.Title"/>', <c:out value="${resource.id}"/>);
     });
 </script>
 </c:if>

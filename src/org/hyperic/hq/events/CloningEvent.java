@@ -56,8 +56,9 @@ public class CloningEvent extends ResourceLogEvent
 
         master = id;
         ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE);
-        messageFormat = new MessageFormat(bundle.getString("event.clone.platform.message.detail"));
         setSource(bundle.getString("event.clone.platform.subject"));
+        setMessage(bundle.getString("event.clone.platform.message.start"));
+        messageFormat = new MessageFormat(bundle.getString("event.clone.platform.message.end"));
     }
     
     public void addClonedResource(AppdefEntityID clonedId) {
@@ -69,7 +70,7 @@ public class CloningEvent extends ResourceLogEvent
     	return Collections.unmodifiableCollection(clonedResources);
     }
     
-    private void logMessage() {
+    public void logMessage() {
     	StringBuffer sb = new StringBuffer();
     	messageFormat.format(
     					new String[] {
@@ -77,7 +78,8 @@ public class CloningEvent extends ResourceLogEvent
     							Integer.toString(getClonedResources().size())},
     					sb, null);
     	
-        setMessage(sb.toString());
+    	setTimestamp(System.currentTimeMillis());
+    	setMessage(sb.toString());
     }
     
     public String toString() {
