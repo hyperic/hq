@@ -114,6 +114,17 @@ class GalertLogDAO
         return new PageList();
     }
 
+    List findUnfixedByTimeWindow(ResourceGroup g, long begin, long end) {
+        final String tsProp = "timestamp";
+        return createCriteria()
+                .createAlias("alertDef", "d")
+                .add(Restrictions.eq("fixed", Boolean.FALSE))
+                .add(Restrictions.eq("d.group", g))
+                .add(Restrictions.ge(tsProp, new Long(begin)))
+                .add(Restrictions.le(tsProp, new Long(end)))
+                .list();
+    }
+
     List findByCreateTime(long startTime, long endTime, int count) {
         Criteria criteria = createCriteria()
             .add(Expression.between("timestamp", new Long(startTime), 

@@ -382,6 +382,15 @@ public class GalertManagerEJBImpl
     }
 
     /**
+     * @ejb:interface-method  
+     */
+    public List findUnfixedAlertLogsByTimeWindow(ResourceGroup group,
+                                                     long begin, long end) 
+    {
+        return _logDAO.findUnfixedByTimeWindow(group, begin, end);
+    }
+
+    /**
      * @see findAlerts
      * @return a list of {@link Escalatable}s
      * @ejb:interface-method

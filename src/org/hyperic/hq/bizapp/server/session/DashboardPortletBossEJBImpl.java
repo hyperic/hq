@@ -214,21 +214,15 @@ public class DashboardPortletBossEJBImpl
                                   long range)
         throws PermissionException
     {
-        List galertDefs = _gaMan.findAlertDefs(group, PageControl.PAGE_ALL);
         String rtn = ALERT_OK;
-        if (galertDefs.size() == 0) {
-            return ALERT_UNKNOWN;
-        }
         long now = System.currentTimeMillis();
         long begin = now - range;
-        PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED);
-        List galerts = _gaMan.findAlertLogsByTimeWindow(group, begin, now, pc);
-        for (Iterator i=galerts.iterator(); i.hasNext(); ) {
+        List galerts = _gaMan.findUnfixedAlertLogsByTimeWindow(group, begin,
+                                                               now);
+        for (Iterator i = galerts.iterator(); i.hasNext();) {
             GalertLog galert = (GalertLog)i.next();
             checkAlertingPermission(subj, galert.getAlertDef().getAppdefID());
-            if (galert.isFixed()) {
-                continue;
-            }
+
             // a galert always has an associated escalation which may or may not
             // be acknowledged.
             if (galert.hasEscalationState() && galert.isAcknowledged()) {
@@ -237,6 +231,16 @@ public class DashboardPortletBossEJBImpl
                 return ALERT_CRITICAL;
             }
         }
+        
+        if (galerts.size() > 0) {
+            return rtn;
+        }
+        
+        List galertDefs = _gaMan.findAlertDefs(group, PageControl.PAGE_ALL);
+        if (galertDefs.size() == 0) {
+            return ALERT_UNKNOWN;
+        }
+        
         return rtn;
     }
     
