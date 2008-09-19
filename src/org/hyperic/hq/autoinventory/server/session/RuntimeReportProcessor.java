@@ -366,8 +366,6 @@ public class RuntimeReportProcessor {
                 ServerValue foundAppdefServer
                     = AIConversionUtil.convertAIServerToServer(aiserver, 
                                                                _serverMgr);
-            
-                foundAppdefServer.setWasAutodiscovered(true);
 
                 serverTypePK = foundAppdefServer.getServerType().getId();
                 
