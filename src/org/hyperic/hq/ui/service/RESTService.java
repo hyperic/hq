@@ -68,7 +68,7 @@ public class RESTService extends BaseService {
     public static final String SERVICE_NAME = "api";
 
     private static final Pattern AEID_PATTERN =
-        Pattern.compile(".*&type=(\\d+).*&rid=(\\d+).*",
+        Pattern.compile(".*type=(\\d+).*rid=(\\d+).*",
                         Pattern.CASE_INSENSITIVE);
 
     private static final Pattern MTID_PATTERN =
