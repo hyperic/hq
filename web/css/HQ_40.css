@@ -1617,6 +1617,10 @@ visibility: hidden;*/
 
 /* schedule maintenance downtime dialog styling */
 
+.dijitDialog button {
+    color: #000;
+}
+
 .dijitDialog fieldset {
     border: 1px solid gray;
     padding: 4pt;
