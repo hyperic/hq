@@ -94,6 +94,7 @@ public class AIConversionUtil {
         server.setDescription(aiserver.getDescription());
         server.setName       (aiserver.getName());
         server.setInstallPath(aiserver.getInstallPath());
+        server.setWasAutodiscovered(true);
         server.setAutoinventoryIdentifier(aiserver.getAutoinventoryIdentifier());
         server.setServerType(stValue);
 
