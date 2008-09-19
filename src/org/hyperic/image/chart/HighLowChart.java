@@ -121,14 +121,12 @@ public class HighLowChart extends ColumnChart {
             if(obj instanceof IHighLowDataPoint) {
                 IHighLowDataPoint datapt = (IHighLowDataPoint)obj;
                 
-                if(Double.isNaN(datapt.getValue()) == true ||
-                   Double.isNaN(datapt.getHighValue()) == true||
-                   Double.isNaN(datapt.getLowValue()) == true)
-                     continue;
-
                 Point ptHigh = this.adjustBorders( this.getDisplayPoint(rect.height, rect.width, collSize, datapt.getHighValue(), index) );
                 Point ptLow  = this.adjustBorders( this.getDisplayPoint(rect.height, rect.width, collSize, datapt.getLowValue(), index) );
                 Point ptAvg  = this.adjustBorders( this.getDisplayPoint(rect.height, rect.width, collSize, datapt.getValue(), index) );
+
+                if (ptHigh == null || ptLow == null || ptAvg == null)
+                    continue;
 
                 ptHigh.x -= halfcol;
                 ptLow.x  -= halfcol;
