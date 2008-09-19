@@ -226,6 +226,8 @@ public class ExecutableProcess extends Collector {
         if (wdog.killedProcess()) {
             setMessage("Timeout running " +
                        "[" + exec.getCommandLineString() + "]");
+            //on posix systems res == 143 (143 & 0x7f == SIGTERM)
+            res = 2;
         }
 
         setLogLevel(getLogLevel(res));
