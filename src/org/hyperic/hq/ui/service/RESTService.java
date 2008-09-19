@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -407,10 +406,11 @@ public class RESTService extends BaseService {
                                     continue;
                                 }
                             }
-                                
+                            
                             arr.put(new JSONObject().put("name", chart.get(0))
                                                     .put("rid", resId)
-                                                    .put("mtid", mtid));
+                                                    .put("mtid", mtid)
+                                                    .put("url", chart.get(1)));
                         }
                         
                         res = arr.toString();
