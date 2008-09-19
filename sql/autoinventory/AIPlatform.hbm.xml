@@ -119,7 +119,7 @@
       <one-to-many class="AIIp"/>
     </bag>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="AIServers" table="EAM_AIQ_SERVER" lazy="true">
+    <bag inverse="true" cascade="all-delete-orphan" name="AIServers" table="EAM_AIQ_SERVER" lazy="true">
       <key on-delete="cascade" column="AIQ_PLATFORM_ID"/>
       <one-to-many class="AIServer"/>
     </bag>
