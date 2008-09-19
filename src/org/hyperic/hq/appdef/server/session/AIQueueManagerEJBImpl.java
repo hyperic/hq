@@ -524,12 +524,12 @@ public class AIQueueManagerEJBImpl
         Integer id;
 
         Map aiplatformsToResync = new HashMap();
-        List aiserversToRemove = new ArrayList();
+        Map aiserversToRemove = new HashMap();
         Object marker = new Object();
 
-        AIPlatformDAO aiplatformLH = getAIPlatformDAO();
-        AIIpDAO aiipLH = getAIIpDAO();
-        AIServerDAO aiserverLH = getAIServerDAO();
+        AIPlatformDAO aiplatformDao = getAIPlatformDAO();
+        AIIpDAO aiipDao = getAIIpDAO();
+        AIServerDAO aiserverDao = getAIServerDAO();
 
         PlatformManagerLocal pmLocal = getPlatformMgrLocal();
         ServerManagerLocal smLocal = getServerMgrLocal();
@@ -555,7 +555,7 @@ public class AIQueueManagerEJBImpl
                 }
 
                 try {
-                    aiplatform = aiplatformLH.get(id);
+                    aiplatform = aiplatformDao.get(id);
                 } catch ( ObjectNotFoundException e ) {
                     if (isPurgeAction) continue;
                     else throw e;
@@ -593,10 +593,8 @@ public class AIQueueManagerEJBImpl
                     }
                 }
 
-                visitor.visitPlatform(aiplatform,
-                                      subject,
-                                      pmLocal, configMgr, cpropMgr,
-                                      createdResources);
+                visitor.visitPlatform(aiplatform, subject, pmLocal, configMgr,
+                                      cpropMgr, createdResources);
                 if (!isPurgeAction) aiplatformsToResync.put(id, marker);
             }
         }
@@ -609,15 +607,14 @@ public class AIQueueManagerEJBImpl
                     continue;
                 }
                 try {
-                    aiip = aiipLH.get(id);
+                    aiip = aiipDao.get(id);
                 } catch (ObjectNotFoundException e) {
                     if (isPurgeAction) continue;
                     else throw e;
                 }
                 visitor.visitIp(aiip, subject, pmLocal);
                 if (!isPurgeAction) {
-                    Integer pk =
-                       aiip.getAIPlatform().getId();
+                    Integer pk = aiip.getAIPlatform().getId();
                     aiplatformsToResync.put(pk, marker);
                 }
             }
@@ -631,21 +628,19 @@ public class AIQueueManagerEJBImpl
                     continue;
                 }
                 try {
-                    aiserver = aiserverLH.get(id);
+                    aiserver = aiserverDao.get(id);
                 } catch (ObjectNotFoundException e) {
                     if (isPurgeAction) continue;
                     else throw e;
                 }
-                visitor.visitServer(aiserver, 
-                                    subject,
-                                    pmLocal, smLocal, configMgr,
-                                    cpropMgr, createdResources);
+                visitor.visitServer(aiserver,  subject, pmLocal, smLocal,
+                                    configMgr, cpropMgr, createdResources);
                 if (isApproveAction) {
                     // Approved servers are removed from the queue
-                    aiserversToRemove.add(aiserver);
+                    String aiid = aiserver.getAutoinventoryIdentifier();
+                    aiserversToRemove.put(aiid, aiserver);
                 } else if (!isPurgeAction) {
-                    Integer pk =
-                        aiserver.getAIPlatform().getId();
+                    Integer pk = aiserver.getAIPlatform().getId();
                     aiplatformsToResync.put(pk, marker);
                 }
             }
@@ -657,7 +652,7 @@ public class AIQueueManagerEJBImpl
             iter = aiplatformsToResync.keySet().iterator();
             while ( iter.hasNext() ) { 
                 id = (Integer) iter.next();
-                aiplatform = aiplatformLH.get(id);
+                aiplatform = aiplatformDao.get(id);
                 syncQueue(aiplatform.getAIPlatformValue(), isApproveAction);
             }
             
@@ -665,16 +660,19 @@ public class AIQueueManagerEJBImpl
                 // See above note, now we remove approved servers from the queue
                 Collection servers = aiplatform.getAIServers();
                 if (servers != null) {
-                    for (i=0; i<aiserversToRemove.size(); i++) {
-                        servers.remove(aiserversToRemove.get(i));
+                    for (Iterator it=servers.iterator(); it.hasNext(); ) {
+                        AIServer aiServer = (AIServer)it.next();
+                        String aiid = aiServer.getAutoinventoryIdentifier();
+                        if (aiserversToRemove.containsKey(aiid)) {
+                            it.remove();
+                        }
                     }
                 }
             }
         }
-
         return createdResources;
     }
-
+    
     /**
      * Remove an AI platform from the queue.
      * @ejb:interface-method
