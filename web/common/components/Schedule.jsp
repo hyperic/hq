@@ -107,7 +107,7 @@
 				<tr>
 					<td><html:radio property="startTime" value="onDate" onclick="turnOnRecurrence(true)"/>&nbsp;</td>
 					<td nowrap>
-						<html:select property="startMonth" styleId="startMonth" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1); changeDropDown('startMonth', 'startDay', 'startYear');">
+						<html:select property="startMonth" styleId="startMonth" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1);">
 							<html:option value="0">01 (Jan)</html:option>
 							<html:option value="1">02 (Feb)</html:option>
 							<html:option value="2">03 (Mar)</html:option>
@@ -122,7 +122,7 @@
 							<html:option value="11">12 (Dec)</html:option>
 						</html:select>
 						/
-						<html:select property="startDay" styleId="startDay" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1); changeDropDown('startMonth', 'startDay', 'startYear');">
+						<html:select property="startDay" styleId="startDay" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1);">
 							<html:option value="1">01</html:option>
 							<html:option value="2">02</html:option>
 							<html:option value="3">03</html:option>
@@ -156,7 +156,7 @@
 							<html:option value="31">31</html:option>
 						</html:select>
 						/
-						<html:select property="startYear" styleId="startYear" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1); changeDropDown('startMonth', 'startDay', 'startYear');">
+						<html:select property="startYear" styleId="startYear" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1);">
 							<script  type="text/javascript">
 								for (i=0; i<SEL_NUMYEARS; i++) {
 									document.writeln("<option value=\"" + yearArr[i] + "\">" + yearArr[i] + "</option>");
@@ -344,19 +344,19 @@
 							<tr>
 								<td nowrap>
 									<html:radio property="endTime" value="onDate"/>
-									<html:select property="endMonth" styleId="endMonth" onchange="toggleRadio('endTime', 1); changeDropDown('endMonth', 'endDay', 'endYear');">
-										<html:option value="1">01 (Jan)</html:option>
-                                        <html:option value="2">02 (Feb)</html:option>
-                                        <html:option value="3">03 (Mar)</html:option>
-                                        <html:option value="4">04 (Apr)</html:option>
-                                        <html:option value="5">05 (May)</html:option>
-                                        <html:option value="6">06 (Jun)</html:option>
-                                        <html:option value="7">07 (Jul)</html:option>
-                                        <html:option value="8">08 (Aug)</html:option>
-                                        <html:option value="9">09 (Sep)</html:option>
-                                        <html:option value="10">10 (Oct)</html:option>
-                                        <html:option value="11">11 (Nov)</html:option>
-                                        <html:option value="12">12 (Dec)</html:option>
+									<html:select property="endMonth" styleId="endMonth" onchange="toggleRadio('endTime', 1);">
+										<html:option value="0">01 (Jan)</html:option>
+                                        <html:option value="1">02 (Feb)</html:option>
+                                        <html:option value="2">03 (Mar)</html:option>
+                                        <html:option value="3">04 (Apr)</html:option>
+                                        <html:option value="4">05 (May)</html:option>
+                                        <html:option value="5">06 (Jun)</html:option>
+                                        <html:option value="6">07 (Jul)</html:option>
+                                        <html:option value="7">08 (Aug)</html:option>
+                                        <html:option value="8">09 (Sep)</html:option>
+                                        <html:option value="9">10 (Oct)</html:option>
+                                        <html:option value="10">11 (Nov)</html:option>
+                                        <html:option value="11">12 (Dec)</html:option>
 									</html:select>
 									/
 									<html:select property="endDay" styleId="endDay" onchange="toggleRadio('endTime', 1);">
@@ -393,7 +393,7 @@
                                         <html:option value="31">31</html:option>
 									</html:select>
 									/
-									<html:select property="endYear" styleId="endYear" onchange="toggleRadio('endTime', 1); changeDropDown('endMonth', 'endDay', 'endYear');">
+									<html:select property="endYear" styleId="endYear" onchange="toggleRadio('endTime', 1);">
 									<script  type="text/javascript">
 										for (i=0; i<SEL_NUMYEARS; i++) {
 											document.writeln("<option value=\"" + yearArr[i] + "\">" + yearArr[i] + "</option>");
@@ -425,12 +425,12 @@
 <script  type="text/javascript">
 <c:choose>
  <c:when test="${param.mode eq 'edit'}">
- init(<c:out escapeXml="false" value="\"${TheControlForm.startMonth}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.startDay}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.startYear}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.endMonth}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.endDay}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.endYear}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.recurInterval}\""/>);
+ init(<c:out escapeXml="false" value="${TheControlForm.startMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.startDay}"/>, <c:out escapeXml="false" value="${TheControlForm.startYear}"/>, <c:out escapeXml="false" value="${TheControlForm.endMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.endDay}"/>, <c:out escapeXml="false" value="${TheControlForm.endYear}"/>, <c:out escapeXml="false" value="\"${TheControlForm.recurInterval}\""/>);
  </c:when>
  <c:otherwise>
  <%-- an error occurred, for a 'new' mode. still init the select boxes. --%>
  <logic:messagesPresent> 
-  init(<c:out escapeXml="false" value="\"${TheControlForm.startMonth}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.startDay}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.startYear}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.endMonth}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.endDay}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.endYear}\""/>, <c:out escapeXml="false" value="\"${TheControlForm.recurInterval}\""/>);
+  init(<c:out escapeXml="false" value="${TheControlForm.startMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.startDay}"/>, <c:out escapeXml="false" value="${TheControlForm.startYear}"/>, <c:out escapeXml="false" value="${TheControlForm.endMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.endDay}"/>, <c:out escapeXml="false" value="${TheControlForm.endYear}"/>, <c:out escapeXml="false" value="\"${TheControlForm.recurInterval}\""/>);
  </logic:messagesPresent>
  <logic:messagesNotPresent> 
   init();

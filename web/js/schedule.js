@@ -100,24 +100,30 @@ function init(jspStartMonth, jspStartDay, jspStartYear, jspEndMonth, jspEndDay, 
   }
 
   setSelect("startDay", START_DATE-1);
-  setSelect("startMonth", START_MONTH );
+  setSelect("startMonth", START_MONTH);
   setSelect("startYear", START_YEAR - SEL_STARTYEAR);
 
   setSelect("endDay", endDate-1);
   setSelect("endMonth", endMonth);
   setSelect("endYear", endYear - SEL_STARTYEAR);
   
-  changeDropDown ("startMonth", "startDay", "startYear");
-  changeDropDown ("endMonth", "endDay", "endYear");
+  // changeDropDown ("startMonth", "startDay", "startYear");
+  // changeDropDown ("endMonth", "endDay", "endYear");
   
-  if (jspStartMonth) {
+  if (typeof jspStartMonth != 'undefined') {
     setFullDate(schedDate, jspStartMonth, jspStartDay, jspStartYear);
-    resetDropdowns('startMonth', 'startDay', 'startYear');
+    // resetDropdowns('startMonth', 'startDay', 'startYear');
+    setSelect("startDay", jspStartDay - 1);
+    setSelect("startMonth", jspStartMonth);
+    setSelect("startYear", jspStartYear - SEL_STARTYEAR);
   }
   
-  if (jspEndYear) {
+  if (typeof jspEndYear != 'undefined') {
     setFullDate(schedEndDate, jspEndMonth, jspEndDay, jspEndYear);
-    resetDropdowns('endMonth', 'endDay', 'endYear');
+    // resetDropdowns('endMonth', 'endDay', 'endYear');
+    setSelect("endDay", jspEndDay - 1);
+    setSelect("endMonth", jspEndMonth);
+    setSelect("endYear", jspEndYear - SEL_STARTYEAR);
   }
   
 }
@@ -282,7 +288,7 @@ function changeDropDown(monthId, dateId, yearId) {
   var startDateIndex = 0;
 
   if (selectedYearValue == START_YEAR) {
-    startMonthIndex = START_MONTH;
+    startMonthIndex = START_MONTH - 1;
     if (selectedMonthValue < START_MONTH)
       selectedMonthValue = START_MONTH;
     
