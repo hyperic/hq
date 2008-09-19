@@ -813,6 +813,19 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     public void reportAIRuntimeReport(String agentToken,
                                       CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, PermissionException, ValidationException,
+               ApplicationException {
+        RuntimePlatformAndServerMerger.schedulePlatformAndServerMerges(
+            agentToken, crrr);
+    }
+
+    /**
+     * Should only be called from RuntimePlatformAndServerMerger
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRESNEW"
+     */
+    public void _reportAIRuntimeReport(String agentToken,
+                                      CompositeRuntimeResourceReport crrr)
+        throws AutoinventoryException, PermissionException, ValidationException,
                ApplicationException 
     {
         List serviceMerges = mergePlatformsAndServers(agentToken, crrr);
@@ -834,7 +847,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         
         ServiceMerger.scheduleServiceMerges(agentToken, serviceMerges);
     }
-
+    
     /**
      * Merge platforms and servers from the runtime report.  
      * 

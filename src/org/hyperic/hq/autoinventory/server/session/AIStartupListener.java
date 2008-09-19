@@ -45,17 +45,20 @@ public class AIStartupListener
          * Add the runtime-AI listener to enable resources for runtime
          * autodiscovery as they are created.
          */
+        ZeventManager zMan = ZeventManager.getInstance();
         Set events = new HashSet();
         events.add(ResourceCreatedZevent.class);
         events.add(ResourceUpdatedZevent.class);
         events.add(ResourceRefreshZevent.class);
-        ZeventManager.getInstance().
-            addBufferedListener(events, new RuntimeAIEnabler());
+        zMan.addBufferedListener(events, new RuntimeAIEnabler());
         
         events = new HashSet();
         events.add(MergeServiceReportZevent.class);
-        ZeventManager.getInstance().addBufferedListener(events, 
-                                                        new ServiceMerger());
+        zMan.addBufferedListener(events, new ServiceMerger());
+
+        events = new HashSet();
+        events.add(MergePlatformAndServersZevent.class);
+        zMan.addBufferedListener(events, new RuntimePlatformAndServerMerger());
         AutoinventoryManagerEJBImpl.getOne().startup();
     }
 
