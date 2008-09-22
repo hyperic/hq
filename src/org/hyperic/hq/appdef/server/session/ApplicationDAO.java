@@ -122,8 +122,8 @@ public class ApplicationDAO extends HibernateDAO
             DependencyNode aNode = (DependencyNode) nodes.get(i);
             // first deal with the removed dependencies for this node
             for (int j = 0; j < aNode.getRemovedChildren().size(); j++) {
-                AppServiceValue removedAsv =
-                    (AppServiceValue)aNode.getRemovedChildren().get(j);
+                AppService removedAsv =
+                    (AppService) aNode.getRemovedChildren().get(j);
                 // this dep has been removed
                 // look it up and delete it
                 AppSvcDependency depEJB =
