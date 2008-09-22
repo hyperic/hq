@@ -14,12 +14,6 @@
     <put name="titleImg" value="title_platform.gif"/>
   </definition>
   
-  <definition name=".page.title.resource.platform.full"
-              extends=".page.title.resource.platform">
-    <put name="linkUrl"
-         value="/resource/platform/inventory/PlatformLinks.jsp"/>
-  </definition>
-  
   <definition name=".page.title.resource.platform.autodiscovery.full"
               extends=".page.title.resource.platform">
     <put name="linkUrl"

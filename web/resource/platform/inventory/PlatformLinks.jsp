@@ -72,9 +72,6 @@
     <tiles:insert definition=".resource.common.quickFavorites">
       <tiles:put name="resource" beanName="resource"/>
     </tiles:insert>
-    <br>
-    <a href="javascript:clone_platform_<c:out value="${resource.id}"/>.dialog.show();"><fmt:message key="resource.platform.clone.Title"/></a>
-	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
 </td></tr></table>
 
 <div id ="clone_resource_dialog" style="display:none;">

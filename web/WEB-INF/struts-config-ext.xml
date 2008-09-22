@@ -301,6 +301,7 @@
                          /WEB-INF/tiles/resource-hub-def.xml,
                          /WEB-INF/tiles/resource-hub-def-ext.xml,
                          /WEB-INF/tiles/resource-platform-def.xml,
+                         /WEB-INF/tiles/resource-platform-def-ext.xml,
                          /WEB-INF/tiles/resource-server-def.xml,
                          /WEB-INF/tiles/resource-service-def.xml,
                          /WEB-INF/tiles/resource-application-def.xml,

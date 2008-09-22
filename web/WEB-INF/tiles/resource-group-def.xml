@@ -21,12 +21,6 @@
     <put name="titleImg" value="title_group.gif"/>
   </definition>
 
-  <definition name=".page.title.resource.group.full"
-              extends=".page.title.resource.group">
-    <put name="linkUrl"
-         value="/resource/group/inventory/GroupLinks.jsp"/>
-  </definition>
-
   <!-- group tabs -->
   <definition name=".tabs.resource.group.control.current"
               extends=".tabs.resource.group">                            
