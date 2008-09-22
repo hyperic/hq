@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.AppdefSessionEJB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -50,6 +51,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBossLocal;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBossUtil;
 import org.hyperic.hq.common.SystemException;
@@ -67,6 +69,8 @@ import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.grouping.server.session.GroupUtil;
+import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
@@ -124,27 +128,47 @@ public class DashboardPortletBossEJBImpl
         throws PermissionException
     {
         JSONArray rtn = new JSONArray();
+        ResourceManagerLocal resMan = getResourceManager();
         MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
         DataManagerLocal dMan = DataManagerEJBImpl.getOne();
-        Map resToMeas = mMan.findMeasurements(subj, resIdsToTemplIds);
-        long intv = (end-begin)/60;
-        PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED);
         DateFormat dateFmt =
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
-        for (Iterator i=resToMeas.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)i.next();
-            Resource res = (Resource)entry.getKey();
-            List measurements = (List)entry.getValue();
-            List data = dMan.getHistoricalData(measurements, begin, end, intv,
-                0, true, pc);
+        long intv = (end - begin) / 60;
+        for (Iterator it = resIdsToTemplIds.entrySet().iterator(); it.hasNext();)
+        {
+            Map.Entry entry = (Map.Entry) it.next();
+            Integer resId = (Integer) entry.getKey();
+            List templs = (List) entry.getValue();
             JSONObject jObj = new JSONObject();
+            Resource res = resMan.findResourcePojoById(resId);
+            AppdefEntityID aeid = new AppdefEntityID(res);
             try {
+
                 jObj.put("resourceName", res.getName());
+
+                AppdefEntityID[] aeids;
+                if (aeid.isGroup()) {
+                    List members =
+                        GroupUtil.getCompatGroupMembers(subj, aeid, null,
+                                                        PageControl.PAGE_ALL);
+                    aeids = (AppdefEntityID[])
+                    members.toArray(new AppdefEntityID[members.size()]);
+                }
+                else {
+                    aeids = new AppdefEntityID[] { aeid };
+                }
+                // Only do one metric
+                Integer mtid = (Integer) templs.get(0);
+                List metrics = mMan.findMeasurements(subj, mtid, aeids);
+                List data = dMan.getHistoricalData(metrics, begin, end,
+                                                   intv, 0, true,
+                                                   PageControl.PAGE_ALL);
+
                 JSONObject dataObj = new JSONObject();
                 jObj.put("data", dataObj);
-                for (Iterator it=data.iterator(); it.hasNext(); ) {
+                for (Iterator dit = data.iterator(); dit.hasNext();) {
                     JSONArray array = new JSONArray();
-                    HighLowMetricValue pt = (HighLowMetricValue)it.next();
+                    HighLowMetricValue pt = (HighLowMetricValue) dit.next();
                     double val = pt.getValue();
                     if (Double.isNaN(val) || Double.isInfinite(val)) {
                         continue;
@@ -155,7 +179,11 @@ public class DashboardPortletBossEJBImpl
                 }
                 rtn.put(jObj);
             } catch (JSONException e) {
-                _log.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
+            } catch (AppdefEntityNotFoundException e) {
+                log.error("AppdefEntityNotFound: " + aeid);
+            } catch (GroupNotCompatibleException e) {
+                log.error("GroupNotCompatibleException: " + aeid);
             }
         }
         return rtn;

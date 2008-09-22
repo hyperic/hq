@@ -502,46 +502,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * @param subject AuthzSubject
-     * @param resIdsToTemplIds Map of Integer of resourceIds to List of templateIds
-     * @return Map of Resource to List of Measurements
-     * @throws PermissionException 
-     * @ejb:interface-method
-     */
-    public Map findMeasurements(AuthzSubject subject, Map resIdsToTemplIds)
-        throws PermissionException
-    {
-        Map rtn = new HashMap();
-        MeasurementDAO dao = getMeasurementDAO();
-        ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
-        ResourceGroupManagerLocal gMan = ResourceGroupManagerEJBImpl.getOne();
-        for (Iterator i=resIdsToTemplIds.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)i.next();
-            Integer resId = (Integer)entry.getKey();
-            List templs = (List)entry.getValue();
-            Integer[] tids = (Integer[])templs.toArray(new Integer[0]);
-            Resource resource = rMan.findResourcePojoById(resId);
-            AppdefEntityID appId = new AppdefEntityID(resource);
-            // checkModifyPermission(subject.getId(), appId);
-            Integer resTypeId = resource.getResourceType().getId();
-            if (resTypeId.equals(AuthzConstants.authzGroup)) {
-                ResourceGroup grp = gMan.findResourceGroupById(
-                    subject, resource.getInstanceId());
-                Collection mems = gMan.getMembers(grp);
-                for (Iterator it=mems.iterator(); it.hasNext(); ) {
-                    Resource res = (Resource)it.next();
-                    rtn.put(
-                        res, dao.findByTemplatesForInstance(tids, res));
-                }
-            } else {
-                rtn.put(
-                    resource, dao.findByTemplatesForInstance(tids, resource));
-            }
-        }
-        return rtn;
-    }
-
-    /**
      * Find the Measurement corresponding to the given MeasurementTemplate id
      * and instance id.
      *
