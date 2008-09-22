@@ -203,7 +203,7 @@ Setup properties will be written to %WRITABLEFILE% instead.
 __ll__
 Setup completed.
 A copy of the output shown above has been saved to:
-  ${install.dir}/hq-install.log
+  ${install.log.path}
 __ll__
     </echo>
     <antcall target="pause-before-exit"/>

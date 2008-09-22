@@ -51,6 +51,7 @@ public class InstallerLogger implements BuildLogger {
     
     public static final String PROP_LOGFILE = "install.log";
     public static final String PROP_NOWRAP  = "install.nowrap";
+    public static final String PROP_LOGFILE_PATH = "install.log.path";
     
     public static final String PREFIX = "^^^";
     public static final String[] MESSAGE_HANDLERS
@@ -140,7 +141,7 @@ public class InstallerLogger implements BuildLogger {
         basicLogger.setFile(logfile);
         basicLogger.setLevel("debug");
         basicLogger.register(project);
-
+        
         // For debugging, uncomment the line below to
         // see all registered message handlers.
         // dumpHandlers();
@@ -220,6 +221,8 @@ public class InstallerLogger implements BuildLogger {
 
             try {
                 logfileStream = new FileWriter(logfile.getAbsolutePath(), true);
+                // set JVM property so we can pick it up from ant
+                System.setProperty(PROP_LOGFILE_PATH, logfile.getAbsolutePath());
             } catch ( IOException ioe ) {
                 err.println("ERROR: could not open install.log: "
                             + logfileName + ": " + ioe);
