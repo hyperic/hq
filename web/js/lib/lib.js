@@ -668,7 +668,7 @@ hyperic.widget = hyperic.widget || {};
 
         if(kwArgs.url)
         {
-            var template = '<div class="chartCont"> <h3 class="cTitle"><a href="'+ kwArgs.url +'">' + kwArgs.name + '</a></h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
+            var template = '<div class="chartCont"> <h3 class="cTitle"><a href="'+ kwArgs.url +'" style="color: #FFF">' + kwArgs.name + '</a></h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
         }
         else
         {
@@ -802,13 +802,22 @@ hyperic.dashboard.widget = {
      * @see #clickHandler
      */
     clickHandler: function(e) {
-        if(this['click_' + e.target.className])
+        var action = '';
+        if(e.target.className.match(/^btn(?:Blue|Gray|Green)$/)) {
+            action = e.target.name;
+        }
+        else
+        {
+            action = e.target.className;
+        }
+
+        if(this['click_' + action])
         {
             e.stopPropagation();
             e.preventDefault();
             dojo11.stopEvent(e);
 
-            this['click_' + e.target.className](e);
+            this['click_' + action](e);
         }
     },
     
@@ -1377,6 +1386,58 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         }
         hyperic.dashboard.widget.click_remove_btn.apply(that);
     };
+    
+    /**
+     * remove chart button click handler
+     * confirm chart deletion with user, make an ajax request to remove chart from config, 
+     * on success, cycle to next chart, 
+     * delete chart from selectbox, 
+     * remove chart refresh interval if set, 
+     * and finally remove chart data from that.charts object
+     * 
+     * @param {Event} e
+     * @see hyperic.dashboard.widget#clickHandler
+     */
+    this.click_chart_remove_btn = function(e)
+    {
+        // save chart id into a variable so if it cycles away from this chart during the request, we still know which one we're deleting
+        var chart = that.currentChartId;
+        var chartIndex = that.chartselect.select.selectedIndex;
+        if(confirm('Remove ' + that.charts[chart].name + ' from saved charts?')) {
+            dojo11.xhrGet( {
+                url: "/api.shtml?v=1.0&remove=true&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]",
+                handleAs: 'json',
+                load: function(data){
+                    if(typeof data.length != 'undefined' && !data.error)
+                    {
+                        // cycle to next chart if we're still displaying the one that's about to get deleted.
+                        if(that.currentChartId == chart)
+                        {
+                            that.cycleCharts();
+                        }
+
+                        // clear chart refresh data interval
+                        if(that.charts[chart].interval)
+                        {
+                            clearInterval(that.charts[chart].interval);
+                        }
+                        // remove chart from selectbox
+                        that.chartselect.remove(chartIndex);
+                        // delete chart data
+                        delete that.charts[chart];
+                    }
+                    else
+                    {
+                        console.debug('An server error occurred deleting chart: ' + data);
+                    }
+                },
+                error: function(data){
+                    console.debug("A connection error occurred deleting chart: ", data);
+                },
+                timeout: 30000
+            });
+        }
+    }
 
     /**
      * an event handler to handle onKeyUp events on a search textbox.
@@ -1457,8 +1518,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     that.cycleCharts = function(chartId)
     {
         var next = 0;
-        // the last is to filter out the odd chartId's that get passed in in firefox when cycleChart is called from the playback timeout
-        if(typeof chartId == 'undefined' || chartId < 0 || chartId >= that.chartselect.length)
+        if(typeof chartId == 'undefined' || chartId < 0)
         {
             if(that.chartselect.select.selectedIndex !== -1 && that.chartselect.select.selectedIndex != that.chartselect.select.options.length-1)
             {
