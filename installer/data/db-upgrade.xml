@@ -9141,6 +9141,11 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.126">
+      <schema-alterColumn table="EAM_CRISPO_ARRAY" column="VAL" precision="4000"
+                          columnType="VARCHAR2" nullable="NOT NULL"/>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
