@@ -550,8 +550,15 @@ public class AvailabilityManagerEJBImpl
         synchronized (cache) {
             updateCache(availPoints, updateList, outOfOrderAvail);
             updateStates(updateList);
+            // scottmf: This method, updateOutOfOrderState(), is cached due to 
+            // AvailabilityManager going through the BatchAggregateInserter(BAI).
+            // Due to the possibility of the BAI cutting off the batch of avail 
+            // measurements coming from an agent it could get into a state where 
+            // it is processing the same measurement in different threads.  This
+            // could lead to contention issues and StaleStateExceptions.  The 
+            // only disadvantage of synchronizing the method is performance.
+            updateOutOfOrderState(outOfOrderAvail);
         }
-        updateOutOfOrderState(outOfOrderAvail);
         sendDataToEventHandlers(availPoints);
     }
 
