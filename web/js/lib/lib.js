@@ -1273,6 +1273,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=chart&config=true&tr=" + that.config.range + "&ivl=" + that.config.interval + "&rot=" + that.config.rotation,
             handleAs: 'json',
+            preventCache: true,
             load: function(data){
                 that.config.interval = parseInt(data.ivl,10) || that.config.interval;
                 that.config.range = data.tr || that.config.range;
@@ -1399,6 +1400,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             dojo11.xhrGet( {
                 url: "/api.shtml?v=1.0&remove=true&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]",
                 handleAs: 'json',
+                preventCache: true,
                 load: function(data){
                     if(data.error)
                     {
@@ -1406,10 +1408,24 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                     }
                     else
                     {
-                        // cycle to next chart if we're still displaying the one that's about to get deleted.
-                        if(that.currentChartId == chart)
+                        if(that.charts.length > 1)
                         {
-                            that.cycleCharts();
+                            // cycle to next chart if we're still displaying the one that's about to get deleted.
+                            if(that.currentChartId == chart)
+                            {
+                                that.cycleCharts();
+                            }
+                        }
+                        else
+                        {
+                            that.pauseCharts();
+                            that.swapSheets('instructions',
+                                function()
+                                {
+                                    // try again after a minute.
+                                    that.fetchChartsCycleId = setInterval(that.fetchAndPlayCharts, 60000);
+                                    that.chart.cleanup();
+                                });
                         }
                         // clear chart refresh data interval
                         if(that.charts[chart].interval)
@@ -1623,6 +1639,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=chart",
             handleAs: 'json',
+            preventCache: true,
             load: function(data){
                 if(typeof data.length != 'undefined' && data.length > 0)
                 {
@@ -1637,7 +1654,10 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                         function()
                         {
                             that.chartContainerResize();
-                            that.playCharts();
+                            if(that.config.rotation == 'true' && that.charts.length > 1)
+                            {
+                                that.playCharts();
+                            }
                         });
                 }
                 else
@@ -1669,6 +1689,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         return dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]",
             handleAs: 'json',
+            preventCache: true,
             load: function(data){
                 // that.charts[chart].data = data;
                 if(!data.error && data.length > 0)
@@ -1696,6 +1717,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=chart&config=true",
             handleAs: 'json',
+            preventCache: true,
             load: function(data){
                 that.config.interval = parseInt(data.ivl,10) || that.config.interval;
                 that.config.range = data.tr || that.config.range;
