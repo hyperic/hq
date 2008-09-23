@@ -223,7 +223,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getControlManager().
-            isControlSupported(subject,
+            isControlSupported(subject, res.getEntityId(),
                                res.getAppdefResourceTypeValue().getName());
     }
 

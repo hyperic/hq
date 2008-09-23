@@ -303,7 +303,7 @@ public class ControlManagerEJBImpl implements SessionBean {
                                          AppdefEntityID id) 
         throws AppdefEntityNotFoundException, PermissionException 
     {
-        if (id.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+        if (!id.isGroup()) {
             throw new IllegalArgumentException ("Expecting entity of type "+
                                                 "group.");
         }
@@ -347,6 +347,43 @@ public class ControlManagerEJBImpl implements SessionBean {
         } catch (PluginNotFoundException e) {
             return false;
         }
+    }
+
+    /**
+     * Checks with the plugin manager to find out if an entity's
+     * resource provides support for control.
+     * @param resType - appdef entity (of all kinds inc. groups)
+     * @return flag - true if supported
+     *
+     * @ejb:interface-method
+     */
+    public boolean isControlSupported(AuthzSubject subject, AppdefEntityID id,
+                                      String resType) {
+        try {
+            if (id.isGroup()) {
+                List members =
+                    GroupUtil.getCompatGroupMembers(subject, id, null);
+
+                if (members.isEmpty())
+                    return false;
+
+                checkControlPermission(subject, (AppdefEntityID) members.get(0));
+            }
+            else {
+                checkControlPermission(subject, id);
+            }
+            _controlManager.getPlugin(resType);
+            return true;
+        } catch (PluginNotFoundException e) {
+            // return false
+        } catch (PermissionException e) {
+            // return false
+        } catch (AppdefEntityNotFoundException e) {
+            // return false
+        } catch (GroupNotCompatibleException e) {
+            // return false
+        }
+        return false;
     }
 
     /**
@@ -550,8 +587,7 @@ public class ControlManagerEJBImpl implements SessionBean {
             // pull the members and check each of them. According
             // to Moseley, if any member of a group is control unauthz
             // then the entire group is unauthz.
-            if (entities[x].getType() == 
-                AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (entities[x].isGroup()) {
                 if (isGroupControlEnabled(caller, entities[x])) {
                     retVal.add(entities[x]);
                 }
@@ -641,8 +677,7 @@ public class ControlManagerEJBImpl implements SessionBean {
                     .checkControlPermission(caller, id);
                 return;
             default:
-                throw new InvalidAppdefTypeException("Unknown type: " 
-                                                     + type);
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
     } 
 
