@@ -42,8 +42,8 @@ a:visited,a:hover,a {
 #headerLinks {
     position: absolute;
     top: 0;
-    right: 68px;
-    width: 250px;
+    right: 0px;
+    width: 300px;
     height: 20px;
     text-align: right;
     padding: 3px 8px 0 0;
@@ -66,11 +66,11 @@ a:visited,a:hover,a {
 
 #headerSearch {
     position: absolute;
-    top: 0;
+    top: 46px;
     right: 0;
     width: 65px;
     height: 13px;
-    background: #F96115 url(/images/4.0/icons/search.gif) no-repeat scroll 1% 50%;
+    background: #666 url(/images/4.0/icons/search.gif) no-repeat scroll 1% 50%;
     color: #FFF;
     padding: 2px 8px 3px 0px;
     text-align: right;
@@ -88,7 +88,7 @@ a:visited,a:hover,a {
 
 #headerSearchBox {
     position: absolute;
-    top: 18px;
+    top: 64px;
     right: 0px;
     height: 24px;
     width: 260px;
@@ -107,10 +107,10 @@ a:visited,a:hover,a {
 
 #headerSearchResults {
     position: absolute;
-    top: 42px;
+    top: 86px;
     right: 0px;
     height: auto;
-    border: solid 1px #F96115;
+    border: solid 1px #3179D4;
     background-color: #FFF;
     width: 250px;
     padding: 4px;
@@ -1324,7 +1324,7 @@ div.timeplot-valueflag-pole {
 
 .ajaxLoading {
     position: absolute;
-    top: 40px;
+    top: 22px;
     right: 5px;
 }
 
