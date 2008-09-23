@@ -240,80 +240,119 @@ public class DashboardPortletBossEJBImpl
 
     private String getGroupStatus(AuthzSubject subj, ResourceGroup group,
                                   long range)
-        throws PermissionException
     {
+        boolean debug = _log.isDebugEnabled();
         String rtn = ALERT_OK;
         long now = System.currentTimeMillis();
-        long begin = now - range;
-        List galerts = _gaMan.findUnfixedAlertLogsByTimeWindow(group, begin,
-                                                               now);
-        for (Iterator i = galerts.iterator(); i.hasNext();) {
-            GalertLog galert = (GalertLog)i.next();
-            checkAlertingPermission(subj, galert.getAlertDef().getAppdefID());
 
-            // a galert always has an associated escalation which may or may not
-            // be acknowledged.
-            if (galert.hasEscalationState() && galert.isAcknowledged()) {
-                rtn = ALERT_WARN;
-            } else {
-                return ALERT_CRITICAL;
+        try {
+            long begin = now - range;
+            List galerts = _gaMan.findUnfixedAlertLogsByTimeWindow(group, begin,
+                                                                   now);
+            if (debug) {
+                _log.debug("getGroupStatus: findUnfixedAlertLogsByTimeWindow execution time(ms)=" 
+                                + (System.currentTimeMillis()-now));
+            }            
+            GalertLog galert = null;
+            for (Iterator i = galerts.iterator(); i.hasNext();) {
+                galert = (GalertLog)i.next();
+                try {
+                    checkAlertingPermission(subj, galert.getAlertDef().getAppdefID());
+                } catch (PermissionException pe) {
+                    // continue to next group alert
+                    continue;
+                }
+                // a galert always has an associated escalation which may or may not
+                // be acknowledged.
+                if (galert.hasEscalationState() && galert.isAcknowledged()) {
+                    rtn = ALERT_WARN;
+                } else {
+                    return ALERT_CRITICAL;
+                }
             }
-        }
-        
-        if (galerts.size() > 0) {
-            return rtn;
-        }
-        
-        List galertDefs = _gaMan.findAlertDefs(group, PageControl.PAGE_ALL);
-        if (galertDefs.size() == 0) {
-            return ALERT_UNKNOWN;
-        }
-        
-        return rtn;
+            
+            // Is it that there are no alerts or that there are no alert
+            // definitions?
+            if (rtn.equals(ALERT_OK)) {
+                List galertDefs = _gaMan.findAlertDefs(group, PageControl.PAGE_ALL);
+                if (galertDefs.size() == 0) {
+                    return ALERT_UNKNOWN;
+                }
+            }
+
+            return rtn;            
+        } finally {
+            if (debug) {
+                _log.debug("getGroupStatus: groupId=" + group.getId()
+                                +", execution time(ms)=" + (System.currentTimeMillis()-now));
+            }
+        }        
     }
     
     private String getResourceStatus(AuthzSubject subj, ResourceGroup group,
                                      long range)
         throws PermissionException, FinderException
     {
+        boolean debug = _log.isDebugEnabled();
         long now = System.currentTimeMillis();
-        long begin = now - range;
-        List alerts = _alMan.findAlerts(subj.getId(), 0, begin, now, false,
-                                        true, group.getId(),
-                                        PageInfo.getAll(AlertSortField.FIXED,
-                                                        true));
-        // There are unfixed alerts
-        if (alerts.size() > 0) {
-            for (Iterator it = alerts.iterator(); it.hasNext(); ) {
-                Alert alert = (Alert) it.next();
-                if (!isAckd(subj, alert)) {
-                    return ALERT_CRITICAL;
+        
+        try {
+            long begin = now - range;
+            List alerts = _alMan.findAlerts(subj.getId(), 0, begin, now, false,
+                                            true, group.getId(),
+                                            PageInfo.getAll(AlertSortField.FIXED,
+                                                            true));
+            if (debug) {
+                _log.debug("getResourceStatus: findAlerts execution time(ms)=" 
+                                + (System.currentTimeMillis()-now));
+            }          
+            // There are unfixed alerts
+            if (alerts.size() > 0) {
+                Alert alert = null;
+                for (Iterator it = alerts.iterator(); it.hasNext(); ) {
+                    alert = (Alert) it.next();
+                    if (!isAckd(subj, alert)) {
+                        return ALERT_CRITICAL;
+                    }
                 }
+                return ALERT_WARN;
             }
-            return ALERT_WARN;
-        }
-        else {
-            // Is it that there are no alerts or that there are no alert
-            // definitions?
-            Collection resources = _rgMan.getMembers(group);
-            PageControl pc = new PageControl(0, 1);
-            for (Iterator i = resources.iterator(); i.hasNext();) {
-                Resource r = (Resource) i.next();
-                AppdefEntityID aId = new AppdefEntityID(r);
-
-                checkViewPermission(subj, aId);
-                List alertDefs = _adMan
-                    .findAlertDefinitions(subj, new AppdefEntityID(r), pc);
-                if (alertDefs.size() > 0) {
-                    return ALERT_OK;
+            else {
+                // Is it that there are no alerts or that there are no alert
+                // definitions?
+                Collection resources = _rgMan.getMembers(group);
+                PageControl pc = new PageControl(0, 1);
+                Resource r = null;
+                AppdefEntityID aId = null;
+                List alertDefs = null;
+                for (Iterator i = resources.iterator(); i.hasNext();) {
+                    r = (Resource) i.next();
+                    aId = new AppdefEntityID(r);
+    
+                    try {
+                        checkViewPermission(subj, aId);
+                    } catch (PermissionException pe) {
+                        // go to next resource
+                        continue;
+                    }
+                    alertDefs = _adMan
+                        .findAlertDefinitions(subj, new AppdefEntityID(r), pc);
+                    if (alertDefs.size() > 0) {
+                        return ALERT_OK;
+                    }
                 }
+                return ALERT_UNKNOWN;
             }
-            return ALERT_UNKNOWN;
+        } finally {
+            if (debug) {
+                _log.debug("getResourceStatus: groupId=" + group.getId()
+                                +", execution time(ms)=" + (System.currentTimeMillis()-now));
+            }            
         }
     }
 
     private boolean isAckd(AuthzSubject subj, Alert alert)
-        throws PermissionException, FinderException
+        throws FinderException
     {
         AlertDefinition alertDef = alert.getAlertDefinition();
         // a resource alert may not have an associated escalation
@@ -321,8 +360,7 @@ public class DashboardPortletBossEJBImpl
         if (esc == null || esc.getMaxPauseTime() == 0) {
             return false;
         }
-        EscalationState state = _escMan.findEscalationState(
-            _alMan.findAlertById(alert.getId()).getAlertDefinition());
+        EscalationState state = _escMan.findEscalationState(alertDef);
         return state != null && state.getAcknowledgedBy() != null;
     }
 
