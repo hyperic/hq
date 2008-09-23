@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -74,18 +75,38 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     List findLastAvail(List mids) {
-        String sql = new StringBuilder()
+        List rtn = new ArrayList(mids.size());
+        String hql = new StringBuilder()
 			         .append("from AvailabilityDataRLE")
                      .append(" WHERE endtime = :endtime")
                      .append(" AND availabilityDataId.measurement in (:ids)")
                      .append(" ORDER BY endtime desc").toString();
-        return getSession()
-            .createQuery(sql)
-            .setLong("endtime", MAX_TIMESTAMP)
-            .setParameterList("ids", mids, new IntegerType())
-            .list();
+        final int batchSize = 500;
+        // need to do this because of hibernate bug
+        // http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
+        int i=0;
+        List tmp = new ArrayList(batchSize);
+        for (Iterator it=mids.iterator(); it.hasNext(); i++) {
+            tmp.add(it.next());
+            if ((i%batchSize) == 0) {
+                rtn.addAll(getSession()
+                    .createQuery(hql)
+                    .setLong("endtime", MAX_TIMESTAMP)
+                    .setParameterList("ids", tmp, new IntegerType())
+                    .list());
+                tmp.clear();
+            }
+        }
+        if (tmp.size() > 0) {
+            rtn.addAll(getSession()
+                .createQuery(hql)
+                .setLong("endtime", MAX_TIMESTAMP)
+                .setParameterList("ids", tmp, new IntegerType())
+                .list());
+        }
+        return rtn;
     }
-
+    
     int updateStartime(AvailabilityDataRLE avail, long startime) {
         remove(avail);
         avail.setStartime(startime);
