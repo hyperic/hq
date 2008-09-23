@@ -182,63 +182,96 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
     
     /**
-     * @throws FinderException 
+     * Clone a Server to a target Platform
      * @ejb:interface-method
      */
     public Server cloneServer(AuthzSubject subject, Platform targetPlatform,
                               Server serverToClone)
-        throws CreateException, ValidationException, PermissionException,
-               PlatformNotFoundException, AppdefDuplicateNameException,
-               FinderException  {
-        serverToClone.isWasAutodiscovered();
-        serverToClone.isRuntimeAutodiscovery();
+        throws ValidationException, PermissionException, RemoveException,
+               VetoException, CreateException, FinderException
+    {
+        Server s = null;
+        // See if we already have this server type
+        for (Iterator it = targetPlatform.getServers().iterator(); it.hasNext();)
+        {
+            Server server = (Server) it.next();
+            if (server.getServerType().equals(serverToClone.getServerType())) {
+                // Do nothing if it's a Network server
+                if (server.getServerType().getName().equals("NetworkServer"))
+                    return null;
+                
+                s = server;
+                break;
+            }
+        }
         ConfigResponseDB cr = serverToClone.getConfigResponse();
         byte[] productResponse = cr.getProductResponse();
         byte[] measResponse = cr.getMeasurementResponse();
         byte[] controlResponse = cr.getControlResponse();
         byte[] rtResponse = cr.getResponseTimeResponse();
         ConfigManagerLocal cMan = ConfigManagerEJBImpl.getOne();
-        ConfigResponseDB configResponse = cMan.createConfigResponse(
-            productResponse, measResponse, controlResponse, rtResponse);
-        Server s = new Server();
-        s.setName(serverToClone.getName());
-        s.setDescription(serverToClone.getDescription());
-        s.setInstallPath(serverToClone.getInstallPath());
-        String aiid = serverToClone.getAutoinventoryIdentifier();
-        if (aiid != null) {
-            s.setAutoinventoryIdentifier(serverToClone.getAutoinventoryIdentifier());
-        } else {
-            // Server was created by hand, use a generated AIID. (This matches
-            // the behaviour in 2.7 and prior)
-            aiid = serverToClone.getInstallPath() + "_" + System.currentTimeMillis() +
+        ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
+        
+        if (s == null) {
+            ConfigResponseDB configResponse = cMan.createConfigResponse(
+                productResponse, measResponse, controlResponse, rtResponse);
+            s = new Server();
+            s.setName(serverToClone.getName());
+            s.setDescription(serverToClone.getDescription());
+            s.setInstallPath(serverToClone.getInstallPath());
+            String aiid = serverToClone.getAutoinventoryIdentifier();
+            if (aiid != null) {
+                s.setAutoinventoryIdentifier(serverToClone.getAutoinventoryIdentifier());
+            } else {
+                // Server was created by hand, use a generated AIID. (This matches
+                // the behaviour in 2.7 and prior)
+                aiid = serverToClone.getInstallPath() + "_" + System.currentTimeMillis() +
                 "_" + serverToClone.getName();
-            s.setAutoinventoryIdentifier(aiid);
+                s.setAutoinventoryIdentifier(aiid);
+            }
+            s.setServicesAutomanaged(serverToClone.isServicesAutomanaged());
+            s.setRuntimeAutodiscovery(serverToClone.isRuntimeAutodiscovery());
+            s.setWasAutodiscovered(serverToClone.isWasAutodiscovered());
+            s.setAutodiscoveryZombie(false);
+            s.setLocation(serverToClone.getLocation());
+            s.setModifiedBy(serverToClone.getModifiedBy());
+            s.setConfigResponse(configResponse);
+            s.setPlatform(targetPlatform);
+
+            Integer stid = serverToClone.getServerType().getId();
+            ServerTypeDAO dao = new ServerTypeDAO(DAOFactory.getDAOFactory());
+            ServerType st = dao.findById(stid);
+            s.setServerType(st);
+            validateNewServer(targetPlatform, s);
+            getServerDAO().create(s);
+            // Add server to parent collection
+            targetPlatform.getServers().add(s);
+    
+            createAuthzServer(subject, s);
+    
+            // Send resource create event
+            ResourceCreatedZevent zevent =
+                new ResourceCreatedZevent(subject, s.getEntityId());
+            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+        }
+        else {
+            cMan.configureResponse(subject, cr, s.getEntityId(),
+                                   productResponse, measResponse,
+                                   controlResponse, rtResponse,
+                                   null, true, true);
+            
+            // Scrub the services
+            Service[] services =
+                (Service[]) s.getServices().toArray(new Service[0]);
+            for (int i = 0; i < services.length; i++) {
+                Service svc = services[i];
+                
+                if (!svc.getServiceType().getName().equals("CPU")) {
+                    svcMan.removeService(subject, svc);
+                }
+            }
         }
 
-        s.setServicesAutomanaged(serverToClone.getServicesAutomanaged());
-        s.setRuntimeAutodiscovery(serverToClone.getRuntimeAutodiscovery());
-        s.setWasAutodiscovered(serverToClone.getWasAutodiscovered());
-        s.setAutodiscoveryZombie(false);
-        s.setLocation(serverToClone.getLocation());
-        s.setModifiedBy(serverToClone.getModifiedBy());
-        s.setConfigResponse(configResponse);
-        s.setPlatform(targetPlatform);
-
-        Integer stid = serverToClone.getServerType().getId();
-        ServerType st;
-        st = DAOFactory.getDAOFactory().getServerTypeDAO().findById(stid);
-        s.setServerType(st);
-        validateNewServer(targetPlatform, s);
-        getServerDAO().create(s);
-        // Add server to parent collection
-        targetPlatform.getServers().add(s);
-
-        createAuthzServer(subject, s);
-
-        // Send resource create event
-        ResourceCreatedZevent zevent =
-            new ResourceCreatedZevent(subject, s.getEntityId());
-        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         return s;
     }
 
