@@ -52,6 +52,8 @@ public abstract class BaseService implements IEngineService {
     
     public static final String PARAM_CLONE = "clone";
     
+    public static final String PARAM_DELETE = "remove";
+
     /**
      * Service IDs
      */

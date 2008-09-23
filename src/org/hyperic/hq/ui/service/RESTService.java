@@ -261,6 +261,7 @@ public class RESTService extends BaseService {
         String rotationParam      = cycle.getParameter(PARAM_ROTATION);
         String intervalParam      = cycle.getParameter(PARAM_INTERVAL);
         String configParam        = cycle.getParameter(PARAM_CONFIG);
+        String deleteParam        = cycle.getParameter(PARAM_DELETE);
         String rpTemp             = cycle.getParameter(PARAM_RESOURCE_ID);
         
         Integer resourceIdParam = null;
@@ -282,7 +283,7 @@ public class RESTService extends BaseService {
 
         String res;
 
-        if (resourceIdParam != null && metricTemplIdParam != null) {
+        if (resourceIdParam != null && metricTemplIdParam != null && deleteParam == null) {
             // Get the timerange for the chart
             String timeRange = config.getValue(Constants.USER_DASHBOARD_CHART_RANGE);
             long end = System.currentTimeMillis();
@@ -360,6 +361,64 @@ public class RESTService extends BaseService {
             } catch (JSONException e) {
                 log.debug(e.getLocalizedMessage());
                 res = ERROR_GENERIC;
+            }
+        } else if (deleteParam != null && metricTemplIdParam != null && resourceIdParam != null) {
+            res = config.getValue(Constants.USER_DASHBOARD_CHARTS);
+            if (res == null)
+                res = ERROR_GENERIC; // chart not found
+            else {
+                List<String> chartList = null;
+                try {
+                    chartList = StringUtil.explode(res, Constants.DASHBOARD_DELIMITER);
+                    if (chartList != null) {
+                        ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+                        Matcher matcher;
+                        for (String chartCfg : chartList) {
+                            List<String> chart =
+                                StringUtil.explode(chartCfg, ",");
+                            //Lookup the rid for the resource in each chart
+                            matcher = AEID_PATTERN.matcher(chart.get(1));
+                            Integer resId = 0;
+                            if (matcher.matches()) {
+                                AppdefEntityID aeid =
+                                    new AppdefEntityID(matcher.group(1) + ':' +
+                                                       matcher.group(2));
+                                try {
+                                    Resource resource =
+                                        resMan.findResource(aeid);
+                                    resId = resource.getId();
+                                } catch (Exception e) {
+                                    // Resource removed
+                                    continue;
+                                }
+                            }
+                            if (resId.intValue() == resourceIdParam) {
+                                //If the resource exists in the chart then check all the mtids
+                                JSONArray mtidArray = new JSONArray(metricTemplIdParam);
+                                int mtidCount = 0;
+                                for (int i = 0; i < mtidArray.length(); i++) {
+                                    if (chartCfg.indexOf(mtidArray.getString(i)) != -1) {
+                                        mtidCount++;
+                                    }
+                                }
+                                if (mtidCount == mtidArray.length()) {
+                                    //If all the mtids are in the chart then remove it
+                                    chartList.remove(chartCfg);
+                                    // put the rest of the charts back in the config and persist it
+                                    String list = StringUtil.implode(chartList, 
+                                            Constants.DASHBOARD_DELIMITER);
+                                    config.setValue(Constants.USER_DASHBOARD_CHARTS, list);
+                                    ConfigurationProxy.getInstance().setDashboardPreferences(
+                                            _request.getSession(), user, boss, config);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    res = EMPTY_RESPONSE;
+                } catch (Exception e) {
+                    res = ERROR_GENERIC;
+                }
             }
         } else {
             // Get the list of saved charts for this dashboard
