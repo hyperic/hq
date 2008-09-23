@@ -1408,7 +1408,11 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 url: "/api.shtml?v=1.0&remove=true&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]",
                 handleAs: 'json',
                 load: function(data){
-                    if(typeof data.length != 'undefined' && !data.error)
+                    if(data.error)
+                    {
+                        console.debug('An server error occurred deleting chart: ' + data);
+                    }
+                    else
                     {
                         // cycle to next chart if we're still displaying the one that's about to get deleted.
                         if(that.currentChartId == chart)
@@ -1425,10 +1429,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                         that.chartselect.remove(chartIndex);
                         // delete chart data
                         delete that.charts[chart];
-                    }
-                    else
-                    {
-                        console.debug('An server error occurred deleting chart: ' + data);
                     }
                 },
                 error: function(data){
