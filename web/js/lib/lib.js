@@ -1394,11 +1394,11 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     this.click_chart_remove_btn = function(e)
     {
         // save chart id into a variable so if it cycles away from this chart during the request, we still know which one we're deleting
-        var chart = that.currentChartId;
+        var chartId = that.currentChartId;
         var chartIndex = that.chartselect.select.selectedIndex;
-        if(confirm('Remove ' + that.charts[chart].name + ' from saved charts?')) {
+        if(confirm('Remove ' + that.charts[chartId].name + ' from saved charts?')) {
             dojo11.xhrGet( {
-                url: "/api.shtml?v=1.0&remove=true&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]",
+                url: "/api.shtml?v=1.0&remove=true&s_id=chart&rid=" + that.charts[chartId].rid + "&mtid=[" + that.charts[chartId].mtid + "]",
                 handleAs: 'json',
                 preventCache: true,
                 load: function(data){
@@ -1411,7 +1411,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                         if(that.charts.length > 1)
                         {
                             // cycle to next chart if we're still displaying the one that's about to get deleted.
-                            if(that.currentChartId == chart)
+                            if(that.currentChartId == chartId)
                             {
                                 that.cycleCharts();
                             }
@@ -1419,23 +1419,29 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                         else
                         {
                             that.pauseCharts();
-                            that.swapSheets('instructions',
-                                function()
-                                {
-                                    // try again after a minute.
-                                    that.fetchChartsCycleId = setInterval(that.fetchAndPlayCharts, 60000);
-                                    that.chart.cleanup();
-                                });
+                            if(that.cycleId !== null) {
+                                clearInterval(that.cycleId);
+                                that.cycleId = null;
+                            }
+
+                            that.chart.cleanup();
+                            that.chart = null;
+
+                            that.swapSheets('instructions');
+
+                            // check for new charts after a minute.
+                            that.fetchChartsCycleId = setInterval(that.fetchAndPlayCharts, 60000);
                         }
                         // clear chart refresh data interval
-                        if(that.charts[chart].interval)
+                        if(that.charts[chartId].interval)
                         {
-                            clearInterval(that.charts[chart].interval);
+                            clearInterval(that.charts[chartId].interval);
                         }
                         // remove chart from selectbox
                         that.chartselect.remove(chartIndex);
+
                         // delete chart data
-                        delete that.charts[chart];
+                        that.charts.remove(chartId);
                     }
                 },
                 error: function(data){
@@ -1654,9 +1660,11 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                         function()
                         {
                             that.chartContainerResize();
-                            if(that.config.rotation == 'true' && that.charts.length > 1)
+                            that.playCharts();
+
+                            if(that.config.rotation != 'true' || data.length == 1)
                             {
-                                that.playCharts();
+                                that.pauseCharts();
                             }
                         });
                 }
@@ -3208,4 +3216,10 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
 
     // set default refresh rate and initialize the refresh rate links.
     that.setRefresh(120);
+};
+
+// see http://ejohn.org/blog/javascript-array-remove/ for explanation
+Array.prototype.remove = function(from, to){
+  this.splice(from, !to || 1 + to - from + (!(to < 0 ^ from >= 0) && (to < 0 || -1) * this.length));
+  return this.length;
 };
