@@ -407,6 +407,7 @@ public class RESTService extends BaseService {
                                     // put the rest of the charts back in the config and persist it
                                     String list = StringUtil.implode(chartList, 
                                             Constants.DASHBOARD_DELIMITER);
+                                    list = Constants.DASHBOARD_DELIMITER + list;
                                     config.setValue(Constants.USER_DASHBOARD_CHARTS, list);
                                     ConfigurationProxy.getInstance().setDashboardPreferences(
                                             _request.getSession(), user, boss, config);
