@@ -291,8 +291,7 @@ public class DashboardPortletBossEJBImpl
     
     private String getResourceStatus(AuthzSubject subj, ResourceGroup group,
                                      long range)
-        throws PermissionException, FinderException
-    {
+        throws FinderException {
         boolean debug = _log.isDebugEnabled();
         long now = System.currentTimeMillis();
         
@@ -341,14 +340,17 @@ public class DashboardPortletBossEJBImpl
                         return ALERT_OK;
                     }
                 }
-                return ALERT_UNKNOWN;
             }
+        } catch (PermissionException e) {
+            // User has no permission to see these resources
         } finally {
             if (debug) {
                 _log.debug("getResourceStatus: groupId=" + group.getId()
-                                +", execution time(ms)=" + (System.currentTimeMillis()-now));
+                                +", execution time(ms)=" +
+                                (System.currentTimeMillis()-now));
             }            
         }
+        return ALERT_UNKNOWN;
     }
 
     private boolean isAckd(AuthzSubject subj, Alert alert)
