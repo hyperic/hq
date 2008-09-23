@@ -51,7 +51,7 @@
     </property>
 
     <many-to-one name="applicationType" class="ApplicationType">
-      <column name="APPLICATION_TYPE_ID" not-null="true"/>
+      <column name="APPLICATION_TYPE_ID" not-null="true" index="APP_TYPE_ID_IDX"/>
     </many-to-one>
 
     <bag inverse="true" cascade="all" name="appServices" table="EAM_APP_SERVICE">
@@ -60,7 +60,7 @@
     </bag>
 
     <many-to-one name="resource" class="org.hyperic.hq.authz.server.session.Resource">
-      <column name="RESOURCE_ID"/>
+      <column name="RESOURCE_ID" index="APP_RES_ID_IDX"/>
     </many-to-one>
   </class>
 

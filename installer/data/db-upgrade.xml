@@ -9146,6 +9146,224 @@ has already been defined.
                           columnType="VARCHAR2" nullable="NOT NULL"/>
   </schemaSpec>
 
+  <schemaSpec version="3.127">
+    <schema-directSQL>
+      <statement>
+        alter table EAM_SUBJECT_ROLE_MAP add index FK320F631499D737AE (ROLE_ID)
+      </statement>
+      <statement>
+        alter table EAM_PLATFORM_SERVER_TYPE_MAP add index FK4BE3F5B5E3E1026D (PLATFORM_TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_APP_TYPE_SERVICE_TYPE_MAP add index FK5A2C503AAAC031CF (APPLICATION_TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_EVENT_LOG add index EVENT_LOG_RES_ID_IDX (RESOURCE_ID)
+      </statement>
+      <statement>
+        alter table EAM_GALERT_ACTION_LOG add index GALERT_ACTION_ID_IDX (ACTION_ID)
+      </statement>
+      <statement>
+        alter table EAM_GALERT_ACTION_LOG add index GALERT_ACTION_SUBJECT_ID_IDX (SUBJECT_ID)
+      </statement>
+      <statement>
+        alter table EAM_SERVICE add index SVC_CONFIG_RESP_ID_IDX (CONFIG_RESPONSE_ID)
+      </statement>
+      <statement>
+        alter table EAM_SERVICE add index SERVICE_RESOURCE_ID_IDX (RESOURCE_ID)
+      </statement>
+      <statement>
+        alter table EAM_SERVICE add index SVC_TYPE_ID_IDX (SERVICE_TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_SERVICE add index PARENT_SERVICE_ID_IDX (PARENT_SERVICE_ID)
+      </statement>
+      <statement>
+        alter table EAM_APP_SERVICE add index APP_SVC_GRP_ID_IDX (GROUP_ID)
+      </statement>
+      <statement>
+        alter table EAM_APP_SERVICE add index APP_SVC_APP_ID_IDX (APPLICATION_ID)
+      </statement>
+      <statement>
+        alter table EAM_APP_SERVICE add index APP_SVC_TYPE_ID_IDX (SERVICE_TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_ALERT_ACTION_LOG add index ALERT_ACTION_SUBJ_ID_IDX (SUBJECT_ID)
+      </statement>
+      <statement>
+        alter table EAM_ALERT_ACTION_LOG add index ALERT_ACTION_ID_IDX (ACTION_ID)
+      </statement>
+      <statement>
+        alter table EAM_ALERT_DEFINITION add index ACT_ON_TRIGGER_ID_IDX (ACT_ON_TRIGGER_ID)
+      </statement>
+      <statement>
+        alter table EAM_ALERT_DEFINITION add index ALERT_DEF_RES_ID_IDX (RESOURCE_ID)
+      </statement>
+      <statement>
+        alter table EAM_ALERT_DEFINITION add index ALERT_DEF_ESC_ID_IDX (ESCALATION_ID)
+      </statement>
+      <statement>
+        alter table EAM_UI_ATTACH_RSRC add index UI_ATTACHMENT_RES_ID_IDX (RESOURCE_ID)
+      </statement>
+      <statement>
+        alter table EAM_EXEC_STRATEGIES add index EXEC_STRATEGIES_DEF_ID_IDX (DEF_ID)
+      </statement>
+      <statement>
+        alter table EAM_EXEC_STRATEGIES add index EXEC_STRATEGIES_TYPE_ID_IDX (TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_EXEC_STRATEGIES add index EXEC_STRATEGIES_CONFIG_ID_IDX (CONFIG_ID)
+      </statement>
+      <statement>
+        alter table EAM_ROLE_RESOURCE_GROUP_MAP add index ROLE_RES_GRP_ROLE_ID_IDX (ROLE_ID)
+      </statement>
+      <statement>
+        alter table EAM_SERVICE_TYPE add index SVC_TYPE_SERVER_TYPE_ID_IDX (SERVER_TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_UI_ATTACHMENT add index UI_ATTACHMENT_VIEW_ID_IDX (VIEW_ID)
+      </statement>
+      <statement>
+        alter table EAM_ALERT_CONDITION add index ALERT_COND_TRIGGER_ID_IDX (TRIGGER_ID)
+      </statement>
+      <statement>
+        alter table EAM_ESCALATION_ACTION add index ESC_ACTION_ID_IDX (ACTION_ID)
+      </statement>
+      <statement>
+        alter table EAM_ESCALATION_STATE add index ACKNOWLEDGED_BY_IDX (ACKNOWLEDGED_BY)
+      </statement>
+      <statement>
+        alter table EAM_PLATFORM add index PLATFORM_TYPE_ID_IDX (PLATFORM_TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_PLATFORM add index PLATFORM_RES_ID_IDX (RESOURCE_ID)
+      </statement>
+      <statement>
+        alter table EAM_PLATFORM add index CONFIG_RESPONSE_ID_IDX (CONFIG_RESPONSE_ID)
+      </statement>
+      <statement>
+        alter table EAM_PLATFORM add index AGENT_ID_IDX (AGENT_ID)
+      </statement>
+      <statement>
+        alter table EAM_GTRIGGERS add index GTRIGGERS_CONFIG_ID_IDX (CONFIG_ID)
+      </statement>
+      <statement>
+        alter table EAM_GTRIGGERS add index GTRIGGERS_TYPE_ID_IDX (TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_GTRIGGERS add index GTRIGGERS_STRAT_ID_IDX (STRAT_ID)
+      </statement>
+      <statement>
+        alter table EAM_SERVER add index SERVER_CONFIG_RESPONSE_ID_IDX (CONFIG_RESPONSE_ID)
+      </statement>
+      <statement>
+        alter table EAM_SERVER add index SERVER_TYPE_ID_IDX (SERVER_TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_SERVER add index SERVER_RES_ID_IDX (RESOURCE_ID)
+      </statement>
+      <statement>
+        alter table EAM_GALERT_AUX_LOGS add index GALERT_AUX_LOGS_PARENT_IDX (PARENT)
+      </statement>
+      <statement>
+        alter table EAM_ROLE_CALENDAR add index ROLE_CAL_ID_IDX (CALENDAR_ID)
+      </statement>
+      <statement>
+        alter table EAM_OPERATION add index OP_RES_TYPE_ID_IDX (RESOURCE_TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_ROLE add index ROLE_RES_ID_IDX (RESOURCE_ID)
+      </statement>
+      <statement>
+        alter table EAM_CRITERIA add index CRITERIA_RESOURCE_ID_PROP_IDX (RESOURCE_ID_PROP)
+      </statement>
+      <statement>
+        alter table EAM_CRITERIA add index CRITERIA_RES_GRP_ID_IDX (RESOURCE_GROUP_ID)
+      </statement>
+      <statement>
+        alter table EAM_UI_VIEW add index UI_PLUGIN_ID_IDX (UI_PLUGIN_ID)
+      </statement>
+      <statement>
+        alter table EAM_RESOURCE_EDGE add index REL_ID_IDX (REL_ID)
+      </statement>
+      <statement>
+        alter table EAM_AGENT add index AGENT_TYPE_ID_IDX (AGENT_TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_RESOURCE_GROUP add index RES_GRP_RES_ID_IDX (RESOURCE_ID)
+      </statement>
+      <statement>
+        alter table EAM_RESOURCE_GROUP add index RES_PROTO_IDX (RESOURCE_PROTOTYPE)
+      </statement>
+      <statement>
+        alter table EAM_GALERT_LOGS add index GALERT_LOGS_DEF_ID_IDX (DEF_ID)
+      </statement>
+      <statement>
+        alter table EAM_GALERT_DEFS add index GALERT_DEFS_ESC_ID_IDX (ESCALATION_ID)
+      </statement>
+      <statement>
+        alter table EAM_GALERT_DEFS add index GALERT_DEFS_GROUP_ID_IDX (GROUP_ID)
+      </statement>
+      <statement>
+        alter table EAM_DASH_CONFIG add index DASH_CONFIG_CRISPO_ID_IDX (CRISPO_ID)
+      </statement>
+      <statement>
+        alter table EAM_MEASUREMENT_TEMPL add index TEMPL_MONITORABLE_TYPE_ID_IDX (MONITORABLE_TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_SERVICE_DEP_MAP add index DEPENDENT_SVC_ID_IDX (DEPENDENT_SERVICE_ID)
+      </statement>
+      <statement>
+        alter table EAM_STAT_ERRORS add index STAT_ERRORS_ERROR_ID_IDX (ERROR_ID)
+      </statement>
+      <statement>
+        alter table EAM_ALERT_CONDITION_LOG add index ALERT_CONDITION_ID_IDX (CONDITION_ID)
+      </statement>
+      <statement>
+        alter table EAM_ROLE_OPERATION_MAP add index ROLE_OP_ID_IDX (OPERATION_ID)
+      </statement>
+      <statement>
+        alter table EAM_SUBJECT add index PREF_CRISPO_ID_IDX (PREF_CRISPO_ID)
+      </statement>
+      <statement>
+        alter table EAM_AIQ_SERVICE add index AIQ_SVC_SERVER_ID_IDX (SERVER_ID)
+      </statement>
+      <statement>
+        alter table EAM_APPLICATION add index APP_TYPE_ID_IDX (APPLICATION_TYPE_ID)
+      </statement>
+      <statement>
+        alter table EAM_APPLICATION add index APP_RES_ID_IDX (RESOURCE_ID)
+      </statement>
+      <statement>
+        alter table QRTZ_TRIGGERS add index EAM_FK_QT_QJD (JOB_NAME, JOB_GROUP)
+      </statement>
+      <statement>
+        alter table HQ_AVAIL_DATA_RLE drop index AVAIL_RLE_ENDTIME_IDX
+      </statement>
+    </schema-directSQL>
+    <groovy targetDB="mysql">
+      <![CDATA[
+        def dbname = SQL.firstRow("select database() as dbname")
+        def stmt = "select distinct(INDEX_NAME), TABLE_NAME from information_schema.STATISTICS where INDEX_SCHEMA = '" +
+                   dbname.get("dbname") + "' and INDEX_NAME like '%_YY'"
+        println(stmt)
+        def sql = []
+        SQL.eachRow(stmt, {
+            sql << "alter table ${it.TABLE_NAME} drop index ${it.INDEX_NAME}"
+        } )
+        try {
+            stmt = CONN.createStatement()
+            for (s in sql) {
+                println(s)
+                stmt.execute(s)
+            }
+        } finally {
+             stmt.close()
+        }
+      ]]>
+    </groovy>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

@@ -19,15 +19,15 @@
     </version>
 
     <many-to-one name="configCrispo">
-      <column name="CONFIG_ID" not-null="true"/>
+      <column name="CONFIG_ID" not-null="true" index="GTRIGGERS_CONFIG_ID_IDX"/>
     </many-to-one>
 
     <many-to-one name="typeInfo">
-      <column name="TYPE_ID" not-null="true"/>
+      <column name="TYPE_ID" not-null="true" index="GTRIGGERS_TYPE_ID_IDX"/>
     </many-to-one>
     
     <many-to-one name="strategy">
-      <column name="STRAT_ID" not-null="true"/>
+      <column name="STRAT_ID" not-null="true" index="GTRIGGERS_STRAT_ID_IDX"/>
     </many-to-one>
 
     <property name="listIndex">

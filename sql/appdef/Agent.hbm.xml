@@ -50,7 +50,7 @@
     </property>
 
     <many-to-one name="agentType">
-      <column name="AGENT_TYPE_ID" not-null="false"/>
+      <column name="AGENT_TYPE_ID" not-null="false" index="AGENT_TYPE_ID_IDX"/>
     </many-to-one>
 
     <!-- cascade must be set to "save-update" or else it will have the undesired affect of

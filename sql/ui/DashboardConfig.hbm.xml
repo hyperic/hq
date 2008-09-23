@@ -22,7 +22,7 @@
     </property>
 
     <many-to-one name="crispo">
-      <column name="CRISPO_ID" not-null="true" />
+      <column name="CRISPO_ID" not-null="true" index="DASH_CONFIG_CRISPO_ID_IDX"/>
     </many-to-one>
 
     <subclass name="RoleDashboardConfig" discriminator-value="ROLE">

@@ -20,11 +20,11 @@
       </many-to-one>
 
       <many-to-one name="resourceGroup" class="org.hyperic.hq.authz.server.session.ResourceGroup">
-        <column name="GROUP_ID" not-null="false"/>
+        <column name="GROUP_ID" not-null="false" index="APP_SVC_GRP_ID_IDX"/>
       </many-to-one>
 
       <many-to-one name="application" class="org.hyperic.hq.appdef.server.session.Application">
-        <column name="APPLICATION_ID" not-null="false"/>
+        <column name="APPLICATION_ID" not-null="false" index="APP_SVC_APP_ID_IDX"/>
       </many-to-one>
     </properties>
 
@@ -49,7 +49,7 @@
     </property>
 
     <many-to-one name="serviceType" class="org.hyperic.hq.appdef.server.session.ServiceType">
-      <column name="SERVICE_TYPE_ID" not-null="false"/>
+      <column name="SERVICE_TYPE_ID" not-null="false" index="APP_SVC_TYPE_ID_IDX"/>
     </many-to-one>
 
     <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="appSvcDependencies" table="EAM_SERVICE_DEP_MAP" lazy="true">

@@ -28,7 +28,7 @@
     </property>
 
     <many-to-one name="alertDef">
-      <column name="DEF_ID" not-null="true"/>
+      <column name="DEF_ID" not-null="true" index="GALERT_LOGS_DEF_ID_IDX"/>
     </many-to-one>
 
     <property name="shortReason">

@@ -52,11 +52,11 @@
     </property>
 
     <many-to-one name="resourcePrototype">
-      <column name="RESOURCE_PROTOTYPE"/>
+      <column name="RESOURCE_PROTOTYPE" index="RES_PROTO_IDX"/>
     </many-to-one>
 
     <many-to-one name="resource">
-      <column name="RESOURCE_ID" not-null="true"/>
+      <column name="RESOURCE_ID" not-null="true" index="RES_GRP_RES_ID_IDX"/>
     </many-to-one>
 
     <bag name="memberBag" table="EAM_RES_GRP_RES_MAP" inverse="true">

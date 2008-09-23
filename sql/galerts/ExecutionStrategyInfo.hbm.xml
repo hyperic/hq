@@ -20,11 +20,11 @@
     </version>
     
     <many-to-one name="alertDef">
-      <column name="DEF_ID" not-null="true"/>
+      <column name="DEF_ID" not-null="true" index="EXEC_STRATEGIES_DEF_ID_IDX"/>
     </many-to-one>
     
     <many-to-one name="configCrispo">
-      <column name="CONFIG_ID" not-null="true"/>
+      <column name="CONFIG_ID" not-null="true" index="EXEC_STRATEGIES_CONFIG_ID_IDX"/>
     </many-to-one>
         
     <property name="partitionEnum">
@@ -32,7 +32,7 @@
     </property>
 
     <many-to-one name="type">
-      <column name="TYPE_ID" not-null="true"/>
+      <column name="TYPE_ID" not-null="true" index="EXEC_STRATEGIES_TYPE_ID_IDX"/>
     </many-to-one>
     
     <list name="triggerList" table="EAM_GTRIGGERS"

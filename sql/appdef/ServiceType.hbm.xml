@@ -48,7 +48,7 @@
     </property>
 
     <many-to-one name="serverType" class="ServerType">
-      <column name="SERVER_TYPE_ID"/>
+      <column name="SERVER_TYPE_ID" index="SVC_TYPE_SERVER_TYPE_ID_IDX"/>
     </many-to-one>
 
     <set name="applicationTypes" table="EAM_APP_TYPE_SERVICE_TYPE_MAP">

@@ -26,11 +26,11 @@
 	</property>
 
     <many-to-one name="action" class="Action">
-      <column name="ACTION_ID"/>
+      <column name="ACTION_ID" index="ALERT_ACTION_ID_IDX"/>
     </many-to-one>
 
     <many-to-one name="subject">
-      <column name="SUBJECT_ID"/>
+      <column name="SUBJECT_ID" index="ALERT_ACTION_SUBJ_ID_IDX"/>
     </many-to-one>
   </class>
 

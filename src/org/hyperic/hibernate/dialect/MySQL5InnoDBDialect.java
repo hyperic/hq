@@ -363,17 +363,8 @@ public class MySQL5InnoDBDialect
                                                    boolean referencesPrimaryKey)
     {
         String cols = StringUtil.implode(Arrays.asList(foreignKey), ", ");
-        // as of MySQL 5.0.x max index size is 64 chars
-        String indxName = cols.replaceAll(", ", "_");
-        indxName = (indxName.length() > 60) ?
-            indxName.substring(0,60) : indxName;
-        indxName = indxName+"_YY";
         return new StringBuffer(64)
-            .append(" add index ")
-            .append(indxName)
-            .append(" (")
-            .append(cols)
-            .append("), add constraint ")
+            .append(" add constraint ")
             .append(constraintName)
             .append(" foreign key (")
             .append(cols)

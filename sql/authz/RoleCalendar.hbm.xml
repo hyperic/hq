@@ -25,7 +25,7 @@
     </many-to-one>
 
     <many-to-one name="calendar">
-      <column name="CALENDAR_ID" not-null="true" unique-key="role_cal_uniq"/>
+      <column name="CALENDAR_ID" not-null="true" unique-key="role_cal_uniq" index="ROLE_CAL_ID_IDX"/>
     </many-to-one>
 
     <property name="typeEnum">

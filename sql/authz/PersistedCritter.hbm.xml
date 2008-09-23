@@ -19,8 +19,8 @@
       <column name="LIST_INDEX" not-null="true"/>
     </property>
     
-     <many-to-one name="resourceGroup" class="ResourceGroup">
-      <column name="RESOURCE_GROUP_ID" not-null="true"/>
+    <many-to-one name="resourceGroup" class="ResourceGroup">
+      <column name="RESOURCE_GROUP_ID" not-null="true" index="CRITERIA_RES_GRP_ID_IDX"/>
     </many-to-one>    
     
      <property name="klazz">
@@ -31,12 +31,12 @@
       <column name="STRING_PROP" not-null="false" length="1024"/>
     </property>
     
-	<property name="dateProp">
+    <property name="dateProp">
       <column name="DATE_PROP" not-null="false"/>
     </property>
 
     <many-to-one name="resourceProp" class="Resource">
-      <column name="RESOURCE_ID_PROP"/>
+      <column name="RESOURCE_ID_PROP" index="CRITERIA_RESOURCE_ID_PROP_IDX"/>
     </many-to-one>
     
      <property name="numericProp">

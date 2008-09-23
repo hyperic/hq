@@ -61,7 +61,7 @@
     </property>
 
     <many-to-one name="monitorableType" class="MonitorableType">
-      <column name="MONITORABLE_TYPE_ID" not-null="true"/>
+      <column name="MONITORABLE_TYPE_ID" not-null="true" index="TEMPL_MONITORABLE_TYPE_ID_IDX"/>
     </many-to-one>
 
     <many-to-one name="category" class="Category">

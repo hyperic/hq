@@ -61,7 +61,7 @@
     </property>
 
     <many-to-one name="parentService" class="Service">
-      <column name="PARENT_SERVICE_ID" not-null="false" unique-key="EAM_SERVICE_PARENT_IDX"/>
+      <column name="PARENT_SERVICE_ID" not-null="false" unique-key="EAM_SERVICE_PARENT_IDX" index="PARENT_SERVICE_ID_IDX"/>
     </many-to-one>
 
     <many-to-one name="server" class="Server">
@@ -69,11 +69,11 @@
     </many-to-one>
 
     <many-to-one name="serviceType" class="ServiceType">
-      <column name="SERVICE_TYPE_ID" not-null="true"/>
+      <column name="SERVICE_TYPE_ID" not-null="true" index="SVC_TYPE_ID_IDX"/>
     </many-to-one>
 
     <many-to-one name="configResponse" unique="true" class="org.hyperic.hq.appdef.ConfigResponseDB">
-      <column name="CONFIG_RESPONSE_ID" not-null="false"/>
+      <column name="CONFIG_RESPONSE_ID" not-null="false" index="SVC_CONFIG_RESP_ID_IDX"/>
     </many-to-one>
 
     <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="appServices" table="EAM_APP_SERVICE">
@@ -82,7 +82,7 @@
     </bag>
 
     <many-to-one name="resource" class="org.hyperic.hq.authz.server.session.Resource">
-      <column name="RESOURCE_ID"/>
+      <column name="RESOURCE_ID" index="SERVICE_RESOURCE_ID_IDX"/>
     </many-to-one>
   </class>
 

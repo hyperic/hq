@@ -67,7 +67,7 @@
     </property>
 
     <many-to-one name="server" class="org.hyperic.hq.appdef.server.session.Server">
-      <column name="SERVER_ID" not-null="true"/>
+      <column name="SERVER_ID" not-null="true" index="AIQ_SVC_SERVER_ID_IDX"/>
     </many-to-one>
   </class>
 

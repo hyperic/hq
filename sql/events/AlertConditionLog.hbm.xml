@@ -20,7 +20,7 @@
     </many-to-one>
 
     <many-to-one name="condition" class="AlertCondition">
-      <column name="CONDITION_ID"/>
+      <column name="CONDITION_ID" index="ALERT_CONDITION_ID_IDX"/>
     </many-to-one>
   </class>
 

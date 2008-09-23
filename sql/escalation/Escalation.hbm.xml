@@ -56,7 +56,7 @@
           <column name="WAIT_TIME" not-null="true"/>
         </property>
         <many-to-one name="action">
-          <column name="ACTION_ID" not-null="true"/>
+          <column name="ACTION_ID" not-null="true" index="ESC_ACTION_ID_IDX"/>
         </many-to-one>
       </composite-element>
     </list>

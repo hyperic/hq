@@ -76,7 +76,7 @@
     </set>
 
     <many-to-one name="prefs">
-      <column name="PREF_CRISPO_ID"/>
+      <column name="PREF_CRISPO_ID" index="PREF_CRISPO_ID_IDX"/>
     </many-to-one>
   </class>
 

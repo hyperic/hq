@@ -31,7 +31,7 @@
     </property>
 
     <many-to-one name="resource" class="Resource">
-      <column name="RESOURCE_ID"/>
+      <column name="RESOURCE_ID" index="ROLE_RES_ID_IDX"/>
     </many-to-one>
 
     <bag inverse="true" name="resourceGroups" table="EAM_ROLE_RESOURCE_GROUP_MAP">
@@ -59,7 +59,7 @@
   <class name="RoleResourceGroupMap" table="EAM_ROLE_RESOURCE_GROUP_MAP">
     <composite-id name="id" class="RoleResourceGroupMapId">
       <key-many-to-one name="role" class="Role">
-        <column name="ROLE_ID" not-null="true"/>
+        <column name="ROLE_ID" not-null="true" index="ROLE_RES_GRP_ROLE_ID_IDX"/>
       </key-many-to-one>
 
       <key-many-to-one name="resourceGroup" class="ResourceGroup">
@@ -75,7 +75,7 @@
       </key-many-to-one>
 
       <key-many-to-one name="operationId" class="Operation">
-        <column name="OPERATION_ID" not-null="true"/>
+        <column name="OPERATION_ID" not-null="true" index="ROLE_OP_ID_IDX"/>
       </key-many-to-one>
     </composite-id>
   </class>

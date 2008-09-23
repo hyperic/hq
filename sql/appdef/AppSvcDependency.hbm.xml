@@ -24,7 +24,7 @@
       </many-to-one>
 
       <many-to-one name="dependentService" class="AppService">
-        <column name="DEPENDENT_SERVICE_ID" not-null="false"/>
+        <column name="DEPENDENT_SERVICE_ID" not-null="false" index="DEPENDENT_SVC_ID_IDX"/>
       </many-to-one>
     </properties>
   </class>

@@ -34,7 +34,7 @@
     </property>
 
     <many-to-one name="plugin" cascade="save-update" class="UIPlugin">
-      <column name="UI_PLUGIN_ID" not-null="true" />
+      <column name="UI_PLUGIN_ID" not-null="true" index="UI_PLUGIN_ID_IDX"/>
     </many-to-one>
     
     <bag name="attachmentsBag" table="EAM_UI_ATTACHMENT"
