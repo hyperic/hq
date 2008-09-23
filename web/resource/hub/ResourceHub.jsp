@@ -369,9 +369,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     </c:choose>
     </th>
     <c:forEach items="${Indicators}" var="indicator">
-      <th class="tableRowInactive" align="middle"><c:out value="${indicator.name}"/></th>
+      <th class="ListHeaderCheckbox"><c:out value="${indicator.name}"/></th>
     </c:forEach>
-      <th class="tableRowInactive" align="middle"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
+      <th class="ListHeaderCheckbox"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
     </tr>
     <c:forEach items="${AllResources}" var="resource">
     <tr class="tableRowOdd">
