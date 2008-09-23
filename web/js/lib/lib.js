@@ -802,15 +802,7 @@ hyperic.dashboard.widget = {
      * @see #clickHandler
      */
     clickHandler: function(e) {
-        var action = '';
-        if(e.target.className.match(/^btn(?:Blue|Gray|Green)$/)) {
-            action = e.target.name;
-        }
-        else
-        {
-            action = e.target.className;
-        }
-
+        var action = e.target.className;
         if(this['click_' + action])
         {
             e.stopPropagation();
@@ -1419,7 +1411,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                         {
                             that.cycleCharts();
                         }
-
                         // clear chart refresh data interval
                         if(that.charts[chart].interval)
                         {
@@ -1772,6 +1763,9 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
 
         // set up the event handler for the select box
         dojo11.connect(that.chartselect.select,'onclick',that.select);
+
+        // set up the event handler for the remove button
+        dojo11.connect(dojo11.byId('chart_remove_btn'),'onclick',that.click_chart_remove_btn);
 
         // handle resizing of the window
         dojo11.connect(window,'onresize',dojo11.hitch(that, that.chartResize));
