@@ -73,6 +73,7 @@ import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
@@ -161,6 +162,11 @@ public class DashboardPortletBossEJBImpl
                 // Only do one metric
                 Integer mtid = (Integer) templs.get(0);
                 List metrics = mMan.findMeasurements(subj, mtid, aeids);
+
+                // Get measurement name
+                Measurement measurement = (Measurement) metrics.get(0);
+                jObj.put("measurementName", measurement.getTemplate().getName());
+                
                 List data = dMan.getHistoricalData(metrics, begin, end,
                                                    intv, 0, true,
                                                    PageControl.PAGE_ALL);

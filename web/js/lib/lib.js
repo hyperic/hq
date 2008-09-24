@@ -665,14 +665,23 @@ hyperic.widget = hyperic.widget || {};
     var that = this;
     that.subscriptions=[];
     that.create = function(node, kwArgs) {
-
+    	// display the metric name for a multiple metric single resource chart
+    	var chartDisplayName = kwArgs.name;  
+    	if(kwArgs.measurementName)
+    	{
+        	if(chartDisplayName.indexOf(kwArgs.measurementName) == -1)
+            {
+        		chartDisplayName += ': ' + kwArgs.measurementName;
+            }     		
+    	}
+    	
         if(kwArgs.url)
         {
-            var template = '<div class="chartCont"> <h3 class="cTitle"><a href="'+ kwArgs.url +'" style="color: #FFF">' + kwArgs.name + '</a></h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
+            var template = '<div class="chartCont"> <h3 class="cTitle"><a href="' + kwArgs.url + '" style="color: #FFF">' + chartDisplayName + '</a></h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
         }
         else
         {
-            var template = '<div class="chartCont"> <h3 class="cTitle">' + kwArgs.name + '</h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
+            var template = '<div class="chartCont"> <h3 class="cTitle">' + chartDisplayName + '</h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
         }
         
         that.template = template;
@@ -1667,7 +1676,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                             that.chartContainerResize();
                             that.playCharts();
 
-                            if(that.config.rotation != 'true' || charts.length == 1)
+                            if(that.config.rotation != 'true' || that.charts.length == 1)
                             {
                                 that.pauseCharts();
                             }
@@ -1698,7 +1707,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
 
     that.fetchChartData = function(chart)
     {
-        // console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]");
+    	// console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]");
         return dojo11.xhrGet( {
             url: "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]",
             handleAs: 'json',
@@ -1707,7 +1716,8 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 // that.charts[chart].data = data;
                 if(!data.error && data.length > 0)
                 {
-                    that.charts[chart].data = data[0].data;
+                	that.charts[chart].data = data[0].data;                	
+                	that.charts[chart].measurementName = data[0].measurementName;               	
                 }
             },
             error: function(data){
