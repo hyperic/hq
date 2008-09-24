@@ -258,6 +258,9 @@ public class HTTPCollector extends SocketChecker {
         HttpClientParams params = new HttpClientParams();
         String userAgent = "Hyperic-HQ-Agent/" + ProductProperties.getVersion();
         params.setParameter(HttpMethodParams.USER_AGENT, userAgent);
+        if (this.hosthdr != null) {
+            params.setVirtualHost(this.hosthdr);
+        }
         client.setParams(params);
         client.setConnectionTimeout(getTimeoutMillis());
         client.setTimeout(getTimeoutMillis());
@@ -300,10 +303,6 @@ public class HTTPCollector extends SocketChecker {
 
                 method.setDoAuthentication(true);
             }
-        }
-
-        if (this.hosthdr != null) {
-            method.setRequestHeader("Host", this.hosthdr);
         }
 
         double avail;
