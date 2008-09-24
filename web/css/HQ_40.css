@@ -2216,3 +2216,7 @@ button span{
     font-weight: 700;
     outline: none;
 }
+
+.SubTabCellWhite {
+    background-color:#fff
+}

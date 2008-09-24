@@ -97,7 +97,7 @@
 <c:forEach var="tab" varStatus="status" items="${subTabList}">
   <c:choose>
     <c:when test="${status.index == subSelectedIndexStr}">
-       <td><html:img page="/images/Sub${subSectionName}_${tab.value}_on.gif" width="${tab.width}" height="${tab.height}" border="0" alt=""/></td>
+       <td class="SubTabCellWhite"><html:img page="/images/Sub${subSectionName}_${tab.value}_on.gif" border="0" alt=""/></td>
     </c:when>
     <c:otherwise>
     <c:choose>
@@ -122,7 +122,7 @@
           <c:param name="ctype" value="${autogroupResourceType}"/>
         </c:if>
       </c:url>
-       <td><html:link href="${tabLink}"><html:img page="/images/Sub${subSectionName}_${tab.value}_off.gif" onmouseover="imageSwap (this, imagePath +  'Sub${subSectionName}_${tab.value}', '_over')" onmouseout="imageSwap (this, imagePath +  'Sub${subSectionName}_${tab.value}', '_off')" width="${tab.width}" height="${tab.height}" alt="" border="0"/></html:link></td>
+       <td class="SubTabCellWhite"><html:link href="${tabLink}"><html:img page="/images/Sub${subSectionName}_${tab.value}_off.gif" onmouseover="imageSwap (this, imagePath +  'Sub${subSectionName}_${tab.value}', '_over')" onmouseout="imageSwap (this, imagePath +  'Sub${subSectionName}_${tab.value}', '_off')" alt="" border="0"/></html:link></td>
     </c:when>
     <c:otherwise>
     <td class="SubTabCell"><html:img page="/images/spacer.gif" width="${tab.width}" height="${tab.height}" alt="" border="0"/></td>

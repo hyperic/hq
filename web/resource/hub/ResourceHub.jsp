@@ -270,19 +270,19 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <div class="FilterImage" style="padding: 4px; text-align: right;">
 	<c:choose>
 	  <c:when test="${ResourceHubForm.view == CHART}">
-	    <html:img page="/images/SubHub_ChartView_on.gif" alt="Chart View" width="104" height="15" border="0"/>
+	    <html:img page="/images/SubHub_ChartView_on.gif" alt="Chart View" border="0"/>
 	  </c:when>
 	  <c:otherwise>
-	    <html:link page="/ResourceHub.do" onclick="ResourceHubForm.view.value = 'chart'; ResourceHubForm.submit(); return false;"><html:img page="/images/SubHub_ChartView_off.gif" alt="Chart View" width="104" height="15" border="0" onmouseover="imageSwap (this, imagePath + 'SubHub_ChartView', '_over')" onmouseout="imageSwap (this, imagePath + 'SubHub_ChartView', '_off')"/></html:link>
+	    <html:link page="/ResourceHub.do" onclick="ResourceHubForm.view.value = 'chart'; ResourceHubForm.submit(); return false;"><html:img page="/images/SubHub_ChartView_off.gif" alt="Chart View" border="0" onmouseover="imageSwap (this, imagePath + 'SubHub_ChartView', '_over')" onmouseout="imageSwap (this, imagePath + 'SubHub_ChartView', '_off')"/></html:link>
 	  </c:otherwise>
 	</c:choose>
 
 	<c:choose>
 	  <c:when test="${ResourceHubForm.view == LIST}">
-	    <html:img page="/images/SubHub_ListView_on.gif" alt="List View" width="104" height="15" border="0"/>
+	    <html:img page="/images/SubHub_ListView_on.gif" alt="List View" border="0"/>
 	  </c:when>
 	  <c:otherwise>
-	    <html:link page="/ResourceHub.do" onclick="ResourceHubForm.view.value = 'list'; ResourceHubForm.submit(); return false;"><html:img page="/images/SubHub_ListView_off.gif" alt="List View" width="104" height="15" border="0" onmouseover="imageSwap (this, imagePath + 'SubHub_ListView', '_over')" onmouseout="imageSwap (this, imagePath + 'SubHub_ListView', '_off')"/></html:link>
+	    <html:link page="/ResourceHub.do" onclick="ResourceHubForm.view.value = 'list'; ResourceHubForm.submit(); return false;"><html:img page="/images/SubHub_ListView_off.gif" alt="List View" border="0" onmouseover="imageSwap (this, imagePath + 'SubHub_ListView', '_over')" onmouseout="imageSwap (this, imagePath + 'SubHub_ListView', '_off')"/></html:link>
 	  </c:otherwise>
 	</c:choose>
 </div>
