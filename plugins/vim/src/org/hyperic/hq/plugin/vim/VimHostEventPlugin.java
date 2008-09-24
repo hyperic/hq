@@ -64,6 +64,11 @@ public class VimHostEventPlugin
 
         super.configure(config);
         _props = config.toProperties();
+        setup();
+        getManager().addRunnableTracker(this);
+    }
+
+    private void setup() throws PluginException {
         _lastCheck = System.currentTimeMillis();
         try {
             _vim = VimUtil.getInstance(_props);
@@ -83,8 +88,6 @@ public class VimHostEventPlugin
             _vim = null;
             throw new PluginException(e.getMessage(), e);
         }
-
-        getManager().addRunnableTracker(this);
     }
 
     public void shutdown() throws PluginException {
@@ -104,6 +107,10 @@ public class VimHostEventPlugin
         }
         _log.debug("Checking for events");
 
+        if (!_vim.isSessionValid()) {
+            VimUtil.dispose(_vim);
+            setup();
+        }
         Event[] events;
         try {
             events = _history.getLastPage();

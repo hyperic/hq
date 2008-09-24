@@ -68,9 +68,11 @@ public class VimConnection {
             _log.debug("Creating cache for: " + url);
         }
         else {
+            boolean requiresReconnect = false;
             boolean usernameChanged = !username.equals(conn._user);
             boolean passwordChanged = !password.equals(conn._pass);
             if (usernameChanged || passwordChanged) {
+                requiresReconnect = true;
                 if (_log.isDebugEnabled()) {
                     String diff = "";
                     if (usernameChanged) {
@@ -85,6 +87,11 @@ public class VimConnection {
                     _log.debug("Credentials changed (" + diff +
                                ") reconnecting cached connection for: " + url);                    
                 }
+            }
+            else {
+                requiresReconnect = !conn.vim.isSessionValid();
+            }
+            if (requiresReconnect) {
                 VimUtil.dispose(conn.vim);
                 _log.debug("Closed previous connection (" +
                            address(conn.vim) + ") for: " + url); 
