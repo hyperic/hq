@@ -92,7 +92,7 @@ public class AlertDAO extends HibernateDAO {
         Query q;
         
         String sql = PermissionManagerFactory.getInstance()
-                        .getAlertsHQL(inEsc, notFixed, groupId)
+                        .getAlertsHQL(inEsc, notFixed, groupId, false)
                      + " order by " + sort.getSortString("a", "d", "r")
                      + (pageInfo.isAscending() ? "" : " DESC");
         
@@ -118,6 +118,32 @@ public class AlertDAO extends HibernateDAO {
         return pageInfo.pageResults(q).list();
     }
     
+    Integer countByCreateTimeAndPriority(Integer subj, long begin, long end,
+                                         int priority, boolean inEsc,
+                                         boolean notFixed, Integer groupId)   
+    {
+        String[] ops =
+            new String[] { AuthzConstants.platformOpManageAlerts,
+                           AuthzConstants.serverOpManageAlerts,
+                           AuthzConstants.serviceOpManageAlerts };
+        Query q;
+        
+        String sql = PermissionManagerFactory.getInstance()
+                        .getAlertsHQL(inEsc, notFixed, groupId, true);
+            
+        q = getSession().createQuery(sql)
+            .setLong("begin", begin)
+            .setLong("end", end)
+            .setInteger("priority", priority);
+    
+        if (sql.indexOf("subj") > 0) {
+            q.setInteger("subj", subj.intValue())
+             .setParameterList("ops", ops);
+        }
+    
+        return (Integer) q.uniqueResult();
+    }
+
     public List findByAppdefEntityInRange(AppdefEntityID id, long begin,
                                           long end, boolean nameSort,
                                           boolean asc)

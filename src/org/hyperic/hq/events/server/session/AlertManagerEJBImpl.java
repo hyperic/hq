@@ -414,6 +414,28 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         return convertAlertsToEscalatables(alerts);
     }
 
+    /**
+     * A more optimized look up which includes the permission checking
+     * @ejb:interface-method
+     */
+    public int getUnfixedCount(Integer subj, long timeRange, long endTime,
+                               Integer groupId) 
+        throws PermissionException 
+    {
+        // Time voodoo the end time to the nearest minute so that we might
+        // be able to use cached results
+        endTime = TimingVoodoo.roundUpTime(endTime, 60000);
+        Integer count = getAlertDAO().countByCreateTimeAndPriority(subj,
+                                                         endTime - timeRange,
+                                                         endTime, 0,
+                                                         false, true,
+                                                         groupId);
+        if (count != null)
+            return count.intValue();
+            
+        return 0;
+    }
+
     private List convertAlertsToEscalatables(Collection alerts) {
         List res = new ArrayList(alerts.size());
 
