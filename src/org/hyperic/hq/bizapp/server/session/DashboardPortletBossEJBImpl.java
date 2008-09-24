@@ -43,6 +43,8 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.AppdefSessionEJB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
+import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
