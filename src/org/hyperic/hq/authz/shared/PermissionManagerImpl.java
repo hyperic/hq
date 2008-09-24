@@ -390,9 +390,10 @@ public class PermissionManagerImpl
                                                                    
     
     public String getAlertsHQL(boolean inEscalation, boolean notFixed,
-                               Integer groupId) {
+                               Integer groupId, boolean count) {
         // Join with Resource for sorting
-        return "select a from " + (inEscalation ? "EscalationState es, " : "") +
+        return "select " + (count ? "count(a)" : "a") + " from " +
+                (inEscalation ? "EscalationState es, " : "") +
         		"Alert a " +
                 "join a.alertDefinition d " +
                 "join d.resource r " +

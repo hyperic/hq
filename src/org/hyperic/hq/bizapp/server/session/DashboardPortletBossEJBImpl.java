@@ -43,8 +43,6 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.AppdefSessionEJB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
-import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -78,6 +76,7 @@ import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.timer.StopWatch;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -294,19 +293,31 @@ public class DashboardPortletBossEJBImpl
         throws FinderException {
         boolean debug = _log.isDebugEnabled();
         long now = System.currentTimeMillis();
+        StopWatch watch = new StopWatch(now);
         
         try {
             long begin = now - range;
-            List alerts = _alMan.findAlerts(subj.getId(), 0, begin, now, false,
-                                            true, group.getId(),
-                                            PageInfo.getAll(AlertSortField.FIXED,
-                                                            true));
-            if (debug) {
-                _log.debug("getResourceStatus: findAlerts execution time(ms)=" 
-                                + (System.currentTimeMillis()-now));
-            }          
+            
+            watch.markTimeBegin("getResourceStatus: getUnfixedCount");
+            int unfixed = _alMan.getUnfixedCount(subj.getId(), begin, now,
+                                                 group.getId());
+            watch.markTimeEnd("getResourceStatus: getUnfixedCount");
+            
             // There are unfixed alerts
-            if (alerts.size() > 0) {
+            if (unfixed > 0) {
+                watch.markTimeBegin("getResourceStatus: findAlerts");            
+                List alerts =
+                    _alMan.findAlerts(subj.getId(), 0, begin, now,
+                                      true, true, group.getId(),
+                                      PageInfo.getAll(AlertSortField.FIXED,
+                                                      true));
+                watch.markTimeEnd("getResourceStatus: findAlerts");
+
+				// Are all unfixed alerts in escalation?
+                if (alerts.size() != unfixed)
+                    return ALERT_CRITICAL;
+
+				// Make sure that all unfixed alerts have been ack'ed
                 Alert alert = null;
                 for (Iterator it = alerts.iterator(); it.hasNext(); ) {
                     alert = (Alert) it.next();
@@ -345,9 +356,8 @@ public class DashboardPortletBossEJBImpl
             // User has no permission to see these resources
         } finally {
             if (debug) {
-                _log.debug("getResourceStatus: groupId=" + group.getId()
-                                +", execution time(ms)=" +
-                                (System.currentTimeMillis()-now));
+                _log.debug("getResourceStatus: groupId=" + group.getId() +
+                           ", execution time =" + watch);
             }            
         }
         return ALERT_UNKNOWN;

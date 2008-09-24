@@ -215,7 +215,7 @@ public abstract class PermissionManager extends AuthzSession {
          
     
     public abstract String getAlertsHQL(boolean inEscalation, boolean notFixed,
-                                        Integer groupId);
+                                        Integer groupId, boolean count);
         
     public abstract String getAlertDefsHQL();
 
