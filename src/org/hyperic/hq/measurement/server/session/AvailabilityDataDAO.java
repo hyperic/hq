@@ -73,7 +73,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         List tmp = new ArrayList(BATCH_SIZE);
         for (Iterator it=mids.iterator(); it.hasNext(); i++) {
             tmp.add(it.next());
-            if ((i%BATCH_SIZE) == 0) {
+            if (i != 0 && (i%BATCH_SIZE) == 0) {
                 rtn.addAll(getSession()
                     .createQuery(hql)
                     .setLong("endtime", after)
@@ -85,7 +85,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         if (tmp.size() > 0) {
             rtn.addAll(getSession()
                 .createQuery(hql)
-                .setLong("endtime", MAX_TIMESTAMP)
+                .setLong("endtime", after)
                 .setParameterList("ids", tmp, new IntegerType())
                 .list());
         }
@@ -105,7 +105,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         List tmp = new ArrayList(BATCH_SIZE);
         for (Iterator it=mids.iterator(); it.hasNext(); i++) {
             tmp.add(it.next());
-            if ((i%BATCH_SIZE) == 0) {
+            if (i != 0 && (i%BATCH_SIZE) == 0) {
                 rtn.addAll(getSession()
                     .createQuery(hql)
                     .setLong("endtime", MAX_TIMESTAMP)
