@@ -42,6 +42,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     private static final String logCtx = AvailabilityDataDAO.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
     
+    private final int BATCH_SIZE = 500;
     private static final long MAX_TIMESTAMP =
         AvailabilityDataRLE.getLastTimestamp();
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
@@ -62,16 +63,33 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     List findLastAvail(List mids, long after) {
-        String sql = new StringBuilder()
+        List rtn = new ArrayList(mids.size());
+        String hql = new StringBuilder()
                      .append("from AvailabilityDataRLE")
                      .append(" WHERE endtime > :endtime")
                      .append(" AND availabilityDataId.measurement in (:ids)")
                      .append(" ORDER BY endtime desc").toString();
-        return getSession()
-            .createQuery(sql)
-            .setLong("endtime", after)
-            .setParameterList("ids", mids, new IntegerType())
-            .list();
+        int i=0;
+        List tmp = new ArrayList(BATCH_SIZE);
+        for (Iterator it=mids.iterator(); it.hasNext(); i++) {
+            tmp.add(it.next());
+            if ((i%BATCH_SIZE) == 0) {
+                rtn.addAll(getSession()
+                    .createQuery(hql)
+                    .setLong("endtime", after)
+                    .setParameterList("ids", tmp, new IntegerType())
+                    .list());
+                tmp.clear();
+            }
+        }
+        if (tmp.size() > 0) {
+            rtn.addAll(getSession()
+                .createQuery(hql)
+                .setLong("endtime", MAX_TIMESTAMP)
+                .setParameterList("ids", tmp, new IntegerType())
+                .list());
+        }
+        return rtn;
     }
 
     List findLastAvail(List mids) {
@@ -81,14 +99,13 @@ public class AvailabilityDataDAO extends HibernateDAO {
                      .append(" WHERE endtime = :endtime")
                      .append(" AND availabilityDataId.measurement in (:ids)")
                      .append(" ORDER BY endtime desc").toString();
-        final int batchSize = 500;
         // need to do this because of hibernate bug
         // http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
         int i=0;
-        List tmp = new ArrayList(batchSize);
+        List tmp = new ArrayList(BATCH_SIZE);
         for (Iterator it=mids.iterator(); it.hasNext(); i++) {
             tmp.add(it.next());
-            if ((i%batchSize) == 0) {
+            if ((i%BATCH_SIZE) == 0) {
                 rtn.addAll(getSession()
                     .createQuery(hql)
                     .setLong("endtime", MAX_TIMESTAMP)

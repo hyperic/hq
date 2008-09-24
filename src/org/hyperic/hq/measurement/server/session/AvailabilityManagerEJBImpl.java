@@ -547,19 +547,24 @@ public class AvailabilityManagerEJBImpl
         List updateList = new ArrayList(availPoints.size());
         List outOfOrderAvail = new ArrayList(availPoints.size());
         AvailabilityCache cache = AvailabilityCache.getInstance();
-        synchronized (cache) {
-            updateCache(availPoints, updateList, outOfOrderAvail);
-            updateStates(updateList);
-            // scottmf: This method, updateOutOfOrderState(), is cached due to 
-            // AvailabilityManager going through the BatchAggregateInserter(BAI).
-            // Due to the possibility of the BAI cutting off the batch of avail 
-            // measurements coming from an agent it could get into a state where 
-            // it is processing the same measurement in different threads.  This
-            // could lead to contention issues and StaleStateExceptions.  The 
-            // only disadvantage of synchronizing the method is performance.
-            updateOutOfOrderState(outOfOrderAvail);
+        try {
+            synchronized (cache) {
+                updateCache(availPoints, updateList, outOfOrderAvail);
+                updateStates(updateList);
+                // scottmf: This method, updateOutOfOrderState(), is cached due to 
+                // AvailabilityManager going through the BatchAggregateInserter(BAI).
+                // Due to the possibility of the BAI cutting off the batch of avail 
+                // measurements coming from an agent it could get into a state where 
+                // it is processing the same measurement in different threads.  This
+                // could lead to contention issues and StaleStateExceptions.  The 
+                // only disadvantage of synchronizing the method is performance.
+                updateOutOfOrderState(outOfOrderAvail);
+            }
+            sendDataToEventHandlers(availPoints);
+        } catch (Throwable e) {
+            _log.error(e.getMessage(), e);
+            throw new SystemException(e);
         }
-        sendDataToEventHandlers(availPoints);
     }
 
     private void updateDup(DataPoint state, AvailabilityDataRLE dup)
