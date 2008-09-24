@@ -141,7 +141,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @return The service id.
      * @ejb:interface-method
      */
-    public Integer createService(AuthzSubject subject, Integer serverId,
+    public Service createService(AuthzSubject subject, Integer serverId,
                                  Integer serviceTypeId, ServiceValue sValue)
         throws CreateException, ValidationException, PermissionException,
                ServerNotFoundException, AppdefDuplicateNameException
@@ -150,10 +150,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         ServiceType serviceType =
             getServiceTypeDAO().findById(serviceTypeId);
 
-        Service s = createService(subject, server, serviceType,
+        return createService(subject, server, serviceType,
                                   sValue.getName(), sValue.getDescription(),
                                   sValue.getLocation(), null);
-        return s.getId();
     }
 
     /**

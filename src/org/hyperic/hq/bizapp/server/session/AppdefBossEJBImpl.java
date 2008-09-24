@@ -1253,8 +1253,9 @@ public class AppdefBossEJBImpl
             } else {
                 serverPK = aeid.getId();
             }
-            return createService(subject, serviceVal, serviceTypePK, serverPK,
-                                 null);
+            Service newSvc = createService(subject, serviceVal, serviceTypePK,
+                                           serverPK, null);
+            return newSvc.getServiceValue();
         } catch(CPropKeyNotFoundException exc){
             log.error("Error setting no properties for new service");
             throw new SystemException("Error setting no properties.", exc);
@@ -1263,31 +1264,25 @@ public class AppdefBossEJBImpl
 
     /**
      * Create a service with CProps
+     * 
      * @param serviceTypePK - the type of service
      * @param serverPK - the server host
      * @param cProps - the map with Custom Properties for the service
-     * @return ServiceValue - the saved ServiceValue
+     * @return Service - the saved Service
      * @ejb:interface-method
      */
-    public ServiceValue createService(AuthzSubject subject,
-                                      ServiceValue serviceVal,
-                                      Integer serviceTypePK,
-                                      Integer serverPK, Map cProps)
+    public Service createService(AuthzSubject subject, ServiceValue serviceVal,
+                                 Integer serviceTypePK, Integer serverPK,
+                                 Map cProps)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefDuplicateNameException, ValidationException,
                PermissionException, CreateException, CPropKeyNotFoundException
     {
         try {
             ServiceManagerLocal svcMan = getServiceManager();
-            Integer pk = svcMan.createService(subject, serverPK,
-                                              serviceTypePK, serviceVal);
-            ServiceValue savedService;
-            try {
-                savedService = svcMan.getServiceById(subject, pk);
-            } catch (ServiceNotFoundException e) {
-                throw new SystemException("Could not find service we just " +
-                                          "created");
-            }
+            Service savedService = svcMan.createService(subject, serverPK,
+                                                        serviceTypePK,
+                                                        serviceVal);
             if(cProps != null ) {
                 AppdefEntityID entityId = savedService.getEntityId();
                 setCPropValues(subject, entityId, cProps);
