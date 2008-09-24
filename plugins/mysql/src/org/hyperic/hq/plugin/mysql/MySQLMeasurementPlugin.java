@@ -63,7 +63,7 @@ public class MySQLMeasurementPlugin
     private static final String NUMDATABASES = "SHOW DATABASES";
     private static final String CONNECT_TIMEOUT_KEY = "connectTimeout";
     private static final String SOCKET_TIMEOUT_KEY = "socketTimeout";
-    private static final Integer TIMEOUT_VALUE = new Integer(60000);
+    private static final int TIMEOUT_VALUE = 60000;
     
     private static HashMap columnMap = null;
 
@@ -76,12 +76,24 @@ public class MySQLMeasurementPlugin
                                        String user,
                                        String password)
         throws SQLException {
-        Properties info = getJDBCConnectionProperties(user, password);
-        info.put(CONNECT_TIMEOUT_KEY, TIMEOUT_VALUE);
-        info.put(SOCKET_TIMEOUT_KEY, TIMEOUT_VALUE);
-        return DriverManager.getConnection(url, info);
+        return DriverManager.getConnection(getJdbcUrl(url), user, password);
     }
 
+    // convenience method used to set timeout properties for JDBC connection
+    private String getJdbcUrl(String url) {
+        if (url == null) {
+            return url;
+        }
+        else if (url.indexOf('?') > 0) {
+            return url + "&socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
+                    + TIMEOUT_VALUE;
+        }
+        else {
+            return url + "?socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
+                    + TIMEOUT_VALUE;
+        }
+    }
+    
     protected String getDefaultURL() {
         // defined in hq-plugin.xml
         return getPluginProperty("DEFAULT_URL");
