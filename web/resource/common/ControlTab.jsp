@@ -69,7 +69,7 @@
   <c:forEach var="tab" varStatus="status" items="${tabList}">
     <c:choose>
      <c:when test="${status.index == selectedIndexStr}">
-      <td><html:img page="/images/tab_${tab.value}_on.gif" width="${tab.width}" height="${tab.height}" alt="" border="0"/></td>
+      <td class="TabCell"><html:img page="/images/tab_${tab.value}_on.gif" alt="" border="0"/></td>
      </c:when>
      <c:otherwise>
       <c:url var="tabLink" value="${tab.link}">
@@ -83,7 +83,7 @@
         </c:choose>
         <c:param name="eid" value="${resourceType}:${resourceId}"/>
       </c:url>
-      <td><html:link href="${tabLink}"><html:img page="/images/tab_${tab.value}_off.gif" onmouseover="imageSwap (this, imagePath +  'tab_${tab.value}', '_over')" onmouseout="imageSwap (this, imagePath +  'tab_${tab.value}', '_off')" width="${tab.width}" height="${tab.height}" alt="" border="0"/></html:link></td>
+      <td class="TabCell" style="cursor:pointer;"><html:link href="${tabLink}"><html:img page="/images/tab_${tab.value}_off.gif" onmouseover="imageSwap (this, imagePath +  'tab_${tab.value}', '_over')" onmouseout="imageSwap (this, imagePath +  'tab_${tab.value}', '_off')"alt="" border="0"/></html:link></td>
      </c:otherwise>
     </c:choose>
   </c:forEach>
