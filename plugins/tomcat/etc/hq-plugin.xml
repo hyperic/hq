@@ -114,8 +114,6 @@
     <property name="VERSION_FILE"
               value="server/lib/catalina-storeconfig.jar"/>
 
-    <plugin type="autoinventory"
-            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
     <property name="domain"
               value="Catalina"/>
 
@@ -150,11 +148,26 @@
     <plugin type="control"
             class="org.hyperic.hq.product.jmx.MxServerControlPlugin"/>
 
+    <actions include="start,stop,restart"/>
+
     <property name="start.args"
               value="start"/> 
 
     <property name="stop.args"
               value="stop"/>
+
+    <plugin type="control"
+            platform="Win32"
+            class="org.hyperic.hq.product.Win32ControlPlugin"/>
+
+    <actions platform="Win32"
+             include="start,stop,restart"/>
+
+    <config type="control" platform="Win32">
+      <option name="service_name"
+              default="Apache Tomcat"
+              description="Tomcat Service Name"/>
+    </config>
 
     <config>
       <option name="jmx.url"
@@ -169,16 +182,15 @@
               optional="true"
               default="manager"
               type="secret"/>
-      <option name="ptql"
-              description="PTQL for Tomcat Process"
-              default="State.Name.eq=java,Args.*.ct=catalina.home"/>
+      <option name="process.query"
+              description="PTQL for Tomcat Process"/>
     </config>
 
     <plugin type="measurement"
             class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
 
     <metric name="Availability"
-            template="sigar:Type=ProcState,Arg=%ptql%:State"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
             indicator="true"/>
 
     <service name="Web Module Stats">
@@ -464,7 +476,7 @@
     <service name="Java Process Metrics">
       <config>
         <option name="process.query"
-                default="%ptql%"
+                default="%process.query%"
                 description="PTQL for Tomcat Java Process"/>
       </config>
       <metric name="Availability"
@@ -498,7 +510,13 @@
     <property name="PROC_HOME_PROPERTY"
               value="catalina.base"/>
     <plugin type="autoinventory"
-            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+            class="org.hyperic.hq.plugin.tomcat.TomcatServerDetector"/>
+            
+    <!-- Registry scan for tomcat service -->
+    <scan registry="SOFTWARE\Apache Software Foundation\Procrun 2.0\*\Parameters\Java">
+      <include name="Classpath"/>
+    </scan>
+
   </server>
 
   <!-- ==================== Plugin Help =========================== -->

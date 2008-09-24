@@ -998,6 +998,8 @@
 
     <hqplugin name="apache"/>
 
+    <hqplugin name="tomcat"/>
+
     <hqplugin name="iplanet"/>
 
     <hqplugin name="oracle"/>
