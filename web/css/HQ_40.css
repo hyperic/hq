@@ -2200,3 +2200,19 @@ button span{
 .gConsoleContainer textarea {
     width:100%
 }
+
+#button {
+    border: 1px solid #84B96D;
+    background-color: #2DBF3D;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    padding: 3px 5px;
+    margin: 3px;
+}
+
+#button a,#button a:visited, #button a:hover, #button a:active {
+    color: #FFF;
+    font-weight: 700;
+    outline: none;
+}
