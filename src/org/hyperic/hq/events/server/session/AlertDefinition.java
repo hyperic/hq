@@ -455,10 +455,6 @@ public class AlertDefinition
     }
 
     void clearTriggers() {
-        for (Iterator it = _triggers.iterator(); it.hasNext(); ) {
-            RegisteredTrigger trigger = (RegisteredTrigger) it.next();
-            trigger.setAlertDefinition(null);
-        }
         _triggers.clear();
     }
 

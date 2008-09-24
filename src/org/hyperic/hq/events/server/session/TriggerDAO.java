@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -52,16 +52,13 @@ public class TriggerDAO extends HibernateDAO {
     void removeTriggers(AlertDefinition def) {
         EventsStartupListener.getChangedTriggerCallback()
             .beforeTriggersDeleted(def.getTriggers());
-        
+
+        String sql = "update AlertCondition set trigger = null " +
+                     "where alertDefinition = :def";
+
+        getSession().createQuery(sql).setParameter("def", def).executeUpdate();
+
         def.setActOnTrigger(null);
-        for (Iterator it = def.getConditions().iterator(); it.hasNext(); ) {
-            AlertCondition cond = (AlertCondition) it.next();
-            cond.setTrigger(null);
-        }
-        
-        for (Iterator it = def.getTriggers().iterator(); it.hasNext(); ) {
-            remove(it.next());
-        }
         def.clearTriggers();
     }
 

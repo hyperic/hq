@@ -112,7 +112,7 @@
       <one-to-many class="AlertCondition"/>
     </bag>
 
-    <bag inverse="true" cascade="all" name="triggersBag" table="EAM_REGISTERED_TRIGGER">
+    <bag inverse="true" cascade="all-delete-orphan" name="triggersBag" table="EAM_REGISTERED_TRIGGER">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="ALERT_DEFINITION_ID"/>
       <one-to-many class="RegisteredTrigger"/>
