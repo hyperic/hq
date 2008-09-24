@@ -1190,6 +1190,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     
     that.chart = null;
     that.charts = [];
+    that.chartCount = 0;
     that.cycleId = null;
     that.fetchChartsCycleId = null;
     that.currentChartId = null;
@@ -1285,7 +1286,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             timeout: 2000
         });
 
-        if(that.charts.length > 0)
+        if(that.chartCount > 0)
         {
             that.swapSheets('content',
                 function()
@@ -1317,7 +1318,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     this.click_cancel_btn = function(e)
     {
-        if(that.charts.length > 0)
+        if(that.chartCount > 0)
         {
             that.swapSheets('content',
                 function()
@@ -1408,7 +1409,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                     }
                     else
                     {
-                        if(that.charts.length > 1)
+                        if(that.chartCount > 1)
                         {
                             // cycle to next chart if we're still displaying the one that's about to get deleted.
                             if(that.currentChartId == chartId)
@@ -1441,7 +1442,8 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                         that.chartselect.remove(chartIndex);
 
                         // delete chart data
-                        that.charts.remove(chartId);
+                        delete that.charts[chartId];
+                        that.chartCount--;
                     }
                 },
                 error: function(data){
@@ -1655,6 +1657,9 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                             b = b.name.toLowerCase();
                             return a > b ? 1 : (a < b ? -1 : 0);
                         });
+
+                    that.chartCount = that.charts.length;
+
                     that.populateChartSelect();
                     that.swapSheets('content',
                         function()
@@ -1662,7 +1667,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                             that.chartContainerResize();
                             that.playCharts();
 
-                            if(that.config.rotation != 'true' || data.length == 1)
+                            if(that.config.rotation != 'true' || charts.length == 1)
                             {
                                 that.pauseCharts();
                             }
