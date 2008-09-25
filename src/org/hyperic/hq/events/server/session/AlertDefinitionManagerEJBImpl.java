@@ -116,6 +116,36 @@ public class AlertDefinitionManagerEJBImpl
         return new AlertConditionDAO(DAOFactory.getDAOFactory());
     }
 
+    private boolean deleteAlertDefinitionStuff(AuthzSubject subj,
+                                               AlertDefinition alertdef,
+                                               EscalationManagerLocal escMan) {
+        StopWatch watch = new StopWatch();
+        
+        // Get rid of their triggers first
+        watch.markTimeBegin("removeTriggers");
+        TriggerDAO tdao = getTriggerDAO();
+        tdao.removeTriggers(alertdef);
+        watch.markTimeEnd("removeTriggers");
+
+        watch.markTimeBegin("markActionsDeleted");
+        getActionDAO().deleteAlertDefinition(alertdef);
+        watch.markTimeBegin("markActionsDeleted");
+        
+        // Delete escalation state
+        watch.markTimeBegin("endEscalation");
+        if (alertdef.getEscalation() != null &&
+            !alertdef.isResourceTypeDefinition()) {
+            escMan.endEscalation(alertdef);
+        }
+        watch.markTimeEnd("endEscalation");
+
+        if (log.isDebugEnabled()) {
+            log.debug("deleteAlertDefinitionStuff: " + watch);
+        }
+
+        return true;
+    }
+    
     /** 
      * Remove alert definitions. It is assumed that the subject has permission 
      * to remove this alert definition and any of its' child alert definitions.
@@ -126,59 +156,36 @@ public class AlertDefinitionManagerEJBImpl
         throws RemoveException, PermissionException {
         StopWatch watch = new StopWatch();
         
-        if (!force) {
+        EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
+        
+        if (force) { // Used when resources are being deleted
+            // Disassociate from Resource so that the Resource can be deleted
+            alertdef.setResource(null);
+        } else {
             // If there are any children, delete them, too
             watch.markTimeBegin("delete children");
             List childBag = new ArrayList(alertdef.getChildrenBag());
-            for (int i=0; i<childBag.size(); i++) {
-                AlertDefinition child = (AlertDefinition)childBag.get(i);
-                deleteAlertDefinition(subj, child, force);
+            for (int i = 0; i < childBag.size(); i++) {
+                AlertDefinition child = (AlertDefinition) childBag.get(i);
+                deleteAlertDefinitionStuff(subj, child, escMan);
             }
+            getAlertDefDAO().deleteByAlertDefinition(alertdef);
             watch.markTimeEnd("delete children");
         }
-        
-        if (force) {
-            // Disassociate from Resource so that the Resource can be deleted
-            alertdef.setResource(null);
-        }
-                
-        // Get rid of their triggers first
-        watch.markTimeBegin("removeTriggers");
-        TriggerDAO tdao = getTriggerDAO();
-        tdao.removeTriggers(alertdef);
-        watch.markTimeEnd("removeTriggers");
 
-        // Delete escalation state
-        watch.markTimeBegin("endEscalation");
-        if (alertdef.getEscalation() != null && !alertdef.isResourceTypeDefinition()) {
-            EscalationManagerEJBImpl.getOne().endEscalation(alertdef);
-        }
-        // Disassociated from escalations
-        alertdef.setEscalation(null);        
-        watch.markTimeEnd("endEscalation");
+        deleteAlertDefinitionStuff(subj, alertdef, escMan);
 
         watch.markTimeBegin("mark deleted");
+        // Disassociated from escalations
+        alertdef.setEscalation(null);
         alertdef.setDeleted(true);
-        
         alertdef.setActiveStatus(false);
-        
-        for (Iterator it = alertdef.getActions().iterator();
-             it.hasNext(); ) {
-            Action act = (Action) it.next();
-            act.setParent(null);
-            act.getChildrenBag().clear();
-        }
-        
         // Disassociate from parent
-        // This must be at the very end since we use the parent to determine 
+        // This must be at the very end since we use the parent to determine
         // whether or not this is a resource type alert definition.
-        if (alertdef.getParent() != null) {
-            alertdef.getParent().removeChild(alertdef);
-            alertdef.setParent(null);
-        }
-            
-        
+        alertdef.setParent(null);
         watch.markTimeEnd("mark deleted");
+        
         if (log.isDebugEnabled()) {
             log.debug("deleteAlertDefinition: " + watch);
         }
