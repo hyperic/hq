@@ -1621,7 +1621,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                PermissionException {
         List resources;
         if (ctype == null) {
-            if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (aeid.isGroup()) {
                 resources =
                     GroupUtil.getCompatGroupMembers(subject, aeid, null,
                                                     PageControl.PAGE_ALL);
