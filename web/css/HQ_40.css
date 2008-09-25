@@ -1535,6 +1535,10 @@ visibility: hidden;*/
 
 /* summary widget stuff */
 
+#summaryWidget .content {
+    height: inherit;
+}
+
 #summaryWidget fieldset {
     padding: 1em;
 }
@@ -1582,7 +1586,6 @@ visibility: hidden;*/
 #summaryWidget .content .lcol {
     border-right: 1px solid #FFF;
     padding: 0px;
-    height: 300px;
     vertical-align: top;
 }
 
