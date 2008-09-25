@@ -109,15 +109,9 @@ public class AI2AppdefDiff {
                 revisedAIplatform.setCpuCount(appdefPlatform.getCpuCount());
             }
             
-            ConfigResponseDB config;
-            try {
-                config =
-                    cmLocal.getConfigResponse(appdefPlatform.getEntityId());
-            } catch (AppdefEntityNotFoundException e) {
-                // Should not happen, unless the platform was deleted since
-                // we just looked it up moments ago.
-                throw new SystemException(e);
-            }
+            ConfigResponseDB config =
+                cmLocal.getConfigResponse(appdefPlatform.getEntityId());
+            
             //if the plugin did not set a config, apply the existing config.
             if (revisedAIplatform.getProductConfig() == null) {
                 revisedAIplatform.setProductConfig(config.getProductResponse());
@@ -412,14 +406,8 @@ public class AI2AppdefDiff {
                 boolean configChanged = false;
                 
                 // Look at configs
-                ConfigResponseDB config;
-                try {
-                    config = cmLocal.getConfigResponse(aID);
-                } catch (AppdefEntityNotFoundException e) {
-                    // Should not happen, unless the server was deleted since
-                    // we just looked it up moments ago.
-                    throw new SystemException(e);
-                }
+                ConfigResponseDB config = cmLocal.getConfigResponse(aID);
+                
                 if (!config.getUserManaged() && (
                     !configsEqual(scannedServer.getProductConfig(), config.getProductResponse()) ||
                     !configsEqual(scannedServer.getControlConfig(), config.getControlResponse()) ||

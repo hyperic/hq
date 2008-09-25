@@ -116,9 +116,7 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ConfigResponseDB getConfigResponse(AppdefEntityID id)
-        throws AppdefEntityNotFoundException {
-
+    public ConfigResponseDB getConfigResponse(AppdefEntityID id) {
         ConfigResponseDAO dao =
             new ConfigResponseDAO(DAOFactory.getDAOFactory());
         return getConfigResponse(dao, id);
@@ -381,7 +379,8 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      */
     public void clearValidationError(AuthzSubject subject, AppdefEntityID id) {
-        setValidationError(subject, id, null);
+        ConfigResponseDB config = getConfigResponse(id);
+        config.setValidationError(null);
     }
 
     /**
@@ -431,26 +430,7 @@ public class ConfigManagerEJBImpl
     public void setValidationError(AuthzSubject subject,
                                    AppdefEntityID id,
                                    String validationError) {
-        ConfigResponseDAO dao =
-            new ConfigResponseDAO(DAOFactory.getDAOFactory());
-        ConfigResponseDB config;
-    
-        switch(id.getType()){
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            config = dao.findByPlatformId(id.getId());
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            config = dao.findByServerId(id.getId());
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            config = dao.findByServiceId(id.getId());
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-        default:
-            throw new IllegalArgumentException("The passed entity type " +
-                                               "does not support config " +
-                                               "responses");
-        }
+        ConfigResponseDB config = getConfigResponse(id);
     
         if (validationError != null) {
             if (validationError.length() > MAX_VALIDATION_ERR_LEN) {
@@ -459,6 +439,8 @@ public class ConfigManagerEJBImpl
                         "...";
             }
         }
+        ConfigResponseDAO dao =
+            new ConfigResponseDAO(DAOFactory.getDAOFactory());
         dao.setValidationError(config, validationError);
     }
 
