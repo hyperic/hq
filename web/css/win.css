@@ -918,7 +918,7 @@ a.displaylink:hover {
 }
 
 .minitabempty {
-    border-bottom: solid #F35E0C;
+    border-bottom: 1px solid #8EAFD6;
     border-width: 1px;
     padding: 0
 }

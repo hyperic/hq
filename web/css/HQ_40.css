@@ -970,7 +970,7 @@ body .dijitPopup {
 .navMap {
     float: left;
     height: 14px;
-    margin: 2px 10px 0 0;
+    margin: 2px 10px 6px 0;
     background-color: #EDF0F8;
     border: 1px solid;
     border-color: #BDCEF0 #477DDF #477DDF #BDCEF0;
@@ -2219,4 +2219,23 @@ button span{
 
 .SubTabCellWhite {
     background-color:#fff
+}
+
+.SubTabCellWhiteLeft {
+    background-color:#fff;
+    border-left: 1px solid gray
+}
+
+#panelHeader {
+    border-left: 1px solid gray;
+    border-right: 1px solid gray;
+}
+
+#panelContent {
+    border-left: 1px solid gray;
+    border-right: 1px solid gray;
+}
+
+.ToolbarContent td a img {
+    margin-left:5px;
 }
