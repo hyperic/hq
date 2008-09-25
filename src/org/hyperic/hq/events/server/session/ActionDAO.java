@@ -51,35 +51,48 @@ public class ActionDAO extends HibernateDAO {
         super.remove(entity);
     }
 
-    void removeActions(AlertDefinition def) {
-        for (Iterator it = def.getActions().iterator(); it.hasNext(); ) {
-            Action action = (Action) it.next();
-            if (action.getParent() != null) {
-                action.getParent().getChildrenBag().remove(action);
-            }
-            
-            for (Iterator ait = action.getLogEntries().iterator();
-                 ait.hasNext(); ) {
-                remove(ait.next());
-            }
-            remove(action);
-        }
-        def.clearActions();
-    }
-    
-    void removeAction(Action action) {
+    private void removeActionCascade(Action action) {
         if (action.getParent() != null) {
             action.getParent().getChildrenBag().remove(action);
         }
         
+        for (Iterator it = action.getLogEntries().iterator(); it.hasNext();) {
+            remove(it.next());
+        }
+        remove(action);
+    }
+
+    void removeActions(AlertDefinition def) {
+        for (Iterator it = def.getActions().iterator(); it.hasNext(); ) {
+            Action action = (Action) it.next();
+            removeActionCascade(action);
+        }
+        def.clearActions();
+    }
+
+    void removeAction(Action action) {
         if (action.getAlertDefinition() != null) {
             action.getAlertDefinition().getActionsBag().remove(action);
         }
 
-        for (Iterator ait = action.getLogEntries().iterator(); ait.hasNext();) {
-            remove(ait.next());
-        }
-        remove(action);
+        removeActionCascade(action);
+    }
+    
+    void deleteAlertDefinition(AlertDefinition def) {
+        String sql = "update Action set parent = null where exists " +
+        		     "(select a from Action a where a = parent and " +
+        		      "a.alertDefinition = :def)";
+        
+        getSession().createQuery(sql)
+                    .setParameter("def", def)
+                    .executeUpdate();
+
+        sql = "update Action set parent = null, deleted = true " +
+                     "where alertDefinition = :def";
+        
+        getSession().createQuery(sql)
+                    .setParameter("def", def)
+                    .executeUpdate();
     }
 
     /**

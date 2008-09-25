@@ -255,6 +255,18 @@ public class AlertDefinitionDAO extends HibernateDAO {
             .setInteger("appdefId", ent.getID())
             .executeUpdate();
     }
+    
+    int deleteByAlertDefinition(AlertDefinition def) {
+        String sql = "update AlertDefinition " +
+        		     "set escalation = null, deleted = true, parent = null, " +
+        		         "active = false where parent = :def";
+
+        int ret = getSession().createQuery(sql).setParameter("def", def)
+                              .executeUpdate();
+        def.getChildrenBag().clear();
+        
+        return ret;
+    }
 
     void setAlertDefinitionValue(AlertDefinition def, AlertDefinitionValue val)
     {
