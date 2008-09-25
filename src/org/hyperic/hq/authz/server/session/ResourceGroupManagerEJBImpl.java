@@ -205,10 +205,16 @@ public class ResourceGroupManagerEJBImpl
             return null;
         }
 
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(), AuthzConstants.authzGroup, group.getId(),
-                 AuthzConstants.perm_viewResourceGroup);
+        checkGroupPermission(whoami, group.getId(),
+                             AuthzConstants.perm_viewResourceGroup);
         return group;
+    }
+
+    private void checkGroupPermission(AuthzSubject whoami, Integer group,
+                                      Integer op)
+        throws PermissionException {
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+        pm.check(whoami.getId(), AuthzConstants.authzGroup, group, op);
     }
 
     /**
@@ -237,9 +243,7 @@ public class ResourceGroupManagerEJBImpl
         if (group == null)
             return null;
         
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(), AuthzConstants.authzGroup, group.getId(),
-                 AuthzConstants.perm_viewResourceGroup);
+        checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_viewResourceGroup);
         return group;
     }
 
@@ -256,10 +260,8 @@ public class ResourceGroupManagerEJBImpl
                             String name, String description, String location) 
         throws PermissionException, DuplicateObjectException
     {
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(),
-                 AuthzConstants.authzGroup, group.getId(),
-                 AuthzConstants.perm_modifyResourceGroup);
+        checkGroupPermission(whoami, group.getId(),
+                             AuthzConstants.perm_modifyResourceGroup);
 
         // XXX:  Add Auditing
         if (name != null && !name.equals(group.getName())) {
@@ -295,11 +297,9 @@ public class ResourceGroupManagerEJBImpl
                                   ResourceGroupValue grpVal)
         throws PermissionException 
     {
+        checkGroupPermission(whoami, grpVal.getId(),
+                             AuthzConstants.perm_modifyResourceGroup);
         ResourceGroup group = lookupGroup(grpVal);
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(),
-                 AuthzConstants.authzGroup, group.getId(),
-                 AuthzConstants.perm_modifyResourceGroup);
 
         // check if the name has changed. If it has, update the resource
         if (!grpVal.getName().equals(group.getName())) {
@@ -349,24 +349,20 @@ public class ResourceGroupManagerEJBImpl
     public void removeResourceGroup(AuthzSubject whoami, ResourceGroup group)
         throws PermissionException, VetoException
     {
+        checkGroupPermission(whoami, group.getId(),
+                             AuthzConstants.perm_removeResourceGroup);
         ResourceGroupDAO dao = getResourceGroupDAO();
-        ResourceGroup resGrp = dao.findById(group.getId());
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-
-        pm.check(whoami.getId(),
-                 AuthzConstants.authzGroup, resGrp.getId(),
-                 AuthzConstants.perm_removeResourceGroup);
 
         ResourceEdgeDAO edgeDao =
             new ResourceEdgeDAO(DAOFactory.getDAOFactory());
-        edgeDao.deleteEdges(resGrp.getResource());
+        edgeDao.deleteEdges(group.getResource());
         
         // TODO scottmf, this should be invoking a pre-transaction callback
         EventLogManagerLocal logMan = EventLogManagerEJBImpl.getOne();
         logMan.deleteLogs(group.getResource());
 
-        GroupingStartupListener.getCallbackObj().preGroupDelete(resGrp);
-        dao.remove(resGrp);
+        GroupingStartupListener.getCallbackObj().preGroupDelete(group);
+        dao.remove(group);
 
         // Send resource delete event
         ResourceDeletedZevent zevent =
@@ -382,11 +378,8 @@ public class ResourceGroupManagerEJBImpl
                              List resources)
         throws PermissionException
     {
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(subj.getId(),
-                 AuthzConstants.authzGroup,
-                 group.getId(),
-                 AuthzConstants.perm_modifyResourceGroup);
+        checkGroupPermission(subj, group.getId(),
+                             AuthzConstants.perm_modifyResourceGroup);
         addResources(group, resources);
     }
 
@@ -403,13 +396,10 @@ public class ResourceGroupManagerEJBImpl
                              ResourceValue[] resources)
         throws PermissionException 
     {
+        checkGroupPermission(whoami, group.getId(),
+                             AuthzConstants.perm_modifyResourceGroup);
         ResourceGroupDAO grpDao = getResourceGroupDAO();
         ResourceGroup resGroup = grpDao.findByName(group.getName());
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(),
-                 AuthzConstants.authzGroup,
-                 group.getId(),
-                 AuthzConstants.perm_modifyResourceGroup);
 
         ResourceDAO resDao = getResourceDAO();
         List resourcePojos = new ArrayList(resources.length);
@@ -434,9 +424,8 @@ public class ResourceGroupManagerEJBImpl
                                      Resource resource)
         throws PermissionException 
     {
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(), AuthzConstants.authzGroup,
-                 group.getId(), AuthzConstants.perm_modifyResourceGroup);
+        checkGroupPermission(whoami, group.getId(),
+                             AuthzConstants.perm_modifyResourceGroup);
 
         getResourceGroupDAO().addMembers(group, 
                                          Collections.singleton(resource));
@@ -455,14 +444,10 @@ public class ResourceGroupManagerEJBImpl
                                 Collection resources)
         throws PermissionException 
     {
-        ResourceGroupDAO grpDao = getResourceGroupDAO();
-
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(),
-                 AuthzConstants.authzGroup,
-                 group.getId(),
-                 AuthzConstants.perm_modifyResourceGroup);
+        checkGroupPermission(whoami, group.getId(),
+                             AuthzConstants.perm_modifyResourceGroup);
         
+        ResourceGroupDAO grpDao = getResourceGroupDAO();
         grpDao.removeMembers(group, resources);
         GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
     }
@@ -480,11 +465,8 @@ public class ResourceGroupManagerEJBImpl
         ResourceGroupDAO dao = getResourceGroupDAO();
         ResourceGroup resGroup = dao.findByName(group.getName());
 
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(),
-                 AuthzConstants.authzGroup,
-                 resGroup.getId(),
-                 AuthzConstants.perm_modifyResourceGroup);
+        checkGroupPermission(whoami, resGroup.getId(),
+                             AuthzConstants.perm_modifyResourceGroup);
 
         dao.removeAllMembers(resGroup);
         GroupingStartupListener.getCallbackObj().groupMembersChanged(resGroup);
@@ -499,13 +481,12 @@ public class ResourceGroupManagerEJBImpl
      * @throws GroupException critters is not a valid list of criteria.
      * @ejb:interface-method
      */
-    public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters) 
+    public void setCriteria(AuthzSubject whoami, ResourceGroup group,
+                            CritterList critters) 
         throws PermissionException, GroupException 
    {
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(),
-                 AuthzConstants.authzGroup, group.getId(),
-                 AuthzConstants.perm_modifyResourceGroup);
+        checkGroupPermission(whoami, group.getId(),
+                             AuthzConstants.perm_modifyResourceGroup);
         
         group.setCritterList(critters);
     }
@@ -524,13 +505,11 @@ public class ResourceGroupManagerEJBImpl
                              ResourceValue[] resources)
         throws PermissionException 
     {
+        checkGroupPermission(whoami, grpVal.getId(),
+                             AuthzConstants.perm_modifyResourceGroup);
+
         ResourceGroupDAO gDao = getResourceGroupDAO();
         ResourceGroup group = gDao.findById(grpVal.getId());
-
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(),
-                 AuthzConstants.authzGroup, group.getId(),
-                 AuthzConstants.perm_modifyResourceGroup);
 
         gDao.setMembers(group, toPojos(resources));
         GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
@@ -547,10 +526,8 @@ public class ResourceGroupManagerEJBImpl
                              ResourceGroup group, Collection resources) 
         throws PermissionException 
     {
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(),
-                 AuthzConstants.authzGroup, group.getId(),
-                 AuthzConstants.perm_modifyResourceGroup);
+        checkGroupPermission(whoami, group.getId(),
+                             AuthzConstants.perm_modifyResourceGroup);
 
         getResourceGroupDAO().setMembers(group, resources);
         GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
@@ -1101,15 +1078,12 @@ public class ResourceGroupManagerEJBImpl
                                 int groupEntResType)
         throws PermissionException
     {
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(subject.getId(),
-                 AuthzConstants.authzGroup,
-                 g.getId(), AuthzConstants.perm_modifyResourceGroup);
+        checkGroupPermission(subject, g.getId(),
+                             AuthzConstants.perm_modifyResourceGroup);
         
         g.setGroupType(new Integer(groupType));
 
-        Resource r = getResourceGroupPrototype(groupEntType,
-                                               groupEntResType);
+        Resource r = getResourceGroupPrototype(groupEntType, groupEntResType);
         g.setResourcePrototype(r);
     }
 
