@@ -67,26 +67,15 @@ public class EventsStartupListener
         
     private void loadConfigProps(String prop) {
         try {
-            MBeanServer mServer = (MBeanServer) MBeanServerFactory
-                    .findMBeanServer(null).iterator().next();
-            
-            ObjectName propName = new ObjectName(
-                    "jboss:type=Service,name=AlertDefinitionsProperties");
-            
-            Object obj = mServer.invoke(
-                            propName, "get", 
-                            new Object[] { prop, null },
-                            new String[] { String.class.getName(),
-                                           String.class.getName() });
+            String property = System.getProperty(prop);
 
-            if (obj == null) {
-                throw new PropertyNotFoundException(prop +
-                                                    " list not found");
+            if (property == null) {
+                throw new PropertyNotFoundException(prop + " list not found");
             }
 
-            _log.info(prop + " list: " + obj);
+            _log.info(prop + " list: " + property);
             
-            StringTokenizer tok = new StringTokenizer((String) obj, ", ");
+            StringTokenizer tok = new StringTokenizer(property, ", ");
             while (tok.hasMoreTokens()) {
                 String className = tok.nextToken();
                     _log.debug("Initialize class: " + className);
