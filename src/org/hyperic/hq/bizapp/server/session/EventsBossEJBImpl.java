@@ -1056,16 +1056,15 @@ public class EventsBossEJBImpl
      */
     public AlertValue getAlert(int sessionID, Integer id)
         throws SessionNotFoundException, SessionTimeoutException, 
-               AlertNotFoundException, PermissionException 
+               AlertNotFoundException 
     {
-        /* Can't use the alert ID as alert definition ID
-        try {                    
-            canManageAlerts(manager.getSubject(sessionID), id);
-        } catch (FinderException e) {
-            throw new AlertNotFoundException(id);                   
-        }
-        */
-        return getAM().getById(id);
+        manager.authenticate(sessionID);
+
+        AlertValue av = getAM().getById(id);
+        if (av == null) {   
+            throw new AlertNotFoundException(id);
+        }       
+        return av;
     }
 
     /**

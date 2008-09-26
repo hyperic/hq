@@ -197,7 +197,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public AlertValue getById(Integer id) {
-        return (AlertValue) valuePager.processOne(getAlertDAO().findById(id));
+        return (AlertValue) valuePager.processOne(getAlertDAO().get(id));
     }
 
     /**
