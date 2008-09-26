@@ -2285,7 +2285,8 @@ public class AppdefBossEJBImpl
      */
     public void updateGroup(int sessionId, ResourceGroup group,
                             String name, String description, String location) 
-        throws SessionException, PermissionException, DuplicateObjectException
+        throws SessionException, PermissionException,
+               GroupDuplicateNameException
     {
         AuthzSubject subject = manager.getSubject(sessionId);
         

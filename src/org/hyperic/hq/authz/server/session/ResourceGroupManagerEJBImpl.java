@@ -258,7 +258,7 @@ public class ResourceGroupManagerEJBImpl
      */
     public void updateGroup(AuthzSubject whoami, ResourceGroup group,
                             String name, String description, String location) 
-        throws PermissionException, DuplicateObjectException
+        throws PermissionException, GroupDuplicateNameException
     {
         checkGroupPermission(whoami, group.getId(),
                              AuthzConstants.perm_modifyResourceGroup);
@@ -268,9 +268,8 @@ public class ResourceGroupManagerEJBImpl
             ResourceGroup existing = getResourceGroupDAO().findByName(name);
             
             if (existing != null) {
-                throw new DuplicateObjectException("Group by that name [" +
-                                                   name + "] already exists",
-                                                   existing);
+                throw new GroupDuplicateNameException("Group by that name [" +
+                                                      name + "] already exists");
             }
             group.setName(name);
             group.getResource().setName(name);
