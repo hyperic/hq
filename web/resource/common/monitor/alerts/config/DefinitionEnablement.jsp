@@ -13,7 +13,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -32,6 +32,7 @@
 
 
 <tiles:importAttribute name="enableList"/>
+<tiles:importAttribute name="showDuration" ignore="true"/>
 
     <tr>
       <td colspan="2" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
@@ -80,5 +81,6 @@
   <tiles:insert beanName="enable">
     <tiles:put name="tpClass" beanName="tpClass"/>
     <tiles:put name="ntClass" beanName="ntClass"/>
+    <tiles:put name="showDuration" beanName="showDuration"/>
   </tiles:insert>
 </c:forEach>

@@ -12,7 +12,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -32,6 +32,7 @@
 
 <tiles:importAttribute name="tpClass"/>
 <tiles:importAttribute name="ntClass"/>
+<tiles:importAttribute name="showDuration" ignore="true"/>
 
     <tr>
       <td class="BlockLabel">
@@ -41,11 +42,37 @@
       </td>
       <td class="BlockContent">
         <html:radio property="whenEnabled"
-        value="${enableEachTime}" onchange="javascript:checkEnable();"/><fmt:message
-        key="alert.config.props.CB.Content.EachTime"/>
+        value="${enableEachTime}" onchange="javascript:checkEnable();"/>
+        <fmt:message key="alert.config.props.CB.Content.EachTime"/>
       </td>
     </tr>
 
+    <tr>
+      <td class="BlockLabel">&nbsp;</td>
+      <td class="<c:out value='${ntClass}'/>">
+      <html:radio property="whenEnabled" onchange="javascript:checkEnable();"
+        value="${enableNumTimesInPeriod}"/>
+        <fmt:message key="alert.config.props.CB.Content.NT1"/>
+        &nbsp;<html:text property="numTimesNT" size="2"
+        maxlength="3" onchange="javascript:checkEnableNT();"/>
+        &nbsp;
+        <fmt:message key="alert.config.props.CB.Content.NT2"/>
+        &nbsp;<html:text property="howLongNT" size="2"
+        maxlength="3" onchange="javascript:checkEnableNT();"/>&nbsp;
+        <tiles:insert definition=".events.config.conditions.enablement.timeunits">
+          <tiles:put name="property" value="howLongUnitsNT"/>
+          <tiles:put name="enableFunc" value="checkEnableNT"/>
+        </tiles:insert>
+        <c:if test="${numTimesNTErrs or howLongNTErrs}">
+        <br>-- <span class="ErrorFieldContent">
+        <html:errors property="numTimesNT"/>
+        <html:errors property="howLongNT"/>
+        </span>
+        </c:if>
+      </td>
+    </tr>
+
+    <c:if test="${showDuration}">
     <tr>
       <td class="BlockLabel">&nbsp;</td>
       <td class="<c:out value='${tpClass}'/>"><html:radio
@@ -74,28 +101,5 @@
         </c:if>
       </td>
     </tr>
+    </c:if>
 
-    <tr>
-      <td class="BlockLabel">&nbsp;</td>
-      <td class="<c:out value='${ntClass}'/>">
-      <html:radio property="whenEnabled" onchange="javascript:checkEnable();"
-        value="${enableNumTimesInPeriod}"/>
-        <fmt:message key="alert.config.props.CB.Content.NT1"/>
-        &nbsp;<html:text property="numTimesNT" size="2"
-        maxlength="3" onchange="javascript:checkEnableNT();"/>
-        &nbsp;
-        <fmt:message key="alert.config.props.CB.Content.NT2"/>
-        &nbsp;<html:text property="howLongNT" size="2"
-        maxlength="3" onchange="javascript:checkEnableNT();"/>&nbsp;
-        <tiles:insert definition=".events.config.conditions.enablement.timeunits">
-          <tiles:put name="property" value="howLongUnitsNT"/>
-          <tiles:put name="enableFunc" value="checkEnableNT"/>
-        </tiles:insert>
-        <c:if test="${numTimesNTErrs or howLongNTErrs}">
-        <br>-- <span class="ErrorFieldContent">
-        <html:errors property="numTimesNT"/>
-        <html:errors property="howLongNT"/>
-        </span>
-        </c:if>
-      </td>
-    </tr>

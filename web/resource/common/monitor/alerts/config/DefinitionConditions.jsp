@@ -31,6 +31,7 @@
 
  <!--<input type="hidden" name="remove.x" id="remove.x"/>-->
 <tiles:importAttribute name="formName"/>
+<tiles:importAttribute name="showDuration" ignore="true"/>
 
 <!-- Content Block Title -->
 <tiles:insert definition=".header.tab">
@@ -52,5 +53,7 @@
     <tiles:put name="formName"><c:out value="${formName}"/></tiles:put>
   </tiles:insert>
 
-  <tiles:insert definition=".events.config.conditions.enablement"/>
+  <tiles:insert definition=".events.config.conditions.enablement">
+    <tiles:put name="showDuration" beanName="showDuration"/>
+  </tiles:insert>
 </table>

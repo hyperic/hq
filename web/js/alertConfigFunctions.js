@@ -5,7 +5,7 @@
 // normal use of the program, and does *not* fall under the heading of
 // "derived work".
 // 
-// Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+// Copyright (C) [2004-2008], Hyperic, Inc.
 // This file is part of HQ.
 // 
 // HQ is free software; you can redistribute it and/or modify
@@ -92,24 +92,29 @@ function checkEnable() {
     document.forms[0].numTimesNT.value = "";
     document.forms[0].howLongNT.value = "";
   } else if (document.forms[0].whenEnabled[1].checked == true) {
-    document.forms[0].numTimesNT.value = "";
-    document.forms[0].howLongNT.value = "";
-  } else if (document.forms[0].whenEnabled[2].checked == true) {
     document.forms[0].meetTimeTP.value = "";
     document.forms[0].howLongTP.value = "";
+  } else if (document.forms[0].whenEnabled[2] != null &&
+             document.forms[0].whenEnabled[2].checked == true) {
+    document.forms[0].numTimesNT.value = "";
+    document.forms[0].howLongNT.value = "";
   }
 }
 function checkEnableTP() {
   document.forms[0].whenEnabled[0].checked = false;
-  document.forms[0].whenEnabled[1].checked = true;
-  document.forms[0].whenEnabled[2].checked = false;
+  document.forms[0].whenEnabled[1].checked = false;
+  if (document.forms[0].whenEnabled[2] != null) {
+    document.forms[0].whenEnabled[2].checked = true;
+  }
   document.forms[0].numTimesNT.value = "";
   document.forms[0].howLongNT.value = "";
 }
 function checkEnableNT() {
   document.forms[0].whenEnabled[0].checked = false;
-  document.forms[0].whenEnabled[1].checked = false;
-  document.forms[0].whenEnabled[2].checked = true;
+  document.forms[0].whenEnabled[1].checked = true;
+  if (document.forms[0].whenEnabled[2] != null) {
+    document.forms[0].whenEnabled[2].checked = false;
+  }
   document.forms[0].meetTimeTP.value = "";
   document.forms[0].howLongTP.value = "";
 }
@@ -124,7 +129,7 @@ function checkRecover() {
 
   if (document.forms[0].recoverId.value == '') {
     document.forms[0].disableForRecovery.disabled = false;
-    document.forms[0].whenEnabled[2].disabled = false;
+    document.forms[0].whenEnabled[1].disabled = false;
     document.forms[0].numTimesNT.disabled = false;
     document.forms[0].howLongNT.disabled = false;
     document.forms[0].howLongUnitsNT.disabled = false;
@@ -132,11 +137,11 @@ function checkRecover() {
   else {
     document.forms[0].disableForRecovery.disabled = true;
 
-    if (document.forms[0].whenEnabled[2].checked) {
+    if (document.forms[0].whenEnabled[1].checked) {
         document.forms[0].whenEnabled[0].checked = true;
     }
 
-    document.forms[0].whenEnabled[2].disabled = true;
+    document.forms[0].whenEnabled[1].disabled = true;
     document.forms[0].numTimesNT.disabled = true;
     document.forms[0].howLongNT.disabled = true;
     document.forms[0].howLongUnitsNT.disabled = true;
