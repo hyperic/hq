@@ -107,7 +107,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                PermissionException, AppdefEntityNotFoundException
                
     {
-        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+        if (id.isGroup()) {
             doGroupAction(sessionId, id, action, args, null);
         } else {
             AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -131,7 +131,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                PermissionException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, ApplicationException
     {
-        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+        if (id.isGroup()) {
             doGroupAction(sessionId, id, action, null, schedule);
         } else {
             AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -330,7 +330,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefGroupNotFoundException
     {
-        if (id.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP)
+        if (!id.isGroup())
           throw new IllegalArgumentException ("Invalid group entity specified");
 
         AuthzSubject subject = sessionManager.getSubject(sessionId);

@@ -178,7 +178,7 @@ public class ControlManagerEJBImpl implements SessionBean {
         throws PluginException, PermissionException
     {
         // This method doesn't support groups.
-        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
+        if (id.isGroup())
             throw new IllegalArgumentException ("Cannot perform single "+
                                                 "action on a group.");
     
@@ -198,7 +198,7 @@ public class ControlManagerEJBImpl implements SessionBean {
         throws PluginException, PermissionException, SchedulerException
     {
         // This method doesn't support groups.
-        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
+        if (id.isGroup())
             throw new IllegalArgumentException ("Cannot perform single "+
                                                 "action on a group.");
     
