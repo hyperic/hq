@@ -34,6 +34,7 @@ import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.SigarMeasurementPlugin;
 import org.hyperic.hq.product.Win32ControlPlugin;
+import org.hyperic.hq.product.jmx.MxServerDetector;
 import org.hyperic.hq.product.jmx.MxUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -43,18 +44,20 @@ import org.hyperic.sigar.win32.Win32Exception;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class TomcatServerDetector extends ServerDetector implements
-        AutoServerDetector {
+public class TomcatServerDetector extends MxServerDetector {
 
     private static final String TOMCAT_PARAMS_KEY = "\\Parameters\\Java";
     private static final String TOMCAT_SERVICE_KEY = "SOFTWARE\\Apache Software Foundation\\Procrun 2.0";
-    
-    private static final String PTQL_QUERY = "State.Name.eq=java,Args.*.ct=-Dcatalina.home=";
+   
     private static final String PTQL_QUERY_WIN32 = "Pid.Service.eq=%service_name%";
 
     private static final String CATALINA_BASE_PROP = "-Dcatalina.base=";
     
     private static final String TOMCAT_DEFAULT_URL = "service:jmx:rmi:///jndi/rmi://localhost:6969/jmxrmi";
+    
+    // use hard-coded ptql instead of SigarMeasurementPlugin.PTQL_CONFIG for backward
+    // compatibility with pre-4.0 tomcat plugin
+    private static final String PTQL_CONFIG_OPTION = "ptql";
 
     private Log log = LogFactory.getLog(TomcatServerDetector.class);
 
@@ -64,53 +67,13 @@ public class TomcatServerDetector extends ServerDetector implements
         // Set PTQL query
         ConfigResponse config = new ConfigResponse();
         config.setValue(MxUtil.PROP_JMX_URL, TOMCAT_DEFAULT_URL);
-        if (win32Service == null) {
-            config.setValue(SigarMeasurementPlugin.PTQL_CONFIG, PTQL_QUERY
-                    + path);
-        }
-        else { // win32 service
-            config.setValue(Win32ControlPlugin.PROP_SERVICENAME, win32Service);
-            config.setValue(SigarMeasurementPlugin.PTQL_CONFIG,
-                    PTQL_QUERY_WIN32);
-            server.setName(server.getName() + " " + win32Service);
-        }
+        config.setValue(Win32ControlPlugin.PROP_SERVICENAME, win32Service);
+        config.setValue(PTQL_CONFIG_OPTION, PTQL_QUERY_WIN32);
+        server.setName(server.getName() + " " + win32Service);
         server.setProductConfig(config);
         server.setMeasurementConfig();
         server.setControlConfig();
         return server;
-    }
-
-    /**
-     * Helper method to discover Tomcat server paths using the process table
-     */
-    private List getServerProcessList() {
-        ArrayList servers = new ArrayList();
-
-        long[] pids = getPids(PTQL_QUERY);
-        for (int i = 0; i < pids.length; i++) {
-            String exe = getProcExe(pids[i]);
-            if (exe == null) {
-                continue;
-            }
-
-            log.debug("Detected Tomcat process " + exe);
-
-            String catalinaBase = getCatalinaBase(getProcArgs(pids[i]));
-            if (catalinaBase != null) {
-                File catalinaBaseDir = new File(catalinaBase);
-                if (catalinaBaseDir.exists()) {
-                    log
-                            .debug("Successfully detected Catalina Base for process: "
-                                    + catalinaBase);
-                    servers.add(catalinaBaseDir.getAbsolutePath());
-                }
-                else {
-                    log.error("Resolved catalina base " + catalinaBase
-                            + " is not a valid directory");
-                }
-            }
-        }
-        return servers;
     }
 
     private String[] getServicesFromRegistry() {
@@ -197,15 +160,7 @@ public class TomcatServerDetector extends ServerDetector implements
      */
     public List getServerResources(ConfigResponse platformConfig)
             throws PluginException {
-        List servers = new ArrayList();
-
-        // first, get servers based on process list
-        List processPaths = getServerProcessList();
-        // convert paths to server value types
-        for (int i = 0; i < processPaths.size(); i++) {
-            String dir = (String) processPaths.get(i);
-            servers.add(getServerResource(dir, null));
-        }
+        List servers = super.getServerResources(platformConfig);
 
         // if we are on windows, take a look at the registry for autodiscovery
         if (isWin32()) {
