@@ -298,7 +298,7 @@
         <exception
             key="resource.common.error.ResourceNotFound"
             type="org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException"
-            path="/common/GenericError.jsp"/>        
+            path="/ResourceHub.do"/>        
 
         <exception
             key="exception.InvalidOptionException"
