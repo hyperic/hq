@@ -452,7 +452,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                GroupNotCompatibleException, MeasurementCreateException,
                MeasurementNotFoundException {
         AuthzSubject subject = manager.getSubject(sessionId);
-        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+        if (id.isGroup()) {
             // Recursively do this for each of the group members
             List grpMembers = getResourceIds(subject, id, null);
         
@@ -669,7 +669,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 }
             }
         }
-        else if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+        else if (id.isGroup()) {
             List grpMembers;
             try {
                 grpMembers = getResourceIds(subj, id, null);
@@ -891,7 +891,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, MeasurementNotFoundException,
                AppdefEntityNotFoundException {
-        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
+        if (id.isGroup())
             return (Measurement)findMeasurements(sessionId, tid,
                                                  new AppdefEntityID[] { id }).get(0);
 
@@ -908,7 +908,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
-        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
+        if (id.isGroup())
             return findGroupMeasurements(sessionId, id, null, pc);
                    
         AuthzSubject subject = manager.getSubject(sessionId);
@@ -940,7 +940,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             if (entIds[i].getType() != type)
                 throw new MeasurementNotFoundException("Entity type != " +type);
             
-            if (type == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (entIds[i].isGroup()) {
                 try {
                     AppdefEntityID[] memberIds = getGroupMemberIDs(subject, entIds[i]);
                     ids.addAll(Arrays.asList(memberIds));
@@ -988,7 +988,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
         AuthzSubject subject = manager.getSubject(sessionId);
-        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
+        if (id.isGroup())
             return findGroupMeasurements(sessionId, id, cat, pc);
 
         AppdefEntityValue aeVal = new AppdefEntityValue(id, subject);
@@ -1290,7 +1290,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         List entities;
 
-        if (aid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+        if (aid.isGroup()) {
             List memberIds =
                 GroupUtil.getCompatGroupMembers(subject, aid, null);
             entities = new ArrayList();
@@ -1557,7 +1557,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             
             throw new MeasurementNotFoundException("No entry point found: " +
                                                    aid);
-        } else if (aid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+        } else if (aid.isGroup()) {
             try {
                 AppdefEntityID[] ids = getGroupMemberIDs(subject, aid);
             
@@ -1878,7 +1878,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubject subject = manager.getSubject(sessionId);
     
         List resources;
-        if (entId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+        if (entId.isGroup()) {
             // we don't use AppdefEntityValue for groups but GroupUtil
             // will give us what we need
             try {
@@ -2537,7 +2537,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         int entType = entId.getType();
 
-        if (entType == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+        if (entId.isGroup()) {
             entType = rv.getAppdefResourceType().getAppdefType();
         }
         
@@ -2877,8 +2877,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
                 ProblemMetricSummary metric =
                     (ProblemMetricSummary) it.next();
-                if (aeid.getType() ==
-                    AppdefEntityConstants.APPDEF_TYPE_GROUP)
+                if (aeid.isGroup())
                     metric.setSingleAppdefKey(aeid.getAppdefKey());
                 else
                     metric.setMultipleAppdefKey(children[0].getAppdefKey());
@@ -2922,9 +2921,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
         ArrayList result = new ArrayList();
         
-        if (aeid == null ||
-            (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP &&
-             hosts != null)) {
+        if (aeid == null || (aeid.isGroup() && hosts != null)) {
             // AutoGroups and groups pass their entities in the hosts
             // parameter
             List metrics = findAllMetrics(sessionId, hosts, begin, end);
