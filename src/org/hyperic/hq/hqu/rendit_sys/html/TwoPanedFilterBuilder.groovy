@@ -42,7 +42,7 @@ class TwoPanedFilterBuilder extends BuilderSupport {
         def res = [nodeType: name, name: attributes.label, markup: attributes.labelMarkup]
         if (name == 'filterAndPane') {
             output.write("""
-    <div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">""")
+    <div style="margin-bottom:5px;padding-right:10px;border:1px solid #7BAFFF; padding:10px;background-color:#fff">""")
             res.finish = { """
     </div>
 """  }
