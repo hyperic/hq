@@ -39,7 +39,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -174,9 +173,7 @@ public class AIScheduleManagerEJBImpl
         String triggerName = getTriggerName(subject, id, configid);
 
         // Setup the quartz job class that will handle this ai action.
-        Class jobClass = 
-            (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) ?
-            AIScanGroupJob.class : AIScanJob.class;
+        Class jobClass = id.isGroup() ? AIScanGroupJob.class : AIScanJob.class;
 
         JobDetail jobDetail = new JobDetail(jobName, GROUP, jobClass);
 
