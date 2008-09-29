@@ -40,6 +40,8 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -296,5 +298,25 @@ public abstract class AuthzSession {
         ResourceRelationDAO rDAO = 
             new ResourceRelationDAO(DAOFactory.getDAOFactory());
         return rDAO.findById(RELATION_CONTAINMENT_ID); 
+    }
+
+    protected Resource findPrototype(AppdefEntityTypeID id) {
+        Integer authzType;
+        
+        switch(id.getType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            authzType = AuthzConstants.authzPlatformProto;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            authzType = AuthzConstants.authzServerProto;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            authzType = AuthzConstants.authzServiceProto;
+            break;
+        default:
+            throw new IllegalArgumentException("Unsupported prototype type: " +
+                                               id.getType());
+        }
+        return getResourceDAO().findByInstanceId(authzType, id.getId());
     }
 }
