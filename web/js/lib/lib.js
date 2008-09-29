@@ -1934,7 +1934,14 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         // {
         //     that.selected_alert_groups.push(that.available_alert_groups.options[that.available_alert_groups.selectedIndex].value);
         // }
-		if(that.enabled_alert_groups.length < that.max_alerts)
+        var proposedCount = 0;
+        //count up the currently selected items that are being added
+        for(var i = 0; i < that.available_alert_groups.select.options.length; i++){
+            if(that.available_alert_groups.select.options[i].selected)
+                proposedCount++;
+        }
+        //if the current proposed additions is less than the max allow the add
+		if(that.enabled_alert_groups.length < that.max_alerts && (that.enabled_alert_groups.length + proposedCount) <= that.max_alerts)
 		{
 	        that.enabled_alert_groups.steal(that.available_alert_groups);
 
