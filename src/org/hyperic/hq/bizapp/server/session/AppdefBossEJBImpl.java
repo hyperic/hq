@@ -2019,20 +2019,21 @@ public class AppdefBossEJBImpl
         AuthzSubject subject = manager.getSubject(sessionId);
         int groupType;
         
-        if (adType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+        switch (adType) {
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
             groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC;
-        } else if (adType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM ||
-                   adType == AppdefEntityConstants.APPDEF_TYPE_SERVER) 
-        {
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
-        } else {
+            break;
+        default:
             throw new IllegalArgumentException("Invalid group compatibility " +
                                                "type specified");
         }
         
-        Resource prototype = 
-            getResourceGroupManager().getResourceGroupPrototype(adType, 
-                                                                adResType);
+        Resource prototype =  getResourceManager()
+            .findResourcePrototype(new AppdefEntityTypeID(adType, adResType));
         
         ResourceGroupCreateInfo cInfo = 
             new ResourceGroupCreateInfo(name, description,

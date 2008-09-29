@@ -40,7 +40,6 @@ import javax.naming.NamingException;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -303,9 +302,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param type This ResourceType.
      * @ejb:interface-method
      */
-    public ResourceValue getResourceTypeResource(ResourceTypeValue type) {
-        ResourceType resourceType = getResourceTypeDAO().findById(type.getId());
-        return resourceType.getResource().getResourceValue();
+    public Resource getResourceTypeResource(Integer typeId) {
+        ResourceType resourceType = getResourceTypeDAO().findById(typeId);
+        return resourceType.getResource();
     }
 
     /**
@@ -411,25 +410,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      */
     public Resource findResourcePrototype(AppdefEntityTypeID id) {
-        Integer authzType;
-        
-        switch(id.getType()) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            authzType = AuthzConstants.authzPlatformProto;
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            authzType = AuthzConstants.authzServerProto;
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            authzType = AuthzConstants.authzServiceProto;
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported prototype type: " +
-                                               id.getType());
-        }
-        return getResourceDAO().findByInstanceId(authzType, id.getId());
+        return findPrototype(id);
     }
-    
+
     /**
      * @ejb:interface-method
      */

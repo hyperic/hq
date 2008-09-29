@@ -54,6 +54,7 @@ import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
@@ -124,38 +125,6 @@ public class ResourceGroupManagerEJBImpl
         Collection pojos = getResourceGroupDAO().findContaining(resource);
         return (ResourceGroupValue[])
             fromPojos(pojos, ResourceGroupValue.class);
-    }
-
-    /**
-     * For compatible groups, get the Resource prototype for the given
-     * appdef entity type and id.
-     * @param atype The appdef type, one of AppdefEntityConstants.APPDEF_TYPE*
-     * @param aid The appdef instance id.
-     * @return The Resource prototype for this type and id or null if one
-     * does not exist.
-     * @ejb:interface-method
-     * @TODO As we migrate to a Resource based inventory this method should go.
-     */
-    public Resource getResourceGroupPrototype(int atype, int aid) {
-
-        ResourceDAO dao = getResourceDAO();
-
-        Integer type;
-        switch (atype) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                type = AuthzConstants.authzPlatformProto;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                type = AuthzConstants.authzServerProto;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                type = AuthzConstants.authzServiceProto;
-                break;
-            default:
-                return null;
-        }
-
-        return dao.findByInstanceId(type, new Integer(aid));
     }
 
     /**
@@ -1108,9 +1077,12 @@ public class ResourceGroupManagerEJBImpl
         
         g.setGroupType(new Integer(groupType));
 
-        Resource r = getResourceGroupPrototype(groupEntType,
-                                               groupEntResType);
-        g.setResourcePrototype(r);
+        if (groupType == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS ||
+            groupType == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
+            Resource r = findPrototype(new AppdefEntityTypeID(groupEntType,
+                                                              groupEntResType));
+            g.setResourcePrototype(r);
+        }
     }
 
     /**

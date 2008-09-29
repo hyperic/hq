@@ -60,7 +60,7 @@ class ResourceHelper extends BaseHelper {
      * Additional arguments are possible, See: AppdefCategory.checkPerms
      *
      * TODO: 
-     *  Currently, this does not take permissions into account whe returning
+     *  Currently, this does not take permissions into account when returning
      *  the count:* methods
      */
     def find(Map args) {
@@ -234,6 +234,26 @@ class ResourceHelper extends BaseHelper {
         findServices(PageInfo.getAll(ResourceSortField.NAME, true))
     }
 
+    /**
+     * Find a subset of all applications
+     *
+     * @param pInfo a pager, using ResourceSortField for sorting
+     *
+     * @return a List of {@link Resource}s 
+     */
+    List findApplications(PageInfo pInfo)  {
+        rman.findResourcesOfType(AuthzConstants.authzApplication, pInfo)
+    }
+    
+    /**
+     * Find all applications, sorted by name
+     *
+     * @return a List of {@link Resource}s
+     */
+    List findAllApplications() {
+        findApplications(PageInfo.getAll(ResourceSortField.NAME, true))
+    }
+
     Collection getDownResources(String typeId, PageInfo pInfo) {
         AppdefBoss.one.getUnavailableResources(user, typeId, pInfo)
     }
@@ -333,6 +353,12 @@ class ResourceHelper extends BaseHelper {
     def findServicesByServer(user, id) {
         ServiceMan.one.getServicesByServer(user, id,
                                            PageControl.PAGE_ALL)
-
+    }
+    
+    /**
+     * Get the ResourceType resource
+     */
+    def findResourceTypeResourceById(id) {
+        rman.getResourceTypeResource(id)
     }
 }
