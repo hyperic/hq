@@ -25,9 +25,14 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -43,7 +48,11 @@ public class AvailabilityCache {
     static final int    CACHESIZE          = 20000;
     static final int    CACHESIZEINCREMENT = 1000;
 
-    private static final Object _cacheLock = new Object();
+    private final Object _cacheLock = new Object();
+    private final Object _tranLock = new Object();
+    private final Map _tranCacheState = new HashMap();
+    private Thread _tranThread;
+    private boolean _inTran = false;
 
     // The internal EhCache
     private static Cache _cache;
@@ -78,6 +87,78 @@ public class AvailabilityCache {
         return _instance;
     }
 
+    private void captureCacheState(Integer metricId) {
+        synchronized (_tranLock) {
+            if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
+                return;
+            }
+            AvailabilityCache cache = AvailabilityCache.getInstance();
+            if (_tranCacheState.containsKey(metricId)) {
+                return;
+            }
+            DataPoint pt;
+            pt = (DataPoint)cache.get(metricId);
+            // doesn't matter if point is null
+            _tranCacheState.put(metricId, pt);
+        }
+    }
+
+    public void rollbackTran() {
+        synchronized (_tranLock) {
+            if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
+                return;
+            }
+            _inTran = false;
+            for (Iterator it=_tranCacheState.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry entry = (Map.Entry)it.next();
+                Integer id = (Integer)entry.getKey();
+                DataPoint pt = (DataPoint)entry.getValue();
+                if (pt == null) {
+                    remove(id);
+                } else {
+                    put(id, pt);
+                }
+            }
+            _tranThread = null;
+            _tranCacheState.clear();
+            _tranLock.notifyAll();
+        }
+    }
+
+    public void commitTran() {
+        synchronized (_tranLock) {
+            if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
+                return;
+            }
+            _inTran = false;
+            _tranThread = null;
+            _tranCacheState.clear();
+            _tranLock.notifyAll();
+        }
+    }
+
+    /**
+     * @return true if a new cache transaction was started, false if the
+     * currentThread was already participating in the current transaction
+     */
+    public boolean beginTran() {
+        synchronized (_tranLock) {
+            if (_inTran && Thread.currentThread().equals(_tranThread)) {
+                return false;
+            }
+            while (_inTran) {
+                try {
+                    _tranLock.wait();
+                } catch (InterruptedException e) {
+                }
+            }
+            _inTran = true;
+            _tranThread = Thread.currentThread();
+            _tranCacheState.clear();
+            return true;
+        }
+    }
+
     /**
      * Get a DataPoint from the cache based on Measurement id
      * @param id The Measurement id in question.
@@ -94,6 +175,16 @@ public class AvailabilityCache {
             }
 
             return (DataPoint)e.getObjectValue();
+        }
+    }
+
+    /**
+     * Remove id from cache
+     * @param id The Measurement id in question.
+     */
+    private boolean remove(Integer id) {
+        synchronized (_cacheLock) {
+            return _cache.remove(id);
         }
     }
 
@@ -121,16 +212,24 @@ public class AvailabilityCache {
      */
     public void put(Integer id, DataPoint state) {
         synchronized (_cacheLock) {
-            if (!_cache.isKeyInCache(id)) {
-                if (isFull()) {
-                    incrementCacheSize();
+            boolean newTran = false;
+            try {
+                newTran = beginTran();
+                captureCacheState(id);
+                if (!_cache.isKeyInCache(id)) {
+                    if (isFull()) {
+                        incrementCacheSize();
+                    }
+                    _cache.put(new Element(id, state));
+                    _cacheSize++;
+                } else {
+                    // Update only, don't increment counter.
+                    _cache.put(new Element(id, state));
                 }
-
-                _cache.put(new Element(id, state));
-                _cacheSize++;
-            } else {
-                // Update only, don't increment counter.
-                _cache.put(new Element(id, state));
+            } finally {
+                if (newTran) {
+                    commitTran();
+                }
             }
         }
     }
@@ -150,8 +249,16 @@ public class AvailabilityCache {
      */
     void clear() {
         synchronized (_cacheLock) {
-            _cache.removeAll();
-            _cacheSize = 0;
+            boolean newTran = false;
+            try {
+                newTran = beginTran();
+                _cache.removeAll();
+                _cacheSize = 0;
+            } finally {
+                if (newTran) {
+                    commitTran();
+                }
+            }
         }
     }
 

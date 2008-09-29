@@ -522,7 +522,6 @@ public class AvailabilityManagerEJBImpl
      * Add a single Availablility Data point.
      * @mid The Measurement id
      * @mval The MetricValue to store.
-     * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
     public void addData(Integer mid, MetricValue mval) {
@@ -547,24 +546,20 @@ public class AvailabilityManagerEJBImpl
         List updateList = new ArrayList(availPoints.size());
         List outOfOrderAvail = new ArrayList(availPoints.size());
         AvailabilityCache cache = AvailabilityCache.getInstance();
-        try {
-            synchronized (cache) {
+        synchronized (cache) {
+            try {
+                cache.beginTran();
                 updateCache(availPoints, updateList, outOfOrderAvail);
                 updateStates(updateList);
-                // scottmf: This method, updateOutOfOrderState(), is cached due to 
-                // AvailabilityManager going through the BatchAggregateInserter(BAI).
-                // Due to the possibility of the BAI cutting off the batch of avail 
-                // measurements coming from an agent it could get into a state where 
-                // it is processing the same measurement in different threads.  This
-                // could lead to contention issues and StaleStateExceptions.  The 
-                // only disadvantage of synchronizing the method is performance.
                 updateOutOfOrderState(outOfOrderAvail);
+                cache.commitTran();
+            } catch (Throwable e) {
+                cache.rollbackTran();
+                _log.error(e.getMessage(), e);
+                throw new SystemException(e);
             }
-            sendDataToEventHandlers(availPoints);
-        } catch (Throwable e) {
-            _log.error(e.getMessage(), e);
-            throw new SystemException(e);
         }
+        sendDataToEventHandlers(availPoints);
     }
 
     private void updateDup(DataPoint state, AvailabilityDataRLE dup)
@@ -620,9 +615,7 @@ public class AvailabilityManagerEJBImpl
                 AvailabilityDataRLE before = dao.findAvailBefore(pt);
                 if (before == null) {
                     dao.updateStartime(after, avail.getStartime());
-                }
-                // XXX this is wrong
-                else if (before.getAvailVal() == after.getAvailVal()) {
+                } else if (before.getAvailVal() == after.getAvailVal()) {
                     dao.remove(avail);
                     dao.remove(before);
                     dao.updateStartime(after, before.getStartime());
