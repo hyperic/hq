@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -29,8 +29,8 @@ import java.util.Collection;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.Virtual;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class VirtualDAO extends HibernateDAO {
@@ -46,9 +46,9 @@ public class VirtualDAO extends HibernateDAO {
         super.remove(entity);
     }
     
-    public void createVirtual(ResourceValue res, Integer processId) {
-        Resource resource = 
-            DAOFactory.getDAOFactory().getResourceDAO().findById(res.getId());
+    public void createVirtual(Resource res, Integer processId) {
+        Resource resource = new ResourceDAO(DAOFactory.getDAOFactory())
+            .findById(res.getId());
         Virtual virt = new Virtual();
         virt.setResource(resource);
         virt.setProcessId(processId);

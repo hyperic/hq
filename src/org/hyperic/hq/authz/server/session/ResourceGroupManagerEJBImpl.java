@@ -1018,10 +1018,10 @@ public class ResourceGroupManagerEJBImpl
     {
         ResourceManagerLocal rmLoc = ResourceManagerEJBImpl.getOne();
 
-        ResourceValue gResource =
+        Resource gResource =
             rmLoc.findResourceByInstanceId(rmLoc.findResourceTypeByName(
                 AuthzConstants.groupResourceTypeName), gid);
-        return gResource.getAuthzSubjectValue();
+        return gResource.getOwner();
     }
 
 

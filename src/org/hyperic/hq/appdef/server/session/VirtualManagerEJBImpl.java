@@ -54,7 +54,6 @@ import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 
 /**
@@ -193,7 +192,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
             for (int i = 0; i < aeids.length; i++) {
                String typeStr =
                    AppdefUtil.appdefTypeIdToAuthzTypeStr(aeids[i].getType());
-               ResourceValue res =
+               Resource res =
                    resMan.findResourceByTypeAndInstanceId(typeStr,
                                                           aeids[i].getId());
                dao.createVirtual(res, processId);

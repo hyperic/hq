@@ -314,8 +314,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return The value-object of the Resource of the given ID.
      * @ejb:interface-method
      */
-    public ResourceValue findResourceByInstanceId(ResourceType type,
-                                                  Integer instanceId) {
+    public Resource findResourceByInstanceId(ResourceType type,
+                                             Integer instanceId) {
         Resource resource = getResourceDAO().findByInstanceId(type.getId(),
                                                               instanceId);
         
@@ -324,7 +324,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                        type.getId() + " instanceId=" + 
                                        instanceId);
         }
-        return resource.getResourceValue();
+        return resource;
     }
 
     /**
@@ -345,16 +345,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         return getResourceDAO().findByInstanceId(typeId, instanceId);
     }
 
-    /**
-     * Find the Resource that has the given ID 
-     * @param id id for the resource you're looking for.
-     * @return The value-object of the Resource of the given ID.
-     * @ejb:interface-method
-     */
-    public ResourceValue findResourceById(Integer id) {
-        return findResourcePojoById(id).getResourceValue();
-    }
-    
     /**
      * Find's the root (id=0) resource
      * @ejb:interface-method
@@ -377,12 +367,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return The value-object of the Resource of the given ID.
      * @ejb:interface-method
      */
-    public ResourceValue findResourceByTypeAndInstanceId(String type,
-                                                  Integer instanceId) {
+    public Resource findResourceByTypeAndInstanceId(String type,
+                                                    Integer instanceId) {
         ResourceType resType = getResourceTypeDAO().findByName(type);
-        Resource resource = getResourceDAO().findByInstanceId(resType.getId(),
-                                                              instanceId);
-        return resource.getResourceValue();
+        return getResourceDAO().findByInstanceId(resType.getId(), instanceId);
     }
 
     /**
