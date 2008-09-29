@@ -14,6 +14,88 @@ public class AvailabilityCache_test extends TestCase {
         return cache;
     }
 
+    public void testCacheTransactionThreads() throws Exception {
+        AvailabilityCache cache = getClearedCache();
+        Thread thread = new Thread() {
+            public void run() {
+                AvailabilityCache cache = AvailabilityCache.getInstance();
+                int id = 0;
+                cache.beginTran();
+                DataPoint dp = new DataPoint(id, 1.0, 1);
+                cache.put(new Integer(id), dp);
+                dp = new DataPoint(id, 1.0, 2);
+                cache.put(new Integer(id), dp);
+                cache.commitTran();
+            }
+        };
+        thread.start();
+
+        int id = 0;
+        cache.beginTran();
+        DataPoint dp = new DataPoint(id, 1.0, 3);
+        cache.put(new Integer(id), dp);
+        dp = new DataPoint(id, 1.0, 4);
+        cache.put(new Integer(id), dp);
+        cache.rollbackTran();
+
+        // don't want to hang the build
+        thread.join(5000);
+        if (thread.isAlive()) {
+            thread.interrupt();
+            assertTrue(false);
+            return;
+        }
+
+        DataPoint curr = (DataPoint)cache.get(new Integer(id));
+        assertTrue(2 == curr.getTimestamp());
+    }
+
+    public void testCacheTransaction2() throws Exception {
+        AvailabilityCache cache = getClearedCache();
+        int id = 0;
+        DataPoint first = new DataPoint(id, 0.0, 0);
+        cache.put(new Integer(id), first);
+
+        cache.beginTran();
+        DataPoint dp = new DataPoint(id, 1.0, 1);
+        cache.put(new Integer(id), dp);
+        dp = new DataPoint(id, 1.0, 2);
+        cache.put(new Integer(id), dp);
+        cache.commitTran();
+
+        DataPoint curr = (DataPoint)cache.get(new Integer(id));
+        assertTrue(dp.getTimestamp() == curr.getTimestamp());
+    }
+
+    public void testCacheTransaction1() throws Exception {
+        AvailabilityCache cache = getClearedCache();
+        int id = 0;
+        DataPoint first = new DataPoint(id, 0.0, 0);
+        cache.put(new Integer(id), first);
+
+        cache.beginTran();
+        DataPoint dp = new DataPoint(id, 1.0, 1);
+        cache.put(new Integer(id), dp);
+        dp = new DataPoint(id, 1.0, 2);
+        cache.put(new Integer(id), dp);
+        cache.rollbackTran();
+
+        DataPoint curr = (DataPoint)cache.get(new Integer(id));
+        assertTrue(first.getValue() == curr.getValue());
+    }
+    
+    public void testCacheTransaction0() throws Exception {
+        AvailabilityCache cache = getClearedCache();
+
+        cache.beginTran();
+        int id = 0;
+        DataPoint dp = new DataPoint(id, 0, 0);
+        cache.put(new Integer(id), dp);
+        cache.rollbackTran();
+
+        assertTrue(cache.get(new Integer(id)) == null);
+    }
+
     /**
      * Test a full load of the cache.
      * @throws Exception If any error occurs within the test.
