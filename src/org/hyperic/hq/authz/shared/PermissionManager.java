@@ -35,6 +35,7 @@ import org.hyperic.hq.appdef.shared.CloningBossInterface;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.util.pager.PageControl;
@@ -141,7 +142,7 @@ public abstract class PermissionManager extends AuthzSession {
      * @return array of authz Resources
      * @exception FinderException
      */
-    public abstract ResourceValue[]
+    public abstract Resource[]
         findOperationScopeBySubjectBatch(AuthzSubject whoami,
                                          ResourceValue[] resArr,
                                          String[] opArr)

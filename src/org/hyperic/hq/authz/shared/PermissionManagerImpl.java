@@ -63,7 +63,7 @@ import org.hyperic.util.pager.SortAttribute;
 public class PermissionManagerImpl 
     extends PermissionManager
 {
-    private static Log _log =
+    private static final Log _log =
         LogFactory.getLog(PermissionManagerImpl.class.getName());
 
     private String _falseToken = null;
@@ -171,7 +171,7 @@ public class PermissionManagerImpl
         return scope;
     }
 
-    public ResourceValue[]
+    public Resource[]
         findOperationScopeBySubjectBatch(AuthzSubject whoami,
                                          ResourceValue[] resArr, 
                                          String[] opArr)
@@ -181,13 +181,9 @@ public class PermissionManagerImpl
             throw new IllegalArgumentException("At least one resource required");
         }
 
-        ArrayList resLocArr = new ArrayList(resArr.length);
-
-        for (int x = 0; x < resArr.length; x++) {
-            resLocArr.add(lookupResource(resArr[x]));
-        }
+        Set resLocArr = toPojos(resArr);
         
-        return (ResourceValue[]) fromLocals(resLocArr, ResourceValue.class);
+        return (Resource[]) resLocArr.toArray(new Resource[resLocArr.size()]);
     }
 
     public List findViewableResources(AuthzSubject subj, String resType,

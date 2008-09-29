@@ -59,6 +59,7 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -99,14 +100,14 @@ import org.quartz.SchedulerException;
  */
 public class ControlManagerEJBImpl implements SessionBean {
 
-    private final Log log =
+    private final Log _log =
         LogFactory.getLog(ControlManagerEJBImpl.class.getName());
 
     private ControlPluginManager _controlManager;
     private ControlScheduleManagerLocal _controlScheduleManager;
 
     private ControlHistoryDAO getControlHistoryDAO() {
-        return DAOFactory.getDAOFactory().getControlHistoryDAO();
+        return new ControlHistoryDAO(DAOFactory.getDAOFactory());
     }
 
     /** @ejb:create-method */
@@ -117,7 +118,7 @@ public class ControlManagerEJBImpl implements SessionBean {
             _controlManager = (ControlPluginManager)ProductManagerEJBImpl.
                 getOne().getPluginManager(ProductPlugin.TYPE_CONTROL);
         } catch (Exception e) {
-            this.log.error("Unable to get plugin manager", e);
+            this._log.error("Unable to get plugin manager", e);
         }
 
         // Get a reference to the control scheduler ejb
@@ -609,10 +610,10 @@ public class ControlManagerEJBImpl implements SessionBean {
             // fetch authz resources and add to return list
             try {
                 PermissionManager pm = PermissionManagerFactory.getInstance();
-                ResourceValue[] authz =
+                Resource[] authz =
                     pm.findOperationScopeBySubjectBatch( caller, resArr, opArr);
                 for (int x=0;x<authz.length;x++) {
-                    retVal.add(AppdefUtil.resValToAppdefEntityId(authz[x]));
+                    retVal.add(new AppdefEntityID(authz[x]));
                 }
             } catch (FinderException e) {
                 // returns empty list as advertised
@@ -649,8 +650,7 @@ public class ControlManagerEJBImpl implements SessionBean {
                     .checkModifyPermission(caller, id);
                 return;
             default:
-                throw new InvalidAppdefTypeException("Unknown type: " 
-                                                     + type);
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
     }
 
