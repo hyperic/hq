@@ -27,6 +27,7 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -42,6 +43,7 @@ import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
+import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.zevents.ZeventManager;
 
 public class MeasurementStartupListener
@@ -54,6 +56,7 @@ public class MeasurementStartupListener
     
     private static final Object LOCK = new Object();
     private static DataInserter _dataInserter;
+    private static DataInserter _availDataInserter;
     private static DefaultMetricEnableCallback _defEnableCallback;
     private static MetricDeleteCallback _delCallback;
     
@@ -81,6 +84,7 @@ public class MeasurementStartupListener
             _delCallback = (MetricDeleteCallback)
                 app.registerCallbackCaller(MetricDeleteCallback.class);
             _dataInserter = new SynchronousDataInserter();
+            _availDataInserter = new SynchronousAvailDataInserter();
         }
         
         app.registerCallbackListener(MetricDeleteCallback.class, 
@@ -133,9 +137,21 @@ public class MeasurementStartupListener
         ReportStatsCollector.getInstance().initialize(repSize);
     }
     
+    public static void setAvailDataInserter(DataInserter d) {
+        synchronized (LOCK) {
+            _availDataInserter = d;
+        }
+    }
+    
     public static void setDataInserter(DataInserter d) {
         synchronized (LOCK) {
             _dataInserter = d;
+        }
+    }
+    
+    static DataInserter getAvailDataInserter() {
+        synchronized (LOCK) {
+            return _availDataInserter;
         }
     }
     
