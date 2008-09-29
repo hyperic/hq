@@ -5,6 +5,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResMan
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
 import org.hyperic.hq.appdef.Agent
@@ -198,8 +199,7 @@ class ResourceCategory {
             return Collections.EMPTY_LIST
         }
         
-        groupMan.findResourceGroupById(user,
-                                       r.instanceId).resources
+        groupMan.findResourceGroupById(user, r.instanceId).resources
     }
     
     /**
@@ -503,6 +503,50 @@ class ResourceCategory {
                                                "${proto.name} not available " + 
                                                "to createInstance()")
         }
+    }
+    
+    static ResourceGroup createGroup(Resource r, AuthzSubject user, String name,
+                                     String description, String location) {
+        def groupType
+        
+        if (r.isGroup()) {
+            if (r.name == AuthzConstants.rootResourceGroupName) {
+                groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS
+            }
+            else if (r.name == AuthzConstants.groupResourceTypeName) {
+                groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP
+            }
+            r = null
+        }
+        else if (r.id == AuthzConstants.authzApplicationProto) {
+            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP
+            r = null
+        }
+        else {
+            switch (r.appdefType) {
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC
+                break
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
+                break
+            default:
+                throw new IllegalArgumentException("Invalid group compatibility"
+                                                   + " type specified")
+            }
+        }
+        
+        ResourceGroupCreateInfo cInfo = 
+            new ResourceGroupCreateInfo(name, description,
+                                        groupType,
+                                        r,      
+                                        location,
+                                        0,         // clusterId 
+                                        false)     // system
+
+        // No roles or resources
+        groupMan.createResourceGroup(user, cInfo, [], [])
     }
 
     static void remove(Resource r, AuthzSubject user) {
