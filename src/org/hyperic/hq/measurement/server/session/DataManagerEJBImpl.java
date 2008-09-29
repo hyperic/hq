@@ -233,34 +233,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * Write metric data points to the DB with transaction
      * 
-     * @param data       a list of {@link MeasDataPoint}s 
+     * @param data       a list of {@link DataPoint}s 
      * @throws NumberFormatException if the value from the
      *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
      *
      * @ejb:interface-method
      */
     public boolean addData(List data) {
-        AvailabilityManagerLocal aMan = AvailabilityManagerEJBImpl.getOne();
-        List aPoints = new ArrayList(data.size());
-        List dPoints = new ArrayList(data.size());
-        for (Iterator it=data.iterator(); it.hasNext(); ) {
-            MeasDataPoint pt = (MeasDataPoint)it.next();
-            if (pt.isAvail()) {
-                aPoints.add(pt);
-            } else {
-                dPoints.add(pt);
-            }
-        }
-        // don't want to lose datapoints, so do this in a try/catch
-        try {
-            aMan.addData(aPoints);
-        } catch (Throwable t) {
-            _log.error(t.getMessage(), t);
-        }
-        return _addData(dPoints);
-    }
-
-    private boolean _addData(List data) {
         if (shouldAbortDataInsertion(data)) {
             return true;
         }

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,18 +27,15 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.List;
 
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
+import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 
-/**
- * A {@link DataInserter} which immediately calls addData in the data manager
- * and will not return until the data has been written to the DB. 
- */
-public class SynchronousDataInserter 
-    implements DataInserter
-{
-    private final DataManagerLocal _dMan = DataManagerEJBImpl.getOne();
+public class SynchronousAvailDataInserter implements DataInserter {
     
-    public void insertMetrics(List metricData) throws InterruptedException {
-        _dMan.addData(metricData);
+    AvailabilityManagerLocal _aMan = AvailabilityManagerEJBImpl.getOne();
+
+    public void insertMetrics(List availData)
+        throws InterruptedException, DataInserterException {
+        _aMan.addData(availData);
     }
+
 }
