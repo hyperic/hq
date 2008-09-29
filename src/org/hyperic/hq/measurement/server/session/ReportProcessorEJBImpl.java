@@ -64,7 +64,7 @@ public class ReportProcessorEJBImpl
     extends SessionEJB 
     implements SessionBean 
 {
-    private final Log log = LogFactory.getLog(ReportProcessorEJBImpl.class);
+    private final Log _log = LogFactory.getLog(ReportProcessorEJBImpl.class);
 
     private final MeasurementManagerLocal _dmMan =
         MeasurementManagerEJBImpl.getOne();
@@ -73,18 +73,21 @@ public class ReportProcessorEJBImpl
     
     private void addPoint(List points, Measurement m, MetricValue[] vals)
     {
+        final boolean debug = _log.isDebugEnabled();
         for (int i=0; i<vals.length; i++)
         {
             try {
                 //this is just to check if the metricvalue is valid
                 //will throw a NumberFormatException if there is a problem
                 new BigDecimal(vals[i].getValue());
-                MeasDataPoint pt = new MeasDataPoint(
-                    m.getId(), vals[i], m.getTemplate().isAvailability());
+                DataPoint pt = new DataPoint(m.getId(), vals[i]);
                 points.add(pt);
+                if (debug && m.getTemplate().isAvailability()) {
+                    _log.debug("availability -> " + pt);
+                }
             } catch(NumberFormatException e) {
-                log.warn("Unable to insert: " + e.getMessage() +
-                         ", metric id=" + m);
+                _log.warn("Unable to insert: " + e.getMessage() +
+                          ", metric id=" + m);
             }
         }
     }
@@ -96,7 +99,7 @@ public class ReportProcessorEJBImpl
 
         // Safeguard against an anomaly
         if (interval <= 0) {
-            log.warn("Measurement had bogus interval[" + interval + "]: " + m);
+            _log.warn("Measurement had bogus interval[" + interval + "]: " + m);
             interval = 60 * 1000;
         }
 
@@ -160,9 +163,11 @@ public class ReportProcessorEJBImpl
             }
         }
 
-        // want to batch availability points separate from data points
-        sendMetricDataToDB(dataPoints);
-        sendMetricDataToDB(availPoints);
+        DataInserter d = MeasurementStartupListener.getDataInserter();
+        sendMetricDataToDB(d, dataPoints);
+        DataInserter a = MeasurementStartupListener.getAvailDataInserter();
+        sendMetricDataToDB(a, availPoints);
+
         // Check the SRNs to make sure the agent is up-to-date
         SRNManagerLocal srnManager = getSRNManager();
         Collection nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
@@ -174,7 +179,7 @@ public class ReportProcessorEJBImpl
             try {
                 _measurementProc.unschedule(report.getAgentToken(), entIds);
             } catch (MeasurementUnscheduleException e) {
-                log.error("Cannot unschedule entities: " +
+                _log.error("Cannot unschedule entities: " +
                           StringUtil.arrayToString(entIds));
             }
         }
@@ -183,11 +188,9 @@ public class ReportProcessorEJBImpl
     /**
      * Sends the actual data to the DB.
      */
-    private void sendMetricDataToDB(List dataPoints) 
+    private void sendMetricDataToDB(DataInserter d, List dataPoints) 
         throws DataInserterException
     {
-        DataInserter d = MeasurementStartupListener.getDataInserter();
-
         try {
             d.insertMetrics(dataPoints);
             int size = dataPoints.size();

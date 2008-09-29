@@ -201,7 +201,14 @@ public class AvailabilityCheckService
                     backfillList.add(point);
                 }
             }
-            availMan.addData(backfillList);
+            final int batchSize = 500;
+            int i=0;
+            for (i=0; (i+batchSize)<backfillList.size(); i+=batchSize) {
+                availMan.addData(backfillList.subList(i, i+batchSize));
+            }
+            if (backfillList.size() > i) {
+                availMan.addData(backfillList.subList(i, backfillList.size()));
+            }
         }
     }
 
