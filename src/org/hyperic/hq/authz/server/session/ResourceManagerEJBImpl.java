@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -36,7 +36,6 @@ import java.util.Set;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
-import javax.naming.NamingException;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -51,7 +50,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.SystemException;
@@ -89,6 +87,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     private final String RES_TYPE_PAGER =
         PagerProcessor_resourceType.class.getName();
 
+    private ResourceEdgeDAO getResourceEdgeDAO() {
+        return new ResourceEdgeDAO(DAOFactory.getDAOFactory());
+    }
+
     /**
      * Create a ResourceType.
      * @param whoami The current running user.
@@ -102,19 +104,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public ResourceType createResourceType(AuthzSubject whoami,
                                            ResourceTypeValue typeV,
-                                           Operation[] operations) 
-    {
+                                           Operation[] operations) {
         AuthzSubject whoamiPojo = lookupSubject(whoami.getId());
-        DAOFactory factory = DAOFactory.getDAOFactory();
-        ResourceType type =
-            factory.getResourceTypeDAO().create(whoamiPojo, typeV);
-        Role rootRole =factory.getRoleDAO().findById(AuthzConstants.rootRoleId);
+        ResourceType type = getResourceTypeDAO().create(whoamiPojo, typeV);
+        Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
         
         /* create associated operations */
         if (operations != null) {
             for (int i = 0; i < operations.length; i++) {
                 Operation op = type.createOperation(operations[i].getName());
-
                 rootRole.addOperation(op);
             }
         }
@@ -123,13 +121,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 
     /**
      * Delete the specified ResourceType.
-     * @param whoami The current running user.
-     * @param type The type to delete.
+     * 
+     * @param whoami
+     *            The current running user.
+     * @param type
+     *            The type to delete.
      * @ejb:interface-method
      */
-    public void removeResourceType(AuthzSubject whoami,
-                                   ResourceTypeValue type) {
-        ResourceTypeDAO dao = DAOFactory.getDAOFactory().getResourceTypeDAO();
+    public void removeResourceType(AuthzSubject whoami, ResourceTypeValue type){
+        ResourceTypeDAO dao = getResourceTypeDAO();
         ResourceType rt = dao.findById(type.getId());
         AuthzSubject who = new AuthzSubjectDAO(DAOFactory.getDAOFactory())
             .findById(whoami.getId());
@@ -143,8 +143,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @throws PermissionException whoami may not perform modifyResourceType on this role.
      * @ejb:interface-method
      */
-    public void saveResourceType(AuthzSubject whoami,
-                                 ResourceTypeValue type)
+    public void saveResourceType(AuthzSubject whoami, ResourceTypeValue type)
         throws PermissionException {
         ResourceType resType = getResourceTypeDAO().findById(type.getId());
 
@@ -215,8 +214,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public ResourceType findResourceTypeByName(String name)
         throws FinderException {
-        ResourceType rt =
-            DAOFactory.getDAOFactory().getResourceTypeDAO().findByName(name);
+        ResourceType rt = getResourceTypeDAO().findByName(name);
         
         if (rt == null)
             throw new FinderException("ResourceType " + name + " not found");
@@ -255,8 +253,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         Resource res = getResourceDAO().create(rt, prototype, name, owner, 
                                                instanceId, system); 
 
-        DAOFactory daoFact        = DAOFactory.getDAOFactory();
-        ResourceEdgeDAO eDAO      = new ResourceEdgeDAO(daoFact);
+        ResourceEdgeDAO eDAO = getResourceEdgeDAO();
         ResourceRelation relation = getContainmentRelation();
             
         eDAO.create(res, res, 0, relation);  // Self-edge
@@ -265,7 +262,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             eDAO.create(res, parent, -1, relation);
             eDAO.create(parent, res, 1, relation);
             
-            for (Iterator i=ancestors.iterator(); i.hasNext(); ) {
+            for (Iterator i = ancestors.iterator(); i.hasNext();) {
                 ResourceEdge ancestorEdge = (ResourceEdge)i.next();
                 
                 int distance = ancestorEdge.getDistance() - 1;
@@ -279,8 +276,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                      System.currentTimeMillis());
         return res;
     }
-    
-    
+
     /**
      * Get the # of resources within HQ inventory
      * @ejb:interface-method
@@ -340,8 +336,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      */
     public Resource findResourcePojoByInstanceId(Integer typeId,
-                                                 Integer instanceId)
-    {
+                                                 Integer instanceId) {
         return getResourceDAO().findByInstanceId(typeId, instanceId);
     }
 
@@ -374,23 +369,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
-     * Write the specified entity out to permanent storage.
-     *
-     * @param res The Resource to save.
-     * @ejb:interface-method
-     */
-    public void saveResource(ResourceValue res) {
-        lookupResource(res);
-
-        // XXX:  Fill this in -- what info can be changed, exactly?
-        //resource.setResourceValue(res);
-    }
-
-    /**
      * @ejb:interface-method
      */
     public Resource findResource(AppdefEntityID id) {
-        return getResourceDAO().findByInstanceId(id.getAuthzTypeId(), 
+        return getResourceDAO().findByInstanceId(id.getAuthzTypeId(),
                                                  id.getId());
     }
 
@@ -414,8 +396,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         cb.preResourceDelete(r);
 
         ResourceAudit.deleteResource(r, subject, now, now);
-        ResourceEdgeDAO edgeDao =
-            new ResourceEdgeDAO(DAOFactory.getDAOFactory());
+        ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
         edgeDao.deleteEdges(r);
         
         getResourceDAO().remove(r);
@@ -427,10 +408,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public void removeResources(AuthzSubject subject, AppdefEntityID[] ids)
         throws VetoException
     {
-        ResourceDeleteCallback cb = AuthzStartupListener.getResourceDeleteCallback();
+        ResourceDeleteCallback cb =
+            AuthzStartupListener.getResourceDeleteCallback();
         ResourceDAO dao = getResourceDAO();
         // No factory method for ResourceEdgeDAO?
-        ResourceEdgeDAO edgeDao = new ResourceEdgeDAO(DAOFactory.getDAOFactory());
+        ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
 
         long now = System.currentTimeMillis();
         
@@ -636,8 +618,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                 ordResources.add(res);
         }
 
-        return resourcePager.seek(ordResources, pc.getPagenum(),
-                                  pc.getPagesize());
+        return new PageList(ordResources, ordResources.size());
     }
 
     /**
@@ -648,24 +629,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public Collection findResourceByOwner(AuthzSubject owner) {
         return getResourceDAO().findByOwner(owner);
-    }
-
-    /**
-     * Gets all the Resources of a particular type owned by the given Subject.
-     * @param resTypeName type
-     * @param whoami The owner.
-     * @return Array of resources owned by the given subject.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @ejb:interface-method
-     */
-    public ResourceValue[] findResourceByOwnerAndType(AuthzSubject whoami,
-                                                      String resTypeName ) {
-        AuthzSubject subj = getSubjectDAO().findById(whoami.getId());
-        ResourceType resType = getResourceTypeDAO().findByName(resTypeName);
-        return (ResourceValue[]) fromPojos(
-            getResourceDAO().findByOwnerAndType(subj,resType),
-            org.hyperic.hq.authz.shared.ResourceValue.class);
     }
 
     public static ResourceManagerLocal getOne() {

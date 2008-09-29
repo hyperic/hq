@@ -50,18 +50,21 @@ public class AppdefUtil {
     public static String appdefTypeIdToAuthzTypeStr (int adTypeId)
         throws InvalidAppdefTypeException {
         
-        if (adTypeId == AppdefEntityConstants.APPDEF_TYPE_PLATFORM)
+        switch (adTypeId) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             return AuthzConstants.platformResType;
-        if (adTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER)
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             return AuthzConstants.serverResType;
-        if (adTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVICE)
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
             return AuthzConstants.serviceResType;
-        if (adTypeId == AppdefEntityConstants.APPDEF_TYPE_APPLICATION)
+        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return AuthzConstants.applicationResType;
-        if (adTypeId == AppdefEntityConstants.APPDEF_TYPE_GROUP)
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             return AuthzConstants.groupResourceTypeName;
-        throw new InvalidAppdefTypeException("No authz resource type "+
-            "String provisioned for appdef type argument.");
+        default:
+            throw new InvalidAppdefTypeException("No authz resource type "
+                    + "String provisioned for appdef type argument.");
+        }
     }
 
     /** Transform an authz resource type name into an appdef type id.

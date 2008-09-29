@@ -106,7 +106,6 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
-import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -132,7 +131,6 @@ import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
@@ -144,7 +142,6 @@ import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.ProductProperties;
@@ -2849,8 +2846,8 @@ public class AppdefBossEJBImpl
         }
         
         for (Iterator i = authzResources.iterator(); i.hasNext();) {
-            ResourceValue rv = (ResourceValue) i.next();
-            AppdefEntityID id = AppdefUtil.resValToAppdefEntityId(rv);
+            Resource rv = (Resource) i.next();
+            AppdefEntityID id = new AppdefEntityID(rv);
             if (!assigned.contains(id)) {
                 toBePaged.add(id);
             }
