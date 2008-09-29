@@ -28,9 +28,6 @@ package org.hyperic.hq.appdef.shared;
 public class AppdefGroupNotFoundException
     extends AppdefEntityNotFoundException
 {
-    private static final int MY_TYPE = 
-        AppdefEntityConstants.APPDEF_TYPE_GROUP;
-
     public AppdefGroupNotFoundException(String msg){
         super(msg);
     }
@@ -56,6 +53,6 @@ public class AppdefGroupNotFoundException
     }
 
     public int getAppdefType(){
-        return MY_TYPE;
+        return AppdefEntityConstants.APPDEF_TYPE_GROUP;
     }
 }
