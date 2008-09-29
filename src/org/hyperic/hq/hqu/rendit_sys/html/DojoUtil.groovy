@@ -281,6 +281,7 @@ class DojoUtil {
      *   url:      URL to contact to get data to populate the table
      *   title*:   A title to display above the table
      *   titleHtml*:  Additional HTML to place in the header of the table
+     *   hidden*: Set to true if this table should start hidden
      *   numRows:  Number of rows to display
      *   refresh*:  If specified, the table will refresh at the passed # of
      *              seconds.
@@ -323,6 +324,7 @@ class DojoUtil {
         def id           = "${params.id}"
         def tableTitle   = params.get('title', '')
         def titleHtml    = params.get('titleHtml', '')
+        def hidden       = params.get('hidden')
         def idVar        = "_hqu_${params.id}"
         def tableVar     = "${idVar}_table" 
         def sortFieldVar = "${idVar}_sortField"
@@ -414,7 +416,20 @@ class DojoUtil {
             ${id}_refreshTable();
         }
 
+        function ${id}_show() {
+            dojo.byId("${id}_tableWrapper").style.display = 'block';
+        }
+
+        function ${id}_hide() {
+            dojo.byId("${id}_tableWrapper").style.display = 'none';
+        }
+
         function ${id}_refreshTable(kwArgs) {
+            // Don't refresh data for this table if it's hidden.
+            var tableWrapper = dojo.byId("${id}_tableWrapper");
+            if (tableWrapper.style.display == 'none') {
+                return;
+            }
             var queryStr = ${idVar}_makeQueryStr(kwArgs);
             ${ajaxCountVar}++;
             if (${ajaxCountVar} > 0) {
@@ -522,7 +537,13 @@ class DojoUtil {
         }
 	res << "</script>"
 	    
+        def tableWrapperStyle = "display:block"
+        if (hidden) {
+            tableWrapperStyle = "display:none"
+        }
+
 	res << """
+        <div id="${id}_tableWrapper" style="${tableWrapperStyle}">
 	<div id="${id}_pageCont" class="pageCont">
 	  <div id="${id}_tableTitleWrapper" class="tableTitleWrapper">
             <div id="${id}_tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
@@ -593,7 +614,7 @@ class DojoUtil {
               </tr>
             </thead>
           </table>
-
+        </div>
         """
         
         res.toString()      
