@@ -57,4 +57,16 @@ class ResourceGroupCategory {
             
         rsrcMan.findResourcePojoByInstanceId(resourceTypeId, g.groupEntResType)
     }
+    
+    static void updateGroupType(ResourceGroup g, AuthzSubject subject,
+                                int groupType, int groupEntType,
+                                int groupEntResType) {
+        groupMan.updateGroupType(subject, g, groupType, groupEntType,
+                                 groupEntResType)
+    }
+    
+    static void updateGroup(ResourceGroup g, AuthzSubject subject,
+                            String name, String description, String location) {
+        groupMan.updateGroup(subject, g, name, description, location)
+    }
 }
