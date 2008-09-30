@@ -424,6 +424,10 @@ class DojoUtil {
             dojo.byId("${id}_tableWrapper").style.display = 'none';
         }
 
+        function ${id}_clear() {
+            ${tableVar}.store.clearData();
+        }
+
         function ${id}_refreshTable(kwArgs) {
             // Don't refresh data for this table if it's hidden.
             var tableWrapper = dojo.byId("${id}_tableWrapper");
