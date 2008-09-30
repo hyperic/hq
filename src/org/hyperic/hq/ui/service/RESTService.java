@@ -482,7 +482,6 @@ public class RESTService extends BaseService {
                             
                             // Extract the ctype if exists
                             String ctype = "";
-                            log.info("url="+chart.get(1));
                             matcher = CTYPE_PATTERN.matcher(chart.get(1));
                             if (matcher.matches()) {
                                 ctype = matcher.group(1) + ":" + matcher.group(2);
