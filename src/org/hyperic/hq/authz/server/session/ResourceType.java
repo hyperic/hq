@@ -126,15 +126,6 @@ public class ResourceType extends AuthzNamedBean {
         _resourceTypeValue.setId(getId());
         _resourceTypeValue.setName(getName());
         _resourceTypeValue.setSystem(isSystem());
-        
-        // Clear out the operation values first
-        _resourceTypeValue.removeAllOperationValues();
-        if (getOperations() != null) {
-            for (Iterator it = getOperations().iterator(); it.hasNext(); ) {
-                Operation op = (Operation) it.next();
-                _resourceTypeValue.addOperationValue(op);
-            }
-        }
         return _resourceTypeValue;
     }
 

@@ -562,7 +562,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * modifyRole on this role.
      * @ejb:interface-method
      */
-    public void removeAllResourceGroups(AuthzSubjectValue whoami, Role role)
+    public void removeAllResourceGroups(AuthzSubject whoami, Role role)
         throws PermissionException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(), role.getResource().getResourceType(),

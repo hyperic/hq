@@ -154,28 +154,19 @@ public class Resource extends AuthzNamedBean implements Comparable {
         return _toEdges;
     }
 
-    /**
-     * @deprecated use (this) Resource instead
-     */
-    public ResourceValue getResourceValue()
-    {
+    public Object getValueObject() {
         resourceValue.setId(getId());
         resourceValue.setAuthzSubjectValue(getOwner());
         resourceValue.setInstanceId(getInstanceId());
         resourceValue.setName(getName());
         resourceValue.setSortName(getSortName());
         resourceValue.setSystem(isSystem());
-
+        
         // Resource type of a resource should never change
-        if (resourceValue.getResourceTypeValue() == null)
-            resourceValue
-                .setResourceTypeValue(getResourceType().getResourceTypeValue());
-
+        if (resourceValue.getResourceType() == null)
+            resourceValue.setResourceType(getResourceType());
+        
         return resourceValue;
-    }
-
-    public Object getValueObject() {
-        return getResourceValue();
     }
 
     public boolean isOwner(Integer possibleOwner)

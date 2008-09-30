@@ -79,11 +79,8 @@ import org.hyperic.util.pager.SortAttribute;
  */
 public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 {
-    private Pager resourcePager = null;
     private Pager resourceTypePager = null;
     
-    private final String RESOURCE_PAGER =
-        PagerProcessor_resource.class.getName();
     private final String RES_TYPE_PAGER =
         PagerProcessor_resourceType.class.getName();
 
@@ -166,9 +163,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      */
     public void addOperations(AuthzSubject whoami,
-                              ResourceTypeValue type,
+                              ResourceType resType,
                               Operation[] operations) {
-        ResourceType resType = getResourceTypeDAO().findById(type.getId());
         Collection rtOps = resType.getOperations();
         rtOps.addAll(toPojos(operations));
     }
@@ -181,10 +177,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      */
     public void removeOperations(AuthzSubject whoami,
-                                 ResourceTypeValue type,
+                                 ResourceType resType,
                                  Operation[] operations) {
         Set opPojos = toPojos(operations);
-        ResourceType resType = getResourceTypeDAO().findById(type.getId());
         for (Iterator it = resType.getOperations().iterator(); it.hasNext(); ) {
             Operation oper = (Operation) it.next();
             if (opPojos.contains(oper)) {
@@ -641,7 +636,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     
     public void ejbCreate() throws CreateException {
         try {
-            resourcePager = Pager.getPager(RESOURCE_PAGER);
             resourceTypePager = Pager.getPager(RES_TYPE_PAGER);
         } catch (Exception e) {
             throw new CreateException("Could not create value pager: " + e);

@@ -60,6 +60,7 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -581,6 +582,8 @@ public class ControlManagerEJBImpl implements SessionBean {
         resList = new ArrayList();
         opList = new ArrayList();
 
+        ResourceTypeDAO typeDao =
+            new ResourceTypeDAO(DAOFactory.getDAOFactory());
         // package up the args for verification
         for (int x=0;x<entities.length;x++) {
 
@@ -599,8 +602,8 @@ public class ControlManagerEJBImpl implements SessionBean {
             opList.add(getControlPermissionByType(entities[x]));
             ResourceValue rv = new ResourceValue();
             rv.setInstanceId(entities[x].getId());
-            rv.setResourceTypeValue( new ResourceTypeValue(false, AppdefUtil
-                .appdefTypeIdToAuthzTypeStr(entities[x].getType()),null) );
+            rv.setResourceType(typeDao.findByName(
+                AppdefUtil.appdefTypeIdToAuthzTypeStr(entities[x].getType())));
             resList.add(rv);
         }
         if (resList.size() > 0) {

@@ -108,8 +108,6 @@ public class ResourceGroupManagerEJBImpl
 {
     private Pager _groupPager;
     private Pager _ownedGroupPager;
-    private final String RESOURCE_PAGER =
-        PagerProcessor_resource.class.getName();
     private final String GROUP_PAGER = 
         PagerProcessor_resourceGroup.class.getName();
     private final String OWNEDGROUP_PAGER =
@@ -1111,7 +1109,6 @@ public class ResourceGroupManagerEJBImpl
     
     public void ejbCreate() throws CreateException {
         try {
-            Pager.getPager(RESOURCE_PAGER);
             _groupPager      = Pager.getPager(GROUP_PAGER);
             _ownedGroupPager = Pager.getPager(OWNEDGROUP_PAGER);
         } catch (Exception e) {

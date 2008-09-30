@@ -194,18 +194,12 @@ public abstract class AuthzSession {
         while (it.hasNext()) {
             if (isOperation) {
                 values[counter] = it.next();
-            } else if (isResource) {
+            } else if (isResource || isRole || isAuthzSubject) {
                 values[counter] =
-                    ((Resource)it.next()).getResourceValue();
+                    ((AuthzNamedBean)it.next()).getValueObject();
             } else if (isResourceGroup) {
                 values[counter] =
                     ((ResourceGroup)it.next()).getResourceGroupValue();
-            } else if (isRole) {
-                values[counter] =
-                    ((Role)it.next()).getRoleValue();
-            } else if (isAuthzSubject) {
-                values[counter] =
-                    ((AuthzSubject)it.next()).getAuthzSubjectValue();
             } else {
                 throw new SystemException("Unknown type");
             }
@@ -220,8 +214,7 @@ public abstract class AuthzSession {
 
     private Resource lookupResource(ResourceValue resource) {
         if (resource.getId() == null) {
-            String typeName = resource.getResourceTypeValue().getName();
-            ResourceType type = getResourceTypeDAO().findByName(typeName);
+            ResourceType type = resource.getResourceType();
             return getResourceDAO().findByInstanceId(type,
                                                      resource.getInstanceId());
         } 
