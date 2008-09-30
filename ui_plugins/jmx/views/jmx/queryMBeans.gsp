@@ -150,8 +150,7 @@ input[type=text] {
                 <% if (op.signature.length > 0 && bean.ops.size > 1) { %>
                    <br/>
                 <% } %>
-                <button style="font-size:10px"
-                        onclick="invoke(${bean.resId}, '${bean.name}', '${op.name}')">${op.name}</button>
+                <a class="buttonGreen" onclick="invoke(${bean.resId}, '${bean.name}', '${op.name}')" href="javascript:void(0)"><span>${op.name}</span></a>
                 <% for (def i=0; i<op.signature.length; i++) { %>
                    <input style="width:75px" type="text" id="${bean.name}.${op.name}.args"/>
                 <% } %>
