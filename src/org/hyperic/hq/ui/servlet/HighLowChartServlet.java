@@ -36,7 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -125,8 +124,7 @@ public class HighLowChartServlet extends ChartServlet {
                 if (entList != null) {
                     if (!RequestUtils.parameterExists(
                             request, Constants.CHILD_RESOURCE_TYPE_ID_PARAM) &&
-                        aeid.getType() !=
-                            AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+                        !aeid.isGroup()) {
                         // Not group or autogroup
                         entList.add(aeid);
                     }

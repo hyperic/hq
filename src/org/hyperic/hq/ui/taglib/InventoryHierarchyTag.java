@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
@@ -38,11 +38,9 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.util.StringUtil;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
+import org.hyperic.util.StringUtil;
 
 /**
  * a tag to show the inventory hierarchy links from the current resource
@@ -93,8 +91,7 @@ public class InventoryHierarchyTag extends TagSupport {
                 
                 // Fix for previously badly saved charts, because group type
                 // is not valid for autogroups
-                if (childTypeId.getType() ==
-                    AppdefEntityConstants.APPDEF_TYPE_GROUP)
+                if (childTypeId.isGroup())
                     childTypeId = null;
             }
             

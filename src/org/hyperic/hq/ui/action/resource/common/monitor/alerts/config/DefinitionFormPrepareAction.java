@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -43,7 +43,6 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.server.session.CpropKey;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -135,7 +134,7 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
             adeId = RequestUtils.getEntityId(request);
             metrics = mb.findMeasurements( sessionID, adeId, pc );
 
-            if (adeId.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (!adeId.isGroup()) {
                 for (Iterator it = metrics.iterator(); it.hasNext();) {
                     Measurement m = (Measurement) it.next();
                     if (m.isEnabled())

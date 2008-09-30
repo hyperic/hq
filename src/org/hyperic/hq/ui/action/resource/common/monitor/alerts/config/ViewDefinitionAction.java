@@ -37,7 +37,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
@@ -71,7 +70,7 @@ public class ViewDefinitionAction extends TilesAction {
             AppdefEntityID aeid = RequestUtils.getEntityId(request);
             
             // If group entity, do nothing
-            if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (aeid.isGroup()) {
                 return null;
             }
         } catch (ParameterNotFoundException e) {

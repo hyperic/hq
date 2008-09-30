@@ -248,12 +248,11 @@ public abstract class InventoryHelper {
                PermissionException, EncodingException, RemoteException {
         final String CONFIG_ATTR = "IsResourceUnconfigured";
 
-        Boolean configured =
-            (Boolean) request.getAttribute(CONFIG_ATTR);
+        Boolean configured = (Boolean) request.getAttribute(CONFIG_ATTR);
         if (configured != null)
             return !configured.booleanValue();
         
-        if (AppdefEntityConstants.APPDEF_TYPE_GROUP == entityId.getType())
+        if (entityId.isGroup())
             return true;
         
         int sessionId = RequestUtils.getSessionId(request).intValue();

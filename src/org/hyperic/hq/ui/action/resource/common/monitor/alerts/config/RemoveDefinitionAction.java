@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -37,7 +37,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
@@ -96,7 +95,7 @@ public class RemoveDefinitionAction extends BaseAction {
         if (rdForm.getSetActiveInactive().equals("y")) {
             enable = rdForm.getActive().intValue() == 1;
 
-            if (adeId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (adeId.isGroup()) {
                 GalertDef[] defPojos = new GalertDef[defs.length];
                 for (int i = 0; i < defs.length; i++) {
                     defPojos[i] = gBoss.findDefinition(sessionId.intValue(),
@@ -118,7 +117,7 @@ public class RemoveDefinitionAction extends BaseAction {
                 params.put(Constants.APPDEF_RES_TYPE_ID, rdForm.getAetid());
             }
             else {
-                if (adeId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
+                if (adeId.isGroup())
                 {
                     gBoss.markDefsDeleted(sessionId.intValue(), defs);
                 } else {
@@ -131,7 +130,7 @@ public class RemoveDefinitionAction extends BaseAction {
         }
         else {
             // Delete the alerts for the definitions
-            if (adeId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (adeId.isGroup()) {
                 // XXX - implement alert deletion in gBoss
             }
             else {

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
@@ -237,9 +238,8 @@ public class MonitorUtils {
         TreeMap serviceTypeSet = new TreeMap();
         for (Iterator i = services.iterator(); i.hasNext();) {
             AppdefResourceValue svcCandidate = (AppdefResourceValue)i.next();
-            int thisType = svcCandidate.getEntityId().getType();
-            if (thisType == AppdefEntityConstants.APPDEF_TYPE_SERVICE ||
-                    thisType == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            final AppdefEntityID aeid = svcCandidate.getEntityId();
+            if (aeid.isService() || aeid.isGroup()) {
                 AppdefResourceValue service = (AppdefResourceValue)svcCandidate;
                 if (service != null && service.getAppdefResourceTypeValue() != null) {
                     // if we don't have a group that is a compat group of services, then this

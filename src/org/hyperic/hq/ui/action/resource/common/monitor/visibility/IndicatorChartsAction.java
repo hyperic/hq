@@ -48,7 +48,6 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.actions.DispatchAction;
 import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -131,8 +130,7 @@ public class IndicatorChartsAction extends DispatchAction
                 MetricDisplaySummary mds;
                 
                 if (entList != null) {
-                    if (ctype == null && aeid.getType() !=
-                        AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+                    if (ctype == null && !aeid.isGroup()) {
                         // Not group or autogroup
                         entList.add(aeid);
                     }

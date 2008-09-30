@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -32,7 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
@@ -66,7 +65,7 @@ public class ViewEscalationAction extends ViewDefinitionAction {
             RequestUtils.getEntityTypeId(request);
         } catch (ParameterNotFoundException e) {
             AppdefEntityID aeid = RequestUtils.getEntityId(request);
-            if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (aeid.isGroup()) {
                 mat = GalertEscalationAlertType.GALERT;
             }
         }

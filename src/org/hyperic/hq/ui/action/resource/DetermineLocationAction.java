@@ -71,10 +71,9 @@ public class DetermineLocationAction extends BaseAction {
             // non-autogroup
             AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
-            int resourceType = aeid.getType();
-            type = AppdefEntityConstants.typeToString(resourceType);
+            type = AppdefEntityConstants.typeToString(aeid.getType());
 
-            if(resourceType == AppdefEntityConstants.APPDEF_TYPE_GROUP){
+            if(aeid.isGroup()){
                 int sessionId = RequestUtils.getSessionId(request).intValue();
                 ServletContext ctx = getServlet().getServletContext();
                 AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);

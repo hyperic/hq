@@ -40,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -112,7 +111,7 @@ public class ViewChartAction extends MetricDisplayRangeAction {
             chartParams.put("showLow", new Boolean(chartForm.getShowLow()));
             chartParams.put("threshold", chartForm.getThreshold());
 
-            if(adeId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP){
+            if(adeId.isGroup()){
                 chartParams.put( "mode", chartForm.getMode() );                
                 chartParams.put( "r", chartForm.getResourceIds() );
                 obj.put("rid", chartForm.getResourceIds());

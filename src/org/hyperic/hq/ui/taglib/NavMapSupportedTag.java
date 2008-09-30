@@ -26,25 +26,22 @@
 package org.hyperic.hq.ui.taglib;
 
 import java.rmi.RemoteException;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.auth.shared.SessionException;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Set a scoped variable containing a boolean flag as to whether or
@@ -87,7 +84,7 @@ public class NavMapSupportedTag extends VarSetterBaseTag {
                     log.error("Couldn't find any entity ids.  Assuming NavMap not supported.");
                     navMapSupported = false;
                 } else if (1 == eids.length) {
-                    if ( AppdefEntityConstants.APPDEF_TYPE_GROUP == eids[0].getType() ) {
+                    if ( eids[0].isGroup() ) {
                         try {
                             int sessionId = RequestUtils.getSessionId(request).intValue();
                             AppdefGroupValue group =

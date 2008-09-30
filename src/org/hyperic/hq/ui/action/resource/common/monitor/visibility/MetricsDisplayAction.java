@@ -106,8 +106,7 @@ public class MetricsDisplayAction extends MetricsControlAction {
             // Don't make any back-end call if user has not selected any metrics
             if (m != null && m.length > 0) {
                 MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
-                if (displayForm.getCtype() == null || entityId.getType() ==
-                        AppdefEntityConstants.APPDEF_TYPE_GROUP)
+                if (displayForm.getCtype() == null || entityId.isGroup())
                     mBoss.updateMeasurements(sessionId.intValue(), entityId, m,
                                              interval);
                 else {
@@ -131,8 +130,7 @@ public class MetricsDisplayAction extends MetricsControlAction {
             if (m != null && m.length > 0) {
                 MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
 
-                if (displayForm.getCtype() == null || entityId.getType() ==
-                        AppdefEntityConstants.APPDEF_TYPE_GROUP)
+                if (displayForm.getCtype() == null || entityId.isGroup())
                     mBoss.disableMeasurements(sessionId.intValue(), entityId,m);
                 else {
                     AppdefEntityTypeID ctid =
