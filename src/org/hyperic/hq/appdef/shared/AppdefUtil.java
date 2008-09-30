@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,13 +25,12 @@
 
 package org.hyperic.hq.appdef.shared;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.ResourceValue;
-
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Map;
 
 /** AppdefUtil - utility methods for appdef entities and
 * brethren.
@@ -88,35 +87,6 @@ public class AppdefUtil {
 
         throw new InvalidAppdefTypeException("No appdef entity type "+
             "provisioned for authz resource name argument: " + resName);
-    }
-
-
-    /** Transform a ResourceValue into an appdef entity id.
-     * @param ResourceValue object.
-     * @return AppdefEntityID object.
-     * @throws InvalidAppdefTypeException
-     */
-    public static AppdefEntityID resValToAppdefEntityId (ResourceValue rv)
-        throws InvalidAppdefTypeException {
-
-        if ( rv.getResourceTypeValue().getName().equals(
-            AuthzConstants.platformResType))
-            return AppdefEntityID.newPlatformID(rv.getInstanceId());
-        if ( rv.getResourceTypeValue().getName().equals(
-             AuthzConstants.serverResType))
-            return AppdefEntityID.newServerID(rv.getInstanceId());
-        if ( rv.getResourceTypeValue().getName().equals(
-             AuthzConstants.serviceResType))
-            return AppdefEntityID.newServiceID(rv.getInstanceId());
-        if ( rv.getResourceTypeValue().getName().equals(
-             AuthzConstants.applicationResType))
-            return AppdefEntityID.newAppID(rv.getInstanceId());
-        if ( rv.getResourceTypeValue().getName().equals(
-            AuthzConstants.groupResourceTypeName))
-            return AppdefEntityID.newGroupID(rv.getInstanceId());
-
-        throw new InvalidAppdefTypeException("No appdef entity type "+
-            "provisioned for authz resource argument:"+rv.toString());
     }
 
     /**
