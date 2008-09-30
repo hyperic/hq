@@ -25,9 +25,11 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -140,6 +142,39 @@ public class AvailabilityDataDAO extends HibernateDAO {
         return 1;
     }
 
+    /**
+     * @param states List<DataPoint>
+     * @return Map<DataPoint, AvailabilityDataRLE>
+     */
+    Map findAvails(List states) {
+        Map rtn = new HashMap();
+        StringBuilder sql = new StringBuilder()
+            .append("FROM AvailabilityDataRLE WHERE ");
+        boolean setOr = false;
+        for (Iterator it=states.iterator(); it.hasNext(); ) {
+            DataPoint state = (DataPoint)it.next();
+            if (setOr) {
+                sql.append(" OR ");
+            }
+            sql.append("(availabilityDataId.measurement = ")
+               .append(state.getMetricId())
+               .append(" AND availabilityDataId.startime = ")
+               .append(state.getTimestamp())
+               .append(")");
+            setOr = true;
+        }
+        List list = getSession().createQuery(sql.toString()).list();
+        for (Iterator it=list.iterator(); it.hasNext(); ) {
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
+            int metricId =  rle.getMeasurement().getId().intValue();
+            double val = rle.getAvailVal();
+            long startTime = rle.getStartime();
+            DataPoint state = new DataPoint(metricId, val, startTime);
+            rtn.put(state, rle);
+        }
+        return rtn;
+    }
+
     AvailabilityDataRLE findAvail(DataPoint state) {
         String sql = new StringBuilder()
                      .append("FROM AvailabilityDataRLE")
@@ -206,6 +241,61 @@ public class AvailabilityDataDAO extends HibernateDAO {
             return null;
         }
         return (AvailabilityDataRLE)list.get(0);
+    }
+
+    /**
+     * @param states List<DataPoint>
+     * @return Map<DataPoint, AvailabilityDataRLE>
+     */
+    Map findAvailsAfter(List states) {
+        return findAvails(states, false);
+    }
+
+    /**
+     * @param states List<DataPoint>
+     * @return Map<DataPoint, AvailabilityDataRLE>
+     */
+    Map findAvailsBefore(List states) {
+        return findAvails(states, true);
+    }
+    
+    /**
+     * @param states List<DataPoint>
+     * @return Map<Integer, Map<DataPoint, AvailabilityDataRLE>>
+     */
+    private Map findAvails(List states, boolean before) {
+        Map rtn = new HashMap();
+        final String select = "(select * from HQ_AVAIL_DATA_RLE rle WHERE ";
+        final String sort = (before) ? "desc" : "asc";
+        final char mod = (before) ? '<' : '>';
+        StringBuilder sql = new StringBuilder();
+        boolean setUnion = false;
+        for (Iterator it=states.iterator(); it.hasNext(); ) {
+            DataPoint state = (DataPoint)it.next();
+            if (setUnion) {
+                sql.append(" UNION ALL ");
+            }
+            sql.append(select);
+            sql.append("rle.measurement_id = ").append(state.getMetricId())
+               .append(" AND rle.startime ").append(mod).append(state.getTimestamp())
+               .append(" ORDER BY startime ").append(sort)
+               .append(" LIMIT 1)");
+            setUnion = true;
+            rtn.put(state, null);
+        }
+        List list = getSession()
+            .createSQLQuery(sql.toString())
+            .addEntity("rle", AvailabilityDataRLE.class)
+            .list();
+        for (Iterator it=list.iterator(); it.hasNext(); ) {
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
+            int metricId =  rle.getMeasurement().getId().intValue();
+            double val = rle.getAvailVal();
+            long startTime = rle.getStartime();
+            DataPoint state = new DataPoint(metricId, val, startTime);
+            rtn.put(state, rle);
+        }
+        return rtn;
     }
 
     List findLastDownAvailability() {
