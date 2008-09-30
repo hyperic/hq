@@ -45,7 +45,7 @@ class RoleCategory {
     static void setOperations(Role role, AuthzSubject user, Collection ops) {
         roleMan.removeAllOperations(user.authzSubjectValue, role.roleValue)
         roleMan.addOperations(user.authzSubjectValue, role.roleValue,
-                              ops as OperationValue[])
+                    ops.collect { op -> op.operationValue } as OperationValue[])
     }
 
     /**
