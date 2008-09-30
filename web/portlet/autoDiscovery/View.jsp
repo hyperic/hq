@@ -106,14 +106,14 @@ function skipResources() {
         <html:form action="/dashboard/ProcessAutoDiscovery">
         <html:hidden property="queueAction"/>
         <tr>
-          <td nowrap class="ListHeaderInactive">&nbsp;</td>
+          <td class="ListHeaderInactive">&nbsp;</td>
           <td colspan="2" class="ListHeaderInactiveSorted"><fmt:message key="dash.home.TableHeader.ResourceName"/><html:img page="/images/tb_sortup_inactive.gif" width="9" height="9" border="0"/></td>
           <td class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.Status"/></td>
           <td class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.Changes"/></td>
         </tr>
         <c:forEach items="${resources}" var="resource">
           <tr class="ListRow">
-            <td nowrap class="ListCell"><html:radio property="platformsToProcess" value="${resource.id}"/></td>
+            <td class="ListCell" nowrap="nowrap"><html:radio property="platformsToProcess" value="${resource.id}"/></td>
             <td colspan="2" class="ListCell">
               <html:link page="/resource/platform/AutoDiscovery.do?mode=results&aiPid=${resource.id}">
                 <c:out value="${resource.name}"/></html:link>
@@ -133,9 +133,9 @@ function skipResources() {
               <c:if test="${server.queueStatus != 0 && !server.ignored}">
                 <tr class="ListRow">
                   <hq:shortenPath property="shortenedInstallPath" value="${server.installPath}" preChars="20" postChars="25"/>
-                  <td nowrap class="ListCell">&nbsp;&nbsp;&nbsp;<html:multibox property="serversToProcess" value="${server.id}"/></td>
-                  <td nowrap class="ListCell"><hq:removePrefix prefix="${resource.name}" value="${server.name}"/></td>
-                  <td nowrap class="ListCell">
+                  <td class="ListCell" nowrap="nowrap">&nbsp;&nbsp;&nbsp;<html:multibox property="serversToProcess" value="${server.id}"/></td>
+                  <td class="ListCell"><hq:removePrefix prefix="${resource.name}" value="${server.name}"/></td>
+                  <td class="ListCell">
                     <c:choose>
                       <c:when test="${wasShortened}">
                         <a href="." onclick="return false;" class="ListCellPopup2">
