@@ -42,4 +42,30 @@ public class DataPoint implements Serializable {
         return "id=" + _metricId + " val=" + _val.getValue() + 
             " time=" + _val.getTimestamp();
     }
+    
+    /**
+     * Checks if metricId && timestamp hashCodes match (not value)
+     */
+    public int hashCode() {
+        return 17 + (37*_metricId.hashCode()) +
+            (37*new Long(_val.getTimestamp()).hashCode());
+    }
+    
+    /**
+     * Determines if metricId && timestamps match (not value)
+     */
+    public boolean equals(Object rhs) {
+        if (this == rhs) {
+            return true;
+        }
+        if (!(rhs instanceof DataPoint)) {
+            return false;
+        }
+        DataPoint d = (DataPoint)rhs;
+        if (d.getMetricId().equals(getMetricId()) &&
+            d.getTimestamp() == getTimestamp()) {
+            return true;
+        }
+        return false;
+    }
 }
