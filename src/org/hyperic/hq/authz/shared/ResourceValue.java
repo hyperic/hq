@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz.shared;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceType;
 
 /**
  * Value object for Resource.
@@ -45,7 +46,7 @@ public class ResourceValue
    private boolean nameHasBeenSet = false;
    private Integer id;
    private boolean idHasBeenSet = false;
-   private org.hyperic.hq.authz.shared.ResourceTypeValue ResourceTypeValue;
+   private ResourceType ResourceTypeValue;
    private boolean ResourceTypeValueHasBeenSet = false;
    private AuthzSubject AuthzSubjectValue;
    private boolean AuthzSubjectValueHasBeenSet = false;
@@ -163,11 +164,11 @@ public class ResourceValue
 	  return idHasBeenSet;
    }
 
-   public org.hyperic.hq.authz.shared.ResourceTypeValue getResourceTypeValue()
+   public ResourceType getResourceType()
    {
 	  return this.ResourceTypeValue;
    }
-   public void setResourceTypeValue( org.hyperic.hq.authz.shared.ResourceTypeValue ResourceTypeValue )
+   public void setResourceType( ResourceType ResourceTypeValue )
    {
 	  this.ResourceTypeValue = ResourceTypeValue;
 	  ResourceTypeValueHasBeenSet = true;
