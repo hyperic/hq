@@ -337,14 +337,13 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * this role.
      * @ejb:interface-method
      */
-    public void addOperations(AuthzSubject whoami, RoleValue role,
+    public void addOperations(AuthzSubject whoami, Role role,
                               Operation[] operations)
         throws PermissionException {
         Set opLocals = toPojos(operations);
-        Role roleLocal = lookupRole(role);
 
 //        roleLocal.setWhoami(lookupSubject(whoami));
-        roleLocal.getOperations().addAll(opLocals);
+        role.getOperations().addAll(opLocals);
     }
 
     /**
