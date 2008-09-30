@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.AppdefSessionEJB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.ServiceCluster;
@@ -52,6 +53,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.bizapp.server.session.MeasurementBossEJBImpl;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBossLocal;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBossUtil;
 import org.hyperic.hq.common.SystemException;
@@ -125,7 +127,9 @@ public class DashboardPortletBossEJBImpl
      * @throws PermissionException 
      * @ejb:interface-method
      */
-    public JSONArray getMeasurementData(AuthzSubject subj, Map resIdsToTemplIds,
+    public JSONArray getMeasurementData(AuthzSubject subj,
+                                        Integer resId, Integer mtid, 
+                                        AppdefEntityTypeID ctype,
                                         long begin, long end)
         throws PermissionException
     {
@@ -136,62 +140,60 @@ public class DashboardPortletBossEJBImpl
         DateFormat dateFmt =
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
         long intv = (end - begin) / 60;
-        for (Iterator it = resIdsToTemplIds.entrySet().iterator(); it.hasNext();)
-        {
-            Map.Entry entry = (Map.Entry) it.next();
-            Integer resId = (Integer) entry.getKey();
-            List templs = (List) entry.getValue();
-            JSONObject jObj = new JSONObject();
-            Resource res = resMan.findResourcePojoById(resId);
-            AppdefEntityID aeid = new AppdefEntityID(res);
-            try {
+        JSONObject jObj = new JSONObject();
+        Resource res = resMan.findResourcePojoById(resId);
+        AppdefEntityID aeid = new AppdefEntityID(res);
+        try {
+            jObj.put("resourceName", res.getName());
 
-                jObj.put("resourceName", res.getName());
+            AppdefEntityID[] aeids;
+            if (aeid.isGroup()) {
+                List members =
+                    GroupUtil.getCompatGroupMembers(subj, aeid, null,
+                                                    PageControl.PAGE_ALL);
+                aeids = (AppdefEntityID[])
+                members.toArray(new AppdefEntityID[members.size()]);
+            } else if (ctype != null) {
+                aeids = MeasurementBossEJBImpl.getOne()
+                                    .getAutoGroupMemberIDs(
+                                            subj,
+                                            new AppdefEntityID[] { aeid },
+                                            ctype); 
+            } else {
+                aeids = new AppdefEntityID[] { aeid };
+            }
+            List metrics = mMan.findMeasurements(subj, mtid, aeids);
 
-                AppdefEntityID[] aeids;
-                if (aeid.isGroup()) {
-                    List members =
-                        GroupUtil.getCompatGroupMembers(subj, aeid, null,
-                                                        PageControl.PAGE_ALL);
-                    aeids = (AppdefEntityID[])
-                    members.toArray(new AppdefEntityID[members.size()]);
-                }
-                else {
-                    aeids = new AppdefEntityID[] { aeid };
-                }
-                // Only do one metric
-                Integer mtid = (Integer) templs.get(0);
-                List metrics = mMan.findMeasurements(subj, mtid, aeids);
-
-                // Get measurement name
+            // Get measurement name
+            if (!metrics.isEmpty()) {
                 Measurement measurement = (Measurement) metrics.get(0);
                 jObj.put("measurementName", measurement.getTemplate().getName());
-                
-                List data = dMan.getHistoricalData(metrics, begin, end,
-                                                   intv, 0, true,
-                                                   PageControl.PAGE_ALL);
-
-                JSONObject dataObj = new JSONObject();
-                jObj.put("data", dataObj);
-                for (Iterator dit = data.iterator(); dit.hasNext();) {
-                    JSONArray array = new JSONArray();
-                    HighLowMetricValue pt = (HighLowMetricValue) dit.next();
-                    double val = pt.getValue();
-                    if (Double.isNaN(val) || Double.isInfinite(val)) {
-                        continue;
-                    }
-                    array.put(val);
-                    Date date = new Date(pt.getTimestamp());
-                    dataObj.put(dateFmt.format(date), array);
-                }
-                rtn.put(jObj);
-            } catch (JSONException e) {
-                log.error(e.getMessage(), e);
-            } catch (AppdefEntityNotFoundException e) {
-                log.error("AppdefEntityNotFound: " + aeid);
-            } catch (GroupNotCompatibleException e) {
-                log.error("GroupNotCompatibleException: " + aeid);
             }
+            
+            List data = dMan.getHistoricalData(metrics, begin, end,
+                                               intv, 0, true,
+                                               PageControl.PAGE_ALL);
+
+            JSONObject dataObj = new JSONObject();
+            jObj.put("data", dataObj);
+            for (Iterator dit = data.iterator(); dit.hasNext();) {
+                JSONArray array = new JSONArray();
+                HighLowMetricValue pt = (HighLowMetricValue) dit.next();
+                double val = pt.getValue();
+                if (Double.isNaN(val) || Double.isInfinite(val)) {
+                    continue;
+                }
+                array.put(val);
+                Date date = new Date(pt.getTimestamp());
+                dataObj.put(dateFmt.format(date), array);
+            }
+            rtn.put(jObj);
+        } catch (JSONException e) {
+            log.error(e.getMessage(), e);
+        } catch (AppdefEntityNotFoundException e) {
+            log.error("AppdefEntityNotFound: " + aeid);
+        } catch (GroupNotCompatibleException e) {
+            log.error("GroupNotCompatibleException: " + aeid);
         }
         return rtn;
     }

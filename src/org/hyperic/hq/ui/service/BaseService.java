@@ -32,6 +32,8 @@ public abstract class BaseService implements IEngineService {
         
     public static final String PARAM_RESOURCE_ID = "rid";
     
+    public static final String PARAM_CTYPE = "ctype";
+    
     public static final String PARAM_CLONE_TARGET_ID = "ctid";
 
     public static final String PARAM_METRIC_TEMPLATE_ID = "mtid";

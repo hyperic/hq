@@ -21,6 +21,7 @@ import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.CloningBossInterface;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -74,6 +75,9 @@ public class RESTService extends BaseService {
     private static final Pattern MTID_PATTERN =
         Pattern.compile(".*&m=(\\d+).*", Pattern.CASE_INSENSITIVE);
 
+    private static final Pattern CTYPE_PATTERN =
+        Pattern.compile(".*ctype=(\\d+)%3A(\\d+).*", Pattern.CASE_INSENSITIVE);
+    
     public String getName() {
         return SERVICE_NAME;
     }
@@ -263,6 +267,7 @@ public class RESTService extends BaseService {
         String configParam        = cycle.getParameter(PARAM_CONFIG);
         String deleteParam        = cycle.getParameter(PARAM_DELETE);
         String rpTemp             = cycle.getParameter(PARAM_RESOURCE_ID);
+        String ctypeParam         = cycle.getParameter(PARAM_CTYPE);
         
         Integer resourceIdParam = null;
         if (rpTemp != null) {
@@ -302,17 +307,25 @@ public class RESTService extends BaseService {
 
             // Get chart metric data, given the RID and MTIDs
             try {
-                ArrayList<Integer> mtids = new ArrayList<Integer>();
                 JSONArray mtidArray = new JSONArray(metricTemplIdParam);
-                for (int i = 0; i < mtidArray.length(); i++) {
-                    mtids.add((Integer) mtidArray.get(i));
+                
+                AppdefEntityTypeID ctype = null;
+                if ((ctypeParam != null) && (ctypeParam.trim().length()>0)) {
+                    try {
+                        ctype = new AppdefEntityTypeID(ctypeParam);
+                    } catch (Exception e) {
+                        // ignore
+                    }
                 }
-                Map<Integer, List<Integer>> map =
-                    new HashMap<Integer, List<Integer>>();
-                map.put(resourceIdParam, mtids);
-                DashboardPortletBossLocal dashBoss =
-                    DashboardPortletBossEJBImpl.getOne();
-                res = dashBoss.getMeasurementData(me, map, start, end).toString();
+                // Only do one metric
+                res = DashboardPortletBossEJBImpl.getOne()
+                            .getMeasurementData(
+                                    me, 
+                                    new Integer(resourceIdParam),
+                                    (Integer) mtidArray.get(0),
+                                    ctype,
+                                    start, 
+                                    end).toString();
             } catch (Exception e) {
                 log.debug(e.getLocalizedMessage());
                 return ERROR_GENERIC;
@@ -467,9 +480,17 @@ public class RESTService extends BaseService {
                                 }
                             }
                             
+                            // Extract the ctype if exists
+                            String ctype = "";
+                            matcher = CTYPE_PATTERN.matcher(chart.get(1));
+                            if (matcher.matches()) {
+                                ctype = matcher.group(1) + ":" + matcher.group(2);
+                            }
+                            
                             arr.put(new JSONObject().put("name", chart.get(0))
                                                     .put("rid", resId)
                                                     .put("mtid", mtid)
+                                                    .put("ctype", ctype)
                                                     .put("url", chart.get(1)));
                         }
                         

@@ -141,7 +141,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         List members = getResourceIds(subject, gid, null);
         return (AppdefEntityID[])members.toArray(new AppdefEntityID[members.size()]);
     }
-
+    
     private List findDesignatedMetrics(AuthzSubject subject, AppdefEntityID id,
                                        Set cats) {
         List metrics;
@@ -164,6 +164,19 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
 
         return metrics;
+    }
+
+    /**
+     * Get Autogroup member ids
+     * @ejb:interface-method
+     */
+    public AppdefEntityID[] getAutoGroupMemberIDs(AuthzSubject subject,
+                                                  AppdefEntityID[] aids,
+                                                  AppdefEntityTypeID ctype)
+        throws AppdefEntityNotFoundException, PermissionException {
+        
+        List members = getAGMemberIds(subject, aids, ctype);
+        return (AppdefEntityID[])members.toArray(new AppdefEntityID[members.size()]);
     }
 
     /**

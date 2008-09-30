@@ -1709,7 +1709,8 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     {
     	// console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]");
         return dojo11.xhrGet( {
-            url: "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]",
+            url: "/api.shtml",
+            content: {v: "1.0", s_id: "chart", rid: that.charts[chart].rid, mtid: "[" + that.charts[chart].mtid + "]", ctype: that.charts[chart].ctype},
             handleAs: 'json',
             preventCache: true,
             load: function(data){
