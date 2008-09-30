@@ -45,7 +45,6 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
@@ -59,7 +58,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleManagerLocal;
 import org.hyperic.hq.authz.shared.RoleManagerUtil;
 import org.hyperic.hq.authz.shared.RoleValue;
@@ -88,8 +86,7 @@ import org.hyperic.util.pager.SortAttribute;
  */
 public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
-    protected Log log = LogFactory.getLog("org.hyperic.hq.authz." +
-                                          "server.session.RoleManagerEJBImpl");
+    private final Log _log = LogFactory.getLog(RoleManagerEJBImpl.class);
     private Pager subjectPager = null;
     private Pager rolePager = null;
     private Pager groupPager = null;
@@ -126,6 +123,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
     private Role lookupRole(Integer id) {
         return getRoleDAO().findById(id);
+    }
+
+    private ResourceGroup lookupGroup(Integer id) {
+        return getResourceGroupDAO().findById(id);
     }
 
     /**
@@ -594,31 +595,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     }
 
      /**
-      * List the ResourceGroups associate with this role.
-      * @param whoami The current running user.
-      * @param role This role.
-      * @throws FinderException Unable to find a given or dependent entities.
-      * @throws PermissionException whoami is not allowed to 
-      * @deprecated this method is not used by anything other than unit
-      * tests. It also
-      * perform listResourceGroup on this role.
-      * @ejb:interface-method
-      */
-     public ResourceGroupValue[] getResourceGroups(AuthzSubject whoami,
-                                                   RoleValue role)
-         throws PermissionException  {
-         Role roleLocal = lookupRole(role);
-         /** NOTE... NO PERMISSION CHECK
-         perm.check(lookupSubject(whoami),
-                    roleLocal.getResource().getResourceType(), roleLocal.getId(),
-                    AuthzConstants.roleOpListResourceGroups);
-         **/
-         return (ResourceGroupValue[])
-             fromLocals(roleLocal.getResourceGroups(),
-                        ResourceGroupValue.class);
-     }
-
-     /**
       * Get the # of roles within HQ inventory
       * @ejb:interface-method
       */
@@ -717,16 +693,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         value.setMemberCount(numSubjects);
 
         return value;
-    }
-
-    /**
-     * Get the Resource entity associated with this Role.
-     * @param role This role.
-     * @ejb:interface-method
-     */
-    public ResourceValue getRoleResource(RoleValue role) {
-        Role local = getRoleDAO().findById(role.getId());
-        return local.getResource().getResourceValue();
     }
 
     /**
@@ -1203,8 +1169,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
             throw new FinderException("Unrecognized sort attribute: " + attr);
         }
 
-        log.debug("Found " + foundRoles.size() + " available roles for group " +
-                  groupId + " before permission checking");
+        _log.debug("Found " + foundRoles.size() + " available roles for group "
+                   + groupId + " before permission checking");
         
         HashSet index = new HashSet();
         if (roleIds != null)
@@ -1220,7 +1186,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
             }
         }
 
-        log.debug("Found " + roles.size() + " available roles for group " +
+        _log.debug("Found " + roles.size() + " available roles for group " +
             groupId + " after exclusions");
   
         // AUTHZ Check - filter the viewable roles
@@ -1241,7 +1207,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
             Collections.reverse(roles);
         }
 
-        log.debug("Found " + roles.size() + " available roles for group " +
+        _log.debug("Found " + roles.size() + " available roles for group " +
             groupId + " after permission checking");
   
 
@@ -1328,6 +1294,30 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         plist.setTotalSize(roles.size());
 
         return plist;
+    }
+
+    /**
+     * Filter a collection of groupLocal objects to only include those viewable
+     * by the specified user
+     */
+    private Collection filterViewableGroups(AuthzSubject who, Collection groups)
+        throws PermissionException, FinderException
+    {
+        // finally scope down to only the ones the user can see
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+        List viewable = pm.findOperationScopeBySubject(who,
+           AuthzConstants.groupOpViewResourceGroup,
+           AuthzConstants.groupResourceTypeName,
+           PageControl.PAGE_ALL);
+        
+        for(Iterator i = groups.iterator(); i.hasNext();) {
+            ResourceGroup resGrp = (ResourceGroup) i.next();
+            
+            if (!viewable.contains(resGrp.getId())) {
+                i.remove();
+            }
+        }
+        return groups;
     }
 
     /**

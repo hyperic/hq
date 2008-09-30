@@ -115,6 +115,10 @@ public class ResourceGroupManagerEJBImpl
     private final String OWNEDGROUP_PAGER =
         PagerProcessor_ownedResourceGroup.class.getName();
 
+    private ResourceGroup lookupGroup(ResourceGroupValue group) {
+        return getResourceGroupDAO().findById(group.getId());
+    }
+
     /**
      * List the ResourceGroups associated with this resource.
      * @param res This resource.

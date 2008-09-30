@@ -29,10 +29,8 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
-import javax.ejb.FinderException;
 import javax.ejb.SessionContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -45,15 +43,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.util.pager.PageControl;
 
 /**
  * This is the parent class for all Authz Session Beans
@@ -93,8 +87,8 @@ public abstract class AuthzSession {
     }
 
     protected ResourceType getRootResourceType() {
-       return DAOFactory.getDAOFactory().getResourceTypeDAO()
-            .findByName(AuthzConstants.typeResourceTypeName); 
+       return getResourceTypeDAO()
+           .findByName(AuthzConstants.typeResourceTypeName); 
     }
 
     /**
@@ -126,7 +120,6 @@ public abstract class AuthzSession {
         
         AuthzSubjectDAO subjDao = 
             new AuthzSubjectDAO(DAOFactory.getDAOFactory());
-        ResourceDAO resDao = null;
         RoleDAO roleDao = null;
         ResourceGroupDAO resGrpDao = null;
         for (int i = 0; i < vals.length; i++) {
@@ -137,10 +130,7 @@ public abstract class AuthzSession {
                 ret.add(subjDao.findById(((AuthzSubjectValue)vals[i]).getId()));
             }
             else if (vals[i] instanceof ResourceValue) {
-                if (resDao == null) {
-                    resDao = getResourceDAO();
-                }
-                ret.add(resDao.findById(((ResourceValue) vals[i]).getId()));
+                ret.add(lookupResource((ResourceValue) vals[i]));
             }
             else if (vals[i] instanceof RoleValue) {
                 if (roleDao == null) {
@@ -228,56 +218,14 @@ public abstract class AuthzSession {
         return getSubjectDAO().findById(id);
     }
 
-    protected ResourceType lookupType(ResourceTypeValue type) {
-        return getResourceTypeDAO().findById(type.getId());
-    }
-
-    protected ResourceGroup lookupGroup(ResourceGroupValue group) {
-        return getResourceGroupDAO().findById(group.getId());
-    }
-
-    protected ResourceGroup lookupGroup(Integer id) {
-        return getResourceGroupDAO().findById(id);
-    }
-
-    protected Resource lookupResource(ResourceValue resource) {
+    private Resource lookupResource(ResourceValue resource) {
         if (resource.getId() == null) {
             String typeName = resource.getResourceTypeValue().getName();
-            return lookupResourcePojoByInstance(typeName,
-                                                resource.getInstanceId());
+            ResourceType type = getResourceTypeDAO().findByName(typeName);
+            return getResourceDAO().findByInstanceId(type,
+                                                     resource.getInstanceId());
         } 
         return getResourceDAO().findById(resource.getId());
-    }
-
-    protected Resource lookupResourcePojoByInstance(String resTypeName,
-                                                    Integer instId) {
-        ResourceType type = getResourceTypeDAO().findByName(resTypeName);
-        return getResourceDAO().findByInstanceId(type, instId);
-    }
-
-    /**
-     * Filter a collection of groupLocal objects to only include those viewable
-     * by the specified user
-     */
-    protected Collection filterViewableGroups(AuthzSubject who,
-                                              Collection groups)
-        throws PermissionException, FinderException
-    {
-        // finally scope down to only the ones the user can see
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        List viewable = pm.findOperationScopeBySubject(who,
-           AuthzConstants.groupOpViewResourceGroup,
-           AuthzConstants.groupResourceTypeName,
-           PageControl.PAGE_ALL);
-        
-        for(Iterator i = groups.iterator(); i.hasNext();) {
-            ResourceGroup resGrp = (ResourceGroup) i.next();
-            
-            if (!viewable.contains(resGrp.getId())) {
-                i.remove();
-            }
-        }
-        return groups;
     }
 
     protected InitialContext getInitialContext() throws NamingException {
