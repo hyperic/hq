@@ -526,7 +526,7 @@ public class ConfigManagerEJBImpl
         }
 
         configBytes = mergeConfig(existingConfig.getMeasurementResponse(),
-                                  measurementConfig, overwrite, false);
+                                  measurementConfig, overwrite, force);
         if (!AICompare.configsEqual(configBytes,
                                     existingConfig.getMeasurementResponse())) {
             existingConfig.setMeasurementResponse(configBytes);
