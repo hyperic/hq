@@ -34,7 +34,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -69,10 +68,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
-import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -86,7 +82,6 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-import org.hyperic.util.pager.SortAttribute;
 
 /**
  * Use this session bean to manipulate ResourceGroups,
@@ -112,22 +107,6 @@ public class ResourceGroupManagerEJBImpl
         PagerProcessor_resourceGroup.class.getName();
     private final String OWNEDGROUP_PAGER =
         PagerProcessor_ownedResourceGroup.class.getName();
-
-    private ResourceGroup lookupGroup(ResourceGroupValue group) {
-        return getResourceGroupDAO().findById(group.getId());
-    }
-
-    /**
-     * List the ResourceGroups associated with this resource.
-     * @param res This resource.
-     * @ejb:interface-method
-     */
-    public ResourceGroupValue[] getResourceGroups(ResourceValue res) {
-        Resource resource = getResourceDAO().findById(res.getId());
-        Collection pojos = getResourceGroupDAO().findContaining(resource);
-        return (ResourceGroupValue[])
-            fromPojos(pojos, ResourceGroupValue.class);
-    }
 
     /**
      * Create a resource group.  Currently no permission checking.
@@ -256,33 +235,6 @@ public class ResourceGroupManagerEJBImpl
     }
     
     /**
-     * Write the specified entity out to permanent storage.
-     * @param whoami The current running user.
-     * @param grpVal The ResourceGroup to save.
-     * @throws PermissionException whoami may not perform modifyResourceGroup on
-     *                             this group.
-     * @ejb:interface-method
-     */
-    public void saveResourceGroup(AuthzSubject whoami,
-                                  ResourceGroupValue grpVal)
-        throws PermissionException 
-    {
-        checkGroupPermission(whoami, grpVal.getId(),
-                             AuthzConstants.perm_modifyResourceGroup);
-        ResourceGroup group = lookupGroup(grpVal);
-
-        // check if the name has changed. If it has, update the resource
-        if (!grpVal.getName().equals(group.getName())) {
-            Resource resource =
-                getResourceDAO().findByInstanceId(AuthzConstants.authzGroup,
-                                                  group.getId());
-
-            resource.setName(grpVal.getName());
-        }
-        group.setResourceGroupValue(grpVal);
-    }
-
-    /**
      * Remove all groups compatable with the specified resource prototype.
      * 
      * @throws VetoException if another subsystem cannot allow it (for 
@@ -353,34 +305,6 @@ public class ResourceGroupManagerEJBImpl
         addResources(group, resources);
     }
 
-    /**
-     * Associate resources with this group.
-     * @param whoami The current running user.
-     * @param group The group.
-     * @param resources The resources to associate with the group.
-     * @throws PermissionException whoami does not own the resources.
-     * @ejb:interface-method
-     */
-    public void addResources(AuthzSubject whoami,
-                             ResourceGroupValue group,
-                             ResourceValue[] resources)
-        throws PermissionException 
-    {
-        checkGroupPermission(whoami, group.getId(),
-                             AuthzConstants.perm_modifyResourceGroup);
-        ResourceGroupDAO grpDao = getResourceGroupDAO();
-        ResourceGroup resGroup = grpDao.findByName(group.getName());
-
-        ResourceDAO resDao = getResourceDAO();
-        List resourcePojos = new ArrayList(resources.length);
-        for (int i = 0; i < resources.length; i++) {
-            Resource resource = resDao.findById(resources[i].getId());
-            resourcePojos.add(resource);
-        }
-        
-        addResources(resGroup, resourcePojos);
-    }
-    
     private void addResources(ResourceGroup group, List resources) {
         getResourceGroupDAO().addMembers(group, resources);
         GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
@@ -423,26 +347,6 @@ public class ResourceGroupManagerEJBImpl
     }
 
     /**
-     * Disassociate all resources from this group.
-     * @param whoami The current running user.
-     * @param group The group.
-     * @ejb:interface-method
-     */
-    public void removeAllResources(AuthzSubject whoami,
-                                   ResourceGroupValue group)
-        throws PermissionException 
-    {
-        ResourceGroupDAO dao = getResourceGroupDAO();
-        ResourceGroup resGroup = dao.findByName(group.getName());
-
-        checkGroupPermission(whoami, resGroup.getId(),
-                             AuthzConstants.perm_modifyResourceGroup);
-
-        dao.removeAllMembers(resGroup);
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(resGroup);
-    }
-
-    /**
      * Sets the criteria list for this group.
      * @param whoami The current running user.
      * @param group This group.
@@ -461,30 +365,6 @@ public class ResourceGroupManagerEJBImpl
         group.setCritterList(critters);
     }
     
-    /**
-     * Set the resources for this group.
-     * To get the operations call getOperationValues() on the value-object.
-     * @param whoami The current running user.
-     * @param grpVal This group.
-     * @param resources Resources to associate with this role.
-     * @throws PermissionException whoami does not own the resource.
-     * @ejb:interface-method
-     */
-    public void setResources(AuthzSubject whoami,
-                             ResourceGroupValue grpVal,
-                             ResourceValue[] resources)
-        throws PermissionException 
-    {
-        checkGroupPermission(whoami, grpVal.getId(),
-                             AuthzConstants.perm_modifyResourceGroup);
-
-        ResourceGroupDAO gDao = getResourceGroupDAO();
-        ResourceGroup group = gDao.findById(grpVal.getId());
-
-        gDao.setMembers(group, toPojos(resources));
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
-    }
-
     /**
      * Change the resource contents of a group to the specified list
      * of resources.
@@ -858,7 +738,7 @@ public class ResourceGroupManagerEJBImpl
         // get all roles, sorted but not paged
         allPc.setSortattribute(pc.getSortattribute());
         allPc.setSortorder(pc.getSortorder());
-        List all = getAllResourceGroups(whoami, allPc);
+        Collection all = getAllResourceGroups(whoami, false);
 
         // build an index of ids
         HashSet index = new HashSet();
@@ -869,7 +749,7 @@ public class ResourceGroupManagerEJBImpl
         List groups = new ArrayList(numToFind);
         Iterator i = all.iterator();
         while (i.hasNext() && groups.size() < numToFind) {
-            ResourceGroupValue g = (ResourceGroupValue) i.next();
+            ResourceGroup g = (ResourceGroup) i.next();
             if (index.contains(g.getId()))
                 groups.add(g);
         }
@@ -879,118 +759,6 @@ public class ResourceGroupManagerEJBImpl
         plist.setTotalSize(groups.size());
 
         return plist;
-    }
-
-    /**
-     * Associate roles with this group.
-     * @param whoami The subject.
-     * @param group The group to associate the roles with.
-     * @param roles The roles to associate with the group.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform addRole on this group.
-     * @ejb:interface-method
-     */
-    public void addRoles(AuthzSubject whoami, ResourceGroupValue group,
-                         RoleValue[] roles) 
-    {
-        Set roleLocals = toPojos(roles);
-        Iterator it = roleLocals.iterator();
-        ResourceGroup groupLocal = lookupGroup(group);
-
-        while (it != null && it.hasNext()) {
-            Role role = (Role)it.next();
-            groupLocal.addRole(role);
-        }
-    }
-
-    /**
-     * Disassociate roles from this group.
-     * @param whoami The current running user.
-     * @param group The group.
-     * @param roles The roles to disassociate.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform removeRole on this group.
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public void removeRoles(AuthzSubject whoami, ResourceGroupValue group,
-                            RoleValue[] roles)
-        throws FinderException, PermissionException 
-    {
-        Set roleLocals = toPojos(roles);
-        Iterator it = roleLocals.iterator();
-        ResourceGroup groupLocal = lookupGroup(group);
-
-        while (it != null && it.hasNext()) {
-            Role role = (Role)it.next();
-            groupLocal.removeRole(role);
-        }
-    }
-
-    /**
-     * Disassociate all roles from this role.
-     * @param whoami The current running user.
-     * @param group The group.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform removeRole on this group.
-     * @ejb:interface-method
-     */
-    public void removeAllRoles(AuthzSubject whoami,
-                               ResourceGroupValue group)
-        throws FinderException, PermissionException 
-    {
-        ResourceGroup groupLocal = lookupGroup(group);
-        removeRoles(whoami, group, (RoleValue[])fromLocals(groupLocal.getRoles(), 
-                                                           RoleValue.class));
-    }
-
-    /**
-     * Set the roles for this group.
-     * To get the roles call getOperationValues() on the value-object.
-     * @param whoami The current running user.
-     * @param group This group.
-     * @param roles Operations to associate with this group.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform setRoles 
-     *                                on this group.
-     * @ejb:interface-method
-     */
-    public void setRoles(AuthzSubject whoami, ResourceGroupValue group,
-                         RoleValue[] roles)
-        throws FinderException, PermissionException 
-    {
-        toPojos(roles);
-        
-        /* remove all roles */
-        removeAllRoles(whoami, group);
-
-        /* add subject to new set of roles */
-        addRoles(whoami, group, roles);
-    }
-
-    /**
-     * List the roles this group belongs to.
-     * @param whoami The current running user.
-     * @param groupValue This group.
-     * @return Array of roles in this role.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform listRoles 
-     *                                on this group.
-     * @ejb:interface-method
-     */
-    public RoleValue[] getRoles(AuthzSubject whoami,
-                                ResourceGroupValue groupValue) 
-    {
-        ResourceGroup groupLocal = lookupGroup(groupValue);
-        /**
-         This is no longer required. Viewing dependent entities is
-         done based on whether or not you can see the group
-        perm.check(this.lookupSubject(whoami),
-                   groupLocal.getResource().getResourceType(),
-                   groupLocal.getId(),
-                   AuthzConstants.groupOpListRoles);
-        **/
-        return (RoleValue[])fromLocals(groupLocal.getRoles(), RoleValue.class);
     }
 
     /**

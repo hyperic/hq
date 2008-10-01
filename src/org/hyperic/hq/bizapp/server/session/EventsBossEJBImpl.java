@@ -507,8 +507,9 @@ public class EventsBossEJBImpl
         
         // Create list of ID's to create the alert definition
         List appdefIds = new ArrayList();
-        appdefIds.add(getAppdefEntityID(adval));
-        if (adval.getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+        final AppdefEntityID aeid = getAppdefEntityID(adval);
+        appdefIds.add(aeid);
+        if (aeid.isGroup()) {
             // Look up the group
             AppdefGroupValue group;
             try {
@@ -536,7 +537,7 @@ public class EventsBossEJBImpl
             // Scrub the triggers just in case
             adval.removeAllTriggers();
 
-            if (id.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (!id.isGroup()) {
                 // If this is for the members of a group, we need to
                 // scrub and copy the parent's conditions
                 if (parent != null) {
@@ -866,8 +867,7 @@ public class EventsBossEJBImpl
             // A little more work to do for group and type alert definition
             adval = getADM().updateAlertDefinition(adval);
    
-            List children =
-                getADM().findAlertDefinitionChildren(adval.getId());
+            List children = getADM().findAlertDefinitionChildren(adval.getId());
    
             for (Iterator it = children.iterator(); it.hasNext();) {
                 AlertDefinitionValue child = (AlertDefinitionValue) it.next();

@@ -57,7 +57,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.RoleManagerLocal;
 import org.hyperic.hq.authz.shared.RoleManagerUtil;
 import org.hyperic.hq.authz.shared.RoleValue;
@@ -412,44 +411,18 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * Associate ResourceGroups with this role.
      * @param whoami The current running user.
      * @param role This role.
-     * @param groups The groups to associate with this role.
-     * @throws FinderException Unable to find a given or dependent entities.
-     * @throws PermissionException whoami is not allowed to perform 
-     * addResourceGroup on this role.
-     * @ejb:interface-method
-     */
-    public void addResourceGroups(AuthzSubject whoami, RoleValue role,
-                                  ResourceGroupValue[] groups)
-        throws PermissionException {
-        Set sLocals = toPojos(groups);
-        Role roleLocal = lookupRole(role);
-
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-                 roleLocal.getId(), AuthzConstants.roleOpModifyRole);
-
-        for (Iterator it = sLocals.iterator(); it.hasNext(); ) {
-            ResourceGroup group = (ResourceGroup) it.next();
-            group.addRole(roleLocal);
-        }
-    }
-
-    /**
-     * Associate ResourceGroups with this role.
-     * @param whoami The current running user.
-     * @param role This role.
-     * @param ids The ids of the groups to associate with this role.
+     * @param gids The ids of the groups to associate with this role.
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform
      * addResourceGroup on this role.
      * @ejb:interface-method
      */
-    public void addResourceGroups(AuthzSubject whoami, RoleValue role,
-                                  Integer[] ids)
+    public void addResourceGroups(AuthzSubject whoami, Integer rid,
+                                  Integer[] gids)
         throws PermissionException {
-        Role roleLocal = lookupRole(role);
-        for (int i = 0; i < ids.length; i++) {
-            ResourceGroup group = lookupGroup(ids[i]);
+        Role roleLocal = getRoleDAO().findById(rid);
+        for (int i = 0; i < gids.length; i++) {
+            ResourceGroup group = lookupGroup(gids[i]);
             group.addRole(roleLocal);
         }
     }
@@ -471,32 +444,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         for (int i = 0; i < ids.length; i++) {
             Role roleLocal = lookupRole(ids[i]);
             group.addRole(roleLocal);
-        }
-    }
-
-    /**
-     * Disassociate ResourceGroups from this role.
-     * @param whoami The current running user.
-     * @param role This role.
-     * @param groups The groups to disassociate.
-     * @throws FinderException Unable to find a given or dependent entities.
-     * @throws PermissionException whoami is not allowed to perform 
-     * modifyRole on this role.
-     * @ejb:interface-method
-     */
-    public void removeResourceGroups(AuthzSubject whoami, RoleValue role,
-                                     ResourceGroupValue[] groups)
-        throws PermissionException {
-        Set sLocals = toPojos(groups);
-        Role roleLocal = lookupRole(role);
-
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-
-        pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-                 roleLocal.getId(), AuthzConstants.roleOpModifyRole);
-
-        for (Iterator it = sLocals.iterator(); it.hasNext(); ) {
-            roleLocal.removeResourceGroup((ResourceGroup) it.next());
         }
     }
 
@@ -571,29 +518,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     }
 
     /**
-     * Set the ResourceGroups of this role.
-     * @param whoami The current running user.
-     * @param role This role.
-     * @param groups The ResourceGroup to associate with this role.
-     * @throws FinderException Unable to find a given or dependent entities.
-     * @throws PermissionException whoami is not allowed to perform 
-     * setResourceGroups on this role.
-     * @ejb:interface-method
-     */
-    public void setResourceGroups(AuthzSubject whoami, RoleValue role,
-                                  ResourceGroupValue[] groups)
-        throws PermissionException {
-        Role roleLocal = lookupRole(role);
-
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-                 roleLocal.getId(), AuthzConstants.roleOpModifyRole);
-
-        Set sLocals = toPojos(groups);
-        roleLocal.setResourceGroups(sLocals);
-    }
-
-     /**
       * Get the # of roles within HQ inventory
       * @ejb:interface-method
       */
