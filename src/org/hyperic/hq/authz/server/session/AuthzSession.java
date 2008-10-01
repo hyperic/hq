@@ -87,8 +87,7 @@ public abstract class AuthzSession {
     }
 
     protected ResourceType getRootResourceType() {
-       return getResourceTypeDAO()
-           .findByName(AuthzConstants.typeResourceTypeName); 
+       return getResourceTypeDAO().findTypeResourceType();
     }
 
     /**

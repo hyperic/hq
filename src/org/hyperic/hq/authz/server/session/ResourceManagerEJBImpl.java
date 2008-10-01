@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -42,14 +41,11 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.SystemException;
@@ -86,118 +82,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 
     private ResourceEdgeDAO getResourceEdgeDAO() {
         return new ResourceEdgeDAO(DAOFactory.getDAOFactory());
-    }
-
-    /**
-     * Create a ResourceType.
-     * @param whoami The current running user.
-     * @param type The ResourceType to be created.
-     * @param operations Operations to associate with the new role. Use null
-     * if you want to associate operations later. Given operations will be
-     * created. So make this these are nonexistent operations. Use
-     * setOperations() to associate existing Operations.
-     * @return Value-object for the ResourceType.
-     * @ejb:interface-method
-     */
-    public ResourceType createResourceType(AuthzSubject whoami,
-                                           ResourceTypeValue typeV,
-                                           Operation[] operations) {
-        AuthzSubject whoamiPojo = lookupSubject(whoami.getId());
-        ResourceType type = getResourceTypeDAO().create(whoamiPojo, typeV);
-        Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
-        
-        /* create associated operations */
-        if (operations != null) {
-            for (int i = 0; i < operations.length; i++) {
-                Operation op = type.createOperation(operations[i].getName());
-                rootRole.addOperation(op);
-            }
-        }
-        return type;
-    }
-
-    /**
-     * Delete the specified ResourceType.
-     * 
-     * @param whoami
-     *            The current running user.
-     * @param type
-     *            The type to delete.
-     * @ejb:interface-method
-     */
-    public void removeResourceType(AuthzSubject whoami, ResourceTypeValue type){
-        ResourceTypeDAO dao = getResourceTypeDAO();
-        ResourceType rt = dao.findById(type.getId());
-        AuthzSubject who = new AuthzSubjectDAO(DAOFactory.getDAOFactory())
-            .findById(whoami.getId());
-        dao.remove(who, rt);
-    }
-
-    /**
-     * Write the specified entity out to permanent storage.
-     * @param whoami The current running user.
-     * @param type The type to save.
-     * @throws PermissionException whoami may not perform modifyResourceType on this role.
-     * @ejb:interface-method
-     */
-    public void saveResourceType(AuthzSubject whoami, ResourceTypeValue type)
-        throws PermissionException {
-        ResourceType resType = getResourceTypeDAO().findById(type.getId());
-
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(),
-                 resType.getResource().getResourceType(), resType.getId(),
-                 AuthzConstants.typeOpModifyResourceType);
-
-        // XXX:  Fill this in -- what info can be changed, exactly?
-        //resType.setResourceTypeValue(type);
-    }
-
-    /**
-     * Associate operations with this role.
-     * @param whoami The current running user.
-     * @param type The type.
-     * @param operations The operations to associate with the role. These
-     * operations will be created. Use setOperations() to associate existing
-     * operations.
-     * @ejb:interface-method
-     */
-    public void addOperations(AuthzSubject whoami,
-                              ResourceType resType,
-                              Operation[] operations) {
-        Collection rtOps = resType.getOperations();
-        rtOps.addAll(toPojos(operations));
-    }
-
-    /**
-     * Disassociate operations from this role.
-     * @param whoami The current running user.
-     * @param type The type.
-     * @param operations The roles to disassociate. These operations will be deleted.
-     * @ejb:interface-method
-     */
-    public void removeOperations(AuthzSubject whoami,
-                                 ResourceType resType,
-                                 Operation[] operations) {
-        Set opPojos = toPojos(operations);
-        for (Iterator it = resType.getOperations().iterator(); it.hasNext(); ) {
-            Operation oper = (Operation) it.next();
-            if (opPojos.contains(oper)) {
-                it.remove();
-            }
-        }
-    }
-
-    /**
-     * Disassociate all operations from this role. All operations will be deleted.
-     * @param whoami The current running user.
-     * @param type The role.
-     * @ejb:interface-method
-     */
-    public void removeAllOperations(AuthzSubject whoami,
-                                    ResourceTypeValue type) {
-        ResourceType resType = getResourceTypeDAO().findById(type.getId());
-        resType.getOperations().clear();
     }
 
     /**
@@ -515,10 +399,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         // First get all resource types
         HashMap resourceMap = new HashMap();
     
-        Collection resTypes =
-            getAllResourceTypes(subject, PageControl.PAGE_ALL);
+        Collection resTypes = getResourceTypeDAO().findAll();
         for (Iterator it = resTypes.iterator(); it.hasNext(); ) {
-            ResourceTypeValue type = (ResourceTypeValue) it.next();
+            ResourceType type = (ResourceType) it.next();
    
             String typeName = type.getName();
                     

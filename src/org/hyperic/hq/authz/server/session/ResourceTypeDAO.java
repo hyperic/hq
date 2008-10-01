@@ -29,7 +29,6 @@ import java.util.Collections;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class ResourceTypeDAO 
@@ -39,17 +38,16 @@ public class ResourceTypeDAO
         super(ResourceType.class, f);
     }
 
-    ResourceType create(AuthzSubject creator, ResourceTypeValue info) {
-        ResourceType resType = new ResourceType(info.getName(), null,
-                                                info.getSystem());
+    ResourceType create(AuthzSubject creator, String name, boolean system) {
+        ResourceType resType = new ResourceType(name, null, system);
 
         save(resType);
 
         // ResourceTypes also have Resources associated with them, so create
         // that and link  'em up.
         DAOFactory fact = DAOFactory.getDAOFactory();
-        ResourceDAO rDao = fact.getResourceDAO();
-        ResourceGroupDAO gDao = fact.getResourceGroupDAO();
+        ResourceDAO rDao = new ResourceDAO(fact);
+        ResourceGroupDAO gDao = new ResourceGroupDAO(fact);
         ResourceType typeResType = findTypeResourceType();
         Resource prototype = rDao.findById(AuthzConstants.rootResourceId); 
         Resource res = rDao.create(typeResType, prototype, resType.getName(), 
