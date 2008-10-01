@@ -127,10 +127,6 @@ public class AlertDefinitionManagerEJBImpl
         tdao.removeTriggers(alertdef);
         watch.markTimeEnd("removeTriggers");
 
-        watch.markTimeBegin("markActionsDeleted");
-        getActionDAO().deleteAlertDefinition(alertdef);
-        watch.markTimeBegin("markActionsDeleted");
-        
         // Delete escalation state
         watch.markTimeBegin("endEscalation");
         if (alertdef.getEscalation() != null &&
@@ -175,6 +171,10 @@ public class AlertDefinitionManagerEJBImpl
 
         deleteAlertDefinitionStuff(subj, alertdef, escMan);
 
+        watch.markTimeBegin("markActionsDeleted");
+        getActionDAO().deleteAlertDefinition(alertdef);
+        watch.markTimeBegin("markActionsDeleted");
+        
         watch.markTimeBegin("mark deleted");
         // Disassociated from escalations
         alertdef.setEscalation(null);
