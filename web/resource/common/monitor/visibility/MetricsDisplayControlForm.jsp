@@ -182,7 +182,7 @@
 </c:choose>
 </table>
   <div id="advancedAnchor" style="position: relative; visibility: hidden;"></div>
-  <div id="advancedDisplay" class="dialog" style="width:600px;height:160px; ">
+  <div id="advancedDisplay" class="dialog" style="width:600px;height:160px;display:none;">
     <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
       <c:if test="${not empty form}">
         <tiles:put name="form" beanName="form"/>
