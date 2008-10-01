@@ -2,8 +2,12 @@ import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImp
 import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as PB
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as subMan
 import org.hyperic.hq.appdef.server.session.AgentSortField
 import org.hyperic.hq.appdef.Agent
+import org.hyperic.hq.appdef.server.session.Server
+import org.hyperic.hq.appdef.shared.AppdefEntityValue
+import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.util.PrintfFormat
 import org.hyperic.util.units.UnitsFormat
 import org.hyperic.util.units.UnitsConstants
@@ -24,7 +28,6 @@ import javax.naming.InitialContext
 import groovy.sql.Sql
 
 import net.sf.ehcache.CacheManager
-
 
 class HealthController 
 	extends BaseController
