@@ -27,6 +27,7 @@ package org.hyperic.hq.events.server.session;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -79,20 +80,26 @@ public class ActionDAO extends HibernateDAO {
     }
     
     void deleteAlertDefinition(AlertDefinition def) {
-        String sql = "update Action set parent = null where exists " +
-        		     "(select a from Action a where a = parent and " +
-        		      "a.alertDefinition = :def)";
+        // Find all actions
+        List actions =
+            createCriteria().add(Restrictions.eq("alertDefinition", def))
+                            .list();
         
-        getSession().createQuery(sql)
-                    .setParameter("def", def)
-                    .executeUpdate();
+        String sql = "update Action set parent = null, deleted = true " +
+        		     "where parent = :act";
+        
+        for (Iterator it = actions.iterator(); it.hasNext(); ) {
+            Action action = (Action) it.next();
+            // Bulk update its children (there should be limited number of
+            // actions
+            createQuery(sql).setParameter("act", action).executeUpdate();
+        }
 
+        // Bulk update all actions
         sql = "update Action set parent = null, deleted = true " +
                      "where alertDefinition = :def";
         
-        getSession().createQuery(sql)
-                    .setParameter("def", def)
-                    .executeUpdate();
+        createQuery(sql).setParameter("def", def).executeUpdate();
     }
 
     /**
