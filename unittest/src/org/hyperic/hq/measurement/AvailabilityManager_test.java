@@ -54,7 +54,7 @@ public class AvailabilityManager_test extends BaseServerTestCase {
         super.tearDown();
         undeployHQ();
     }
-    
+   
     public void testBackfill() throws Exception {
         AvailabilityManager_testLocal aTest =
             (AvailabilityManager_testLocal)
@@ -62,6 +62,7 @@ public class AvailabilityManager_test extends BaseServerTestCase {
                     AvailabilityManager_testEJBImpl.class,
                     AvailabilityManager_testLocal.class);
         aTest.testCatchup();
+        aTest.testBackfillingForService();
     }
     
     public void testRLE() throws Exception {
@@ -72,5 +73,13 @@ public class AvailabilityManager_test extends BaseServerTestCase {
                     AvailabilityManager_testLocal.class);
         aTest.testInsertScenarios();
     }
-    
+   
+    public void testAvailabilityStatus() throws Exception {
+        AvailabilityManager_testLocal aTest =
+            (AvailabilityManager_testLocal)
+                _registry.getLocalInterface(
+                    AvailabilityManager_testEJBImpl.class,
+                    AvailabilityManager_testLocal.class);
+        aTest.testAvailabilityStatusWhenNtwkDwn();
+    }
 }
