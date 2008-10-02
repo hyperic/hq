@@ -311,8 +311,12 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
      */
     public static Properties getJDBCConnectionProperties(String user, String password) {
         Properties info = new Properties();
-        info.put (USER_KEY, user);
-        info.put (PASSWORD_KEY, password);
+        if (user != null) {
+            info.put (USER_KEY, user);
+        }
+        if (password != null) {
+            info.put (PASSWORD_KEY, password);
+        }
         return info;
     }
 }
