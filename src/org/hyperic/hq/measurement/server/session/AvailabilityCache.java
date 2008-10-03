@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -49,7 +50,6 @@ public class AvailabilityCache {
     static final int    CACHESIZEINCREMENT = 1000;
 
     private final Object _cacheLock = new Object();
-    private final Object _tranLock = new Object();
     private final Map _tranCacheState = new HashMap();
     private Thread _tranThread;
     private boolean _inTran = false;
@@ -88,7 +88,7 @@ public class AvailabilityCache {
     }
 
     private void captureCacheState(Integer metricId) {
-        synchronized (_tranLock) {
+        synchronized (_tranCacheState) {
             if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
                 return;
             }
@@ -104,36 +104,38 @@ public class AvailabilityCache {
     }
 
     public void rollbackTran() {
-        synchronized (_tranLock) {
+        synchronized (_tranCacheState) {
             if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
                 return;
             }
             _inTran = false;
-            for (Iterator it=_tranCacheState.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry)it.next();
-                Integer id = (Integer)entry.getKey();
-                DataPoint pt = (DataPoint)entry.getValue();
+            // scottmf, when I use an iterator here, under certain circumstances
+            // ConcurrentModificationException is thrown.  It is very hard
+            // to reproduce and not straight forward
+            Integer[] keys = (Integer[])_tranCacheState.keySet().toArray(new Integer[0]);
+            for (int i=0; i<keys.length; i++) {
+                DataPoint pt = (DataPoint)_tranCacheState.get(keys[i]);
                 if (pt == null) {
-                    remove(id);
+                    remove(keys[i]);
                 } else {
-                    put(id, pt);
+                    put(keys[i], pt);
                 }
             }
             _tranThread = null;
             _tranCacheState.clear();
-            _tranLock.notifyAll();
+            _tranCacheState.notifyAll();
         }
     }
 
     public void commitTran() {
-        synchronized (_tranLock) {
+        synchronized (_tranCacheState) {
             if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
                 return;
             }
             _inTran = false;
             _tranThread = null;
             _tranCacheState.clear();
-            _tranLock.notifyAll();
+            _tranCacheState.notifyAll();
         }
     }
 
@@ -142,13 +144,13 @@ public class AvailabilityCache {
      * currentThread was already participating in the current transaction
      */
     public boolean beginTran() {
-        synchronized (_tranLock) {
+        synchronized (_tranCacheState) {
             if (_inTran && Thread.currentThread().equals(_tranThread)) {
                 return false;
             }
             while (_inTran) {
                 try {
-                    _tranLock.wait();
+                    _tranCacheState.wait();
                 } catch (InterruptedException e) {
                 }
             }

@@ -28,11 +28,16 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -74,7 +79,11 @@ import org.hyperic.util.pager.PageList;
 public class AvailabilityManagerEJBImpl
     extends SessionEJB implements SessionBean {
 
+    private final MeasurementManagerLocal _mMan =
+            MeasurementManagerEJBImpl.getOne();
     private final Log _log = LogFactory.getLog(AvailabilityManagerEJBImpl.class);
+    private final Log _traceLog = LogFactory.getLog(
+        AvailabilityManagerEJBImpl.class.getName() + "Trace");
     private static final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
     private static final double AVAIL_UNKNOWN =
@@ -92,10 +101,12 @@ public class AvailabilityManagerEJBImpl
         "org.hq.triggers.all.events.interesting";
     private static final int DEFAULT_INTERVAL = 60;
     private final AvailabilityDataDAO _dao = getAvailabilityDataDAO();
+    private final Map _createMap = new HashMap();
+    private final Map _removeMap = new HashMap();
     
-    private Map findAvailCache = null;
-    private Map findAvailBeforeCache = null;
-    private Map findAvailAfterCache = null;
+    private Map _currAvails = null;
+    private static final long MAX_DATA_BACKLOG_TIME =
+        7 * MeasurementConstants.DAY;
     
     /**
      * @ejb:interface-method
@@ -544,52 +555,119 @@ public class AvailabilityManagerEJBImpl
         List updateList = new ArrayList(availPoints.size());
         List outOfOrderAvail = new ArrayList(availPoints.size());
         AvailabilityCache cache = AvailabilityCache.getInstance();
+        _createMap.clear();
+        _removeMap.clear();
         final boolean debug = _log.isDebugEnabled();
         long begin = -1;
+        Map state = null;
         synchronized (cache) {
             try {
                 cache.beginTran();
-                if (debug) {
-                    begin = System.currentTimeMillis();
-                }
+                begin = getDebugTime(debug);
+                setCurrAvails(availPoints);
+                debugTimes(begin, "setCurrAvails", availPoints.size());
+                state = captureCurrAvailState();
+                begin = getDebugTime(debug);
                 updateCache(availPoints, updateList, outOfOrderAvail);
-                if (debug) {
-                    long time = System.currentTimeMillis() - begin;
-                    _log.debug("AvailabilityInserter time to updateCache -> "
-                        + time + " ms, points: " + availPoints.size());
-                }
-                if (debug) {
-                    begin = System.currentTimeMillis();
-                }
+                debugTimes(begin, "updateCache", availPoints.size());
+                begin = getDebugTime(debug);
                 updateStates(updateList);
-                if (debug) {
-                    long time = System.currentTimeMillis() - begin;
-                    _log.debug("AvailabilityInserter time to updateStates -> "
-                        + time + " ms, points: " + updateList.size());
-                }
+                debugTimes(begin, "updateStates", updateList.size());
+                begin = getDebugTime(debug);
+                updateOutOfOrderState(outOfOrderAvail);
+                flushCreateAndRemoves();
+                logErrorInfo(state, availPoints);
+                debugTimes(begin, "updateOutOfOrderState", outOfOrderAvail.size());
                 cache.commitTran();
             } catch (Throwable e) {
-                cache.rollbackTran();
+                logErrorInfo(state, availPoints);
                 _log.error(e.getMessage(), e);
+                cache.rollbackTran();
                 throw new SystemException(e);
-            } finally {
-                findAvailBeforeCache = null;
-                findAvailAfterCache = null;
-                findAvailCache = null;
             }
-        }
-        if (debug) {
-            begin = System.currentTimeMillis();
-        }
-        updateOutOfOrderState(outOfOrderAvail);
-        if (debug) {
-            long time = System.currentTimeMillis() - begin;
-            _log.debug("AvailabilityInserter time to updateOutOfOrderState -> "
-                + time + " ms, points: " + outOfOrderAvail.size());
         }
         sendDataToEventHandlers(availPoints);
     }
 
+    private void flushCreateAndRemoves() {
+        for (Iterator it=_removeMap.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)it.next();
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)entry.getValue();
+            _dao.remove(rle);
+        }
+        // for some reason if flush is not run, then create() will throw
+        // Hibernate NonUniqueObjectExceptions
+        _dao.getSession().flush();
+        for (Iterator it=_createMap.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)it.next();
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)entry.getValue();
+            AvailabilityDataId id = new AvailabilityDataId();
+            id.setMeasurement(rle.getMeasurement());
+            id.setStartime(rle.getStartime());
+            _dao.create(rle.getMeasurement(), rle.getStartime(),
+                        rle.getEndtime(), rle.getAvailVal());
+        }
+    }
+
+    private long getDebugTime(boolean debug) {
+        if (debug) {
+            return System.currentTimeMillis();
+        }
+        return -1;
+    }
+    
+    private void debugTimes(long begin, String name, int points) {
+        if (_log.isDebugEnabled()) {
+            long time = System.currentTimeMillis() - begin;
+            _log.debug("AvailabilityInserter time to " + name + " -> "
+                + time + " ms, points: " + points);
+        }
+    }
+
+    private void logErrorInfo(Map oldState, List availPoints) {
+        if (!_traceLog.isDebugEnabled()) {
+            return;
+        }
+        Integer mid;
+        Map currState = captureCurrAvailState();
+        if (null != (mid = isAvailDataRLEValid())) {
+            logAvailState(oldState, mid);
+            logStates(availPoints, mid);
+            logAvailState(currState, mid);
+        } else {
+            _traceLog.debug("RLE Data is valid");
+        }
+    }
+
+    private void setCurrAvails(List states) {
+        int i=0;
+        HashSet mids = new HashSet();
+        // only allow data for the last MAX_DATA_BACKLOG_TIME ms
+        // this way we don't have to bring too much into memory which could
+        // severily
+        long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000);
+        for (Iterator it=states.iterator(); it.hasNext(); i++) {
+            DataPoint pt = (DataPoint)it.next();
+            long timestamp = pt.getTimestamp();
+            if ((now-timestamp) > MAX_DATA_BACKLOG_TIME) {
+                it.remove();
+                long days = (now-timestamp)/MeasurementConstants.DAY;
+                _log.warn(" Avail measurement came in " + days + " days " +
+                          " late, dropping: timestamp=" + timestamp +
+                          " measId=" + pt.getMetricId() + 
+                          " value=" + pt.getMetricValue());
+                continue;
+            }
+            Integer mId = pt.getMetricId();
+            if (!mids.contains(mId)) {
+                mids.add(mId);
+            }
+        }
+        Integer[] mIds = (Integer[])mids.toArray(new Integer[0]);
+        _currAvails = _dao.getHistoricalAvailMap(
+            mIds, now-MAX_DATA_BACKLOG_TIME, false);
+    }
+    
     private void updateDup(DataPoint state, AvailabilityDataRLE dup)
         throws BadAvailStateException
     {
@@ -632,7 +710,7 @@ public class AvailabilityManagerEJBImpl
         } else if (newStartime < avail.getEndtime()) {
             prependState(pt, avail);
         } else if (newStartime > avail.getEndtime()) {
-            _dao.remove(avail);
+            removeAvail(avail);
         } else if (newStartime == avail.getEndtime()) {
             AvailabilityDataRLE after = findAvailAfter(pt);
             if (after.getAvailVal() == pt.getValue()) {
@@ -640,11 +718,11 @@ public class AvailabilityManagerEJBImpl
                 // and sliding back the start time of after obj
                 AvailabilityDataRLE before = findAvailBefore(pt);
                 if (before == null) {
-                    _dao.updateStartime(after, avail.getStartime());
+                    after = updateStartime(after, avail.getStartime());
                 } else if (before.getAvailVal() == after.getAvailVal()) {
-                    _dao.remove(avail);
-                    _dao.remove(before);
-                    _dao.updateStartime(after, before.getStartime());
+                    removeAvail(avail);
+                    removeAvail(before);
+                    after = updateStartime(after, before.getStartime());
                 }
             } else {
                 // newStartime == avail.getEndtime() &&
@@ -660,10 +738,10 @@ public class AvailabilityManagerEJBImpl
                         after.getAvailVal(), after.getStartime());
                     AvailabilityDataRLE afterAfter = findAvailAfter(afterPt);
                     if (afterAfter.getAvailVal() == pt.getValue()) {
-                        _dao.remove(after);
-                        updateStartime(afterAfter, pt.getTimestamp());
+                        removeAvail(after);
+                        afterAfter = updateStartime(afterAfter, pt.getTimestamp());
                     } else {
-                        _dao.updateVal(after, pt.getValue());
+                        updateAvailVal(after, pt.getValue());
                     }
                 }
             }
@@ -671,65 +749,43 @@ public class AvailabilityManagerEJBImpl
     }
     
     private AvailabilityDataRLE findAvail(DataPoint state) {
-        if (findAvailCache == null) {
-            return _dao.findAvail(state);
+        Integer mId = state.getMetricId();
+        List rleList = (List)_currAvails.get(mId);
+        long start = state.getTimestamp();
+        for (Iterator it=rleList.iterator(); it.hasNext(); ) {
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
+            if (rle.getStartime() == start) {
+                return rle;
+            }
         }
-        AvailabilityDataRLE rtn = (AvailabilityDataRLE)findAvailCache.get(state);
-        if (rtn == null) {
-            return _dao.findAvail(state);
-        }
-        findAvailCache.remove(state);
-        return rtn;
+        return null;
     }
     
     private AvailabilityDataRLE findAvailAfter(DataPoint state) {
-        if (findAvailAfterCache == null) {
-            return _dao.findAvailAfter(state);
-        }
-        Map map = (Map)findAvailAfterCache.get(state.getMetricId());
-        if (map == null) {
-            return _dao.findAvailAfter(state);
-        }
-        AvailabilityDataRLE rtn = (AvailabilityDataRLE)map.get(state);
-        try {
-            if (rtn == null) {
-                // there may be no avail after in the db
-                // in this case the state will still be in the findAvailAfterCache
-                // and return null instead of invoking db query
-                if (map.containsKey(state)) {
-                    return null;
-                }
-                return _dao.findAvailAfter(state);
+        Integer mId = state.getMetricId();
+        List rleList = (List)_currAvails.get(mId);
+        long start = state.getTimestamp();
+        for (Iterator it=rleList.iterator(); it.hasNext(); ) {
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
+            if (rle.getStartime() > start) {
+                return rle;
             }
-        } finally {
-            findAvailAfterCache.remove(state.getMetricId());
         }
-        return rtn;
+        return null;
     }
 
     private AvailabilityDataRLE findAvailBefore(DataPoint state) {
-        if (findAvailBeforeCache == null) {
-            return _dao.findAvailBefore(state);
-        }
-        Map map = (Map)findAvailBeforeCache.get(state.getMetricId());
-        if (map == null) {
-            return _dao.findAvailBefore(state);
-        }
-        AvailabilityDataRLE rtn = (AvailabilityDataRLE)map.get(state);
-        try {
-            if (rtn == null) {
-                // there may be no avail before in the db
-                // in this case the state will still be in the findAvailBeforeCache
-                // and return null instead of invoking db query
-                if (map.containsKey(state)) {
-                    return null;
-                }
-                return _dao.findAvailBefore(state);
+        Integer mId = state.getMetricId();
+        List rleList = (List)_currAvails.get(mId);
+        long start = state.getTimestamp();
+        int size = rleList.size();
+        for (ListIterator it=rleList.listIterator(size); it.hasPrevious(); ) {
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.previous();
+            if (start > rle.getStartime()) {
+                return rle;
             }
-        } finally {
-            findAvailBeforeCache.remove(state.getMetricId());
         }
-        return rtn;
+        return null;
     }
 
     private void merge(DataPoint state)
@@ -743,19 +799,17 @@ public class AvailabilityManagerEJBImpl
         AvailabilityDataRLE after = findAvailAfter(state);
         if (before == null && after == null) {
             // this shouldn't happen here
-            Measurement meas = getMeasurement(state.getMetricId().intValue());
-            _dao.create(meas, state.getTimestamp(),
-                       MAX_AVAIL_TIMESTAMP,
-                       state.getValue());
+            Measurement meas = getMeasurement(state.getMetricId());
+            create(meas, state.getTimestamp(), state.getValue());
         } else if (before == null) {
             if (after.getAvailVal() != state.getValue()) {
                 prependState(state, after);
             } else {
-                _dao.updateStartime(after, state.getTimestamp());
+                after = updateStartime(after, state.getTimestamp());
             }
         } else if (after == null) {
             // this shouldn't happen here
-            updateState(state, null);
+            updateState(state);
         } else {
             insertAvail(before, after, state);
         }
@@ -766,15 +820,15 @@ public class AvailabilityManagerEJBImpl
 
         if (state.getValue() != after.getAvailVal() &&
                 state.getValue() != before.getAvailVal()) {
-            Measurement meas = getMeasurement(state.getMetricId().intValue());
+            Measurement meas = getMeasurement(state.getMetricId());
             long pivotTime = state.getTimestamp() + meas.getInterval();
-            _dao.create(meas, state.getTimestamp(), pivotTime, state.getValue());
-            _dao.updateEndtime(before, state.getTimestamp());
-            _dao.updateStartime(after, pivotTime);
+            create(meas, state.getTimestamp(), pivotTime, state.getValue());
+            updateEndtime(before, state.getTimestamp());
+            after = updateStartime(after, pivotTime);
         } else if (state.getValue() == after.getAvailVal() &&
                    state.getValue() != before.getAvailVal()) {
-            _dao.updateEndtime(before, state.getTimestamp());
-            _dao.updateStartime(after, state.getTimestamp());
+            updateEndtime(before, state.getTimestamp());
+            after = updateStartime(after, state.getTimestamp());
         } else if (state.getValue() != after.getAvailVal() &&
                    state.getValue() == before.getAvailVal()) {
             // this is fine
@@ -786,8 +840,8 @@ public class AvailabilityManagerEJBImpl
                 "] have the same values.  This should not be the case.  " +
                 "Cleaning up";
             _log.warn(msg);
-            _dao.updateEndtime(before, after.getEndtime());
-            _dao.remove(after);
+            updateEndtime(before, after.getEndtime());
+            removeAvail(after);
         }
     }
 
@@ -796,14 +850,14 @@ public class AvailabilityManagerEJBImpl
         Measurement meas = avail.getMeasurement();
         if (before != null && before.getAvailVal() == state.getValue()) {
             long newStart =  state.getTimestamp() + meas.getInterval();
-            _dao.updateEndtime(before, newStart);
-            updateStartime(avail, newStart);
+            updateEndtime(before, newStart);
+            avail = updateStartime(avail, newStart);
         } else {
             long newStart =  state.getTimestamp() + meas.getInterval();
             long endtime = newStart;
-            updateStartime(avail, newStart);
-            _dao.create(avail.getMeasurement(), state.getTimestamp(),
-                       endtime, state.getValue());
+            avail = updateStartime(avail, newStart);
+            create(avail.getMeasurement(), state.getTimestamp(),
+                   endtime, state.getValue());
         }
         return true;
     }
@@ -814,62 +868,138 @@ public class AvailabilityManagerEJBImpl
                                         avail.getStartime());
         AvailabilityDataRLE before = findAvailBefore(state);
         if (before == null || before.getAvailVal() != val) {
-            _dao.updateVal(avail, val);
+            avail.setAvailVal(val);
         } else {
-            _dao.remove(before);
-            _dao.updateStartime(avail, before.getStartime());
-            _dao.updateVal(avail, val);
+            removeAvail(before);
+            avail = updateStartime(avail, before.getStartime());
+            avail.setAvailVal(val);
         }
     }
     
-    /*
-     * !!!need to move all calls to this
-     */
-    private void updateStartime(AvailabilityDataRLE avail, long start) {
+    private void sortRleList(List rleList) {
+        Collections.sort(rleList, new Comparator() {
+            public int compare(Object arg0, Object arg1) {
+                AvailabilityDataRLE lhs = (AvailabilityDataRLE)arg0;
+                AvailabilityDataRLE rhs = (AvailabilityDataRLE)arg1;
+                Long lhsStart = new Long(lhs.getStartime());
+                Long rhsStart = new Long(rhs.getStartime());
+                return lhsStart.compareTo(rhsStart);
+            }
+        });
+    }
+    
+    private void updateEndtime(AvailabilityDataRLE avail, long endtime) {
+        avail.setEndtime(endtime);
+        Integer mId = avail.getMeasurement().getId();
+        List rleList = (List)_currAvails.get(mId);
+        sortRleList(rleList);
+    }
+    
+    private AvailabilityDataRLE updateStartime(AvailabilityDataRLE avail,
+                                               long start) {
         // this should not be the case here, but want to make sure and
         // avoid HibernateUniqueKeyExceptions :(
         AvailabilityDataRLE tmp;
+        Measurement meas = avail.getMeasurement();
+        Integer mId = meas.getId();
         DataPoint tmpState = new DataPoint(
-            avail.getMeasurement().getId().intValue(),
-            avail.getAvailVal(), start);
+            mId.intValue(), avail.getAvailVal(), start);
         if (null != (tmp = findAvail(tmpState))) {
-            _dao.remove(tmp);
+            removeAvail(tmp);
         }
-        _dao.updateStartime(avail, start);
+        removeAvail(avail);
+        return create(meas, start, avail.getEndtime(), avail.getAvailVal());
+    }
+    
+    private void removeAvail(AvailabilityDataRLE avail) {
+        long start = avail.getStartime();
+        Integer mId = avail.getMeasurement().getId();
+        List rleList = (List)_currAvails.get(mId);
+        for (Iterator it=rleList.iterator(); it.hasNext(); ) {
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
+            if (rle.getMeasurement().getId().equals(mId) &&
+                rle.getStartime() == start) {
+                DataPoint key =
+                    new DataPoint(mId.intValue(), rle.getAvailVal(), start);
+                _createMap.remove(key);
+                _removeMap.put(key, rle);
+                it.remove();
+                break;
+            }
+        }
     }
 
-    private AvailabilityDataRLE getLastAvail(DataPoint state, Map availMap) {
-        AvailabilityDataRLE avail = null;
-        if (availMap != null ) {
-            // remove the avail just in case it is updated
-            // don't want stale data
-            avail = (AvailabilityDataRLE)availMap.remove(state.getMetricId());
+    private AvailabilityDataRLE getLastAvail(DataPoint state) {
+        Integer mId = state.getMetricId();
+        List rleList = (List)_currAvails.get(mId);
+        if (rleList.size() == 0) {
+            return null;
         }
-        if (avail == null) {
-            List mids = new ArrayList();
-            mids.add(state.getMetricId());
-            List avails = _dao.findLastAvail(mids);
-	        if (avails.size() > 0) {
-	            avail = (AvailabilityDataRLE)avails.get(0);
-	        }
-        }
-        return avail;
+        int last = rleList.size()-1;
+        return (AvailabilityDataRLE)rleList.get(last);
+    }
+    
+    private AvailabilityDataRLE create(Measurement meas, long start,
+                                       long end, double val) {
+        AvailabilityDataRLE rtn = _createAvail(meas, start, end, val);
+        _createMap.put(new DataPoint(meas.getId().intValue(), val, start), rtn);
+        Integer mId = meas.getId();
+        List rleList = (List)_currAvails.get(mId);
+        rleList.add(0, rtn);
+        sortRleList(rleList);
+        return rtn;
+    }
+    
+    private AvailabilityDataRLE _createAvail(Measurement meas, long start,
+                                             long end, double val) {
+        AvailabilityDataRLE rtn = new AvailabilityDataRLE();
+        rtn.setMeasurement(meas);
+        rtn.setStartime(start);
+        rtn.setEndtime(end);
+        rtn.setAvailVal(val);
+        return rtn;
+    }
+    
+    private AvailabilityDataRLE create(Measurement meas, long start, double val) {
+        AvailabilityDataRLE rtn = _createAvail(meas, start, MAX_AVAIL_TIMESTAMP, val);
+        _createMap.put(new DataPoint(meas.getId().intValue(), val, start), rtn);
+        Integer mId = meas.getId();
+        List rleList = (List)_currAvails.get(mId);
+        // I am assuming that this will be cleaned up by the caller where it
+        // will update the rle before rtn if one exists
+        rleList.add(rtn);
+        return rtn;
     }
 
-    private boolean updateState(DataPoint state, Map availMap)
+    private boolean updateState(DataPoint state)
         throws BadAvailStateException {
-        AvailabilityDataRLE avail = getLastAvail(state, availMap);
+        AvailabilityDataRLE avail = getLastAvail(state);
 	    final boolean debug = _log.isDebugEnabled();
+	    long begin = -1;
 	    if (avail == null) {
-	        Measurement meas = getMeasurement(state.getMetricId().intValue());
-	        _dao.create(meas, state.getTimestamp(), state.getValue());
+	        Measurement meas = getMeasurement(state.getMetricId());
+	        create(meas, state.getTimestamp(), state.getValue());
 	        return true;
 	    } else if (state.getTimestamp() < avail.getStartime()) {
+	        if (debug) {
+	            begin = System.currentTimeMillis();
+	        }
 	        merge(state);
+	        if (debug) {
+	            long now = System.currentTimeMillis();
+	            _log.debug("updateState.merge() -> " + (now - begin) + " ms");
+	        }
 	        return false;
 	    } else if (state.getTimestamp() == avail.getStartime() &&
                    state.getValue() != avail.getAvailVal()) {
+	        if (debug) {
+	            begin = System.currentTimeMillis();
+	        }
 	        updateDup(state, avail);
+	        if (debug) {
+	            long now = System.currentTimeMillis();
+	            _log.debug("updateState.updateDup() -> " + (now - begin) + " ms");
+	        }
 	        return true;
 	    } else if (state.getValue() == avail.getAvailVal()) {
 	        if (debug) {
@@ -881,25 +1011,10 @@ public class AvailabilityManagerEJBImpl
 	        _log.debug("updating endtime on avail -> " + avail +
 	                   ", updating to state -> " + state);
 	    }
-	    _dao.updateEndtime(avail, state.getTimestamp());
-	    _dao.create(avail.getMeasurement(), state.getTimestamp(),
+	    updateEndtime(avail, state.getTimestamp());
+	    create(avail.getMeasurement(), state.getTimestamp(),
 	        state.getValue());
 	    return true;
-    }
-    
-    private Map getLastAvails(List states) {
-        List mids = new ArrayList(states.size());
-        for (Iterator i=states.iterator(); i.hasNext(); ) {
-            DataPoint state = (DataPoint)i.next();
-            mids.add(state.getMetricId());
-        }
-        List avails = _dao.findLastAvail(mids);
-        Map rtn = new HashMap(avails.size());
-        for (Iterator i=avails.iterator(); i.hasNext(); ) {
-            AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
-            rtn.put(avail.getMeasurement().getId(), avail);
-        }
-        return rtn;
     }
 
     private void updateStates(List states) {
@@ -909,7 +1024,6 @@ public class AvailabilityManagerEJBImpl
         }
         // as a performance optimization, fetch all the last avails
         // at once, rather than one at a time in updateState()
-        Map avMap = getLastAvails(states);
         for (Iterator i=states.iterator(); i.hasNext(); ) {
             DataPoint state = (DataPoint)i.next();
             try {
@@ -920,7 +1034,7 @@ public class AvailabilityManagerEJBImpl
                     currState.getValue() == state.getValue()) {
                     continue;
                 }
-                boolean updateCache = updateState(state, avMap);
+                boolean updateCache = updateState(state);
                 if (_log.isDebugEnabled()) {
                     _log.debug("state " + state + 
                                " was updated, cache updated: " + updateCache);
@@ -938,9 +1052,6 @@ public class AvailabilityManagerEJBImpl
         if (outOfOrderAvail.size() == 0) {
             return;
         }
-        findAvailCache = _dao.findAvails(outOfOrderAvail);
-        findAvailBeforeCache = _dao.findAvailsBefore(outOfOrderAvail);
-        findAvailAfterCache = _dao.findAvailsAfter(outOfOrderAvail);
         for (Iterator i=outOfOrderAvail.iterator(); i.hasNext(); ) {
             try {
             	DataPoint state = (DataPoint)i.next();
@@ -1019,11 +1130,9 @@ public class AvailabilityManagerEJBImpl
             ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
         }
     }
-
-    private Measurement getMeasurement(int id) {
-        MeasurementManagerLocal derMan =
-            MeasurementManagerEJBImpl.getOne();
-        return derMan.getMeasurement(new Integer(id));
+    
+    private Measurement getMeasurement(Integer mId) {
+        return _mMan.getMeasurement(mId);
     }
 
     public static AvailabilityManagerLocal getOne() {
@@ -1032,6 +1141,101 @@ public class AvailabilityManagerEJBImpl
         } catch (Exception e) {
             throw new SystemException(e);
         }
+    }
+
+    private Map captureCurrAvailState() {
+        if (!_traceLog.isDebugEnabled()) {
+            return null;
+        }
+        Map rtn = new HashMap();
+        for (Iterator it=_currAvails.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)it.next();
+            Integer mid = (Integer)entry.getKey();
+            List rleList = (List)entry.getValue();
+            StringBuilder buf = new StringBuilder();
+            for (Iterator ii=rleList.iterator(); ii.hasNext(); ) {
+                AvailabilityDataRLE rle = (AvailabilityDataRLE)ii.next();
+                buf.append(mid).append(" | ")
+                   .append(rle.getStartime()).append(" | ")
+                   .append(rle.getEndtime()).append(" | ")
+                   .append(rle.getAvailVal()).append("\n");
+            }
+            rtn.put(mid, buf);
+        }
+        return rtn;
+    }
+
+    private void logAvailState(Map availState, Integer mid) {
+        StringBuilder buf = (StringBuilder)availState.get(mid);
+        _traceLog.debug(buf.toString());
+    }
+
+    private void logStates(List states, Integer mid) {
+        StringBuilder log = new StringBuilder();
+        for (Iterator it=states.iterator(); it.hasNext(); ) {
+            DataPoint pt = (DataPoint)it.next();
+            if (!pt.getMetricId().equals(mid)) {
+                continue;
+            }
+            log.append(pt.getMetricId()).append(" | ")
+               .append(pt.getTimestamp()).append(" | ")
+               .append(pt.getMetricValue()).append("\n");
+        }
+        _traceLog.debug(log.toString());
+    }
+
+    private Integer isAvailDataRLEValid() {
+        AvailabilityCache cache = AvailabilityCache.getInstance();
+        synchronized(cache) {
+            for (Iterator it=_currAvails.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry entry = (Map.Entry)it.next();
+                Integer mId = (Integer)entry.getKey();
+                List rleList = (List)entry.getValue();
+                if (!isAvailDataRLEValid(mId, cache.get(mId), rleList)) {
+                    return mId;
+                }
+            }
+        }
+        return null;
+    }
+        
+    private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt, List avails) {
+        AvailabilityDataRLE last = null;
+        Set endtimes = new HashSet();
+        for (Iterator it=avails.iterator(); it.hasNext(); ) {
+            AvailabilityDataRLE avail = (AvailabilityDataRLE)it.next();
+            Long endtime = new Long(avail.getEndtime());
+            if (endtimes.contains(endtime)) {
+                _log.error("list for MID=" + measId + 
+                           " contains two or more of the same endtime=" + endtime);
+                return false;
+            }
+            endtimes.add(endtime);
+            if (last == null) {
+                last = avail;
+                continue;
+            }
+            if (last.getAvailVal() == avail.getAvailVal()) {
+                _log.error("consecutive availpoints have the same value");
+                return false;
+            } else if (last.getEndtime() != avail.getStartime()) {
+                _log.error("there are gaps in the availability table");
+                return false;
+            } else if (last.getStartime() > avail.getStartime()) {
+                _log.error("startime availability is out of order");
+                return false;
+            } else if (last.getEndtime() > avail.getEndtime()) {
+                _log.error("endtime availability is out of order");
+                return false;
+            }
+            last = avail;
+        }
+        AvailabilityCache cache = AvailabilityCache.getInstance();
+        if (((DataPoint)cache.get(measId)).getValue() != lastPt.getValue()) {
+            _log.error("last avail data point does not match cache");
+            return false;
+        }
+        return true;
     }
 
     public void ejbCreate() {}

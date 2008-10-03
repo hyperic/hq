@@ -9337,8 +9337,14 @@ has already been defined.
       <statement>
         create index EAM_FK_QT_QJD on QRTZ_TRIGGERS (JOB_NAME, JOB_GROUP)
       </statement>
-      <statement>
+      <statement targetDB="oracle">
         drop index AVAIL_RLE_ENDTIME_IDX
+      </statement>
+      <statement targetDB="postgresql">
+        drop index AVAIL_RLE_ENDTIME_IDX
+      </statement>
+      <statement targetDB="mysql">
+        drop index AVAIL_RLE_ENDTIME_IDX on HQ_AVAIL_DATA_RLE
       </statement>
     </schema-directSQL>
     <groovy targetDB="mysql">
