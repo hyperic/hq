@@ -491,7 +491,7 @@ class HealthController
 
     private getDatabaseVersionQuery(conn) {
         if (DBUtil.isOracle(conn)) {
-            return "SELECT * FROM V$VERSION"
+            return "SELECT * FROM V\$VERSION"
         } else {
             return "SELECT VERSION()"
         }
