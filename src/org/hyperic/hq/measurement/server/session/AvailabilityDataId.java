@@ -57,8 +57,8 @@ public class AvailabilityDataId implements Serializable {
     }
     
     public int hashCode() {
-        return (new Long(_startime)).hashCode() +
-            _measurement.getId().hashCode();
+        return 17 + (37*(new Long(_startime)).hashCode()) +
+            (37*_measurement.getId().hashCode());
     }
     
     public boolean equals(Object rhs) {

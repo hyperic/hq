@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -126,55 +127,6 @@ public class AvailabilityDataDAO extends HibernateDAO {
         return rtn;
     }
     
-    int updateStartime(AvailabilityDataRLE avail, long startime) {
-        remove(avail);
-        avail.setStartime(startime);
-        if (_log.isDebugEnabled()) {
-            _log.debug("update StartTime Avail: "+avail);
-        }
-        save(avail);
-        return 1;
-    }
-
-    long updateEndtime(AvailabilityDataRLE avail, long endtime) {
-        avail.setEndtime(endtime);
-        save(avail);
-        return 1;
-    }
-
-    /**
-     * @param states List<DataPoint>
-     * @return Map<DataPoint, AvailabilityDataRLE>
-     */
-    Map findAvails(List states) {
-        Map rtn = new HashMap();
-        StringBuilder sql = new StringBuilder()
-            .append("FROM AvailabilityDataRLE WHERE ");
-        boolean setOr = false;
-        for (Iterator it=states.iterator(); it.hasNext(); ) {
-            DataPoint state = (DataPoint)it.next();
-            if (setOr) {
-                sql.append(" OR ");
-            }
-            sql.append("(availabilityDataId.measurement = ")
-               .append(state.getMetricId())
-               .append(" AND availabilityDataId.startime = ")
-               .append(state.getTimestamp())
-               .append(")");
-            setOr = true;
-        }
-        List list = getSession().createQuery(sql.toString()).list();
-        for (Iterator it=list.iterator(); it.hasNext(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
-            int metricId =  rle.getMeasurement().getId().intValue();
-            double val = rle.getAvailVal();
-            long startTime = rle.getStartime();
-            DataPoint state = new DataPoint(metricId, val, startTime);
-            rtn.put(state, rle);
-        }
-        return rtn;
-    }
-
     AvailabilityDataRLE findAvail(DataPoint state) {
         String sql = new StringBuilder()
                      .append("FROM AvailabilityDataRLE")
@@ -243,61 +195,6 @@ public class AvailabilityDataDAO extends HibernateDAO {
         return (AvailabilityDataRLE)list.get(0);
     }
 
-    /**
-     * @param states List<DataPoint>
-     * @return Map<DataPoint, AvailabilityDataRLE>
-     */
-    Map findAvailsAfter(List states) {
-        return findAvails(states, false);
-    }
-
-    /**
-     * @param states List<DataPoint>
-     * @return Map<DataPoint, AvailabilityDataRLE>
-     */
-    Map findAvailsBefore(List states) {
-        return findAvails(states, true);
-    }
-    
-    /**
-     * @param states List<DataPoint>
-     * @return Map<Integer, Map<DataPoint, AvailabilityDataRLE>>
-     */
-    private Map findAvails(List states, boolean before) {
-        Map rtn = new HashMap();
-        final String select = "(select * from HQ_AVAIL_DATA_RLE rle WHERE ";
-        final String sort = (before) ? "desc" : "asc";
-        final char mod = (before) ? '<' : '>';
-        StringBuilder sql = new StringBuilder();
-        boolean setUnion = false;
-        for (Iterator it=states.iterator(); it.hasNext(); ) {
-            DataPoint state = (DataPoint)it.next();
-            if (setUnion) {
-                sql.append(" UNION ALL ");
-            }
-            sql.append(select);
-            sql.append("rle.measurement_id = ").append(state.getMetricId())
-               .append(" AND rle.startime ").append(mod).append(state.getTimestamp())
-               .append(" ORDER BY startime ").append(sort)
-               .append(" LIMIT 1)");
-            setUnion = true;
-            rtn.put(state, null);
-        }
-        List list = getSession()
-            .createSQLQuery(sql.toString())
-            .addEntity("rle", AvailabilityDataRLE.class)
-            .list();
-        for (Iterator it=list.iterator(); it.hasNext(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
-            int metricId =  rle.getMeasurement().getId().intValue();
-            double val = rle.getAvailVal();
-            long startTime = rle.getStartime();
-            DataPoint state = new DataPoint(metricId, val, startTime);
-            rtn.put(state, rle);
-        }
-        return rtn;
-    }
-
     List findLastDownAvailability() {
         String sql = "from AvailabilityDataRLE where availval=?";
         return getSession()
@@ -312,17 +209,15 @@ public class AvailabilityDataDAO extends HibernateDAO {
     List getHistoricalAvails(Measurement m, long start,
                              long end, boolean descending) {
         String sql = new StringBuilder()
-                    .append("SELECT rle")
-                    .append(" FROM AvailabilityDataRLE rle")
-				    .append(" JOIN rle.availabilityDataId.measurement m")
-				 	.append(" WHERE m = :m")
-				 	.append(" AND (rle.availabilityDataId.startime > :startime")
-				 	.append("   OR rle.endtime > :startime)")
-				 	.append(" AND (rle.availabilityDataId.startime < :endtime")
-				 	.append("   OR rle.endtime < :endtime)")
-				 	.append(" ORDER BY rle.availabilityDataId.measurement,")
-				 	.append(" rle.availabilityDataId.startime")
-				 	.append(((descending) ? " DESC" : " ASC")).toString();
+            .append("FROM AvailabilityDataRLE rle ")
+            .append("WHERE rle.availabilityDataId.measurement = :m AND")
+            .append(" (rle.availabilityDataId.startime > :startime")
+            .append("   OR rle.endtime > :startime)")
+            .append(" AND (rle.availabilityDataId.startime < :endtime")
+            .append("   OR rle.endtime < :endtime)")
+            .append(" ORDER BY rle.availabilityDataId.measurement,")
+            .append(" rle.availabilityDataId.startime")
+            .append(((descending) ? " DESC" : " ASC")).toString();
         return getSession()
             .createQuery(sql)
             .setLong("startime", start)
@@ -337,10 +232,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
     List getHistoricalAvails(Integer[] mids, long start,
                              long end, boolean descending) {
         String sql = new StringBuilder()
-                    .append("SELECT rle")
-                    .append(" FROM AvailabilityDataRLE rle")
-                    .append(" JOIN rle.availabilityDataId.measurement m")
-                    .append(" WHERE m.id in (:mids)")
+                    .append("FROM AvailabilityDataRLE rle")
+                    .append(" WHERE rle.availabilityDataId.measurement in (:mids)")
                     .append(" AND rle.endtime > :startime")
                     .append(" AND rle.availabilityDataId.startime < :endtime")
                     .append(" ORDER BY rle.availabilityDataId.measurement,")
@@ -353,12 +246,51 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .setParameterList("mids", mids, new IntegerType())
             .list();
     }
+    
+    /**
+     * @return Map<Integer, List<AvailabilityDataRLE>> Integer -> mid
+     */
+    Map getHistoricalAvailMap(Integer[] mids, final long after,
+                              final boolean descending) {
+        StringBuilder sql = new StringBuilder()
+            .append("FROM AvailabilityDataRLE rle")
+            .append(" WHERE rle.availabilityDataId.measurement in (:mids)");
+        if (after > 0) {
+            sql.append(" AND rle.endtime >= :endtime");
+        }
+        sql.append(" ORDER BY rle.availabilityDataId.measurement,")
+            .append(" rle.availabilityDataId.startime")
+            .append(((descending) ? " DESC" : " ASC")).toString();
+        Query query = getSession()
+            .createQuery(sql.toString())
+            .setParameterList("mids", mids, new IntegerType());
+        if (after > 0) {
+            query.setLong("endtime", after);
+        }
+        List list = query.list();
+        Map rtn = new HashMap(list.size());
+        List tmp;
+        for (Iterator it=list.iterator(); it.hasNext(); ) {
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
+            Integer mId = rle.getMeasurement().getId();
+            if (null == (tmp = (List)rtn.get(mId))) {
+                tmp = new ArrayList();
+                rtn.put(rle.getMeasurement().getId(), tmp);
+            }
+            tmp.add(rle);
+        }
+        for (int i=0; i<mids.length; i++) {
+            if (!rtn.containsKey(mids[i])) {
+                rtn.put(mids[i], new ArrayList());
+            }
+        }
+        return rtn;
+    }
 
     /**
      * @return List of AvailabilityDataRLE objs
      */
-    List getHistoricalAvails(Resource res, long start,
-                             long end) {
+    List getHistoricalAvails(Resource res, long start, long end) {
         String sql = new StringBuilder()
                     .append("SELECT rle")
                     .append(" FROM AvailabilityDataRLE rle")
