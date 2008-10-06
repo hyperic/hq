@@ -299,8 +299,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         // detects it) however it is still present in the appdef model.
         // We wish to remove the appdef platform.
         try {
-            Server server = smLocal.findServerValueByAIID(
-                subject, platform, aiserver.getAutoinventoryIdentifier());
+            Server server = getExistingServer(subject, platform, aiserver, smLocal);
             if (server == null) {
                 // Server has already been removed, return.
                 _log.warn("Server has already been removed, cannot " +
@@ -335,8 +334,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         // We wish to sync the appdef attributes to match
         // the queue.
         try {
-            Server server = smLocal.findServerValueByAIID(
-                subject, platform, aiserver.getAutoinventoryIdentifier());
+            Server server = getExistingServer(subject, platform, aiserver, smLocal);
             if (server == null) {
                 // XXX scottmf probably should not blow up here
                 // better to change status to added from changed??
@@ -390,7 +388,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         // so add it to appdef.
         try {
             // Before we add it, make sure it's not already there...
-            Server server = getServer(subject, platform, aiserver, smLocal);
+            Server server = getExistingServer(subject, platform, aiserver, smLocal);
             if (server != null) {
                 // remove the server if it already exists.
                 // probably shouldn't get into the AIQ to begin with but
@@ -398,7 +396,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 removeChild(aiserver.getAIPlatform(), aiserver);
                 return;
             }
-
             AIServerValue aiserverValue = aiserver.getAIServerValue();
             ServerValue serverValue = AIConversionUtil.convertAIServerToServer(
                 aiserverValue, smLocal);
@@ -442,12 +439,14 @@ public class AIQRV_approve implements AIQResourceVisitor {
         }
     }
 
-    private Server getServer(AuthzSubjectValue subject, Platform platform,
-                             AIServer aiserver, ServerManagerLocal smLocal)
+    private Server getExistingServer(AuthzSubjectValue subject,
+                                     Platform platform,
+                                     AIServer aiserver,
+                                     ServerManagerLocal smLocal)
         throws PermissionException, FinderException {
         Server server = smLocal.findServerValueByAIID(
             subject, platform, aiserver.getAutoinventoryIdentifier());
-        if (server != null) {
+        if (server != null || aiserver.getAIPlatform().isPlatformDevice()) {
             return server;
         }
         ServerType serverType =
@@ -462,9 +461,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
         // serverType.isVirtual() == true
         // Unfortunately this is not enforced anywhere so we should do something
         // to handle it just in case
-        if (servers.size() > 1) {
-        } else if (servers.size() == 1) {
-            return (Server)servers.get(0);
+        if (servers.size() > 0) {
+            return (Server) servers.get(0);
         }
         return null;
     }
