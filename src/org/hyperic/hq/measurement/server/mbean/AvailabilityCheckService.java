@@ -61,12 +61,27 @@ public class AvailabilityCheckService
     private long _interval = 0;
     private long _startTime = 0;
     private long _wait = 5 * MeasurementConstants.MINUTE;
+    
+    /**
+     * This method is used mainly for the unittest from
+     * AvailabilityManager_testEJBImpl.invokeBackfiller()
+     * @jmx:managed-operation
+     */
+    public void hitWithDate(Date lDate) {
+        super.hit(lDate);
+    }
 
     /**
+     * This method ignores the date which is passed in, the reason for this is
+     * that we have seen instances where the JBoss Timer service produces an
+     * invalid date which is in the past.  Since AvailabilityCheckService is
+     * very time sensitive this is not acceptable.  Therefore we use
+     * System.currentTimeMillis() and ignore the date which is passed in.
      * @jmx:managed-operation
      */
     public void hit(Date lDate) {
-        super.hit(lDate);
+        Date date = new Date(System.currentTimeMillis());
+        super.hit(date);
     }
     
     // End is at least more than 1 interval away
@@ -95,6 +110,7 @@ public class AvailabilityCheckService
         AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
         List platformResources = availMan.getPlatformResources();
         final long now = lDate.getTime();
+        final String nowTimestamp = TimeUtil.toString(now);
         List rtn = new ArrayList(platformResources.size());
         synchronized (cache) {
             for (Iterator i = platformResources.iterator(); i.hasNext();) {
@@ -108,8 +124,8 @@ public class AvailabilityCheckService
                 long lastTimestamp = last.getTimestamp();
                 if (debug) {
                     String msg = "Checking availability for " + last +
-                        ", " + TimeUtil.toString(lastTimestamp) +
-                        " vs. " + TimeUtil.toString(now) + " (checktime)";
+                        ", CacheValue=(" + TimeUtil.toString(lastTimestamp) +
+                        ") vs. Now=(" + nowTimestamp + ")";
                     _log.debug(msg);
                 }
                 if (begin > end) {

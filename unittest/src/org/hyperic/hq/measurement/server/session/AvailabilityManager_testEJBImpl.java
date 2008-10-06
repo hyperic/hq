@@ -27,9 +27,13 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -47,7 +51,6 @@ import junit.framework.Assert;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
@@ -87,6 +90,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
      */
     public void testInsertScenarios() throws Exception {
         // testing out of order scenarios
+        testOverlap();
         testInsertIntoMiddle();
         testPrepend();
         testPrependWithDupValue();
@@ -119,9 +123,22 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         ObjectName objName = new ObjectName(BACKFILLER_SERVICE);
         Object[] obj = {date};
         String[] str = {"java.util.Date"};
-        server.invoke(objName, "hit", obj, str);
+        server.invoke(objName, "hitWithDate", obj, str);
     }
     
+    private void testOverlap() throws Exception {
+        AvailabilityManagerLocal avail = AvailabilityManagerEJBImpl.getOne();
+        List list = new ArrayList();
+        long now = System.currentTimeMillis();
+        long baseTime = TimingVoodoo.roundDownTime(now, 60000);
+        DataPoint pt = new DataPoint(PLAT_MEAS_ID, new MetricValue(1.0, baseTime));
+        pt = new DataPoint(PLAT_MEAS_ID, new MetricValue(0.5, baseTime));
+        pt = new DataPoint(PLAT_MEAS_ID, new MetricValue(1.0, baseTime));
+        list.add(pt);
+        avail.addData(list);
+        Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
+    }
+
     private void stressTest2() throws Exception {
         setupAvailabilityTable();
         AvailabilityManagerLocal avail = AvailabilityManagerEJBImpl.getOne();
@@ -153,8 +170,9 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         long now = System.currentTimeMillis();
         long baseTime = TimingVoodoo.roundDownTime(now, 60000);
         long incrTime = 60000;
-        testCatchup(PLAT_MEAS_ID, baseTime, incrTime);
-        DataPoint pt = testCatchup(PLAT_MEAS_ID, (baseTime+120000), incrTime);
+        DataPoint pt = testCatchup(PLAT_MEAS_ID, baseTime, incrTime);
+        Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
+        pt = testCatchup(PLAT_MEAS_ID, (baseTime+120000), incrTime);
         Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
     
@@ -352,14 +370,17 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         baseTime = TimingVoodoo.roundDownTime(baseTime, 60000);
         long tmpTime = baseTime;
 
-        addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=INCRTIME));
-        addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=INCRTIME));
-        addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=INCRTIME));
-        addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=INCRTIME));
+        DataPoint pt = addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=INCRTIME));
+        pt = addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=INCRTIME));
+        Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
+        pt = addData(PLAT_MEAS_ID, new MetricValue(0.0, tmpTime+=INCRTIME));
+        Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
+        pt = addData(PLAT_MEAS_ID, new MetricValue(1.0, tmpTime+=INCRTIME));
+        Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
 
         // insert into the middle
         long middleTime = baseTime+(INCRTIME*3)+(INCRTIME/2);
-        DataPoint pt = addData(PLAT_MEAS_ID, new MetricValue(1.0, middleTime));
+        pt = addData(PLAT_MEAS_ID, new MetricValue(1.0, middleTime));
 
         Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
@@ -372,18 +393,40 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         avail.addData(_list);
         return pt;
     }
-    
-    private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt) {
+
+    private boolean isAvailDataRLEValid(Integer mId, DataPoint lastPt) {
+        List mids = Collections.singletonList(mId);
+        return isAvailDataRLEValid(mids, lastPt);
+    }
+
+    private boolean isAvailDataRLEValid(List mids, DataPoint lastPt) {
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
         boolean descending = false;
-        long start = 0l;
-        long end = AvailabilityDataRLE.getLastTimestamp();
-        Integer[] mids = new Integer[1];
-        mids[0] = measId;
-        List avails = dao.getHistoricalAvails(mids, start, end, descending);
+        Map avails = dao.getHistoricalAvailMap(
+            (Integer[])mids.toArray(new Integer[0]), 0, descending);
+        for (Iterator it=avails.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)it.next();
+            Integer mId = (Integer)entry.getKey();
+            List rleList = (List)entry.getValue();
+            if (!isAvailDataRLEValid(mId, lastPt, rleList)) {
+                return false;
+            }
+        }
+        return true;
+    }
+        
+    private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt, List avails) {
         AvailabilityDataRLE last = null;
+        Set endtimes = new HashSet();
         for (Iterator it=avails.iterator(); it.hasNext(); ) {
             AvailabilityDataRLE avail = (AvailabilityDataRLE)it.next();
+            Long endtime = new Long(avail.getEndtime());
+            if (endtimes.contains(endtime)) {
+                _log.error("list for MID=" + measId + 
+                           " contains two or more of the same endtime=" + endtime);
+                return false;
+            }
+            endtimes.add(endtime);
             if (last == null) {
                 last = avail;
                 continue;
