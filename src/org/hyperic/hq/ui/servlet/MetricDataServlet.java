@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -159,32 +159,45 @@ public class MetricDataServlet extends HttpServlet {
         }
 
         ArrayList rows = new ArrayList();
-        for (Iterator i = resources.iterator(); i.hasNext(); ) {
-            AppdefResourceValue rValue = (AppdefResourceValue) i.next();
+        for (int i = 0; i < resources.size(); i++) {
+            AppdefResourceValue rValue = (AppdefResourceValue) resources.get(i);
             try {
-                PageList list =
+                Measurement m = _mboss.findMeasurement(sessionId, templ.getId(),
+                                                       rValue.getEntityId());
+                List<HighLowMetricValue> list =
                     _mboss.findMeasurementData(sessionId,
-                                               templ.getId(),
-                                               rValue.getEntityId(),
+                                               m,
                                                begin.longValue(),
                                                end.longValue(),
-                                               templ.getDefaultInterval(),
-                                               true,
                                                PageControl.PAGE_ALL);
-                for (Iterator j = list.iterator(); j.hasNext(); ) {
-                    HighLowMetricValue metric = (HighLowMetricValue)j.next();
+                ArrayList hold = new ArrayList();
+                for (int j = 0; j < list.size(); j++) {
+                    HighLowMetricValue metric = list.get(j);
+
                     String dateString =
                         _df.format(new Date(metric.getTimestamp()));
 
                     RowData row = new RowData(dateString);
-                    if (rows.contains(row)) {
-                        row = (RowData) rows.get(rows.indexOf(row));
+                    if (rows.indexOf(row) > -1) {
+                        row = (RowData) rows.remove(rows.indexOf(row));
                         row.addData(metric.getValue());
                     } else {
+                        for (int f = 0; f < i; f++) {
+                            row.addData(Double.NaN);
+                        }
                         row.addData(metric.getValue());
-                        rows.add(row);
                     }
+                    // Move to hold list
+                    hold.add(row);
                 }
+                
+                // Go through the left-overs
+                for (int j = 0; j < rows.size(); j++) {
+                    RowData row = (RowData) rows.get(j);
+                    row.addData(Double.NaN);
+                    hold.add(row);
+                }
+                rows = hold;
             } catch (Exception e) {
                 throw new ServletException("Error loading measurement data", e);
             }
