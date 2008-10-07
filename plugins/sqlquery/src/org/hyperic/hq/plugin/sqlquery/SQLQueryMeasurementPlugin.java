@@ -49,6 +49,14 @@ public class SQLQueryMeasurementPlugin
     private static final String DOMAIN = "sql";
     private static final String PROP_DRIVER = "jdbcDriver";
     private static final String EXEC_TIME_ATTR = "QueryExecTime";
+    private static final String PROP_ORACLE_USER = "user";
+    private static final String PROP_ORACLE_PASSWORD = "password";
+    private static final String PROP_ORACLE_READ_TIMEOUT = "oracle.jdbc.ReadTimeout";
+    private static final int TIMEOUT_VALUE = 60000;
+    
+    private static final String ORACLE_JDBC_URL = "jdbc:oracle";
+    private static final String MYSQL_JDBC_URL = "jdbc:mysql";
+    
     private String config;
     private boolean isProxy = false;
 
@@ -108,16 +116,79 @@ public class SQLQueryMeasurementPlugin
             user = props.getProperty(PROP_USER),
             pass = props.getProperty(PROP_PASSWORD);
 
-        return DriverManager.getConnection(url, user, pass);
+        return getTimedOutConnection(url, user, pass);
     }
 
     protected Connection getConnection(String url,
                                        String user,
                                        String password)
         throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+        return getTimedOutConnection(url, user, password);
     }
 
+    static Connection getTimedOutConnection(String url, String user, String password) throws SQLException {
+        // set the timeout property in a DB-specific way
+        // currently only Oracle and MySQL support timeout parameters in the JDBC connection
+        if (isOracleUrl(url)) {
+            // pass in timeout property for Oracle
+            Properties info = getOracleJDBCConnectionProperties(user, password);
+            return DriverManager.getConnection(url, info);    
+        }
+        else if (isMySqlUrl(url)) {
+            // pass in timeout in URL for MySQL
+            url = getMySqlUrl(url);
+        }
+        return DriverManager.getConnection(url, user, password);
+    }
+    
+    static boolean isOracleUrl(String url) {
+        return url != null && url.toLowerCase().startsWith(ORACLE_JDBC_URL);
+    }
+    
+    static boolean isMySqlUrl(String url) {
+        return url != null && url.toLowerCase().startsWith(MYSQL_JDBC_URL);
+    }
+    
+    // convenience method used to set timeout properties for MySql
+    // JDBC connection by appending a url timeout parameter
+    private static String getMySqlUrl(String url) {
+        if (url == null) {
+            return url;
+        }
+        else if (url.indexOf('?') > 0) {
+            return url + "&socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
+                    + TIMEOUT_VALUE;
+        }
+        else {
+            return url + "?socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
+                    + TIMEOUT_VALUE;
+        }
+    }
+    
+    /**
+     * Utility method that returns an instance of Properties containing the
+     * given user and password keys along with the default timeout. The
+     * Properties instance returned can be passed in as the info argument to
+     * DriverManager.getConnection(url, info) when acquiring Oracle connections
+     * 
+     * @param user the username for the JDBC connection
+     * @param password the password for the JDBC connection
+     * @return an instance of Properties containing the user and password JDBC
+     *         Connection properties
+     */
+    public static Properties getOracleJDBCConnectionProperties(String user,
+            String password) {
+        Properties info = new Properties();
+        if (user != null) {
+            info.put(PROP_ORACLE_USER, user);
+        }
+        if (password != null) {
+            info.put(PROP_ORACLE_PASSWORD, password);
+        }
+        info.put(PROP_ORACLE_READ_TIMEOUT, new Integer(TIMEOUT_VALUE));
+        return info;
+    }
+    
     protected String getDefaultURL() {
         return "";
     }
