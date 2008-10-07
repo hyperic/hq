@@ -425,6 +425,15 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.fg}">
     <c:param name="fg" value="${param.fg}"/>
   </c:if>
+  <c:if test="${not empty param.unavail}">
+    <c:param name="unavail" value="${param.unavail}"/>
+  </c:if>
+  <c:if test="${not empty param.own}">
+    <c:param name="own" value="${param.own}"/>
+  </c:if>
+  <c:if test="${not empty param.any}">
+    <c:param name="any" value="${param.any}"/>
+  </c:if>
   <c:param name="ff" value="${ResourceHubForm.ff}"/>
   <c:param name="view" value="${ResourceHubForm.view}"/>
 </c:url>
@@ -447,6 +456,15 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:if>
   <c:if test="${not empty param.fg}">
     <c:param name="g" value="${param.fg}"/>
+  </c:if>
+  <c:if test="${not empty param.unavail}">
+    <c:param name="unavail" value="${param.unavail}"/>
+  </c:if>
+  <c:if test="${not empty param.own}">
+    <c:param name="own" value="${param.own}"/>
+  </c:if>
+  <c:if test="${not empty param.any}">
+    <c:param name="any" value="${param.any}"/>
   </c:if>
   <c:param name="ff" value="${ResourceHubForm.ff}"/>
   <c:param name="view" value="${ResourceHubForm.view}"/>
