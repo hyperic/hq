@@ -160,15 +160,17 @@ public class MetricDataServlet extends HttpServlet {
 
         ArrayList rows = new ArrayList();
         for (Iterator i = resources.iterator(); i.hasNext(); ) {
-            AppdefResourceValue rValue = (AppdefResourceValue)i.next();
-            Measurement m;
+            AppdefResourceValue rValue = (AppdefResourceValue) i.next();
             try {
-                m = _mboss.findMeasurement(sessionId, templ.getId(),
-                                           rValue.getEntityId());
-                PageList list = _mboss.findMeasurementData(sessionId, m,
-                                                           begin.longValue(),
-                                                           end.longValue(),
-                                                           PageControl.PAGE_ALL);
+                PageList list =
+                    _mboss.findMeasurementData(sessionId,
+                                               templ.getId(),
+                                               rValue.getEntityId(),
+                                               begin.longValue(),
+                                               end.longValue(),
+                                               templ.getDefaultInterval(),
+                                               true,
+                                               PageControl.PAGE_ALL);
                 for (Iterator j = list.iterator(); j.hasNext(); ) {
                     HighLowMetricValue metric = (HighLowMetricValue)j.next();
                     String dateString =
@@ -176,7 +178,7 @@ public class MetricDataServlet extends HttpServlet {
 
                     RowData row = new RowData(dateString);
                     if (rows.contains(row)) {
-                        row = (RowData)rows.get(rows.indexOf(row));
+                        row = (RowData) rows.get(rows.indexOf(row));
                         row.addData(metric.getValue());
                     } else {
                         row.addData(metric.getValue());
@@ -184,8 +186,7 @@ public class MetricDataServlet extends HttpServlet {
                     }
                 }
             } catch (Exception e) {
-                throw new ServletException("Error loading measurement data.",
-                                           e);
+                throw new ServletException("Error loading measurement data", e);
             }
         }
 
@@ -206,7 +207,10 @@ public class MetricDataServlet extends HttpServlet {
             List data = row.getData();
             for (Iterator j = data.iterator(); j.hasNext(); ) {
                 Double metricdata = (Double)j.next();
-                buf.append(",").append(metricdata);
+                buf.append(",");
+                // Comparing to Double.NaN doesn't work
+                if (!metricdata.toString().equals("NaN"))
+                    buf.append(metricdata);
             }
             buf.append("\n");
         }
