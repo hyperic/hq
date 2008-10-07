@@ -1613,7 +1613,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public void removeIp(Platform platform, String address, String netmask,
                          String macAddress) {
         Ip ip = platform.removeIp(address, netmask, macAddress);
-        getPlatformDAO().remove(ip);
+        if (ip != null)
+            getPlatformDAO().remove(ip);
     }
 
     /**
