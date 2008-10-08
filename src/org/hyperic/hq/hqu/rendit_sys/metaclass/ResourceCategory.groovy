@@ -471,15 +471,15 @@ class ResourceCategory {
                 
                 def server = svrMan.findServerById(servers[0].id) // value -> pojo
                 def res = svcMan.createService(subjectVal, server, 
-                                               serviceType, name, "desc: ${name}",
-                                               "loc: ${name}", null).resource
+                                               serviceType, name, "",
+                                               "", null).resource
                 setConfig(res, cfg, subject)
                 return res
             } else {
                 Server server = toServer(parent)
                 def res = svcMan.createService(subjectVal, server,
-                                               serviceType, name, "desc: ${name}",
-                                               "loc: ${name}", null).resource
+                                               serviceType, name, "",
+                                               "", null).resource
                 setConfig(res, cfg, subject)
                 return res
             }
