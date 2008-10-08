@@ -1,0 +1,229 @@
+/*
+    This stylesheet defines styles that only apply to the Default theme. Styles common to all themes should go in
+    master.css
+*/
+
+body {
+    /* Page-level left and right padding. Internal content that needs to be full-width should use 'margin: 0 -10px'. */
+    margin: 0;
+    border-left: solid #fff 10px;
+    border-right: solid #fff 10px;
+    font-family: Helvetica, Arial, sans-serif;
+    position: relative;
+}
+
+#header {
+    margin: 0 -10px;
+    padding: 0 10px;
+    /*overflow: auto;*/
+}
+
+#user-control-panel, #page-view-panel {
+    float: right;
+}
+
+#com-atlassian-confluence h1 img {
+    height: 2em; /* scale logo image with font size */
+}
+
+h1 span.title-text {
+    display: table; /* page title wrapping drops straight down */
+}
+h1 a:hover {
+    color: #369;
+}
+
+#main {
+    padding: 0 0 20px 0;
+    border-top: solid #fff 10px;
+    border-bottom: solid #fff 10px;
+}
+
+#content {
+    clear: left;
+}
+
+#quick-search-submit {
+    display: none;
+}
+
+#user-control-panel {
+    display: none;   
+}
+
+#user-control-panel li {
+    border-left: solid 1px;
+}
+
+#user-control-panel li.first {
+    border: none;
+}
+
+#user-control-panel li, #page-view-panel li, #page-prefs-list li {
+    color: #666;
+    float: left;
+    font-size: .9em;
+    margin: 0 0 0 .3em;
+    padding: 0 0 0 .3em;
+}
+
+#user-control-panel a {
+    color: #666;
+}
+
+#navigation {
+    display: inline;
+}
+
+.page-actions {
+    float: right;
+    border: solid 1px #ccc;
+    padding: 5px;
+    margin-left: 10px;
+}
+
+.remove-control {
+    display: none;
+}
+
+.page-metadata {
+    color: #666;
+    font-size: 0.9em;
+    margin: 10px 0;
+}
+.page-metadata a:link,
+.page-metadata a:active,
+.page-metadata a:hover,
+.page-metadata a:visited {
+    color: #666;
+    font-style: normal;
+}
+/*#labels-edit {*/
+    /*font-style: normal;*/
+/*}*/
+
+.section-header {
+    margin-bottom: 5px;
+    padding: 2px 0;    
+}
+
+/* All links are set to action.linkColor but section header links are grey */
+.section-header a:link,
+.section-header a:active,
+.section-header a:hover,
+.section-header a:visited {
+    color: #666;
+}
+
+h2.section-title,
+.pageSectionTitle {
+    font-size: 12pt;
+    font-weight: bold;
+    color: black;
+    margin-top: 20px;
+    padding: 0;
+    display: inline;
+}
+
+.section-title a:link,
+.section-title a:active,
+.section-title a:hover,
+.section-title a:visited,
+a.pageSectionTitle:link,
+a.pageSectionTitle:active,
+a.pageSectionTitle:hover,
+a.pageSectionTitle:visited {
+    color: black;
+}
+
+.submit-buttons input {
+    position: relative;
+    top: -10px;
+}
+
+#sidebar {
+    clear: right;
+    float: right;
+    width: 16em;
+}
+#content.edit form.markup {
+    margin-right: 16em;
+}
+.sidebar-content {
+    margin: 10px 0 0 1em;
+}
+.blogcalendar {
+    width: 15em;
+}
+.blogcalendar th a.calendarhead,
+.blogcalendar th.calendarhead {
+    font-size: 1em;
+}
+.blogcalendar td,
+.blogcalendar th {
+    font-size: .85em;
+}
+
+/* folder tab link styles */
+.tabnav .tabs a {
+    padding: 5px 5px 4px;
+    margin: 5px 3px 0 0;
+    border-width: 1px;
+    border-style: solid;
+    border-bottom: none;
+    text-decoration: none;
+    display: block;
+    float: left;
+}
+
+.tabnav .tabs a.current {
+    background: white;
+    border-bottom: 1px solid white;
+    color: black;
+}
+.tabnav .tabs a.current:link, .tabnav .tabs a.current:visited {
+    color: black;
+}
+.tabnav .tabs a.current:hover {
+    background: white;
+    border-bottom: 1px solid white;
+    color: black;
+}
+
+/* list page navigational tabs */
+.tabnav, .comment .tabnav {
+    padding: 0;
+    margin: 0;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    float: left;
+    display: inline;
+    list-style-position: outside;
+    width: 100%;
+    font-weight: bold;
+    font-size: 10pt;
+}
+
+.after-tabnav {
+    clear: both;
+}
+
+.tabnav li.tabs {
+    list-style: none;
+    margin: 0 0 -1px 10px;
+    float: left;
+    display: block;
+}
+
+
+/* dashboard customization */
+#spacesLabel {
+    padding: 4px 6px;
+    float: left;
+    margin-top: 5px;
+}
+
+#footer #poweredby {
+    font-size: 0.9em;
+    margin: 0 -10px;
+}
