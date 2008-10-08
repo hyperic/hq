@@ -466,6 +466,7 @@ class ResourceCategory {
             def serviceType = svcMan.findServiceType(proto.instanceId)
             def serverType  = serviceType.serverType
             
+            Server server
             if (serverType.isVirtual()) {
                 // Parent points at the 'resource' version of the Platform, so
                 // we use the instanceId here, not the Resource.id
@@ -474,20 +475,14 @@ class ResourceCategory {
                                                                      proto.instanceId)
                 assert servers.size() == 1, "All virtual servers should be created for Platform ${parent.name}" 
                 
-                def server = svrMan.findServerById(servers[0].id) // value -> pojo
-                def res = svcMan.createService(subject, server, 
-                                               serviceType, name, "desc: ${name}",
-                                               "loc: ${name}", null).resource
-                setConfig(res, cfg, subject)
-                return res
+                server = svrMan.findServerById(servers[0].id) // value -> pojo
             } else {
-                Server server = toServer(parent)
-                def res = svcMan.createService(subject, server,
-                                               serviceType, name, "desc: ${name}",
-                                               "loc: ${name}", null).resource
-                setConfig(res, cfg, subject)
-                return res
+                server = toServer(parent)
             }
+            def res = svcMan.createService(subject, server,  serviceType, name,
+                                           "", "", null).resource
+            setConfig(res, cfg, subject)
+            return res
         } else if (proto.isServerPrototype()) {
             Platform platform = toPlatform(parent)
             ServerValue sv = new ServerValue()
