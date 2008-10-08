@@ -77,6 +77,7 @@ import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlManagerUtil;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.control.shared.ControlManagerLocal;
+import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.ControlPluginManager;
@@ -551,7 +552,7 @@ public class ControlManagerEJBImpl implements SessionBean {
                              cLocal.getDateScheduled(),
                              status);
         Messenger sender = new Messenger();
-        sender.publishMessage("topic/eventsTopic", event);
+        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
     }
 
    /**

@@ -48,6 +48,7 @@ import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlManagerLocal;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
+import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.ControlPlugin;
@@ -203,7 +204,7 @@ public class ControlActionGroupJob extends ControlJob {
                                          status);
         
                     Messenger sender = new Messenger();
-                    sender.publishMessage("topic/eventsTopic", event);
+                    sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
                 } catch (Exception e) {
                     this.log.error("Unable to update control history: " +
                                    e.getMessage());
