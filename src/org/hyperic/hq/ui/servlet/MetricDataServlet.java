@@ -25,47 +25,50 @@
 
 package org.hyperic.hq.ui.servlet;
 
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.MonitorUtils;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.measurement.shared.HighLowMetricValue;
-import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.PageControl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Collections;
-import java.text.SimpleDateFormat;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
 
 /**
  * The MetricDataServlet generates raw metric data in CVS format
  */
 public class MetricDataServlet extends HttpServlet {
 
+    private static final String CSV_DELIM = ",";
+
     private static final SimpleDateFormat _df
         = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    Log _log = LogFactory.getLog(MetricDataServlet.class);
+    private final Log _log = LogFactory.getLog(MetricDataServlet.class);
+    
     MeasurementBoss _mboss;
     AppdefBoss _aboss;
 
@@ -105,30 +108,27 @@ public class MetricDataServlet extends HttpServlet {
         Long begin = (Long)prefs.get(MonitorUtils.BEGIN);
 
         // The list of resources to generate data for
-        ArrayList resources = new ArrayList();
+        List resources = new ArrayList();
         if (typeId != null) {
-            PageList children;
             try {
-                children = _aboss.findChildResources(sessionId, id, typeId,
-                                                     PageControl.PAGE_ALL);
+                resources.addAll(_aboss.findChildResources(sessionId, id, typeId,
+                                                         PageControl.PAGE_ALL));
             } catch (Exception e) {
                 throw new ServletException("Error finding child resources.", e);
             }
-            resources.addAll(children);
         } else if (id.isGroup()) {
-            AppdefGroupValue gval;
+            List entities;
             try {
-                gval = _aboss.findGroup(sessionId, id.getId());
+                AppdefGroupValue gval = _aboss.findGroup(sessionId, id.getId());
+                entities = gval.getAppdefGroupEntries();
             } catch (Exception e) {
                 throw new ServletException("Error finding group=" + id, e);
             }
 
-            for (Iterator i = gval.getAppdefGroupEntries().iterator();
-                 i.hasNext(); ) {
+            for (Iterator i = entities.iterator(); i.hasNext();) {
                 try {
-                    AppdefResourceValue val =
-                        _aboss.findById(sessionId,(AppdefEntityID)i.next());
-                    resources.add(val);  
+                    resources.add(_aboss.findById(sessionId,
+                                                  (AppdefEntityID) i.next()));  
                 } catch (Exception e) {
                     throw new ServletException("Error finding group members",
                                                e);
@@ -158,7 +158,7 @@ public class MetricDataServlet extends HttpServlet {
             throw new ServletException("Error looking up measurement.", e);
         }
 
-        ArrayList rows = new ArrayList();
+        List<RowData> rows = new ArrayList<RowData>();
         for (int i = 0; i < resources.size(); i++) {
             AppdefResourceValue rValue = (AppdefResourceValue) resources.get(i);
             try {
@@ -170,14 +170,11 @@ public class MetricDataServlet extends HttpServlet {
                                                begin.longValue(),
                                                end.longValue(),
                                                PageControl.PAGE_ALL);
-                ArrayList hold = new ArrayList();
+                List<RowData> hold = new ArrayList<RowData>();
                 for (int j = 0; j < list.size(); j++) {
                     HighLowMetricValue metric = list.get(j);
 
-                    String dateString =
-                        _df.format(new Date(metric.getTimestamp()));
-
-                    RowData row = new RowData(dateString);
+                    RowData row = new RowData(new Date(metric.getTimestamp()));
                     if (rows.indexOf(row) > -1) {
                         row = (RowData) rows.remove(rows.indexOf(row));
                         row.addData(metric.getValue());
@@ -208,21 +205,22 @@ public class MetricDataServlet extends HttpServlet {
         // Print header
         for (Iterator i = resources.iterator(); i.hasNext(); ) {
             AppdefResourceValue val = (AppdefResourceValue)i.next();
-            buf.append(",").append(val.getName());
+            buf.append(CSV_DELIM).append(val.getName());
         }
 
         // Print data, sorted from oldest to newest.
-        Collections.reverse(rows);
+        Collections.sort(rows);
+        
         buf.append("\n");
-        for (Iterator i = rows.iterator(); i.hasNext(); ) {
-            RowData row = (RowData)i.next();
-            buf.append(row.getDate());
-            List data = row.getData();
-            for (Iterator j = data.iterator(); j.hasNext(); ) {
-                Double metricdata = (Double)j.next();
-                buf.append(",");
+        for (int i = 0; i < rows.size(); i++) {
+            RowData row = rows.get(i);
+            buf.append(_df.format(row.getDate()));
+            List<Double> data = row.getData();
+            for (int j = 0; j < data.size(); j++) {
+                Double metricdata = data.get(j);
+                buf.append(CSV_DELIM);
                 // Comparing to Double.NaN doesn't work
-                if (!metricdata.toString().equals("NaN"))
+                if (!Double.isNaN(metricdata))
                     buf.append(metricdata);
             }
             buf.append("\n");
@@ -239,21 +237,21 @@ public class MetricDataServlet extends HttpServlet {
         }
     }
 
-    private class RowData {
+    private class RowData implements Comparable {
 
-        private String _date;
-        private List _data;
+        private Date _date;
+        private List<Double> _data;
 
-        protected RowData(String date) {
+        protected RowData(Date date) {
             _date = date;
-            _data = new ArrayList();
+            _data = new ArrayList<Double>();
         }
 
-        protected void setDate(String date) {
+        protected void setDate(Date date) {
             _date = date;
         }
 
-        protected String getDate() {
+        protected Date getDate() {
             return _date;
         }
 
@@ -261,7 +259,7 @@ public class MetricDataServlet extends HttpServlet {
             _data.add(new Double(data));
         }
 
-        protected List getData() {
+        protected List<Double> getData() {
             return _data;
         }
 
@@ -271,6 +269,13 @@ public class MetricDataServlet extends HttpServlet {
 
         public int hashCode() {
             return getDate().hashCode();
+        }
+
+        public int compareTo(Object o) {
+            if (!(o instanceof RowData))
+                return 0;
+            
+            return getDate().compareTo(((RowData) o).getDate());
         }
     }
 }
