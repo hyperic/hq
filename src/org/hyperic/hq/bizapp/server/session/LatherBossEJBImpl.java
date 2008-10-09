@@ -71,7 +71,7 @@ public class LatherBossEJBImpl
         try {
             return _dispatcher.dispatch(ctx, method, arg);
         } catch(RuntimeException exc){
-            _ctx.setRollbackOnly();
+            _log.error("Error dispatching method '" + method + "'", exc);
             throw new LatherRemoteException("Runtime exception: " + 
                                             exc.getMessage());
         }
