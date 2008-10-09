@@ -28,9 +28,6 @@ package org.hyperic.hq.appdef.shared;
 public class ApplicationNotFoundException
     extends AppdefEntityNotFoundException
 {
-    private static final int MY_TYPE = 
-        AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-
     public ApplicationNotFoundException(String msg){
         super(msg);
     }
@@ -64,6 +61,6 @@ public class ApplicationNotFoundException
     }
 
     public int getAppdefType(){
-        return MY_TYPE;
+        return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
     }
 }
