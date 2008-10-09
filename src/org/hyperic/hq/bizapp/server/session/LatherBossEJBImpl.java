@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,6 +28,8 @@ package org.hyperic.hq.bizapp.server.session;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
@@ -46,6 +48,9 @@ public class LatherBossEJBImpl
     extends BizappSessionEJB
     implements SessionBean
 {
+    private final Log _log =
+        LogFactory.getLog(LatherBossEJBImpl.class.getName());
+
     private LatherDispatcher _dispatcher = new LatherDispatcher();
     private SessionContext _ctx;
 
