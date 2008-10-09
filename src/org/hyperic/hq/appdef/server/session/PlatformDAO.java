@@ -279,12 +279,14 @@ public class PlatformDAO extends HibernateDAO {
             .uniqueResult();
     }
 
-    public Platform findByCertDN(String dn)
+    public Platform findByCertDN(String dn, String type)
     {
-        String sql = "from Platform where certdn = ?";
+        String sql = "from Platform p where p.certdn = ? and " +
+        		                           "p.platformType.name = ?";
         return (Platform)getSession()
             .createQuery(sql)
             .setString(0, dn)
+            .setString(1, type)
             .uniqueResult();
     }
 

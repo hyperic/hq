@@ -653,7 +653,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         // allowed to return.
         Collection apps;
         try {
-            if (resource.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP)
+            if (!resource.isGroup())
                 apps = getApplicationsByResource(resource, pc);
             else
                 apps = getApplicationsByGroup(subject, resource, pc);
