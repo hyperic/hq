@@ -807,7 +807,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @return List<Object[]> - [0] = Measurement, [1] MeasurementTemplate
      * @ejb:interface-method
      */
-    public List findAllEnabledMeasurements() {
+    public List findAllEnabledMeasurementsAndTemplates() {
         MeasurementDAO dao = getMeasurementDAO();
         return dao.findAllEnabledMeasurementsAndTemplates();
     }
