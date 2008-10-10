@@ -71,6 +71,20 @@ public class MeasurementDAO extends HibernateDAO {
             super.remove(entity.getBaseline());
         super.remove(entity);
     }
+    
+    /**
+     * retrieves List<Object[]>
+     * [0] = Measurement
+     * [1] = MeasurementTemplate
+     */
+    List findAllEnabledMeasurementsAndTemplates() {
+        String hql = new StringBuilder()
+            .append("from Measurement m")
+            .append(" join m.template t")
+            .append(" where enabled = 1")
+            .toString();
+        return getSession().createQuery(hql).list();
+    }
 
     /**
      * Remove all measurements associated with a MeasurementTemplate
