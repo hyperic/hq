@@ -29,13 +29,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.CreateException;
@@ -52,7 +49,6 @@ import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
-import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentValue;
@@ -84,11 +80,6 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
-import org.hyperic.hq.auth.shared.SessionManager;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -99,10 +90,8 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.bizapp.shared.AIBossLocal;
-import org.hyperic.hq.bizapp.shared.AIBossUtil;
+import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
@@ -110,16 +99,9 @@ import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
-import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.sigar.NetFlags;
-import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -640,84 +622,101 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Get the Platform object based on an AIPlatformValue.
-     * Checks against FQDN, CertDN, then checks to see if all IP addresses
-     * match.  If all of these checks fail null is returned.
+     * Get the Platform object based on an AIPlatformValue. Checks against FQDN,
+     * CertDN, then checks to see if all IP addresses match. If all of these
+     * checks fail null is returned.
+     * 
      * @ejb:interface-method
      */
     public Platform getPlatformByAIPlatform(AuthzSubjectValue subject,
                                             AIPlatformValue aiPlatform)
         throws PermissionException {
-        
-        String certdn = aiPlatform.getCertdn();
-        String fqdn = aiPlatform.getFqdn();
-        String agentToken = aiPlatform.getAgentToken();
-
-        // First try to find by FQDN
-        Platform p;
-        if (null != (p = getPlatformDAO().findByFQDN(fqdn))) {
-            checkViewPermission(subject, p.getEntityId());
-            return p;
-        }
-        if (null != (p = getPlatformDAO().findByCertDN(certdn))) {
-            checkViewPermission(subject, p.getEntityId());
-            return p;
-        }
-        List ips = Arrays.asList(aiPlatform.getAIIpValues());
-        if (null != (p = getPlatformFromAgentToken(agentToken))) {
-            checkViewPermission(subject, p.getEntityId());
-            return p;
-        }
-        if (isAgentPorker(ips)) {
-            return null;
-        }
-        if (null != (p = getPlatformFromIPs(aiPlatform, ips))) {
-            checkViewPermission(subject, p.getEntityId());
-            return p;
-        }
-        return null;
-    }
+        Platform p = null;
     
-    private Platform getPlatformFromIPs(AIPlatformValue aiPlatform, List ips) {
-        int matches = 0;
-        Platform rtn = null;
-        // IPs from the aiPlatform must match all the appdef platform's
-        // in order to be 100% sure this is the same platform.  In the future
-        // we may want to reconsider this logic.
-        Set fqdnMatches = new HashSet();
-        for (Iterator it=ips.iterator(); it.hasNext(); ) {
-            AIIpValue ip = (AIIpValue)it.next();
-            // don't want to check LOOPBACK_ADDRESS since the query will
-            // return all platforms which is not desirable / useful
-            if (ip.getAddress().equals(NetFlags.LOOPBACK_ADDRESS)) {
+        String fqdn = aiPlatform.getFqdn();
+        String certdn = aiPlatform.getCertdn();
+    
+        final AIIpValue[] ipvals = aiPlatform.getAIIpValues();
+        // We can't use the FQDN to find a platform, because
+        // the FQDN can change too easily.  Instead we use the
+        // IP address now.  For now, if we get one IP address
+        // match (and it isn't localhost), we assume that it is
+        // the same platform.  In the future, we are probably going
+        // to need to do better.
+        for (int i = 0; i < ipvals.length; i++) {
+            AIIpValue qip = ipvals[i];
+            
+            String address = qip.getAddress();
+            // XXX This is a hack that we need to get rid of
+            // at some point.  The idea is simple.  Every platform
+            // has the localhost address.  So, if we are looking
+            // for a platform based on IP address, searching for
+            // localhost doesn't give us any information.  Long
+            // term, when we are trying to match all addresses,
+            // this can go away.
+            if (address.equals(NetFlags.LOOPBACK_ADDRESS) &&
+                i < (ipvals.length - 1)) {
                 continue;
             }
-            Collection platforms = findPlatformPojosByIpAddr(ip.getAddress());
-            for (Iterator i=platforms.iterator(); i.hasNext(); ) {
-                rtn = (Platform)i.next();
-                if (!fqdnMatches.contains(rtn.getFqdn())
-                    && platformMatchesAllIps(rtn, ips)) {
-                    matches++;
-                    fqdnMatches.add(rtn.getFqdn());
+                
+            Collection platforms = getPlatformDAO().findByIpAddr(address);
+            
+            if (!platforms.isEmpty()) {
+                Platform ipMatch = null;
+                
+                Platform plat;
+                for (Iterator it = platforms.iterator(); it.hasNext(); ) {
+                    plat = (Platform) it.next();
+                    
+                    // Make sure the types match
+                    if (!plat.getPlatformType().getName()
+                            .equals(aiPlatform.getPlatformTypeName()))
+                        continue;
+                    
+                    // If we got any platforms that match this IP address, then
+                    // we just take it and see if we can match up more criteria.
+                    // We can assume that is a candidate for the platform we are
+                    // looking for.  This should only fall apart if we have
+                    // multiple platforms defined for the same IP address, which
+                    // should be a rarity.
+                    
+                    if (plat.getFqdn().equals(fqdn)) {  // Perfect
+                        p = plat;
+                        break;
+                    }
+                    
+                    // FQDN changed
+                    if (platformMatchesAllIps(plat, Arrays.asList(ipvals)))
+                        ipMatch = plat;
                 }
-                if (matches > 1) {
-                    // XXX scottmf, need to figure out what to do here.
-                    // If matches > 1 it is probably not the biggest deal 
-                    // to return null because it is most definitely the 
-                    // agentporker
-                    // is checking the agent port is a good way to resolve?
-                    return null;
-                }
+                
+                // If FQDN was not matched, but all IPs are
+                p = (p == null) ? ipMatch : p;
+            }
+            
+            // Found a match
+            if (p != null)
+                break;
+        }
+    
+        // One more try
+        if (p == null)
+            p = getPlatformDAO().findByFQDN(fqdn);
+            
+        String agentToken = aiPlatform.getAgentToken();
+        if (p == null)
+            p = getPlatformFromAgentToken(agentToken);
+        
+        if (p != null) {
+            checkViewPermission(subject, p.getEntityId());
+            if (isAgentPorker(Arrays.asList(ipvals)) &&   // Let agent porker create new platforms
+                !(p.getFqdn().equals(fqdn) || p.getCertdn().equals(certdn) ||
+                  p.getAgent().getAgentToken().equals(agentToken))) {
+                p = null;
             }
         }
-        if (matches <= 0) {
-            // XXX scottmf, if it gets to this point should check against
-            // macaddrs as well
-            return null;
-        } else if (matches == 1) {
-            return rtn;
-        }
-        return null;
+        
+        return p;
     }
 
     private Platform getPlatformFromAgentToken(String agentToken) {
@@ -801,27 +800,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         return getPlatformDAO().findBySortName(name);
     }
     
-    /**
-     * Get the platform that has the specified CertDN
-     */
-    private Platform getPlatformByCertDN(AuthzSubjectValue subject,
-                                         String certDN)
-        throws PlatformNotFoundException, PermissionException {
-        Platform p;
-        try {
-            p = getPlatformDAO().findByCertDN(certDN);
-        } catch (NonUniqueResultException e) {
-            p = null;
-        }
-        if (p == null) {
-            throw new PlatformNotFoundException("Platform with certdn " +
-                                                certDN + " not found");
-        }
-        
-        checkViewPermission(subject, p.getEntityId());
-        return p;
-    }
-
     /**
      * Get the Platform that has the specified Fqdn
      * @ejb:interface-method
@@ -1244,12 +1222,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 if (plat.getAgent() == null && existing.getAgent() != null) {
                     // Create AIPlatform for manually created platform
                     AIQueueManagerLocal aiqManagerLocal;
-                    try {
-                        aiqManagerLocal =
-                            AIQueueManagerUtil.getLocalHome().create();
-                    } catch (CreateException e) {
-                        throw new SystemException(e);
-                    }
+                    aiqManagerLocal = AIQueueManagerEJBImpl.getOne();
                     AIPlatformValue aiPlatform = new AIPlatformValue();
                     aiPlatform.setFqdn(existing.getFqdn());
                     aiPlatform.setName(existing.getName());
@@ -1275,8 +1248,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 return true;
             }
         } catch (FinderException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
             throw new SystemException(e);
         }
     }

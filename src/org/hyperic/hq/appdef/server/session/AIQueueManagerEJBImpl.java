@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.hq.dao.AIIpDAO;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
@@ -270,7 +271,7 @@ public class AIQueueManagerEJBImpl
             // view permissions on the platform that backs the aiplatform.
             Iterator iter = queue.iterator();
             AIPlatform aipLocal;
-            PlatformValue pValue;
+            Platform pValue;
             AppdefEntityID aid;
             Integer ppk;
             while (iter.hasNext()) {
@@ -570,14 +571,11 @@ public class AIQueueManagerEJBImpl
                             AIUtil.getClient(aiplatform.getAgentToken());
                         client.getScanStatus();
                     } catch (AgentNotFoundException e) {
-                        // XXX scottmf, in this case we may just want to
+                        // In this case we just want to
                         // remove the AIPlatform from the AIQ since the
                         // agent does not exist anyway
-                        throw new AIQApprovalException(
-                            "Cannot approve platform, agent not found in DB.  " +
-                            "Removing from AIQ.  To correct this issue " +
-                            " remove data dir and restart agent." +
-                            "Error Message -> " + e.getMessage(), e);
+                        removeFromQueue(aiplatform);
+                        continue;
                     } catch (AgentRemoteException e) {
                         throw new AIQApprovalException(
                             "Error invoking remote method on agent " +
@@ -681,7 +679,7 @@ public class AIQueueManagerEJBImpl
     public void removeFromQueue(AIPlatform aiplatform ) {
         // Remove the platform, this should recursively remove all queued 
         // servers and IPs
-        DAOFactory.getDAOFactory().getAIPlatformDAO().remove(aiplatform);
+        getAIPlatformDAO().remove(aiplatform);
     }
 
     /**
@@ -697,7 +695,7 @@ public class AIQueueManagerEJBImpl
 
         // XXX Do authz check
         aiplatform = getAIPlatformDAO().get(new Integer(aiPlatformID));
-        return getPlatformByAI(subject, aiplatform);
+        return getPlatformByAI(subject, aiplatform).getPlatformValue();
     }
 
     /**
@@ -759,51 +757,19 @@ public class AIQueueManagerEJBImpl
      * Find an AI platform given an platform 
      * @ejb:interface-method
      */
-    public PlatformValue getPlatformByAI(AuthzSubjectValue subject, 
-                                         AIPlatform aipLocal)
+    public Platform getPlatformByAI(AuthzSubjectValue  subject, 
+                                    AIPlatform aipLocal)
         throws FinderException, CreateException, NamingException,
                PermissionException, PlatformNotFoundException
     {
-        Collection ips;
-        PlatformValue pValue;
-
-        ips = aipLocal.getAIIps();
-        // We can't use the FQDN to find a platform, because
-        // the FQDN can change too easily.  Instead we use the
-        // IP address now.  For now, if we get one IP address
-        // match (and it isn't localhost), we assume that it is
-        // the same platform.  In the future, we are probably going
-        // to need to do better.
         PlatformManagerLocal pmLocal = getPlatformMgrLocal();
-        for (Iterator i = ips.iterator(); i.hasNext(); ) {
-            AIIp qip = (AIIp) i.next();
-            
-            String address = qip.getAddress();
-            // XXX This is a hack that we need to get rid of
-            // at some point.  The idea is simple.  Every platform
-            // has the localhost address.  So, if we are looking
-            // for a platform based on IP address, searching for
-            // localhost doesn't give us any information.  Long
-            // term, when we are trying to match all addresses,
-            // this can go away.
-            if (address.equals(NetFlags.LOOPBACK_ADDRESS) && i.hasNext()) {
-                continue;
-            }
-                
-            PageList platforms = pmLocal.findPlatformsByIpAddr(subject, address,
-                                                               null);
-            if (!platforms.isEmpty()) {
-                // If we got any platforms that match this
-                // IP address, then we just take the first
-                // one and assume that is the platform we
-                // are looking for.  This should only fall
-                // apart if we have multiple platforms defined
-                // for the same IP address, which should be
-                // a rarity.
-                pValue = (PlatformValue)platforms.get(0);
-                return pValue;
-            }
-        }
+        Platform p =
+            pmLocal.getPlatformByAIPlatform(subject,
+                                            aipLocal.getAIPlatformValue());
+
+        if (p != null)
+            return p;
+        
         throw new PlatformNotFoundException("platform not found for ai " +
                                             "platform: " +
                                             aipLocal.getId());
