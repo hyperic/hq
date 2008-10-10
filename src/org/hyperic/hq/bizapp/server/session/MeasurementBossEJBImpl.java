@@ -923,7 +923,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                PermissionException {
         if (id.isGroup())
             return findGroupMeasurements(sessionId, id, null, pc);
-                   
+
+        if (id instanceof AppdefEntityTypeID)
+            return new ArrayList(0);
+        
         AuthzSubject subject = manager.getSubject(sessionId);
         return getMetricManager().findMeasurements(subject, id, null, pc);
     }
