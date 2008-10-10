@@ -291,13 +291,12 @@ public class MeasurementDAO extends HibernateDAO {
         String sql =
             "select m from Measurement m " +
             "join m.template t " +
-            "where m.enabled = ? and " +
+            "where m.enabled = true and " +
             "m.resource = ? " +
             "order by t.name";
 
         return getSession().createQuery(sql)
-            .setBoolean(0, true)
-            .setParameter(1, resource)
+            .setParameter(0, resource)
             .setCacheable(true)
             .setCacheRegion("Measurement.findEnabledByResource").list();
     }
