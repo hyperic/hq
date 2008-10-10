@@ -612,72 +612,74 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
         String certdn = aiPlatform.getCertdn();
 
         final AIIpValue[] ipvals = aiPlatform.getAIIpValues();
-        // We can't use the FQDN to find a platform, because
-        // the FQDN can change too easily.  Instead we use the
-        // IP address now.  For now, if we get one IP address
-        // match (and it isn't localhost), we assume that it is
-        // the same platform.  In the future, we are probably going
-        // to need to do better.
-        for (int i = 0; i < ipvals.length; i++) {
-            AIIpValue qip = ipvals[i];
-            
-            String address = qip.getAddress();
-            // XXX This is a hack that we need to get rid of
-            // at some point.  The idea is simple.  Every platform
-            // has the localhost address.  So, if we are looking
-            // for a platform based on IP address, searching for
-            // localhost doesn't give us any information.  Long
-            // term, when we are trying to match all addresses,
-            // this can go away.
-            if (address.equals(NetFlags.LOOPBACK_ADDRESS) &&
-                i < (ipvals.length - 1)) {
-                continue;
-            }
+        if (!isAgentPorker(Arrays.asList(ipvals))) {
+            // We can't use the FQDN to find a platform, because
+            // the FQDN can change too easily.  Instead we use the
+            // IP address now.  For now, if we get one IP address
+            // match (and it isn't localhost), we assume that it is
+            // the same platform.  In the future, we are probably going
+            // to need to do better.
+            for (int i = 0; i < ipvals.length; i++) {
+                AIIpValue qip = ipvals[i];
                 
-            Collection platforms = getPlatformDAO().findByIpAddr(address);
-            
-            if (!platforms.isEmpty()) {
-                Platform ipMatch = null;
+                String address = qip.getAddress();
+                // XXX This is a hack that we need to get rid of
+                // at some point.  The idea is simple.  Every platform
+                // has the localhost address.  So, if we are looking
+                // for a platform based on IP address, searching for
+                // localhost doesn't give us any information.  Long
+                // term, when we are trying to match all addresses,
+                // this can go away.
+                if (address.equals(NetFlags.LOOPBACK_ADDRESS) &&
+                    i < (ipvals.length - 1)) {
+                    continue;
+                }
+                    
+                Collection platforms = getPlatformDAO().findByIpAddr(address);
                 
-                Platform plat;
-                for (Iterator it = platforms.iterator(); it.hasNext(); ) {
-                    plat = (Platform) it.next();
+                if (!platforms.isEmpty()) {
+                    Platform ipMatch = null;
                     
-                    // Make sure the types match
-                    if (!plat.getPlatformType().getName()
-                            .equals(aiPlatform.getPlatformTypeName()))
-                        continue;
-                    
-                    // If we got any platforms that match this IP address, then
-                    // we just take it and see if we can match up more criteria.
-                    // We can assume that is a candidate for the platform we are
-                    // looking for.  This should only fall apart if we have
-                    // multiple platforms defined for the same IP address, which
-                    // should be a rarity.
-                    
-                    if (plat.getFqdn().equals(fqdn)) {  // Perfect
-                        p = plat;
-                        break;
+                    Platform plat;
+                    for (Iterator it = platforms.iterator(); it.hasNext(); ) {
+                        plat = (Platform) it.next();
+                        
+                        // Make sure the types match
+                        if (!plat.getPlatformType().getName()
+                                .equals(aiPlatform.getPlatformTypeName()))
+                            continue;
+                        
+                        // If we got any platforms that match this IP address, then
+                        // we just take it and see if we can match up more criteria.
+                        // We can assume that is a candidate for the platform we are
+                        // looking for.  This should only fall apart if we have
+                        // multiple platforms defined for the same IP address, which
+                        // should be a rarity.
+                        
+                        if (plat.getFqdn().equals(fqdn)) {  // Perfect
+                            p = plat;
+                            break;
+                        }
+                        
+                        // FQDN changed
+                        if (platformMatchesAllIps(plat, Arrays.asList(ipvals)))
+                            ipMatch = plat;
                     }
                     
-                    // FQDN changed
-                    if (platformMatchesAllIps(plat, Arrays.asList(ipvals)))
-                        ipMatch = plat;
+                    // If FQDN was not matched, but all IPs are
+                    p = (p == null) ? ipMatch : p;
                 }
                 
-                // If FQDN was not matched, but all IPs are
-                p = (p == null) ? ipMatch : p;
+                // Found a match
+                if (p != null)
+                    break;
             }
-            
-            // Found a match
-            if (p != null)
-                break;
         }
-
+        
         // One more try
         if (p == null)
             p = getPlatformDAO().findByFQDN(fqdn);
-            
+
         String agentToken = aiPlatform.getAgentToken();
         if (p == null)
             p = getPlatformFromAgentToken(agentToken);
