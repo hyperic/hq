@@ -598,13 +598,18 @@ class DojoUtil {
 	            else
 	                label = header
 	        }
-	        
-	        def widthvar = ""
+
+            def nowrapvar = "nowrap='true'"
+            if (c.nowrap != null && c.nowrap == false) {
+                nowrapvar = ""
+            }
+
+            def widthvar = ""
 	        if (c.width != null) {
 	            widthvar="width=\"${c.width}\""   
 	        }
 	        res << """<th ${widthvar} field='${fieldName}' align='left' 
-                          nosort='true'  nowrap='true'
+                          nosort='true' ${nowrapvar}
 	                      onclick='${idVar}_setSortField(this);'
                           colidx="${colIdx}" """
             if (!field.sortable) {
