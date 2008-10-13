@@ -578,7 +578,7 @@ class DojoUtil {
           <div style="clear: both;"></div>
         </div>
         
-        <table id='${id}'>
+        <table width="100%" id='${id}'>
           <thead>
             <tr>
         """
