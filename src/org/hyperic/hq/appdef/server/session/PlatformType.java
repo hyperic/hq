@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -207,29 +205,6 @@ public class PlatformType extends AppdefResourceType {
         _platformTypeValue.setMTime(getMTime());
         _platformTypeValue.setCTime(getCTime());
         return _platformTypeValue;
-    }
-
-    /**
-     * legacy EJB DTO pattern
-     * @deprecated use (this) PlatformType object instead
-     */
-    public PlatformTypeValue getPlatformTypeValueObject() {
-        PlatformTypeValue vo = new PlatformTypeValue();
-        vo.setSortName(getSortName());
-        vo.setName(getName());
-        vo.setDescription(getDescription());
-        vo.setPlugin(getPlugin());
-        vo.setId(getId());
-        vo.setMTime(getMTime());
-        vo.setCTime(getCTime());
-        return vo;
-    }
-
-    public Set getServerTypeSnapshot() {
-        if (getServerTypes() == null) {
-            return new LinkedHashSet();
-        }
-        return new LinkedHashSet(getServerTypes());
     }
 
     public boolean equals(Object obj) {
