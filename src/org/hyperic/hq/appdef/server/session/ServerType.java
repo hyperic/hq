@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -25,16 +25,14 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-
-import java.util.Collection;
-import java.util.Set;
-import java.util.LinkedHashSet;
-import java.util.HashSet;
-import java.util.ArrayList;
 
 public class ServerType extends AppdefResourceType
 {
@@ -127,13 +125,6 @@ public class ServerType extends AppdefResourceType
         _serverTypeValue.setMTime(getMTime());
         _serverTypeValue.setCTime(getCTime());
         return _serverTypeValue;
-    }
-
-    public Set getServiceTypeSnapshot() {
-        if (getServiceTypes() == null) {
-            return new LinkedHashSet();
-        }
-        return new LinkedHashSet(getServiceTypes());
     }
 
     public boolean equals(Object obj) {

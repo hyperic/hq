@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -61,14 +61,6 @@ public class ServiceType extends AppdefResourceType
     }
 
     public boolean isIsInternal() {
-        return _isInternal;
-    }
-
-    /**
-     * legacy EJB getter
-     * @deprecated use isIsInternal() instead
-     */
-    public boolean getIsInternal() {
         return _isInternal;
     }
 
@@ -133,26 +125,12 @@ public class ServiceType extends AppdefResourceType
             _serviceTypeValue.setSortName(getSortName());
             _serviceTypeValue.setDescription(getDescription());
             _serviceTypeValue.setPlugin(getPlugin());
-            _serviceTypeValue.setIsInternal(getIsInternal());
+            _serviceTypeValue.setIsInternal(isIsInternal());
             _serviceTypeValue.setId(getId());
             _serviceTypeValue.setMTime(getMTime());
             _serviceTypeValue.setCTime(getCTime());
         }
         return _serviceTypeValue;
-    }
-
-    /**
-     * legacy DTO pattern
-     * @deprecated use (this) ServiceType setters instead
-     */
-    public void setServiceTypeValue(ServiceTypeValue val) {
-        setName( val.getName() );
-        setSortName( val.getSortName() );
-        setDescription( val.getDescription() );
-        setPlugin( val.getPlugin() );
-        setIsInternal( val.getIsInternal() );
-        setModifiedTime(val.getMTime());
-        setCreationTime(val.getCTime());
     }
 
     public boolean equals(Object obj) {
