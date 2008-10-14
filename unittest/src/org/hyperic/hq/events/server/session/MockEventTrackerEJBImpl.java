@@ -161,6 +161,28 @@ public class MockEventTrackerEJBImpl
         return eventStreams;
     }
 
+    public Integer getEventsCount(Integer tid)
+        throws SQLException {
+        _expectedNumCalls.inc();
+        
+        Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
+        
+        LinkedList eventStreams = new LinkedList();
+        
+        int count = 0;
+        if (triggerEvents != null && !triggerEvents.isEmpty()) {            
+            for (Iterator iter = triggerEvents.iterator(); iter.hasNext();) {
+                TriggerEvent triggerEvent = (TriggerEvent) iter.next();
+                
+                if (!isExpired(triggerEvent)) {
+                    count++;
+                }
+            }
+        }
+        
+        return new Integer(count);
+    }
+
     /**
      * @see org.hyperic.hq.events.shared.EventTrackerLocal#updateReference(java.lang.Long, org.hyperic.hq.events.AbstractEvent)
      */
