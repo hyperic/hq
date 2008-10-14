@@ -51,7 +51,6 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
@@ -71,7 +70,6 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
@@ -1253,15 +1251,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
         return ids;
     }
-
-    /**
-     * Validate a new Server Type
-     * @throws ValidationException
-     */  
-    public void validateNewServerType(ServerTypeValue stv, List suppPlatTypes) 
-        throws ValidationException {
-            // Currently no validation rules for new ServerTypes
-    } 
 
     /** 
      * Update a server
