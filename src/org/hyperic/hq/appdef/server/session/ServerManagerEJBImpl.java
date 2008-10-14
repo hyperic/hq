@@ -659,14 +659,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return ServerTypeValue
      * @ejb:interface-method
      */
-    public ServerTypeValue findServerTypeByName(String name)
+    public ServerType findServerTypeByName(String name)
         throws FinderException {
 
         ServerType ejb = findServerTypePojoByName(name);
         if (ejb == null) {
             throw new FinderException("name not found: " + name);
         }
-        return ejb.getServerTypeValue();
+        return ejb;
     }
 
     /** 

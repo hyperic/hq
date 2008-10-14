@@ -27,6 +27,8 @@ package org.hyperic.hq.appdef.shared;
 
 import javax.ejb.FinderException;
 
+import org.hyperic.hq.appdef.server.session.ServerType;
+
 /**
  * A utility for converting value objects from AI to appdef.
  */
@@ -87,15 +89,15 @@ public class AIConversionUtil {
                                                       ServerManagerLocal serverMgr)
         throws FinderException {
 
-        ServerTypeValue stValue;
-        stValue = serverMgr.findServerTypeByName(aiserver.getServerTypeName());
+        ServerType stype =
+            serverMgr.findServerTypeByName(aiserver.getServerTypeName());
 
         ServerValue server = new ServerValue();
         server.setDescription(aiserver.getDescription());
         server.setName       (aiserver.getName());
         server.setInstallPath(aiserver.getInstallPath());
         server.setAutoinventoryIdentifier(aiserver.getAutoinventoryIdentifier());
-        server.setServerType(stValue);
+        server.setServerType(stype.getServerTypeValue());
 
         if ( server.getName() == null ) {
             server.setName(aiserver.getServerTypeName()
