@@ -44,10 +44,8 @@ import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
-import org.hyperic.hq.common.SystemException;
 
 /**
  * This is the parent class for all Authz Session Beans
@@ -170,43 +168,6 @@ public abstract class AuthzSession {
         return values;
     }
     
-    protected Object[] fromLocals(Collection locals, Class c) {
-        Object[] values = null;
-        Iterator it = locals.iterator();
-        int counter = 0;
-        boolean isOperation = false;
-        boolean isResource = false;
-        boolean isResourceGroup = false;
-        boolean isRole = false;
-        boolean isAuthzSubject = false;
-
-        values = new Object[locals.size()];
-        if (isOperation = c.equals(Operation.class)) {
-        } else if (isResource = c.equals(ResourceValue.class)) {
-        } else if (isResourceGroup = c.equals(ResourceGroupValue.class)) {
-        } else if (isRole = c.equals(RoleValue.class)) {
-        } else if (isAuthzSubject = c.equals(AuthzSubjectValue.class)) {
-        } else {
-            throw new SystemException("Unknown type");
-        }
-
-        while (it.hasNext()) {
-            if (isOperation) {
-                values[counter] = it.next();
-            } else if (isResource || isRole || isAuthzSubject) {
-                values[counter] =
-                    ((AuthzNamedBean)it.next()).getValueObject();
-            } else if (isResourceGroup) {
-                values[counter] =
-                    ((ResourceGroup)it.next()).getResourceGroupValue();
-            } else {
-                throw new SystemException("Unknown type");
-            }
-            counter++;
-        }
-        return values;
-    }
-
     protected AuthzSubject lookupSubject(Integer id) {
         return getSubjectDAO().findById(id);
     }
