@@ -92,7 +92,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             "EAM_METRIC_PROB", "EAM_REQUEST_STAT",
             "EAM_ALERT_ACTION_LOG", "EAM_ALERT_CONDITION_LOG",
             "EAM_ALERT", "EAM_EVENT_LOG", "EAM_CPROP", "EAM_MEASUREMENT",
-            "EAM_SRN"};
+            "EAM_SRN", "HQ_AVAIL_DATA_RLE"};
                          
     public final String logCtx
         = "org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl";
