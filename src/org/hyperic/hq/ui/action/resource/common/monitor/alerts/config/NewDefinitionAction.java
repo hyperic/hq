@@ -158,9 +158,7 @@ public class NewDefinitionAction extends BaseAction {
                 Integer mid = new Integer( adv.getConditions()[i].getMeasurementId());
                 Boolean metricEnabled = (Boolean)metricEnabledFlags.get(mid);
                 if (null != metricEnabled) {
-                    if (!metricEnabled.booleanValue()) {
-                        return true;
-                    }
+                    return metricEnabled.equals(Boolean.FALSE);
                 }
             }
         }
