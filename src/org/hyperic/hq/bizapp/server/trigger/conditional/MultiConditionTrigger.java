@@ -42,6 +42,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -200,7 +201,37 @@ public class MultiConditionTrigger
      */
     public boolean triggeringConditionsFulfilled() {
         synchronized (lastFulfillingEventsLock) {
-            return !lastFulfillingEvents.isEmpty();            
+            // Find out which instance we should be looking for
+            Integer[] subIds = getAndTriggerIds();
+            Map orIds = getOrTriggerIds();
+            
+            Set fulfilled = new HashSet();
+            for (Iterator it = lastFulfillingEvents.iterator(); it.hasNext(); ){
+                AbstractEvent event = (AbstractEvent) it.next();
+                fulfilled.add(event.getInstanceId());
+            }
+            
+            // Now let's see how well we did
+            int orInd = 0;
+            
+            for (Iterator i = orIds.keySet().iterator(); i.hasNext(); ) {
+                Object orId = i.next();
+                if (fulfilled.contains(orId)) {
+                    Integer index = (Integer) orIds.get(orId);
+                    if (orInd < index.intValue()) {
+                        orInd = index.intValue();
+                    }
+                }
+            }
+    
+            // Go through the subIds
+            for (int i = orInd; i < subIds.length; i++) {
+                // Did not fulfill yet
+                if (!fulfilled.contains(subIds[i]))
+                    return false;
+            }
+    
+            return true;            
         }
     }    
     
@@ -430,7 +461,7 @@ public class MultiConditionTrigger
                 }                            
             } else {
                 List tempLastFulfillingEvents = 
-                    checkIfNewEventFulfillsConditions(event, etracker);
+                    addNewEvent(event, etracker);
                 
                 synchronized (lastFulfillingEventsLock) {
                     lastFulfillingEvents = tempLastFulfillingEvents;                    
@@ -450,8 +481,7 @@ public class MultiConditionTrigger
      *          be thread-safe!
      * @throws ActionExecuteException
      */    
-    private List checkIfNewEventFulfillsConditions(AbstractEvent event, 
-                                                   EventTrackerLocal etracker) 
+    private List addNewEvent(AbstractEvent event, EventTrackerLocal etracker)
         throws ActionExecuteException {        
                               
         List events = getPriorEventsForTrigger(etracker);
@@ -490,55 +520,33 @@ public class MultiConditionTrigger
                 // Once the recovery condition is met for the recovery alert 
                 // definition we only want the listening DurationTrigger to 
                 // receive a TriggerNotFiredEvent when the conditions are not 
-                // met, not because the primary alert definition has not currently 
-                // fired.                
+                // met, not because the primary alert definition has not
+                // currently fired.                
                 notFired();
             }
         }
 
         // If we've got nothing, then just clean up
-        if (fulfilled.size() == 0 && events.size() > 0) {
-            try {
-                etracker.deleteReference(getId());            
-            } catch (SQLException e) {
-                // It's ok if we can't delete the old events now.
-                // We can do it next time.
-                log.warn("Failed to remove all references to trigger id="+getId(), e);                
-            }
-                        
+        if (fulfilled.size() == 0) {
+            if (events.size() > 1) {
+                try {
+                    etracker.deleteReference(getId());            
+                } catch (SQLException e) {
+                    // It's ok if we can't delete the old events now.
+                    // We can do it next time.
+                    log.warn("Failed to remove all references to trigger id=" +
+                             getId(), e);                
+                }
+            }                        
             return Collections.EMPTY_LIST;
         }
         
-        // Find out which instance we should be looking for
-        Integer[] subIds = getAndTriggerIds();
-        Map orIds = getOrTriggerIds();
-        
-        // Now let's see how well we did
-        int orInd = 0;
-        
-        for (Iterator i = orIds.keySet().iterator(); i.hasNext(); ) {
-            Object orId = i.next();
-            if (fulfilled.containsKey(orId)) {
-                Integer index = (Integer) orIds.get(orId);
-                if (orInd < index.intValue()) {
-                    orInd = index.intValue();
-                }
-            }
-        }
-
-        // Go through the subIds
-        for (int i = orInd; i < subIds.length; i++) {
-            // Did not fulfill yet
-            if (!fulfilled.containsKey(subIds[i])) {
-                fulfilled.clear();
-                break;
-            }
-        }
-
         try {
             // Clean up unused event
             if (toDelete != null) {
-                etracker.updateReference(toDelete.getId(), event);
+                // Only need to update reference if event may expire
+                if (getTimeRange() > 0)
+                    etracker.updateReference(toDelete.getId(), event);
             } else {
                 etracker.addReference(getId(), event, getTimeRange());
             }          
@@ -553,20 +561,38 @@ public class MultiConditionTrigger
     private List getPriorEventsForTrigger(EventTrackerLocal etracker) 
         throws ActionExecuteException {
         List events = new ArrayList();
-        
-        try {
-            Collection eventObjectDesers =
-                etracker.getReferencedEventStreams(getId());
-            if (log.isDebugEnabled())
-                log.debug("Get prior events for trigger id="+getId());
-        
-            for (Iterator iter = eventObjectDesers.iterator(); iter.hasNext(); ) {
-                EventObjectDeserializer deser = (EventObjectDeserializer) iter.next();
-                events.add(deserializeEvent(deser, true));
+
+        if (lastFulfillingEvents.isEmpty()) {
+            try {
+                Collection eventObjectDesers =
+                    etracker.getReferencedEventStreams(getId());
+                if (log.isDebugEnabled())
+                    log.debug("Get prior events for trigger id="+getId());
+            
+                for (Iterator iter = eventObjectDesers.iterator();
+                     iter.hasNext(); ) {
+                    EventObjectDeserializer deser =
+                        (EventObjectDeserializer) iter.next();
+                    events.add(deserializeEvent(deser, true));
+                }
+            } catch(Exception exc) {
+                throw new ActionExecuteException(
+                    "Failed to get referenced streams for trigger id=" +getId(),
+                    exc);
             }
-        } catch(Exception exc) {
-            throw new ActionExecuteException(
-                "Failed to get referenced streams for trigger id="+getId(), exc);
+        }
+        else {
+            synchronized (lastFulfillingEventsLock) {
+                long expire = getTimeRange() > 0 ?
+                        System.currentTimeMillis() - getTimeRange() : 0;
+                        
+                for (Iterator it = lastFulfillingEvents.iterator();
+                     it.hasNext(); ) {
+                    AbstractEvent event = (AbstractEvent) it.next();
+                    if (event.getTimestamp() > expire)
+                        events.add(event);
+                }
+            }
         }
         
         return events;
