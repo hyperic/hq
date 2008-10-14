@@ -228,14 +228,6 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         try {
             txn = session.beginTransaction();
             triggerEventDAO.deleteByTriggerId(tid, session);        
-            
-            // To reduce contention on the trigger_event table we are going to reduce 
-            // the number of times we try to delete expired trigger_events.
-            if (ExpiredEventsDeletionScheduler.getInstance()
-                        .shouldDeleteExpiredEvents()) {
-                triggerEventDAO.deleteExpired(session);
-            }
-            
             txn.commit();
         } catch (Exception e) {
             if (txn != null) {
@@ -283,8 +275,8 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         LinkedList eventObjectDeserializers = new LinkedList();
         
         try {
-            List triggerEvents = getTriggerEventDAO()
-                                    .findUnexpiredByTriggerId(tid, session);
+            List triggerEvents =
+                triggerEventDAO.findUnexpiredByTriggerId(tid, session);
 
             // When returning the events, we link the event to the trigger_event.
             for (Iterator it = triggerEvents.iterator(); it.hasNext();) {
@@ -310,6 +302,37 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         }
         
         return eventObjectDeserializers;
+    }
+
+    /** 
+     * Get the count of events that are referenced by a given trigger
+     * 
+     * @param tid The trigger id.
+     * @return The list of {@link EventObjectDeserializer EventObjectDeserializers} 
+     *         containing the events referenced by the trigger. Each event will 
+     *         have its id set to the trigger event id.
+     *         
+     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:interface-method
+     */
+    public Integer getEventsCount(Integer tid)  throws SQLException {
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Get events count for trigger id: " + tid);                
+        }
+        
+        TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
+    
+        Session session = triggerEventDAO.getNewSession();
+        
+        try {
+            return triggerEventDAO.countUnexpiredByTriggerId(tid, session);
+        } catch (Exception e) {
+            log.error("Failed to get count of events for trigger id=" + tid, e);     
+            throw new SQLException("Failed to get referenced events for trigger id="+tid);            
+        } finally {
+            session.close();
+        }        
     }
 
     public static EventTrackerLocal getOne() {

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -26,10 +26,6 @@
 package org.hyperic.hq.bizapp.server.trigger.frequency;
 
 import java.sql.SQLException;
-import java.util.Collection;
-
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
 
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
@@ -37,8 +33,8 @@ import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
+import org.hyperic.hq.events.server.session.EventTrackerEJBImpl;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
-import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -56,7 +52,7 @@ import org.hyperic.util.config.LongConfigOption;
 public class CounterTrigger extends AbstractTrigger
     implements FrequencyTriggerInterface
 {
-    private static final String CFG_COUNT      = "count";
+    private static final String CFG_COUNT = "count";
 
     private final   Object  lock = new Object();
     private Integer triggerId;
@@ -175,47 +171,41 @@ public class CounterTrigger extends AbstractTrigger
                                          tfe.getInstanceId() + ") expected " +
                                          triggerId);
 
-        EventTrackerLocal eTracker;
-        
-        try {
-            eTracker = EventTrackerUtil.getLocalHome().create();
-        } catch(NamingException exc){
-            return; // No fire since we can't track the events
-        } catch(CreateException exc){
-            return; // No fire since we can't track the events
-        }
+        EventTrackerLocal eTracker = EventTrackerEJBImpl.getOne();
         
         TriggerFiredEvent myEvent = null;
         
         synchronized (lock) {
-            Collection eventObjectDesers;
+            Integer prevCount;
 
             try {
                 // Now find out if we have the specified # within the interval
-                eventObjectDesers = eTracker.getReferencedEventStreams(getId());
+                prevCount = eTracker.getEventsCount(getId());
             } catch(Exception exc){
                 throw new ActionExecuteException("Failed to get referenced " +
                                                  "streams for trigger id="+
                                                  getId()+" : " + exc);
             }
 
-            /* Make sure we only write once (either delete or add) in this function
-               otherwise, we have to make sure that things are in the same
-               user transaction, which is a pain */
-            if ((eventObjectDesers.size() + 1) >= count){
+            /* Make sure we only write once (either delete or add) in this
+             * function otherwise, we have to make sure that things are in the
+             * same user transaction, which is a pain */
+            if ((prevCount.intValue() + 1) >= count){
                 // Get ready to fire, reset EventTracker
                 try {
                     eTracker.deleteReference(getId());                            
                 } catch (SQLException exc) {
                     throw new ActionExecuteException(
-                        "Failed to delete event references for trigger id="+getId(), exc);                  
+                        "Failed to delete event references for trigger id=" + 
+                        getId(), exc);                  
                 }
                             
                 myEvent = new TriggerFiredEvent(getId(), event);
 
                 myEvent.setMessage("Event " + triggerId + " occurred " +
-                                   (eventObjectDesers.size() + 1) + " times within " +
-                                   timeRange / 1000 + " seconds");
+                                   (prevCount.intValue() + 1) +
+                                   " times within " + timeRange / 1000 +
+                                   " seconds");
             } else {
                 // Throw it into the event tracker
                 try {
@@ -239,6 +229,5 @@ public class CounterTrigger extends AbstractTrigger
                                                  exc);
             }            
         }
-
     }
 }

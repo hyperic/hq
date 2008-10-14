@@ -62,20 +62,23 @@ public class TriggerEventDAO extends HibernateDAO {
                         .list();            
     }
     
+    Integer countUnexpiredByTriggerId(Integer tid, Session session) {
+        String hql = "select count(te) from TriggerEvent te " +
+        		     "where te.triggerId= :tid and te.expiration > :exp";
+        
+        return (Integer) session.createQuery(hql)
+                        .setInteger("tid", tid.intValue())
+                        .setLong("exp", System.currentTimeMillis())
+                        .uniqueResult();            
+    }
+    
     void deleteByTriggerId(Integer tid, Session session) {
-        String hql = "delete from TriggerEvent te where te.triggerId= :tid";
+        String hql = "delete from TriggerEvent te where te.triggerId= :tid " +
+        		     "or te.expiration < :exp";
 
         session.createQuery(hql)
                 .setInteger("tid", tid.intValue())
-                .executeUpdate();
-    }
-
-    void deleteExpired(Session session) {
-        String hql = "delete from TriggerEvent te where te.expiration < :exp";
-        
-        session.createQuery(hql)
                 .setLong("exp", System.currentTimeMillis())
                 .executeUpdate();
-    } 
-    
+    }
 }
