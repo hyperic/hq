@@ -77,8 +77,20 @@ public class AvailabilityDataRLE
         _availVal = val;
     }
 
+    public boolean equals(Object rhs) {
+        if (this == rhs) {
+            return true;
+        }
+        if (!(rhs instanceof AvailabilityDataRLE)) {
+            return false;
+        }
+        AvailabilityDataRLE rle = (AvailabilityDataRLE)rhs;
+        AvailabilityDataId id = rle.getAvailabilityDataId();
+        return getAvailabilityDataId().equals(id);
+    }
+
     public String toString() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         return buf.append(" measurement -> ").append(_measurement.getId())
                .append(" startime -> ").append(_startime)
                .append(" endtime -> ").append(_endtime)

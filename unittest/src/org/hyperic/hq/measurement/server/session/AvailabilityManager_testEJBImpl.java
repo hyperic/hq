@@ -27,6 +27,7 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -289,7 +290,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
     }
 
     private void testAvailabilityForPlatform(Integer measId) throws Exception{
-	setupAvailabilityTable();
+        setupAvailabilityTable();
         AvailabilityManagerLocal avail = AvailabilityManagerEJBImpl.getOne();
         MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
         Measurement meas = mMan.getMeasurement(measId);
@@ -532,7 +533,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         for (Iterator it=avails.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry)it.next();
             Integer mId = (Integer)entry.getKey();
-            List rleList = (List)entry.getValue();
+            Collection rleList = (Collection)entry.getValue();
             if (!isAvailDataRLEValid(mId, lastPt, rleList)) {
                 return false;
             }
@@ -540,7 +541,8 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         return true;
     }
         
-    private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt, List avails) {
+    private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt,
+                                        Collection avails) {
         AvailabilityDataRLE last = null;
         Set endtimes = new HashSet();
         for (Iterator it=avails.iterator(); it.hasNext(); ) {

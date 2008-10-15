@@ -25,11 +25,13 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -248,19 +250,28 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
     
     /**
-     * @return Map<Integer, List<AvailabilityDataRLE>> Integer -> mid
+     * @return Map<Integer, TreeSet<AvailabilityDataRLE>> Integer -> mid
      */
     Map getHistoricalAvailMap(Integer[] mids, final long after,
                               final boolean descending) {
+        final Comparator comparator = new Comparator() {
+            public int compare(Object arg0, Object arg1) {
+                AvailabilityDataRLE lhs = (AvailabilityDataRLE)arg0;
+                AvailabilityDataRLE rhs = (AvailabilityDataRLE)arg1;
+                Long lhsStart = new Long(lhs.getStartime());
+                Long rhsStart = new Long(rhs.getStartime());
+                if (descending) {
+                    return rhsStart.compareTo(lhsStart);
+                }
+                return lhsStart.compareTo(rhsStart);
+            }
+        };
         StringBuilder sql = new StringBuilder()
             .append("FROM AvailabilityDataRLE rle")
             .append(" WHERE rle.availabilityDataId.measurement in (:mids)");
         if (after > 0) {
             sql.append(" AND rle.endtime >= :endtime");
         }
-        sql.append(" ORDER BY rle.availabilityDataId.measurement,")
-            .append(" rle.availabilityDataId.startime")
-            .append(((descending) ? " DESC" : " ASC")).toString();
         Query query = getSession()
             .createQuery(sql.toString())
             .setParameterList("mids", mids, new IntegerType());
@@ -269,24 +280,24 @@ public class AvailabilityDataDAO extends HibernateDAO {
         }
         List list = query.list();
         Map rtn = new HashMap(list.size());
-        List tmp;
+        TreeSet tmp;
         for (Iterator it=list.iterator(); it.hasNext(); ) {
             AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
             Integer mId = rle.getMeasurement().getId();
-            if (null == (tmp = (List)rtn.get(mId))) {
-                tmp = new ArrayList();
+            if (null == (tmp = (TreeSet)rtn.get(mId))) {
+                tmp = new TreeSet(comparator);
                 rtn.put(rle.getMeasurement().getId(), tmp);
             }
             tmp.add(rle);
         }
         for (int i=0; i<mids.length; i++) {
             if (!rtn.containsKey(mids[i])) {
-                rtn.put(mids[i], new ArrayList());
+                rtn.put(mids[i], new TreeSet(comparator));
             }
         }
         return rtn;
     }
-
+    
     /**
      * @return List of AvailabilityDataRLE objs
      */
