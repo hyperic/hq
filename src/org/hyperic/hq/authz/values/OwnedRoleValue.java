@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,19 +25,20 @@
 
 package org.hyperic.hq.authz.values;
 
-import org.hyperic.hq.authz.shared.*;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.RoleValue;
 
 public class OwnedRoleValue extends RoleValue {
 
     private int memberCount;
-    private AuthzSubjectValue owner;
+    private AuthzSubject owner;
 
     public OwnedRoleValue()
     {
         super();
     }
 
-    public OwnedRoleValue(RoleValue parent, AuthzSubjectValue owner) {
+    public OwnedRoleValue(RoleValue parent, AuthzSubject owner) {
         super(parent);
         this.setOwner(owner);
     }
@@ -50,11 +51,11 @@ public class OwnedRoleValue extends RoleValue {
         this.memberCount = count;
     }
 
-    public AuthzSubjectValue getOwner() {
+    public AuthzSubject getOwner() {
         return this.owner;
     }
 
-    public void setOwner(AuthzSubjectValue owner) {
+    public void setOwner(AuthzSubject owner) {
         this.owner = owner;
     }
 

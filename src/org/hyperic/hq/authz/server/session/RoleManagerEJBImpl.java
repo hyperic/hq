@@ -611,8 +611,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
         OwnedRoleValue value =
             new OwnedRoleValue(local.getRoleValue(), 
-                               local.getResource().getOwner()
-                                    .getAuthzSubjectValue());
+                               local.getResource().getOwner());
         value.setMemberCount(numSubjects);
 
         return value;
