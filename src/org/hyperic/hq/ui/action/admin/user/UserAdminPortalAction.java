@@ -32,7 +32,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.WebUser;
@@ -43,12 +48,6 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up user admin
@@ -215,14 +214,14 @@ public class UserAdminPortalAction extends BaseDispatchAction {
         if (log.isTraceEnabled()) {
             log.trace("finding user [" + userId + "]");
         }
-        AuthzSubjectValue user =
-            ContextUtils.getAuthzBoss(ctx).findSubject(sessionId, userId);
+        AuthzSubject user =
+            ContextUtils.getAuthzBoss(ctx).findSubjectById(sessionId, userId);
 
         // when CAM is in LDAP mode, we may still have
         // users logging in with JDBC. the only way we can
         // distinguish these users is by checking to see
         // if they have an entry in the principals table.
-        WebUser webUser = new WebUser(user);
+        WebUser webUser = new WebUser(user.getAuthzSubjectValue());
         boolean hasPrincipal =
             ContextUtils.getAuthBoss(ctx).isUser(sessionId.intValue(),
                                                  user.getName());

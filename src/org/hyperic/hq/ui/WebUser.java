@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -29,11 +29,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.util.StringUtil;
-
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.ui.util.MonitorUtils;
-
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
@@ -85,6 +84,13 @@ public class WebUser {
         _hasPrincipal = false;
     }
     
+    public WebUser(AuthzSubject subject, Integer sessionId,
+                   ConfigResponse preferences, boolean hasPrincipal) {
+                       
+        this(subject.getAuthzSubjectValue(), sessionId, preferences,
+             hasPrincipal);
+    }
+
     public WebUser(AuthzSubjectValue subject, Integer sessionId,
                    ConfigResponse preferences, boolean hasPrincipal) {
                        

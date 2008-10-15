@@ -348,19 +348,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     }
     
     /**
-     * Return the <code>AuthzSubjectValue</code> object identified by
-     * the given subject id.
-     *
-     * @ejb:interface-method
-     * @deprecated use findSubjectById() to retrieve an AuthzSubject object
-     */
-    public AuthzSubjectValue findSubject(Integer sessionId, Integer subjectId)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException {
-        return findSubjectById(sessionId, subjectId).getAuthzSubjectValue();
-    }
-
-    /**
      * Return the <code>AuthzSubject</code> object identified by
      * the given subject id.
      * @throws SessionTimeoutException 

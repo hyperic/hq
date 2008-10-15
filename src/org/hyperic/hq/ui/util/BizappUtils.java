@@ -606,7 +606,7 @@ public class BizappUtils {
      *
      * @param subject the subject
      */
-    public static String makeSubjectFullName(AuthzSubjectValue subject) {
+    public static String makeSubjectFullName(AuthzSubject subject) {
         return makeSubjectFullName(subject.getFirstName(),
                                    subject.getLastName());
     }
