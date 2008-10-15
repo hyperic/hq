@@ -28,16 +28,16 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -56,10 +56,10 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.HighLowMetricValue;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerUtil;
+import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
@@ -750,9 +750,9 @@ public class AvailabilityManagerEJBImpl
     
     private AvailabilityDataRLE findAvail(DataPoint state) {
         Integer mId = state.getMetricId();
-        List rleList = (List)_currAvails.get(mId);
+        Collection rles = (Collection)_currAvails.get(mId);
         long start = state.getTimestamp();
-        for (Iterator it=rleList.iterator(); it.hasNext(); ) {
+        for (Iterator it=rles.iterator(); it.hasNext(); ) {
             AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
             if (rle.getStartime() == start) {
                 return rle;
@@ -763,29 +763,30 @@ public class AvailabilityManagerEJBImpl
     
     private AvailabilityDataRLE findAvailAfter(DataPoint state) {
         Integer mId = state.getMetricId();
-        List rleList = (List)_currAvails.get(mId);
+        TreeSet rles = (TreeSet)_currAvails.get(mId);
         long start = state.getTimestamp();
-        for (Iterator it=rleList.iterator(); it.hasNext(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
-            if (rle.getStartime() > start) {
-                return rle;
-            }
+        AvailabilityDataRLE tmp = new AvailabilityDataRLE();
+        // tailSet is inclusive so we need to add 1 to start
+        tmp.setStartime(start+1);
+        SortedSet set = rles.tailSet(tmp);
+        if (set.size() == 0) {
+            return null;
         }
-        return null;
+        return (AvailabilityDataRLE)set.first();
     }
 
     private AvailabilityDataRLE findAvailBefore(DataPoint state) {
         Integer mId = state.getMetricId();
-        List rleList = (List)_currAvails.get(mId);
+        TreeSet rles = (TreeSet)_currAvails.get(mId);
         long start = state.getTimestamp();
-        int size = rleList.size();
-        for (ListIterator it=rleList.listIterator(size); it.hasPrevious(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.previous();
-            if (start > rle.getStartime()) {
-                return rle;
-            }
+        AvailabilityDataRLE tmp = new AvailabilityDataRLE();
+        // headSet is inclusive so we need to subtract 1 from start
+        tmp.setStartime(start-1);
+        SortedSet set = rles.headSet(tmp);
+        if (set.size() == 0) {
+            return null;
         }
-        return null;
+        return (AvailabilityDataRLE)set.last();
     }
 
     private void merge(DataPoint state)
@@ -875,24 +876,9 @@ public class AvailabilityManagerEJBImpl
             avail.setAvailVal(val);
         }
     }
-    
-    private void sortRleList(List rleList) {
-        Collections.sort(rleList, new Comparator() {
-            public int compare(Object arg0, Object arg1) {
-                AvailabilityDataRLE lhs = (AvailabilityDataRLE)arg0;
-                AvailabilityDataRLE rhs = (AvailabilityDataRLE)arg1;
-                Long lhsStart = new Long(lhs.getStartime());
-                Long rhsStart = new Long(rhs.getStartime());
-                return lhsStart.compareTo(rhsStart);
-            }
-        });
-    }
-    
+
     private void updateEndtime(AvailabilityDataRLE avail, long endtime) {
         avail.setEndtime(endtime);
-        Integer mId = avail.getMeasurement().getId();
-        List rleList = (List)_currAvails.get(mId);
-        sortRleList(rleList);
     }
     
     private AvailabilityDataRLE updateStartime(AvailabilityDataRLE avail,
@@ -914,29 +900,22 @@ public class AvailabilityManagerEJBImpl
     private void removeAvail(AvailabilityDataRLE avail) {
         long start = avail.getStartime();
         Integer mId = avail.getMeasurement().getId();
-        List rleList = (List)_currAvails.get(mId);
-        for (Iterator it=rleList.iterator(); it.hasNext(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
-            if (rle.getMeasurement().getId().equals(mId) &&
-                rle.getStartime() == start) {
-                DataPoint key =
-                    new DataPoint(mId.intValue(), rle.getAvailVal(), start);
-                _createMap.remove(key);
-                _removeMap.put(key, rle);
-                it.remove();
-                break;
-            }
+        TreeSet rles = (TreeSet)_currAvails.get(mId);
+        if (rles.remove(avail)) {
+            DataPoint key =
+                new DataPoint(mId.intValue(), avail.getAvailVal(), start);
+            _createMap.remove(key);
+            _removeMap.put(key, avail);
         }
     }
 
     private AvailabilityDataRLE getLastAvail(DataPoint state) {
         Integer mId = state.getMetricId();
-        List rleList = (List)_currAvails.get(mId);
-        if (rleList.size() == 0) {
+        TreeSet rles = (TreeSet)_currAvails.get(mId);
+        if (rles.size() == 0) {
             return null;
         }
-        int last = rleList.size()-1;
-        return (AvailabilityDataRLE)rleList.get(last);
+        return (AvailabilityDataRLE)rles.last();
     }
     
     private AvailabilityDataRLE create(Measurement meas, long start,
@@ -944,9 +923,8 @@ public class AvailabilityManagerEJBImpl
         AvailabilityDataRLE rtn = _createAvail(meas, start, end, val);
         _createMap.put(new DataPoint(meas.getId().intValue(), val, start), rtn);
         Integer mId = meas.getId();
-        List rleList = (List)_currAvails.get(mId);
-        rleList.add(0, rtn);
-        sortRleList(rleList);
+        Collection rles = (Collection)_currAvails.get(mId);
+        rles.add(rtn);
         return rtn;
     }
     
@@ -964,10 +942,10 @@ public class AvailabilityManagerEJBImpl
         AvailabilityDataRLE rtn = _createAvail(meas, start, MAX_AVAIL_TIMESTAMP, val);
         _createMap.put(new DataPoint(meas.getId().intValue(), val, start), rtn);
         Integer mId = meas.getId();
-        List rleList = (List)_currAvails.get(mId);
+        Collection rles = (Collection)_currAvails.get(mId);
         // I am assuming that this will be cleaned up by the caller where it
         // will update the rle before rtn if one exists
-        rleList.add(rtn);
+        rles.add(rtn);
         return rtn;
     }
 
@@ -1151,9 +1129,9 @@ public class AvailabilityManagerEJBImpl
         for (Iterator it=_currAvails.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry)it.next();
             Integer mid = (Integer)entry.getKey();
-            List rleList = (List)entry.getValue();
-            StringBuilder buf = new StringBuilder();
-            for (Iterator ii=rleList.iterator(); ii.hasNext(); ) {
+            Collection rles = (Collection)entry.getValue();
+            StringBuilder buf = new StringBuilder("\n");
+            for (Iterator ii=rles.iterator(); ii.hasNext(); ) {
                 AvailabilityDataRLE rle = (AvailabilityDataRLE)ii.next();
                 buf.append(mid).append(" | ")
                    .append(rle.getStartime()).append(" | ")
@@ -1171,7 +1149,7 @@ public class AvailabilityManagerEJBImpl
     }
 
     private void logStates(List states, Integer mid) {
-        StringBuilder log = new StringBuilder();
+        StringBuilder log = new StringBuilder("\n");
         for (Iterator it=states.iterator(); it.hasNext(); ) {
             DataPoint pt = (DataPoint)it.next();
             if (!pt.getMetricId().equals(mid)) {
@@ -1190,8 +1168,8 @@ public class AvailabilityManagerEJBImpl
             for (Iterator it=_currAvails.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)it.next();
                 Integer mId = (Integer)entry.getKey();
-                List rleList = (List)entry.getValue();
-                if (!isAvailDataRLEValid(mId, cache.get(mId), rleList)) {
+                Collection rles = (Collection)entry.getValue();
+                if (!isAvailDataRLEValid(mId, cache.get(mId), rles)) {
                     return mId;
                 }
             }
@@ -1199,7 +1177,8 @@ public class AvailabilityManagerEJBImpl
         return null;
     }
         
-    private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt, List avails) {
+    private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt,
+                                        Collection avails) {
         AvailabilityDataRLE last = null;
         Set endtimes = new HashSet();
         for (Iterator it=avails.iterator(); it.hasNext(); ) {

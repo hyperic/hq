@@ -27,6 +27,7 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -108,6 +109,27 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         invokeBackfiller(1l);
         testCatchup(PLAT_MEAS_ID);
         testCatchup(SERVICE_MEAS_ID);
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void testAvailabilityStatusWhenNtwkDwn() throws Exception {
+        // need to invoke backfiller once so that its initial time is set
+        // so that it can start when invoked the next time
+        invokeBackfiller(1l);       
+        testAvailabilityForPlatform(PLAT_MEAS_ID);        
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void testBackfillingForService() throws Exception {        
+        invokeBackfiller(1l);
+        //Following method will verify that when the platform is down it's 
+        //associated resources will be marked down by the backfiller
+        //after waiting for one interval from the last cache update time        
+        testAvailabilityForService(SERVICE_MEAS_ID);        
     }
     
     private void invokeBackfiller(long timestamp)
@@ -267,6 +289,110 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         return pt;
     }
 
+    private void testAvailabilityForPlatform(Integer measId) throws Exception{
+        setupAvailabilityTable();
+        AvailabilityManagerLocal avail = AvailabilityManagerEJBImpl.getOne();
+        MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+        Measurement meas = mMan.getMeasurement(measId);
+
+        long interval = meas.getInterval();        
+        long now = System.currentTimeMillis();
+        long baseTime = TimingVoodoo.roundDownTime(now, 600000);
+        DataPoint pt;
+        List list = new ArrayList();
+        pt = new DataPoint(measId, new MetricValue(1.0, baseTime));
+        list.add(pt);
+        pt = new DataPoint(measId, new MetricValue(0.0, baseTime+interval));        
+        list.add(pt);
+        pt = new DataPoint(measId, new MetricValue(1.0, baseTime+interval*2));        
+        list.add(pt);
+        // Add DataPoints for three consecutive intervals with varying availability data
+        avail.addData(list);
+        List avails = avail.getHistoricalAvailData(meas.getResource(), baseTime,
+                baseTime+(interval*10));
+        if (avails.size() != 3) {
+            dumpAvailsToLogger(avails);
+        }
+        Assert.assertTrue(avails.size() == 3);
+        // Assume that the network is down from the interval "baseTime+interval*2"
+        // Invoke the backfiller for every two interval
+        invokeBackfiller(baseTime+interval*4);
+        invokeBackfiller(baseTime+interval*6);
+        invokeBackfiller(baseTime+interval*8);         
+        invokeBackfiller(baseTime+interval*10);
+        // Expect the backfiller to fill in the unavailable data
+        avails = avail.getHistoricalAvailData(meas.getResource(), baseTime,
+                baseTime+(interval*10));
+        if (avails.size() != 4) {
+            dumpAvailsToLogger(avails);
+        }
+        Assert.assertTrue(avails.size() == 4);
+        list.clear();
+        //After the network is up we start getting the availability data for the period when the network was down
+        for (int i=3; i<=10; i++){
+            pt = new DataPoint(measId, new MetricValue(1.0, baseTime+interval*(i)));        
+            list.add(pt);
+        }
+        avail.addData(list);
+        // Expect to have 3 availability data after processing the agent data that is sent after network is up
+        avails = avail.getHistoricalAvailData(meas.getResource(), baseTime,
+                                                   baseTime+(interval*100));
+        if (avails.size() != 3) {
+            dumpAvailsToLogger(avails);
+        }
+        Assert.assertTrue(avails.size() == 3);      
+    }    
+    
+    private void testAvailabilityForService(Integer measId) throws Exception{
+	setupAvailabilityTable();
+	setupAvailabilityTable(measId);
+        AvailabilityManagerLocal avail = AvailabilityManagerEJBImpl.getOne();
+        MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+        Measurement meas = mMan.getMeasurement(measId); 
+
+        long interval = meas.getInterval();        
+        long now = System.currentTimeMillis();
+        long baseTime = TimingVoodoo.roundDownTime(now, 600000);
+        DataPoint pt;
+        List list = new ArrayList();        
+        //First, let's make the platform as down
+        pt = new DataPoint(PLAT_MEAS_ID, new MetricValue(0.0, baseTime));
+        list.add(pt);
+        pt = new DataPoint(measId, new MetricValue(1.0, baseTime+interval*10));
+        list.add(pt);        
+        avail.addData(list);
+        List avails = avail.getHistoricalAvailData(meas.getResource(), baseTime,
+                baseTime+(interval*20));
+        if (avails.size() != 1) {
+            dumpAvailsToLogger(avails);
+        }
+        Assert.assertTrue(avails.size() == 1);
+        Measurement meas1 = mMan.getMeasurement(PLAT_MEAS_ID);
+        avails = avail.getHistoricalAvailData(meas1.getResource(), baseTime,
+                baseTime+(interval*10));
+        if (avails.size() != 1) {
+            dumpAvailsToLogger(avails);
+        }
+        Assert.assertTrue(avails.size() == 1);
+        //Invoking the backfiller with exactly the same time of the last update time
+        invokeBackfiller(baseTime+interval*10);
+        avails = avail.getHistoricalAvailData(meas.getResource(), baseTime,
+                baseTime+(interval*20));
+        if (avails.size() != 1) {
+            dumpAvailsToLogger(avails);
+        }
+        Assert.assertTrue(avails.size() == 1); 
+        //Invoking the backfiller one interval after the last update time
+        invokeBackfiller(baseTime+interval*11);
+        avails = avail.getHistoricalAvailData(meas.getResource(), baseTime,
+                baseTime+(interval*20));
+        if (avails.size() != 2) {
+            dumpAvailsToLogger(avails);
+        }
+        Assert.assertTrue(avails.size() == 2);
+        list.clear();            
+    }
+    
     /*
      * This test will insert into the middle of two availability points Hits
      * this code path
@@ -407,7 +533,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         for (Iterator it=avails.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry)it.next();
             Integer mId = (Integer)entry.getKey();
-            List rleList = (List)entry.getValue();
+            Collection rleList = (Collection)entry.getValue();
             if (!isAvailDataRLEValid(mId, lastPt, rleList)) {
                 return false;
             }
@@ -415,7 +541,8 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         return true;
     }
         
-    private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt, List avails) {
+    private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt,
+                                        Collection avails) {
         AvailabilityDataRLE last = null;
         Set endtimes = new HashSet();
         for (Iterator it=avails.iterator(); it.hasNext(); ) {
@@ -466,6 +593,24 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
                   " with measurement Id = " + PLAT_MEAS_ID);
     }
 
+    private void setupAvailabilityTable(Integer measId) throws Exception {
+        AvailabilityCache cache = AvailabilityCache.getInstance();
+        cache.clear();
+        AvailabilityDataDAO dao = getAvailabilityDataDAO();
+        boolean descending = false;
+        long start = 0l;
+        long end = AvailabilityDataRLE.getLastTimestamp();
+        Integer[] mids = new Integer[1];
+        mids[0] = measId;
+        List avails = dao.getHistoricalAvails(mids, start, end, descending);
+        for (Iterator it=avails.iterator(); it.hasNext(); ) {
+            AvailabilityDataRLE avail = (AvailabilityDataRLE)it.next();
+            dao.remove(avail);
+        }
+        _log.info("deleted " + avails.size() + " rows from " + AVAIL_TAB +
+                  " with measurement Id = " + PLAT_MEAS_ID);
+    }
+    
     private AvailabilityDataDAO getAvailabilityDataDAO() {
         return new AvailabilityDataDAO(DAOFactory.getDAOFactory());
     }
