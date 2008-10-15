@@ -74,6 +74,11 @@ public class ScheduleThread
     private static final Log _log =
         LogFactory.getLog(ScheduleThread.class.getName());
     
+    // We are separating the platform availability schedule to make sure
+    // it is collected first to so that we don't risk any metrics hanging 
+    // and making the agent seem unavailable
+    private ResourceSchedule _platformAvailSchedule;
+    
     private final    Object     _lock = new Object();
 
     private          Map       _schedules;   // AppdefID -> Schedule
@@ -139,6 +144,10 @@ public class ScheduleThread
         throws UnscheduledItemException
     {
         String key = ent.getAppdefKey();
+        if (_platformAvailSchedule != null &&
+            ent.getID() == _platformAvailSchedule._id.getID()) {
+            _platformAvailSchedule = null;
+        }
         ResourceSchedule rs =
             (ResourceSchedule)_schedules.remove(key);
         if (rs == null) {
@@ -170,9 +179,20 @@ public class ScheduleThread
     void scheduleMeasurement(ScheduledMeasurement meas){
         ResourceSchedule rs = getSchedule(meas);
         try {
-            rs._schedule.scheduleItem(meas, meas.getInterval(), true, true);
+            final String platformTemplate =
+                ("system.avail:Type=Platform:Availability").toLowerCase();
+            final String dsn = meas.getDSN().toLowerCase();
+            if (dsn.endsWith(platformTemplate)) {
+                _log.debug("Scheduling Platform Availability");
+                _platformAvailSchedule = new ResourceSchedule();
+                _platformAvailSchedule._id = meas.getEntity();
+                _platformAvailSchedule._schedule.scheduleItem(
+                    meas, meas.getInterval(), true, true);
+            } else {
+                rs._schedule.scheduleItem(meas, meas.getInterval(), true, true);
+            }
             synchronized (_lock) {
-                _stat_numMetricsScheduled++;                
+                _stat_numMetricsScheduled++;
             }
         } catch (ScheduleException e) {
             _log.error("Unable to schedule metric '" +
@@ -432,10 +452,18 @@ public class ScheduleThread
     private long collect() {
         long timeOfNext = 0;
         synchronized (_schedules) {
+            // want to make sure and schedule the platform availability first
+            // so that we don't risk any metrics hanging and making the agent
+            // seem unavailable
+            if (_platformAvailSchedule != null) {
+                collect(_platformAvailSchedule);
+            }
+
             if (_schedules.size() == 0) {
                 //nothing scheduled
                 return POLL_PERIOD + System.currentTimeMillis();
             }
+            
             for (Iterator it = _schedules.values().iterator();
                  it.hasNext() && (_shouldDie == false);) {
                 
