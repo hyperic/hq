@@ -84,8 +84,6 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -561,14 +559,16 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
         throws PlatformNotFoundException, PermissionException {
         Platform platform = findPlatformById(id);
         checkViewPermission(subject, platform.getEntityId());
+        // Make sure that resource is loaded as to not get 
+        // LazyInitializationException
+        platform.getName();
         return platform;
     }
 
     /**
      * Find a Platform by Id.
      * 
-     * @param id
-     *            The id to look up.
+     * @param id The id to look up.
      * @return A Platform object representing this Platform.
      * @throws PlatformNotFoundException
      *             If the given Platform is not found.
@@ -576,11 +576,16 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
      */
     public Platform findPlatformById(Integer id)
         throws PlatformNotFoundException {
-        Platform res = getPlatformDAO().get(id);
+        Platform platform = getPlatformDAO().get(id);
 
-        if (res == null)
+        if (platform == null)
             throw new PlatformNotFoundException(id);
-        return res;
+
+        // Make sure that resource is loaded as to not get 
+        // LazyInitializationException
+        platform.getName();
+
+        return platform;
     }
 
     /**
