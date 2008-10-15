@@ -43,7 +43,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -175,8 +174,7 @@ public final class AuthenticationFilter extends BaseFilter {
                     .getAttribute(Constants.DEF_USER_PREFS);
 
             AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-            AuthzSubjectValue subject = authzBoss.getCurrentSubject(sid)
-                    .getAuthzSubjectValue();
+            AuthzSubject subject = authzBoss.getCurrentSubject(sid);
 
             Integer sessionId = new Integer(sid);
             preferences = authzBoss.getUserPrefs(sessionId, subject.getId());
