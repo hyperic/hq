@@ -284,7 +284,7 @@ public class Action
                 _log.debug("Unable to execute action", e);
             }
             throw new ActionExecuteException("Unable to execute action: " +
-                                             e.getMessage()); 
+                                             e.getMessage(), e); 
         }
     }
 
