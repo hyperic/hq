@@ -286,8 +286,7 @@ public class MxUtil {
         
         Object obj = mServer.getAttribute(objName, attr);
         if (obj instanceof CompositeData) {
-            CompositeData data = (CompositeData)obj;
-            return data.get(key);
+            return MxCompositeData.getValue((CompositeData)obj, key);
         }
         else {
             throw new MetricInvalidException("Not CompositeData");
