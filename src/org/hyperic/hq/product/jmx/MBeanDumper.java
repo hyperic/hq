@@ -109,7 +109,9 @@ public class MBeanDumper {
             _config.setProperty(MxUtil.PROP_JMX_URL, url);
         }
 
-        _config.setProperty(PROP_JMX_QUERY, query);
+        if (_config.getProperty(PROP_JMX_QUERY) == null) {
+            _config.setProperty(PROP_JMX_QUERY, query);
+        }
 
         if (user != null) {
             _config.setProperty(MxUtil.PROP_JMX_USERNAME, user);
