@@ -202,6 +202,17 @@ public class ApacheServerDetector
             //-d overrides compiled in HTTPD_ROOT
             info.root = root;
         }
+
+        if (info.conf != null) {
+            //check that httpd.conf exists and is absolute 
+            File conf = new File(info.conf);
+            if (!conf.isAbsolute() && (info.root != null)) {
+                conf = new File(info.root, info.conf);
+            }
+            if (!conf.exists()) {
+                info.conf = null; //use the defaults
+            }
+        }
     }
 
     private void findServerProcess(List servers, String query,
