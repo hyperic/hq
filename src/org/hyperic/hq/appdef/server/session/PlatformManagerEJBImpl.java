@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -102,6 +102,7 @@ import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.sigar.NetFlags;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -1488,8 +1489,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             for (Iterator it = platform.getServers().iterator(); it.hasNext();){
                 Server server = (Server) it.next();
                 if (server.getAutoinventoryIdentifier().startsWith(prevFqdn)) {
-                    String newAID = server.getAutoinventoryIdentifier()
-                        .replace(prevFqdn, fqdn);
+                    String newAID = StringUtil
+                        .replace(server.getAutoinventoryIdentifier(),
+                                 prevFqdn, fqdn);
                     server.setAutoinventoryIdentifier(newAID);
                 }
             }
