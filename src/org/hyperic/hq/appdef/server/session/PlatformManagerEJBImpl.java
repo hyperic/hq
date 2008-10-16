@@ -1477,8 +1477,24 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             counter.addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
         
+        // Get the FQDN before we update
+        String prevFqdn = platform.getFqdn();
+        
         platform.updateWithAI(
             aiplatform, subj.getName(), getAuthzResource(platform.getEntityId()));
+        
+        // If FQDN has changed, we need to update servers' auto-inventory tokens
+        if (!prevFqdn.equals(platform.getFqdn())) {
+            for (Iterator it = platform.getServers().iterator(); it.hasNext();){
+                Server server = (Server) it.next();
+                if (server.getAutoinventoryIdentifier().startsWith(prevFqdn)) {
+                    String newAID = server.getAutoinventoryIdentifier()
+                        .replace(prevFqdn, fqdn);
+                    server.setAutoinventoryIdentifier(newAID);
+                }
+            }
+        }
+
         // need to check if IPs have changed, if so update Agent
         List ips = Arrays.asList(aiplatform.getAIIpValues());
         AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
