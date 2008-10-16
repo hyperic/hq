@@ -75,13 +75,11 @@
   <metrics name="OS Metrics">
     <metric name="Free Swap Space Size"
             alias="FreeSwapSpaceSize"
-            indicator="true"
             template="${OBJECT_NAME}:${alias}"
             units="B"
             collectionType="dynamic"/>
     <metric name="Free Physical Memory Size"
             alias="FreePhysicalMemorySize"
-            indicator="true"
             template="${OBJECT_NAME}:${alias}"
             units="B"
             collectionType="dynamic"/>
@@ -108,6 +106,28 @@
             collectionType="static"/>
   </metrics>
 
+  <filter name="memory" value="java.lang:type=Memory"/>
+
+  <metrics name="Heap Metrics">
+    <metric name="Heap Memory Used"
+            units="B"
+            template="${memory}:Composite.HeapMemoryUsage.used"/>
+
+    <metric name="Heap Memory Committed"
+            units="B"
+            template="${memory}:Composite.HeapMemoryUsage.committed"/>
+
+    <metric name="Heap Memory Free"
+            indicator="true"
+            units="B"
+            template="${memory}:Composite.HeapMemoryUsage.free"/>
+
+    <metric name="Heap Memory Max"
+            units="B"
+            collectionType="static"
+            template="${memory}:Composite.HeapMemoryUsage.max"/>
+  </metrics>
+
   <server name="Apache Tomcat"
           version="5.5">
 
@@ -131,6 +151,8 @@
     <property name="OBJECT_NAME"
               value="java.lang:type=Threading"/>
     <metrics include="Thread Metrics"/>
+
+    <metrics include="Heap Metrics"/>
 
     <!-- remove -DISABLED to enable server discovery for 5.5 -->
     <property name="PROC_HOME_PROPERTY"
