@@ -81,7 +81,14 @@ public class SenderThread
 
     private static final int    PROP_RECSIZE  = 34; // 34 byte records.
 
-    private static final int    SEND_INTERVAL = 60000;
+    // sending every 50 secs to ensure that the SenderThread runs
+    // in each minute interval vs. sending every 60 secs and risking that
+    // the sender thread skips a minute interval and the server marking
+    // the agent down
+    // If there is nothing to send at the wakeup interval no connection is
+    // established, so there is no added overhead as long as the
+    // ScheduleThread can keep up with its 60 second interval
+    private static final int    SEND_INTERVAL = 50000;
     private static final int    MAX_BATCHSIZE = 500;
     private static final String DATA_LISTNAME = "measurement_spool";
 
@@ -545,7 +552,6 @@ public class SenderThread
 
     public void run(){
         Long lastMetricTime;
-        boolean checkTime = true;
         
         while(this.shouldDie == false){
             try {
