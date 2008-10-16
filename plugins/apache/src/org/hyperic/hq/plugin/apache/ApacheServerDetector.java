@@ -148,7 +148,7 @@ public class ApacheServerDetector
     }
 
     protected String getConfigProperty(String name, String defval) {
-        String key = "apache." + name;
+        String key = "httpd." + name;
         String val = getManager().getProperty(key); //agent.properties
         if (val != null) {
             log.debug("ConfigProperty: " + key + "==" + val);
@@ -184,6 +184,12 @@ public class ApacheServerDetector
                 root = arg.substring(2, arg.length());
                 if (root.length() == 0) {
                     root = args[i+1];
+                }
+            }
+            else if (arg.startsWith("-f")) {
+                info.conf = arg.substring(2, arg.length());
+                if (info.conf.length() == 0) {
+                    info.conf = args[i+1];
                 }
             }
             else if (arg.startsWith(nameProp)) {
@@ -245,6 +251,9 @@ public class ApacheServerDetector
             ConfigFileTrackPlugin.PROP_FILES_SERVER
         };
         for (int i=0; i<keys.length; i++) {
+            if (config.getValue(keys[i]) != null) {
+                continue;
+            }
             String val = getConfigProperty(keys[i]);
             if (val != null) {
                 config.setValue(keys[i], val);
@@ -252,15 +261,32 @@ public class ApacheServerDetector
         }
     }
 
-    protected boolean configureServer(ServerResource server)
-        throws PluginException {
+    private void setLogTrack(ConfigResponse config, String file) {
+        config.setValue(LogFileTrackPlugin.PROP_FILES_SERVER, file);
+    }
 
+    private void setConfigTrack(ConfigResponse config, String file) {
+        config.setValue(ConfigFileTrackPlugin.PROP_FILES_SERVER, file);
+    }
+
+    private void setPidFile(ConfigResponse config, String file) {
+        config.setValue(ApacheControlPlugin.DEFAULT_PIDFILE, file);
+    }
+
+    protected boolean configureServer(ServerResource server, ApacheBinaryInfo binary)
+        throws PluginException {
+        
         ConfigResponse metricConfig, productConfig, controlConfig;
         String installpath = server.getInstallPath();
         File snmpConfig = getSnmpdConf(installpath);
         boolean snmpConfigExists = snmpConfig.exists();
 
         controlConfig = getControlConfig(installpath);
+
+        if (binary != null) {
+            ConfigResponse cprops = new ConfigResponse(binary.toProperties());
+            server.setCustomProperties(cprops);
+        }
 
         if (snmpConfigExists || this.discoverModSnmp) {
             if (!snmpConfigExists) {
@@ -299,18 +325,7 @@ public class ApacheServerDetector
             if (configureURL(getManagerProperty("httpd.url"), productConfig)) {
                 server.setMeasurementConfig();
             }
-            else {
-                String port = "80";
-                String address =
-                    getListenAddress(port, this.defaultIp);
-
-                productConfig.setValue(Collector.PROP_PROTOCOL,
-                                       getConnectionProtocol(port));
-                productConfig.setValue(Collector.PROP_SSL, isSSL(port));
-                productConfig.setValue(Collector.PROP_HOSTNAME, address);
-                productConfig.setValue(Collector.PROP_PORT, port);
-                productConfig.setValue(Collector.PROP_PATH, "/server-status");
-                //XXX need to auto-configure port and path, using defaults for now
+            else if (configureURL(binary, productConfig)){
                 server.setMeasurementConfig();
             }
             addTrackConfig(productConfig);
@@ -319,9 +334,19 @@ public class ApacheServerDetector
             }
             server.setDescription("mod_status monitor");
             server.setType(TYPE_HTTPD);
+            String path = binary.conf;
+            if (path == null) {
+                path = server.getInstallPath();
+            }
+            else {
+                //use -f file for path and AIID
+                //since binary installpath will be the same
+                //for multiple instances
+                server.setInstallPath(path);
+            }
             //in the event that mod_snmp is added later,
             //we won't clash w/ the other types
-            server.setIdentifier(TYPE_HTTPD + " " + server.getInstallPath());
+            server.setIdentifier(TYPE_HTTPD + " " + path);
             server.setProductConfig(productConfig);
 
             return true;
@@ -331,16 +356,6 @@ public class ApacheServerDetector
                       " at " + server.getInstallPath());
             return false;
         }
-    }
-
-    protected boolean configureServer(ServerResource server, ApacheBinaryInfo binary)
-        throws PluginException {
-        
-        ConfigResponse cprops = new ConfigResponse(binary.toProperties());
-
-        server.setCustomProperties(cprops);
-
-        return configureServer(server);
     }
 
     public List getServerList(String installpath, String fullVersion,
@@ -571,6 +586,56 @@ public class ApacheServerDetector
         }
 
         return services;
+    }
+
+    protected boolean configureURL(ApacheBinaryInfo binary, ConfigResponse config) {
+        String port=null, address=null;
+        if (binary.conf != null) {
+            //XXX config parsing not complete
+            Map cfg = ApacheBinaryInfo.parseConfig(binary.conf);
+            String listen = (String)cfg.get("Listen");
+            if (listen != null) {
+                int ix = listen.lastIndexOf(':');
+                if (ix == -1) {
+                    port = listen;
+                    address = (String)cfg.get("ServerName");
+                    if (address != null) {
+                        ix = address.indexOf(':');
+                        if (ix != -1) {
+                            address = address.substring(0, ix);
+                        }
+                    }
+                }
+                else {
+                    address = listen.substring(0, ix);
+                    port = listen.substring(ix+1);
+                }
+            }
+            setConfigTrack(config, binary.conf);
+            String log = (String)cfg.get("ErrorLog");
+            if (exists(log)) {
+                setLogTrack(config, log);                        
+            }
+            String pid = (String)cfg.get("PidFile");
+            if (exists(pid)) {
+                setPidFile(config, log);
+            }
+        }
+        if (port == null) {
+            port = getConfigProperty(Collector.PROP_PORT, "80");
+        }
+        if (address == null) {
+            address = getListenAddress(port, this.defaultIp);
+        }
+
+        config.setValue(Collector.PROP_PROTOCOL,
+                        getConnectionProtocol(port));
+        config.setValue(Collector.PROP_SSL, isSSL(port));
+        config.setValue(Collector.PROP_HOSTNAME, address);
+        config.setValue(Collector.PROP_PORT, port);
+        config.setValue(Collector.PROP_PATH,
+                        getConfigProperty(Collector.PROP_PATH, "/server-status"));
+        return true;
     }
 
     protected boolean configureURL(String urlstr, ConfigResponse config) {
