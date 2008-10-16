@@ -37,6 +37,8 @@ import net.sf.ehcache.Element;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import EDU.oswego.cs.dl.util.concurrent.ReentrantWriterPreferenceReadWriteLock;
+
 /**
  * Dynamic EhCache that is allowed to grow over time as needed.  At some point
  * this logic should be pushed into a base class so other Cache's managed
@@ -63,6 +65,8 @@ public class AvailabilityCache {
     private static Log _log = LogFactory.getLog(AvailabilityCache.class);
 
     private static final AvailabilityCache _instance = new AvailabilityCache();
+    private final ReentrantWriterPreferenceReadWriteLock _priorityLock =
+        new ReentrantWriterPreferenceReadWriteLock();
 
     private AvailabilityCache() {
         CacheManager cm = CacheManager.getInstance();
@@ -85,6 +89,10 @@ public class AvailabilityCache {
      */
     public static AvailabilityCache getInstance() {
         return _instance;
+    }
+    
+    public ReentrantWriterPreferenceReadWriteLock getLock() {
+        return _priorityLock;
     }
 
     private void captureCacheState(Integer metricId) {

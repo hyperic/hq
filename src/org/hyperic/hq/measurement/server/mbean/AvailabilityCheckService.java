@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.server.mbean;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -61,6 +62,7 @@ public class AvailabilityCheckService
     private long _interval = 0;
     private long _startTime = 0;
     private long _wait = 5 * MeasurementConstants.MINUTE;
+    private boolean _isRunning = false;
     
     /**
      * This method is used mainly for the unittest from
@@ -164,7 +166,7 @@ public class AvailabilityCheckService
     }
 
     protected void hitInSession(Date lDate) {
-        boolean debug = _log.isDebugEnabled();
+        final boolean debug = _log.isDebugEnabled();
         if (debug) {
             _log.debug("Availability Check Service started executing: "+lDate);            
         }
@@ -174,58 +176,95 @@ public class AvailabilityCheckService
             _log.debug("not starting availability check");
             return;
         }
-        AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
         AvailabilityCache cache = AvailabilityCache.getInstance();
         synchronized (cache) {
-            List downPlatforms = getDownPlatforms(lDate);
-            List backfillList = new ArrayList();
-            for (Iterator i=downPlatforms.iterator(); i.hasNext(); ) {
-                ResourceDataPoint rdp = (ResourceDataPoint)i.next();
-                Resource platform = rdp.getResource();
-                if (debug) {
-                    _log.debug("platform measurement id " + rdp.getMetricId() +
-                               " is being marked down");
+            try {
+                if (_isRunning) {
+                    _log.debug("Availability Check Service is already running");
+                    return;
+                } else {
+                    _isRunning = true;
                 }
-                backfillList.add(rdp);
-                List associatedResources =
-                    availMan.getAvailMeasurementChildren(platform);
-                if (debug) {
-                    _log.debug("platform id " + platform.getId() + " has " +
-                        associatedResources.size() + " associated resources");
+                try {
+                    cache.getLock().readLock().acquire();
+                } catch (InterruptedException e) {
                 }
-                for (Iterator j=associatedResources.iterator(); j.hasNext(); ) {
-                    Measurement meas = (Measurement)j.next();
-                    if (!meas.isEnabled()) {
-                        continue;
-                    }
-                    long end = getEndWindow(current, meas);
-                    DataPoint defaultPt =
-                        new DataPoint(meas.getId().intValue(), AVAIL_NULL, end);
-                    DataPoint lastPt = cache.get(meas.getId(), defaultPt);
-                    long backfillTime =
-                        lastPt.getTimestamp() + meas.getInterval();
-                    if (backfillTime > current) {
-                        continue;
-                    }
-                    if (debug) {
-                        _log.debug("measurement id " + meas.getId() + " is " +
-                                   "being marked down, time=" + backfillTime);
-                    }
-                    MetricValue val = new MetricValue(AVAIL_DOWN, backfillTime);
-                    MeasDataPoint point = new MeasDataPoint(
-                        meas.getId(), val, meas.getTemplate().isAvailability());
-                    backfillList.add(point);
-                }
-            }
-            final int batchSize = 500;
-            int i=0;
-            for (i=0; (i+batchSize)<backfillList.size(); i+=batchSize) {
-                availMan.addData(backfillList.subList(i, i+batchSize));
-            }
-            if (backfillList.size() > i) {
-                availMan.addData(backfillList.subList(i, backfillList.size()));
+                List downPlatforms = getDownPlatforms(lDate);
+                List backfillList = getBackfillPts(downPlatforms, current);
+                backfillAvails(backfillList);
+            } finally {
+                _isRunning = false;
+                cache.getLock().readLock().release();
             }
         }
+    }
+    
+    private void backfillAvails(List backfillList) {
+        final boolean debug = _log.isDebugEnabled();
+        final AvailabilityManagerLocal availMan =
+            AvailabilityManagerEJBImpl.getOne();
+        final int batchSize = 500;
+        int i=0;
+        for (i=0; (i+batchSize)<backfillList.size(); i+=batchSize) {
+            if (debug) {
+                _log.debug("backfilling " + batchSize + " datapoints, " +
+                    (backfillList.size() - i) + " remaining");
+            }
+            availMan.addData(backfillList.subList(i, i+batchSize));
+        }
+        if (backfillList.size() > i) {
+            if (debug) {
+                _log.debug("backfilling " + (backfillList.size() - i) +
+                           " datapoints");
+            }
+            availMan.addData(backfillList.subList(i, backfillList.size()));
+        }
+    }
+
+    private List getBackfillPts(List downPlatforms, long current) {
+        final boolean debug = _log.isDebugEnabled();
+        AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
+        final AvailabilityCache cache = AvailabilityCache.getInstance();
+        List rtn = new ArrayList();
+        for (Iterator i=downPlatforms.iterator(); i.hasNext(); ) {
+            ResourceDataPoint rdp = (ResourceDataPoint)i.next();
+            Resource platform = rdp.getResource();
+            if (debug) {
+                _log.debug("platform measurement id " + rdp.getMetricId() +
+                           " is being marked down");
+            }
+            rtn.add(rdp);
+            List associatedResources =
+                availMan.getAvailMeasurementChildren(platform);
+            if (debug) {
+                _log.debug("platform id " + platform.getId() + " has " +
+                    associatedResources.size() + " associated resources");
+            }
+            for (Iterator j=associatedResources.iterator(); j.hasNext(); ) {
+                Measurement meas = (Measurement)j.next();
+                if (!meas.isEnabled()) {
+                    continue;
+                }
+                long end = getEndWindow(current, meas);
+                DataPoint defaultPt =
+                    new DataPoint(meas.getId().intValue(), AVAIL_NULL, end);
+                DataPoint lastPt = cache.get(meas.getId(), defaultPt);
+                long backfillTime =
+                    lastPt.getTimestamp() + meas.getInterval();
+                if (backfillTime > current) {
+                    continue;
+                }
+                if (debug) {
+                    _log.debug("measurement id " + meas.getId() + " is " +
+                               "being marked down, time=" + backfillTime);
+                }
+                MetricValue val = new MetricValue(AVAIL_DOWN, backfillTime);
+                MeasDataPoint point = new MeasDataPoint(
+                    meas.getId(), val, meas.getTemplate().isAvailability());
+                rtn.add(point);
+            }
+        }
+        return rtn;
     }
 
     private boolean canStart(long now) {
