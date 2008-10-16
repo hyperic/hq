@@ -28,13 +28,16 @@ package org.hyperic.hq.plugin.apache;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.hyperic.sigar.CpuTimer;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
@@ -60,6 +63,7 @@ public class ApacheBinaryInfo {
     
     public String version = null;
     public String root = null;
+    public String conf;
     public String binary;
     public String ctl;
     public String built;
@@ -70,6 +74,22 @@ public class ApacheBinaryInfo {
     private long lastModified = 0;
 
     private ApacheBinaryInfo() {}
+
+    //clone method..only want to cache the fields
+    //extracted from the binary itself which are static.
+    //root, conf, ctl, etc., can change based on process args
+    private ApacheBinaryInfo(ApacheBinaryInfo info) {
+        this.version = info.version;
+        this.root = info.root;
+        this.conf = info.conf;
+        this.binary = info.binary;
+        this.ctl = info.ctl;
+        this.built = info.built;
+        this.mpm = info.mpm;
+        this.name = info.name;
+        this.errmsg = info.errmsg;
+        this.lastModified = info.lastModified;
+    }
 
     public static synchronized ApacheBinaryInfo getInfo(String binary) {
         if (cache == null) {
@@ -94,7 +114,7 @@ public class ApacheBinaryInfo {
             }
         }
 
-        return info;
+        return new ApacheBinaryInfo(info);
     }
 
     public static ApacheBinaryInfo getInfo(String binary,
@@ -111,6 +131,45 @@ public class ApacheBinaryInfo {
         }
 
         return null;
+    }
+
+    //XXX very minimal parsing of httpd.conf (see HHQ-2594)
+    public static Map parseConfig(String file) {
+        Map values = new HashMap();
+        String line;
+        BufferedReader reader = null;
+
+        try {
+            reader = new BufferedReader(new FileReader(file));
+            while ((line = reader.readLine()) != null) {
+                if (line.length() == 0) {
+                    continue;
+                }
+                char chr = line.charAt(0);
+                if ((chr == '#') || (chr == '<') ||
+                    Character.isWhitespace(chr))
+                {
+                    continue; //only looking at top-level
+                }
+                int ix = line.indexOf('#');
+                if (ix != -1) {
+                    line = line.substring(0, ix);
+                }
+                line = line.trim();
+                String[] ent = StringUtil.explodeQuoted(line);
+                if (ent.length == 2) {
+                    values.put(ent[0], ent[1]);
+                }
+            }
+        } catch (IOException e) {
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {}
+            }
+        }
+        return values;
     }
 
     public static String getVersion(String binary,
