@@ -456,23 +456,37 @@ public class RuntimeReportProcessor {
                                                     server.getName());
                 aiSvc.setName(newName);
             }
-            
+
+            String fqdn = platform.getFqdn();
             
             // Filter out and mark zombie services
             for (Iterator i=appdefServices.iterator(); i.hasNext(); ) {
                 ServiceValue appdefSvc = (ServiceValue)i.next();
                 boolean found = false;
                 
+                AIServiceValue aiSvc = null;
                 for (Iterator j=aiServices.iterator(); j.hasNext(); ) {
-                    AIServiceValue aiSvc = (AIServiceValue)j.next();
-                    
-                    if (aiSvc.getName().equals(appdefSvc.getName())) {
-                        found = true;
-                        break;
+                    aiSvc = (AIServiceValue) j.next();
+                    String subname = aiSvc.getName();
+                    // Get rid of the FQDN
+                    if (aiSvc.getName().startsWith(fqdn)) {
+                        subname = subname.substring(fqdn.length());
                     }
+                    
+                    if (found = appdefSvc.getName().contains(subname))
+                        break;
                 }
                 
-                if (!found) {
+                if (found) {
+                    // Update name if FQDN changed
+                    if (aiSvc != null &&
+                        !appdefSvc.getName().equals(aiSvc.getName())) {
+                        Service svc =
+                            _serviceMgr.getServiceById(appdefSvc.getId());
+                        svc.setName(aiSvc.getName());
+                    }
+                }
+                else {
                     Service svc = _serviceMgr.getServiceById(appdefSvc.getId());
                     _log.info("Service id=" + svc.getId() + " name=" + 
                               svc.getName() + " has become a zombie");
