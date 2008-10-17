@@ -42,11 +42,11 @@ import java.util.StringTokenizer;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.ConfigFileTrackPlugin;
+import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.LogFileTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
-import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.hq.product.Win32ControlPlugin;
@@ -61,7 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class ApacheServerDetector
-    extends ServerDetector 
+    extends DaemonDetector 
     implements FileServerDetector, AutoServerDetector {
 
     static final String TYPE_HTTPD = "Apache httpd";
@@ -235,6 +235,7 @@ public class ApacheServerDetector
                 continue;
             }
 
+            info.pid = pids[i];
             getServerInfo(info, getProcArgs(pids[i]));
 
             if (info.root == null) {
@@ -547,7 +548,12 @@ public class ApacheServerDetector
 
             List found = getServerList(info.root, info.version, info);
             if (found != null) {
-                servers.addAll(found);
+                for (int j=0; j<found.size(); j++) {
+                    ServerResource server = (ServerResource)found.get(j);
+                    //apply externally defined AUTOINVENTORY_NAME, etc.
+                    discoverServerConfig(server, info.pid);
+                    servers.add(server);
+                }
             }
         }
 

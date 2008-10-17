@@ -69,7 +69,7 @@ public class ApacheBinaryInfo {
     public String built;
     public String mpm;
     public String name;
-
+    public long pid = 0;
     public String errmsg = "";
     private long lastModified = 0;
 
