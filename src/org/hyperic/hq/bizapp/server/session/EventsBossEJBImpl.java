@@ -1317,8 +1317,7 @@ public class EventsBossEJBImpl
             AlertDefinitionInterface defInfo = def.getDefinitionInfo();
             AppdefEntityID aeid;
 
-            aeid = new AppdefEntityID(defInfo.getAppdefType(),
-                                      defInfo.getAppdefId());
+            aeid = new AppdefEntityID(defInfo.getResource());
 
             if (badIds.contains(aeid))
                 continue;

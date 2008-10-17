@@ -145,7 +145,7 @@ public class ViewAction extends BaseAction {
             String date = 
                 df.format(new Date(alert.getAlertInfo().getTimestamp()));
             def = alert.getDefinition().getDefinitionInfo();
-            eid = new AppdefEntityID(def.getAppdefType(), def.getAppdefId());
+            eid = new AppdefEntityID(def.getResource());
 
             aVal = new AppdefEntityValue(eid, subject);
             JSONObject jAlert = new JSONObject();

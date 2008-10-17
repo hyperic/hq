@@ -10,15 +10,15 @@ class RoleCategory {
     private static roleMan = RoleMan.one
 
     static void setSubjects(Role role, AuthzSubject user, Collection subjects) {
-        roleMan.removeSubjects(user, role.roleValue,
+        roleMan.removeSubjects(user, role.id,
                                (role.subjects.collect {it.id}) as Integer[])
-        roleMan.addSubjects(user, role.roleValue, 
+        roleMan.addSubjects(user, role.id, 
                             (subjects.collect {it.id}) as Integer[])
     }
 
     static void setGroups(Role role, AuthzSubject user, Collection groups) {
         roleMan.removeAllResourceGroups(user, role)
-        roleMan.addResourceGroups(user, role.roleValue,
+        roleMan.addResourceGroups(user, role.id,
                                   (groups.collect {it.id}) as Integer[])
     }
 
@@ -43,8 +43,7 @@ class RoleCategory {
      * Set the operations for a Role.
      */
     static void setOperations(Role role, AuthzSubject user, Collection ops) {
-        roleMan.removeAllOperations(user, role.roleValue)
-        roleMan.addOperations(user, role, ops as Operation[])
+        roleMan.setOperations(user, role.id, ops as Operation[])
     }
 
     /**

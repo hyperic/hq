@@ -53,8 +53,7 @@ public class AlertFiredEvent extends AbstractEvent
         setMessage(e.getMessage());
         setInstanceId(alertDef.getId());
         setAlertId(alertId);
-        setResource(new AppdefEntityID(alertDef.getAppdefType(),
-                                       alertDef.getAppdefId()));
+        setResource(new AppdefEntityID(alertDef.getResource()));
         setAlertDefName(alertDef.getName());
     }
     

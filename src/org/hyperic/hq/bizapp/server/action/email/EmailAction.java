@@ -133,7 +133,7 @@ public class EmailAction extends EmailActionConfig
     }
     
     private AppdefEntityID getResource(AlertDefinitionInterface def) {
-        return new AppdefEntityID(def.getAppdefType(), def.getAppdefId());
+        return new AppdefEntityID(def.getResource());
     }
 
     public String execute(AlertInterface alert, ActionExecutionInfo info) 

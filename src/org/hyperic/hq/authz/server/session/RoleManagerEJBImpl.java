@@ -117,7 +117,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     }
     
     private Role lookupRole(RoleValue role) {
-        return getRoleDAO().findById(role.getId());
+        return lookupRole(role.getId());
     }
 
     private Role lookupRole(Integer id) {
@@ -308,16 +308,15 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     /**
      * Change the owner of the role.
      * @param whoami The current running user.
-     * @param role The role to save
+     * @param id The ID of the role to change
      * @param ownerVal The new owner of the role..
      * @throws PermissionException whoami may not perform modifyRole 
      * on this role.
      * @ejb:interface-method
      */
-    public void changeOwner(AuthzSubject whoami, RoleValue role,
-                            AuthzSubject owner)
+    public void changeOwner(AuthzSubject whoami, Integer id, AuthzSubject owner)
         throws PermissionException {
-        Role roleLocal = lookupRole(role);
+        Role roleLocal = lookupRole(id);
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
@@ -346,25 +345,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     }
 
     /**
-     * Disassociate operations from this role.
-     * @param whoami The current running user.
-     * @param role The role.
-     * @param operations The roles to disassociate.
-     * @throws FinderException Unable to find a given or dependent entities.
-     * @throws PermissionException whoami may not perform removeOperation
-     * on this role.
-     * @ejb:interface-method
-     */
-    public void removeOperations(AuthzSubject whoami, RoleValue role,
-                                 Operation[] operations)
-        throws PermissionException {
-        Set opLocals = toPojos(operations);
-        Role roleLocal = lookupRole(role);
-//        roleLocal.setWhoami(lookupSubject(whoami));
-        roleLocal.getOperations().removeAll(opLocals);
-    }
-
-    /**
      * Disassociate all operations from this role.
      * @param whoami The current running user.
      * @param role The role.
@@ -373,29 +353,28 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * on this role.
      * @ejb:interface-method
      */
-    public void removeAllOperations(AuthzSubject whoami, RoleValue role)
+    public void removeAllOperations(AuthzSubject whoami, Role role)
         throws PermissionException {
-        Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
-        roleLocal.getOperations().clear();
+        role.getOperations().clear();
     }
 
     /**
      * Set the operations for this role.
      * To get the operations call getOperations() on the value-object.
      * @param whoami The current running user.
-     * @param role This role.
+     * @param id The ID of the role.
      * @param operations Operations to associate with this role.
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform
      * setOperations on this role.
      * @ejb:interface-method
      */
-    public void setOperations(AuthzSubject whoami, RoleValue role,
+    public void setOperations(AuthzSubject whoami, Integer id,
                               Operation[] operations)
         throws PermissionException {
         if (operations != null) {
-            Role roleLocal = lookupRole(role);
+            Role roleLocal = lookupRole(id);
 
             PermissionManager pm = PermissionManagerFactory.getInstance(); 
             pm.check(whoami.getId(),
@@ -450,24 +429,24 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     /**
      * Disassociate ResourceGroups from this role.
      * @param whoami The current running user.
-     * @param role This role.
-     * @param ids The ids of the groups to disassociate.
+     * @param id This role.
+     * @param gids The ids of the groups to disassociate.
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform 
      * modifyRole on this role.
      * @ejb:interface-method
      */
-    public void removeResourceGroups(AuthzSubject whoami, RoleValue role,
-                                     Integer[] ids)
+    public void removeResourceGroups(AuthzSubject whoami, Integer id,
+                                     Integer[] gids)
         throws PermissionException {
-        Role roleLocal = lookupRole(role);
+        Role roleLocal = lookupRole(id);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
                  roleLocal.getId(), AuthzConstants.roleOpModifyRole);
 
-        for (int i=0; i<ids.length; i++) {
-            roleLocal.removeResourceGroup(lookupGroup(ids[i]));
+        for (int i=0; i<gids.length; i++) {
+            roleLocal.removeResourceGroup(lookupGroup(gids[i]));
         }
     }
 
@@ -547,7 +526,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @ejb:interface-method
      */
     public Role findRoleById(int id){
-        return getRoleDAO().findById(new Integer(id));
+        return lookupRole(new Integer(id));
     }
 
     /**
@@ -807,13 +786,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @ejb:interface-method
      */
     public void addRoles(AuthzSubject whoami, AuthzSubject subject,
-                         RoleValue[] roles)
+                         Integer[] roles)
         throws PermissionException  {
-        Set roleLocals = toPojos(roles);
-        Iterator it = roleLocals.iterator();
-
-        while (it != null && it.hasNext()) {
-            subject.addRole((Role) it.next());
+        for (int i = 0; i < roles.length; i++) {
+            subject.addRole(lookupRole(roles[i]));
         }
     }
 
@@ -1323,43 +1299,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         return plist;
     }
     
-    /** Add subjects to this role.
-     * @param whoami The current running user.
-     * @param roleVal This role.
-     * @param subjects Subjects to add to role.
-     * @throws PermissionException whoami is not allowed to perform
-     * addSubject on this role.
-     * @ejb:interface-method
-     */
-    public void addSubjects(AuthzSubject whoami, RoleValue roleVal,
-                            AuthzSubjectValue[] subjects) 
-        throws PermissionException {
-        Set sLocals = toPojos(subjects);
-        Role role = lookupRole(roleVal);
-//        roleLocal.setWhoami(lookupSubject(whoami));
-        for (Iterator it = sLocals.iterator(); it.hasNext(); ) {
-            AuthzSubject subj = (AuthzSubject) it.next();
-            subj.addRole(role);
-        }
-    }
-    
-    /** Add subjects to this role.
-     * @param whoami The current running user.
-     * @param roleVal This role.
-     * @param ids Ids of ubjects to add to role.
-     * @throws PermissionException whoami is not allowed to perform 
-     * addSubject on this role.
-     * @ejb:interface-method
-     */
-    public void addSubjects(AuthzSubject whoami, RoleValue roleVal,
-                            Integer[] ids)
-        throws PermissionException {
-        Role role = lookupRole(roleVal);
-        for (int i = 0; i < ids.length; i++) {
-            lookupSubject(ids[i]).addRole(role);
-        }
-    }
-    
     /** List the subjects in this role.
      * @param whoami The current running user.
      * @param roleId The id of the role.
@@ -1475,47 +1414,56 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         return plist;
     }
     
+    /** Add subjects to this role.
+     * @param whoami The current running user.
+     * @param id The ID of the role.
+     * @param subjects Subjects to add to role.
+     * @throws PermissionException whoami is not allowed to perform
+     * addSubject on this role.
+     * @ejb:interface-method
+     */
+    public void addSubjects(AuthzSubject whoami, Integer id,
+                            AuthzSubjectValue[] subjects) 
+        throws PermissionException {
+        Integer[] sids = new Integer[subjects.length];
+        for (int i = 0; i < subjects.length; i++) {
+            sids[i] = subjects[i].getId();
+        }
+        addSubjects(whoami, id, sids);
+    }
+
+    /** Add subjects to this role.
+     * @param whoami The current running user.
+     * @param id The ID of the role.
+     * @param sids Ids of ubjects to add to role.
+     * @throws PermissionException whoami is not allowed to perform 
+     * addSubject on this role.
+     * @ejb:interface-method
+     */
+    public void addSubjects(AuthzSubject whoami, Integer id, Integer[] sids)
+        throws PermissionException {
+        Role role = lookupRole(id);
+        for (int i = 0; i < sids.length; i++) {
+            lookupSubject(sids[i]).addRole(role);
+        }
+    }
+
     /** Remove subjects from this role.
      * @param whoami The current running user.
-     * @param role This role.
+     * @param id The ID of the role.
      * @param ids The ids of the subjects to remove.
      * @throws PermissionException whoami is not allowed to perform
      * removeSubject on this role.
      * @ejb:interface-method
      *
      */
-    public void removeSubjects(AuthzSubject whoami, RoleValue role,
-                               Integer[] ids)
+    public void removeSubjects(AuthzSubject whoami, Integer id, Integer[] ids)
         throws PermissionException {
-        Role roleLocal = lookupRole(role);
+        Role roleLocal = lookupRole(id);
         for (int i = 0; i < ids.length; i++) {
             AuthzSubject subj = lookupSubject(ids[i]);
             subj.removeRole(roleLocal);
         }
-    }
-    
-    /** Set the subjects in this role.
-     * @param whoami The current running user.
-     * @param role This role.
-     * @param subjects The subjects you want in this role.
-     * @throws PermissionException whoami is not allowed to perform
-     * setSubjects on this role.
-     * @ejb:interface-method
-     *
-     */
-    public void setSubjects(AuthzSubject whoami, RoleValue role,
-                            AuthzSubjectValue[] subjects)
-        throws PermissionException {
-        Role roleLocal = lookupRole(role);
-        
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-                 roleLocal.getId(), AuthzConstants.roleOpModifyRole);
-        pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-                 roleLocal.getId(), AuthzConstants.roleOpModifyRole);
-        
-        Set sLocals = toPojos(subjects);
-        roleLocal.setSubjects(sLocals);
     }
     
     /** 

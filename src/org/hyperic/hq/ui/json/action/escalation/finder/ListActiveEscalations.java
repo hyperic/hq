@@ -65,8 +65,7 @@ public class ListActiveEscalations extends BaseAction {
             AlertDefinitionInterface defInfo = 
                 alert.getAlertInfo().getAlertDefinitionInterface();
             AppdefEntityID entId = 
-                new AppdefEntityID(defInfo.getAppdefType(),
-                                   defInfo.getAppdefId());
+                new AppdefEntityID(defInfo.getResource());
             AppdefEntityValue ent = new AppdefEntityValue(entId, me);
                 
             sj.put(Escalation.JSON_NAME, s.getEscalation().toJSON());
@@ -74,8 +73,9 @@ public class ListActiveEscalations extends BaseAction {
             sj.put("alertType", s.getAlertType().getCode());
             sj.put("alertName", defInfo.getName()); 
             sj.put("entName", ent.getName());
-            sj.put("entType", defInfo.getAppdefType());
-            sj.put("entId", defInfo.getAppdefId()); 
+            AppdefEntityID aeid = new AppdefEntityID(defInfo.getResource());
+            sj.put("entType", aeid.getType());
+            sj.put("entId", aeid.getID()); 
             sj.put("timeUntilNext", 
                    System.currentTimeMillis() - s.getNextActionTime());
             sj.put("nextActionIdx", s.getNextAction());

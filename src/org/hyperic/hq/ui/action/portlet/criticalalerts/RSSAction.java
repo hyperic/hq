@@ -110,8 +110,7 @@ public class RSSAction extends BaseRSSAction {
             Escalatable alert = (Escalatable) i.next();
             AlertDefinitionInterface defInfo = 
                 alert.getDefinition().getDefinitionInfo();
-            AppdefEntityID aeid = new AppdefEntityID(defInfo.getAppdefType(),
-                                                     defInfo.getAppdefId());
+            AppdefEntityID aeid = new AppdefEntityID(defInfo.getResource());
                 
             DateSpecifics specs = new DateSpecifics();
             specs.setDateFormat(new SimpleDateFormat(res.getMessage(

@@ -32,8 +32,6 @@ public interface AlertDefinitionInterface {
     public String getName();
     public String getDescription();
     public int getPriority();
-    public int getAppdefType();
-    public int getAppdefId();
     public boolean isNotifyFiltered();
     public boolean performsEscalations();
     public Resource getResource();

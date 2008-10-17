@@ -48,8 +48,7 @@ public class EscalationEvent extends AbstractEvent
         super();
         setTimestamp(System.currentTimeMillis());
         _aeid = new AppdefEntityID(
-            alert.getDefinition().getDefinitionInfo().getAppdefType(),
-            alert.getDefinition().getDefinitionInfo().getAppdefId());
+            alert.getDefinition().getDefinitionInfo().getResource());
         _alertName = alert.getDefinition().getName();
         _msg = msg;
     }

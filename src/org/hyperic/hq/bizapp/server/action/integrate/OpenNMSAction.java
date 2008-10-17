@@ -94,8 +94,7 @@ public class OpenNMSAction implements ActionInterface {
         params.put("port", _port);
 
         // Look up the platform
-        AppdefEntityID aeid = new AppdefEntityID(alertdef.getAppdefType(),
-                                                 alertdef.getAppdefId());
+        AppdefEntityID aeid = new AppdefEntityID(alertdef.getResource());
         AppdefEntityValue arv =
             new AppdefEntityValue(aeid, AuthzSubjectManagerEJBImpl.getOne()
                                           .getOverlordPojo());

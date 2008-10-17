@@ -143,8 +143,7 @@ public class RecentAlertsTag extends TagSupport {
                 AlertDefinitionInterface defInfo = 
                     alert.getDefinition().getDefinitionInfo();
                 AppdefEntityID adeId = 
-                    new AppdefEntityID(defInfo.getAppdefType(),
-                                       defInfo.getAppdefId());
+                    new AppdefEntityID(defInfo.getResource());
                 AppdefEntityValue aVal = new AppdefEntityValue(adeId, subject); 
 
                 alertArr.add(

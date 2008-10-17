@@ -94,8 +94,7 @@ public class SyslogAction extends SyslogActionConfig
         EmailFilter filter = new EmailFilter();
         AlertDefinitionInterface alertDef =
             alert.getAlertDefinitionInterface();
-        AppdefEntityID aeid = new AppdefEntityID(alertDef.getAppdefType(),
-                                                 alertDef.getAppdefId());
+        AppdefEntityID aeid = new AppdefEntityID(alertDef.getResource());
         String resName = filter.getAppdefEntityName(aeid);
         resName = hackDBString(resName);
 

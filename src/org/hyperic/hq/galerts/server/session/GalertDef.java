@@ -180,7 +180,7 @@ public class GalertDef
     }
 
     public AppdefEntityID getAppdefID() {
-        return new AppdefEntityID(getAppdefType(), getAppdefId());
+        return new AppdefEntityID(getResource());
     }
     
     public int getAppdefId() {
