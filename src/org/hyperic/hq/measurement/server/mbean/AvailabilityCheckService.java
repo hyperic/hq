@@ -114,6 +114,7 @@ public class AvailabilityCheckService
         final long now = lDate.getTime();
         final String nowTimestamp = TimeUtil.toString(now);
         List rtn = new ArrayList(platformResources.size());
+        TimingVoodoo.roundDownTime(now, MeasurementConstants.MINUTE);
         synchronized (cache) {
             for (Iterator i = platformResources.iterator(); i.hasNext();) {
                 Measurement meas = (Measurement)i.next();
@@ -137,7 +138,7 @@ public class AvailabilityCheckService
                     continue;
                 }
                 if (last.getValue() == AVAIL_DOWN ||
-                    (now - lastTimestamp) >= interval*2)
+                    (now - lastTimestamp) > interval*2)
                 {
                     long t = last.getValue() != AVAIL_DOWN ?
                              lastTimestamp + interval :
@@ -204,20 +205,13 @@ public class AvailabilityCheckService
         final AvailabilityManagerLocal availMan =
             AvailabilityManagerEJBImpl.getOne();
         final int batchSize = 500;
-        int i=0;
-        for (i=0; (i+batchSize)<backfillList.size(); i+=batchSize) {
+        for (int i=0; i<backfillList.size(); i+=batchSize) {
             if (debug) {
                 _log.debug("backfilling " + batchSize + " datapoints, " +
                     (backfillList.size() - i) + " remaining");
             }
-            availMan.addData(backfillList.subList(i, i+batchSize));
-        }
-        if (backfillList.size() > i) {
-            if (debug) {
-                _log.debug("backfilling " + (backfillList.size() - i) +
-                           " datapoints");
-            }
-            availMan.addData(backfillList.subList(i, backfillList.size()));
+            int end = Math.min(i + batchSize, backfillList.size());
+            availMan.addData(backfillList.subList(i, end));
         }
     }
 
