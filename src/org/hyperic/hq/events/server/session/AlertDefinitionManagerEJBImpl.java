@@ -49,6 +49,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
@@ -193,6 +194,10 @@ public class AlertDefinitionManagerEJBImpl
         return true;
     }
     
+    private Resource findResource(AppdefEntityID id) {
+        return ResourceManagerEJBImpl.getOne().findResource(id);
+    }
+
     /** 
      * Create a new alert definition
      * @ejb:interface-method
@@ -583,7 +588,8 @@ public class AlertDefinitionManagerEJBImpl
         canManageAlerts(subj, aeid);
 
         AlertDefinitionDAO aDao = getAlertDefDAO();
-        List adefs = aDao.findByAppdefEntity(aeid.getType(), aeid.getID());
+        Resource res = findResource(aeid);
+        List adefs = aDao.findByResource(res);
         
         for (Iterator i = adefs.iterator(); i.hasNext(); ) {
             AlertDefinition adef = (AlertDefinition) i.next();
@@ -614,7 +620,8 @@ public class AlertDefinitionManagerEJBImpl
         StopWatch watch = new StopWatch();
         
         AlertDefinitionDAO aDao = getAlertDefDAO();
-        List adefs = aDao.findAllByEntity(aeid);
+        Resource res = findResource(aeid);
+        List adefs = aDao.findAllByResource(res);
         
         for (Iterator i = adefs.iterator(); i.hasNext(); ) {
             AlertDefinition alertdef = (AlertDefinition) i.next();
@@ -768,7 +775,8 @@ public class AlertDefinitionManagerEJBImpl
      * @ejb:interface-method
      */
     public boolean isAlertDefined(AppdefEntityID id, Integer parentId) {
-        return getAlertDefDAO().findChildAlertDef(id, parentId) != null;
+        Resource res = findResource(id);
+        return getAlertDefDAO().findChildAlertDef(res, parentId) != null;
     }
 
     /** 
@@ -822,7 +830,8 @@ public class AlertDefinitionManagerEJBImpl
      */
     public Integer findChildAlertDefinitionId(AppdefEntityID aeid,
                                               Integer pid) {
-        AlertDefinition def = getAlertDefDAO().findChildAlertDef(aeid, pid);
+        Resource res = findResource(aeid);
+        AlertDefinition def = getAlertDefDAO().findChildAlertDef(res, pid);
         
         return def == null ? null : def.getId();
     }
@@ -845,7 +854,8 @@ public class AlertDefinitionManagerEJBImpl
     public Integer findChildAlertDefinitionId(AppdefEntityID aeid,
                                               Integer pid,
                                               boolean allowStale) {
-        AlertDefinition def = getAlertDefDAO().findChildAlertDef(aeid, pid, true);
+        Resource res = findResource(aeid);
+        AlertDefinition def = getAlertDefDAO().findChildAlertDef(res, pid, true);
         
         return def == null ? null : def.getId();        
     }
@@ -901,14 +911,15 @@ public class AlertDefinitionManagerEJBImpl
         throws PermissionException
     {
         canManageAlerts(subj, id);
+        Resource res = findResource(id);
+        
         AlertDefinitionDAO aDao = getAlertDefDAO(); 
         
         List adefs;
         if (pc.getSortattribute() == SortAttribute.CTIME) {
-            adefs = aDao.findByAppdefEntitySortByCtime(id.getType(),
-                                                       id.getID());
+            adefs = aDao.findByResourceSortByCtime(res);
         } else {
-            adefs = aDao.findByAppdefEntity(id.getType(), id.getID());
+            adefs = aDao.findByResource(res);
         }
                 
         if (pc.getSortorder() == PageControl.SORT_DESC)
@@ -931,13 +942,16 @@ public class AlertDefinitionManagerEJBImpl
 
         Collection adefs;
         if (parentId.equals(EventConstants.TYPE_ALERT_DEF_ID)) {
+            AppdefEntityTypeID aetid = new AppdefEntityTypeID(id.getType(),
+                                                              id.getId());            
+            Resource res =
+                ResourceManagerEJBImpl.getOne().findResourcePrototype(aetid);
             if (pc.getSortattribute() == SortAttribute.CTIME) {
                 adefs =
-                    aDao.findByAppdefEntityTypeSortByCtime(id,
-                                                           pc.isAscending());
+                    aDao.findByResourceSortByCtime(res, pc.isAscending());
             }
             else {
-                adefs = aDao.findByAppdefEntityType(id, pc.isAscending());
+                adefs = aDao.findByResource(res, pc.isAscending());
             }
         } else {
             AlertDefinition def = getAlertDefDAO().findById(parentId);
@@ -955,7 +969,8 @@ public class AlertDefinitionManagerEJBImpl
     public List findAlertDefinitions(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
         canManageAlerts(subject, id);
-        return getAlertDefDAO().findByAppdefEntity(id.getType(), id.getID());
+        Resource res = findResource(id);
+        return getAlertDefDAO().findByResource(res);
     }
     
     /**
@@ -997,7 +1012,11 @@ public class AlertDefinitionManagerEJBImpl
             
         if (parentId != null) {
             if (EventConstants.TYPE_ALERT_DEF_ID.equals(parentId)) {
-                adefs = aDao.findByAppdefEntityType(id, true);
+                AppdefEntityTypeID aetid = new AppdefEntityTypeID(id.getType(),
+                                                                  id.getId());            
+                Resource res =
+                    ResourceManagerEJBImpl.getOne().findResourcePrototype(aetid);
+                adefs = aDao.findByResource(res);
             }
             else  {
                 AlertDefinition def = getAlertDefDAO().findById(parentId);
@@ -1005,7 +1024,8 @@ public class AlertDefinitionManagerEJBImpl
             }
         } else {
             canManageAlerts(subj, id);
-            adefs = aDao.findByAppdefEntity(id.getType(), id.getID());
+            Resource res = findResource(id);
+            adefs = aDao.findByResource(res);
         }
             
         // Use name as key so that map is sorted
@@ -1015,7 +1035,7 @@ public class AlertDefinitionManagerEJBImpl
         }
         return ret;
     }
-    
+
     /**
      * Return array of two values: enabled and act on trigger ID
      * @ejb:interface-method

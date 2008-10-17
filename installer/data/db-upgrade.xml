@@ -9380,6 +9380,24 @@ has already been defined.
     </groovy>
   </schemaSpec>
 
+  <schemaSpec version="3.128">
+    <schema-directSQL>
+      <statement desc="Update new resource_id column">
+        UPDATE EAM_ALERT_DEFINITION SET RESOURCE_ID =
+              (SELECT R.ID FROM EAM_RESOURCE R
+               WHERE EAM_ALERT_DEFINITION.APPDEF_ID = R.INSTANCE_ID AND
+                     EAM_ALERT_DEFINITION.APPDEF_TYPE = R.RESOURCE_TYPE_ID - 600)
+            WHERE PARENT_ID = 0
+      </statement>
+      <statement desc="Drop unused EAM_ALERT_DEFINITION column APPDEF_TYPE." fail="false">
+        ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN APPDEF_TYPE
+      </statement>
+      <statement desc="Drop unused EAM_ALERT_DEFINITION column APPDEF_ID." fail="false">
+        ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN APPDEF_ID
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

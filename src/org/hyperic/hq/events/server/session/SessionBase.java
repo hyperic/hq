@@ -102,10 +102,11 @@ public abstract class SessionBase {
     }
 
     protected AppdefEntityID getAppdefEntityID(AlertDefinition ad) {
-        if (ad.getParent() != null &&
-            EventConstants.TYPE_ALERT_DEF_ID.equals(ad.getParent().getId()))
+        try {
+            return new AppdefEntityID(ad.getResource());
+        } catch (IllegalArgumentException e) {
             return new AppdefEntityTypeID(ad.getAppdefType(), ad.getAppdefId());
-        return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
+        }
     }
 
     /**

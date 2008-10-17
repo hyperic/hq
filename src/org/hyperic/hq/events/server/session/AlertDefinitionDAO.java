@@ -34,6 +34,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -72,41 +73,8 @@ public class AlertDefinitionDAO extends HibernateDAO {
                 .getSessionFactory().openSession();
     }
 
-    public List findByAppdefEntity(int type, int id) {
-        return findByAppdefEntity(type, id, "d.name");
-    }
-
-    public List findByAppdefEntitySortByCtime(int type, int id) {
-        return findByAppdefEntity(type, id, "d.ctime");
-    }
-
-    private List findByAppdefEntity(int type, int id, String orderBy) {
-        String sql = "from AlertDefinition d " + 
-            "WHERE d.appdefType = ? AND d.appdefId = ? " +
-            "AND d.deleted = false " + 
-            "AND (NOT d.parent.id = 0 OR d.parent IS NULL) "+
-            "ORDER BY " + orderBy;
-        
-        return getSession().createQuery(sql)
-            .setInteger(0, type)
-            .setInteger(1, id)
-            .list();
-    }
-    
-    public List findAllByEntity(AppdefEntityID aeid) {
-        String sql = "from AlertDefinition d " + 
-            "WHERE d.appdefType = ? AND d.appdefId = ? " +
-            "AND (NOT d.parent.id = 0 OR d.parent IS NULL) ";
-        
-        return getSession().createQuery(sql)
-            .setInteger(0, aeid.getType())
-            .setInteger(1, aeid.getID())
-            .list();
-    }
-    
     public List findAllByResource(Resource r) {
-        String sql = "from AlertDefinition d WHERE " +
-        		"d.resource = ? AND (NOT d.parent.id = 0 OR d.parent IS NULL)";
+        String sql = "from AlertDefinition d WHERE d.resource = ?";
         
         return getSession().createQuery(sql)
             .setParameter(0, r)
@@ -119,15 +87,13 @@ public class AlertDefinitionDAO extends HibernateDAO {
      * @param ent      Entity to find alert defs for
      * @param parentId ID of the parent
      */
-    public AlertDefinition findChildAlertDef(AppdefEntityID ent,
+    public AlertDefinition findChildAlertDef(Resource res,
                                              Integer parentId){
         String sql = "FROM AlertDefinition a WHERE " + 
-            "a.appdefType = :appdefType AND a.appdefId = :appdefId " +
-            "AND a.deleted = false AND a.parent = :parent";
+            "a.resource = :res AND a.deleted = false AND a.parent = :parent";
         
         List defs = getSession().createQuery(sql)
-            .setInteger("appdefType", ent.getType())
-            .setInteger("appdefId", ent.getID())
+            .setParameter("res", res)
             .setInteger("parent", parentId.intValue())
             .list();
         
@@ -151,7 +117,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
      *                   sync with the database.
      * @return The alert definition or <code>null</code>.
      */
-    public AlertDefinition findChildAlertDef(AppdefEntityID ent, 
+    public AlertDefinition findChildAlertDef(Resource res, 
                                              Integer parentId, 
                                              boolean allowStale) {
         Session session = this.getSession();
@@ -162,7 +128,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
                 session.setFlushMode(FlushMode.MANUAL);                
             }
             
-            return findChildAlertDef(ent, parentId);
+            return findChildAlertDef(res, parentId);
         } finally {
             session.setFlushMode(oldFlushMode);
         } 
@@ -195,15 +161,31 @@ public class AlertDefinitionDAO extends HibernateDAO {
         return (AlertDefinition)super.get(id);
     }
     
-    public List findByAppdefEntityTypeSortByCtime(AppdefEntityID id,
-                                                  boolean asc) {
-        return findByAppdefEntityType(id, "ctime", asc);
-    }
-    
-    public List findByAppdefEntityType(AppdefEntityID id, boolean asc) {
-        return findByAppdefEntityType(id, "name", asc);
+    private List findByResource(Resource res, String sort, boolean asc) {
+        String sql = "from AlertDefinition a where a.resource = :res and " +
+            "a.deleted = false order by a." + sort + (asc ? " ASC" : " DESC");
+        
+        return getSession().createQuery(sql)
+            .setParameter("res", res)
+            .list();
     }
 
+    public List findByResource(Resource res) {
+        return findByResource(res, true);
+    }
+
+    public List findByResource(Resource res, boolean asc) {
+        return findByResource(res, "name", asc);
+    }
+
+    public List findByResourceSortByCtime(Resource res) {
+        return findByResourceSortByCtime(res, true);
+    }
+
+    public List findByResourceSortByCtime(Resource res, boolean asc) {
+        return findByResource(res, "ctime", asc);
+    }
+    
     /**
      * Return all alert definitions for the given resource and its descendants
      * @param res the root resource
@@ -223,18 +205,6 @@ public class AlertDefinitionDAO extends HibernateDAO {
                                 Arrays.asList(MANAGE_ALERTS_OPS)).list();
     }
     
-    private List findByAppdefEntityType(AppdefEntityID id, String sort,
-                                        boolean asc) {
-        String sql = "from AlertDefinition a where a.appdefType = :aType " +
-            "and a.appdefId = :aId and a.deleted = false and " +
-            "a.parent.id = 0 order by a." + sort + (asc ? " ASC" : " DESC");
-        
-        return getSession().createQuery(sql)
-            .setInteger("aType", id.getType())
-            .setInteger("aId", id.getID())
-            .list();
-    }
-    
     void save(AlertDefinition def) {
         super.save(def);
 
@@ -244,16 +214,6 @@ public class AlertDefinitionDAO extends HibernateDAO {
             def.setAlertDefinitionState(state);
             super.save(state);
         }
-    }
-    
-    int deleteByEntity(AppdefEntityID ent) {
-        String sql = "DELETE AlertDefinition a WHERE " + 
-            "a.appdefType = :appdefType AND a.appdefId = :appdefId";
-
-        return getSession().createQuery(sql)
-            .setInteger("appdefType", ent.getType())
-            .setInteger("appdefId", ent.getID())
-            .executeUpdate();
     }
     
     int deleteByAlertDefinition(AlertDefinition def) {
@@ -341,18 +301,34 @@ public class AlertDefinitionDAO extends HibernateDAO {
         def.setPriority(val.getPriority());
         
         // def.set the resource based on the entity ID
-        def.setAppdefId(val.getAppdefId());
-        def.setAppdefType(val.getAppdefType());
-        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(val.getParentId())) {
-            AppdefEntityID aeid = def.getAppdefEntityId();
-            ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
-            
-            // Don't need to synch the Resource with the db since changes 
-            // to the Resource aren't cascaded on saving the AlertDefinition.
-            def.setResource(rDao.findByInstanceId(aeid.getAuthzTypeId(),
-                                                  aeid.getId(), 
-                                                  true));
+        ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
+        // Don't need to synch the Resource with the db since changes 
+        // to the Resource aren't cascaded on saving the AlertDefinition.
+        Integer authzTypeId;
+        if (EventConstants.TYPE_ALERT_DEF_ID.equals(val.getParentId())) {
+            switch(val.getAppdefType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                authzTypeId = AuthzConstants.authzPlatformProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                authzTypeId = AuthzConstants.authzServerProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                authzTypeId = AuthzConstants.authzServiceProto;
+                break;
+            default:
+                throw new IllegalArgumentException("Type " + val.getAppdefType()
+                                                   + " is not a valid type");
+            }
         }
+        else {
+            AppdefEntityID aeid = new AppdefEntityID(val.getAppdefType(),
+                                                     val.getAppdefId());
+            authzTypeId = aeid.getAuthzTypeId();
+        }
+        def.setResource(rDao.findByInstanceId(authzTypeId,
+                                              new Integer(val.getAppdefId()),
+                                              true));
 
         def.setFrequencyType(val.getFrequencyType());
         def.setCount(new Long(val.getCount()));
@@ -376,7 +352,10 @@ public class AlertDefinitionDAO extends HibernateDAO {
         }
         
         if (excludeTypeBased) {
-            sql += " and d.parent is null";
+            sql += " and d.parent is null ";
+        }
+        else {
+            sql += " and not d.parent.id = 0 ";
         }
 
         sql += getOrderByClause(pInfo);

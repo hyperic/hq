@@ -457,7 +457,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public String getShortReason(Alert alert) {
         AlertDefinition def = alert.getAlertDefinition();
         AppdefEntityID aeid =
-            new AppdefEntityID(def.getAppdefType(), def.getAppdefId());
+            new AppdefEntityID(def.getResource());
         AppdefEntityValue aev = new AppdefEntityValue(
             aeid, AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo());
         
