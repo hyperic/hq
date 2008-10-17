@@ -144,19 +144,20 @@ public class ScheduleThread
         throws UnscheduledItemException
     {
         String key = ent.getAppdefKey();
+        ScheduledItem[] items = null;
         if (_platformAvailSchedule != null &&
             ent.getID() == _platformAvailSchedule._id.getID()) {
             _platformAvailSchedule = null;
+            items = _platformAvailSchedule._schedule.getScheduledItems();
+            _log.debug("Unscheduling metrics for Platform Availability");
+        } else {
+            ResourceSchedule rs = (ResourceSchedule)_schedules.remove(key);
+            if (rs == null) {
+                throw new UnscheduledItemException("No measurement schedule for: " + key);
+            }
+            items = rs._schedule.getScheduledItems();
+            _log.debug("Unscheduling " + items.length + " metrics for " + ent);
         }
-        ResourceSchedule rs =
-            (ResourceSchedule)_schedules.remove(key);
-        if (rs == null) {
-            throw new UnscheduledItemException("No measurement schedule for: " + key);
-        }
-
-        ScheduledItem[] items = rs._schedule.getScheduledItems();
-        _log.debug("Unscheduling " + items.length + " metrics for " + ent);
-        
         synchronized (_lock) {
             _stat_numMetricsScheduled -= items.length;            
         }

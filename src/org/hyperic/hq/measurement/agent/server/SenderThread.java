@@ -31,6 +31,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -81,14 +82,7 @@ public class SenderThread
 
     private static final int    PROP_RECSIZE  = 34; // 34 byte records.
 
-    // sending every 50 secs to ensure that the SenderThread runs
-    // in each minute interval vs. sending every 60 secs and risking that
-    // the sender thread skips a minute interval and the server marking
-    // the agent down
-    // If there is nothing to send at the wakeup interval no connection is
-    // established, so there is no added overhead as long as the
-    // ScheduleThread can keep up with its 60 second interval
-    private static final int    SEND_INTERVAL = 50000;
+    private static final int    SEND_INTERVAL = 60000;
     private static final int    MAX_BATCHSIZE = 500;
     private static final String DATA_LISTNAME = "measurement_spool";
 
@@ -552,23 +546,39 @@ public class SenderThread
 
     public void run(){
         Long lastMetricTime;
+        Calendar controlCal = Calendar.getInstance();
+        controlCal.setTimeInMillis(System.currentTimeMillis());
+        Calendar cal = Calendar.getInstance();
+        controlCal.add(Calendar.SECOND, 20);
         
         while(this.shouldDie == false){
             try {
-                Thread.sleep(SenderThread.SEND_INTERVAL);
+                controlCal.add(Calendar.MINUTE, 1);
+                long now = System.currentTimeMillis();
+                cal.setTimeInMillis(now + SEND_INTERVAL);
+                // want to keep some randomness for all agents to send their
+                // data.  This way an agent is not pegged to a certain
+                // second interval
+                if (cal.get(Calendar.MINUTE) != controlCal.get(Calendar.MINUTE)) {
+                    Thread.sleep(controlCal.getTimeInMillis() - now);
+                } else {
+                    Thread.sleep(SEND_INTERVAL);
+                }
             } catch(InterruptedException exc){
                 this.log.info("Measurement sender interrupted");
                 return;
             }
-
+            
             lastMetricTime = this.sendBatch();
             if(lastMetricTime != null){
                 String backlogNum = "";
                 int numConsec = 0;
 
+                final long start = System.currentTimeMillis();
+
                 // Give it a single shot to catch up before starting to
                 // squawk
-                while((lastMetricTime = this.sendBatch()) != null){
+                while((lastMetricTime = this.sendBatch()) != null) {
                     long now = System.currentTimeMillis(),
                         tDiff = now - lastMetricTime.longValue();
                     String backlog;
@@ -598,6 +608,14 @@ public class SenderThread
                         this.log.info("Dying with measurements backlogged");
                         return;
                     }
+                }
+                final long total = System.currentTimeMillis() - start;
+                if (total > SEND_INTERVAL) {
+                    log.warn("Agent took " + total + " ms to send its spool.  " +
+                        "This could mean the network is having issues or the " +
+                        "HQ Server's I/O is overloaded.");
+                } else if (log.isDebugEnabled()) {
+                    log.debug("Agent took " + total + " ms to send its spool");
                 }
 
                 if(numConsec >= 3){
