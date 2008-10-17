@@ -25,9 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import net.sf.ehcache.Cache;
@@ -36,8 +34,6 @@ import net.sf.ehcache.Element;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import EDU.oswego.cs.dl.util.concurrent.ReentrantWriterPreferenceReadWriteLock;
 
 /**
  * Dynamic EhCache that is allowed to grow over time as needed.  At some point
@@ -65,8 +61,6 @@ public class AvailabilityCache {
     private static Log _log = LogFactory.getLog(AvailabilityCache.class);
 
     private static final AvailabilityCache _instance = new AvailabilityCache();
-    private final ReentrantWriterPreferenceReadWriteLock _priorityLock =
-        new ReentrantWriterPreferenceReadWriteLock();
 
     private AvailabilityCache() {
         CacheManager cm = CacheManager.getInstance();
@@ -91,10 +85,6 @@ public class AvailabilityCache {
         return _instance;
     }
     
-    public ReentrantWriterPreferenceReadWriteLock getLock() {
-        return _priorityLock;
-    }
-
     private void captureCacheState(Integer metricId) {
         synchronized (_tranCacheState) {
             if (!_inTran || !Thread.currentThread().equals(_tranThread)) {

@@ -40,4 +40,6 @@ public interface DataInserter {
      */
     public void insertMetrics(List metricData)
         throws InterruptedException, DataInserterException;
+
+    public Object getLock();
 }

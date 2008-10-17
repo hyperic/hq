@@ -29,22 +29,24 @@ import java.util.List;
 
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 
-import EDU.oswego.cs.dl.util.concurrent.ReentrantWriterPreferenceReadWriteLock;
-
 public class SynchronousAvailDataInserter implements DataInserter {
     
-    AvailabilityManagerLocal _aMan = AvailabilityManagerEJBImpl.getOne();
+    private final AvailabilityManagerLocal _aMan =
+        AvailabilityManagerEJBImpl.getOne();
+    
+    private final Object _lock;
+
+    public SynchronousAvailDataInserter(Object lock) {
+        _lock = lock;
+    }
 
     public void insertMetrics(List availData)
         throws InterruptedException, DataInserterException {
-        ReentrantWriterPreferenceReadWriteLock lock =
-            AvailabilityCache.getInstance().getLock();
-        try {
-            lock.writeLock().acquire();
-            _aMan.addData(availData);
-        } finally {
-            lock.writeLock().release();
-        }
+        _aMan.addData(availData);
+    }
+
+    public Object getLock() {
+        return _lock;
     }
 
 }

@@ -84,7 +84,8 @@ public class MeasurementStartupListener
             _delCallback = (MetricDeleteCallback)
                 app.registerCallbackCaller(MetricDeleteCallback.class);
             _dataInserter = new SynchronousDataInserter();
-            _availDataInserter = new SynchronousAvailDataInserter();
+            Object _availLock = AvailabilityCache.getInstance();
+            _availDataInserter = new SynchronousAvailDataInserter(_availLock);
         }
         
         app.registerCallbackListener(MetricDeleteCallback.class, 
