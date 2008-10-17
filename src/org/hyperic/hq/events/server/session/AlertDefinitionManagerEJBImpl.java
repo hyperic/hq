@@ -820,23 +820,6 @@ public class AlertDefinitionManagerEJBImpl
     }
 
     /** 
-     * Get the resource-specific alert definition ID by parent ID.
-     * 
-     * @param aeid The resource.
-     * @param pid The ID of the resource type alert definition (parent ID).
-     * @return The alert definition ID or <code>null</code> if no alert definition 
-     *         is found for the resource.
-     * @ejb:interface-method
-     */
-    public Integer findChildAlertDefinitionId(AppdefEntityID aeid,
-                                              Integer pid) {
-        Resource res = findResource(aeid);
-        AlertDefinition def = getAlertDefDAO().findChildAlertDef(res, pid);
-        
-        return def == null ? null : def.getId();
-    }
-    
-    /** 
      * Get the resource-specific alert definition ID by parent ID, allowing for 
      * the query to return a stale copy of the alert definition (for efficiency 
      * reasons).

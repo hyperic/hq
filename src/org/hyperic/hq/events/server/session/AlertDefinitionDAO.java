@@ -87,10 +87,9 @@ public class AlertDefinitionDAO extends HibernateDAO {
      * @param ent      Entity to find alert defs for
      * @param parentId ID of the parent
      */
-    public AlertDefinition findChildAlertDef(Resource res,
-                                             Integer parentId){
+    public AlertDefinition findChildAlertDef(Resource res, Integer parentId) {
         String sql = "FROM AlertDefinition a WHERE " + 
-            "a.resource = :res AND a.deleted = false AND a.parent = :parent";
+            "a.resource = :res AND a.deleted = false AND a.parent.id = :parent";
         
         List defs = getSession().createQuery(sql)
             .setParameter("res", res)
