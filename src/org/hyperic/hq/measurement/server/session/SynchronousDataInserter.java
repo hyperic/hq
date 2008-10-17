@@ -36,9 +36,15 @@ import org.hyperic.hq.measurement.shared.DataManagerLocal;
 public class SynchronousDataInserter 
     implements DataInserter
 {
+    private final Object _lock = new Object();
+
     private final DataManagerLocal _dMan = DataManagerEJBImpl.getOne();
     
     public void insertMetrics(List metricData) throws InterruptedException {
         _dMan.addData(metricData);
+    }
+
+    public Object getLock() {
+        return _lock;
     }
 }

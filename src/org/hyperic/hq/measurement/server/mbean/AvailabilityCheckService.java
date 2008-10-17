@@ -26,7 +26,6 @@
 package org.hyperic.hq.measurement.server.mbean;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -62,6 +61,7 @@ public class AvailabilityCheckService
     private long _interval = 0;
     private long _startTime = 0;
     private long _wait = 5 * MeasurementConstants.MINUTE;
+    private final Object IS_RUNNING_LOCK = new Object();
     private boolean _isRunning = false;
     
     /**
@@ -178,24 +178,24 @@ public class AvailabilityCheckService
             return;
         }
         AvailabilityCache cache = AvailabilityCache.getInstance();
-        synchronized (cache) {
-            try {
-                if (_isRunning) {
-                    _log.debug("Availability Check Service is already running");
-                    return;
-                } else {
-                    _isRunning = true;
-                }
-                try {
-                    cache.getLock().readLock().acquire();
-                } catch (InterruptedException e) {
-                }
+        synchronized (IS_RUNNING_LOCK) {
+            if (_isRunning) {
+                _log.warn("Availability Check Service is already running, " +
+                    "bailing out");
+                return;
+            } else {
+                _isRunning = true;
+            }
+        }
+        try {
+            synchronized (cache) {
                 List downPlatforms = getDownPlatforms(lDate);
                 List backfillList = getBackfillPts(downPlatforms, current);
                 backfillAvails(backfillList);
-            } finally {
+            }
+        } finally {
+            synchronized (IS_RUNNING_LOCK) {
                 _isRunning = false;
-                cache.getLock().readLock().release();
             }
         }
     }
