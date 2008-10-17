@@ -206,8 +206,7 @@ public class Role extends AuthzNamedBean {
     }
 
     public OwnedRoleValue getOwnedRoleValue() {
-        OwnedRoleValue orv = new OwnedRoleValue(this.getRoleValue(),
-                                                this.getResource().getOwner());
+        OwnedRoleValue orv = new OwnedRoleValue(this);
         return orv;
     }
 }

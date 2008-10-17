@@ -43,9 +43,7 @@ public class PagerProcessor_ownedRole implements PagerProcessor {
                 int numSubjects = DAOFactory.getDAOFactory().getRoleDAO()
                     .size(role.getSubjects());
 
-                OwnedRoleValue value =
-                    new OwnedRoleValue(role.getRoleValue(),
-                                       role.getResource().getOwner());
+                OwnedRoleValue value = new OwnedRoleValue(role);
                 value.setMemberCount(numSubjects);
 
                 return value;

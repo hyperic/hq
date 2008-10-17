@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz.values;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.RoleValue;
 
 public class OwnedRoleValue extends RoleValue {
@@ -38,9 +39,9 @@ public class OwnedRoleValue extends RoleValue {
         super();
     }
 
-    public OwnedRoleValue(RoleValue parent, AuthzSubject owner) {
-        super(parent);
-        this.setOwner(owner);
+    public OwnedRoleValue(Role parent) {
+        super(parent.getRoleValue());
+        this.setOwner(parent.getResource().getOwner());
     }
 
     public int getMemberCount() {
