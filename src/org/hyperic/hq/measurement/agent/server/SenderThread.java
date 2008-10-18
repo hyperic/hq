@@ -549,7 +549,7 @@ public class SenderThread
         Calendar controlCal = Calendar.getInstance();
         controlCal.setTimeInMillis(System.currentTimeMillis());
         Calendar cal = Calendar.getInstance();
-        controlCal.add(Calendar.SECOND, 20);
+        controlCal.set(Calendar.SECOND, 5);
         
         while(this.shouldDie == false){
             try {
