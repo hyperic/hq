@@ -111,10 +111,10 @@ public class AvailabilityCheckService
         AvailabilityCache cache = AvailabilityCache.getInstance();
         AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
         List platformResources = availMan.getPlatformResources();
-        final long now = lDate.getTime();
+        final long now = TimingVoodoo.roundDownTime(
+            lDate.getTime(), MeasurementConstants.MINUTE);
         final String nowTimestamp = TimeUtil.toString(now);
         List rtn = new ArrayList(platformResources.size());
-        TimingVoodoo.roundDownTime(now, MeasurementConstants.MINUTE);
         synchronized (cache) {
             for (Iterator i = platformResources.iterator(); i.hasNext();) {
                 Measurement meas = (Measurement)i.next();

@@ -553,74 +553,81 @@ public class SenderThread
         
         while(this.shouldDie == false){
             try {
-                controlCal.add(Calendar.MINUTE, 1);
-                long now = System.currentTimeMillis();
-                cal.setTimeInMillis(now + SEND_INTERVAL);
-                // want to keep some randomness for all agents to send their
-                // data.  This way an agent is not pegged to a certain
-                // second interval
-                if (cal.get(Calendar.MINUTE) != controlCal.get(Calendar.MINUTE)) {
-                    Thread.sleep(controlCal.getTimeInMillis() - now);
-                } else {
-                    Thread.sleep(SEND_INTERVAL);
+                try {
+                    controlCal.add(Calendar.MINUTE, 1);
+                    long now = System.currentTimeMillis();
+                    cal.setTimeInMillis(now + SEND_INTERVAL);
+                    // want to keep some randomness for all agents to send their
+                    // data.  This way an agent is not pegged to a certain
+                    // second interval
+                    if (cal.get(Calendar.MINUTE) != controlCal.get(Calendar.MINUTE)) {
+                        long sleeptime = controlCal.getTimeInMillis() - now;
+                        if (sleeptime > 0) {
+                            Thread.sleep(controlCal.getTimeInMillis() - now);
+                        }
+                    } else {
+                        Thread.sleep(SEND_INTERVAL);
+                    }
+                } catch(InterruptedException exc){
+                    this.log.info("Measurement sender interrupted");
+                    return;
                 }
-            } catch(InterruptedException exc){
-                this.log.info("Measurement sender interrupted");
-                return;
-            }
-            
-            lastMetricTime = this.sendBatch();
-            if(lastMetricTime != null){
-                String backlogNum = "";
-                int numConsec = 0;
 
-                final long start = System.currentTimeMillis();
-
-                // Give it a single shot to catch up before starting to
-                // squawk
-                while((lastMetricTime = this.sendBatch()) != null) {
-                    long now = System.currentTimeMillis(),
-                        tDiff = now - lastMetricTime.longValue();
-                    String backlog;
-
-                    numConsec++;
-
-                    // Log a warning if we send 4 or more complete
-                    // batches consecutively.
-                    if(numConsec == 3){
-                        this.log.warn("The Agent is having a hard time " +
-                                      "keeping up with the frequency of " +
-                                      "metrics taken.  " +
-                                      "Consider increasing your collection " +
-                                      "interval.");
+                lastMetricTime = this.sendBatch();
+                if(lastMetricTime != null){
+                    String backlogNum = "";
+                    int numConsec = 0;
+    
+                    final long start = System.currentTimeMillis();
+    
+                    // Give it a single shot to catch up before starting to
+                    // squawk
+                    while((lastMetricTime = this.sendBatch()) != null) {
+                        long now = System.currentTimeMillis(),
+                            tDiff = now - lastMetricTime.longValue();
+                        String backlog;
+    
+                        numConsec++;
+    
+                        // Log a warning if we send 4 or more complete
+                        // batches consecutively.
+                        if(numConsec == 3){
+                            this.log.warn("The Agent is having a hard time " +
+                                          "keeping up with the frequency of " +
+                                          "metrics taken.  " +
+                                          "Consider increasing your collection " +
+                                          "interval.");
+                        }
+    
+                        backlog = Long.toString(tDiff / (60 * 1000));
+                        if(tDiff / (60 * 1000) > 1 &&
+                           backlog.equals(backlogNum) == false)
+                        {
+                            backlogNum = backlog;
+                            this.log.warn(backlog + 
+                                          " minute(s) of metrics backlogged");
+                        }
+    
+                        if(this.shouldDie == true){
+                            this.log.info("Dying with measurements backlogged");
+                            return;
+                        }
+                    }
+                    final long total = System.currentTimeMillis() - start;
+                    if (total > SEND_INTERVAL) {
+                        log.warn("Agent took " + total + " ms to send its spool.  " +
+                            "This could mean the network is having issues or the " +
+                            "HQ Server's I/O is overloaded.");
+                    } else if (log.isDebugEnabled()) {
+                        log.debug("Agent took " + total + " ms to send its spool");
                     }
 
-                    backlog = Long.toString(tDiff / (60 * 1000));
-                    if(tDiff / (60 * 1000) > 1 &&
-                       backlog.equals(backlogNum) == false)
-                    {
-                        backlogNum = backlog;
-                        this.log.warn(backlog + 
-                                      " minute(s) of metrics backlogged");
-                    }
-
-                    if(this.shouldDie == true){
-                        this.log.info("Dying with measurements backlogged");
-                        return;
+                    if(numConsec >= 3){
+                        this.log.info("Agent measurements no longer backlogged");
                     }
                 }
-                final long total = System.currentTimeMillis() - start;
-                if (total > SEND_INTERVAL) {
-                    log.warn("Agent took " + total + " ms to send its spool.  " +
-                        "This could mean the network is having issues or the " +
-                        "HQ Server's I/O is overloaded.");
-                } else if (log.isDebugEnabled()) {
-                    log.debug("Agent took " + total + " ms to send its spool");
-                }
-
-                if(numConsec >= 3){
-                    this.log.info("Agent measurements no longer backlogged");
-                }
+            } catch (Throwable e) {
+                log.error(e.getMessage(), e);
             }
         }
     }
