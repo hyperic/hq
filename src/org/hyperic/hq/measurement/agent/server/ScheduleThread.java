@@ -147,8 +147,8 @@ public class ScheduleThread
         ScheduledItem[] items = null;
         if (_platformAvailSchedule != null &&
             ent.getID() == _platformAvailSchedule._id.getID()) {
-            _platformAvailSchedule = null;
             items = _platformAvailSchedule._schedule.getScheduledItems();
+            _platformAvailSchedule = null;
             _log.debug("Unscheduling metrics for Platform Availability");
         } else {
             ResourceSchedule rs = (ResourceSchedule)_schedules.remove(key);
@@ -163,8 +163,7 @@ public class ScheduleThread
         }
 
         for (int i=0; i<items.length; i++) {
-            ScheduledMeasurement meas =
-                (ScheduledMeasurement)items[i].getObj();
+            ScheduledMeasurement meas = (ScheduledMeasurement)items[i].getObj();
             //For plugin/Collector awareness
             ParsedTemplate tmpl = getParsedTemplate(meas);
             tmpl.metric.setInterval(-1);
