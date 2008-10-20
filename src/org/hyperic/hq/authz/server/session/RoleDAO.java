@@ -44,7 +44,8 @@ public class RoleDAO extends HibernateDAO {
     }
 
     Role create(AuthzSubject creator, RoleValue createInfo) {
-        Role role = new Role(createInfo);
+        Role role = new Role();
+        role.setRoleValue(createInfo);
         // Save it at this point to get an ID
         save(role);
 
