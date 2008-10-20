@@ -27,7 +27,6 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
@@ -886,64 +885,6 @@ public class AlertDefinitionManagerEJBImpl
         return getAlertDefDAO().findTypeBased(enabled, pInfo);
     }
 
-    /** 
-     * @ejb:interface-method
-     */
-    public PageList findAlertDefinitions(AuthzSubject subj,
-                                         AppdefEntityID id, PageControl pc)
-        throws PermissionException
-    {
-        canManageAlerts(subj, id);
-        Resource res = findResource(id);
-        
-        AlertDefinitionDAO aDao = getAlertDefDAO(); 
-        
-        List adefs;
-        if (pc.getSortattribute() == SortAttribute.CTIME) {
-            adefs = aDao.findByResourceSortByCtime(res);
-        } else {
-            adefs = aDao.findByResource(res);
-        }
-                
-        if (pc.getSortorder() == PageControl.SORT_DESC)
-            Collections.reverse(adefs);
-
-        return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
-    }
-
-    /** 
-     * Get list of alert conditions for a resource or resource type
-     * @ejb:interface-method
-     */
-    public PageList findAlertDefinitions(AuthzSubject subj, AppdefEntityID id,
-                                         Integer parentId, PageControl pc)
-        throws PermissionException 
-    {
-        canManageAlerts(subj, id);
-
-        AlertDefinitionDAO aDao = getAlertDefDAO();
-
-        Collection adefs;
-        if (parentId.equals(EventConstants.TYPE_ALERT_DEF_ID)) {
-            AppdefEntityTypeID aetid = new AppdefEntityTypeID(id.getType(),
-                                                              id.getId());            
-            Resource res =
-                ResourceManagerEJBImpl.getOne().findResourcePrototype(aetid);
-            if (pc.getSortattribute() == SortAttribute.CTIME) {
-                adefs =
-                    aDao.findByResourceSortByCtime(res, pc.isAscending());
-            }
-            else {
-                adefs = aDao.findByResource(res, pc.isAscending());
-            }
-        } else {
-            AlertDefinition def = getAlertDefDAO().findById(parentId);
-            adefs = def.getChildren();
-        }
-                
-        return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
-    }
-
     /**
      * Get list of alert definition POJOs for a resource
      * @throws PermissionException if user cannot manage alerts for resource
@@ -955,7 +896,54 @@ public class AlertDefinitionManagerEJBImpl
         Resource res = findResource(id);
         return getAlertDefDAO().findByResource(res);
     }
-    
+
+    /** 
+     * @ejb:interface-method
+     */
+    public PageList findAlertDefinitions(AuthzSubject subj, AppdefEntityID id,
+                                         PageControl pc)
+        throws PermissionException
+    {
+        canManageAlerts(subj, id);
+        Resource res = findResource(id);
+        
+        AlertDefinitionDAO aDao = getAlertDefDAO(); 
+        
+        List adefs;
+        if (pc.getSortattribute() == SortAttribute.CTIME) {
+            adefs = aDao.findByResourceSortByCtime(res, !pc.isDescending());
+        } else {
+            adefs = aDao.findByResource(res, !pc.isDescending());
+        }
+
+        return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
+    }
+
+    /** 
+     * Get list of alert conditions for a resource or resource type
+     * @ejb:interface-method
+     */
+    public PageList findAlertDefinitions(AuthzSubject subj,
+                                         AppdefEntityTypeID aetid,
+                                         PageControl pc)
+        throws PermissionException 
+    {
+        AlertDefinitionDAO aDao = getAlertDefDAO();
+
+        Resource res =
+            ResourceManagerEJBImpl.getOne().findResourcePrototype(aetid);
+        Collection adefs;
+        if (pc.getSortattribute() == SortAttribute.CTIME) {
+            adefs =
+                aDao.findByResourceSortByCtime(res, pc.isAscending());
+        }
+        else {
+            adefs = aDao.findByResource(res, pc.isAscending());
+        }
+                
+        return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
+    }
+
     /**
      * Get a list of all alert definitions for the resource and its descendents
      * @param subj the caller

@@ -727,8 +727,7 @@ public class EventsBossEJBImpl
                                          PageControl.SORT_ASC, 
                                          SortAttribute.CTIME);
                 
-        List defs = getADM().findAlertDefinitions(subject,
-            aetid, EventConstants.TYPE_ALERT_DEF_ID, pc);
+        List defs = getADM().findAlertDefinitions(subject, aetid, pc);
         
         AlertDefinitionManagerLocal adm = getADM();
         ArrayList triggers = new ArrayList();
@@ -1096,20 +1095,6 @@ public class EventsBossEJBImpl
     
     /**
      * Get a collection of alert definitions for a resource or resource type
-     *
-     * @ejb:interface-method
-     */
-    public PageList findAlertDefinitions(int sessionID, AppdefEntityID id,
-                                         Integer parentId, PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException 
-    {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        return getADM().findAlertDefinitions(subject, id, parentId, pc);
-    }
-    
-    /**
-     * Get a collection of alert definitions for a resource or resource type
      * @ejb:interface-method
      */
     public PageList findAlertDefinitions(int sessionID, AppdefEntityTypeID id,
@@ -1118,9 +1103,7 @@ public class EventsBossEJBImpl
                PermissionException 
     {
         AuthzSubject subject = manager.getSubject(sessionID);
-        return getADM().findAlertDefinitions(subject, id,
-                                             EventConstants.TYPE_ALERT_DEF_ID,
-                                             pc);
+        return getADM().findAlertDefinitions(subject, id, pc);
     }
     
     /**

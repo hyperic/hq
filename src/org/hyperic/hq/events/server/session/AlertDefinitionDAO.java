@@ -32,6 +32,7 @@ import org.hibernate.FlushMode;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -68,17 +69,13 @@ public class AlertDefinitionDAO extends HibernateDAO {
         super.remove(def);
     }
     
-    public Session getNewSession() {
+    Session getNewSession() {
         return HibernateDAOFactory.getInstance()
                 .getSessionFactory().openSession();
     }
 
     public List findAllByResource(Resource r) {
-        String sql = "from AlertDefinition d WHERE d.resource = ?";
-        
-        return getSession().createQuery(sql)
-            .setParameter(0, r)
-            .list();
+        return createCriteria().add(Restrictions.eq("resource", r)).list();
     }
     
     /**
@@ -175,10 +172,6 @@ public class AlertDefinitionDAO extends HibernateDAO {
 
     public List findByResource(Resource res, boolean asc) {
         return findByResource(res, "name", asc);
-    }
-
-    public List findByResourceSortByCtime(Resource res) {
-        return findByResourceSortByCtime(res, true);
     }
 
     public List findByResourceSortByCtime(Resource res, boolean asc) {
@@ -398,9 +391,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
     }
     
     List getUsing(Escalation e) {
-        return getSession()
-            .createQuery("from AlertDefinition where escalation = :esc")
-            .setParameter("esc", e).list();
+        return createCriteria().add(Restrictions.eq("escalation", e)).list();
     }
     
     Object[] getEnabledAndTriggerId(Integer id) {
