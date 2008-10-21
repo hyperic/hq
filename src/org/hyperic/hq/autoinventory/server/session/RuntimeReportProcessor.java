@@ -268,8 +268,9 @@ public class RuntimeReportProcessor {
 
         for (int i=0; i<aiservers.length; i++) {
             if(aiservers[i] != null) {
-                mergeServerIntoInventory(subject, appdefPlatform, aiservers[i],
-                                         appdefServerList, reportingServer);
+                mergeServerIntoInventory(subject, appdefPlatform, aiplatform,
+                                         aiservers[i], appdefServerList,
+                                         reportingServer);
                 Util.flushCurrentSession();
             } else {
                 _log.error("Platform: " + appdefPlatform.getName() + 
@@ -307,6 +308,7 @@ public class RuntimeReportProcessor {
 
     /**
      * @param platform the platform that the server is on
+     * @param aiplatform the AIPlatform that is parent to the AI Server
      * @param aiserver the server we're going to merge into inventory
      * @param appdefServers the existing servers on the platform.
      * this method is expected to remove a server from this collection
@@ -315,6 +317,7 @@ public class RuntimeReportProcessor {
      */
     private void mergeServerIntoInventory(AuthzSubjectValue subject,
                                           PlatformValue platform,
+                                          AIPlatformValue aiplatform,
                                           AIServerValue aiserver,
                                           List appdefServers,
                                           ServerValue reportingServer)
@@ -506,7 +509,7 @@ public class RuntimeReportProcessor {
                 aiSvc.setName(newName);
             }
 
-            String fqdn = platform.getFqdn();
+            String fqdn = aiplatform.getFqdn();
             
             // Filter out and mark zombie services
             for (Iterator i=appdefServices.iterator(); i.hasNext(); ) {
