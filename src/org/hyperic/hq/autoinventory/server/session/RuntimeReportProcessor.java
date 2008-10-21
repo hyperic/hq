@@ -522,8 +522,7 @@ public class RuntimeReportProcessor {
                         subname = subname.substring(fqdn.length());
                     }
                     
-                    if (found = StringUtil.stringExists(appdefSvc.getName(),
-                                                        subname))
+                    if (found = (appdefSvc.getName().indexOf(subname) > -1))
                         break;
                 }
                 
