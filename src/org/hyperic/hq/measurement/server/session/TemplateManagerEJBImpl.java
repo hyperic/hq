@@ -268,7 +268,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             MeasurementTemplate tmpl = (MeasurementTemplate) it.next();
 
             // First, keyword
-            if (StringUtil.stringExists(tmpl.getName(), keyword)) {
+            if (StringUtil.stringDoesNotExist(tmpl.getName(), keyword)) {
                 it.remove();
                 continue;
             }

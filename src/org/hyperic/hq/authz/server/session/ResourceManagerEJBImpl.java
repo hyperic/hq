@@ -487,7 +487,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         for (Iterator it = resources.iterator(); it.hasNext();) {
             Resource res = (Resource) it.next();
             
-            if (StringUtil.stringExists(res.getName(), resourceName))
+            if (StringUtil.stringDoesNotExist(res.getName(), resourceName))
                 continue;
             
             if (pc.isDescending())  // Add to head of array list
