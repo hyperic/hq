@@ -458,7 +458,7 @@ public class RuntimeReportProcessor {
                 aiSvc.setName(newName);
             }
 
-            String fqdn = aiplatform.getFqdn();
+            String fqdn = aiplatform.getName();
             
             // Filter out and mark zombie services
             for (Iterator i=appdefServices.iterator(); i.hasNext(); ) {
