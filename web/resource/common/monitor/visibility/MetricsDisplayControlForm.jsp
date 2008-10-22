@@ -120,11 +120,11 @@
     </td>
   </tr>
 </c:if>
+  <tr valign="middle">
+    <td class="boldText" style="text-align:right;"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.MetricDisplayRangeLabel"/></td>
 <c:choose>
   <c:when test="${readOnly}">
-  <tr valign="middle">
-    <td width="20%" align="right"><b><fmt:message key="resource.common.monitor.visibility.metricsToolbar.MetricDisplayRangeLabel"/></b></td>
-    <td width="80%">
+    <td>
       <table width="100%" cellpadding="0" cellspacing="3" border="0">
         <tr>
           <td><html:image property="prevRange" page="/images/tbb_pageleft.gif" border="0"/></td>
@@ -133,16 +133,13 @@
             <c:if test="${form.a != 1 || (rangeEnd - rangeBegin) > 172800000}">
               <fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
           </c:if>
-          <html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), '-100px',null);showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link> </td>
+          <html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), '-20px', '25px');showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link> </td>
         </tr>
       </table>
     </td>
-  </tr>
   </c:when>
   <c:otherwise>
-  <tr valign="middle">
-    <td width="20%" align="right"><b><fmt:message key="resource.common.monitor.visibility.metricsToolbar.MetricDisplayRangeLabel"/></b></td>
-    <td width="80%">
+    <td>
       <table width="100%" cellpadding="0" cellspacing="3" border="0">
         <tr>
           <td><html:image property="prevRange" page="/images/tbb_pageleft.gif" border="0"/></td>
@@ -166,12 +163,11 @@
             <c:if test="${form.a != 1 || (rangeEnd - rangeBegin) > 172800000}">
               <fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
             </c:if>
-			<html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), '-100px',null);showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
+			<html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), '-20px', '25px');showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
           </td>
         </tr>
       </table>
     </td>
-  </tr>
 <logic:messagesPresent property="rn">
   <tr>
     <td>&nbsp;</td>
@@ -180,9 +176,10 @@
 </logic:messagesPresent>
   </c:otherwise>
 </c:choose>
+  </tr>
 </table>
   <div id="advancedAnchor" style="position: relative; visibility: hidden;"></div>
-  <div id="advancedDisplay" class="dialog" style="width:600px;height:160px;display:none;">
+  <div id="advancedDisplay" class="dialog" style="padding:15px;width:600px;height:150px;display:none;">
     <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
       <c:if test="${not empty form}">
         <tiles:put name="form" beanName="form"/>

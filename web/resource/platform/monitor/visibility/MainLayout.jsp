@@ -13,7 +13,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -73,6 +73,21 @@ var pageData = new Array();
 
 <table width="100%" class="MonitorBlockContainer">
   <tr>
+    <td colspan="2" style="padding-bottom: 10px;">
+      <html:form method="GET" action="/resource/common/monitor/visibility/MetricsControl">
+        <tiles:insert definition=".resource.common.monitor.visibility.metricsDisplayControlForm">
+          <tiles:put name="form" beanName="MetricsControlForm"/>
+          <tiles:put name="formName" value="MetricsControlForm"/>
+          <tiles:put name="mode" beanName="mode"/>
+          <tiles:put name="eid" beanName="eid"/>
+          <c:if test="${not empty view}">
+            <tiles:put name="view" beanName="view"/>
+          </c:if>
+          </tiles:insert>
+      </html:form>
+    </td>
+  </tr>
+  <tr>
     <td valign="top">
       <c:choose>
         <c:when test="${isCurrentHealth}">
@@ -119,21 +134,6 @@ var pageData = new Array();
     <c:out value="${mode}"/>
   </c:otherwise>
 </c:choose>
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2" width="100%">
-      <html:form method="GET" action="/resource/common/monitor/visibility/MetricsControl">
-        <tiles:insert definition=".resource.common.monitor.visibility.metricsDisplayControlForm">
-          <tiles:put name="form" beanName="MetricsControlForm"/>
-          <tiles:put name="formName" value="MetricsControlForm"/>
-          <tiles:put name="mode" beanName="mode"/>
-          <tiles:put name="eid" beanName="eid"/>
-          <c:if test="${not empty view}">
-            <tiles:put name="view" beanName="view"/>
-          </c:if>
-          </tiles:insert>
-      </html:form>
     </td>
   </tr>
 </table>
