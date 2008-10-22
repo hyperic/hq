@@ -446,7 +446,9 @@ public class HQApp {
         }
         
         private boolean methIsReadOnly(String methName) {
-            return methName.equals("fillAlertCount") || // recent alerts & indicators
+            return methName.equals("login") || // For HQU methods 
+                   methName.equals("loginGuest") ||
+                   methName.equals("fillAlertCount") || // recent alerts & indicators
                    methName.equals("resourcesExistOfType") || // masthead
                    methName.equals("logsExistPerInterval") || // indicators
                    methName.startsWith("get") ||

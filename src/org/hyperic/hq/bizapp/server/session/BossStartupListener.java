@@ -24,6 +24,7 @@ public class BossStartupListener
     
     public void hqStarted() {
         EventsBossEJBImpl.getOne().startup();
+        AuthBossEJBImpl.getOne().startup();
         ProductBossEJBImpl.getOne().preload();
         
         try {

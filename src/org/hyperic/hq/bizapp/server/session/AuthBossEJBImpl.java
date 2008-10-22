@@ -26,6 +26,9 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Iterator;
 
 import javax.ejb.AccessLocalException;
 import javax.ejb.FinderException;
@@ -34,6 +37,7 @@ import javax.ejb.SessionContext;
 import javax.security.auth.login.LoginException;
 
 import org.hyperic.hq.auth.server.session.UserAudit;
+import org.hyperic.hq.auth.server.session.UserLoginZevent;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -43,6 +47,14 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
+import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.bizapp.shared.AuthBossUtil;
+import org.hyperic.hq.bizapp.shared.AuthBossLocal;
 import org.hyperic.util.ConfigPropertyException;
 
 /** 
@@ -61,6 +73,35 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public AuthBossEJBImpl() {}
 
     /**
+     * Add buffered listener to register login audits post commit.  This
+     * allows for read-only operations to succeed properly when accessed
+     * via HQU
+     *
+     * @ejb:interface-method
+     */
+    public void startup() {
+        HashSet events = new HashSet();
+        events.add (UserLoginZevent.class);
+        ZeventManager.getInstance().addBufferedListener(events,
+            new ZeventListener() {
+                public void processEvents(List events) {
+                    for (Iterator i = events.iterator(); i.hasNext();) {
+                        UserLoginZevent z = (UserLoginZevent) i.next();
+                        UserLoginZevent.UserLoginZeventPayload p =
+                            (UserLoginZevent.UserLoginZeventPayload)z.getPayload();
+                        AuthzSubject s = p.getSubject();
+                        UserAudit.loginAudit(s);
+                    }
+                }
+
+                public String toString() {
+                    return "UserLoginListener";
+                }
+            }
+        );
+    }
+
+    /**
      * Login a user.
      * @param username The name of the user.
      * @param password The password.
@@ -73,7 +114,10 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     {
         try {
             int res = getAuthManager().getSessionId(username, password);
-            UserAudit.loginAudit(manager.getSubjectPojo(res));
+
+            UserLoginZevent evt = new UserLoginZevent(manager.getSubjectPojo(res));
+            ZeventManager.getInstance().enqueueEventAfterCommit(evt);
+            
             return res;
         } catch (AccessLocalException e) {
             throw new LoginException(e.getMessage());
@@ -176,6 +220,14 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         return getAuthManager().isUser(subject, username);
+    }
+
+    public static AuthBossLocal getOne() {
+        try {
+            return AuthBossUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     /**
