@@ -88,6 +88,17 @@ var pageData = new Array();
 
 <table width="100%" class="MonitorBlockContainer">
   <tr>
+<c:choose>
+  <c:when test="${isPerformance}">
+    <td valign="top">
+    <tiles:insert page="/resource/group/monitor/visibility/GroupPerformance.jsp">
+      <tiles:put name="entityId" beanName="entityId"/>
+      <tiles:put name="entityType" value="autogroup"/>
+      <tiles:put name="ctype" beanName="ctype"/>
+    </tiles:insert>
+    </td>
+  </c:when>
+  <c:otherwise>
     <td colspan="2" style="padding-bottom: 10px;">
       <html:form method="GET" action="/resource/common/monitor/visibility/MetricsControl">
         <input type="hidden" name="ctype" value="<c:out value="${ctype}"/>"/>
@@ -101,21 +112,10 @@ var pageData = new Array();
           </c:if>
        </tiles:insert>
      </html:form>
-  </c:otherwise>
-</c:choose>
     </td>
   </tr>
   <tr>
     <td valign="top">
-<c:choose>
-  <c:when test="${isPerformance}">
-    <tiles:insert page="/resource/group/monitor/visibility/GroupPerformance.jsp">
-      <tiles:put name="entityId" beanName="entityId"/>
-      <tiles:put name="entityType" value="autogroup"/>
-      <tiles:put name="ctype" beanName="ctype"/>
-    </tiles:insert>
-  </c:when>
-  <c:otherwise>
       <c:choose>
         <c:when test="${isCurrentHealth}">
           <html:form action="/resource/common/monitor/visibility/SelectResources.do">
@@ -166,6 +166,8 @@ var pageData = new Array();
       </c:otherwise>
     </c:choose>
     </td>
+  </c:otherwise>
+</c:choose>
   </tr>
 </table>
 
