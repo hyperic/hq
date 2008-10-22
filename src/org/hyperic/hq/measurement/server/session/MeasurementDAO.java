@@ -281,30 +281,6 @@ public class MeasurementDAO extends HibernateDAO {
             .list();
     }
 
-    int deleteByIds(Collection ids) {
-        final String hql = "delete from Measurement where id in (:ids)";
-
-        Session session = getSession();
-        int count = 0;
-        for (Iterator it = ids.iterator(); it.hasNext(); ) {
-            ArrayList subIds = new ArrayList();
-            
-            for (int i = 0; i < DBUtil.IN_CHUNK_SIZE && it.hasNext(); i++) {
-                subIds.add(it.next());
-            }
-            
-            count += session.createQuery(hql).setParameterList("ids", subIds)
-                            .executeUpdate();
-            
-            if (_log.isDebugEnabled()) {
-                _log.debug("deleteByIds() " + subIds.size() + " of " +
-                           ids.size() + " metric IDs");
-            }
-        }
-        
-        return count;
-    }
-
     public List findEnabledByResource(Resource resource) {
         String sql =
             "select m from Measurement m " +
@@ -701,5 +677,12 @@ public class MeasurementDAO extends HibernateDAO {
     List findOrphanedMeasurements() {
         String sql = "SELECT id FROM Measurement WHERE resource IS NULL";
         return getSession().createQuery(sql).list();
+    }
+
+    int deleteOrphanedMeasurements() {
+        final String hql =
+            "delete from Measurement where WHERE resource IS NULL";
+    
+        return getSession().createQuery(hql).executeUpdate();
     }
 }
