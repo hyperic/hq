@@ -741,9 +741,11 @@ class DojoUtil {
      */
     static dojoTabPane(Binding b, Map params, Closure yield) {
         def idVar  = "_hqu_TabPane_${params.id}"
+        def cntVar = "_hqu_ContentPane_${params.id}"
+        
         def output = b.PAGE.getOutput()
         output.write("<div id='${idVar}' style='display:none'>\n")
-        output.write("  <div dojoType='ContentPane' label='${params.label}'>\n")
+        output.write("  <div id='${cntVar}' dojoType='ContentPane' label='${params.label}'>\n")
         yield()
         output.write('  </div>\n')
         output.write('</div>\n')
