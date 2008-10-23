@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,24 +25,24 @@
 
 package org.hyperic.hq.appdef.shared.resourceTree;
 
-import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.appdef.server.session.Service;
 
 public class ServiceNode 
     implements java.io.Serializable
 {
     private ResourceTree tree;
     private ServerNode   ownerServer;
-    private ServiceValue service;
+    private Service service;
 
     ServiceNode(ResourceTree tree, ServerNode ownerServer, 
-                ServiceValue service)
+                Service service)
     {
         this.tree        = tree;
         this.ownerServer = ownerServer;
         this.service     = service;
     }
 
-    public ServiceValue getService(){
+    public Service getService(){
         return this.service;
     }
 

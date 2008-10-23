@@ -29,8 +29,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 
 /**
  * A tree which represents portions of a hierarchy.  The tree
@@ -60,7 +60,7 @@ public class ResourceTree
         return this.apps.iterator();
     }
 
-    public PlatformNode addPlatform(PlatformValue platform){
+    public PlatformNode addPlatform(Platform platform){
         PlatformNode node;
 
         node = new PlatformNode(this, platform);

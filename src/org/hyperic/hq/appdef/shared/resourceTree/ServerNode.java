@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,12 +25,12 @@
 
 package org.hyperic.hq.appdef.shared.resourceTree;
 
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceValue;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.shared.ServerValue;
 
 public class ServerNode 
     implements java.io.Serializable
@@ -57,7 +57,7 @@ public class ServerNode
         return this.ownerPlatform;
     }
 
-    public ServiceNode addService(ServiceValue service){
+    public ServiceNode addService(Service service){
         ServiceNode node;
 
         node = new ServiceNode(this.tree, this, service);

@@ -603,8 +603,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                         Integer serverId, PageControl pc) 
         throws ServiceNotFoundException, ServerNotFoundException, 
                PermissionException {
-        return getServicesByServer(subject, serverId, APPDEF_RES_TYPE_UNDEFINED,
-                                   pc);
+        return getServicesByServer(subject, serverId, null, pc);
     }
 
     /**
@@ -614,6 +613,26 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                         Integer serverId, Integer svcTypeId,
                                         PageControl pc) 
         throws ServiceNotFoundException, PermissionException {
+        List toBePaged = getServicesByServerImpl(subject, serverId, svcTypeId,
+                                                 pc);
+        return valuePager.seek(toBePaged, pc);
+    }
+
+    /**
+     * Get service POJOs by server and type.
+     * @ejb:interface-method
+     */
+    public List getServicesByServer(AuthzSubject subject, Integer serverId) 
+        throws ServiceNotFoundException, ServerNotFoundException, 
+               PermissionException {
+        return getServicesByServerImpl(subject, serverId, null,
+                                       PageControl.PAGE_ALL);
+    }
+
+    private List getServicesByServerImpl(AuthzSubject subject,
+                                         Integer serverId, Integer svcTypeId,
+                                         PageControl pc)
+        throws PermissionException, ServiceNotFoundException {
         if (svcTypeId == null)
             svcTypeId = APPDEF_RES_TYPE_UNDEFINED;
 
@@ -621,20 +640,16 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         switch (pc.getSortattribute()) {
         case SortAttribute.SERVICE_TYPE:
-            services =
-                getServiceDAO().findByServer_orderType(serverId);
+            services = getServiceDAO().findByServer_orderType(serverId);
             break;
         case SortAttribute.SERVICE_NAME:
         default:
             if (svcTypeId != APPDEF_RES_TYPE_UNDEFINED) {
-                services =
-                    getServiceDAO().findByServerAndType_orderName(
-                        serverId, svcTypeId);
+                services = getServiceDAO()
+                        .findByServerAndType_orderName(serverId, svcTypeId);
             }
             else {
-                services =
-                    getServiceDAO().findByServer_orderName(
-                        serverId);
+                services = getServiceDAO().findByServer_orderName(serverId);
             }
             break;
         }
@@ -643,8 +658,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             Collections.reverse(services);
         }
             
-        List toBePaged = filterUnviewable(subject, services);
-        return valuePager.seek(toBePaged, pc);
+        return filterUnviewable(subject, services);
     }
 
     /**
@@ -914,10 +928,30 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public PageList getServicesByApplication(AuthzSubject subject,
                                              Integer appId, Integer svcTypeId,
-                                             PageControl pc ) 
+                                             PageControl pc) 
         throws PermissionException, ApplicationNotFoundException,
                ServiceNotFoundException {
+        return filterAndPage(getServicesByApplication(appId, pc), subject,
+                             svcTypeId, pc);
+   }
 
+    /**
+     * @ejb:interface-method
+     * @return A List of Service and ServiceCluster objects 
+     * representing all of the services that the given subject is allowed to view.
+     * @throws ApplicationNotFoundException if the appId is bogus
+     * @throws ServiceNotFoundException if services could not be looked up
+     */
+    public List getServicesByApplication(AuthzSubject subject, Integer appId) 
+        throws PermissionException, ApplicationNotFoundException,
+               ServiceNotFoundException {
+        return filterUnviewable(subject,
+                                getServicesByApplication(appId,
+                                                         PageControl.PAGE_ALL));
+   }
+
+    private List getServicesByApplication(Integer appId, PageControl pc)
+        throws ApplicationNotFoundException {
         try {
             // we only look up the application to validate
             // the appId param
@@ -927,22 +961,18 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         }
 
         Collection appServiceCollection;
-        AppServiceDAO appServLocHome =
-            DAOFactory.getDAOFactory().getAppServiceDAO();
-        pc = PageControl.initDefaults (pc, SortAttribute.SERVICE_NAME);
+        AppServiceDAO dao = new AppServiceDAO(DAOFactory.getDAOFactory());
+        pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
 
         switch (pc.getSortattribute()) {
-        case SortAttribute.SERVICE_NAME :
-            appServiceCollection = appServLocHome
-                .findByApplication_orderSvcName(appId,pc.isAscending());
+        case SortAttribute.SERVICE_NAME:
+        case SortAttribute.RESOURCE_NAME:
+            appServiceCollection =
+                dao.findByApplication_orderSvcName(appId, pc.isAscending());
             break;
-        case SortAttribute.RESOURCE_NAME :
-            appServiceCollection = appServLocHome
-                .findByApplication_orderSvcName(appId,pc.isAscending());
-            break;
-        case SortAttribute.SERVICE_TYPE :
-            appServiceCollection = appServLocHome
-                .findByApplication_orderSvcType(appId,pc.isAscending());
+        case SortAttribute.SERVICE_TYPE:
+            appServiceCollection =
+                dao.findByApplication_orderSvcType(appId, pc.isAscending());
             break;
         default:
             throw new IllegalArgumentException("Unsupported sort " +
@@ -961,8 +991,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 services.add(appService.getService());
             }
         }
-        return filterAndPage(services, subject, svcTypeId, pc);
-   }
+        return services;
+    }
 
    /**
     * @ejb:interface-method

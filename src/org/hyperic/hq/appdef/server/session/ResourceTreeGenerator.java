@@ -34,15 +34,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
-import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.resourceTree.ApplicationNode;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
@@ -72,10 +68,8 @@ public class ResourceTreeGenerator {
     private static final int GO_UP   = 1 << 5;
     private static final int GO_DOWN = 1 << 6;
 
-    private ApplicationManagerLocal appMan;
-    private ServerManagerLocal      serverMan;
-    private ServiceManagerLocal     serviceMan;
-    private AuthzSubject            subject;
+    private ServiceManagerLocal     _serviceMan;
+    private AuthzSubject            _subject;
 
     // Caches so we don't do much work twice
     private HashSet upPlats;    // Platform IDs which we've traversed up from
@@ -87,7 +81,7 @@ public class ResourceTreeGenerator {
     private HashSet dnApps;     // App IDs which we've traversed down from
 
     ResourceTreeGenerator(AuthzSubject subject){
-        this.subject = subject;
+        _subject = subject;
 
         upPlats    = new HashSet();
         upServers  = new HashSet();
@@ -97,9 +91,7 @@ public class ResourceTreeGenerator {
         dnServices = new HashMap();
         dnApps     = new HashSet();
 
-        appMan     = ApplicationManagerEJBImpl.getOne();
-        serverMan  = ServerManagerEJBImpl.getOne();
-        serviceMan = ServiceManagerEJBImpl.getOne();
+        _serviceMan = ServiceManagerEJBImpl.getOne();
     }
 
     /**
@@ -135,7 +127,7 @@ public class ResourceTreeGenerator {
 
         res = new ResourceTree();
 
-        for(int i=0; i<ids.length; i++){
+        for (int i = 0; i < ids.length; i++) {
             Integer iID = ids[i].getId();
 
             switch(ids[i].getType()){
@@ -152,8 +144,8 @@ public class ResourceTreeGenerator {
                 addFromApp(iID, direction, res);
                 break;
             default:
-                throw new SystemException("Unable to generate tree " +
-                                             "from " + ids[i]);
+                throw new SystemException("Unable to generate tree from " +
+                                          ids[i]);
             } 
         }
         return res;
@@ -163,12 +155,12 @@ public class ResourceTreeGenerator {
         throws PermissionException, AppdefEntityNotFoundException, 
                PlatformNotFoundException
     {
-        PlatformValue val;
+        Platform val;
 
         try {
             AppdefEntityValue aeval = new AppdefEntityValue(
-                AppdefEntityID.newPlatformID(id), subject);
-            val = (PlatformValue) aeval.getResourceValue();
+                AppdefEntityID.newPlatformID(id), _subject);
+            val = (Platform) aeval.getResourcePOJO();
         } catch(PermissionException exc){
             throw new PermissionException("Failed to find platform " + id + 
                                           ": permission denied");
@@ -184,7 +176,7 @@ public class ResourceTreeGenerator {
 
         try {
             AppdefEntityValue aeval = new AppdefEntityValue(
-                AppdefEntityID.newServerID(id), subject);
+                AppdefEntityID.newServerID(id), _subject);
             val = (ServerValue) aeval.getResourceValue();
         } catch(PermissionException exc){
             throw new PermissionException("Failed to find server " + id + 
@@ -197,12 +189,12 @@ public class ResourceTreeGenerator {
     private void addFromService(Integer id, int direction, ResourceTree tree)
         throws PermissionException, AppdefEntityNotFoundException
     {
-        ServiceValue val;
+        Service val;
         
         try {
             AppdefEntityValue aeval = new AppdefEntityValue(
-                AppdefEntityID.newServiceID(id), subject);
-            val = (ServiceValue) aeval.getResourceValue();
+                AppdefEntityID.newServiceID(id), _subject);
+            val = (Service) aeval.getResourcePOJO();
         } catch(PermissionException exc){
             throw new PermissionException("Failed to find service " + id + 
                                           ": permission denied");
@@ -217,13 +209,13 @@ public class ResourceTreeGenerator {
         ApplicationValue val;
         
         AppdefEntityValue aeval = new AppdefEntityValue(
-            AppdefEntityID.newAppID(id), subject);
+            AppdefEntityID.newAppID(id), _subject);
         val = (ApplicationValue) aeval.getResourceValue();
 
         traverseApp(val, direction, tree);
     }
 
-    private PlatformNode traversePlatform(PlatformValue platform, 
+    private PlatformNode traversePlatform(Platform platform, 
                                           int direction,
                                           ResourceTree tree)
         throws PermissionException
@@ -244,20 +236,20 @@ public class ResourceTreeGenerator {
 
             upPlats.add(platform.getId());
             try {
-                servers = serverMan.getServersByPlatform(
-                    subject, platformID, true, null);
+                servers = ServerManagerEJBImpl.getOne().getServersByPlatform(
+                    _subject, platformID, true, null);
             } catch(AppdefEntityNotFoundException exc){
                 throw new SystemException("Internal inconsistancy: " +
-                                             "could not find servers for " +
-                                             "platform '" + platform + "'");
+                                          "could not find servers for " +
+                                          "platform '" + platform + "'");
             } catch(PermissionException exc){
                 throw new SystemException("Failed to get servers for " +
-                                             "platform " + platformID +
-                                             ": permission denied");
+                                          "platform " + platformID +
+                                          ": permission denied");
             }
 
-            for(Iterator i=servers.iterator(); i.hasNext(); ){
-                traverseServer((ServerValue)i.next(), GO_UP, tree);
+            for (Iterator i = servers.iterator(); i.hasNext();) {
+                traverseServer((ServerValue) i.next(), GO_UP, tree);
             }
         }
         return res;
@@ -267,19 +259,17 @@ public class ResourceTreeGenerator {
                                       ResourceTree tree)
         throws PermissionException
     {
-        Integer serverID;
+        Integer serverID = server.getId();
         ServerNode res;
-
-        serverID = server.getId();
-        if((res = (ServerNode)dnServers.get(serverID)) == null){
+        if ((res = (ServerNode) dnServers.get(serverID)) == null) {
             PlatformNode platformNode;
-            PlatformValue platform;
+            Platform platform;
             
             AppdefEntityValue aeval =
                 new AppdefEntityValue(server.getPlatform().getEntityId(),
-                                      subject);
+                                      _subject);
             try {
-                platform = (PlatformValue) aeval.getResourceValue();
+                platform = (Platform) aeval.getResourcePOJO();
             } catch(AppdefEntityNotFoundException exc){
                 throw new SystemException("Internal inconsistancy: " +
                                           "could not find platform " +
@@ -302,15 +292,12 @@ public class ResourceTreeGenerator {
         }
 
         
-        if((direction & GO_UP) != 0 &&
-           !upServers.contains(serverID))
-        {
+        if ((direction & GO_UP) != 0 && !upServers.contains(serverID)) {
             List services;
 
             upServers.add(serverID);
             try {
-                services = serviceMan.getServicesByServer(subject, serverID,
-                                                          PageControl.PAGE_ALL);
+                services = _serviceMan.getServicesByServer(_subject, serverID);
             } catch(AppdefEntityNotFoundException exc){
                 throw new SystemException("Internal inconsistancy: " +
                                              "could not find services for " +
@@ -323,13 +310,13 @@ public class ResourceTreeGenerator {
             }
 
             for(Iterator i=services.iterator(); i.hasNext(); ){
-                traverseService((ServiceValue)i.next(), GO_UP, tree);
+                traverseService((Service)i.next(), GO_UP, tree);
             }
         }
         return res;
     }
 
-    private ServiceNode traverseService(ServiceValue service, int direction,
+    private ServiceNode traverseService(Service service, int direction,
                                         ResourceTree tree)
         throws PermissionException
     {
@@ -342,7 +329,7 @@ public class ResourceTreeGenerator {
             ServerValue server;
             AppdefEntityValue aeval =
                 new AppdefEntityValue(service.getServer().getEntityId(),
-                                      subject);
+                                      _subject);
             try {
                 server = (ServerValue) aeval.getResourceValue();
             } catch(AppdefEntityNotFoundException exc){
@@ -365,18 +352,16 @@ public class ResourceTreeGenerator {
 
         }
 
-        if((direction & GO_UP) != 0 &&
-           !upServices.contains(service.getId()))
-        {
+        if ((direction & GO_UP) != 0 && !upServices.contains(service.getId())) {
             List apps;
 
             upServices.add(service.getId());
             try {
                 AppdefEntityID id =
                     AppdefEntityID.newServiceID(service.getId());
-                apps = 
-                    appMan.getApplicationsByResource(subject, id,
-                                                          PageControl.PAGE_ALL);
+                apps = ApplicationManagerEJBImpl.getOne()
+                    .getApplicationsByResource(_subject, id,
+                                               PageControl.PAGE_ALL);
             } catch(ApplicationNotFoundException exc){
                 throw new SystemException("Internal inconsistancy: could not " +
                                           "find apps for service '" +
@@ -404,23 +389,20 @@ public class ResourceTreeGenerator {
 
         appNode = tree.addApplication(app);
 
-        if((direction & GO_DOWN) != 0){
+        if ((direction & GO_DOWN) != 0) {
             try {
                 services =
-                    serviceMan.getServicesByApplication(subject, app.getId(),
-                                                        PageControl.PAGE_ALL);
+                    _serviceMan.getServicesByApplication(_subject, app.getId());
             } catch(AppdefEntityNotFoundException exc){
                 throw new SystemException("Internal inconsistancy: could " +
-                                             "not get services on which " +
-                                             "application " + app.getId() + 
-                                             " depends on");
+                                          "not get services on which " +
+                                          "application " + app.getId() + 
+                                          " depends on");
             }
 
             for(Iterator i=services.iterator(); i.hasNext(); ){
-                ServiceNode servNode;
-                
-                servNode = traverseService((ServiceValue) i.next(), GO_DOWN,
-                                           tree);
+                ServiceNode servNode =
+                    traverseService((Service) i.next(), GO_DOWN, tree);
                 
                 appNode.linkToService(servNode);
             }

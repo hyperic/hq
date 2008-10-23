@@ -49,6 +49,7 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -681,6 +682,11 @@ public class LatherDispatcher
         res = new MeasurementGetConfigs_result();
         res.setConfigs(cList);
         return res;
+    }
+
+    private void addMeasurementConfig(List ents, AppdefResource resource){
+        addMeasurementConfig(ents, resource.getEntityId(),
+                             resource.getAppdefResourceType().getName());
     }
 
     private void addMeasurementConfig(List ents, AppdefResourceValue resource){

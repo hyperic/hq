@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,29 +25,29 @@
 
 package org.hyperic.hq.appdef.shared.resourceTree;
 
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerValue;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.shared.ServerValue;
 
 public class PlatformNode 
     implements java.io.Serializable
 {
     private ResourceTree  tree;
-    private PlatformValue platform;
+    private Platform platform;
     private ArrayList     servers;
 
     private boolean       showServers = false;
 
-    PlatformNode(ResourceTree tree, PlatformValue platform){
+    PlatformNode(ResourceTree tree, Platform platform){
         this.tree     = tree;
         this.platform = platform;
         this.servers  = new ArrayList();
     }
 
-    public PlatformValue getPlatform(){
+    public Platform getPlatform(){
         return this.platform;
     }
 
