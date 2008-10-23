@@ -680,8 +680,7 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     int deleteOrphanedMeasurements() {
-        final String hql =
-            "delete from Measurement where WHERE resource IS NULL";
+        final String hql = "delete from Measurement WHERE resource IS NULL";
     
         return getSession().createQuery(hql).executeUpdate();
     }
