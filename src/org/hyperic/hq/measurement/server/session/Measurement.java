@@ -47,7 +47,7 @@ public class Measurement extends PersistedObject
     private long                _interval;
     private String              _formula;
     private Collection          _baselines = new ArrayList();
-    private Set                 _availabilityData = new HashSet();
+    private Collection          _availabilityData = new ArrayList();
     private Resource            _resource;
 
     public Measurement() {
@@ -149,11 +149,11 @@ public class Measurement extends PersistedObject
         _baselines = baselines;
     }
     
-    protected Set getAvailabilityData() {
+    protected Collection getAvailabilityData() {
         return _availabilityData;
     }
     
-    protected void setAvailabilityData(Set availabilityData) {
+    protected void setAvailabilityData(Collection availabilityData) {
         _availabilityData = availabilityData;
     }
 
