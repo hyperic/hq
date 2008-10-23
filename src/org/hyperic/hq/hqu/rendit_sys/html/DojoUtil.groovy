@@ -319,6 +319,8 @@ class DojoUtil {
      *           width (optional):  Specifies the width of the column.  
      *                              For instance: '10%' will ensure that the 
      *                              column is 10% of the table width
+     *           nowrap (optional): If set to false, the nowrap attribute will
+     *                              not be set.  Defaults to true.
      */
     static String dojoTable(Binding scriptBinding, params) {
         def id           = "${params.id}"
@@ -597,13 +599,18 @@ class DojoUtil {
                 else
                     label = header
             }
+
+            def nowrapvar = "nowrap='true'"
+            if (c.nowrap != null && c.nowrap == false) {
+                nowrapvar = ""
+            }
             
             def widthvar = ""
             if (c.width != null) {
                 widthvar="width=\"${c.width}\""   
             }
             res << """<th ${widthvar} field='${fieldName}' align='left' 
-                          nosort='true'  nowrap='true'
+                          nosort='true' ${nowrapvar}
                           onclick='${idVar}_setSortField(this);'
                           colidx="${colIdx}" """
             if (!field.sortable) {
