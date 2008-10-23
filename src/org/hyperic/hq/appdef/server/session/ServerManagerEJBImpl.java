@@ -838,6 +838,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
         return servers;
     }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public Collection getViewableServers(AuthzSubject subject,
+                                         Platform platform) {
+        return filterViewableServers(platform.getServers(), subject);        
+    }
 
     private Collection getServersByPlatformImpl( AuthzSubject subject,
                                                  Integer platId,

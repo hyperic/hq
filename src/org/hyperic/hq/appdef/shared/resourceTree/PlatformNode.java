@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.server.session.Server;
 
 public class PlatformNode 
     implements java.io.Serializable
@@ -51,7 +51,7 @@ public class PlatformNode
         return this.platform;
     }
 
-    public ServerNode addServer(ServerValue server){
+    public ServerNode addServer(Server server){
         ServerNode node;
 
         node = new ServerNode(this.tree, this, server);

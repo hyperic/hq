@@ -29,19 +29,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.shared.ServerValue;
 
 public class ServerNode 
     implements java.io.Serializable
 {
     private ResourceTree tree;
     private PlatformNode ownerPlatform;
-    private ServerValue  server;
+    private Server  server;
     private ArrayList    services;
 
-    ServerNode(ResourceTree tree, PlatformNode ownerPlatform, 
-               ServerValue server)
+    ServerNode(ResourceTree tree, PlatformNode ownerPlatform, Server server)
     {
         this.tree          = tree;
         this.ownerPlatform = ownerPlatform;
@@ -49,7 +48,7 @@ public class ServerNode
         this.services      = new ArrayList();
     }
 
-    public ServerValue getServer(){
+    public Server getServer(){
         return this.server;
     }
 
