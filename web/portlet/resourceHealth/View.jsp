@@ -6,7 +6,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -44,7 +44,8 @@
   <!-- JSON available at /dashboard/ViewResourceHealth.do -->
 <script type="text/javascript">
 function requestFavoriteResources() {
-	var faveUrl = "<html:rewrite page="/dashboard/ViewResourceHealth.do"/>"
+    var preventCacheStr = "?hq=" + new Date().getTime();
+	var faveUrl = "<html:rewrite page="/dashboard/ViewResourceHealth.do"/>" + preventCacheStr;
 	new Ajax.Request(faveUrl, {method: 'get', onSuccess:showFavoriteResponse, onFailure :reportError});
 }
 onloads.push(requestFavoriteResources);
