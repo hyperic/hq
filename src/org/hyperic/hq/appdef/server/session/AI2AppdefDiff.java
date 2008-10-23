@@ -469,7 +469,9 @@ public class AI2AppdefDiff {
                                     AIPlatformValue aiPlatform)
     {
         // Compare AI platform against appdef data.
-        if ( !appdefPlatform.getFqdn().equals(aiPlatform.getFqdn()) ) {
+        if ( !appdefPlatform.getFqdn().equals(aiPlatform.getFqdn()) ||
+             (aiPlatform.getName() != null &&
+                     !appdefPlatform.getName().equals(aiPlatform.getName()))) {
             aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
             addDiff(aiPlatform, AIQueueConstants.Q_PLATFORM_FQDN_CHANGED);
         }
