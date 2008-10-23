@@ -51,7 +51,16 @@ hyperic.form = {
         var hiddenInputObj = dojo.byId(inputNodeName);
         hiddenInputObj.name=inputName;
         hiddenInputObj.value=inputValue;
-        hiddenInputObj.form.submit();
+        
+        var myForm = hiddenInputObj.form;
+        if (myForm.onsubmit) {
+        	var onsubmitResult = myForm.onsubmit(); 
+        	if ((onsubmitResult == undefined) || onsubmitResult) {
+        		myForm.submit();
+        	}
+        } else {
+        	myForm.submit();
+        }
     }
 };
 
