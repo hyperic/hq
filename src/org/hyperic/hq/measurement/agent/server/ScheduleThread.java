@@ -145,8 +145,8 @@ public class ScheduleThread
     {
         String key = ent.getAppdefKey();
         ScheduledItem[] items = null;
-        if (_platformAvailSchedule != null &&
-            ent.getID() == _platformAvailSchedule._id.getID()) {
+        if (ent.isPlatform() && _platformAvailSchedule != null &&
+            ent.equals(_platformAvailSchedule._id)) {
             items = _platformAvailSchedule._schedule.getScheduledItems();
             _platformAvailSchedule = null;
             _log.debug("Unscheduling metrics for Platform Availability");
