@@ -145,8 +145,8 @@ public class ScheduleThread
     {
         String key = ent.getAppdefKey();
         ScheduledItem[] items = null;
-        if (_platformAvailSchedule != null &&
-            ent.getID() == _platformAvailSchedule._id.getID()) {
+        if (ent.isPlatform() && _platformAvailSchedule != null &&
+            ent.equals(_platformAvailSchedule._id)) {
             items = _platformAvailSchedule._schedule.getScheduledItems();
             _platformAvailSchedule = null;
             _log.debug("Unscheduling metrics for Platform Availability");
@@ -182,6 +182,9 @@ public class ScheduleThread
             final String platformTemplate =
                 ("system.avail:Type=Platform:Availability").toLowerCase();
             final String dsn = meas.getDSN().toLowerCase();
+            if (_log.isDebugEnabled()) {
+                _log.debug("scheduleMeasurement " + dsn);
+            }
             if (dsn.endsWith(platformTemplate)) {
                 _log.debug("Scheduling Platform Availability");
                 _platformAvailSchedule = new ResourceSchedule();
@@ -456,7 +459,15 @@ public class ScheduleThread
             // so that we don't risk any metrics hanging and making the agent
             // seem unavailable
             if (_platformAvailSchedule != null) {
+                if (_log.isDebugEnabled()) {
+                    _log.debug("Platform schedule is not null");
+                }
                 collect(_platformAvailSchedule);
+            }
+            else {
+                if (_log.isDebugEnabled()) {
+                    _log.debug("Platform schedule is null");
+                }
             }
 
             if (_schedules.size() == 0) {
