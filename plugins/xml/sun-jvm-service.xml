@@ -78,6 +78,10 @@
           units="B"
           template="${memory}:Composite.HeapMemoryUsage.committed"/>
 
+  <metric name="Heap Memory Free"
+          units="B"
+          template="${memory}:Composite.HeapMemoryUsage.free"/>
+
   <metric name="Heap Memory Max"
           units="B"
           collectionType="static"
