@@ -149,24 +149,35 @@ public class MxServerDetector
     }
 
     protected String getProcQuery() {
+        return getProcQuery(null);
+    }
+
+    protected String getProcQuery(String path) {
         StringBuffer query = new StringBuffer();
         String mainClass = getProcMainClass(); 
         query.append(PROC_JAVA);
 
-        if (mainClass == null) {
-            String homeProp = getProcHomeProperty();
-            if (homeProp == null) {
-                String msg =
-                    "No " + PROC_MAIN_CLASS + " or " +
-                    PROC_HOME_PROPERTY + " defined";
-                throw new IllegalStateException(msg);
-            }
-            query.append(",Args.*.sw=-D" + homeProp + "=");
-        }
-        else {
+        if (mainClass != null) {
             query.append(",Args.*.eq=" + mainClass);
         }
 
+        String homeProp = getProcHomeProperty();
+        if (homeProp != null) {
+            if (path == null) {
+                query.append(",Args.*.sw=-D" + homeProp + "=");
+            }
+            else {
+                //expand to exact match if given path
+                query.append(",Args.*.eq=-D" + homeProp + "=" + path);
+            }
+        }
+        
+        if ((homeProp == null) && (mainClass == null)) {
+            String msg =
+                "No " + PROC_MAIN_CLASS + " or " +
+                PROC_HOME_PROPERTY + " defined";
+            throw new IllegalStateException(msg);
+        }
         return query.toString();
     }
 
@@ -263,9 +274,9 @@ public class MxServerDetector
             if (!isInstallTypeVersion(dir)) {
                 continue;
             }
-            String query =
-                PROC_JAVA + ",Args.*.eq=-D" +
-                getProcHomeProperty() + "=" + dir;
+            //set process.query using the same query used to find the process,
+            //with PROC_HOME_DIR (if defined) expanded to match dir
+            String query = getProcQuery(dir);
 
             // Create the server resource
             ServerResource server = newServerResource(dir);
