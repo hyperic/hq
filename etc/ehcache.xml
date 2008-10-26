@@ -111,7 +111,7 @@
   <cache eternal="true" maxElementsInMemory="300000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.Resource" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
   <cache eternal="true" maxElementsInMemory="50000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.Resource.groupBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
   <cache eternal="true" maxElementsInMemory="1" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceRelation" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="200000" memoryStoreEvictionPolicy="LRU" name="Resource.findByInstanceId" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache eternal="true" maxElementsInMemory="200000" memoryStoreEvictionPolicy="LRU" name="ResourceByInstanceId" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
   <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceType" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
   <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceType.operationsBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
   <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceType.findAll" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
