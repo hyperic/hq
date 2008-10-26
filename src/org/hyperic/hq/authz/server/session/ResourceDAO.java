@@ -32,6 +32,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
@@ -82,6 +86,10 @@ public class ResourceDAO
     
     public Resource findById(Integer id) {
         return (Resource) super.findById(id);
+    }
+
+    public Resource get(Integer id) {
+        return (Resource) super.get(id);
     }
 
     public void save(Resource entity) {
@@ -229,15 +237,27 @@ public class ResourceDAO
                     .list();
     }
     
-    public Resource findByInstanceId(Integer typeId, Integer id) {            
-        String sql = "from Resource where instanceId = ? and" +
-                     " resourceType.id = ?";
-        return (Resource)getSession().createQuery(sql)
-            .setInteger(0, id.intValue())
-            .setInteger(1, typeId.intValue())
-            .setCacheable(true)
-            .setCacheRegion("Resource.findByInstanceId")
-            .uniqueResult();
+    public Resource findByInstanceId(Integer typeId, Integer id) {
+        // Resource table is often updated.  Manage the instance id and type
+        // to resource mapping manually to avoid the query cache getting
+        // invalidated on updates to the resource table.
+        Cache ridCache = CacheManager.getInstance().getCache("ResourceByInstanceId");
+        String key = "" + typeId + "" + id;
+
+        Element e = ridCache.get(key);
+        if (e != null) {
+            Integer rid = (Integer)e.getObjectValue();
+            return get(rid);
+        } else {
+            String sql = "from Resource where instanceId = ? and" +
+                         " resourceType.id = ?";
+            Resource r = (Resource)getSession().createQuery(sql)
+                .setInteger(0, id.intValue())
+                .setInteger(1, typeId.intValue())
+                .uniqueResult();
+            ridCache.put(new Element(key, r.getId()));
+            return r;
+        }
     }
         
     /**
