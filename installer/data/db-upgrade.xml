@@ -9381,6 +9381,13 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.128">
+      <schema-alterColumn table="EAM_AIQ_SERVER" column="AUTOINVENTORYIDENTIFIER"
+                          precision="500" columnType="VARCHAR2" />
+      <schema-alterColumn table="EAM_AIQ_SERVER" column="INSTALLPATH"
+                          precision="500" columnType="VARCHAR2" />
+  </schemaSpec>
+
+  <schemaSpec version="3.129">
     <schema-directSQL>
       <statement desc="Update new resource_id column">
         UPDATE EAM_ALERT_DEFINITION SET RESOURCE_ID =
