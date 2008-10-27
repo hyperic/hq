@@ -447,7 +447,8 @@ public class HQApp {
         
         private boolean methIsReadOnly(String methName) {
             return methName.equals("onMessage") || // JMS
-                   methName.equals("dispatchHeartBeat") || // Heartbeats
+                   methName.startsWith("dispatch") ||
+                   methName.equals("alertsEnabled") ||
                    methName.equals("login") || // For HQU methods
                    methName.equals("loginGuest") ||
                    methName.equals("fillAlertCount") || // recent alerts & indicators
