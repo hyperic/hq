@@ -199,7 +199,7 @@
   <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.hqu.server.session.View" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
 
   <!-- Application caches -->
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="Application.findByServiceId_orderName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache eternal="true" maxElementsInMemory="10000" memoryStoreEvictionPolicy="LRU" name="Application.findByServiceId_orderName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
             
 
 </ehcache>
