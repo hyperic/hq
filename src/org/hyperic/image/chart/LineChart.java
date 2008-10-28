@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -65,8 +65,6 @@ public class LineChart extends VerticalChart
         new Color(0x4A, 0x36, 0xB3),
         new Color(0x80, 0x00, 0xE8),
     };
-
-
     
     /**
      * Specified whether the data to be charted is cumulative data.
@@ -164,5 +162,9 @@ public class LineChart extends VerticalChart
     
     public Color getDataLineColor(int index) {
         return DEFAULT_COLORS[index];
+    }
+    
+    public static int getNumColors() {
+        return DEFAULT_COLORS.length;
     }
 }

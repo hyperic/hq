@@ -81,6 +81,7 @@ import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.image.chart.LineChart;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.TimeUtil;
@@ -530,14 +531,15 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
 
     private int _getMaxResources(HttpServletRequest request,
                                  int allResourcesLength) {
-        int maxResources = 10;
+        int maxResources = LineChart.getNumColors();
         String maxResourcesS =
             RequestUtils.message(request,
                                  "resource.common.monitor.visibility.chart" +
                                  ".MaxResources");
         if ( null != maxResourcesS && !maxResourcesS.startsWith("???") ) {
             try {
-                maxResources = Integer.parseInt(maxResourcesS);
+                maxResources = Math.min(maxResources,
+                                        Integer.parseInt(maxResourcesS));
             } catch (NumberFormatException e) {
                 // just use 10
                 log.trace("invalid resource.common.monitor.visibility.chart" +

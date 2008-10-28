@@ -130,7 +130,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     </c:if>
     <c:choose>
     <c:when test="${multiResource}">
-      <c:set var="maxResources"><fmt:message key="resource.common.monitor.visibility.chart.MaxResources"/></c:set>
+      <c:set var="maxResources"><c:out value="${checkedResourcesSize}"/></c:set>
       <c:set var="maxMessage">
       <fmt:message key="resource.common.monitor.visibility.chart.TooManyResources">
       <fmt:param value="${maxResources}"/>
