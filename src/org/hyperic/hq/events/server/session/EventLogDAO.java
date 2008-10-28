@@ -259,16 +259,17 @@ public class EventLogDAO extends HibernateDAO {
     }
     
     List findLastByType(Resource proto) {
-        String hql = "from EventLog as el " + 
-            "  where " +  
-            "(el.resource, el.timestamp) in ( " + 
-            "     select resource, max(timestamp) from EventLog el " +
-            "     where el.resource.prototype = :proto " + 
-            "     group by el.resource " + 
-            ")";
-        
-        return createQuery(hql)
-            .setParameter("proto", proto)
+        String hql = "select {ev.*} from EAM_EVENT_LOG ev, " +
+            "(select resource_id, max(EAM_EVENT_LOG.timestamp) as maxt " +
+             "from EAM_EVENT_LOG, EAM_RESOURCE res " +
+             "where res.id = resource_id and " +
+                   "res.proto_id=:proto group by resource_id) l " +
+             "where l.resource_id = ev.resource_id and l.maxt = ev.timestamp";
+
+
+        return getSession().createSQLQuery(hql)
+            .addEntity("ev", EventLog.class)
+            .setInteger("proto", proto.getId().intValue())
             .list();
     }
     
