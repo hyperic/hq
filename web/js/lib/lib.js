@@ -3292,3 +3292,292 @@ Array.prototype.remove = function(from, to){
   this.splice(from, !to || 1 + to - from + (!(to < 0 ^ from >= 0) && (to < 0 || -1) * this.length));
   return this.length;
 };
+
+/**
+ * The Health Widget
+ * 
+ * @param parentNodeId where to create the node
+ * @param kwArgs the data 
+ * @parma isDetail whether the node should have the show detail property
+ */
+hyperic.widget.Health = function(parentNodeId, kwArgs, isDetail) {
+    var that = this;
+    that.parendNodeId = parentNodeId;
+    that.id = ++id1;
+    that.isDetail = isDetail;
+    that.connects = [];
+    that.title = kwArgs.n;
+    that.legend = "";
+    that.data = kwArgs.d;
+    that.statusMsg = kwArgs.sm;
+    that.shortname = kwArgs.sn.toLowerCase();
+    var range_start = new Date(kwArgs.startMillis);
+    var range_end = new Date(kwArgs.endMillis);
+    
+    that.template = '<div class="rle-box" id="' + that.id + '_health"><div class="roll-title"> <span class="left" id="' + that.id + '_roll_title">' + kwArgs.n + '</span><span class="rle-cs">' + kwArgs.nm + '</span></div><div class="both"></div><div class="rle-cont"><div class="rle-data" id="' + that.id + '_data">' + '</div><div class="rle-now ' + kwArgs.cs + 'Avail" id="ec2_now">&nbsp;</div><div class="rle-rule"></div><div class="rle-legend" id="' + that.id + '_legend"><span class="ll">' + range_start.formatDate('M/d HH:mm z') + '</span><span class="rl">' + range_end.formatDate('M/d HH:mm z') + '</span></div></div>' + '<div style="clear:both"></div><div class="rle-more" id="' + that.id + '_more" style="display:none"><a href="javascript:void(0)" onclick="changeTabs(\'' + that.shortname + '\');">more detail</a></div><div class="rle-status" id="' + that.id + '_status"></div><div style="clear:both"></div></div></div>';
+    that.create = function() {
+        var f = hyperic.widget.tempNode;
+        f.innerHTML = that.template;
+        that.appendNode = dojo.byId(parentNodeId);
+        that.titleNode = dojo.byId(that.id + '_roll_title');
+        that.legendNode = dojo.byId(that.id + '_legend');
+        that.node = dojo.byId(that.id + '_health');
+        that.moreNode = dojo.byId(that.id + '_more');
+        dojo.byId(that.id + '_data').innerHTML = that.createHealthData(that.data);
+        dojo.byId(that.id + '_status').innerHTML = that.createStatus(that.statusMsg);
+        that.connects[0] = dojo.connect(that.node, 'onmouseenter', that, 'onMouseOver');
+        that.connects[1] = dojo.connect(that.node, 'onmouseleave', that, 'onMouseOut');
+        dojo.byId(parentNodeId).appendChild(f.firstChild);
+        };
+    that.createStatus = function(data) {
+        var ihtml = '';
+        var datestring = '';
+        if (data) {
+            ihtml = '<ul>';
+            for (var i = 0; i < data.length; i++) { 
+                console.log(data[i]);
+                datestring = new Date(data[i].timeMillis).formatDate('M/d HH:mm z');
+                ihtml += '<li>' + datestring + ' : ';
+                if(data[i].url) {
+                    ihtml += '<a href="'+ data[i].url +'">' + data[i].msg + '</a>';
+                }
+                else
+                {
+                    ihtml += data[i].msg;
+                }
+                datestring = '';
+                ihtml += '</li>'; 
+            }
+        ihtml += '</ul>';
+        }
+        return ihtml;
+        };
+    that.createHealthData = function(data) {
+        var range_start = new Date(data[0].startMillis);
+        var i_range_start = i_range_end = null;
+    	//beggining cap
+        var ihtml = '<div class="bg ' + data[0].s + 'Left" style="width:4px" title="' + range_start.formatDate('M/d HH:mm z') + '"></div>';
+        for (var i = 0; i < data.length; i++) {
+            i_range_start = new Date(data[i].startMillis);
+            i_range_end = new Date(data[i].endMillis);
+        	//Scale to 98% to compensate for the fixed with of the 3px caps - (3px*2)/418px ~= 2%
+            ihtml += '<div class="bg ' + data[i].s + '" style="width:' + (data[i].w * 0.98) + '%" title="' + i_range_start.formatDate('M/d HH:mm') + ' &#8594; ' + i_range_end.formatDate('M/d HH:mm z') + '"></div>';
+            i_range_start = i_range_end = null;
+        }
+        //end cap
+        var range_end = new Date(data[data.length-1].endMillis);
+        ihtml += '<div class="bg ' + data[data.length-1].s + 'Right" style="width:4px" title="' + range_end.formatDate('M/d HH:mm z') + '"></div>';
+        delete range_start;
+        delete range_end;
+        return ihtml;
+        };
+    that.onMouseOver = function() {
+        //Append the class rle-over to rle-box for ie 6 since it can't do div:hover
+        if (dojo.isIE === 6) {
+        	that.node.className += ' rle-over';
+        }
+        //that.legendNode.innerHTML = that.legend;
+        if(that.isDetail){ that.moreNode.style.display = 'block'; }
+        };
+    that.onMouseOut = function() {
+        //reset the hover effect
+        if (dojo.isIE === 6) {
+        	that.node.className = 'rle-box';
+        }
+        //that.legendNode.innerHTML = "&nbsp;";
+        if(that.isDetail){ that.moreNode.style.display = 'none'; }
+        };
+    that.cleanup = function() {
+        //null out references to DOM Nodes
+        that.node = null;
+        that.titleNode = null;
+        that.legendNode = null;
+        that.moreNode = null;
+        that.appendNode = null;
+        //disconnect all aggregated events
+        dojo.disconnect(that.connects[0]);
+        dojo.disconnect(that.connects[1]);
+        };
+    //init
+    this.create();
+};
+    
+/**
+* Table - creates a Table with a title
+*
+* @param node
+* @param kwArgs
+*/
+hyperic.widget.Table = function(node, kwArgs) {
+    var t1 = '<div><div class="tTitle">' + kwArgs.label + '</div><table id="aws_table"><thead><tr><td class="tRight"></td>';
+    var t2 = '</tr></thead><tbody>';
+    var t3 = '</tbody></table><div>';
+    this.create = function(node, kwArgs) {
+        this.node = dojo.byId(node);
+        var t = t1 + this.createHeader(kwArgs.header) + t2 + this.createBody(kwArgs.data) + t3;
+        var f = hyperic.widget.tempNode;
+        f.innerHTML = t;
+        this.node.appendChild(f.firstChild);
+        f.innerHTML = '';
+        f = null;
+        };
+    this.createHeader = function(data) {
+        var ret = '';
+        for (var i = 0; i < data.length; i++) { ret += '<td>' + data[i] + '</td>'; }
+        return ret;
+        };
+    this.createBody = function(data) {
+        var ret = '';
+        for (var i = 0; i < data.length; i++) {
+            ret += i % 2 !== 0 ? '<tr>': '<tr class="alternate">';
+            for (var j = 0; j < data[i].length; j++) {
+                if (j === 0) { ret += '<td class="tRight">' + data[i][j] + '</td>'; }
+                else { ret += '<td>' + data[i][j] + '</td>'; }
+            }
+            ret += '</td>';
+        }
+        return ret;
+        };
+    this.cleanup = function(){
+        this.node = null;
+        };
+    //init
+    this.create(node, kwArgs);
+};
+
+/**
+ * @param kwArgs 
+ *    - document (boolean) whether the 
+ *    - tipElements (Array) the nodes to parse for
+ *    - baseNodeId (String) the node in the document to start the parsing at
+ *    -
+ */
+hyperic.widget.tooltip = { 
+    tipElements : [],   // @Array: Allowable elements that can have the toolTip
+    obj : {},                           // @Element: That of which you're hovering over
+    tip : {},                           // @Element: The actual toolTip itself
+    xPos : 0,                               // @Number: x pixel value of current cursor position
+    yPos : 0,                               // @Number: y pixel value of current cursor position
+    active : 0,                             // @Number: 0: Not Active || 1: Active
+    connections : [],
+    conIdx : -1,
+    init : function(kwArgs) {
+        if(dojo.isIE == 6)
+            return;
+        if(kwArgs.tipElements)
+            this.tipElements = kwArgs.tipElements;
+        if ( !document.getElementById ||
+            !document.createElement ||
+            !document.getElementsByTagName ) {
+            return;
+        }
+        var i,j;
+        if(!dojo.byId('toolTip')){
+            this.tip = document.createElement('div');
+            this.tip.id = 'toolTip';
+            document.getElementsByTagName('body')[0].appendChild(this.tip);
+        }else{
+            this.tip = dojo.byId('toolTip');
+        }
+        this.tip.style.top = '0';
+        this.tip.style.display = 'none';
+        var tipLen = this.tipElements.length;
+        for ( i=0; i<tipLen; i++ ) {
+            var current = {};
+            if(kwArgs.document){
+                current = document.getElementsByTagName(this.tipElements[i]);
+            }else{
+                current = dojo.byId(kwArgs.baseNodeId).getElementsByTagName(this.tipElements[i]);
+            }   
+            var curLen = current.length;
+            for ( j=0; j<curLen; j++ ) {
+                if(current[j].getAttribute('title')){
+                    this.connections[++this.conIdx] = dojo.connect(current[j], 'mouseover', hyperic.widget.tooltip, "tipOver");
+                    this.connections[++this.conIdx] = dojo.connect(current[j], 'mouseout', hyperic.widget.tooltip, "tipOut");
+                    current[j].setAttribute('tip',current[j].getAttribute('title'));
+                    current[j].removeAttribute('title');
+                }
+            }
+        }
+    },
+    updateXY : function(e) {
+        if ( document.captureEvents ) {
+            hyperic.widget.tooltip.xPos = e.pageX;
+            hyperic.widget.tooltip.yPos = e.pageY;
+        } else if ( window.event.clientX ) {
+            hyperic.widget.tooltip.xPos = window.event.clientX+document.documentElement.scrollLeft;
+            hyperic.widget.tooltip.yPos = window.event.clientY+document.documentElement.scrollTop;
+        }
+    },
+    //TODO there is no tID
+    tipOut: function() {
+        if ( window.tID ) {
+            clearTimeout(window.tID);
+        }
+        if ( window.opacityID ) {
+            clearTimeout(window.opacityID);
+        }
+        hyperic.widget.tooltip.tip.style.display = 'none';
+    },
+    checkNode : function() {
+        var trueObj = this.obj;
+        if ( inArray(this.tipElements, trueObj.nodeName.toLowerCase()) ) {
+            return trueObj;
+        } else {
+            return trueObj.parentNode;
+        }
+    },
+    tipOver : function(e) {
+        hyperic.widget.tooltip.obj = e.target;
+        window.tID = window.setTimeout("hyperic.widget.tooltip.tipShow()",10);
+        hyperic.widget.tooltip.updateXY(e);
+    },
+    tipShow : function() {      
+        var scrX = Number(this.xPos);
+        var scrY = Number(this.yPos);
+        var tp = parseInt(scrY+15);
+        var lt = parseInt(scrX+10);
+        var anch = this.checkNode();
+        var addy = '';
+        var access = '';
+        if ( anch.nodeName.toLowerCase() == 'a' ) {
+            addy = (anch.href.length > 25 ? anch.href.toString().substring(0,25)+"..." : anch.href);
+            var access = ( anch.accessKey ? ' <span>['+anch.accessKey+']</span> ' : '' );
+        } else {
+            //addy = anch.firstChild.nodeValue;
+        }
+        this.tip.innerHTML = "<p>"+anch.getAttribute('tip')+"<em>"+access+addy+"</em></p>";
+        if ( parseInt(document.documentElement.clientWidth+document.documentElement.scrollLeft) < parseInt(this.tip.offsetWidth+lt) ) {
+            this.tip.style.left = parseInt(lt-(this.tip.offsetWidth+10))+'px';
+        } else {
+            this.tip.style.left = lt+'px';
+        }
+        if ( parseInt(document.documentElement.clientHeight+document.documentElement.scrollTop) < parseInt(this.tip.offsetHeight+tp) ) {
+            this.tip.style.top = parseInt(tp-(this.tip.offsetHeight+10))+'px';
+        } else {
+            this.tip.style.top = tp+'px';
+        }
+        this.tip.style.display = 'block';
+        this.tip.style.opacity = '.1';
+        this.tipFade(10);
+    },
+    tipFade: function(opac) {
+        var passed = parseInt(opac);
+        var newOpac = parseInt(passed+10);
+        if ( newOpac < 80 ) {
+            this.tip.style.opacity = '.'+newOpac;
+            this.tip.style.filter = "alpha(opacity:"+newOpac+")";
+            window.opacityID = window.setTimeout("hyperic.widget.tooltip.tipFade('"+newOpac+"')",20);
+        }
+        else { 
+            this.tip.style.opacity = '.80';
+            this.tip.style.filter = "alpha(opacity:80)";
+        }
+    },
+    cleanup: function() {
+        for(var i = 0; i < this.connections.length; i++) {
+            dojo.disconnect(this.connections[i]);
+        }
+        this.conIdx = -1;
+    }
+};
