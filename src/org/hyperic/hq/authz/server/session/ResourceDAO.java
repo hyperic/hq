@@ -159,7 +159,11 @@ public class ResourceDAO
                 .setInteger(0, id.intValue())
                 .setInteger(1, typeId.intValue())
                 .uniqueResult();
-            ridCache.put(new Element(key, r.getId()));
+
+            if (r != null) {
+                ridCache.put(new Element(key, r.getId()));
+            }
+
             return r;
         }
     }
