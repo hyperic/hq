@@ -459,6 +459,11 @@ public class HQApp {
                    methName.startsWith("is") ||
                    methName.startsWith("check") ||
                    methName.startsWith("list") ||
+                   methName.equals("agentConnected") ||
+                   methName.equals("agentDisconnected") ||
+                   methName.equals("handleMeasurementReport") ||
+                   methName.equals("reportAgentSRNs") ||
+                   methName.equals("onMessage") ||
                    methName.equals("create"); /* 'create' is part of EJB session
                                                  bean creation */
         }
