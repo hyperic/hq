@@ -1019,7 +1019,7 @@ public class AlertDefinitionManagerEJBImpl
      * Returns true if alerts are allowed.
      * @ejb:interface-method
      */
-    public boolean alertsAllowed() {
+    public boolean areAlertsAllowed() {
         return AlertRegulator.getInstance().alertsAllowed();
     }
     

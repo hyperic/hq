@@ -110,7 +110,7 @@ public class AgentConnections {
         return newConn;
     }
     
-    void agentDisconnected(AgentConnection c) {
+    void disconnectAgent(AgentConnection c) {
         synchronized (_activeConns) {
             Set conns = (Set)_activeConns.get(c.getMethod());
             

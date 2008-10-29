@@ -806,11 +806,11 @@ public class LatherDispatcher
         
         AgentConnection conn = null;
         try {
-            conn = agentMan.agentConnected(method, ctx.getCallerIP(), agentId);             
+            conn = agentMan.getAgentConnection(method, ctx.getCallerIP(), agentId);             
             return _dispatch(ctx, method, arg);
         } finally {
             if (conn != null)
-                agentMan.agentDisconnected(conn);
+                agentMan.disconnectAgent(conn);
         }
     }
     

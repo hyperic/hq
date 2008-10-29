@@ -1733,10 +1733,10 @@ public class EventsBossEJBImpl
      * See if alerts are enabled
      * @ejb:interface-method
      */
-    public boolean alertsAllowed(int sessionId)
+    public boolean areAlertsAllowed(int sessionId)
         throws SessionNotFoundException, SessionTimeoutException {
         manager.authenticate(sessionId);
-        return getADM().alertsAllowed();
+        return getADM().areAlertsAllowed();
     }
 
     /**

@@ -302,7 +302,7 @@ public class EscalationManagerEJBImpl
     public boolean startEscalation(PerformsEscalations def, 
                                    EscalatableCreator creator) 
     {
-        if (!AlertDefinitionManagerEJBImpl.getOne().alertsAllowed()) {
+        if (!AlertDefinitionManagerEJBImpl.getOne().areAlertsAllowed()) {
             return false;
         }
         

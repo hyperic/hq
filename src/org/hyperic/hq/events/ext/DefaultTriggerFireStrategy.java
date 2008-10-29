@@ -99,7 +99,7 @@ public class DefaultTriggerFireStrategy implements TriggerFireStrategy {
         AlertDefinitionManagerLocal aman =
             AlertDefinitionManagerEJBImpl.getOne();
 
-        if (!aman.alertsAllowed()) {
+        if (!aman.areAlertsAllowed()) {
             _log.debug("Alert not firing because they are not allowed");
             return;
         }
