@@ -74,7 +74,7 @@ public class EditConfigPrepAction extends TilesAction {
         // Get the alert enablement status
         EventsBoss eboss = ContextUtils.getEventsBoss(ctx);
         cForm.setAlertsAllowed(
-            eboss.alertsAllowed(RequestUtils.getSessionIdInt(request)));
+            eboss.areAlertsAllowed(RequestUtils.getSessionIdInt(request)));
         
         return null;
     }

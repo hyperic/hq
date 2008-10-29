@@ -547,21 +547,30 @@ public class HQApp {
         }
         
         private boolean methIsReadOnly(String methName) {
-            return methName.equals("onMessage") || // JMS
-                   methName.equals("dispatchHeartBeat") || // Heartbeats
-                   methName.equals("login") || // For HQU methods
+            return // 'create' is part of EJB session bean creation
+                   methName.equals("create") ||
+                   methName.equals("disconnectAgent") ||
+                   // recent alerts & indicators
+                   methName.equals("fillAlertCount") ||
+                   // gather agent metrics
+                   methName.equals("handleMeasurementReport") ||
+                   // For HQU methods
+                   methName.equals("login") ||
                    methName.equals("loginGuest") ||
-                   methName.equals("fillAlertCount") || // recent alerts & indicators
-                   methName.equals("resourcesExistOfType") || // masthead
-                   methName.equals("logsExistPerInterval") || // indicators
+                   // indicators
+                   methName.equals("logsExistPerInterval") ||
+                   // JMS
+                   methName.equals("onMessage") ||
+                   // masthead
+                   methName.equals("resourcesExistOfType") ||
                    methName.equals("search") || 
-                   methName.startsWith("get") ||
-                   methName.startsWith("find") ||
-                   methName.startsWith("is") ||
+                   methName.startsWith("are") ||
                    methName.startsWith("check") ||
-                   methName.startsWith("list") ||
-                   methName.equals("create"); /* 'create' is part of EJB session
-                                                 bean creation */
+                   methName.startsWith("dispatch") ||
+                   methName.startsWith("find") ||
+                   methName.startsWith("get") ||
+                   methName.startsWith("is") ||
+                   methName.startsWith("list");
         }
 
         public Object invokeProxyNext(org.jboss.proxy.Interceptor next, 

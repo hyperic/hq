@@ -507,8 +507,8 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AgentConnection agentConnected(String method, String connIp,
-                                          Integer agentId) 
+    public AgentConnection getAgentConnection(String method, String connIp,
+                                              Integer agentId) 
     {
         return AgentConnections.getInstance().agentConnected(method, connIp, 
                                                              agentId);
@@ -518,8 +518,8 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void agentDisconnected(AgentConnection a) {
-        AgentConnections.getInstance().agentDisconnected(a);
+    public void disconnectAgent(AgentConnection a) {
+        AgentConnections.getInstance().disconnectAgent(a);
     }
     
     /**
