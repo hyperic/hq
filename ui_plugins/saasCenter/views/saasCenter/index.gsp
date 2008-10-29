@@ -18,7 +18,7 @@
 
 <!-- Source file for buttons-->
 <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/button/button-min.js"></script>
-
+<script type="text/javascript">document.navTabCat = "Resource";</script>
         <div class="yui-skin-sam">
 
             <div id="clouds" class="yui-navset">
