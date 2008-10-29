@@ -39,7 +39,6 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 
 public abstract class PermissionManager extends AuthzSession {
 
@@ -114,9 +113,9 @@ public abstract class PermissionManager extends AuthzSession {
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
-    public abstract PageList 
+    public abstract List 
         findOperationScopeBySubject(AuthzSubject subj, String opName,
-                                    String resType, PageControl pc) 
+                                    String resType) 
         throws FinderException, PermissionException;
 
     /**
@@ -124,9 +123,8 @@ public abstract class PermissionManager extends AuthzSession {
      * has a given operation.
      * @return List of integer instance ids
      */
-    public abstract PageList 
-        findOperationScopeBySubject(AuthzSubject subj, Integer opId,
-                                    PageControl pc)
+    public abstract List 
+        findOperationScopeBySubject(AuthzSubject subj, Integer opId)
         throws FinderException, PermissionException;
 
     /**

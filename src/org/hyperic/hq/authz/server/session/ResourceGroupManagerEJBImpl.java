@@ -643,8 +643,7 @@ public class ResourceGroupManagerEJBImpl
         try {
             groupIds = pm.findOperationScopeBySubject(subject, 
                                         AuthzConstants.groupOpViewResourceGroup, 
-                                        AuthzConstants.groupResourceTypeName, 
-                                        PageControl.PAGE_ALL);
+                                        AuthzConstants.groupResourceTypeName);
         } catch(FinderException e) {
             // Makes no sense
             throw new SystemException(e);
@@ -694,8 +693,7 @@ public class ResourceGroupManagerEJBImpl
         List groupIds =
             pm.findOperationScopeBySubject(subject,
                                            AuthzConstants.groupOpViewResourceGroup,
-                                           AuthzConstants.groupResourceTypeName,
-                                           PageControl.PAGE_ALL);
+                                           AuthzConstants.groupResourceTypeName);
 
         Collection groups = getResourceGroupDAO().findCompatible(resProto);
         for (Iterator i = groups.iterator(); i.hasNext(); ) {

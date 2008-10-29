@@ -489,8 +489,7 @@ public abstract class AppdefSessionEJB
             List platIds = 
                 pm.findOperationScopeBySubject(subj,
                                                AuthzConstants.platformOpManageAlerts,
-                                               AuthzConstants.platformResType,
-                                               PageControl.PAGE_ALL);
+                                               AuthzConstants.platformResType);
             for(int i = 0; i < platIds.size(); i++) {
                 Integer id = (Integer)platIds.get(i);
                 entityIds.add(AppdefEntityID.newPlatformID(id));                                                             
@@ -499,8 +498,7 @@ public abstract class AppdefSessionEJB
             List serverIds = 
                 pm.findOperationScopeBySubject(subj,
                                                AuthzConstants.serverOpManageAlerts,
-                                               AuthzConstants.serverResType,
-                                               PageControl.PAGE_ALL);
+                                               AuthzConstants.serverResType);
             for(int i = 0; i < serverIds.size(); i++) {
                 Integer id = (Integer)serverIds.get(i);
                 entityIds.add(AppdefEntityID.newServerID(id));                                                                           
@@ -509,8 +507,7 @@ public abstract class AppdefSessionEJB
             List serviceIds =
                 pm.findOperationScopeBySubject(subj,
                                                AuthzConstants.serviceOpManageAlerts,
-                                               AuthzConstants.serviceResType,
-                                               PageControl.PAGE_ALL);
+                                               AuthzConstants.serviceResType);
             for(int i = 0; i < serviceIds.size(); i++) {
                 Integer id = (Integer)serviceIds.get(i);
                 entityIds.add(AppdefEntityID.newServiceID(id));
@@ -520,8 +517,7 @@ public abstract class AppdefSessionEJB
             List groupids = 
                 pm.findOperationScopeBySubject(subj, 
                                                AuthzConstants.groupOpManageAlerts,
-                                               AuthzConstants.groupResType,
-                                               PageControl.PAGE_ALL);
+                                               AuthzConstants.groupResType);
             for (int i=0; i<groupids.size(); i++) {
                 Integer id = (Integer)groupids.get(i);
                 entityIds.add(AppdefEntityID.newGroupID(id));
@@ -844,8 +840,7 @@ public abstract class AppdefSessionEJB
             getOperationByName(getServiceResourceType(),
                                AuthzConstants.serviceOpViewService);
         List idList = 
-            pm.findOperationScopeBySubject(whoami, op.getId(),
-                                           PageControl.PAGE_ALL);
+            pm.findOperationScopeBySubject(whoami, op.getId());
         
         List keyList = new ArrayList(idList.size());
         for(int i=0; i < idList.size(); i++) {
@@ -869,8 +864,7 @@ public abstract class AppdefSessionEJB
         List viewableGroups = 
             pm.findOperationScopeBySubject(whoami,
                                            AuthzConstants.groupOpViewResourceGroup, 
-                                           AuthzConstants.groupResourceTypeName,
-                                           PageControl.PAGE_ALL);
+                                           AuthzConstants.groupResourceTypeName);
         for (int i=0;i<viewableGroups.size();i++) {
             Integer gid = (Integer) viewableGroups.get(i);
             viewableGroups.set(i, AppdefEntityID.newGroupID(gid));
@@ -892,8 +886,7 @@ public abstract class AppdefSessionEJB
         Operation op = 
             getOperationByName(getApplicationResourceType(),
                                AuthzConstants.appOpViewApplication);
-        List idList = pm.findOperationScopeBySubject(whoami, op.getId(),
-                                                     PageControl.PAGE_ALL);
+        List idList = pm.findOperationScopeBySubject(whoami, op.getId());
         List keyList = new ArrayList(idList.size());
         for(int i=0; i < idList.size(); i++) {
             keyList.add(idList.get(i));
@@ -918,8 +911,7 @@ public abstract class AppdefSessionEJB
         Operation op =
             getOperationByName(getServerResourceType(), 
                                AuthzConstants.serverOpViewServer);
-        List idList =  pm.findOperationScopeBySubject(whoami, op.getId(),
-                                                      PageControl.PAGE_ALL);
+        List idList =  pm.findOperationScopeBySubject(whoami, op.getId());
 
         if (log.isDebugEnabled()) {
             log.debug("There are: " + idList.size() + " viewable servers");
@@ -1015,8 +1007,7 @@ public abstract class AppdefSessionEJB
         PermissionManager pm = PermissionManagerFactory.getInstance();
         Operation op = getOperationByName(getPlatformResourceType(),
                                           AuthzConstants.platformOpViewPlatform);
-        return pm.findOperationScopeBySubject(who, op.getId(),
-                                              PageControl.PAGE_ALL);
+        return pm.findOperationScopeBySubject(who, op.getId());
     }
 
     /**
@@ -1037,8 +1028,7 @@ public abstract class AppdefSessionEJB
         Operation op =
             getOperationByName(getGroupResourceType(), 
                                AuthzConstants.groupOpViewResourceGroup);
-        List idList = pm.findOperationScopeBySubject(whoami, op.getId(),
-                                                     PageControl.PAGE_ALL);
+        List idList = pm.findOperationScopeBySubject(whoami, op.getId());
 
         List valueList = new ArrayList(idList.size());
         ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();

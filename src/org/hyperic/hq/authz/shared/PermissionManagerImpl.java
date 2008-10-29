@@ -41,8 +41,8 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.server.session.CloningBossEJBImpl;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CloningBossInterface;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
@@ -56,7 +56,6 @@ import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 
@@ -134,9 +133,8 @@ public class PermissionManagerImpl
         return true;
     }
     
-    public PageList findOperationScopeBySubject(AuthzSubject subj,
-                                                String opName, String resType,
-                                                PageControl pc) 
+    public List findOperationScopeBySubject(AuthzSubject subj, String opName,
+                                            String resType) 
         throws FinderException, PermissionException
     {
         if (_log.isDebugEnabled()) { 
@@ -148,25 +146,24 @@ public class PermissionManagerImpl
             Operation opEJB =
                 getOperationDAO().findByTypeAndName(resTypeBean, opName);
             if (opEJB != null) {
-                return findOperationScopeBySubject(subj, opEJB.getId(), pc);
+                return findOperationScopeBySubject(subj, opEJB.getId());
             }
         }
-        return new PageList();
+        return new ArrayList();
     }
 
-    public PageList findOperationScopeBySubject(AuthzSubject subj,
-                                                Integer opId, PageControl pc) 
+    public List findOperationScopeBySubject(AuthzSubject subj, Integer opId) 
         throws FinderException, PermissionException
     {
         if (_log.isDebugEnabled()) {
             _log.debug("Checking Scope for Operation: " + opId + " subject: " + 
                        subj);
         }
-        PageList scope = findScopeBySQL(subj, opId, pc);
+        List scope = findScopeBySQL(subj, opId);
 
         if (_log.isDebugEnabled()) {
-            _log.debug("Scope check returned a page of : " + scope.size() +
-                       " of " + scope.getTotalSize() + " items");
+            _log.debug("Scope check returned a size of : " + scope.size() +
+                       " items");
         }
         return scope;
     }
@@ -304,8 +301,7 @@ public class PermissionManagerImpl
         }
     }
 
-    private PageList findScopeBySQL(AuthzSubject subj, Integer opId, 
-                                    PageControl pc)
+    private List findScopeBySQL(AuthzSubject subj, Integer opId)
         throws FinderException, PermissionException 
     {
         Pager defaultPager = Pager.getDefaultPager();
@@ -324,7 +320,7 @@ public class PermissionManagerImpl
             for(int i = 1; rs.next(); i++) {
                 instanceIds.add(new Integer(rs.getInt(1)));
             }
-            return defaultPager.seek(instanceIds, pc.getPagenum(), pc.getPagesize());
+            return instanceIds;
         } catch (SQLException e) {
             _log.error("Error getting scope by SQL", e);
             throw new FinderException("Error getting scope: " + e.getMessage());

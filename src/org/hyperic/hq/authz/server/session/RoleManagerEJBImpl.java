@@ -1203,8 +1203,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         PermissionManager pm = PermissionManagerFactory.getInstance();
         List viewable = pm.findOperationScopeBySubject(who,
            AuthzConstants.groupOpViewResourceGroup,
-           AuthzConstants.groupResourceTypeName,
-           PageControl.PAGE_ALL);
+           AuthzConstants.groupResourceTypeName);
         
         for(Iterator i = groups.iterator(); i.hasNext();) {
             ResourceGroup resGrp = (ResourceGroup) i.next();
