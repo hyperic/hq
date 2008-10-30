@@ -96,12 +96,7 @@ public class ResourceDAO
 
         // need this to ensure that the optimistic locking doesn't fail
         entity.markDirty();
-
-        String sql = "delete GroupMember g where g.resource = :resource";
-        getSession().createQuery(sql)
-            .setParameter("resource", entity)
-            .executeUpdate();
-        getSession().flush();
+        entity.getGroupBag().clear();
         super.remove(entity);
     }
 
