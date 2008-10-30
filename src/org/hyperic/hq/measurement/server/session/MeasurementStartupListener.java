@@ -27,9 +27,14 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,7 +48,8 @@ import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.zevents.ZeventManager;
 
 public class MeasurementStartupListener
@@ -73,9 +79,8 @@ public class MeasurementStartupListener
         listenEvents.add(ResourceCreatedZevent.class);
         listenEvents.add(ResourceUpdatedZevent.class);
         listenEvents.add(ResourceRefreshZevent.class);
-        ZeventManager.getInstance()
-                     .addBufferedListener(listenEvents,
-                                          new MeasurementEnabler());
+        ZeventManager.getInstance().addBufferedListener(
+            listenEvents, new MeasurementEnabler());
 
         HQApp app = HQApp.getInstance();
         synchronized (LOCK) {
@@ -120,8 +125,14 @@ public class MeasurementStartupListener
         });
         */
 
+        prefetchEnabledMeasurementsAndTemplates();
         initReportsStats();
         AgentScheduleSynchronizer.getInstance().initialize();
+    }
+
+    private void prefetchEnabledMeasurementsAndTemplates() {
+        MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+        mMan.findAllEnabledMeasurementsAndTemplates();
     }
 
     private void initReportsStats() {

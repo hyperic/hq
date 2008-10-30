@@ -38,8 +38,10 @@ import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.dialect.Dialect;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -70,6 +72,22 @@ public class MeasurementDAO extends HibernateDAO {
         if (entity.getBaseline() != null)
             super.remove(entity.getBaseline());
         super.remove(entity);
+    }
+    
+    /**
+     * retrieves List<Object[]>
+     * [0] = Measurement
+     * [1] = MeasurementTemplate
+     */
+    List findAllEnabledMeasurementsAndTemplates() {
+        Dialect dialect = Util.getDialect();
+        String hql = new StringBuilder()
+            .append("from Measurement m")
+            .append(" join m.template t")
+            .append(" where enabled = ")
+            .append(dialect.toBooleanValueString(true))
+            .toString();
+        return getSession().createQuery(hql).list();
     }
 
     /**
