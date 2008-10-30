@@ -3456,9 +3456,9 @@ public class AppdefBossEJBImpl
                 appdefTypeId = aetid.getID();
             }
         }
-        
-        List viewables = findViewableEntityIds(user, APPDEF_TYPE_UNDEFINED,
-                                               null, null, null);
+
+        Set viewables = new HashSet(
+            findViewableEntityIds(user, APPDEF_TYPE_UNDEFINED, null, null, null));        
         for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
             DownMetricValue dmv = (DownMetricValue) it.next();
             AppdefEntityID entityId = dmv.getEntityId();
@@ -3515,9 +3515,9 @@ public class AppdefBossEJBImpl
         
         if (unavailEnts.size() == 0)
             return ret;
-        
-        List viewables = findViewableEntityIds(user, APPDEF_TYPE_UNDEFINED,
-                                               null, null, null);
+
+        Set viewables = new HashSet(
+            findViewableEntityIds(user, APPDEF_TYPE_UNDEFINED, null, null, null));        
         for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
             DownMetricValue dmv = (DownMetricValue) it.next();
             
