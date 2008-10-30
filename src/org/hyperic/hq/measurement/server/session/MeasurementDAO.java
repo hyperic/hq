@@ -48,7 +48,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.util.jdbc.DBUtil;
 
 public class MeasurementDAO extends HibernateDAO {
     private static Log _log = LogFactory.getLog(MeasurementDAO.class);
@@ -69,8 +68,6 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     void remove(Measurement entity) {
-        if (entity.getBaseline() != null)
-            super.remove(entity.getBaseline());
         super.remove(entity);
     }
     
@@ -279,6 +276,22 @@ public class MeasurementDAO extends HibernateDAO {
             .setCacheable(true)
             .setCacheRegion("Measurement.findByResource")
             .list();
+    }
+
+    int deleteByIds(List ids) {
+        int count = 0;
+        // need to remove one at a time to avoid EhCache clearing the
+        // measurement cache which would lead to thrashing
+        for (Iterator it=ids.iterator(); it.hasNext(); ) {
+            Integer id = (Integer)it.next();
+            Measurement meas = findById(id);
+            if (meas == null) {
+                continue;
+            }
+            count++;
+            remove(meas);
+        }
+        return count;
     }
 
     public List findEnabledByResource(Resource resource) {
@@ -659,13 +672,19 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     int clearResource(Resource resource) {
-        // XXX: Shouldn't this reference Measurement rather than the mapped
-        //      table? -RPM
-        return getSession()
-            .createSQLQuery("update EAM_MEASUREMENT set resource_id = null "
-                            + "where resource_id = :res")
-            .setInteger("res", resource.getId().intValue())
-            .executeUpdate();
+        // need to do this one measurement at a time to avoid the whole EhCache
+        // being cleared due to bulk updates
+        List list = findByResource(resource);
+        int count = 0;
+        for (Iterator it=list.iterator(); it.hasNext(); ) {
+            Measurement meas = (Measurement)it.next();
+            if (meas == null) {
+                continue;
+            }
+            meas.setResource(null);
+            count++;
+        }
+        return count;
     }
 
     /**
@@ -677,11 +696,5 @@ public class MeasurementDAO extends HibernateDAO {
     List findOrphanedMeasurements() {
         String sql = "SELECT id FROM Measurement WHERE resource IS NULL";
         return getSession().createQuery(sql).list();
-    }
-
-    int deleteOrphanedMeasurements() {
-        final String hql = "delete from Measurement WHERE resource IS NULL";
-    
-        return getSession().createQuery(hql).executeUpdate();
     }
 }
