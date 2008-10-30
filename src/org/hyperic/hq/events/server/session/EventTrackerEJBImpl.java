@@ -186,7 +186,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
                 txn.rollback();
             }
             
-            log.error("Failed to update event object for trigger event id="+teid, e);     
+            log.debug("Failed to update event object for trigger event id="+teid, e);     
             throw new SQLException("Failed to update event object for trigger event id="+teid);
             
         } finally {

@@ -197,7 +197,7 @@ public abstract class AppdefSessionEJB
                                                      " unknown");
         }
     }
-        
+
     /**
      * remove the authz resource entry
      */

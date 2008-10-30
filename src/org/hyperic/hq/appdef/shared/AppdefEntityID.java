@@ -255,13 +255,21 @@ public class AppdefEntityID
     }
 
     public boolean equals(Object other){
-        AppdefEntityID othObj = (AppdefEntityID)other;
+        if (this == other) {
+            return true;
+        }
 
-        return othObj.getAppdefKey().equals(getAppdefKey());
+        if (!(other instanceof AppdefEntityID))
+            return false;
+
+
+        AppdefEntityID o = (AppdefEntityID)other;
+        return o._entityID == _entityID &&
+               o._entityType == _entityType;
     }
 
     public int hashCode(){
-        return _entityType * _entityID;
+        return _entityType * 100000 + _entityID;
     }
 
     public static AppdefEntityID newPlatformID(Integer id) {
