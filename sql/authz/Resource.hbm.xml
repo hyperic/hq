@@ -49,13 +49,13 @@
       <column name="MTIME" default="0"/>
     </property>
 
-    <bag name="groupBag" table="EAM_RES_GRP_RES_MAP" inverse="true">
+    <bag inverse="true" cascade="all-delete-orphan" name="groupBag" table="EAM_RES_GRP_RES_MAP">
       <cache usage="read-write"/>
-      <key column="RESOURCE_ID"/>
+      <key on-delete="cascade" column="RESOURCE_ID"/>
       <one-to-many class="GroupMember"/>
     </bag>
 
-    <bag inverse="true" cascade="all" name="virtuals" table="EAM_VIRTUAL">
+    <bag inverse="true" cascade="all-delete-orphan" name="virtuals" table="EAM_VIRTUAL">
       <key on-delete="cascade" column="RESOURCE_ID"/>
       <one-to-many class="Virtual"/>
     </bag>
