@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -247,7 +249,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             List serviceIds = new ArrayList(services.size());
          
             // now get the list of PKs
-            Collection viewable = super.getViewableServices(subject);
+            Set viewable = new HashSet(super.getViewableServices(subject));
             // and iterate over the ejbList to remove any item not in the
             // viewable list
             int i = 0;
@@ -436,7 +438,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                PermissionException {
         Collection toBePaged = new ArrayList();
         // get list of pks user can view
-        List authzPks = getViewableServices(subject);
+        Set authzPks = new HashSet(getViewableServices(subject));
         Collection services = null;
         pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
         
@@ -483,7 +485,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public PageList getAllClusterAppUnassignedServices(AuthzSubject subject, 
         PageControl pc) throws FinderException, PermissionException {
         // get list of pks user can view
-        List authzPks = getViewableServices(subject);
+        Set authzPks = new HashSet(getViewableServices(subject));
         Collection services = null;
         Collection toBePaged = new ArrayList();
         pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
