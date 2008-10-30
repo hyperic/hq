@@ -511,16 +511,18 @@ public class AvailabilityManagerEJBImpl
      * @ejb:interface-method
      */
     public List getUnavailEntities(List includes) {
-        List rtn = new ArrayList();
-        List down = _dao.getDownMeasurements();
-        for (Iterator i=down.iterator(); i.hasNext(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE) i.next();
+        List rtn;
+        if (includes != null) {
+            rtn = new ArrayList(includes.size());
+        } else {
+            rtn = new ArrayList();
+        }
+        List unavails = _dao.getDownMeasurements(includes);
+        for (Iterator it=unavails.iterator(); it.hasNext(); ) {
+            AvailabilityDataRLE rle = (AvailabilityDataRLE) it.next();
             Measurement meas = rle.getMeasurement();
             long timestamp = rle.getStartime();
             Integer mid = meas.getId();
-            if (includes != null && !includes.contains(mid)) {
-                continue;
-            }
             MetricValue val = new MetricValue(AVAIL_DOWN, timestamp);
             rtn.add(new DownMetricValue(meas.getEntityId(), mid, val));
         }

@@ -412,18 +412,32 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of down Measurements
      */
-    List getDownMeasurements() {
-        String sql = new StringBuilder()
+    List getDownMeasurements(List includes) {
+        StringBuilder sql = new StringBuilder()
                      .append("SELECT rle FROM AvailabilityDataRLE rle")
                      .append(" JOIN rle.availabilityDataId.measurement m")
-				     .append(" JOIN m.template t")
-				 	 .append(" WHERE rle.endtime = " + MAX_TIMESTAMP)
-				 	 .append(" AND m.resource is not null ")
-				 	 .append(" AND rle.availVal = " + AVAIL_DOWN)
-				 	 .append(" AND " + ALIAS_CLAUSE).toString();
-        return getSession()
-            .createQuery(sql)
-            .list();
+                     .append(" JOIN m.template t")
+				     .append(" WHERE rle.endtime = ").append(MAX_TIMESTAMP)
+                     .append(" AND m.resource is not null ")
+                     .append(" AND rle.availVal = ").append(AVAIL_DOWN)
+                     .append(" AND ").append(ALIAS_CLAUSE);
+        final boolean hasIncludes =
+            (includes != null && includes.size() > 0) ? true : false;
+        if (hasIncludes) {
+            sql.append(" rle.availabilityDataId.measurement in (:mids)");
+        }
+        Query query = getSession().createQuery(sql.toString());
+        if (!hasIncludes) {
+            return query.list();
+        }
+        List rtn = new ArrayList(includes.size());
+        for (int i=0; i<includes.size(); i+=BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, includes.size());
+            query.setParameterList(
+                "mids", includes.subList(i, end), new IntegerType());
+            rtn.addAll(query.list());
+        }
+        return rtn;
     }
 
     AvailabilityDataRLE create(Measurement meas, long startime, double availVal)
