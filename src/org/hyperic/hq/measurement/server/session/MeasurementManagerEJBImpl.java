@@ -392,7 +392,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         
         if (mids.size() > 0) {
             cb.beforeMetricsDelete(mids);
-            getBaselineDAO().deleteByIds(mids);
             dao.deleteByIds(mids);
         }
 
