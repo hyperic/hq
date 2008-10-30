@@ -221,7 +221,7 @@ public class AlertDAO extends HibernateDAO {
     }
 
     int deleteByAlertDefinition(AlertDefinition def) {
-        String sql = "DELETE Alert WHERE alertDefinition = :alertDef";
+        String sql = "DELETE FROM Alert WHERE alertDefinition = :alertDef";
 
         return getSession().createQuery(sql)
             .setParameter("alertDef", def)

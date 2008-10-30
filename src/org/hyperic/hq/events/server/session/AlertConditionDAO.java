@@ -41,11 +41,4 @@ public class AlertConditionDAO extends HibernateDAO {
     void save(AlertCondition cond) {
         super.save(cond);
     }
-
-    void removeConditions(AlertDefinition def) {
-        for (Iterator it = def.getConditions().iterator(); it.hasNext(); ) {
-            remove(it.next());
-        }
-        def.clearConditions();
-    }
 }

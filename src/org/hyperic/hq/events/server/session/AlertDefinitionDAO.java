@@ -78,6 +78,13 @@ public class AlertDefinitionDAO extends HibernateDAO {
         return createCriteria().add(Restrictions.eq("resource", r)).list();
     }
     
+    public List findAllDeletedResources() {
+        return createCriteria()
+            .add(Restrictions.isNull("resource"))
+            .add(Restrictions.eq("deleted", Boolean.TRUE))
+            .list();
+    }
+    
     /**
      * Find the alert def for a given appdef entity and is child of the parent
      * alert def passed in
@@ -186,8 +193,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
     public List findByRootResource(AuthzSubject subject, Resource r) {
         EdgePermCheck wherePermCheck = 
             getPermissionManager().makePermCheckHql("rez");
-        String hql = "select ad from AlertDefinition ad " + 
-            "join ad.resource rez " +
+        String hql = "select ad from AlertDefinition ad join ad.resource rez " +
             wherePermCheck; 
         
         Query q = createQuery(hql);
@@ -223,52 +229,40 @@ public class AlertDefinitionDAO extends HibernateDAO {
     void setAlertDefinitionValue(AlertDefinition def, AlertDefinitionValue val)
     {
         AlertConditionDAO cDAO =
-            DAOFactory.getDAOFactory().getAlertConditionDAO();
-        ActionDAO actDAO = DAOFactory.getDAOFactory().getActionDAO();
-        TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
+            new AlertConditionDAO(DAOFactory.getDAOFactory());
+        ActionDAO actDAO = new ActionDAO(DAOFactory.getDAOFactory());
+        TriggerDAO tDAO = new TriggerDAO(DAOFactory.getDAOFactory());
         
         setAlertDefinitionValueNoRels(def, val);
     
         for (Iterator i=val.getAddedTriggers().iterator(); i.hasNext(); ) {
-            RegisteredTriggerValue tVal = (RegisteredTriggerValue)i.next();
-            RegisteredTrigger t = tDAO.findById(tVal.getId());
-            
-            def.addTrigger(t);
+            RegisteredTriggerValue tVal = (RegisteredTriggerValue) i.next();
+            def.addTrigger(tDAO.findById(tVal.getId()));
         }
         
         for (Iterator i=val.getRemovedTriggers().iterator(); i.hasNext(); ) {
             RegisteredTriggerValue tVal = (RegisteredTriggerValue)i.next();
-            RegisteredTrigger t = tDAO.findById(tVal.getId());
-            
-            def.removeTrigger(t);
+            def.removeTrigger(tDAO.findById(tVal.getId()));
         }
         
         for (Iterator i=val.getAddedConditions().iterator(); i.hasNext(); ) {
             AlertConditionValue cVal = (AlertConditionValue)i.next();
-            AlertCondition c = cDAO.findById(cVal.getId());
-            
-            def.addCondition(c);
+            def.addCondition(cDAO.findById(cVal.getId()));
         }
     
         for (Iterator i=val.getRemovedConditions().iterator(); i.hasNext(); ) {
             AlertConditionValue cVal = (AlertConditionValue)i.next();
-            AlertCondition c = cDAO.findById(cVal.getId());
-            
-            def.removeCondition(c);
+            def.removeCondition(cDAO.findById(cVal.getId()));
         }
     
         for (Iterator i=val.getAddedActions().iterator(); i.hasNext(); ) {
             ActionValue aVal = (ActionValue)i.next();
-            Action a = actDAO.findById(aVal.getId());
-            
-            def.addAction(a);
+            def.addAction(actDAO.findById(aVal.getId()));
         }
     
         for (Iterator i=val.getRemovedActions().iterator(); i.hasNext(); ) {
             ActionValue aVal = (ActionValue)i.next();
-            Action a = actDAO.findById(aVal.getId());
-            
-            def.removeAction(a);
+            def.removeAction(actDAO.findById(aVal.getId()));
         }
     }
 

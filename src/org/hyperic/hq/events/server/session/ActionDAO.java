@@ -55,11 +55,7 @@ public class ActionDAO extends HibernateDAO {
     private void removeActionCascade(Action action) {
         if (action.getParent() != null) {
             action.getParent().getChildrenBag().remove(action);
-        }
-        
-        for (Iterator it = action.getLogEntries().iterator(); it.hasNext();) {
-            remove(it.next());
-        }
+        }        
         remove(action);
     }
 
@@ -75,7 +71,6 @@ public class ActionDAO extends HibernateDAO {
         if (action.getAlertDefinition() != null) {
             action.getAlertDefinition().getActionsBag().remove(action);
         }
-
         removeActionCascade(action);
     }
     
