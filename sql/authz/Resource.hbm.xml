@@ -51,7 +51,7 @@
 
     <bag inverse="true" cascade="all-delete-orphan" name="groupBag" table="EAM_RES_GRP_RES_MAP">
       <cache usage="read-write"/>
-      <key on-delete="cascade" column="RESOURCE_ID"/>
+      <key column="RESOURCE_ID"/>
       <one-to-many class="GroupMember"/>
     </bag>
 
