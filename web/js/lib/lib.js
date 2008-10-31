@@ -3325,8 +3325,8 @@ hyperic.widget.Health = function(parentNodeId, kwArgs, isDetail) {
         that.moreNode = dojo.byId(that.id + '_more');
         dojo.byId(that.id + '_data').innerHTML = that.createHealthData(that.data);
         dojo.byId(that.id + '_status').innerHTML = that.createStatus(that.statusMsg);
-        that.connects[0] = dojo.connect(that.node, 'onmouseenter', that, 'onMouseOver');
-        that.connects[1] = dojo.connect(that.node, 'onmouseleave', that, 'onMouseOut');
+        that.connects[0] = dojo11.connect(that.node, 'onmouseenter', that, 'onMouseOver');
+        that.connects[1] = dojo11.connect(that.node, 'onmouseleave', that, 'onMouseOut');
         dojo.byId(parentNodeId).appendChild(f.firstChild);
         };
     that.createStatus = function(data) {
@@ -3395,8 +3395,8 @@ hyperic.widget.Health = function(parentNodeId, kwArgs, isDetail) {
         that.moreNode = null;
         that.appendNode = null;
         //disconnect all aggregated events
-        dojo.disconnect(that.connects[0]);
-        dojo.disconnect(that.connects[1]);
+        dojo11.disconnect(that.connects[0]);
+        dojo11.disconnect(that.connects[1]);
         };
     //init
     this.create();
@@ -3492,8 +3492,8 @@ hyperic.widget.tooltip = {
             var curLen = current.length;
             for ( j=0; j<curLen; j++ ) {
                 if(current[j].getAttribute('title')){
-                    this.connections[++this.conIdx] = dojo.connect(current[j], 'mouseover', hyperic.widget.tooltip, "tipOver");
-                    this.connections[++this.conIdx] = dojo.connect(current[j], 'mouseout', hyperic.widget.tooltip, "tipOut");
+                    this.connections[++this.conIdx] = dojo11.connect(current[j], 'mouseover', hyperic.widget.tooltip, "tipOver");
+                    this.connections[++this.conIdx] = dojo11.connect(current[j], 'mouseout', hyperic.widget.tooltip, "tipOut");
                     current[j].setAttribute('tip',current[j].getAttribute('title'));
                     current[j].removeAttribute('title');
                 }
@@ -3576,7 +3576,7 @@ hyperic.widget.tooltip = {
     },
     cleanup: function() {
         for(var i = 0; i < this.connections.length; i++) {
-            dojo.disconnect(this.connections[i]);
+            dojo11.disconnect(this.connections[i]);
         }
         this.conIdx = -1;
     }
