@@ -57,9 +57,9 @@ import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
+import org.hyperic.hq.events.server.session.EventTrackerEJBImpl;
 import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
-import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.config.BooleanConfigOption;
 import org.hyperic.util.config.ConfigResponse;
@@ -401,10 +401,11 @@ public class MultiConditionTrigger
         EventTrackerLocal etracker = null;
         
         try {
-            etracker = EventTrackerUtil.getLocalHome().create();
+            etracker = EventTrackerEJBImpl.getOne();
         } catch (Exception e) {
-            throw new ActionExecuteException("Failed to evaluate multi condition " +
-                                              "trigger id="+getId(), e);
+            throw new ActionExecuteException("Failed to evaluate multi" +
+                                             "condition trigger id=" + getId(),
+                                             e);
         }
         
         TriggerFiredEvent target = prepareTargetEventOnFlush(event, etracker);
@@ -425,9 +426,8 @@ public class MultiConditionTrigger
                 throw new ActionExecuteException(e);
             } catch (SystemException e) {
                 throw new ActionExecuteException(e);
-            }            
-        }        
-
+            }
+        }
     }
 
     private TriggerFiredEvent prepareTargetEventOnFlush(AbstractEvent event,
@@ -454,10 +454,11 @@ public class MultiConditionTrigger
                                                 etracker);
                 }
             } else {
-                List tempLastFulfillingEvents = addNewEvent(event, etracker);
+                List priorEvents = getPriorEventsForTrigger(etracker);
                 
                 synchronized (lastFulfillingEventsLock) {
-                    lastFulfillingEvents = tempLastFulfillingEvents;                    
+                    lastFulfillingEvents = addNewEvent(priorEvents, event,
+                                                       etracker);
                 }
             }            
         }
@@ -474,10 +475,9 @@ public class MultiConditionTrigger
      *          be thread-safe!
      * @throws ActionExecuteException
      */    
-    private List addNewEvent(AbstractEvent event, EventTrackerLocal etracker)
+    private List addNewEvent(List events, AbstractEvent event,
+                             EventTrackerLocal etracker)
         throws ActionExecuteException {        
-
-        List events = getPriorEventsForTrigger(etracker);
 
         // Now add the new event, too
         events.add(event);
