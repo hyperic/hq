@@ -19,7 +19,7 @@
         <column name="AIQ_PLATFORM_ID" not-null="false" unique-key="AIQ_SERVER_UNIQUE_IDX"/>
       </many-to-one>
       <property name="autoinventoryIdentifier" type="string">
-        <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="200" unique-key="AIQ_SERVER_UNIQUE_IDX"/>
+        <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="255" unique-key="AIQ_SERVER_UNIQUE_IDX"/>
       </property>
     </properties>
 
@@ -40,7 +40,7 @@
     </property>
 
     <property name="installPath" type="string">
-      <column name="INSTALLPATH" not-null="false" length="200"/>
+      <column name="INSTALLPATH" not-null="false" length="255"/>
     </property>
 
     <property name="servicesAutomanaged" type="boolean">

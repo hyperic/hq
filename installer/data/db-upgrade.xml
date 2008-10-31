@@ -9382,9 +9382,9 @@ has already been defined.
 
   <schemaSpec version="3.128">
       <schema-alterColumn table="EAM_AIQ_SERVER" column="AUTOINVENTORYIDENTIFIER"
-                          precision="500" columnType="VARCHAR2" />
+                          precision="255" columnType="VARCHAR2" />
       <schema-alterColumn table="EAM_AIQ_SERVER" column="INSTALLPATH"
-                          precision="500" columnType="VARCHAR2" />
+                          precision="255" columnType="VARCHAR2" />
   </schemaSpec>
 
 </dbupgrade>
