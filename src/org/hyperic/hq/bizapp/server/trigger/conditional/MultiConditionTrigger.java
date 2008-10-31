@@ -92,8 +92,7 @@ public class MultiConditionTrigger
     
     private final Object lastFulfillingEventsLock = new Object();
 
-    private final Map currentSharedLockHolders =
-        Collections.synchronizedMap(new HashMap());
+    private final Map currentSharedLockHolders = Collections.synchronizedMap(new HashMap());
         
     // make the lock reentrant just to be safe in preventing deadlocks
     private final ReadWriteLock rwLock = new ReentrantWriterPreferenceReadWriteLock();
@@ -432,29 +431,37 @@ public class MultiConditionTrigger
 
     private TriggerFiredEvent prepareTargetEventOnFlush(AbstractEvent event,
                                                         EventTrackerLocal etracker)
-        throws ActionExecuteException {
+            throws ActionExecuteException {
         
         TriggerFiredEvent target = null;
         
         synchronized (lock) {
             if (event instanceof FlushStateEvent) {
                 if (triggeringConditionsFulfilled()) {
-                    // Since prepareTargetEvent iterates through the
-                    // lastFulfillingEvents, make a copy so we don't
-                    // have to synchronize on the list iteration.
-                    List copyOfLastFulfillingEvents = null;
+                    try {
+                        // Since prepareTargetEvent iterates through the 
+                        // lastFulfillingEvents, make a copy so we don't 
+                        // have to synchronize on the list iteration.                        
+                        List copyOfLastFulfillingEvents = null;
+                        
+                        synchronized (lastFulfillingEventsLock) {
+                            copyOfLastFulfillingEvents = 
+                                new ArrayList(lastFulfillingEvents);
+                        }     
+                        
+                        target = prepareTargetEvent(copyOfLastFulfillingEvents, etracker);                        
 
-                    synchronized (lastFulfillingEventsLock) {
-                        copyOfLastFulfillingEvents =
-                            new ArrayList(lastFulfillingEvents);
-                        lastFulfillingEvents.clear();
+                    } finally {
+                        if (target != null) {
+                            synchronized (lastFulfillingEventsLock) {
+                                lastFulfillingEvents.clear();                                                            
+                            }
+                        }
                     }
-
-                    target = prepareTargetEvent(copyOfLastFulfillingEvents,
-                                                etracker);
-                }
+                }                            
             } else {
-                List tempLastFulfillingEvents = addNewEvent(event, etracker);
+                List tempLastFulfillingEvents = 
+                    addNewEvent(event, etracker);
                 
                 synchronized (lastFulfillingEventsLock) {
                     lastFulfillingEvents = tempLastFulfillingEvents;                    
@@ -476,7 +483,7 @@ public class MultiConditionTrigger
      */    
     private List addNewEvent(AbstractEvent event, EventTrackerLocal etracker)
         throws ActionExecuteException {        
-
+                              
         List events = getPriorEventsForTrigger(etracker);
 
         // Now add the new event, too
@@ -535,22 +542,17 @@ public class MultiConditionTrigger
         }
         
         try {
-            long expire = getTimeRange() > 0 ?
-                    System.currentTimeMillis() - getTimeRange() : 0;
-                        
             // Clean up unused event
-            if (toDelete != null && toDelete.getTimestamp() > expire) {
-                // Only need to update reference if event may expire or if
-                // we haven't fired since we started evaluating
-                if (getTimeRange() > 0 && !lastFulfillingEvents.isEmpty())
+            if (toDelete != null) {
+                // Only need to update reference if event may expire
+                if (getTimeRange() > 0)
                     etracker.updateReference(toDelete.getId(), event);
             } else {
                 etracker.addReference(getId(), event, getTimeRange());
             }          
         } catch (SQLException e) {
             throw new ActionExecuteException(
-                    "Failed to update event references for trigger id="+getId(),
-                    e);
+                    "Failed to update event references for trigger id="+getId(), e);
         }
         
         return new ArrayList(fulfilled.values());
@@ -578,10 +580,6 @@ public class MultiConditionTrigger
                     "Failed to get referenced streams for trigger id=" +getId(),
                     exc);
             }
-            synchronized (lastFulfillingEventsLock) {
-                lastFulfillingEvents = events;
-            }
-
         }
         else {
             synchronized (lastFulfillingEventsLock) {
