@@ -42,8 +42,12 @@ public class LiveData_result extends AgentRemoteValue {
 
     private static final Log _log = LogFactory.getLog(LiveData_result.class);
 
-    private static final String PARAM_RESULT = "result";
-
+    private static final String PARAM_RESULT = "result"; // Backwards compat w/ 3.2.6 & 4.0.0
+    private static final String PARAM_NUM    = "num";
+    private static final String PARAM_CHUNK  = "chunk.";
+    
+    private static final int    CHUNK_MAX = 65535; // Unsigned short max
+    
     public void setValue(String key, String val) {
         throw new AgentAssertionException("This should never be called");
     }
@@ -55,14 +59,20 @@ public class LiveData_result extends AgentRemoteValue {
     public LiveData_result(AgentRemoteValue val)
         throws AgentRemoteException
     {
-        String resultAlreadyCompressed = val.getValue(PARAM_RESULT);
         // Only used from the LiveDataClient, where the result value has
         // already been compressed.
-        setResultCompressed(resultAlreadyCompressed);
-    }
-
-    public void setResultCompressed(String alreadyCompressed) {
-        super.setValue(PARAM_RESULT, alreadyCompressed);
+        String res = val.getValue(PARAM_RESULT);
+        String num = val.getValue(PARAM_NUM);
+        if (num != null) {
+            int numChunks = Integer.parseInt(num);
+            for (int i = 0; i < numChunks; i++) {
+                String key = PARAM_CHUNK + i;
+                super.setValue(key, val.getValue(key));
+            }
+            super.setValue(PARAM_NUM, String.valueOf(num));
+        } else {
+            super.setValue(PARAM_RESULT, res);
+        }
     }
 
     public void setResult(String result)
@@ -72,13 +82,33 @@ public class LiveData_result extends AgentRemoteValue {
         _log.debug("Compressed " + result.length() + " bytes to " +
                    compressed.length() + " bytes.");
 
-        super.setValue(PARAM_RESULT, compressed);
+        int num = 0;
+        while ((num * CHUNK_MAX) < compressed.length()) {
+            int start = num * CHUNK_MAX;
+            int end = ((start + CHUNK_MAX) > compressed.length()) ?
+                compressed.length() : start + CHUNK_MAX;
+
+            String chunk = compressed.substring(start, end);
+            super.setValue(PARAM_CHUNK + num, chunk);
+            num++;
+        }
+        super.setValue(PARAM_NUM, String.valueOf(num));
     }
 
     public String getResult()
         throws IOException, DataFormatException
     {
         String compressed = super.getValue(PARAM_RESULT);
+        if (compressed == null) {
+            StringBuffer result = new StringBuffer();
+            int num = Integer.parseInt(super.getValue(PARAM_NUM));
+            for (int i = 0; i < num; i++) {
+                String key = PARAM_CHUNK + i;
+                result.append(super.getValue(key));
+            }
+            compressed = result.toString();
+        }
+
         _log.debug("Decompressing " + compressed.length() + " bytes");
         return decompress(compressed);
     }
