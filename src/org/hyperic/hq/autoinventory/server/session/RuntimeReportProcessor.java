@@ -523,10 +523,10 @@ public class RuntimeReportProcessor {
                     String subname = aiSvc.getName();
                     // Get rid of the FQDN
                     if (aiSvc.getName().startsWith(fqdn)) {
-                        subname = subname.substring(fqdn.length());
+                        subname = subname.substring(fqdn.length() - 1);
                     }
                     
-                    if (found = (appdefSvc.getName().indexOf(subname) > -1))
+                    if (found = appdefSvc.getName().endsWith(subname))
                         break;
                 }
                 
