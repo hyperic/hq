@@ -41,7 +41,7 @@
     </property>
 
     <property name="name" type="string">
-      <column name="NAME" length="200" index="EAM_SERVICE_NAME_IDX"/>
+      <column name="NAME" length="200" unique-key="EAM_SERVER_SERVICE_IDX" index="EAM_SERVICE_NAME_IDX"/>
     </property>
 
     <property name="sortName" type="string">
@@ -65,7 +65,7 @@
     </many-to-one>
 
     <many-to-one name="server" class="Server">
-      <column name="SERVER_ID" not-null="false" index="EAM_SERVICE_SERVER_IDX"/>
+      <column name="SERVER_ID" not-null="false" index="EAM_SERVICE_SERVER_IDX" unique-key="EAM_SERVER_SERVICE_IDX"/>
     </many-to-one>
 
     <many-to-one name="serviceType" class="ServiceType">

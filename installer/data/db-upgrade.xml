@@ -9405,6 +9405,15 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.130">
+    <schema-directSQL>
+      <statement>
+        alter table EAM_SERVICE add constraint eam_server_service_idx
+              unique (server_id, name)
+      </statement>    	
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
