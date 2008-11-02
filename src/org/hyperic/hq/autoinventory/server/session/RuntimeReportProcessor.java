@@ -472,13 +472,16 @@ public class RuntimeReportProcessor {
                 for (Iterator j=aiServices.iterator(); j.hasNext(); ) {
                     aiSvc = (AIServiceValue) j.next();
                     String subname = aiSvc.getName();
-                    // Get rid of the FQDN
-                    if (aiSvc.getName().startsWith(fqdn)) {
-                        subname = subname.substring(fqdn.length() - 1);
-                    }
-                    
-                    if (found = appdefSvc.getName().endsWith(subname))
+                    if (found = appdefSvc.getName().equals(subname)) {
                         break;
+                    }
+                    else if (aiSvc.getName().startsWith(fqdn)) {
+                     // Get rid of the FQDN
+                       subname = subname.substring(fqdn.length());
+                        
+                        if (found = appdefSvc.getName().endsWith(subname))
+                            break;
+                    }
                 }
                 
                 if (found) {
