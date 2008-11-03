@@ -303,84 +303,58 @@ class SaascenterController extends BaseController
         _healthGenerator.getHealth(healthGroup, start, end)
     }
     
-    
-    /**
-     * Returns the data for a specified service
-     *  - summaryData.hqu&time=1225691380254&range=1w&
-     */
-    def serviceData(params) {
-        /*
-         long currTime = Long.parseLong(params.getOne('time'))
-         def range   = params.getOne('range')
-         long from = convertRangeToUTC(currTime, range)
-         JSONObject json = new JSONObject()
-         json.put("key","value");
-        */
-         // render(inline:"/* ${json.toString()} */", contentType:'text/json-comment-filtered')
-         
-         def json = new StringBuffer( """
-               {
-                'strips' : [
-                    {
-                        "stripType":"health",
-                        "d":[
-                            {"startMillis":1224808981813,
-                            "m":"",
-                            "w":100,
-                            "endMillis":1225413781813,
-                            "s":"green"}],
-                        "sn":"APPENGINE",
-                        "startMillis":1224808981813,
-                        "rm":"1 Day",
-                        "r":100,
-                        "cs":"green",
-                        "sm":[],
-                        "n":"Health",
-                        "endMillis":1225413781813,
-                        "nm":""
-                    },
-                    {
-                        "stripType":"indicators",
-                        "charts":[
-                            {
-                                "legendY":"legendY",
-                                "legendX":"time (days)",
-                                "chartName":"Datastore Delete Time"
-                                "data":{}                            
-                            },
-                            {
-                                "legendY":"legendY",
-                                "legendX":"time (days)",
-                                "data":{}
-                                "chartName":"Datastore Read Time"
-                            },
-                            {
-                                "legendY":"legendY",
-                                "legendX":"time (days)",
-                                "data":{}
-                                "chartName":"memcache Get Time"}
-                        ]
-                    }
-                ]
-               }
-         """)
-         render(inline:"/* ${json.toString()} */", contentType:'text/json-comment-filtered')
+    def sampleServiceData(params) {
+        def json = new StringBuffer( """
+                {
+                 'strips' : [
+                     {
+                         "stripType":"health",
+                         "d":[
+                             {"startMillis":1224808981813,
+                             "m":"",
+                             "w":100,
+                             "endMillis":1225413781813,
+                             "s":"green"}],
+                         "sn":"APPENGINE",
+                         "startMillis":1224808981813,
+                         "rm":"1 Day",
+                         "r":100,
+                         "cs":"green",
+                         "sm":[],
+                         "n":"Health",
+                         "endMillis":1225413781813,
+                         "nm":""
+                     },
+                     {
+                         "stripType":"indicators",
+                         "charts":[
+                             {
+                                 "legendY":"legendY",
+                                 "legendX":"time (days)",
+                                 "chartName":"Datastore Delete Time"
+                                 "data":{}                            
+                             },
+                             {
+                                 "legendY":"legendY",
+                                 "legendX":"time (days)",
+                                 "data":{}
+                                 "chartName":"Datastore Read Time"
+                             },
+                             {
+                                 "legendY":"legendY",
+                                 "legendX":"time (days)",
+                                 "data":{}
+                                 "chartName":"memcache Get Time"}
+                         ]
+                     }
+                 ]
+                }
+          """)
+          render(inline:"/* ${json.toString()} */", contentType:'text/json-comment-filtered')
     }
     
-    /**
-     * Returns the data for the summary tabs as well as the names of the installed services
-     *  - summaryData.hqu&time=1225691380254&range=1w
-     */
-    def summaryData(params) {
-         /*
-         long to = Long.parseLong(params.getOne('time'))
-         def range   = params.getOne('range')
-         long from = convertRangeToUTC(range, to)
-         _log.debug("TIME: " + to + " : " + from)
-         JSONObject json = getMeasurementJSON(from, to)
-         */
-         //render(inline:"/* ${json.toString()} */", contentType:'text/json-comment-filtered')
-         def json = new StringBuffer( """
+    def sampleSummaryData(params) {
+        def json = new StringBuffer( """
                 {
                 'providers': [
                     { 
@@ -457,6 +431,35 @@ class SaascenterController extends BaseController
             }
         """)
          render(inline:"/* ${json.toString()} */", contentType:'text/json-comment-filtered')
+         
+    }
+    /**
+     * Returns the data for a specified service
+     *  - summaryData.hqu&time=1225691380254&range=1w&
+     */
+    def serviceData(params) {
+         long currTime = Long.parseLong(params.getOne('time'))
+         def range   = params.getOne('range')
+         long from = convertRangeToUTC(currTime, range)
+         JSONObject json = new JSONObject()
+         json.put("key","value");
+         render(inline:"/* ${json.toString()} */", contentType:'text/json-comment-filtered')
+         
+         
+    }
+    
+    /**
+     * Returns the data for the summary tabs as well as the names of the installed services
+     *  - summaryData.hqu&time=1225691380254&range=1w
+     */
+    def summaryData(params) {
+         long to = Long.parseLong(params.getOne('time'))
+         def range   = params.getOne('range')
+         long from = convertRangeToUTC(range, to)
+         _log.debug("TIME: " + to + " : " + from)
+         JSONObject json = getMeasurementJSON(from, to)
+         render(inline:"/* ${json.toString()} */", contentType:'text/json-comment-filtered')
+         
     }
     
     def index(params) {
