@@ -1,4 +1,6 @@
 <style type="text/css">
+/*Widgets*/
+
 /*Health Bars*/
 
 .grey {
@@ -93,7 +95,7 @@
 }
 
 .rle-box:hover {
-	background: url(/images/saas/highlight_middle.png);
+	background: url('/images/saas/highlight_middle.png');
 }
 
 /*for ie6 since it sucks and cant do div:hover*/
@@ -101,7 +103,7 @@
 .rle-over {
 
 
-/*background: url(/images/saas/highlight.png) no-repeat;*/
+/*background: url('/images/saas/highlight.png') no-repeat;*/
 	background-color: #E9F5FB;
 }
 
@@ -180,6 +182,11 @@
 	padding-top: 3px
 }
 
+.rle-bg {
+	height: 14px;
+	float: left
+}
+
 .ll {
 	float: left;
 	margin-left: 4px
@@ -202,6 +209,433 @@
 	bottom: 4px;
 	position: absolute;
 	right: 4px
+}
+
+
+/*Status Indicator Widget*/
+
+.status {
+	color: #BBB;
+	font-size: .7em;
+	height: 0;
+    padding-right: 10px;
+    float: right;
+	position: relative;
+	top: 0;
+	text-align: right;
+	width: 250px
+}
+
+#update {
+	background: transparent url(/images/saas/activity.gif) no-repeat;
+	margin-left: 110px;
+	height: 16px;
+	padding: 1px 21px 0
+}
+
+#nt {
+	color: #06A
+}
+/*TIMELINE*/
+.timeline-ether-marker-bottom {
+    width:          5em; 
+    height:         1.5em; 
+    border-left:    1px solid #aaa; 
+    padding-left:   2px; 
+    color:          #aaa;
+}
+
+.timeline-ether-marker-bottom-emphasized {
+    width:          5em; 
+    height:         2em; 
+    border-left:    1px solid #aaa; 
+    padding-left:   2px; 
+    color:          black;
+}
+
+.timeline-ether-marker-top {
+    width:          5em; 
+    height:         1.5em; 
+    border-left:    1px solid #aaa; 
+    padding-left:   2px; 
+    color:          #aaa;
+}
+
+.timeline-ether-marker-top-emphasized {
+    width:          5em; 
+    height:         2em; 
+    border-left:    1px solid #aaa; 
+    padding-left:   2px; 
+    color:          black;
+}
+
+
+.timeline-ether-marker-right {
+    width:          5em; 
+    height:         1.5em; 
+    border-top:     1px solid #aaa; 
+    padding-top:    2px; 
+    color:          #aaa;
+}
+
+.timeline-ether-marker-right-emphasized {
+    width:          7em; 
+    height:         1.5em; 
+    border-top:     1px solid #aaa; 
+    padding-top:    2px; 
+    color:          black;
+}
+.timeline-ether-marker-left {
+    width:          5em; 
+    height:         1.5em; 
+    border-top:     1px solid #aaa; 
+    padding-top:    2px; 
+    color:          #aaa;
+}
+
+.timeline-ether-marker-left-emphasized {
+    width:          7em; 
+    height:         1.5em; 
+    border-top:     1px solid #aaa; 
+    padding-top:    2px; 
+    color:          black;
+}
+.timeline-duration-event {
+    position: absolute;
+    overflow: hidden;
+    border: 1px solid blue;
+}
+
+.timeline-instant-event2 {
+    position: absolute;
+    overflow: hidden;
+    border-left: 1px solid blue;
+    padding-left: 2px;
+}
+
+.timeline-instant-event {
+    position: absolute;
+    overflow: hidden;
+}
+
+.timeline-event-bubble-title {
+    font-weight: bold;
+    border-bottom: 1px solid #888;
+    margin-bottom: 0.5em;
+}
+
+.timeline-event-bubble-body {
+}
+
+.timeline-event-bubble-wiki {
+    margin:     0.5em;
+    text-align: right;
+    color:      #A0A040;
+}
+.timeline-event-bubble-wiki a {
+    color:      #A0A040;
+}
+
+.timeline-event-bubble-time {
+    color: #aaa;
+}
+
+.timeline-event-bubble-image {
+    float: right;
+    padding-left: 5px;
+    padding-bottom: 5px;
+}
+
+.timeline-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.timeline-copyright {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.timeline-message-container {
+    position:   absolute;
+    top:        30%;
+    left:       35%;
+    right:      35%;
+    z-index:    1000;
+    display:    none;
+}
+.timeline-message {
+    font-size:      120%;
+    font-weight:    bold;
+    text-align:     center;
+}
+.timeline-message img {
+    vertical-align: middle;
+}
+
+.timeline-band {
+    position:   absolute;
+    background: #eee;
+    z-index:    10;
+}
+
+.timeline-band-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.timeline-band-input {
+    position:   absolute;
+    width:      1em;
+    height:     1em;
+    overflow:   hidden;
+    z-index:    0;
+}
+.timeline-band-input input{
+    width:      0;
+}
+
+.timeline-band-layer {
+    position:   absolute;
+    width:      100%;
+    height:     100%;
+}
+
+.timeline-band-layer-inner {
+    position:   relative;
+    width:      100%;
+    height:     100%;
+}
+
+/*TIMEPLOT*/
+
+.timeplot-container {
+    overflow: hidden;
+    position: relative;
+    height: 200px;
+    border: 1px solid #ccc;
+    padding: 12px 14px;
+}
+
+.timeplot-copyright {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.timeplot-message-container {
+    position:   absolute;
+    top:        30%;
+    left:       35%;
+    right:      35%;
+    max-width:  400px;
+    z-index:    1000;
+    display:    none;
+}
+.timeplot-message {
+    font-size:      120%;
+    font-weight:    bold;
+    text-align:     center;
+}
+.timeplot-message img {
+    vertical-align: middle;
+}
+
+.timeplot-div {
+    position: absolute;
+}
+
+.timeplot-grid-label {
+    font-size: 9px;
+}
+
+.timeplot-event-box {
+    cursor: pointer;
+}
+
+.timeplot-event-box-highlight {
+    border: 1px solid #FFB03B;
+}
+
+.timeplot-valueflag {
+    display: none;
+    border: 1px solid #FFB02D;
+    padding: 2px 4px;
+    text-align: center;
+    background-color: #FFE57F;
+    font-weight: bold;
+    z-index: 1000;
+}
+
+.timeplot-valueflag-line {
+    display: none;
+    width: 14px;
+    height: 14px;
+    z-index: 1000;
+}
+
+.timeplot-timeflag {
+    display: none;
+    border: 1px solid #FFB02D;
+    padding: 2px 4px;
+    text-align: center;
+    background-color: #FFE57F;
+    font-weight: bold;
+    z-index: 1000;
+}
+
+.timeplot-timeflag-triangle {
+    display: none;
+    width: 11px;
+    height: 6px;
+    z-index: 1001;
+}
+
+.timeplot-valueflag-pole {
+    display: none;
+    border-left: 1px solid #FFB02D;
+    z-index: 999;
+}
+
+.timeplot-lens {
+    display: none;
+    border: 1px solid #FFB02D;
+    z-index: 998;
+}
+
+/*Chart Widget*/
+
+.chartS {
+	height: 80px;
+	width: 180px;
+	cursor: default
+}
+
+.chart {
+	height: 150px;
+	width: 320px;
+	cursor: default
+}
+
+.chartW {
+	height: 150px;
+	width: 700px;
+	cursor: default
+}
+
+.chartT {
+	height: 75px;
+	width: 700px;
+	cursor: default
+}
+
+.chartCont {
+	font-size: .65em;
+	font-family: verdana;
+	float: left;
+	margin: 0 0 0 8px;
+	padding: 10px 0 0 10px
+}
+
+.cTitle {
+	font-size: 1.1em
+}
+
+.xlegend {
+	text-align: right
+}
+
+.ylegend {
+	float: left;
+	width: 2px
+}
+
+div.timeplot-container {
+	border: 0
+}
+
+canvas {
+	_border-left: 1px solid #444;
+	_border-bottom: 1px solid #444
+}
+
+div.timeplot-valueflag,div.timeplot-timeflag {
+	background-color: #73D2F7;
+	border: 1px solid #2813F1
+}
+
+div.timeplot-valueflag-pole {
+	border-left: 1px solid #2813F1
+}
+
+/*diplay none tag*/
+
+.none,img.timeplot-copyright {
+	display: none
+}
+
+/* IE 6 PNG FIX */
+
+* html img, * html .png {
+	position: relative;
+	behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1?(this.runtimeStyle.backgroundImage = "none",
+this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')",
+this.src = "transparent.gif"):(this.origBg = this.origBg? this.origBg :this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''),
+this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='crop')",
+this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
+);
+}
+
+/*TOOLTIP WIDGET*/
+
+#toolTip {
+	position: absolute;
+	z-index: 1000;
+	width: 220px;
+	background: #000;
+	border: 1px solid #fff;
+	text-align: left;
+	padding: 5px;
+	min-height: 1em;
+	-moz-border-radius: 5px;
+}
+
+#toolTip p {
+	margin: 0;
+	padding: 0;
+	color: #fff;
+	font: 11px verdana;
+}
+
+#toolTip p em {
+	display: block;
+	margin-top: 3px;
+	color: #f60;
+	font-style: normal;
+	font-weight: bold;
+}
+
+#toolTip p em span {
+	font-weight: bold;
+	color: #fff;
+}
+
+.hover {
+	cursor: pointer
+}
+
+#overallSummary h1 {
+    cursor: pointer;
+}
+
+#overallSummary h1:hover {
+    color: red;
 }
 </style>
 <!-- hqu plugin -->
