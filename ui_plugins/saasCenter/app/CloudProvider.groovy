@@ -1,0 +1,119 @@
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
+import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceGroup
+import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
+import org.hyperic.hq.hqu.rendit.helpers.MetricHelper
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.hyperic.util.config.ConfigResponse
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate
+import org.hyperic.hq.measurement.server.session.Measurement
+
+/**
+ * A CloudProvider represents a grouping of cloud services.
+ */
+class CloudProvider {
+    def authzMan = AuthzMan.one
+    Log _log = LogFactory.getLog(this.getClass())
+    private AuthzSubject   _user
+    private ResourceHelper _rHelp
+    private MetricHelper   _mHelp
+    
+    /**
+     * Descriptive text, naming the provider: 'Amazon Web Services'
+     */
+    String longName
+    
+    /**
+     * Code, used to ID the provider in <div> tags, etc.:  'APPENGINE'
+     */
+    String code
+    
+    /**
+     * A list of {@link CloudService}s which the provider hosts. 
+     */
+    List<CloudService> services = []
+
+    /**
+     * The indicators that a provider should show if it is displayed on the
+     * dashboard.
+     *   
+     * Subclasses may initialize indicators in their constructors
+     */
+    List<DashboardIndicator> indicators = []
+
+    List<PerformanceMetric> performanceMetrics = []
+     
+    void init(AuthzSubject user) {
+        _user  = user
+        _rHelp = new ResourceHelper(user)
+        _mHelp = new MetricHelper(user)
+    }
+     
+    AuthzSubject getUser() {
+        _user
+    }
+    
+    ResourceHelper getResourceHelper() {
+        _rHelp
+    }
+    
+    MetricHelper getMetricHelper() {
+        _mHelp
+    }
+    
+    List<ChartData> getIndicatorCharts() {
+        List<ChartData> res = []
+        
+        for (indicator in indicators) {
+            MetricName metric = indicator.metric 
+            ResourceGroup grp = resourceHelper.findGroupByName(metric.groupName)
+            
+            if (!grp) {
+                _log.error("getIndicatorCharts:  Unable to find indicator group [${metric.groupName}]")
+                continue
+            }
+            
+            if (!grp.isCompatible()) {
+                _log.error("getIndicatorCharts:  Group [${grp.name}] is not a compatible group")
+                continue
+            }
+            
+            if (!grp.resources) {
+                _log.error("getIndicatorCharts: Group [${grp.name}] has no members")
+                continue
+            }
+            
+            Resource r = grp.resources[0] 
+            List templates = r.enabledMetrics.collect { it.template }
+            MeasurementTemplate tmpl = templates.find { it.name == metric.metricName } 
+
+            if (!tmpl) {
+                _log.error("getIndicatorCharts:  Group [${grp.name}] does not " + 
+                           "have members with the metric [${metric.metricName}].  Unable to " +
+                           "create indicator chart")
+                continue
+            }
+
+            res << new ChartData(resource: grp.resource, metric: tmpl,
+                                 label: indicator.label) 
+        }
+        
+        res
+    }
+    
+    boolean equals(other) {
+        if (other?.is(this))
+            return true
+        
+        if (!(other instanceof CloudProvider))
+            return false
+            
+        return code == other.code
+    }
+    
+    int hashCode() {
+        code.hashCode()
+    }
+}
