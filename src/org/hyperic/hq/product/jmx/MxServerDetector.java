@@ -28,6 +28,7 @@ package org.hyperic.hq.product.jmx;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -117,7 +118,8 @@ public class MxServerDetector
                             MxUtil.PTQL_PREFIX + query);
             return true;
         } catch (Exception e) {
-            log.debug(e.getMessage());
+            log.debug("Cannot configure local jmx.url: " +
+                      e.getMessage());
             return false;
         }
     }
@@ -152,6 +154,10 @@ public class MxServerDetector
         return getProcQuery(null);
     }
 
+    private boolean isMatch(String val) {
+        return val.indexOf('=') != -1;
+    }
+
     protected String getProcQuery(String path) {
         StringBuffer query = new StringBuffer();
         String mainClass = getProcMainClass(); 
@@ -163,10 +169,23 @@ public class MxServerDetector
 
         String homeProp = getProcHomeProperty();
         if (homeProp != null) {
+            boolean isMatch = isMatch(homeProp);
             if (path == null) {
-                query.append(",Args.*.sw=-D" + homeProp + "=");
+                query.append(",Args.*.");
+                if (isMatch) {
+                    query.append("re=-D" + homeProp);
+                }
+                else {
+                    query.append("sw=-D" + homeProp + "=");
+                }
             }
             else {
+                if (isMatch) {
+                    int ix = homeProp.indexOf('=');
+                    if (ix != -1) {
+                        homeProp = homeProp.substring(0, ix);
+                    }
+                }
                 //expand to exact match if given path
                 query.append(",Args.*.eq=-D" + homeProp + "=" + path);
             }
@@ -216,13 +235,24 @@ public class MxServerDetector
         }
     }
 
+    private boolean matches(String source, String regex) {
+        return Pattern.compile(regex).matcher(source).find();
+    }
+
     protected List getServerProcessList()
     {
         List procs = new ArrayList();
         long[] pids = getPids(getProcQuery());
         log.debug(getProcQuery() + " matched " + pids.length + " processes");
 
-        String homeProp = "-D" + getProcHomeProperty() + "=";
+        String homeProp = getProcHomeProperty();
+        final boolean isMatch = isMatch(homeProp);
+        if (isMatch) {
+            homeProp = "-D" +  homeProp;
+        }
+        else {
+            homeProp = "-D" +  homeProp + "=";
+        }
 
         for (int i=0; i<pids.length; i++) {
             long pid = pids[i];
@@ -234,7 +264,16 @@ public class MxServerDetector
             for (int j=0; j<args.length; j++) {
                 String arg = args[j];
 
-                if (arg.startsWith(homeProp)) {
+                if (isMatch) {
+                    if (matches(arg, homeProp)) {
+                        int ix = arg.indexOf('=');
+                        if (ix != -1) {
+                            path = arg.substring(ix+1);
+                            break;
+                        }
+                    }
+                }
+                else if (arg.startsWith(homeProp)) {
                     path = arg.substring(homeProp.length());
                     break;
                 }
