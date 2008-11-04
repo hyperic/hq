@@ -181,7 +181,9 @@ abstract class BaseController {
 	        invokeArgs.response.sendError(404)
 	        return
 	    }
-	   
+	    
+	    log.info "Invoking method: ${action} with ${params}"
+	    
 	    try {
 	        for (f in beforeFilters) {
 	        	if (f(params))
