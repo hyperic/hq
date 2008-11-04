@@ -661,6 +661,9 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
 <script type="text/javascript">document.navTabCat = "Resource";</script>
         <div class="yui-skin-sam">
 
+            <% providers.each { p -> %>
+                ${p.longName};
+            <% } %>
             <div id="clouds" class="yui-navset">
                 <ul class="yui-nav">
                     <li class="selected"><a href="#overview"><em>Overview</em></a></li>
@@ -744,75 +747,60 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
         function buildTab(resp)
         {
             var data = eval('(' + resp.responseText + ')');
-            console.log(data);
-            // for (i in data) {
-            //     if(!0[i]){
-            //         //clear out each sections iHTML.
-            //         //health
-            //         if(data[i].health)
-            //         {
-            //             //clear the node for the current section
-            //             dojo.byId(i.toLowerCase() + '_health').innerHTML = '';
-            //             objs[++objIdx] = new hyperic.widget.Health(i.toLowerCase() + '_health', data[i].health, false);
-            //         }
-            //         else
-            //         {
-            //             dojo.byId(i.toLowerCase() + '_health_section').style.display = 'none';
-            //         }
-            //         //charts
-            //         //limit the charts to a max of 6
-            //         var length = data[i].charts.length < 6 ? data[i].charts.length : 6;
-            //         if(length > 0)
-            //         {
-            //             //clear the node for the current section
-            //             dojo.byId(i.toLowerCase() + '_chartCont').innerHTML = '';
-            //             for (var j = 0; j < length; j++) {
-            //                 var chart_type = null;
-            //                 if(data[i].charts[j].style !== undefined && data[i].charts[j].style == 'skinny') 
-            //                 {
-            //                     chart_type = 'skinny';
-            //                 }
-            //                 else
-            //                 {
-            //                     // (display chart full-width if only one chart is displayed, 
-            //                     // or if the chart is the last on the page with an odd number of charts)
-            //                     if(length==1 || (j == length-1 && length % 2)) {
-            //                         chart_type = 'single';
-            //                     }
-            //                     else
-            //                     {
-            //                         chart_type = 'double';
-            //                     }
-            //                 }
-            //                 // console.log(i + ': ' + data[i].charts[j].chartName + ' ('+data[i].charts[j].style+'): ' + chart_type);
-            //                 objs[++objIdx] = new hyperic.widget.Chart(
-            //                     i.toLowerCase() + '_chartCont', // chart container id
-            //                     data[i].charts[j], // chart data
-            //                     i.toLowerCase(), // tab id
-            //                     j + 1, // chart position
-            //                     chart_type); // chart type 
-            //             }
-            //         }
-            //         else // if there are no charts to display, hide the chart header.
-            //         {
-            //             dojo.byId(i.toLowerCase() + '_performance_section').style.display = 'none';
-            //         }
-            //         //table
-            //         if(data[i].table.length > 0)
-            //         {
-            //             //clear the node for the current section
-            //             dojo.byId(i.toLowerCase() + '_table').innerHTML = '';
-            //             for (var k = 0; k < data[i].table.length; k++) {
-            //                 objs[++objIdx] = new hyperic.widget.Table(i.toLowerCase() + '_table', data[i].table[k]);
-            //             }
-            //         }
-            //         else
-            //         {
-            //             dojo.byId(i.toLowerCase() + '_metrics_section').style.display = 'none';
-            //         }
-            //     }
-            // }
-            this.set('content','data loaded!');            
+            var f = document.createElement("div");
+            f.style.display = 'none';
+            document.body.appendChild(f);
+
+            for (var i in data) {
+                if(typeof data[i] !== 'function') {
+                    console.log(data[i]);
+                    var id = i.replace(/\\s+/,'_','g').toLowerCase();
+                    f.innerHTML = f.innerHTML + '<h2 class="title">' + i + '</h2><div id="'+id+'_health"></div><div id="'+id+'_chartCont"></div><div class="both"></div>';
+                    //health
+                    if(data[i].health)
+                    {
+                        //clear the node for the current section
+                        dojo.byId(id + '_health').innerHTML = '';
+                        objs[++objIdx] = new hyperic.widget.Health(id + '_health', data[i].health, false);
+                    }
+                    // charts
+                    // limit the charts to a max of 6
+                    var length = data[i].charts.length < 6 ? data[i].charts.length : 6;
+                    if(length > 0) {
+                        //clear the node for the current section
+                        dojo.byId(id + '_chartCont').innerHTML = '';
+                        for (var j = 0; j < length; j++) {
+                            var chart_type = null;
+                            if(data[i].charts[j].style !== undefined && data[i].charts[j].style == 'skinny') 
+                            {
+                                chart_type = 'skinny';
+                            }
+                            else
+                            {
+                                // (display chart full-width if only one chart is displayed, 
+                                // or if the chart is the last on the page with an odd number of charts)
+                                if(length==1 || (j == length-1 && length % 2)) {
+                                    chart_type = 'single';
+                                }
+                                else
+                                {
+                                    chart_type = 'double';
+                                }
+                            }
+                            // console.log(i + ': ' + data[i].charts[j].chartName + ' ('+data[i].charts[j].style+'): ' + chart_type);
+                            objs[++objIdx] = new hyperic.widget.CloudChart(
+                                id + '_chartCont', // chart container id
+                                data[i].charts[j], // chart data
+                                id, // tab id
+                                j + 1, // chart position
+                                chart_type); // chart type
+                            objs[objIdx].showChart(); 
+                        }
+                    }
+                }
+            }
+            this.set('content',f.innerHTML);
+            f.innerHTML = '';
         }
 
         /**
