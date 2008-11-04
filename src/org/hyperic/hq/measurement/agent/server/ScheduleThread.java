@@ -462,7 +462,7 @@ public class ScheduleThread
                 if (_log.isDebugEnabled()) {
                     _log.debug("Platform schedule is not null");
                 }
-                collect(_platformAvailSchedule);
+                timeOfNext = collect(_platformAvailSchedule);
             }
             else {
                 if (_log.isDebugEnabled()) {
