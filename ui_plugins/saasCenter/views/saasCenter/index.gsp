@@ -664,9 +664,6 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             <div id="clouds" class="yui-navset">
                 <ul class="yui-nav">
                     <li class="selected"><a href="#overview"><em>Overview</em></a></li>
-                    <% providers.each { p -> %>
-                        <li><a href="#${p.code}"><em>${p.longName}</em></a></li>
-                    <% } %>
                 </ul>            
                 <div class="yui-content">
                     <!-- overall summary tab --> 
@@ -679,22 +676,22 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                           <div class="both"></div>
                           <div id="overallSummary"></div>
                     </div>
-                    <% providers.each { p -> %>
-                        <!-- ${p.longName} tab --> 
-                        <div>
-                            <div class="title">${p.longName} Health Summary</div>
-                            <div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for ${p.longName}.</div>
-
-                            <div class="both"></div>
-                            <div id="${p.code}_summary"></div>
-                        </div>
-                    <% } %>
                 </div>
             </div>
         </div>
         <div id="z" style="display: none"></div>
         <script type="text/javascript">
         var cloudTabs = new YAHOO.widget.TabView('clouds');
+        t = new Date().getTime();
+
+        <% providers.each { p -> %>
+            cloudTabs.addTab( new YAHOO.widget.Tab({ 
+                label: '${p.longName}', 
+                content: '<!-- ${p.longName} tab --><div><div class="title">${p.longName} Health Summary</div><div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for ${p.longName}.</div><div class="both"></div><div id="${p.code}_summary"></div></div>',
+                dataSrc: '/hqu/saasCenter/Saascenter/sampleServiceData.hqu?time=' + t + '&range=1w&service=${p.code}?' + t,
+                cacheData: false
+            }));
+        <% } %>
 
         // var d = document;
         var refInt = 90; //Set the pages Refresh Interval - for update timer and the pages coundown timer - in seconds
@@ -714,8 +711,8 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
 
         var providers = {
             '0': 'aws',
-            '1', 'salesforce'
-        };
+            '1': 'salesforce'
+        }
 
         function getTabData(evt) {
             provider = providers[cloudTabs.getTabIndex(evt.newValue)];
@@ -768,7 +765,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             for(var j in resp.providers) {
                 if(typeof(resp.providers[j]) !== 'function') {
                     tmp_id = 'overall_' + resp.providers[j].code.toLowerCase() + '_summary';
-                    f.innerHTML = '<div id="' + tmp_id + '"><h1 class="title" onclick="changeTabs(\''+ resp.providers[j].code.toLowerCase() +'\')">' + resp.providers[j].name + '</h1></div>';
+                    f.innerHTML = '<div id="' + tmp_id + '"><h1 class="title" onclick="changeTabs(\\\''+ resp.providers[j].code +'\\\')">' + resp.providers[j].name + '</h1></div>';
                     dojo.byId('overallSummary').appendChild(f.firstChild);
                     for (var i in resp.providers[j].strips) {
                         if(typeof(resp.providers[j].strips[i]) !== 'function')
