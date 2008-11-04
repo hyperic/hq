@@ -172,20 +172,9 @@ class HealthStripGenerator {
              log.warn "Unable to find resources by proto [${protoName}]"
              return []
          }
-         def subHealths = []
-         log.debug "ffoo "
-         for (resource in resources) {
-             
-             def leafHealths = getRLE(resource, begin, end)
-             subHealths << rleManipulator.combineRLELists(leafHealths) { sRange, eRange, vals ->
-                 if (vals.findAll { it == 0 }.size() >= Math.min(2, vals.size())) {
-                     return 0.0
-                 } else {
-                     return 1.0
-                 }
-             }
-         }
-
+         
+         def subHealths = resources.collect { getRLE(it, begin, end) }
+         
          List result = rleManipulator.combineRLELists(subHealths) { sRange, eRange, vals ->
              if (vals.findAll { it == 0 }.size() > 0) {
                  return 0.0
