@@ -145,7 +145,7 @@ public class AIScheduleManagerEJBImpl
     /**
      * Schedule an AI scan on an appdef entity (platform or group of platforms)
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void doScheduledScan(AuthzSubject subject,
                                 AppdefEntityID id, 
@@ -276,7 +276,7 @@ public class AIScheduleManagerEJBImpl
     /**
      * Get a list of scheduled scans based on appdef id
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public PageList findScheduledJobs(AuthzSubject subject, 
                                       AppdefEntityID id, PageControl pc)
@@ -313,7 +313,7 @@ public class AIScheduleManagerEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public AISchedule findScheduleByID(AuthzSubject subject, 
                                             Integer id)
@@ -326,7 +326,7 @@ public class AIScheduleManagerEJBImpl
     /**
      * Get a job history based on appdef id
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      *
      */
     public PageList findJobHistory(AuthzSubject subject, 
@@ -380,7 +380,7 @@ public class AIScheduleManagerEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void deleteAIJob(AuthzSubject subject, Integer ids[])
         throws AutoinventoryException

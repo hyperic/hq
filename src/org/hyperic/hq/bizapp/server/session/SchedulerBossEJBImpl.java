@@ -49,7 +49,7 @@ import org.quartz.utils.Key;
  *      local-jndi-name="LocalSchedulerBoss"
  *      view-type="both"
  *      type="Stateless"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class SchedulerBossEJBImpl implements SessionBean {
     private SessionManager manager;

@@ -73,7 +73,7 @@ import org.hyperic.util.jdbc.DBUtil;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class CPropManagerEJBImpl
     extends AppdefSessionUtil

@@ -46,7 +46,7 @@ import org.quartz.SchedulerException;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:interface local-extends="MaintenanceEventManagerInterface, javax.ejb.EJBLocalObject"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  *
  */
 public class MaintenanceEventManagerEJBImpl 

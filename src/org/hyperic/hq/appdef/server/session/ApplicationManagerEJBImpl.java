@@ -89,7 +89,7 @@ import org.hibernate.ObjectNotFoundException;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {

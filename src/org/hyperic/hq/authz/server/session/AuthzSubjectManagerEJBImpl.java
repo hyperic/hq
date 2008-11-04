@@ -64,7 +64,7 @@ import org.hyperic.util.pager.SortAttribute;
  *      type="Stateless"
  * 
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class AuthzSubjectManagerEJBImpl
     extends AuthzSession implements SessionBean {

@@ -60,7 +60,7 @@ import org.hyperic.hq.events.shared.EventTrackerUtil;
  *      view-type="local"
  *      type="Stateless"
  *      
- * @ejb:transaction type="REQUIRESNEW"
+ * @ejb:transaction type="RequiresNew"
  */
 public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
 
@@ -254,7 +254,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      *         containing the events referenced by the trigger. Each event will 
      *         have its id set to the trigger event id.
      *         
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public LinkedList getReferencedEventStreams(Integer tid) 
@@ -312,7 +312,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      *         containing the events referenced by the trigger. Each event will 
      *         have its id set to the trigger event id.
      *         
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public Integer getEventsCount(Integer tid)  throws SQLException {

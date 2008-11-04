@@ -61,7 +61,7 @@ import org.hyperic.hq.measurement.shared.SRNManagerUtil;
  *      local-jndi-name="SRNManager"
  *      view-type="local"
  *      type="Stateless"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class SRNManagerEJBImpl extends SessionEJB
     implements SessionBean {

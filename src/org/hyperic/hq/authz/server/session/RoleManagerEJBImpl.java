@@ -81,7 +81,7 @@ import org.hyperic.util.pager.SortAttribute;
  *      type="Stateless"
  * 
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
@@ -259,7 +259,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param role The role to delete.
      * @throws RemoveException Unable to delete the specified entity.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeRole(AuthzSubject whoami, Integer rolePk)
         throws RemoveException, PermissionException {
@@ -853,7 +852,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param pc The PageControl object for paging results.
      * @return List a list of OwnedRoleValues that are not system roles
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      * @throws CreateException indicating ejb creation / container failure.
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException caller is not allowed to perform listRoles
@@ -875,7 +873,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @param pc The PageControl object for paging results.
      * @return List a list of OwnedRoleValues that are not system roles
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      * @throws CreateException indicating ejb creation / container failure.
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException caller is not allowed to perform listRoles

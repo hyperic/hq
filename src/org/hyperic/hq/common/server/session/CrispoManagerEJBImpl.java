@@ -53,7 +53,7 @@ import org.hyperic.util.config.ConfigResponse;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class CrispoManagerEJBImpl implements SessionBean {
     private CrispoDAO getCrispoDAO() {

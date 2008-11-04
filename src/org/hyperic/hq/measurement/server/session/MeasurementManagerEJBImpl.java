@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,28 +49,20 @@ import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -101,7 +92,7 @@ import org.hyperic.util.timer.StopWatch;
  *      view-type="local"
  *      type="Stateless"
  * 
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class MeasurementManagerEJBImpl extends SessionEJB
     implements SessionBean 
@@ -204,7 +195,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @param props       Configuration data for the instance
      *
      * @return a List of the associated Measurement objects
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
     public List createMeasurements(AppdefEntityID id, Integer[] templates,
@@ -1057,7 +1048,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="NotSupported"
      */
     public void syncPluginMetrics(String plugin) {
         ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();

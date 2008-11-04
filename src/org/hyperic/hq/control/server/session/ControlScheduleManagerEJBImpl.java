@@ -344,7 +344,7 @@ public class ControlScheduleManagerEJBImpl
      * Get a list of scheduled jobs based on appdef id
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public PageList findScheduledJobs(AuthzSubject subject, 
                                       AppdefEntityID id, PageControl pc)
@@ -451,7 +451,7 @@ public class ControlScheduleManagerEJBImpl
      * Get a batch job history based on batchJobId and appdef id
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public PageList findGroupJobHistory(AuthzSubject subject, int batchId,
                                         AppdefEntityID id, PageControl pc)
@@ -526,7 +526,7 @@ public class ControlScheduleManagerEJBImpl
      * Remove an entry from the control history
      *
      * @ejb:interface-method 
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void deleteJobHistory(AuthzSubject subject, Integer[] ids)
         throws ApplicationException
@@ -548,7 +548,7 @@ public class ControlScheduleManagerEJBImpl
      * no current running action, null is returned.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
      public ControlHistory getCurrentJob(AuthzSubject whoami, AppdefEntityID id)
          throws ApplicationException
@@ -574,7 +574,7 @@ public class ControlScheduleManagerEJBImpl
      * Obtain a control history object based on the history id
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public ControlHistory getJobByJobId(AuthzSubject subject, Integer id)
         throws ApplicationException
@@ -595,7 +595,7 @@ public class ControlScheduleManagerEJBImpl
      * are no previous events.  This ignores jobs that are in progress.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public ControlHistory getLastJob(AuthzSubject subject, AppdefEntityID id)
         throws ApplicationException
@@ -617,7 +617,7 @@ public class ControlScheduleManagerEJBImpl
      * Obtain a scheduled control action based on an id
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public ControlSchedule getControlJob(AuthzSubject subject, Integer id)
         throws PluginException
@@ -641,7 +641,7 @@ public class ControlScheduleManagerEJBImpl
      * Delete a scheduled control actions based on id
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void deleteControlJob(AuthzSubject subject, Integer ids[])
         throws PluginException
@@ -665,7 +665,7 @@ public class ControlScheduleManagerEJBImpl
      * Removes all jobs associated with an appdef entity
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="RequiresNew"
      */
     public void removeScheduledJobs(AuthzSubject subject, AppdefEntityID id)
         throws ScheduledJobRemoveException
@@ -727,7 +727,7 @@ public class ControlScheduleManagerEJBImpl
      * Schedule an action on an appdef entity
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void doScheduledAction(AppdefEntityID id, AuthzSubject subject,
                                   String action, ScheduleValue schedule,
@@ -816,7 +816,7 @@ public class ControlScheduleManagerEJBImpl
      * Create a control history entry
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public ControlHistory createHistory(AppdefEntityID id,
                                         Integer groupId,
@@ -842,7 +842,7 @@ public class ControlScheduleManagerEJBImpl
      * Update a control history entry
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void updateHistory(Integer jobId, long endTime,
                               String status, String message)
@@ -865,7 +865,7 @@ public class ControlScheduleManagerEJBImpl
      * Get a control history value based on primary key
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public ControlHistory getJobHistoryValue(Integer jobId)
         throws ApplicationException
@@ -881,7 +881,7 @@ public class ControlScheduleManagerEJBImpl
      * Get a control history value based on primary key
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void removeHistory(Integer id) throws ApplicationException {
         try {

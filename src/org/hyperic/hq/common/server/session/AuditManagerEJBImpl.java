@@ -56,7 +56,7 @@ import org.hyperic.hq.common.server.session.Audit;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class AuditManagerEJBImpl implements SessionBean {
     private final Log _log = LogFactory.getLog(AuditManagerEJBImpl.class);

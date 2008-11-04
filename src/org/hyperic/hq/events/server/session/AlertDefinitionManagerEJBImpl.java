@@ -82,7 +82,7 @@ import org.hyperic.util.timer.StopWatch;
  *      local-jndi-name="LocalAlertDefinitionManager"
  *      view-type="local"
  *      type="Stateless"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  *
  */
 public class AlertDefinitionManagerEJBImpl 
@@ -492,7 +492,7 @@ public class AlertDefinitionManagerEJBImpl
      * be performed within a new transaction.
      * 
      * @return <code>true</code> if the enable/disable succeeded.
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
     public boolean updateAlertDefinitionInternalEnableForceNewTxn(AuthzSubject subj,

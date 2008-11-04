@@ -95,7 +95,7 @@ import org.hyperic.util.pager.Pager;
  *      type="Stateless"
  * 
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class ResourceGroupManagerEJBImpl 
     extends AuthzSession 
@@ -390,7 +390,6 @@ public class ResourceGroupManagerEJBImpl
      * @param pc Paging information for the request
      * @return list of authorized resources in this group.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Collection getResources(AuthzSubject whoami, Integer id)
     {
@@ -479,7 +478,6 @@ public class ResourceGroupManagerEJBImpl
     /**
      * Temporary method to convert a ResourceGroup into an AppdefGroupValue
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AppdefGroupValue getGroupConvert(AuthzSubject subj, ResourceGroup g)
     {
@@ -671,7 +669,6 @@ public class ResourceGroupManagerEJBImpl
      * Get all {@link ResourceGroup}s 
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Collection getAllResourceGroups() {
         return getResourceGroupDAO().findAll();
@@ -763,7 +760,6 @@ public class ResourceGroupManagerEJBImpl
      * Change owner of a group.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void changeGroupOwner(AuthzSubject subject, ResourceGroup group,
                                  AuthzSubject newOwner)
@@ -807,7 +803,6 @@ public class ResourceGroupManagerEJBImpl
     
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void updateGroupType(AuthzSubject subject, ResourceGroup g,
                                 int groupType, int groupEntType,

@@ -224,7 +224,7 @@ public class AgentManagerEJBImpl
      * either a bidirectional or unidirectional transport.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public Agent createNewTransportAgent(String address, Integer port, 
                                          String authToken, String agentToken, 
@@ -252,7 +252,7 @@ public class AgentManagerEJBImpl
      * the legacy 'covalent-eam' type.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public Agent createLegacyAgent(String address, Integer port, 
                                    String authToken, String agentToken, 
@@ -282,7 +282,7 @@ public class AgentManagerEJBImpl
      * unidirectional transport.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateNewTransportAgent(String agentToken, 
@@ -317,7 +317,7 @@ public class AgentManagerEJBImpl
      * be reset. The type of the agent that is updated is the legacy 'covalent-eam' type.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateLegacyAgent(String agentToken,
@@ -352,7 +352,7 @@ public class AgentManagerEJBImpl
      * configured to use either a bidirectional or unidirectional transport.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateNewTransportAgent(String ip, int port, String authToken,
@@ -384,7 +384,7 @@ public class AgentManagerEJBImpl
      * that is updated is the legacy 'covalent-eam' type.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateLegacyAgent(String ip, int port, String authToken,
@@ -412,7 +412,7 @@ public class AgentManagerEJBImpl
     
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public List findAgentsByIP(String ip) {
         return getAgentDAO().findByIP(ip);
@@ -429,7 +429,7 @@ public class AgentManagerEJBImpl
      * @param port       The new port
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateNewTransportAgent(String agentToken, String ip, 
@@ -463,7 +463,7 @@ public class AgentManagerEJBImpl
      * @param port       The new port
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateLegacyAgent(String agentToken, String ip, int port)
@@ -488,11 +488,11 @@ public class AgentManagerEJBImpl
     }
 
     /**
-     * Find an agent by the token which is required for the agent
+     * Find an agent by the token which is Required for the agent
      * to send when it connects.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void checkAgentAuth(String agentToken)
         throws AgentUnauthorizedException
@@ -563,7 +563,7 @@ public class AgentManagerEJBImpl
      * @param agentToken the agent token to look for
      * @return An Agent representing the agent that has the given token.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public Agent getAgent(String agentToken)
         throws AgentNotFoundException 
@@ -585,7 +585,7 @@ public class AgentManagerEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public Agent findAgent(Integer id) {
         return getAgentDAO().findById(id);
@@ -650,7 +650,7 @@ public class AgentManagerEJBImpl
      * @throws AgentRemoteException if an exception occurs on the remote agent side.
      * @throws AgentConnectionException  if the connection to the agent fails.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public String getCurrentAgentBundle(AuthzSubject subject, AppdefEntityID aid) 
         throws PermissionException, 
@@ -683,7 +683,7 @@ public class AgentManagerEJBImpl
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void upgradeAgentAsync(AuthzSubject subject,
                                          AppdefEntityID aid,  
@@ -732,7 +732,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void upgradeAgent(AuthzSubject subject,
                                          AppdefEntityID aid,  
@@ -771,7 +771,7 @@ public class AgentManagerEJBImpl
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void transferAgentBundleAsync(AuthzSubject subject,
                                          AppdefEntityID aid,  
@@ -819,7 +819,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void transferAgentBundle(AuthzSubject subject,
                                     AppdefEntityID aid,  
@@ -870,7 +870,7 @@ public class AgentManagerEJBImpl
      * @throws AgentConnectionException  if the connection to the agent fails.
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void transferAgentPlugin(AuthzSubject subject,
                                     AppdefEntityID aid,  
@@ -934,7 +934,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void transferAgentPluginAsync(AuthzSubject subject,
                                     AppdefEntityID aid,  
@@ -986,7 +986,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void upgradeAgentBundle(AuthzSubject subject,
                                     AppdefEntityID aid,  
@@ -1025,7 +1025,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void restartAgent(AuthzSubject subject,
                                     AppdefEntityID aid) 
@@ -1077,7 +1077,7 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public long pingAgent(AuthzSubject subject, Agent agent)
         throws PermissionException, AgentNotFoundException,

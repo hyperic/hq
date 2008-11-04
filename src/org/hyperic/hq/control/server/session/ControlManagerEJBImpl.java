@@ -98,7 +98,7 @@ import org.quartz.SchedulerException;
  *      local-jndi-name="LocalControlManager"
  *      view-type="local"
  *      type="Stateless"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class ControlManagerEJBImpl implements SessionBean {
 

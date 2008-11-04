@@ -68,7 +68,7 @@ import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class UIPluginManagerEJBImpl 
     implements SessionBean 

@@ -54,7 +54,7 @@ import org.json.JSONObject;
  *      local-jndi-name="LocalActionManager"
  *      view-type="local"
  *      type="Stateless"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 
 public class ActionManagerEJBImpl implements SessionBean {

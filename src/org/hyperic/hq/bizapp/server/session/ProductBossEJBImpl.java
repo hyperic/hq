@@ -84,7 +84,7 @@ import org.hyperic.util.file.FileUtil;
  *      local-jndi-name="LocalProductBoss"
  *      view-type="both"
  *      type="Stateless"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
 {

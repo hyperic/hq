@@ -83,7 +83,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @param password The password for the user
      * @return session id that is associated with the user
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Supports"
      */
     public int getSessionId(String user, String password)
         throws SecurityException, LoginException, ConfigPropertyException,
@@ -136,7 +136,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @throws ApplicationException if user is not found
      * @throws LoginException if user account has been disabled
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Supports"
      */
     public int getUnauthSessionId(String user)
         throws ApplicationException 
@@ -178,7 +178,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @param password The password for this user
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * XXX: Shouldn't this check permissions?
      */
     public void addUser(AuthzSubject subject,
@@ -198,7 +198,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @param password The new password for this user
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void changePassword(AuthzSubject subject,
                                String username, String password)
@@ -225,7 +225,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @param password The new password for this user
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void changePasswordHash(AuthzSubject subject, String username,
                                    String hash)
@@ -253,7 +253,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @param username The user to delete
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * XXX: Shouldn't this check permissions?
      */
     public void deleteUser(AuthzSubject subject, String username) {

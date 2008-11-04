@@ -119,7 +119,7 @@ public class AIQueueManagerEJBImpl
      * platform was removed because the AI platform had a qstat of "remove" that
      * was approved.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public AIPlatformValue queue(AuthzSubject subject,
                                  AIPlatformValue aiplatform,
@@ -207,7 +207,7 @@ public class AIQueueManagerEJBImpl
      * @return A List of AIPlatformValue objects representing the contents
      * of the autoinventory queue.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public PageList getQueue(AuthzSubject subject, boolean showIgnored,
                              boolean showPlaceholders,
@@ -310,7 +310,7 @@ public class AIQueueManagerEJBImpl
      * Get an AIPlatformValue by id.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return An AIPlatformValue with the given id, or null if that platform
      * id is not present in the queue.
      */
@@ -330,7 +330,7 @@ public class AIQueueManagerEJBImpl
      * Get an AIPlatformValue by FQDN.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return The AIPlatformValue with the given FQDN, or null if that FQDN does
      * not exist in the queue.
      */
@@ -364,7 +364,7 @@ public class AIQueueManagerEJBImpl
      * Get an AIServerValue by Id.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return The AIServerValue with the given id, or null if that server id
      * does not exist in the queue.
      */
@@ -384,7 +384,7 @@ public class AIQueueManagerEJBImpl
      * Get an AIServerValue by name.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return The AIServerValue with the given id, or null if that server name
      * does not exist in the queue.
      */
@@ -404,7 +404,7 @@ public class AIQueueManagerEJBImpl
      * Get an AIIp by id.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return The AIIp with the given id, or null if that ip does not exist.
      */
     public AIIpValue findAIIpById(AuthzSubject subject,
@@ -421,7 +421,7 @@ public class AIQueueManagerEJBImpl
      * Get an AIIpValue by address.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @return The AIIpValue with the given address, or null if an ip with
      * that address does not exist in the queue.
      */
@@ -651,7 +651,7 @@ public class AIQueueManagerEJBImpl
     /**
      * Remove an AI platform from the queue.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void removeFromQueue(AIPlatform aiplatform ) {
         // Remove the platform, this should recursively remove all queued 

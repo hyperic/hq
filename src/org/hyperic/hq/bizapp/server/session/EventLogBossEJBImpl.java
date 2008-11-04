@@ -59,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
  *      view-type="both"
  *      type="Stateless"
  * 
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class EventLogBossEJBImpl extends BizappSessionEJB implements
         SessionBean {

@@ -40,7 +40,7 @@ import org.hyperic.util.Runnee;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class TransactionManagerEJBImpl implements SessionBean {
 

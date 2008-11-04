@@ -65,7 +65,7 @@ import org.hyperic.hq.common.SystemException;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class VirtualManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {
@@ -177,7 +177,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
     /**
      * Associate an array of entities to a VM
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void associateEntities(AuthzSubject subj,
                                   Integer processId,
@@ -208,7 +208,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
      * Associate an array of entities to a VM
      * @throws FinderException 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void associateToPhysical(AuthzSubject subj,
                                     Integer physicalId,

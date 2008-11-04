@@ -48,7 +48,7 @@ import org.hyperic.hq.measurement.shared.MetricAuxLogManagerUtil;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class MetricAuxLogManagerEJBImpl 
     implements SessionBean

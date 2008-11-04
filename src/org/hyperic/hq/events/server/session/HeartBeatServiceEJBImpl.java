@@ -50,7 +50,7 @@ import org.hyperic.hq.zevents.ZeventManager;
  *      local-jndi-name="LocalHeartBeatService"
  *      view-type="local"
  *      type="Stateless"
- * @ejb:transaction type="NOTSUPPORTED"
+ * @ejb:transaction type="NotSupported"
  *
  */
 public class HeartBeatServiceEJBImpl     

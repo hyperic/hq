@@ -62,7 +62,7 @@ import org.hyperic.util.jdbc.DBUtil;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="SUPPORTS"
+ * @ejb:transaction type="Supports"
  */
 
 public class AppdefManagerEJBImpl

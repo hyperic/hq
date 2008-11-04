@@ -47,7 +47,7 @@ import org.hyperic.hq.common.shared.CalendarManagerUtil;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class CalendarManagerEJBImpl implements SessionBean {
     private final CalendarDAO _calDAO = 

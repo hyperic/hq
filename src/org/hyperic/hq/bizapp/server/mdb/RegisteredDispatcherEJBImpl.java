@@ -67,7 +67,7 @@ import org.hyperic.hq.events.ext.RegisteredTriggers;
  *      acknowledge-mode="Auto-acknowledge"
  *      destination-type="javax.jms.Topic"
  *         
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  *      
  * @jboss:destination-jndi-name name="topic/eventsTopic"
  */

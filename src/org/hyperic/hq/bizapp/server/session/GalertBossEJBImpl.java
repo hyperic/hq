@@ -79,7 +79,7 @@ import org.json.JSONObject;
 *      view-type="both"
 *      type="Stateless"
 * 
-* @ejb:transaction type="REQUIRED"
+* @ejb:transaction type="Required"
 */
 public class GalertBossEJBImpl 
    implements SessionBean 

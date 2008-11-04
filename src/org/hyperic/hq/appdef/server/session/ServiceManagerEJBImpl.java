@@ -99,7 +99,7 @@ import org.hyperic.hq.zevents.ZeventManager;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class ServiceManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {

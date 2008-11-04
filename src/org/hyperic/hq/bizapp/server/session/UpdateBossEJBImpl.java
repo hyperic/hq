@@ -69,7 +69,7 @@ import org.hyperic.util.thread.LoggingThreadGroup;
  *      local-jndi-name="LocalUpdateBoss"
  *      view-type="both"
  *      type="Stateless"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class UpdateBossEJBImpl 
     extends BizappSessionEJB

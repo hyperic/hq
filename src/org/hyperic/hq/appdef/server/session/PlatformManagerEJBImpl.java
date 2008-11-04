@@ -114,7 +114,7 @@ import org.hibernate.NonUniqueResultException;
  *           local-jndi-name="LocalPlatformManager" view-type="local"
  *           type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
         SessionBean {

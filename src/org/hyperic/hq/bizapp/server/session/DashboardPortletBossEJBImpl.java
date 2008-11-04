@@ -92,7 +92,7 @@ import org.json.JSONObject;
  *      local-jndi-name="LocalDashboardPortletBoss"
  *      view-type="both"
  *      type="Stateless"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class DashboardPortletBossEJBImpl
     extends AppdefSessionEJB

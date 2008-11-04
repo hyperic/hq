@@ -48,7 +48,7 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
  *      view-type="local"
  *      type="Stateless"
  * 
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 
 public class RegisteredTriggerManagerEJBImpl implements SessionBean {

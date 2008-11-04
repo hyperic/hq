@@ -282,7 +282,7 @@ public abstract class AppdefSessionEJB
     /**
      * Check for modify permission for a given resource
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void checkModifyPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException 
@@ -618,7 +618,7 @@ public abstract class AppdefSessionEJB
      * @param id - what
      * @param subject - who
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void checkCreateChildPermission(AuthzSubject subject,
                                            AppdefEntityID id)
@@ -643,7 +643,7 @@ public abstract class AppdefSessionEJB
     /**
      * Get the AppdefResourcePermissions for a given resource
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      *
      * XXX: DON'T USE THIS!!
      * @deprecated Use the individual check*Permission methods instead.

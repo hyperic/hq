@@ -56,7 +56,7 @@ import org.hyperic.hq.events.shared.EventLogManagerLocal;
  *      acknowledge-mode="Auto-acknowledge"
  *      destination-type="javax.jms.Topic"
  *
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  *
  * @jboss:destination-jndi-name name="topic/eventsTopic"
  */

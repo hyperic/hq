@@ -51,12 +51,12 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 
 /**
- * @ejb:transaction type="REQUIRED"
  * @ejb:bean name="MeasurementProcessor"
  *      jndi-name="ejb/measurement/MeasurementProcessor"
  *      local-jndi-name="LocalMeasurementProcessor"
  *      view-type="local"
  *      type="Stateless"
+ * @ejb:transaction type="Required"
  */
 public class MeasurementProcessorEJBImpl 
     extends SessionEJB 

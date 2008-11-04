@@ -70,7 +70,7 @@ import org.hibernate.mapping.Table;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class ServerConfigManagerEJBImpl implements SessionBean {
     private Log _log = LogFactory.getLog(ServerConfigManagerEJBImpl.class);
@@ -296,7 +296,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * that have been modified are analyzed.
      *
      * @return The time taken in milliseconds to run the command.
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public long analyzeNonMetricTables() {
@@ -338,7 +338,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * well as the previous data slice.
      *
      * @return The time taken in milliseconds to run the command.
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public long analyzeHqMetricTables()
@@ -380,7 +380,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * 
      * @return The time it took to vaccum, in milliseconds, or -1 if the 
      * database is not PostgreSQL.
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public long vacuum() {

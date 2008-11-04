@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -25,11 +25,9 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.CreateException;
@@ -42,10 +40,8 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventLogStatus;
@@ -65,7 +61,7 @@ import org.hyperic.hq.product.TrackEvent;
  *      view-type="local"
  *      type="Stateless"
  *
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     
@@ -152,10 +148,9 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      * 
      * @ejb:interface-method
      */
-    public List findLogs(AuthzSubject subject, long begin, long end, 
-                         PageInfo pInfo,
-                         EventLogStatus maxStatus, String typeClass,
-                         Collection inGroups)
+    public List findLogs(AuthzSubject subject, long begin, long end,
+                         PageInfo pInfo, EventLogStatus maxStatus,
+                         String typeClass, Collection inGroups)
     {
         return getEventLogDAO().findLogs(subject, begin, end, pInfo, maxStatus, 
                                          typeClass, inGroups);
@@ -259,7 +254,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      * including the most recent record.
      * @return The number of records removed.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="NotSupported"
      */
     public int deleteLogs(long from, long to) { 
         if (log.isDebugEnabled()) {

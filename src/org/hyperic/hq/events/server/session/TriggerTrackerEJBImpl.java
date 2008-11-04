@@ -70,7 +70,7 @@ public class TriggerTrackerEJBImpl extends SessionBase implements SessionBean {
      * If trigger should fire, then register the time that it fired.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      * @param tid the Trigger ID
      */
     public boolean fire(Integer tid, long frequency) {
@@ -153,7 +153,7 @@ public class TriggerTrackerEJBImpl extends SessionBase implements SessionBean {
      * @param tid the Trigger ID
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void remove(Integer tid) {
         // Look up any triggers that have fired in the past

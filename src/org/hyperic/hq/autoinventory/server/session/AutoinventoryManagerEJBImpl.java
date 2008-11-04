@@ -150,7 +150,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @return A Map, where the keys are the names of the ServerTypeValues,
      * and the values are the ServerSignature objects.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public Map getServerSignatures(AuthzSubject subject,
                                    List serverTypes)
@@ -240,7 +240,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @param id The AppdefEntityID of the resource to turn
      * off runtime config for.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void turnOffRuntimeDiscovery(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException
@@ -274,7 +274,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @param agentToken Which agent controls the runtime AI scans for 
      * this resource.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void turnOffRuntimeDiscovery(AuthzSubject subject,
                                         AppdefEntityID id,
@@ -400,7 +400,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * this is null, then the scan will be run as an immediate, one-time only 
      * scan.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void startScan(AuthzSubject subject,
                           AppdefEntityID aid,
@@ -457,7 +457,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * Start an autoinventory scan by agentToken
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void startScan(AuthzSubject subject,
                           String agentToken,
@@ -512,7 +512,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * Stop an autoinventory scan.
      * @param aid The appdef entity whose agent we'll talk to.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void stopScan(AuthzSubject subject, AppdefEntityID aid)
         throws AutoinventoryException {
@@ -532,7 +532,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * Get status for an autoinventory scan.
      * @param aid The appdef entity whose agent we'll talk to.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public ScanStateCore getScanStatus(AuthzSubject subject, AppdefEntityID aid)
         throws AgentNotFoundException, AgentConnectionException,
@@ -563,7 +563,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * create AIHistory
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public AIHistory createAIHistory(AppdefEntityID id,
                                      Integer groupId,
@@ -590,7 +590,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * remove AIHistory
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void removeHistory(AIHistory history) {
         getHistoryDAO().remove(history);
@@ -599,7 +599,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * update AIHistory
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void updateAIHistory(Integer jobId, long endTime,
                                 String status, String message) {
@@ -619,7 +619,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * Get status for an autoinventory scan, given the agentToken
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public ScanStateCore getScanStatusByAgentToken(AuthzSubject subject,
                                                    String agentToken)
@@ -678,7 +678,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * scan.
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="RequiresNew"
      */
     public void reportAIData(String agentToken, ScanStateCore stateCore)
         throws AutoinventoryException {
@@ -808,7 +808,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * during the runtime autoinventory scan.
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void reportAIRuntimeReport(String agentToken,
                                       CompositeRuntimeResourceReport crrr)
@@ -821,7 +821,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * Should only be called from RuntimePlatformAndServerMerger
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="RequiresNew"
      */
     public void _reportAIRuntimeReport(String agentToken,
                                       CompositeRuntimeResourceReport crrr)
@@ -855,7 +855,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      *         report about services still needing to be processed
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public List mergePlatformsAndServers(String agentToken, 
                                          CompositeRuntimeResourceReport crrr)
@@ -876,7 +876,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * Merge a list of {@link ServiceMergeInfo}s in HQ's appdef model
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="RequiresNew"
      */
     public void mergeServices(List mergeInfos)
         throws PermissionException, ApplicationException, FinderException {
@@ -951,7 +951,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * runtime scan (their last runtime scan was unsuccessfully processed)
      *  
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public List findAgentsRequiringRuntimeScan() {
         AgentReportStatusDAO statDAO = 
@@ -980,7 +980,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void notifyAgentsNeedingRuntimeScan() {
         List agents = findAgentsRequiringRuntimeScan();
@@ -1012,7 +1012,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void markServiceClean(String agentToken) {
         Agent a;
@@ -1029,7 +1029,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void markServiceClean(Agent agent, boolean serviceClean) {
         AgentReportStatusDAO statDAO = 
@@ -1044,7 +1044,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void startup() {
         AgentCreateCallback listener = new AgentCreateCallback() {
@@ -1061,7 +1061,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      *
      * @param events A list of ResourceZevents
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="Required"
      */
     public void handleResourceEvents(List events)
     {

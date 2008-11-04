@@ -109,9 +109,7 @@ public abstract class PermissionManager extends AuthzSession {
      * Find the list of instance ids for which a given subject id 
      * has the named operation in one of their roles or owns a resource
      * for which the operation is valid
-     * @return List of integer instnace ids
-     * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @return List of integer instance ids
      */
     public abstract List 
         findOperationScopeBySubject(AuthzSubject subj, String opName,

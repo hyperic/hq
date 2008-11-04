@@ -45,7 +45,7 @@ import org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class ResourceAuxLogManagerEJBImpl 
     implements SessionBean

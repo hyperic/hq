@@ -126,7 +126,7 @@ import org.hyperic.util.timer.StopWatch;
  *      local-jndi-name="LocalMeasurementBoss"
  *      view-type="both"
  *      type="Stateless"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class MeasurementBossEJBImpl extends MetricSessionEJB
     implements SessionBean 

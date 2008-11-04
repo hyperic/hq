@@ -82,7 +82,7 @@ import org.hyperic.util.pager.PageList;
  *      view-type="local"
  *      type="Stateless"
  *
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     private final Log log = LogFactory.getLog(TemplateManagerEJBImpl.class);

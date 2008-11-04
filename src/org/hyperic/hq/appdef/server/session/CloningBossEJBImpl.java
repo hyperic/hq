@@ -85,7 +85,7 @@ import org.hyperic.util.config.EncodingException;
  * @ejb:interface extends="CloningBossInterface, javax.ejb.EJBObject"
  * 		local-extends="CloningBossInterface, javax.ejb.EJBLocalObject"
  * 
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class CloningBossEJBImpl extends AppdefSessionEJB
     implements CloningBossInterface, SessionBean {

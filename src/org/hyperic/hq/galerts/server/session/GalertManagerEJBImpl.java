@@ -86,7 +86,7 @@ import org.hyperic.util.pager.Pager;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="REQUIRED"
+ * @ejb:transaction type="Required"
  */
 public class GalertManagerEJBImpl 
     implements SessionBean 
