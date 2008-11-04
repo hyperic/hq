@@ -8,6 +8,12 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as rme
 import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl as AvailMan
+import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl as DataMan
+import org.hyperic.hq.measurement.server.session.Measurement
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate
+import org.hyperic.hq.measurement.UnitsConvert
+import org.hyperic.util.units.FormattedNumber
+import org.hyperic.util.units.UnitsFormat
 import org.hyperic.util.pager.PageControl
 
 import org.hyperic.hq.hqu.rendit.BaseController
@@ -15,6 +21,14 @@ import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 
 import org.json.JSONObject
 import org.json.JSONArray
+
+import static org.hyperic.hq.measurement.MeasurementConstants.CAT_AVAILABILITY as AVAIL
+import static org.hyperic.hq.measurement.MeasurementConstants.IND_AVG
+import static org.hyperic.hq.measurement.MeasurementConstants.AVAIL_UP
+import static org.hyperic.hq.measurement.MeasurementConstants.AVAIL_DOWN
+import static org.hyperic.hq.measurement.MeasurementConstants.AVAIL_WARN
+import static org.hyperic.hq.measurement.MeasurementConstants.AVAIL_UNKNOWN
+import static org.hyperic.hq.measurement.MeasurementConstants.AVAIL_PAUSED
 
 /**
  * The SaascenterController is responsible for creating the initial scaffold 
@@ -303,6 +317,68 @@ class SaascenterController extends BaseController
         _healthGenerator.getHealth(healthGroup, start, end)
     }
     
+    private FormattedNumber[] getFormattedValues(Measurement meas, List data) {
+        def vals = []
+        data.each() {
+            // see HHQ-2168
+            if (it.value != Double.NaN) {
+                vals.add(it.value)
+            }
+        }
+        def tmps = vals.toArray(new Double[0])
+        def values = new double[tmps.length]
+        for (int i=0; i<tmps.length; i++) {
+            values[i] = tmps[i]
+        }
+        def unitType = UnitsConvert.getUnitForUnit(meas.template.units)
+        def scale = UnitsConvert.getScaleForUnit(meas.template.units)
+        return UnitsFormat.formatSame(values, unitType, scale);
+    }
+    
+    private String getSeconds(String val) {
+        if (-1 == val.indexOf(":")) {
+            return val
+        }
+        //00:00:03.808
+        float rtn = 0
+        def toks = val.split(":")
+        def hours = new Double(toks[0])
+        def mins  = new Double(toks[1])
+        def secs  = new Double(toks[2])
+        def format = NumberFormat.instance
+        format.setMaximumFractionDigits(3) 
+        rtn *= 60*60*hours
+        rtn += 60*mins
+        if (rtn <= 0) {
+            return format.format(secs).toString()
+        }
+        return format.format(rtn).toString()
+    }
+    
+    /**
+     * Get the JSONObject representing the indicators for various providers.
+     */
+    private JSONObject getIndicatorsStripJSON(CloudProvider p, long start, 
+                                              long end) 
+    {
+        JSONObject res = new JSONObject()
+        res.put('stripType', 'indicators')
+        
+        JSONArray charts = new JSONArray()
+        p.indicatorCharts.each { ChartData chart ->
+            JSONObject chartJson = new JSONObject()
+            
+            // XXX:  This needs to reflect the real legend
+            chartJson.put('url', chart.dataUrl)
+                     .put("chartName", "${chart.label}")
+                     .put("legendX", "time (days)")
+                     .put("legendY", "legendY")
+            charts.put(chartJson)
+        }
+        res.put('charts', charts)
+        res
+    }
+    
     def sampleServiceData(params) {
         def json = new StringBuffer( """
                 {
@@ -463,6 +539,7 @@ class SaascenterController extends BaseController
     }
     
     def index(params) {
+        getProviders()
         render(locals:[ plugin :  getPlugin(),
     	                userName: user.name,
     	                providers: _providers ])
