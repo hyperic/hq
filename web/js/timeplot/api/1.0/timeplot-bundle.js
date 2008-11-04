@@ -1148,7 +1148,7 @@ this._axisColor=("axisColor"in params)?((typeof params.axisColor=="string")?new 
 this._gridColor=("gridColor"in params)?((typeof params.gridColor=="string")?new Timeplot.Color(params.gridColor):params.gridColor):null,
 this._gridLineWidth=("gridLineWidth"in params)?params.gridLineWidth:0.5;
 this._axisLabelsPlacement=("axisLabelsPlacement"in params)?params.axisLabelsPlacement:"right";
-this._gridSpacing=("gridSpacing"in params)?params.gridStep:50;
+this._gridSpacing=("gridSpacing"in params)?params.gridSpacing:50;
 this._gridType=("gridType"in params)?params.gridType:"short";
 this._gridShortSize=("gridShortSize"in params)?params.gridShortSize:10;
 this._minValue=("min"in params)?params.min:null;
