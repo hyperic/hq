@@ -67,11 +67,10 @@ class SaascenterController extends BaseController
     private List<CloudProvider> getProviders() {
         if (!_providers) {
             _providers = []
-            if (rme.one.resourcesExistOfType('AWS')) {
+            if (rme.one.resourcesExistOfType('AWS'))
                 _providers += new AWSProvider()
-            } else if (rme.one.resourcesExistOfType('salesforce')) {
+            if (rme.one.resourcesExistOfType('salesforce'))
                 _providers += new SalesforceProvider()
-            }
             _providers.each { it.init(user) }
         }
         _providers
