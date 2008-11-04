@@ -664,9 +664,9 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             <div id="clouds" class="yui-navset">
                 <ul class="yui-nav">
                     <li class="selected"><a href="#overview"><em>Overview</em></a></li>
-                    <li><a href="#amazon"><em>Amazon Web Services</em></a></li>
-                    <li><a href="#google"><em>Google App Engine</em></a></li>
-                    <li><a href="#salesforce"><em>Salesforce</em></a></li>
+                    <% providers.each { p -> %>
+                        <li><a href="#${p.code}"><em>${p.longName}</em></a></li>
+                    <% } %>
                 </ul>            
                 <div class="yui-content">
                     <!-- overall summary tab --> 
@@ -679,74 +679,22 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                           <div class="both"></div>
                           <div id="overallSummary"></div>
                     </div>
-                    <!-- amazon tab --> 
-                    <div>
-                        <div class="title">Amazon Web Services Health Summary</div>
-                        <div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for key <a href="http://www.amazonaws.com/" target="amazon" title="Amazon Web Service Home">Amazon Web Services</a>.
-                           Click a Service in the left panel for detailed service health status, metrics, and more history. <a href="/help/aws.html" target="help">More information</a> on how we monitor Amazon Web Services.
-                        </div>
-                        
-                        <div class="clear" style="margin-bottom:20px"></div>
-                        <div class="secLegend">
-                           <span class="greenAvailS"> <a href="/help/aws.html#health" target="help">Healthy</a> </span>
-                           <span class="yellowAvailS"> <a href="/help/aws.html#health" target="help">Service&nbsp;Issues</a> </span>
-                           <span class="redAvailS"> <a href="/help/aws.html#health" target="help">Service&nbsp;Failure</a></span>
-                        
-                        </div>
-                        <div class="both"></div>
-                        <div id="aws_summary"></div>
-                    </div>
-                    <!-- google tab --> 
-                    <div>
-                        <div class="title">Google App Engine Health Summary</div>
-                        <div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for key Google App Engine services.
-                           Click a Service in the left panel for detailed service health status, metrics, and more history. <br/><a href="/help/appengine.html" target="help">More information</a> on CloudStatus Google App Engine Support.
-                           <ul>
-                             <li>App Engine <a href="http://code.google.com/appengine/docs">documentation</a></li>
-                        
-                             <li>Google Groups hosts <a href="http://groups.google.com/group/google-appengine">discussion</a> and <a href="http://groups.google.com/group/google-appengine-downtime-notify">downtime</a> notifications</li>
-                             <li>Get the <a href="http://support.hyperic.com/display/hypcomm/Google+App+Engine">App Engine HQ Plugin</a> for monitoring your own App Engine apps.</li>
-                           </ul>
-                        
-                        </div>
-                        <div class="clear" style="margin-bottom:20px"></div>
-                        <div class="secLegend">
-                           <span class="greenAvailS"> <a href="/help/appengine.html#health" target="help">Healthy</a> </span>
-                           <span class="yellowAvailS"> <a href="/help/appengine.html#health" target="help">Service&nbsp;Issues</a> </span>
-                        
-                           <span class="redAvailS"> <a href="/help/appengine.html#health" target="help">Service&nbsp;Failure</a></span>
-                        </div>
-                        <div class="both"></div>
-                        <div id="appengine_summary"></div>
-                    </div>
-                    <!-- salesforce tab --> 
-                    <div>    
-                        <div class="title">Salesforce Health Summary</div>
-                        <div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for key Salesforce services.</div>
-                        <div class="clear" style="margin-bottom:20px"></div>
-                        <div class="secLegend">
-                           <span class="greenAvailS"> <a href="/help/appengine.html#health" target="help">Healthy</a> </span>
-                           <span class="yellowAvailS"> <a href="/help/appengine.html#health" target="help">Service&nbsp;Issues</a> </span>
+                    <% providers.each { p -> %>
+                        <!-- ${p.longName} tab --> 
+                        <div>
+                            <div class="title">${p.longName} Health Summary</div>
+                            <div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for ${p.longName}.</div>
 
-                           <span class="redAvailS"> <a href="/help/appengine.html#health" target="help">Service&nbsp;Failure</a></span>
+                            <div class="both"></div>
+                            <div id="${p.code}_summary"></div>
                         </div>
-                        <div class="both"></div>
-                        <div id="salesforce_summary"></div>
-                    </div>
+                    <% } %>
                 </div>
             </div>
         </div>
         <div id="z" style="display: none"></div>
         <script type="text/javascript">
         var cloudTabs = new YAHOO.widget.TabView('clouds');
-        var tabs = [
-            {
-                id:     'aws',
-                title:  'Amazon Web Services',
-                legend: 'These charts display real-time health status and <strong>one week</strong> of health history for key <a href="http://www.amazonaws.com/" target="amazon" title="Amazon Web Service Home">Amazon Web Services</a>.',
-                rle:    ''
-            }
-        ];
 
         // var d = document;
         var refInt = 90; //Set the pages Refresh Interval - for update timer and the pages coundown timer - in seconds
@@ -763,6 +711,24 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                 // setInterval(loadData, refInt * 1000);
             }
         );
+
+        var providers = {
+            '0': 'aws',
+            '1', 'salesforce'
+        };
+
+        function getTabData(evt) {
+            provider = providers[cloudTabs.getTabIndex(evt.newValue)];
+            t = new Date().getTime();
+            dojo11.xhrGet( {
+                url : '/hqu/saasCenter/Saascenter/sampleServiceData.hqu?time=' + t + '&range=1w&service=' + provider + '?' + t,
+                handleAs : 'json',
+                load : function (resp) {
+                    buildPage(resp);
+                    // d.status.endUpdate();
+                }
+            } );
+        }
 
         /**
          * Called by the onload event and the refresh timer. 
@@ -787,8 +753,6 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
          */
         function buildPage(resp) {
             
-            console.log(resp);
-
             //Remove all the old widgets before creating the new ones
             for (i = 0; i < objs.length; i++) {
                 objs[i].cleanup();
@@ -821,10 +785,8 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                                 for(chart in resp.providers[j].strips[i].charts) {
                                     if(typeof(resp.providers[j].strips[i].charts[chart]) !== 'function')
                                     {
-                                        objs[++objIdx] = new hyperic.widget.Chart(charts_container_id, resp.providers[j].strips[i].charts[chart], 'cso', chart + '_' + j + '_' + i , 'dashboard');
-                                        // if(activeTab.id == 'cso'){
-                                        //     objs[objIdx].showChart('cso');
-                                        // }
+                                        objs[++objIdx] = new hyperic.widget.CloudChart(charts_container_id, resp.providers[j].strips[i].charts[chart], 0, chart + '_' + j + '_' + i , 'dashboard');
+                                        objs[objIdx].showChart();
                                     }
                                 }
                                 f.innerHTML = '<div style="clear: both;"></div>';
