@@ -42,6 +42,8 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl;
@@ -142,6 +144,10 @@ public abstract class SessionBase {
         
         permMgr.check(subjectId, resType.getId(), instId, operation.getId());
         // Permission Check Succesful
+    }
+
+    protected Resource findResource(AppdefEntityID id) {
+        return ResourceManagerEJBImpl.getOne().findResource(id);
     }
 
     protected void canManageAlerts(AuthzSubject who, AlertDefinition ad)

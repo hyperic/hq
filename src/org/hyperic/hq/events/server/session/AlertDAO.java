@@ -32,7 +32,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -68,8 +68,8 @@ public class AlertDAO extends HibernateDAO {
             .executeUpdate();
     }
     
-    public List findByEntity(AppdefEntityID id) {
-        return findByEntity(id, "a.ctime DESC");
+    public List findByResource(Resource res) {
+        return findByResource(res, "a.ctime DESC");
     }
     
     List findEscalatables() {
@@ -144,49 +144,43 @@ public class AlertDAO extends HibernateDAO {
         return (Integer) q.uniqueResult();
     }
 
-    public List findByAppdefEntityInRange(AppdefEntityID id, long begin,
+    public List findByAppdefEntityInRange(Resource res, long begin,
                                           long end, boolean nameSort,
                                           boolean asc)
     {
-        String sql = "from Alert a where a.alertDefinition.appdefType = :aType " +
-            "and a.alertDefinition.appdefId = :aId and a.ctime between :begin " +
-            "and :end order by " +
+        String sql = "from Alert a where a.alertDefinition.resource = :res " +
+            "and a.ctime between :begin and :end order by " +
             (nameSort ? "a.alertDefinition.name" : "a.ctime") + 
             (asc ? " asc" : " desc");
         
         return getSession().createQuery(sql)
-            .setInteger("aType", id.getType())
-            .setInteger("aId", id.getID())
+            .setParameter("res", res)
             .setLong("begin", begin)
             .setLong("end", end)
             .list();
     }
     
-    private List findByEntity(AppdefEntityID id, String orderBy) {
-        String sql = "from Alert a WHERE a.alertDefinition.appdefType = :aType " +
-            "and a.alertDefinition.appdefId = :aId ORDER BY " + orderBy;
+    private List findByResource(Resource res, String orderBy) {
+        String sql = "from Alert a WHERE a.alertDefinition.resource = :res " +
+            "ORDER BY " + orderBy;
         
         return getSession().createQuery(sql)
-            .setInteger("aType", id.getType())
-            .setInteger("aId", id.getId().intValue())
+            .setParameter("res", res)
             .setCacheable(true)
             .setCacheRegion("Alert.findByEntity")
             .list();
     }
 
-    int deleteByEntity(AppdefEntityID id) {
-        String sql = "delete Alert WHERE alertDefinition in " +
-            "(SELECT d FROM AlertDefinition d WHERE d.appdefType = :aType " +
-               "and d.appdefId = :aId)";
+    int deleteByResource(Resource res) {
+        String sql = "delete Alert WHERE alertDefinition.resource = :res";
 
         return getSession().createQuery(sql)
-            .setInteger("aType", id.getType())
-            .setInteger("aId", id.getId().intValue())
+            .setParameter("res", res)
             .executeUpdate();
     }
 
-    public List findByAppdefEntitySortByAlertDef(AppdefEntityID id) {
-        return findByEntity(id, "a.alertDefinition.name DESC");
+    public List findByResourceSortByAlertDef(Resource res) {
+        return findByResource(res, "a.alertDefinition.name DESC");
     }
     
     public Alert findByAlertDefinitionAndCtime(AlertDefinition def, long ctime){
@@ -235,11 +229,10 @@ public class AlertDAO extends HibernateDAO {
             .uniqueResult(); 
     }
     
-    public Integer countAlerts(AppdefEntityID aeid) {
+    public Integer countAlerts(Resource res) {
         return (Integer) createCriteria()
             .createAlias("alertDefinition", "d")
-            .add(Restrictions.eq("d.appdefType", new Integer(aeid.getType())))
-            .add(Restrictions.eq("d.appdefId", aeid.getId()))
+            .add(Restrictions.eq("d.resource", res))
             .setProjection(Projections.rowCount())
             .uniqueResult(); 
     }

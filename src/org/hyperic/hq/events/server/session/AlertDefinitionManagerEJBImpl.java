@@ -192,10 +192,6 @@ public class AlertDefinitionManagerEJBImpl
 
         return true;
     }
-    
-    private Resource findResource(AppdefEntityID id) {
-        return ResourceManagerEJBImpl.getOne().findResource(id);
-    }
 
     /** 
      * Create a new alert definition

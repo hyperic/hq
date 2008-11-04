@@ -46,6 +46,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -169,7 +170,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
         throws PermissionException {
         canManageAlerts(subj, id);
-        return getAlertDAO().deleteByEntity(id);
+        return getAlertDAO().deleteByResource(findResource(id));
     }
 
     /** 
@@ -258,7 +259,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         int[] counts = new int[ids.length];
         for (int i = 0; i < ids.length; i++) {
             if (ids[i].isPlatform() || ids[i].isServer() || ids[i].isService()){
-                counts[i] = dao.countAlerts(ids[i]).intValue();
+                counts[i] = dao.countAlerts(findResource(ids[i])).intValue();
             }
         }
         return counts;
@@ -294,10 +295,11 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         canManageAlerts(subj, id);
         List alerts;
 
+        final Resource resource = findResource(id);
         if (pc.getSortattribute() == SortAttribute.NAME) {
-            alerts = getAlertDAO().findByAppdefEntitySortByAlertDef(id);
+            alerts = getAlertDAO().findByResourceSortByAlertDef(resource);
         } else {
-            alerts = getAlertDAO().findByEntity(id);
+            alerts = getAlertDAO().findByResource(resource);
         }
         
         if (pc.getSortorder() == PageControl.SORT_DESC)
@@ -317,9 +319,12 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         throws PermissionException 
     {
         canManageAlerts(subj, id);
-        List alerts = getAlertDAO().findByAppdefEntityInRange(id, begin, end,
-                               pc.getSortattribute() == SortAttribute.NAME,
-                               pc.isAscending());
+        List alerts =
+            getAlertDAO().findByAppdefEntityInRange(findResource(id),
+                                                    begin, end,
+                                                    pc.getSortattribute() ==
+                                                        SortAttribute.NAME,
+                                                    pc.isAscending());
 
         return valuePager.seek(alerts, pc);
     }
