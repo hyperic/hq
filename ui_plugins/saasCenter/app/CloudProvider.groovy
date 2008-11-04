@@ -68,24 +68,19 @@ class CloudProvider {
         
         for (indicator in indicators) {
             MetricName metric = indicator.metric 
-            ResourceGroup grp = resourceHelper.findGroupByName(metric.groupName)
+            List<Resource> resources = resourceHelper.find(byPrototype: metric.protoName)
             
-            if (!grp) {
+            if (!resources) {
                 _log.error("getIndicatorCharts:  Unable to find indicator group [${metric.groupName}]")
                 continue
             }
             
-            if (!grp.isCompatible()) {
-                _log.error("getIndicatorCharts:  Group [${grp.name}] is not a compatible group")
+            if (resources.size() == 0) {
+                _log.error("getIndicatorCharts: protoname [${metric.protoName}] has no matches")
                 continue
             }
             
-            if (!grp.resources) {
-                _log.error("getIndicatorCharts: Group [${grp.name}] has no members")
-                continue
-            }
-            
-            Resource r = grp.resources[0] 
+            Resource r = resources[0] 
             List templates = r.enabledMetrics.collect { it.template }
             MeasurementTemplate tmpl = templates.find { it.name == metric.metricName } 
 
@@ -96,7 +91,7 @@ class CloudProvider {
                 continue
             }
 
-            res << new ChartData(resource: grp.resource, metric: tmpl,
+            res << new ChartData(resource: r, metric: tmpl,
                                  label: indicator.label) 
         }
         
