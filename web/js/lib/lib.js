@@ -664,13 +664,12 @@ function activateHeaderTab(){
 hyperic.widget = hyperic.widget || {};
 
 /**
-* Chart - timeplot chart manager functionality. Creates and manages dom and datasource for timeplot
+* Chart - timeplot chart manager functionality. Creates and manages dom and datasource for dashboard timeplot chart widgets
 *
 * @param node
 * @param kwArgs
 */
-// hyperic.widget.Chart = function(node, kwArgs, tabid, chartPos, singleChart) {
-  hyperic.widget.Chart = function(node, kwArgs) {
+hyperic.widget.Chart = function(node, kwArgs) {
     var that = this;
     that.subscriptions=[];
     that.create = function(node, kwArgs) {
@@ -3356,17 +3355,17 @@ hyperic.widget.Health = function(parentNodeId, kwArgs, isDetail) {
         var range_start = new Date(data[0].startMillis);
         var i_range_start = i_range_end = null;
     	//beggining cap
-        var ihtml = '<div class="bg ' + data[0].s + 'Left" style="width:4px" title="' + range_start.formatDate('M/d HH:mm z') + '"></div>';
+        var ihtml = '<div class="rle-bg ' + data[0].s + 'Left" style="width:4px" title="' + range_start.formatDate('M/d HH:mm z') + '"></div>';
         for (var i = 0; i < data.length; i++) {
             i_range_start = new Date(data[i].startMillis);
             i_range_end = new Date(data[i].endMillis);
         	//Scale to 98% to compensate for the fixed with of the 3px caps - (3px*2)/418px ~= 2%
-            ihtml += '<div class="bg ' + data[i].s + '" style="width:' + (data[i].w * 0.98) + '%" title="' + i_range_start.formatDate('M/d HH:mm') + ' &#8594; ' + i_range_end.formatDate('M/d HH:mm z') + '"></div>';
+            ihtml += '<div class="rle-bg ' + data[i].s + '" style="width:' + (data[i].w * 0.98) + '%" title="' + i_range_start.formatDate('M/d HH:mm') + ' &#8594; ' + i_range_end.formatDate('M/d HH:mm z') + '"></div>';
             i_range_start = i_range_end = null;
         }
         //end cap
         var range_end = new Date(data[data.length-1].endMillis);
-        ihtml += '<div class="bg ' + data[data.length-1].s + 'Right" style="width:4px" title="' + range_end.formatDate('M/d HH:mm z') + '"></div>';
+        ihtml += '<div class="rle-bg ' + data[data.length-1].s + 'Right" style="width:4px" title="' + range_end.formatDate('M/d HH:mm z') + '"></div>';
         delete range_start;
         delete range_end;
         return ihtml;
@@ -3581,3 +3580,107 @@ hyperic.widget.tooltip = {
         this.conIdx = -1;
     }
 };
+
+/* SaaS plugin js */
+hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
+    var that = this;
+    that.subscriptions=[];
+    that.create = function(node, kwArgs, tabid, chartPos) {
+        var chart_class = '';
+        if(chartType)
+        {
+            switch(chartType) {
+                case 'single':
+                    chart_class = 'chartW';
+                    break;
+                case 'dashboard':
+                    chart_class = 'chartS';
+                    break;
+                case 'skinny':
+                    chart_class = 'chartT';
+                    break;
+                default:
+                    chart_class = 'chart';
+                    break;
+            }
+        }
+        var template = '<div class="chartCont"> <div class="cTitle">' + kwArgs.chartName + '</div><div id="' + tabid + '_chart' + chartPos + '" class="'+chart_class+'"></div><div class="xlegend"></div></div>';
+        that.template = template;
+        that.tabid = tabid;
+        var f = dojo.byId('z');
+        that.chartName = kwArgs.chartName;
+        //console.log("created chart: "+kwArgs.chartName);
+        f.innerHTML = template;
+        dojo.byId(node).appendChild(f.firstChild);
+        that.url = kwArgs.url;
+        that.chartPos = chartPos;
+        //chartObjs[tabid] = that;
+        that.node = dojo.byId(tabid);
+        cloudTabs.addListener('activeTabChange', that.onTabChange);
+        //TODO check if the tab that is currently selected is the one that is getting the chart.
+        f=null;
+    };
+    that.onTabChange = function(evt) {
+        if (!that.isShowing && cloudTabs.getTabIndex(evt.newValue) == that.tabid){
+            that.showChart();
+        }
+    };
+    that.showChart = function() {
+        //create chart
+        var es = new Timeplot.DefaultEventSource();
+        var pi = null;
+        if(chartType == 'dashboard')
+        {
+            pi = [Timeplot.createPlotInfo( {
+                id : "plot1", 
+                dataSource : new Timeplot.ColumnSource(es, 1), 
+                valueGeometry : new Timeplot.DefaultValueGeometry( {
+                    axisLabelsPlacement : "left"
+                    }
+                ), 
+                timeGeometry : new Timeplot.DefaultTimeGeometry( {
+                    axisLabelsPlacement : "bottom" }
+                ), 
+                showValues : false, 
+                lineColor : "#00EB08", 
+                roundValues:false, //00EB08 89EB0F
+                fillColor : "#D0FFD2" //#E6FCCA
+                }
+            )];
+        }
+        else
+        {
+            pi = [Timeplot.createPlotInfo( {
+                id : "plot1", 
+                dataSource : new Timeplot.ColumnSource(es, 1), 
+                valueGeometry : new Timeplot.DefaultValueGeometry( {
+                    gridColor : "#000000", 
+                    axisLabelsPlacement : "left"
+                    }
+                ), 
+                timeGeometry : new Timeplot.DefaultTimeGeometry( {
+                    gridColor : new Timeplot.Color("#DDDDDD"), 
+                    axisLabelsPlacement : "bottom" }
+                ), 
+                showValues : true, 
+                lineColor : "#00EB08", 
+                roundValues: false, //00EB08 89EB0F
+                fillColor : "#D0FFD2" //#E6FCCA
+                }
+            )];
+        }
+        var chart = Timeplot.create(dojo.byId(that.tabid + "_chart" + that.chartPos), pi);
+        chart.loadText(that.url, ",", es);
+        that.isShowing = true;
+        chart=null;
+    };
+    this.cleanup = function(){
+        dojo.unsubscribe(that.subscriptions[0]);
+        that.node = null;
+    };
+    //init
+    that.isShowing = false;
+    this.create(node, kwArgs, tabid, chartPos);
+};
+
+/* end SaaS plugin js */
