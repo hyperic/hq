@@ -27,6 +27,7 @@ package org.hyperic.hq.measurement.server.mbean;
 
 import java.util.Date;
 
+import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.hq.scheduler.shared.SchedulerUtil;
@@ -102,6 +103,18 @@ public class DataPurgeService
                 MISFIRE_INSTRUCTION_DO_NOTHING);
 
             scheduler.scheduleJob(job, trigger);
+            
+            // Clear out all EmailFilter jobs
+            String[] triggersInGroup =
+                scheduler.getTriggerNames(EmailFilter.JOB_GROUP);
+            int numDeleted = 0;
+            for (int i = 0; i < triggersInGroup.length; ++i) {
+                if (scheduler.unscheduleJob(triggersInGroup[i],
+                                            EmailFilter.JOB_GROUP)) {
+                    ++numDeleted;
+                }
+            }
+
         } catch (Exception e) {
             // This probably isnt fatal.  
             this.log.error("Unable to start HQ Data Manager Service", e);
