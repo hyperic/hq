@@ -688,10 +688,24 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             cloudTabs.addTab( new YAHOO.widget.Tab({ 
                 label: '${p.longName}', 
                 content: '<!-- ${p.longName} tab --><div><div class="title">${p.longName} Health Summary</div><div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for ${p.longName}.</div><div class="both"></div><div id="${p.code}_summary"></div></div>',
-                dataSrc: '/hqu/saasCenter/Saascenter/sampleServiceData.hqu?time=' + t + '&range=1w&service=${p.code}?' + t,
+                // dataSrc: '/hqu/saasCenter/Saascenter/sampleServiceData.hqu?time=' + t + '&range=1w&service=${p.code}?' + t,
+                dataSrc : '/cloud.${p.code}.js?' + new Date().getTime(), //prevent caching
                 cacheData: false
             }));
         <% } %>
+
+        tabs = cloudTabs.get('tabs');
+        for(var i in tabs) {
+            if(typeof(tabs[i]) !== 'function' && i > 0)
+            {
+                tabs[i].loadHandler = { 
+                    success: buildTab,
+                    failure: function(data) {
+                        this.set('content','could not load data');
+                    }
+                };
+            }                
+        }
 
         // var d = document;
         var refInt = 90; //Set the pages Refresh Interval - for update timer and the pages coundown timer - in seconds
@@ -709,24 +723,6 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             }
         );
 
-        var providers = {
-            '0': 'aws',
-            '1': 'salesforce'
-        }
-
-        function getTabData(evt) {
-            provider = providers[cloudTabs.getTabIndex(evt.newValue)];
-            t = new Date().getTime();
-            dojo11.xhrGet( {
-                url : '/hqu/saasCenter/Saascenter/sampleServiceData.hqu?time=' + t + '&range=1w&service=' + provider + '?' + t,
-                handleAs : 'json',
-                load : function (resp) {
-                    buildPage(resp);
-                    // d.status.endUpdate();
-                }
-            } );
-        }
-
         /**
          * Called by the onload event and the refresh timer. 
          * This is the startup function for the page.
@@ -736,12 +732,87 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             // d.status.startUpdate();
             dojo11.xhrGet( {
                 url : '/cloud.js?' + new Date().getTime(), //prevent caching
+                // url : '/hqu/saasCenter/Saascenter/sampleSummaryData.hqu?time=' + t + '&range=1w?' + t,
                 handleAs : 'json',
                 load : function (resp) {
                     buildPage(resp);
                     // d.status.endUpdate();
                 }
             } );
+        }
+        
+        function buildTab(resp)
+        {
+            var data = eval('(' + resp.responseText + ')');
+            console.log(data);
+            // for (i in data) {
+            //     if(!0[i]){
+            //         //clear out each sections iHTML.
+            //         //health
+            //         if(data[i].health)
+            //         {
+            //             //clear the node for the current section
+            //             dojo.byId(i.toLowerCase() + '_health').innerHTML = '';
+            //             objs[++objIdx] = new hyperic.widget.Health(i.toLowerCase() + '_health', data[i].health, false);
+            //         }
+            //         else
+            //         {
+            //             dojo.byId(i.toLowerCase() + '_health_section').style.display = 'none';
+            //         }
+            //         //charts
+            //         //limit the charts to a max of 6
+            //         var length = data[i].charts.length < 6 ? data[i].charts.length : 6;
+            //         if(length > 0)
+            //         {
+            //             //clear the node for the current section
+            //             dojo.byId(i.toLowerCase() + '_chartCont').innerHTML = '';
+            //             for (var j = 0; j < length; j++) {
+            //                 var chart_type = null;
+            //                 if(data[i].charts[j].style !== undefined && data[i].charts[j].style == 'skinny') 
+            //                 {
+            //                     chart_type = 'skinny';
+            //                 }
+            //                 else
+            //                 {
+            //                     // (display chart full-width if only one chart is displayed, 
+            //                     // or if the chart is the last on the page with an odd number of charts)
+            //                     if(length==1 || (j == length-1 && length % 2)) {
+            //                         chart_type = 'single';
+            //                     }
+            //                     else
+            //                     {
+            //                         chart_type = 'double';
+            //                     }
+            //                 }
+            //                 // console.log(i + ': ' + data[i].charts[j].chartName + ' ('+data[i].charts[j].style+'): ' + chart_type);
+            //                 objs[++objIdx] = new hyperic.widget.Chart(
+            //                     i.toLowerCase() + '_chartCont', // chart container id
+            //                     data[i].charts[j], // chart data
+            //                     i.toLowerCase(), // tab id
+            //                     j + 1, // chart position
+            //                     chart_type); // chart type 
+            //             }
+            //         }
+            //         else // if there are no charts to display, hide the chart header.
+            //         {
+            //             dojo.byId(i.toLowerCase() + '_performance_section').style.display = 'none';
+            //         }
+            //         //table
+            //         if(data[i].table.length > 0)
+            //         {
+            //             //clear the node for the current section
+            //             dojo.byId(i.toLowerCase() + '_table').innerHTML = '';
+            //             for (var k = 0; k < data[i].table.length; k++) {
+            //                 objs[++objIdx] = new hyperic.widget.Table(i.toLowerCase() + '_table', data[i].table[k]);
+            //             }
+            //         }
+            //         else
+            //         {
+            //             dojo.byId(i.toLowerCase() + '_metrics_section').style.display = 'none';
+            //         }
+            //     }
+            // }
+            this.set('content','data loaded!');            
         }
 
         /**
