@@ -85,7 +85,7 @@ class CloudProvider {
             MeasurementTemplate tmpl = templates.find { it.name == metric.metricName } 
 
             if (!tmpl) {
-                _log.error("getIndicatorCharts:  Group [${grp.name}] does not " + 
+                _log.error("getIndicatorCharts:  Resource [${r}] does not " + 
                            "have members with the metric [${metric.metricName}].  Unable to " +
                            "create indicator chart")
                 continue
