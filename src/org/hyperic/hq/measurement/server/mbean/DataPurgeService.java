@@ -105,16 +105,17 @@ public class DataPurgeService
             scheduler.scheduleJob(job, trigger);
             
             // Clear out all EmailFilter jobs
-            String[] triggersInGroup =
-                scheduler.getTriggerNames(EmailFilter.JOB_GROUP);
-            int numDeleted = 0;
-            for (int i = 0; i < triggersInGroup.length; ++i) {
-                if (scheduler.unscheduleJob(triggersInGroup[i],
-                                            EmailFilter.JOB_GROUP)) {
-                    ++numDeleted;
+            synchronized (EmailFilter.SCHEDULER_LOCK) {
+                String[] triggersInGroup =
+                    scheduler.getTriggerNames(EmailFilter.JOB_GROUP);
+                int numDeleted = 0;
+                for (int i = 0; i < triggersInGroup.length; ++i) {
+                    if (scheduler.unscheduleJob(triggersInGroup[i],
+                                                EmailFilter.JOB_GROUP)) {
+                        ++numDeleted;
+                    }
                 }
             }
-
         } catch (Exception e) {
             // This probably isnt fatal.  
             this.log.error("Unable to start HQ Data Manager Service", e);

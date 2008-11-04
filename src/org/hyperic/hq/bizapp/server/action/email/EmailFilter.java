@@ -72,9 +72,9 @@ import org.quartz.Trigger;
 public class EmailFilter {
     private Log _log = LogFactory.getLog(EmailFilter.class);
 
-    private static final String     JOB_GROUP  = "EmailFilterGroup";
-    private static final IntHashMap _alertBuffer = new IntHashMap();
-    private static final Object SCHEDULER_LOCK = new Object();
+    public  static final String     JOB_GROUP      = "EmailFilterGroup";
+    private static final IntHashMap _alertBuffer   = new IntHashMap();
+    public  static final Object     SCHEDULER_LOCK = new Object();
 
     public EmailFilter() {}
 
