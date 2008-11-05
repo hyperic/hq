@@ -98,7 +98,7 @@ class SaascenterController extends BaseController
             }
             summaries.put(p.code, svcJson)
         }
-        page.put("svcSummaryTab", summaries)
+        //page.put("svcSummaryTab", summaries)
         page.put("detailedDataTab", details)
         page.put("dashboard", getDashboardJSON(start, end))
         new JSONObject().put("page", page)
@@ -116,6 +116,9 @@ class SaascenterController extends BaseController
                 
             JSONObject chartJson = new JSONObject();
             String unitsBuf = ""
+            
+            JSONArray chartData = new JSONArray()
+            
             if (!chart.metric.units.equals("none")) {
                 long window = ((end-begin)/60).longValue()
                 def dMan = DataMan.one
@@ -127,6 +130,20 @@ class SaascenterController extends BaseController
                     log.warn "Got no data querying for ${chart.metric.name}"
                 } else {
                     List fmtValues = getFormattedValues(chart.measurements[0], data)
+                    
+                    int i = 0
+                    for (dp in data) {
+                        // see HHQ-2168
+                        if (dp.value == Double.NaN) {
+                            continue
+                        }
+                        def date = _gmtFmt.format(new Date(dp.timestamp))
+                        String val = getTimeplotMetricValue(fmtValues[i++].value.toString())
+                        chartData.put(new JSONObject().put(date, val))
+                    }
+                    
+                    chart.data = chartData
+                    
                     if (fmtValues) {
                         def value = fmtValues[0].toString()
                         if (!value.equals(getSeconds(value))) {
@@ -141,7 +158,7 @@ class SaascenterController extends BaseController
                 }
             }
             
-            chartJson.put("url", chart.dataUrl)
+            chartJson.put("data", chartData)
                      .put("chartName", "${chart.label} ${unitsBuf}")
                      .put("legendX", "time (days)")
                      .put("legendY", "${unitsBuf}")
@@ -354,6 +371,14 @@ class SaascenterController extends BaseController
         return format.format(rtn).toString()
     }
     
+    private String getTimeplotMetricValue(String valStr) {
+        String res = valStr.replaceAll("\\s*[a-zA-z]+", "")
+        if (-1 != res.indexOf(":")) {
+            res = getSeconds(res)
+        }
+        res
+    }
+    
     /**
      * Get the JSONObject representing the indicators for various providers.
      */
@@ -368,7 +393,7 @@ class SaascenterController extends BaseController
             JSONObject chartJson = new JSONObject()
             
             // XXX:  This needs to reflect the real legend
-            chartJson.put('url', chart.dataUrl)
+            chartJson.put('data', chart.data)
                      .put("chartName", "${chart.label}")
                      .put("legendX", "time (days)")
                      .put("legendY", "legendY")
@@ -508,21 +533,7 @@ class SaascenterController extends BaseController
          render(inline:"/* ${json.toString()} */", contentType:'text/json-comment-filtered')
          
     }
-    /**
-     * Returns the data for a specified service
-     *  - summaryData.hqu&time=1225691380254&range=1w&
-     */
-    def serviceData(params) {
-         long currTime = Long.parseLong(params.getOne('time'))
-         def range   = params.getOne('range')
-         long from = convertRangeToUTC(currTime, range)
-         JSONObject json = new JSONObject()
-         json.put("key","value");
-         render(inline:"/* ${json.toString()} */", contentType:'text/json-comment-filtered')
-         
-         
-    }
-    
+
     /**
      * Returns the data for the summary tabs as well as the names of the installed services
      *  - summaryData.hqu&time=1225691380254&range=1w
@@ -533,7 +544,7 @@ class SaascenterController extends BaseController
          long from = convertRangeToUTC(range, to)
          _log.debug("TIME: " + to + " : " + from)
          JSONObject json = getMeasurementJSON(from, to)
-         render(inline:"/* ${json.toString()} */", contentType:'text/json-comment-filtered')
+         render(inline:" ${json.toString()} ", contentType:'text/json')
          
     }
     
