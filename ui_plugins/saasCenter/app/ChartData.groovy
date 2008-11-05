@@ -8,6 +8,9 @@ import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
+import org.json.JSONObject
+import org.json.JSONArray
+
 /**
  * ChartData represents a combination of a resource and a metric template.
  * The resource is usually a group, meaning that the measurements that
@@ -27,6 +30,8 @@ class ChartData {
 
     // All the measurements comprising the chart data
     List measurements
+    
+    JSONArray data
     
     String toString() {
         "${resource.name} -> ${metric.name}"
