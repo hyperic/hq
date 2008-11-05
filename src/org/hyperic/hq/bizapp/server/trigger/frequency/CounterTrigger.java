@@ -176,7 +176,7 @@ public class CounterTrigger extends AbstractTrigger
         TriggerFiredEvent myEvent = null;
         
         synchronized (lock) {
-            Integer prevCount;
+            int prevCount;
 
             try {
                 // Now find out if we have the specified # within the interval
@@ -190,7 +190,7 @@ public class CounterTrigger extends AbstractTrigger
             /* Make sure we only write once (either delete or add) in this
              * function otherwise, we have to make sure that things are in the
              * same user transaction, which is a pain */
-            if ((prevCount.intValue() + 1) >= count){
+            if ((prevCount + 1) >= count) {
                 // Get ready to fire, reset EventTracker
                 try {
                     eTracker.deleteReference(getId());                            
@@ -203,9 +203,8 @@ public class CounterTrigger extends AbstractTrigger
                 myEvent = new TriggerFiredEvent(getId(), event);
 
                 myEvent.setMessage("Event " + triggerId + " occurred " +
-                                   (prevCount.intValue() + 1) +
-                                   " times within " + timeRange / 1000 +
-                                   " seconds");
+                                   (prevCount + 1) + " times within " +
+                                   timeRange / 1000 + " seconds");
             } else {
                 // Throw it into the event tracker
                 try {

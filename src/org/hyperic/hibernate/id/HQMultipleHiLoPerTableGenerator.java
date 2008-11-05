@@ -140,7 +140,7 @@ public class HQMultipleHiLoPerTableGenerator
 			// or read committed isolation level
 
 			//sql = query;
-			SQL.debug(query);
+			log.debug(query);
 			PreparedStatement qps = conn.prepareStatement(query);
 			PreparedStatement ips = null;
 			try {

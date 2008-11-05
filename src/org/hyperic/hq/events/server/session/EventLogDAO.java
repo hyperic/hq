@@ -307,8 +307,8 @@ public class EventLogDAO extends HibernateDAO {
     int getTotalNumberLogs() {
         String sql = "select count(*) from EventLog";
         
-        Integer result = (Integer)getSession().createQuery(sql).uniqueResult();
-        
+        java.lang.Number result =
+            (java.lang.Number) getSession().createQuery(sql).uniqueResult();        
         return result.intValue();
     }
 

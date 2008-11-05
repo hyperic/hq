@@ -315,7 +315,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
-    public Integer getEventsCount(Integer tid)  throws SQLException {
+    public int getEventsCount(Integer tid)  throws SQLException {
         
         if (log.isDebugEnabled()) {
             log.debug("Get events count for trigger id: " + tid);                

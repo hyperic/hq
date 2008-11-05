@@ -127,14 +127,14 @@ public abstract class HibernateDAO {
     }
 
     public int size() {
-        return ((Integer)getSession()
+        return ((Number)getSession()
             .createQuery("select count(*) from "+getPersistentClass().getName())
             .uniqueResult())
             .intValue();
     }
 
     public int size(Collection coll) {
-        return ((Integer)getSession()
+        return ((Number)getSession()
             .createFilter(coll, "select count(*)")
             .uniqueResult())
             .intValue();
