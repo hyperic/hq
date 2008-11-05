@@ -51,7 +51,7 @@ import org.hyperic.hq.common.SystemException;
  *      type="Stateless"
  * 
  * @ejb:util generate="physical"
- * @ejb:transaction type="NOTSUPPORTED"
+ * @ejb:transaction type="NotSupported"
  */
 public class AuthzSubjectManager_testEJBImpl implements SessionBean {
     

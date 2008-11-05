@@ -24,7 +24,7 @@ import java.util.ArrayList;
  *      type="Stateless"
  *
  * @ejb:util generate="physical"
- * @ejb:transaction type="SUPPORTS"
+ * @ejb:transaction type="Supports"
  */
 public class DataManager_testEJBImpl implements SessionBean {
 

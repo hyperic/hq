@@ -43,7 +43,7 @@ import org.hyperic.util.unittest.server.ExampleInContainer_testUtil;
 /**
  * The session bean implementing the in-container unit tests for the 
  * ExampleInContainer_test. Note that the transaction type should 
- * always be set to "NOTSUPPORTED" since we don't want the unit testing 
+ * always be set to "NotSupported" since we don't want the unit testing 
  * framework modifying the transactional behavior of the target component 
  * we are testing.
  * 
@@ -54,7 +54,7 @@ import org.hyperic.util.unittest.server.ExampleInContainer_testUtil;
 *      type="Stateless"
 * 
 * @ejb:util generate="physical"
-* @ejb:transaction type="NOTSUPPORTED"
+* @ejb:transaction type="NotSupported"
 */
 public class ExampleInContainer_testEJBImpl implements SessionBean {
     

@@ -72,7 +72,7 @@ import org.hyperic.hq.product.server.MBeanUtil;
  *      type="Stateless"
  * 
  * @ejb:util generate="physical"
- * @ejb:transaction type="NOTSUPPORTED"
+ * @ejb:transaction type="NotSupported"
  */
 public class AvailabilityManager_testEJBImpl implements SessionBean {
 

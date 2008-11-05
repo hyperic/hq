@@ -161,7 +161,7 @@ public class MockEventTrackerEJBImpl
         return eventStreams;
     }
 
-    public Integer getEventsCount(Integer tid)
+    public int getEventsCount(Integer tid)
         throws SQLException {
         _expectedNumCalls.inc();
         
@@ -180,7 +180,7 @@ public class MockEventTrackerEJBImpl
             }
         }
         
-        return new Integer(count);
+        return count;
     }
 
     /**

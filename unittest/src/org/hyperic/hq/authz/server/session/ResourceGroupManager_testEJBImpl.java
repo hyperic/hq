@@ -59,7 +59,7 @@ import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
  *      type="Stateless"
  * 
  * @ejb:util generate="physical"
- * @ejb:transaction type="NOTSUPPORTED"
+ * @ejb:transaction type="NotSupported"
  */
 public class ResourceGroupManager_testEJBImpl implements SessionBean {
 

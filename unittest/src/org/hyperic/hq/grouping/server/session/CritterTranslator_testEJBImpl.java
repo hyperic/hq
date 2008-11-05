@@ -75,7 +75,7 @@ import org.hyperic.util.pager.PageList;
  *      type="Stateless"
  * 
  * @ejb:util generate="physical"
- * @ejb:transaction type="NOTSUPPORTED"
+ * @ejb:transaction type="NotSupported"
  */
 public class CritterTranslator_testEJBImpl implements SessionBean {
     
