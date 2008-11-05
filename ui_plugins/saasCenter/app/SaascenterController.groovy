@@ -82,8 +82,10 @@ class SaascenterController extends BaseController
         JSONObject page      = new JSONObject()
         JSONObject summaries = new JSONObject()
         JSONObject details   = new JSONObject()
-
+        JSONObject services  = new JSONObject()
+        
         providers.each { CloudProvider p ->
+            
             JSONArray svcJson = new JSONArray()
             p.services.each() { CloudService svc ->
                 JSONObject obj = new JSONObject()
@@ -96,10 +98,13 @@ class SaascenterController extends BaseController
                 //obj.put("table", getMetricTableJSON(svc))
                 details.put(svc.code, obj)
             }
+            services.put(p.code, details)
+            //reset for each provider
+            details = new JSONObject()
             summaries.put(p.code, svcJson)
         }
         //page.put("svcSummaryTab", summaries)
-        page.put("detailedDataTab", details)
+        page.put("detailedDataTab", services)
         page.put("dashboard", getDashboardJSON(start, end))
         new JSONObject().put("page", page)
     }
