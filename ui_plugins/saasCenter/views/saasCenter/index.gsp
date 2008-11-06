@@ -661,9 +661,6 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
 <script type="text/javascript">document.navTabCat = "Resource";</script>
         <div class="yui-skin-sam">
 
-            <% providers.each { p -> %>
-                ${p.longName};
-            <% } %>
             <div id="clouds" class="yui-navset">
                 <ul class="yui-nav">
                     <li class="selected"><a href="#overview"><em>Overview</em></a></li>
@@ -685,30 +682,6 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
         <div id="z" style="display: none"></div>
         <script type="text/javascript">
         var cloudTabs = new YAHOO.widget.TabView('clouds');
-        t = new Date().getTime();
-
-        <% providers.each { p -> %>
-            cloudTabs.addTab( new YAHOO.widget.Tab({ 
-                label: '${p.longName}', 
-                content: '<!-- ${p.longName} tab --><div><div class="title">${p.longName} Health Summary</div><div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for ${p.longName}.</div><div class="both"></div><div id="${p.code}_summary"></div></div>',
-                // dataSrc: '/hqu/saasCenter/Saascenter/sampleServiceData.hqu?time=' + t + '&range=1w&service=${p.code}?' + t,
-                dataSrc : '/cloud.${p.code}.js?' + new Date().getTime(), //prevent caching
-                cacheData: false
-            }));
-        <% } %>
-
-        tabs = cloudTabs.get('tabs');
-        for(var i in tabs) {
-            if(typeof(tabs[i]) !== 'function' && i > 0)
-            {
-                tabs[i].loadHandler = { 
-                    success: buildTab,
-                    failure: function(data) {
-                        this.set('content','could not load data');
-                    }
-                };
-            }                
-        }
 
         // var d = document;
         var refInt = 90; //Set the pages Refresh Interval - for update timer and the pages coundown timer - in seconds
@@ -744,18 +717,23 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             } );
         }
         
-        function buildTab(resp)
+        function buildTab(provider)
         {
-            var data = eval('(' + resp.responseText + ')');
+            var tabid = provider.code.replace(/\\s+/g,'_').toLowerCase();
+            var tab = new YAHOO.widget.Tab({
+                label: provider.longName
+            });
+
             var f = document.createElement("div");
             f.style.display = 'none';
+            f.innerHTML = '<!-- ' + provider.longName + ' tab --><div><div class="title">' + provider.longName + ' Health Summary</div><div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for ' + provider.longName + '.</div><div style="clear: both;"></div><div id="' + tabid + '_summary"></div></div>';
             document.body.appendChild(f);
-
+            
+            data = provider.data;
             for (var i in data) {
                 if(typeof data[i] !== 'function') {
-                    console.log(data[i]);
-                    var id = i.replace(/\\s+/,'_','g').toLowerCase();
-                    f.innerHTML = f.innerHTML + '<h2 class="title">' + i + '</h2><div id="'+id+'_health"></div><div id="'+id+'_chartCont"></div><div class="both"></div>';
+                    var id = tabid + '-' + i.replace(/\\s+/g,'_').toLowerCase();
+                    f.innerHTML = f.innerHTML + '<h2 class="title">' + i + '</h2><div id="'+id+'_health"></div><div id="'+id+'_chartCont"></div><div style="clear: both;"></div>';
                     //health
                     if(data[i].health)
                     {
@@ -791,16 +769,17 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                             objs[++objIdx] = new hyperic.widget.CloudChart(
                                 id + '_chartCont', // chart container id
                                 data[i].charts[j], // chart data
-                                id, // tab id
+                                tabid, // tab id
                                 j + 1, // chart position
                                 chart_type); // chart type
-                            objs[objIdx].showChart(); 
                         }
                     }
                 }
             }
-            this.set('content',f.innerHTML);
-            f.innerHTML = '';
+            tab.tabid = tabid;
+            tab.set('content',f.innerHTML);
+            document.body.removeChild(f);
+            cloudTabs.addTab( tab );
         }
 
         /**
@@ -821,27 +800,28 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             dojo.byId('overallSummary').innerHTML = '';
             // create the cloudstatus overview widgets
             var f = hyperic.widget.tempNode;
-            for(var j in resp.providers) {
-                if(typeof(resp.providers[j]) !== 'function') {
-                    tmp_id = 'overall_' + resp.providers[j].code.toLowerCase() + '_summary';
-                    f.innerHTML = '<div id="' + tmp_id + '"><h1 class="title" onclick="changeTabs(\\\''+ resp.providers[j].code +'\\\')">' + resp.providers[j].name + '</h1></div>';
+            providers = resp.page.dashboard.providers;
+            for(var j in providers) {
+                if(typeof(providers[j]) !== 'function') {
+                    tmp_id = 'overall_' + providers[j].code.toLowerCase() + '_summary';
+                    f.innerHTML = '<div id="' + tmp_id + '"><h1 class="title" onclick="changeTabs(\\\''+ providers[j].code +'\\\')">' + providers[j].longName + '</h1></div>';
                     dojo.byId('overallSummary').appendChild(f.firstChild);
-                    for (var i in resp.providers[j].strips) {
-                        if(typeof(resp.providers[j].strips[i]) !== 'function')
+                    for (var i in providers[j].strips) {
+                        if(typeof(providers[j].strips[i]) !== 'function')
                         {
-                            if(resp.providers[j].strips[i].stripType == 'health')
+                            if(providers[j].strips[i].stripType == 'health')
                             {
-                                objs[++objIdx] = new hyperic.widget.Health(tmp_id, resp.providers[j].strips[i], true);
+                                objs[++objIdx] = new hyperic.widget.Health(tmp_id, providers[j].strips[i], true);
                             }
                             else
                             {
                                 charts_container_id = (++id1) + '_charts';
                                 f.innerHTML = '<div id="' + charts_container_id + '"></div>';
                                 dojo.byId(tmp_id).appendChild(f.firstChild);
-                                for(chart in resp.providers[j].strips[i].charts) {
-                                    if(typeof(resp.providers[j].strips[i].charts[chart]) !== 'function')
+                                for(chart in providers[j].strips[i].charts) {
+                                    if(typeof(providers[j].strips[i].charts[chart]) !== 'function')
                                     {
-                                        objs[++objIdx] = new hyperic.widget.CloudChart(charts_container_id, resp.providers[j].strips[i].charts[chart], 0, chart + '_' + j + '_' + i , 'dashboard');
+                                        objs[++objIdx] = new hyperic.widget.CloudChart(charts_container_id, providers[j].strips[i].charts[chart], 'overview', chart + '_' + j + '_' + i , 'dashboard');
                                         objs[objIdx].showChart();
                                     }
                                 }
@@ -855,94 +835,14 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                 }
             }
             delete f;
-            // for(var j in resp.page.svcSummaryTab) {
-            //     if(typeof(resp.page.svcSummaryTab[j]) !== 'function')
-            //     {
-            //         //clear out the attach points for the new widgets
-            //         dojo.byId(j.toLowerCase() + '_summary').innerHTML = '';
-            //         for (var i in resp.page.svcSummaryTab[j]) {
-            //             if(typeof(resp.page.svcSummaryTab[j][i]) !== 'function')
-            //             {
-            //                 objs[++objIdx] = new hyperic.widget.Health(j.toLowerCase() + '_summary', resp.page.svcSummaryTab[j][i], true);
-            //             }
-            //         }
-            //     }
-            // }
-            // // dojo.byId('sumHealth').innerHTML = '';
-            // // var data = resp.page.svcSummaryTab.summary;
-            // // for (i = 0; i < data.length; i++) {
-            // //     objs[++objIdx] = new hyperic.widget.Health('sumHealth', data[i], true);
-            // // }
-            // //create each detail tab contents
-            // data = resp.page.detailedDataTab;
-            // // console.log(data);
-            // for (i in data) {
-            //     if(!0[i]){
-            //         //clear out each sections iHTML.
-            //         //health
-            //         if(data[i].health)
-            //         {
-            //             //clear the node for the current section
-            //             dojo.byId(i.toLowerCase() + '_health').innerHTML = '';
-            //             objs[++objIdx] = new hyperic.widget.Health(i.toLowerCase() + '_health', data[i].health, false);
-            //         }
-            //         else
-            //         {
-            //             dojo.byId(i.toLowerCase() + '_health_section').style.display = 'none';
-            //         }
-            //         //charts
-            //         //limit the charts to a max of 6
-            //         var length = data[i].charts.length < 6 ? data[i].charts.length : 6;
-            //         if(length > 0)
-            //         {
-            //             //clear the node for the current section
-            //             dojo.byId(i.toLowerCase() + '_chartCont').innerHTML = '';
-            //             for (var j = 0; j < length; j++) {
-            //                 var chart_type = null;
-            //                 if(data[i].charts[j].style !== undefined && data[i].charts[j].style == 'skinny') 
-            //                 {
-            //                     chart_type = 'skinny';
-            //                 }
-            //                 else
-            //                 {
-            //                     // (display chart full-width if only one chart is displayed, 
-            //                     // or if the chart is the last on the page with an odd number of charts)
-            //                     if(length==1 || (j == length-1 && length % 2)) {
-            //                         chart_type = 'single';
-            //                     }
-            //                     else
-            //                     {
-            //                         chart_type = 'double';
-            //                     }
-            //                 }
-            //                 // console.log(i + ': ' + data[i].charts[j].chartName + ' ('+data[i].charts[j].style+'): ' + chart_type);
-            //                 objs[++objIdx] = new hyperic.widget.Chart(
-            //                     i.toLowerCase() + '_chartCont', // chart container id
-            //                     data[i].charts[j], // chart data
-            //                     i.toLowerCase(), // tab id
-            //                     j + 1, // chart position
-            //                     chart_type); // chart type 
-            //             }
-            //         }
-            //         else // if there are no charts to display, hide the chart header.
-            //         {
-            //             dojo.byId(i.toLowerCase() + '_performance_section').style.display = 'none';
-            //         }
-            //         //table
-            //         if(data[i].table.length > 0)
-            //         {
-            //             //clear the node for the current section
-            //             dojo.byId(i.toLowerCase() + '_table').innerHTML = '';
-            //             for (var k = 0; k < data[i].table.length; k++) {
-            //                 objs[++objIdx] = new hyperic.widget.Table(i.toLowerCase() + '_table', data[i].table[k]);
-            //             }
-            //         }
-            //         else
-            //         {
-            //             dojo.byId(i.toLowerCase() + '_metrics_section').style.display = 'none';
-            //         }
-            //     }
-            // }
+            //create each detail tab contents
+            // console.log(data);
+            for (var j in resp.page.detailedDataTab) {
+                if(typeof resp.page.detailedDataTab[j] !== 'function') {
+                    buildTab(resp.page.detailedDataTab[j]);
+                }
+            }
+
             // //change the default tab to the last selected (cso)
             // if(activeTab.id == 'cso'){
             //     return;
@@ -953,11 +853,5 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             // dojo.byId(activeTab.id+'_tab').style.display = '';
             // dojo.publish('tabchange', [activeTab.id]);
         }
-
-        // cloudTabs.addTab( new YAHOO.widget.Tab({
-        //     label: 
-        //     content: 
-        //     active:
-        // })
         </script>
 <!-- end hqu plugin -->
