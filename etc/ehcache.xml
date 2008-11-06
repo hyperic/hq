@@ -1,205 +1,877 @@
-<?xml version="1.0" encoding="UTF-8"?><ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ehcache.xsd">
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="ehcache.xsd">
 
   <!-- The default cache -->
-  <defaultCache eternal="false" maxElementsInMemory="1" overflowToDisk="false"/>
+  <defaultCache maxElementsInMemory="1"
+                eternal="false"
+                overflowToDisk="false"/>
 
   <!-- Timestamp cache for the query cache -->
-  <cache eternal="true" maxElementsInMemory="5000" name="org.hibernate.cache.UpdateTimestampsCache" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hibernate.cache.UpdateTimestampsCache"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"/>
 
   <!-- Server configuration cache -->
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.common.ConfigProperty" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-   <cache eternal="true" maxElementsInMemory="10" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.common.ConfigProperty.findAll" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.common.ConfigProperty"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+   <cache name="org.hyperic.hq.common.ConfigProperty.findAll"
+         maxElementsInMemory="10"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Measurement caches -->
-  <cache eternal="true" maxElementsInMemory="500000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.measurement.server.session.Measurement.baselinesBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="1000000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.measurement.server.session.Measurement" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="50000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.measurement.server.session.MeasurementTemplate" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="5000" memoryStoreEvictionPolicy="LRU" name="MeasurementTemplate.findTemplates" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.measurement.server.session.MonitorableType" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="4" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.measurement.server.session.Category" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="4" memoryStoreEvictionPolicy="LRU" name="Category.findByName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="50000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.measurement.server.session.Baseline" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="50000" memoryStoreEvictionPolicy="LRU" name="Measurement.findByResource" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="Measurement.findEnabledByResource" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="200000" memoryStoreEvictionPolicy="LRU" name="Measurement.findByTemplateForInstance" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="5000" memoryStoreEvictionPolicy="LRU" name="Measurement.findIdsByTemplateForInstances" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="4" memoryStoreEvictionPolicy="LRU" name="Measurement.findByCategory" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="Measurement.findDesignatedByResource" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="Measurement.findDesignatedByResourceForCategory" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="1" memoryStoreEvictionPolicy="LRU" name="Measurement.findAllAvailIds" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-   <cache eternal="true" maxElementsInMemory="200000" memoryStoreEvictionPolicy="LRU" name="Measurement.findAvailMeasurements" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-   <cache eternal="true" maxElementsInMemory="25000" memoryStoreEvictionPolicy="LRU" name="Measurement.findRelatedAvailMeasurements" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="200000" memoryStoreEvictionPolicy="LRU" name="Measurement.findAvailMeasurementsByInstances" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="2000" memoryStoreEvictionPolicy="LRU" name="CpropKey.findByKey" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.measurement.server.session.Measurement.baselinesBag"
+         maxElementsInMemory="50000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.measurement.server.session.Measurement"
+         maxElementsInMemory="50000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.measurement.server.session.MeasurementTemplate"
+         maxElementsInMemory="50000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="MeasurementTemplate.findTemplates"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.measurement.server.session.MonitorableType"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.measurement.server.session.Category"
+         maxElementsInMemory="4"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Category.findByName"
+         maxElementsInMemory="4"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.measurement.server.session.Baseline"
+         maxElementsInMemory="50000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Measurement.findByResource"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Measurement.findEnabledByResource"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Measurement.findByTemplateForInstance"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Measurement.findIdsByTemplateForInstances"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Measurement.findByCategory"
+         maxElementsInMemory="4"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Measurement.findDesignatedByResource"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Measurement.findDesignatedByResourceForCategory"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Measurement.findAllAvailIds"
+         maxElementsInMemory="1"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+   <cache name="Measurement.findAvailMeasurements"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+   <cache name="Measurement.findRelatedAvailMeasurements"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Measurement.findAvailMeasurementsByInstances"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="CpropKey.findByKey"
+         maxElementsInMemory="2000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Appdef config responses -->
-  <cache maxElementsInMemory="10000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.ConfigResponseDB" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache maxElementsInMemory="10000" memoryStoreEvictionPolicy="LRU" name="ConfigReponseDB.findByPlatformId" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache maxElementsInMemory="10000" memoryStoreEvictionPolicy="LRU" name="ConfigReponseDB.findByServerId" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache maxElementsInMemory="50000" memoryStoreEvictionPolicy="LRU" name="ConfigReponseDB.findByServiceId" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.appdef.ConfigResponseDB"
+         maxElementsInMemory="10000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ConfigReponseDB.findByPlatformId"
+         maxElementsInMemory="10000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ConfigReponseDB.findByServerId"
+         maxElementsInMemory="10000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ConfigReponseDB.findByServiceId"
+         maxElementsInMemory="10000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- User config response -->
-  <cache maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.UserConfigResp" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.authz.server.session.UserConfigResp"
+         maxElementsInMemory="100"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Metric data caches, used outside of hibernate -->
-  <cache maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="MetricDataCache" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="MetricDataCache"
+         maxElementsInMemory="100000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Cache used outside Hibernate which contains ent IDs which are in the
        zevent queue -->
-  <cache maxElementsInMemory="20000" memoryStoreEvictionPolicy="LRU" name="AgentScheduleInQueue" timeToIdleSeconds="0" timeToLiveSeconds="0">
+  <cache name="AgentScheduleInQueue"
+         maxElementsInMemory="20000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU">
   </cache>
 
   <!-- Cache used outside of hibernate, which maintains a set of agents
        which we are currently processing for AI services -->
-  <cache maxElementsInMemory="50000" memoryStoreEvictionPolicy="LRU" name="ServiceMergerWorking" timeToIdleSeconds="0" timeToLiveSeconds="0">
+  <cache name="ServiceMergerWorking"
+         maxElementsInMemory="3000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU">
   </cache>
 
   <!-- The SRN cache, used outside of hibernate -->
-  <cache maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="SRNCache" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="SRNCache"
+         maxElementsInMemory="100000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Agent Caches -->
-  <cache eternal="true" maxElementsInMemory="5000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.Agent" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="2" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.AgentType" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="5000" memoryStoreEvictionPolicy="LRU" name="Agent.findByAgentToken" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.appdef.Agent"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.AgentType"
+         maxElementsInMemory="2"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Agent.findByAgentToken"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Platform Caches -->
-  <cache eternal="true" maxElementsInMemory="15" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.PlatformType" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.Platform" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="1" memoryStoreEvictionPolicy="LRU" name="Platform.findAll_orderName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.Ip" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="10000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.Platform.ips" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.appdef.server.session.PlatformType"
+         maxElementsInMemory="15"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.Platform"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Platform.findAll_orderName"
+         maxElementsInMemory="1"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.Ip"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.Platform.ips"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Server Caches -->
-  <cache eternal="true" maxElementsInMemory="200" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.ServerType" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.Server" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="Server.findByPlatformAndType_orderName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="Server.findByPlatform_orderName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="2" memoryStoreEvictionPolicy="LRU" name="Server.findAll_orderName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="2000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.Platform.servers" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="15" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.PlatformType.serverTypesBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.appdef.server.session.ServerType"
+         maxElementsInMemory="200"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.Server"
+         maxElementsInMemory="2000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Server.findByPlatformAndType_orderName"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Server.findByPlatform_orderName"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Server.findAll_orderName"
+         maxElementsInMemory="2"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.Platform.servers"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.PlatformType.serverTypesBag"
+         maxElementsInMemory="15"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Virtual -->
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="Virtual.findVirtualByPhysicalId" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="Virtual.findVirtualByPhysicalId"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Service Caches -->
-  <cache eternal="true" maxElementsInMemory="500" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.ServiceType" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="500" memoryStoreEvictionPolicy="LRU" name="ServiceType.findByName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="200000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.Service" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="2" memoryStoreEvictionPolicy="LRU" name="Service.findAll_orderName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.Server.services" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="200" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.ServerType.serviceTypes" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="Service.findByServerAndType" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="500" memoryStoreEvictionPolicy="LRU" name="Service.findPlatformServices" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.appdef.server.session.ServiceType"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ServiceType.findByName"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.Service"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Service.findAll_orderName"
+         maxElementsInMemory="2"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.Server.services"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.ServerType.serviceTypes"
+         maxElementsInMemory="200"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Service.findByServerAndType"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Service.findPlatformServices"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Resource caches -->
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceEdge" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceEdge"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Group caches -->
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceGroup" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="50000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.GroupMember" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceGroup.criteriaList" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.PersistedCritter" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="ResourceGroup.findByName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="ResourceGroup.getMaxCollectionInterval" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="ResourceGroup.getMetricsCollecting" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceGroup"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.GroupMember"
+         maxElementsInMemory="20000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceGroup.criteriaList"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.PersistedCritter"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ResourceGroup.findByName"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ResourceGroup.getMaxCollectionInterval"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ResourceGroup.getMetricsCollecting"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceGroup.memberBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceGroup.roles" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="500" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResGrpResMap" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceGroup.memberBag"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceGroup.roles"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResGrpResMap"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Permission related caches -->
-  <cache eternal="true" maxElementsInMemory="300000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.Resource" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="50000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.Resource.groupBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="1" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceRelation" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="200000" memoryStoreEvictionPolicy="LRU" name="ResourceByInstanceId" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceType" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceType.operationsBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.ResourceType.findAll" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20" memoryStoreEvictionPolicy="LRU" name="ResourceType.findByName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.Operation" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="Operation.findByTypeAndName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.AuthzSubject" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20" memoryStoreEvictionPolicy="LRU" name="AuthzSubject.findByAuth" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20" memoryStoreEvictionPolicy="LRU" name="AuthzSubject.findByName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="PermissionCache" timeToIdleSeconds="0" timeToLiveSeconds="60"/>
+  <cache name="org.hyperic.hq.authz.server.session.Resource"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.Resource.groupBag"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceRelation"
+         maxElementsInMemory="1"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ResourceByInstanceId"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceType"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceType.operationsBag"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceType.findAll"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ResourceType.findByName"
+         maxElementsInMemory="20"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.Operation"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Operation.findByTypeAndName"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.AuthzSubject"
+         maxElementsInMemory="20"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="AuthzSubject.findByAuth"
+         maxElementsInMemory="20"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="AuthzSubject.findByName"
+         maxElementsInMemory="20"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="PermissionCache"
+         maxElementsInMemory="1000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="60"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Config caches -->
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.common.server.session.Crispo" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.common.server.session.Crispo.optsSet" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="4000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.common.server.session.CrispoOption" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="4000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.common.server.session.CrispoOption.array" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.common.server.session.Crispo"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.common.server.session.Crispo.optsSet"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.common.server.session.CrispoOption"
+         maxElementsInMemory="4000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.common.server.session.CrispoOption.array"
+         maxElementsInMemory="4000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Classic alert caches -->
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="Alert.findByCreateTime" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="Alert.findByEntity" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="5000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.Alert" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="15000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.Alert.actionLogBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="15000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.Alert.conditionLogBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="50000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.Action" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.Action.logEntriesBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="Alert.findByCreateTime"
+         maxElementsInMemory="10"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Alert.findByEntity"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.Alert"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.Alert.actionLogBag"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.Alert.conditionLogBag"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.Action"
+         maxElementsInMemory="3000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.Action.logEntriesBag"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <!-- The AlertDefinition and AlertDefinitionState caches should have 
 	   the same maxElementsInMemory setting since there is a one-to-one 
 	   relationship between these objects. -->	
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.AlertDefinition" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.AlertDefinitionState" timeToIdleSeconds="0" timeToLiveSeconds="0"/>	
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.AlertDefinition.actionsBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.AlertDefinition.conditionsBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.AlertDefinition.triggersBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="10000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.AlertConditionLog" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.AlertCondition" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="10000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.AlertCondition.logEntriesBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.events.server.session.RegisteredTrigger" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.events.server.session.AlertDefinition"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.AlertDefinitionState"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>	
+  <cache name="org.hyperic.hq.events.server.session.AlertDefinition.actionsBag"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.AlertDefinition.conditionsBag"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.AlertDefinition.triggersBag"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.AlertConditionLog"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.AlertCondition"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.AlertCondition.logEntriesBag"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.RegisteredTrigger"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Group alert caches -->
-  <cache eternal="true" maxElementsInMemory="30" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.GalertDef" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="30" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.GalertDef.strategySet" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="30" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="30" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo.triggerList" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="5" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.GtriggerInfo" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.GalertActionLog" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.GalertLog" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.GalertAuxLog" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.GalertAuxLog.childrenBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.GalertLog.actionLogBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.galerts.server.session.GalertLog.auxLogBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="5000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.measurement.server.session.MetricAuxLogPojo" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="5000" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertDef"
+         maxElementsInMemory="30"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertDef.strategySet"
+         maxElementsInMemory="30"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo"
+         maxElementsInMemory="30"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo.triggerList"
+         maxElementsInMemory="30"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo"
+         maxElementsInMemory="5"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GtriggerInfo"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertActionLog"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertLog"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertAuxLog"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertAuxLog.childrenBag"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertLog.actionLogBag"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertLog.auxLogBag"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.measurement.server.session.MetricAuxLogPojo"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Escalation caches -->
-  <cache eternal="true" maxElementsInMemory="10" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.escalation.server.session.Escalation" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.escalation.server.session.EscalationState" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="EscalationState.findByTypeAndDef" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.escalation.server.session.Escalation.actionsList" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.escalation.server.session.Escalation"
+         maxElementsInMemory="10"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.escalation.server.session.EscalationState"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="EscalationState.findByTypeAndDef"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.escalation.server.session.Escalation.actionsList"
+         maxElementsInMemory="20"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Update Cache -->
-  <cache eternal="true" maxElementsInMemory="1" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.bizapp.server.session.UpdateStatus" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.bizapp.server.session.UpdateStatus"
+         maxElementsInMemory="1"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Dashboard caches -->
-  <cache eternal="true" maxElementsInMemory="10000" memoryStoreEvictionPolicy="LRU" name="AvailabilitySummary" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="10000" memoryStoreEvictionPolicy="LRU" name="MetricViewer" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="10" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.ui.server.session.DashboardConfig" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="10" memoryStoreEvictionPolicy="LRU" name="UserDashboardConfig.findDashboard" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="10" memoryStoreEvictionPolicy="LRU" name="RoleDashboardConfig.findDashboard" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="10" memoryStoreEvictionPolicy="LRU" name="RoleDashboardConfig.findAllRoleDashboards" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="AvailabilitySummary"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="MetricViewer"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.ui.server.session.DashboardConfig"
+         maxElementsInMemory="10"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="UserDashboardConfig.findDashboard"
+         maxElementsInMemory="10"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="RoleDashboardConfig.findDashboard"
+         maxElementsInMemory="10"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="RoleDashboardConfig.findAllRoleDashboards"
+         maxElementsInMemory="10"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Livedata cache -->
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="LiveData" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="LiveData"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Calendar caches -->
-  <cache eternal="true" maxElementsInMemory="200" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.common.server.session.CalendarEntry" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.common.server.session.Calendar" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="20" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.common.server.session.Calendar.entriesBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="200" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.RoleCalendar" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="200" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.authz.server.session.Role.calendarBag" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.common.server.session.CalendarEntry"
+         maxElementsInMemory="200"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.common.server.session.Calendar"
+         maxElementsInMemory="20"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.common.server.session.Calendar.entriesBag"
+         maxElementsInMemory="20"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.RoleCalendar"
+         maxElementsInMemory="200"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.Role.calendarBag"
+         maxElementsInMemory="200"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- UI Plugin caches -->
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.hqu.server.session.Attachment" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.hqu.server.session.UIPlugin" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
-  <cache eternal="true" maxElementsInMemory="100" memoryStoreEvictionPolicy="LRU" name="org.hyperic.hq.hqu.server.session.View" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="org.hyperic.hq.hqu.server.session.Attachment"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.hqu.server.session.UIPlugin"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.hqu.server.session.View"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Application caches -->
-  <cache eternal="true" maxElementsInMemory="1000" memoryStoreEvictionPolicy="LRU" name="Application.findByServiceId_orderName" timeToIdleSeconds="0" timeToLiveSeconds="0"/>
+  <cache name="Application.findByServiceId_orderName"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
             
 
 </ehcache>
