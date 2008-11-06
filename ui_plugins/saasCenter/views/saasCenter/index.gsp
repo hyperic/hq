@@ -699,6 +699,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             }
         );
 
+        var t = new Date().getTime();
         /**
          * Called by the onload event and the refresh timer. 
          * This is the startup function for the page.
@@ -707,8 +708,8 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             //Show the status update message
             // d.status.startUpdate();
             dojo11.xhrGet( {
-                url : '/cloud.js?' + new Date().getTime(), //prevent caching
-                // url : '/hqu/saasCenter/Saascenter/sampleSummaryData.hqu?time=' + t + '&range=1w?' + t,
+                // url : '/cloud.js?' + new Date().getTime(), //prevent caching
+                url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=1w?' + t,
                 handleAs : 'json',
                 load : function (resp) {
                     buildPage(resp);
