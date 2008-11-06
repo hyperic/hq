@@ -1,7 +1,6 @@
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.rendit.helpers.MetricHelper
 import org.apache.commons.logging.Log
@@ -71,7 +70,7 @@ class CloudProvider {
             List<Resource> resources = resourceHelper.find(byPrototype: metric.protoName)
             
             if (!resources) {
-                _log.error("getIndicatorCharts:  Unable to find indicator group [${metric.groupName}]")
+                _log.error("getIndicatorCharts:  Unable to find resources of type [${metric.protoName}]")
                 continue
             }
             

@@ -56,7 +56,6 @@ class SaascenterController extends BaseController
 
     private final List resourcePrototypes = ["AWS", "salesforce"]
     
-    private List _resourceGroups
     private List _providers
     private HealthStripGenerator _healthGenerator = new HealthStripGenerator()
     
@@ -77,8 +76,6 @@ class SaascenterController extends BaseController
     }
     
     private getMeasurementJSON(start, end) {
-        _resourceGroups = getResourceHelper().findViewableGroups()
-        
         JSONObject page      = new JSONObject()
         JSONObject summaries = new JSONObject()
         JSONObject details   = new JSONObject()
