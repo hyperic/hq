@@ -682,12 +682,15 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
         <div id="z" style="display: none"></div>
         <script type="text/javascript">
         var cloudTabs = new YAHOO.widget.TabView('clouds');
+        cloudTabs.getTab(0).tabid = 'overview';
 
         // var d = document;
         var refInt = 90; //Set the pages Refresh Interval - for update timer and the pages coundown timer - in seconds
         var id1 = 149; //For ID Generator
         // var objIdx = -1; //For indexing the collection of widget references
         var objs = [];
+        
+        var providerTabs = {};
         hyperic.widget.tempNode = dojo.byId('z');
 
         // var cprop = {expires:1}; //cookies should expire after 1d
@@ -695,7 +698,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
         dojo11.addOnLoad(
             function() {
                 loadData();
-                // setInterval(loadData, refInt * 1000);
+                setInterval(loadData, refInt * 1000);
             }
         );
 
@@ -708,8 +711,8 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             //Show the status update message
             // d.status.startUpdate();
             dojo11.xhrGet( {
-                // url : '/cloud.js?' + new Date().getTime(), //prevent caching
-                url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=1w?' + t,
+                url : '/cloud.js?' + new Date().getTime(), //prevent caching
+                // url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=1w?' + t,
                 handleAs : 'json',
                 load : function (resp) {
                     buildPage(resp);
@@ -783,6 +786,10 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             cloudTabs.addTab( tab );
         }
 
+        function changeTabs(provider) {
+            cloudTabs.set('activeIndex', providerTabs[provider]);
+        }
+
         /**
          * Called by the loaddata sucess callback. Builds each part 
          * of the page from the data retuned from the server
@@ -803,9 +810,11 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             var f = hyperic.widget.tempNode;
             providers = resp.page.dashboard.providers;
             for(var j in providers) {
-                if(typeof(providers[j]) !== 'function') {
-                    tmp_id = 'overall_' + providers[j].code.toLowerCase() + '_summary';
-                    f.innerHTML = '<div id="' + tmp_id + '"><h1 class="title" onclick="changeTabs(\\\''+ providers[j].code +'\\\')">' + providers[j].longName + '</h1></div>';
+                if(typeof providers[j] !== 'function') {
+                    var tabid = providers[j].code.replace(/\\s+/g,'_').toLowerCase();
+
+                    tmp_id = 'overall_' + tabid + '_summary';
+                    f.innerHTML = '<div id="' + tmp_id + '"><h1 class="title" onclick="changeTabs(\\\''+ tabid +'\\\')">' + providers[j].longName + '</h1></div>';
                     dojo.byId('overallSummary').appendChild(f.firstChild);
                     for (var i in providers[j].strips) {
                         if(typeof(providers[j].strips[i]) !== 'function')
@@ -841,6 +850,13 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             for (var j in resp.page.detailedDataTab) {
                 if(typeof resp.page.detailedDataTab[j] !== 'function') {
                     buildTab(resp.page.detailedDataTab[j]);
+                }
+            }
+
+            var tabs = cloudTabs.get('tabs');
+            for(var tab in tabs) {
+                if(typeof(tabs[tab]) !== 'function') {
+                    providerTabs[tabs[tab].tabid] = tab;
                 }
             }
 
