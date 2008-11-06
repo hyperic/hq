@@ -339,27 +339,26 @@ class HealthStripGenerator {
          List<Resource> resources = rHelp.find(byPrototype:svc.code)
 
          if (resources == null) {
-             log.warn "Can't find by protoname ${svc.code}, which is used to get log messages"
+             log.warn "Can't find resources by protoname ${svc.code}, which is used to get log messages"
              return []
          }
-         def list
+         def list = []
          for (resource in resources){
              def aeid = new AppdefEntityID(resource)
          
-              list = EventMan.one.findLogs(aeid, overlord, 
+              list.addAll(EventMan.one.findLogs(aeid, overlord, 
                                           ["org.hyperic.hq.measurement.shared.ResourceLogEvent"] as String[], 
-                                          begin, end).grep { it.status.equals("INF") }
-         
-             if (!list) {
-                 return []
-             }
+                                          begin, end).grep { it.status.equals("INF") } )
+         } 
+         if (list.size() < 1) {
+             return []
          }
          list = list.reverse()
-
+         
          def maxInd = Math.min(list.size(), max)
          list[0..(maxInd-1)].collect { EventLog event ->
              decodeEvent(event)
-         }
+         }    
      
      }
 
