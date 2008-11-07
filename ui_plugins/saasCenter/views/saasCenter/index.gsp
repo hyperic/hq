@@ -711,7 +711,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             //Show the status update message
             // d.status.startUpdate();
             dojo11.xhrGet( {
-                url : '/cloud.js?' + new Date().getTime(), //prevent caching
+                url : '/cloud1.js?' + new Date().getTime(), //prevent caching
                 // url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=1w?' + t,
                 handleAs : 'json',
                 load : function (resp) {
@@ -721,19 +721,13 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             } );
         }
         
-        function buildTab(provider)
+        function buildTab(data, tabid)
         {
-            var tabid = provider.code.replace(/\\s+/g,'_').toLowerCase();
-            var tab = new YAHOO.widget.Tab({
-                label: provider.longName
-            });
-
             var f = document.createElement("div");
             f.style.display = 'none';
-            f.innerHTML = '<!-- ' + provider.longName + ' tab --><div><div class="title">' + provider.longName + ' Health Summary</div><div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for ' + provider.longName + '.</div><div style="clear: both;"></div><div id="' + tabid + '_summary"></div></div>';
+            // f.innerHTML = '<!-- ' + longName + ' tab --><div><div class="title">' + longName + ' Health Summary</div><div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for ' + provider.longName + '.</div><div style="clear: both;"></div><div id="' + tabid + '_summary"></div></div>';
             document.body.appendChild(f);
             
-            data = provider.data;
             for (var i in data) {
                 if(typeof data[i] !== 'function') {
                     var id = tabid + '-' + i.replace(/\\s+/g,'_').toLowerCase();
@@ -780,10 +774,8 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                     }
                 }
             }
-            tab.tabid = tabid;
-            tab.set('content',f.innerHTML);
+            return f.innerHTML;
             document.body.removeChild(f);
-            cloudTabs.addTab( tab );
         }
 
         function changeTabs(provider) {
@@ -811,9 +803,17 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             providers = resp.page.dashboard.providers;
             for(var j in providers) {
                 if(typeof providers[j] !== 'function') {
-                    var tabid = providers[j].code.replace(/\\s+/g,'_').toLowerCase();
+                    var tabid = providers[j].code;
+
+                    var tab = new YAHOO.widget.Tab({
+                        label: providers[j].longName
+                    });
+
+                    tab.tabid = tabid;
+                    cloudTabs.addTab( tab );
 
                     tmp_id = 'overall_' + tabid + '_summary';
+
                     f.innerHTML = '<div id="' + tmp_id + '"><h1 class="title" onclick="changeTabs(\\\''+ tabid +'\\\')">' + providers[j].longName + '</h1></div>';
                     dojo.byId('overallSummary').appendChild(f.firstChild);
                     for (var i in providers[j].strips) {
@@ -847,18 +847,22 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             delete f;
             //create each detail tab contents
             // console.log(data);
-            for (var j in resp.page.detailedDataTab) {
-                if(typeof resp.page.detailedDataTab[j] !== 'function') {
-                    buildTab(resp.page.detailedDataTab[j]);
-                }
-            }
 
             var tabs = cloudTabs.get('tabs');
             for(var tab in tabs) {
                 if(typeof(tabs[tab]) !== 'function') {
                     providerTabs[tabs[tab].tabid] = tab;
+                    tabs[tab].set('content',buildTab(resp.page.detailedDataTab[tabs[tab].tabid], tabs[tab].tabid));
                 }
             }
+
+            // for (var j in resp.page.detailedDataTab) {
+            //     if(typeof resp.page.detailedDataTab[j] !== 'function') {
+            //         buildTab(resp.page.detailedDataTab[j]);
+            //     }
+            // }
+
+
 
             // //change the default tab to the last selected (cso)
             // if(activeTab.id == 'cso'){
