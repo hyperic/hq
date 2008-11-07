@@ -711,8 +711,8 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             //Show the status update message
             // d.status.startUpdate();
             dojo11.xhrGet( {
-                url : '/cloud1.js?' + new Date().getTime(), //prevent caching
-                // url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=1w?' + t,
+                // url : '/cloud1.js?' + new Date().getTime(), //prevent caching
+                url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=1w?' + t,
                 handleAs : 'json',
                 load : function (resp) {
                     buildPage(resp);
