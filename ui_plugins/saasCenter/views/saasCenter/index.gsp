@@ -698,7 +698,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
         dojo11.addOnLoad(
             function() {
                 loadData();
-                setInterval(loadData, refInt * 1000);
+                // setInterval(loadData, refInt * 1000);
             }
         );
 
@@ -798,8 +798,12 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             hyperic.widget.tooltip.cleanup();
 
             dojo.byId('overallSummary').innerHTML = '';
+
             // create the cloudstatus overview widgets
-            var f = hyperic.widget.tempNode;
+            var f = document.createElement("div");
+            f.style.display = 'none';
+            document.body.appendChild(f);
+
             providers = resp.page.dashboard.providers;
             for(var j in providers) {
                 if(typeof providers[j] !== 'function') {
@@ -852,7 +856,10 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             for(var tab in tabs) {
                 if(typeof(tabs[tab]) !== 'function') {
                     providerTabs[tabs[tab].tabid] = tab;
-                    tabs[tab].set('content',buildTab(resp.page.detailedDataTab[tabs[tab].tabid], tabs[tab].tabid));
+                    if(tabs[tab].tabid != 'overview')
+                    {
+                        tabs[tab].set('content',buildTab(resp.page.detailedDataTab[tabs[tab].tabid], tabs[tab].tabid));
+                    }
                 }
             }
 
