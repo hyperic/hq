@@ -29,8 +29,10 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -136,13 +138,7 @@ public class Util {
             }
 
             private List getSortedCaches() {
-                CacheManager cacheManager = CacheManager.getInstance();
-                String[] caches = cacheManager.getCacheNames();
-                List res = new ArrayList(caches.length);
-                
-                for (int i=0; i<caches.length; i++) {
-                    res.add(cacheManager.getCache(caches[i]));
-                }
+                List res = getCaches();
                 
                 Collections.sort(res, new Comparator() {
                     public int compare(Object o1, Object o2) {
@@ -388,5 +384,31 @@ public class Util {
         SessionImplementor sessImpl = (SessionImplementor)
             factImpl.getCurrentSession();
         return (Integer)gen.generate(sessImpl, o);
+    }
+
+    private static List getCaches() {
+        CacheManager cacheManager = CacheManager.getInstance();
+        String[] caches = cacheManager.getCacheNames();
+        List res = new ArrayList(caches.length);
+        
+        for (int i=0; i<caches.length; i++) {
+            res.add(cacheManager.getCache(caches[i]));
+        }
+        return res;
+    }
+    
+    public static List getCacheHealths() {
+        List caches = getCaches();
+        List healths = new ArrayList(caches.size());
+        for (Iterator it = caches.iterator(); it.hasNext(); ) {
+            Cache cache = (Cache) it.next();
+            Map health = new HashMap();
+            health.put("region", cache.getName());
+            health.put("size", new Integer(cache.getSize()));
+            health.put("hits", new Integer(cache.getHitCount()));
+            health.put("misses", new Integer(cache.getMissCountNotFound()));
+            healths.add(health);
+        }
+        return healths;
     }
 }

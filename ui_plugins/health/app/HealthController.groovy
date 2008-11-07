@@ -21,15 +21,13 @@ import org.hyperic.hq.common.DiagnosticThread
 import org.hyperic.hq.common.Humidor
 import org.hyperic.util.jdbc.DBUtil
 import org.hyperic.hibernate.PageInfo
+import org.hyperic.hibernate.Util
 
 import java.text.DateFormat;
 import java.sql.Types
 import javax.naming.InitialContext
 
 import groovy.sql.Sql
-
-import net.sf.ehcache.CacheManager
-
 
 class HealthController 
 	extends BaseController
@@ -206,16 +204,7 @@ class HealthController
     }
     
 	private getCacheData(pageInfo) {
-	    def cm = CacheManager.instance
-	    def res = []
-	               
-	    for (name in cm.cacheNames) {
-	        def cache = cm.getCache(name)
-	        res << [region: name,
-	                size:   cache.size,
-	                hits:   cache.hitCount,
-	                misses: cache.missCountNotFound]
-	    }
+        def res = Util.cacheHealths
 	    
 	    def d = pageInfo.sort.description
 	    res = res.sort {a, b ->
