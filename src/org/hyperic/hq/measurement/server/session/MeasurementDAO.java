@@ -71,6 +71,10 @@ public class MeasurementDAO extends HibernateDAO {
         super.remove(entity);
     }
     
+    public void removeBaseline(Measurement m) {
+        m.setBaseline(null);
+    }
+    
     /**
      * retrieves List<Object[]>
      * [0] = Measurement

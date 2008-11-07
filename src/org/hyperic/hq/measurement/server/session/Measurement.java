@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -166,8 +166,12 @@ public class Measurement extends PersistedObject
     }
 
     void setBaseline(Baseline b) {
-        clearBaseline();
-        getBaselinesBag().add(b);
+        final Collection baselines = getBaselinesBag();
+        if (!baselines.isEmpty())
+            baselines.clear();
+
+        if (b != null)
+            baselines.add(b);
     }
 
     public Baseline getBaseline() {
@@ -175,10 +179,6 @@ public class Measurement extends PersistedObject
             return null;
         else
             return (Baseline)getBaselinesBag().iterator().next();
-    }
-
-    void clearBaseline() {
-        getBaselinesBag().clear();
     }
 
     public boolean equals(Object obj) {
