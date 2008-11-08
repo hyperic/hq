@@ -31,7 +31,7 @@ class ChartData {
     // All the measurements comprising the chart data
     List measurements
     
-    JSONArray data
+    JSONObject data
     
     String toString() {
         "${resource.name} -> ${metric.name}"

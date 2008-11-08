@@ -119,7 +119,7 @@ class SaascenterController extends BaseController
             JSONObject chartJson = new JSONObject();
             String unitsBuf = ""
             
-            JSONArray chartData = new JSONArray()
+            JSONObject chartData = new JSONObject()
             
             if (!chart.metric.units.equals("none")) {
                 long window = ((end-begin)/60).longValue()
@@ -141,7 +141,7 @@ class SaascenterController extends BaseController
                         }
                         def date = _gmtFmt.format(new Date(dp.timestamp))
                         String val = getTimeplotMetricValue(fmtValues[i++].value.toString())
-                        chartData.put(new JSONObject().put(date, val))
+                        chartData.put(date, val)
                     }
                     
                     chart.data = chartData
