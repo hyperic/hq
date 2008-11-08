@@ -68,7 +68,6 @@ class CloudProvider {
         for (indicator in indicators) {
             MetricName metric = indicator.metric 
             List<Resource> resources = resourceHelper.find(byPrototype: metric.protoName)
-            
             if (!resources) {
                 _log.error("getIndicatorCharts:  Unable to find resources of type [${metric.protoName}]")
                 continue
@@ -80,17 +79,17 @@ class CloudProvider {
             }
             
             Resource r = resources[0] 
-            List templates = r.enabledMetrics.collect { it.template }
-            MeasurementTemplate tmpl = templates.find { it.name == metric.metricName } 
+            Measurement m =
+                r.enabledMetrics.find { it.template.name == metric.metricName } 
 
-            if (!tmpl) {
+            if (!m) {
                 _log.error("getIndicatorCharts:  Resource [${r}] does not " + 
                            "have members with the metric [${metric.metricName}].  Unable to " +
                            "create indicator chart")
                 continue
             }
 
-            res << new ChartData(resource: r, metric: tmpl,
+            res << new ChartData(resource: [r], metric: m.template,
                                  label: indicator.label) 
         }
         
