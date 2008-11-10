@@ -3629,60 +3629,57 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
     };
     that.showChart = function() {
         //create chart
-        var es = new Timeplot.DefaultEventSource();
-        var pi = null;
-        if(chartType == 'dashboard')
-        {
-            pi = [Timeplot.createPlotInfo( {
-                id : "plot1", 
-                dataSource : new Timeplot.ColumnSource(es, 1), 
-                valueGeometry : new Timeplot.DefaultValueGeometry( {
-                    axisLabelsPlacement : "left"
-                    }
-                ), 
-                timeGeometry : new Timeplot.DefaultTimeGeometry( {
-                    axisLabelsPlacement : "bottom" }
-                ), 
-                showValues : false, 
-                lineColor : "#00EB08", 
-                roundValues:false, //00EB08 89EB0F
-                fillColor : "#D0FFD2" //#E6FCCA
+        that.dataSource = new Timeplot.DefaultEventSource();
+        var chartOptions = null;
+        var count = 0;
+        for(var i in that.data) {
+            if(undefined !== that.data[i] && typeof(that.data[i]) !== 'function')
+            {
+                count++;
+            }
+        }
+        
+        chartOptions = {
+            id : "plot1", 
+            dataSource : new Timeplot.ColumnSource(that.dataSource, 1), 
+            valueGeometry : new Timeplot.DefaultValueGeometry( {
+                axisLabelsPlacement : "left"
                 }
-            )];
+            ), 
+            timeGeometry : new Timeplot.DefaultTimeGeometry( {
+                axisLabelsPlacement : "bottom" }
+            ), 
+            showValues : false, 
+            lineColor : "#00EB08", 
+            roundValues: false,
+            fillColor : "#D0FFD2"
+        };
+
+        if(chartType != 'dashboard')
+        {
+            chartOptions.valueGeometry.gridColor = new Timeplot.Color("#000000");
+            chartOptions.timeGeometry.gridColor  = new Timeplot.Color("#DDDDDD");
+            chartOptions.showValues = true;
+            chartOptions.fillColor = "#00B93A";
+        }
+
+        if(count == 0)
+        {
+            chartOptions.showValues = false;
+        }
+
+        that.chart = Timeplot.create(dojo11.byId(that.tabid + "_chart" + that.chartPos), [Timeplot.createPlotInfo( chartOptions )]);
+
+        if(count > 1)
+        {
+            // that.chart.loadText(that.url, ",", that.dataSource);
+            that.chart.loadJSON(that.data, that.dataSource);
         }
         else
         {
-            var count = 0;
-            for(var i in that.data) {
-                if(undefined !== that.data[i] && typeof(that.data[i]) !== 'function')
-                {
-                    count++;
-                }
-            }
-            
-            that.dataSource = new Timeplot.DefaultEventSource();
-            if(count > 1)
+            if(chartType != 'dashboard')
             {
-                var pi = [Timeplot.createPlotInfo( {
-                    id : "plot1", 
-                    dataSource    : new Timeplot.ColumnSource(that.dataSource, 1), 
-                    valueGeometry : new Timeplot.DefaultValueGeometry( { 
-                                            gridColor : "#000000", 
-                                            axisLabelsPlacement : "left" }), 
-                    timeGeometry  : new Timeplot.DefaultTimeGeometry( { 
-                                            gridColor : new Timeplot.Color("#DDDDDD"), 
-                                            axisLabelsPlacement : "bottom"} ), 
-                    showValues    : true, 
-                    lineColor     : "#00EB08", 
-                    roundValues   : false, //00EB08 89EB0F
-                    fillColor     : "#00B93A" //#E6FCCA
-                    }
-                )];
-                that.chart = Timeplot.create(dojo11.byId(that.tabid + "_chart" + that.chartPos), pi);
-                // that.chart.loadText(that.url, ",", that.dataSource);
-                that.chart.loadJSON(that.data, that.dataSource);                }
-            else
-            {
+                // display 'no data' message
                 containerNode = dojo11.byId(that.containerId);
                 var message = SimileAjax.Graphics.createMessageBubble(containerNode.ownerDocument);
                 message.containerDiv.className = "timeline-message-container";
@@ -3691,27 +3688,11 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
                 message.contentDiv.className = "timeline-message";
                 message.contentDiv.innerHTML = '<span style="color: #000; font-size: 12px;">No Data</span>';
                 message.containerDiv.style.display = "block";
-
-                var pi = [Timeplot.createPlotInfo( {
-                    id            : "plot1", 
-                    dataSource    : new Timeplot.ColumnSource(that.dataSource, 1), 
-                    valueGeometry : new Timeplot.DefaultValueGeometry( {
-                                            gridColor : "#000000", 
-                                            axisLabelsPlacement : "left" } ), 
-                    timeGeometry  : new Timeplot.DefaultTimeGeometry( {
-                                            gridColor : new Timeplot.Color("#DDDDDD"), 
-                                            axisLabelsPlacement : "bottom"}), 
-                    showValues    : true, 
-                    lineColor     : "#00EB08", 
-                    roundValues   : false, //00EB08 89EB0F
-                    fillColor     : "#00B93A" //#E6FCCA
-                    }
-                )];
-                that.chart = Timeplot.create(dojo11.byId(that.tabid + "_chart" + that.chartPos), pi);
-                that.chart.loadJSON({"2008-08-04T01:08:51-0700":[0],"2008-08-04T01:09:51-0700":[0],"2008-08-04T01:10:51-0700":[0],"2008-08-04T01:11:51-0700":[0],"2008-08-04T01:12:51-0700":[0]}, that.dataSource);
             }
+
+            // load fake data to make the chart draw a grid
+            that.chart.loadJSON({"2008-08-04T01:08:51-0700":[0],"2008-08-04T01:09:51-0700":[0],"2008-08-04T01:10:51-0700":[0]}, that.dataSource);
         }
-        
         // chart.loadText(that.url, ",", es);
         that.isShowing = true;
     };
