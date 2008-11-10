@@ -540,7 +540,8 @@
 	font-family: verdana;
 	float: left;
 	margin: 0 0 0 8px;
-	padding: 10px 0 0 10px
+	padding: 10px 0 0 10px;
+	position: relative;
 }
 
 .cTitle {
