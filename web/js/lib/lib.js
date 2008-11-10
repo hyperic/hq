@@ -3604,9 +3604,11 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
                     break;
             }
         }
-        var template = '<div class="chartCont"> <div class="cTitle">' + kwArgs.chartName + '</div><div id="' + tabid + '_chart' + chartPos + '" class="'+chart_class+'"></div><div class="xlegend"></div></div>';
+        that.containerId = tabid+'-chartCont-'+chartPos;
+        var template = '<div class="chartCont" id="'+that.containerId+'"><div class="cTitle">' + kwArgs.chartName + '</div><div id="' + tabid + '_chart' + chartPos + '" class="'+chart_class+'"></div><div class="xlegend"></div></div>';
         that.template = template;
         that.tabid = tabid;
+        that.node = node;
         var f = dojo.byId('z');
         that.chartName = kwArgs.chartName;
         //console.log("created chart: "+kwArgs.chartName);
@@ -3616,7 +3618,6 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
         that.data = kwArgs.data;
         that.chartPos = chartPos;
         //chartObjs[tabid] = that;
-        that.node = dojo.byId(tabid);
         cloudTabs.addListener('activeTabChange', that.onTabChange);
         //TODO check if the tab that is currently selected is the one that is getting the chart.
         f=null;
@@ -3682,11 +3683,11 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
                 that.chart.loadJSON(that.data, that.dataSource);                }
             else
             {
-                node_el = dojo11.byId(node);
-                var message = SimileAjax.Graphics.createMessageBubble(node_el.ownerDocument);
+                containerNode = dojo11.byId(that.containerId);
+                var message = SimileAjax.Graphics.createMessageBubble(containerNode.ownerDocument);
                 message.containerDiv.className = "timeline-message-container";
-                node_el.appendChild(message.containerDiv);
-                
+                containerNode.appendChild(message.containerDiv);
+
                 message.contentDiv.className = "timeline-message";
                 message.contentDiv.innerHTML = '<span style="color: #000; font-size: 12px;">No Data</span>';
                 message.containerDiv.style.display = "block";
