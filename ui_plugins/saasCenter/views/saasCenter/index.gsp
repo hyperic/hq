@@ -769,7 +769,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                                 id + '_chartCont', // chart container id
                                 data[i].charts[j], // chart data
                                 tabid, // tab id
-                                j + 1, // chart position
+                                id + '_' + j, // chart position
                                 chart_type); // chart type
                         }
                     }
