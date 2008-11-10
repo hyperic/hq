@@ -1,4 +1,5 @@
 import java.text.DateFormat
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 
 import org.apache.commons.logging.Log;
@@ -560,18 +561,20 @@ class SaascenterController extends BaseController
     private Long convertRangeToUTC(String range, final Long currTime) {
         _log.debug("Converting " + range + " & " + Long.toString(currTime));
         Long time = 0L;
-        if (range.equalsIgnoreCase("1hr")) {
+        if (range ==~ /^1[hH]/) {
             time = currTime - 3600000L;
-        } else if (range.equalsIgnoreCase("6hr")) {
+        } else if (range ==~ /^6[hH]/) {
             time = currTime - 21600000L;
-        } else if (range.equalsIgnoreCase("12hr")) {
+        } else if (range ==~ /^12[hH]/) {
             time = currTime - 43200000L;
-        } else if (range.equalsIgnoreCase("1d")) {
+        } else if (range ==~ /^1[dD]/) {
             time = currTime - 86400000L;
-        } else if (range.equalsIgnoreCase("1w")) {
+        } else if (range ==~ /^1[wW]/) {
             time = currTime - 604800000L;
-        } else if (range.equalsIgnoreCase("2w")){
+        } else if (range ==~ /^2[wW]/) {
             time = currTime - 1209600000L;
+        } else { // Default to 8 hours
+            time = currTime - 28800000L;
         }
         _log.debug("Converted to  " + time);
         return time;
