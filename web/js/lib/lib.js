@@ -3584,7 +3584,6 @@ hyperic.widget.tooltip = {
 /* SaaS plugin js */
 hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
     var that = this;
-    that.subscriptions=[];
     that.create = function(node, kwArgs, tabid, chartPos) {
         var chart_class = '';
         if(chartType)
@@ -3618,7 +3617,9 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
         that.data = kwArgs.data;
         that.chartPos = chartPos;
         //chartObjs[tabid] = that;
-        cloudTabs.addListener('activeTabChange', that.onTabChange);
+
+        cloudTabs.subscribe('activeTabChange', that.onTabChange);
+        
         //TODO check if the tab that is currently selected is the one that is getting the chart.
         f=null;
     };
@@ -3697,12 +3698,75 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
         that.isShowing = true;
     };
     this.cleanup = function(){
-        dojo.unsubscribe(that.subscriptions[0]);
+        cloudTabs.unsubscribe('activeTabChange', that.onTabChange);
+
+        n = dojo11.byId(that.containerId);
+        // destroy all children of the chart container
+        while(n.lastChild) {
+          n.removeChild(n.lastChild);
+        }
+        dojo11.byId(that.node).removeChild(n);
+
         that.node = null;
     };
     //init
     that.isShowing = false;
     this.create(node, kwArgs, tabid, chartPos);
 };
+
+/** 
+ * Status Element Functionality
+ * @param ct The Current Time Node
+ * @param nt the Countdown time Node
+ * @param status the status node
+ * @param update the update node
+ *
+ * The template - 
+ *   <div class="status">
+ *      <div id="status" style="display:none">Updated <span id="ct">DateTime</span>. Updates in <span id="nt">59</span></div>
+ *      <div id="update">Updating...</div>
+ *   </div>
+ */
+hyperic.widget.StatusElement = function(ct, nt, status, update, interval) {
+    var that = this;
+    that.ctNode = dojo.byId(ct);
+    that.ntNode = dojo.byId(nt);
+    that.sNode = dojo.byId(status);
+    that.uNode = dojo.byId(update);
+    that.interval = null;
+    that.time = interval;
+    that.refInterval = interval;
+    that.startUpdate = function() {
+        //show updating
+        that.uNode.style.display = 'block';
+        that.sNode.style.display = 'none';
+        that.isUpdating = !that.isUpdating;
+        };
+    that.endUpdate = function() {
+        //hide updating
+        that.uNode.style.display = 'none';
+        that.sNode.style.display = 'block';
+        //reset timer with the inteval value
+        that.time = that.refInterval;
+        //then start the new clock
+        that.startClock();
+        //mark current date
+        that.ctNode.innerHTML = new Date().formatDate('HH:mm:ss z');
+        };
+    that.startClock = function() {
+        that.ntNode.innerHTML = that.time + '';
+        clearInterval(that.interval);
+        that.interval = window.setInterval(that.updateClock, 1000);
+        };
+    that.updateClock = function() {
+        that.ntNode.innerHTML = that.time + '';
+        --that.time;
+        };
+    that.cleanup = function() {
+        };
+    //init
+    return that;
+};
+
 
 /* end SaaS plugin js */
