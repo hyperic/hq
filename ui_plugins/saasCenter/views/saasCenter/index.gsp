@@ -215,8 +215,7 @@
 /*Status Indicator Widget*/
 
 .status {
-	color: #BBB;
-	font-size: .7em;
+	color: #333;
 	height: 0;
     padding-right: 10px;
     float: right;
