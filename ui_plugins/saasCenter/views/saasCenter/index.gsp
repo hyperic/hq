@@ -637,6 +637,10 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
 #overallSummary h1:hover {
     color: red;
 }
+
+#migContainer .yui-nav .selected a:visited, #migContainer .yui-nav .selected a:hover, #migContainer .yui-nav .selected a {
+    color: #FFF;
+} 
 </style>
 <!-- hqu plugin -->
 <!-- Dependencies -->
