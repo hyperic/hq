@@ -96,6 +96,15 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         mt.setCollectionType(info.getCollectionType());
         mt.setPlugin(pluginName);
         mt.setCategory(cat);
+        
+        // Don't reset indicator, defaultOn or interval if it's been
+        // changed
+        if (mt.getMtime() == mt.getCtime()) {        
+            mt.setDesignate(info.isIndicator());
+            mt.setDefaultOn(info.isDefaultOn());
+            mt.setDefaultInterval(info.getInterval());
+        }
+        
         save(mt);
     }
 
