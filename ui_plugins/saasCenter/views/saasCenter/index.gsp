@@ -691,8 +691,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
 
         var refInt = 20; //Set the pages Refresh Interval - for update timer and the pages coundown timer - in seconds
         var id1 = 149; //For ID Generator
-        var objIdx = -1; //For indexing the collection of widget references
-        var objs = [];
+        var tabWidgets = {};
 
         var providerTabs = {};
         hyperic.widget.tempNode = dojo.byId('z');
@@ -703,7 +702,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             function() {
                 document.status = hyperic.widget.StatusElement('ct', 'nt', 'status', 'update', refInt);
                 loadData();
-                // setInterval(loadData, refInt * 1000);
+                setInterval(loadData, refInt * 1000);
             }
         );
 
@@ -716,8 +715,8 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             //Show the status update message
             document.status.startUpdate();
             dojo11.xhrGet( {
-                url : '/cloud1.js?' + new Date().getTime(), //prevent caching
-                // url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=1w?' + t,
+                // url : '/cloud1.js?' + new Date().getTime(), //prevent caching
+                url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=1w?' + t,
                 handleAs : 'json',
                 load : function (resp) {
                     buildPage(resp);
@@ -728,11 +727,17 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
         
         function buildTab(data, tab)
         {
+            // clear old tab contents
+            tab.set('content','');
+            
             var f = document.createElement("div");
             f.style.display = 'none';
+            f.id = 'tmpZ';
             // f.innerHTML = '<!-- ' + longName + ' tab --><div><div class="title">' + longName + ' Health Summary</div><div class="legend">These charts display real-time health status and <strong>one week</strong> of health history for ' + provider.longName + '.</div><div style="clear: both;"></div><div id="' + tab.tabid + '_summary"></div></div>';
             document.body.appendChild(f);
             
+            tabWidgets[tab.tabid] = [];
+
             for (var i in data) {
                 if(typeof data[i] !== 'function') {
                     var id = tab.tabid + '-' + i.replace(/\\s+/g,'_').toLowerCase();
@@ -740,16 +745,13 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                     //health
                     if(data[i].health)
                     {
-                        //clear the node for the current section
-                        dojo.byId(id + '_health').innerHTML = '';
-                        objs[++objIdx] = new hyperic.widget.Health(id + '_health', data[i].health, false);
+                        tabWidgets[tab.tabid].push(new hyperic.widget.Health(id + '_health', data[i].health, false));
                     }
                     // charts
                     // limit the charts to a max of 6
                     var length = data[i].charts.length < 6 ? data[i].charts.length : 6;
+
                     if(length > 0) {
-                        //clear the node for the current section
-                        dojo.byId(id + '_chartCont').innerHTML = '';
                         for (var j = 0; j < length; j++) {
                             var chart_type = null;
                             if(data[i].charts[j].style !== undefined && data[i].charts[j].style == 'skinny') 
@@ -769,23 +771,19 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                                 }
                             }
                             // console.log(i + ': ' + data[i].charts[j].chartName + ' ('+data[i].charts[j].style+'): ' + chart_type);
-                            objs[++objIdx] = new hyperic.widget.CloudChart(
+                            tabWidgets[tab.tabid].push(new hyperic.widget.CloudChart(
                                 id + '_chartCont', // chart container id
                                 data[i].charts[j], // chart data
                                 tab.tabid, // tab id
                                 id + '_' + j, // chart position
-                                chart_type); // chart type
-                            if(cloudTabs.get('activeIndex') == cloudTabs.getTabIndex(tab))
-                            {
-                                objs[objIdx].showChart();
-                            }
+                                chart_type) // chart type
+                                );
                         }
                     }
                 }
             }
             
             tab.set('content',f.innerHTML);
-            console.log(f);
             while(f.lastChild) {
               f.removeChild(f.lastChild);
             }
@@ -803,12 +801,19 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
         function buildPage(resp) {
             
             //Remove all the old widgets before creating the new ones
-            for (i = 0; i < objs.length; i++) {
-                objs[i].cleanup();
-                objs[i] = null;
+            for(tab in tabWidgets) {
+                if(typeof tabWidgets[tab] !== "function")
+                {
+                    for(widget in tabWidgets[tab])
+                    {
+                        if(typeof tabWidgets[tab][widget] !== "function")
+                        {
+                            tabWidgets[tab][widget].cleanup();
+                            tabWidgets[tab][widget] = null;
+                        }
+                    }
+                }
             }
-            objs = [];
-            objIdx = -1;
             hyperic.widget.tooltip.cleanup();
 
             dojo.byId('overallSummary').innerHTML = '';
@@ -817,6 +822,8 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             var f = document.createElement("div");
             f.style.display = 'none';
             document.body.appendChild(f);
+
+            tabWidgets['overview'] = [];
 
             providers = resp.page.dashboard.providers;
             for(var j in providers) {
@@ -846,7 +853,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                         {
                             if(providers[j].strips[i].stripType == 'health')
                             {
-                                objs[++objIdx] = new hyperic.widget.Health(tmp_id, providers[j].strips[i], true);
+                                tabWidgets['overview'].push(new hyperic.widget.Health(tmp_id, providers[j].strips[i], true));
                             }
                             else
                             {
@@ -856,11 +863,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                                 for(chart in providers[j].strips[i].charts) {
                                     if(typeof(providers[j].strips[i].charts[chart]) !== 'function')
                                     {
-                                        objs[++objIdx] = new hyperic.widget.CloudChart(charts_container_id, providers[j].strips[i].charts[chart], 'overview', chart + '_' + j + '_' + i , 'dashboard');
-                                        if(cloudTabs.get('activeIndex') == 0)
-                                        {
-                                            objs[objIdx].showChart();
-                                        }
+                                        tabWidgets['overview'].push(new hyperic.widget.CloudChart(charts_container_id, providers[j].strips[i].charts[chart], 'overview', chart + '_' + j + '_' + i , 'dashboard'));
                                     }
                                 }
                                 f.innerHTML = '<div style="clear: both;"></div>';
@@ -886,6 +889,16 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                     }
                 }
             }
+            
+            activeTabId = cloudTabs.getTab(cloudTabs.get('activeIndex')).tabid;
+            for(widget in tabWidgets[activeTabId])
+            {
+                if(typeof widget !== 'function' && tabWidgets[activeTabId][widget].isShowing === false)
+                {
+                    tabWidgets[activeTabId][widget].showChart();
+                }
+            }
+            
 
             // for (var j in resp.page.detailedDataTab) {
             //     if(typeof resp.page.detailedDataTab[j] !== 'function') {
