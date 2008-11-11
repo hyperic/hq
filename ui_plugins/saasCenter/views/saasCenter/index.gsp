@@ -666,6 +666,13 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                <div id="status" style="display:none">Updated <span id="ct">DateTime</span>. Updates in <span id="nt">59</span></div>
                <div id="update">Updating...</div>
             </div>
+            <div id="cloudRangeGroup" class="yui-buttongroup">
+                <input id="cloudRange1" type="radio" name="cloudRange" value="1hr">
+                <input id="cloudRange2" type="radio" name="cloudRange" value="6hr">
+                <input id="cloudRange3" type="radio" name="cloudRange" value="12hr">
+                <input id="cloudRange4" type="radio" name="cloudRange" value="1d">
+                <input id="cloudRange5" type="radio" name="cloudRange" value="1w" checked>
+            </div>
             <div id="clouds" class="yui-navset">
                 <ul class="yui-nav">
                     <li class="selected"><a href="#overview"><em>Overview</em></a></li>
@@ -688,21 +695,31 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
         <script type="text/javascript">
         var cloudTabs = new YAHOO.widget.TabView('clouds');
         cloudTabs.getTab(0).tabid = 'overview';
+        
+        var cloudRangeGroup = new YAHOO.widget.ButtonGroup("cloudRangeGroup");
 
-        var refInt = 20; //Set the pages Refresh Interval - for update timer and the pages coundown timer - in seconds
+        cloudRangeGroup.subscribe('checkedButtonChange', changeCloudRange);
+
+        var refInt = 90; //Set the pages Refresh Interval - for update timer and the pages coundown timer - in seconds
         var id1 = 149; //For ID Generator
         var tabWidgets = {};
+        var dataRange = '1w';
 
         var providerTabs = {};
         hyperic.widget.tempNode = dojo.byId('z');
 
         // var cprop = {expires:1}; //cookies should expire after 1d
+        function changeCloudRange(evt)
+        {
+            dataRange = evt.newValue.get('value');
+            loadData();
+        }
 
         dojo11.addOnLoad(
             function() {
                 document.status = hyperic.widget.StatusElement('ct', 'nt', 'status', 'update', refInt);
                 loadData();
-                setInterval(loadData, refInt * 1000);
+                var refresh = setInterval(loadData, refInt * 1000);
             }
         );
 
@@ -716,7 +733,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             document.status.startUpdate();
             dojo11.xhrGet( {
                 // url : '/cloud1.js?' + new Date().getTime(), //prevent caching
-                url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=1w?' + t,
+                url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=' + dataRange + '?' + t,
                 handleAs : 'json',
                 load : function (resp) {
                     buildPage(resp);
