@@ -54,16 +54,16 @@ onloads.push(requestFavoriteResources);
  <table width="100%" border="0" cellspacing="0" cellpadding="0" id="favoriteTable" class="portletLRBorder">
  	<tbody>
 	<tr class="tableRowHeader">
-		<th width="50%" class="tableRowInactive">
+		<th class="tableRowInactive">
 			<fmt:message key="dash.home.TableHeader.ResourceName"/>
 		</th>
-		<th width="30%" class="tableRowInactive">
+		<th width="80px" class="tableRowInactive">
 			<fmt:message key="dash.home.TableHeader.Type"/>
 		</th>
-		<th width="10%" align="center" class="tableRowInactive">
+		<th width="60px" align="center" class="tableRowInactive">
 			<fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/>
 		</th>
-		<th width="10%" align="center" class="tableRowInactive">
+		<th width="40px" align="center" class="tableRowInactive">
 			<fmt:message key="dash.home.TableHeader.Alerts"/>
 		</th>
 	</tr>
