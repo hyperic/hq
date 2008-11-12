@@ -45,6 +45,8 @@ import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
+import org.hyperic.hq.hibernate.SessionManager;
+import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.util.Runnee;
 
 public class RenditServer {
@@ -117,10 +119,36 @@ public class RenditServer {
     /**
      * Loads a plugin into the rendit system, verifying the version numbers,
      * etc.
+     *
+     * @param path Path to the plugin
+     */
+    public PluginWrapper loadPlugin(final File path)
+        throws PluginLoadException
+    {
+        final PluginWrapper[] w = new PluginWrapper[1];
+        try {
+            SessionManager.runInSession(new SessionRunner() {
+                public String getName() {
+                    return "SessionMBeanBase";
+                }
+
+                public void run() throws Exception {
+                    w[0] = loadPluginInternal(path);
+                }
+            });
+        } catch (Exception e) {
+            throw new PluginLoadException(e.getMessage());
+        }
+        return w[0];
+    }
+
+    /**
+     * Loads a plugin into the rendit system, verifying the version numbers,
+     * etc.
      * 
      * @param path Path to the plugin
      */
-    public PluginWrapper loadPlugin(final File path) 
+    private PluginWrapper loadPluginInternal(final File path)
         throws PluginLoadException
     {
         final PluginWrapper plugin = new PluginWrapper(path, getSysDir(), 
