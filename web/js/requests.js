@@ -22,101 +22,103 @@
         var urlColon = ":"
         var resUrl = $('viewResUrl').href;
         var noProblemResources = $('noProblemResources');
+        var maxResourceNameSize;
         $('modifiedProblemTime').innerHTML = 'Updated: ' + refreshTime();
 
-            if (mList && mList.length > 0) {
+        // find the 'Resource Name' header cell and figure out it's displayed width.
+        dojo11.forEach(problemTable.getElementsByTagName('thead')[0].rows[0].cells,
+            function(cell) {
+                if(/Resource Name/.test(cell.innerHTML))
+                {
+                    maxResourceNameSize = cell.offsetWidth;
+                }
+            });
 
-                var tbody = problemTable.getElementsByTagName('tbody')[0];
-                var browser = BrowserDetect.browser;
+        if (mList && mList.length > 0) {
 
-                if (browser == "Safari") {
-                    for (var i = tbody.childNodes.length; i > 1; i--) {
-                    tbody.removeChild(tbody.childNodes[i]);
-                    }
+            var tbody = problemTable.getElementsByTagName('tbody')[0];
+            var browser = BrowserDetect.browser;
+
+            if (browser == "Safari") {
+                for (var i = tbody.childNodes.length; i > 1; i--) {
+                tbody.removeChild(tbody.childNodes[i]);
+                }
+            } else {
+                for (var i = tbody.childNodes.length - 1; i > 1; i--) {
+                tbody.removeChild(tbody.childNodes[i]);
+                }
+            }
+        
+            for (i = 0; i < mList.length; i++) {
+
+                var tr = document.createElement('tr');
+                var trTime = document.createElement('tr');
+                var td1 = document.createElement('td');
+                var td2 = document.createElement('td');
+                var td3 = document.createElement('td');
+                var td4 = document.createElement('td');
+                var td5 = document.createElement('td');
+
+                tbody.appendChild(tr);
+
+                if (i % 2 == 0) {
+                    tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
                 } else {
-                    for (var i = tbody.childNodes.length - 1; i > 1; i--) {
-                    tbody.removeChild(tbody.childNodes[i]);
-                    }
-                }
-                
-                for (i = 0; i < mList.length; i++) {
-
-                    var tr = document.createElement('tr');
-                    var trTime = document.createElement('tr');
-                    var td1 = document.createElement('td');
-                    var td2 = document.createElement('td');
-                    var td3 = document.createElement('td');
-                    var td4 = document.createElement('td');
-                    var td5 = document.createElement('td');
-
-                    tbody.appendChild(tr);
-
-                    if (i % 2 == 0) {
-                        tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
-                    } else {
-                        tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
-                    }
-
-                    tr.appendChild(td1);
-                    td1.setAttribute((document.all ? 'className' : 'class'), "resource");
-                    td1.setAttribute("id", (mList[i].resource));
-
-                    if (mList[i].resourceName) {
-                        var short_name = (mList[i].resourceName.length > 20) ? mList[i].resourceName.substring(0,20) + '&hellip;' : mList[i].resourceName;
-                        td1.innerHTML = '<a href="' + resUrl + mList[i].resourceType + urlColon + mList[i].resourceId + '" title="'+ mList[i].resourceName +'">'+ short_name +'</a>';
-                    }
-
-                    tr.appendChild(td2);
-                    td2.setAttribute((document.all ? 'className' : 'class'), "availability");
-
-                    if (mList[i].availability) {
-                        switch (mList[i].availability) {
-                            case "green":
-                                td2.innerHTML = "<img src=images/icon_available_green.gif>";
-                                break;
-                            case "red":
-                                td2.innerHTML = "<img src=images/icon_available_red.gif>";
-                                break;
-                            case "yellow":
-                                td2.innerHTML = "<img src=images/icon_available_yellow.gif>";
-                                break;
-                            case "orange":
-                                td2.innerHTML = "<img src=images/icon_available_orange.gif>";
-                                break;
-                            default:
-                                td2.innerHTML = "<img src=images/icon_available_error.gif>";
-                        }
-                    }
-
-                    tr.appendChild(td3);
-                    td3.setAttribute((document.all ? 'className' : 'class'), "alerts");
-
-                    if (mList[i].alerts != '') {
-                        td3.appendChild(document.createTextNode(mList[i].alerts));
-                    } else {
-                        td3.appendChild(document.createTextNode("0"));
-                    }
-                    
-                    tr.appendChild(td4);
-                    td4.setAttribute((document.all ? 'className' : 'class'), "oob");
-                    td4.appendChild(document.createTextNode(mList[i].oob));
-
-                    tr.appendChild(td5);
-                    td5.setAttribute((document.all ? 'className' : 'class'), "latest");
-                    td5.setAttribute("nowrap", "true");
-                    td5.appendChild(document.createTextNode(mList[i].latest));
-
+                    tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
                 }
 
+                tr.appendChild(td1);
+                td1.setAttribute((document.all ? 'className' : 'class'), "resource");
+                td1.setAttribute("id", (mList[i].resource));
+
+                if (mList[i].resourceName) {
+                    td1.innerHTML = getShortLink(mList[i].resourceName, maxResourceNameSize, resUrl + mList[i].resourceType + urlColon + mList[i].resourceId);
+                }
+
+                tr.appendChild(td2);
+                td2.setAttribute((document.all ? 'className' : 'class'), "availability");
+
+                if (mList[i].availability) {
+                    switch (mList[i].availability) {
+                        case "green":
+                            td2.innerHTML = "<img src=images/icon_available_green.gif>";
+                            break;
+                        case "red":
+                            td2.innerHTML = "<img src=images/icon_available_red.gif>";
+                            break;
+                        case "yellow":
+                            td2.innerHTML = "<img src=images/icon_available_yellow.gif>";
+                            break;
+                        case "orange":
+                            td2.innerHTML = "<img src=images/icon_available_orange.gif>";
+                            break;
+                        default:
+                            td2.innerHTML = "<img src=images/icon_available_error.gif>";
+                    }
+                }
+
+                tr.appendChild(td3);
+                td3.setAttribute((document.all ? 'className' : 'class'), "alerts");
+
+                if (mList[i].alerts != '') {
+                    td3.appendChild(document.createTextNode(mList[i].alerts));
+                } else {
+                    td3.appendChild(document.createTextNode("0"));
+                }
             
+                tr.appendChild(td4);
+                td4.setAttribute((document.all ? 'className' : 'class'), "oob");
+                td4.appendChild(document.createTextNode(mList[i].oob));
+
+                tr.appendChild(td5);
+                td5.setAttribute((document.all ? 'className' : 'class'), "latest");
+                td5.setAttribute("nowrap", "true");
+                td5.appendChild(document.createTextNode(mList[i].latest));
+            }
         } else {
             $('noProblemResources').style.display = '';
         }
-
-
-
     }
-
 
     function showRecentAlerts(originalRequest) {
 
@@ -125,6 +127,7 @@
         var token = alertText.token;
         var alertTable;
         var alertFunc;
+        var maxResourceNameSize;
 
         if (alertText.token != null) {
             alertTable = document.getElementById('recentAlertsTable' + token);
@@ -135,6 +138,15 @@
         }
 
         var tbody = alertTable.getElementsByTagName('tbody')[0];
+
+        // find the 'Resource Name' header cell and figure out it's displayed width.
+        dojo11.forEach(alertTable.getElementsByTagName('thead')[0].rows[0].cells,
+            function(cell) {
+                if(/Resource Name/.test(cell.innerHTML))
+                {
+                    maxResourceNameSize = cell.offsetWidth;
+                }
+            });
 
         var noCritAlerts = alertText.token != null ?
                            $('noCritAlerts' + token) : $('noCritAlerts');
@@ -206,7 +218,7 @@
                 td4.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlertLeft");
 
                 if (aList[i].resourceName) {
-                    td4.innerHTML = (aList[i].resourceName.length > 20) ? '<abbr title="' + aList[i].resourceName + '">' + aList[i].resourceName.substring(0,20) + '&hellip;</abbr>' : aList[i].resourceName;
+                    td4.innerHTML = getShortAbbr(aList[i].resourceName,maxResourceNameSize);
                 }
                 tr.appendChild(td5);
                 td5.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
@@ -397,8 +409,6 @@
         }
 
         if (metricTable && metricValues.values) {
-
-
             var tbody = metricTable.getElementsByTagName('tbody')[0];
             var browser = BrowserDetect.browser;
             
@@ -428,6 +438,10 @@
             th1.style.padding = "3px";
             th1.style.borderBottom = "1px solid #D5D8DE";
             th1.appendChild(document.createTextNode(resourceNameHeader));
+            
+            // find the 'Resource Name' header cell and figure out it's displayed width.
+            var maxResourceNameSize = th1.offsetWidth;
+
             trHeader.appendChild(th2);
             th2.setAttribute("width", "10%");
             th2.setAttribute("class", "tableRowInactive");
@@ -450,8 +464,7 @@
                 tr.appendChild(td1);
                 td1.setAttribute((document.all ? 'className' : 'class'), "resource");
                 if (metricValues.values[i].resourceName) {
-                    var short_name = (metricValues.values[i].resourceName.length > 20) ? metricValues.values[i].resourceName.substring(0,20) + '&hellip;' : metricValues.values[i].resourceName;
-                    td1.innerHTML = '<a href="' + resUrl + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId + '" title="'+ metricValues.values[i].resourceName +'">'+ short_name +'</a>';
+                    td1.innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,resUrl + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId);
                 }
 
                 tr.appendChild(td2);
@@ -489,8 +502,18 @@
         var fList = faveText.favorites;
         var table = document.getElementById('favoriteTable');
         $('modifiedFavoriteTime').innerHTML = 'Updated: ' + refreshTime();
+        var maxResourceNameSize;
         
         if (table) {
+            // find the 'Resource Name' header cell and figure out it's displayed width.
+            dojo11.forEach(table.getElementsByTagName('tbody')[0].rows[0].cells,
+                function(cell) {
+                    if(/Resource Name/.test(cell.innerHTML))
+                    {
+                        maxResourceNameSize = cell.offsetWidth;
+                    }
+                });
+
             if (fList && fList.length > 0) {
                 var tbody = table.getElementsByTagName('tbody')[0];
 
@@ -524,8 +547,7 @@
                     td1.setAttribute("id", (fList[i].resourceName));
 
                     if (fList[i].resourceName && fList[i].resourceId && fList[i].resourceTypeId) {
-                        var short_name = (fList[i].resourceName.length > 20) ? fList[i].resourceName.substring(0,20) + '&hellip;' : fList[i].resourceName;
-                        td1.innerHTML = '<a href="' + resUrl + fList[i].resourceTypeId + urlColon + fList[i].resourceId + '" title="'+ fList[i].resourceName +'">'+ short_name +'</a>';
+                        td1.innerHTML = getShortLink(fList[i].resourceName,maxResourceNameSize,resUrl + fList[i].resourceTypeId + urlColon + fList[i].resourceId);
                     } else {
                         td1.innerHTML = "&nbsp;";
                     }
