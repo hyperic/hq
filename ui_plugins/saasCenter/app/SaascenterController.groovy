@@ -55,7 +55,7 @@ class SaascenterController extends BaseController
     static Long _1_DAY  = 24 * _1_HOUR
     static Long _1_WEEK = 7 * _1_DAY
 
-    private final List resourcePrototypes = ["AWS", "salesforce"]
+    private final List resourcePrototypes = ["AWS", "Salesforce.com"]
     
     private List _providers
     private HealthStripGenerator _healthGenerator = new HealthStripGenerator()
@@ -69,7 +69,7 @@ class SaascenterController extends BaseController
             _providers = []
             if (rme.one.resourcesExistOfType('AWS'))
                 _providers += new AWSProvider()
-            if (rme.one.resourcesExistOfType('salesforce'))
+            if (rme.one.resourcesExistOfType('Salesforce.com'))
                 _providers += new SalesforceProvider()
             _providers.each { it.init(user) }
         }
