@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -43,6 +43,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -198,11 +199,14 @@ public class AddResourcesPrepareAction extends Action {
         log.debug("determine if user wants to filter available resources");
 
         Integer ff = addForm.getFf();
-        Integer ft = addForm.getFt();
+        AppdefEntityTypeID ft = null;
+        
+        if (addForm.getFt() != null)
+            ft = new AppdefEntityTypeID(addForm.getFt());
 
         int appdefType =
             (ff == null) ? Constants.FILTER_BY_DEFAULT : ff.intValue();
-        int resourceType = ft == null ? -1 : ft.intValue();
+        int resourceType = ft == null ? -1 : ft.getID();
         boolean compat = false;
         if(appdefType == 0) 
             appdefType = Constants.FILTER_BY_DEFAULT;
@@ -238,7 +242,8 @@ public class AddResourcesPrepareAction extends Action {
             avail = boss.findCompatInventory(sessionId.intValue(),
                                              groupSubtype,
                                              appdefType, 
-                                             DEFAULT_RESOURCE_TYPE,
+                                             ft == null ? DEFAULT_RESOURCE_TYPE:
+                                                          ft.getType(),
                                              resourceType,
                                              addForm.getNameFilter(),
                                              pendingEntities,
@@ -442,7 +447,7 @@ public class AddResourcesPrepareAction extends Action {
                 AppdefResourceTypeValue value =
                     (AppdefResourceTypeValue) itr.next();
                 form.addType(new LabelValueBean(value.getName(),
-                                                   value.getId().toString()));
+                                                value.getAppdefTypeKey()));
             }
         }
     }
