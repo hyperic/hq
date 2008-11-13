@@ -68,18 +68,18 @@ import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.measurement.BaselineCreationException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.BaselineValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.beans.ChartedMetricBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.image.chart.LineChart;
 import org.hyperic.util.ArrayUtil;
@@ -511,19 +511,19 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                 m = mb.findMeasurement(sessionId,
                                        chartedMetrics[i].getTemplateId(),
                                        aeid);
-                BaselineValue baselineValue = m.getBaseline().getBaselineValue();
+                Baseline baselineValue = m.getBaseline();
                 if (null != baselineValue) {
                     if (null != baselineValue.getMean())
                         chartedMetrics[i].setBaselineRaw(
                             baselineValue.getMean());
                     
-                    if (null != baselineValue.getMaxExpectedValue())
+                    if (null != baselineValue.getMaxExpectedVal())
                         chartedMetrics[i].setHighRangeRaw(
-                            baselineValue.getMaxExpectedValue());
+                            baselineValue.getMaxExpectedVal());
 
-                    if (null != baselineValue.getMinExpectedValue())
+                    if (null != baselineValue.getMinExpectedVal())
                         chartedMetrics[i].setLowRangeRaw(
-                            baselineValue.getMinExpectedValue());
+                            baselineValue.getMinExpectedVal());
                 }
             }
         }
