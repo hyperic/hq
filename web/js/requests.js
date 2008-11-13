@@ -22,101 +22,100 @@
         var urlColon = ":"
         var resUrl = $('viewResUrl').href;
         var noProblemResources = $('noProblemResources');
+        var maxResourceNameSize;
         $('modifiedProblemTime').innerHTML = 'Updated: ' + refreshTime();
 
-            if (mList && mList.length > 0) {
+        if (mList && mList.length > 0) {
 
-                var tbody = problemTable.getElementsByTagName('tbody')[0];
-                var browser = BrowserDetect.browser;
+            var tbody = problemTable.getElementsByTagName('tbody')[0];
+            var browser = BrowserDetect.browser;
 
-                if (browser == "Safari") {
-                    for (var i = tbody.childNodes.length; i > 1; i--) {
-                    tbody.removeChild(tbody.childNodes[i]);
-                    }
+            if (browser == "Safari") {
+                for (var i = tbody.childNodes.length; i > 1; i--) {
+                tbody.removeChild(tbody.childNodes[i]);
+                }
+            } else {
+                for (var i = tbody.childNodes.length - 1; i > 1; i--) {
+                tbody.removeChild(tbody.childNodes[i]);
+                }
+            }
+        
+            for (var i = 0; i < mList.length; i++) {
+
+                var tr = document.createElement('tr');
+                var trTime = document.createElement('tr');
+                var td1 = document.createElement('td');
+                var td2 = document.createElement('td');
+                var td3 = document.createElement('td');
+                var td4 = document.createElement('td');
+                var td5 = document.createElement('td');
+
+                tbody.appendChild(tr);
+
+                if (i % 2 == 0) {
+                    tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
                 } else {
-                    for (var i = tbody.childNodes.length - 1; i > 1; i--) {
-                    tbody.removeChild(tbody.childNodes[i]);
-                    }
-                }
-                
-                for (i = 0; i < mList.length; i++) {
-
-                    var tr = document.createElement('tr');
-                    var trTime = document.createElement('tr');
-                    var td1 = document.createElement('td');
-                    var td2 = document.createElement('td');
-                    var td3 = document.createElement('td');
-                    var td4 = document.createElement('td');
-                    var td5 = document.createElement('td');
-
-                    tbody.appendChild(tr);
-
-                    if (i % 2 == 0) {
-                        tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
-                    } else {
-                        tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
-                    }
-
-                    tr.appendChild(td1);
-                    td1.setAttribute((document.all ? 'className' : 'class'), "resource");
-                    td1.setAttribute("id", (mList[i].resource));
-
-                    if (mList[i].resourceName) {
-                        var short_name = (mList[i].resourceName.length > 20) ? mList[i].resourceName.substring(0,20) + '&hellip;' : mList[i].resourceName;
-                        td1.innerHTML = '<a href="' + resUrl + mList[i].resourceType + urlColon + mList[i].resourceId + '" title="'+ mList[i].resourceName +'">'+ short_name +'</a>';
-                    }
-
-                    tr.appendChild(td2);
-                    td2.setAttribute((document.all ? 'className' : 'class'), "availability");
-
-                    if (mList[i].availability) {
-                        switch (mList[i].availability) {
-                            case "green":
-                                td2.innerHTML = "<img src=images/icon_available_green.gif>";
-                                break;
-                            case "red":
-                                td2.innerHTML = "<img src=images/icon_available_red.gif>";
-                                break;
-                            case "yellow":
-                                td2.innerHTML = "<img src=images/icon_available_yellow.gif>";
-                                break;
-                            case "orange":
-                                td2.innerHTML = "<img src=images/icon_available_orange.gif>";
-                                break;
-                            default:
-                                td2.innerHTML = "<img src=images/icon_available_error.gif>";
-                        }
-                    }
-
-                    tr.appendChild(td3);
-                    td3.setAttribute((document.all ? 'className' : 'class'), "alerts");
-
-                    if (mList[i].alerts != '') {
-                        td3.appendChild(document.createTextNode(mList[i].alerts));
-                    } else {
-                        td3.appendChild(document.createTextNode("0"));
-                    }
-                    
-                    tr.appendChild(td4);
-                    td4.setAttribute((document.all ? 'className' : 'class'), "oob");
-                    td4.appendChild(document.createTextNode(mList[i].oob));
-
-                    tr.appendChild(td5);
-                    td5.setAttribute((document.all ? 'className' : 'class'), "latest");
-                    td5.setAttribute("nowrap", "true");
-                    td5.appendChild(document.createTextNode(mList[i].latest));
-
+                    tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
                 }
 
+                tr.appendChild(td1);
+                td1.setAttribute((document.all ? 'className' : 'class'), "resource");
+                td1.setAttribute("id", (mList[i].resource));
+
+                tr.appendChild(td2);
+                td2.setAttribute((document.all ? 'className' : 'class'), "availability");
+
+                if (mList[i].availability) {
+                    switch (mList[i].availability) {
+                        case "green":
+                            td2.innerHTML = "<img src=images/icon_available_green.gif>";
+                            break;
+                        case "red":
+                            td2.innerHTML = "<img src=images/icon_available_red.gif>";
+                            break;
+                        case "yellow":
+                            td2.innerHTML = "<img src=images/icon_available_yellow.gif>";
+                            break;
+                        case "orange":
+                            td2.innerHTML = "<img src=images/icon_available_orange.gif>";
+                            break;
+                        default:
+                            td2.innerHTML = "<img src=images/icon_available_error.gif>";
+                    }
+                }
+
+                tr.appendChild(td3);
+                td3.setAttribute((document.all ? 'className' : 'class'), "alerts");
+
+                if (mList[i].alerts != '') {
+                    td3.appendChild(document.createTextNode(mList[i].alerts));
+                } else {
+                    td3.appendChild(document.createTextNode("0"));
+                }
             
+                tr.appendChild(td4);
+                td4.setAttribute((document.all ? 'className' : 'class'), "oob");
+                td4.appendChild(document.createTextNode(mList[i].oob));
+
+                tr.appendChild(td5);
+                td5.setAttribute((document.all ? 'className' : 'class'), "latest");
+                td5.setAttribute("nowrap", "true");
+                td5.appendChild(document.createTextNode(mList[i].latest));
+            }
+            
+            // find the 'Resource Name' header cell and figure out it's displayed width.
+            maxResourceNameSize = problemTable.rows[0].cells[0].offsetWidth;
+            // loop through all rows and set the contents to the shortened link.
+            for (var i = 0; i < mList.length; i++) {
+                if(mList[i].resourceName)
+                {
+                    problemTable.rows[i+1].cells[0].innerHTML = getShortLink(mList[i].resourceName, maxResourceNameSize, resUrl + mList[i].resourceType + urlColon + mList[i].resourceId);
+                }
+            }
         } else {
             $('noProblemResources').style.display = '';
         }
-
-
-
     }
-
 
     function showRecentAlerts(originalRequest) {
 
@@ -125,6 +124,7 @@
         var token = alertText.token;
         var alertTable;
         var alertFunc;
+        var maxResourceNameSize;
 
         if (alertText.token != null) {
             alertTable = document.getElementById('recentAlertsTable' + token);
@@ -205,9 +205,6 @@
                 tr.appendChild(td4);
                 td4.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlertLeft");
 
-                if (aList[i].resourceName) {
-                    td4.innerHTML = (aList[i].resourceName.length > 20) ? '<abbr title="' + aList[i].resourceName + '">' + aList[i].resourceName.substring(0,20) + '&hellip;</abbr>' : aList[i].resourceName;
-                }
                 tr.appendChild(td5);
                 td5.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
 
@@ -250,6 +247,14 @@
                     imgNode = document.createElement('img');
                     imgNode.setAttribute("src", "images/spacer.gif");
                     td6.appendChild(imgNode);
+                }
+            }
+            // find the 'Resource Name' header cell and figure out it's displayed width.
+            maxResourceNameSize = alertTable.rows[0].cells[3].offsetWidth;
+            // loop through all rows and set the contents to the shortened link.
+            for (var i = 0; i < aList.length; i++) {
+                if (aList[i].resourceName) {
+                    alertTable.rows[i+1].cells[3].innerHTML = getShortAbbr(aList[i].resourceName,maxResourceNameSize);
                 }
             }
         } else {
@@ -397,8 +402,6 @@
         }
 
         if (metricTable && metricValues.values) {
-
-
             var tbody = metricTable.getElementsByTagName('tbody')[0];
             var browser = BrowserDetect.browser;
             
@@ -428,6 +431,7 @@
             th1.style.padding = "3px";
             th1.style.borderBottom = "1px solid #D5D8DE";
             th1.appendChild(document.createTextNode(resourceNameHeader));
+            
             trHeader.appendChild(th2);
             th2.setAttribute("width", "10%");
             th2.setAttribute("class", "tableRowInactive");
@@ -449,15 +453,21 @@
 
                 tr.appendChild(td1);
                 td1.setAttribute((document.all ? 'className' : 'class'), "resource");
-                if (metricValues.values[i].resourceName) {
-                    var short_name = (metricValues.values[i].resourceName.length > 20) ? metricValues.values[i].resourceName.substring(0,20) + '&hellip;' : metricValues.values[i].resourceName;
-                    td1.innerHTML = '<a href="' + resUrl + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId + '" title="'+ metricValues.values[i].resourceName +'">'+ short_name +'</a>';
-                }
 
                 tr.appendChild(td2);
                 td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
                 td2.appendChild(document.createTextNode(metricValues.values[i].value));
             }
+
+            // find the 'Resource Name' header cell and figure out it's displayed width.
+            var maxResourceNameSize = th1.offsetWidth;
+
+            for (i = 0; i < metricValues.values.length; i++) {
+                if (metricValues.values[i].resourceName) {
+                    metricTable.rows[i+1].cells[0].innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,resUrl + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId);
+                }
+            }
+
             tbody.appendChild(trTime);
             trTime.appendChild(td3);
             td3.setAttribute('colSpan', '2');
@@ -489,8 +499,10 @@
         var fList = faveText.favorites;
         var table = document.getElementById('favoriteTable');
         $('modifiedFavoriteTime').innerHTML = 'Updated: ' + refreshTime();
+        var maxResourceNameSize;
         
         if (table) {
+
             if (fList && fList.length > 0) {
                 var tbody = table.getElementsByTagName('tbody')[0];
 
@@ -522,13 +534,6 @@
                     tr.appendChild(td1);
                     td1.setAttribute((document.all ? 'className' : 'class'), "resourceName");
                     td1.setAttribute("id", (fList[i].resourceName));
-
-                    if (fList[i].resourceName && fList[i].resourceId && fList[i].resourceTypeId) {
-                        var short_name = (fList[i].resourceName.length > 20) ? fList[i].resourceName.substring(0,20) + '&hellip;' : fList[i].resourceName;
-                        td1.innerHTML = '<a href="' + resUrl + fList[i].resourceTypeId + urlColon + fList[i].resourceId + '" title="'+ fList[i].resourceName +'">'+ short_name +'</a>';
-                    } else {
-                        td1.innerHTML = "&nbsp;";
-                    }
 
                     tr.appendChild(td2);
                     td2.setAttribute((document.all ? 'className' : 'class'), "resourceTypeName");
@@ -581,6 +586,19 @@
 
 
                 }
+
+                // find the 'Resource Name' header cell and figure out it's displayed width.
+                var maxResourceNameSize = table.rows[0].cells[0].offsetWidth;
+
+                for (i = 0; i < fList.length; i++) {
+                    
+                    if (fList[i].resourceName && fList[i].resourceId && fList[i].resourceTypeId) {
+                        table.rows[i+1].cells[0].innerHTML = getShortLink(fList[i].resourceName,maxResourceNameSize,resUrl + fList[i].resourceTypeId + urlColon + fList[i].resourceId);
+                    } else {
+                        table.rows[i+1].cells[0].innerHTML = "&nbsp;";
+                    }
+                }
+                
             } else {
                 $('noFaveResources').style.display = '';
             }
