@@ -50,7 +50,7 @@ public class AddResourcesForm extends ResourceForm  {
     private Integer psp;
     private List availResourceTypes;
     private String key;
-    private Integer ft;
+    private String ft;
     private Integer ff;
     private List functions;
     private List types;
@@ -185,7 +185,7 @@ public class AddResourcesForm extends ResourceForm  {
      * @return Value of property ft.
      *
      */
-    public Integer getFt() {
+    public String getFt() {
         return this.ft;
     }
     
@@ -193,7 +193,7 @@ public class AddResourcesForm extends ResourceForm  {
      * @param ft New value of property ft.
      *
      */
-    public void setFt(Integer ft) {
+    public void setFt(String ft) {
         this.ft = ft;
     }
     
@@ -277,7 +277,7 @@ public class AddResourcesForm extends ResourceForm  {
     // ******************** support methods ***********************************
     private void setDefaults() {
         ff = null;
-        ft = new Integer(-1);
+        ft = null;
         functions = new ArrayList();        
         types = new ArrayList();
         nameFilter = null;
