@@ -36,6 +36,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
@@ -552,12 +553,16 @@ public class EscalationManagerEJBImpl
             return true;
         }
         
-        PerformsEscalations def = s.getAlertType().findDefinition(
+        try {
+            PerformsEscalations def = s.getAlertType().findDefinition(
                                     new Integer(s.getAlertDefinitionId()));
-        
-        // galert defs may be deleted from the DB when the group is deleted, 
-        // so we may get a null value.
-        return def == null || def.isDeleted();
+
+            // galert defs may be deleted from the DB when the group is deleted, 
+            // so we may get a null value.
+            return def == null || def.isDeleted();
+        } catch (ObjectNotFoundException e) {
+            return true;
+        }        
     }
         
     /**
