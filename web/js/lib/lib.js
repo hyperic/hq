@@ -951,6 +951,8 @@ function moveOption(from,to)
 function addOptionToSelect(select,option)
 {
     var newLocation = null;
+    // set a 'title' property on the option to use as a tooltip.
+    option.title = option.text;
     if(select.options.length > 0)
     {
         for(var i = 0,j = select.options.length; i < j; i++)
