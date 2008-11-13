@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hq.measurement.shared.BaselineValue;
-
 import org.hyperic.hibernate.PersistedObject;
 
 public class Baseline extends PersistedObject
@@ -115,22 +113,6 @@ public class Baseline extends PersistedObject
         setMean(mean);
         setMinExpectedVal(minExpectedValue);
         setMaxExpectedVal(maxExpectedValue);
-    }
-
-    /**
-     * Legacy EJB DTO pattern
-     * @deprecated Use (this) Baseline object instead
-     */
-    public BaselineValue getBaselineValue() {
-        BaselineValue b = new BaselineValue();
-        b.setId(getId());
-        b.setMeasurementId(getMeasurement().getId());
-        b.setComputeTime(getComputeTime());
-        b.setUserEntered(isUserEntered());
-        b.setMean(getMean());
-        b.setMinExpectedValue(getMinExpectedVal());
-        b.setMaxExpectedValue(getMaxExpectedVal());
-        return b;
     }
 }
 
