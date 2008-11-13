@@ -375,11 +375,17 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @return The number of Measurement objects removed.
      */
     public int removeOrphanedMeasurements() {
+        final int MAX_MIDS = 200;
+        
         StopWatch watch = new StopWatch();
         MetricDeleteCallback cb = 
             MeasurementStartupListener.getMetricDeleteCallbackObj();
         MeasurementDAO dao = getMeasurementDAO();
         List mids = dao.findOrphanedMeasurements();
+        
+        if (mids.size() > MAX_MIDS) {
+            mids = mids.subList(0, MAX_MIDS);
+        }
         
         if (mids.size() > 0) {
             cb.beforeMetricsDelete(mids);
