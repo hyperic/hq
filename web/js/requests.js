@@ -25,15 +25,6 @@
         var maxResourceNameSize;
         $('modifiedProblemTime').innerHTML = 'Updated: ' + refreshTime();
 
-        // find the 'Resource Name' header cell and figure out it's displayed width.
-        dojo11.forEach(problemTable.getElementsByTagName('thead')[0].rows[0].cells,
-            function(cell) {
-                if(/Resource Name/.test(cell.innerHTML))
-                {
-                    maxResourceNameSize = cell.offsetWidth;
-                }
-            });
-
         if (mList && mList.length > 0) {
 
             var tbody = problemTable.getElementsByTagName('tbody')[0];
@@ -49,7 +40,7 @@
                 }
             }
         
-            for (i = 0; i < mList.length; i++) {
+            for (var i = 0; i < mList.length; i++) {
 
                 var tr = document.createElement('tr');
                 var trTime = document.createElement('tr');
@@ -70,10 +61,6 @@
                 tr.appendChild(td1);
                 td1.setAttribute((document.all ? 'className' : 'class'), "resource");
                 td1.setAttribute("id", (mList[i].resource));
-
-                if (mList[i].resourceName) {
-                    td1.innerHTML = getShortLink(mList[i].resourceName, maxResourceNameSize, resUrl + mList[i].resourceType + urlColon + mList[i].resourceId);
-                }
 
                 tr.appendChild(td2);
                 td2.setAttribute((document.all ? 'className' : 'class'), "availability");
@@ -115,6 +102,16 @@
                 td5.setAttribute("nowrap", "true");
                 td5.appendChild(document.createTextNode(mList[i].latest));
             }
+            
+            // find the 'Resource Name' header cell and figure out it's displayed width.
+            maxResourceNameSize = problemTable.rows[0].cells[0].offsetWidth;
+            // loop through all rows and set the contents to the shortened link.
+            for (var i = 0; i < mList.length; i++) {
+                if(mList[i].resourceName)
+                {
+                    problemTable.rows[i+1].cells[0].innerHTML = getShortLink(mList[i].resourceName, maxResourceNameSize, resUrl + mList[i].resourceType + urlColon + mList[i].resourceId);
+                }
+            }
         } else {
             $('noProblemResources').style.display = '';
         }
@@ -138,15 +135,6 @@
         }
 
         var tbody = alertTable.getElementsByTagName('tbody')[0];
-
-        // find the 'Resource Name' header cell and figure out it's displayed width.
-        dojo11.forEach(alertTable.getElementsByTagName('thead')[0].rows[0].cells,
-            function(cell) {
-                if(/Resource Name/.test(cell.innerHTML))
-                {
-                    maxResourceNameSize = cell.offsetWidth;
-                }
-            });
 
         var noCritAlerts = alertText.token != null ?
                            $('noCritAlerts' + token) : $('noCritAlerts');
@@ -217,9 +205,6 @@
                 tr.appendChild(td4);
                 td4.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlertLeft");
 
-                if (aList[i].resourceName) {
-                    td4.innerHTML = getShortAbbr(aList[i].resourceName,maxResourceNameSize);
-                }
                 tr.appendChild(td5);
                 td5.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
 
@@ -262,6 +247,14 @@
                     imgNode = document.createElement('img');
                     imgNode.setAttribute("src", "images/spacer.gif");
                     td6.appendChild(imgNode);
+                }
+            }
+            // find the 'Resource Name' header cell and figure out it's displayed width.
+            maxResourceNameSize = alertTable.rows[0].cells[3].offsetWidth;
+            // loop through all rows and set the contents to the shortened link.
+            for (var i = 0; i < aList.length; i++) {
+                if (aList[i].resourceName) {
+                    alertTable.rows[i+1].cells[3].innerHTML = getShortAbbr(aList[i].resourceName,maxResourceNameSize);
                 }
             }
         } else {
@@ -439,9 +432,6 @@
             th1.style.borderBottom = "1px solid #D5D8DE";
             th1.appendChild(document.createTextNode(resourceNameHeader));
             
-            // find the 'Resource Name' header cell and figure out it's displayed width.
-            var maxResourceNameSize = th1.offsetWidth;
-
             trHeader.appendChild(th2);
             th2.setAttribute("width", "10%");
             th2.setAttribute("class", "tableRowInactive");
@@ -463,14 +453,21 @@
 
                 tr.appendChild(td1);
                 td1.setAttribute((document.all ? 'className' : 'class'), "resource");
-                if (metricValues.values[i].resourceName) {
-                    td1.innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,resUrl + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId);
-                }
 
                 tr.appendChild(td2);
                 td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
                 td2.appendChild(document.createTextNode(metricValues.values[i].value));
             }
+
+            // find the 'Resource Name' header cell and figure out it's displayed width.
+            var maxResourceNameSize = th1.offsetWidth;
+
+            for (i = 0; i < metricValues.values.length; i++) {
+                if (metricValues.values[i].resourceName) {
+                    metricTable.rows[i+1].cells[0].innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,resUrl + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId);
+                }
+            }
+
             tbody.appendChild(trTime);
             trTime.appendChild(td3);
             td3.setAttribute('colSpan', '2');
@@ -505,14 +502,6 @@
         var maxResourceNameSize;
         
         if (table) {
-            // find the 'Resource Name' header cell and figure out it's displayed width.
-            dojo11.forEach(table.getElementsByTagName('tbody')[0].rows[0].cells,
-                function(cell) {
-                    if(/Resource Name/.test(cell.innerHTML))
-                    {
-                        maxResourceNameSize = cell.offsetWidth;
-                    }
-                });
 
             if (fList && fList.length > 0) {
                 var tbody = table.getElementsByTagName('tbody')[0];
@@ -545,12 +534,6 @@
                     tr.appendChild(td1);
                     td1.setAttribute((document.all ? 'className' : 'class'), "resourceName");
                     td1.setAttribute("id", (fList[i].resourceName));
-
-                    if (fList[i].resourceName && fList[i].resourceId && fList[i].resourceTypeId) {
-                        td1.innerHTML = getShortLink(fList[i].resourceName,maxResourceNameSize,resUrl + fList[i].resourceTypeId + urlColon + fList[i].resourceId);
-                    } else {
-                        td1.innerHTML = "&nbsp;";
-                    }
 
                     tr.appendChild(td2);
                     td2.setAttribute((document.all ? 'className' : 'class'), "resourceTypeName");
@@ -603,6 +586,19 @@
 
 
                 }
+
+                // find the 'Resource Name' header cell and figure out it's displayed width.
+                var maxResourceNameSize = table.rows[0].cells[0].offsetWidth;
+
+                for (i = 0; i < fList.length; i++) {
+                    
+                    if (fList[i].resourceName && fList[i].resourceId && fList[i].resourceTypeId) {
+                        table.rows[i+1].cells[0].innerHTML = getShortLink(fList[i].resourceName,maxResourceNameSize,resUrl + fList[i].resourceTypeId + urlColon + fList[i].resourceId);
+                    } else {
+                        table.rows[i+1].cells[0].innerHTML = "&nbsp;";
+                    }
+                }
+                
             } else {
                 $('noFaveResources').style.display = '';
             }
