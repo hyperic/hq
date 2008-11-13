@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -23,302 +23,166 @@
  * USA.
  */
 
-/*
- * Generated file - Do not edit!
- */
 package org.hyperic.hq.measurement.shared;
 
-import java.rmi.RemoteException;
-import javax.ejb.CreateException;
-import javax.ejb.EntityBean;
-import javax.ejb.EntityContext;
-import javax.ejb.RemoveException;
+import org.hyperic.hq.measurement.server.session.Baseline;
 
 /**
  * Value object for Baseline.
- *
  */
-public class BaselineValue
-   extends java.lang.Object
-   implements java.io.Serializable
-{
-   private Integer id;
-   private boolean idHasBeenSet = false;
-   private Integer measurementId;
-   private boolean measurementIdHasBeenSet = false;
-   private long computeTime;
-   private boolean computeTimeHasBeenSet = false;
-   private boolean userEntered;
-   private boolean userEnteredHasBeenSet = false;
-   private Double mean;
-   private boolean meanHasBeenSet = false;
-   private Double minExpectedValue;
-   private boolean minExpectedValueHasBeenSet = false;
-   private Double maxExpectedValue;
-   private boolean maxExpectedValueHasBeenSet = false;
+public class BaselineValue implements java.io.Serializable {
+    private Integer _id;
+    private long _computeTime;
+    private boolean _userEntered;
+    private Double _mean;
+    private Double _minExpectedValue;
+    private Double _maxExpectedValue;
 
+    public BaselineValue() {
+    }
 
-   public BaselineValue() {}
+    public Integer getId() {
+        return _id;
+    }
 
-   public BaselineValue( Integer id,Integer measurementId,long computeTime,boolean userEntered,Double mean,Double minExpectedValue,Double maxExpectedValue )
-   {
-	  this.id = id;
-	  idHasBeenSet = true;
-	  this.measurementId = measurementId;
-	  measurementIdHasBeenSet = true;
-	  this.computeTime = computeTime;
-	  computeTimeHasBeenSet = true;
-	  this.userEntered = userEntered;
-	  userEnteredHasBeenSet = true;
-	  this.mean = mean;
-	  meanHasBeenSet = true;
-	  this.minExpectedValue = minExpectedValue;
-	  minExpectedValueHasBeenSet = true;
-	  this.maxExpectedValue = maxExpectedValue;
-	  maxExpectedValueHasBeenSet = true;
-   }
+    public void setId(Integer id) {
+        _id = id;
+    }
 
-   //TODO Cloneable is better than this !
-   public BaselineValue( BaselineValue otherValue )
-   {
-	  this.id = otherValue.id;
-	  idHasBeenSet = true;
-	  this.measurementId = otherValue.measurementId;
-	  measurementIdHasBeenSet = true;
-	  this.computeTime = otherValue.computeTime;
-	  computeTimeHasBeenSet = true;
-	  this.userEntered = otherValue.userEntered;
-	  userEnteredHasBeenSet = true;
-	  this.mean = otherValue.mean;
-	  meanHasBeenSet = true;
-	  this.minExpectedValue = otherValue.minExpectedValue;
-	  minExpectedValueHasBeenSet = true;
-	  this.maxExpectedValue = otherValue.maxExpectedValue;
-	  maxExpectedValueHasBeenSet = true;
-   }
+    public long getComputeTime() {
+        return _computeTime;
+    }
 
-   public Integer getId()
-   {
-	  return this.id;
-   }
+    public void setComputeTime(long computeTime) {
+        _computeTime = computeTime;
+    }
 
-   public void setId( Integer id )
-   {
-	  this.id = id;
-	  idHasBeenSet = true;
-   }
+    public boolean getUserEntered() {
+        return _userEntered;
+    }
 
-   public boolean idHasBeenSet(){
-	  return idHasBeenSet;
-   }
-   public Integer getMeasurementId()
-   {
-	  return this.measurementId;
-   }
+    public void setUserEntered(boolean userEntered) {
+        _userEntered = userEntered;
+    }
 
-   public void setMeasurementId( Integer measurementId )
-   {
-	  this.measurementId = measurementId;
-	  measurementIdHasBeenSet = true;
+    public Double getMean() {
+        return _mean;
+    }
 
-   }
+    public void setMean(Double mean) {
+        _mean = mean;
+    }
 
-   public boolean measurementIdHasBeenSet(){
-	  return measurementIdHasBeenSet;
-   }
-   public long getComputeTime()
-   {
-	  return this.computeTime;
-   }
+    public Double getMinExpectedValue() {
+        return _minExpectedValue;
+    }
 
-   public void setComputeTime( long computeTime )
-   {
-	  this.computeTime = computeTime;
-	  computeTimeHasBeenSet = true;
+    public void setMinExpectedValue(Double minExpectedValue) {
+        _minExpectedValue = minExpectedValue;
+    }
 
-   }
+    public Double getMaxExpectedValue() {
+        return _maxExpectedValue;
+    }
 
-   public boolean computeTimeHasBeenSet(){
-	  return computeTimeHasBeenSet;
-   }
-   public boolean getUserEntered()
-   {
-	  return this.userEntered;
-   }
+    public void setMaxExpectedValue(Double maxExpectedValue) {
+        _maxExpectedValue = maxExpectedValue;
+    }
 
-   public void setUserEntered( boolean userEntered )
-   {
-	  this.userEntered = userEntered;
-	  userEnteredHasBeenSet = true;
+    public void setBaseline(Baseline baseline) {
+        setId(baseline.getId());
+        setComputeTime(baseline.getComputeTime());
+        setUserEntered(baseline.isUserEntered());
+        setMean(baseline.getMean());
+        setMinExpectedValue(baseline.getMinExpectedVal());
+        setMaxExpectedValue(baseline.getMaxExpectedVal());
+    }
 
-   }
+    public String toString() {
+        StringBuffer str = new StringBuffer("{")
+            .append("id=").append(getId())
+            .append(" computeTime=").append(getComputeTime())
+            .append(" userEntered=").append(getUserEntered())
+            .append(" mean=").append(getMean())
+            .append(" minExpectedValue=").append(getMinExpectedValue())
+            .append(" maxExpectedValue=").append(getMaxExpectedValue())
+            .append('}');
 
-   public boolean userEnteredHasBeenSet(){
-	  return userEnteredHasBeenSet;
-   }
-   public Double getMean()
-   {
-	  return this.mean;
-   }
+        return str.toString();
+    }
 
-   public void setMean( Double mean )
-   {
-	  this.mean = mean;
-	  meanHasBeenSet = true;
+    public boolean equals(Object other) {
+        if (this == other)
+            return true;
 
-   }
+        if (other instanceof BaselineValue) {
+            BaselineValue that = (BaselineValue) other;
+            boolean lEquals = true;
+            if (_id == null) {
+                lEquals = lEquals && (that._id == null);
+            } else {
+                lEquals = lEquals && _id.equals(that._id);
+            }
 
-   public boolean meanHasBeenSet(){
-	  return meanHasBeenSet;
-   }
-   public Double getMinExpectedValue()
-   {
-	  return this.minExpectedValue;
-   }
+            lEquals = lEquals && isIdentical(that);
 
-   public void setMinExpectedValue( Double minExpectedValue )
-   {
-	  this.minExpectedValue = minExpectedValue;
-	  minExpectedValueHasBeenSet = true;
+            return lEquals;
+        } else {
+            return false;
+        }
+    }
 
-   }
+    public boolean isIdentical(Object other) {
+        if (other instanceof BaselineValue) {
+            BaselineValue that = (BaselineValue) other;
+            boolean lEquals = true;
+            lEquals = lEquals && _computeTime == that._computeTime;
+            lEquals = lEquals && _userEntered == that._userEntered;
+            if (_mean == null) {
+                lEquals = lEquals && (that._mean == null);
+            } else {
+                lEquals = lEquals && _mean.equals(that._mean);
+            }
+            if (_minExpectedValue == null) {
+                lEquals = lEquals && (that._minExpectedValue == null);
+            } else {
+                lEquals = lEquals
+                        && _minExpectedValue.equals(that._minExpectedValue);
+            }
+            if (_maxExpectedValue == null) {
+                lEquals = lEquals && (that._maxExpectedValue == null);
+            } else {
+                lEquals = lEquals
+                        && _maxExpectedValue.equals(that._maxExpectedValue);
+            }
 
-   public boolean minExpectedValueHasBeenSet(){
-	  return minExpectedValueHasBeenSet;
-   }
-   public Double getMaxExpectedValue()
-   {
-	  return this.maxExpectedValue;
-   }
+            return lEquals;
+        } else {
+            return false;
+        }
+    }
 
-   public void setMaxExpectedValue( Double maxExpectedValue )
-   {
-	  this.maxExpectedValue = maxExpectedValue;
-	  maxExpectedValueHasBeenSet = true;
+    public int hashCode() {
+        int result = 17;
+        result = 37 * result + ((_id != null) ? _id.hashCode() : 0);
 
-   }
+        result = 37 * result + (int) (_computeTime ^ (_computeTime >>> 32));
 
-   public boolean maxExpectedValueHasBeenSet(){
-	  return maxExpectedValueHasBeenSet;
-   }
+        result = 37 * result + (_userEntered ? 0 : 1);
 
-   public String toString()
-   {
-	  StringBuffer str = new StringBuffer("{");
+        result = 37 * result + ((_mean != null) ? _mean.hashCode() : 0);
 
-	  str.append("id=" + getId() + " " + "measurementId=" + getMeasurementId() + " " + "computeTime=" + getComputeTime() + " " + "userEntered=" + getUserEntered() + " " + "mean=" + getMean() + " " + "minExpectedValue=" + getMinExpectedValue() + " " + "maxExpectedValue=" + getMaxExpectedValue());
-	  str.append('}');
+        result = 37
+                * result
+                + ((_minExpectedValue != null) ? _minExpectedValue.hashCode()
+                        : 0);
 
-	  return(str.toString());
-   }
+        result = 37
+                * result
+                + ((_maxExpectedValue != null) ? _maxExpectedValue.hashCode()
+                        : 0);
 
-   /**
-	* A Value object have an identity if its attributes making its Primary Key
-	* has all been set.  One object without identity is never equal to any other
-	* object.
-	*
-	* @return true if this instance have an identity.
-	*/
-   protected boolean hasIdentity()
-   {
-	  boolean ret = true;
-	  ret = ret && idHasBeenSet;
-	  return ret;
-   }
-
-   public boolean equals(Object other)
-   {
-	  if ( ! hasIdentity() ) return false;
-	  if (other instanceof BaselineValue)
-	  {
-		 BaselineValue that = (BaselineValue) other;
-		 if ( ! that.hasIdentity() ) return false;
-		 boolean lEquals = true;
-		 if( this.id == null )
-		 {
-			lEquals = lEquals && ( that.id == null );
-		 }
-		 else
-		 {
-			lEquals = lEquals && this.id.equals( that.id );
-		 }
-
-		 lEquals = lEquals && isIdentical(that);
-
-		 return lEquals;
-	  }
-	  else
-	  {
-		 return false;
-	  }
-   }
-
-   public boolean isIdentical(Object other)
-   {
-	  if (other instanceof BaselineValue)
-	  {
-		 BaselineValue that = (BaselineValue) other;
-		 boolean lEquals = true;
-		 if( this.measurementId == null )
-		 {
-			lEquals = lEquals && ( that.measurementId == null );
-		 }
-		 else
-		 {
-			lEquals = lEquals && this.measurementId.equals( that.measurementId );
-		 }
-		 lEquals = lEquals && this.computeTime == that.computeTime;
-		 lEquals = lEquals && this.userEntered == that.userEntered;
-		 if( this.mean == null )
-		 {
-			lEquals = lEquals && ( that.mean == null );
-		 }
-		 else
-		 {
-			lEquals = lEquals && this.mean.equals( that.mean );
-		 }
-		 if( this.minExpectedValue == null )
-		 {
-			lEquals = lEquals && ( that.minExpectedValue == null );
-		 }
-		 else
-		 {
-			lEquals = lEquals && this.minExpectedValue.equals( that.minExpectedValue );
-		 }
-		 if( this.maxExpectedValue == null )
-		 {
-			lEquals = lEquals && ( that.maxExpectedValue == null );
-		 }
-		 else
-		 {
-			lEquals = lEquals && this.maxExpectedValue.equals( that.maxExpectedValue );
-		 }
-
-		 return lEquals;
-	  }
-	  else
-	  {
-		 return false;
-	  }
-   }
-
-   public int hashCode(){
-	  int result = 17;
-      result = 37*result + ((this.id != null) ? this.id.hashCode() : 0);
-
-      result = 37*result + ((this.measurementId != null) ? this.measurementId.hashCode() : 0);
-
-      result = 37*result + (int)(computeTime^(computeTime>>>32));
-
-      result = 37*result + (userEntered ? 0 : 1);
-
-      result = 37*result + ((this.mean != null) ? this.mean.hashCode() : 0);
-
-      result = 37*result + ((this.minExpectedValue != null) ? this.minExpectedValue.hashCode() : 0);
-
-      result = 37*result + ((this.maxExpectedValue != null) ? this.maxExpectedValue.hashCode() : 0);
-
-	  return result;
-   }
+        return result;
+    }
 
 }
