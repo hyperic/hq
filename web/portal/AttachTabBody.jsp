@@ -23,7 +23,7 @@
 </div>
 <c:choose>
 <c:when test="${resourceViewTabAttachment ne null}">
-	<div id=attachPointContainer style="padding:4px;">
+	<div id="attachPointContainer" style="padding:4px;">
 		<c:url var="attachUrl" context="/hqu/${resourceViewTabAttachment.plugin.name}" value="${resourceViewTabAttachment.path}"/>
 		<c:import url="${attachUrl}?attachId=${param.id}"/>
 	</div>
@@ -35,7 +35,7 @@
 </c:when>
 <c:otherwise>
 	<div class="viewSelectionNote">
-	<img src="<html:rewrite page="/images/arrow_up.png"/>"/><span>Please choose a view from the list above.</span>
+	<img src="<html:rewrite page="/images/arrow_up_transparent.gif"/>"/><span>Please choose a view from the list above.</span>
 	</div>
 </c:otherwise>
 </c:choose>

@@ -2181,10 +2181,7 @@ button span{
     padding: 5px 0px 45px 59px;
     color: gray;
     font-size: 14px;
-    background-color: #fff;
-    border-left: 1px solid gray;
-    border-right: 1px solid gray;
-    border-bottom: 1px solid gray;
+    border-top: 1px solid gray;
 }
 
 /*GConsole*/
