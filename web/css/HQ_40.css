@@ -1417,6 +1417,12 @@ select {
     bottom: 10px;
 }
 
+.widget .last_updated {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}
+
 .widget .content select, .widget input {
     width: 120px;
     margin: 10px 0px;
@@ -1537,6 +1543,11 @@ visibility: hidden;*/
 
 #summaryWidget fieldset {
     padding: 1em;
+}
+
+#summaryWidget .content {
+    height: inherit;
+    padding-bottom: 30px; /* leave room for the "last-updated" div */
 }
 
 #summaryWidget .content table {

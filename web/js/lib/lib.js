@@ -1203,6 +1203,8 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     that.sheets.content = dojo11.query('.content',node)[0];
     that.currentSheet = 'loading';
 
+    that.last_updated_div = dojo11.query('.last_updated',node)[0];
+
     that.chartsearch = dojo11.byId('chartsearch');
     that.chartselect = new hyperic.selectBox(dojo11.byId('chartselect'));
     
@@ -1583,6 +1585,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             that.chart = new hyperic.widget.Chart('chart_container', that.charts[next]);
             that.currentChartId = next;
             chartId = null;
+            that.last_updated_div.innerHTML = 'Updated: ' + that.charts[next].last_updated.formatDate('h:mm t');
         }
         else
         {
@@ -1604,6 +1607,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                     {
                         that.chart = new hyperic.widget.Chart('chart_container', {data: {'0': [0]}, name: that.charts[next].name});
                     }
+                    that.last_updated_div.innerHTML = 'Updated: ' + that.charts[next].last_updated.formatDate('h:mm t');
                     that.currentChartId = next;
                     chartId = null;
                 });
@@ -1728,8 +1732,9 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 // that.charts[chart].data = data;
                 if(!data.error && data.length > 0)
                 {
-                	that.charts[chart].data = data[0].data;                	
-                	that.charts[chart].measurementName = data[0].measurementName;               	
+                	that.charts[chart].data = data[0].data;
+                	that.charts[chart].measurementName = data[0].measurementName;
+                	that.charts[chart].last_updated = new Date();
                 }
             },
             error: function(data){
@@ -1860,6 +1865,9 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     that.sheets.config = dojo11.query('.config',node)[0];
     that.sheets.content = dojo11.query('.content',node)[0];
     that.currentSheet = 'loading';
+
+    that.last_updated = new Date();
+    that.last_updated_div = dojo11.query('.last_updated',node)[0];
 
     that.alert_groups = {"data": {}, "count": 0};
     that.selected_alert_groups = [];
@@ -2266,6 +2274,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 	    	that.populateAlertGroups();
 	        if(that.selected_alert_groups.length > 0)
 	        {
+	            that.last_updated = new Date();
+	            that.last_updated_div.innerHTML = 'Updated: ' + that.last_updated.formatDate('h:mm t');
 	            that.swapSheets('content',
 	                function()
 	                {
@@ -3055,11 +3065,11 @@ Date.prototype.formatDate = function(format)
     {
        if (hours > 11)
        {
-           format = format.replace("t","pm");
+           format = format.replace("t","PM");
        }
        else
        {
-           format = format.replace("t","am");
+           format = format.replace("t","AM");
        }
     }
     if (format.indexOf("HH") > -1)
@@ -3070,6 +3080,11 @@ Date.prototype.formatDate = function(format)
         if (hours > 12) {hours -= 12;}
         if (hours == 0) {hours = 12;}
         format = format.replace("hh",hours.toString().padL(2,"0"));        
+    }
+    if (format.indexOf("h") > -1) {
+        if (hours > 12) {hours -= 12;}
+        if (hours == 0) {hours = 12;}
+        format = format.replace("h",hours.toString());        
     }
     if (format.indexOf("mm") > -1)
     {
