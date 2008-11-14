@@ -47,14 +47,13 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventListener;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.bizapp.shared.AuthBossUtil;
 import org.hyperic.hq.bizapp.shared.AuthBossLocal;
 import org.hyperic.util.ConfigPropertyException;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /** 
  * The BizApp's interface to the Auth Subsystem
@@ -69,7 +68,46 @@ import org.hyperic.util.ConfigPropertyException;
 public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     private SessionManager manager = SessionManager.getInstance();
 
+    private static Log _log = LogFactory.getLog(AuthBossEJBImpl.class);
+
     public AuthBossEJBImpl() {}
+
+    public class UserZeventListener implements ZeventListener {
+
+        public void processEvents(final List events) {
+            // Process events needs to occur within a session due to
+            // UserAudit accessing pojo's outside of an EJBImpl.
+            try {
+                org.hyperic.hq.hibernate.SessionManager.runInSession(
+                    new org.hyperic.hq.hibernate.SessionManager.SessionRunner() {
+
+                    public String getName() {
+                        return "UserLoginListener";
+                    }
+
+                    public void run() throws Exception {
+                        for (Iterator i = events.iterator(); i.hasNext();) {
+
+                            UserLoginZevent z = (UserLoginZevent) i.next();
+                            UserLoginZevent.UserLoginZeventPayload p =
+                                    (UserLoginZevent.UserLoginZeventPayload) z.getPayload();
+                            Integer subjectId = p.getSubjectId();
+                            // Re-look up subject
+                            AuthzSubject sub =
+                                    getAuthzSubjectManager().getSubjectById(subjectId);
+                            UserAudit.loginAudit(sub);
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                _log.error("Exception running login audit", e);
+            }
+        }
+
+        public String toString() {
+            return "UserLoginListener";
+        }
+    }
 
     /**
      * Add buffered listener to register login audits post commit.  This
@@ -80,24 +118,9 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      */
     public void startup() {
         HashSet events = new HashSet();
-        events.add (UserLoginZevent.class);
+        events.add(UserLoginZevent.class);
         ZeventManager.getInstance().addBufferedListener(events,
-            new ZeventListener() {
-                public void processEvents(List events) {
-                    for (Iterator i = events.iterator(); i.hasNext();) {
-                        UserLoginZevent z = (UserLoginZevent) i.next();
-                        UserLoginZevent.UserLoginZeventPayload p =
-                            (UserLoginZevent.UserLoginZeventPayload)z.getPayload();
-                        AuthzSubject s = p.getSubject();
-                        UserAudit.loginAudit(s);
-                    }
-                }
-
-                public String toString() {
-                    return "UserLoginListener";
-                }
-            }
-        );
+                                                        new UserZeventListener());
     }
 
     /**
@@ -113,10 +136,10 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     {
         try {
             int res = getAuthManager().getSessionId(username, password);
-
-            UserLoginZevent evt = new UserLoginZevent(manager.getSubject(res));
+            AuthzSubject s = manager.getSubject(res);
+            UserLoginZevent evt = new UserLoginZevent(s.getId());
             ZeventManager.getInstance().enqueueEventAfterCommit(evt);
-            
+
             return res;
         } catch (AccessLocalException e) {
             throw new LoginException(e.getMessage());
