@@ -1299,6 +1299,12 @@ div.timeplot-valueflag-pole {
     z-index: 998;
 }
 
+/* projection chart specific chart css styles  */
+
+.projectionChart .timeplot-grid-label {
+    color: #000 !important;
+}
+
 /*Resource Hub*/
 
 .hubContainer table {
