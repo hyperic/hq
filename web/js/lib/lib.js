@@ -1177,10 +1177,10 @@ hyperic.selectBox = function(select, data) {
     };
 
     that.reset = function() {
-        while(that.length > 0)
-        {
-            // remove takes an index, and our data array is zero-indexed.
-            that.remove(that.length-1);
+        that.length = 0;
+        that.data = {};
+        while(that.select.lastChild) {
+            that.select.removeChild(that.select.lastChild);
         }
     };
 };
@@ -2009,23 +2009,41 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     };
 
     /**
+     * config button handler
+     * pause the chart refresh cycle while in config sheet
+     */
+    this.click_config_btn = function(e)
+    {
+        that.pauseRefreshCycle();
+        hyperic.dashboard.widget.click_config_btn.apply(this);
+    }
+
+    /**
      * cancel button handler
      * reset the available/enabled alert group selectboxes
      * and swap the config layer and show content layer again
      */
     this.click_cancel_btn = function(e)
     {
-        hyperic.dashboard.widget.click_cancel_btn.apply(
-            this,
-            [
-                e,
-                function()
-                {
-                    that.enabled_alert_groups.reset();
-                    that.available_alert_groups.reset();
-                    that.populateAlertGroups();
-                }
-            ]);
+        if(that.selected_alert_groups.length > 0)
+        {
+            that.swapSheets('content', function() {that.reset_config();});
+        }
+        else
+        {
+            that.swapSheets('instructions', function() {that.reset_config();});
+        }
+        that.startRefreshCycle();
+    };
+    
+    that.reset_config = function() {
+        // reset the searchbox
+        that.groupsearch.value = '';
+        that.resetSearch({target: that.groupsearch});
+
+        that.enabled_alert_groups.reset();
+        that.available_alert_groups.reset();
+        that.populateAlertGroups();
     };
 
     /**
@@ -2048,43 +2066,35 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                 that.alert_groups.data = data.avail || that.alert_groups.data;
                 that.alert_groups.count = data.count || that.alert_groups.count;
 
+
                 that.fetchAlertGroupStatus().addCallback(function(){
+
                     that.repaintAlertGroups();
                     if(that.selected_alert_groups.length > 0)
                     {
-                        that.swapSheets('content');
+                        that.swapSheets('content', function() {that.reset_config();});
                     }
                     else
                     {
-                        that.swapSheets('instructions');
+                        that.swapSheets('instructions', function() {that.reset_config();});
                     }
                 });
             },
             error: function(data){
                 console.debug("An error occurred saving alerts config... " + data);
+
                 if(that.selected_alert_groups.length > 0)
                 {
-                    that.swapSheets('content');
+                    that.swapSheets('content', function() {that.reset_config();});
                 }
                 else
                 {
-                    that.swapSheets('instructions');
+                    that.swapSheets('instructions', function() {that.reset_config();});
                 }
             },
             timeout: 2000
         });
-    };
-
-    that.click_cancel_btn = function(e)
-    {
-        if(that.selected_alert_groups.length > 0)
-        {
-            that.swapSheets('content');
-        }
-        else
-        {
-            that.swapSheets('instructions');
-        }
+        that.startRefreshCycle();
     };
     
     /**
@@ -2271,7 +2281,10 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     that.fetchAlertGroupStatusCallback = function()
     {    	
     	if (that.currentSheet != 'error_loading') {
-	    	that.populateAlertGroups();
+    	    // let's make sure we reset the select boxes before repopulating them with new data.
+
+            that.reset_config();
+
 	        if(that.selected_alert_groups.length > 0)
 	        {
 	            that.last_updated = new Date();
@@ -2332,6 +2345,27 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         });
     };
 
+    that.startRefreshCycle = function()
+    {
+        that.cycleId = setInterval(
+        		function() {
+                	if (that.currentSheet == 'error_loading') {
+                		that.swapSheets('loading');
+                	}
+        			that.fetchAlertGroupStatus().addCallback(
+    	                    function() {
+    	                    	that.fetchAlertGroupStatusCallback();
+    	                    }
+    	            );
+        		}, 
+    	        60000);
+    };
+    
+    that.pauseRefreshCycle = function() {
+        clearInterval(that.cycleId);
+        delete that.cycleId;
+    }
+    
     if(that.available_alert_groups && that.enabled_alert_groups)
     {
         // connect the onclick event of the whole widget to the clickHandler
@@ -2356,18 +2390,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 	                    function() {
 		                    that.fetchAlertGroupStatusCallback();
 	                        // periodically refresh the status
-		                    that.cycleId = setInterval(
-	                        		function() {
-	        	                    	if (that.currentSheet == 'error_loading') {
-	        	                    		that.swapSheets('loading');
-	        	                    	}
-	                        			that.fetchAlertGroupStatus().addCallback(
-	                    	                    function() {
-	                    	                    	that.fetchAlertGroupStatusCallback();
-	                    	                    }
-	                    	            );
-	                        		}, 
-	                    	        60000);
+	                        that.startRefreshCycle();
 	                    });
                 }
             });
