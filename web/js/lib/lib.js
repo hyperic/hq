@@ -1855,7 +1855,6 @@ hyperic.dashboard.chartWidget.prototype = hyperic.dashboard.widget;
 hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     var that = this;
 
-	that.max_alerts = 20;
 	that.cycleId = null;
 
     that.sheets = {};
@@ -1953,20 +1952,17 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                 proposedCount++;
         }
         //if the current proposed additions is less than the max allow the add
-		if(that.enabled_alert_groups.length < that.max_alerts && (that.enabled_alert_groups.length + proposedCount) <= that.max_alerts)
-		{
-	        that.enabled_alert_groups.steal(that.available_alert_groups);
+        that.enabled_alert_groups.steal(that.available_alert_groups);
 
-			if(that.enabled_alert_groups.length == that.max_alerts || that.available_alert_groups.length == 0)
-			{
-			    that.enable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select_disabled.gif" alt="select">';
-				that.enable_alert_btn.disabled = true;
-			}
-			if(that.disable_alert_btn.disabled === true)
-    		{
-    		    that.disable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect.gif" alt="select">';
-    			that.disable_alert_btn.disabled = false;
-    		}
+		if(that.available_alert_groups.length == 0)
+		{
+		    that.enable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select_disabled.gif" alt="select">';
+			that.enable_alert_btn.disabled = true;
+		}
+		if(that.disable_alert_btn.disabled === true)
+		{
+		    that.disable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect.gif" alt="select">';
+			that.disable_alert_btn.disabled = false;
 		}
     };
     

@@ -1541,13 +1541,13 @@ visibility: hidden;*/
 
 /* summary widget stuff */
 
-#summaryWidget fieldset {
-    padding: 1em;
-}
-
 #summaryWidget .content {
     height: inherit;
     padding-bottom: 30px; /* leave room for the "last-updated" div */
+}
+
+#summaryWidget fieldset {
+    padding: 1em;
 }
 
 #summaryWidget .content table {
@@ -1593,7 +1593,6 @@ visibility: hidden;*/
 #summaryWidget .content .lcol {
     border-right: 1px solid #FFF;
     padding: 0px;
-    height: 300px;
     vertical-align: top;
 }
 
