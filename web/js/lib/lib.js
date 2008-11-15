@@ -2435,7 +2435,7 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
     			constraints: {
                     datePattern: 'MM/dd/y'},
     			lang: "en-us",
-    			promptMessage: "mm/dd/yyyy",
+    			promptMessage: "A valid date in format mm/dd/yyyy is required.",
     			rangeMessage: hyperic.data.maintenance_schedule.error.startDateRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.datePattern,
     			required: true
@@ -2447,7 +2447,7 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
     			constraints: {
                     datePattern: 'MM/dd/y'},
     			lang: "en-us",
-    			promptMessage: "mm/dd/yyyy",
+    			promptMessage: "A valid date in format mm/dd/yyyy is required.",
     			rangeMessage: hyperic.data.maintenance_schedule.error.endDateRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.datePattern,
     			required: true
