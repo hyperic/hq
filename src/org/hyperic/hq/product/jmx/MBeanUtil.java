@@ -388,6 +388,37 @@ public class MBeanUtil {
         return sb.toString();
     }
 
+    private static Object[] asObjectArray(long[] values) {
+        Long[] list = new Long[values.length];
+        for (int i=0; i<values.length; i++) {
+            list[i] = new Long(values[i]);
+        }
+        return list;
+    }
+
+    private static Object[] asObjectArray(int[] values) {
+        Integer[] list = new Integer[values.length];
+        for (int i=0; i<values.length; i++) {
+            list[i] = new Integer(values[i]);
+        }
+        return list;
+    }
+
+    private static Object[] asObjectArray(Object values) {
+        if (values instanceof long[]) {
+            return asObjectArray((long[])values);
+        }
+        else if (values instanceof int[]) {
+            return asObjectArray((int[])values);
+        }
+        else if (values instanceof Object[]) {
+            return (Object[])values;
+        }
+        else {
+            return null;
+        }
+    }
+
     public static OperationParams getOperationParams(MBeanInfo info,
                                                      String method,
                                                      Object args[])
@@ -536,7 +567,12 @@ public class MBeanUtil {
             if (isDebug) {
                 Object arg = arguments.get(i);
                 if (arg.getClass().isArray()) {
-                    arg = Arrays.asList((Object[])arg).toString();
+                    if ((arg = asObjectArray(arg)) == null) {
+                        arg = arguments.get(i).toString();
+                    }
+                    else {
+                        arg = Arrays.asList((Object[])arg).toString();
+                    }
                 }
                 log.debug(method + "() arg " + i + "=" +
                           arg + ", type=" + sig);
