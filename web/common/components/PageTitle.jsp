@@ -295,8 +295,7 @@
             <html:radio styleId="anyRadio" property="any" value="true"/>
             <label for="anyRadio"><fmt:message key="any"/></label>
             <html:radio styleId="allRadio" property="any" value="false"/>
-            <label for="allRadio"><fmt:message key="all"/></label>
-            <html:image page="/images/4.0/icons/accept.png" property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
+            <label for="allRadio"><fmt:message key="all"/></label>&nbsp;<html:image page="/images/4.0/icons/accept.png" property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
         
     </div>
 </div>
@@ -309,10 +308,7 @@
     <td class="PageTitleSmallText" colspan="2">&nbsp;</td>
 </c:otherwise>
 </c:choose>
-
-<td style="padding: 4px;">
-    
-</td>
+    <td>&nbsp;</td>
   </tr>
 </c:if>
 </table>
