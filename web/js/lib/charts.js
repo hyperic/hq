@@ -5782,15 +5782,6 @@ Timeline._Impl.prototype._initialize = function() {
     }
     
     /*
-     *  inserting copyright and link to simile
-     */
-    var elmtCopyright = SimileAjax.Graphics.createTranslucentImage(Timeline.urlPrefix + (this.isHorizontal() ? "images/copyright-vertical.png" : "images/copyright.png"));
-    elmtCopyright.className = "timeline-copyright";
-    elmtCopyright.title = "Timeline (c) SIMILE - http://simile.mit.edu/timeline/";
-    SimileAjax.DOM.registerEvent(elmtCopyright, "click", function() { window.location = "http://simile.mit.edu/timeline/"; });
-    containerDiv.appendChild(elmtCopyright);
-    
-    /*
      *  creating bands
      */
     this._bands = [];
@@ -5902,7 +5893,9 @@ Timeline._Band = function(timeline, bandInfo, index) {
     this._div = this._timeline.getDocument().createElement("div");
     this._div.className = "timeline-band timeline-band-" + index;
     this._timeline.addDiv(this._div);
-    
+
+    /* 
+     * HHQ-2096: disable all movement for the timeline based on mouseclicks or 
     SimileAjax.DOM.registerEventWithObject(this._div, "mousedown", this, "_onMouseDown");
     SimileAjax.DOM.registerEventWithObject(this._div, "mousemove", this, "_onMouseMove");
     SimileAjax.DOM.registerEventWithObject(this._div, "mouseup", this, "_onMouseUp");
