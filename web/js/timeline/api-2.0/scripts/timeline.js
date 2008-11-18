@@ -401,11 +401,16 @@ Timeline._Band = function(timeline, bandInfo, index) {
     this._div.className = "timeline-band timeline-band-" + index;
     this._timeline.addDiv(this._div);
     
-    SimileAjax.DOM.registerEventWithObject(this._div, "mousedown", this, "_onMouseDown");
-    SimileAjax.DOM.registerEventWithObject(this._div, "mousemove", this, "_onMouseMove");
-    SimileAjax.DOM.registerEventWithObject(this._div, "mouseup", this, "_onMouseUp");
-    SimileAjax.DOM.registerEventWithObject(this._div, "mouseout", this, "_onMouseOut");
-    SimileAjax.DOM.registerEventWithObject(this._div, "dblclick", this, "_onDblClick");
+    /* 
+     * HHQ-2096: disable all scrolling of the timeline; uncomment the following to re-enable it.
+     */
+    /*
+     * SimileAjax.DOM.registerEventWithObject(this._div, "mousedown", this, "_onMouseDown");
+     * SimileAjax.DOM.registerEventWithObject(this._div, "mousemove", this, "_onMouseMove");
+     * SimileAjax.DOM.registerEventWithObject(this._div, "mouseup", this, "_onMouseUp");
+     * SimileAjax.DOM.registerEventWithObject(this._div, "mouseout", this, "_onMouseOut");
+     * SimileAjax.DOM.registerEventWithObject(this._div, "dblclick", this, "_onDblClick");
+     */
     
     /*
      *  The inner div that contains layers
