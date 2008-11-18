@@ -3769,7 +3769,7 @@ hyperic.widget.StatusElement = function(ct, nt, status, update, interval) {
 
 /* end SaaS plugin js */
 
-function fitStringToSize(str,len) {
+function fitStringToSize(str,width) {
     var result = str;
     var span = document.createElement("span");
     span.style.visibility = 'hidden';
@@ -3778,21 +3778,20 @@ function fitStringToSize(str,len) {
 
     // on first run, check if string fits into the length already.
     span.innerHTML = result;
-    if(span.offsetWidth > len) {
-        var posStart = 0, posMid, posEnd = str.length;
-        while (true) {
-            // Calculate the middle position
-            posMid = posStart + Math.ceil((posEnd - posStart) / 2);
-            // Break the loop if this is the last round
-            if (posMid==posEnd || posMid==posStart) break;
+    if(span.offsetWidth > width) {
+        var posStart = 0, posMid, posEnd = str.length, posLength;
 
+        // Calculate (posEnd - posStart) integer division by 2 and
+        // assign it to posLength. Repeat until posLength is zero.
+        while (posLength = (posEnd - posStart) >> 1) {
+            posMid = posStart + posLength;
+            //Get the string from the begining up to posMid;
             span.innerHTML = str.substring(0,posMid) + '&hellip;';
 
-            // Test if the width at the middle position is
-            // too wide (set new end) or too narrow (set new start).
-            if ( span.offsetWidth > len ) posEnd = posMid; else posStart=posMid;
+            // Check if the current width is too wide (set new end)
+            // or too narrow (set new start)
+            if ( span.offsetWidth > width ) posEnd = posMid; else posStart=posMid;
         }
-        
         //Escape < and >, eliminate trailing space and a widow character if one is present.
         result = str.substring(0,posStart).replace("<","&lt;").replace(">","&gt;").replace(/(\s.)?\s*$/,'') + '&hellip;';
     }
@@ -3800,12 +3799,12 @@ function fitStringToSize(str,len) {
     return result;
 }
 
-function getShortLink(str,len,url)
+function getShortLink(str,width,url)
 {
-    return '<a title="' + str.replace("\"","&#34;") + '" href="'+ url +'">' + fitStringToSize(str,len) + '<\/a>';
+    return '<a title="' + str.replace("\"","&#34;") + '" href="'+ url +'">' + fitStringToSize(str,width) + '<\/a>';
 }
 
-function getShortAbbr(str,len)
+function getShortAbbr(str,width)
 {
-    return '<abbr title="' + str.replace("\"","&#34;") + '">' + fitStringToSize(str,len) + '<\/abbr>';
+    return '<abbr title="' + str.replace("\"","&#34;") + '">' + fitStringToSize(str,width) + '<\/abbr>';
 }
