@@ -166,10 +166,10 @@ class GalertLogDAO
         List ids = pageInfo.pageResults(q).list();
         List logs = new ArrayList(ids.size());
         for (Iterator it = ids.iterator(); it.hasNext(); ) {
-            ids.add(findById((Integer) it.next()));
+            logs.add(findById((Integer) it.next()));
         }
         
-        return ids;
+        return logs;
     }
 
     void removeAll(ResourceGroup g) {
