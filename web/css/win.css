@@ -1077,7 +1077,7 @@ a.displaylink:hover {
     top: 0;
     visibility: hidden;
     width: 24em;
-    z-index: 500
+    z-index: 500;
 }
 
 .menu ul,.dropdown ul {
@@ -1806,6 +1806,8 @@ a.notbold:link,.dropdown a:link,a.notbold:visited,.dropdown a:visited {
 
 .toolbarcontent {
     height: 30px;
+    z-index: 1;
+    position: relative;
 }
 
 .pagetitlesmalltext,a.listcellpopup5:link,a.listcellpopup5:visited {
