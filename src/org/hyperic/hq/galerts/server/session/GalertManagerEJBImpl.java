@@ -355,7 +355,9 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method  
      */
     public Escalatable findEscalatableAlert(Integer id) {
-        return GalertEscalatableCreator.createEscalatable(_logDAO.findById(id));
+        GalertLog alert = _logDAO.findById(id);       
+        _logDAO.getSession().refresh(alert);
+        return GalertEscalatableCreator.createEscalatable(alert);
     }
 
     /**
