@@ -408,7 +408,8 @@ public class PermissionManagerImpl
 
     public String getGroupAlertsHQL(boolean inEscalation, boolean notFixed,
                                     Integer groupId) {
-        return "select a from " + (inEscalation ? "EscalationState es, " : "") +
+        return "select a.id from " +
+                (inEscalation ? "EscalationState es, " : "") +
                 "GalertLog a " +
                "join a.alertDef d " +
          "where " +
