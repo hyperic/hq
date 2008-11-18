@@ -1137,14 +1137,6 @@ div.timeplot-valueflag-pole {
     position: relative;
 }
 
-.timeline-copyright {
-    bottom: 0pt;
-    cursor: pointer;
-    left: 0pt;
-    position: absolute;
-    z-index: 1000;
-}
-
 .timeline-message-container {
     display: none;
     left: 35%;

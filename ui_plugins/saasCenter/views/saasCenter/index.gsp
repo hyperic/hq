@@ -350,14 +350,6 @@
     overflow: hidden;
 }
 
-.timeline-copyright {
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    z-index: 1000;
-    cursor: pointer;
-}
-
 .timeline-message-container {
     position:   absolute;
     top:        30%;
