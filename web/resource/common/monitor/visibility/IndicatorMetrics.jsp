@@ -52,7 +52,7 @@
         <%--<html:image page="/images/fb_addResourcesApply.gif" border="0" onmouseover="imageSwap(this, imagePath + 'fb_addResourcesApply', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_addResourcesApply', '');" onmousedown="imageSwap(this, imagePath +  'fb_addResourcesApply', '_down')"/>
     <html:hidden property="fresh" value="false"/>--%>
     </td>
-    <td style="padding-left:5px;padding-right:3px"> <html:image page="/images/icon_info2.gif" onmouseover="menuLayers.show('stepInfo', event)" onmouseout="menuLayers.hide()" border="0"/></td>
+    <td style="padding-left:5px;padding-right:3px"> <html:img page="/images/icon_info2.gif" onmouseover="menuLayers.show('stepInfo', event)" onmouseout="menuLayers.hide()" border="0"/></td>
   </tr>
 </table>
 </c:if>
