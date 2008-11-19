@@ -1585,6 +1585,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             that.currentChartId = next;
             chartId = null;
             that.last_updated_div.innerHTML = 'Updated: ' + that.charts[next].last_updated.formatDate('h:mm t');
+            that.truncateChartTitle();
         }
         else
         {
@@ -1608,6 +1609,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                     }
                     that.last_updated_div.innerHTML = 'Updated: ' + that.charts[next].last_updated.formatDate('h:mm t');
                     that.currentChartId = next;
+                    that.truncateChartTitle();
                     chartId = null;
                 });
         }
@@ -1795,6 +1797,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             }
             that.chartContainerResize();
             that.chart = new hyperic.widget.Chart('chart_container', that.charts[that.currentChartId]);
+            that.truncateChartTitle();
             that.needsResize = false;
         }
         else
@@ -1810,6 +1813,12 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             dojo11.query('#chart_container',that.sheets.content)[0].style.width = that.sheets.content.offsetWidth - 150;
         }
     };
+    
+    that.truncateChartTitle = function()
+    {
+        var width = (that.sheets.content.offsetWidth - 150) * 1.5;
+        dojo11.query('.cTitle',that.sheets.content)[0].innerHTML = getShortLink(that.charts[that.currentChartId].name, width, that.charts[that.currentChartId].url);
+    }
 
     if(that.chartsearch && that.chartselect)
     {
