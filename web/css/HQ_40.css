@@ -1584,6 +1584,8 @@ visibility: hidden;*/
     padding: 4px;
 }
 
+/* HQ-1491 fix */
+/* 
 #summaryWidget .content tr.even {
     background-color: #4F4F4F;
 }
@@ -1591,6 +1593,7 @@ visibility: hidden;*/
 #summaryWidget .content tr.odd {
     background-color: transparent;
 }
+*/
 
 #summaryWidget .content .lcol {
     border-right: 1px solid #FFF;

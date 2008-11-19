@@ -2176,7 +2176,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             var table = (i < half) ? that.tables.lcol : that.tables.rcol;
             var row = table.rows[0].cloneNode(true);
             
-            row.className = ((i < half ? i : i - half) % 2 == 0) ? 'even' : 'odd';
+            // HQ-1491 says remove alternating row colors; leaving code in here in case this decision is reversed.
+            // row.className = ((i < half ? i : i - half) % 2 == 0) ? 'even' : 'odd';
             row.style.display = '';
             row.id = 'alertGroup:' + groups[i];
             var data = that.alert_group_status[groups[i]] || ['gray','gray'];
