@@ -1525,7 +1525,7 @@ visibility: hidden;*/
 
 .widget #chart_container {
     position: absolute;
-    top: 45px;
+    top: 35px;
     right: 10px;
 /*  width: 300px;*/
     height: 250px;
@@ -1535,6 +1535,10 @@ visibility: hidden;*/
 /*    width: 300px;*/
     height: 250px;
     border: 1px solid #DDD;
+}
+
+.widget #chart_container .cTitle a {
+    color: #FFFFFF;
 }
 
 /* summary widget stuff */
