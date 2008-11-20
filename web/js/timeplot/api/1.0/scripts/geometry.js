@@ -613,7 +613,7 @@ Timeplot.DefaultTimeGeometry.prototype = {
                 case time.DAY:
                 case time.WEEK:
                 case time.MONTH:
-                  var l = t.toLocaleDateString();
+                  var l = t.formatDate('MM/dd/yyyy');
                   break;  
                 case time.YEAR:
                 case time.DECADE:
