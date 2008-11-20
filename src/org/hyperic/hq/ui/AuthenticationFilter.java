@@ -53,6 +53,7 @@ import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.image.widget.ResourceTree;
 import org.hyperic.ui.tapestry.page.PageListing;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.encoding.Base64;
@@ -130,6 +131,7 @@ public final class AuthenticationFilter extends BaseFilter {
                 return;
             }
         }
+        
         String callbackURL = (String) session
                 .getAttribute(Constants.POST_AUTH_CALLBACK_URL);
         if (webUser != null && !PageListing.SIGN_IN_URL.equals(servletPath)
@@ -185,8 +187,8 @@ public final class AuthenticationFilter extends BaseFilter {
             WebUser webUser = new WebUser(subject, sessionId, preferences, true);
 
             Map userOpsMap = SignIn.loadUserPermissions(sessionId, authzBoss);
-            request.getSession().setAttribute(Constants.USER_OPERATIONS_ATTR,
-                    userOpsMap);
+            HttpSession session = request.getSession();
+            session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
 
             try {
                 DashboardManagerLocal dashManager = DashboardManagerEJBImpl
@@ -209,8 +211,15 @@ public final class AuthenticationFilter extends BaseFilter {
             } catch (PermissionException e) {
                 e.printStackTrace();
             }
-            request.getSession().setAttribute(Constants.WEBUSER_SES_ATTR,
-                    webUser);
+            session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
+            
+            try {
+                new ResourceTree(1);    // See if graphics engine is present
+                session.setAttribute(Constants.XLIB_INSTALLED, Boolean.TRUE);
+            } catch (Throwable t) {
+                session.setAttribute(Constants.XLIB_INSTALLED, Boolean.FALSE);
+            }
+
             return webUser;
         } catch (Exception e) {
             // No guest account available
