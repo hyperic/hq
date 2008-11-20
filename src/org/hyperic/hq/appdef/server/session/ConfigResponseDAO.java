@@ -79,39 +79,21 @@ public class ConfigResponseDAO extends HibernateDAO
     }
 
     ConfigResponseDB findByPlatformId(Integer id) {
-        String sql = "select c from ConfigResponseDB c, Platform p where " +
-                     "c.id = p.configResponse.id and " +
-                     "p.id = ?";
-        return (ConfigResponseDB)getSession()
-            .createQuery(sql)
-            .setInteger(0, id.intValue())
-            .setCacheable(true)
-            .setCacheRegion("ConfigReponseDB.findByPlatformId")
-            .uniqueResult();
+        PlatformDAO dao = new PlatformDAO(getFactory());
+        Platform plat = dao.findById(id);
+        return plat.getConfigResponse();
     }
 
     public ConfigResponseDB findByServerId(Integer id) {
-        String sql = "select c from ConfigResponseDB c, Server s where " +
-                     "c.id = s.configResponse.id and " +
-                     "s.id = ?";
-        return (ConfigResponseDB)getSession()
-            .createQuery(sql)
-            .setInteger(0, id.intValue())
-            .setCacheable(true)
-            .setCacheRegion("ConfigReponseDB.findByServerId")
-            .uniqueResult();
+        ServerDAO dao = new ServerDAO(getFactory());
+        Server server = dao.findById(id);
+        return server.getConfigResponse();
     }
 
     public ConfigResponseDB findByServiceId(Integer id) {
-        String sql = "select c from ConfigResponseDB c, Service s where " +
-                     "c.id = s.configResponse.id and " +
-                     "s.id = ?";
-        return (ConfigResponseDB)getSession()
-            .createQuery(sql)
-            .setInteger(0, id.intValue())
-            .setCacheable(true)
-            .setCacheRegion("ConfigReponseDB.findByServiceId")
-            .uniqueResult();
+        ServiceDAO dao = new ServiceDAO(getFactory());
+        Service service = dao.findById(id);
+        return service.getConfigResponse();
     }
     
     /**
