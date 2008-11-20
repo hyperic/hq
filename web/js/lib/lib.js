@@ -1733,9 +1733,22 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 // that.charts[chart].data = data;
                 if(!data.error && data.length > 0)
                 {
-                	that.charts[chart].data = data[0].data;
-                	that.charts[chart].measurementName = data[0].measurementName;
-                	that.charts[chart].last_updated = new Date();
+                    that.charts[chart].data = {};
+                    // loop through the 'data' object and round all values to 3 decimal places
+                    for(var i in data[0].data) {
+                        if(typeof data[0].data[i] != 'function')
+                        {
+                            that.charts[chart].data[i] = [];
+                            for(var j in data[0].data[i]) {
+                                if(typeof data[0].data[i][j] != 'function')
+                                {
+                                    that.charts[chart].data[i][j] = data[0].data[i][j].toFixed(3);
+                                }
+                            }
+                        }
+                    }
+                    that.charts[chart].measurementName = data[0].measurementName;
+                    that.charts[chart].last_updated = new Date();
                 }
             },
             error: function(data){
@@ -2039,7 +2052,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         }
         that.startRefreshCycle();
     };
-    
+
     that.reset_config = function() {
         // reset the searchbox
         that.groupsearch.value = '';
