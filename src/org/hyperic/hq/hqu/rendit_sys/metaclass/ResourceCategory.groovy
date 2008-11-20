@@ -137,7 +137,7 @@ class ResourceCategory {
      * Get all metrics for a resource
      */
      static Collection getMetrics(Resource r) {
-        dman.findMeasurements(null, r.entityId, null, PageControl.PAGE_ALL)
+        dman.findMeasurements(null, r)
     }
 
     /**
