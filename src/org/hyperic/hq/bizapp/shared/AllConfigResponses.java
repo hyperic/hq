@@ -27,7 +27,7 @@ package org.hyperic.hq.bizapp.shared;
 
 import java.io.Serializable;
 
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -38,7 +38,7 @@ import org.hyperic.util.config.ConfigResponse;
  */
 public class AllConfigResponses implements Serializable {
 
-    private AppdefResourceValue _resource;
+    private AppdefEntityID _resource;
 
     private ConfigResponse[] _configs
         = new ConfigResponse[ProductPlugin.CONFIGURABLE_TYPES.length];
@@ -53,11 +53,11 @@ public class AllConfigResponses implements Serializable {
 
     public AllConfigResponses () {}
 
-    public void setResource(AppdefResourceValue resource) {
+    public void setResource(AppdefEntityID resource) {
         _resource = resource;
     }
 
-    public AppdefResourceValue getResource() {
+    public AppdefEntityID getResource() {
         return _resource;
     }
 
