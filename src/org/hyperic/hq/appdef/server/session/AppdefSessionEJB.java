@@ -202,7 +202,7 @@ public abstract class AppdefSessionEJB
      * remove the authz resource entry
      */
     protected void removeAuthzResource(AuthzSubject subject,
-                                       AppdefEntityID aeid)
+                                       AppdefEntityID aeid, Resource r)
         throws RemoveException, PermissionException, VetoException 
     {
         if (log.isDebugEnabled())
@@ -211,7 +211,7 @@ public abstract class AppdefSessionEJB
         ResourceManagerLocal rm = getResourceManager();
         AuthzSubject s = 
             AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId()); 
-        rm.removeResources(s, new AppdefEntityID[] { aeid });
+        rm.removeResource(s, r);
         
         // Send resource delete event
         ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, aeid);
@@ -1040,7 +1040,7 @@ public abstract class AppdefSessionEJB
     } 
 
     protected void deleteCustomProperties(AppdefEntityID aeid) {
-        CPropManagerLocal cpropMan = getCPropMgrLocal();
+        CPropManagerLocal cpropMan = getCPropManager();
         cpropMan.deleteValues(aeid.getType(), aeid.getID());
     }
 
