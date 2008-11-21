@@ -383,6 +383,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         MeasurementDAO dao = getMeasurementDAO();
         List mids = dao.findOrphanedMeasurements();
         
+        // Shrink the list down to MAX_MIDS so that we spread out the work over
+        // successive data purges
         if (mids.size() > MAX_MIDS) {
             mids = mids.subList(0, MAX_MIDS);
         }
@@ -977,27 +979,44 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     public void disableMeasurements(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
         // Authz check
-        checkModifyPermission(subject.getId(), id);        
-
-        List mcol =
-            getMeasurementDAO().findEnabledByResource(getResource(id));
+        checkModifyPermission(subject.getId(), id);
+        disableMeasurements(subject, getResource(id));
+    }
+    
+    /**
+     * Disable all Measurements for a resource
+     *
+     * @ejb:interface-method
+     */
+    public void disableMeasurements(AuthzSubject subject, Resource res)
+        throws PermissionException {
+        List mcol = getMeasurementDAO().findEnabledByResource(res);
+        
+        if (mcol.size() == 0)
+            return;
+        
         Integer[] mids = new Integer[mcol.size()];
         Iterator it = mcol.iterator();
+        AppdefEntityID aeid = null;
         for (int i = 0; it.hasNext(); i++) {
             Measurement dm = (Measurement)it.next();
             dm.setEnabled(false);
             mids[i] = dm.getId();
+            if (aeid == null) {
+                aeid = new AppdefEntityID(dm.getTemplate().getMonitorableType()
+                                              .getAppdefType(),
+                                          dm.getInstanceId());
+            }
         }
 
         removeMeasurementsFromCache(mids);
-        
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
 
         // Unscheduling of all metrics for a resource could indicate that
         // the resource is getting removed.  Send the unschedule synchronously
         // so that all the necessary plumbing is in place.
         try {
-            MeasurementProcessorEJBImpl.getOne().unschedule(id);
+            MeasurementProcessorEJBImpl.getOne().unschedule(aeid);
         } catch (MeasurementUnscheduleException e) {
             log.error("Unable to disable measurements", e);
         }
