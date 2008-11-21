@@ -93,7 +93,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public MeasurementTemplate getTemplate(Integer id) {
-        return getMeasurementTemplateDAO().findById(id);
+        return getMeasurementTemplateDAO().get(id);
     }
 
     /**
