@@ -190,7 +190,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
             // Remove the platform
             try {
-                pmLocal.removePlatform(subject, existingPlatform.getId());
+                pmLocal.removePlatform(subject, existingPlatform);
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {
@@ -306,7 +306,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                           "remove aiserver=" + aiserver.getId());
             }
             _log.info("Removing Server...");
-            smLocal.removeServer(subject, server.getId());
+            smLocal.removeServer(subject, server);
        } catch (PermissionException e) {
            throw e;
        } catch (Exception e) {
