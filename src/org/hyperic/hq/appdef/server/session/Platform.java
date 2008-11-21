@@ -27,11 +27,10 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -182,10 +181,14 @@ public class Platform extends PlatformBase
     }
     
     public Collection getServers() {
-        return _servers;
+        return Collections.unmodifiableCollection(_servers);
     }
 
-    void setServers(Collection servers) {
+    public Collection getServersBag() {
+        return _servers;
+    }
+    
+    void setServersBag(Collection servers) {
         _servers = servers;
     }
 
@@ -263,14 +266,6 @@ public class Platform extends PlatformBase
         return matches;
     }
 
-    /**
-     * Get a snapshot of the ServerLocals associated with this platform
-     * @deprecated use getServers()
-     */
-    public Set getServerSnapshot() {
-        return new LinkedHashSet(_servers);
-    }
-
     private PlatformValue _platformValue = new PlatformValue();
 
     /**
@@ -282,7 +277,7 @@ public class Platform extends PlatformBase
         _platformValue.setSortName(getSortName());
         _platformValue.setCommentText(getCommentText());
         _platformValue.setModifiedBy(getModifiedBy());
-        _platformValue.setOwner(getResource().getOwner().getName());
+        _platformValue.setOwner(getOwner());
         _platformValue.setConfigResponseId(getConfigResponse().getId());
         _platformValue.setCertdn(getCertdn());
         _platformValue.setFqdn(getFqdn());
@@ -305,6 +300,8 @@ public class Platform extends PlatformBase
         else
             _platformValue.setPlatformType( null );
         if (getAgent() != null) {
+            // Make sure that the agent is loaded
+            getAgent().getAddress();
             _platformValue.setAgent(getAgent());
         }
         else
@@ -312,6 +309,10 @@ public class Platform extends PlatformBase
         return _platformValue;
     }
 
+    private String getOwner() {
+        return getResource() != null && getResource().getOwner() != null ?
+                getResource().getOwner().getName() : "";
+    }
 
     /**
      * convenience method for copying simple values from
@@ -326,14 +327,6 @@ public class Platform extends PlatformBase
         setCertdn(pv.getCertdn());
         setFqdn(pv.getFqdn());
         setName(pv.getName());
-    }
-
-    /**
-     * Get a snapshot of the IPLocals associated with this platform
-     * @deprecated use getIps()
-     */
-    public Set getIpSnapshot() {
-        return new LinkedHashSet(getIps());
     }
 
     public boolean equals(Object obj) {
