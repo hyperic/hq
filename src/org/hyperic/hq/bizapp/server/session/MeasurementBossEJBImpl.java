@@ -549,25 +549,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /**
-     * Disable all measurements for the given resources.
-     *
-     * @param agentId The entity id to use to look up the agent connection
-     * @param ids The list of entitys to unschedule
-     * @ejb:interface-method
-     *
-     * NOTE: This method requires all entity ids to be monitored by the same
-     * agent as specified by the agentId
-     */
-    public void disableMeasurements(int sessionId, AppdefEntityID agentId,
-                                    AppdefEntityID[] ids)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException
-    {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        getMetricManager().disableMeasurements(subject, agentId, ids);
-    }
-
-    /**
      * Disable all measurements for a resource
      * @param id the resource's ID
      * @param tids the array of measurement ID's
@@ -2970,40 +2951,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
 
         return result;
-    }
-
-    /**
-     * Remove config and track plugins for a given resource
-     *
-     * @ejb:interface-method
-     */
-    public void removeTrackers(int sessionId, AppdefEntityID id)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException
-    {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        TrackerManagerLocal trackManager = getTrackerManager();
-        ConfigResponse response;
-    
-        try {
-            response = getConfigManager().
-                getMergedConfigResponse(subject,
-                                        ProductPlugin.TYPE_MEASUREMENT,
-                                        id, true);
-        } catch (Exception e) {
-            // If anything goes wrong getting the config, just move
-            // along.  The plugins will be removed on the next agent
-            // restart.
-            return;
-        }
-    
-        try {
-            trackManager.disableTrackers(subject, id, response);
-        } catch (PluginException e) {
-            // Not much we can do.. plugins will be removed on next
-            // agent restart.
-            _log.error("Unable to remove track plugins", e);
-        }
     }
 
     /**
