@@ -85,11 +85,7 @@ public class RootInventoryHelper extends InventoryHelper {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         log.trace("finding all platform types");
-        try {
-            return boss.findAllPlatformTypes( sessionId, PageControl.PAGE_ALL );
-        } catch (FinderException e) {
-            throw new PlatformNotFoundException("couldn't find all platform types");
-        }
+        return boss.findAllPlatformTypes(sessionId, PageControl.PAGE_ALL);
     }
 
     /**
