@@ -259,7 +259,7 @@ public class PlatformDAO extends HibernateDAO {
     {
         return createCriteria()
             .createAlias("resource", "r")
-            .createAlias("servers", "s")
+            .createAlias("serversBag", "s")
             .add(Restrictions.in("s.id", ids))
             .addOrder(Order.asc("r.sortName"))
             .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
@@ -269,7 +269,7 @@ public class PlatformDAO extends HibernateDAO {
     public Platform findByServiceId(Integer id)
     {
         String sql = "select distinct p from Platform p " +
-                     " join p.servers s " +
+                     " join p.serversBag s " +
                      " join s.services sv " +
                      "where " +
                      " sv.id = ?";
@@ -293,11 +293,10 @@ public class PlatformDAO extends HibernateDAO {
     public Collection findByApplication(Application app)
     {
         String sql = "select distinct p from Platform p " +
-                     " join p.servers s " +
+                     " join p.serversBag s " +
                      " join s.services sv " +
                      " join sv.appServices asv " +
-                     "where " +
-                     " asv.appication.id = ?";
+                     "where asv.appication.id = ?";
         return getSession()
             .createQuery(sql)
             .setInteger(0, app.getId().intValue())
