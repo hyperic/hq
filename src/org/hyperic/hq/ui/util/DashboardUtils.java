@@ -381,10 +381,10 @@ public class DashboardUtils {
     /**
      * Find the user's dashboard
      */
-    public static DashboardConfig findUserDashboard(WebUser user,
-                                                    AuthzBoss boss)
+    public static ConfigResponse findUserDashboardConfig(WebUser user,
+                                                         AuthzBoss boss)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, RemoteException {
-        return boss.getUserDashboard(user.getSessionId());
+        return boss.getUserDashboardConfig(user.getSessionId());
     }
 }

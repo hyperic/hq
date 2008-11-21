@@ -27,7 +27,9 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -37,6 +39,7 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.auth.shared.SessionException;
@@ -47,16 +50,14 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
 import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
@@ -211,6 +212,32 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         AuthzSubject subject = manager.getSubject(sessionId.intValue());
         return getResourceGroupManager().getResourceGroupsById(subject, ids,
                                                                pc);
+    }
+    
+    /**
+     * @ejb.interface-method
+     */
+    public Map findResourcesByIds(Integer sessionId, AppdefEntityID[] entities)
+        throws SessionNotFoundException, SessionTimeoutException
+    {
+        // get the user
+        AuthzSubject subject = manager.getSubject(sessionId);
+        Map appdefMap = new LinkedHashMap();
+
+        // cheaper to find the resource first
+        ResourceManagerLocal resMan = getResourceManager();
+        for (int i = 0; i < entities.length; i++) {
+            Resource res = resMan.findResource(entities[i]);
+            if (res != null) {
+                try {
+                    appdefMap.put(new AppdefEntityID(res), res);
+                } catch (IllegalArgumentException e) {
+                    // Not a valid appdef resource, continue
+                }
+            }
+        }
+        
+        return appdefMap;
     }
 
     /**
@@ -443,11 +470,12 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * Get the current user's dashboard
      * @ejb:interface-method
      */
-    public DashboardConfig getUserDashboard(Integer sessionId)
+    public ConfigResponse getUserDashboardConfig(Integer sessionId)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
         AuthzSubject subj = manager.getSubject(sessionId.intValue());
-        return DashboardManagerEJBImpl.getOne().getUserDashboard(subj, subj);
+        return DashboardManagerEJBImpl.getOne()
+            .getUserDashboard(subj, subj).getConfig();
     }
 
     /**
