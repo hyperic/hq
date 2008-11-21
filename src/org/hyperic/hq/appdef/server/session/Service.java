@@ -76,14 +76,6 @@ public class Service extends AppdefResource
         return _autodiscoveryZombie;
     }
 
-    /**
-     * legacy EJB getter
-     * @deprecated use isAutodiscoveryZombie() instead
-     */
-    public boolean getAutodiscoveryZombie() {
-        return isAutodiscoveryZombie();
-    }
-
     void setAutodiscoveryZombie(boolean autodiscoveryZombie) {
         _autodiscoveryZombie = autodiscoveryZombie;
     }
@@ -106,15 +98,6 @@ public class Service extends AppdefResource
 
     public Service getParentService() {
         return _parentService;
-    }
-
-    /**
-     * legacy EJB getter for parent service id
-     * @deprecated use getParentService().getId() instead
-     * @return
-     */
-    public Integer getParentId() {
-        return _parentService != null ? _parentService.getId() : null;
     }
 
     void setParentService(Service parentService) {
@@ -163,14 +146,6 @@ public class Service extends AppdefResource
         return _configResponse;
     }
 
-    /**
-     * legacy EJB getter for configresponse id
-     * @deprecated use getConfigResponse().getId() instead
-     */
-    public Integer getConfigResponseId() {
-        return _configResponse != null ? _configResponse.getId() : null;
-    }
-
     void setConfigResponse(ConfigResponseDB configResponse) {
         _configResponse = configResponse;
     }
@@ -205,14 +180,16 @@ public class Service extends AppdefResource
     public ServiceValue getServiceValue()
     {
         _serviceValue.setSortName(getSortName());
-        _serviceValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
+        _serviceValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
         _serviceValue.setServiceRt(isServiceRt());
         _serviceValue.setEndUserRt(isEndUserRt());
         _serviceValue.setModifiedBy(getModifiedBy());
-        _serviceValue.setOwner(getResource().getOwner().getName());
+        _serviceValue.setOwner(getOwner());
         _serviceValue.setLocation(getLocation());
-        _serviceValue.setConfigResponseId(getConfigResponseId());
-        _serviceValue.setParentId(getParentId());
+        _serviceValue.setConfigResponseId(_configResponse != null ?
+                                          _configResponse.getId() : null);
+        _serviceValue.setParentId(_parentService != null ?
+                                  _parentService.getId() : null);
         _serviceValue.setName(getName());
         _serviceValue.setDescription(getDescription());
         _serviceValue.setId(getId());
@@ -235,6 +212,11 @@ public class Service extends AppdefResource
         else
             _serviceValue.setServiceType( null );
         return _serviceValue;
+    }
+
+    private String getOwner() {
+        return getResource() != null && getResource().getOwner() != null ?
+                getResource().getOwner().getName() : "";
     }
 
     /**

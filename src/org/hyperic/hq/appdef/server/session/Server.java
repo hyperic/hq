@@ -140,13 +140,6 @@ public class Server extends ServerBase
         _services.add(s);
     }
 
-    /**
-     * @deprecated use getConfigResponse().getId()
-     */
-    public Integer getConfigResponseId() {
-        return _configResponse != null ? _configResponse.getId() : null;
-    }
-
     private ServerLightValue _serverLightValue = new ServerLightValue();
 
     /**
@@ -157,10 +150,11 @@ public class Server extends ServerBase
     public ServerLightValue getServerLightValue()
     {
         _serverLightValue.setSortName(getSortName());
-        _serverLightValue.setRuntimeAutodiscovery(getRuntimeAutodiscovery());
-        _serverLightValue.setWasAutodiscovered(getWasAutodiscovered());
-        _serverLightValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
-        _serverLightValue.setConfigResponseId(getConfigResponseId());
+        _serverLightValue.setRuntimeAutodiscovery(isRuntimeAutodiscovery());
+        _serverLightValue.setWasAutodiscovered(isWasAutodiscovered());
+        _serverLightValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
+        _serverLightValue.setConfigResponseId(_configResponse != null ?
+                                              _configResponse.getId() : null);
         _serverLightValue.setModifiedBy(getModifiedBy());
         _serverLightValue.setOwner(getResource().getOwner().getName());
         _serverLightValue.setLocation(getLocation());
@@ -168,7 +162,7 @@ public class Server extends ServerBase
         _serverLightValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
         _serverLightValue.setInstallPath(getInstallPath());
         _serverLightValue.setDescription(getDescription());
-        _serverLightValue.setServicesAutomanaged(getServicesAutomanaged());
+        _serverLightValue.setServicesAutomanaged(isServicesAutomanaged());
         _serverLightValue.setId(getId());
         _serverLightValue.setMTime(getMTime());
         _serverLightValue.setCTime(getCTime());
@@ -189,18 +183,19 @@ public class Server extends ServerBase
     public ServerValue getServerValue()
     {
         _serverValue.setSortName(getSortName());
-        _serverValue.setRuntimeAutodiscovery(getRuntimeAutodiscovery());
-        _serverValue.setWasAutodiscovered(getWasAutodiscovered());
-        _serverValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
-        _serverValue.setConfigResponseId(getConfigResponseId());
+        _serverValue.setRuntimeAutodiscovery(isRuntimeAutodiscovery());
+        _serverValue.setWasAutodiscovered(isWasAutodiscovered());
+        _serverValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
+        _serverValue.setConfigResponseId(_configResponse != null ?
+                                         _configResponse.getId() : null);
         _serverValue.setModifiedBy(getModifiedBy());
-        _serverValue.setOwner(getResource().getOwner().getName());
+        _serverValue.setOwner(getOwner());
         _serverValue.setLocation(getLocation());
         _serverValue.setName(getName());
         _serverValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
         _serverValue.setInstallPath(getInstallPath());
         _serverValue.setDescription(getDescription());
-        _serverValue.setServicesAutomanaged(getServicesAutomanaged());
+        _serverValue.setServicesAutomanaged(isServicesAutomanaged());
         _serverValue.setId(getId());
         _serverValue.setMTime(getMTime());
         _serverValue.setCTime(getCTime());
@@ -215,6 +210,11 @@ public class Server extends ServerBase
         else
             _serverValue.setPlatform(null);
         return _serverValue;
+    }
+
+    private String getOwner() {
+        return getResource() != null && getResource().getOwner() != null ?
+                getResource().getOwner().getName() : "";
     }
 
     public Set getServiceSnapshot()
@@ -253,7 +253,7 @@ public class Server extends ServerBase
             (getLocation() != null ?
                 this.getLocation().equals(obj.getLocation())
                 : (obj.getLocation() == null)) &&
-            (getRuntimeAutodiscovery() == obj.getRuntimeAutodiscovery()) &&
+            (isRuntimeAutodiscovery() == obj.getRuntimeAutodiscovery()) &&
             (getInstallPath().equals(obj.getInstallPath())) &&
             (getAutoinventoryIdentifier() != null ?
                 getAutoinventoryIdentifier().equals(
@@ -320,27 +320,6 @@ public class Server extends ServerBase
         setAutoinventoryIdentifier( valueHolder.getAutoinventoryIdentifier() );
         setInstallPath( valueHolder.getInstallPath() );
         setServicesAutomanaged( valueHolder.getServicesAutomanaged() );
-    }
-
-    /**
-     * @deprecated use isWasAutodiscovered()
-     */
-    public boolean getWasAutodiscovered() {
-        return isWasAutodiscovered();
-    }
-
-    /**
-     * @deprecated use isRuntimeAutodiscovery()
-     */
-    public boolean getRuntimeAutodiscovery() {
-        return isRuntimeAutodiscovery();
-    }
-
-    /**
-     * @deprecated use isAutodiscoveryZombie()
-     */
-    public boolean getAutodiscoveryZombie() {
-        return isAutodiscoveryZombie();
     }
 
     public boolean equals(Object obj) {
