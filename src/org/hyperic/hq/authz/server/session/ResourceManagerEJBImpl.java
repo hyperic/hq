@@ -276,6 +276,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         final ResourceType resourceType = r.getResourceType();
         String opName = null;
         
+        // Possible this resource has already been marked for deletion
+        if (resourceType == null)
+            return;
+        
         if (resourceType.getId().equals(AuthzConstants.authzPlatform)) {
             opName = AuthzConstants.platformOpRemovePlatform;
         }

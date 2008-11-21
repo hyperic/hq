@@ -1297,14 +1297,18 @@ public class AppdefBossEJBImpl
     public void removeAppdefEntity(int sessionId, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException,
                ApplicationException, VetoException {
+        final StopWatch timer = new StopWatch();
         final ResourceManagerLocal resMan = getResourceManager();
-        AuthzSubject subject = manager.getSubject(sessionId);
-        Resource res = resMan.findResource(aeid);
-        resMan.removeResourcePerms(subject, res);
+        final AuthzSubject subject = manager.getSubject(sessionId);
+        final Resource res = resMan.findResource(aeid);
         
-        // Send resources deleted event
-        ResourcesCleanupZevent zevent = new ResourcesCleanupZevent();
-        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+        resMan.removeResourcePerms(subject, res);
+        if (log.isDebugEnabled()) {
+            log.debug("removeAppdefEntity() for " + aeid + " executed in " +
+                      timer.getElapsed());
+        }
+        
+        ZeventManager.getInstance().enqueueEventAfterCommit(new ResourcesCleanupZevent());
     }
     
     /**
@@ -1313,35 +1317,66 @@ public class AppdefBossEJBImpl
      */
     public void removeDeletedResources()
         throws ApplicationException, VetoException, RemoveException {
-        AuthzSubject subject =
+        final StopWatch watch = new StopWatch();
+        final AuthzSubject subject =
             getAuthzSubjectManager().findSubjectById(AuthzConstants.overlordId);
         
-        // Look through services, servers, platforms, applications, and groups
-        Collection services = getServiceManager().findDeletedServices();
-        for (Iterator it = services.iterator(); it.hasNext(); ) {
-            Service service = (Service) it.next();
-            removeService(subject, service);
-        }
-        Collection servers = getServerManager().findDeletedServers();
-        for (Iterator it = servers.iterator(); it.hasNext(); ) {
-            Server server = (Server) it.next();
-            removeServer(subject, server);
-        }
-        Collection platforms = getPlatformManager().findDeletedPlatforms();
-        for (Iterator it = platforms.iterator(); it.hasNext(); ) {
-            Platform platform = (Platform) it.next();
-            removePlatform(subject, platform);
-        }
+        watch.markTimeBegin("removeApplications");
         Collection applications =
             getApplicationManager().findDeletedApplications();
         for (Iterator it = applications.iterator(); it.hasNext(); ) {
             Application application = (Application) it.next();
             removeApplication(subject, application);
         }
+        watch.markTimeEnd("removeApplications");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed " + applications.size() + " applications");
+        }
+
+        watch.markTimeBegin("removeResourceGroups");
         Collection groups = getResourceGroupManager().findDeletedGroups();
         for (Iterator it = groups.iterator(); it.hasNext(); ) {
             ResourceGroup group = (ResourceGroup) it.next();
             removeGroup(subject, group);
+        }
+        watch.markTimeEnd("removeResourceGroups");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed " + groups.size() + " resource groups");
+        }
+
+        watch.markTimeBegin("removeServices");
+        // Look through services, servers, platforms, applications, and groups
+        Collection services = getServiceManager().findDeletedServices();
+        for (Iterator it = services.iterator(); it.hasNext(); ) {
+            Service service = (Service) it.next();
+            removeService(subject, service);
+        }
+        watch.markTimeEnd("removeServices");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed " + services.size() + " services");
+        }
+
+        watch.markTimeBegin("removeServers");
+        Collection servers = getServerManager().findDeletedServers();
+        for (Iterator it = servers.iterator(); it.hasNext(); ) {
+            Server server = (Server) it.next();
+            removeServer(subject, server);
+        }
+        watch.markTimeEnd("removeServers");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed " + servers.size() + " servers");
+        }
+
+        watch.markTimeBegin("removePlatforms");
+        Collection platforms = getPlatformManager().findDeletedPlatforms();
+        for (Iterator it = platforms.iterator(); it.hasNext(); ) {
+            Platform platform = (Platform) it.next();
+            removePlatform(subject, platform);
+        }
+        watch.markTimeEnd("removePlatforms");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed " + platforms.size() + " platforms");
+            log.debug("removeDeletedResources() timing: " + watch);
         }
     }
 
