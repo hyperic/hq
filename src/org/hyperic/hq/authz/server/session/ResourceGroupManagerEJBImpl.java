@@ -196,6 +196,13 @@ public class ResourceGroupManagerEJBImpl
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_viewResourceGroup);
         return group;
     }
+    
+    /**
+     * @ejb.interface-method
+     */
+    public Collection findDeletedGroups() {
+        return getResourceGroupDAO().findDeletedGroups();
+    }
 
     /**
      * Update some of the fundamentals of groups (name, description, location).
