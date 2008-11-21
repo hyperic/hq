@@ -56,24 +56,12 @@ public class AppdefStartupListener
 
                 public void preResourceDelete(Resource r)
                     throws VetoException {
-                    try {
-                        AppdefEntityID aeid = new AppdefEntityID(r);
-                        if (aeid.isPlatform()) {
-                            PlatformManagerEJBImpl.getOne()
-                                .handleResourceDelete(r);
-                        } else if (aeid.isServer()) {
-                            ServerManagerEJBImpl.getOne()
-                                .handleResourceDelete(r);
-                        } else if (aeid.isService()) {
-                            ServiceManagerEJBImpl.getOne()
-                                .handleResourceDelete(r);
-                        } else if (aeid.isApplication()) {
-                            ApplicationManagerEJBImpl.getOne()
-                                .handleResourceDelete(r);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        // Not an appdef resource
-                    }
+                    // Go ahead and let every appdef type handle a resource
+                    // delete
+                    PlatformManagerEJBImpl.getOne().handleResourceDelete(r);
+                    ServerManagerEJBImpl.getOne().handleResourceDelete(r);
+                    ServiceManagerEJBImpl.getOne().handleResourceDelete(r);
+                    ApplicationManagerEJBImpl.getOne().handleResourceDelete(r);
                 }
             });
         }
