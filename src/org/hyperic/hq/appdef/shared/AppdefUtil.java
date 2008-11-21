@@ -99,10 +99,10 @@ public class AppdefUtil {
      * server, false otherwise.
      */
     public static boolean areRuntimeScansEnabled ( Server server ) {
-        return ( server.getRuntimeAutodiscovery() &&
-                 ( !server.getWasAutodiscovered() ||
-                   ( server.getWasAutodiscovered() &&
-                     !server.getServicesAutomanaged()) ));
+        return ( server.isRuntimeAutodiscovery() &&
+                 ( !server.isWasAutodiscovered() ||
+                   ( server.isWasAutodiscovered() &&
+                     !server.isServicesAutomanaged()) ));
     }
 
     public static Map groupByAppdefType(AppdefEntityID[] ids) {
