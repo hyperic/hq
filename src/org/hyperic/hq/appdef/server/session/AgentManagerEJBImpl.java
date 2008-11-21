@@ -524,7 +524,12 @@ public class AgentManagerEJBImpl
         return client.agentSendFileData(id, data, streams);
     }
 
-
+    /**
+     * Ping an agent.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"     
+     */
     public long pingAgent(AuthzSubject subject, Agent agent)
         throws PermissionException, AgentNotFoundException,
                AgentConnectionException, AgentRemoteException

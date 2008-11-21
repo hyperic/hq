@@ -44,19 +44,19 @@ public class UserLoginZevent extends Zevent {
 
     public static class UserLoginZeventPayload implements ZeventPayload {
 
-        AuthzSubject _subj;
+        Integer _subjectId;
 
-        public UserLoginZeventPayload(AuthzSubject subj) {
-            _subj = subj;
+        public UserLoginZeventPayload(Integer id) {
+            _subjectId = id;
         }
 
-        public AuthzSubject getSubject() {
-            return _subj;
+        public Integer getSubjectId() {
+            return _subjectId;
         }
     }
     
-    public UserLoginZevent(AuthzSubject subj) {
-        super(new UserLoginZeventSource(subj.getId().intValue()),
-              new UserLoginZeventPayload(subj));
+    public UserLoginZevent(Integer id) {
+        super(new UserLoginZeventSource(id.intValue()),
+              new UserLoginZeventPayload(id));
     }
 }
