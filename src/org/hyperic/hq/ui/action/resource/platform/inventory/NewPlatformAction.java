@@ -114,13 +114,11 @@ public class NewPlatformAction extends BaseAction {
             
             AppdefEntityID entityId = newPlatform.getEntityId();
 
-            BizappUtils.startAutoScan(ctx,
-                                      sessionId.intValue(), entityId);
+            BizappUtils.startAutoScan(ctx, sessionId.intValue(), entityId);
 
             Integer entityType =
                 new Integer(newPlatform.getEntityId().getType());
             newForm.setType(entityType);
-            
 
             RequestUtils
                 .setConfirmation(request,
