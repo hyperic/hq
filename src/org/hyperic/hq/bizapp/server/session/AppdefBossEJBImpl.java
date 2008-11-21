@@ -44,7 +44,6 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,6 +72,7 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
+import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
@@ -101,6 +101,7 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerValue;
@@ -114,6 +115,7 @@ import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterAssignSvc;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupEntityResource;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupMemExclude;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -138,7 +140,6 @@ import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
 import org.hyperic.hq.bizapp.shared.AppdefBossUtil;
-import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
@@ -167,10 +168,12 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.AvailabilityType;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
+import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -263,8 +266,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public PageList findAllPlatformTypes(int sessionID, PageControl pc)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException {
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException {
 
         AuthzSubject subject = manager.getSubject(sessionID);
         PageList platTypeList =
@@ -280,8 +283,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public PageList findViewablePlatformTypes(int sessionID, PageControl pc)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException {
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException, FinderException {
         AuthzSubject subject = manager.getSubject(sessionID);
         PageList platTypeList = null ;
 
@@ -346,9 +349,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public PageList findAllServiceTypes(int sessionID, PageControl pc)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException {
-
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException {
         AuthzSubject subject = manager.getSubject(sessionID);
         return getServiceManager().getAllServiceTypes(subject, pc);
     }
@@ -370,9 +372,8 @@ public class AppdefBossEJBImpl
      */
     public PageList findViewablePlatformServiceTypes(int sessionID,
                                                      Integer platId)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException {
-    
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException {
         AuthzSubject subject = manager.getSubject(sessionID);
         return getServiceManager()
             .findVirtualServiceTypesByPlatform(subject, platId);
@@ -516,7 +517,6 @@ public class AppdefBossEJBImpl
                SessionException
     {
         AppdefEntityID aeid = AppdefEntityID.newServerID(serverId);
-                               
         return findServices(sessionID, aeid, false, pc);
     }
 
@@ -609,9 +609,8 @@ public class AppdefBossEJBImpl
                                                  Integer platformId,
                                                  int adResTypeId,
                                                  PageControl pc)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
+        throws AppdefEntityNotFoundException, PermissionException,
+               SessionTimeoutException, SessionNotFoundException
     {
         return findServers(sessionId, AppdefEntityID.newPlatformID(platformId),
                            adResTypeId, pc);
@@ -674,9 +673,8 @@ public class AppdefBossEJBImpl
     public PageList findServerTypesByPlatform (int sessionID,
                                                Integer platformId,
                                                PageControl pc)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
+        throws AppdefEntityNotFoundException, PermissionException,
+               SessionTimeoutException, SessionNotFoundException
     {
         AuthzSubject subject = manager.getSubject(sessionID);
         return getServerManager().getServerTypesByPlatform(subject, platformId, 
@@ -700,18 +698,16 @@ public class AppdefBossEJBImpl
 
     private PageList findServers(int sessionID, AppdefEntityID aeid,
                                  PageControl pc)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
+        throws AppdefEntityNotFoundException, PermissionException,
+               SessionTimeoutException, SessionNotFoundException
     {
       return findServers(sessionID, aeid, APPDEF_RES_TYPE_UNDEFINED, pc);
     }
 
     private PageList findServers(int sessionID, AppdefEntityID aeid,
                                  int servTypeId, PageControl pc)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
+        throws AppdefEntityNotFoundException, PermissionException,
+               SessionTimeoutException, SessionNotFoundException
     {
         ServerManagerLocal serverMan = getServerManager();
         PageList res;
@@ -902,7 +898,8 @@ public class AppdefBossEJBImpl
                SessionNotFoundException, PermissionException 
     {
         AuthzSubject subject = manager.getSubject(sessionID);
-        return getPlatformManager().getPlatformValueById(subject, id);
+        return (PlatformValue) findById(subject,
+                                        AppdefEntityID.newPlatformID(id));
     }
 
     /**
@@ -924,7 +921,7 @@ public class AppdefBossEJBImpl
                SessionNotFoundException, PermissionException
     {
         AuthzSubject subject = manager.getSubject(sessionID);
-        return getServerManager().getServerById(subject, id);
+        return (ServerValue) findById(subject, AppdefEntityID.newServerID(id));
     }
 
     /**
@@ -935,7 +932,7 @@ public class AppdefBossEJBImpl
                SessionNotFoundException, PermissionException 
     {
         AuthzSubject subject = manager.getSubject(sessionID);
-        return getServiceManager().getServiceById(subject, id);
+        return (ServiceValue) findById(subject, AppdefEntityID.newServiceID(id));
     }
     
     /**
@@ -1028,7 +1025,7 @@ public class AppdefBossEJBImpl
                                         PlatformValue platformVal,
                                         Integer platTypePK,
                                         Integer agent)
-        throws NamingException, CreateException, ValidationException,
+        throws CreateException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefDuplicateNameException ,
                AppdefDuplicateFQDNException, ApplicationException
@@ -1210,7 +1207,7 @@ public class AppdefBossEJBImpl
                                               ApplicationValue appVal,
                                               Collection services,
                                               ConfigResponse protoProps)
-        throws CreateException, ValidationException, FinderException,
+        throws CreateException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefDuplicateNameException 
     {
@@ -1295,239 +1292,210 @@ public class AppdefBossEJBImpl
     /**
      * Remove an appdef entity
      * @ejb:interface-method
+     * @ejb:transaction type="RequiresNew"
      */
     public void removeAppdefEntity(int sessionId, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException,
                ApplicationException, VetoException {
-        if (aeid.isPlatform()) {
-            removePlatform(sessionId, aeid.getId());
-        } else if (aeid.isServer()) {
-            removeServer(sessionId, aeid.getId());
-        } else if (aeid.isService()) {
-            removeService(sessionId, aeid.getId());
-        } else if (aeid.isGroup()) {
-            removeGroup(sessionId, aeid.getId());
-        } else if (aeid.isApplication()) {
-            removeApplication(sessionId, aeid.getId());
+        final ResourceManagerLocal resMan = getResourceManager();
+        AuthzSubject subject = manager.getSubject(sessionId);
+        Resource res = resMan.findResource(aeid);
+        resMan.removeResourcePerms(subject, res);
+        
+        // Send resources deleted event
+        ResourcesCleanupZevent zevent = new ResourcesCleanupZevent();
+        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+    }
+    
+    /**
+     * Remove all delete resources
+     * @ejb:interface-method
+     */
+    public void removeDeletedResources()
+        throws ApplicationException, VetoException, RemoveException {
+        AuthzSubject subject =
+            getAuthzSubjectManager().findSubjectById(AuthzConstants.overlordId);
+        
+        // Look through services, servers, platforms, applications, and groups
+        Collection services = getServiceManager().findDeletedServices();
+        for (Iterator it = services.iterator(); it.hasNext(); ) {
+            Service service = (Service) it.next();
+            removeService(subject, service);
+        }
+        Collection servers = getServerManager().findDeletedServers();
+        for (Iterator it = servers.iterator(); it.hasNext(); ) {
+            Server server = (Server) it.next();
+            removeServer(subject, server);
+        }
+        Collection platforms = getPlatformManager().findDeletedPlatforms();
+        for (Iterator it = platforms.iterator(); it.hasNext(); ) {
+            Platform platform = (Platform) it.next();
+            removePlatform(subject, platform);
+        }
+        Collection applications =
+            getApplicationManager().findDeletedApplications();
+        for (Iterator it = applications.iterator(); it.hasNext(); ) {
+            Application application = (Application) it.next();
+            removeApplication(subject, application);
+        }
+        Collection groups = getResourceGroupManager().findDeletedGroups();
+        for (Iterator it = groups.iterator(); it.hasNext(); ) {
+            ResourceGroup group = (ResourceGroup) it.next();
+            removeGroup(subject, group);
         }
     }
 
-    private void removePlatform(int sessionId, Integer platformId)
-        throws SessionNotFoundException, SessionTimeoutException,
-               ApplicationException, VetoException 
+    /**
+     * Disable all measurements for a resource
+     * @param id the resource's ID
+     */
+    private void disableMeasurements(AuthzSubject subject, Resource res)
+        throws PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionId);
-            
+        getMetricManager().disableMeasurements(subject, res);
+    }
+
+    /**
+     * Remove config and track plugins for a given resource
+     */
+    private void removeTrackers(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException
+    {
+        TrackerManagerLocal trackManager = getTrackerManager();
+        ConfigResponse response;
+    
         try {
-            // Lookup the platform (make sure someone else hasn't deleted it)
-            Platform plat = getPlatformManager().findPlatformById(platformId);
+            response = getConfigManager().
+                getMergedConfigResponse(subject,
+                                        ProductPlugin.TYPE_MEASUREMENT,
+                                        id, true);
+        } catch (Exception e) {
+            // If anything goes wrong getting the config, just move
+            // along.  The plugins will be removed on the next agent
+            // restart.
+            return;
+        }
+    
+        try {
+            trackManager.disableTrackers(subject, id, response);
+        } catch (PluginException e) {
+            // Not much we can do.. plugins will be removed on next
+            // agent restart.
+            log.error("Unable to remove track plugins", e);
+        }
+    }
 
-            // Add it to the list
-            List unscheduleList = new ArrayList();
-            unscheduleList.add(plat);
-
-            // Add dependent children to the list of metrics to unschedule
-            // XXX: Use POJOs here.
-            ServerManagerLocal svrMgrLoc = getServerManager();
-            unscheduleList.addAll(
-                svrMgrLoc.getServersByPlatform(subject, platformId, false,
-                                               PageControl.PAGE_ALL));
-
-            ServiceManagerLocal svcMgrLoc= getServiceManager();
-            unscheduleList.addAll(
-                svcMgrLoc.getServicesByPlatform(subject, platformId,
-                                                PageControl.PAGE_ALL));
-
-            AppdefEntityID[] toDeleteResourceIds =
-                new AppdefEntityID[unscheduleList.size()];
-            ArrayList toDeleteIdsList = new ArrayList(unscheduleList.size());
-
-            Iterator it = unscheduleList.iterator();
-            for (int i = 0; it.hasNext(); i++) {
-                Object o = it.next();
-                AppdefEntityID thisId;
-                if (o instanceof Platform) {
-                    thisId = ((Platform) o).getEntityId();
-                }
-                else {
-                    AppdefResourceValue v =(AppdefResourceValue) o;
-                    thisId = v.getEntityId();
-
-                    if (v instanceof ServerValue &&
-                            ((ServerValue)v).getServerType().getVirtual()) {
-                        // skip virtual servers
-                        toDeleteResourceIds[i] = thisId;
-                        continue;
-                    }
-                }
-
-                toDeleteIdsList.add(thisId);
-                toDeleteResourceIds[i] = thisId;
+    private void removePlatform(AuthzSubject subject, Platform platform)
+        throws ApplicationException, VetoException 
+    {
+        try {
+            for (Iterator it = platform.getServers().iterator(); it.hasNext(); )
+            {
+                Server server = (Server) it.next();
+                removeServer(subject, server);
             }
-            AppdefEntityID[] toDeleteIds = (AppdefEntityID[])
-                toDeleteIdsList.toArray(new AppdefEntityID[0]);
-
+            
             // Disable all measurements for this platform.  We don't actually
             // remove the measurements here to avoid delays in deleting
             // resources.
-            MeasurementBossLocal mBoss = getMeasurementBoss();
-            mBoss.disableMeasurements(sessionId, plat.getEntityId(),
-                                      toDeleteIds);
+            disableMeasurements(subject, platform.getResource());
 
             // Remove from AI queue
             try {
                 AIBossLocal aiBoss = getAIBoss();
                 List aiplatformList = new ArrayList();
-                AIPlatformValue aiPlatform
-                    = aiBoss.findAIPlatformByPlatformID(sessionId, 
-                                                        platformId.intValue());
-                aiplatformList.add(aiPlatform.getId());
-                log.info("Removing from AIqueue: " + aiPlatform.getId());
-                aiBoss.processQueue(sessionId, aiplatformList, null, null,
-                                    AIQueueConstants.Q_DECISION_PURGE);
-            } catch (PlatformNotFoundException e) {
-                log.debug("AIPlatform not found: " + platformId);
+                Integer platformID = platform.getId();
+                final AIQueueManagerLocal aiMan = getAIManager();
+                AIPlatformValue aiPlatform =
+                    aiMan.getAIPlatformByPlatformID(subject, platformID);
+
+                if (aiPlatform != null) {
+                    aiplatformList.add(aiPlatform.getId());
+                    log.info("Removing from AIqueue: " + aiPlatform.getId());
+                    aiMan.processQueue(subject, aiplatformList, null, null,
+                                       AIQueueConstants.Q_DECISION_PURGE);
+                }                
             } catch (AIQApprovalException e) {
                 log.error("Error removing from AI queue", e);
+            } catch (FinderException e) {
+                log.debug("AIPlatform resources not found: " + platform.getId());
             }
 
             // now, remove the platform.
-            getPlatformManager().removePlatform(subject, platformId);
-            
+            getPlatformManager().removePlatform(subject, platform);
         } catch (RemoveException e) {
             log.error("Caught EJB RemoveException",e);
             throw new SystemException(e);
         } catch (PermissionException e) {
             log.error("Caught PermissionException while removing platform: " +
-                      platformId,e);
+                      platform.getId(),e);
             throw e;
         }
     }
 
-    private void removeServer(int sessionId, Integer serverId)
-        throws PermissionException, ServerNotFoundException,
-               SessionException, VetoException
+    private void removeServer(AuthzSubject subject, Server server)
+        throws VetoException, PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionId);
-    
         try {
-            ServerManagerLocal smLoc = getServerManager();
-    
-            // Lookup the server (make sure someone else hasn't deleted it)
-            ServerValue serverRes = smLoc.getServerById(subject,serverId);
-    
-            // Add it to the list
-            List unscheduleList = new ArrayList();
-            unscheduleList.add(serverRes);
-    
-            // Unschedule service metrics.
-            // XXX: Use POJO to lookup services.
-            ServiceManagerLocal svcMgrLoc = getServiceManager();
-            unscheduleList.addAll(
-                svcMgrLoc.getServicesByServer(subject, serverId,
-                                              PageControl.PAGE_ALL));
-    
-            MeasurementBossLocal measBoss = getMeasurementBoss();
-    
-            AppdefEntityID[] toUnschedule =
-                new AppdefEntityID[unscheduleList.size()];
-            Iterator it = unscheduleList.iterator();
-            for (int i = 0; it.hasNext(); i++) {
-                AppdefEntityID thisId =
-                    ((AppdefResourceValue)it.next()).getEntityId();
-    
-                toUnschedule[i] = thisId;
-                // remove any log or config track plugins
-                measBoss.removeTrackers(sessionId, thisId);
+            for (Iterator it = server.getServices().iterator(); it.hasNext();) {
+                Service service = (Service) it.next();
+                removeService(subject, service);
             }
     
             // now remove the measurements
-            measBoss.disableMeasurements(sessionId, serverRes.getEntityId(),
-                                         toUnschedule);
+            disableMeasurements(subject, server.getResource());
     
             try {
-                AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
-                aiManager.toggleRuntimeScan(getOverlord(),
-                                            serverRes.getEntityId(),
-                                            false);
+                getAutoInventoryManager().toggleRuntimeScan(getOverlord(),
+                                                            server.getEntityId(),
+                                                            false);
             } catch (Exception e) {
-                log.error("Error turning off RuntimeScan for: " + serverRes, 
-                          e);
+                log.error("Error turning off RuntimeScan for: " + server, e);
             }
     
             // finally, remove the server
-            getServerManager().removeServer(subject, serverId);
+            getServerManager().removeServer(subject, server);
         } catch (RemoveException e) {
             rollback();
             throw new SystemException(e);
-        } catch (AppdefEntityNotFoundException e) {
-            rollback();
-            String msg = "Caught not found exception [server: "+serverId+"]";
-            log.error(msg,e);
-            throw new ServerNotFoundException(msg,e);
         } catch (PermissionException e) {
             rollback();
-            log.error("Caught permission exception: [server:"+serverId+"]");
-            throw e;
+            log.error("Caught permission exception: [server:" + server.getId()
+                    + "]");
+            throw (PermissionException) e;
         }
     }
 
-    private void removeService(int sessionId, Integer serviceId)
-        throws ApplicationException, VetoException 
+    private void removeService(AuthzSubject subject, Service service)
+        throws VetoException, PermissionException, RemoveException 
     {
-        try {
-            AuthzSubject subject = manager.getSubject(sessionId);
-    
-            AppdefEntityID id = AppdefEntityID.newServiceID(serviceId);
-    
+        try {    
             // now remove any measurements associated with the service
-            MeasurementBossLocal measBoss = getMeasurementBoss();
-            measBoss.disableMeasurements(sessionId, id);
-    
-            // remove any log or config track plugins
-            measBoss.removeTrackers(sessionId, id);
-            
-            getServiceManager().removeService(subject, serviceId);
-        } catch (SessionTimeoutException e) {
-            rollback();
-            throw e;
-        } catch (SessionNotFoundException e) {
-            rollback();
-            throw e;
+            disableMeasurements(subject, service.getResource());
+            removeTrackers(subject, service.getEntityId());
+            getServiceManager().removeService(subject, service);
         } catch (PermissionException e) {
             rollback();
-            throw e;
-        } catch (FinderException e) {
-            rollback();
-            throw new ApplicationException(e);
+            throw (PermissionException) e;
         } catch (RemoveException e) {
             rollback();
-            throw new ApplicationException(e);
+            throw (RemoveException) e;
         }
     }
 
-    private void removeGroup(int sessionId, Integer groupId)
+    private void removeGroup(AuthzSubject subject, ResourceGroup group)
         throws SessionException, PermissionException, VetoException
     {
-        AuthzSubject subject = manager.getSubject(sessionId);
         ResourceGroupManagerLocal groupMan = getResourceGroupManager();
-        ResourceGroup group = groupMan.findResourceGroupById(subject, groupId);
         groupMan.removeResourceGroup(subject, group);
     }
 
-    private void removeApplication(int sessionId, Integer appId)
+    private void removeApplication(AuthzSubject subject, Application app)
         throws ApplicationException, PermissionException, 
                SessionException, VetoException
     {
         try {
-            AuthzSubject caller = manager.getSubject(sessionId);
-            getApplicationManager().removeApplication(caller, appId);
-        } catch (SessionNotFoundException e) {
-            rollback();
-            throw e;
-        } catch (SessionTimeoutException e) {
-            rollback();
-            throw e;
+            getApplicationManager().removeApplication(subject, app.getId());
         } catch (PermissionException e) {
             rollback();
             throw e;
@@ -1541,7 +1509,7 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public ServerValue updateServer(int sessionId, ServerValue aServer)
-        throws NamingException, PermissionException, ValidationException,
+        throws PermissionException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
                FinderException, UpdateException, AppdefDuplicateNameException
     {
@@ -1560,7 +1528,7 @@ public class AppdefBossEJBImpl
      */
     public ServerValue updateServer(int sessionId, ServerValue aServer,
                                     Map cProps)
-        throws NamingException, FinderException, ValidationException,
+        throws FinderException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, UpdateException,
                AppdefDuplicateNameException, CPropKeyNotFoundException
@@ -1582,14 +1550,12 @@ public class AppdefBossEJBImpl
                 rollback();
                 throw e;
             }
-        } catch (NamingException e) {
-            throw (NamingException) e;
         } catch (CreateException e) {
             // change to a update exception as this only occurs
             // if there was a failure instantiating the session
             // bean
-            throw new UpdateException("Error creating manager session "
-                                      + "bean: " + e.getMessage());
+            throw new UpdateException("Error creating manager session bean: " +
+                                      e.getMessage());
         } catch (PermissionException e) {
             throw (PermissionException) e;
         } catch (FinderException e) {
@@ -1714,12 +1680,9 @@ public class AppdefBossEJBImpl
         } catch (Exception e) {
             log.error("Error updating platform: " + aPlatform.getId());
             // rollback();
-            if(e instanceof NamingException) {
-                throw new SystemException(e);
-            } else if (e instanceof CreateException) {
+            if(e instanceof CreateException) {
                 // change to a update exception as this only occurs
-                // if there was a failure instantiating the session
-                // bean
+                // if there was a failure instantiating the session bean
                 throw new UpdateException("Error creating manager session " +
                                           "bean:" + e.getMessage());
             } else if (e instanceof PermissionException) {
@@ -1830,7 +1793,8 @@ public class AppdefBossEJBImpl
         throws ServerNotFoundException, SessionNotFoundException,
                SessionTimeoutException, PermissionException,
                SessionException, VetoException {
-        removeServer(manager.getIdFromUsername(subj.getName()), serverId);
+        Server server = getServerManager().findServerById(serverId);
+        removeServer(subj, server);
     }
 
     /**
@@ -2236,7 +2200,7 @@ public class AppdefBossEJBImpl
      * */
     public Collection findAllGroupPojos(int sessionId)
         throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException, FinderException 
+               SessionNotFoundException 
     {
         AuthzSubject subject = manager.getSubject(sessionId);
         ResourceGroupManagerLocal mgr = ResourceGroupManagerEJBImpl.getOne();
@@ -2259,7 +2223,7 @@ public class AppdefBossEJBImpl
      */
     public void addResourcesToGroup(int sessionID, ResourceGroup group,
                                     List aeids)
-        throws SessionException, PermissionException, FinderException 
+        throws SessionException, PermissionException 
     {
         AuthzSubject subject = manager.getSubject(sessionID);
         ResourceGroupManagerLocal groupMan = 
@@ -2270,7 +2234,6 @@ public class AppdefBossEJBImpl
         for (Iterator i = aeids.iterator(); i.hasNext(); ) {
             AppdefEntityID aeid = (AppdefEntityID)i.next();
             Resource resource = resourceMan.findResource(aeid);
-            
             groupMan.addResource(subject, group, resource);
         }
     }
@@ -2777,7 +2740,7 @@ public class AppdefBossEJBImpl
      */
     public PageList search(int sessionId, String searchFor, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException, FinderException {
+               PermissionException {
         AuthzSubject subject = manager.getSubject(sessionId);
         PageList resources =
             getResourceManager().findViewables(subject, searchFor, pc);
@@ -2910,8 +2873,7 @@ public class AppdefBossEJBImpl
      */
     public void batchGroupAdd(int sessionId, AppdefEntityID entityId,
                               Integer[] groupIds)
-        throws SessionException, PermissionException, VetoException,
-               FinderException
+        throws SessionException, PermissionException, VetoException
     {
         AuthzSubject subject = manager.getSubject(sessionId);
         ResourceGroupManagerLocal groupMan = getResourceGroupManager();
@@ -2933,8 +2895,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public void resetResourceOwnership(int sessionId, AuthzSubject currentOwner)
-        throws FinderException, UpdateException,
-               PermissionException, AppdefEntityNotFoundException
+        throws UpdateException, PermissionException,
+               AppdefEntityNotFoundException
     {
         ResourceGroupManagerLocal groupMan = getResourceGroupManager();
         
@@ -2989,8 +2951,7 @@ public class AppdefBossEJBImpl
      */
     public void batchGroupRemove(int sessionId, AppdefEntityID entityId,
                                  Integer[] groupIds)
-        throws PermissionException, SessionException,
-               VetoException, FinderException
+        throws PermissionException, SessionException, VetoException
     {
         AuthzSubject subject = manager.getSubject(sessionId);
         ResourceGroupManagerLocal groupMan = getResourceGroupManager();
@@ -3163,13 +3124,13 @@ public class AppdefBossEJBImpl
                                       AllConfigResponses allConfigs,
                                       AllConfigResponses allConfigsRollback )
         throws PermissionException, EncodingException, PluginException,
-               ApplicationException, FinderException, AutoinventoryException,
+               ApplicationException, AutoinventoryException,
                ScheduleWillNeverFireException, AgentConnectionException
     {
         AuthzSubject subject = manager.getSubject(sessionInt);
         boolean doRollback = true;
         boolean doValidation = (allConfigsRollback != null);
-        AppdefEntityID id = allConfigs.getResource().getEntityId();
+        AppdefEntityID id = allConfigs.getResource();
 
         try {
             doSetAll(subject, allConfigs, doValidation, false);
@@ -3210,29 +3171,15 @@ public class AppdefBossEJBImpl
 
     private void doSetAll(AuthzSubject subject, AllConfigResponses allConfigs,
                           boolean doValidation, boolean force)
-        throws EncodingException, FinderException, PermissionException,
+        throws EncodingException, PermissionException,
                ConfigFetchException, PluginException, ApplicationException
     {
-    	AppdefEntityID entityId = allConfigs.getResource().getEntityId();
+    	AppdefEntityID entityId = allConfigs.getResource();
         Set ids = new HashSet();
         ConfigResponseDB existingConfig;
         Service svc = null;
         try {
-            if (entityId.isPlatform()) {
-                Platform plat = getPlatformManager()
-                    .updatePlatform(subject,
-                                    (PlatformValue) allConfigs.getResource());
-                existingConfig = plat.getConfigResponse();
-            } else if (entityId.isService()) {
-                svc =
-                    getServiceManager().updateService(subject,
-                                       (ServiceValue) allConfigs.getResource());
-                existingConfig = svc.getConfigResponse();
-            } else {
-                Server svr =
-                    getServerManager().findServerById(entityId.getId());
-                existingConfig = svr.getConfigResponse();
-            }
+            existingConfig = getConfigManager().getConfigResponse(entityId);
             
             if (getConfigManager().configureResponse(
                 subject, existingConfig, entityId,
@@ -3370,7 +3317,7 @@ public class AppdefBossEJBImpl
             }
         } catch (UpdateException e) {
             log.error("Error while updating resource " +
-                      allConfigs.getResource().getName());
+                      allConfigs.getResource());
             throw new ApplicationException(e);
         }
     }
@@ -3381,10 +3328,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public ResourceTreeNode[] getNavMapData(int sessionId, AppdefEntityID adeId)
-        throws SessionNotFoundException,
-               SessionTimeoutException,
-               PermissionException,
-               AppdefEntityNotFoundException
+        throws SessionNotFoundException, SessionTimeoutException,
+               PermissionException, AppdefEntityNotFoundException
     {
         AuthzSubject subject = manager.getSubject(sessionId);
         AppdefStatManagerLocal local = getAppdefStatManager();
@@ -3781,6 +3726,37 @@ public class AppdefBossEJBImpl
      */
     public boolean isNavMapSupported () {
         return getAppdefStatManager().isNavMapSupported();    
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void startup() {
+        log.info("AppdefBoss Boss starting up!");
+        
+        HQApp app = HQApp.getInstance();
+        
+        // Add listener to remove alert definition and alerts after resources
+        // are deleted.
+        HashSet events = new HashSet();
+        events.add (ResourcesCleanupZevent.class);
+        ZeventManager.getInstance().addBufferedListener(events,
+            new ZeventListener() {
+                public void processEvents(List events) {
+                    for (Iterator i = events.iterator(); i.hasNext();) {
+                        ResourcesCleanupZevent z =
+                            (ResourcesCleanupZevent) i.next();
+                        try {
+                            getOne().removeDeletedResources();
+                        } catch (Exception e) {
+                            log.error("removeDeletedResources() failed", e);
+                        }
+                        // Only need to run this once
+                        break;
+                    }
+                }
+            }
+        );
     }
 
     public static AppdefBossLocal getOne() {
