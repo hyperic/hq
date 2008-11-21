@@ -30,6 +30,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.util.StringUtil;
 
@@ -133,25 +134,29 @@ public class AppdefEntityID
     }
 
     public AppdefEntityID(Resource rv) {
-        String rtName = rv.getResourceType().getName();
+        ResourceType resType = rv.getResourceType();
         _entityID = rv.getInstanceId().intValue();
-        if(rtName.equals(AuthzConstants.platformResType)) {
+        if (resType == null) {
+            throw new IllegalArgumentException(rv.getName() + 
+                " does not have a Resource Type");
+        }
+        if(resType.getId().equals(AuthzConstants.authzPlatform)) {
             _entityType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
         }
-        else if(rtName.equals(AuthzConstants.serverResType)) {
+        else if(resType.getId().equals(AuthzConstants.authzServer)) {
             _entityType = AppdefEntityConstants.APPDEF_TYPE_SERVER;
         }
-        else if(rtName.equals(AuthzConstants.serviceResType)) {
+        else if(resType.getId().equals(AuthzConstants.authzService)) {
             _entityType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
         }
-        else if(rtName.equals(AuthzConstants.applicationResType)) {
+        else if(resType.getId().equals(AuthzConstants.authzApplication)) {
             _entityType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
         }
-        else if(rtName.equals(AuthzConstants.groupResType)) {
+        else if(resType.getId().equals(AuthzConstants.authzGroup)) {
             _entityType = AppdefEntityConstants.APPDEF_TYPE_GROUP;
         } 
         else {
-            throw new IllegalArgumentException(rtName + 
+            throw new IllegalArgumentException(resType.getName() + 
                 " is not a valid Appdef Resource Type");
         }
     }
