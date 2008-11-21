@@ -56,9 +56,8 @@ public class QuickFavoritesAction extends BaseAction {
     	WebUser user = RequestUtils.getWebUser(request);
         AuthzBoss boss =
             ContextUtils.getAuthzBoss(getServlet().getServletContext());
-        DashboardConfig dashConfig =
-            DashboardUtils.findUserDashboard(user, boss);
-        ConfigResponse dashPrefs = dashConfig.getConfig();
+        ConfigResponse dashPrefs =
+            DashboardUtils.findUserDashboardConfig(user, boss);
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         String mode   = request.getParameter(Constants.MODE_PARAM);
 

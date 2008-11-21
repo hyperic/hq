@@ -37,10 +37,10 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
 
 public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
 
@@ -60,10 +60,10 @@ public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
 		// is in there.
         AuthzBoss boss =
             ContextUtils.getAuthzBoss(getServlet().getServletContext());
-        DashboardConfig dashConfig =
-            DashboardUtils.findUserDashboard(user, boss);
+        ConfigResponse dashConfig =
+            DashboardUtils.findUserDashboardConfig(user, boss);
 		isFavorite = QuickFavoritesUtil
-				.isFavorite(dashConfig.getConfig(), arv.getEntityId());
+				.isFavorite(dashConfig, arv.getEntityId());
 
 		request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId()
 				.getAppdefKey());
