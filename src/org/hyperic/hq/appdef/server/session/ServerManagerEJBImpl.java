@@ -243,7 +243,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             validateNewServer(targetPlatform, s);
             getServerDAO().create(s);
             // Add server to parent collection
-            targetPlatform.getServers().add(s);
+            targetPlatform.getServersBag().add(s);
     
             createAuthzServer(subject, s);
     
@@ -302,7 +302,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             Server server = getServerDAO().create(sValue, platform);
 
             // Add server to parent collection
-            platform.getServers().add(server);
+            platform.getServersBag().add(server);
 
             createAuthzServer(subject, server);
 
@@ -352,7 +352,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         Server server = getServerDAO().create(sv, platform);
         
         // Add server to parent collection
-        Collection servers = platform.getServers();
+        Collection servers = platform.getServersBag();
         if (!servers.contains(server)) {
             servers.add(server);
         }
@@ -362,40 +362,16 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
     
     /**
-     * Remove a server
-     * 
-     * @param subject
-     *            The user issuing the delete operation.
-     * @param id
-     *            The id of the Server.
-     * @ejb:interface-method
-     */
-    public void removeServer(AuthzSubject subject, Integer id)
-        throws ServerNotFoundException, RemoveException, PermissionException,
-               VetoException
-    {
-        Server server = getServerDAO().get(id);
-
-        if (server == null)
-            throw new ServerNotFoundException(id);
-
-        removeServer(subject, server);
-    }
-    
-    /**
      * A removeServer method that takes a ServerLocal.  Used by
      * PlatformManager.removePlatform when cascading removal to servers.
      * @ejb:interface-method
      */
     public void removeServer(AuthzSubject subject, Server server)
-        throws ServerNotFoundException, RemoveException, PermissionException,
-               VetoException
+        throws RemoveException, PermissionException, VetoException
     {
-        AppdefEntityID aeid = server.getEntityId();
-        Resource r = server.getResource();
-        AuthzSubject svrPojo = AuthzSubjectManagerEJBImpl.getOne()
-            .findSubjectById(subject.getId());
-        Audit audit = ResourceAudit.deleteResource(r, svrPojo, 0, 0);
+        final AppdefEntityID aeid = server.getEntityId();
+        final Resource r = server.getResource();
+        final Audit audit = ResourceAudit.deleteResource(r, subject, 0, 0);
         boolean pushed = false;
         
         try {
@@ -409,18 +385,15 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             Collection services = new ArrayList(server.getServices());
             for (Iterator i = services.iterator(); i.hasNext(); ) {
                 Service service = (Service)i.next();
-                getServiceMgrLocal().removeService(subject, service);
+                getServiceManager().removeService(subject, service);
             }
 
             // Keep config response ID so it can be deleted later.
-            Integer cid = server.getConfigResponseId();
-
-            // Remove authz resource
-            removeAuthzResource(subject, aeid);
+            final ConfigResponseDB config = server.getConfigResponse();
 
             // Remove server from parent Platform Server collection.
             Platform platform = server.getPlatform();
-            Collection servers = platform.getServers();
+            Collection servers = platform.getServersBag();
             for (Iterator i = servers.iterator(); i.hasNext(); ) {
                 Server s = (Server)i.next();
                 if (s.equals(server)) {
@@ -431,16 +404,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             
             getServerDAO().remove(server);
 
+            // Remove authz resource
+            removeAuthzResource(subject, aeid, r);
+
             // Remove the config response
-            if (cid != null) {
-                try {
-                    ConfigResponseDAO cdao =
-                        DAOFactory.getDAOFactory().getConfigResponseDAO();
-                    cdao.remove(cdao.findById(cid));
-                } catch (ObjectNotFoundException e) {
-                    // OK, no config response, just log it
-                    log.warn("Invalid config ID " + cid);
-                }
+            if (config != null) {
+                getConfigResponseDAO().remove(config);
             }
 
             deleteCustomProperties(aeid);
@@ -549,21 +518,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         throws PlatformNotFoundException
     {
         PlatformType platType =
-            getPlatformMgrLocal().findPlatformType(platformTypeId);
+            getPlatformManager().findPlatformType(platformTypeId);
 
         Collection serverTypes = platType.getServerTypes();
 
         return valuePager.seek(serverTypes, pc);
-    }
-
-    /**
-     * Find a ServerValue by Id.
-     * @ejb:interface-method
-     * @deprecated Use findServerById instead.
-     */
-    public ServerValue findServerValueById(AuthzSubject subject, Integer id)
-        throws ServerNotFoundException {
-        return findServerById(id).getServerValue();
     }
 
     /**
@@ -667,6 +626,21 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         return ejb;
     }
 
+    /**
+     * @ejb:interface-method
+     */
+    public List findServersByType(Platform p, ServerType st) {
+        return getServerDAO().findByPlatformAndType_orderName(p.getId(), 
+                                                              st.getId());
+    }
+
+    /**
+     * @ejb.interface-method
+     */
+    public Collection findDeletedServers() {
+        return getServerDAO().findDeletedServers();
+    }
+    
     /** 
      * Get server lite value by id.  Does not check permission.
      * @ejb:interface-method
@@ -737,14 +711,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public ServerValue[] getServersByName(AuthzSubject subject, String name)
         throws ServerNotFoundException {
         return findServersByName(subject, name);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public List findServersByType(Platform p, ServerType st) {
-        return getServerDAO().findByPlatformAndType_orderName(p.getId(), 
-                                                              st.getId());
     }
 
     /**
@@ -1447,13 +1413,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             Server[] servers = (Server[])
                 serverType.getServers().toArray(new Server[0]);
             for (int i = 0; i < servers.length; i++) {
-                try {
-                    removeServer(overlord, servers[i]);
-                } catch (ServerNotFoundException e) {
-                    assert false :
-                        "Delete based on a server should not " +
-                        "result in ServerNotFoundException";
-                }
+                removeServer(overlord, servers[i]);
             }
         } catch (PermissionException e) {
             assert false :

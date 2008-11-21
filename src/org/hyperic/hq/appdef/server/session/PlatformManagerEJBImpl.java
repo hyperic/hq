@@ -276,20 +276,12 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
      *            - The id of the Platform
      * @ejb:interface-method
      */
-    public void removePlatform(AuthzSubject subject, Integer id)
+    public void removePlatform(AuthzSubject subject, Platform platform)
         throws RemoveException, PlatformNotFoundException, PermissionException,
-        VetoException {
-        removePlatform(subject, findPlatformById(id));
-    }
-
-    private void removePlatform(AuthzSubject subject, Platform platform)
-        throws RemoveException, PermissionException, PlatformNotFoundException,
-        VetoException {
-        AppdefEntityID aeid = platform.getEntityId();
-        Resource r = platform.getResource();
-        AuthzSubject platPojo = AuthzSubjectManagerEJBImpl.getOne()
-                .findSubjectById(subject.getId());
-        Audit audit = ResourceAudit.deleteResource(r, platPojo, 0, 0);
+               VetoException {
+        final AppdefEntityID aeid = platform.getEntityId();
+        final Resource r = platform.getResource();
+        final Audit audit = ResourceAudit.deleteResource(r, subject, 0, 0);
         boolean pushed = false;
 
         try {
@@ -299,37 +291,25 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
             checkRemovePermission(subject, platform.getEntityId());
 
             // keep the configresponseId so we can remove it later
-            Integer cid = platform.getConfigResponse().getId();
+            ConfigResponseDB config = platform.getConfigResponse();
 
-            ServerManagerLocal srvMgr = getServerMgrLocal();
+            ServerManagerLocal srvMgr = getServerManager();
             // Server manager will update the collection, so we need to copy
-            Collection servers = new ArrayList(platform.getServers());
+            Collection servers = platform.getServers();
+            // Remove servers
             for (Iterator i = servers.iterator(); i.hasNext();) {
                 Server server = (Server) i.next();
-                try {
-                    // Remove servers
-                    srvMgr.removeServer(subject, server);
-                } catch (ServerNotFoundException e) {
-                    _log.error("Unable to remove server", e);
-                }
+                srvMgr.removeServer(subject, server);
             }
-
-            // now remove the resource for the platform
-            removeAuthzResource(subject, aeid);
 
             getPlatformDAO().remove(platform);
 
-            // remove the config response
-            if (cid != null) {
-                ConfigResponseDAO cdao = DAOFactory.getDAOFactory()
-                        .getConfigResponseDAO();
-                ConfigResponseDB dbcfg = cdao.get(cid);
+            // now remove the resource for the platform
+            removeAuthzResource(subject, aeid, r);
 
-                if (cid == null) {
-                    _log.warn("Invalid config ID " + cid);
-                } else {
-                    cdao.remove(dbcfg);
-                }
+            // remove the config response
+            if (config != null) {
+                getConfigResponseDAO().remove(config);
             }
 
             // remove custom properties
@@ -409,7 +389,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
             {
                 ServerType st = (ServerType) it.next();
                 if (st.isVirtual()) {
-                    getServerMgrLocal().createVirtualServer(subject, platform,
+                    getServerManager().createVirtualServer(subject, platform,
                                                             st);
                 }
             }
@@ -586,19 +566,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
         platform.getName();
 
         return platform;
-    }
-
-    /**
-     * Get a PlatformValue object by id.
-     * 
-     * @deprecated use findPlatformById instead.
-     * @ejb:interface-method
-     */
-    public PlatformValue getPlatformValueById(AuthzSubject subject, Integer id)
-        throws PlatformNotFoundException, PermissionException {
-        Platform platform = findPlatformById(id);
-        checkViewPermission(subject, platform.getEntityId());
-        return platform.getPlatformValue();
     }
 
     /**
@@ -1168,7 +1135,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
     public Collection findPlatformPojosByIpAddr(String addr) {
         return getPlatformDAO().findByIpAddr(addr);
     }
-
+    
+    /**
+     * @ejb.interface-method
+     */
+    public Collection findDeletedPlatforms() {
+        return getPlatformDAO().findDeletedPlatforms();
+    }
+    
     /**
      * Update an existing Platform. Requires all Ip's to have been re-added via
      * the platformValue.addIpValue(IpValue) method due to bug 4924

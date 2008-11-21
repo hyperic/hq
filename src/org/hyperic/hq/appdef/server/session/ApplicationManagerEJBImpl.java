@@ -234,8 +234,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         ApplicationDAO dao = getApplicationDAO();
         Application app = dao.findById(id);
         checkRemovePermission(subject, app.getEntityId());
-        removeAuthzResource(subject, app.getEntityId());
         dao.remove(app);
+        removeAuthzResource(subject, app.getEntityId(), app.getResource());
     }
 
     /**
@@ -377,6 +377,13 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(id, e);
         }
+    }
+    
+    /**
+     * @ejb.interface-method
+     */
+    public Collection findDeletedApplications() {
+        return getApplicationDAO().findDeletedApplications();
     }
 
     /**
@@ -576,7 +583,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
         // We need to look up the service so that we can see if we need to 
         // look up its cluster, too
-        Service service = getServiceMgrLocal().findServiceById(id);
+        Service service = getServiceManager().findServiceById(id);
         
         boolean cluster = service.getResourceGroup() != null;
         

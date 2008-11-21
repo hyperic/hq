@@ -58,6 +58,7 @@ import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -332,6 +333,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public ServiceType findServiceTypeByName(String name) { 
         return getServiceTypeDAO().findByName(name);
+    }
+    
+    /**
+     * @ejb.interface-method
+     */
+    public Collection findDeletedServices() {
+        return getServiceDAO().findDeletedServices();
     }
 
     /**     
@@ -1398,19 +1406,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Remove a Service from the inventory.
-     *
-     * @ejb:interface-method
-     */
-    public void removeService(AuthzSubject subj, Integer serviceId)
-        throws RemoveException, FinderException, PermissionException,
-               VetoException 
-    {
-        Service service = getServiceDAO().findById(serviceId);
-        removeService(subj, service);
-    }
-
-    /**
      * A removeService method that takes a ServiceLocal.  This is called by
      * ServerManager.removeServer when cascading a delete onto services.
      * @ejb:interface-method
@@ -1420,11 +1415,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     {
         AppdefEntityID aeid = service.getEntityId();
 
-        checkRemovePermission(subject, service.getEntityId());
-        Integer cid = service.getConfigResponseId();
-
-        // Remove authz resource.
-        removeAuthzResource(subject, aeid);
+        checkRemovePermission(subject, aeid);
+        final ConfigResponseDB config = service.getConfigResponse();
 
         // Remove service from parent Server's Services collection
         Server server = service.getServer();
@@ -1437,18 +1429,15 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             }
         }
 
+        // Remove authz resource.
+        removeAuthzResource(subject, aeid, service.getResource());
+
         // remove from appdef
         getServiceDAO().remove(service);
 
         // remove the config response
-        if (cid != null) {
-            try {
-                ConfigResponseDAO cdao = getConfigResponseDAO();
-                cdao.remove(cdao.findById(cid));
-            } catch (ObjectNotFoundException e) {
-                // OK, no config response, just log it
-                log.warn("Invalid config ID " + cid);
-            }
+        if (config != null) {
+            getConfigResponseDAO().remove(config);
         }
 
         // remove custom properties
