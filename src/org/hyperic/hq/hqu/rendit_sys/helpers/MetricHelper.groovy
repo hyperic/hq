@@ -12,6 +12,7 @@ import org.hyperic.util.pager.PageControl
 class MetricHelper extends BaseHelper {
     private tmplMan = TemplateManagerEJBImpl.one
     private measMan = MeasurementManagerEJBImpl.one
+
     MetricHelper(AuthzSubject user) {
         super(user)
     }
@@ -82,35 +83,53 @@ class MetricHelper extends BaseHelper {
          tmplMan.getTemplate(id)
      }
 
+     Measurement findMeasurementById(int id) {
+         measMan.getMeasurement(id)
+     }
+
+    /**
+     * @deprecated Use MetricCategory.
+     */
      def setDefaultInterval(int id, long interval) {
          Integer[] tmpls = new Integer[1]
          tmpls[0] = id
          tmplMan.updateTemplateDefaultInterval(user, tmpls, interval)
      }
 
+    /**
+     * @deprecated Use MetricCategory
+     */
      def setDefaultIndicator(int id, boolean on) {
          def tmpl = findTemplateById(id)
          tmplMan.setDesignated(tmpl, on)
      }
 
+    /**
+     * @deprecated Use MetricCategory
+     */
      def setDefaultOn(int id, boolean on) {
          Integer[] tmpls = new Integer[1]
          tmpls[0] = id
          tmplMan.setTemplateEnabledByDefault(user, tmpls, on)
      }
 
-     Measurement findMeasurementById(int id) {
-         measMan.getMeasurement(id)
-     }
-
+    /**
+     * @deprecated Use MetricCategory
+     */
      def disableMeasurement(Integer mId) {
         measMan.disableMeasurement(user, mId);
      }
 
+    /**
+     * @deprecated Use MetricCategory
+     */
      def enableMeasurement(Integer mId, Long interval) {
         measMan.enableMeasurement(user, mId, interval);
      }
 
+    /**
+     * @deprecated Use MetricCategory
+     */
      def updateMeasurementInterval(Integer mId, Long interval) {
         measMan.updateMeasurementInterval(user, mId, interval);
      }

@@ -3,15 +3,20 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.product.MetricValue
 import org.hyperic.hq.measurement.UnitsConvert
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl
+import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl
 import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.util.units.UnitNumber
 import org.hyperic.util.units.UnitsFormat
+import org.hyperic.hq.authz.server.session.AuthzSubject
 
 class MetricCategory {
     private static dataMan = DataManagerEJBImpl.one
-    
+    private static tmplMan = TemplateManagerEJBImpl.one
+    private static measMan = MeasurementManagerEJBImpl.one
+
     static String urlFor(Measurement d, Map context) {
         def template = d.template
         if (context?.chart) {
@@ -76,7 +81,7 @@ class MetricCategory {
     }
     
     /**
-     * Get the last data point for a derived measurement.
+     * Get the last data point for a measurement.
      *
      * @param timeWindow The minimum timestamp (in millis) that the result 
      *                   will have.
@@ -86,16 +91,19 @@ class MetricCategory {
     }
     
     /**
-     * Get the last data point collected for a derived measurement.
+     * Get the last data point collected for a measurement.
      */
     static MetricValue getLastDataPoint(Measurement m) {
         m.getLastDataPoint(0)
     }
-    
+
+    /**
+     * Get the measurement data for the given measurement and range.
+     */
     static List getData(Measurement m, long start, long end) {
         boolean prependAvailUnknowns = false;
         dataMan.getHistoricalData(m, start, end, new PageControl(),
-            prependAvailUnknowns)
+                                  prependAvailUnknowns)
     }
     
     /**
@@ -107,8 +115,59 @@ class MetricCategory {
         def scale = UnitsConvert.getScaleForUnit(t.units)
         new UnitNumber(value, units, scale)
     }
-          
+
+    /**
+     * Format a data point using the template's units.
+     */
     static String renderWithUnits(MeasurementTemplate t, double value) {
         UnitsFormat.format(getUnitOf(t, value)).toString()
+    }
+
+    /**
+     * Set the default interval for a template.
+     */
+    static void setDefaultInterval(MeasurementTemplate t, AuthzSubject user,
+                                   long interval) {
+        tmplMan.updateTemplateDefaultInterval(user, [t.getId()] as Integer[],
+                                              interval)
+    }
+
+    /**
+     * Set the indicator flag for a template.
+     */
+    static void setDefaultIndicator(MeasurementTemplate t, AuthzSubject user,
+                                    boolean on) {
+        tmplMan.setDesignated(t, on);
+    }
+    
+    /**
+     * Set the default on flag for a template.
+     */
+    static void setDefaultOn(MeasurementTemplate t, AuthzSubject user,
+                             boolean on) {
+        tmplMan.setTemplateEnabledByDefault(user, [t.getId()] as Integer[], on)
+    }
+
+    /**
+     * Disable the specified measurement.
+     */
+    static void disableMeasurement(Measurement m, AuthzSubject user) {
+        measMan.disableMeasurement(user, m.getId())
+    }
+
+    /**
+     * Enable the specified measurement.
+     */
+    static void enableMeasurement(Measurement m, AuthzSubject user,
+                                  long interval) {
+        measMan.enableMeasurement(user, m.getId(), interval)
+    }
+
+    /**
+     * Update the specified measurement interval.
+     */
+    static void updateMeasurementInterval(Measurement m, AuthzSubject user,
+                                          long interval) {
+        measMan.updateMeasurementInterval(user, m.getId(), interval)
     }
 }
