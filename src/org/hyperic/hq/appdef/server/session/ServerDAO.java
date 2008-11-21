@@ -258,8 +258,13 @@ public class ServerDAO extends HibernateDAO
     }
 
     void clearResource(Resource res) {
-        createQuery("update Server set resource = null where id = ?")
-            .setParameter(0, res.getInstanceId())
+        createQuery("update Server set resource = null where resource = ?")
+            .setParameter(0, res)
             .executeUpdate();
+    }
+
+    public Collection findDeletedServers() {
+        String hql = "from Server where resource.resourceType = null";
+        return createQuery(hql).list();
     }
 }

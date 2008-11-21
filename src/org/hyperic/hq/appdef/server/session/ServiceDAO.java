@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -126,7 +127,7 @@ public class ServiceDAO extends HibernateDAO
     public Collection findByParent(Integer parentId)
     {
         String sql="from Service where parentService.id=?";
-        return getSession().createQuery(sql)
+        return createQuery(sql)
             .setInteger(0, parentId.intValue())
             .list();
     }
@@ -134,7 +135,7 @@ public class ServiceDAO extends HibernateDAO
     public Collection findByParentAndType(Integer parentId, Integer typeId)
     {
         String sql="from Service where parentService.id=? and serviceType.id=?";
-        return getSession().createQuery(sql)
+        return createQuery(sql)
             .setInteger(0, parentId.intValue())
             .setInteger(1, typeId.intValue())
             .list();
@@ -152,17 +153,15 @@ public class ServiceDAO extends HibernateDAO
 
     public Collection findAll_orderCtime(boolean asc)
     {
-        return getSession()
-            .createQuery("from Service order by creationTime " +
-                         (asc ? "asc" : "desc"))
-            .list();
+        return createQuery("from Service order by creationTime " +
+                           (asc ? "asc" : "desc")).list();
     }
 
     public Collection findByType(Integer st, boolean asc)
     {
         String sql = "from Service where serviceType.id=? order by sortName " +
                      (asc ? "asc" : "desc");
-        return getSession().createQuery(sql)
+        return createQuery(sql)
             .setInteger(0, st.intValue())
             .list();
     }
@@ -170,7 +169,7 @@ public class ServiceDAO extends HibernateDAO
     public List findByName(String name)
     {
         String sql="from Service where sortName=?";
-        return getSession().createQuery(sql)
+        return createQuery(sql)
             .setString(0, name.toUpperCase())
             .list();
     }
@@ -179,7 +178,7 @@ public class ServiceDAO extends HibernateDAO
         String sql = "select v from Service v " +
             "where v.server = :server and v.sortName = :name";
         
-        return (Service)getSession().createQuery(sql)
+        return (Service) createQuery(sql)
             .setParameter("server", server)
             .setParameter("name", serviceName.toUpperCase())
             .uniqueResult();
@@ -193,7 +192,7 @@ public class ServiceDAO extends HibernateDAO
                    "where p.id=?" +
                    "order by s.sortName " +
                    (asc ? "asc" : "desc");
-        return getSession().createQuery(sql)
+        return createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
     }
@@ -208,7 +207,7 @@ public class ServiceDAO extends HibernateDAO
                    "order by st.sortName "+
                    (asc ? "asc" : "desc") +
                    ", s.sortName";
-        return getSession().createQuery(sql)
+        return createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
     }
@@ -222,7 +221,7 @@ public class ServiceDAO extends HibernateDAO
                   " and v.serviceType = :serviceType " + 
                   " order by v.sortName";
         
-        return getSession().createQuery(sql)
+        return createQuery(sql)
             .setParameter("platform", p)
             .setParameter("serviceType", st)
             .list();
@@ -239,7 +238,7 @@ public class ServiceDAO extends HibernateDAO
                    " and st.virtual=? " +
                    "order by sv.sortName " +
                    (asc ? "asc" : "desc");
-        return getSession().createQuery(sql)
+        return createQuery(sql)
             .setInteger(0, platId.intValue())
             .setBoolean(1, true)
             .setCacheRegion("Service.findPlatformServices")
@@ -250,7 +249,7 @@ public class ServiceDAO extends HibernateDAO
     public List findByServer_orderName(Integer id)
     {
         String sql="from Service where server.id=? order by sortName";
-        return getSession().createQuery(sql)
+        return createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
     }
@@ -261,7 +260,7 @@ public class ServiceDAO extends HibernateDAO
                    " join fetch s.serviceType st " +
                    "where s.server.id=? " +
                    "order by st.sortName";
-        return getSession().createQuery(sql)
+        return createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
     }
@@ -270,7 +269,7 @@ public class ServiceDAO extends HibernateDAO
     {
         String sql="from Service where server.id=? and serviceType.id=? " +
                    "order by sortName";
-        return getSession().createQuery(sql)
+        return createQuery(sql)
             .setInteger(0, id.intValue())
             .setInteger(1, tid.intValue())
             .setCacheable(true)
@@ -283,7 +282,7 @@ public class ServiceDAO extends HibernateDAO
         String sql="select s from Service s " +
                    " join fetch s.appServices a " +
                    "where a.application.id=? ";
-        return (Service)getSession().createQuery(sql)
+        return (Service) createQuery(sql)
             .setInteger(0, appId.intValue())
             .uniqueResult();
     }
@@ -293,7 +292,7 @@ public class ServiceDAO extends HibernateDAO
         String sql="from Service where serviceCluster is null " +
                    "order by sortName " +
                    (asc ? "asc" : "desc");
-        return getSession().createQuery(sql).list();
+        return createQuery(sql).list();
     }
 
     public Collection findAllClusterAppUnassigned_orderName(boolean asc)
@@ -302,7 +301,7 @@ public class ServiceDAO extends HibernateDAO
                    "appServices.size=0 " +
                    "order by sortName " +
                    (asc ? "asc" : "desc");
-        return getSession().createQuery(sql).list();
+        return createQuery(sql).list();
     }
     
     public Resource findVirtualByInstanceId(Integer id) {
@@ -339,17 +338,27 @@ public class ServiceDAO extends HibernateDAO
                      "Service s where s.serviceType = t " + 
                      "group by t.name order by t.name";
         
-        return getSession().createQuery(sql).list();
+        return createQuery(sql).list();
     }
     
     public Number getServiceCount() {
-        return (Number)getSession().createQuery("select count(*) from Service")
+        return (Number) createQuery("select count(*) from Service")
             .uniqueResult();
     }
 
     void clearResource(Resource res) {
-        createQuery("update Service set resource = null where id = ?")
-            .setParameter(0, res.getInstanceId())
+        createQuery("update Service set resource = null where resource = ?")
+            .setParameter(0, res)
             .executeUpdate();
+    }
+
+    public Collection findDeletedServices() {
+        String hql = "from Service where resource.resourceType = null";
+        return createQuery(hql).list();
+    }
+    
+    public Service findByResource(Resource res) {
+        return (Service) createCriteria().add(Restrictions.eq("resource", res))
+            .uniqueResult();
     }
 }

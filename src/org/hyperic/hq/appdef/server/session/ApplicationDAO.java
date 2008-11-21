@@ -309,8 +309,13 @@ public class ApplicationDAO extends HibernateDAO
     }
 
     void clearResource(Resource res) {
-        createQuery("update Application set resource = null where id = ?")
-            .setParameter(0, res.getInstanceId())
+        createQuery("update Application set resource = null where resource = ?")
+            .setParameter(0, res)
             .executeUpdate();
+    }
+
+    public Collection findDeletedApplications() {
+        String hql = "from Application where resource.resourceType = null";
+        return createQuery(hql).list();
     }
 }

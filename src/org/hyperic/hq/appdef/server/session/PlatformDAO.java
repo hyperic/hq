@@ -390,8 +390,13 @@ public class PlatformDAO extends HibernateDAO {
     }
     
     void clearResource(Resource res) {
-        createQuery("update Platform set resource = null where id = ?")
-            .setParameter(0, res.getInstanceId())
+        createQuery("update Platform set resource = null where resource = ?")
+            .setParameter(0, res)
             .executeUpdate();
+    }
+
+    public Collection findDeletedPlatforms() {
+        String hql = "from Platform where resource.resourceType = null";
+        return createQuery(hql).list();
     }
 }
