@@ -28,6 +28,7 @@ package org.hyperic.hq.ui.action.portlet.recentresources;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -42,14 +43,13 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 
 /**
@@ -72,13 +72,13 @@ public class ViewAction extends TilesAction {
         StopWatch timer = new StopWatch();
 
         ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
         ConfigResponse userPrefs = user.getPreferences();
         String key = Constants.USERPREF_KEY_RECENT_RESOURCES;
         if(userPrefs.getValue(key, null) != null){
-	        List list;
+	        Map list;
 	        try {
 	            list = getStuff(key, boss, user, userPrefs);
 	        } catch (Exception e) {
@@ -95,7 +95,8 @@ public class ViewAction extends TilesAction {
         return null;
     }
 
-    private List getStuff(String key, AppdefBoss boss, WebUser user, ConfigResponse dashPrefs)
+    private Map getStuff(String key, AuthzBoss boss, WebUser user,
+                          ConfigResponse dashPrefs)
         throws Exception {
         List entityIds = DashboardUtils.preferencesAsEntityIds(key, dashPrefs);
         Collections.reverse(entityIds);     // Most recent on top
@@ -103,6 +104,6 @@ public class ViewAction extends TilesAction {
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
         arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
 
-        return boss.findByIds(user.getSessionId().intValue(), arrayIds, null);
+        return boss.findResourcesByIds(user.getSessionId().intValue(), arrayIds);
     }
 }
