@@ -27,15 +27,9 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.dao.PlatformTypeDAO;
-import org.hyperic.hq.dao.AgentTypeDAO;
-import org.hyperic.hq.dao.AgentDAO;
-import org.hyperic.hq.dao.ApplicationTypeDAO;
-import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
@@ -44,55 +38,60 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
+import org.hyperic.hq.dao.AIServerDAO;
+import org.hyperic.hq.dao.AgentDAO;
+import org.hyperic.hq.dao.AgentTypeDAO;
+import org.hyperic.hq.dao.ApplicationTypeDAO;
+import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.product.TypeInfo;
 
 
 public abstract class AppdefSessionUtil {
-    private AIQueueManagerLocal         aiqManagerLocal;
-    private ConfigManagerLocal          configMgrL;
-    private ResourceManagerLocal        rmLocal;
-    private CPropManagerLocal           cpropLocal;
+    private AIQueueManagerLocal  aiqManagerLocal;
+    private ConfigManagerLocal   configMgrL;
+    private ResourceManagerLocal rmLocal;
+    private CPropManagerLocal    cpropLocal;
 
-    protected CPropManagerLocal getCPropMgrLocal(){
-        if(cpropLocal == null){
+    protected CPropManagerLocal getCPropManager() {
+        if (cpropLocal == null) {
             cpropLocal = CPropManagerEJBImpl.getOne();
         }
         return cpropLocal;
     }
 
-    protected ConfigManagerLocal getConfigMgrLocal() {
+    protected ConfigManagerLocal getConfigManager() {
         if (configMgrL == null) {
             configMgrL = ConfigManagerEJBImpl.getOne();
         }
         return configMgrL;
     }
 
-    protected ApplicationManagerLocal getApplicationMgrLocal() {
+    protected ApplicationManagerLocal getApplicationManager() {
         return ApplicationManagerEJBImpl.getOne();
     }
 
-    protected PlatformManagerLocal getPlatformMgrLocal() {
+    protected PlatformManagerLocal getPlatformManager() {
         return PlatformManagerEJBImpl.getOne();
     }
 
-    protected ServerManagerLocal getServerMgrLocal() {
+    protected ServerManagerLocal getServerManager() {
         return ServerManagerEJBImpl.getOne();
     }
 
-    protected ServiceManagerLocal getServiceMgrLocal() {
+    protected ServiceManagerLocal getServiceManager() {
         return ServiceManagerEJBImpl.getOne();
     }
 
     protected ResourceManagerLocal getResourceManager() {
         if (rmLocal == null) {
             rmLocal = ResourceManagerEJBImpl.getOne();
-        } 
+        }
         return rmLocal;
-    } 
+    }
 
     protected AIQueueManagerLocal getAIQManagerLocal() {
         if (aiqManagerLocal == null) {
@@ -106,47 +105,47 @@ public abstract class AppdefSessionUtil {
     }
 
     protected AgentDAO getAgentDAO() {
-        return DAOFactory.getDAOFactory().getAgentDAO();
+        return new AgentDAO(DAOFactory.getDAOFactory());
     }
 
     protected ResourceGroupDAO getResourceGroupDAO() {
-        return DAOFactory.getDAOFactory().getResourceGroupDAO();
+        return new ResourceGroupDAO(DAOFactory.getDAOFactory());
     }
 
     protected AgentTypeDAO getAgentTypeDAO() {
-        return DAOFactory.getDAOFactory().getAgentTypeDAO();
+        return new AgentTypeDAO(DAOFactory.getDAOFactory());
     }
 
     protected ConfigResponseDAO getConfigResponseDAO() {
-        return DAOFactory.getDAOFactory().getConfigResponseDAO();
+        return new ConfigResponseDAO(DAOFactory.getDAOFactory());
     }
 
     protected PlatformDAO getPlatformDAO() {
-        return DAOFactory.getDAOFactory().getPlatformDAO();
+        return new PlatformDAO(DAOFactory.getDAOFactory());
     }
 
     protected PlatformTypeDAO getPlatformTypeDAO() {
-        return DAOFactory.getDAOFactory().getPlatformTypeDAO();
+        return new PlatformTypeDAO(DAOFactory.getDAOFactory());
     }
 
     protected ServerDAO getServerDAO() {
-        return DAOFactory.getDAOFactory().getServerDAO();
+        return new ServerDAO(DAOFactory.getDAOFactory());
     }
 
     protected ServerTypeDAO getServerTypeDAO() {
-        return DAOFactory.getDAOFactory().getServerTypeDAO();
+        return new ServerTypeDAO(DAOFactory.getDAOFactory());
     }
 
     protected ServiceTypeDAO getServiceTypeDAO() {
-        return DAOFactory.getDAOFactory().getServiceTypeDAO();
+        return new ServiceTypeDAO(DAOFactory.getDAOFactory());
     }
 
     protected ServiceDAO getServiceDAO() {
-        return DAOFactory.getDAOFactory().getServiceDAO();
+        return new ServiceDAO(DAOFactory.getDAOFactory());
     }
 
     protected ApplicationTypeDAO getApplicationTypeDAO() {
-        return DAOFactory.getDAOFactory().getApplicationTypeDAO();
+        return new ApplicationTypeDAO(DAOFactory.getDAOFactory());
     }
 
     protected ApplicationDAO getApplicationDAO() {
@@ -164,10 +163,10 @@ public abstract class AppdefSessionUtil {
         Integer id = new Integer(appdefTypeId);
 
         if(appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM){
-            return getPlatformMgrLocal().findPlatformType(id);
+            return getPlatformManager().findPlatformType(id);
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER){
             try {
-                return getServerMgrLocal().findServerType(id);
+                return getServerManager().findServerType(id);
             } catch(ObjectNotFoundException exc){
                 throw new ServerNotFoundException("Server type id=" +
                                                   appdefTypeId + 
@@ -175,14 +174,14 @@ public abstract class AppdefSessionUtil {
             }
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
             try {
-                return getServiceMgrLocal().findServiceType(id);
+                return getServiceManager().findServiceType(id);
             } catch(ObjectNotFoundException exc){
                 throw new ServiceNotFoundException("Service type id=" +
                                                    appdefTypeId +
                                                    " not found");
             }
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
-            return getApplicationMgrLocal().findApplicationType(id);
+            return getApplicationManager().findApplicationType(id);
         } else {
             throw new IllegalArgumentException("Unrecognized appdef type:"+
                                                " " + appdefType);
