@@ -526,7 +526,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         throws PlatformNotFoundException, PermissionException {
         try {
             Platform platVo = 
-                getPlatformMgrLocal().findPlatformById(platformId);
+                getPlatformManager().findPlatformById(platformId);
             ResourceTreeNode[] retVal;
             retVal = getNavMapDataForPlatform(subject, platVo);
             return retVal;
@@ -710,7 +710,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     public ResourceTreeNode[] getNavMapDataForServer(AuthzSubject subject,
                                                      Integer serverId) 
         throws ServerNotFoundException, PermissionException {
-        Server serverVo = getServerMgrLocal().findServerById(serverId);
+        Server serverVo = getServerManager().findServerById(serverId);
 
         ResourceTreeNode[] retVal = null;
         Statement stmt = null;
@@ -885,7 +885,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     public ResourceTreeNode[] getNavMapDataForService(AuthzSubject subject,
                                                       Integer serviceId) 
         throws ServiceNotFoundException, PermissionException {
-        Service serviceVo = getServiceMgrLocal().findServiceById(serviceId);
+        Service serviceVo = getServiceManager().findServiceById(serviceId);
 
         ResourceTreeNode[] retVal = null;
         Statement stmt = null;
@@ -1140,7 +1140,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                                                           Integer appId)
         throws ApplicationNotFoundException, PermissionException {
         Application appVo =
-            getApplicationMgrLocal().findApplicationById(subject,appId);
+            getApplicationManager().findApplicationById(subject,appId);
 
         ResourceTreeNode[] retVal = null;
         Statement stmt = null;
@@ -1286,11 +1286,11 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         throws AppdefEntityNotFoundException {
         switch (entityType) {
             case APPDEF_TYPE_PLATFORM:
-                return getPlatformMgrLocal().findPlatformType(resType);
+                return getPlatformManager().findPlatformType(resType);
             case APPDEF_TYPE_SERVER:
-                return getServerMgrLocal().findServerType(resType);
+                return getServerManager().findServerType(resType);
             case APPDEF_TYPE_SERVICE:
-                return getServiceMgrLocal().findServiceType(resType);
+                return getServiceManager().findServiceType(resType);
             default:
                 return null;
         }

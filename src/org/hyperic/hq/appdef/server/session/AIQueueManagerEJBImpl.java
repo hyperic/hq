@@ -128,10 +128,10 @@ public class AIQueueManagerEJBImpl
                                  boolean isReport)
     {
         AIPlatformDAO aiplatformLH = getAIPlatformDAO();
-        PlatformManagerLocal pmLocal = getPlatformMgrLocal();
+        PlatformManagerLocal pmLocal = getPlatformManager();
         AIQueueManagerLocal aiqLocal = getAIQManagerLocal();
-        ConfigManagerLocal crmLocal = getConfigMgrLocal();
-        CPropManagerLocal cpropMgr = getCPropMgrLocal();
+        ConfigManagerLocal crmLocal = getConfigManager();
+        CPropManagerLocal cpropMgr = getCPropManager();
 
         // First, calculate queuestatus and diff with respect to 
         // existing appdef data.
@@ -507,10 +507,10 @@ public class AIQueueManagerEJBImpl
         AIIpDAO aiipDao = getAIIpDAO();
         AIServerDAO aiserverDao = getAIServerDAO();
 
-        PlatformManagerLocal pmLocal = getPlatformMgrLocal();
-        ServerManagerLocal smLocal = getServerMgrLocal();
-        ConfigManagerLocal configMgr = getConfigMgrLocal();
-        CPropManagerLocal cpropMgr = getCPropMgrLocal();
+        PlatformManagerLocal pmLocal = getPlatformManager();
+        ServerManagerLocal smLocal = getServerManager();
+        ConfigManagerLocal configMgr = getConfigManager();
+        CPropManagerLocal cpropMgr = getCPropManager();
 
         AIPlatform aiplatform = null;
         AIServer aiserver = null;
@@ -679,9 +679,9 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      */
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubject subject,
-                                                     int platformID)
+                                                     Integer platformID)
     {
-        Platform pLocal = getPlatformDAO().get(new Integer(platformID));
+        Platform pLocal = getPlatformDAO().get(platformID);
 
         Collection ips = pLocal.getIps();
         // We can't use the FQDN to find a platform, because
@@ -736,7 +736,7 @@ public class AIQueueManagerEJBImpl
                                          AIPlatform aipLocal)
         throws PermissionException, PlatformNotFoundException
     {
-        PlatformManagerLocal pmLocal = getPlatformMgrLocal();
+        PlatformManagerLocal pmLocal = getPlatformManager();
         Platform p =
             pmLocal.getPlatformByAIPlatform(subject,
                                             aipLocal.getAIPlatformValue());
