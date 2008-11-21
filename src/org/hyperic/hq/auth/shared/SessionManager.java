@@ -126,6 +126,12 @@ public class SessionManager {
         return getSubject(sessionId).getId();
     }
 
+    public AuthzSubject getSubject(Integer sessionId) 
+        throws SessionNotFoundException, SessionTimeoutException
+    {
+        return getSubject(sessionId.intValue());
+    }
+    
     public synchronized AuthzSubject getSubject(int sessionId) 
         throws SessionNotFoundException, SessionTimeoutException
     {
