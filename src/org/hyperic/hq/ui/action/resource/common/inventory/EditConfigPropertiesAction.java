@@ -107,7 +107,6 @@ public class EditConfigPropertiesAction extends BaseAction {
         AllConfigResponses allConfigs = new AllConfigResponses();
         AllConfigResponses allConfigsRollback = new AllConfigResponses();
         String prefix;
-
         if (forward != null) {
             // HACK to redirect back to Problem Resources portlet if the
             // request originated there.
@@ -115,14 +114,13 @@ public class EditConfigPropertiesAction extends BaseAction {
                 return mapping.findForward("dash");
             }
             return forward;
-        }         
+        }    
+        
         try {
             ServletContext ctx = getServlet().getServletContext();
             Integer sessionId = RequestUtils.getSessionId(request);
             int sessionInt = sessionId.intValue();
             AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-            AppdefResourceValue updatedResource =
-                boss.findById(sessionInt, aeid);
             ProductBoss pboss = ContextUtils.getProductBoss(ctx);
 
             String[] cfgTypes = ProductPlugin.CONFIGURABLE_TYPES;
@@ -132,8 +130,8 @@ public class EditConfigPropertiesAction extends BaseAction {
             ConfigResponse[] newConfigs = new ConfigResponse[cfgTypes.length];
 
             // Save the original resource
-            allConfigs.setResource(updatedResource);
-            allConfigsRollback.setResource(updatedResource);
+            allConfigs.setResource(aeid);
+            allConfigsRollback.setResource(aeid);
 
             ConfigResponseDB oldConfig =
                 pboss.getConfigResponse(sessionInt, aeid);
@@ -170,12 +168,15 @@ public class EditConfigPropertiesAction extends BaseAction {
                 } catch (PluginNotFoundException e) {
                     // No plugin support for this config type - skip ahead to the next type.
                     log.debug(cfgTypes[i] + " PluginNotFound for " 
-                              + updatedResource.getName() + ": " + e);
+                              + aeid + " : " + e);
                     log.debug("Blanking for " + cfgTypes[i] + "->(not supported)");
                     blankoutConfig(i, allConfigs, allConfigsRollback);
                 }
             }
 
+            AppdefResourceValue updatedResource =
+                boss.findById(sessionInt, aeid);
+                    
             // get the new configs based on UI form fields
             for ( i=0; i<numConfigs; i++ ) {
 
@@ -317,7 +318,7 @@ public class EditConfigPropertiesAction extends BaseAction {
                      "resource."+ aeid.getTypeName() +
                      ".inventory.confirm.EditConfigProperties",
                      updatedResource.getName());
-                                         
+
             // HACK to redirect back to Problem Resources portlet if the
             // request originated there.
             if (request.getParameter("todash") != null) {
