@@ -93,10 +93,8 @@ public class ResourceDAO
     }
 
     public void remove(Resource entity) {
-
         // need this to ensure that the optimistic locking doesn't fail
         entity.markDirty();
-        entity.getGroupBag().clear();
         super.remove(entity);
     }
 

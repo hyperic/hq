@@ -522,4 +522,9 @@ public class ResourceGroupDAO extends HibernateDAO
             .setInteger("type", groupType)
             .list();
     }
+
+    public Collection findDeletedGroups() {
+        String hql = "from ResourceGroup where resource.resourceType = null";
+        return createQuery(hql).list();
+    }
 }
