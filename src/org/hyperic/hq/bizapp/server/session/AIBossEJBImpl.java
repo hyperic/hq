@@ -36,14 +36,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
-import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
@@ -85,10 +82,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     private SessionManager sessionManager = SessionManager.getInstance();
 
     protected Log log = LogFactory.getLog(AIBossEJBImpl.class.getName());
-
-    private AIQueueManagerLocal getAIManager() {
-        return AIQueueManagerEJBImpl.getOne();
-    }
 
     private AIScheduleManagerLocal getAIScheduleManager() {
         return AIScheduleManagerEJBImpl.getOne();
@@ -527,7 +520,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public AIPlatformValue findAIPlatformByPlatformID(int sessionId, 
-                                                      int platformID)
+                                                      Integer platformID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, PlatformNotFoundException
     {
