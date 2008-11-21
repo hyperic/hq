@@ -38,11 +38,14 @@ import javax.ejb.SessionBean;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -265,46 +268,74 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     /**
      * @ejb:interface-method
      */
+    public void removeResourcePerms(AuthzSubject subject, Resource r)
+        throws VetoException, PermissionException
+    {
+        // Make sure user has permission to remove this resource
+        final PermissionManager pm = PermissionManagerFactory.getInstance();
+        final ResourceType resourceType = r.getResourceType();
+        String opName = null;
+        
+        if (resourceType.getId().equals(AuthzConstants.authzPlatform)) {
+            opName = AuthzConstants.platformOpRemovePlatform;
+        }
+        else if (resourceType.getId().equals(AuthzConstants.authzServer))
+        {
+            opName = AuthzConstants.serverOpRemoveServer;
+        }
+        else if (resourceType.getId()
+                    .equals(AuthzConstants.authzService))
+        {
+            opName = AuthzConstants.serviceOpRemoveService;
+        }
+        else if (resourceType.getId()
+                    .equals(AuthzConstants.authzApplication))
+        {
+            opName = AuthzConstants.appOpRemoveApplication;
+        }
+        else if (resourceType.getId().equals(AuthzConstants.authzGroup))
+        {
+            opName = AuthzConstants.groupOpRemoveResourceGroup;
+        }
+
+        pm.check(subject.getId(), resourceType, r.getInstanceId(),
+                 opName);
+
+        ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
+        Collection edges = edgeDao.findDescendantEdges(r);
+        for (Iterator it = edges.iterator(); it.hasNext(); ) {
+            ResourceEdge edge = (ResourceEdge) it.next();
+            // Remove descendents' permissions
+            removeResourcePerms(subject, edge.getTo());
+        }
+
+        // Delete the edges and resource groups
+        edgeDao.deleteEdges(r);
+        
+        // Null out the instance_id and resource type so that the resource
+        // does not appear in queries
+        r.setResourceType(null);
+
+        final long now = System.currentTimeMillis();
+        ResourceAudit.deleteResource(r, subject, now, now);        
+    }
+
+    /**
+     * @ejb:interface-method
+     */
     public void removeResource(AuthzSubject subject, Resource r)
         throws VetoException
     {
-        long now = System.currentTimeMillis();
-        
         ResourceDeleteCallback cb =
             AuthzStartupListener.getResourceDeleteCallback();
         cb.preResourceDelete(r);
 
-        ResourceAudit.deleteResource(r, subject, now, now);
-        ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
-        edgeDao.deleteEdges(r);
-        
+        final long now = System.currentTimeMillis();
+        ResourceAudit.deleteResource(r, subject, now, now);        
+        r.getGroupBag().clear();
         getResourceDAO().remove(r);
     }
     
-    /**
-     * @ejb:interface-method
-     */
-    public void removeResources(AuthzSubject subject, AppdefEntityID[] ids)
-        throws VetoException
-    {
-        ResourceDeleteCallback cb =
-            AuthzStartupListener.getResourceDeleteCallback();
-        ResourceDAO dao = getResourceDAO();
-        // No factory method for ResourceEdgeDAO?
-        ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
-
-        long now = System.currentTimeMillis();
-        
-        for (int i=0; i < ids.length; i++) {
-            Resource r = dao.findByInstanceId(ids[i].getAuthzTypeId(), 
-                                              ids[i].getId());
-            cb.preResourceDelete(r);
-            ResourceAudit.deleteResource(r, subject, now, now);
-            edgeDao.deleteEdges(r);
-            dao.remove(r);
-        }
-    }
-
     /**
      * @ejb:interface-method
      */
