@@ -104,7 +104,7 @@ public final class AuthenticationFilter extends BaseFilter {
 
         if (webUser == null) {
             // See if there is a guest user
-            webUser = loginGuest(request, ctx);
+            webUser = SignIn.loginGuest(ctx, request);
         }
 
         if (webUser == null) {
@@ -164,72 +164,10 @@ public final class AuthenticationFilter extends BaseFilter {
         super.init(filterConfig);
     }
 
-    private WebUser loginGuest(HttpServletRequest request, ServletContext ctx) {
-        AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
-        try {
-            int sid = authBoss.loginGuest();
-
-            ConfigResponse preferences = new ConfigResponse();
-
-            // look up the user's preferences
-            ConfigResponse defaultPreferences = (ConfigResponse) ctx
-                    .getAttribute(Constants.DEF_USER_PREFS);
-
-            AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-            AuthzSubject subject = authzBoss.getCurrentSubject(sid);
-
-            Integer sessionId = new Integer(sid);
-            preferences = authzBoss.getUserPrefs(sessionId, subject.getId());
-            preferences.merge(defaultPreferences, false);
-
-            WebUser webUser = new WebUser(subject, sessionId, preferences, true);
-
-            Map userOpsMap = SignIn.loadUserPermissions(sessionId, authzBoss);
-            HttpSession session = request.getSession();
-            session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
-
-            try {
-                DashboardManagerLocal dashManager = DashboardManagerEJBImpl
-                        .getOne();
-                ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
-                        .getAttribute(Constants.DEF_USER_DASH_PREFS);
-                AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
-                        .findSubjectById(webUser.getSubject().getId());
-                UserDashboardConfig userDashboard = dashManager
-                        .getUserDashboard(me, me);
-                if (userDashboard == null) {
-                    userDashboard = dashManager.createUserDashboard(me, me,
-                            webUser.getName());
-                    ConfigResponse userDashobardConfig = userDashboard
-                            .getConfig();
-                    userDashobardConfig.merge(defaultUserDashPrefs, false);
-                    dashManager.configureDashboard(me, userDashboard,
-                            userDashobardConfig);
-                }
-            } catch (PermissionException e) {
-                e.printStackTrace();
-            }
-            session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
-            
-            try {
-                new ResourceTree(1);    // See if graphics engine is present
-                session.setAttribute(Constants.XLIB_INSTALLED, Boolean.TRUE);
-            } catch (Throwable t) {
-                session.setAttribute(Constants.XLIB_INSTALLED, Boolean.FALSE);
-            }
-
-            return webUser;
-        } catch (Exception e) {
-            // No guest account available
-            return null;
-        }
-    }
-    
     private void setCallback(String url, HttpSession session) {
         String currVal = (String) session.getAttribute(Constants.POST_AUTH_CALLBACK_URL);
         if (currVal == null) {
             session.setAttribute(Constants.POST_AUTH_CALLBACK_URL, url);
         }
     }
-
 }
