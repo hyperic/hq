@@ -142,7 +142,26 @@ public class PlatformType extends AppdefResourceType {
     protected Platform create(PlatformValue pv, Agent agent, 
                               ConfigResponseDB config) 
     {
-        return newPlatform(pv, config, agent);
+        Platform p = new Platform();
+        
+        p.setName(pv.getName());
+        p.setDescription(pv.getDescription());
+        p.setCertdn(pv.getCertdn());
+        p.setCommentText(pv.getCommentText());
+        p.setCpuCount(pv.getCpuCount());
+        p.setFqdn(pv.getFqdn());
+        p.setLocation(pv.getLocation());
+        p.setModifiedBy(pv.getModifiedBy());
+        p.setPlatformType(this);
+        p.setAgent(agent);
+        p.setConfigResponse(config);
+        
+        for (Iterator i=pv.getAddedIpValues().iterator(); i.hasNext();) {
+            IpValue ipv = (IpValue)i.next();
+            p.addIp(ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
+        }
+        registerNewPlatform(p);
+        return p;
     }
 
     private Platform copyAIPlatformValue(AIPlatformValue aip) {
@@ -167,31 +186,6 @@ public class PlatformType extends AppdefResourceType {
         }
     }
     
-    private Platform newPlatform(PlatformValue pv, ConfigResponseDB config,
-                                 Agent agent) 
-    {
-        Platform p = new Platform();
-
-        p.setName(pv.getName());
-        p.setDescription(pv.getDescription());
-        p.setCertdn(pv.getCertdn());
-        p.setCommentText(pv.getCommentText());
-        p.setCpuCount(pv.getCpuCount());
-        p.setFqdn(pv.getFqdn());
-        p.setLocation(pv.getLocation());
-        p.setModifiedBy(pv.getModifiedBy());
-        p.setPlatformType(this);
-        p.setAgent(agent);
-        p.setConfigResponse(config);
-
-        for (Iterator i=pv.getAddedIpValues().iterator(); i.hasNext();) {
-            IpValue ipv = (IpValue)i.next();
-            p.addIp(ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
-        }
-        registerNewPlatform(p);
-        return p;
-    }
-
     /**
      * legacy EJB DTO pattern
      * @deprecated use (this) PlatformType object instead
