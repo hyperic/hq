@@ -9387,6 +9387,24 @@ has already been defined.
                           precision="255" columnType="VARCHAR2" />
   </schemaSpec>
 
+  <schemaSpec version="3.128.1">
+    <schema-directSQL>
+      <statement targetDB="postgresql" desc="Drop constraing FKE5B6292DC81F5938 for Postgres">
+        alter table EAM_AUDIT drop constraint FKE5B6292DC81F5938
+      </statement>
+      <statement targetDB="oracle" desc="Drop constraing FKE5B6292DC81F5938 for Oracle">
+        alter table EAM_AUDIT drop constraint FKE5B6292DC81F5938
+      </statement>
+      <statement targetDB="mysql" desc="Drop foreign key FKE5B6292DC81F5938 for MySQL">
+        alter table EAM_AUDIT drop foreign key FKE5B6292DC81F5938
+      </statement>
+      <statement>
+        alter table EAM_AUDIT add constraint FKE5B6292DC81F5938 foreign key (PARENT_ID)
+            REFERENCES EAM_AUDIT (ID) on delete cascade
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
   <schemaSpec version="3.129">
     <schema-directSQL>
       <statement desc="Update new resource_id column">

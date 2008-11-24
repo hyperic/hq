@@ -70,7 +70,7 @@
 
     <bag name="childrenBag" table="EAM_AUDIT" cascade="all-delete-orphan"
          optimistic-lock="false" inverse="true">
-      <key column="PARENT_ID" />
+      <key column="PARENT_ID" on-delete="cascade"/>
       <one-to-many class="Audit"/>
     </bag>
 
