@@ -2127,6 +2127,10 @@ button.btnGreen{
     background: transparent url(/images/4.0/buttons/button_green_left.gif) no-repeat;
 }
 
+button.btnGreenBlack{
+    background: transparent url(/images/4.0/buttons/button_green_b_left.gif) no-repeat;
+}
+
 button.btnInactive{
     background: transparent url(/images/4.0/buttons/button_inactive_left.gif) no-repeat;
     cursor:default
@@ -2142,6 +2146,10 @@ button.btnGray span{
 
 button.btnGreen span{
     background: transparent url(/images/4.0/buttons/button_green_right.gif) no-repeat scroll 100% 0;
+}
+
+button.btnGreenBlack span{
+    background: transparent url(/images/4.0/buttons/button_green_b_right.gif) no-repeat scroll 100% 0;
 }
 
 button.btnInactive span{
