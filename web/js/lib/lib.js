@@ -2049,6 +2049,28 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         that.enabled_alert_groups.reset();
         that.available_alert_groups.reset();
         that.populateAlertGroups();
+        
+        // reset enable/disable alert buttons.
+        if(that.enable_alert_btn.disabled === true && that.available_alert_groups.length > 0)
+        {
+            that.enable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select.gif" alt="select">';
+            that.enable_alert_btn.disabled = false;
+        }
+        else if(that.enable_alert_btn.disabled === false && that.available_alert_groups.length == 0)
+        {
+            that.enable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_select_disabled.gif" alt="select">';
+            that.enable_alert_btn.disabled = true;
+        }
+        if(that.disable_alert_btn.disabled === true && that.enabled_alert_groups.length > 0)
+        {
+            that.disable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect.gif" alt="select">';
+            that.disable_alert_btn.disabled = false;
+        }
+        else if(that.disable_alert_btn.disabled === false && that.enabled_alert_groups.length == 0)
+        {
+            that.disable_alert_btn.innerHTML = '<img src="/images/4.0/buttons/arrow_deselect_disabled.gif" alt="select">';
+            that.disable_alert_btn.disabled = true;
+        }
     };
 
     /**
