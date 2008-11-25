@@ -28,7 +28,6 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -103,8 +102,8 @@ public class AvailabilityManagerEJBImpl
     private final AvailabilityDataDAO _dao = getAvailabilityDataDAO();
     private final Map _createMap = new HashMap();
     private final Map _removeMap = new HashMap();
-    
     private Map _currAvails = null;
+
     private static final long MAX_DATA_BACKLOG_TIME =
         7 * MeasurementConstants.DAY;
     
@@ -586,6 +585,10 @@ public class AvailabilityManagerEJBImpl
                 _log.error(e.getMessage(), e);
                 cache.rollbackTran();
                 throw new SystemException(e);
+            } finally {
+                _createMap.clear();
+                _removeMap.clear();
+                _currAvails.clear();
             }
         }
         sendDataToEventHandlers(availPoints);
