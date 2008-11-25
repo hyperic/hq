@@ -559,8 +559,28 @@ public class MultiConditionTrigger
     private List getPriorEventsForTrigger(EventTrackerLocal etracker) 
         throws ActionExecuteException {
         List events = new ArrayList();
+        
+        synchronized (lastFulfillingEventsLock) {
+            if (!lastFulfillingEvents.isEmpty()) {
+                long expire = getTimeRange() > 0 ?
+                        System.currentTimeMillis() - getTimeRange() : 0;
+                        
+                for (Iterator it = lastFulfillingEvents.iterator();
+                     it.hasNext(); ) {
+                    AbstractEvent event = (AbstractEvent) it.next();
+                    // If we know we have old events, then look up from DB
+                    if (event.getTimestamp() < expire) {
+                        events.clear();
+                        break;
+                    }
+                    else {
+                        events.add(event);
+                    }
+                }
+            }
+        }
 
-        if (lastFulfillingEvents.isEmpty()) {
+        if (events.isEmpty()) {
             try {
                 Collection eventObjectDesers =
                     etracker.getReferencedEventStreams(getId());
@@ -580,20 +600,6 @@ public class MultiConditionTrigger
             }
             synchronized (lastFulfillingEventsLock) {
                 lastFulfillingEvents = events;
-            }
-
-        }
-        else {
-            synchronized (lastFulfillingEventsLock) {
-                long expire = getTimeRange() > 0 ?
-                        System.currentTimeMillis() - getTimeRange() : 0;
-                        
-                for (Iterator it = lastFulfillingEvents.iterator();
-                     it.hasNext(); ) {
-                    AbstractEvent event = (AbstractEvent) it.next();
-                    if (event.getTimestamp() > expire)
-                        events.add(event);
-                }
             }
         }
         
