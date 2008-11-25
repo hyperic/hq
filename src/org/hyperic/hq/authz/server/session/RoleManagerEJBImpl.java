@@ -53,7 +53,6 @@ import org.hyperic.hq.authz.server.session.RoleCalendar;
 import org.hyperic.hq.authz.server.session.RoleCalendarType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzDuplicateNameException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -1408,24 +1407,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         return plist;
     }
     
-    /** Add subjects to this role.
-     * @param whoami The current running user.
-     * @param id The ID of the role.
-     * @param subjects Subjects to add to role.
-     * @throws PermissionException whoami is not allowed to perform
-     * addSubject on this role.
-     * @ejb:interface-method
-     */
-    public void addSubjects(AuthzSubject whoami, Integer id,
-                            AuthzSubjectValue[] subjects) 
-        throws PermissionException {
-        Integer[] sids = new Integer[subjects.length];
-        for (int i = 0; i < subjects.length; i++) {
-            sids[i] = subjects[i].getId();
-        }
-        addSubjects(whoami, id, sids);
-    }
-
     /** Add subjects to this role.
      * @param whoami The current running user.
      * @param id The ID of the role.

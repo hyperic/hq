@@ -697,11 +697,7 @@ public class BizappUtils {
         Iterator mi = matches.iterator();
         while (mi.hasNext()) {
             Object m = mi.next();
-            
-            if (m instanceof AuthzSubjectValue)
-                index.add(((AuthzSubjectValue) m).getId());
-            else if (m instanceof AuthzSubject)
-                index.add(((AuthzSubject) m).getId());
+            index.add(((AuthzSubject) m).getId());
         }
 
         // find available subjects (those not in the index)

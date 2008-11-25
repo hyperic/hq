@@ -42,7 +42,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
@@ -122,9 +121,6 @@ public abstract class AuthzSession {
         for (int i = 0; i < vals.length; i++) {
             if (vals[i] instanceof Operation) {
                 ret.add(vals[i]);
-            }
-            else if (vals[i] instanceof AuthzSubjectValue) {
-                ret.add(subjDao.findById(((AuthzSubjectValue)vals[i]).getId()));
             }
             else if (vals[i] instanceof ResourceValue) {
                 ret.add(lookupResource((ResourceValue) vals[i]));
