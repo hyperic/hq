@@ -73,7 +73,7 @@ class EventController
             def subject = l.subject + ": "
             def detail = l.detail
             if (detail.startsWith(subject)) {
-                detail = detail[subject.length()..-1]
+                detail = detail[subject.length()..detail.length()-1]
             }
             return detail
         } else { 
