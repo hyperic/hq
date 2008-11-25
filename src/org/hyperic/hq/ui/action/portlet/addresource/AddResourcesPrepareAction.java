@@ -46,6 +46,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
@@ -201,11 +202,19 @@ public class AddResourcesPrepareAction extends Action {
         Integer ff = addForm.getFf();
         AppdefEntityTypeID ft = null;
         
-        if (addForm.getFt() != null)
-            ft = new AppdefEntityTypeID(addForm.getFt());
-
         int appdefType =
             (ff == null) ? Constants.FILTER_BY_DEFAULT : ff.intValue();
+
+        if (addForm.getFt() != null &&
+            !addForm.getFt().equals(String.valueOf(DEFAULT_RESOURCE_TYPE))) {
+            try {
+                ft = new AppdefEntityTypeID(addForm.getFt());
+            } catch (InvalidAppdefTypeException e) {
+                ft = new AppdefEntityTypeID(appdefType,
+                                            new Integer(addForm.getFt()));
+            }
+        }
+
         int resourceType = ft == null ? -1 : ft.getID();
         boolean compat = false;
         if(appdefType == 0) 
