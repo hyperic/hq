@@ -61,6 +61,7 @@ import org.hyperic.hq.events.server.session.EventTrackerEJBImpl;
 import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.config.BooleanConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -79,6 +80,9 @@ import EDU.oswego.cs.dl.util.concurrent.ReentrantWriterPreferenceReadWriteLock;
  */
 public class MultiConditionTrigger
     extends AbstractTrigger {
+    private static final long EVENT_CACHE_TIME =
+        30 * MeasurementConstants.MINUTE;
+
     private final Log log = LogFactory.getLog(MultiConditionTrigger.class);
 
     public static final String CFG_TRIGGER_IDS = "triggerIds";
@@ -562,8 +566,8 @@ public class MultiConditionTrigger
         
         synchronized (lastFulfillingEventsLock) {
             if (!lastFulfillingEvents.isEmpty()) {
-                long expire = getTimeRange() > 0 ?
-                        System.currentTimeMillis() - getTimeRange() : 0;
+                long expire =  System.currentTimeMillis() -
+                    (getTimeRange() > 0 ? getTimeRange() : EVENT_CACHE_TIME);
                         
                 for (Iterator it = lastFulfillingEvents.iterator();
                      it.hasNext(); ) {
@@ -577,15 +581,22 @@ public class MultiConditionTrigger
                         events.add(event);
                     }
                 }
+                
+                if (log.isDebugEnabled())
+                    log.debug("Get " + events.size() +
+                              " events from cache for trigger id=" + getId());
+
             }
         }
 
+        // Look up events in database
         if (events.isEmpty()) {
             try {
                 Collection eventObjectDesers =
                     etracker.getReferencedEventStreams(getId());
                 if (log.isDebugEnabled())
-                    log.debug("Get prior events for trigger id="+getId());
+                    log.debug("Get prior events from database for trigger id=" +
+                              getId());
             
                 for (Iterator iter = eventObjectDesers.iterator();
                      iter.hasNext(); ) {
@@ -593,13 +604,14 @@ public class MultiConditionTrigger
                         (EventObjectDeserializer) iter.next();
                     events.add(deserializeEvent(deser, true));
                 }
+                
+                synchronized (lastFulfillingEventsLock) {
+                    lastFulfillingEvents = events;
+                }
             } catch(Exception exc) {
                 throw new ActionExecuteException(
                     "Failed to get referenced streams for trigger id=" +getId(),
                     exc);
-            }
-            synchronized (lastFulfillingEventsLock) {
-                lastFulfillingEvents = events;
             }
         }
         
