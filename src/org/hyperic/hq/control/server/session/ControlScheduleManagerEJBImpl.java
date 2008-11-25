@@ -195,7 +195,7 @@ public class ControlScheduleManagerEJBImpl
                     new AppdefEntityID(cLocal.getEntityType().intValue(),
                                        cLocal.getEntityId());
                 try {
-                    checkViewPermission(subject, entity);
+                    checkControlPermission(subject, entity);
                     
                     AppdefEntityValue aVal = new AppdefEntityValue(entity,
                                                                    subject);
@@ -244,7 +244,7 @@ public class ControlScheduleManagerEJBImpl
                     new AppdefEntityID(sLocal.getEntityType().intValue(),
                                        sLocal.getEntityId());
                 try {
-                    checkViewPermission(subject, entity);
+                    checkControlPermission(subject, entity);
                     if (++count > rows)
                         break;
                 } catch (PermissionException e) {
@@ -306,7 +306,7 @@ public class ControlScheduleManagerEJBImpl
                     id = new AppdefEntityID(rs.getInt(1), rs.getInt(2));
                     
                     try {
-                        checkViewPermission(subject, id);
+                        checkControlPermission(subject, id);
                     } catch (PermissionException e) {
                         continue;
                     }
@@ -898,9 +898,9 @@ public class ControlScheduleManagerEJBImpl
      * @throws PermissionException if the user does not have the
      *         modify Operation for the given resource.
      */
-    private void checkViewPermission(AuthzSubject caller, AppdefEntityID id)
+    private void checkControlPermission(AuthzSubject caller, AppdefEntityID id)
         throws PermissionException {
-        getAppdefMan().checkViewPermission(caller, id);
+        getAppdefMan().checkControlPermission(caller, id);
     }
     
     private class ControlHistoryLocalComparatorAsc implements Comparator {
