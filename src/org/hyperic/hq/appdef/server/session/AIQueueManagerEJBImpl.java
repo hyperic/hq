@@ -529,17 +529,20 @@ public class AIQueueManagerEJBImpl
                     log.error("processQueue: platform with ID=null");
                     continue;
                 }
+                
+                aiplatform = aiplatformDao.get(id);
 
-                try {
-                    aiplatform = aiplatformDao.get(id);
-                } catch ( ObjectNotFoundException e ) {
-                    if (isPurgeAction) continue;
-                    else throw e;
+                if (aiplatform == null) {
+                    if (isPurgeAction)
+                        continue;
+                    else
+                        throw new ObjectNotFoundException(id, AIPlatform.class
+                                                                    .getName());
                 }
 
                 // Before processing platforms, ensure the agent is up since
-                // the approval process depends on being able to schedule runtime
-                // discovery and enable metrics.
+                // the approval process depends on being able to schedule 
+                // runtime discovery and enable metrics.
                 if (isApproveAction && verifyLiveAgent) {
                     try {
                         AICommandsClient client = 
@@ -581,11 +584,15 @@ public class AIQueueManagerEJBImpl
                               " has an IP with ID=null");
                     continue;
                 }
-                try {
-                    aiip = aiipDao.get(id);
-                } catch (ObjectNotFoundException e) {
-                    if (isPurgeAction) continue;
-                    else throw e;
+
+                aiip = aiipDao.get(id);
+                
+                if (aiip == null) {
+                    if (isPurgeAction)
+                        continue;
+                    else
+                        throw new ObjectNotFoundException(id,
+                                                          AIIp.class.getName());
                 }
                 visitor.visitIp(aiip, subject, pmLocal);
                 if (!isPurgeAction) {
@@ -602,12 +609,15 @@ public class AIQueueManagerEJBImpl
                               " has a Server with ID=null");
                     continue;
                 }
-                try {
-                    aiserver = aiserverDao.get(id);
-                } catch (ObjectNotFoundException e) {
-                    if (isPurgeAction) continue;
-                    else throw e;
+                aiserver = aiserverDao.get(id);
+                if (aiserver == null) {
+                    if (isPurgeAction)
+                        continue;
+                    else
+                        throw new ObjectNotFoundException(id, AIServer.class
+                                                                    .getName());
                 }
+
                 visitor.visitServer(aiserver,  subject, pmLocal, smLocal,
                                     configMgr, cpropMgr, createdResources);
                 if (isApproveAction) {

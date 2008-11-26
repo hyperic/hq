@@ -156,6 +156,11 @@ public class ProcessQueueAction extends BaseAction {
             }
         }
 
+        if (aiServerList.isEmpty() && isIgnore) {
+            // Change to purge
+            queueAction = AIQueueConstants.Q_DECISION_PURGE;
+        }
+        
         try {
             aiBoss.processQueue(sessionId,
                     aiPlatformList,
