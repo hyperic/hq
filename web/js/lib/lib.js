@@ -891,7 +891,7 @@ hyperic.dashboard.widget = {
             dojo11.fadeOut({
                 node : fromSheet, 
                 onEnd: function() { 
-                        dojo11.style(fromSheet,'display','none'); 
+                        dojo11.style(fromSheet,'display','none');
                         dojo11.style(toSheet,'display','block'); 
                     } 
                 }
@@ -1233,7 +1233,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     this.click_config_btn = function(e)
     {
         that.pauseCharts();
-        hyperic.dashboard.widget.click_config_btn.apply(this);
+        hyperic.dashboard.widget.click_config_btn.apply(this,[e]);
         
         var input_rotation = dojo11.byId('chart_rotation');
         var input_interval = dojo11.byId('chart_interval');
@@ -2032,7 +2032,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     this.click_config_btn = function(e)
     {
         that.pauseRefreshCycle();
-        hyperic.dashboard.widget.click_config_btn.apply(this);
+        hyperic.dashboard.widget.click_config_btn.apply(this, [e,that.reset_config]);
     }
 
     /**
@@ -2044,11 +2044,11 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     {
         if(that.selected_alert_groups.length > 0)
         {
-            that.swapSheets('content', function() {that.reset_config();});
+            that.swapSheets('content');
         }
         else
         {
-            that.swapSheets('instructions', function() {that.reset_config();});
+            that.swapSheets('instructions');
         }
         that.startRefreshCycle();
     };
@@ -2110,11 +2110,11 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                     that.repaintAlertGroups();
                     if(that.selected_alert_groups.length > 0)
                     {
-                        that.swapSheets('content', function() {that.reset_config();});
+                        that.swapSheets('content');
                     }
                     else
                     {
-                        that.swapSheets('instructions', function() {that.reset_config();});
+                        that.swapSheets('instructions');
                     }
                 });
             },
@@ -2123,11 +2123,11 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 
                 if(that.selected_alert_groups.length > 0)
                 {
-                    that.swapSheets('content', function() {that.reset_config();});
+                    that.swapSheets('content');
                 }
                 else
                 {
-                    that.swapSheets('instructions', function() {that.reset_config();});
+                    that.swapSheets('instructions');
                 }
             },
             timeout: 2000
@@ -2179,7 +2179,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         for(var i in that.tables)
         {
             while(that.tables[i].rows.length > 1) {
-              that.tables[i].removeChild(that.tables[i].lastChild);
+                that.tables[i].removeChild(that.tables[i].lastChild);
             }
         }
         that.paintAlertGroups();
@@ -2318,12 +2318,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     };
 
     that.fetchAlertGroupStatusCallback = function()
-    {    	
+    {
     	if (that.currentSheet != 'error_loading') {
-    	    // let's make sure we reset the select boxes before repopulating them with new data.
-
-            that.reset_config();
-
 	        if(that.selected_alert_groups.length > 0)
 	        {
 	            that.last_updated = new Date();
@@ -3027,7 +3023,7 @@ hyperic.clone_resource_dialog = function(title_name, platform_id) {
         var fromSheet = that.sheets[that.currentSheet];
         var toSheet = that.sheets[to];
         
-        fromSheet.style.display = 'none'; 
+        fromSheet.style.display = 'none';
         toSheet.style.display = 'block'; 
 
         that.currentSheet = to;
