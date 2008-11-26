@@ -274,11 +274,15 @@ public class EmailFilter {
                 if (addresses[i].useHtml()) {
                     m.setContent(htmlBody[i], "text/html");
                     if (_log.isDebugEnabled()) {
-                        _log.debug("Sending HTML Alert Email: " + subject);
+                        _log.debug("Sending HTML Alert notification: " +
+                                   subject + " to " +
+                                   addresses[i].getAddress().getAddress());
                     }
                 } else {
                     if (_log.isDebugEnabled()) {
-                        _log.debug("Sending Alert Email: " + subject);
+                        _log.debug("Sending Alert notification: " + subject +
+                                   " to " +
+                                   addresses[i].getAddress().getAddress());
                     }
                     m.setContent(body[i], "text/plain");
                 }
