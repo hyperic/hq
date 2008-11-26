@@ -63,10 +63,13 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger;
@@ -113,6 +116,7 @@ import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -829,6 +833,74 @@ public class EventsBossEJBImpl
     }
 
     /**
+     * Activate or deactivate alert definitions by AppdefEntityID.
+     * 
+     * @ejb:interface-method
+     */
+    public void activateAlertDefinitions(int sessionID, AppdefEntityID[] eids,
+                                         boolean activate)
+        throws SessionNotFoundException, SessionTimeoutException,
+               AppdefEntityNotFoundException, PermissionException
+    {
+        AuthzSubject subject = manager.getSubject(sessionID);
+
+        boolean debugEnabled = _log.isDebugEnabled();       
+        String status = (activate ? "enabled" : "disabled");
+        Resource res = null;
+        
+        for (int i=0; i<eids.length; i++) {
+            AppdefEntityID eid = eids[i];
+            if (debugEnabled) {
+                _log.debug("AppdefEntityID [" + eid + "]");
+            }
+            if (eid.isGroup()) {
+                ResourceGroupManagerLocal rgm = ResourceGroupManagerEJBImpl.getOne();
+                ResourceGroup group = rgm.findResourceGroupById(eid.getId());
+                
+                // Get the group alerts
+                GalertManagerLocal gam = GalertManagerEJBImpl.getOne();
+                Collection allAlerts = gam.findAlertDefs(group, PageControl.PAGE_ALL);
+                for (Iterator it = allAlerts.iterator(); it.hasNext(); ) {
+                    GalertDef galertDef = (GalertDef) it.next();  
+                    gam.enable(galertDef, activate);
+                    if (debugEnabled) {
+                        _log.debug("Group Alert [" + galertDef + "] " + status);
+                    }
+                }
+                
+                // Get the resource alerts of the group
+                Collection resources = rgm.getMembers(group);
+                for (Iterator rIter = resources.iterator(); rIter.hasNext(); ) {
+                    res = (Resource) rIter.next();
+                    updateAlertDefinitionsActiveStatus(subject, res, activate);                                        
+                }
+            } else {
+                res = getResourceManager().findResource(eid);
+                updateAlertDefinitionsActiveStatus(subject, res, activate);
+            }        
+        }
+    }
+    
+    private void updateAlertDefinitionsActiveStatus(AuthzSubject subject,
+                                Resource res, boolean activate)
+        throws PermissionException
+    {
+        boolean debugEnabled = _log.isDebugEnabled();       
+        String status = (activate ? "enabled" : "disabled");
+
+        AlertDefinitionManagerLocal adm = getADM();
+        Collection allAlerts = adm.findRelatedAlertDefinitions(subject, res);
+        
+        for (Iterator it = allAlerts.iterator(); it.hasNext();) {
+            AlertDefinition alertDef = (AlertDefinition) it.next();
+            adm.updateAlertDefinitionActiveStatus(subject, alertDef, activate);
+            if (debugEnabled) {
+                _log.debug("Resource Alert [" + alertDef + "] " + status);
+            }
+        }
+    }
+
+    /**
      * Update just the basics
      *
      * @ejb:interface-method
@@ -1107,25 +1179,6 @@ public class EventsBossEJBImpl
     }
     
     /**
-     * Find all alertdefs for a platform and any of its servers and services
-     * @return PageList of AlertDefinitionValues
-     * @ejb:interface-method
-     */
-    public List findAlertDefinitionsByAgent(int sessionID, AppdefEntityID id)
-    	throws SessionNotFoundException, SessionTimeoutException,
-			   AppdefEntityNotFoundException, PermissionException 
-    {
-    	AuthzSubject subject = manager.getSubject(sessionID);
-        // bomb if this isnt a platform
-        if(!id.isPlatform()) {
-            throw new IllegalArgumentException(id + " is not a platform");
-        }
-        
-        Resource res = getResourceManager().findResource(id);
-        return getADM().findRelatedAlertDefinitions(subject, res);
-    }
-    
-    /**
      * Find all alert definition names for a resource
      * @return Map of AlertDefinition names and IDs
      * @ejb:interface-method
@@ -1138,46 +1191,7 @@ public class EventsBossEJBImpl
         AuthzSubject subject = manager.getSubject(sessionID);
         return getADM().findAlertDefinitionNames(subject, id, parentId);
     }
-    
-    /**
-     * Activate or deactivate alert definitions by agent.
-     * 
-     * @ejb:interface-method
-     */
-    public void updateAlertsByAgent(int sessionID, AppdefEntityID platId,
-                                    boolean activate)
-        throws SessionNotFoundException, SessionTimeoutException,
-               AppdefEntityNotFoundException, PermissionException
-    {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        List allAlerts = findAlertDefinitionsByAgent(sessionID, platId);
-        AlertDefinitionManagerLocal adm = getADM();
-        for (Iterator it = allAlerts.iterator(); it.hasNext();) {
-            AlertDefinition ad = (AlertDefinition) it.next();
-            adm.updateAlertDefinitionActiveStatus(subject, ad, activate);
-        }
-    }
-    
-    /**
-     * Check that all alerts for an agent are enabled or disabled
-     * @return true if they are all enabled false if they are all disabled
-     * @ejb:interface-method
-     */
-    public boolean checkAllAgentAlertsEnabled(int sessionID,
-                                              AppdefEntityID platId)
-        throws SessionNotFoundException, SessionTimeoutException,
-               AppdefEntityNotFoundException, PermissionException 
-    {
-        List allAgentAlerts = findAlertDefinitionsByAgent(sessionID, platId);
-        for(int i = 0; i < allAgentAlerts.size(); i++) {
-            AlertDefinition ad = (AlertDefinition) allAgentAlerts.get(i);
-            if(!ad.isEnabled())
-                return false;
-        }
-        return true;
-    }
-    
-    
+            
     /**
      * Get a list of all alerts
      *

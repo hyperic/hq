@@ -68,7 +68,9 @@ public class AlertEnablerAction extends BaseAction {
         if (state.equals(Constants.MODE_DISABLED)) {
             enabled = false;
         }
-        ev.updateAlertsByAgent(sessionId.intValue(), eid, enabled);
+        ev.activateAlertDefinitions(sessionId.intValue(),
+                new AppdefEntityID[] {eid}, enabled);
+        
         return this.returnSuccess(request, mapping, 
                                   forwardParams, BaseAction.YES_RETURN_PATH);
     }

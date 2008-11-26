@@ -52,6 +52,10 @@ function ReplaceButton(divId, tdId, tdState, imageId, btnFunction) {
 		newInput.setAttribute("name", inputName);
         if (btnFunction == 'delete' || btnFunction == 'remove') {
             newInput.setAttribute("onclick", "return confirm('Are you sure you want to remove or disable selections?');");
+        } else if (btnFunction == 'enableAlerts') {
+        	newInput.setAttribute("onclick", "return confirm('Are you sure you want to enable all alerts for the selections?');");
+        } else if (btnFunction == 'disableAlerts') {
+        	newInput.setAttribute("onclick", "return confirm('Are you sure you want to disable all alerts for the selections?');");        	
         }
 		newDiv.appendChild(newInput);
 	}
@@ -88,6 +92,11 @@ function ToggleButtons(widgetInstanceName, prefix, isRemove, form) {
                       "on", "delete_alerts", "deleteAlerts");
 		ReplaceButton(prefix + "GroupButtonDiv", prefix + "GroupButtonTd",
                       "on", "group", "group");
+		ReplaceButton(prefix + "EnableAlertsButtonDiv", prefix + "EnableAlertsButtonTd",
+					  "on", "enable_alerts", "enableAlerts");
+		ReplaceButton(prefix + "DisableAlertsButtonDiv", prefix + "DisableAlertsButtonTd",
+					  "on", "disable_alerts", "disableAlerts");
+		
         if (goButtonLink!=null)
             ReplaceGoButton(true);
 
@@ -106,7 +115,12 @@ function ToggleButtons(widgetInstanceName, prefix, isRemove, form) {
                       "off", "delete_alerts", "deleteAlerts");
 		ReplaceButton(prefix + "GroupButtonDiv", prefix + "GroupButtonTd",
                       "off", "group", "group");
-        if (goButtonLink != null)
+		ReplaceButton(prefix + "EnableAlertsButtonDiv", prefix + "EnableAlertsButtonTd",
+				  	  "off", "enable_alerts", "enableAlerts");
+		ReplaceButton(prefix + "DisableAlertsButtonDiv", prefix + "DisableAlertsButtonTd",
+				  	  "off", "disable_alerts", "disableAlerts");
+
+		if (goButtonLink != null)
             ReplaceGoButton(false);
 
         // Disable all submit buttons

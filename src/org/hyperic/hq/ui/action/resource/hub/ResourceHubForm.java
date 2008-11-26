@@ -75,6 +75,8 @@ public class ResourceHubForm extends BaseValidatorForm {
     private boolean  _unavail;
 
     private ImageButtonBean _group = null;
+    private ImageButtonBean _enableAlerts = null;
+    private ImageButtonBean _disableAlerts = null;
     
     //-------------------------------------constructors
 
@@ -173,6 +175,22 @@ public class ResourceHubForm extends BaseValidatorForm {
         return getGroup().isSelected();
     }
 
+    public ImageButtonBean getEnableAlerts() {
+        return _enableAlerts;
+    }
+    
+    public void setEnableAlerts(ImageButtonBean enableAlerts) {
+        _enableAlerts = enableAlerts;
+    }
+
+    public ImageButtonBean getDisableAlerts() {
+        return _disableAlerts;
+    }
+    
+    public void setDisableAlerts(ImageButtonBean disableAlerts) {
+        _disableAlerts = disableAlerts;
+    }
+    
     public String getFg() {
         return _fg;
     }
@@ -219,6 +237,8 @@ public class ResourceHubForm extends BaseValidatorForm {
         _types = new ArrayList();
         _view = null;
         _group = new ImageButtonBean();
+        _enableAlerts = new ImageButtonBean();
+        _disableAlerts = new ImageButtonBean();
         _fg = null;
         _any = false;
         _own = false;

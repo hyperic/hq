@@ -43,6 +43,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.ui.Constants;
@@ -83,10 +84,39 @@ public class RemoveResourceAction extends BaseAction {
         }
         else if (hubForm.isDeleteClicked()) {
             removeResources(request, hubForm.getResources());
+        } else if (hubForm.getEnableAlerts().isSelected()) {
+            activateAlerts(request, hubForm.getResources(), true);
+        } else if (hubForm.getDisableAlerts().isSelected()) {
+            activateAlerts(request, hubForm.getResources(), false);
         }
         return returnSuccess(request, mapping);
     }
 
+    private void activateAlerts(HttpServletRequest request,
+                                String[] resourceItems,
+                                boolean enabled)
+        throws Exception {
+        
+        Integer sessionId = RequestUtils.getSessionId(request);
+        ServletContext ctx = getServlet().getServletContext();
+        EventsBoss ev = ContextUtils.getEventsBoss(ctx);
+
+        List resourceList = new ArrayList();
+        CollectionUtils.addAll(resourceList, resourceItems);
+        List entities =
+            BizappUtils.buildAppdefEntityIds(resourceList);
+        
+        ev.activateAlertDefinitions(
+                 sessionId.intValue(),
+                 (AppdefEntityID[]) entities
+                         .toArray(new AppdefEntityID[entities.size()]), 
+                 enabled);
+
+        RequestUtils.setConfirmation(request,
+                        enabled ? "resource.common.confirm.AlertsEnabled"
+                                : "resource.common.confirm.AlertsDisabled");
+    }
+    
     private void removeResources(HttpServletRequest request,
                                  String[] resourceItems)
         throws SessionNotFoundException, ApplicationException, VetoException,
