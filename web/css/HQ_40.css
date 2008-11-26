@@ -1459,7 +1459,6 @@ select {
 }
 
 .widget .content {
-    height: 322px;
     padding: 0px 10px 10px 10px;
     margin: 0px;
     display: none;
@@ -1523,7 +1522,11 @@ visibility: hidden;*/
 
 /* chart widget stuff */
 
-.widget #chart_container {
+#chartWidget .content {
+    height: 322px;
+}
+
+#chartWidget #chart_container {
     position: absolute;
     top: 35px;
     right: 10px;
@@ -1531,20 +1534,19 @@ visibility: hidden;*/
     height: 250px;
 }
 
-.widget #widget_chart {
+#chartWidget #widget_chart {
 /*    width: 300px;*/
     height: 250px;
     border: 1px solid #DDD;
 }
 
-.widget #chart_container .cTitle a {
+#chartWidget #chart_container .cTitle a {
     color: #FFFFFF;
 }
 
 /* summary widget stuff */
 
 #summaryWidget .content {
-    height: inherit;
     padding-bottom: 30px; /* leave room for the "last-updated" div */
 }
 
