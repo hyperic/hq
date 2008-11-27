@@ -716,7 +716,7 @@ public class EscalationManagerEJBImpl
         }
         
         if (fixed) {  
-            if (moreInfo == null)
+            if (moreInfo == null || moreInfo.trim().length() == 0)
                 moreInfo = "(Fixed by " + subject.getFullName() + ")";
             
             _log.debug(subject.getFullName() + " has fixed alertId=" + alertId);

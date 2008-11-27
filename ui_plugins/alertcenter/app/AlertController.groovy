@@ -49,14 +49,18 @@ class AlertController
         defaultSortOrder: 0,  // descending
         styleClass: {it.fixed ? null : "alertHighlight"},
         columns: [
+            [field:AlertSortField.ACTION_TYPE, width:'3%',
+             label:{
+             	 def member = (it.ackable ? "ackableAlert" : "fixableAlert")
+             	 def box = (it.fixed ? "" : "<input type='checkbox' name='ealerts' class='" + member + "' value='-559038737:" + it.id +"' onclick='ToggleAlertButtons(this)' />")}],
             [field:AlertSortField.DATE, width:'8%',
              label:{df.format(it.timestamp)}],
             [field:AlertSortField.DEFINITION, width:'15%',
              label:{linkTo(it.alertDefinition.name, [resource:it]) }],
-            [field:AlertSortField.RESOURCE, width:'30%',
+            [field:AlertSortField.RESOURCE, width:'28%',
              label:{linkTo(it.alertDefinition.resource.name,
                            [resource:it.alertDefinition.resource])}],
-            [field:AlertSortField.PLATFORM, width:'29%',
+            [field:AlertSortField.PLATFORM, width:'28%',
              label:{linkTo(it.alertDefinition.resource.platform.name,
                            [resource:it.alertDefinition.resource.platform])}],
             [field:AlertSortField.FIXED, width:'5%',
@@ -64,7 +68,7 @@ class AlertController
             [field:AlertSortField.ACKED_BY, width:'7%',
              label:{
                  def by = it.acknowledgedBy
-                 by == null ? "" : by.fullName
+                 by == null ? (it.ackable ? "<img src='/images/icon_ack.gif'>" : "") : by.fullName
             }],
             [field:AlertSortField.SEVERITY, width:'6%',
              label:{
@@ -93,20 +97,24 @@ class AlertController
         defaultSortOrder: 0,  // descending
         styleClass: {it.fixed ? null : "alertHighlight"},
         columns: [
-            [field:GalertLogSortField.DATE, width:'12%',
+            [field:GalertLogSortField.ACTION_TYPE, width:'3%',
+             label:{
+             	 def member = (it.acknowledgeable ? "ackableAlert" : "fixableAlert")
+             	 def box = (it.fixed ? "" : "<input type='checkbox' name='ealerts' class='" + member + "' value='195934910:" + it.id +"' onclick='ToggleAlertButtons(this)' />")}],
+            [field:GalertLogSortField.DATE, width:'14%',
              label:{df.format(it.timestamp)}],
             [field:GalertLogSortField.DEFINITION, width:'25%',
              label:{linkTo(it.alertDef.name, [resource:it]) }],
-            [field:GalertLogSortField.GROUP, width:'40%',
+            [field:GalertLogSortField.GROUP, width:'35%',
              label:{linkTo(it.alertDef.group.name,
                     [resource:it.alertDef.group])}],
             [field:GalertLogSortField.FIXED, width:'5%',
              label:{YesOrNo.valueFor(it.fixed).value.capitalize()}],
-            [field:GalertLogSortField.ACKED_BY, width:'8%',
+            [field:GalertLogSortField.ACKED_BY, width:'10%',
              label:{
                  def by = it.acknowledgedBy
-                 by == null ? "" : by.fullName }],
-            [field:GalertLogSortField.SEVERITY, width:'10%',
+                 by == null ? (it.acknowledgeable ? "<img src='/images/icon_ack.gif'>" : "") : by.fullName }],
+            [field:GalertLogSortField.SEVERITY, width:'8%',
              label:{
                  def s = it.alertDef.severity
                  def imgUrl = urlFor(asset:'images') + 

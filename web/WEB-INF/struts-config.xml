@@ -2110,6 +2110,8 @@
               <!-- we need this here in case we're coming from the alerts list page -->
               <forward name="remove" path="/alerts/Alerts.do?mode=list" />
               <forward name="failure" path="/alerts/Alerts.do?mode=list" />
+              <!-- optional json output -->
+              <forward name="json" path="/common/JSONResponse.jsp" />
       </action>
 
       <action path="/alerts/EditPropertiesFormPrepare"

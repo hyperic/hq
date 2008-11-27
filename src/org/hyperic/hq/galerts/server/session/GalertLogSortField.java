@@ -115,6 +115,18 @@ public abstract class GalertLogSortField
         }
     };
 
+    public static final GalertLogSortField ACTION_TYPE = 
+        new GalertLogSortField(6, "ActionType", "galert.sortField.actionType") 
+    {
+        String getSortString(String alert, String def, String group) {
+            return def + ".actionType";
+        }
+
+        public boolean isSortable() {
+            return false;
+        }
+    };
+    
     private GalertLogSortField(int code, String desc, String localeProp) {
         super(GalertLogSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));

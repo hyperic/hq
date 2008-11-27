@@ -46,6 +46,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.json.JSONObject;
 
 /**
  * An Action that removes an alert
@@ -114,11 +115,28 @@ public class RemoveAction extends BaseAction {
             if ("ACKNOWLEDGE".equals(nwForm.getButtonAction())) {
                 log.debug("Acknowledge alerts");
 
-                for (int i=0; i<alertIds.length; i++) {
-                    // XXX:  This only works for classic alert types ATM
-                    boss.acknowledgeAlert(sessionId.intValue(), 
-                                          ClassicEscalationAlertType.CLASSIC,
-                                          alertIds[i], 0, nwForm.getAckNote());
+                if (alertIds != null) {
+                    for (int i=0; i<alertIds.length; i++) {
+                        // XXX:  This only works for classic alert types ATM
+                        boss.acknowledgeAlert(sessionId.intValue(),
+                                    ClassicEscalationAlertType.CLASSIC,
+                                    alertIds[i], 0, nwForm.getAckNote());
+                    }
+                }
+
+                if (escalatables != null) {
+                    log.debug("Escalatable alerts");
+                    for (int i = 0; i < escalatables.length; i++) {
+                        StringTokenizer st =
+                            new StringTokenizer(escalatables[i], ":");
+                        
+                        int code = Integer.parseInt(st.nextToken());
+                        Integer alert = Integer.valueOf(st.nextToken());
+                        
+                        boss.acknowledgeAlert(sessionId.intValue(),
+                                      EscalationAlertType.findByCode(code),
+                                      alert, 0, nwForm.getAckNote());
+                    }
                 }
             } else if ("FIXED".equals(nwForm.getButtonAction())) { 
                 log.debug("Fixed alerts");
@@ -133,6 +151,7 @@ public class RemoveAction extends BaseAction {
                 }
 
                 if (escalatables != null) {
+                    log.debug("Escalatable alerts");
                     for (int i = 0; i < escalatables.length; i++) {
                         StringTokenizer st =
                             new StringTokenizer(escalatables[i], ":");
@@ -148,7 +167,11 @@ public class RemoveAction extends BaseAction {
             }
         }
 
-        if (nwForm.getEid() == null) {
+        if ("json".equals(RequestUtils.getStringParameter(request, "output"))) {
+            JSONObject ajaxJson = new JSONObject();
+            request.setAttribute(Constants.AJAX_JSON, ajaxJson);
+            return constructForward(request, mapping, "json");
+        } else if (nwForm.getEid() == null) {
             return returnNoResource(request, mapping);
         } else {
             return returnSuccess(request, mapping, params);

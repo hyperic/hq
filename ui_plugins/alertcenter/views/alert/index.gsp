@@ -53,6 +53,84 @@ function setSelectedOption() {
   <% } %>
 }
 
+function ToggleAll(checkAllBox) {
+	var checkedState = checkAllBox.checked;
+	var uList = checkAllBox.form;
+    var len = uList.elements.length;
+
+	for (var i = 0; i < len; i++) {
+        var e = uList.elements[i];
+       
+        if (e.className == "fixableAlert" || e.className == "ackableAlert") {
+        	e.checked = checkedState;
+		}
+	}
+	ToggleAlertButtons(checkAllBox);
+}
+
+function ToggleAlertButtons(myCheckBox) {
+	var myList = myCheckBox.form;
+	var subgroup = myList.name.substring(0, myList.name.indexOf("_"));
+	var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
+	var fixedButton = dojo11.byId(subgroup + "_FixAlertButton");
+	var ackButton = dojo11.byId(subgroup + "_AckAlertButton");
+
+	if (myCheckBox.id != checkAllBox.id) {
+		checkAllBox.checked = false;
+	}
+	
+	if (getNumCheckedByClass(myList, "fixableAlert") > 0) {
+		fixedButton.className = "CompactButton";	
+		ackButton.className = "CompactButtonInactive";
+	} else if (getNumCheckedByClass(myList, "ackableAlert") > 0) {
+		fixedButton.className = "CompactButton";
+		ackButton.className = "CompactButton";	
+	} else {
+		fixedButton.className = "CompactButtonInactive";		
+		ackButton.className = "CompactButtonInactive";	
+	}
+}
+
+function processButtonAction(myButton) {
+	myButton.form.buttonAction.value = myButton.value;
+	confirmAlertFix(myButton.form);
+}
+
+function confirmAlertFix(myForm) {	
+	if (myForm.buttonAction.value == "FIXED") {
+		var notes = prompt("Optional note to be applied to all selected alerts:");
+		myForm.fixedNote.value = notes;
+	}
+	
+	alert(Form.serialize(myForm));
+	
+    dojo11.xhrPost( {
+    	url: myForm.action,
+    	content: Form.serialize(myForm,true),
+    	handleAs: 'json',
+    	load: function(data){
+    		if (dojo11.byId("alertSelect").value == 1) {
+    			Alerts_refreshTable();
+    		} else {
+    			GroupAlerts_refreshTable();
+    		}
+    	},
+    	error: function(data){
+    		console.debug("An error occurred.", data);
+		}
+	});
+	
+	// reset	
+	var subgroup = myForm.name.substring(0, myForm.name.indexOf("_"));
+	var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
+	checkAllBox.checked = false;
+	ToggleAll(checkAllBox);	
+	myForm.fixedNote.value = "";
+	
+	// using ajax, so return false so the form is not submitted
+	return false;
+}
+
 dojo.addOnLoad( function(){
     setSelectedOption()
 });
@@ -119,14 +197,42 @@ dojo.addOnLoad( function(){
       </div>
       <div style="float:right;width:78%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" id="alertsCont">
         <div id="alertsTable" style="display:none;">
+          <form id="Classic_FixAlertsForm" name="Classic_FixAlertsForm" method="POST" action="/alerts/RemoveAlerts.do">
+          <div id="classicAlertsDataDiv" style="height: 400px;overflow-x: hidden; overflow-y: auto;">
           <%= dojoTable(id:'Alerts', title:l.ClassicAlertsTable,
                         refresh:60, url:urlFor(action:'data'),
                         schema:alertSchema, numRows:15) %>
+          </div>
+          <hr/>
+          <div id="alertsFixedButtonDiv" style="margin-top:6px">
+          	<input type="button" id="Classic_FixAlertButton" value="FIXED" class="CompactButtonInactive" onclick="processButtonAction(this)" />
+          	&nbsp;&nbsp;
+          	<input type="button" id="Classic_AckAlertButton" value="ACKNOWLEDGE" class="CompactButtonInactive" onclick="processButtonAction(this)" />          	
+          	<input type="hidden" name="buttonAction" value="" />
+          	<input type="hidden" name="output" value="json" />
+          	<input type="hidden" name="fixedNote" value="" />
+          	<input type="hidden" name="pauseTime" value="" />          	
+          </div>
+          </form>
         </div>
         <div id="groupAlertsTable" style="display:none;">
+          <form id="Group_FixAlertsForm" name="Group_FixAlertsForm" method="POST" action="/alerts/RemoveAlerts.do">
+          <div id="groupAlertsDataDiv" style="height: 400px;overflow-x: hidden; overflow-y: auto;">
           <%= dojoTable(id:'GroupAlerts', title:l.GroupAlertsTable,
                         refresh:60, url:urlFor(action:'groupData'),
                         schema:galertSchema, numRows:15) %>
+          </div>
+          <hr/>
+          <div id="groupAlertsFixedButtonDiv" style="margin-top:6px">
+          	<input type="button" id="Group_FixAlertButton" value="FIXED" class="CompactButtonInactive" onclick="processButtonAction(this)" />
+          	&nbsp;&nbsp;
+          	<input type="button" id="Group_AckAlertButton" value="ACKNOWLEDGE" class="CompactButtonInactive" onclick="processButtonAction(this)" />          	
+          	<input type="hidden" name="buttonAction" value="" />
+          	<input type="hidden" name="output" value="json" />
+          	<input type="hidden" name="fixedNote" value="" />
+          	<input type="hidden" name="pauseTime" value="" />          	
+          </div>
+          </form>
         </div>
       </div>
     </div>

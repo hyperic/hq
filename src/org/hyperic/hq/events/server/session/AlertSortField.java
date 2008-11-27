@@ -126,6 +126,18 @@ public abstract class AlertSortField
             return false;
         }
     };
+ 
+    public static final AlertSortField ACTION_TYPE = 
+        new AlertSortField(7, "ActionType", "alert.sortField.actionType")
+    {
+        String getSortString(String alert, String def, String resource) {
+            return alert + ".actionType";
+        }
+
+        public boolean isSortable() {
+            return false;
+        }
+    };
     
     private AlertSortField(int code, String desc, String localeProp) {
         super(AlertSortField.class, code, desc, localeProp,
