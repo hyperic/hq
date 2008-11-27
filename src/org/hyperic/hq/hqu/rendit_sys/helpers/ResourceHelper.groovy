@@ -309,14 +309,24 @@ class ResourceHelper extends BaseHelper {
     }
 
     /**
-     * Find all prototypes of platforms, servers, and services
+     * Find all prototypes of platforms, servers, and services.
      *
      * @return a list of {@link Resource}s which are prototypes.
      */
     List findAllAppdefPrototypes() {
         rman.findAllAppdefPrototypes()
     }
-     
+
+    /**
+     * Find prototypes of platforms, servers, and services that have
+     * at least 1 instance of that prototype in the inventory.
+     *
+     * @return a list of {@link Resource}s which are prototypes.
+     */
+    List findAppdefPrototypes() {
+        rman.findAppdefPrototypes()
+    }
+         
     /**
      * Find a group by id.  Permission checking is performed.
      */
