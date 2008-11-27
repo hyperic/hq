@@ -595,7 +595,17 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public List findResourcesOfPrototype(Resource proto, PageInfo pInfo) { 
         return getResourceDAO().findResourcesOfPrototype(proto, pInfo);
     }
-    
+
+    /**
+     * Get all resources which are prototypes of platforms, servers, and
+     * services and have a resource of that type in the inventory.
+     *
+     * @ejb:interface-method
+     */
+    public List findAppdefPrototypes() {
+        return getResourceDAO().findAppdefPrototypes();
+    }
+
     /**
      * Get all resources which are prototypes of platforms, servers, and
      * services.

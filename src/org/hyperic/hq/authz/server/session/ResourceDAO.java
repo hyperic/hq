@@ -439,4 +439,16 @@ public class ResourceDAO
             .setParameter("svcProto", AuthzConstants.authzServiceProto)
             .list();
     }
+
+
+    List findAppdefPrototypes() {
+        String sql = "select distinct r.prototype from Resource r " +
+            "where r.resourceType.id in (:platProto, :svrProto, :svcProto) ";
+
+        return getSession().createQuery(sql)
+            .setParameter("platProto", AuthzConstants.authzPlatform)
+            .setParameter("svrProto", AuthzConstants.authzServer)
+            .setParameter("svcProto", AuthzConstants.authzService)
+            .list();
+    }
 }
