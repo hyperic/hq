@@ -6,7 +6,6 @@ import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl as ConfigMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
-import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.server.session.AuthzSubject
@@ -260,12 +259,10 @@ class ResourceConfig {
         }
         
         // Config Response changes
-        def entVal          = new AppdefEntityValue(entityID, subject)
-        def appdefVal       = entVal.resourceValue
         def allConfigs      = new AllConfigResponses()
-        allConfigs.resource = appdefVal
+        allConfigs.resource = entityID
         def allConfigsRoll  = new AllConfigResponses()
-        allConfigsRoll.resource = appdefVal
+        allConfigsRoll.resource = entityID
         
         for (i in 0..<ProductPlugin.CONFIGURABLE_TYPES.length) {
             def type        = ProductPlugin.CONFIGURABLE_TYPES[i]
