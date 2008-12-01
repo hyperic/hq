@@ -112,7 +112,7 @@ initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 <!--  GENERAL PROPERTIES TITLE -->
 <!--  /  -->
 
-<tiles:insert page="View_FilterToolbar.jsp"/>
+<!-- tiles:insert page="View_FilterToolbar.jsp"/ -->
 
 <!--  SERVICES CONTENTS -->
   <display:table items="${services}" cellspacing="0" cellpadding="0" width="100%" action="${ssAction}" var="service" pageSizeValue="ps" pageSize="${param.ps}" pageValue="pn" page="${param.pn}" orderValue="so" order="${param.so}" sortValue="sc" sort="${param.sc}">
