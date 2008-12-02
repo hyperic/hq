@@ -591,7 +591,7 @@ public class MeasurementDAO extends HibernateDAO {
         String sql = "select a, p, s, meas from Agent a " + 
             "join a.platforms p " + 
             "join p.platformType pt " + 
-            "join p.servers s " + 
+            "join p.serversBag s " + 
             "join s.serverType st, " + 
             "Measurement as meas " + 
             "join meas.template as templ " + 
@@ -622,7 +622,7 @@ public class MeasurementDAO extends HibernateDAO {
         String serverSQL = 
             "select a.id, count(m) from Agent a " + 
             "join a.platforms p " +
-            "join p.servers s, " +
+            "join p.serversBag s, " +
             "Measurement as m " + 
             "join m.template templ " + 
             "join templ.monitorableType monType " + 
@@ -633,7 +633,7 @@ public class MeasurementDAO extends HibernateDAO {
         String serviceSQL = 
             "select a.id, count(m) from Agent a " + 
             "join a.platforms p " +
-            "join p.servers s " +
+            "join p.serversBag s " +
             "join s.services v, " +
             "Measurement as m " + 
             "join m.template templ " + 
