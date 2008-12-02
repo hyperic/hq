@@ -79,8 +79,8 @@
     <%-- this is for formatting nazis (you know who you are): there is a good reason for "bad" formatting of the next line --%>
     <td width="40" align="left" id="<c:out value="${widgetInstanceName}"/>DeleteButtonTd"><div id="<c:out value="${widgetInstanceName}"/>DeleteButtonDiv"><html:img page="/images/tbb_delete_gray.gif" border="0"  /></div></td>
       <c:if test="${not empty ResourceSummary}">
-	<td align="left" id="<c:out value="${widgetInstanceName}"/>EnableAlertsButtonTd"><div id="<c:out value="${widgetInstanceName}"/>EnableAlertsButtonDiv"><html:img page="/images/tbb_enable_alerts_gray.gif" border="0"  /></div></td>
-    <td align="left" id="<c:out value="${widgetInstanceName}"/>DisableAlertsButtonTd"><div id="<c:out value="${widgetInstanceName}"/>DisableAlertsButtonDiv"><html:img page="/images/tbb_disable_alerts_gray.gif" border="0"  /></div></td>
+	<td align="left" id="<c:out value="${widgetInstanceName}"/>EnableAlertsButtonTd"><div id="<c:out value="${widgetInstanceName}"/>EnableAlertsButtonDiv"><html:img page="/images/tbb_enable_all_alerts_gray.gif" border="0"  /></div></td>
+    <td align="left" id="<c:out value="${widgetInstanceName}"/>DisableAlertsButtonTd"><div id="<c:out value="${widgetInstanceName}"/>DisableAlertsButtonDiv"><html:img page="/images/tbb_disable_all_alerts_gray.gif" border="0"  /></div></td>
       </c:if>
     </c:if>
   </c:if>
