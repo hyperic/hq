@@ -30,6 +30,7 @@
 package org.hyperic.hq.appdef.shared;
 
 import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 
 /**
  * Value object for AppService.
@@ -53,7 +54,7 @@ public class AppServiceValue
    private boolean ServiceHasBeenSet = false;
    private org.hyperic.hq.appdef.shared.ServiceClusterValue ServiceCluster;
    private boolean ServiceClusterHasBeenSet = false;
-   private org.hyperic.hq.appdef.shared.ServiceTypeValue ServiceType;
+   private ServiceType ServiceType;
    private boolean ServiceTypeHasBeenSet = false;
 
 
@@ -194,11 +195,11 @@ public class AppServiceValue
 	  this.ServiceCluster = ServiceCluster;
 	  ServiceClusterHasBeenSet = true;
    }
-   public org.hyperic.hq.appdef.shared.ServiceTypeValue getServiceType()
+   public ServiceType getServiceType()
    {
 	  return this.ServiceType;
    }
-   public void setServiceType( org.hyperic.hq.appdef.shared.ServiceTypeValue ServiceType )
+   public void setServiceType( ServiceType ServiceType )
    {
 	  this.ServiceType = ServiceType;
 	  ServiceTypeHasBeenSet = true;

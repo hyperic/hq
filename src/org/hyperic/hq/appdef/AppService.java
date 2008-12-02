@@ -161,8 +161,7 @@ public class AppService extends AppdefBean
         else
             appServiceValue.setService( null );
         if ( getServiceType() != null )
-            appServiceValue.setServiceType(
-                getServiceType().getServiceTypeValue() );
+            appServiceValue.setServiceType(getServiceType() );
         else
             appServiceValue.setServiceType( null );
         return appServiceValue;
