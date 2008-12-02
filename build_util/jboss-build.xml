@@ -89,6 +89,7 @@
       <fileset dir="${thirdparty.lib}/hibernate">
         <include name="hibernate3.jar" />
         <include name="antlr-2.7.6.jar" />
+        <include name="asm-attrs.jar" />
       </fileset>
     </copy>
 
