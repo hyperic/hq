@@ -335,6 +335,7 @@ class DojoUtil {
         def sortOrderVar = "${idVar}_sortOrder"
         def urlXtraVar   = "${idVar}_urlXtra"
         def ajaxCountVar = "${idVar}_ajaxCountVar"
+        def refreshTimeoutVar = "${idVar}_refreshTimeout"
         def pageControlStyle = 'display:none'
 
         def scriptMap = scriptBinding.variables['PAGE']
@@ -356,6 +357,7 @@ class DojoUtil {
         var ${sortOrderVar};
         var ${urlXtraVar} = [];
         var ${ajaxCountVar} = 0;
+        var ${refreshTimeoutVar};
 
         dojo.addOnLoad(function() {
             ${tableVar} = dojo.widget.createWidget("dojo:FilteringTable",
@@ -534,11 +536,11 @@ class DojoUtil {
         if (params.refresh) {
             res << """
             function ${idVar}_autoRefresh() {
-                setTimeout("${idVar}_autoRefresh()", ${params.refresh * 1000});
+                ${refreshTimeoutVar} = setTimeout("${idVar}_autoRefresh()", ${params.refresh * 1000});
                 ${id}_refreshTable();
             }
 
-            setTimeout("${idVar}_autoRefresh()", ${params.refresh * 1000});
+            ${refreshTimeoutVar} = setTimeout("${idVar}_autoRefresh()", ${params.refresh * 1000});
             """   
         }
 	res << "</script>"
