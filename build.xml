@@ -420,13 +420,13 @@
         <include name="commons-lang-2.3.jar" />
         <include name="commons-logging.jar" />
         <include name="commons-modeler.jar" />
-        <include name="commons-collections.jar" />
         <include name="commons-dbcp.jar" />
         <include name="commons-pool.jar" />
         <include name="commons-services.jar" />
         <include name="log4j-1.2.14.jar" />
-        <include name="quartz-1.5.1.jar" />
-        <include name="quartz-oracle-1.5.1.jar" />
+        <include name="quartz-1.6.3.jar" />
+        <include name="quartz-oracle-1.6.3.jar" />
+        <include name="quartz-jboss-1.6.3.jar" />
         <include name="snmp4j.jar" />
         <include name="dnsjava-2.0.3.jar" />
         <include name="ehcache-1.5.0.jar" />
@@ -635,7 +635,6 @@
       <fileset dir="${thirdparty.lib}" >
         <include name="commons-beanutils.jar" />
         <include name="commons-digester.jar" />
-        <include name="commons-collections.jar" />
         <include name="commons-validator.jar" />
         <include name="commons-dbcp.jar" />        
         <include name="jstl.jar" />
@@ -910,7 +909,7 @@
         <!-- commons-{collections,beanutils} not in the
              agent classpath but required for
              PluginDumper scripts -->
-        <include name="commons-collections.jar" />
+        <include name="commons-collections-3.2.jar" />
         <include name="commons-beanutils.jar" />  
         <include name="commons-logging.jar" />
         <include name="log4j-1.2.14.jar" />
@@ -1641,7 +1640,7 @@
         <include name="jakarta-oro*.jar" />
         <include name="ant-contrib.jar" />
         <include name="commons-logging.jar"/>
-        <include name="commons-collections.jar"/>
+        <include name="commons-collections-3.2.jar"/>
         <include name="hibernate/*.jar"/>
         <include name="groovy-all-1.5.jar"/>
         <include name="json.jar"/>
