@@ -2435,6 +2435,76 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 // set the hyperic.dashboard.widget as the ancestor of the summaryWidget class.
 hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
 
+hyperic.alert_center = function() {
+	var that = this;
+	that.dialog = null;
+	that.form = null;
+	that.subgroup = null;
+	that.fixedNote = dojo11.byId("FixedNoteTextArea");
+	
+	that.init = function(myForm) {
+	    if(!that.dialog){
+	    	var pane = dojo11.byId('FixedNoteDialog');
+			pane.style.width = "600px";
+			that.dialog = new dijit11.Dialog({
+				id: "Alert_Center_Dialog",
+				refocus: true,
+				autofocus: false,
+				title: "Alert Center"
+			},pane);
+		}
+	    
+	    if (myForm) {
+	    	that.form = myForm;
+	    	that.subgroup = that.form.name.substring(0, that.form.name.indexOf("_"));
+	    }
+	}
+	
+	that.clearRefreshTimeout = function() {
+		eval("clearTimeout(_hqu_" + that.subgroup + "_refreshTimeout);");	
+	}
+	
+	that.confirmFixAlert = function() {
+		that.clearRefreshTimeout();
+		that.dialog.show();
+	}
+	
+	that.fixAlert = function() {
+		that.form.fixedNote.value = that.fixedNote.value;
+		//alert(Form.serialize(that.form));
+		that.submit();
+	    that.dialog.hide();  
+	}
+	
+	that.acknowledgeAlert = function() {
+		//alert(Form.serialize(that.form));
+		that.clearRefreshTimeout();
+		that.submit();
+	}
+	
+	that.submit = function() {
+	    dojo11.xhrPost( {
+	    	url: that.form.action,
+	    	content: Form.serialize(that.form,true),
+	    	handleAs: 'json',
+	    	load: function(data){
+	    		eval("_hqu_" + that.subgroup + "_autoRefresh();");
+	    		resetAlertTable(that.form);
+	    	},
+	    	error: function(data){
+	    		console.debug("An error occurred.", data);
+			}
+		});
+	    that.reset();
+	}
+	
+	that.reset = function() {
+		that.fixedNote.value = "";		
+	}
+	
+	that.init();
+}
+
 hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
     var that = this;
     that.existing_schedule = {};
