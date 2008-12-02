@@ -1043,4 +1043,34 @@ public class SchedulerEJBImpl
            throw new SystemException(e);
        }
    }
+
+    public JobListener getGlobalJobListener(String arg0)
+        throws SchedulerException {
+        return getSchedulerService().getGlobalJobListener(arg0);
+    }
+
+    public TriggerListener getGlobalTriggerListener(String arg0)
+        throws SchedulerException {
+        return getSchedulerService().getGlobalTriggerListener(arg0);
+    }
+
+    public boolean isStarted()
+        throws SchedulerException {
+        return getSchedulerService().isStarted();
+    }
+
+    public boolean removeGlobalJobListener(String arg0)
+        throws SchedulerException {
+        return getSchedulerService().removeGlobalJobListener(arg0);
+    }
+
+    public boolean removeGlobalTriggerListener(String arg0)
+        throws SchedulerException {
+        return getSchedulerService().removeGlobalTriggerListener(arg0);
+    }
+
+    public void startDelayed(int arg0)
+        throws SchedulerException {
+        getSchedulerService().startDelayed(arg0);
+    }
 }

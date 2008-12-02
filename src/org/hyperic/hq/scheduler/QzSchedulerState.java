@@ -31,8 +31,6 @@ public class QzSchedulerState  implements java.io.Serializable {
     private String _instanceName;
     private long _lastCheckinTime;
     private long _checkinInterval;
-    private String _recoverer;
-
     // Constructors
     public QzSchedulerState() {
     }
@@ -60,13 +58,5 @@ public class QzSchedulerState  implements java.io.Serializable {
     
     public void setCheckinInterval(long checkinInterval) {
         _checkinInterval = checkinInterval;
-    }
-
-    public String getRecoverer() {
-        return _recoverer;
-    }
-    
-    public void setRecoverer(String recoverer) {
-        _recoverer = recoverer;
     }
 }

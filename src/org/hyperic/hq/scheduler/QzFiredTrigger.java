@@ -39,6 +39,7 @@ public class QzFiredTrigger  implements java.io.Serializable {
     private String _jobGroup;
     private boolean _isStateful;
     private boolean _requestsRecovery;
+    private int     _priority;
 
     // Constructors
     public QzFiredTrigger() {
@@ -132,4 +133,13 @@ public class QzFiredTrigger  implements java.io.Serializable {
     public void setRequestsRecovery(boolean requestsRecovery) {
         _requestsRecovery = requestsRecovery;
     }
+
+    public int getPriority() {
+        return _priority;
+    }
+
+    public void setPriority(int priority) {
+        _priority = priority;
+    }
+
 }

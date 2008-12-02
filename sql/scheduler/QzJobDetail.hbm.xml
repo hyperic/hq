@@ -6,23 +6,21 @@
       <meta attribute="use-in-equals"><![CDATA[true]]></meta>
       <key-property name="jobName" type="string">
         <meta attribute="use-in-equals"><![CDATA[true]]></meta>
-        <column name="JOB_NAME" not-null="true" length="80"/>
+        <column name="JOB_NAME" not-null="true" length="200"/>
       </key-property>
 
       <key-property name="jobGroup" type="string">
         <meta attribute="use-in-equals"><![CDATA[true]]></meta>
-        <column name="JOB_GROUP" not-null="true" length="80"/>
+        <column name="JOB_GROUP" not-null="true" length="200"/>
       </key-property>
     </composite-id>
 
-    
-
     <property name="description" type="string">
-      <column name="DESCRIPTION" not-null="false" length="120"/>
+      <column name="DESCRIPTION" not-null="false" length="250"/>
     </property>
 
     <property name="jobClassName" type="string">
-      <column name="JOB_CLASS_NAME" not-null="true" length="128"/>
+      <column name="JOB_CLASS_NAME" not-null="true" length="250"/>
     </property>
 
     <property name="isDurable" type="boolean">
@@ -68,17 +66,17 @@
       <meta attribute="use-in-equals"><![CDATA[true]]></meta>
       <key-property name="jobName" type="string">
         <meta attribute="use-in-equals"><![CDATA[true]]></meta>
-        <column name="JOB_NAME" not-null="true" length="80"/>
+        <column name="JOB_NAME" not-null="true" length="200"/>
       </key-property>
 
       <key-property name="jobGroup" type="string">
         <meta attribute="use-in-equals"><![CDATA[true]]></meta>
-        <column name="JOB_GROUP" not-null="true" length="80"/>
+        <column name="JOB_GROUP" not-null="true" length="200"/>
       </key-property>
 
       <key-property name="jobListener" type="string">
         <meta attribute="use-in-equals"><![CDATA[true]]></meta>
-        <column name="JOB_LISTENER" not-null="true" length="80"/>
+        <column name="JOB_LISTENER" not-null="true" length="200"/>
       </key-property>
     </composite-id>
 
@@ -95,23 +93,21 @@
       <meta attribute="use-in-equals"><![CDATA[true]]></meta>
       <key-property name="triggerName" type="string">
         <meta attribute="use-in-equals"><![CDATA[true]]></meta>
-        <column name="TRIGGER_NAME" not-null="true" length="80"/>
+        <column name="TRIGGER_NAME" not-null="true" length="200"/>
       </key-property>
 
       <key-property name="triggerGroup" type="string">
         <meta attribute="use-in-equals"><![CDATA[true]]></meta>
-        <column name="TRIGGER_GROUP" not-null="true" length="80"/>
+        <column name="TRIGGER_GROUP" not-null="true" length="200"/>
       </key-property>
     </composite-id>
 
-    
-
     <property name="jobName" type="string">
-      <column name="JOB_NAME" not-null="true" length="80"/>
+      <column name="JOB_NAME" not-null="true" length="200"/>
     </property>
 
     <property name="jobGroup" type="string">
-      <column name="JOB_GROUP" not-null="true" length="80"/>
+      <column name="JOB_GROUP" not-null="true" length="200"/>
     </property>
 
     <property name="isVolatile" type="boolean">
@@ -119,7 +115,7 @@
     </property>
 
     <property name="description" type="string">
-      <column name="DESCRIPTION" not-null="false" length="120"/>
+      <column name="DESCRIPTION" not-null="false" length="250"/>
     </property>
 
     <property name="nextFireTime" type="long">
@@ -147,7 +143,7 @@
     </property>
 
     <property name="calendarName" type="string">
-      <column name="CALENDAR_NAME" not-null="false" length="80"/>
+      <column name="CALENDAR_NAME" not-null="false" length="200"/>
     </property>
 
     <property name="misFireInstr" type="integer">
@@ -156,6 +152,10 @@
 
     <property lazy="true" name="jobData" type="binary">
       <column name="JOB_DATA" not-null="false"/>
+    </property>
+
+    <property name="priority" type="integer">
+      <column name="PRIORITY" not-null="false"/>
     </property>
 
     <many-to-one name="jobDetail" class="QzJobDetail" cascade="all" insert="false" update="false" foreign-key="EAM_FK_QT_QJD">
@@ -173,8 +173,8 @@
 
     <joined-subclass name="QzSimpleTrigger" table="QRTZ_SIMPLE_TRIGGERS">
       <key foreign-key="EAM_FK_QST_QT">
-        <column name="TRIGGER_NAME" not-null="true" length="80"/>
-        <column name="TRIGGER_GROUP" not-null="true" length="80"/>
+        <column name="TRIGGER_NAME" not-null="true" length="200"/>
+        <column name="TRIGGER_GROUP" not-null="true" length="200"/>
       </key>
 
       <property name="repeatCount" type="long">
@@ -192,12 +192,12 @@
 
     <joined-subclass name="QzCronTrigger" table="QRTZ_CRON_TRIGGERS">
       <key foreign-key="EAM_FK_QCT_QT">
-        <column name="TRIGGER_NAME" not-null="true" length="80"/>
-        <column name="TRIGGER_GROUP" not-null="true" length="80"/>
+        <column name="TRIGGER_NAME" not-null="true" length="200"/>
+        <column name="TRIGGER_GROUP" not-null="true" length="200"/>
       </key>
 
       <property name="cronExpression" type="string">
-        <column name="CRON_EXPRESSION" not-null="true" length="80"/>
+        <column name="CRON_EXPRESSION" not-null="true" length="200"/>
       </property>
 
       <property name="timeZoneId" type="string">
@@ -207,8 +207,8 @@
 
     <joined-subclass name="QzBlobTrigger" table="QRTZ_BLOB_TRIGGERS">
       <key foreign-key="EAM_FK_QBT_QT">
-        <column name="TRIGGER_NAME" not-null="true" length="80"/>
-        <column name="TRIGGER_GROUP" not-null="true" length="80"/>
+        <column name="TRIGGER_NAME" not-null="true" length="200"/>
+        <column name="TRIGGER_GROUP" not-null="true" length="200"/>
       </key>
 
       <property lazy="true" name="blobData" type="binary">
@@ -223,15 +223,15 @@
       <meta attribute="use-in-equals"><![CDATA[true]]></meta>
       <key-property name="triggerName" type="string">
         <meta attribute="use-in-equals"><![CDATA[true]]></meta>
-        <column name="TRIGGER_NAME" not-null="true" length="80"/>
+        <column name="TRIGGER_NAME" not-null="true" length="200"/>
       </key-property>
       <key-property name="triggerGroup" type="string">
         <meta attribute="use-in-equals"><![CDATA[true]]></meta>
-        <column name="TRIGGER_GROUP" not-null="true" length="80"/>
+        <column name="TRIGGER_GROUP" not-null="true" length="200"/>
       </key-property>
       <key-property name="triggerListener" type="string">
         <meta attribute="use-in-equals"><![CDATA[true]]></meta>
-        <column name="TRIGGER_LISTENER" not-null="true" length="80"/>
+        <column name="TRIGGER_LISTENER" not-null="true" length="200"/>
       </key-property>
     </composite-id>
 

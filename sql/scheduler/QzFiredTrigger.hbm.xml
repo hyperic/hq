@@ -8,15 +8,15 @@
       <generator class="assigned"/>
     </id>
     <property name="triggerName" type="string">
-      <column name="TRIGGER_NAME" not-null="true" length="80"/>
+      <column name="TRIGGER_NAME" not-null="true" length="200"/>
     </property>
 
     <property name="triggerGroup" type="string">
-      <column name="TRIGGER_GROUP" not-null="true" length="80"/>
+      <column name="TRIGGER_GROUP" not-null="true" length="200"/>
     </property>
 
     <property name="instanceName" type="string">
-      <column name="INSTANCE_NAME" not-null="true" length="80"/>
+      <column name="INSTANCE_NAME" not-null="true" length="200"/>
     </property>
 
     <property name="firedTime" type="long">
@@ -32,11 +32,11 @@
     </property>
 
     <property name="jobName" type="string">
-      <column name="JOB_NAME" not-null="false" length="80"/>
+      <column name="JOB_NAME" not-null="false" length="200"/>
     </property>
 
     <property name="jobGroup" type="string">
-      <column name="JOB_GROUP" not-null="false" length="80"/>
+      <column name="JOB_GROUP" not-null="false" length="200"/>
     </property>
 
     <property name="isStateful" type="boolean">
@@ -45,6 +45,10 @@
 
     <property name="requestsRecovery" type="boolean">
       <column name="REQUESTS_RECOVERY" not-null="false"/>
+    </property>
+
+    <property name="priority" type="integer">
+      <column name="PRIORITY" not-null="true"/>
     </property>
 
   </class>

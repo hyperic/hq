@@ -9432,6 +9432,81 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.131">
+    <schema-alterColumn table="QRTZ_BLOB_TRIGGERS" column="TRIGGER_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_BLOB_TRIGGERS" column="TRIGGER_GROUP"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_CALENDARS" column="CALENDAR_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_CRON_TRIGGERS" column="TRIGGER_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_CRON_TRIGGERS" column="TRIGGER_GROUP"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_CRON_TRIGGERS" column="CRON_EXPRESSION"
+                        precision="120" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_FIRED_TRIGGERS" column="TRIGGER_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_FIRED_TRIGGERS" column="TRIGGER_GROUP"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_FIRED_TRIGGERS" column="INSTANCE_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_FIRED_TRIGGERS" column="JOB_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_FIRED_TRIGGERS" column="JOB_GROUP"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-addColumn table="QRTZ_FIRED_TRIGGERS" column="PRIORITY"
+                      columnType="INTEGER"/>
+    <schema-alterColumn table="QRTZ_FIRED_TRIGGERS" column="PRIORITY"
+                        nullable="NOT NULL"/>
+    <schema-alterColumn table="QRTZ_JOB_DETAILS" column="JOB_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_JOB_DETAILS" column="JOB_GROUP"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_JOB_DETAILS" column="DESCRIPTION"
+                        precision="250" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_JOB_DETAILS" column="JOB_CLASS_NAME"
+                        precision="250" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_JOB_LISTENERS" column="JOB_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_JOB_LISTENERS" column="JOB_GROUP"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_JOB_LISTENERS" column="JOB_LISTENER"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_PAUSED_TRIGGER_GRPS" column="TRIGGER_GROUP"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_SCHEDULER_STATE" column="INSTANCE_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_SIMPLE_TRIGGERS" column="TRIGGER_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_SIMPLE_TRIGGERS" column="TRIGGER_GROUP"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_TRIGGER_LISTENERS" column="TRIGGER_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_TRIGGER_LISTENERS" column="TRIGGER_GROUP"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_TRIGGER_LISTENERS" column="TRIGGER_LISTENER"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_TRIGGERS" column="TRIGGER_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_TRIGGERS" column="TRIGGER_GROUP"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_TRIGGERS" column="JOB_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_TRIGGERS" column="JOB_GROUP"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_TRIGGERS" column="DESCRIPTION"
+                        precision="250" columnType="VARCHAR2" />
+    <schema-alterColumn table="QRTZ_TRIGGERS" column="CALENDAR_NAME"
+                        precision="200" columnType="VARCHAR2" />
+    <schema-addColumn table="QRTZ_TRIGGERS" column="PRIORITY" columnType="INTEGER"/>
+    <schema-directSQL>
+      <statement fail="false">
+        ALTER TABLE QRTZ_SCHEDULER_STATE DROP COLUMN RECOVERER
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

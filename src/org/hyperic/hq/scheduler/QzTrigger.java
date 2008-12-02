@@ -46,6 +46,7 @@ public class QzTrigger  implements java.io.Serializable {
     private byte[] _jobData;
     private QzJobDetail _jobDetail;
     private Collection _triggerListeners;
+    private int     _priority;
 
     // Constructors
     public QzTrigger() {
@@ -178,5 +179,13 @@ public class QzTrigger  implements java.io.Serializable {
     
     public void setTriggerListeners(Collection triggerListeners) {
         _triggerListeners = triggerListeners;
+    }
+
+    public int getPriority() {
+        return _priority;
+    }
+
+    public void setPriority(int priority) {
+        _priority = priority;
     }
 }

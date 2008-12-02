@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -63,7 +63,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     private Properties quartzProps;
 
     private StdSchedulerFactory schedFact = new StdSchedulerFactory();
-    private Scheduler sched;
+    private Scheduler _sched;
 
     public SchedulerService() {
     }
@@ -95,37 +95,37 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
      */
 
     public void stop() throws SchedulerException {
-        log.info("Stopping " + sched );
+        log.info("Stopping " + _sched );
         shutdown();
-        sched = null;
+        _sched = null;
     }
 
     /**
      * @jmx:managed-attribute
      */
     public String getSchedulerName() throws SchedulerException {
-        return sched.getSchedulerName();
+        return _sched.getSchedulerName();
     }
 
     /**
      * @jmx:managed-attribute
      */
     public String getSchedulerInstanceId() throws SchedulerException {
-        return sched.getSchedulerInstanceId();
+        return _sched.getSchedulerInstanceId();
     }
 
     /**
      * @jmx:managed-attribute
      */
     public SchedulerContext getContext() throws SchedulerException {
-        return sched.getContext();
+        return _sched.getContext();
     }
 
     /**
      * @jmx:managed-attribute
      */
     public SchedulerMetaData getMetaData() throws SchedulerException {
-        return sched.getMetaData();
+        return _sched.getMetaData();
     }
 
     /**
@@ -138,29 +138,29 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
      */
     public void startScheduler() throws SchedulerException {
         log.info("Starting Scheduler");
-        sched = schedFact.getScheduler();
-        sched.start();
+        _sched = schedFact.getScheduler();
+        _sched.start();
     }
     
     /**
      * @jmx:managed-operation
      */
     public void pause() throws SchedulerException {
-        sched.pause();
+        _sched.pause();
     }
 
     /**
      * @jmx:managed-attribute
      */
     public boolean isPaused() throws SchedulerException {
-        return sched.isPaused();
+        return _sched.isPaused();
     }
 
     /**
      * @jmx:managed-operation
      */
     public void shutdown() throws SchedulerException {
-        sched.shutdown();
+        _sched.shutdown();
     }
 
     /**
@@ -169,21 +169,21 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void shutdown(boolean waitForJobsToComplete) 
         throws SchedulerException
     {
-        sched.shutdown(waitForJobsToComplete);
+        _sched.shutdown(waitForJobsToComplete);
     }
 
     /**
      * @jmx:managed-attribute
      */
     public boolean isShutdown() throws SchedulerException {
-        return sched.isShutdown();
+        return _sched.isShutdown();
     }
 
     /**
      * @jmx:managed-operation
      */
     public List getCurrentlyExecutingJobs() throws SchedulerException {
-        return sched.getCurrentlyExecutingJobs();
+        return _sched.getCurrentlyExecutingJobs();
     }
 
     /**
@@ -196,14 +196,14 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
             log.debug("Job details: " + jobDetail);
         }
 
-        return sched.scheduleJob(jobDetail, trigger);
+        return _sched.scheduleJob(jobDetail, trigger);
     }
 
     /**
      * @jmx:managed-operation
      */
     public Date scheduleJob(Trigger trigger) throws SchedulerException {
-        return sched.scheduleJob(trigger);
+        return _sched.scheduleJob(trigger);
     }
 
     /**
@@ -212,7 +212,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void addJob(JobDetail jobDetail, boolean replace)
         throws SchedulerException
     {
-        sched.addJob(jobDetail, replace);
+        _sched.addJob(jobDetail, replace);
     }
 
     /**
@@ -221,7 +221,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public boolean deleteJob(String jobName, String groupName)
         throws SchedulerException
     {
-        return sched.deleteJob(jobName, groupName);
+        return _sched.deleteJob(jobName, groupName);
     }
 
     /**
@@ -230,7 +230,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public boolean unscheduleJob(String triggerName, String groupName)
         throws SchedulerException
     {
-        return sched.unscheduleJob(triggerName, groupName);
+        return _sched.unscheduleJob(triggerName, groupName);
     }
 
     /**
@@ -239,7 +239,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void triggerJob(String jobName, String groupName)
         throws SchedulerException
     {
-        sched.triggerJob(jobName, groupName);
+        _sched.triggerJob(jobName, groupName);
     }
 
     /**
@@ -248,7 +248,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void triggerJob(String jobName, String groupName, JobDataMap map)
         throws SchedulerException
     {
-        sched.triggerJob(jobName, groupName, map);
+        _sched.triggerJob(jobName, groupName, map);
     }
 
     /**
@@ -258,7 +258,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
                                               String groupName)
         throws SchedulerException
     {
-        sched.triggerJobWithVolatileTrigger(jobName, groupName);
+        _sched.triggerJobWithVolatileTrigger(jobName, groupName);
     }
 
     /**
@@ -269,7 +269,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
                                               JobDataMap map)
         throws SchedulerException
     {
-        sched.triggerJobWithVolatileTrigger(jobName, groupName, map);
+        _sched.triggerJobWithVolatileTrigger(jobName, groupName, map);
     }
 
     /**
@@ -278,14 +278,14 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void pauseTrigger(String triggerName, String groupName)
         throws SchedulerException
     {
-        sched.pauseTrigger(triggerName, groupName);
+        _sched.pauseTrigger(triggerName, groupName);
     }
 
     /**
      * @jmx:managed-operation
      */
     public void pauseTriggerGroup(String groupName) throws SchedulerException {
-        sched.pauseTriggerGroup(groupName);
+        _sched.pauseTriggerGroup(groupName);
     }
 
     /**
@@ -294,14 +294,14 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void pauseJob(String jobName, String groupName)
         throws SchedulerException
     {
-        sched.pauseJob(jobName, groupName);
+        _sched.pauseJob(jobName, groupName);
     }
 
     /**
      * @jmx:managed-operation
      */
     public void pauseJobGroup(String groupName) throws SchedulerException {
-        sched.pauseJobGroup(groupName);
+        _sched.pauseJobGroup(groupName);
     }
 
     /**
@@ -310,7 +310,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void resumeTrigger(String triggerName, String groupName)
         throws SchedulerException
     {
-        sched.resumeTrigger(triggerName, groupName);
+        _sched.resumeTrigger(triggerName, groupName);
     }
 
     /**
@@ -319,7 +319,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void resumeTriggerGroup(String groupName)
         throws SchedulerException
     {
-        sched.resumeTriggerGroup(groupName);
+        _sched.resumeTriggerGroup(groupName);
     }
 
     /**
@@ -328,42 +328,42 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void resumeJob(String jobName, String groupName)
         throws SchedulerException
     {
-        sched.resumeJob(jobName, groupName);
+        _sched.resumeJob(jobName, groupName);
     }
 
     /**
      * @jmx:managed-operation
      */
     public void resumeJobGroup(String groupName) throws SchedulerException {
-        sched.resumeJobGroup(groupName);
+        _sched.resumeJobGroup(groupName);
     }
 
     /**
      * @jmx:managed-operation
      */
     public void pauseAll() throws SchedulerException {
-        sched.pauseAll();
+        _sched.pauseAll();
     }
 
     /**
      * @jmx:managed-operation
      */
     public void resumeAll() throws SchedulerException {
-        sched.resumeAll();
+        _sched.resumeAll();
     }
 
     /**
      * @jmx:managed-attribute
      */
     public String[] getJobGroupNames() throws SchedulerException {
-        return sched.getJobGroupNames();
+        return _sched.getJobGroupNames();
     }
 
     /**
      * @jmx:managed-operation
      */
     public String[] getJobNames(String groupName) throws SchedulerException {
-        return sched.getJobNames(groupName);
+        return _sched.getJobNames(groupName);
     }
 
     /**
@@ -372,14 +372,14 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public Trigger[] getTriggersOfJob(String jobName, String groupName)
         throws SchedulerException
     {
-        return sched.getTriggersOfJob(jobName, groupName);
+        return _sched.getTriggersOfJob(jobName, groupName);
     }
 
     /**
      * @jmx:managed-attribute
      */
     public String[] getTriggerGroupNames() throws SchedulerException {
-        return sched.getTriggerGroupNames();
+        return _sched.getTriggerGroupNames();
     }
 
     /**
@@ -388,7 +388,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public String[] getTriggerNames(String groupName)
         throws SchedulerException
     {
-        return sched.getTriggerNames(groupName);
+        return _sched.getTriggerNames(groupName);
     }
 
     /**
@@ -397,7 +397,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public JobDetail getJobDetail(String jobName, String jobGroup)
         throws SchedulerException
     {
-        return sched.getJobDetail(jobName, jobGroup);
+        return _sched.getJobDetail(jobName, jobGroup);
     }
 
     /**
@@ -406,7 +406,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public Trigger getTrigger(String triggerName, String triggerGroup)
         throws SchedulerException
     {
-        return sched.getTrigger(triggerName, triggerGroup);
+        return _sched.getTrigger(triggerName, triggerGroup);
     }
 
     /**
@@ -416,28 +416,28 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
                             boolean replace, boolean updateTriggers) 
         throws SchedulerException
     {
-        sched.addCalendar(calName, calendar, replace, updateTriggers);
+        _sched.addCalendar(calName, calendar, replace, updateTriggers);
     }
 
     /**
      * @jmx:managed-operation
      */
     public boolean deleteCalendar(String calName) throws SchedulerException {
-        return sched.deleteCalendar(calName);
+        return _sched.deleteCalendar(calName);
     }
 
     /**
      * @jmx:managed-operation
      */
     public Calendar getCalendar(String calName) throws SchedulerException {
-        return sched.getCalendar(calName);
+        return _sched.getCalendar(calName);
     }
 
     /**
      * @jmx:managed-attribute
      */
     public String[] getCalendarNames() throws SchedulerException {
-        return sched.getCalendarNames();
+        return _sched.getCalendarNames();
     }
 
     /**
@@ -446,7 +446,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void addGlobalJobListener(JobListener jobListener)
         throws SchedulerException
     {
-        sched.addGlobalJobListener(jobListener);
+        _sched.addGlobalJobListener(jobListener);
     }
 
     /**
@@ -455,7 +455,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void addJobListener(JobListener jobListener)
         throws SchedulerException
     {
-        sched.addJobListener(jobListener);
+        _sched.addJobListener(jobListener);
     }
 
     /**
@@ -464,21 +464,21 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public boolean removeGlobalJobListener(JobListener jobListener)
         throws SchedulerException
     {
-        return sched.removeGlobalJobListener(jobListener);
+        return _sched.removeGlobalJobListener(jobListener);
     }
 
     /**
      * @jmx:managed-operation
      */
     public boolean removeJobListener(String name) throws SchedulerException {
-        return sched.removeJobListener(name);
+        return _sched.removeJobListener(name);
     }
 
     /**
      * @jmx:managed-attribute
      */
     public List getGlobalJobListeners() throws SchedulerException {
-        return sched.getGlobalJobListeners();
+        return _sched.getGlobalJobListeners();
     }
 
     /**
@@ -486,14 +486,14 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
      * @jmx:managed-attribute
      */
     public Set getJobListenerNames() throws SchedulerException {
-        return sched.getJobListenerNames();
+        return _sched.getJobListenerNames();
     }
 
     /**
      * @jmx:managed-operation
      */
     public JobListener getJobListener(String name) throws SchedulerException {
-        return sched.getJobListener(name);
+        return _sched.getJobListener(name);
     }
 
     /**
@@ -502,7 +502,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void addGlobalTriggerListener(TriggerListener triggerListener)
         throws SchedulerException
     {
-        sched.addGlobalTriggerListener(triggerListener);
+        _sched.addGlobalTriggerListener(triggerListener);
     }
 
     /**
@@ -511,7 +511,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void addTriggerListener(TriggerListener triggerListener)
         throws SchedulerException
     {
-        sched.addTriggerListener(triggerListener);
+        _sched.addTriggerListener(triggerListener);
     }
 
     /**
@@ -520,7 +520,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public boolean removeGlobalTriggerListener(TriggerListener triggerListener)
         throws SchedulerException 
     {
-        return sched.removeGlobalTriggerListener(triggerListener);
+        return _sched.removeGlobalTriggerListener(triggerListener);
     }
 
     /**
@@ -529,21 +529,21 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public boolean removeTriggerListener(String name)
         throws SchedulerException
     {
-        return sched.removeTriggerListener(name);
+        return _sched.removeTriggerListener(name);
     }
 
     /**
      * @jmx:managed-attribute
      */
     public List getGlobalTriggerListeners() throws SchedulerException {
-        return sched.getGlobalTriggerListeners();
+        return _sched.getGlobalTriggerListeners();
     }
 
     /**
      * @jmx:managed-attribute
      */
     public Set getTriggerListenerNames() throws SchedulerException {
-        return sched.getTriggerListenerNames();
+        return _sched.getTriggerListenerNames();
     }
 
     /**
@@ -552,7 +552,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public TriggerListener getTriggerListener(String name)
         throws SchedulerException
     {
-        return sched.getTriggerListener(name);
+        return _sched.getTriggerListener(name);
     }
 
     /**
@@ -561,7 +561,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void addSchedulerListener(SchedulerListener schedulerListener) 
         throws SchedulerException 
     {
-        sched.addSchedulerListener(schedulerListener);
+        _sched.addSchedulerListener(schedulerListener);
     }
 
     /**
@@ -570,14 +570,14 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public boolean removeSchedulerListener(SchedulerListener schedulerListener)
         throws SchedulerException 
     {
-        return sched.removeSchedulerListener(schedulerListener);
+        return _sched.removeSchedulerListener(schedulerListener);
     }
 
     /**
      * @jmx:managed-attribute
      */
     public List getSchedulerListeners() throws SchedulerException {
-        return sched.getSchedulerListeners();
+        return _sched.getSchedulerListeners();
     }
 
     /**
@@ -586,7 +586,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public boolean interrupt(String jobName, String groupName)
         throws UnableToInterruptJobException
     {
-        return this.sched.interrupt(jobName, groupName);
+        return _sched.interrupt(jobName, groupName);
     }
 
     /**
@@ -595,7 +595,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public int getTriggerState(String triggerName, String triggerGroup) 
         throws SchedulerException
     {
-        return this.sched.getTriggerState(triggerName, triggerGroup);
+        return _sched.getTriggerState(triggerName, triggerGroup);
     }
 
     /**
@@ -604,7 +604,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public Set getPausedTriggerGroups()
         throws SchedulerException
     {
-        return this.sched.getPausedTriggerGroups();
+        return _sched.getPausedTriggerGroups();
     }
 
     /**
@@ -614,7 +614,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
                               Trigger newTriggerName)
         throws SchedulerException
     {
-        return this.sched.rescheduleJob(triggerName, groupName,
+        return _sched.rescheduleJob(triggerName, groupName,
                                         newTriggerName);
     }
 
@@ -624,7 +624,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void setJobFactory(JobFactory factory)
         throws SchedulerException
     {
-        this.sched.setJobFactory(factory);
+        _sched.setJobFactory(factory);
     }
 
     /**
@@ -633,7 +633,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public boolean isInStandbyMode()
         throws SchedulerException
     {
-        return this.sched.isInStandbyMode();
+        return _sched.isInStandbyMode();
     }
 
     /**
@@ -642,7 +642,7 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void standby()
         throws SchedulerException
     {
-        this.sched.standby();
+        _sched.standby();
     }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name)
@@ -656,11 +656,41 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     public void preDeregister()
             throws Exception {
         log.error("Deregister ");
-        if( sched!=null )
+        if( _sched!=null )
             shutdown();
     }
 
     public void postDeregister() {
+    }
+
+    public JobListener getGlobalJobListener(String arg0)
+        throws SchedulerException {
+        return _sched.getGlobalJobListener(arg0);
+    }
+
+    public TriggerListener getGlobalTriggerListener(String arg0)
+        throws SchedulerException {
+        return _sched.getGlobalTriggerListener(arg0);
+    }
+
+    public boolean isStarted()
+        throws SchedulerException {
+        return _sched.isStarted();
+    }
+
+    public boolean removeGlobalJobListener(String arg0)
+        throws SchedulerException {
+        return this.removeGlobalJobListener(arg0);
+    }
+
+    public boolean removeGlobalTriggerListener(String arg0)
+        throws SchedulerException {
+        return _sched.removeGlobalTriggerListener(arg0);
+    }
+
+    public void startDelayed(int arg0)
+        throws SchedulerException {
+        _sched.startDelayed(arg0);
     }
 }
 

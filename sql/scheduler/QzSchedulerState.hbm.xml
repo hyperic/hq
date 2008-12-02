@@ -4,7 +4,7 @@
   <class name="QzSchedulerState" table="QRTZ_SCHEDULER_STATE">
     <id name="instanceName" type="string">
       <meta attribute="use-in-equals"><![CDATA[true]]></meta>
-      <column name="INSTANCE_NAME" length="80" not-null="true"/>
+      <column name="INSTANCE_NAME" length="200" not-null="true"/>
       <generator class="assigned"/>
     </id>
 
@@ -16,9 +16,6 @@
       <column name="CHECKIN_INTERVAL" not-null="true"/>
     </property>
 
-    <property name="recoverer" type="string">
-      <column name="RECOVERER" not-null="false" length="80"/>
-    </property>
   </class>
 
 </hibernate-mapping>
