@@ -93,9 +93,9 @@ function ToggleButtons(widgetInstanceName, prefix, isRemove, form) {
 		ReplaceButton(prefix + "GroupButtonDiv", prefix + "GroupButtonTd",
                       "on", "group", "group");
 		ReplaceButton(prefix + "EnableAlertsButtonDiv", prefix + "EnableAlertsButtonTd",
-					  "on", "enable_alerts", "enableAlerts");
+					  "on", "enable_all_alerts", "enableAlerts");
 		ReplaceButton(prefix + "DisableAlertsButtonDiv", prefix + "DisableAlertsButtonTd",
-					  "on", "disable_alerts", "disableAlerts");
+					  "on", "disable_all_alerts", "disableAlerts");
 		
         if (goButtonLink!=null)
             ReplaceGoButton(true);
@@ -116,9 +116,9 @@ function ToggleButtons(widgetInstanceName, prefix, isRemove, form) {
 		ReplaceButton(prefix + "GroupButtonDiv", prefix + "GroupButtonTd",
                       "off", "group", "group");
 		ReplaceButton(prefix + "EnableAlertsButtonDiv", prefix + "EnableAlertsButtonTd",
-				  	  "off", "enable_alerts", "enableAlerts");
+				  	  "off", "enable_all_alerts", "enableAlerts");
 		ReplaceButton(prefix + "DisableAlertsButtonDiv", prefix + "DisableAlertsButtonTd",
-				  	  "off", "disable_alerts", "disableAlerts");
+				  	  "off", "disable_all_alerts", "disableAlerts");
 
 		if (goButtonLink != null)
             ReplaceGoButton(false);
