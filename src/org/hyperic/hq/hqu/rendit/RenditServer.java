@@ -137,7 +137,7 @@ public class RenditServer {
                 }
             });
         } catch (Exception e) {
-            throw new PluginLoadException(e.getMessage());
+            throw new PluginLoadException(e.getMessage(), e);
         }
         return w[0];
     }
