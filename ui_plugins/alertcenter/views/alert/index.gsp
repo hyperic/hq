@@ -10,19 +10,9 @@ function selectAlertType(t) {
   }
 }
 
-function resetAlertTable(myForm) {
-	var subgroup = myForm.name.substring(0, myForm.name.indexOf("_"));
-	var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
-	checkAllBox.checked = false;
-	ToggleAll(checkAllBox);	
-	myForm.fixedNote.value = "";
-}
-
 function refreshAlertTables() {
   Alerts_refreshTable();
-  resetAlertTable(document.Alerts_FixForm);
   GroupAlerts_refreshTable();
-  resetAlertTable(document.GroupAlerts_FixForm);
 }
   
 function refreshDefTables() {
@@ -61,61 +51,6 @@ function setSelectedOption() {
     selectDrop = document.getElementById('defSelect')
     selectDefType(selectDrop.options[selectDrop.selectedIndex].value);
   <% } %>
-}
-
-function ToggleAll(checkAllBox) {
-	var checkedState = checkAllBox.checked;
-	var uList = checkAllBox.form;
-    var len = uList.elements.length;
-
-	for (var i = 0; i < len; i++) {
-        var e = uList.elements[i];
-       
-        if (e.className == "fixableAlert" || e.className == "ackableAlert") {
-        	e.checked = checkedState;
-		}
-	}
-	ToggleAlertButtons(checkAllBox);
-}
-
-function ToggleAlertButtons(myCheckBox) {
-	var myList = myCheckBox.form;
-	var subgroup = myList.name.substring(0, myList.name.indexOf("_"));
-	var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
-	var fixedButton = dojo11.byId(subgroup + "_FixButton");
-	var ackButton = dojo11.byId(subgroup + "_AckButton");
-
-	if (myCheckBox.id != checkAllBox.id) {
-		checkAllBox.checked = false;
-	}
-	
-	if (getNumCheckedByClass(myList, "fixableAlert") > 0) {
-		fixedButton.className = "CompactButton";
-		fixedButton.disabled = false;	
-		ackButton.className = "CompactButtonInactive";
-		ackButton.disabled = true;
-	} else if (getNumCheckedByClass(myList, "ackableAlert") > 0) {
-		fixedButton.className = "CompactButton";
-		fixedButton.disabled = false;	
-		ackButton.className = "CompactButton";	
-		ackButton.disabled = false;
-	} else {
-		fixedButton.className = "CompactButtonInactive";		
-		fixedButton.disabled = true;	
-		ackButton.className = "CompactButtonInactive";	
-		ackButton.disabled = true;
-	}
-}
-
-function processButtonAction(myButton) {
-	myButton.form.buttonAction.value = myButton.value;
-	My_Alert_Center.init(myButton.form);
-	
-	if (myButton.value == "FIXED") {
-		My_Alert_Center.confirmFixAlert();
-	} else if (myButton.value == "ACKNOWLEDGE") {
-		My_Alert_Center.acknowledgeAlert();
-	}
 }
 
 dojo.addOnLoad( function(){
@@ -192,9 +127,9 @@ dojo.addOnLoad( function(){
           </div>
           <hr/>
           <div id="Alerts_FixedButtonDiv" style="margin-top:6px">
-          	<input type="button" id="Alerts_FixButton" value="FIXED" class="CompactButtonInactive" disabled="disabled" onclick="processButtonAction(this)" />
+          	<input type="button" id="Alerts_FixButton" value="FIXED" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />
           	&nbsp;&nbsp;
-          	<input type="button" id="Alerts_AckButton" value="ACKNOWLEDGE" class="CompactButtonInactive" disabled="disabled" onclick="processButtonAction(this)" />          	
+          	<input type="button" id="Alerts_AckButton" value="ACKNOWLEDGE" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />          	
           	<input type="hidden" name="buttonAction" value="" />
           	<input type="hidden" name="output" value="json" />
           	<input type="hidden" name="fixedNote" value="" />
@@ -211,9 +146,9 @@ dojo.addOnLoad( function(){
           </div>
           <hr/>
           <div id="GroupAlerts_FixedButtonDiv" style="margin-top:6px">
-          	<input type="button" id="GroupAlerts_FixButton" value="FIXED" class="CompactButtonInactive" disabled="disabled" onclick="processButtonAction(this)" />
+          	<input type="button" id="GroupAlerts_FixButton" value="FIXED" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />
           	&nbsp;&nbsp;
-          	<input type="button" id="GroupAlerts_AckButton" value="ACKNOWLEDGE" class="CompactButtonInactive" disabled="disabled" onclick="processButtonAction(this)" />          	
+          	<input type="button" id="GroupAlerts_AckButton" value="ACKNOWLEDGE" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />          	
           	<input type="hidden" name="buttonAction" value="" />
           	<input type="hidden" name="output" value="json" />
           	<input type="hidden" name="fixedNote" value="" />
@@ -234,7 +169,7 @@ dojo.addOnLoad( function(){
           	    <tr>
           	    	<td class="buttonLeft"></td>
           	    	<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">
-          	    		<span id="button"><a href="javascript:My_Alert_Center.fixAlert();">FIXED</a></span>
+          	    		<span id="button"><a href="javascript:MyAlertCenter.fixAlert();">FIXED</a></span>
           	    		<span style="padding-left: 3px;"><img src="/images/icon_fixed.gif" align="middle" alt="Click to mark as Fixed"></span>
           	    		<span>Click the "Fixed" button to mark alert condition as fixed</span>
           	    	</td>
@@ -246,9 +181,12 @@ dojo.addOnLoad( function(){
           	dojo11.require("dijit.dijit");
           	dojo11.require("dijit.Dialog");
           	
-          	var My_Alert_Center = null;
+          	var MyAlertCenter = null;
           	dojo11.addOnLoad(function(){
-          		My_Alert_Center = new hyperic.alert_center();
+          		MyAlertCenter = new hyperic.alert_center();
+          		
+          		dojo11.connect("Alerts_refreshTable", function() { MyAlertCenter.resetAlertTable(document.Alerts_FixForm); });
+          		dojo11.connect("GroupAlerts_refreshTable", function() { MyAlertCenter.resetAlertTable(document.GroupAlerts_FixForm); });         		
           	});
       </script>
       

@@ -52,7 +52,7 @@ class AlertController
             [field:AlertSortField.ACTION_TYPE, width:'3%',
              label:{
              	 def member = (it.ackable ? "ackableAlert" : "fixableAlert")
-             	 def box = (it.fixed ? "" : "<input type='checkbox' name='ealerts' class='" + member + "' value='-559038737:" + it.id +"' onclick='ToggleAlertButtons(this)' />")}],
+             	 def box = (it.fixed ? "" : "<input type='checkbox' name='ealerts' class='" + member + "' value='-559038737:" + it.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />")}],
             [field:AlertSortField.DATE, width:'8%',
              label:{df.format(it.timestamp)}],
             [field:AlertSortField.DEFINITION, width:'15%',
@@ -100,7 +100,7 @@ class AlertController
             [field:GalertLogSortField.ACTION_TYPE, width:'3%',
              label:{
              	 def member = (it.acknowledgeable ? "ackableAlert" : "fixableAlert")
-             	 def box = (it.fixed ? "" : "<input type='checkbox' name='ealerts' class='" + member + "' value='195934910:" + it.id +"' onclick='ToggleAlertButtons(this)' />")}],
+             	 def box = (it.fixed ? "" : "<input type='checkbox' name='ealerts' class='" + member + "' value='195934910:" + it.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />")}],
             [field:GalertLogSortField.DATE, width:'14%',
              label:{df.format(it.timestamp)}],
             [field:GalertLogSortField.DEFINITION, width:'25%',

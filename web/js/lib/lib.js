@@ -2444,14 +2444,14 @@ hyperic.alert_center = function() {
 	
 	that.init = function(myForm) {
 	    if(!that.dialog){
-	    	var pane = dojo11.byId('FixedNoteDialog');
+	    	var pane = dojo11.byId("FixedNoteDialog");
 			pane.style.width = "600px";
 			that.dialog = new dijit11.Dialog({
 				id: "Alert_Center_Dialog",
 				refocus: true,
 				autofocus: false,
 				title: "Alert Center"
-			},pane);
+				}, pane);			
 		}
 	    
 	    if (myForm) {
@@ -2459,13 +2459,17 @@ hyperic.alert_center = function() {
 	    	that.subgroup = that.form.name.substring(0, that.form.name.indexOf("_"));
 	    }
 	}
-	
-	that.clearRefreshTimeout = function() {
+		
+	that.startAutoRefresh = function() {
+		eval("_hqu_" + that.subgroup + "_autoRefresh();");		
+	}
+
+	that.stopAutoRefresh = function() {
 		eval("clearTimeout(_hqu_" + that.subgroup + "_refreshTimeout);");	
 	}
 	
 	that.confirmFixAlert = function() {
-		that.clearRefreshTimeout();
+		that.stopAutoRefresh();
 		that.dialog.show();
 	}
 	
@@ -2473,12 +2477,12 @@ hyperic.alert_center = function() {
 		that.form.fixedNote.value = that.fixedNote.value;
 		//alert(Form.serialize(that.form));
 		that.submit();
-	    that.dialog.hide();  
+		that.dialog.hide();
 	}
 	
 	that.acknowledgeAlert = function() {
 		//alert(Form.serialize(that.form));
-		that.clearRefreshTimeout();
+		that.stopAutoRefresh();
 		that.submit();
 	}
 	
@@ -2488,18 +2492,82 @@ hyperic.alert_center = function() {
 	    	content: Form.serialize(that.form,true),
 	    	handleAs: 'json',
 	    	load: function(data){
-	    		eval("_hqu_" + that.subgroup + "_autoRefresh();");
-	    		resetAlertTable(that.form);
+	    		that.startAutoRefresh();
 	    	},
 	    	error: function(data){
+	    		alert("An error occurred processing your request.");
 	    		console.debug("An error occurred.", data);
 			}
-		});
-	    that.reset();
+		});	    
+	}
+
+	that.resetAlertTable = function(myForm) {
+		var subgroup = myForm.name.substring(0, myForm.name.indexOf("_"));
+		var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
+		checkAllBox.checked = false;
+		that.toggleAll(checkAllBox);
+		that.fixedNote.value = "";
+		myForm.fixedNote.value = "";
 	}
 	
-	that.reset = function() {
-		that.fixedNote.value = "";		
+	that.toggleAll = function(checkAllBox) {
+		var checkedState = checkAllBox.checked;
+		var uList = checkAllBox.form;
+	    var len = uList.elements.length;
+
+		for (var i = 0; i < len; i++) {
+	        var e = uList.elements[i];
+	       
+	        if (e.className == "fixableAlert" || e.className == "ackableAlert") {
+	        	e.checked = checkedState;
+			}
+		}
+		that.toggleAlertButtons(checkAllBox);
+	}
+
+	that.toggleAlertButtons = function(myCheckBox) {
+		var myList = myCheckBox.form;
+		var subgroup = myList.name.substring(0, myList.name.indexOf("_"));
+		var refreshDelay = 60000;
+		var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
+		var fixedButton = dojo11.byId(subgroup + "_FixButton");
+		var ackButton = dojo11.byId(subgroup + "_AckButton");
+
+		// delay refresh for X milliseconds if checkbox is clicked
+		eval("clearTimeout(_hqu_" + subgroup + "_refreshTimeout);");
+		eval("_hqu_" + subgroup + "_refreshTimeout = setTimeout('_hqu_" + subgroup + "_autoRefresh()', refreshDelay);");
+
+		if (myCheckBox.id != checkAllBox.id) {
+			checkAllBox.checked = false;
+		}
+		
+		if (getNumCheckedByClass(myList, "fixableAlert") > 0) {
+			fixedButton.className = "CompactButton";
+			fixedButton.disabled = false;	
+			ackButton.className = "CompactButtonInactive";
+			ackButton.disabled = true;
+		} else if (getNumCheckedByClass(myList, "ackableAlert") > 0) {
+			fixedButton.className = "CompactButton";
+			fixedButton.disabled = false;	
+			ackButton.className = "CompactButton";	
+			ackButton.disabled = false;
+		} else {
+			fixedButton.className = "CompactButtonInactive";		
+			fixedButton.disabled = true;	
+			ackButton.className = "CompactButtonInactive";	
+			ackButton.disabled = true;
+		}
+	}
+
+	that.processButtonAction = function(myButton) {
+		myButton.form.buttonAction.value = myButton.value;
+		that.init(myButton.form);
+		
+		if (myButton.value == "FIXED") {
+			that.confirmFixAlert();
+		} else if (myButton.value == "ACKNOWLEDGE") {
+			that.acknowledgeAlert();
+		}
 	}
 	
 	that.init();
