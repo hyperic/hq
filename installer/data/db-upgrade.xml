@@ -8344,7 +8344,7 @@ has already been defined.
             CREATE TABLE EAM_MEASUREMENT_TMP AS SELECT (ID+1) ID, DSN FROM EAM_MEASUREMENT WHERE MEASUREMENT_CLASS='R'
         </statement>
         <statement desc="Index TMP table for performance on UPDATE" targetDB="mysql">
-            ALTER TABLE EAM_MEASUREMENT_TMP ADD PRIMARY KEY (ID);
+            ALTER TABLE EAM_MEASUREMENT_TMP ADD PRIMARY KEY (ID)
         </statement>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="mysql">
             UPDATE EAM_MEASUREMENT SET dsn = (SELECT m.dsn FROM EAM_MEASUREMENT_TMP m where m.id = EAM_MEASUREMENT.id) WHERE MEASUREMENT_CLASS='D'
@@ -8924,13 +8924,13 @@ has already been defined.
   <schemaSpec version="3.117">
     <schema-directSQL>
       <statement desc="Copy column NAME.">
-      UPDATE EAM_RESOURCE SET NAME = (SELECT NAME FROM EAM_PLATFORM WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 301;
+      UPDATE EAM_RESOURCE SET NAME = (SELECT NAME FROM EAM_PLATFORM WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 301
       </statement>
       <statement desc="Drop unused column NAME." fail="false">
         ALTER TABLE EAM_PLATFORM DROP COLUMN NAME
       </statement>
       <statement desc="Copy column SORT_NAME.">
-      UPDATE EAM_RESOURCE SET SORT_NAME = (SELECT SORT_NAME FROM EAM_PLATFORM WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 301;
+      UPDATE EAM_RESOURCE SET SORT_NAME = (SELECT SORT_NAME FROM EAM_PLATFORM WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 301
       </statement>
       <statement desc="Drop unused column SORT_NAME." fail="false">
         ALTER TABLE EAM_PLATFORM DROP COLUMN SORT_NAME
@@ -9096,7 +9096,7 @@ has already been defined.
   <schemaSpec version="3.122">
     <schema-directSQL>
       <statement fail="false" desc="Insert resource groups into edge table">
-        insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance) select 20000 - id, 0, resource_id, resource_id, 1, 0 from EAM_RESOURCE_GROUP;
+        insert into EAM_RESOURCE_EDGE (id, version_col, from_id, to_id, rel_id, distance) select 20000 - id, 0, resource_id, resource_id, 1, 0 from EAM_RESOURCE_GROUP
       </statement>
     </schema-directSQL>
   </schemaSpec>
@@ -9116,25 +9116,25 @@ has already been defined.
   <schemaSpec version="3.124">
     <schema-directSQL>
       <statement desc="Copy column NAME.">
-      UPDATE EAM_RESOURCE SET NAME = (SELECT NAME FROM EAM_RESOURCE_GROUP WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 3;
+      UPDATE EAM_RESOURCE SET NAME = (SELECT NAME FROM EAM_RESOURCE_GROUP WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 3
       </statement>
       <statement desc="Drop unused EAM_RESOURCE_GROUP column NAME." fail="false">
         ALTER TABLE EAM_RESOURCE_GROUP DROP COLUMN NAME
       </statement>
       <statement desc="Copy column SORT_NAME.">
-      UPDATE EAM_RESOURCE SET SORT_NAME = (SELECT SORT_NAME FROM EAM_RESOURCE_GROUP WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 3;
+      UPDATE EAM_RESOURCE SET SORT_NAME = (SELECT SORT_NAME FROM EAM_RESOURCE_GROUP WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 3
       </statement>
       <statement desc="Drop unused EAM_RESOURCE_GROUP column SORT_NAME." fail="false">
         ALTER TABLE EAM_RESOURCE_GROUP DROP COLUMN SORT_NAME
       </statement>
       <statement desc="Copy column NAME.">
-      UPDATE EAM_RESOURCE SET NAME = (SELECT NAME FROM EAM_APPLICATION WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 308;
+      UPDATE EAM_RESOURCE SET NAME = (SELECT NAME FROM EAM_APPLICATION WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 308
       </statement>
       <statement desc="Drop unused EAM_APPLICATION  column NAME." fail="false">
         ALTER TABLE EAM_APPLICATION DROP COLUMN NAME
       </statement>
       <statement desc="Copy column SORT_NAME.">
-      UPDATE EAM_RESOURCE SET SORT_NAME = (SELECT SORT_NAME FROM EAM_APPLICATION  WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 308;
+      UPDATE EAM_RESOURCE SET SORT_NAME = (SELECT SORT_NAME FROM EAM_APPLICATION  WHERE ID = EAM_RESOURCE.INSTANCE_ID) WHERE RESOURCE_TYPE_ID = 308
       </statement>
       <statement desc="Drop unused EAM_APPLICATION  column SORT_NAME." fail="false">
         ALTER TABLE EAM_APPLICATION DROP COLUMN SORT_NAME
