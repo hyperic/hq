@@ -1018,8 +1018,6 @@
 
     <hqplugin name="sybase"/>
 
-    <hqplugin name="mysql_status"/>
-
     <hqplugin name="coldfusion"/>
 
     <hqplugin name="alfresco"/>
