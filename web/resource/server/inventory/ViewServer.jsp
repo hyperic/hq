@@ -15,7 +15,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -87,10 +87,11 @@ var pageData = new Array();
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
 </tiles:insert>
-<tiles:insert page="/resource/server/inventory/ViewTypeAndHostProperties.jsp">
-  <tiles:put name="serviceCount" beanName="NumChildResources"/>
-  <tiles:put name="serviceTypeMap" beanName="ResourceTypeMap"/>
-</tiles:insert>
+<div class="accordionTabTitleBar">
+<!--  GENERAL PROPERTIES TITLE -->
+  <fmt:message key="resource.server.inventory.TypeAndHostPropertiesTab"/>
+</div>
+<tiles:insert page="/resource/server/inventory/ViewTypeAndHostProperties.jsp"/>
 </div>
 </div>
 
@@ -101,6 +102,8 @@ var pageData = new Array();
 </div>
 <div id="panelContent">
 <tiles:insert definition=".resource.server.inventory.services">
+  <tiles:put name="serviceCount" beanName="NumChildResources"/>
+  <tiles:put name="serviceTypeMap" beanName="ResourceTypeMap"/>
   <tiles:put name="server" beanName="Resource"/>
   <tiles:put name="services" beanName="ChildResources"/>
   <tiles:put name="serviceCount" beanName="NumChildResources"/>

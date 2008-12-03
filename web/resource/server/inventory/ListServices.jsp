@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -31,9 +31,10 @@
   USA.
  --%>
 
-
 <hq:pageSize var="pageSize"/>
 
+<tiles:importAttribute name="serviceCount"/>
+<tiles:importAttribute name="serviceTypeMap"/>
 <tiles:importAttribute name="selfAction"/>
 
 <c:set var="newServiceUrl" value="/resource/service/Inventory.do?mode=new&rid=${Resource.id}&type=${Resource.entityId.type}" />
@@ -99,6 +100,43 @@ initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </script>
 
+<!--  SERVICE COUNTS CONTENTS -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.serviceCounts.TotalServices"/></td>
+		<td width="30%" class="BlockContent"><c:out value="${serviceCount}"/></td>
+    <td width="20%" class="BlockLabel">&nbsp;</td>
+    <td width="30%" class="BlockContent">&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.serviceCounts.ServicesByType"/></td>
+    <td width="30%" class="BlockContentNoPadding" colspan="3">
+      <table width="66%" cellpadding="0" cellspacing="0" border="0" class="BlockContent">
+        <tr valign="top">
+<c:forEach var="entry" varStatus="status" items="${serviceTypeMap}">
+          <td width="50%"><c:out value="${entry.key}"/> (<c:out value="${entry.value}"/>)</td>
+  <c:choose>
+    <c:when test="${status.count % 2 == 0}">
+        </tr>
+        <tr>
+    </c:when>
+    <c:otherwise>
+      <c:if test="${status.last}">
+        <c:forEach begin="${(status.count % 2) + 1}" end="2">
+          <td width="50%">&nbsp;</td>
+        </c:forEach>
+      </c:if>
+    </c:otherwise>
+  </c:choose>
+</c:forEach>
+        </tr>
+      </table> 
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+  </tr>
+</table>
 <html:form action="/resource/server/inventory/RemoveService">
 <html:hidden property="eid"/>
 
