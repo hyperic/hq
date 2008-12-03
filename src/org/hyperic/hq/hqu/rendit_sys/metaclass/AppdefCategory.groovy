@@ -1,6 +1,5 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
-import org.hyperic.hq.hibernate.SessionManager
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResourceMan
 import org.hyperic.hq.appdef.server.session.AppdefResource
@@ -40,27 +39,18 @@ class AppdefCategory {
         if (p.permCheck == false)
             return r.resource
 
-        def result = []
-        def runner = [
-            getName:{'HQU Perm Check'},
-            run:{
-                PermissionManager permMan = PermManFactory.instance
-                
-                ['operation', 'user'].each {p.get(it, null)}
-             
-                def operation  = r.getAuthzOp(p.operation)
-                def user       = p.user
-                def resource   = r.resource
-                def instanceId = resource.instanceId
-                assert instanceId == r.id
-                
-                permMan.check(user.id, resource.resourceType, instanceId, 
-                              operation)
-                result << r.resource
-            }
-        ] as SessionManager.SessionRunner
-        
-        SessionManager.runInSession(runner)
-        return result[0]
+        PermissionManager permMan = PermManFactory.instance
+
+        ['operation', 'user'].each {p.get(it, null)}
+
+        def operation = r.getAuthzOp(p.operation)
+        def user = p.user
+        def resource = r.resource
+        def instanceId = resource.instanceId
+        assert instanceId == r.id
+
+        permMan.check(user.id, resource.resourceType, instanceId,
+                      operation)
+        resource
     }
 }
