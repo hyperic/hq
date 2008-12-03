@@ -398,6 +398,7 @@ class DojoUtil {
                     res += '&' + v + '=' + cbmap[v];
                 }
             }
+            res += '&preventCache=' + new Date().getTime();
             return res;
         }
 
