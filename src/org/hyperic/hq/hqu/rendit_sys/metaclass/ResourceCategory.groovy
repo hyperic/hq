@@ -37,6 +37,7 @@ import org.hyperic.hq.hqu.rendit.util.ResourceConfig
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.events.AlertSeverity
+import org.hyperic.hq.authz.shared.PermissionException
 
 /**
  * This class provides tonnes of abstractions over the Appdef layer.
@@ -312,19 +313,24 @@ class ResourceCategory {
         def res = []
         if (isPlatform(r)) {
             def plat    = toPlatform(r)
-            def servers = plat.servers.grep { 
-                it.checkPerms(operation: 'view', user:user)
+            plat.servers.each {
+                try {
+                    def resource = it.checkPerms(operation: 'view', user:user)
+                    res.add(resource)
+                } catch (PermissionException e) {
+                    // Ignore
+                }
             }
-                                                            
-            res.addAll(servers*.resource)
-            res.addAll(svcMan.getPlatformServices(user, r.instanceId)*.resource)
         } else if (isServer(r)) {
             def svr = toServer(r)
-            def services = svr.services.grep { 
-                it.checkPerms(operation: 'view', user:user)
+            svr.services.each {
+                try {
+                    def resource = it.checkPerms(operation: 'view', user:user)
+                    res.add(resource)
+                } catch (PermissionException e) {
+                    // Ignore
+                }
             }
-            
-            res.addAll(services*.resource)
         }
         res
     }
