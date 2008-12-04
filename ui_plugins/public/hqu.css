@@ -239,6 +239,13 @@ table border on left side - do not remove */
     font-weight: bold;
 }
 
+.dojoTab {
+	z-index:0
+}
+.dojoTabLabels-top {
+	z-index:1
+}
+
 .filters {
     background-color: #EFEFEF;
     border: 1px solid #7bafff;
