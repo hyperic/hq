@@ -132,7 +132,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     private Log _log = 
         LogFactory.getLog(AutoinventoryManagerEJBImpl.class.getName());
                           
-    protected static final String DATASOURCE_NAME = HQConstants.DATASOURCE;
+    protected final String DATASOURCE_NAME = HQConstants.DATASOURCE;
 
     private ServiceManagerLocal _serviceMan = ServiceManagerEJBImpl.getOne();
     private ServerManagerLocal _serverMan = ServerManagerEJBImpl.getOne();
@@ -384,10 +384,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     }
 
-    // XXX hack, see usage in startScan method below.
-    private static final
-        AIQueueManagerEJBImpl authzChecker = new AIQueueManagerEJBImpl();
-
     /**
      * Start an autoinventory scan.
      * @param aid The appdef entity whose agent we'll talk to.
@@ -412,13 +408,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                ScheduleWillNeverFireException, PermissionException
     {
         try {
-            // XXX XXX XXX
-            // Dude, this is a totally silly, ugly hack.  In my defense,
-            // implementing these security checks as methods in AppdefSessionEJB
-            // was a bad idea, they are not what inheritance was meant for.
-            // They should be static utilities in some other class.  But I'm not
-            // about to make waves that big, this close to release.
-            // For now, this works.
+            final AIQueueManagerEJBImpl authzChecker =
+                new AIQueueManagerEJBImpl();
+
             authzChecker.checkAIScanPermission(subject, aid);
 
             ConfigResponse config = _configMan.

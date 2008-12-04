@@ -94,7 +94,7 @@ public class ProductManagerEJBImpl
     implements SessionBean 
 {
     //XXX constant should be elsewhere
-    private static final String PLUGIN_DEPLOYER = 
+    private final String PLUGIN_DEPLOYER = 
         "hyperic.jmx:type=Service,name=ProductPluginDeployer";
 
     private Log log = LogFactory.getLog(ProductManagerEJBImpl.class);

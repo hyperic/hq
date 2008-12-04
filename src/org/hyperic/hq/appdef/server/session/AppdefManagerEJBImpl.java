@@ -77,7 +77,7 @@ public class AppdefManagerEJBImpl
     }
     
 
-    private static final String OPERABLE_SQL =
+    private final String OPERABLE_SQL =
     /* ex. "SELECT DISTINCT(server_type_id) FROM eam_server " + */
     " s, EAM_CONFIG_RESPONSE c, EAM_RESOURCE r, EAM_OPERATION o, " +
         "EAM_RESOURCE_TYPE t, EAM_ROLE_OPERATION_MAP ro, " +

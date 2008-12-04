@@ -77,8 +77,8 @@ public class ConfigManagerEJBImpl
     extends AppdefSessionEJB
     implements SessionBean
 {
-    private static final int MAX_VALIDATION_ERR_LEN = 512;
-    private final static String logCtx = ConfigManagerEJBImpl.class.getName();
+    private final int MAX_VALIDATION_ERR_LEN = 512;
+    private final String logCtx = ConfigManagerEJBImpl.class.getName();
     protected Log log = LogFactory.getLog(logCtx);
 
     private PlatformManagerLocal getPlatformManagerLocal(){

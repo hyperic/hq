@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -40,6 +40,8 @@ import org.quartz.Trigger;
 
 public class PagerProcessor_ai_schedule implements PagerProcessorExt {
 
+    private final String GROUP = "autoinventory";
+
     public PagerProcessor_ai_schedule() {}
 
     public PagerEventHandler getEventHandler () { return null; }
@@ -56,8 +58,7 @@ public class PagerProcessor_ai_schedule implements PagerProcessorExt {
                 Trigger trigger;
                 try {
                     trigger =
-                        scheduler.getTrigger(s.getTriggerName(),
-                                             AIScheduleManagerEJBImpl.GROUP);
+                        scheduler.getTrigger(s.getTriggerName(), GROUP);
                     if (trigger == null) {
                         // Job no longer exists
                         try {

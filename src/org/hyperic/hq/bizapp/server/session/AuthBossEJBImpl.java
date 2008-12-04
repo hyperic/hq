@@ -68,7 +68,7 @@ import org.apache.commons.logging.Log;
 public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     private SessionManager manager = SessionManager.getInstance();
 
-    private static Log _log = LogFactory.getLog(AuthBossEJBImpl.class);
+    private Log _log = LogFactory.getLog(AuthBossEJBImpl.class);
 
     public AuthBossEJBImpl() {}
 

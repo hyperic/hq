@@ -77,14 +77,8 @@ import org.quartz.SimpleTrigger;
 public class AIScheduleManagerEJBImpl 
     extends BaseScheduleManagerEJB implements SessionBean {
 
-    public static final String GROUP = "autoinventory";
-    public static final String STATUS_STARTED   = "scan running";
-    public static final String STATUS_COMPLETED = "scan completed";
-    public static final String AI_SCHED_TABLE = "EAM_AUTOINV_SCHEDULE";
-    public static final String AI_SCHED_TABLE_COL_ID = "ID";
-    public static final String AI_SCHED_TABLE_COL_BL = "CONFIG";
-
-    private static final Log _log = 
+    private final String GROUP = "autoinventory";
+    private final Log _log = 
         LogFactory.getLog(AIScheduleManagerEJBImpl.class.getName());
 
     private final String JOB_PREFIX      = "aiScan";

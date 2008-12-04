@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,7 +28,6 @@ package org.hyperic.hq.bizapp.server.session;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -42,7 +41,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
@@ -52,7 +50,6 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.UpdateBossLocal;
-import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.UpdateBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigAudit;
@@ -75,15 +72,13 @@ public class UpdateBossEJBImpl
     extends BizappSessionEJB
     implements SessionBean 
 {
-    private static final UpdateStatusDAO _updateDAO = 
+    private final UpdateStatusDAO _updateDAO = 
         new UpdateStatusDAO(DAOFactory.getDAOFactory());
-    private static final int CHECK_INTERVAL = 1000 * 60 * 60 * 24; 
-    private static final String CHECK_URL = 
-        "http://updates.hyperic.com/hq-updates"; 
+    private final String CHECK_URL =  "http://updates.hyperic.com/hq-updates"; 
         
-    private static final Log _log = LogFactory.getLog(UpdateBossEJBImpl.class);
+    private final Log _log = LogFactory.getLog(UpdateBossEJBImpl.class);
 
-    private static String getCheckURL() {
+    private String getCheckURL() {
         try {
             Properties p = HQApp.getInstance().getTweakProperties();
             String res = p.getProperty("hq.updateNotify.url");
@@ -95,18 +90,6 @@ public class UpdateBossEJBImpl
         return CHECK_URL;
     }
     
-    private static long getCheckInterval() {
-        try {
-            Properties p = HQApp.getInstance().getTweakProperties();
-            String res = p.getProperty("hq.updateNotify.interval");
-            if (res != null)
-                return Long.parseLong(res);
-        } catch(Exception e) {
-            _log.warn("Unable to get notification interval", e);
-        }
-        return CHECK_INTERVAL;
-    }
-
     /**
      * @ejb:interface-method
      */
@@ -323,6 +306,9 @@ public class UpdateBossEJBImpl
     }
      
     private static class UpdateFetcher implements Runnable {
+        private static final int CHECK_INTERVAL = 1000 * 60 * 60 * 24;
+        private static final Log _log = LogFactory.getLog(UpdateFetcher.class);
+
         public void run() {
             long interval = getCheckInterval();
             while(true) {
@@ -337,6 +323,18 @@ public class UpdateBossEJBImpl
                     return;
                 }
             }
+        }
+
+        private static long getCheckInterval() {
+            try {
+                Properties p = HQApp.getInstance().getTweakProperties();
+                String res = p.getProperty("hq.updateNotify.interval");
+                if (res != null)
+                    return Long.parseLong(res);
+            } catch(Exception e) {
+                _log.warn("Unable to get notification interval", e);
+            }
+            return CHECK_INTERVAL;
         }
     }
 

@@ -83,29 +83,28 @@ public class AvailabilityManagerEJBImpl
     private final Log _log = LogFactory.getLog(AvailabilityManagerEJBImpl.class);
     private final Log _traceLog = LogFactory.getLog(
         AvailabilityManagerEJBImpl.class.getName() + "Trace");
-    private static final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
-    private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
-    private static final double AVAIL_UNKNOWN =
+    private final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
+    private final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
+    private final double AVAIL_UNKNOWN =
         MeasurementConstants.AVAIL_UNKNOWN;
-    private static final int IND_MIN       = MeasurementConstants.IND_MIN;
-    private static final int IND_AVG       = MeasurementConstants.IND_AVG;
-    private static final int IND_MAX       = MeasurementConstants.IND_MAX;
-    private static final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
-    private static final int IND_LAST_TIME = MeasurementConstants.IND_LAST_TIME;
-    private static final int IND_UP_TIME   = IND_LAST_TIME + 1;
-    private static final int IND_TOTAL_TIME = IND_UP_TIME + 1;
-    private static final long MAX_AVAIL_TIMESTAMP =
+    private final int IND_MIN       = MeasurementConstants.IND_MIN;
+    private final int IND_AVG       = MeasurementConstants.IND_AVG;
+    private final int IND_MAX       = MeasurementConstants.IND_MAX;
+    private final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
+    private final int IND_LAST_TIME = MeasurementConstants.IND_LAST_TIME;
+    private final int IND_UP_TIME   = IND_LAST_TIME + 1;
+    private final int IND_TOTAL_TIME = IND_UP_TIME + 1;
+    private final long MAX_AVAIL_TIMESTAMP =
         AvailabilityDataRLE.getLastTimestamp();
-    private static final String ALL_EVENTS_INTERESTING_PROP = 
+    private final String ALL_EVENTS_INTERESTING_PROP = 
         "org.hq.triggers.all.events.interesting";
-    private static final int DEFAULT_INTERVAL = 60;
+    private final int DEFAULT_INTERVAL = 60;
     private final AvailabilityDataDAO _dao = getAvailabilityDataDAO();
     private final Map _createMap = new HashMap();
     private final Map _removeMap = new HashMap();
     private Map _currAvails = null;
 
-    private static final long MAX_DATA_BACKLOG_TIME =
-        7 * MeasurementConstants.DAY;
+    private final long MAX_DATA_BACKLOG_TIME = 7 * MeasurementConstants.DAY;
     
     /**
      * @ejb:interface-method

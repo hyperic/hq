@@ -91,38 +91,38 @@ import org.hyperic.util.timer.StopWatch;
  *      transaction-type="Bean"
  */
 public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
-    private static final String logCtx = DataManagerEJBImpl.class.getName();
+    private final String logCtx = DataManagerEJBImpl.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
 
     // The boolean system property that makes all events interesting. This 
     // property is provided as a testing hook so we can flood the event 
     // bus on demand.
-    public static final String ALL_EVENTS_INTERESTING_PROP = 
+    public final String ALL_EVENTS_INTERESTING_PROP = 
         "org.hq.triggers.all.events.interesting";
     
-    private static final BigDecimal MAX_DB_NUMBER =
+    private final BigDecimal MAX_DB_NUMBER =
         new BigDecimal("10000000000000000000000");
     
-    private static final long MINUTE = 60 * 1000,
-                              HOUR = 60 * MINUTE;
+    private final long MINUTE = 60 * 1000,
+                       HOUR = 60 * MINUTE;
         
     // Table names
-    private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
-    private static final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
-    private static final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
-    private static final String TAB_MEAS    = MeasurementConstants.TAB_MEAS;
-    private static final String TAB_NUMS    = "EAM_NUMBERS";
+    private final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
+    private final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
+    private final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
+    private final String TAB_MEAS    = MeasurementConstants.TAB_MEAS;
+    private final String TAB_NUMS    = "EAM_NUMBERS";
     
     // Error strings
-    private static final String ERR_DB    = "Cannot look up database instance";
-    private static final String ERR_INTERVAL =
+    private final String ERR_DB    = "Cannot look up database instance";
+    private final String ERR_INTERVAL =
         "Interval cannot be larger than the time range";
     
     // Save some typing
-    private static final int IND_MIN       = MeasurementConstants.IND_MIN;
-    private static final int IND_AVG       = MeasurementConstants.IND_AVG;
-    private static final int IND_MAX       = MeasurementConstants.IND_MAX;
-    private static final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
+    private final int IND_MIN       = MeasurementConstants.IND_MIN;
+    private final int IND_AVG       = MeasurementConstants.IND_AVG;
+    private final int IND_MAX       = MeasurementConstants.IND_MAX;
+    private final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
     
     // Pager class name
     private boolean confDefaultsLoaded = false;
@@ -1880,7 +1880,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
 
-        double[] result = new double[DataManagerEJBImpl.IND_CFG_COUNT + 1];
+        double[] result = new double[IND_CFG_COUNT + 1];
         if (mids.length == 0)
             return result;
         
@@ -1933,10 +1933,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             rs = stmt.executeQuery();
             
             if (rs.next()) {
-                result[DataManagerEJBImpl.IND_MIN] = rs.getDouble(1);
-                result[DataManagerEJBImpl.IND_AVG] = rs.getDouble(2);
-                result[DataManagerEJBImpl.IND_MAX] = rs.getDouble(3);
-                result[DataManagerEJBImpl.IND_CFG_COUNT] = rs.getDouble(4);
+                result[IND_MIN] = rs.getDouble(1);
+                result[IND_AVG] = rs.getDouble(2);
+                result[IND_MAX] = rs.getDouble(3);
+                result[IND_CFG_COUNT] = rs.getDouble(4);
             }
             else {
                 return result;    
@@ -2058,9 +2058,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     double[] data = new double[IND_MAX + 1];
     
                     Integer mid = new Integer(rs.getInt(1));
-                    data[DataManagerEJBImpl.IND_MIN] = rs.getDouble(2);
-                    data[DataManagerEJBImpl.IND_AVG] = rs.getDouble(3);
-                    data[DataManagerEJBImpl.IND_MAX] = rs.getDouble(4);
+                    data[IND_MIN] = rs.getDouble(2);
+                    data[IND_AVG] = rs.getDouble(3);
+                    data[IND_MAX] = rs.getDouble(4);
     
                     // Put it into the result map
                     resMap.put(mid, data);
@@ -2183,10 +2183,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 {
                     double[] data = new double[IND_CFG_COUNT + 1];
                     Integer mid = new Integer(rs.getInt(1));
-                    data[DataManagerEJBImpl.IND_MIN] = rs.getDouble(2);
-                    data[DataManagerEJBImpl.IND_AVG] = rs.getDouble(3);
-                    data[DataManagerEJBImpl.IND_MAX] = rs.getDouble(4);
-                    data[DataManagerEJBImpl.IND_CFG_COUNT] = rs.getDouble(5);
+                    data[IND_MIN] = rs.getDouble(2);
+                    data[IND_AVG] = rs.getDouble(3);
+                    data[IND_MAX] = rs.getDouble(4);
+                    data[IND_CFG_COUNT] = rs.getDouble(5);
     
                     // Put it into the result map
                     resMap.put(mid, data);

@@ -515,7 +515,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         return res;
     }
 
-    private static InitialContext ic = null;
+    private InitialContext ic = null;
     protected InitialContext getInitialContext() {
         if (ic == null) {
             try {

@@ -69,11 +69,9 @@ import org.hyperic.util.pager.SortAttribute;
 public class AuthzSubjectManagerEJBImpl
     extends AuthzSession implements SessionBean {
 
-    private static final Log _log
-        = LogFactory.getLog(AuthzSubjectManagerEJBImpl.class);
+    private final Log _log = LogFactory.getLog(AuthzSubjectManagerEJBImpl.class);
 
-    private static final String SUBJECT_PAGER =
-        PagerProcessor_subject.class.getName();
+    private final String SUBJECT_PAGER = PagerProcessor_subject.class.getName();
     private Pager _subjectPager;
 
     public AuthzSubjectManagerEJBImpl() {}

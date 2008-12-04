@@ -78,13 +78,13 @@ import net.sf.ehcache.Element;
  */
 public class LiveDataManagerEJBImpl implements SessionBean {
 
-    private static Log _log = LogFactory.getLog(LiveDataManagerEJBImpl.class);
+    private Log _log = LogFactory.getLog(LiveDataManagerEJBImpl.class);
 
     private LiveDataPluginManager _manager;
     private Cache _cache;
 
-    private static final String CACHENAME = "LiveData";
-    private static final long NO_CACHE = -1;
+    private final String CACHENAME = "LiveData";
+    private final long NO_CACHE = -1;
 
     /** @ejb:create-method */
     public void ejbCreate() {

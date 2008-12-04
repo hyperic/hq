@@ -62,9 +62,8 @@ public class MeasurementProcessorEJBImpl
     extends SessionEJB 
     implements SessionBean 
 {
-    private static final String logCtx = 
-        MeasurementProcessorEJBImpl.class.getName();
-    private final Log log = LogFactory.getLog(logCtx);
+    private final String logCtx = MeasurementProcessorEJBImpl.class.getName();
+    private Log log = LogFactory.getLog(logCtx);
 
     /**
      * Ping the agent to make sure it's up

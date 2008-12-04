@@ -65,8 +65,8 @@ import org.hyperic.hq.product.TrackEvent;
  */
 public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     
-    private static final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
-    private static final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
+    private final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
+    private final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
     
     private EventLogDAO getEventLogDAO() {
         return new EventLogDAO(DAOFactory.getDAOFactory());

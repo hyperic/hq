@@ -135,7 +135,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
@@ -195,16 +194,16 @@ public class AppdefBossEJBImpl
     extends BizappSessionEJB
     implements SessionBean
 {
-    private final static String APPDEF_PAGER_PROCESSOR =
+    private final String APPDEF_PAGER_PROCESSOR =
         "org.hyperic.hq.appdef.shared.pager.AppdefPagerProc";
 
     private SessionManager manager = SessionManager.getInstance();
 
     protected Log log = LogFactory.getLog(AppdefBossEJBImpl.class.getName());
     protected boolean debug = log.isDebugEnabled();
-    protected static final int APPDEF_TYPE_UNDEFINED     = -1;
-    protected static final int APPDEF_RES_TYPE_UNDEFINED = -1;
-    protected static final int APPDEF_GROUP_TYPE_UNDEFINED = -1;
+    protected final int APPDEF_TYPE_UNDEFINED     = -1;
+    protected final int APPDEF_RES_TYPE_UNDEFINED = -1;
+    protected final int APPDEF_GROUP_TYPE_UNDEFINED = -1;
 
     public AppdefBossEJBImpl() {}
 
