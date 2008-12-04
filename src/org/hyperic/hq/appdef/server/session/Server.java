@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2008], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -38,7 +39,6 @@ import org.hyperic.hq.appdef.ServerBase;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.HasAuthzOperations;
@@ -232,10 +232,10 @@ public class Server extends ServerBase
         // now get the service types
         Collection serviceTypes = myType.getServiceTypes();
         // now turn em into beans
-        Collection suppSvcTypes = new ArrayList();
+        Collection suppSvcTypes = new HashSet();
         Iterator it = serviceTypes.iterator();
-        while(it.hasNext()) {
-            ServiceType svcType = (ServiceType)it.next();
+        while (it.hasNext()) {
+            ServiceType svcType = (ServiceType) it.next();
             suppSvcTypes.add(svcType.getName());
         }
         return suppSvcTypes;
@@ -271,16 +271,12 @@ public class Server extends ServerBase
     void validateNewService(ServiceValue sv)
         throws ValidationException
     {
-        String msg = null;
         // first we check that the server includes the specified type
-        if(!isSupportedServiceType(sv.getServiceType())) {
-            msg = "ServiceType: " + sv.getServiceType().getName()
-                + " not supported by ServerType: "
-                + this.getServerType().getName();
-        }
-
-        // now deal with the message
-        if(msg != null) {
+        final String serviceType = sv.getServiceType().getName();
+        if (!isSupportedServiceType(serviceType)) {
+            String msg = "ServiceType: " + serviceType +
+                         " not supported by ServerType: " +
+                         getServerType().getName();
             throw new ValidationException(msg);
         }
     }
@@ -292,17 +288,10 @@ public class Server extends ServerBase
      * @param stv - the type to check
      * @return boolean - true if its supported, false otherwise
      */
-    private boolean isSupportedServiceType(ServiceTypeValue stv) {
-        boolean REQUIRED;
-        // Look up the ServiceTypeLocal
-        // ServiceTypeLocal serviceType =
-        //    ServiceTypeUtil.getLocalHome().findByPrimaryKey(
-        //        stv.getPrimaryKey());
-        // now check to see if it is included in the set of
-        // supported services
+    private boolean isSupportedServiceType(String stv) {
+        // check to see if it is included in the set of supported services
         Collection suppServiceTypes = getSupportedServiceTypes();
-        REQUIRED = suppServiceTypes.contains(stv.getName());
-        return REQUIRED;
+        return suppServiceTypes.contains(stv);
     }
 
     /**
