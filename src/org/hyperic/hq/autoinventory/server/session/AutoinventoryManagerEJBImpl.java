@@ -80,8 +80,6 @@ import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -134,11 +132,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                           
     protected final String DATASOURCE_NAME = HQConstants.DATASOURCE;
 
-    private ServiceManagerLocal _serviceMan = ServiceManagerEJBImpl.getOne();
-    private ServerManagerLocal _serverMan = ServerManagerEJBImpl.getOne();
-    private ConfigManagerLocal _configMan = ConfigManagerEJBImpl.getOne(); 
-    private CPropManagerLocal _cpropMan = CPropManagerEJBImpl.getOne();
-    
     private AutoinventoryPluginManager aiPluginManager;
     private AIScheduleManagerLocal     aiScheduleManager;
 
@@ -410,10 +403,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         try {
             final AIQueueManagerEJBImpl authzChecker =
                 new AIQueueManagerEJBImpl();
+            final ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne(); 
 
             authzChecker.checkAIScanPermission(subject, aid);
 
-            ConfigResponse config = _configMan.
+            ConfigResponse config = cfgMan.
                     getMergedConfigResponse(subject, 
                                             ProductPlugin.TYPE_MEASUREMENT, 
                                             aid, false);
@@ -715,14 +709,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         if (stateCore.getAreServersIncluded()) {
             Set serverSet = state.getAllServers(_log);
 
-            Iterator aiservers = serverSet.iterator();
-            while (aiservers.hasNext()) {
+            final ServerManagerLocal svrMan = ServerManagerEJBImpl.getOne();
+            for (Iterator aiservers = serverSet.iterator();aiservers.hasNext();)
+            {
                 AIServerValue aiServer = (AIServerValue)aiservers.next();
 
                 // Ensure the server reported has a valid appdef type
                 try {
-                    _serverMan.
-                        findServerTypeByName(aiServer.getServerTypeName());
+                    svrMan. findServerTypeByName(aiServer.getServerTypeName());
                 } catch (FinderException e) {
                     _log.error("Ignoring non-existent server type: " +
                                aiServer.getServerTypeName(), e);
@@ -871,73 +865,71 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="RequiresNew"
      */
     public void mergeServices(List mergeInfos)
-        throws PermissionException, ApplicationException, FinderException {
-        for (Iterator i=mergeInfos.iterator(); i.hasNext(); ) {
-            ServiceMergeInfo sInfo = (ServiceMergeInfo)i.next();
+        throws PermissionException, ApplicationException {
+        final ServerManagerLocal svrMan = ServerManagerEJBImpl.getOne();
+        final CPropManagerLocal cpropMan = CPropManagerEJBImpl.getOne();
+    
+        for (Iterator i = mergeInfos.iterator(); i.hasNext();) {
+            ServiceMergeInfo sInfo = (ServiceMergeInfo) i.next();
+            AIServiceValue aiservice = sInfo.aiservice;
+            Server server = svrMan.getServerById(sInfo.serverId);
             
-            mergeService(sInfo);
+            _log.info("Checking for existing service: " + aiservice.getName());
+            
+            final ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
+            Service service = svcMan.getServiceByName(server,
+                                                      aiservice.getName());
+            boolean update = false;
+            
+            if (service == null) {
+                // CREATE SERVICE
+                _log.info("Creating new service: " + aiservice.getName());
+            
+                String typeName = aiservice.getServiceTypeName();
+                ServiceType serviceType = 
+                    svcMan.findServiceTypeByName(typeName);
+                service = svcMan.createService(sInfo.subject, server,
+                                               serviceType, aiservice.getName(),
+                                               aiservice.getDescription(), "",
+                                               null);
+            
+                _log.debug("New service created: " + service);
+            } else {
+                update = true;
+                // UPDATE SERVICE
+                _log.info("Updating service: " + service.getName());
+                if (aiservice.getName() != null &&
+                    !aiservice.getName().equals(service.getName())) {
+                    service.setName(aiservice.getName().trim());
+                    service.getResource().setName(service.getName());
+                }
+                if (aiservice.getDescription() != null)
+                    service.setDescription(aiservice.getDescription().trim());
+            }
+                    
+            // CONFIGURE SERVICE
+            final ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
+            cfgMan.configureResponse(sInfo.subject,
+                                         service.getConfigResponse(),
+                                         service.getEntityId(),
+                                         aiservice.getProductConfig(),
+                                         aiservice.getMeasurementConfig(),
+                                         aiservice.getControlConfig(),
+                                         aiservice.getResponseTimeConfig(),
+                                         null,
+                                         update,
+                                         false);
+                    
+            // SET CUSTOM PROPERTIES FOR SERVICE
+            if (aiservice.getCustomProperties() != null) {
+                int typeId = service.getServiceType().getId().intValue();
+                cpropMan.setConfigResponse(service.getEntityId(),
+                                            typeId,
+                                            aiservice.getCustomProperties());            
+            }
         }
     }
     
-    private void mergeService(ServiceMergeInfo sInfo) 
-        throws PermissionException, ApplicationException, FinderException {
-        AIServiceValue aiservice = sInfo.aiservice;
-        Server server = _serverMan.getServerById(sInfo.serverId);
-
-        _log.info("Checking for existing service: " + aiservice.getName());
-
-        Service service = _serviceMan.getServiceByName(server, 
-                                                       aiservice.getName());
-        boolean update = false;
-
-        if (service == null) {
-            // CREATE SERVICE
-            _log.info("Creating new service: " + aiservice.getName());
-
-            String typeName = aiservice.getServiceTypeName();
-            ServiceType serviceType = 
-                _serviceMan.findServiceTypeByName(typeName);
-            service = _serviceMan.createService(sInfo.subject, server, 
-                                                serviceType, 
-                                                aiservice.getName(),
-                                                aiservice.getDescription(), "", 
-                                                null);
-
-            _log.debug("New service created: " + service);
-        } else {
-            update = true;
-            // UPDATE SERVICE
-            _log.info("Updating service: " + service.getName());
-            if (aiservice.getName() != null &&
-                !aiservice.getName().equals(service.getName())) {
-                service.setName(aiservice.getName().trim());
-                service.getResource().setName(service.getName());
-            }
-            if (aiservice.getDescription() != null)
-                service.setDescription(aiservice.getDescription().trim());
-        }
-                
-        // CONFIGURE SERVICE
-        _configMan.configureResponse(sInfo.subject,
-                                     service.getConfigResponse(),
-                                     service.getEntityId(),
-                                     aiservice.getProductConfig(),
-                                     aiservice.getMeasurementConfig(),
-                                     aiservice.getControlConfig(),
-                                     aiservice.getResponseTimeConfig(),
-                                     null,
-                                     update,
-                                     false);
-                
-        // SET CUSTOM PROPERTIES FOR SERVICE
-        if (aiservice.getCustomProperties() != null) {
-            int typeId = service.getServiceType().getId().intValue();
-            _cpropMan.setConfigResponse(service.getEntityId(),
-                                        typeId,
-                                        aiservice.getCustomProperties());            
-        }
-    }
-
     /**
      * Returns a list of {@link Agent}s which still need to send in a 
      * runtime scan (their last runtime scan was unsuccessfully processed)
@@ -1112,8 +1104,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     public void ejbCreate() throws CreateException {
         // Get reference to the AI plugin manager
         try {
-            ProductManagerLocal productManager = 
-                ProductManagerUtil.getLocalHome().create();
+            ProductManagerLocal productManager = ProductManagerEJBImpl.getOne();
             aiPluginManager = 
                 (AutoinventoryPluginManager) productManager.
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
@@ -1124,8 +1115,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
         // Get a reference to the control scheduler ejb
         try {
-            aiScheduleManager =
-                AIScheduleManagerUtil.getLocalHome().create();
+            aiScheduleManager = AIScheduleManagerEJBImpl.getOne();
         } catch (Exception e) {
             _log.error("Unable to get autoinventory schedule manager: " +
                            e.getMessage());
