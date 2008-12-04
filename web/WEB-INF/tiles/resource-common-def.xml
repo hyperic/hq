@@ -52,6 +52,10 @@
               controllerUrl="/resource/common/QuickFavoritesPrepare.do"
               path="/resource/common/QuickFavorites.jsp"/>
 
+  <!-- quick "delete resource" from tools menu -->
+  <definition name=".resource.common.quickDelete"
+              path="/resource/common/QuickDelete.jsp"/>
+
   <!-- tabs -->
   <definition name=".tabs.resource.inventoryonly"
               path="/resource/common/ControlTab.jsp">

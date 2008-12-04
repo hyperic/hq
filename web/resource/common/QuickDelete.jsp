@@ -2,7 +2,6 @@
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -31,16 +30,9 @@
 
 
 <tiles:importAttribute name="resource"/>
+<tiles:importAttribute name="deleteMessage"/>
 
-<table border="0"><tr><td class="LinkBox">
-    <tiles:insert definition=".resource.common.quickDelete">
-      <tiles:put name="resource" beanName="resource"/>
-	  <tiles:put name="deleteMessage">
-		<fmt:message key="resource.application.inventory.DeleteApplication"/>
-	  </tiles:put>
-    </tiles:insert>
-	<br />
-    <tiles:insert definition=".resource.common.quickFavorites">
-      <tiles:put name="resource" beanName="resource"/>
-    </tiles:insert>
-</td></tr></table>
+<html:link page="javascript:hyperic.utils.deleteResource('${resource.entityId.type}:${resource.id}');">
+	<c:out value="${deleteMessage}"/>
+</html:link>
+<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>

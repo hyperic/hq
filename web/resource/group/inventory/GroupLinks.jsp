@@ -34,8 +34,15 @@
 
 <table border="0"><tr><td class="LinkBox">
 
-<html:link page="/resource/group/Inventory.do?mode=new"><fmt:message key="resource.hub.NewGroupLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
-
+	<html:link page="/resource/group/Inventory.do?mode=new"><fmt:message key="resource.hub.NewGroupLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link>
+	<br />
+    <tiles:insert definition=".resource.common.quickDelete">
+      <tiles:put name="resource" beanName="resource"/>
+	  <tiles:put name="deleteMessage">
+		<fmt:message key="resource.group.inventory.link.DeleteGroup"/>
+	  </tiles:put>
+    </tiles:insert>
+	<br />
     <tiles:insert definition=".resource.common.quickFavorites">
       <tiles:put name="resource" beanName="resource"/>
     </tiles:insert>

@@ -44,7 +44,13 @@
     <c:if test="${canModify}">
             <html:link page="/resource/platform/Inventory.do?mode=editConfig&eid=${resource.entityId}"><fmt:message key="resource.platform.inventory.link.Configure"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
     </c:if>
-
+    <tiles:insert definition=".resource.common.quickDelete">
+      <tiles:put name="resource" beanName="resource"/>
+	  <tiles:put name="deleteMessage">
+		<fmt:message key="resource.platform.inventory.link.DeletePlatform"/>
+	  </tiles:put>
+    </tiles:insert>
+	<br>
     <c:choose>
         <c:when test="${canCreateChild}" >
             <html:link page="/resource/server/Inventory.do?mode=new&eid=${resource.entityId}"><fmt:message key="resource.platform.inventory.NewServerLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
@@ -74,50 +80,4 @@
     </tiles:insert>
 </td></tr></table>
 
-<div id ="clone_resource_dialog" style="display:none;">
-	<div id="clone_instructions" style="display: none">
-	</div>
-    <div id="clone_queue_status" class="confirmationPanel" style="display: none">
-		<fmt:message key="resource.platform.clone.queue.status"/>
-	</div>
-    <div id="clone_error_status" class="errorPanel" style="display: none">
-		<fmt:message key="resource.platform.clone.error.resource.min"/>
-	</div>
-    <form action="" id="clone_resource_dialog_form" onsubmit="javascript: return false;">
-        <fieldset style="width: 450px; text-align: center;">
-            <legend>Choose clone target resources</legend>
-            <label for="cln_search" style="width: 150px">Search resources:</label>
-            <input type="text" id="cln_search" name="cln_search" value="[ Resources ]">
-            <div style="width: 180px; float: left; text-align: right">
-                <label for="available_clone_targets" style="width: inherit">Available clone targets</label>
-                <select name="available_clone_targets" id="available_clone_targets" size="10" style="width: 120px" multiple="multiple"></select>
-            </div>
-            <div style="width: 66px; height: 100px; float: left; text-align: center; padding-top: 3em">
-                <button id="add_clone_btn" style="background: transparent"><img src="/images/arrow_right.gif" alt="select"></button><br>
-                <button id="remove_clone_btn" style="background: transparent"><img src="/images/arrow_left.gif" alt="deselect"></button>
-            </div>
-            <div style="width: 180px; float: left; text-align: left">
-                <label for="selected_clone_targets" style="width: inherit">Selected clone targets</label>
-                <select name="selected_clone_targets" id="selected_clone_targets" size="10" style="width: 120px" multiple="multiple"></select>
-            </div>
-        </fieldset>
-        <div style="text-align: right;">
-            <span id="clone_cancel_btn"></span>
-            <span id="clone_btn"></span>
-        </div>
-    </form>
-</div>
-<script type="text/javascript">
-
-    dojo11.require("dijit.dijit");
-    dojo11.require("dijit.form.Button");
-    dojo11.require("dijit.form.DateTextBox");
-    dojo11.require("dijit.form.TimeTextBox");
-    dojo11.require("dijit.Dialog");
-
-    var clone_platform_<c:out value="${resource.id}"/> = null;
-    dojo11.addOnLoad(function(){
-        clone_platform_<c:out value="${resource.id}"/> = new hyperic.clone_resource_dialog('<fmt:message key="resource.platform.clone.Title"/>', <c:out value="${resource.id}"/>);
-    });
-</script>
 </c:if>

@@ -102,6 +102,7 @@ hyperic.utils.getUniqueId = function(/*String*/ prefix){
     return (('undefined' !== typeof(prefix)) ? prefix : "unique" ) + hyperic.config.uniqueIndex++ +"";
 };
 
+
 /**
  * Register a key listener and publish the event on the specified topic
  * @param node A DOM object 
@@ -157,6 +158,16 @@ hyperic.utils.addUrlXtraCallback = function(plugin_id, fn) {
     urlXtraVar[plugin_id] = urlXtraVar[plugin_id] || [];
     urlXtraVar[plugin_id].push(fn);
 };
+
+hyperic.utils.deleteResource = function(appdefentityId) {
+	var url = "/resource/hub/RemoveResource.do";
+	var msg = "Are you sure you want to delete this resource?\n\nThis action cannot be undone.";
+	if (confirm(msg)) {
+		url += "?resources=" + escape(appdefentityId);
+		url += "&delete.x=1&preventCache=" + new Date().getTime();
+		document.location = url;
+	}
+}
 
 hyperic.utils.passwd = {
     /**
