@@ -28,6 +28,7 @@ package org.hyperic.hq.ui.action.resource.hub;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -65,40 +66,35 @@ public class ResourceMetricValuesAction extends TilesAction {
 
         List templates = (List) context.getAttribute("Indicators");
         
-        int sessionId = RequestUtils.getSessionId(request).intValue();
+        int sessionId = RequestUtils.getSessionId(request);
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
 
-        Integer[] tids = new Integer[templates.size()];
-        int i = 0;
-        for (Iterator it = templates.iterator(); it.hasNext(); i++) {
-            MeasurementTemplate mtv = (MeasurementTemplate) it.next();
-            tids[i] = mtv.getId();
-        }
-        MetricValue[] vals = boss.getLastMetricValue(sessionId, entityId, tids);
-
-        // Format the values
-        String[] metrics = new String[vals.length];
+        Map vals = boss.getLastIndicatorValues(sessionId, entityId);
         
-        if (vals == null) {
+        // Format the values
+        String[] metrics = new String[templates.size()];
+        if (vals.size() == 0) {
             Arrays.fill(metrics,
                         RequestUtils.message(request, "common.value.notavail"));
         }
         else {
-            i = 0;
+            int i = 0;
             for (Iterator it = templates.iterator(); it.hasNext(); i++) {
                 MeasurementTemplate mt = (MeasurementTemplate) it.next();
-                if (vals[i] == null)
-                    metrics[i] =
-                        RequestUtils.message(request, "common.value.notavail");
-                else {                
+                if (vals.containsKey(mt.getId())) {
+                    MetricValue mv = (MetricValue) vals.get(mt.getId());
                     FormattedNumber fn =
-                        UnitsConvert.convert(vals[i].getValue(), mt.getUnits());
+                        UnitsConvert.convert(mv.getValue(), mt.getUnits());
                     metrics[i] = fn.toString();
                 }
+                else {
+                    metrics[i] =
+                        RequestUtils.message(request, "common.value.notavail");
+                 }
             }
         }
-
+        
         request.setAttribute("metrics", metrics);
         
         return null;

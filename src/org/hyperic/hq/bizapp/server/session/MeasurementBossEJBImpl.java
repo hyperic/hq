@@ -753,7 +753,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         return getLastMetricValue(sessionId,  measurements, interval);
     }
-
+    
     /**
      * Get the last metric data for the array of measurement ids.
      *
@@ -773,6 +773,35 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             Measurement m = (Measurement)measurements.get(i);
             if (m != null && data.containsKey(m.getId())) {
                 ret[i] = (MetricValue)data.get(m.getId());
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     * Get the last indicator metric values
+     * @ejb:interface-method
+     */
+    public Map getLastIndicatorValues(Integer sessionId, AppdefEntityID aeid) {
+        final MeasurementManagerLocal metricManager = getMetricManager();
+        List metrics = metricManager.findDesignatedMeasurements(aeid);
+        long interval = 0;
+        for (Iterator it = metrics.iterator(); it.hasNext();) {
+            Measurement m = (Measurement) it.next();
+            if (m.getTemplate().getAlias().equalsIgnoreCase("Availability"))
+                it.remove();
+            else
+                interval = Math.max(interval, m.getInterval());
+        }
+        final long after =  System.currentTimeMillis() - (3 * interval);
+        Map data = getDataMan().getLastDataPoints(metrics, after);
+        
+        Map ret = new HashMap(data.size());
+        for (Iterator it = metrics.iterator(); it.hasNext();) {
+            Measurement m = (Measurement) it.next();
+            if (data.containsKey(m.getId())) {
+                ret.put(m.getTemplate().getId(), data.get(m.getId()));
             }
         }
 

@@ -592,9 +592,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @return a List of Measurement objects.
      * @ejb:interface-method
      */
-    public List findMeasurements(AuthzSubject subject,
-                                 AppdefEntityID id, String cat,
-                                 PageControl pc) {
+    public List findMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                 String cat, PageControl pc) {
         List meas;
             
         // See if category is valid
@@ -615,8 +614,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @return a list of {@link Measurement}
      * @ejb:interface-method
      */
-    public List findEnabledMeasurements(AuthzSubject subject,
-                                        AppdefEntityID id, String cat) {
+    public List findEnabledMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                        String cat) {
         List mcol;
             
         // See if category is valid
