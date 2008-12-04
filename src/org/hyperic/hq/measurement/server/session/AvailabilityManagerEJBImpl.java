@@ -58,7 +58,6 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerUtil;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
@@ -78,8 +77,6 @@ import org.hyperic.util.pager.PageList;
 public class AvailabilityManagerEJBImpl
     extends SessionEJB implements SessionBean {
 
-    private final MeasurementManagerLocal _mMan =
-            MeasurementManagerEJBImpl.getOne();
     private final Log _log = LogFactory.getLog(AvailabilityManagerEJBImpl.class);
     private final Log _traceLog = LogFactory.getLog(
         AvailabilityManagerEJBImpl.class.getName() + "Trace");
@@ -1114,7 +1111,7 @@ public class AvailabilityManagerEJBImpl
     }
     
     private Measurement getMeasurement(Integer mId) {
-        return _mMan.getMeasurement(mId);
+        return MeasurementManagerEJBImpl.getOne().getMeasurement(mId);
     }
 
     public static AvailabilityManagerLocal getOne() {
