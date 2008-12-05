@@ -179,10 +179,6 @@ public class AddGroupResourcesAction extends BaseAction {
                           "resource.common.inventory.error.ResourceNotFound");
                      
             return returnFailure(request, mapping, forwardParams);
-        } 
-        catch (GroupVisitorException e) {
-            log.error("Unable to add resources to group", e);
-            throw e;
         }
     }
 }

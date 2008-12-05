@@ -35,8 +35,6 @@ import java.util.List;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.grouping.shared.GroupValue;
-import org.hyperic.hq.grouping.shared.GroupVisitor;
-import org.hyperic.hq.grouping.shared.GroupVisitorException;
 import org.hyperic.util.pager.PageList;
 
 /** 
@@ -45,9 +43,6 @@ import org.hyperic.util.pager.PageList;
  *  The class extends the domain of groupable elements to include
  *  appdef entities. The group entries are converted to and from
  *  appdef entities as required to meet the needs of consumers.
- *  Operations intended to be applied circumstantially should be
- *  manifested as visitors and registered for either immediate or
- *  incremental application.
  *
  *  Note, despite the "Value" name and implied value object pattern, this
  *  class is not necessarily light weight. It is likely that an instance
@@ -74,8 +69,6 @@ public class AppdefGroupValue
     private AuthzSubject subject;   // group owner
     private String   owner;         // String value of owner
     private PageList groupEntries;  // list of group entries
-    private List     visitors;      // registered visitors
-    private List     visitorsInc;   // registered incremental visitors.
     
     private Long    cTime;
     private Long    mTime;
@@ -220,12 +213,10 @@ public class AppdefGroupValue
 
     /** Adds an entity identified by AppdefEntityID to our group. Conversion
      *  to the underlying group entry type (GroupEntry) will be automatic.
-     *  Any registered incremental visitors will visit the GroupEntry.
      * @param appdef entity id
-     * @throws GroupVisitorException
-     * */
-    public void addAppdefEntity ( AppdefEntityID entity )
-        throws GroupVisitorException {
+     *
+     */
+    public void addAppdefEntity ( AppdefEntityID entity ) {
         addEntry(  entityToEntry(entity)  );
     }
 
@@ -271,16 +262,7 @@ public class AppdefGroupValue
     /** Adds an entry to the group.
      * @param group entry value object.
      * */
-    public void addEntry (GroupEntry entry)
-        throws GroupVisitorException 
-    {
-        // If there are any incremental vistors registered, dispatch.
-        if (visitorsInc != null) {
-            for (Iterator i=visitorsInc.iterator();i.hasNext();) {
-                GroupVisitor gv = (GroupVisitor) i.next();
-                gv.visitGroupIncremental(entry);
-            }
-        }
+    public void addEntry (GroupEntry entry) {
         groupEntries.add(entry);
     }
 
@@ -294,55 +276,6 @@ public class AppdefGroupValue
                 i.remove();
             }
         }
-    }
-
-    /** Iterate through all registered visitors and invoke their
-     * visitGroup method passing this group as a parameter. Operations
-     * will be performed in order of registration.
-     */
-    public void visit () throws GroupVisitorException {
-        if (visitors != null) {
-            for (Iterator i=visitors.iterator();i.hasNext();) {
-                GroupVisitor gv = (GroupVisitor) i.next();
-                gv.visitGroup(this);
-            }
-        }
-    }
-    
-    /** With the argument visitor immediately invoke its
-     * visitGroup method passing this group as a parameter.
-     */
-    public void visit (GroupVisitor gv) throws GroupVisitorException {
-        gv.visitGroup(this);
-    }
-
-    public void clearVisitors() {
-        if (visitors!=null)
-            visitors.clear();
-    }
-
-    public void clearVisitorsInc() {
-        if (visitorsInc!=null)
-            visitorsInc.clear();
-    }
-
-    /** Register a visitor with this group value object for later
-     *  visitation.
-     */
-    public void registerVisitor (GroupVisitor gv) {
-        if (visitors == null)
-            visitors = new ArrayList();
-        visitors.add(gv);
-    }
-
-    /** Register an incremental visitor with this group value object
-     * for later visitation. Visitation occurs automatically after
-     * an add operation.
-     */
-    public void registerVisitorInc (GroupVisitor gv) {
-        if (visitorsInc == null)
-            visitorsInc = new ArrayList();
-        visitorsInc.add(gv);
     }
 
     // utility method for converting back and forth from appdef to authz
@@ -414,15 +347,6 @@ public class AppdefGroupValue
      * */
     public Object clone () throws CloneNotSupportedException {
         AppdefGroupValue newGroupVo = (AppdefGroupValue) super.clone();
-        newGroupVo.clearVisitors();
-
-        if (visitors != null)
-            for (Iterator i = this.visitors.iterator();i.hasNext();)
-                newGroupVo.registerVisitor((GroupVisitor) i.next());
-
-        if (visitorsInc != null)
-            for (Iterator i= this.visitorsInc.iterator();i.hasNext();)
-                newGroupVo.registerVisitorInc((GroupVisitor)i.next());
 
         newGroupVo.init(); // reset any state.
 

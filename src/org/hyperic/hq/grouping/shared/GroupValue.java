@@ -32,12 +32,7 @@ import org.hyperic.util.pager.PageList;
 /** Interface specification for group value objects. Provides access
  * to group and elements for persistence.
  * 
- * (This really should be an abstract base class and should aggregate
- *  methods like registration of visitors, etc. However, this was not
- *  possible due to the necessity of its sole implementor
- *  (AppdefGroupValue) to subclass AppdefResourceValue.
- * 
-*/
+ */
 public interface GroupValue {
 
     /** The group identifier */
@@ -90,7 +85,7 @@ public interface GroupValue {
      * @param group entry value object.
      * @throws ApplicationException
      * */
-    public void addEntry (GroupEntry entry) throws GroupVisitorException;
+    public void addEntry (GroupEntry entry);
 
     /** Asserts that an entry exists in the group */
     public boolean existsEntry (GroupEntry entry);
@@ -100,29 +95,6 @@ public interface GroupValue {
      * @throws ApplicationException
      * */
     public void removeEntry (GroupEntry entry);
-
-    /** Iterate through all registered visitors and invoke their
-     * visitGroup method passing this group as a parameter. Operations
-     * will be performed in order of registration.
-     * @throws ApplicationException
-     * */
-    public void visit () throws GroupVisitorException;
-    public void visit (GroupVisitor gv) throws GroupVisitorException;
-    public void clearVisitors();
-    public void clearVisitorsInc();
-
-    /** Register a visitor with this group value object for later
-     * visitation. Visitation is delayed until visit() is invoked.
-     * @param object implementing GroupVisitor interface.
-     * */
-    public void registerVisitor (GroupVisitor gv);
-
-    /** Register an incremental visitor with this group value object
-     * for later visitation. Visitation occurs automatically after
-     * an add operation.
-     * @param object implementing GroupVisitor interface.
-     * */
-    public void registerVisitorInc (GroupVisitor gv);
 
     public boolean equals(Object other);
     public int hashCode();
