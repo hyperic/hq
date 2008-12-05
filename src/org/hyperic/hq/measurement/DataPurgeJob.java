@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement;
 
+import java.beans.Introspector;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -83,6 +84,9 @@ public class DataPurgeJob implements Job {
 
             long now = System.currentTimeMillis();
             
+            // need to do this because of the Sun JVM bug
+            // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5102804
+            Introspector.flushCaches();
             purge(conf, now);
         } catch (CreateException e) {
             throw new JobExecutionException(
