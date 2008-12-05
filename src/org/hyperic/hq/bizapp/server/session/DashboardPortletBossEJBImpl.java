@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
@@ -98,23 +97,11 @@ public class DashboardPortletBossEJBImpl
     extends AppdefSessionEJB
     implements SessionBean {
 
-    private GalertManagerLocal _gaMan;
-    private ResourceGroupManagerLocal _rgMan;
-    private AlertDefinitionManagerLocal _adMan;
-    private EscalationManagerLocal _escMan;
-    private AlertManagerLocal _alMan = AlertManagerEJBImpl.getOne();
     private static final String ALERT_CRITICAL = "red",
                                 ALERT_WARN     = "yellow",
                                 ALERT_UNKNOWN  = "gray",
                                 ALERT_OK       = "green";
     
-    public DashboardPortletBossEJBImpl() {
-        _rgMan = ResourceGroupManagerEJBImpl.getOne();
-        _gaMan = GalertManagerEJBImpl.getOne();
-        _adMan = AlertDefinitionManagerEJBImpl.getOne();
-        _escMan = EscalationManagerEJBImpl.getOne();
-    }
-
     private final Log _log =
         LogFactory.getLog(DashboardPortletBossEJBImpl.class);
 
@@ -207,7 +194,8 @@ public class DashboardPortletBossEJBImpl
         throws PermissionException, JSONException
     {
         JSONObject rtn = new JSONObject();
-        Collection groups = _rgMan.getAllResourceGroups(subj, true);
+        Collection groups =
+            ResourceGroupManagerEJBImpl.getOne().getAllResourceGroups(subj, true);
         for (Iterator i=groups.iterator(); i.hasNext(); ) {
             ResourceGroup group = (ResourceGroup)i.next();
             rtn.put(group.getId().toString(), group.getName());
@@ -225,7 +213,7 @@ public class DashboardPortletBossEJBImpl
         final long PORTLET_RANGE = MeasurementConstants.DAY * 3;
         
         JSONObject rtn = new JSONObject();
-        _rgMan = ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
         final int maxRecords = pageInfo.getStartRow() + pageInfo.getPageSize();
         int i=0;
         for (Iterator it=groupIds.iterator(); it.hasNext(); i++) {
@@ -236,7 +224,7 @@ public class DashboardPortletBossEJBImpl
                 continue;
             }
             Integer gId = (Integer)it.next();
-            ResourceGroup group = _rgMan.findResourceGroupById(subj, gId);
+            ResourceGroup group = rgMan.findResourceGroupById(subj, gId);
             if (group != null) {
                 JSONArray array = new JSONArray()
                     .put(getResourceStatus(subj, group, PORTLET_RANGE))
@@ -256,7 +244,8 @@ public class DashboardPortletBossEJBImpl
 
         try {
             long begin = now - range;
-            List galerts = _gaMan.findUnfixedAlertLogsByTimeWindow(group, begin,
+            GalertManagerLocal gaMan = GalertManagerEJBImpl.getOne();
+            List galerts = gaMan.findUnfixedAlertLogsByTimeWindow(group, begin,
                                                                    now);
             if (debug) {
                 _log.debug("getGroupStatus: findUnfixedAlertLogsByTimeWindow execution time(ms)=" 
@@ -283,7 +272,7 @@ public class DashboardPortletBossEJBImpl
             // Is it that there are no alerts or that there are no alert
             // definitions?
             if (rtn.equals(ALERT_OK)) {
-                List galertDefs = _gaMan.findAlertDefs(group, PageControl.PAGE_ALL);
+                List galertDefs = gaMan.findAlertDefs(group, PageControl.PAGE_ALL);
                 if (galertDefs.size() == 0) {
                     return ALERT_UNKNOWN;
                 }
@@ -309,7 +298,8 @@ public class DashboardPortletBossEJBImpl
             long begin = now - range;
             
             watch.markTimeBegin("getResourceStatus: getUnfixedCount");
-            int unfixed = _alMan.getUnfixedCount(subj.getId(), begin, now,
+            AlertManagerLocal alMan = AlertManagerEJBImpl.getOne();
+            int unfixed = alMan.getUnfixedCount(subj.getId(), begin, now,
                                                  group.getId());
             watch.markTimeEnd("getResourceStatus: getUnfixedCount");
             
@@ -317,7 +307,7 @@ public class DashboardPortletBossEJBImpl
             if (unfixed > 0) {
                 watch.markTimeBegin("getResourceStatus: findAlerts");            
                 List alerts =
-                    _alMan.findAlerts(subj.getId(), 0, begin, now,
+                    alMan.findAlerts(subj.getId(), 0, begin, now,
                                       true, true, group.getId(),
                                       PageInfo.getAll(AlertSortField.FIXED,
                                                       true));
@@ -340,7 +330,11 @@ public class DashboardPortletBossEJBImpl
             else {
                 // Is it that there are no alerts or that there are no alert
                 // definitions?
-                Collection resources = _rgMan.getMembers(group);
+                ResourceGroupManagerLocal rgMan =
+                    ResourceGroupManagerEJBImpl.getOne();
+                AlertDefinitionManagerLocal adMan =
+                    AlertDefinitionManagerEJBImpl.getOne();
+                Collection resources = rgMan.getMembers(group);
                 PageControl pc = new PageControl(0, 1);
                 Resource r = null;
                 AppdefEntityID aId = null;
@@ -355,8 +349,8 @@ public class DashboardPortletBossEJBImpl
                         // go to next resource
                         continue;
                     }
-                    alertDefs = _adMan
-                        .findAlertDefinitions(subj, new AppdefEntityID(r), pc);
+                    alertDefs = adMan.findAlertDefinitions(
+                        subj, new AppdefEntityID(r), pc);
                     if (alertDefs.size() > 0) {
                         return ALERT_OK;
                     }
@@ -382,7 +376,8 @@ public class DashboardPortletBossEJBImpl
         if (esc == null || esc.getMaxPauseTime() == 0) {
             return false;
         }
-        EscalationState state = _escMan.findEscalationState(alertDef);
+        EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
+        EscalationState state = escMan.findEscalationState(alertDef);
         return state != null && state.getAcknowledgedBy() != null;
     }
 

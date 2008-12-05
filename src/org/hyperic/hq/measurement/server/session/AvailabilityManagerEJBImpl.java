@@ -97,8 +97,8 @@ public class AvailabilityManagerEJBImpl
         "org.hq.triggers.all.events.interesting";
     private final int DEFAULT_INTERVAL = 60;
     private final AvailabilityDataDAO _dao = getAvailabilityDataDAO();
-    private final Map _createMap = new HashMap();
-    private final Map _removeMap = new HashMap();
+    private Map _createMap = null;
+    private Map _removeMap = null;
     private Map _currAvails = null;
 
     private final long MAX_DATA_BACKLOG_TIME = 7 * MeasurementConstants.DAY;
@@ -552,8 +552,8 @@ public class AvailabilityManagerEJBImpl
         List updateList = new ArrayList(availPoints.size());
         List outOfOrderAvail = new ArrayList(availPoints.size());
         AvailabilityCache cache = AvailabilityCache.getInstance();
-        _createMap.clear();
-        _removeMap.clear();
+        _createMap = new HashMap();
+        _removeMap = new HashMap();
         final boolean debug = _log.isDebugEnabled();
         long begin = -1;
         Map state = null;
@@ -582,9 +582,9 @@ public class AvailabilityManagerEJBImpl
                 cache.rollbackTran();
                 throw new SystemException(e);
             } finally {
-                _createMap.clear();
-                _removeMap.clear();
-                _currAvails.clear();
+                _createMap = null;
+                _removeMap = null;
+                _currAvails = null;
             }
         }
         sendDataToEventHandlers(availPoints);
