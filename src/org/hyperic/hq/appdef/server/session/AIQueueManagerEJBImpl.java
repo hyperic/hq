@@ -43,6 +43,8 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -71,8 +73,6 @@ import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
-import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
-import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.dao.AIIpDAO;
@@ -542,10 +542,10 @@ public class AIQueueManagerEJBImpl
                 // discovery and enable metrics.
                 if (isApproveAction && verifyLiveAgent) {
                     try {
-                        AICommandsClient client = 
-                            AICommandsClientFactory.getInstance()
+                        AgentCommandsClient client =
+                            AgentCommandsClientFactory.getInstance()
                                 .getClient(aiplatform.getAgentToken());
-                        client.getScanStatus();
+                        client.ping();
                     } catch (AgentNotFoundException e) {
                         // In this case we just want to
                         // remove the AIPlatform from the AIQ since the
@@ -560,10 +560,6 @@ public class AIQueueManagerEJBImpl
                     } catch (AgentConnectionException e) {
                         throw new AIQApprovalException(
                             "Error connecting or communicating with agent " +
-                            e.getMessage(), e);
-                    } catch (AutoinventoryException e) {
-                        throw new AIQApprovalException(
-                            "Error reading data from Remote Agent Value " +
                             e.getMessage(), e);
                     }
                 }
