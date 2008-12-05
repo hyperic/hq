@@ -256,7 +256,18 @@ public class PluginLoader extends URLClassLoader {
 
         if (isExpand || file.isDirectory()) {
             if (!isExpand) {
+                boolean addedDir = addedURLs.get(file) == Boolean.TRUE; 
                 logAddPath(file, true);
+                if (!addedDir) {
+                    addedURLs.put(file, Boolean.TRUE);
+                    //add the directory itself
+                    //must end with '/' (see URLClassLoader)
+                    try {
+                        super.addURL(toURL(file.toString() + "/"));
+                    } catch (Exception e) {
+                        throw new PluginLoaderException(e.getMessage());
+                    }
+                }
                 jars = file.list();
             }
 
