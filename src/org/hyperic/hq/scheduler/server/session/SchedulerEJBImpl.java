@@ -75,8 +75,8 @@ public class SchedulerEJBImpl
    implements SessionBean,
               SchedulerServiceMBean
 {
-   private static final long serialVersionUID     = 1962110997028005340L;
-   private static final ObjectName SCHEDULER_MBEAN_NAME 
+   private final long serialVersionUID     = 1962110997028005340L;
+   private final ObjectName SCHEDULER_MBEAN_NAME 
        = ObjectNameFactory.create("hyperic.jmx:type=Service,name=Scheduler");
    private Log log = LogFactory.getLog(SchedulerEJBImpl.class.getName());
    private SessionContext sessCtx;

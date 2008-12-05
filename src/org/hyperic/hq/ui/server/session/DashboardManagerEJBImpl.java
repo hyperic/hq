@@ -77,7 +77,7 @@ import org.hyperic.util.StringUtil;
 
 public class DashboardManagerEJBImpl implements SessionBean {
 
-    private static Log _log = LogFactory.getLog(DashboardManagerEJBImpl.class);
+    private Log _log = LogFactory.getLog(DashboardManagerEJBImpl.class);
 
     protected SessionManager _manager = SessionManager.getInstance();
 

@@ -85,48 +85,41 @@ import org.hyperic.util.timer.StopWatch;
 
 public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {
-    private static final String TBL_GROUP    = "EAM_RESOURCE_GROUP";
-    private static final String TBL_PLATFORM = "EAM_PLATFORM";
-    private static final String TBL_SERVICE  = "EAM_SERVICE";
-    private static final String TBL_SERVER   = "EAM_SERVER";
-    private static final String TBL_APP      = "EAM_APPLICATION";
+    private final String TBL_GROUP    = "EAM_RESOURCE_GROUP";
+    private final String TBL_PLATFORM = "EAM_PLATFORM";
+    private final String TBL_SERVICE  = "EAM_SERVICE";
+    private final String TBL_SERVER   = "EAM_SERVER";
+    private final String TBL_APP      = "EAM_APPLICATION";
     
     private final String logCtx  = AppdefStatManagerEJBImpl.class.getName();
     private final Log    log     = LogFactory.getLog(logCtx);
     private int          DB_TYPE = -1;
     
-    private static final String platformResType =
-        AuthzConstants.platformResType;
-    private static final String applicationResType =
-        AuthzConstants.applicationResType;
-    private static final String serverResType =
-        AuthzConstants.serverResType;
-    private static final String serviceResType =
-        AuthzConstants.serviceResType;
-    private static final String groupResType =
-        AuthzConstants.groupResType;
-    private static final String platformOpViewPlatform =
+    private final String platformResType = AuthzConstants.platformResType;
+    private final String applicationResType = AuthzConstants.applicationResType;
+    private final String serverResType = AuthzConstants.serverResType;
+    private final String serviceResType = AuthzConstants.serviceResType;
+    private final String groupResType = AuthzConstants.groupResType;
+    private final String platformOpViewPlatform =
         AuthzConstants.platformOpViewPlatform;
-    private static final String applicationOpViewApplication =
+    private final String applicationOpViewApplication =
         AuthzConstants.appOpViewApplication;
-    private static final String serverOpViewServer =
-        AuthzConstants.serverOpViewServer;
-    private static final String serviceOpViewService =
+    private final String serverOpViewServer = AuthzConstants.serverOpViewServer;
+    private final String serviceOpViewService =
         AuthzConstants.serviceOpViewService;
-    private static final String groupOpViewResourceGroup =
+    private final String groupOpViewResourceGroup =
         AuthzConstants.groupOpViewResourceGroup;
     
-    private static final int APPDEF_TYPE_PLATFORM =
+    private final int APPDEF_TYPE_PLATFORM =
         AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-    private static final int APPDEF_TYPE_SERVER =
+    private final int APPDEF_TYPE_SERVER =
         AppdefEntityConstants.APPDEF_TYPE_SERVER;
-    private static final int APPDEF_TYPE_SERVICE =
+    private final int APPDEF_TYPE_SERVICE =
         AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-    private static final int APPDEF_TYPE_GROUP =
+    private final int APPDEF_TYPE_GROUP =
         AppdefEntityConstants.APPDEF_TYPE_GROUP;
     
-    private static final PermissionManager pm =
-        PermissionManagerFactory.getInstance();
+    private final PermissionManager pm = PermissionManagerFactory.getInstance();
 
     /**
      * <p>Return map of platform counts.</p>

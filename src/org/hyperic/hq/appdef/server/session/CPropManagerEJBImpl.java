@@ -79,9 +79,9 @@ public class CPropManagerEJBImpl
     extends AppdefSessionUtil
     implements SessionBean
 {
-    private static final int    CHUNKSIZE      = 1000; // Max size for each row
-    private static final String CPROP_TABLE    = "EAM_CPROP";
-    private static final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
+    private final int    CHUNKSIZE      = 1000; // Max size for each row
+    private final String CPROP_TABLE    = "EAM_CPROP";
+    private final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
     
     private Log log = 
         LogFactory.getLog(CPropManagerEJBImpl.class.getName());

@@ -63,7 +63,7 @@ import org.jboss.security.auth.callback.UsernamePasswordHandler;
 public class AuthManagerEJBImpl implements SessionBean {
 
     // Always authenticate against the HQ application realm
-    private static final String appName = HQConstants.ApplicationName;
+    private final String appName = HQConstants.ApplicationName;
 
     public AuthManagerEJBImpl() {}
 

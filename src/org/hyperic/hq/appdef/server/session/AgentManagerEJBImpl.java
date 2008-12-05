@@ -95,9 +95,9 @@ public class AgentManagerEJBImpl
     // XXX: These should go elsewhere.
     private final String CAM_AGENT_TYPE = "covalent-eam";
     private final String HQ_AGENT_REMOTING_TYPE = "hyperic-hq-remoting";
-    private static final String JBOSS_SERVER_HOME_DIR_PROP = "jboss.server.home.dir";
-    private static final String HQ_PLUGINS_DIR ="/deploy/hq.ear/hq-plugins";
-    private static final String PLUGINS_EXTENSION = "-plugin";
+    private final String JBOSS_SERVER_HOME_DIR_PROP = "jboss.server.home.dir";
+    private final String HQ_PLUGINS_DIR ="/deploy/hq.ear/hq-plugins";
+    private final String PLUGINS_EXTENSION = "-plugin";
     
     private Log log = LogFactory.getLog(AgentManagerEJBImpl.class.getName());
 

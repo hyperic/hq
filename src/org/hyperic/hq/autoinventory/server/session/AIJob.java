@@ -64,6 +64,10 @@ public abstract class AIJob extends BaseJob {
     public static final String PROP_SCANNAME = "scanName";
     public static final String PROP_SCANDESC = "scanDesc";
 
+    private final String STATUS_STARTED   = "scan running";
+
+    private final String STATUS_COMPLETED = "scan completed";
+
     protected Log log = LogFactory.getLog(AIJob.class);
 
     /**
@@ -96,7 +100,7 @@ public abstract class AIJob extends BaseJob {
                               scanConfig, scanName, scanDesc,
                               scheduled, startTime, startTime,
                               dateScheduled.getTime(),
-                              AIScheduleManagerEJBImpl.STATUS_STARTED,
+                              STATUS_STARTED,
                               null);
             client.startScan(scanConfig);
 
@@ -130,7 +134,7 @@ public abstract class AIJob extends BaseJob {
                                   scheduled, startTime, 
                                   System.currentTimeMillis(),
                                   dateScheduled.getTime(),
-                                  AIScheduleManagerEJBImpl.STATUS_COMPLETED,
+                                  STATUS_COMPLETED,
                                   errorMsg);
                 } catch (Exception exc) {
                     this.log.error("Unable to create history entry for " +
@@ -185,6 +189,7 @@ public abstract class AIJob extends BaseJob {
     }
 
     private AutoinventoryManagerLocal aimanager = null;
+
     protected AutoinventoryManagerLocal getAutoInventoryManager()
         throws NamingException, CreateException {
         if (aimanager == null) {
