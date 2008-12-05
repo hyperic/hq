@@ -102,7 +102,7 @@ public class MetricDataCache {
      * @param mval The MetricValue to store.
      * @return true if the MetricValue was added to the cache, false otherwise.
      */
-    private boolean add(Integer mid, MetricValue mval) {
+    protected boolean add(Integer mid, MetricValue mval) {
         // Need to synchronize on cache update since the back filler  
         // may be updating the cache concurrently with the data inserter.
         // Without synchronization, a race condition could cause the latest 

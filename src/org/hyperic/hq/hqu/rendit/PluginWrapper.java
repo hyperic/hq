@@ -58,13 +58,14 @@ public class PluginWrapper {
     
     private static final Log _log = LogFactory.getLog(PluginWrapper.class);
     
-    private       File              _pluginDir;
-    private final File              _sysDir;
-    private final GroovyClassLoader _loader;
-    private       IDispatcher       _dispatcher;
+    private       File                  _pluginDir;
+    private final File                  _sysDir;
+    private final GroovyClassLoader     _loader;
+    private       IDispatcher           _dispatcher;
+    private       static URLClassLoader _urlLoader = null;
+    private final static Object         _urlLoaderLock = new Object();
 
     PluginWrapper(File pluginDir, File sysDir, ClassLoader parentLoader) {
-        URLClassLoader urlLoader;
         List urls = new ArrayList();
         URL[] u;
 
@@ -88,14 +89,30 @@ public class PluginWrapper {
             
             urls.add(sysDir.toURL());
             u = (URL[])urls.toArray(new URL[urls.size()]);
+
+            // Default class loader with only the sysdir
+            synchronized (_urlLoaderLock) {
+                if (_urlLoader == null) {
+                    _urlLoader =
+                        URLClassLoader.newInstance(new URL[] { sysDir.toURL() },
+                                                   parentLoader);
+                }
+            }
         } catch(MalformedURLException e) {
             throw new RuntimeException(e);
         }
 
         _log.info("Loading plugin in [" + pluginDir + "] with loaders for: " +
                   urls);
-        urlLoader = URLClassLoader.newInstance(u, parentLoader);
-        _loader = new GroovyClassLoader(urlLoader);
+        
+        if (u.length == 1) {    // Just the sysdir
+            _loader = new GroovyClassLoader(_urlLoader);
+        }
+        else {
+            URLClassLoader urlLoader = URLClassLoader.newInstance(u,
+                                                                  _urlLoader);
+            _loader = new GroovyClassLoader(urlLoader);
+        }
     }
     
     private Object doInContext(Runnee c) throws Exception {

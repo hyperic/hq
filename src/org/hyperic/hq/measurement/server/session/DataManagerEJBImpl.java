@@ -1465,7 +1465,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             rs = stmt.executeQuery(sqlBuf.toString());
 
             if (rs.next()) {
-                return getMetricValue(rs);
+                MetricValue mv = getMetricValue(rs);
+                cache.add(m.getId(), mv);
+                return mv;
             } else {
                 // No cached value, nothing in the database
                 return null;
@@ -1576,8 +1578,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
         Map data = getLastDataPts(sepMids, timestamp);
 
-        data.putAll(getAvailMan().getLastAvail(avIds,
-                                                                     timestamp));
+        if (availIds.size() > 0)
+            data.putAll(getAvailMan().getLastAvail(avIds, timestamp));
+        
         return data;
     }
 
@@ -1590,20 +1593,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             return data;
     
         // Try to get the values from the cache first
-        MetricDataCache cache = MetricDataCache.getInstance();
-        ArrayList nodata = new ArrayList();
-        for (int i = 0; i < ids.length; i++) {
-            if (ids[i] == null) {
-                continue;
-            }
-    
-            MetricValue mval = cache.get(ids[i], timestamp);
-            if (mval != null) {
-                data.put(ids[i], mval);
-            } else {
-                nodata.add(ids[i]);
-            }
-        }
+        ArrayList nodata = getCachedDataPoints(ids, data, timestamp);
     
         if (nodata.size() == 0) {
             return data;
@@ -1649,6 +1639,30 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return data;
     }
 
+    /**
+     * Get data points from cache only
+     * 
+     * @ejb:interface-method
+     */
+    public ArrayList getCachedDataPoints(Integer[] ids, Map data,
+                                         long timestamp) {
+        MetricDataCache cache = MetricDataCache.getInstance();
+        ArrayList nodata = new ArrayList();
+        for (int i = 0; i < ids.length; i++) {
+            if (ids[i] == null) {
+                continue;
+            }
+    
+            MetricValue mval = cache.get(ids[i], timestamp);
+            if (mval != null) {
+                data.put(ids[i], mval);
+            } else {
+                nodata.add(ids[i]);
+            }
+        }
+        return nodata;
+    }
+
     private void setDataPoints(Map data, int length, long timestamp,
                                Integer[] measIds, Statement stmt)
         throws SQLException
@@ -1656,16 +1670,20 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ResultSet rs = null;
         try
         {
-            StringBuilder sqlBuf = getLastDataPointsSQL(length, timestamp, measIds);
+            StringBuilder sqlBuf =
+                getLastDataPointsSQL(length, timestamp, measIds);
             if (_log.isTraceEnabled()) {
                 _log.trace("getLastDataPoints(): " + sqlBuf);
             }
             rs = stmt.executeQuery(sqlBuf.toString());
+            
+            MetricDataCache cache = MetricDataCache.getInstance();
             while (rs.next()) {
                 Integer mid = new Integer(rs.getInt(1));
                 if (!data.containsKey(mid)) {
                     MetricValue mval = getMetricValue(rs);
                     data.put(mid, mval);
+                    cache.add(mid, mval);       // Add to cache to avoid lookup
                 }
             }
         }

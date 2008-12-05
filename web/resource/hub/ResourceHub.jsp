@@ -385,10 +385,16 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     </td>
       <td class="tableCell" align="left" valign="top"><span class="SpanPopup1"><html:link page="/Resource.do" paramId="eid" paramName="resource" paramProperty="entityId"><c:out value="${resource.name}"/></html:link><c:if test="${not empty resource.description}"><span><c:out value="${resource.description}" escapeXml="false"/></span></c:if></span></td>
       <!-- Insert metrics tile here -->
-      <tiles:insert definition=".resource.hub.metrics">
-        <tiles:put name="eid" beanName="resource" beanProperty="entityId"/>
-        <tiles:put name="Indicators" beanName="Indicators"/>
-      </tiles:insert>
+      <c:forEach items="${indicatorsMap[resource.entityId]}" var="metric">
+        <td class="tableCell" align="middle" valign="top">
+        <c:choose>
+        <c:when test="${not empty metric}">
+            <c:out value="${metric}"/>
+        </c:when>
+        <c:otherwise>&nbsp;</c:otherwise>
+        </c:choose>
+        </td>
+      </c:forEach>
       <td class="tableCell" align="middle" valign="top">
         <html:img imageName="avail${resource.id}" page="/resource/Availability?timeout=30000" paramId="eid" paramName="resource" paramProperty="entityId"/>
       </td>
