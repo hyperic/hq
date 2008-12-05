@@ -1307,7 +1307,7 @@ public class EventsBossEJBImpl
         
         List res = new ArrayList();
         for (Iterator i = alerts.iterator();
-             i.hasNext() && res.size() <= count; ) 
+             i.hasNext() && res.size() < count; ) 
         {
             Escalatable alert = (Escalatable) i.next();
             PerformsEscalations def = alert.getDefinition();
