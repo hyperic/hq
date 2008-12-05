@@ -35,10 +35,6 @@
             link="/resource/autogroup/monitor/Visibility.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Views" mode="list"
-            link="/TabBodyAttach.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
    </putList>     
   </definition>
   
