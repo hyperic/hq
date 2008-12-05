@@ -794,8 +794,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             else
                 interval = Math.max(interval, m.getInterval());
         }
+        
+        Integer[] mids = new Integer[metrics.size()];
+        int i = 0;
+        for (Iterator it = metrics.iterator(); it.hasNext();) {
+            Measurement m = (Measurement) it.next();
+            mids[i++] = m.getId();
+        }
+        
         final long after =  System.currentTimeMillis() - (3 * interval);
-        Map data = getDataMan().getLastDataPoints(metrics, after);
+        Map data = new HashMap();
+        getDataMan().getCachedDataPoints(mids, data, after);
         
         Map ret = new HashMap(data.size());
         for (Iterator it = metrics.iterator(); it.hasNext();) {

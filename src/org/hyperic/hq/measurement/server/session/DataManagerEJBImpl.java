@@ -1593,20 +1593,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             return data;
     
         // Try to get the values from the cache first
-        MetricDataCache cache = MetricDataCache.getInstance();
-        ArrayList nodata = new ArrayList();
-        for (int i = 0; i < ids.length; i++) {
-            if (ids[i] == null) {
-                continue;
-            }
-    
-            MetricValue mval = cache.get(ids[i], timestamp);
-            if (mval != null) {
-                data.put(ids[i], mval);
-            } else {
-                nodata.add(ids[i]);
-            }
-        }
+        ArrayList nodata = getCachedDataPoints(ids, data, timestamp);
     
         if (nodata.size() == 0) {
             return data;
@@ -1650,6 +1637,30 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         List dataPoints = convertMetricId2MetricValueMapToDataPoints(data);
         updateMetricDataCache(dataPoints);
         return data;
+    }
+
+    /**
+     * Get data points from cache only
+     * 
+     * @ejb:interface-method
+     */
+    public ArrayList getCachedDataPoints(Integer[] ids, Map data,
+                                         long timestamp) {
+        MetricDataCache cache = MetricDataCache.getInstance();
+        ArrayList nodata = new ArrayList();
+        for (int i = 0; i < ids.length; i++) {
+            if (ids[i] == null) {
+                continue;
+            }
+    
+            MetricValue mval = cache.get(ids[i], timestamp);
+            if (mval != null) {
+                data.put(ids[i], mval);
+            } else {
+                nodata.add(ids[i]);
+            }
+        }
+        return nodata;
     }
 
     private void setDataPoints(Map data, int length, long timestamp,

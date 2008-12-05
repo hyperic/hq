@@ -25,11 +25,15 @@
 
 package org.hyperic.hq.ui.action.resource.hub;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -56,6 +60,9 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.WebUser;
@@ -68,6 +75,7 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
+import org.hyperic.util.units.FormattedNumber;
 
 /**
  * An <code>Action</code> that sets up the Resource Hub portal.
@@ -342,7 +350,7 @@ public class ResourceHubPortalAction extends BaseAction {
             }
         }
         
-        watch.markTimeBegin("batchCheckControlPermissions");
+        watch.markTimeBegin("batchGetIndicators");
         if (ids.size() > 0) {
             if (prefView.equals(ResourceHubForm.LIST_VIEW) &&
                 !isGroupSelected && resourceType != DEFAULT_RESOURCE_TYPE) {
@@ -356,18 +364,26 @@ public class ResourceHubPortalAction extends BaseAction {
 
                 Collection templates = null;
                 
+                Map metricsMap = new HashMap(ids.size());
                 for (Iterator it = ids.iterator(); it.hasNext(); ) {
-                    templates =
-                        mboss.getDesignatedTemplates(sessionId,
-                                                     (AppdefEntityID) it.next(),
-                                                     cats);
-                    
-                    if (templates.size() > 0)
-                        break;
-                }
+                    final AppdefEntityID entityId = (AppdefEntityID) it.next();
+                    if (templates == null || templates.size() == 0) {
+                        templates =
+                            mboss.getDesignatedTemplates(sessionId,
+                                                         entityId,
+                                                         cats);
                 
-                if (templates.size() > 0)
-                    request.setAttribute("Indicators", templates);
+                        if (templates.size() > 0) {
+                            request.setAttribute("Indicators", templates);
+                        }
+                    }
+                    
+                    String[] metrics = getResourceMetrics(request, sessionId,
+                                                          mboss, templates,
+                                                          entityId);
+                    metricsMap.put(entityId, metrics);
+                }
+                request.setAttribute("indicatorsMap", metricsMap);
             }
 
             /*
@@ -380,7 +396,7 @@ public class ResourceHubPortalAction extends BaseAction {
                                  */
         }
         
-        watch.markTimeEnd("batchCheckControlPermissions");
+        watch.markTimeEnd("batchGetIndicators");
 
         // retrieve inventory summary
         watch.markTimeBegin("getInventorySummary");
@@ -452,6 +468,37 @@ public class ResourceHubPortalAction extends BaseAction {
         request.setAttribute(Constants.INVENTORY_HIERARCHY_ATTR, navHierarchy);
         
         return null;
+    }
+
+    private String[] getResourceMetrics(HttpServletRequest request,
+                                        int sessionId, MeasurementBoss mboss,
+                                        Collection templates,
+                                        final AppdefEntityID entityId)
+        throws RemoteException {
+        Map vals = mboss.getLastIndicatorValues(sessionId, entityId);
+
+        // Format the values
+        String[] metrics = new String[templates.size()];
+        if (vals.size() == 0) {
+            Arrays.fill(metrics, RequestUtils.message(request,
+                                                      "common.value.notavail"));
+        } else {
+            int i = 0;
+            for (Iterator it = templates.iterator(); it.hasNext(); i++) {
+                MeasurementTemplate mt = (MeasurementTemplate) it.next();
+
+                if (vals.containsKey(mt.getId())) {
+                    MetricValue mv = (MetricValue) vals.get(mt.getId());
+                    FormattedNumber fn = UnitsConvert.convert(mv.getValue(), mt
+                            .getUnits());
+                    metrics[i] = fn.toString();
+                } else {
+                    metrics[i] = RequestUtils.message(request,
+                                                      "common.value.notavail");
+                }
+            }
+        }
+        return metrics;
     }
 
     private void addTypeOptions(ResourceHubForm form, List types) {
