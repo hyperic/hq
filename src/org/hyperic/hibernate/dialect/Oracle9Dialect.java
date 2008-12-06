@@ -163,4 +163,8 @@ public class Oracle9Dialect
         // oracle limit is 1000, but leave room for others
         return 900;
     }
+
+    public boolean supportsPLSQL() {
+        return true;
+    }
 }

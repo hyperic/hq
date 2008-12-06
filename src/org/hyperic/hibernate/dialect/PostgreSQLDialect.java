@@ -163,4 +163,8 @@ public class PostgreSQLDialect
     public int getMaxExpressions() {
         return -1;
     }
+
+    public boolean supportsPLSQL() {
+        return false;
+    }
 }

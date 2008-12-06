@@ -122,4 +122,9 @@ public interface HQDialect
      * uses the MultipleHiLoPerTableGenerator
      */
     public boolean usesSequenceGenerator();
+
+    /**
+     * true if the database supports PL/SQL
+     */
+    public boolean supportsPLSQL();
 }
